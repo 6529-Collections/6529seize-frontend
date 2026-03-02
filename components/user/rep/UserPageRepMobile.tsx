@@ -23,10 +23,7 @@ import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
 import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
-import {
-  getContributorLabel,
-  type RepDirection,
-} from "./header/UserPageRepHeader";
+import { getContributorLabel, type RepDirection } from "./UserPageRep.helpers";
 import RepCategoryPill from "./RepCategoryPill";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import { getCanEditRep } from "./UserPageRep.helpers";
@@ -49,9 +46,7 @@ function RepEmptyState({
   }
   return (
     <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-font-normal tw-text-iron-500">
-      {repDirection === "given"
-        ? "No rep given yet."
-        : "No rep received yet."}
+      {repDirection === "given" ? "No rep given yet." : "No rep received yet."}
     </p>
   );
 }
@@ -137,7 +132,6 @@ export default function UserPageRepMobile({
       })),
     [cicOverview?.contributors.data]
   );
-
 
   return (
     <div>

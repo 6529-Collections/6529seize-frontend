@@ -7,7 +7,6 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPage";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { RateMatter } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -18,9 +17,8 @@ import UserPageIdentityStatements from "../identity/statements/UserPageIdentityS
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
-import UserPageRepHeader, {
-  type RepDirection,
-} from "./header/UserPageRepHeader";
+import type { RepDirection } from "./UserPageRep.helpers";
+import UserPageRepHeader from "./header/UserPageRepHeader";
 import UserPageRepMobile from "./UserPageRepMobile";
 
 export default function UserPageRep({
@@ -32,7 +30,6 @@ export default function UserPageRep({
 }) {
   const params = useParams();
   const user = (params?.["user"] as string)?.toLowerCase();
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const [repDirection, setRepDirection] = useState<RepDirection>("received");
 
@@ -126,71 +123,68 @@ export default function UserPageRep({
       ? isFetchingOverview || isFetchingCategories
       : isFetchingOverviewGiven || isFetchingCategoriesGiven;
 
-  const mobileLayout = (
-    <UserPageRepMobile
-      profile={profile}
-      overview={activeOverview}
-      categories={activeCategories}
-      cicOverview={cicOverview ?? null}
-      repDirection={repDirection}
-      onRepDirectionChange={setRepDirection}
-      initialActivityLogParams={initialActivityLogParams}
-      loading={activeLoading}
-    />
-  );
-
-  const desktopLayout = (
-    <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
-      <div className="tw-min-w-0">
-        <UserPageRepHeader
+  return (
+    <div className="tailwind-scope">
+      <div className="lg:tw-hidden">
+        <UserPageRepMobile
+          profile={profile}
           overview={activeOverview}
           categories={activeCategories}
-          profile={profile}
+          cicOverview={cicOverview ?? null}
           repDirection={repDirection}
           onRepDirectionChange={setRepDirection}
+          initialActivityLogParams={initialActivityLogParams}
           loading={activeLoading}
         />
-        <div className="tw-mt-6 lg:tw-mt-8">
-          <UserPageCombinedActivityLog
-            initialActivityLogParams={initialActivityLogParams}
-          />
-        </div>
       </div>
-
-      <div className="tw-min-w-0 tw-self-start">
-        <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#08090b]">
-          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-emerald-500/[0.05] tw-via-transparent tw-to-transparent" />
-          <div className="tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/25 tw-to-transparent" />
-          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/40 tw-to-transparent" />
-          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
-          <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
-          <div className="tw-relative tw-z-10">
-            <UserPageIdentityHeader
+      <div className="tw-hidden lg:tw-block">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
+          <div className="tw-min-w-0">
+            <UserPageRepHeader
+              overview={activeOverview}
+              categories={activeCategories}
               profile={profile}
-              cicOverview={cicOverview ?? null}
+              repDirection={repDirection}
+              onRepDirectionChange={setRepDirection}
+              loading={activeLoading}
             />
-            <UserPageIdentityStatements profile={profile} />
-            <div className="tw-px-6 tw-pb-8">
-              <UserPageRateWrapper
-                profile={profile}
-                type={RateMatter.NIC}
-                hideOwnProfileMessage
-              >
-                <UserPageIdentityHeaderCICRate
+            <div className="tw-mt-6 lg:tw-mt-8">
+              <UserPageCombinedActivityLog
+                initialActivityLogParams={initialActivityLogParams}
+              />
+            </div>
+          </div>
+
+          <div className="tw-min-w-0 tw-self-start">
+            <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#08090b]">
+              <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-emerald-500/[0.05] tw-via-transparent tw-to-transparent" />
+              <div className="tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/25 tw-to-transparent" />
+              <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/40 tw-to-transparent" />
+              <div className="tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
+              <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
+              <div className="tw-relative tw-z-10">
+                <UserPageIdentityHeader
                   profile={profile}
-                  isTooltip={false}
+                  cicOverview={cicOverview ?? null}
                 />
-              </UserPageRateWrapper>
+                <UserPageIdentityStatements profile={profile} />
+                <div className="tw-px-6 tw-pb-8">
+                  <UserPageRateWrapper
+                    profile={profile}
+                    type={RateMatter.NIC}
+                    hideOwnProfileMessage
+                  >
+                    <UserPageIdentityHeaderCICRate
+                      profile={profile}
+                      isTooltip={false}
+                    />
+                  </UserPageRateWrapper>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-
-  return (
-    <div className="tailwind-scope">
-      {isDesktop ? desktopLayout : mobileLayout}
     </div>
   );
 }

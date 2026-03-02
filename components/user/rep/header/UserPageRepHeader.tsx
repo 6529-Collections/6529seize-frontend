@@ -10,10 +10,11 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import RepCategoryPill from "../RepCategoryPill";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
-import { getCanEditRep, getContributorLabel, type RepDirection } from "../UserPageRep.helpers";
-
-export type { RepDirection } from "../UserPageRep.helpers";
-export { getContributorLabel } from "../UserPageRep.helpers";
+import {
+  getCanEditRep,
+  getContributorLabel,
+  type RepDirection,
+} from "../UserPageRep.helpers";
 
 export default function UserPageRepHeader({
   overview,
