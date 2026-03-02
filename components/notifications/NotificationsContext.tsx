@@ -212,15 +212,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           return false;
         }
 
-        if (connectedProfileRef.current?.id === notificationProfileId) {
-          return true;
-        }
-
-        const activeAccount = connectedAccountsRef.current.find(
-          (account) =>
-            account.address.toLowerCase() === normalizedMatchedAddress
-        );
-        return activeAccount?.role === notificationProfileId;
+        return connectedProfileRef.current?.id === notificationProfileId;
       };
 
       const waitForProfileSwitchSettlement = async (): Promise<boolean> => {
