@@ -39,8 +39,10 @@ target, tabs look wrong, or posting is unavailable.
   wait for older-drop fetch to finish, then retry jump controls.
 - `serialNo`/`divider` disappeared from the URL:
   expected; those query values are consumed once on load.
-- Cannot post in chat:
-  if composer shows `Wave is closed`, posting is disabled for that wave.
+- Cannot post in thread:
+  if footer shows `You cannot participate in this wave at the moment`, both
+  chat and submission are blocked for your current context; if footer shows
+  `Wave is closed`, chat is disabled in that thread context.
 - Expected tab is missing:
   wave type/state can hide tabs; use the available tab set.
 - `Copy link` is unavailable:

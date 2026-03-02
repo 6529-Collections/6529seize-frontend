@@ -2,62 +2,70 @@
 
 ## Overview
 
-The thread composer is shown only when current wave state and user permissions allow posting.
-When posting is unavailable, the composer area switches to a status panel instead of input fields.
+Composer availability is evaluated only after thread access checks pass.
 
-For chat-type waves with chat disabled, that panel text is `Wave is closed`.
+Before a thread loads, routing can stop at:
+
+- Connect wallet
+- Set up profile
+- `This content is not available`
+
+If the thread loads, the footer then checks chat and submission availability for
+the current account.
 
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`
 - Direct-message threads: `/messages?wave={waveId}`
-- Sticky composer area at the bottom of thread view
+- Same footer rules in single-drop thread context (`drop={dropId}`)
 
-## Entry Points
+## Footer States
 
-- Open a thread where chat posting is enabled.
-- Open a thread where chat posting is disallowed for your profile.
-- Open a chat-type thread where chat has been closed by wave config.
-- In app mode, edit an existing drop in-thread and return to normal compose state.
+- Composer visible: at least one mode is allowed.
+- Generic blocked panel: if both modes are blocked, footer shows
+  `You cannot participate in this wave at the moment`.
+- Closed-chat panel: if composer rendering reaches a chat-type wave with chat
+  disabled, footer shows `Wave is closed`.
 
-## User Journey
+## Mode Rules
 
-1. Open a wave or direct-message thread.
-2. The app checks posting eligibility and chat availability for this wave.
-3. If posting is available, normal composer controls render.
-4. If posting is not available, the composer area renders an unavailable-state panel.
-5. If the wave is chat-type and chat is disabled, the panel text is `Wave is closed`.
-6. Existing drops stay readable in the same thread.
-
-## Common Scenarios
-
-- Chat is open: users can post from the normal composer.
-- Posting is disallowed for the current profile: composer area shows an unavailable-state message.
-- Chat is closed for a chat-type wave: thread is read-only and composer shows `Wave is closed`.
-- In app mode during inline drop edit, the main thread composer hides until edit mode exits.
+- For `DropMode.BOTH`, footer picks an allowed mode automatically.
+- If one mode is blocked and the other is allowed, composer stays available in
+  the allowed mode.
+- Mode toggle appears only on participatory waves in main thread view.
+- Mode toggle is hidden in single-drop context and memes waves.
+- When one mode is blocked, toggle cannot switch into the blocked mode.
 
 ## Edge Cases
 
-- Composer state is recalculated per wave; switching threads can immediately change availability.
-- Closed-state messaging applies only when chat-type waves have chat explicitly disabled.
-- Route-level auth/profile gates can block thread rendering before composer rules are evaluated.
-- Unread controls, typing indicator, and drop content keep their own behavior while composer is unavailable.
+- In app mode, if inline drop editing is active in the main thread, the footer
+  composer is hidden until edit mode exits.
+- Availability recalculates per wave. Switching threads can change footer state
+  immediately.
+- Existing drops, unread controls, and typing indicators continue to render
+  while posting is blocked.
 
 ## Failure and Recovery
 
-- If composer state looks stale after permission/wave changes, refresh the thread.
-- If a thread opened from stale list metadata, leave and reopen the thread.
-- If posting is unexpectedly unavailable, verify auth/profile eligibility first.
+- If posting is unexpectedly blocked, verify wallet/profile access first.
+- Check wave eligibility for chat and submission.
+- Check submission window and per-user submission limits.
+- Check whether chat is disabled for the current chat-type wave.
+- If app edit mode is active and footer is hidden, exit edit mode.
+- If state looks stale after changes, refresh the thread.
 
 ## Limitations / Notes
 
-- This page covers composer availability, not input-formatting rules.
-- There is no inline reopen/permission escalation action in this panel.
-- Create-wave and create-DM modal behavior is documented in Waves Create docs.
+- This page covers availability only, not input formatting or submission
+  syntax.
+- Blocked panels are informational only; there is no inline permission
+  escalation action.
+- When both chat and submission are blocked, messaging is generic, not
+  reason-specific.
 
 ## Related Pages
 
-- [Wave Chat Index](./README.md)
+- [Wave Chat Index](README.md)
 - [Wave Composer Index](../composer/README.md)
 - [Wave Participation Flow](../flow-wave-participation.md)
 - [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)

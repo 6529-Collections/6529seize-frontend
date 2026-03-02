@@ -58,8 +58,9 @@ sharing links that reopen the same context.
 - Chat-type waves can render without the tab strip.
 - If a saved tab is no longer available, the UI falls back to the first
   available tab for that wave.
-- If chat is closed, thread content remains readable but composer actions are
-  replaced by `Wave is closed`.
+- If posting is blocked, thread content remains readable while the footer shows
+  a blocked state (for example `You cannot participate in this wave at the
+  moment` or `Wave is closed`).
 - Shared links with both `drop` and `serialNo` prioritize drop-open behavior.
 - Legacy `/waves?wave=...` links are normalized to canonical `/waves/{waveId}`.
 
