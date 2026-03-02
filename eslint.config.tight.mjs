@@ -146,6 +146,6 @@ export default createEslintConfig({
     },
     reactYouMightNotNeedAnEffect.configs.strict,
   ],
-  includeTestResultsIgnore: false,
+  includeTestResultsIgnore: true,
   reactCompilerRule: "error",
 });

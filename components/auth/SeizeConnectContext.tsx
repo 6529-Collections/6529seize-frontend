@@ -953,7 +953,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
             if (!isMountedRef.current) {
               return;
             }
-            seizeConnect();
+            try {
+              seizeConnect();
+            } catch (error: unknown) {
+              addFlowOriginAddressRef.current = null;
+              setIsAddingConnectedAccount(false);
+              const connectionError = createWalletError(
+                WalletConnectionError,
+                "start add-account connection flow",
+                error
+              );
+              logError("seizeAddConnectedAccount", connectionError);
+            }
           }, 100);
         })
         .catch((error: unknown) => {
@@ -969,7 +980,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    seizeConnect();
+    try {
+      seizeConnect();
+    } catch (error: unknown) {
+      addFlowOriginAddressRef.current = null;
+      setIsAddingConnectedAccount(false);
+      const connectionError = createWalletError(
+        WalletConnectionError,
+        "start add-account connection flow",
+        error
+      );
+      logError("seizeAddConnectedAccount", connectionError);
+    }
   }, [
     account.address,
     account.isConnected,
