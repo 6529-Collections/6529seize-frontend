@@ -2,114 +2,106 @@
 
 ## Overview
 
-Wave drops support a per-user boost action with immediate visual feedback.
+Boosting is a per-user toggle on full drop cards in wave and direct-message
+threads.
 
-Users can toggle a boost on a drop, and the boost count is shown on the same action control.
-Top boosted drops in the current wave also appear as contextual cards in the message
-list and in the right-sidebar trending section.
-The rank chip uses color for top placement:
-- Gold for #1, silver for #2, amber for #3, and neutral styling for lower ranks.
-Mobile boost/remove actions can trigger a short on-screen icon animation on the
-active drop card.
+Boosted ranking appears in two places:
+
+- in-thread boosted cards inserted into the message list (fixed `Day` window)
+- right-sidebar `Trending` cards (`Day`, `Week`, `Month`)
+
+This page owns boost toggles and shared boosted-card interaction behavior.
+Sidebar layout and `Trending` shell behavior are documented in
+[Wave Right Sidebar Trending Drops](../sidebars/feature-right-sidebar-trending-drops.md).
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Full drop cards in wave message lists where action buttons are available
-- Boosted drops cards injected into wave message list sections
+- Full drop cards in thread message lists
+- Boosted cards in the thread list and right-sidebar `Trending`
 
 ## Entry Points
 
-- Desktop: open a full drop and click the flame button in the action bar.
-- Mobile: open the drop menu and choose **Boost** / **Remove Boost**.
-- Wave message list: scroll through the feed to see boosted-drops cards and select
-  one.
-- Right-sidebar `Trending` section: from any open wave sidebar, switch the time
-  window and select a card to jump to the referenced drop.
+- Desktop: hover a full drop and use the flame button in the action bar.
+- Mobile: open the touch menu and choose `Boost` or `Remove Boost`.
+- Any boosted card: press the card body to jump to that drop.
+- Any boosted card: press the flame/count button to boost or unboost without
+  triggering jump.
 
 ## User Journey
 
 1. Open a wave thread and locate a full drop.
-2. If your wallet is connected and the drop is already posted, tap/click the boost
-   action control.
-3. The button toggles between outline and filled flame states:
-   - Outline = not boosted by this account
-   - Filled = already boosted by this account
-4. The action applies optimistic UI feedback immediately (for most taps/presses).
-5. If the server request succeeds, the resulting state persists.
-6. If the server request fails, the action and count revert to the previous
-   values and an error toast is shown.
-7. Boosted-drop cards in the message list can be selected to jump directly to the
-   corresponding drop in the same thread.
-8. In the right-sidebar trending view, the top-ranked row is visually emphasized
-   compared with lower-ranked rows.
-
-The drop body can still be used for reading and text selection; it does not
-toggle boost. On mobile, boosting is only available from the action control (or
-mobile menu entry).
+2. If you are connected and the drop is posted (not `temp-*`), toggle boost.
+3. The flame icon toggles:
+   - outlined flame: you have not boosted this drop
+   - filled flame: you have boosted this drop
+4. Full-drop controls update optimistically. Icon and count change immediately.
+5. If the request succeeds, the new state remains.
+6. If the request fails, the icon/count roll back and an error toast appears.
+7. From any boosted card:
+   - press card body to jump to that serial in the same thread
+   - press card flame/count to toggle boost without jumping
+8. If the target serial is not loaded yet, the thread loads older pages, then
+   retries scroll and centers the target drop.
 
 ## Common Scenarios
 
-- A user boosts a drop:
-  - the icon animates,
-  - the boost count increases by one,
-  - the control becomes filled.
-- A user removes a boost:
-  - the icon returns to outlined style,
-  - the boost count decreases if it was previously at least one.
-- Boosted drops cards show rank badges for the current boosted ranking (for example,
-  `#1`, `#2`, ...).
-  - rank colors match the top-three color treatment above.
-- Boosted cards appear only for the trending set and include:
-  - author
-  - short content preview
-  - current boost total
-- Selecting a boosted card scrolls to the referenced drop and centers it in view.
-- When new drops arrive, boosted-drop cards keep their original placement and move
-  upward with the feed instead of staying fixed near the newest messages.
+- Boosting a zero-count drop shows the count next to the flame; unboosting back
+  to zero hides the count on full-drop controls.
+- In-thread boosted cards are inserted at fixed feed anchors before drops at
+  depths `5`, `10`, `20`, `40`, `80`, and `160` from newest.
+- In-thread insertion shows up to six ranked cards (`#1` to `#6`) when enough
+  drops are loaded.
+- Sidebar `Trending` shows up to five ranked cards and supports `Day`, `Week`,
+  and `Month`.
+- Rank badges use yellow for `#1`, silver for `#2`, amber for `#3`, and neutral
+  styling below top three.
+- Sidebar cards use stronger highlight for `#1`; lower ranks are intentionally
+  muted.
+- When new drops arrive, in-thread boosted cards move upward with the feed; they
+  do not stay pinned near the newest message.
 
 ## Edge Cases
 
-- Unauthenticated users cannot toggle boosts (desktop control is disabled; touch
-  menu boost entry is hidden).
-- Temporary/unsent drops cannot be boosted (controls are disabled or hidden,
-  depending on surface).
-- Repeated taps in the body/tap-and-select gestures do not toggle boost. Use the
-  boost control to avoid accidental toggles while selecting text.
-- Mobile actions run a brief boost/unboost animation centered on the drop card.
-  When reduced-motion mode is enabled, the animation is skipped.
-- If a boosted drop card is not in the loaded message range, the thread loads the
-  required pages during jump flow.
-- If there are fewer positioned slots than available boosted drops, only the slots
-  available in the list are used.
-- Loading older pages above the anchors does not reposition boosted cards; they stay
-  attached to the same in-thread drop.
-- In the right-sidebar trending section, only the top-ranked card keeps the strongest
-  emphasis; lower positions remain visible but more subdued.
+- Not connected:
+  - desktop full-drop boost button is disabled
+  - mobile touch-menu boost row is hidden
+  - boosted-card flame/count button is disabled
+- Temporary/unsent drops (`temp-*`) cannot be boosted.
+- One drop cannot be boosted/unboosted repeatedly while a prior toggle is still
+  pending.
+- Mobile touch-menu boost actions trigger a centered overlay animation (flame on
+  boost, smoke on unboost). Reduced-motion users skip animation.
+- If there are not enough loaded drops for every anchor slot, fewer in-thread
+  boosted cards render.
+- If fewer than five drops are loaded, no in-thread boosted cards render yet.
+- Loading older history above current anchors does not move existing in-thread
+  boosted-card anchor positions.
 
 ## Failure and Recovery
 
-- If boost/unboost fails, the UI rolls back the optimistic update.
-- A network error or request failure shows an explicit toast explaining that the
-  action did not apply.
-- While a boost action is in-flight, the control is disabled to prevent duplicate
-  toggles.
-- If jump-to-drop needs older data, the list continues loading pages and then
-  scrolls again when the target becomes available.
+- Failed boost/unboost requests roll back optimistic full-drop updates and show
+  an error toast.
+- After successful toggles, wave-specific boosted-ranking queries are invalidated
+  so cards refresh from server data.
+- Boosted-ranking queries retry failed fetches and continue polling while the
+  thread/sidebar surface is open.
+- Jump-to-drop from boosted cards keeps loading and retrying scroll until the
+  target serial is rendered or the operation times out.
 
 ## Limitations / Notes
 
-- Boosting is available only on full drop cards, not compact list-only variants.
-- Temporary posts cannot be boosted.
-- Boosted-drop cards are driven by the wave’s boosted ranking feed and only show a
-  limited top set.
-- Right-sidebar trending cards use a stronger visual treatment for rank 1 and muted
-  styling for ranks below that threshold.
+- Boosting is available on full drop cards and boosted cards, not compact
+  light-drop rows.
+- In-thread boosted-card insertion uses a fixed `Day` window, fixed feed
+  anchors, and a capped visible set.
+- Sidebar `Trending` has a five-card cap and no custom date range.
+- This page does not document sidebar tab-shell behavior; see sidebars docs.
 
 ## Related Pages
 
-- [Waves Drop Actions Index](README.md)
+- [Wave Drop Actions Index](README.md)
 - [Wave Drop Reactions and Rating Actions](feature-reactions-and-ratings.md)
 - [Wave Drop Vote Slider](feature-vote-slider.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
