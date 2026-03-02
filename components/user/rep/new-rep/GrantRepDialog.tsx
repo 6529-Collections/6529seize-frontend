@@ -22,6 +22,7 @@ export default function GrantRepDialog({
       isOpen={isOpen}
       onClose={onClose}
       tabletModal
+      maxWidthClass="md:tw-max-w-md"
     >
       <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
         <UserPageRepNewRep

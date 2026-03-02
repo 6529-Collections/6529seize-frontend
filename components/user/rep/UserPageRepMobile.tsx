@@ -28,6 +28,9 @@ import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
 import TopRaterAvatars from "./header/TopRaterAvatars";
 import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
+import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
+import type { RepDirection } from "./header/UserPageRepHeader";
+import RepGivenList from "./RepGivenList";
 import RepCategoryPill from "./RepCategoryPill";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import {
@@ -51,6 +54,7 @@ export default function UserPageRepMobile({
   const profileHandle = profile.handle ?? "";
 
   const [activeTab, setActiveTab] = useState<MobileTab>("rep");
+  const [repDirection, setRepDirection] = useState<RepDirection>("received");
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(5);
@@ -275,67 +279,103 @@ export default function UserPageRepMobile({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15, ease: "easeInOut" }}
           >
-            {/* Rep Categories */}
-            {reps.length > 0 && (
-              <div className="tw-mt-4">
-                <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-100 tw-font-semibold">
-                  Rep Categories
-                </div>
-                <div className="tw-flex tw-flex-wrap tw-gap-2">
-                  {reps.slice(0, visibleCount).map((rep) => (
-                    <RepCategoryPill
-                      key={rep.category}
-                      rep={rep}
-                      profileHandle={profile.handle ?? ""}
-                      canEdit={canEditRep}
-                      onEdit={setEditCategory}
-                      compact
-                    />
-                  ))}
-                  {reps.length > visibleCount && (
-                    <button
-                      type="button"
-                      onClick={() => setVisibleCount((prev) => prev + 10)}
-                      className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
-                    >
-                      +{reps.length - visibleCount} more
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+            {/* Received / Given toggle */}
+            <div className="tw-mt-4 tw-flex tw-items-center tw-gap-4">
+              <button
+                type="button"
+                onClick={() => setRepDirection("received")}
+                className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
+                  repDirection === "received"
+                    ? "tw-text-iron-100"
+                    : "tw-text-iron-500 hover:tw-text-iron-300"
+                }`}
+              >
+                <ArrowDownLeftIcon className="tw-h-3 tw-w-3 tw-flex-shrink-0" aria-hidden="true" />
+                Received
+              </button>
+              <button
+                type="button"
+                onClick={() => setRepDirection("given")}
+                className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
+                  repDirection === "given"
+                    ? "tw-text-iron-100"
+                    : "tw-text-iron-500 hover:tw-text-iron-300"
+                }`}
+              >
+                <ArrowUpRightIcon className="tw-h-3 tw-w-3 tw-flex-shrink-0" aria-hidden="true" />
+                Given
+              </button>
+            </div>
 
-            {canEditRep && (
-              <div className="tw-mt-4">
-                <UserPageRateWrapper
-                  profile={profile}
-                  type={RateMatter.REP}
-                  hideOwnProfileMessage
-                >
-                  <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-5 tw-py-3">
-                    <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
-                      Add rep to this identity
-                    </span>
-                    <button
-                      onClick={() => setIsGrantRepOpen(true)}
-                      className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-blue-500/20 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 md:tw-py-3"
-                    >
-                      <svg
-                        className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                      Grant Rep
-                    </button>
+            {repDirection === "received" ? (
+              <>
+                {/* Rep Categories */}
+                {reps.length > 0 && (
+                  <div className="tw-mt-4">
+                    <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-100 tw-font-semibold">
+                      Rep Categories
+                    </div>
+                    <div className="tw-flex tw-flex-wrap tw-gap-2">
+                      {reps.slice(0, visibleCount).map((rep) => (
+                        <RepCategoryPill
+                          key={rep.category}
+                          rep={rep}
+                          profileHandle={profile.handle ?? ""}
+                          canEdit={canEditRep}
+                          onEdit={setEditCategory}
+                          compact
+                        />
+                      ))}
+                      {reps.length > visibleCount && (
+                        <button
+                          type="button"
+                          onClick={() => setVisibleCount((prev) => prev + 10)}
+                          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
+                        >
+                          +{reps.length - visibleCount} more
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </UserPageRateWrapper>
+                )}
+
+                {canEditRep && (
+                  <div className="tw-mt-4">
+                    <UserPageRateWrapper
+                      profile={profile}
+                      type={RateMatter.REP}
+                      hideOwnProfileMessage
+                    >
+                      <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-5 tw-py-3">
+                        <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
+                          Add rep to this identity
+                        </span>
+                        <button
+                          onClick={() => setIsGrantRepOpen(true)}
+                          className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-blue-500/20 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 md:tw-py-3"
+                        >
+                          <svg
+                            className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M12 5v14M5 12h14" />
+                          </svg>
+                          Grant Rep
+                        </button>
+                      </div>
+                    </UserPageRateWrapper>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="tw-mt-4">
+                <RepGivenList handle={profileHandle} />
               </div>
             )}
 
@@ -416,6 +456,7 @@ export default function UserPageRepMobile({
         isOpen={isNicRateOpen}
         onClose={() => setIsNicRateOpen(false)}
         tabletModal
+        maxWidthClass="md:tw-max-w-md"
       >
         <div className="tw-px-4 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>

@@ -16,8 +16,9 @@ import UserPageIdentityStatements from "../identity/statements/UserPageIdentityS
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
-import UserPageRepHeader from "./header/UserPageRepHeader";
+import UserPageRepHeader, { type RepDirection } from "./header/UserPageRepHeader";
 import UserPageRepMobile from "./UserPageRepMobile";
+
 export default function UserPageRep({
   profile,
   initialActivityLogParams,
@@ -35,6 +36,8 @@ export default function UserPageRep({
     () => setRater(connectedProfile?.handle?.toLowerCase()),
     [connectedProfile]
   );
+
+  const [repDirection, setRepDirection] = useState<RepDirection>("received");
 
   const { data: repRates } = useQuery<ApiProfileRepRatesState>({
     queryKey: [
@@ -63,7 +66,12 @@ export default function UserPageRep({
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
           {/* Left Column - Rep Content */}
           <div className="tw-min-w-0">
-            <UserPageRepHeader repRates={repRates ?? null} profile={profile} />
+            <UserPageRepHeader
+              repRates={repRates ?? null}
+              profile={profile}
+              repDirection={repDirection}
+              onRepDirectionChange={setRepDirection}
+            />
             <div className="tw-mt-6 lg:tw-mt-8">
               <UserPageCombinedActivityLog
                 initialActivityLogParams={initialActivityLogParams}

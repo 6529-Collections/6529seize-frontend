@@ -14,12 +14,12 @@ describe('UserPageRepHeader', () => {
       number_of_raters: 25,
       rating_stats: [],
     } as any;
-    render(<UserPageRepHeader repRates={repRates} profile={mockProfile} />);
+    render(<UserPageRepHeader repRates={repRates} profile={mockProfile} repDirection="received" onRepDirectionChange={() => {}} />);
     expect(screen.getByText('1,500')).toBeInTheDocument();
   });
 
   it('renders without repRates', () => {
-    const { container } = render(<UserPageRepHeader repRates={null} profile={mockProfile} />);
+    const { container } = render(<UserPageRepHeader repRates={null} profile={mockProfile} repDirection="received" onRepDirectionChange={() => {}} />);
     expect(container).toHaveTextContent('Rep');
   });
 });

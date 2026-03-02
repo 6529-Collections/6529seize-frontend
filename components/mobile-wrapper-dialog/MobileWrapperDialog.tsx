@@ -20,6 +20,7 @@ export default function MobileWrapperDialog({
   fixedHeight,
   tabletModal,
   showScrollbar,
+  maxWidthClass,
 }: {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
@@ -32,6 +33,7 @@ export default function MobileWrapperDialog({
   readonly fixedHeight?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
+  readonly maxWidthClass?: string | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
 
@@ -50,7 +52,7 @@ export default function MobileWrapperDialog({
   const panelClassNames = `mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen${
     tabletModal ? "" : " md:tw-max-w-screen-md"
   }${isIos ? "" : " tw-transform-gpu tw-will-change-transform"}${
-    tabletModal ? " md:tw-w-full md:tw-max-w-md" : ""
+    tabletModal ? ` md:tw-w-full ${maxWidthClass ?? "md:tw-max-w-md"}` : ""
   }`;
 
   const containerClassNames = `tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10${
