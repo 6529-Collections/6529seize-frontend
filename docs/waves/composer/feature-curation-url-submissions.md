@@ -2,75 +2,108 @@
 
 ## Overview
 
-Curation submissions use a URL-only composer. Users submit one supported NFT
-marketplace URL as drop content.
+Curation waves use a URL-only drop composer. Each submission accepts one
+supported NFT marketplace URL.
 
-In curation leaderboard layouts, eligible users get an inline URL composer row
-with direct submit controls and a `Supported URLs` reference.
+This flow appears in two places:
+
+- Curation `Drop` mode in the thread composer.
+- Curation leaderboard inline composer row with a `Supported URLs` helper.
 
 ## Location in the Site
 
 - Curation wave threads: `/waves/{waveId}`
 - Direct-message thread context with an active wave:
   `/messages?wave={waveId}` (no `/messages/{waveId}` route)
-- Curation participation (`Drop`) mode in the shared composer
+- Leaderboard view inside those same thread routes
 
 ## Entry Points
 
-- Open a curation wave and switch to `Drop` mode when chat/drop mode is shown.
-- In curation leaderboards, use the inline URL field above leaderboard results.
-- Paste one supported marketplace URL and submit with `Enter` or `Drop`.
+1. Open a curation wave thread.
+2. In thread composer, switch to `Drop` mode when chat/drop toggles are shown.
+3. In `Leaderboard`, use the inline URL composer row when eligible.
+4. Paste one supported URL and submit with `Enter` or `Drop`.
 
-## User Journey
+## Composer Variants
 
-1. Focus the curation URL input (`Enter supported curation URL`).
-2. Paste or type one marketplace URL.
-3. The composer validates URL-only input and supported URL families.
-4. If the value can be normalized (for example missing scheme), the composer
-   shows the canonical URL it will submit.
-5. Submit with `Enter` or `Drop`.
-6. The composer queues the drop request and clears the URL input.
-7. In leaderboard layouts, a success toast confirms server submission.
+- Both variants use input placeholder `Enter supported curation URL`.
+- Default thread composer shows helper text:
+  `Use one supported HTTPS URL only, without extra text.`
+- Leaderboard variant shows a `Supported URLs` button that opens a modal with
+  accepted URL examples.
+- If the value can be normalized, both variants show:
+  `Will submit as: {canonicalUrl}`.
+- In thread composer, active reply/quote context is preserved, but drop content
+  still submits as URL-only.
 
-## Common Scenarios
+## Submission Flow
 
-- Scheme-less supported input such as `opensea.io/item/...` is accepted and
-  submitted as `https://...`.
-- `www.` host variants for supported marketplaces are accepted.
-- In leaderboard variant, users can open `Supported URLs` to review accepted
-  URL formats before posting.
-- In leaderboard variant, successful submissions show
-  `Drop submitted successfully`.
-- Reply and quote context can be preserved while posting a curation URL drop.
+1. Enter one URL token (no extra text).
+2. Validation appears after blur or submit attempt.
+3. Submit with `Enter` or `Drop` (button stays disabled until valid).
+4. If auth/signature/terms are required, complete that step.
+5. If auth/signature/terms is canceled, the typed URL remains in the input.
+6. When submission is queued, the input clears.
+7. In leaderboard variant only, success toast appears after server success:
+   `Drop submitted successfully`.
 
-## Edge Cases
+## Supported URL Formats
 
-- Extra text, whitespace-separated values, or multiple URLs in one input are
-  rejected.
-- Non-HTTPS URLs are rejected.
-- URLs with unsupported hosts or unsupported path formats are rejected.
-- URL values with query strings, hash fragments, custom ports, or credentials
-  are rejected.
-- In leaderboard variant, invalid non-empty input can trigger an attention
-  prompt that points users to `Supported URLs`.
-- Non-leaderboard curation composer layouts post successfully without the
-  leaderboard success toast.
+Accepted host forms are root domain or `www.` only. Other subdomains are
+rejected.
+
+- SuperRare artwork:
+  `https://superrare.com/artwork/eth/{contractAddress}/{tokenId}`
+- Transient NFT:
+  `https://transient.xyz/nfts/ethereum/{contractAddress}/{tokenId}`
+- Transient mint:
+  `https://transient.xyz/mint/{slug}`
+- Manifold listing:
+  `https://manifold.xyz/@{creator}/id/{id}`
+- Foundation mint:
+  `https://foundation.app/mint/eth/{contractAddress}/{tokenId}`
+- OpenSea item:
+  `https://opensea.io/item/ethereum/{contractAddress}/{tokenId}`
+- OpenSea asset:
+  `https://opensea.io/assets/ethereum/{contractAddress}/{tokenId}`
+
+## Validation Feedback
+
+- Scheme-less supported input (for example `opensea.io/item/...`) is accepted
+  and submitted as `https://...`.
+- `www.` host variants are accepted.
+- Optional trailing slash is accepted on supported paths.
+- Transient mint URLs accept slug-style IDs.
+
+## Validation Errors
+
+- Extra text or whitespace is rejected with:
+  `Enter URL only (no extra text).`
+- Explicit non-HTTPS schemes (for example `http://...`) or malformed HTTPS
+  values are rejected with:
+  `Enter a valid HTTPS URL.`
+- Unsupported host/path patterns are rejected with:
+  `URL must match a supported curation link format.`
+- This includes invalid contract or token segments, query/hash fragments,
+  custom ports, credentials, extra path segments, and unsupported non-`www`
+  subdomains.
+- In leaderboard variant, invalid non-empty input also shows:
+  `Unsupported URL format. Open Supported URLs.`
 
 ## Failure and Recovery
 
-- If authentication or required signature is canceled, submission stops and the
-  typed URL remains available to retry.
-- If submission fails after the request is sent, users receive an error and can
-  retry by entering the URL again.
+- If authentication/signature is canceled, submission stops and the typed URL
+  stays available to retry.
+- If server submission fails after queueing, users get an error toast and can
+  retry by re-entering the URL.
 - If validation fails, users can correct the URL and resubmit immediately.
 
 ## Limitations / Notes
 
-- This flow submits one URL as drop content; it does not include additional
-  inline text or file attachments in the same curation submission.
-- Supported URL families currently cover Manifold listing, SuperRare artwork,
-  Foundation mint, OpenSea item/asset, and Transient NFT/mint formats.
-- Validation is path-specific for each marketplace family, not host-only.
+- This flow submits one URL as drop content only.
+- Inline text, file attachments, and metadata are not included in the same
+  curation submission.
+- Validation is host-plus-path specific, not host-only.
 
 ## Related Pages
 
