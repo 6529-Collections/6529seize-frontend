@@ -743,7 +743,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [open]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
-    if (!isActiveWalletConnected) {
+    const hasLiveProviderConnection = !!(
+      account.address &&
+      account.isConnected &&
+      isAddress(account.address)
+    );
+
+    if (!hasLiveProviderConnection && !isActiveWalletConnected) {
       return;
     }
 
@@ -758,7 +764,12 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       logError("seizeDisconnect", walletError);
       throw walletError;
     }
-  }, [disconnect, isActiveWalletConnected]);
+  }, [
+    account.address,
+    account.isConnected,
+    disconnect,
+    isActiveWalletConnected,
+  ]);
 
   const seizeDisconnectAndLogout = useCallback(async (): Promise<void> => {
     // CRITICAL: Wallet disconnect MUST succeed before auth cleanup

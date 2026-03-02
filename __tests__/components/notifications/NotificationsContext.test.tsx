@@ -4,9 +4,18 @@ import {
 } from "@/components/notifications/NotificationsContext";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
+import { commonApiFetch } from "@/services/api/common-api";
 
 const push = jest.fn();
 const mockUseRouter = jest.fn(() => ({ push }));
+const mockSeizeSwitchConnectedAccount = jest.fn();
+const mockSeizeConnectContext = {
+  address: "0xaaa",
+  connectedAccounts: [
+    { address: "0xaaa", role: null, refreshToken: "rt-a", jwt: "jwt-a" },
+  ],
+  seizeSwitchConnectedAccount: mockSeizeSwitchConnectedAccount,
+};
 
 let mockIsActive = true;
 jest.mock("@/hooks/useCapacitor", () => () => ({
@@ -23,7 +32,11 @@ jest.mock("next/navigation", () => ({
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: { id: "test-profile-id" } }),
 }));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => mockSeizeConnectContext,
+}));
 jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue({ id: "test-profile-id" }),
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
@@ -80,6 +93,10 @@ describe("NotificationsContext initialization", () => {
     mockIsActive = true;
     const { PushNotifications } = require("@capacitor/push-notifications");
     jest.clearAllMocks();
+    mockSeizeConnectContext.address = "0xaaa";
+    mockSeizeConnectContext.connectedAccounts = [
+      { address: "0xaaa", role: null, refreshToken: "rt-a", jwt: "jwt-a" },
+    ];
     PushNotifications.removeAllListeners.mockClear();
     PushNotifications.addListener.mockClear();
     PushNotifications.register.mockClear();
@@ -124,8 +141,9 @@ describe("NotificationsContext initialization", () => {
 it("removes notifications when functions called", async () => {
   const { PushNotifications } = require("@capacitor/push-notifications");
 
-  let registrationCallback: ((token: { value: string }) => Promise<void>) | null =
-    null;
+  let registrationCallback:
+    | ((token: { value: string }) => Promise<void>)
+    | null = null;
   PushNotifications.addListener.mockImplementation(
     (event: string, callback: (arg: unknown) => Promise<void>) => {
       if (event === "registration") {
@@ -181,12 +199,18 @@ it("skips notification removal when not registered", async () => {
   });
 
   expect(PushNotifications.getDeliveredNotifications).not.toHaveBeenCalled();
-  expect(PushNotifications.removeAllDeliveredNotifications).not.toHaveBeenCalled();
+  expect(
+    PushNotifications.removeAllDeliveredNotifications
+  ).not.toHaveBeenCalled();
 });
 
 describe("push notification action handling", () => {
   beforeEach(() => {
     push.mockClear();
+    mockSeizeConnectContext.address = "0xaaa";
+    mockSeizeConnectContext.connectedAccounts = [
+      { address: "0xaaa", role: null, refreshToken: "rt-a", jwt: "jwt-a" },
+    ];
     const { PushNotifications } = require("@capacitor/push-notifications");
     PushNotifications.addListener.mockClear();
     PushNotifications.removeDeliveredNotifications.mockClear();
@@ -195,8 +219,9 @@ describe("push notification action handling", () => {
   it("redirects based on notification data", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
 
-    let registrationCallback: ((token: { value: string }) => Promise<void>) | null =
-      null;
+    let registrationCallback:
+      | ((token: { value: string }) => Promise<void>)
+      | null = null;
     let actionPerformedCallback:
       | ((action: { notification: { data: unknown } }) => Promise<void>)
       | null = null;
@@ -253,6 +278,72 @@ describe("push notification action handling", () => {
       expect(push).toHaveBeenCalledWith("/abc");
     });
 
+    expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
+  });
+
+  it("discards notification when profile is not connected", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const mockedCommonApiFetch = commonApiFetch as jest.MockedFunction<
+      typeof commonApiFetch
+    >;
+    mockedCommonApiFetch.mockResolvedValue({ id: "another-profile-id" });
+
+    let registrationCallback:
+      | ((token: { value: string }) => Promise<void>)
+      | null = null;
+    let actionPerformedCallback:
+      | ((action: { notification: { data: unknown } }) => Promise<void>)
+      | null = null;
+
+    PushNotifications.addListener.mockImplementation(
+      (event: string, callback: (arg: unknown) => Promise<void>) => {
+        if (event === "registration") {
+          registrationCallback = callback as (token: {
+            value: string;
+          }) => Promise<void>;
+        }
+        if (event === "pushNotificationActionPerformed") {
+          actionPerformedCallback = callback as (action: {
+            notification: { data: unknown };
+          }) => Promise<void>;
+        }
+        return Promise.resolve();
+      }
+    );
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(PushNotifications.addListener).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(registrationCallback).not.toBeNull();
+      expect(actionPerformedCallback).not.toBeNull();
+    });
+
+    await act(async () => {
+      if (registrationCallback) {
+        await registrationCallback({ value: "test-token" });
+      }
+    });
+
+    await act(async () => {
+      if (actionPerformedCallback) {
+        await actionPerformedCallback({
+          notification: {
+            data: {
+              redirect: "profile",
+              handle: "abc",
+              profile_id: "missing-profile-id",
+            },
+          },
+        });
+      }
+      await new Promise((r) => setTimeout(r, 100));
+    });
+
+    expect(push).not.toHaveBeenCalled();
     expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
   });
 });
