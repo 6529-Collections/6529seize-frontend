@@ -1,13 +1,27 @@
 #!/usr/bin/env node
 
 const { spawnSync } = require("node:child_process");
+const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
 
 const BRANCH = "main";
+const SAFE_POSIX_PATH = [
+  "/usr/bin",
+  "/bin",
+  "/usr/sbin",
+  "/sbin",
+  "/usr/local/bin",
+  "/opt/homebrew/bin",
+].join(":");
+const SAFE_WINDOWS_PATH = "C:\\Windows\\System32";
 const EXEC_OPTIONS = {
   encoding: "utf8",
   stdio: ["ignore", "pipe", "pipe"],
+  env: {
+    ...process.env,
+    PATH: process.platform === "win32" ? SAFE_WINDOWS_PATH : SAFE_POSIX_PATH,
+  },
 };
 
 const canonicalPath = (filePath) => {
@@ -15,8 +29,31 @@ const canonicalPath = (filePath) => {
   return process.platform === "win32" ? normalized.toLowerCase() : normalized;
 };
 
+const resolveGitBinary = () => {
+  if (process.platform === "win32") {
+    return "git.exe";
+  }
+
+  const fixedCandidates = [
+    "/usr/bin/git",
+    "/usr/local/bin/git",
+    "/opt/homebrew/bin/git",
+    "/bin/git",
+  ];
+
+  for (const candidate of fixedCandidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error("Unable to locate git binary in fixed system directories.");
+};
+
+const GIT_BINARY = resolveGitBinary();
+
 const runGitCommand = (args) => {
-  const result = spawnSync("git", args, EXEC_OPTIONS);
+  const result = spawnSync(GIT_BINARY, args, EXEC_OPTIONS);
   if (result.error) {
     throw result.error;
   }

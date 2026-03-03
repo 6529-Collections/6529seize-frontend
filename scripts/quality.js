@@ -1,20 +1,56 @@
 #!/usr/bin/env node
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 const REMOTE = "origin";
 const BRANCH = "main";
 const TARGET = `${REMOTE}/${BRANCH}`;
+const SAFE_POSIX_PATH = [
+  "/usr/bin",
+  "/bin",
+  "/usr/sbin",
+  "/sbin",
+  "/usr/local/bin",
+  "/opt/homebrew/bin",
+].join(":");
+const SAFE_WINDOWS_PATH = "C:\\Windows\\System32";
+const SAFE_ENV = {
+  ...process.env,
+  PATH: process.platform === "win32" ? SAFE_WINDOWS_PATH : SAFE_POSIX_PATH,
+};
+const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
+const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
+const coderabbitCmd =
+  process.platform === "win32" ? "coderabbit.cmd" : "coderabbit";
 
 const args = new Set(process.argv.slice(2));
 const enableCoderabbit = args.has("--coderabbit");
 const changedMode = args.has("--changed");
 
-const run = (command, options = {}) =>
-  execSync(command, {
+const runCommand = ({ command, args = [], inheritOutput = false }) => {
+  const result = spawnSync(command, args, {
     encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-    ...options,
-  }).trim();
+    stdio: inheritOutput ? "inherit" : ["ignore", "pipe", "pipe"],
+    env: SAFE_ENV,
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result;
+};
+
+const run = (command, commandArgs = []) => {
+  const result = runCommand({ command, args: commandArgs });
+  if (result.status !== 0) {
+    const stderr = result.stderr?.trim() || "";
+    throw new Error(
+      stderr ||
+        `${command} ${commandArgs.join(" ")} failed with status ${result.status}`
+    );
+  }
+  return (result.stdout ?? "").trim();
+};
 
 const fail = (message, code = 1) => {
   console.error(`ERROR: ${message}`);
@@ -30,7 +66,7 @@ const KNIP_IGNORE_PATTERNS = [
 
 const isIgnoredKnipPath = (filePath) => {
   if (!filePath) return false;
-  const normalized = filePath.replace(/\\/g, "/");
+  const normalized = filePath.replaceAll("\\", "/");
   return KNIP_IGNORE_PATTERNS.some((pattern) => pattern.test(normalized));
 };
 
@@ -164,7 +200,14 @@ try {
 }
 
 try {
-  execSync(`git fetch ${REMOTE} ${BRANCH} --quiet`, { stdio: "inherit" });
+  const result = runCommand({
+    command: "git",
+    args: ["fetch", REMOTE, BRANCH, "--quiet"],
+    inheritOutput: true,
+  });
+  if (result.status !== 0) {
+    throw new Error();
+  }
 } catch (error) {
   fail(`Failed to fetch ${TARGET}.`, 2);
 }
@@ -191,12 +234,14 @@ if (!Number.isFinite(behind) || !Number.isFinite(ahead)) {
 // }
 
 try {
-  execSync(
-    changedMode ? "npm run format:changed" : "npm run format:uncommitted",
-    {
-      stdio: "inherit",
-    }
-  );
+  const result = runCommand({
+    command: npmCmd,
+    args: ["run", changedMode ? "format:changed" : "format:uncommitted"],
+    inheritOutput: true,
+  });
+  if (result.status !== 0) {
+    throw new Error();
+  }
 } catch (error) {
   fail(
     changedMode
@@ -206,9 +251,14 @@ try {
 }
 
 try {
-  execSync(changedMode ? "npm run lint:changed" : "npm run lint:diff", {
-    stdio: "inherit",
+  const result = runCommand({
+    command: npmCmd,
+    args: ["run", changedMode ? "lint:changed" : "lint:diff"],
+    inheritOutput: true,
   });
+  if (result.status !== 0) {
+    throw new Error();
+  }
 } catch (error) {
   fail(
     changedMode ? "ESLint changed check failed." : "ESLint diff check failed."
@@ -216,14 +266,26 @@ try {
 }
 
 try {
-  execSync(
-    changedMode
-      ? "node scripts/typecheck-changed.cjs"
-      : "npx --no-install tsc --noEmit -p tsconfig.typecheck.json",
-    {
-      stdio: "inherit",
-    }
-  );
+  const result = changedMode
+    ? runCommand({
+        command: "node",
+        args: ["scripts/typecheck-changed.cjs"],
+        inheritOutput: true,
+      })
+    : runCommand({
+        command: npxCmd,
+        args: [
+          "--no-install",
+          "tsc",
+          "--noEmit",
+          "-p",
+          "tsconfig.typecheck.json",
+        ],
+        inheritOutput: true,
+      });
+  if (result.status !== 0) {
+    throw new Error();
+  }
 } catch (error) {
   fail(
     changedMode
@@ -236,10 +298,13 @@ let knipStdout = "";
 let knipStderr = "";
 let knipStatus = 0;
 try {
-  knipStdout = execSync("npx --no-install knip --reporter json", {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
+  const result = runCommand({
+    command: npxCmd,
+    args: ["--no-install", "knip", "--reporter", "json"],
   });
+  knipStdout = result.stdout ?? "";
+  knipStderr = result.stderr ?? "";
+  knipStatus = typeof result.status === "number" ? result.status : 1;
 } catch (error) {
   knipStdout = error.stdout?.toString() ?? "";
   knipStderr = error.stderr?.toString() ?? "";
@@ -284,8 +349,10 @@ if (enableCoderabbit) {
   if (uncommittedFiles) {
     console.log("\nRunning CodeRabbit review on uncommitted changes...\n");
     try {
-      execSync("coderabbit --prompt-only --type uncommitted", {
-        stdio: "inherit",
+      runCommand({
+        command: coderabbitCmd,
+        args: ["--prompt-only", "--type", "uncommitted"],
+        inheritOutput: true,
       });
     } catch (error) {
       // CodeRabbit may exit with non-zero even on success, just let output through
