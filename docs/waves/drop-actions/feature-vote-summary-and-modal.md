@@ -2,79 +2,88 @@
 
 ## Overview
 
-Single-drop views show a voting summary strip with current totals, projected
-totals (when available), and a `Vote` action that opens the dedicated voting
-modal. The voting modal opens as a full-screen overlay over current content and
-locks page scroll while open. This surface does not include an inline voting
-countdown.
+Non-chat single-drop panels show a vote summary strip with current total,
+optional projected total, wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or
+`Rep`), and a `Vote` action when voting is visible. Selecting `Vote` opens
+`Vote for this artwork` with the shared vote-entry form.
 
 ## Location in the Site
 
-- Single-drop detail views opened from wave threads.
-- Memes artwork detail panels that reuse the same vote summary strip.
-- Desktop modal overlay and mobile voting sheet opened from that summary.
+- Non-chat single-drop overlays in thread contexts:
+  - `/waves/{waveId}`
+  - `/messages?wave={waveId}`
+  - focused drop overlay via `?drop={dropId}`
+- Both default and memes single-drop panels reuse the same summary strip.
+- Container variants:
+  - `VotingModal` (default panel and memes on larger screens)
+  - `MobileVotingModal` (memes panel on small screens only)
 
 ## Entry Points
 
-- Open a drop detail view from a wave thread.
-- In eligible voting states, select `Vote` from the summary strip.
-- On mobile, open the same action from the drop detail and use the mobile vote
-  sheet.
+- Open a non-chat drop in single-drop view.
+- Review the summary strip.
+- Select `Vote` when visible.
 
 ## User Journey
 
 1. Open a drop detail view.
 2. Review the vote summary strip:
-   - current total vote count,
-   - projected count tooltip when projection differs from current total, and
-   - `Vote` action when voting is available to the viewer.
+   - current total
+   - projected total with tooltip when projection differs
+   - credit label
+   - `Vote` action when visible
 3. Select `Vote` to open `Vote for this artwork`.
-4. The overlay opens with focus moved into the modal.
-5. Choose slider or numeric input and submit.
-6. After a successful vote, the modal closes and the summary updates.
+4. Use slider or numeric controls and submit.
+5. Submit button transitions `Vote` -> loading -> `Voted`.
+6. After success, voting closes and the same drop detail stays open.
 
 ## Common Scenarios
 
-- Eligible viewers can open voting directly from single-drop details without
-  returning to leaderboard rows.
-- When voting is unavailable, the summary remains visible but the `Vote` action
-  is hidden.
-- After voting ends (or for winner drops), viewers who voted see a `Your votes`
-  value in the summary strip.
-- Mobile users get the same voting form inside the mobile dialog layout.
-- Desktop users get the same form in a full-viewport modal with backdrop.
+- Eligible viewers vote directly from single-drop detail.
+- When `Vote` is hidden, summary totals still show.
+- `Your votes` appears only when voting ended or the drop is a winner, and only
+  when the viewer vote is non-zero.
+- Negative `Your votes` values display with a leading `-`.
+- Default single-drop panels use centered modal overlay on all screen sizes.
+- Memes single-drop panels use bottom sheet on small screens and centered modal
+  on larger screens.
 
 ## Edge Cases
 
 - Chat drops do not render voting summary/vote controls in single-drop details.
-- Winner drops and ineligible states hide the `Vote` action.
-- If projected totals are unavailable, only the current total is shown.
-- Negative prior votes are shown with a leading minus sign in the `Your votes`
-  field.
-- While open, page background scrolling is disabled so background content stays
-  fixed.
+- `Vote` is hidden for: not logged in, missing profile handle, proxy session,
+  ineligible state, temporary local drop (`temp-*`), winner drops, voting not
+  started, and voting ended.
+- `No credit` does not automatically hide `Vote`; input range can still resolve
+  to zero-only values.
+- Projected value and tooltip render only when `rating` and `rating_prediction`
+  differ.
+- Desktop modal supports `Esc`, backdrop click, and close-button dismissal.
+- Desktop modal restores focus to the previously focused element on close.
+- In app mode, modal renders inline and does not mutate `document.body`
+  overflow.
 
 ## Failure and Recovery
 
-- If authentication is interrupted during submit, the vote dialog remains open
-  so the user can retry.
-- If vote submission fails, the dialog stays open and an error toast is shown.
-- Focus returns to the control that opened the dialog after the modal closes.
-- Closing the dialog with `Esc`, backdrop click, or cancel keeps the user on
-  the same drop detail context.
+- Submit performs an auth check first; if auth is canceled or fails, voting
+  stays open.
+- If vote submit request fails, voting stays open and an error toast is shown.
+- Closing voting only closes the voting surface; single-drop view stays open.
 
 ## Limitations / Notes
 
-- This page documents single-drop vote summary/modal behavior, not inline
-  leaderboard mini voting controls.
-- The single-drop `Top voters` ranking section is documented separately.
-- Voting availability depends on viewer eligibility, drop type, and voting
-  window state.
-- The summary strip does not show `Voting Starts In` or `Voting Ends In`
-  countdown labels.
+- This page owns single-drop vote summary strip and modal/sheet container
+  behavior.
+- Vote value-entry controls are documented in
+  [Wave Drop Vote Slider](feature-vote-slider.md).
+- Single-drop `Top voters` behavior is documented in
+  [Wave Top Voters Lists](../leaderboard/feature-top-voters-lists.md).
+- Summary strip does not show `Voting Starts In` or `Voting Ends In`
+  countdown text.
 
 ## Related Pages
 
+- [Wave Drop Actions Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Top Voters Lists](../leaderboard/feature-top-voters-lists.md)
 - [Wave Drop Vote Slider](feature-vote-slider.md)
