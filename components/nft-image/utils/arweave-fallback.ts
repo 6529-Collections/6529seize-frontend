@@ -1,46 +1,161 @@
 import type React from "react";
 
-function isArweaveUrl(url: string): boolean {
-  try {
-    const h = new URL(url).hostname.toLowerCase();
-    return h === "arweave.net" || h.endsWith(".arweave.net");
-  } catch {
-    return false;
-  }
+const ARWEAVE_GATEWAYS_PRIORITY: readonly string[] = [
+  "arweave.net",
+  "gateway.arweave.net",
+  "g8way.io",
+] as const;
+
+const ARWEAVE_GATEWAYS_LONG_TAIL: readonly string[] = [
+  "arweave.org",
+  "arweave.dev",
+  "ar-io.net",
+  "arweave.live",
+  "arweave.surf",
+  "arweave.team",
+  "arweavetoday.com",
+  "arweave.fyi",
+  "arweave.guide",
+] as const;
+
+const ARWEAVE_GATEWAYS: readonly string[] = dedupe([
+  ...ARWEAVE_GATEWAYS_PRIORITY,
+  ...ARWEAVE_GATEWAYS_LONG_TAIL,
+]);
+
+function dedupe(list: readonly string[]): string[] {
+  return Array.from(new Set(list));
 }
 
-function getArweaveFallbackUrl(url: string): string | null {
-  if (!isArweaveUrl(url)) return null;
+function safeParseUrl(url: string): URL | null {
   try {
-    const u = new URL(url);
-    u.hostname = "ar-io.net";
-    u.host = "ar-io.net" + (u.port ? ":" + u.port : "");
-    return u.toString();
+    return new URL(url);
   } catch {
     return null;
   }
+}
+
+function normalizeHost(hostname: string): string {
+  const h = hostname.toLowerCase();
+
+  if (h === "arweave.net" || h.endsWith(".arweave.net")) return "arweave.net";
+
+  return h;
+}
+
+function isArweaveGatewayHost(hostname: string): boolean {
+  return ARWEAVE_GATEWAYS.includes(normalizeHost(hostname));
+}
+
+function isArweaveUrl(url: string): boolean {
+  const u = safeParseUrl(url);
+  return !!u && isArweaveGatewayHost(u.hostname);
+}
+
+function buildUrlWithGateway(
+  originalUrl: string,
+  gatewayHost: string
+): string | null {
+  const u = safeParseUrl(originalUrl);
+  if (!u) return null;
+
+  u.hostname = gatewayHost;
+  u.host = gatewayHost + (u.port ? `:${u.port}` : "");
+  return u.toString();
 }
 
 type MediaErrorEvent =
   | React.SyntheticEvent<HTMLImageElement, Event>
   | React.SyntheticEvent<HTMLVideoElement, Event>;
 
+const DS_ORIGINAL = "arweaveOriginalSrc";
+const DS_LAST_HOST = "arweaveLastGatewayHost";
+
+function getTryList(currentSrc: string, originalSrc: string): string[] {
+  const current = safeParseUrl(currentSrc);
+  const orig = safeParseUrl(originalSrc);
+
+  // Always try the exact originalSrc first.
+  const base: string[] = [originalSrc];
+
+  // If we can parse the host, skip it in fallbacks to avoid dumb retries.
+  const currentHost = current ? normalizeHost(current.hostname) : null;
+  const origHost = orig ? normalizeHost(orig.hostname) : null;
+
+  // Build gateway variants from originalSrc (preserves path/query exactly).
+  const variants = ARWEAVE_GATEWAYS.filter((h) => h !== origHost) // original already first in base
+    .filter((h) => h !== currentHost) // skip current host too
+    .map((h) => buildUrlWithGateway(originalSrc, h))
+    .filter((u): u is string => !!u);
+
+  return dedupe([...base, ...variants]);
+}
+
 export function withArweaveFallback(
   onError?: (event: MediaErrorEvent) => void
 ): (event: MediaErrorEvent) => void {
   return (event: MediaErrorEvent) => {
     const target = event.currentTarget;
-    const src = target.src;
-    if (src && isArweaveUrl(src)) {
-      const fallback = getArweaveFallbackUrl(src);
-      if (fallback) {
-        if (target.dataset['arweaveOriginalSrc'] === undefined) {
-          target.dataset['arweaveOriginalSrc'] = src;
-        }
-        target.src = fallback;
-        return;
-      }
+    const currentSrc = target.src;
+
+    if (!currentSrc || !isArweaveUrl(currentSrc)) {
+      onError?.(event);
+      return;
     }
-    onError?.(event);
+
+    // Establish the "original" src once per media load.
+    // Only reset it if the app code changed `src` to a *non-gateway-swapped* URL.
+    const storedOriginal = target.dataset[DS_ORIGINAL];
+    const originalSrc = storedOriginal ?? currentSrc;
+
+    if (!storedOriginal) {
+      target.dataset[DS_ORIGINAL] = originalSrc;
+    }
+
+    const tryList = getTryList(currentSrc, originalSrc);
+
+    // Track what we last tried so we can advance deterministically.
+    const lastHost = target.dataset[DS_LAST_HOST];
+    const currentHost = (() => {
+      const u = safeParseUrl(currentSrc);
+      return u ? normalizeHost(u.hostname) : null;
+    })();
+
+    // Find next URL to try:
+    // - If we have lastHost, advance from that in the tryList.
+    // - Otherwise, advance from currentSrc.
+    let nextUrl: string | null = null;
+
+    // Prefer stepping from the exact currentSrc position if present
+    const curIdx = tryList.indexOf(currentSrc);
+    if (curIdx >= 0 && curIdx + 1 < tryList.length) {
+      nextUrl = tryList[curIdx + 1] ?? null;
+    } else if (lastHost) {
+      // Fallback: step based on host
+      const lastIdx = tryList.findIndex((u) => {
+        const p = safeParseUrl(u);
+        return p ? normalizeHost(p.hostname) === lastHost : false;
+      });
+      if (lastIdx >= 0 && lastIdx + 1 < tryList.length) {
+        nextUrl = tryList[lastIdx + 1] ?? null;
+      }
+    } else {
+      // Final fallback: just try the second item
+      nextUrl = tryList[1] ?? null;
+    }
+
+    if (!nextUrl) {
+      onError?.(event);
+      return;
+    }
+
+    const nextParsed = safeParseUrl(nextUrl);
+    if (nextParsed) {
+      target.dataset[DS_LAST_HOST] = normalizeHost(nextParsed.hostname);
+    } else if (currentHost) {
+      target.dataset[DS_LAST_HOST] = currentHost;
+    }
+
+    target.src = nextUrl;
   };
 }

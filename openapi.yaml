@@ -2705,6 +2705,84 @@ paths:
                 $ref: "#/components/schemas/ApiRatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
+  /profiles/{identity}/cic/overview:
+    get:
+      tags:
+        - ProfileCIC
+      summary: Get profile CIC overview
+      operationId: getProfileCicOverview
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiRepDirection"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCicOverview"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/cic/contributors:
+    get:
+      tags:
+        - ProfileCIC
+      summary: Get profile CIC contributors
+      operationId: getProfileCicContributors
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiRepDirection"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCicContributorsPage"
+        "404":
+          description: Profile not found
   /profiles/{identity}/rep/rating:
     post:
       tags:
@@ -2818,6 +2896,138 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiRatingWithProfileInfoAndLevelPage"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/rep/overview:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get profile REP overview
+      operationId: getProfileRepOverview
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiRepDirection"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRepOverview"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/rep/categories:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get profile REP categories
+      operationId: getProfileRepCategories
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiRepDirection"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: top_contributors_limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRepCategoriesPage"
+        "404":
+          description: Profile not found
+  /profiles/{identity}/rep/categories/{category}/contributors:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get profile REP contributors for category
+      operationId: getProfileRepCategoryContributors
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[a-zA-Z0-9?!,."() ]{1,100}$
+        - name: direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiRepDirection"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRepContributorsPage"
         "404":
           description: Profile not found
   /profiles:
@@ -4843,6 +5053,22 @@ paths:
           required: false
           schema:
             type: string
+        - name: min_price
+          in: query
+          description: Optional minimum price filter used when sorting by PRICE
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: max_price
+          in: query
+          description: Optional maximum price filter used when sorting by PRICE
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
         - name: curated_by_group
           in: query
           required: false
@@ -6130,6 +6356,48 @@ components:
           maxLength: 100
           minLength: 1
           pattern: ^[a-zA-Z0-9?!,."() ]{1,100}$
+    ApiCicContributor:
+      type: object
+      required:
+        - contribution
+        - profile
+      properties:
+        contribution:
+          type: number
+          format: int64
+        profile:
+          $ref: "#/components/schemas/ApiProfileMin"
+    ApiCicContributorsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCicContributor"
+    ApiCicOverview:
+      type: object
+      required:
+        - total_cic
+        - authenticated_user_contribution
+        - contributor_count
+        - contributors
+      properties:
+        total_cic:
+          type: number
+          format: int64
+        authenticated_user_contribution:
+          type: number
+          format: int64
+          nullable: true
+        contributor_count:
+          type: number
+          format: int64
+        contributors:
+          $ref: "#/components/schemas/ApiCicContributorsPage"
     ApiCommunityMemberMinimal:
       type: object
       required:
@@ -9288,6 +9556,69 @@ components:
         platform:
           type: string
           description: Optional platform (ios, android, web)
+    ApiRepCategoriesPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiRepCategory"
+    ApiRepCategory:
+      type: object
+      required:
+        - category
+        - total_rep
+        - contributor_count
+        - authenticated_user_contribution
+        - top_contributors
+      properties:
+        category:
+          type: string
+        total_rep:
+          type: number
+          format: int64
+        contributor_count:
+          type: number
+          format: int64
+        authenticated_user_contribution:
+          type: number
+          format: int64
+          nullable: true
+        top_contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiRepContributor"
+    ApiRepContributor:
+      type: object
+      required:
+        - contribution
+        - profile
+      properties:
+        contribution:
+          type: number
+          format: int64
+        profile:
+          $ref: "#/components/schemas/ApiProfileMin"
+    ApiRepContributorsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiRepContributor"
+    ApiRepDirection:
+      type: string
+      enum:
+        - incoming
+        - outgoing
     ApiReplyToDrop:
       type: object
       required:
@@ -9315,6 +9646,26 @@ components:
           type: boolean
         drop:
           $ref: "#/components/schemas/ApiDropWithoutWave"
+    ApiRepOverview:
+      type: object
+      required:
+        - total_rep
+        - authenticated_user_contribution
+        - contributor_count
+        - contributors
+      properties:
+        total_rep:
+          type: number
+          format: int64
+        authenticated_user_contribution:
+          type: number
+          format: int64
+          nullable: true
+        contributor_count:
+          type: number
+          format: int64
+        contributors:
+          $ref: "#/components/schemas/ApiRepContributorsPage"
     ApiRepRating:
       type: object
       required:

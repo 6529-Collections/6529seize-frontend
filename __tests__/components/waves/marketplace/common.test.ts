@@ -1,5 +1,6 @@
 import { createTestQueryClient } from "../../../utils/reactQuery";
 import {
+  deriveMarketplaceDataHealth,
   patchFromMediaLinkUpdate,
   primeMarketplacePreviewCacheFromNftLinks,
   type MarketplacePreviewData,
@@ -111,6 +112,9 @@ describe("patchFromMediaLinkUpdate", () => {
     },
     price: "1.0",
     priceCurrency: "ETH",
+    lastErrorMessage: null,
+    lastSuccessfullyUpdatedMs: null,
+    failedSinceMs: null,
     ...overrides,
   });
 
@@ -173,6 +177,107 @@ describe("patchFromMediaLinkUpdate", () => {
     expect(patched.media).toEqual({
       url: "https://cdn.example.com/small-preview.png",
       mimeType: "image/png",
+    });
+  });
+
+  it("patches metadata timestamps from websocket payload", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData(),
+      update: createMediaLinkUpdatedPayload({
+        last_error_message: "Timed out while fetching metadata",
+        last_successfully_updated: "1735689600",
+        failed_since: 1735689700,
+      }),
+    });
+
+    expect(patched.lastErrorMessage).toBe("Timed out while fetching metadata");
+    expect(patched.lastSuccessfullyUpdatedMs).toBe(1735689600000);
+    expect(patched.failedSinceMs).toBe(1735689700000);
+  });
+
+  it("clears metadata error fields when websocket sends null values", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData({
+        lastErrorMessage: "temporary provider outage",
+        lastSuccessfullyUpdatedMs: 1735689600000,
+        failedSinceMs: 1735689700000,
+      }),
+      update: createMediaLinkUpdatedPayload(),
+    });
+
+    expect(patched.lastErrorMessage).toBeNull();
+    expect(patched.lastSuccessfullyUpdatedMs).toBeNull();
+    expect(patched.failedSinceMs).toBeNull();
+  });
+});
+
+describe("deriveMarketplaceDataHealth", () => {
+  const createData = (
+    overrides: Partial<MarketplacePreviewData> = {}
+  ): MarketplacePreviewData => ({
+    href: "https://example.com/1",
+    canonicalId: "manifold:claim:1",
+    platform: "MANIFOLD",
+    title: "NFT #1",
+    description: null,
+    media: {
+      url: "https://cdn.example.com/current-preview.webp",
+      mimeType: "image/webp",
+    },
+    price: "1.0",
+    priceCurrency: "ETH",
+    lastErrorMessage: null,
+    lastSuccessfullyUpdatedMs: null,
+    failedSinceMs: null,
+    ...overrides,
+  });
+
+  it("returns fresh for recent successful updates", () => {
+    const data = createData({
+      lastSuccessfullyUpdatedMs: Date.now() - 60 * 60 * 1000,
+    });
+
+    const health = deriveMarketplaceDataHealth(data);
+
+    expect(health.state).toBe("fresh");
+    expect(health.details).toContain("NFT data fresh: last successful update");
+  });
+
+  it("returns stale when update age exceeds threshold", () => {
+    const data = createData({
+      lastSuccessfullyUpdatedMs: Date.now() - 4 * 24 * 60 * 60 * 1000,
+    });
+
+    const health = deriveMarketplaceDataHealth(data);
+
+    expect(health.state).toBe("stale");
+    expect(health.details).toContain("NFT data stale: last successful update");
+  });
+
+  it("returns error when nft-link reports last error message", () => {
+    const data = createData({
+      lastErrorMessage: "Could not fetch metadata",
+      failedSinceMs: Date.now() - 10 * 60 * 1000,
+    });
+
+    const health = deriveMarketplaceDataHealth(data);
+
+    expect(health.state).toBe("error");
+    expect(health.details).toContain("Could not fetch metadata");
+  });
+
+  it("returns unknown when no status metadata exists", () => {
+    const data = createData({
+      lastSuccessfullyUpdatedMs: null,
+      lastErrorMessage: null,
+      failedSinceMs: null,
+    });
+
+    const health = deriveMarketplaceDataHealth(data);
+
+    expect(health).toEqual({
+      state: "unknown",
+      details: "NFT data update status unavailable",
     });
   });
 });
@@ -395,6 +500,9 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
         media: null,
         price: null,
         priceCurrency: null,
+        lastErrorMessage: null,
+        lastSuccessfullyUpdatedMs: null,
+        failedSinceMs: null,
       }
     );
 

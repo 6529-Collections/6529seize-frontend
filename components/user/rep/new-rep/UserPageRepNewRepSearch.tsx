@@ -5,7 +5,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import type { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "./rep-search-types";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -46,12 +46,12 @@ const getErrorMessage = (error: unknown): string => {
 };
 
 export default function UserPageRepNewRepSearch({
-  repRates,
+  overview,
   profile,
   onSuccess,
   onCancel,
 }: {
-  readonly repRates: ApiProfileRepRatesState | null;
+  readonly overview: ApiRepOverview | null;
   readonly profile: ApiIdentity;
   readonly onSuccess?: (() => void) | undefined;
   readonly onCancel?: (() => void) | undefined;
@@ -259,7 +259,7 @@ export default function UserPageRepNewRepSearch({
                     </span>
                     <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
                       {formatNumberWithCommas(
-                        repRates?.total_rep_rating_by_rater ?? 0
+                        overview?.authenticated_user_contribution ?? 0
                       )}
                     </span>
                   </span>

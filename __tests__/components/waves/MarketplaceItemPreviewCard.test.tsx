@@ -73,9 +73,7 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(screen.getByTestId("marketplace-item-title")).toHaveTextContent(
       "Wave Artifact"
     );
-    expect(screen.getByTestId("marketplace-item-price")).toHaveTextContent(
-      "1.25"
-    );
+    expect(screen.getByText("1.25")).toBeInTheDocument();
     expect(
       screen.getByTestId("marketplace-item-price-currency")
     ).toHaveTextContent("ETH");
@@ -177,9 +175,7 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(ctaLink.className).toContain("tw-border-white");
     expect(ctaLink).toHaveAttribute("aria-label", "Open listing - 0.42 USDC");
     expect(screen.queryByTestId("marketplace-item-cta-open-icon")).toBeNull();
-    expect(screen.getByTestId("marketplace-item-price")).toHaveTextContent(
-      "0.42"
-    );
+    expect(screen.getByText("0.42")).toBeInTheDocument();
     expect(
       screen.getByTestId("marketplace-item-price-currency")
     ).toHaveTextContent("USDC");
@@ -201,9 +197,7 @@ describe("MarketplaceItemPreviewCard", () => {
 
     const ctaLink = screen.getByTestId("marketplace-item-cta-link");
     expect(ctaLink).toHaveAttribute("aria-label", "Open listing - 1.25 ETH");
-    expect(screen.getByTestId("marketplace-item-price")).toHaveTextContent(
-      "1.25"
-    );
+    expect(screen.getByText("1.25")).toBeInTheDocument();
     expect(
       screen.getByTestId("marketplace-item-price-currency")
     ).toHaveTextContent("ETH");
@@ -291,9 +285,7 @@ describe("MarketplaceItemPreviewCard", () => {
       "Open on Manifold - 1.25 ETH"
     );
     expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
-    expect(screen.getByTestId("marketplace-item-price")).toHaveTextContent(
-      "1.25"
-    );
+    expect(screen.getByText("1.25")).toBeInTheDocument();
     expect(
       screen.getByTestId("marketplace-item-price-currency")
     ).toHaveTextContent("ETH");
@@ -349,12 +341,77 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(
       screen.getByRole("link", { name: "Open listing - 0.42 ETH" })
     ).toBeInTheDocument();
-    expect(screen.getByTestId("marketplace-item-price")).toHaveTextContent(
-      "0.42"
-    );
+    expect(screen.getByText("0.42")).toBeInTheDocument();
     expect(
       screen.getByTestId("marketplace-item-price-currency")
     ).toHaveTextContent("ETH");
     expect(screen.queryByAltText(/logo$/i)).toBeNull();
+  });
+
+  it("renders subtle data-health icon with state details when provided", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://example.com/item/health"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          dataHealth={{
+            state: "stale",
+            details:
+              "NFT data stale: last successful update 4 days ago (1/1/2026, 10:00:00 AM)",
+          }}
+        />
+      </LinkPreviewProvider>
+    );
+
+    const icon = screen.getByTestId("marketplace-data-health-icon");
+    expect(icon).toHaveAttribute("data-state", "stale");
+    expect(icon).toHaveAttribute(
+      "title",
+      "NFT data stale: last successful update 4 days ago (1/1/2026, 10:00:00 AM)"
+    );
+    expect(icon).toHaveAttribute(
+      "aria-label",
+      "NFT data stale: last successful update 4 days ago (1/1/2026, 10:00:00 AM)"
+    );
+  });
+
+  it("hides data-health icon when state is fresh in full mode", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://example.com/item/fresh"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          dataHealth={{
+            state: "fresh",
+            details:
+              "NFT data fresh: last successful update just now (1/1/2026, 10:00:00 AM)",
+          }}
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(screen.queryByTestId("marketplace-data-health-icon")).toBeNull();
+  });
+
+  it("hides data-health icon when state is fresh in compact mode", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://example.com/item/fresh-compact"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          compact={true}
+          dataHealth={{
+            state: "fresh",
+            details:
+              "NFT data fresh: last successful update just now (1/1/2026, 10:00:00 AM)",
+          }}
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(screen.queryByTestId("marketplace-data-health-icon")).toBeNull();
   });
 });

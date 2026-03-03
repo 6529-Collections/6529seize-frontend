@@ -1,15 +1,17 @@
-import type { RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
-export function sortRepsByRatingAndContributors(items: RatingStats[]) {
-  return [...items].sort((a, d) => {
-    if (a.rating === d.rating) {
-      return d.contributor_count - a.contributor_count;
-    }
-    return d.rating - a.rating;
-  });
+export type RepDirection = "received" | "given";
+
+export function getContributorLabel(
+  direction: RepDirection,
+  count: number
+): string {
+  if (direction === "given") {
+    return count === 1 ? "receiver" : "receivers";
+  }
+  return count === 1 ? "rater" : "raters";
 }
 
 export function getCanEditRep({

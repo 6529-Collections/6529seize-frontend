@@ -1,17 +1,17 @@
 "use client";
 
-import type { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearch from "./UserPageRepNewRepSearch";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageRepNewRep({
   profile,
-  repRates,
+  overview,
   onSuccess,
   onCancel,
 }: {
   readonly profile: ApiIdentity;
-  readonly repRates: ApiProfileRepRatesState | null;
+  readonly overview: ApiRepOverview | null;
   readonly onSuccess?: () => void;
   readonly onCancel?: () => void;
 }) {
@@ -19,7 +19,7 @@ export default function UserPageRepNewRep({
 
   return (
     <UserPageRepNewRepSearch
-      repRates={repRates}
+      overview={overview}
       profile={profile}
       onCancel={onCancel}
       {...searchProps}

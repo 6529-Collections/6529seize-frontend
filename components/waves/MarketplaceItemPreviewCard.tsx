@@ -3,6 +3,7 @@
 import { useLinkPreviewVariant } from "./LinkPreviewContext";
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 import MarketplaceCompactCta from "./marketplace/MarketplaceCompactCta";
+import MarketplaceDataHealthIcon from "./marketplace/MarketplaceDataHealthIcon";
 import MarketplaceFullFooter from "./marketplace/MarketplaceFullFooter";
 import MarketplaceItemPreviewMediaLink from "./marketplace/MarketplaceItemPreviewMediaLink";
 import { DEFAULT_MARKETPLACE_TITLE } from "./marketplace/MarketplaceItemPreviewCard.constants";
@@ -69,6 +70,7 @@ export default function MarketplaceItemPreviewCard({
   price,
   priceCurrency,
   title,
+  dataHealth,
   compact = false,
   hideActions = false,
 }: MarketplaceItemPreviewCardProps) {
@@ -94,6 +96,8 @@ export default function MarketplaceItemPreviewCard({
     normalizedPrice: ariaPriceText,
     marketplaceBrand,
   });
+  const shouldShowDataHealthIcon =
+    dataHealth !== undefined && dataHealth.state !== "fresh";
 
   if (compact) {
     return (
@@ -102,6 +106,9 @@ export default function MarketplaceItemPreviewCard({
           className={`${getMarketplaceContainerClass(variant, compact)} tw-relative`}
           data-testid="manifold-item-card"
         >
+          {shouldShowDataHealthIcon && (
+            <MarketplaceDataHealthIcon dataHealth={dataHealth} />
+          )}
           <MarketplaceItemPreviewMediaLink
             mediaMimeType={mediaMimeType}
             mediaUrl={mediaUrl}
@@ -133,6 +140,9 @@ export default function MarketplaceItemPreviewCard({
         className={`${getMarketplaceContainerClass(variant, compact)} tw-relative`}
         data-testid="manifold-item-card"
       >
+        {shouldShowDataHealthIcon && (
+          <MarketplaceDataHealthIcon dataHealth={dataHealth} />
+        )}
         <MarketplaceItemPreviewMediaLink
           mediaMimeType={mediaMimeType}
           mediaUrl={mediaUrl}
