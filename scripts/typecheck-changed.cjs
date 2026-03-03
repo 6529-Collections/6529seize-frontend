@@ -5,6 +5,10 @@ const path = require("node:path");
 const ts = require("typescript");
 
 const BRANCH = "main";
+const EXEC_OPTIONS = {
+  encoding: "utf8",
+  stdio: ["ignore", "pipe", "pipe"],
+};
 
 const canonicalPath = (filePath) => {
   const normalized = path.resolve(filePath).replace(/\\/g, "/");
@@ -12,17 +16,16 @@ const canonicalPath = (filePath) => {
 };
 
 const runChangedFilesCommand = () => {
-  const command = [
-    "{",
-    `git diff --name-only -z ${BRANCH}...HEAD -- "*.ts" "*.tsx" "*.mts" "*.cts" ":(exclude)generated/**";`,
-    'git ls-files --others --exclude-standard -z -- "*.ts" "*.tsx" "*.mts" "*.cts" ":(exclude)generated/**";',
-    "}",
-  ].join(" ");
-
-  return execSync(command, {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+  const patterns = '"*.ts" "*.tsx" "*.mts" "*.cts" ":(exclude)generated/**"';
+  const changedTracked = execSync(
+    `git diff --name-only -z ${BRANCH}...HEAD -- ${patterns}`,
+    EXEC_OPTIONS
+  );
+  const changedUntracked = execSync(
+    `git ls-files --others --exclude-standard -z -- ${patterns}`,
+    EXEC_OPTIONS
+  );
+  return changedTracked + changedUntracked;
 };
 
 const getChangedTypeScriptFiles = () => {
