@@ -14,6 +14,7 @@ const SCALABLE_PREFIXES = [
   "https://d3lqz0a4bldqgf.cloudfront.net/rememes/",
   "https://d3lqz0a4bldqgf.cloudfront.net/drops/",
   "https://d3lqz0a4bldqgf.cloudfront.net/waves/",
+  "https://d3lqz0a4bldqgf.cloudfront.net/images/",
 ];
 
 export function getScaledImageUri(url: string, scale: ImageScale): string {

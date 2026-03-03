@@ -4,6 +4,7 @@ import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -51,7 +52,7 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
     ) : (
       <Image
         key={`${resolvedPfp}-${loadMode}`}
-        src={resolvedPfp}
+        src={getScaledImageUri(resolvedPfp, ImageScale.W_AUTO_H_50)}
         alt={
           authorHandle ? `${authorHandle}'s profile picture` : "Profile picture"
         }
