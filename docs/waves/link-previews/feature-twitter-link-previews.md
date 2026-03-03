@@ -1,102 +1,98 @@
 # Wave Drop Twitter/X Link Previews
 
+Parent: [Wave Link Previews Index](README.md)
+
 ## Overview
 
-Wave post cards and homepage boosted cards render supported Twitter/X status links as
-inline tweet previews instead of plain URL text.
+Supported Twitter/X status URLs render as inline tweet cards instead of plain
+links.
 
-In standard chat and message surfaces, tweet previews are constrained to the full
-available width with a desktop max-width cap so previews stay narrower than wide
-screens and avoid dominating list rows.
+This page covers:
 
-The preview component measures tweet height so most short tweets stay fully expanded,
-while long tweets can be shown compactly with a `Show full tweet` action. This keeps
-message and card layouts stable in dense lists.
-
-When tweet content cannot be loaded, the card falls back to a clearly labeled
-external-link state.
+- wave and direct-message markdown drops
+- wave leaderboard cards that render markdown in home style
+- boosted cards on `/` when the card preview URL resolves to a supported
+  Twitter/X status URL
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Any drop-card context that uses the shared wave markdown renderer
-- Boosted cards on `/` (twitter-linked boosted drops)
+- Boosted cards on `/`
+- Wave leaderboard card content that reuses markdown rendering
+
+## Supported URL Patterns
+
+- Hosts: `twitter.com` and `x.com`, including subdomains (for example
+  `mobile.twitter.com`)
+- Path must contain `status/{numericId}` or `statuses/{numericId}`
+- `i/web` variants are supported (for example `.../i/web/status/{id}`)
+- Legacy hash-bang links are supported (for example
+  `https://twitter.com/#!/user/status/{id}`)
+- Query parameters after the tweet ID are supported
+
+Links that do not match these rules stay regular links.
 
 ## Entry Points
 
-- Open a drop that contains a supported Twitter/X status URL.
-- Open a shared drop link that includes a supported Twitter/X status URL in markdown
-  content.
-- Open a boosted tweet card on `/`.
+- Open or publish a drop that contains a supported Twitter/X status URL.
+- Open a shared drop route where markdown contains a supported Twitter/X status
+  URL.
+- Open a boosted drop on `/` where the selected preview URL is a supported
+  Twitter/X status URL.
+- If previews are hidden for a drop, use `Show link previews` when available.
 
 ## User Journey
 
-1. Open a wave thread, DM thread, or homepage boosted card containing a supported
-   Twitter/X status URL.
-2. The URL is normalized into a tweet preview URL and rendered inline with a loading
-   state.
-3. When tweet data is available, the card renders tweet content inline.
-4. The system checks tweet height:
-   - Short tweets render fully.
-   - Longer tweets render in compact mode and show `Show full tweet`.
-5. Tap/click `Show full tweet` to reveal the full content, replies, actions, and
-   media block where available.
+1. Open a surface with a supported Twitter/X status link.
+2. The renderer validates the link and extracts the tweet ID.
+3. A loading state appears (`Loading tweet...`).
+4. If tweet data loads, the tweet renders inline.
+5. In auto-compact contexts, long tweets show `Show full tweet`; selecting it
+   expands the tweet inline.
+6. In wave/DM chat layouts, side actions (open/copy) appear beside the card.
+   In home-style layouts, side actions are hidden.
 
 ## Common Scenarios
 
-- Supported links include `twitter.com` and `x.com` hosts (including subdomains such
-  as `mobile.twitter.com`) when the URL path contains `status/{id}` or
-  `statuses/{id}` with a numeric tweet ID.
-- Tracking query parameters after the tweet ID (for example `?s=20`) do not prevent
-  the tweet preview card from rendering.
-- In wave contexts that show link previews, users still get adjacent copy/open controls
-  alongside the tweet preview card.
-- Multiple supported Twitter/X links in one drop each render their own preview card.
-- If link previews are hidden for a drop, Twitter/X URLs remain plain links until
-  previews are enabled.
-- During message loading from jump-to-serial or older-page scroll operations, newly
-  inserted drops can keep long tweets in compact mode until users choose to expand.
-- In homepage and leaderboard card contexts, tweet previews keep the shared width
-  rule and still allow the `Show full tweet` control.
+- Multiple supported Twitter/X links in one drop each render their own tweet card.
+- If previews are hidden for a drop, Twitter/X links stay plain until previews are
+  shown again.
+- Hidden drops can show one inline `Show link previews` action beside the first
+  hidden link.
+- During serial-jump or history-load scroll operations, newly inserted drops can
+  stay in auto-compact mode.
 
 ## Edge Cases
 
-- Twitter/X links without a valid numeric tweet ID do not render as tweet cards and
-  remain regular links.
-- Legacy hash-based status URL formats such as
-  `https://twitter.com/#!/user/status/{id}` are accepted, including variants that
-  append query parameters.
-- If tweet content is short, the preview renders fully with no expand control.
-- If tweet metadata loads but rendering fails, users see the fallback card and can open
-  the original URL.
+- Non-numeric tweet IDs do not render as tweet cards.
+- Links missing `status`/`statuses` do not render as tweet cards.
+- Invalid Twitter/X links do not fall back to generic OpenGraph cards; they remain
+  regular links.
+- Short tweets render without `Show full tweet`.
 
 ## Failure and Recovery
 
-- While tweet data is loading, users see a loading placeholder in the card.
-- If tweet data is unavailable (for example removed, restricted, or not returned),
-  users see a fallback card labeled `Tweet unavailable` and can continue with
-  `Open on X`.
-- If tweet preview rendering throws an error, users see the same fallback card and can
-  continue with the original link.
-- If a compacted long tweet is difficult to scan, users can expand it directly without
-  leaving the thread.
-- If preview visibility toggling fails, the drop returns to its prior state and users can
-  retry from the same thread context.
+- If tweet data is unavailable in markdown-rendered cards, users see
+  `Tweet unavailable` with `Open on X`.
+- If tweet rendering throws in markdown-rendered cards, the same fallback appears.
+- In boosted cards on `/`, unavailable tweet data falls back to an `X post` card
+  linking to the original URL.
+- If `Show full tweet` appears, users can expand in place without leaving the
+  current surface.
 
 ## Limitations / Notes
 
-- Auto-compaction is driven by measured tweet height and the surrounding viewport flow;
-  external content or network state still determines whether full metadata is available.
-- This page covers inline tweet rendering in drop and boosted-card contexts only, not
-  standalone tweet tooling outside the current UI surfaces.
+- Only Twitter/X status URL patterns listed above are supported.
+- This page covers tweet cards in wave/DM markdown, leaderboard markdown, and
+  boosted `/` cards.
+- This page does not cover non-drop tweet surfaces.
 
 ## Related Pages
 
-- [Waves Index](../README.md)
+- [Wave Link Previews Index](README.md)
+- [Wave Drop Link Preview Toggle](feature-link-preview-toggle.md)
 - [Wave Drop External Link Previews](feature-external-link-previews.md)
 - [Wave Drop YouTube Link Previews](feature-youtube-link-previews.md)
 - [Wave Drop Social Platform Previews](feature-social-platform-previews.md)
-- [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
-- [Docs Home](../../README.md)
