@@ -79,7 +79,10 @@ function renderConnected(onMintFor = jest.fn()) {
       cic: 1,
       wallets: [
         { wallet: seizeCtx.address, display: "Primary" },
-        { wallet: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", display: "Alt" },
+        {
+          wallet: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          display: "Alt",
+        },
       ],
     },
   } as any;

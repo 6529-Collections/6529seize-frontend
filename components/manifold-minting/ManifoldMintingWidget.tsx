@@ -89,7 +89,8 @@ export default function ManifoldMintingWidget(
         })
         .catch((err) => {
           setMerkleProofs([]);
-          const msg = typeof err === "string" ? err : (err as Error)?.message ?? "";
+          const msg =
+            typeof err === "string" ? err : ((err as Error)?.message ?? "");
           const isNotFound =
             /404|not found|no proof/i.test(msg) || msg.includes("404");
           setIsError(!isNotFound);

@@ -146,7 +146,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }, [instance, props.contract, props.title]);
 
   const artist = useMemo(() => {
-    const name = getTraitValue(instance?.asset.attributes, "Artist") ?? undefined;
+    const name =
+      getTraitValue(instance?.asset.attributes, "Artist") ?? undefined;
     const handle =
       getTraitValue(instance?.asset.attributes, "SEIZE Artist Profile") ??
       undefined;

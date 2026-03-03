@@ -4,7 +4,7 @@ import { DropdownTrait } from "./DropdownTrait";
 import { NumberTrait } from "./NumberTrait";
 import { FieldType } from "./schema";
 import { TextTrait } from "./TextTrait";
-import type { FieldDefinition} from "./schema";
+import type { FieldDefinition } from "./schema";
 import type { TraitsData } from "../submission/types/TraitsData";
 
 interface TraitFieldProps {
@@ -142,10 +142,7 @@ const arePropsEqual = (
   }
 
   return (
-    fieldMatches &&
-    definitionMatches &&
-    readOnlyOverrideMatches &&
-    errorMatches
+    fieldMatches && definitionMatches && readOnlyOverrideMatches && errorMatches
   );
 };
 

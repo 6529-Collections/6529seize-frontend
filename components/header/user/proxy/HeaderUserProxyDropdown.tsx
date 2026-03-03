@@ -296,7 +296,11 @@ export default function HeaderUserProxyDropdown({
                         title="Switch Chain"
                         className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
-                        <FontAwesomeIcon icon={faShuffle} height={16} width={16} />
+                        <FontAwesomeIcon
+                          icon={faShuffle}
+                          height={16}
+                          width={16}
+                        />
                         <span>Switch to {nextChainName}</span>
                       </button>
                     </div>

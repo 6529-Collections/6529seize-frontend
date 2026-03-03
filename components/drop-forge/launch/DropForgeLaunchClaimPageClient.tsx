@@ -98,7 +98,8 @@ function getSelectedPhaseFormValues({
     selectedPhasePriceValue: phasePricesEth[selectedPhase] ?? "",
     selectedPhaseWindowStartValue:
       phaseAllowlistWindows[selectedPhase]?.start ?? "",
-    selectedPhaseWindowEndValue: phaseAllowlistWindows[selectedPhase]?.end ?? "",
+    selectedPhaseWindowEndValue:
+      phaseAllowlistWindows[selectedPhase]?.end ?? "",
   };
 }
 

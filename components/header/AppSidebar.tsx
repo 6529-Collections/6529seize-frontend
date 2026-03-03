@@ -130,7 +130,9 @@ export default function AppSidebar({
     });
 
     if (showDropForge) {
-      const aboutIndex = updatedMenu.findIndex((item) => item.label === "About");
+      const aboutIndex = updatedMenu.findIndex(
+        (item) => item.label === "About"
+      );
       const dropForgeItem = {
         label: DROP_FORGE_TITLE,
         path: DROP_FORGE_PATH,

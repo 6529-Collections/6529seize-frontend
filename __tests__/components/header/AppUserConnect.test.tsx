@@ -167,7 +167,10 @@ describe("AppUserConnect", () => {
       seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),
     });
     (useChainSwitcher as jest.Mock).mockReturnValue({
-      chains: [{ id: 1, name: "Ethereum" }, { id: 137, name: "Polygon" }],
+      chains: [
+        { id: 1, name: "Ethereum" },
+        { id: 137, name: "Polygon" },
+      ],
       currentChainName: "Ethereum",
       nextChainName: "Polygon",
       switchToNextChain,

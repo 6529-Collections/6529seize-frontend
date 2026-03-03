@@ -13,9 +13,7 @@ interface MemesArtSubmissionTraitsProps {
   readonly validationErrors?:
     | Record<keyof TraitsData, string | null>
     | undefined;
-  readonly onFieldBlur?:
-    | ((field: keyof TraitsData) => void)
-    | undefined;
+  readonly onFieldBlur?: ((field: keyof TraitsData) => void) | undefined;
   readonly readOnlyOverrides?: Partial<Record<keyof TraitsData, boolean>>;
 }
 
@@ -67,7 +65,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-1">
       {showTitle && (
-        <h2 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4">
+        <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-text-xl">
           Artwork Traits
         </h2>
       )}

@@ -30,7 +30,9 @@ export default function ClaimTransactionModal({
   if (!state) return null;
 
   const closable = state.status === "success" || state.status === "error";
-  const txUrl = state.txHash ? getTransactionLink(chain.id, state.txHash) : null;
+  const txUrl = state.txHash
+    ? getTransactionLink(chain.id, state.txHash)
+    : null;
   const modalTitle = state.actionLabel ?? "Onchain Action";
 
   if (typeof document === "undefined") return null;
@@ -143,7 +145,8 @@ export default function ClaimTransactionModal({
                 ) : null}
               </p>
               <p className="tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-md tw-font-medium tw-text-iron-100">
-                Waiting for confirmation <CircleLoader size={CircleLoaderSize.MEDIUM} />
+                Waiting for confirmation{" "}
+                <CircleLoader size={CircleLoaderSize.MEDIUM} />
               </p>
             </div>
           ) : null}

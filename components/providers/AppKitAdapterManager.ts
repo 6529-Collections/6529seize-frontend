@@ -51,9 +51,7 @@ export class AppKitAdapterManager {
     chains: Chain[] = [mainnet]
   ): WagmiAdapter {
     if (!Array.isArray(chains) || chains.length === 0) {
-      throw new AdapterError(
-        "ADAPTER_021: chains must be a non-empty array"
-      );
+      throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
     }
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_007: appWallets must be an array");
@@ -160,7 +158,10 @@ export class AppKitAdapterManager {
     return false;
   }
 
-  private toWalletAddressSet(wallets: AppWallet[], errorMessage: string): Set<string> {
+  private toWalletAddressSet(
+    wallets: AppWallet[],
+    errorMessage: string
+  ): Set<string> {
     return new Set(
       wallets.map((w) => {
         if (!w?.address) {
@@ -192,9 +193,7 @@ export class AppKitAdapterManager {
     chains: Chain[] = [mainnet]
   ): WagmiAdapter {
     if (!Array.isArray(chains) || chains.length === 0) {
-      throw new AdapterError(
-        "ADAPTER_021: chains must be a non-empty array"
-      );
+      throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
     }
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_012: appWallets must be an array");
@@ -290,7 +289,9 @@ export class AppKitAdapterManager {
     const chainIdentifiers = this.getSortedChainIdentifiers(chains);
 
     const walletsKey =
-      sortedAddresses.length === 0 ? "empty-wallets" : sortedAddresses.join(",");
+      sortedAddresses.length === 0
+        ? "empty-wallets"
+        : sortedAddresses.join(",");
     return `${walletsKey}|chains:${chainIdentifiers.join(",")}|platform:${
       isCapacitor ? "capacitor" : "web"
     }`;
@@ -304,7 +305,9 @@ export class AppKitAdapterManager {
     return chains
       .map((chain) => {
         if (!chain || typeof chain.id !== "number") {
-          throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
+          throw new AdapterError(
+            "ADAPTER_021: chains must be a non-empty array"
+          );
         }
         return `${chain.id}`;
       })

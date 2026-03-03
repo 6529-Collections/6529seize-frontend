@@ -514,10 +514,10 @@ export function getInitialTraitsValues(): TraitsData {
           field.initialValue !== undefined
             ? field.initialValue
             : field.type === FieldType.BOOLEAN
-            ? false
-            : field.type === FieldType.NUMBER
-            ? 0
-            : "";
+              ? false
+              : field.type === FieldType.NUMBER
+                ? 0
+                : "";
       }
     });
   });

@@ -79,11 +79,14 @@ type DistributionSectionKey =
 
 function getClaimMediaType(claim: MintingClaim): ClaimMediaType {
   const hasImageData = Boolean(claim.image_url || claim.image_details);
-  const hasAnimationData = Boolean(claim.animation_url || claim.animation_details);
+  const hasAnimationData = Boolean(
+    claim.animation_url || claim.animation_details
+  );
   if (!hasImageData && !hasAnimationData) return "unknown";
   if (hasAnimationData) {
-    const format = (claim.animation_details as { format?: string } | null | undefined)
-      ?.format;
+    const format = (
+      claim.animation_details as { format?: string } | null | undefined
+    )?.format;
     if (format === "HTML") return "html";
     if (format === "GLB") return "glb";
     return "video";
@@ -173,8 +176,8 @@ function DropForgeCraftClaimHeader({
         Back to Craft list
       </Link>
       <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
-        <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left tw-text-2xl sm:tw-text-3xl tw-font-semibold tw-text-iron-50">
-          <DropForgeCraftIcon className="tw-h-7 tw-w-7 sm:tw-h-8 sm:tw-w-8 tw-flex-shrink-0" />
+        <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-2xl tw-font-semibold tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left sm:tw-text-3xl">
+          <DropForgeCraftIcon className="tw-h-7 tw-w-7 tw-flex-shrink-0 sm:tw-h-8 sm:tw-w-8" />
           <span className="tw-break-words">{pageTitle}</span>
         </h1>
         <div className="tw-flex tw-w-full tw-justify-center sm:tw-w-auto sm:tw-justify-end">
@@ -202,8 +205,10 @@ export default function DropForgeCraftClaimPageClient({
   const [animationDirty, setAnimationDirty] = useState(false);
   const [coreInfoDirty, setCoreInfoDirty] = useState(false);
   const [metadataDirty, setMetadataDirty] = useState(false);
-  const [distributionSummariesRefreshNonce, setDistributionSummariesRefreshNonce] =
-    useState(0);
+  const [
+    distributionSummariesRefreshNonce,
+    setDistributionSummariesRefreshNonce,
+  ] = useState(0);
 
   const fetchClaim = useCallback(async () => {
     setLoading(true);
@@ -258,7 +263,7 @@ export default function DropForgeCraftClaimPageClient({
     return (
       <div className={PAGE_CONTAINER_CLASS}>
         <DropForgeCraftClaimHeader pageTitle={pageTitle} />
-        <p className="tw-text-rose-300 tw-mb-0" role="alert">
+        <p className="tw-mb-0 tw-text-rose-300" role="alert">
           {error}
         </p>
       </div>
@@ -501,7 +506,7 @@ function ImageSection({
           </p>
         )}
         {formError && (
-          <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+          <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
             {formError}
           </p>
         )}
@@ -589,8 +594,7 @@ function AnimationSection({
     const lowered = animationDisplayUrl.toLowerCase();
     if (lowered.endsWith(".glb")) return "model/gltf-binary";
     if (lowered.endsWith(".gltf")) return "model/gltf+json";
-    if (mediaType === "glb")
-      return "model/gltf-binary";
+    if (mediaType === "glb") return "model/gltf-binary";
     if (mediaType === "video" || isAnimationVideoUrl) return "video/mp4";
     if (
       mediaType === "html" ||
@@ -730,7 +734,9 @@ function AnimationSection({
   const showChoice = showAddFlow && replaceMode === "choose";
   const showAddLink = showAddFlow && replaceMode === "link";
   const showAnimationControls =
-    hasAnimation || pendingAnimation !== undefined || pendingAnimationFile !== null;
+    hasAnimation ||
+    pendingAnimation !== undefined ||
+    pendingAnimationFile !== null;
   const animationActionLabel =
     pendingAnimation === null ? "Add animation" : "Replace";
 
@@ -800,7 +806,7 @@ function AnimationSection({
         />
         {linkError && (
           <p
-            className="tw-text-rose-300 tw-mb-0 tw-w-full tw-text-sm"
+            className="tw-mb-0 tw-w-full tw-text-sm tw-text-rose-300"
             role="alert"
           >
             {linkError}
@@ -884,9 +890,7 @@ function AnimationSection({
         )}
         {showAnimationControls && (
           <>
-            <DropForgeMediaTypePill
-              label={animationPreviewLabel}
-            />
+            <DropForgeMediaTypePill label={animationPreviewLabel} />
             {animationDisplayUrl && animationPreviewMimeType && (
               <div className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
                 <MediaDisplay
@@ -915,7 +919,10 @@ function AnimationSection({
 
         {showAddLink && (
           <div className="tw-flex tw-flex-col tw-gap-2">
-            <label htmlFor="drop-forge-animation-link" className="tw-text-sm tw-text-iron-400">
+            <label
+              htmlFor="drop-forge-animation-link"
+              className="tw-text-sm tw-text-iron-400"
+            >
               IPFS or Arweave URL (GLB or HTML)
             </label>
             <input
@@ -930,7 +937,7 @@ function AnimationSection({
               className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
             />
             {linkError && (
-              <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+              <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
                 {linkError}
               </p>
             )}
@@ -963,7 +970,7 @@ function AnimationSection({
       {hasPendingChanges && (
         <form onSubmit={handleSave} className="tw-flex tw-flex-col tw-gap-2">
           {formError && (
-            <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+            <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
               {formError}
             </p>
           )}
@@ -1025,9 +1032,7 @@ function CoreInformationSection({
   const [coreError, setCoreError] = useState<string | null>(null);
 
   useEffect(() => {
-    setEditionSize(
-      formatNullableEditionSize(claim.edition_size)
-    );
+    setEditionSize(formatNullableEditionSize(claim.edition_size));
     setSeason(getClaimSeason(claim));
     setCoreError(null);
   }, [claim.claim_id]);
@@ -1096,13 +1101,8 @@ function CoreInformationSection({
                 },
               ];
       }
-      const nextClaim = await patchClaim(
-        claimId,
-        body
-      );
-      setEditionSize(
-        formatNullableEditionSize(nextClaim.edition_size)
-      );
+      const nextClaim = await patchClaim(claimId, body);
+      setEditionSize(formatNullableEditionSize(nextClaim.edition_size));
       setSeason(getClaimSeason(nextClaim));
       onUpdated(nextClaim);
       if (editionSizeChanged) {
@@ -1176,7 +1176,7 @@ function CoreInformationSection({
         </div>
       </div>
       {coreError && (
-        <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+        <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
           {coreError}
         </p>
       )}
@@ -1199,9 +1199,7 @@ function CoreInformationSection({
           type="button"
           disabled={!coreChanged}
           onClick={() => {
-            setEditionSize(
-              formatNullableEditionSize(claim.edition_size)
-            );
+            setEditionSize(formatNullableEditionSize(claim.edition_size));
             setSeason(getClaimSeason(claim));
             setCoreError(null);
           }}
@@ -1346,7 +1344,7 @@ function MetadataSection({
         <div className="tw-relative">
           <label
             htmlFor="metadata-external-url"
-            className="tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all group-focus-visible-within:tw-text-primary-400"
+            className="group-focus-visible-within:tw-text-primary-400 tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all"
           >
             External URL
           </label>
@@ -1378,7 +1376,7 @@ function MetadataSection({
         />
       </div>
       {traitsError && (
-        <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+        <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
           {traitsError}
         </p>
       )}
@@ -1457,7 +1455,7 @@ function ArweaveLinkRow({
     <div className={ARWEAVE_LINK_CARD}>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-min-w-0 tw-text-base tw-text-iron-200">{label}</div>
-        <div className="tw-flex tw-items-center tw-gap-2 tw-flex-shrink-0">
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
           {url && (
             <>
               <button
@@ -1573,7 +1571,7 @@ function ArweaveSection({
             </p>
           )}
           {error && (
-            <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+            <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
               {error}
             </p>
           )}
@@ -1936,7 +1934,7 @@ function DistributionSection({
       )}
 
       {!loading && error && (
-        <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+        <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
           {error}
         </p>
       )}
@@ -1994,12 +1992,12 @@ function DistributionSection({
 
       <div className="tw-mt-8 tw-space-y-7">
         {airdropSummariesError && (
-          <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+          <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
             {airdropSummariesError}
           </p>
         )}
         {allowlistSummariesError && (
-          <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
+          <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
             {allowlistSummariesError}
           </p>
         )}
@@ -2154,9 +2152,7 @@ function DistributionPhotoLightbox({
   }
 
   return createPortal(
-    <div
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-flex tw-items-center tw-justify-center"
-    >
+    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-flex tw-items-center tw-justify-center">
       <button
         type="button"
         aria-label="Close photo lightbox"
@@ -2165,9 +2161,7 @@ function DistributionPhotoLightbox({
         className="tw-absolute tw-inset-0 tw-border-0 tw-bg-black/85 tw-p-0"
       />
 
-      <div
-        className="tw-relative tw-z-[1001] tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5"
-      >
+      <div className="tw-relative tw-z-[1001] tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5">
         <img
           src={photo.link}
           alt={photoFileName}

@@ -38,14 +38,12 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Track current input value for real-time checkmark updates
-    const [currentInputValue, setCurrentInputValue] = React.useState<string>(
-      currentTraitValue
-    );
+    const [currentInputValue, setCurrentInputValue] =
+      React.useState<string>(currentTraitValue);
 
     // Debounced update function - stores the current input value for use in the debounced function
-    const [debouncedValue, setDebouncedValue] = React.useState<string>(
-      currentTraitValue
-    );
+    const [debouncedValue, setDebouncedValue] =
+      React.useState<string>(currentTraitValue);
 
     useDebounce(
       () => {

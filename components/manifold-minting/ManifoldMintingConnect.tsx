@@ -36,24 +36,25 @@ export default function ManifoldMintingConnect(
     string | null
   >(null);
 
-  const connectedRecipientProfile = useMemo<CommunityMemberMinimal | null>(() => {
-    if (!account.address) {
-      return null;
-    }
+  const connectedRecipientProfile =
+    useMemo<CommunityMemberMinimal | null>(() => {
+      if (!account.address) {
+        return null;
+      }
 
-    return {
-      profile_id: connectedProfile?.id ?? null,
-      handle: connectedProfile?.handle ?? null,
-      normalised_handle: connectedProfile?.normalised_handle ?? null,
-      primary_wallet: connectedProfile?.primary_wallet ?? account.address,
-      display: connectedProfile?.display ?? account.address,
-      tdh: connectedProfile?.tdh ?? 0,
-      level: connectedProfile?.level ?? 0,
-      cic_rating: connectedProfile?.cic ?? 0,
-      wallet: account.address,
-      pfp: connectedProfile?.pfp ?? null,
-    };
-  }, [connectedProfile, account.address]);
+      return {
+        profile_id: connectedProfile?.id ?? null,
+        handle: connectedProfile?.handle ?? null,
+        normalised_handle: connectedProfile?.normalised_handle ?? null,
+        primary_wallet: connectedProfile?.primary_wallet ?? account.address,
+        display: connectedProfile?.display ?? account.address,
+        tdh: connectedProfile?.tdh ?? 0,
+        level: connectedProfile?.level ?? 0,
+        cic_rating: connectedProfile?.cic ?? 0,
+        wallet: account.address,
+        pfp: connectedProfile?.pfp ?? null,
+      };
+    }, [connectedProfile, account.address]);
 
   const resetFren = useCallback(() => {
     setSelectedFrenProfile(null);
@@ -99,7 +100,7 @@ export default function ManifoldMintingConnect(
 
   function printMintForFren() {
     return (
-      <div className="tw-pt-2 tw-pb-1">
+      <div className="tw-pb-1 tw-pt-2">
         <RecipientSelector
           open={mintForFren}
           selectedProfile={selectedFrenProfile}
@@ -119,7 +120,7 @@ export default function ManifoldMintingConnect(
     }
 
     return (
-      <div className="tw-pt-2 tw-pb-1">
+      <div className="tw-pb-1 tw-pt-2">
         <RecipientSelector
           open={!mintForFren}
           selectedProfile={connectedRecipientProfile}
@@ -179,7 +180,9 @@ export default function ManifoldMintingConnect(
         <Link
           href={mintOn6529Href}
           className="text-center pt-2 pb-2"
-          target="_blank" rel="noopener noreferrer">
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <button className="btn btn-light" style={{ width: "100%" }}>
             Mint on 6529.io
           </button>
@@ -211,13 +214,15 @@ export default function ManifoldMintingConnect(
             onClick={() => {
               resetFren();
               setMintForFren(false);
-            }}>
+            }}
+          >
             Mint for me
           </button>
           <button
             className={`btn ${mintForFren ? "btn-light" : "btn-dark"}`}
             style={{ width: "50%" }}
-            onClick={() => setMintForFren(true)}>
+            onClick={() => setMintForFren(true)}
+          >
             Mint for fren
           </button>
         </Col>

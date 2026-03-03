@@ -106,14 +106,14 @@ export default function DropForgeAccordionSection({
 
   return (
     <div className={`${SECTION_CARD_CLASS} ${className}`}>
-      <div className="tw-flex tw-w-full tw-min-h-10 tw-items-start sm:tw-items-center tw-justify-between tw-gap-2">
+      <div className="tw-flex tw-min-h-10 tw-w-full tw-items-start tw-justify-between tw-gap-2 sm:tw-items-center">
         <button
           type="button"
           disabled={disabled}
           aria-expanded={isOpen}
           aria-disabled={disabled}
           onClick={toggleOpen}
-          className={`tw-flex tw-min-h-10 tw-min-w-0 tw-flex-1 tw-items-start sm:tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
+          className={`tw-flex tw-min-h-10 tw-min-w-0 tw-flex-1 tw-items-start tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left sm:tw-items-center ${
             disabled ? "tw-!cursor-default" : "tw-cursor-pointer"
           }`}
         >

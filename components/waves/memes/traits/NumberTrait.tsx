@@ -205,7 +205,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
           readOnly={readOnly}
           min={min}
           max={max}
-          className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
+          className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
           style={{
             MozAppearance: "textfield",
             WebkitAppearance: "none",

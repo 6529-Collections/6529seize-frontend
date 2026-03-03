@@ -54,7 +54,8 @@ function renderDropdown(options: any) {
     seizeDisconnect:
       options.seizeDisconnect || jest.fn().mockResolvedValue(undefined),
     seizeDisconnectAndLogout:
-      options.seizeDisconnectAndLogout || jest.fn().mockResolvedValue(undefined),
+      options.seizeDisconnectAndLogout ||
+      jest.fn().mockResolvedValue(undefined),
     seizeDisconnectAndLogoutAll:
       options.seizeDisconnectAndLogoutAll ||
       jest.fn().mockResolvedValue(undefined),
@@ -134,7 +135,10 @@ describe("HeaderUserProxyDropdown", () => {
       profile: profileBase,
       address: "0xabc",
       isConnected: true,
-      chains: [{ id: 1, name: "Ethereum" }, { id: 137, name: "Polygon" }],
+      chains: [
+        { id: 1, name: "Ethereum" },
+        { id: 137, name: "Polygon" },
+      ],
       currentChainName: "Ethereum",
       nextChainName: "Polygon",
       switchToNextChain,

@@ -102,7 +102,11 @@ function ClaimCardThumbnail({ claim }: Readonly<{ claim: MintingClaim }>) {
       <div className={containerClass}>
         <img
           src={claim.image_url}
-          alt={claim.name?.trim() ? `${claim.name} thumbnail` : `Claim #${claim.claim_id} thumbnail`}
+          alt={
+            claim.name?.trim()
+              ? `${claim.name} thumbnail`
+              : `Claim #${claim.claim_id} thumbnail`
+          }
           className="tw-h-full tw-w-full tw-object-cover"
         />
       </div>
@@ -139,7 +143,7 @@ function ClaimCardThumbnail({ claim }: Readonly<{ claim: MintingClaim }>) {
   }
 
   return (
-    <div className="tw-flex tw-w-16 sm:tw-w-24 tw-flex-shrink-0 tw-items-center tw-justify-center tw-self-stretch tw-rounded-lg tw-bg-iron-900 tw-text-iron-500 tw-ring-1 tw-ring-iron-800">
+    <div className="tw-flex tw-w-16 tw-flex-shrink-0 tw-items-center tw-justify-center tw-self-stretch tw-rounded-lg tw-bg-iron-900 tw-text-iron-500 tw-ring-1 tw-ring-iron-800 sm:tw-w-24">
       —
     </div>
   );
@@ -233,14 +237,14 @@ export default function DropForgeClaimsListPageClient({
       <div className="tw-mb-6">
         <Link
           href="/drop-forge"
-          className="tw-inline-flex tw-w-full tw-justify-center sm:tw-w-auto sm:tw-justify-start tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
+          className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start"
         >
           <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
           Back to Drop Forge
         </Link>
         <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
-          <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left tw-text-2xl sm:tw-text-3xl tw-font-semibold tw-text-iron-50">
-            <HeaderIcon className="tw-h-7 tw-w-7 sm:tw-h-8 sm:tw-w-8 tw-flex-shrink-0" />
+          <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-2xl tw-font-semibold tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left sm:tw-text-3xl">
+            <HeaderIcon className="tw-h-7 tw-w-7 tw-flex-shrink-0 sm:tw-h-8 sm:tw-w-8" />
             <span className="tw-break-words">{title}</span>
           </h1>
           <div className="tw-flex tw-w-full tw-justify-center sm:tw-w-auto sm:tw-justify-end">
@@ -248,7 +252,7 @@ export default function DropForgeClaimsListPageClient({
           </div>
         </div>
       </div>
-      <p className="tw-mb-6 tw-text-center sm:tw-text-left tw-text-iron-400">
+      <p className="tw-mb-6 tw-text-center tw-text-iron-400 sm:tw-text-left">
         {description}
       </p>
 
@@ -319,11 +323,11 @@ function ClaimCardContent({
   return (
     <div className="tw-flex tw-min-h-full tw-flex-1 tw-items-stretch tw-gap-3 sm:tw-gap-5">
       <ClaimCardThumbnail claim={claim} />
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-2 tw-self-stretch sm:tw-gap-3 min-[480px]:tw-pr-36 lg:tw-pr-40">
-        <div className="tw-min-w-0 tw-font-mono tw-text-[11px] sm:tw-text-xs tw-tracking-wide tw-text-iron-400 min-[480px]:tw-truncate">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-2 tw-self-stretch min-[480px]:tw-pr-36 sm:tw-gap-3 lg:tw-pr-40">
+        <div className="tw-min-w-0 tw-font-mono tw-text-[11px] tw-tracking-wide tw-text-iron-400 min-[480px]:tw-truncate sm:tw-text-xs">
           {metadataLabel}
         </div>
-        <div className="tw-min-w-0 tw-break-words tw-text-sm sm:tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50 min-[480px]:tw-truncate">
+        <div className="tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-tight tw-text-iron-50 min-[480px]:tw-truncate sm:tw-text-base">
           {claim.name || "—"}
         </div>
         <DropForgeMediaTypePill

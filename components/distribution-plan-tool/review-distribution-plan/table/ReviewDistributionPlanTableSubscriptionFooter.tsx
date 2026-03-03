@@ -363,10 +363,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   useEffect(() => {
     if (
       !distributionPlan ||
-      !isSubscriptionsAdmin(
-        connectedProfile,
-        distributionAdminWallets
-      )
+      !isSubscriptionsAdmin(connectedProfile, distributionAdminWallets)
     ) {
       return;
     }

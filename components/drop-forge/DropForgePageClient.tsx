@@ -42,7 +42,7 @@ export default function DropForgePageClient() {
       <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2">
         <Link
           href={DROP_FORGE_SECTIONS.CRAFT.path}
-          className={`tw-group tw-relative tw-flex tw-min-h-[14rem] sm:tw-min-h-[20rem] tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-xl tw-px-4 tw-py-6 tw-text-center tw-no-underline tw-ring-1 tw-ring-inset tw-transition-all tw-duration-300 ${
+          className={`tw-group tw-relative tw-flex tw-min-h-[14rem] tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-xl tw-px-4 tw-py-6 tw-text-center tw-no-underline tw-ring-1 tw-ring-inset tw-transition-all tw-duration-300 sm:tw-min-h-[20rem] ${
             canAccessCraft
               ? "tw-cursor-pointer tw-bg-iron-950 tw-ring-iron-800 hover:tw-bg-iron-900 hover:tw-ring-iron-600"
               : "tw-cursor-not-allowed tw-bg-black/90 tw-ring-iron-900"
@@ -53,7 +53,7 @@ export default function DropForgePageClient() {
           aria-disabled={!canAccessCraft}
         >
           <div
-            className={`tw-flex tw-h-12 tw-w-12 sm:tw-h-16 sm:tw-w-16 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 ${
+            className={`tw-flex tw-h-12 tw-w-12 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 sm:tw-h-16 sm:tw-w-16 ${
               canAccessCraft
                 ? "group-hover:tw-bg-iron-700 group-hover:tw-text-iron-100"
                 : ""
@@ -71,7 +71,7 @@ export default function DropForgePageClient() {
 
         <Link
           href={DROP_FORGE_SECTIONS.LAUNCH.path}
-          className={`tw-group tw-relative tw-flex tw-min-h-[14rem] sm:tw-min-h-[20rem] tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-xl tw-px-4 tw-py-6 tw-text-center tw-no-underline tw-ring-1 tw-ring-inset tw-transition-all tw-duration-300 ${
+          className={`tw-group tw-relative tw-flex tw-min-h-[14rem] tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-rounded-xl tw-px-4 tw-py-6 tw-text-center tw-no-underline tw-ring-1 tw-ring-inset tw-transition-all tw-duration-300 sm:tw-min-h-[20rem] ${
             canAccessLaunch
               ? "tw-cursor-pointer tw-bg-iron-950 tw-ring-iron-800 hover:tw-bg-iron-900 hover:tw-ring-iron-600"
               : "tw-cursor-not-allowed tw-bg-black/90 tw-ring-iron-900"
@@ -82,7 +82,7 @@ export default function DropForgePageClient() {
           aria-disabled={!canAccessLaunch}
         >
           <div
-            className={`tw-flex tw-h-12 tw-w-12 sm:tw-h-16 sm:tw-w-16 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 ${
+            className={`tw-flex tw-h-12 tw-w-12 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 sm:tw-h-16 sm:tw-w-16 ${
               canAccessLaunch
                 ? "group-hover:tw-bg-iron-700 group-hover:tw-text-iron-100"
                 : ""

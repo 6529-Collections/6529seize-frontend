@@ -116,8 +116,13 @@ export function claimToTraitsData(claim: MintingClaim): TraitsData {
     const v = attrMap.get(key);
     if (v !== undefined && v !== null) {
       const initialValue = initial[key] as TraitPrimitive;
-      const numberFallback = typeof initialValue === "number" ? initialValue : 0;
-      traitsRecord[key] = normalizeTraitPrimitive(initialValue, v, numberFallback);
+      const numberFallback =
+        typeof initialValue === "number" ? initialValue : 0;
+      traitsRecord[key] = normalizeTraitPrimitive(
+        initialValue,
+        v,
+        numberFallback
+      );
     }
   });
   return traits;
@@ -150,15 +155,13 @@ export function traitsDataToUpdateRequest(
   const body: Partial<MintingClaimUpdateRequest> = {};
 
   if (hasChangedAttributeValues) {
-    body.attributes = ATTRIBUTE_TRAIT_KEYS.map(
-      (key): MintingClaimAttribute => {
-        const normalizedValue = normalizeValue(key, traits[key]);
-        return {
-          trait_type: FIELD_TO_LABEL_MAP[key] ?? key,
-          value: toAttributeValue(normalizedValue),
-        };
-      }
-    );
+    body.attributes = ATTRIBUTE_TRAIT_KEYS.map((key): MintingClaimAttribute => {
+      const normalizedValue = normalizeValue(key, traits[key]);
+      return {
+        trait_type: FIELD_TO_LABEL_MAP[key] ?? key,
+        value: toAttributeValue(normalizedValue),
+      };
+    });
   }
 
   if (

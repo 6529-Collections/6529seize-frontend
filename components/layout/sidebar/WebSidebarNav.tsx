@@ -365,7 +365,6 @@ const WebSidebarNav = React.forwardRef<
                 )}
               </React.Fragment>
             ))}
-
         </ul>
       </nav>
 

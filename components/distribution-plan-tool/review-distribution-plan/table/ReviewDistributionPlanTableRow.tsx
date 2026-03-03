@@ -13,13 +13,14 @@ import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
   FetchResultsType,
-  ReviewDistributionPlanTableItemType
+  ReviewDistributionPlanTableItemType,
 } from "./ReviewDistributionPlanTable";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 import type {
   FullResultWallet,
   ReviewDistributionPlanTableItem,
-  ReviewDistributionPlanTablePhase} from "./ReviewDistributionPlanTable";
+  ReviewDistributionPlanTablePhase,
+} from "./ReviewDistributionPlanTable";
 
 export default function ReviewDistributionPlanTableRow({
   item,
@@ -145,9 +146,8 @@ export default function ReviewDistributionPlanTableRow({
     if (loadingType) return;
     setLoadingType(fetchType);
     const endpoint = getEndpoint(distributionPlan.id);
-    const { success, data } = await distributionPlanApiFetch<AllowlistResult[]>(
-      endpoint
-    );
+    const { success, data } =
+      await distributionPlanApiFetch<AllowlistResult[]>(endpoint);
     setLoadingType(null);
     if (!success || !data) {
       return;

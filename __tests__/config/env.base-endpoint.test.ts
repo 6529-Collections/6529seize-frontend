@@ -17,7 +17,7 @@ const originalEnv = process.env;
 function freshImportPublicEnvSchema() {
   jest.resetModules();
   // Adjust path if needed
-   
+
   const mod = require("@/config/env.schema");
   if (!mod.publicEnvSchema) {
     throw new Error(

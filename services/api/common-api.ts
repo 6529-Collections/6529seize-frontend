@@ -173,7 +173,7 @@ interface RetryOptions {
  */
 export const commonApiFetchWithRetry = async <
   T,
-  U = Record<string, string>
+  U = Record<string, string>,
 >(param: {
   readonly endpoint: string;
   readonly headers?: Record<string, string> | undefined;
@@ -190,7 +190,6 @@ export const commonApiFetchWithRetry = async <
   let attempts = 0;
   let currentDelayMs = initialDelayMs;
 
-   
   while (true) {
     try {
       if (fetchParams.signal?.aborted) {
@@ -317,7 +316,7 @@ export const commonApiDelete = async (param: {
 export const commonApiDeleteWithBody = async <
   T,
   U,
-  Z = Record<string, string>
+  Z = Record<string, string>,
 >(param: {
   endpoint: string;
   body: T;

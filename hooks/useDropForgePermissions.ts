@@ -23,10 +23,8 @@ export function useDropForgePermissions() {
     () => JSON.parse(claimsAdminWalletsKey) as string[],
     [claimsAdminWalletsKey]
   );
-  const {
-    isDropForgeAdmin,
-    isFetching: isDropForgeAdminFetching,
-  } = useIsDropForgeAdmin();
+  const { isDropForgeAdmin, isFetching: isDropForgeAdminFetching } =
+    useIsDropForgeAdmin();
 
   return useMemo(() => {
     const hasWallet = !!address;
