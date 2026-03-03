@@ -2,79 +2,80 @@
 
 ## Overview
 
-Rank waves can show a tab row in the right sidebar so users can switch between
-`About`, `Leaderboard`, `Winners`, `Voters`, and `Activity` without leaving the
-current wave route.
-The `About` tab can also surface a `Trending` list for boosted drops.
+Rank-wave threads show a right-sidebar tab row so users can switch sidebar
+sections without leaving the current thread route.
+
+This page owns tab-shell behavior only. Section rendering is documented in the
+linked section pages.
 
 ## Location in the Site
 
-- Right sidebar panel on wave surfaces that use the shared waves/messages
-  layout.
-- Shown when a wave is selected and the right sidebar is open.
-- Available in inline and overlay sidebar variants.
+- `/waves/{waveId}` and `/messages?wave={waveId}`
+- Right sidebar open (`inline` on large web layouts, `overlay` on smaller ones)
+- Rank waves only
+- Hidden while full drop overlay is open (`drop={dropId}`)
+- Tab row renders only after wave data is available
 
 ## Entry Points
 
-- Open a wave in `/waves` or `/messages` and open the right sidebar.
-- Keep the right sidebar open while viewing a rank wave.
-- Select a tab directly, or open `More` when not all tabs fit.
+- Open a rank-wave thread.
+- Open the right sidebar.
+- Select a tab button, or open `More` and select an overflow tab.
+
+## Tab Availability and Order
+
+- Fixed generation order:
+  `About`, `Leaderboard` (while voting is not completed), `Winners` (after
+  first decision is reached), `Voters`, `Activity`.
+- `Voters` and `Activity` stay available for rank waves across wave-time states.
+- Non-rank waves do not render this tab row.
+
+## Overflow and Keyboard Behavior
+
+- The first three available tabs render as visible buttons.
+- When more than three tabs are available, remaining tabs move into `More`.
+- If the active tab is in overflow, the `More` trigger label switches to that
+  active tab name.
+- Visible tabs support `ArrowLeft`, `ArrowRight`, `Home`, and `End`.
+- `More` options are keyboard accessible.
 
 ## User Journey
 
-1. Open a rank wave with the right sidebar visible.
-2. Use the tab row at the top of the sidebar to switch sections.
-3. If more than three tabs are available, open `More` to access overflow tabs.
-4. Select a tab and continue reading/updating sidebar content in place.
+1. Open a rank-wave thread on `/waves/{waveId}` or `/messages?wave={waveId}`.
+2. Open the right sidebar.
+3. Select a visible tab, or open `More` and pick an overflow tab.
+4. Sidebar content switches in place without route navigation.
 
-## Common Scenarios
+## State Changes and Recovery
 
-- Move between `About` and `Leaderboard` during active voting.
-- Open `Winners` after first decision is available.
-- Use `Voters` and `Activity` as always-available reference tabs.
-- Select an overflow tab and see the `More` trigger label reflect the active
-  overflow tab name.
-- Use keyboard navigation for visible tabs (`ArrowLeft`, `ArrowRight`, `Home`,
-  `End`) and activate overflow menu options from keyboard focus.
-
-## Edge Cases
-
-- Non-rank waves do not show this tab row; sidebar content stays on the
-  non-tabbed about/followers layout.
-- Tab availability changes with wave state:
-  - `Leaderboard` is hidden after voting completes.
-  - `Winners` appears only after first-decision timing is reached.
-- Overflow appears only when more than three tabs are available.
-- When a full drop overlay is open, the right sidebar is not shown.
-
-## Failure and Recovery
-
-- If the active tab becomes unavailable after a wave-state transition, sidebar
-  content automatically returns to `About`.
-- If a user closes the overflow menu without selecting a tab, the current tab
-  remains unchanged.
-- If wave data is not available, right-sidebar content is not rendered until
-  data is ready.
+- If voting completes while `Leaderboard` is active, the sidebar automatically
+  returns to `About`.
+- If `Winners` is active and first-decision availability becomes invalid, the
+  sidebar automatically returns to `About`.
+- Closing `More` without a selection keeps the current tab.
+- Tab choice is in-session UI state, not a URL tab parameter.
+- Closing and reopening the sidebar keeps the current tab choice unless wave
+  state rules make that tab unavailable.
+- If wave data does not load, the tab row does not appear and the sidebar can
+  stay blank.
 
 ## Limitations / Notes
 
-- Tab state is session UI state and is not encoded as a dedicated tab URL
-  parameter.
-- Tab ordering is fixed by wave state rules and does not support custom user
-  reordering.
-- Overflow tab access depends on the `More` menu when tab count exceeds visible
-  capacity.
+- Tab order is fixed by wave-state rules; users cannot reorder tabs.
+- This page does not own section rendering behavior for `About`,
+  `Leaderboard`, `Winners`, `Voters`, or `Activity`.
+- `Trending` behavior is part of `About` content and is documented separately.
 
 ## Related Pages
 
+- [Wave Sidebars Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Top Voters Lists](../leaderboard/feature-top-voters-lists.md)
 - [Wave Winners Tab](../leaderboard/feature-winners-tab.md)
 - [Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md)
 - [Wave Right Sidebar Leaderboard](feature-right-sidebar-leaderboard.md)
+- [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md)
 - [Wave Right Sidebar Group and Curation Management](feature-right-sidebar-group-management.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
-- [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md)
 - [Docs Home](../../README.md)
