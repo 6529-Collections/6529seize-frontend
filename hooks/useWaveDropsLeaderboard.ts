@@ -163,11 +163,23 @@ export function useWaveDropsLeaderboard({
       if (normalizedCuratedByGroupId) {
         params["curated_by_group"] = normalizedCuratedByGroupId;
       }
-      if (typeof normalizedMinPrice === "number") {
-        params["min_price"] = normalizedMinPrice.toString();
+      let effectiveMinPrice = normalizedMinPrice;
+      let effectiveMaxPrice = normalizedMaxPrice;
+
+      if (
+        typeof normalizedMinPrice === "number" &&
+        typeof normalizedMaxPrice === "number" &&
+        normalizedMinPrice > normalizedMaxPrice
+      ) {
+        effectiveMinPrice = normalizedMaxPrice;
+        effectiveMaxPrice = normalizedMinPrice;
       }
-      if (typeof normalizedMaxPrice === "number") {
-        params["max_price"] = normalizedMaxPrice.toString();
+
+      if (typeof effectiveMinPrice === "number") {
+        params["min_price"] = effectiveMinPrice.toString();
+      }
+      if (typeof effectiveMaxPrice === "number") {
+        params["max_price"] = effectiveMaxPrice.toString();
       }
       if (normalizedPriceCurrency) {
         params["price_currency"] = normalizedPriceCurrency;

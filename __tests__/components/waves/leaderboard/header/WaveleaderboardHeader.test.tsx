@@ -793,6 +793,119 @@ it("applies resolved modes and enables scroll fallback styling when requested", 
   expect(resolveHeaderLayoutMock).toHaveBeenCalled();
 });
 
+it("uses controls row width for non-curation layout measurements", async () => {
+  const clientWidthGetter = jest
+    .spyOn(HTMLElement.prototype, "clientWidth", "get")
+    .mockImplementation(function (this: HTMLElement) {
+      if (
+        this.getAttribute("data-testid") === "leaderboard-header-controls-row"
+      ) {
+        return 320;
+      }
+
+      if (
+        this.className.includes("tw-flex-wrap") &&
+        this.className.includes("tw-items-start")
+      ) {
+        return 480;
+      }
+
+      return 0;
+    });
+
+  try {
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <WaveLeaderboardHeader
+          wave={wave}
+          onCreateDrop={jest.fn()}
+          viewMode="list"
+          onViewModeChange={jest.fn()}
+          sort={WaveDropsLeaderboardSort.RANK}
+          onSortChange={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() =>
+      expect(resolveHeaderLayoutMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rowWidth: 320,
+        })
+      )
+    );
+  } finally {
+    clientWidthGetter.mockRestore();
+  }
+});
+
+it("uses full header row width when curation actions are inline", async () => {
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  const clientWidthGetter = jest
+    .spyOn(HTMLElement.prototype, "clientWidth", "get")
+    .mockImplementation(function (this: HTMLElement) {
+      if (
+        this.getAttribute("data-testid") === "leaderboard-header-controls-row"
+      ) {
+        return 320;
+      }
+
+      if (
+        this.className.includes("tw-flex-wrap") &&
+        this.className.includes("tw-items-start")
+      ) {
+        return 480;
+      }
+
+      return 0;
+    });
+
+  try {
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <WaveLeaderboardHeader
+          wave={wave}
+          onCreateDrop={jest.fn()}
+          viewMode="list"
+          onViewModeChange={jest.fn()}
+          sort={WaveDropsLeaderboardSort.RANK}
+          onSortChange={jest.fn()}
+          onPriceRangeChange={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() =>
+      expect(resolveHeaderLayoutMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rowWidth: 480,
+        })
+      )
+    );
+  } finally {
+    clientWidthGetter.mockRestore();
+  }
+});
+
 it("renders icon-only curation actions with drop glyph when layout requests compact mode", () => {
   resolveHeaderLayoutMock.mockReturnValue({
     sortMode: "dropdown",

@@ -116,4 +116,32 @@ describe("useWaveDropsLeaderboard extra", () => {
       })
     );
   });
+
+  it("swaps inverted min and max price bounds before request params", async () => {
+    renderHook(() =>
+      useWaveDropsLeaderboard({
+        waveId: "2",
+        minPrice: 2.75,
+        maxPrice: 0.5,
+        priceCurrency: "ETH",
+        sort: WaveDropsLeaderboardSort.PRICE,
+      })
+    );
+
+    const call = (queryClientMock.prefetchInfiniteQuery as jest.Mock).mock
+      .calls[0][0];
+    await call.queryFn({ pageParam: null });
+
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "waves/2/leaderboard",
+        params: expect.objectContaining({
+          sort: WaveDropsLeaderboardSort.PRICE,
+          min_price: "0.5",
+          max_price: "2.75",
+          price_currency: "ETH",
+        }),
+      })
+    );
+  });
 });

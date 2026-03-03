@@ -21,6 +21,7 @@ interface LeaderboardHeaderControlMeasurements {
 
 interface UseLeaderboardHeaderControlMeasurementsInput {
   readonly showCurationGroupSelect: boolean;
+  readonly measureAgainstHeaderRow: boolean;
   readonly remeasureKey: string;
 }
 
@@ -63,6 +64,7 @@ const areMeasurementsEqual = (
 
 export function useLeaderboardHeaderControlMeasurements({
   showCurationGroupSelect,
+  measureAgainstHeaderRow,
   remeasureKey,
 }: UseLeaderboardHeaderControlMeasurementsInput): UseLeaderboardHeaderControlMeasurementsResult {
   const headerRowRef = useRef<HTMLDivElement | null>(null);
@@ -78,8 +80,12 @@ export function useLeaderboardHeaderControlMeasurements({
     useState<LeaderboardHeaderControlMeasurements>(INITIAL_MEASUREMENTS);
 
   const measureNow = useCallback(() => {
+    const rowWidth = measureAgainstHeaderRow
+      ? (headerRowRef.current?.clientWidth ?? 0)
+      : (controlsRowRef.current?.clientWidth ?? 0);
+
     const nextMeasurements: LeaderboardHeaderControlMeasurements = {
-      rowWidth: headerRowRef.current?.clientWidth ?? 0,
+      rowWidth,
       viewModesWidth: viewModeTabsRef.current?.offsetWidth ?? 0,
       sortTabsWidth: sortTabsProbeRef.current?.offsetWidth ?? 0,
       sortDropdownWidth: sortDropdownProbeRef.current?.offsetWidth ?? 0,
@@ -98,7 +104,7 @@ export function useLeaderboardHeaderControlMeasurements({
         ? currentMeasurements
         : nextMeasurements
     );
-  }, [showCurationGroupSelect]);
+  }, [measureAgainstHeaderRow, showCurationGroupSelect]);
 
   useEffect(() => {
     let frameId: number | null = null;

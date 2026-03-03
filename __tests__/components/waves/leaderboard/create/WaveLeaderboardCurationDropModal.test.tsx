@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
 
@@ -67,6 +67,107 @@ describe("WaveLeaderboardCurationDropModal", () => {
     await screen.findByTestId("curation-drop-modal");
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("moves initial focus to the close button when opened", async () => {
+    render(
+      <WaveLeaderboardCurationDropModal
+        isOpen={true}
+        wave={wave}
+        onClose={jest.fn()}
+      />
+    );
+
+    const closeButton = await screen.findByLabelText("Close modal");
+    await waitFor(() => {
+      expect(closeButton).toHaveFocus();
+    });
+  });
+
+  it("traps tab navigation inside the modal panel", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <WaveLeaderboardCurationDropModal
+        isOpen={true}
+        wave={wave}
+        onClose={jest.fn()}
+      />
+    );
+
+    const panel = await screen.findByTestId("curation-drop-modal-panel");
+    const closeButton = screen.getByLabelText("Close modal");
+    const createButton = screen.getByTestId("modal-create-drop");
+
+    await waitFor(() => {
+      expect(closeButton).toHaveFocus();
+    });
+
+    await user.tab();
+    expect(createButton).toHaveFocus();
+    expect(panel.contains(document.activeElement)).toBe(true);
+
+    await user.tab();
+    expect(closeButton).toHaveFocus();
+    expect(panel.contains(document.activeElement)).toBe(true);
+
+    await user.tab({ shift: true });
+    expect(createButton).toHaveFocus();
+    expect(panel.contains(document.activeElement)).toBe(true);
+  });
+
+  it("restores focus to the previously focused element when closed", async () => {
+    const onClose = jest.fn();
+    const { rerender } = render(
+      <>
+        <button type="button" data-testid="opener">
+          Open modal
+        </button>
+        <WaveLeaderboardCurationDropModal
+          isOpen={false}
+          wave={wave}
+          onClose={onClose}
+        />
+      </>
+    );
+
+    const opener = screen.getByTestId("opener");
+    opener.focus();
+    expect(opener).toHaveFocus();
+
+    rerender(
+      <>
+        <button type="button" data-testid="opener">
+          Open modal
+        </button>
+        <WaveLeaderboardCurationDropModal
+          isOpen={true}
+          wave={wave}
+          onClose={onClose}
+        />
+      </>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Close modal")).toHaveFocus();
+    });
+
+    rerender(
+      <>
+        <button type="button" data-testid="opener">
+          Open modal
+        </button>
+        <WaveLeaderboardCurationDropModal
+          isOpen={false}
+          wave={wave}
+          onClose={onClose}
+        />
+      </>
+    );
+
+    await waitFor(() => {
+      expect(opener).toHaveFocus();
+    });
   });
 
   it("locks body scroll while open and restores it when closed", () => {

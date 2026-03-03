@@ -341,6 +341,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     measurements,
   } = useLeaderboardHeaderControlMeasurements({
     showCurationGroupSelect,
+    measureAgainstHeaderRow: showCurationActions,
     remeasureKey,
   });
 
