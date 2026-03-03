@@ -2,60 +2,66 @@
 
 ## Overview
 
-Edit-eligible users can update a wave picture from the header avatar.
-
-The avatar pencil opens `Update wave picture` with image upload and preview.
+Edit-eligible users can change a wave picture from the `About` avatar.
+Selecting the avatar pencil opens `Update wave picture`.
 
 ## Location in the Site
 
-- Wave `About` header on:
+- Wave `About` header in right-sidebar surfaces on:
   - `/waves/{waveId}`
   - `/messages?wave={waveId}`
-- The avatar edit control is hover-revealed in hover-capable layouts.
+- Mobile `About` uses the same header component.
+- The pencil overlay is hover-only (`@media (any-hover: hover)`), so touch-only
+  web layouts do not show this action.
+
+## Availability Rules
+
+- The control renders only when `canEditWave` is true.
+- `canEditWave` requires:
+  - connected profile handle
+  - no active proxy session
+  - wave author match, or `authenticated_user_eligible_for_admin`
 
 ## Entry Points
 
-- Open a wave where `canEditWave` is true (author or admin-eligible, connected,
-  non-proxy).
-- Hover the avatar and select `Edit wave picture`.
+1. Open an active wave and switch to `About`.
+2. Hover the avatar.
+3. Select `Edit wave picture`.
 
 ## User Journey
 
-1. Open wave `About`.
-2. Select the avatar pencil.
-3. In `Update wave picture`, upload by click or drag-and-drop.
-4. Confirm preview.
-5. Select `Save`.
-6. Complete auth.
-7. The app uploads media, updates wave data, closes modal, and refreshes the avatar.
+1. Select the avatar pencil to open `Update wave picture`.
+2. Add an image by click or drag-and-drop.
+3. Confirm the round preview updates.
+4. Select `Save`.
+5. Complete auth.
+6. The app uploads the file, updates `waves/{waveId}`, refreshes wave data, and
+   closes the modal.
 
-## Common Scenarios
+## Validation and States
 
 - Accepted formats: `JPG`, `JPEG`, `PNG`, `GIF`, `WEBP`.
 - Max file size: `10MB`.
+- Only the first selected or dropped file is used.
 - `Save` stays disabled until a valid file is selected.
+- While saving, `Save` stays disabled and shows `Uploading`.
 - `Cancel`, outside click, or `Escape` closes without saving.
+- There is no in-modal remove action in this flow.
 
-## Edge Cases
+## Errors and Recovery
 
-- Users without edit permission do not see the avatar edit control.
-- On touch-only layouts, hover-only controls might not be available.
-- Unsupported files show `Invalid file type`.
-- Oversized files show `File size must be less than 10MB`.
-- Failed auth shows `Failed to authenticate`.
-- Upload/update failures show API text or fallback `Failed to update wave picture`.
-
-## Failure and Recovery
-
-- If save fails, keep modal open, select a valid file again if needed, and retry.
-- If auth failed, re-authenticate and retry `Save`.
-- If modal state looks stale, close and reopen before retrying.
+- No permission or touch-only web layout: pencil is not shown.
+- Unsupported file: `Invalid file type`.
+- Oversized file: `File size must be less than 10MB`.
+- Auth failure: `Failed to authenticate`.
+- Upload/update failure: API/server message when available, otherwise
+  `Failed to update wave picture`.
+- On failure, the modal stays open so users can retry `Save`.
 
 ## Limitations / Notes
 
-- The modal uses wave update permissions from `canEditWave`.
-- There is no crop flow and no in-modal remove-file action.
-- If no new file is selected, no update request is sent.
+- There is no crop flow.
+- No request is sent until a valid file is selected and `Save` is pressed.
 
 ## Related Pages
 
