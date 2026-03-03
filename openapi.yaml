@@ -2097,54 +2097,6 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
-  /minting-claims/{contract}/{card_id}/{merkle_root}/proofs:
-    get:
-      tags:
-        - Minting Claims
-      summary: Get all merkle proofs for a card root
-      description: >
-        Returns allowlist merkle proofs for all addresses for the given
-        contract, card and merkle root. Listing all addresses requires
-        DISTRIBUTION_ADMIN_WALLETS.
-      operationId: getMintingClaimsProofs
-      parameters:
-        - name: contract
-          in: path
-          required: true
-          description: Contract address
-          schema:
-            type: string
-            pattern: ^0x[a-fA-F0-9]{40}$
-        - name: card_id
-          in: path
-          required: true
-          description: Card (token) ID
-          schema:
-            type: integer
-            format: int64
-            minimum: 0
-        - name: merkle_root
-          in: path
-          required: true
-          description: 0x-prefixed 66-character hex merkle root
-          schema:
-            type: string
-            pattern: ^0x[a-fA-F0-9]{64}$
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MintingClaimsProofsByAddressResponse"
-        "400":
-          description: Invalid request (missing or invalid parameters)
-        "403":
-          description: >
-            Forbidden - only distribution admins can list all proofs for a
-            merkle_root
-        "404":
-          description: No proofs found for the given contract/card/merkle_root
   /minting-claims/{contract}/{card_id}/{merkle_root}/proofs/{address}:
     get:
       tags:
@@ -2153,7 +2105,7 @@ paths:
       description: >
         Returns allowlist merkle proofs for one address for the given contract,
         card and merkle root.
-      operationId: getMintingClaimsProofsByAddress
+      operationId: getMintingClaimsProofs
       parameters:
         - name: contract
           in: path
@@ -2366,8 +2318,8 @@ paths:
             type: integer
             format: int64
       responses:
-        "202":
-          description: Accepted; work queued
+        "200":
+          description: successful operation
           content:
             application/json:
               schema:
@@ -2378,8 +2330,6 @@ paths:
           description: Forbidden - only distribution admins can access
         "404":
           description: Claim not found
-        "409":
-          description: Conflict - claim media upload already in progress
     patch:
       tags:
         - Minting Claims
@@ -2445,8 +2395,8 @@ paths:
             type: integer
             format: int64
       responses:
-        "200":
-          description: successful operation
+        "202":
+          description: Accepted; work queued
           content:
             application/json:
               schema:
@@ -5512,13 +5462,15 @@ paths:
               - TREND
         - name: price_currency
           in: query
-          description: Optional currency filter used when sorting by PRICE
+          description: >-
+            Optional currency used for min_price/max_price filtering and PRICE
+            sorting
           required: false
           schema:
             type: string
         - name: min_price
           in: query
-          description: Optional minimum price filter used when sorting by PRICE
+          description: Optional minimum price filter applied to leaderboard results
           required: false
           schema:
             type: number
@@ -5526,7 +5478,7 @@ paths:
             minimum: 0
         - name: max_price
           in: query
-          description: Optional maximum price filter used when sorting by PRICE
+          description: Optional maximum price filter applied to leaderboard results
           required: false
           schema:
             type: number
@@ -8961,10 +8913,12 @@ components:
         addresses:
           type: integer
           format: int64
+          minimum: 0
           description: Number of unique addresses in this phase
         total:
           type: integer
           format: int64
+          minimum: 0
           description: Sum of spots for this phase
     ApiMintMetrics:
       type: object
@@ -12021,28 +11975,6 @@ components:
           type: integer
           format: int64
           description: Spot index (value) for this proof
-    MintingClaimsProofsByAddressEntry:
-      type: object
-      required:
-        - address
-        - proofs
-      properties:
-        address:
-          type: string
-          description: Wallet address
-        proofs:
-          type: array
-          items:
-            $ref: "#/components/schemas/MintingClaimsProofItem"
-    MintingClaimsProofsByAddressResponse:
-      type: object
-      required:
-        - proofs_by_address
-      properties:
-        proofs_by_address:
-          type: array
-          items:
-            $ref: "#/components/schemas/MintingClaimsProofsByAddressEntry"
     MintingClaimsProofsResponse:
       type: object
       required:

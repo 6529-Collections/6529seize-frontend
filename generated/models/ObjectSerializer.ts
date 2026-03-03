@@ -261,8 +261,6 @@ export * from '../models/MintingClaimImageDetails';
 export * from '../models/MintingClaimUpdateRequest';
 export * from '../models/MintingClaimsPageResponse';
 export * from '../models/MintingClaimsProofItem';
-export * from '../models/MintingClaimsProofsByAddressEntry';
-export * from '../models/MintingClaimsProofsByAddressResponse';
 export * from '../models/MintingClaimsProofsResponse';
 export * from '../models/MintingClaimsResponse';
 export * from '../models/MintingClaimsRootItem';
@@ -552,8 +550,6 @@ import { MintingClaimImageDetails } from '../models/MintingClaimImageDetails';
 import { MintingClaimUpdateRequest } from '../models/MintingClaimUpdateRequest';
 import { MintingClaimsPageResponse } from '../models/MintingClaimsPageResponse';
 import { MintingClaimsProofItem } from '../models/MintingClaimsProofItem';
-import { MintingClaimsProofsByAddressEntry } from '../models/MintingClaimsProofsByAddressEntry';
-import { MintingClaimsProofsByAddressResponse } from '../models/MintingClaimsProofsByAddressResponse';
 import { MintingClaimsProofsResponse } from '../models/MintingClaimsProofsResponse';
 import { MintingClaimsResponse } from '../models/MintingClaimsResponse';
 import { MintingClaimsRootItem } from '../models/MintingClaimsRootItem';
@@ -867,8 +863,6 @@ let typeMap: {[index: string]: any} = {
     "MintingClaimUpdateRequest": MintingClaimUpdateRequest,
     "MintingClaimsPageResponse": MintingClaimsPageResponse,
     "MintingClaimsProofItem": MintingClaimsProofItem,
-    "MintingClaimsProofsByAddressEntry": MintingClaimsProofsByAddressEntry,
-    "MintingClaimsProofsByAddressResponse": MintingClaimsProofsByAddressResponse,
     "MintingClaimsProofsResponse": MintingClaimsProofsResponse,
     "MintingClaimsResponse": MintingClaimsResponse,
     "MintingClaimsRootItem": MintingClaimsRootItem,
