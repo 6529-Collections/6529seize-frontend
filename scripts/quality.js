@@ -277,6 +277,7 @@ try {
       });
   ensureSuccess(result, changedMode ? "typecheck:changed" : "typecheck");
 } catch (error) {
+  console.error(error);
   fail(
     changedMode
       ? "TypeScript changed check failed."

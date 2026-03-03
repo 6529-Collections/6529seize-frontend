@@ -193,6 +193,7 @@ export default function AppHeader() {
   ) : (
     <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
   );
+  const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
 
   const switchToNextConnectedAccount = (): boolean => {
     if (connectedAccounts.length < 2) {
@@ -268,7 +269,11 @@ export default function AppHeader() {
         {!showBackButton && (
           <button
             type="button"
-            aria-label="Open menu"
+            aria-label={
+              hasMultipleConnectedAccounts
+                ? "Open menu (double-click to switch accounts)"
+                : "Open menu"
+            }
             onClick={onProfileActivate}
             className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-transparent tw-bg-transparent"
           >

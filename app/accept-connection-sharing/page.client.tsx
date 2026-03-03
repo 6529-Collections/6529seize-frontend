@@ -183,7 +183,7 @@ function AcceptConnectionSharing(
                 onClick={() => {
                   if (acceptingConnection) return;
                   setAcceptingConnection(true);
-                  acceptConnection();
+                  void acceptConnection();
                 }}
                 className="tw-flex tw-min-w-[200px] tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-6 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-none tw-outline-none tw-ring-0 tw-transition-colors hover:tw-bg-primary-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-70"
               >

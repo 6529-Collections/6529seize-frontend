@@ -336,7 +336,7 @@ describe("Auth component", () => {
         expect(params.abortSignal).toHaveProperty("aborted", false);
         expect(params.abortSignal).toHaveProperty("addEventListener");
         expect(params.abortSignal).toHaveProperty("removeEventListener");
-        expect(params.operationId).toMatch(/^auth-\d+-/);
+        expect(params.operationId).toMatch(/^auth-\d+-[a-z0-9]+/);
         return {
           validationCompleted: true,
           wasCancelled: false,
@@ -367,7 +367,7 @@ describe("Auth component", () => {
               addEventListener: expect.any(Function),
               removeEventListener: expect.any(Function),
             }),
-            operationId: expect.stringMatching(/^auth-\d+-/),
+            operationId: expect.stringMatching(/^auth-\d+-[a-z0-9]+/),
           }),
         })
       );

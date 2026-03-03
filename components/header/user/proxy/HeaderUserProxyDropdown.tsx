@@ -100,22 +100,16 @@ export default function HeaderUserProxyDropdown({
     }
   };
 
-  const onSelectConnectedAccount = async (nextAddress: string) => {
+  const onSelectConnectedAccount = (nextAddress: string) => {
     if (nextAddress.toLowerCase() === address?.toLowerCase()) {
       onClose();
       return;
     }
-    try {
-      await Promise.resolve(seizeSwitchConnectedAccount(nextAddress));
-    } catch (error) {
-      console.error("Failed to switch connected account", error);
-      setToast({
-        message: "Failed to switch connected account. Please try again.",
-        type: "error",
-      });
-    } finally {
-      onClose();
-    }
+    void runMenuAction({
+      action: () => seizeSwitchConnectedAccount(nextAddress),
+      pendingKey: `switch-connected-account-${nextAddress.toLowerCase()}`,
+      errorMessage: "Failed to switch connected account. Please try again.",
+    });
   };
 
   return (

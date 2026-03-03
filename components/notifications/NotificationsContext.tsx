@@ -333,14 +333,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       await removeDeliveredNotifications([notification]);
 
-      const handle =
-        typeof notificationData.handle === "string" &&
-        notificationData.handle.trim().length > 0
-          ? notificationData.handle
-          : undefined;
+      const { handle: rawHandle, ...notificationDataWithoutHandle } =
+        notificationData;
+      const handle = typeof rawHandle === "string" ? rawHandle.trim() : "";
       const redirectData: DevicePushData = handle
-        ? { ...notificationData, handle }
-        : { ...notificationData };
+        ? { ...notificationDataWithoutHandle, handle }
+        : notificationDataWithoutHandle;
       const redirectUrl = resolveRedirectUrl(redirectData);
       if (redirectUrl) {
         routerInstance.push(redirectUrl);
