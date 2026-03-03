@@ -30,7 +30,7 @@ Route scope:
 
 ### Left Sidebar and Lists
 
-- [Wave List Navigation Behavior](feature-wave-list-navigation.md):
+- [Wave List Navigation](feature-wave-list-navigation.md):
   row open/clear behavior, unread `divider` routing, and stale `wave` query
   cleanup.
 - [Brain Wave Row Metadata and Last Drop Indicator](feature-brain-list-last-drop-indicator.md):

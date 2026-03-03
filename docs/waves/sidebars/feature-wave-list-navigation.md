@@ -1,63 +1,65 @@
-# Wave List Navigation Behavior
+# Wave List Navigation
 
 ## Overview
 
-Sidebar rows set or clear the active thread in Waves and Messages.
+Wave and DM rows in the left list control which thread is open.
 
 - Click an inactive row to open that thread.
 - Click the active row to clear selection and return to section home.
+- Browser back/forward keeps the active row and URL in sync.
 
-## Route Rules
+## Where It Works
+
+- Web left sidebar on:
+  - `/waves` and `/waves/{waveId}`
+  - `/messages` and `/messages?wave={waveId}`
+- Mobile/app Waves and Messages list views that reuse the same row behavior.
+
+## Route and URL Rules
 
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages?wave={waveId}`.
-- Direct-message threads do not use `/messages/{waveId}`.
-- Re-clicking the active row clears selection and returns to `/waves` or
-  `/messages`.
-- If the first unread drop is known, row navigation can append `divider={n}`.
+- Active-row re-click returns to `/waves` or `/messages`.
+- Direct-message navigation does not use `/messages/{waveId}`.
+- If first unread is known, row navigation can add `divider={serialNo}`.
 
-## Entry Points
+## Interaction Rules
 
-- Use the shared left sidebar in `/waves`, `/waves/{waveId}`, `/messages`, or
-  `/messages?wave={waveId}`.
-- On non-touch devices, hovering an inactive row prefetches that wave.
+- Non-touch devices: hovering an inactive row can prefetch that thread.
+- Touch devices: no hover prefetch.
+- Browser-default behavior is kept for modified clicks:
+  - Cmd/Ctrl-click
+  - Shift/Alt-click
+  - Middle-click
+  - Right-click/context menu
 
-## User Journey
+## History and Shell Behavior
 
-1. Open the Waves or Messages sidebar list.
-2. Click an inactive row.
-3. The row becomes active and the URL updates to the thread route.
-4. If the first unread drop is known, the URL can include `divider=...`.
-5. Click the same active row again to clear selection and return to `/waves` or
-   `/messages`.
-6. Browser back/forward restores prior selections and keeps active highlight in
-   sync.
+- Inside the `/waves` or `/messages` shell, row changes update URL/history in
+  place and keep row highlight aligned.
+- Outside those shells, row click performs normal route navigation into the
+  selected thread.
 
-## Edge Cases
+## Failure Recovery
 
-- Touch devices skip hover prefetch.
-- Cmd/Ctrl/Shift/Alt-click, middle-click, and right-click keep browser-default
-  behavior.
-- If navigation starts outside the Waves/Messages shell, row click performs normal
-  route navigation into the target thread.
-
-## Failure and Recovery
-
-- If a selected wave no longer resolves, the app returns to section home
+- If the selected thread no longer resolves, the app returns to section home
   (`/waves` or `/messages`).
-- If a stale `wave` query is present during that recovery, it is removed.
-- Users can immediately pick another row from the same list.
+- Recovery removes stale `wave` query values when present.
+- After recovery, users can select another row immediately.
 
-## Limitations / Notes
+## Scope Notes
 
-- This page covers shared left-sidebar row navigation only.
-- Hover-based prefetch is non-touch only.
-- Other route and shell behaviors are documented in navigation and layout pages.
+- This page owns row selection/navigation only.
+- Row metadata (`Last drop`, badges, tooltips) is owned by the row-metadata
+  page.
+- Pin and mute controls are owned by their sidebar control pages.
 
 ## Related Pages
 
-- [Sidebar Navigation](../../navigation/feature-sidebar-navigation.md)
-- [Sidebars Index](README.md)
-- [Brain Wave List Row Metadata](feature-brain-list-last-drop-indicator.md)
+- [Wave Sidebars Index](README.md)
+- [Waves Index](../README.md)
+- [Brain Wave Row Metadata and Last Drop Indicator](feature-brain-list-last-drop-indicator.md)
+- [Pinned Wave Controls](feature-pinned-wave-controls.md)
+- [Wave Notification Controls and Mute Behavior](feature-wave-notification-controls.md)
 - [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md)
-- [Docs Home](../../README.md)
+- [Sidebar Navigation](../../navigation/feature-sidebar-navigation.md)
