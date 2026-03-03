@@ -2,74 +2,61 @@
 
 ## Overview
 
-Wave drops include a `Mark as unread` action so readers can manually reset where
-their unread boundary sits in a thread.
-
-The action is available in:
-
-- Desktop `More` menu on the drop action row.
-- Touch action sheet opened from long-press (small touch layouts) or the drop
-  header action button (touch medium+ layouts).
+Use `Mark as unread` to set your unread boundary at a selected drop so you can
+jump back to that spot later.
 
 ## Location in the Site
 
-- `/waves/{waveId}`
-- `/messages?wave={waveId}`
-- Drop action menus for full drop cards.
+- Public or group waves: `/waves/{waveId}`
+- Direct messages: `/messages?wave={waveId}`
+- Single-drop overlay in the current thread route: `?drop={dropId}`
+- Drop action menus on full drop cards
 
 ## Entry Points
 
 - Open a wave or direct-message thread.
-- Locate a drop that is not authored by you.
-- Open the drop action menu and select `Mark as unread`.
+- Open the drop action menu:
+  - Desktop: `More` (`...`).
+  - Touch small layouts: long-press a drop.
+  - Touch medium+ layouts: use the drop header action button.
+- Select `Mark as unread`.
 
-## User Journey
+## What Happens
 
-1. Open a thread and find a drop from another author.
-2. Open the drop action menu.
-3. Select `Mark as unread`.
-4. The action shows a loading spinner while the request is in flight.
-5. On success:
-   - A toast confirms the action.
-   - The thread unread divider updates to the server-reported first unread serial.
-   - Existing wave unread counts are updated for both wave and direct-message lists.
-6. The unread jump controls can now be used to return to that divider boundary.
+1. Select `Mark as unread` from a drop menu.
+2. The action shows a spinner and is disabled while the request runs.
+3. On success:
+   - You see `Marked as unread`.
+   - Waves and Messages unread counts refresh.
+   - The thread refreshes unread metadata.
+   - If the server returns an unread boundary serial, the divider moves there.
+   - The menu closes.
+4. Use unread jump controls to return to the boundary.
 
-## Common Scenarios
+## Availability and Edge Cases
 
-- Marking as unread is available only for drops not authored by you.
-- The action is exposed through drop action menus, not as a standalone desktop
-  row icon.
-- The action remains available in both desktop and touch menu flows.
-- Existing unread and divider context is replaced with the new boundary returned by
-  the API.
-
-## Edge Cases
-
-- The action is hidden for drop authors to prevent self-mark operations.
-- Menu-entry visual style differs by surface (desktop dropdown row vs touch
-  full-width row) but triggers the same API action.
-- If the action is already in progress, the control is disabled until the request
-  resolves.
+- If no connected profile is available, the action is hidden.
+- In standard profile sessions, the action is hidden on your own drops.
+- Desktop and touch menus run the same mark-unread request.
+- Repeated taps/clicks are blocked while one request is in flight.
 
 ## Failure and Recovery
 
-- If the request fails, users see an error toast.
-- If the update fails, existing unread state remains unchanged.
-- Users can retry after the toast by re-selecting `Mark as unread` on the same drop.
+- On failure, you see an error toast (server message when available, otherwise
+  `Failed to mark as unread`).
+- Existing unread state stays unchanged.
+- The menu stays open, so you can retry immediately.
 
-## Limitations / Notes
+## Notes
 
-- The action does not modify existing content; it only changes unread position and
-  surface counters.
-- Unread count visibility depends on wave unread-state synchronization and mute
-  rules.
-- You can only mark unread from currently available list data in an open thread.
+- The action does not change drop content. It only updates unread position and
+  unread counters.
+- This is a menu action, not a standalone desktop action-row button.
 
 ## Related Pages
 
 - [Wave Chat Unread Divider and Jump Controls](../chat/feature-unread-divider-and-controls.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
+- [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
-- [Wave Sidebars Features](../sidebars/README.md)
+- [Wave Drop Actions Index](README.md)
 - [Docs Home](../../README.md)
