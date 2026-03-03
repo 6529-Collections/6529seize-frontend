@@ -114,7 +114,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
           return false;
         }
 
-        if (Boolean(Reflect.get(params, "pinned"))) {
+        if (Reflect.get(params, "pinned")) {
           return false;
         }
 

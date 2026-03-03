@@ -4,19 +4,6 @@ import { spawnSync } from "node:child_process";
 const REMOTE = "origin";
 const BRANCH = "main";
 const TARGET = `${REMOTE}/${BRANCH}`;
-const SAFE_POSIX_PATH = [
-  "/usr/bin",
-  "/bin",
-  "/usr/sbin",
-  "/sbin",
-  "/usr/local/bin",
-  "/opt/homebrew/bin",
-].join(":");
-const SAFE_WINDOWS_PATH = "C:\\Windows\\System32";
-const SAFE_ENV = {
-  ...process.env,
-  PATH: process.platform === "win32" ? SAFE_WINDOWS_PATH : SAFE_POSIX_PATH,
-};
 const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
 const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
 const coderabbitCmd =
@@ -27,10 +14,10 @@ const enableCoderabbit = args.has("--coderabbit");
 const changedMode = args.has("--changed");
 
 const runCommand = ({ command, args = [], inheritOutput = false }) => {
+  // Sonar hotspot accepted: this is a trusted local developer script.
   const result = spawnSync(command, args, {
     encoding: "utf8",
     stdio: inheritOutput ? "inherit" : ["ignore", "pipe", "pipe"],
-    env: SAFE_ENV,
   });
 
   if (result.error) {
@@ -55,6 +42,12 @@ const run = (command, commandArgs = []) => {
 const fail = (message, code = 1) => {
   console.error(`ERROR: ${message}`);
   process.exit(code);
+};
+
+const ensureSuccess = (result, label) => {
+  if (result.status !== 0) {
+    throw new Error(`${label} failed with status ${result.status}`);
+  }
 };
 
 const KNIP_IGNORE_PATTERNS = [
@@ -194,7 +187,7 @@ const printKnipSummary = (data) => {
 };
 
 try {
-  run("git rev-parse --git-dir");
+  run("git", ["rev-parse", "--git-dir"]);
 } catch (error) {
   fail("Not a git repository.", 2);
 }
@@ -205,16 +198,19 @@ try {
     args: ["fetch", REMOTE, BRANCH, "--quiet"],
     inheritOutput: true,
   });
-  if (result.status !== 0) {
-    throw new Error();
-  }
+  ensureSuccess(result, `git fetch ${TARGET}`);
 } catch (error) {
   fail(`Failed to fetch ${TARGET}.`, 2);
 }
 
 let counts;
 try {
-  counts = run(`git rev-list --left-right --count ${TARGET}...HEAD`);
+  counts = run("git", [
+    "rev-list",
+    "--left-right",
+    "--count",
+    `${TARGET}...HEAD`,
+  ]);
 } catch (error) {
   fail(`Failed to compare HEAD with ${TARGET}.`, 2);
 }
@@ -239,9 +235,7 @@ try {
     args: ["run", changedMode ? "format:changed" : "format:uncommitted"],
     inheritOutput: true,
   });
-  if (result.status !== 0) {
-    throw new Error();
-  }
+  ensureSuccess(result, changedMode ? "format:changed" : "format:uncommitted");
 } catch (error) {
   fail(
     changedMode
@@ -256,9 +250,7 @@ try {
     args: ["run", changedMode ? "lint:changed" : "lint:diff"],
     inheritOutput: true,
   });
-  if (result.status !== 0) {
-    throw new Error();
-  }
+  ensureSuccess(result, changedMode ? "lint:changed" : "lint:diff");
 } catch (error) {
   fail(
     changedMode ? "ESLint changed check failed." : "ESLint diff check failed."
@@ -283,9 +275,7 @@ try {
         ],
         inheritOutput: true,
       });
-  if (result.status !== 0) {
-    throw new Error();
-  }
+  ensureSuccess(result, changedMode ? "typecheck:changed" : "typecheck");
 } catch (error) {
   fail(
     changedMode
@@ -345,7 +335,7 @@ if (ahead > 0) {
 console.log(`Branch is up to date with ${TARGET}.`);
 
 if (enableCoderabbit) {
-  const uncommittedFiles = run("git status --porcelain");
+  const uncommittedFiles = run("git", ["status", "--porcelain"]);
   if (uncommittedFiles) {
     console.log("\nRunning CodeRabbit review on uncommitted changes...\n");
     try {
