@@ -11,10 +11,12 @@ interface ResolveWaveLeaderboardHeaderLayoutInput {
   readonly curationTabsWidth?: number | undefined;
   readonly curationDropdownWidth?: number | undefined;
   readonly hasActions: boolean;
+  readonly allowActionWrap?: boolean | undefined;
   readonly actionsFullWidth?: number | undefined;
   readonly actionsIconWidth?: number | undefined;
   readonly controlsGapWidth?: number | undefined;
   readonly actionsGapWidth?: number | undefined;
+  readonly wrapEarlyThresholdPx?: number | undefined;
 }
 
 interface WaveLeaderboardHeaderLayout {
@@ -27,6 +29,7 @@ interface WaveLeaderboardHeaderLayout {
 
 const DEFAULT_GAP_WIDTH = 8; // tw-gap-2
 const WIDTH_TOLERANCE_PX = 1;
+const DEFAULT_WRAP_EARLY_THRESHOLD_PX = 20;
 
 const isValidWidth = (value: number): boolean =>
   Number.isFinite(value) && value > 0;
@@ -34,6 +37,14 @@ const isValidWidth = (value: number): boolean =>
 const normalizeGapWidth = (value: number | undefined): number => {
   if (value === undefined || !Number.isFinite(value)) {
     return DEFAULT_GAP_WIDTH;
+  }
+
+  return Math.max(0, value);
+};
+
+const normalizeWrapEarlyThreshold = (value: number | undefined): number => {
+  if (value === undefined || !Number.isFinite(value)) {
+    return DEFAULT_WRAP_EARLY_THRESHOLD_PX;
   }
 
   return Math.max(0, value);
@@ -73,8 +84,12 @@ const getDropdownControlsWidth = ({
   );
 };
 
-const fits = (availableWidth: number, requiredWidth: number): boolean =>
-  requiredWidth <= availableWidth + WIDTH_TOLERANCE_PX;
+const fits = (
+  availableWidth: number,
+  requiredWidth: number,
+  wrapEarlyThresholdPx: number
+): boolean =>
+  requiredWidth + wrapEarlyThresholdPx <= availableWidth + WIDTH_TOLERANCE_PX;
 
 export function resolveWaveLeaderboardHeaderLayout({
   rowWidth,
@@ -85,13 +100,17 @@ export function resolveWaveLeaderboardHeaderLayout({
   curationTabsWidth = 0,
   curationDropdownWidth = 0,
   hasActions,
+  allowActionWrap = true,
   actionsFullWidth = 0,
   actionsIconWidth = 0,
   controlsGapWidth,
   actionsGapWidth,
+  wrapEarlyThresholdPx,
 }: ResolveWaveLeaderboardHeaderLayoutInput): WaveLeaderboardHeaderLayout {
   const safeControlsGapWidth = normalizeGapWidth(controlsGapWidth);
   const safeActionsGapWidth = normalizeGapWidth(actionsGapWidth);
+  const safeWrapEarlyThresholdPx =
+    normalizeWrapEarlyThreshold(wrapEarlyThresholdPx);
 
   const defaultControls = resolveWaveLeaderboardHeaderControlModes({
     availableWidth: rowWidth,
@@ -140,17 +159,19 @@ export function resolveWaveLeaderboardHeaderLayout({
     minimumControlsWidth + safeActionsGapWidth + actionsFullWidth;
   const requiredWidthWithIconActions =
     minimumControlsWidth + safeActionsGapWidth + actionsIconWidth;
+  const fitsFull = fits(
+    rowWidth,
+    requiredWidthWithFullActions,
+    safeWrapEarlyThresholdPx
+  );
+  const fitsIcon = fits(
+    rowWidth,
+    requiredWidthWithIconActions,
+    safeWrapEarlyThresholdPx
+  );
 
-  if (fits(rowWidth, requiredWidthWithFullActions)) {
-    actionMode = "full";
-    wrapActions = false;
-  } else if (fits(rowWidth, requiredWidthWithIconActions)) {
-    actionMode = "icon";
-    wrapActions = false;
-  } else {
-    actionMode = "icon";
-    wrapActions = true;
-  }
+  actionMode = fitsFull ? "full" : "icon";
+  wrapActions = !fitsFull && !fitsIcon && allowActionWrap;
 
   const actionWidth =
     actionMode === "full" ? actionsFullWidth : actionsIconWidth;

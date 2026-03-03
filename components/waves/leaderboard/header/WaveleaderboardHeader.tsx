@@ -7,9 +7,19 @@ import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGro
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import React, { useContext, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { Tooltip } from "react-tooltip";
 import { useDebounce } from "react-use";
 import { getWaveDropEligibility } from "../dropEligibility";
@@ -57,6 +67,7 @@ interface WaveLeaderboardPriceFiltersProps {
     | undefined;
   readonly onFiltersActivated: () => void;
   readonly onFiltersCleared: () => void;
+  readonly trailingActions?: React.ReactNode | undefined;
 }
 
 const toPriceInputValue = (value?: number): string =>
@@ -78,6 +89,8 @@ const isZeroDraftInput = (rawValue: string): boolean => {
   return trimmedValue === "0" || trimmedValue === "0.";
 };
 
+const PRICE_FILTER_LONG_PLACEHOLDER_WIDTH = 576;
+
 const WaveLeaderboardPriceFilters: React.FC<
   WaveLeaderboardPriceFiltersProps
 > = ({
@@ -87,6 +100,7 @@ const WaveLeaderboardPriceFilters: React.FC<
   onPriceRangeChange,
   onFiltersActivated,
   onFiltersCleared,
+  trailingActions,
 }) => {
   const [minPriceInput, setMinPriceInput] = useState(() =>
     toPriceInputValue(minPrice)
@@ -95,6 +109,43 @@ const WaveLeaderboardPriceFilters: React.FC<
     toPriceInputValue(maxPrice)
   );
   const hasDraftInputEditsRef = useRef(false);
+  const priceFiltersContainerRef = useRef<HTMLDivElement | null>(null);
+  const subscribePlaceholderMode = useCallback((onStoreChange: () => void) => {
+    const container = priceFiltersContainerRef.current;
+    const notify = () => onStoreChange();
+
+    notify();
+
+    if (typeof ResizeObserver !== "undefined" && container) {
+      const resizeObserver = new ResizeObserver(() => {
+        notify();
+      });
+      resizeObserver.observe(container);
+      return () => resizeObserver.disconnect();
+    }
+
+    if (typeof window === "undefined") {
+      return () => undefined;
+    }
+
+    window.addEventListener("resize", notify);
+    return () => window.removeEventListener("resize", notify);
+  }, []);
+  const getPlaceholderSnapshot = useCallback(() => {
+    const container = priceFiltersContainerRef.current;
+    if (!container) {
+      return false;
+    }
+    return (
+      container.getBoundingClientRect().width >=
+      PRICE_FILTER_LONG_PLACEHOLDER_WIDTH
+    );
+  }, []);
+  const useLongPlaceholders = useSyncExternalStore(
+    subscribePlaceholderMode,
+    getPlaceholderSnapshot,
+    () => false
+  );
 
   const commitPriceRange = () => {
     if (!onPriceRangeChange) {
@@ -144,15 +195,15 @@ const WaveLeaderboardPriceFilters: React.FC<
     ]
   );
 
+  const hasAnyPriceInput =
+    minPriceInput.trim().length > 0 || maxPriceInput.trim().length > 0;
+
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-2.5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4">
-      <div className="tw-flex tw-min-w-[9rem] tw-flex-col tw-gap-y-1">
-        <label
-          htmlFor={`leaderboard-min-price-${waveId}`}
-          className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
-        >
-          Min (ETH)
-        </label>
+    <div
+      ref={priceFiltersContainerRef}
+      className="tw-flex tw-flex-nowrap tw-items-center tw-gap-2 tw-overflow-x-auto tw-@container/price"
+    >
+      <div className="tw-min-w-[6.5rem] tw-flex-1 @[28rem]/price:tw-min-w-[8rem] @[36rem]/price:tw-min-w-[9.5rem]">
         <input
           id={`leaderboard-min-price-${waveId}`}
           data-testid="leaderboard-price-min-input"
@@ -160,7 +211,9 @@ const WaveLeaderboardPriceFilters: React.FC<
           min={0}
           step="any"
           inputMode="decimal"
-          placeholder="0"
+          aria-label="Minimum ETH"
+          title="Minimum ETH"
+          placeholder={useLongPlaceholders ? "Minimum ETH" : "Min"}
           value={minPriceInput}
           onChange={(event) => {
             hasDraftInputEditsRef.current = true;
@@ -172,16 +225,10 @@ const WaveLeaderboardPriceFilters: React.FC<
               commitPriceRange();
             }
           }}
-          className="tw-h-10 tw-rounded-lg tw-border-0 tw-bg-black tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400"
+          className="tw-form-input tw-block tw-h-9 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out [appearance:textfield] placeholder:tw-text-iron-400 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
         />
       </div>
-      <div className="tw-flex tw-min-w-[9rem] tw-flex-col tw-gap-y-1">
-        <label
-          htmlFor={`leaderboard-max-price-${waveId}`}
-          className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
-        >
-          Max (ETH)
-        </label>
+      <div className="tw-min-w-[6.5rem] tw-flex-1 @[28rem]/price:tw-min-w-[8rem] @[36rem]/price:tw-min-w-[9.5rem]">
         <input
           id={`leaderboard-max-price-${waveId}`}
           data-testid="leaderboard-price-max-input"
@@ -189,7 +236,9 @@ const WaveLeaderboardPriceFilters: React.FC<
           min={0}
           step="any"
           inputMode="decimal"
-          placeholder="No max"
+          aria-label="Maximum ETH"
+          title="Maximum ETH"
+          placeholder={useLongPlaceholders ? "Maximum ETH" : "Max"}
           value={maxPriceInput}
           onChange={(event) => {
             hasDraftInputEditsRef.current = true;
@@ -201,25 +250,30 @@ const WaveLeaderboardPriceFilters: React.FC<
               commitPriceRange();
             }
           }}
-          className="tw-h-10 tw-rounded-lg tw-border-0 tw-bg-black tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400"
+          className="tw-form-input tw-block tw-h-9 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out [appearance:textfield] placeholder:tw-text-iron-400 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
         />
       </div>
-      <button
-        type="button"
-        data-testid="leaderboard-price-clear"
-        onClick={() => {
-          setMinPriceInput("");
-          setMaxPriceInput("");
-          onFiltersCleared();
-          onPriceRangeChange?.({
-            minPrice: undefined,
-            maxPrice: undefined,
-          });
-        }}
-        className="tw-h-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100"
-      >
-        Clear Filters
-      </button>
+      {hasAnyPriceInput && (
+        <button
+          type="button"
+          data-testid="leaderboard-price-clear"
+          aria-label="Clear filters"
+          title="Clear filters"
+          onClick={() => {
+            setMinPriceInput("");
+            setMaxPriceInput("");
+            onFiltersCleared();
+            onPriceRangeChange?.({
+              minPrice: undefined,
+              maxPrice: undefined,
+            });
+          }}
+          className="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-transparent tw-text-iron-500 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-200"
+        >
+          <XMarkIcon className="tw-h-4 tw-w-4" aria-hidden="true" />
+        </button>
+      )}
+      {trailingActions}
     </div>
   );
 };
@@ -358,6 +412,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         hasActions: showCurationActions,
         actionsFullWidth: measurements.actionsFullWidth,
         actionsIconWidth: measurements.actionsIconWidth,
+        wrapEarlyThresholdPx: 20,
       }),
     [measurements, showCurationActions, showCurationGroupSelect]
   );
@@ -455,18 +510,84 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   };
 
   const isCompactActions = layout.actionMode === "icon";
+  const shouldRenderActionsInPriceRow =
+    showCurationActions && isPriceFiltersOpen && layout.wrapActions;
+  let headerRowFlexClass = "tw-flex-wrap";
+  if (showCurationActions) {
+    if (shouldRenderActionsInPriceRow) {
+      headerRowFlexClass = "tw-flex-nowrap";
+    } else {
+      headerRowFlexClass = layout.wrapActions
+        ? "tw-flex-wrap"
+        : "tw-flex-nowrap";
+    }
+  }
+  const controlsRowBasisClass =
+    layout.wrapActions && !shouldRenderActionsInPriceRow ? "tw-basis-full" : "";
+  const showHeaderActions =
+    showCurationActions && !shouldRenderActionsInPriceRow;
+  const showDefaultCreateRow = !showCurationActions && isLoggedIn;
+  const curationActionControls = (
+    <>
+      <button
+        type="button"
+        data-testid="leaderboard-price-toggle"
+        aria-label="Toggle filters"
+        aria-expanded={isPriceFiltersOpen}
+        aria-controls={`leaderboard-price-panel-${wave.id}`}
+        onClick={onTogglePriceFilters}
+        className={`tw-inline-flex tw-h-9 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-text-xs tw-font-semibold tw-transition ${
+          isCompactActions
+            ? "tw-w-9 tw-justify-center tw-px-0"
+            : "tw-gap-2 tw-px-3.5"
+        } ${
+          isPriceFiltersOpen || hasActivePriceFilters
+            ? "tw-border-white/15 tw-bg-white/10 tw-text-iron-100"
+            : "tw-border-white/10 tw-bg-iron-950 tw-text-iron-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/5"
+        }`}
+      >
+        <AdjustmentsHorizontalIcon className="tw-size-4 tw-flex-shrink-0" />
+        {isCompactActions ? (
+          <span className="tw-sr-only">Filters</span>
+        ) : (
+          <span>Filters</span>
+        )}
+      </button>
+      {showCreateAction && (
+        <PrimaryButton
+          loading={false}
+          disabled={false}
+          onClicked={() => onCreateDrop?.()}
+          padding={isCompactActions ? "tw-px-2.5 tw-py-2" : "tw-px-3.5 tw-py-2"}
+        >
+          {isCompactActions ? (
+            <>
+              <DropModeGlyphIcon />
+              <span className="tw-sr-only">Drop Art</span>
+            </>
+          ) : (
+            <>
+              <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+              <span>Drop Art</span>
+            </>
+          )}
+        </PrimaryButton>
+      )}
+    </>
+  );
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-gap-y-4 tw-bg-black tw-@container">
       <div
         ref={headerRowRef}
-        className="tw-flex tw-flex-wrap tw-items-start tw-gap-2"
+        data-testid="leaderboard-header-row"
+        className={`tw-flex tw-items-start tw-gap-2 ${headerRowFlexClass}`}
       >
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
           className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-2 ${
-            layout.wrapActions ? "tw-basis-full" : ""
+            controlsRowBasisClass
           } ${
             layout.enableControlsScroll
               ? "horizontal-menu-hide-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
@@ -535,7 +656,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             </div>
           )}
         </div>
-        {showCurationActions ? (
+        {showHeaderActions && (
           <div
             data-testid="leaderboard-header-actions-row"
             data-action-mode={layout.actionMode}
@@ -544,71 +665,25 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               layout.wrapActions ? "tw-basis-auto" : ""
             }`}
           >
-            <button
-              type="button"
-              data-testid="leaderboard-price-toggle"
-              aria-label="Toggle filters"
-              aria-expanded={isPriceFiltersOpen}
-              aria-controls={`leaderboard-price-panel-${wave.id}`}
-              onClick={onTogglePriceFilters}
-              className={`tw-inline-flex tw-h-9 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-text-xs tw-font-semibold tw-transition ${
-                isCompactActions
-                  ? "tw-w-9 tw-justify-center tw-px-0"
-                  : "tw-gap-2 tw-px-3.5"
-              } ${
-                isPriceFiltersOpen || hasActivePriceFilters
-                  ? "tw-border-white/15 tw-bg-white/10 tw-text-iron-100"
-                  : "tw-border-white/10 tw-bg-iron-950 tw-text-iron-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/5"
-              }`}
-            >
-              <AdjustmentsHorizontalIcon className="tw-size-4 tw-flex-shrink-0" />
-              {isCompactActions ? (
-                <span className="tw-sr-only">Filters</span>
-              ) : (
-                <span>Filters</span>
-              )}
-            </button>
-            {showCreateAction && (
+            {curationActionControls}
+          </div>
+        )}
+        {showDefaultCreateRow && (
+          <div
+            className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
+          >
+            {canCreateDrop && onCreateDrop && (
               <PrimaryButton
                 loading={false}
                 disabled={false}
-                onClicked={() => onCreateDrop?.()}
-                padding={
-                  isCompactActions ? "tw-px-2.5 tw-py-2" : "tw-px-3.5 tw-py-2"
-                }
+                onClicked={onCreateDrop}
+                padding="tw-px-3 tw-py-2"
               >
-                {isCompactActions ? (
-                  <>
-                    <DropModeGlyphIcon />
-                    <span className="tw-sr-only">Drop Art</span>
-                  </>
-                ) : (
-                  <>
-                    <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                    <span>Drop Art</span>
-                  </>
-                )}
+                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                <span>Drop</span>
               </PrimaryButton>
             )}
           </div>
-        ) : (
-          isLoggedIn && (
-            <div
-              className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
-            >
-              {canCreateDrop && onCreateDrop && (
-                <PrimaryButton
-                  loading={false}
-                  disabled={false}
-                  onClicked={onCreateDrop}
-                  padding="tw-px-3 tw-py-2"
-                >
-                  <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                  <span>Drop</span>
-                </PrimaryButton>
-              )}
-            </div>
-          )
         )}
       </div>
 
@@ -635,6 +710,16 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                   setIsManualFiltersOpen(false);
                   setIsActiveFiltersCollapsed(false);
                 }}
+                trailingActions={
+                  shouldRenderActionsInPriceRow ? (
+                    <div
+                      data-testid="leaderboard-price-actions-row"
+                      className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2"
+                    >
+                      {curationActionControls}
+                    </div>
+                  ) : undefined
+                }
               />
             </motion.div>
           )}

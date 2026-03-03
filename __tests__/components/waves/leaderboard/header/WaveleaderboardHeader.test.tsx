@@ -312,6 +312,23 @@ it("renders curation price controls and commits range updates", async () => {
   await user.click(screen.getByTestId("leaderboard-price-toggle"));
   const minInput = screen.getByTestId("leaderboard-price-min-input");
   const maxInput = screen.getByTestId("leaderboard-price-max-input");
+  const priceFiltersContainer = minInput.parentElement?.parentElement;
+
+  expect(minInput).toHaveClass("tw-h-9", "tw-text-sm");
+  expect(maxInput).toHaveClass("tw-h-9", "tw-text-sm");
+  expect(priceFiltersContainer).not.toBeNull();
+  expect(priceFiltersContainer).not.toHaveClass("tw-bg-iron-950");
+  expect(priceFiltersContainer).not.toHaveClass("tw-border");
+  expect(priceFiltersContainer).not.toHaveClass("tw-rounded-lg");
+  expect(priceFiltersContainer).not.toHaveClass("tw-p-2");
+  expect(minInput).toHaveAttribute("placeholder", "Min");
+  expect(maxInput).toHaveAttribute("placeholder", "Max");
+  expect(screen.getByLabelText("Minimum ETH")).toBe(minInput);
+  expect(screen.getByLabelText("Maximum ETH")).toBe(maxInput);
+  expect(
+    screen.queryByRole("button", { name: "Clear filters" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Clear Filters")).not.toBeInTheDocument();
   await user.clear(minInput);
   await user.type(minInput, "1.5");
   await user.clear(maxInput);
@@ -330,11 +347,101 @@ it("renders curation price controls and commits range updates", async () => {
     ])
   );
 
-  await user.click(screen.getByTestId("leaderboard-price-clear"));
+  const clearButton = screen.getByRole("button", { name: "Clear filters" });
+  expect(clearButton).toHaveClass("tw-h-9", "tw-w-9", "tw-rounded-lg");
+  await user.click(clearButton);
   expect(onPriceRangeChange).toHaveBeenLastCalledWith({
     minPrice: undefined,
     maxPrice: undefined,
   });
+});
+
+it("uses long placeholders when the price filter container is wide", async () => {
+  const originalResizeObserver = globalThis.ResizeObserver;
+  const getBoundingClientRectSpy = jest
+    .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+    .mockImplementation(function () {
+      return {
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        bottom: 40,
+        right: 600,
+        width: 600,
+        height: 40,
+        toJSON: () => ({}),
+      } as DOMRect;
+    });
+
+  const observeMock = jest.fn();
+  const disconnectMock = jest.fn();
+  let resizeObserverCallback: ResizeObserverCallback | null = null;
+
+  globalThis.ResizeObserver = jest
+    .fn()
+    .mockImplementation((callback: ResizeObserverCallback) => {
+      resizeObserverCallback = callback;
+      return {
+        observe: observeMock,
+        unobserve: jest.fn(),
+        disconnect: disconnectMock,
+      };
+    }) as unknown as typeof ResizeObserver;
+
+  try {
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: { isEligible: true },
+    });
+
+    const { unmount } = render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <WaveLeaderboardHeader
+          wave={wave}
+          onCreateDrop={jest.fn()}
+          viewMode="list"
+          onViewModeChange={jest.fn()}
+          sort={WaveDropsLeaderboardSort.RANK}
+          onSortChange={jest.fn()}
+          onPriceRangeChange={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("leaderboard-price-toggle"));
+    const minInput = screen.getByTestId("leaderboard-price-min-input");
+    const maxInput = screen.getByTestId("leaderboard-price-max-input");
+
+    expect(minInput).toHaveAttribute("placeholder", "Minimum ETH");
+    expect(maxInput).toHaveAttribute("placeholder", "Maximum ETH");
+
+    expect(observeMock).toHaveBeenCalled();
+    expect(resizeObserverCallback).toBeTruthy();
+
+    act(() => {
+      resizeObserverCallback?.([], {} as ResizeObserver);
+    });
+
+    await waitFor(() =>
+      expect(minInput).toHaveAttribute("placeholder", "Minimum ETH")
+    );
+    expect(maxInput).toHaveAttribute("placeholder", "Maximum ETH");
+
+    unmount();
+    expect(disconnectMock).toHaveBeenCalled();
+  } finally {
+    getBoundingClientRectSpy.mockRestore();
+    globalThis.ResizeObserver = originalResizeObserver;
+  }
 });
 
 it("auto-applies price range updates after debounce while typing", () => {
@@ -391,6 +498,7 @@ it("auto-applies price range updates after debounce while typing", () => {
       maxPrice: 3.25,
     });
 
+    expect(screen.getByTestId("leaderboard-price-clear")).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("leaderboard-price-clear"));
     expect(onPriceRangeChange).toHaveBeenLastCalledWith({
       minPrice: undefined,
@@ -541,6 +649,7 @@ it("auto-expands price filters when min or max price is active", () => {
     "aria-expanded",
     "true"
   );
+  expect(screen.getByTestId("leaderboard-price-clear")).toBeInTheDocument();
 });
 
 it("allows collapsing and reopening filters while price filters are active", async () => {
@@ -753,7 +862,7 @@ it("applies resolved modes and enables scroll fallback styling when requested", 
     curationMode: "dropdown",
     enableControlsScroll: true,
     actionMode: "icon",
-    wrapActions: true,
+    wrapActions: false,
   });
 
   render(
@@ -803,10 +912,7 @@ it("uses controls row width for non-curation layout measurements", async () => {
         return 320;
       }
 
-      if (
-        this.className.includes("tw-flex-wrap") &&
-        this.className.includes("tw-items-start")
-      ) {
+      if (this.getAttribute("data-testid") === "leaderboard-header-row") {
         return 480;
       }
 
@@ -862,10 +968,7 @@ it("uses full header row width when curation actions are inline", async () => {
         return 320;
       }
 
-      if (
-        this.className.includes("tw-flex-wrap") &&
-        this.className.includes("tw-items-start")
-      ) {
+      if (this.getAttribute("data-testid") === "leaderboard-header-row") {
         return 480;
       }
 
@@ -988,10 +1091,72 @@ it("marks the actions row as wrapped when layout requests wrapping", () => {
   );
 
   expect(screen.getByTestId("leaderboard-header-actions-row")).toHaveAttribute(
+    "data-action-mode",
+    "icon"
+  );
+  expect(screen.getByTestId("leaderboard-header-actions-row")).toHaveAttribute(
     "data-wrap",
     "yes"
+  );
+  expect(screen.getByTestId("leaderboard-header-row").className).toContain(
+    "tw-flex-wrap"
   );
   expect(
     screen.getByTestId("leaderboard-header-controls-row").className
   ).toContain("tw-basis-full");
+});
+
+it("moves actions to the price row when filters are open on wrapped layouts", () => {
+  resolveHeaderLayoutMock.mockReturnValue({
+    sortMode: "dropdown",
+    curationMode: "dropdown",
+    enableControlsScroll: false,
+    actionMode: "icon",
+    wrapActions: true,
+  });
+
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        minPrice={1.25}
+        onPriceRangeChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByTestId("leaderboard-price-panel")).toBeInTheDocument();
+  expect(
+    screen.queryByTestId("leaderboard-header-actions-row")
+  ).not.toBeInTheDocument();
+  const priceActionsRow = screen.getByTestId("leaderboard-price-actions-row");
+  expect(priceActionsRow).toBeInTheDocument();
+  expect(priceActionsRow.className).toContain("tw-ml-auto");
+  expect(priceActionsRow).toContainElement(
+    screen.getByTestId("leaderboard-price-toggle")
+  );
+  expect(screen.getByTestId("leaderboard-header-row").className).toContain(
+    "tw-flex-nowrap"
+  );
+  expect(
+    screen.getByTestId("leaderboard-header-controls-row").className
+  ).not.toContain("tw-basis-full");
 });

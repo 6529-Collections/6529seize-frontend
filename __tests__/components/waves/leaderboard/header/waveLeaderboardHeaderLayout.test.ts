@@ -16,7 +16,7 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
   it("keeps full action buttons on one row when everything fits", () => {
     const result = resolveWaveLeaderboardHeaderLayout({
       ...baseInput,
-      rowWidth: 730,
+      rowWidth: 760,
     });
 
     expect(result).toEqual({
@@ -28,10 +28,10 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
     });
   });
 
-  it("uses icon-only actions before wrapping", () => {
+  it("uses icon-only actions before controls need scroll fallback", () => {
     const result = resolveWaveLeaderboardHeaderLayout({
       ...baseInput,
-      rowWidth: 560,
+      rowWidth: 590,
     });
 
     expect(result).toEqual({
@@ -43,7 +43,7 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
     });
   });
 
-  it("wraps actions when even icon actions cannot stay on the first row", () => {
+  it("wraps actions early when space gets tight", () => {
     const result = resolveWaveLeaderboardHeaderLayout({
       ...baseInput,
       rowWidth: 450,
@@ -58,10 +58,11 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
     });
   });
 
-  it("keeps control scroll fallback when wrapped controls still cannot fit", () => {
+  it("keeps actions inline when wrapping is disabled and falls back to scroll", () => {
     const result = resolveWaveLeaderboardHeaderLayout({
       ...baseInput,
-      rowWidth: 300,
+      rowWidth: 450,
+      allowActionWrap: false,
     });
 
     expect(result).toEqual({
@@ -69,7 +70,23 @@ describe("resolveWaveLeaderboardHeaderLayout", () => {
       curationMode: "dropdown",
       enableControlsScroll: true,
       actionMode: "icon",
-      wrapActions: true,
+      wrapActions: false,
+    });
+  });
+
+  it("keeps control scroll fallback when controls still cannot fit", () => {
+    const result = resolveWaveLeaderboardHeaderLayout({
+      ...baseInput,
+      rowWidth: 300,
+      allowActionWrap: false,
+    });
+
+    expect(result).toEqual({
+      sortMode: "dropdown",
+      curationMode: "dropdown",
+      enableControlsScroll: true,
+      actionMode: "icon",
+      wrapActions: false,
     });
   });
 
