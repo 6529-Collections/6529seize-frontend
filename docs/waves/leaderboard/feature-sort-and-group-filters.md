@@ -2,77 +2,79 @@
 
 ## Overview
 
-Wave leaderboard headers let users:
+Use leaderboard header filters to:
 - reorder drops with `Sort` (`Current Vote`, `Projected Vote`, `Hot`, `Newest`)
-- filter to one curation group when groups exist
+- filter to one curation `Group` when groups exist
 
-Controls switch between tabs and dropdowns based on available width. In
-URL-synced curation layouts, the selected group is stored in
-`curated_by_group`.
+`Sort` is saved per wave in local browser storage. `Group` is URL-synced with
+`curated_by_group={groupId}`.
 
 ## Location in the Site
 
-- Wave `Leaderboard` tab header above leaderboard results on `/waves/{waveId}`.
-- Legacy wave links (`/waves?wave={waveId}`) normalize to `/waves/{waveId}`.
+- `Leaderboard` tab header on `/waves/{waveId}`.
+- `Leaderboard` tab header on `/messages?wave={waveId}`.
+- Legacy wave links (`/waves?wave={waveId}`) redirect to `/waves/{waveId}` and
+  keep other query params, including `curated_by_group`.
 
 ## Entry Points
 
-- Open `/waves/{waveId}` and select `Leaderboard`.
-- Use `Sort` to change ordering.
-- If curation groups are available, use `Group` to filter submissions.
-- Open `/waves/{waveId}?curated_by_group={groupId}` to pre-apply a group filter.
+- Open `/waves/{waveId}` and switch to `Leaderboard`.
+- Open `/messages?wave={waveId}` and switch to `Leaderboard`.
+- Change `Sort`.
+- If `Group` is visible, pick one curation group or `All submissions`.
+- Open a deep link with `curated_by_group` to pre-apply group filtering.
+
+## Control Behavior
+
+- `Sort` is always visible in the leaderboard header.
+- `Sort` options are `Current Vote`, `Projected Vote`, `Hot`, and `Newest`.
+- `Group` is shown only when curation groups load for that wave.
+- `Group` options always include `All submissions` plus every loaded curation
+  group.
+- Group tabs can show a small avatar when group profile media is available.
+- Selecting a group updates `curated_by_group` with in-place URL replace (no
+  full-page navigation). Selecting `All submissions` removes that param.
+- Header layout is width-based:
+  - tries view-mode tabs + `Sort` tabs + `Group` tabs
+  - falls back to `Sort` dropdown + `Group` tabs
+  - falls back again to `Sort` dropdown + `Group` dropdown
+  - enables horizontal control-row scroll if even dropdown layout does not fit
 
 ## User Journey
 
-1. Open a wave with a `Leaderboard` tab.
-2. Use `Sort` to reorder the leaderboard.
-3. (Optional) Use `Group` to narrow results to one curation group.
-4. In URL-synced curation layouts, group changes update/remove
-   `curated_by_group` without full-page navigation.
-5. Switch between sorts or groups to compare results.
-6. If controls do not fit, scroll the controls row horizontally.
-
-## Common Scenarios
-
-- Sort options include: `Current Vote`, `Projected Vote`, `Hot`, `Newest`.
-- `Sort` and `Group` render as tabs when there is enough space, and as dropdowns
-  when space is tight.
-- Group filtering includes `All submissions` plus each available curation group.
-- In URL-synced curation layouts, clearing group filter removes
-  `curated_by_group` and returns to `All submissions`.
-- If `curated_by_group` no longer maps to a valid group, the filter falls back
-  to `All submissions`.
+1. Open `Leaderboard`.
+2. Pick a `Sort` mode.
+3. Optional: pick a `Group`.
+4. Compare results in the current leaderboard view mode.
 
 ## Edge Cases
 
-- Sort and group combinations can legitimately produce empty leaderboards.
-- If a wave has no curation groups, only the `Sort` control is shown.
-- While curation groups are still loading, URL-provided group IDs can be held
-  temporarily until group data resolves.
-- Legacy links like `/waves?wave={waveId}&curated_by_group={groupId}` normalize
-  to `/waves/{waveId}?curated_by_group={groupId}`.
+- Some sort/group combinations validly return empty results.
+- If no curation groups exist, only `Sort` is shown.
+- While curation groups are still loading, URL `curated_by_group` can stay
+  active for requests until groups resolve.
+- If URL `curated_by_group` does not match loaded groups, active filtering
+  falls back to `All submissions`.
+- If curation groups fail to load, `Group` stays hidden and results load
+  unfiltered.
 
 ## Failure and Recovery
 
-- Switching sort or group options triggers a fresh leaderboard load.
-- If a load fails, users can retry by reselecting the option or refreshing the page.
-- If controls cannot fit as tabs, the header falls back to dropdown controls and
-  horizontal overflow.
-- If a URL-provided group cannot be resolved, filter state recovers to
-  `All submissions`.
+- Any sort or group change triggers a fresh leaderboard query.
+- If controls are clipped on small widths, scroll the controls row horizontally.
+- If URL filtering looks wrong, switch to `All submissions` to clear
+  `curated_by_group`.
 
 ## Limitations / Notes
 
-- Sorting and filtering only change the leaderboard presentation; they do not
-  change votes or wave configuration.
-- Sort mode is stored as a local per-wave preference and is not encoded in the URL.
-- URL persistence applies only to group filter via `curated_by_group` in layouts
-  that wire this behavior.
-- Group names and membership are determined by current curation-group
-  configuration.
+- Sort/group changes only affect leaderboard presentation.
+- Sort preference is local per wave and browser, and is not part of the URL.
+- URL persistence is only for `curated_by_group`.
+- Group names and membership follow current curation-group configuration.
 
 ## Related Pages
 
+- [Wave Leaderboards Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Leaderboard Drop Entry and Eligibility](feature-drop-entry-and-eligibility.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
