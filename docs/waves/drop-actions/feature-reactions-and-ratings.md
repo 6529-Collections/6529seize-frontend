@@ -2,111 +2,91 @@
 
 ## Overview
 
-Wave drop cards support emoji reactions and rating actions directly in the drop
-controls. Quick-react buttons show the top recent reactions for this user and
-update as usage changes, while the full picker remains available for any emoji.
-Reaction and rating changes appear immediately on the drop while the request is in
-flight, then stay if the request succeeds or roll back if it fails.
+Posted full drops support two interaction paths:
 
-Only full-size drop cards expose enabled reaction and rating actions. Light
-compact drop cards and temporary unsent drops keep those controls disabled.
+- emoji reactions (quick react, picker, and reaction chips)
+- clap rating (set value with `+` / `-`, then submit with clap)
+
+Both flows are optimistic: UI updates immediately, then either confirms or
+rolls back if the request fails.
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Desktop drop action bar (hover actions) and non-hover long-press drop action menu
-- Reaction chips shown below drop content
+- Desktop hover action bar on full drops
+- Touch drop action menu
+- Reaction chips below full drop content
 
 ## Entry Points
 
-- Hover a drop on desktop and use quick-react buttons, the emoji picker button,
-  or clap rating controls.
-- Open the non-hover long-press drop menu and use quick reactions, emoji picker,
-  or rating controls.
-- Tap an existing reaction chip on a drop to toggle that reaction.
-- Open reaction details from chip tooltip overflow (`and N others`) or long
-  press on non-hover devices.
+- Use quick-react buttons in the action bar/menu.
+- Use `Add Reaction` / `Update Reaction` to open the emoji picker.
+- Click or tap a reaction chip to toggle that same reaction.
+- Open reaction details from:
+  - desktop tooltip overflow (`and N others`)
+  - long press on a reaction chip on touch devices
+- When rating is visible, set value with `+` / `-` and submit with clap.
 
 ## User Journey
 
-1. Open a wave or direct-message thread and locate a drop.
-2. Choose a reaction path:
-   - quick-react from recent emojis (including frequently used reactions),
-   - open emoji picker and choose an emoji, or
-   - tap an existing reaction chip.
-3. For existing reaction chips, up to three responders are previewed directly in the tooltip.
-4. If a reaction has additional responders, `and N others` appears; clicking it opens the **Reactions** detail panel.
-5. On non-hover devices, pressing and holding a reaction chip opens the same
-   detail panel.
-6. In the detail panel:
-   - the left side lists all reaction types with totals,
-   - selecting a reaction updates the user list on the right,
-   - each row shows a profile avatar (when available) and display name.
-7. The selected reaction state and counts update immediately on the drop.
-8. If the request succeeds, the new reaction state remains.
-9. If the request fails, the drop restores the previous reaction state and
-   shows an error toast.
-10. For rating, adjust the value with `+` / `-` controls and submit with clap.
-11. The drop rating totals update immediately, then stay on success or revert on
-    failure.
+1. Open a wave or direct-message thread and locate a posted full drop.
+2. React with quick react, picker, or a reaction chip.
+3. The app keeps one reaction per viewer per drop:
+   - choosing a new emoji replaces your previous reaction
+   - choosing your current emoji removes your reaction
+4. Reaction chips show emoji + count. Desktop tooltip previews up to 3 profiles.
+5. If more profiles reacted, `and N others` opens **Reactions**.
+6. In **Reactions**, pick an emoji on the left and review profile rows on the
+   right.
+7. If rating controls are visible, adjust value with `+` / `-` and press clap.
+8. Reaction and rating UI update immediately, then either confirm or roll back.
 
 ## Common Scenarios
 
-- Selecting a new emoji replaces the viewer's prior reaction on that drop.
-- Selecting the same reaction again removes the viewer's reaction.
-- Reaction chips show emoji plus count; selecting a chip toggles participation.
-- On mobile, opening the emoji picker lets users browse and select emojis without the
-  drop list or page scrolling in response to their touch-drag gesture.
-- Tooltip summaries show up to a few reacting profiles and expose an overflow
-  path to a full reaction-detail dialog.
-- Display names in the tooltip are clickable profile links where handles exist, and
-  plain profile identifiers are shown when a handle is unavailable.
-- In the detail panel, users can switch between reaction types to review who reacted
-  with each reaction.
-- Repeated clap taps in a short burst are batched into one rating submission.
+- Quick-react options come from local emoji history. If history is empty, quick
+  react falls back to `:+1:`.
+- Touch move inside the mobile emoji picker stays inside the picker dialog.
+- Repeated clap taps in a short burst are merged into one rating request.
+- Rating values are clamped to each drop's allowed min/max range.
 
 ## Edge Cases
 
-- Temporary (unsent) drops disable reaction and rating actions.
-- Light compact drops disable reaction and rating actions; only full drops can
-  be reacted to.
-- On non-hover devices, long press opens reaction details instead of toggling.
-- If a reaction count reaches zero after removal, that reaction chip disappears.
-- On mobile, the full-screen reaction picker keeps touch-move interaction inside the
-  picker so the parent feed does not scroll during emoji selection.
-- If the reaction list is long, the detail panel still uses one selected reaction
-  and lets you switch between all options.
-- Rating controls clamp to each drop's allowed min/max range.
+- Temporary drops (`temp-*`) cannot be reacted to and do not show rating actions.
+- Light placeholder drops do not render reaction or rating controls.
+- Chat drops do not show clap rating controls.
+- Memes-wave participatory drops hide clap rating controls.
+- In the mobile action menu, rating controls are hidden for the drop author.
+- On touch devices, long press opens reaction details instead of toggling the
+  chip.
+- If a reaction count reaches zero, that chip disappears.
+- Profiles without a handle are shown as plain IDs (no profile link).
 
 ## Failure and Recovery
 
-- If add/remove reaction fails, optimistic reaction UI is rolled back and users
+- If add/remove reaction fails, optimistic reaction state rolls back and users
   can retry immediately.
-- If rating submission fails, optimistic rating totals and user rating context
-  roll back to the previous values.
-- Error responses surface through drop-level toast messages without leaving the
-  thread.
+- If rating submit fails, optimistic rating state rolls back and users can retry.
+- Failures surface as toast errors while users stay in the same thread.
 
 ## Limitations / Notes
 
-- Rating controls appear only where voting is available for the current viewer
-  and drop type.
-- This page covers wave drop action controls, not the standalone vote
-  slider/numeric vote module.
-- Reaction quick-action options depend on locally stored recent reactions.
-- Direct links in reaction details require a profile handle; entries without handles
-  appear as plain identifiers.
-- Reaction picker symbols use a fixed-size emoji rendering baseline to keep the picker
-  selection grid readable and consistent.
+- This page covers thread drop action controls only.
+- Standalone voting controls are documented in:
+  - [Wave Drop Vote Slider](feature-vote-slider.md)
+  - [Wave Drop Vote Summary and Modal](feature-vote-summary-and-modal.md)
+- Rating controls are hidden in most unavailable states (for example: not logged
+  in, no profile, proxy session, winner, voting not started/ended, or ineligible
+  to vote).
+- If rating is visible but the viewer has no available credit, clap stays visible
+  in a disabled state with a tooltip.
 
 ## Related Pages
 
+- [Wave Drop Actions Index](README.md)
 - [Waves Index](../README.md)
-- [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
+- [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Drop Vote Slider](feature-vote-slider.md)
-- [Wave Drop Content Display](feature-content-display.md)
-- [Wave Drop Media Download](feature-media-download.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
-- [Wave Drop Boosting](feature-drop-boosting.md)
+- [Wave Drop Vote Summary and Modal](feature-vote-summary-and-modal.md)
+- [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
 - [Docs Home](../../README.md)
