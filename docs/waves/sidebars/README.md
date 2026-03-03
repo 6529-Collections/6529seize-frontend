@@ -36,7 +36,8 @@ Route scope:
   source, live refresh, and sorting behavior across wave and DM lists.
 - [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md):
   legacy deep-link alias that points to the canonical row-metadata page.
-- [Pinned Wave Controls](feature-pinned-wave-controls.md)
+- [Pinned Wave Controls](feature-pinned-wave-controls.md): server-backed wave
+  pin/unpin controls plus app small-screen local thread shortcuts.
 - [Wave Notification Controls and Mute Behavior](feature-wave-notification-controls.md)
 - [Wave Left Sidebar Expand Control](feature-left-sidebar-expand-control.md):
   desktop control that closes inline right sidebar and restores the full left
