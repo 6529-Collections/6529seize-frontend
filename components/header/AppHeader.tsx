@@ -28,6 +28,8 @@ import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
+import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
+import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -98,6 +100,7 @@ export default function AppHeader() {
   const { isRankWave, isMemesWave, isDm } = useWave(activeWave);
   const showGalleryToggle = !!waveId && !isRankWave && !isMemesWave && !isDm;
   const showWaveLinkAction = Boolean(activeWave && !isDm);
+  const previewText = getWaveDescriptionPreviewText(activeWave);
   const {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
@@ -193,8 +196,24 @@ export default function AppHeader() {
             {pfpElement}
           </button>
         )}
-        <div className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
-          <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
+          {activeWave !== null && !isDm && previewText !== null ? (
+            <WaveDescriptionPopover
+              wave={activeWave}
+              align="center"
+              ariaLabel="Show wave description"
+              triggerClassName="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-center"
+            >
+              <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+                {activeWave.name}
+              </span>
+              <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
+                {previewText}
+              </span>
+            </WaveDescriptionPopover>
+          ) : (
+            <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>
+          )}
           {showGalleryToggle && (
             <button
               type="button"
