@@ -23,8 +23,8 @@ This area covers:
   and empty leaderboard behavior.
 - [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md):
   sort options, group filtering, and URL sync behavior.
-- [Wave Leaderboard Gallery Cards](feature-gallery-cards.md): gallery/grid cards,
-  ranking metadata, and vote entry points.
+- [Wave Leaderboard Gallery Cards](feature-gallery-cards.md): memes `Grid view`
+  cards, media badges, and vote entry points.
 
 ### Decision and Outcome Views
 

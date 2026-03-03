@@ -2,85 +2,86 @@
 
 ## Overview
 
-Gallery mode in wave leaderboards displays each drop as a compact card with media, identity, ranking, and vote information.
-
-Users can quickly scan:
-
-- artwork
-- title (if provided)
-- author
-- rank badge
-- current votes and projected votes
-- optional vote actions
-- media-type badge next to the title for quick format recognition
+In memes waves, leaderboard `Grid view` renders media-first cards.
+This page covers what each card shows, when cards appear, and how voting entry
+works from the card.
 
 ## Location in the Site
 
-- Wave detail pages that include a `Leaderboard` tab.
-- Leaderboard view mode set to gallery/grid (not list mode).
-- Desktop and mobile contexts where cards render in a multi-column gallery.
+- `/waves/{waveId}` and `/messages?wave={waveId}` when `Leaderboard` is available.
+- `Leaderboard` tab with `Grid view` selected on memes waves.
+- Card order and membership follow active `Sort` and optional `Group` filter context.
 
 ## Entry Points
 
-- Open a wave with a leaderboard.
-- Select the `Leaderboard` tab.
-- Switch to gallery layout.
+- Open a memes wave that has `Leaderboard`.
+- Select `Leaderboard`.
+- Select `Grid view`.
+- Use `Load more drops` when pagination is available.
+
+## Availability Rules
+
+- Gallery includes only drops where the first part has at least one media item.
+- Text-only drops are excluded here; use `List view` to see them.
+- Each card uses the first media item from the first drop part.
+- Curation actions are not shown in gallery cards.
 
 ## User Journey
 
-1. Open a leaderboard card.
-2. Read the image area and supporting metadata:
-   - title text appears above the author handle when a title is present
-   - author handle is a profile link
-   - rank badge appears when ranking metadata is available
-   - media-type badge appears next to title and identifies image, video, or interactive drops
-3. Check vote indicators in the footer area:
-   - current score and projected score at decision time
-   - raters count icon
-   - optional "your vote" line if you have already voted
-4. Use the `Vote` button when available to open the voting modal.
-5. Tap/click a card image or call `open` action to view the drop detail.
-
-If a card includes non-image media, hover/focus the format badge for a short tooltip label such as `Image - PNG`, `Video - MP4`, or `Interactive - GLB`.
+1. Open `Leaderboard` and switch to `Grid view`.
+2. Review each card:
+   - media surface
+   - media format badge (with tooltip label)
+   - optional title
+   - optional author handle link
+   - optional rank/winner badge
+3. Review vote summary:
+   - current vote total
+   - projected vote total only when current and projected values are both numeric and different
+   - rater count
+   - optional `Your votes` with wave credit label when viewer rating context exists
+4. Select card media to open drop detail, or select `Vote` when the action is available.
+5. Select `Load more drops` to fetch the next page.
 
 ## Common Scenarios
 
-- Browsing many drops: cards prioritize media and title/author information, with vote metrics below.
-- When a drop includes a preview image, gallery/grid cards use it for non-image
-  media so the card shows a static thumbnail instead of embedding the media.
-- Returning to a wave after voting activity: cards keep the same layout and show updated vote numbers when ranking data refreshes.
-- Empty / unrated drops: cards still render with available fields and omit missing optional metadata.
-- Users with active voting ability:
-  - see `Vote` in the card footer
-  - can open the voting modal directly from the card.
+- Non-image media with additional `preview_image` metadata shows a static image preview.
+- Non-image media without preview metadata renders native media output in-card
+  (video, audio, or interactive content).
+- Known MIME values show tooltip labels like `Image - PNG`, `Video - MP4`, and
+  `Interactive - GLB`.
+- Unknown or missing MIME values still show a badge tooltip as `Unknown`.
+- On non-touch devices, sort changes briefly highlight card media to signal reordering.
 
 ## Edge Cases
 
-- If a drop title is missing, only author and vote information are shown in the metadata row.
-- If a rank is not present, the rank badge is omitted.
-- If a user has not voted on a card, no personal vote line is shown.
-- If voting is unavailable for a card, the `Vote` button is not shown.
-- If media metadata includes a recognized MIME type, a format badge is shown; if the type is unrecognized, the badge is omitted.
-- If no preview image is available for non-image media, the card renders the
-  original media element in place of the thumbnail.
-- Desktop hover and animation behavior does not appear for touch-only devices; card transitions stay static on mobile-focused layouts.
+- Missing title or author handle: the missing field is omitted, other fields still render.
+- Missing rank metadata: rank/winner badge is omitted.
+- If projected vote equals current vote, projected vote indicator is hidden.
+- Gallery can show `No drops to show` even when list view has entries, if none of
+  the current results include media.
+- `Vote` is hidden when voting UI is not available for the current viewer/drop state.
 
 ## Failure and Recovery
 
-- If leaderboard vote metadata is delayed or temporarily unavailable, the card still renders with available metadata and image content.
-- If vote actions are blocked by current wave rules, users do not lose access to details: they can still open the drop and read the card metrics.
-- If predicted vote values are unavailable, the projected vote area falls back to whatever values are provided by current leaderboard data for that card.
+- Initial fetch shows `Loading drops...` until at least one media-qualified card can render.
+- If no media-qualified cards are available, gallery shows `No drops to show`.
+- If vote submit fails, the voting surface stays open and shows error feedback;
+  users can retry from the same card action.
+- If loading or pagination stalls, refresh the thread to request fresh leaderboard data.
 
 ## Limitations / Notes
 
-- The card is an adaptive gallery surface; list-mode layouts are documented separately under other leaderboard/drop actions documentation.
-- Visual motion and hover effects are intentionally tuned per device class and can differ between desktop and touch-first views.
-- This page describes current visible behavior and does not cover internal sorting implementation details.
+- Scope is memes leaderboard `Grid view` card behavior only.
+- Non-memes `Grid` and `Content only` views are separate surfaces.
+- Sort/group control behavior is owned by `feature-sort-and-group-filters.md`.
+- Cross-view loading and empty-state ownership is in `feature-drop-states.md`.
 
 ## Related Pages
 
 - [Wave Leaderboards Index](README.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
+- [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Drop Actions: Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
 - [Vote Slider](../drop-actions/feature-vote-slider.md)
