@@ -71,6 +71,6 @@ The maximum is **20 pinned waves**.
 
 - [Wave Sidebars Index](README.md)
 - [Wave List Navigation Behavior](feature-wave-list-navigation.md)
-- [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md)
+- [Brain Wave List Row Metadata](feature-brain-list-last-drop-indicator.md)
 - [Wave Left Sidebar Expand Control](feature-left-sidebar-expand-control.md)
 - [Wave Notification Controls and Mute Behavior](feature-wave-notification-controls.md)

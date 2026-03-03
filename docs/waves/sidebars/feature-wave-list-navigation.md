@@ -58,6 +58,6 @@ Sidebar rows set or clear the active thread in Waves and Messages.
 
 - [Sidebar Navigation](../../navigation/feature-sidebar-navigation.md)
 - [Sidebars Index](README.md)
-- [Wave List Name Tooltips](feature-brain-list-name-tooltips.md)
+- [Brain Wave List Row Metadata](feature-brain-list-last-drop-indicator.md)
 - [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md)
 - [Docs Home](../../README.md)

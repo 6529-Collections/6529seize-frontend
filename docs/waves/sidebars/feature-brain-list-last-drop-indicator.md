@@ -1,60 +1,87 @@
-# Brain Wave List Last Drop Indicator
+# Brain Wave Row Metadata and Last Drop Indicator
 
-## What This Shows
+## Overview
 
-Expanded wave and direct-message rows can show `Last drop:` under the row name.
+This is the canonical page for left-sidebar row metadata in Waves and Messages.
 
-The value uses the newest known drop time for that row from list data plus live
-updates.
+- name labels and tooltip rules
+- `Last drop` visibility, timestamp source, and refresh behavior
+- live unread/new-drop interactions that affect row badges and divider jumps
 
-## Where You See It
+Legacy tooltip-only links should resolve here.
 
-- Expanded list rows on `/waves`, `/waves/{waveId}`, `/messages`, and
-  `/messages?wave={waveId}`
-- Mobile Waves and Messages list screens that reuse the same row behavior
-- Not shown in collapsed desktop sidebar rows
+## Location in the Site
 
-## When It Appears
+- Expanded rows on `/waves`, `/waves/{waveId}`, `/messages`, and
+  `/messages?wave={waveId}`.
+- Mobile Waves and Messages list views that reuse the same row behavior.
+- Desktop Brain/sidebar wave lists that reuse the same wave-row label model.
+- Collapsed desktop rows hide `Last drop`, but still expose name tooltips.
 
-1. You are authenticated and can access Waves/Messages content.
-2. The row is in expanded mode.
-3. The row has a known latest-drop timestamp.
+## Name Label and Tooltip Behavior
 
-If no timestamp is known, the `Last drop` line stays hidden.
+- Expanded mode keeps row names inline.
+- Expanded mode shows a tooltip only when the row name is truncated and the
+  device supports hover.
+- Collapsed mode is avatar-first and exposes the row name only through hover
+  tooltip.
+- Pinned and regular rows follow the same tooltip rules.
+- Direct-message rows follow the same tooltip rules as wave rows.
 
-## How It Updates
+On touch devices, hover tooltips are unavailable. Users can expand the sidebar
+to read inline names.
 
-1. Initial value comes from list overview timestamps.
-2. New live drops in unmuted rows can move `Last drop` forward immediately.
-3. The label refreshes every minute.
-4. Opening a row clears its live new-drop counter, but keeps the newest `Last drop` time.
+## `Last drop` Visibility and Source
 
-## Unread and Mute Behavior
+`Last drop` appears only when all conditions are true:
 
-- Your own new drop updates `Last drop` but does not increase unread count.
-- If a row is active and the tab is visible, `Last drop` updates but unread does
-  not increase.
-- If a row is active and the tab is hidden, unread can increase until the tab is
-  visible again.
-- Muted rows ignore live timestamp/unread updates. Later list refreshes can still
-  update `Last drop`.
+- you can access Waves/Messages content
+- the row is expanded
+- the row has a known latest-drop timestamp
 
-## Sorting Behavior
+If no timestamp is known, the line stays hidden.
 
-- Rows sort by newest `Last drop` time.
-- Non-muted rows stay above muted rows.
-- Pinned and regular sections both follow this ordering.
-- Direct-message rows show `Last drop` but do not show pin controls.
+Timestamp source and precedence:
+
+1. Start with list overview `metrics.latest_drop_timestamp`.
+2. Live websocket drops for unmuted rows can move the timestamp forward.
+3. When both sources exist, the newer value wins.
+
+## Live Refresh, Unread, and Mute Behavior
+
+- The relative-time label refreshes every 60 seconds, and immediately when the
+  timestamp changes.
+- Opening a row clears that row's live new-drop counter after a short delay
+  (about 1 second).
+- Clearing live unread/new-drop counters does not clear `Last drop`.
+- Your own new drops can update `Last drop` without increasing unread.
+- If a row is active and the tab is visible, `Last drop` updates while unread
+  stays stable.
+- If a row is active and the tab is hidden, unread can increase until the tab
+  is visible again.
+- Returning to a visible tab clears the active row's live unread count and
+  keeps `Last drop`.
+- Muted rows ignore live websocket timestamp/unread updates, but later list
+  refreshes can still update `Last drop`.
+
+## Sorting and Section Behavior
+
+1. Non-muted rows sort above muted rows.
+2. Within each mute group, rows sort by newest timestamp.
+3. Pinned and regular wave sections each preserve this ordering.
+4. Direct-message rows still show `Last drop`, but row pin controls stay hidden.
 
 ## Recovery and Edge Cases
 
-- If a live drop arrives for a wave missing from this list, the list refetches
-  with a cooldown (about every 3 seconds) unless that wave is already in the
-  opposite list.
-- If websocket delivery pauses, the current label stays until the next live
-  update or list refresh.
+- If a live drop arrives for a wave missing from this list, the list refetches.
+- Refetch is skipped when that wave already exists in the opposite list.
+- Unknown-wave live-drop refetch is throttled (about every 3 seconds).
+- If websocket delivery pauses, current labels remain until live updates or a
+  list refresh.
 - Reconnect/refetch can refresh stale timestamps.
-- If no timestamp is returned after refresh, the line remains hidden.
+- If no timestamp is returned after refresh, `Last drop` remains hidden.
+- Resizing can change truncation and tooltip eligibility in expanded rows.
+- Active-row highlight and unread badges do not block hover tooltips.
 
 ## Related Pages
 
@@ -62,4 +89,5 @@ If no timestamp is known, the `Last drop` line stays hidden.
 - [Waves Index](../README.md)
 - [Wave List Navigation Behavior](feature-wave-list-navigation.md)
 - [Wave Notification Controls and Mute Behavior](feature-wave-notification-controls.md)
+- [Pinned Wave Controls](feature-pinned-wave-controls.md)
 - [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md)

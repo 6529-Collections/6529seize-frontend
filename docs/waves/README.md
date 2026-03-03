@@ -67,7 +67,8 @@ Use this area for wave and direct-message tasks:
 - [Header](header/README.md): header controls, picture editing, and
   chat/gallery toggle behavior across supported header surfaces.
 - [Sidebars](sidebars/README.md): wave/direct-message list navigation and
-  right-sidebar controls.
+  right-sidebar controls, including
+  [Brain Wave Row Metadata and Last Drop Indicator](sidebars/feature-brain-list-last-drop-indicator.md).
 - [Link Previews](link-previews/README.md): external/social/web3 preview-card
   rendering in thread content and home-style drop-card variants.
 - [Leaderboard](leaderboard/README.md): leaderboard states, filters, timeline,

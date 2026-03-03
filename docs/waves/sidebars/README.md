@@ -31,9 +31,11 @@ Route scope:
 - [Wave List Navigation Behavior](feature-wave-list-navigation.md):
   row open/clear behavior, unread `divider` routing, and stale `wave` query
   cleanup.
-- [Brain Wave List Last Drop Indicator](feature-brain-list-last-drop-indicator.md):
-  expanded-row `Last drop` timestamp source, refresh, and ordering behavior.
-- [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md)
+- [Brain Wave Row Metadata and Last Drop Indicator](feature-brain-list-last-drop-indicator.md):
+  canonical owner for expanded/collapsed name labels, tooltip behavior,
+  `Last drop` timestamp source, live refresh, and ordering behavior.
+- [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md):
+  legacy pointer kept for older tooltip-only deep links.
 - [Pinned Wave Controls](feature-pinned-wave-controls.md)
 - [Wave Notification Controls and Mute Behavior](feature-wave-notification-controls.md)
 - [Wave Left Sidebar Expand Control](feature-left-sidebar-expand-control.md):
