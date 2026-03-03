@@ -2,94 +2,77 @@
 
 ## Overview
 
-Wave drop actions expose two distinct link behaviors:
+`Open` and `Copy link` are separate.
 
-- `Open drop` opens selected drop details in the current thread context by setting
-  a `drop` query parameter.
-- `Copy link` copies a shareable thread URL that targets a specific drop serial.
-
-In app-shell contexts, opening a drop uses a shared overlay where drop details stay
-visible while discussion mode can be shown/hidden inline.
+- `Open` / `Open drop` uses `drop={dropId}` to open single-drop view in the
+  current thread.
+- `Copy link` copies an absolute share URL that targets the drop with
+  `serialNo={serialNo}`.
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Desktop drop `More` menu
-- Non-hover long-press drop menu
-- Single-drop app-shell overlay
+- Thread desktop `More` menu: `Open`, `Copy link`
+- Thread mobile action sheet: `Open drop`, `Copy link`
+- Leaderboard and winners cards can also show `Open` (same `drop` behavior).
 
 ## Entry Points
 
-- Open a wave or DM thread and use drop action controls.
-- Choose `Open drop` from desktop or touch menus.
-- Choose `Copy link` from desktop or touch menus.
+- Open a wave or DM thread.
+- Use `Open` / `Open drop` from thread actions, or from leaderboard/winners
+  cards where shown.
+- Use `Copy link` from thread desktop `More` or thread mobile action sheet.
 
 ## User Journey
 
-1. Open a thread and locate a drop.
-2. Choose an action:
-   - `Open drop` sets `drop` query and opens drop details in current route context.
-   - `Copy link` copies an absolute serial-target URL.
-3. Copied links use route-specific formats:
-   - Wave thread: `/waves/{waveId}?serialNo={serialNo}`
+1. Open a thread and find a drop.
+2. Choose `Open` / `Open drop`.
+3. The app sets `drop={dropId}` in the current URL and opens single-drop view.
+4. Close single-drop view to remove `drop` and return to thread browsing.
+5. Choose `Copy link` to copy an absolute serial-target URL:
+   - wave thread: `/waves/{waveId}?serialNo={serialNo}`
    - DM thread: `/messages?wave={waveId}&serialNo={serialNo}`
-4. In app-shell routes, opened drops present full-viewport overlay controls:
-   - Desktop: drop detail left + optional right discussion pane.
-   - Mobile: full-screen drop detail + right slide-over discussion panel.
-5. Closing the drop removes `drop` from query and returns to the same thread state.
+6. Opening the copied URL runs serial-jump behavior for that thread.
 
 ## Common Scenarios
 
-- Opening a drop keeps users in current wave/DM context instead of full route exit.
-- If selected drop already exists in rendered list state, overlay opens immediately
-  with local data, then refreshes with server data.
-- Copying in non-DM waves uses canonical `/waves/{waveId}` serial links.
-- Copying in DM waves uses `/messages` links with `wave` + `serialNo`.
-- Temporary drops disable `Copy link` and show unavailable action state.
-- Action controls stop propagation so open/copy actions do not also trigger parent
-  card click-through.
+- `Open` keeps the current route and keeps existing query params.
+- `Open` is hidden for chat-type drops.
+- Temporary drops (`temp-*`) disable `Copy link`.
+- Successful copy shows `Copied!` for about 2 seconds.
+- Desktop copy can still infer DM routes from stream context when DM scope data
+  on the drop is incomplete.
+- Mobile copy uses Clipboard API when available and falls back to textarea copy.
 
 ## Edge Cases
 
-- `Open drop` is not shown for chat-type drops.
-- `Open drop` preserves other query params while replacing current `drop` value.
-- If a same-origin link carries both `drop` and `serialNo`, `drop` takes precedence
-  and opens drop-preview flow instead of serial quote-jump flow.
-- On mobile, background scrolling is blocked while slide-over discussion is open.
-- Serial-target links may require historical fetches before target becomes visible.
-- Desktop copy actions can still resolve DM routing from stream context when direct
-  DM metadata is incomplete.
-- Opening a drop via `drop` query disables the route-level wave overview prefetch
-  while that drop is open. After closing, the app sets a short-lived
-  `drop_close` marker for about 5 seconds, so the next server-side render also
-  keeps prefetching disabled.
+- If URL has both `drop` and `serialNo`, drop-open flow is handled first.
+- On mobile single-drop view, opening the chat panel locks body scrolling until
+  the panel closes.
+- While a drop is open, route-level waves overview prefetch is skipped. After
+  close, a short `drop_close` window (about 5 seconds) keeps that prefetch
+  disabled briefly.
 
 ## Failure and Recovery
 
-- If clipboard permission is blocked, copy feedback may not appear; users can retry
-  after permission/context is restored.
-- If opened-drop details are stale, overlay renders latest local data first and then
-  refreshes from API.
-- If serial-target navigation stalls after opening copied links, temporary scroll
-  overlays clear while normal scrolling remains available.
+- If clipboard access is blocked, copy can fail without `Copied!`; restore
+  clipboard access and try again.
+- If a serial link targets older history, loading can take longer before the
+  target appears.
 
 ## Limitations / Notes
 
-- `Open drop` (`drop` query) and copied links (`serialNo` query) are separate
+- `Open` (`drop` query) and copied links (`serialNo` query) are different
   navigation mechanisms.
+- Opening a copied link does not force single-drop overlay mode.
 - `Copy link` is unavailable for temporary drops.
-- Copied links target thread position; they do not force persistent single-drop
-  overlay state.
-- If a user relies on immediate full-thread prefetch after closing a drop, there is
-  a short delay before that behavior resumes.
 
 ## Related Pages
 
 - [Waves Index](../README.md)
+- [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Chat Serial Jump Navigation](../chat/feature-serial-jump-navigation.md)
 - [Wave Drop Quote Link Cards](feature-quote-link-cards.md)
 - [Wave Drop Content Display](feature-content-display.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)
-- [Wave Drop Reactions and Rating Actions](feature-reactions-and-ratings.md)
-- [Legacy Route Redirects](../../shared/feature-legacy-route-redirects.md)
