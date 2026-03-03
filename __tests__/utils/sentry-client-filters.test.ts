@@ -17,8 +17,37 @@ describe("sentry-client-filters", () => {
 
   it("filters events when the original exception stack contains a filename exception", () => {
     // Arrange
-    const error = new Error("Cannot read properties of undefined (reading 'ton')");
+    const error = new Error(
+      "Cannot read properties of undefined (reading 'ton')"
+    );
     error.stack = `TypeError: Cannot read properties of undefined (reading 'ton')\n    at requestAccounts (app:///extensionServiceWorker.js:75067:1)`;
+
+    // Act
+    const result = shouldFilterByFilenameExceptions(undefined, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters events when a stack frame matches extensionPageScript.js", () => {
+    // Arrange
+    const frames = [{ filename: "app:///extensionPageScript.js" } as any];
+
+    // Act
+    const result = shouldFilterByFilenameExceptions(frames);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters events when the original exception stack contains extensionPageScript.js", () => {
+    // Arrange
+    const error = new Error(
+      "Cannot assign to read only property 'solana' of object '#<Window>'"
+    );
+    error.stack = `TypeError: Cannot assign to read only property 'solana' of object '#<Window>'\n    at foo (app:///extensionPageScript.js:4857:19)`;
 
     // Act
     const result = shouldFilterByFilenameExceptions(undefined, {
@@ -57,6 +86,17 @@ describe("sentry-client-filters", () => {
   it("includes extensionServiceWorker.js in filename exceptions", () => {
     // Arrange
     const expected = "extensionServiceWorker.js";
+
+    // Act
+    const result = __testing.filenameExceptions;
+
+    // Assert
+    expect(result).toContain(expected);
+  });
+
+  it("includes extensionPageScript.js in filename exceptions", () => {
+    // Arrange
+    const expected = "extensionPageScript.js";
 
     // Act
     const result = __testing.filenameExceptions;

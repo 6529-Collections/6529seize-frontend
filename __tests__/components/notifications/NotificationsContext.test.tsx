@@ -44,6 +44,10 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
+jest.mock("@sentry/nextjs", () => ({
+  captureException: jest.fn(),
+  addBreadcrumb: jest.fn(),
+}));
 
 jest.mock("@capacitor/push-notifications", () => {
   return {
@@ -96,6 +100,7 @@ describe("NotificationsContext initialization", () => {
   beforeEach(() => {
     mockIsActive = true;
     const { PushNotifications } = require("@capacitor/push-notifications");
+    const sentry = require("@sentry/nextjs");
     jest.clearAllMocks();
     mockSeizeConnectContext.address = "0xaaa";
     mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
@@ -110,6 +115,7 @@ describe("NotificationsContext initialization", () => {
     PushNotifications.removeAllListeners.mockClear();
     PushNotifications.addListener.mockClear();
     PushNotifications.register.mockClear();
+    sentry.captureException.mockClear();
   });
 
   it("does not initialize when isActive is false", async () => {
@@ -145,6 +151,37 @@ describe("NotificationsContext initialization", () => {
       },
       { timeout: 2000 }
     );
+  });
+
+  it("captures unrecoverable initialization errors", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const {
+      getStableDeviceId,
+    } = require("@/components/notifications/stable-device-id");
+    const sentry = require("@sentry/nextjs");
+    const fatalError = new Error("fatal secure storage error");
+
+    getStableDeviceId.mockRejectedValueOnce(fatalError);
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(sentry.captureException).toHaveBeenCalledWith(
+        fatalError,
+        expect.objectContaining({
+          tags: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "initializeNotifications",
+          }),
+        })
+      );
+    });
+
+    expect(PushNotifications.register).not.toHaveBeenCalled();
   });
 });
 
