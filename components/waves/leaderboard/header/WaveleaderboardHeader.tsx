@@ -268,7 +268,7 @@ const WaveLeaderboardPriceFilters: React.FC<
               maxPrice: undefined,
             });
           }}
-          className="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-transparent tw-text-iron-500 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-200"
+          className="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-100"
         >
           <XMarkIcon className="tw-h-4 tw-w-4" aria-hidden="true" />
         </button>

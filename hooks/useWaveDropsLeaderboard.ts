@@ -90,24 +90,41 @@ export function useWaveDropsLeaderboard({
     () => curatedByGroupId?.trim() ?? undefined,
     [curatedByGroupId]
   );
-  const normalizedMinPrice = useMemo(
-    () =>
+  const canonicalPriceFilters = useMemo(() => {
+    const normalizedPriceCurrency = priceCurrency?.trim() ?? undefined;
+    const normalizedMinPrice =
       typeof minPrice === "number" && Number.isFinite(minPrice) && minPrice >= 0
         ? minPrice
-        : undefined,
-    [minPrice]
-  );
-  const normalizedMaxPrice = useMemo(
-    () =>
+        : undefined;
+    const normalizedMaxPrice =
       typeof maxPrice === "number" && Number.isFinite(maxPrice) && maxPrice >= 0
         ? maxPrice
-        : undefined,
-    [maxPrice]
-  );
-  const normalizedPriceCurrency = useMemo(
-    () => priceCurrency?.trim() ?? undefined,
-    [priceCurrency]
-  );
+        : undefined;
+
+    let normalizedPriceLower = normalizedMinPrice;
+    let normalizedPriceUpper = normalizedMaxPrice;
+
+    if (
+      typeof normalizedPriceLower === "number" &&
+      typeof normalizedPriceUpper === "number" &&
+      normalizedPriceLower > normalizedPriceUpper
+    ) {
+      normalizedPriceLower = normalizedMaxPrice;
+      normalizedPriceUpper = normalizedMinPrice;
+    }
+
+    return {
+      normalizedPriceCurrency,
+      normalizedPriceLower:
+        typeof normalizedPriceLower === "number"
+          ? normalizedPriceLower.toString()
+          : undefined,
+      normalizedPriceUpper:
+        typeof normalizedPriceUpper === "number"
+          ? normalizedPriceUpper.toString()
+          : undefined,
+    };
+  }, [maxPrice, minPrice, priceCurrency]);
 
   const queryKey = useMemo(
     () =>
@@ -119,9 +136,9 @@ export function useWaveDropsLeaderboard({
           sort,
           sort_direction: sortDirection,
           curated_by_group: normalizedCuratedByGroupId ?? null,
-          min_price: normalizedMinPrice ?? null,
-          max_price: normalizedMaxPrice ?? null,
-          price_currency: normalizedPriceCurrency ?? null,
+          min_price: canonicalPriceFilters.normalizedPriceLower ?? null,
+          max_price: canonicalPriceFilters.normalizedPriceUpper ?? null,
+          price_currency: canonicalPriceFilters.normalizedPriceCurrency ?? null,
         },
       ] as const,
     [
@@ -129,9 +146,9 @@ export function useWaveDropsLeaderboard({
       sort,
       sortDirection,
       normalizedCuratedByGroupId,
-      normalizedMinPrice,
-      normalizedMaxPrice,
-      normalizedPriceCurrency,
+      canonicalPriceFilters.normalizedPriceLower,
+      canonicalPriceFilters.normalizedPriceUpper,
+      canonicalPriceFilters.normalizedPriceCurrency,
     ]
   );
 
@@ -163,36 +180,20 @@ export function useWaveDropsLeaderboard({
       if (normalizedCuratedByGroupId) {
         params["curated_by_group"] = normalizedCuratedByGroupId;
       }
-      let effectiveMinPrice = normalizedMinPrice;
-      let effectiveMaxPrice = normalizedMaxPrice;
-
-      if (
-        typeof normalizedMinPrice === "number" &&
-        typeof normalizedMaxPrice === "number" &&
-        normalizedMinPrice > normalizedMaxPrice
-      ) {
-        effectiveMinPrice = normalizedMaxPrice;
-        effectiveMaxPrice = normalizedMinPrice;
+      if (canonicalPriceFilters.normalizedPriceLower) {
+        params["min_price"] = canonicalPriceFilters.normalizedPriceLower;
       }
-
-      if (typeof effectiveMinPrice === "number") {
-        params["min_price"] = effectiveMinPrice.toString();
+      if (canonicalPriceFilters.normalizedPriceUpper) {
+        params["max_price"] = canonicalPriceFilters.normalizedPriceUpper;
       }
-      if (typeof effectiveMaxPrice === "number") {
-        params["max_price"] = effectiveMaxPrice.toString();
-      }
-      if (normalizedPriceCurrency) {
-        params["price_currency"] = normalizedPriceCurrency;
+      if (canonicalPriceFilters.normalizedPriceCurrency) {
+        params["price_currency"] =
+          canonicalPriceFilters.normalizedPriceCurrency;
       }
 
       return params;
     },
-    [
-      normalizedCuratedByGroupId,
-      normalizedMaxPrice,
-      normalizedMinPrice,
-      normalizedPriceCurrency,
-    ]
+    [normalizedCuratedByGroupId, canonicalPriceFilters]
   );
 
   const fetchLeaderboardPage = useCallback(
