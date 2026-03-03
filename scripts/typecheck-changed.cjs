@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require("node:child_process");
+const { spawnSync } = require("node:child_process");
 const path = require("node:path");
 const ts = require("typescript");
 
@@ -11,19 +11,38 @@ const EXEC_OPTIONS = {
 };
 
 const canonicalPath = (filePath) => {
-  const normalized = path.resolve(filePath).replace(/\\/g, "/");
+  const normalized = path.resolve(filePath).replaceAll("\\", "/");
   return process.platform === "win32" ? normalized.toLowerCase() : normalized;
 };
 
+const runGitCommand = (args) => {
+  const result = spawnSync("git", args, EXEC_OPTIONS);
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.status !== 0) {
+    const stderr = result.stderr?.toString().trim();
+    throw new Error(
+      stderr || `git ${args.join(" ")} failed with exit code ${result.status}`
+    );
+  }
+
+  return result.stdout ?? "";
+};
+
 const runChangedFilesCommand = () => {
-  const patterns = '"*.ts" "*.tsx" "*.mts" "*.cts" ":(exclude)generated/**"';
-  const changedTracked = execSync(
-    `git diff --name-only -z ${BRANCH}...HEAD -- ${patterns}`,
-    EXEC_OPTIONS
+  const patterns = [
+    "*.ts",
+    "*.tsx",
+    "*.mts",
+    "*.cts",
+    ":(exclude)generated/**",
+  ];
+  const changedTracked = runGitCommand(
+    ["diff", "--name-only", "-z", `${BRANCH}...HEAD`, "--"].concat(patterns)
   );
-  const changedUntracked = execSync(
-    `git ls-files --others --exclude-standard -z -- ${patterns}`,
-    EXEC_OPTIONS
+  const changedUntracked = runGitCommand(
+    ["ls-files", "--others", "--exclude-standard", "-z", "--"].concat(patterns)
   );
   return changedTracked + changedUntracked;
 };

@@ -5,9 +5,9 @@ const REMOTE = "origin";
 const BRANCH = "main";
 const TARGET = `${REMOTE}/${BRANCH}`;
 
-const args = process.argv.slice(2);
-const enableCoderabbit = args.includes("--coderabbit");
-const changedMode = args.includes("--changed");
+const args = new Set(process.argv.slice(2));
+const enableCoderabbit = args.has("--coderabbit");
+const changedMode = args.has("--changed");
 
 const run = (command, options = {}) =>
   execSync(command, {
