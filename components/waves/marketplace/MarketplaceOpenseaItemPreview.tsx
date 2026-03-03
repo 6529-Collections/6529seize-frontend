@@ -34,6 +34,7 @@ export default function MarketplaceOpenseaItemPreview({
         price={state.resolvedPrice}
         priceCurrency={state.resolvedPriceCurrency}
         title={state.resolvedTitle}
+        dataHealth={state.resolvedDataHealth}
         compact={compact}
         hideActions={compact}
       />

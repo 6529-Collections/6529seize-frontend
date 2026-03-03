@@ -24,6 +24,7 @@ export default function UserPageFollowersModal({
       tall
       fixedHeight
       tabletModal
+      maxWidthClass="md:tw-max-w-md"
       showScrollbar
     >
       <div className="tw-px-4 sm:tw-px-6">
