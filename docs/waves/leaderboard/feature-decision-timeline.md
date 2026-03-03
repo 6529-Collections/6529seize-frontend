@@ -1,80 +1,64 @@
 # Wave Leaderboard Decision Timeline
 
-## Overview
+## What This Covers
 
-Leaderboard views for multi-decision waves include a collapsible timeline
-header that summarizes upcoming decision timing and season-transition
-announcements.
+Multi-decision leaderboard waves show an expandable timeline header.  
+It summarizes the next valid decision or season-transition message and can open
+into a horizontal decision strip.
 
-## Location in the Site
+## Where Users See It
 
-- Wave detail pages that expose the `Leaderboard` tab.
-- Desktop leaderboard layout above sort/filter controls and drop results.
-- Mobile leaderboard view before leaderboard content sections.
+- Routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Only when the wave still has an available `Leaderboard` tab.
+- At the top of leaderboard content, above sticky sort and filter controls.
+- Same behavior on desktop and mobile.
 
-## Entry Points
+## Header States
 
-- Open a wave that has a `Leaderboard` tab available.
-- Switch from `Chat` to `Leaderboard`.
-- Look for the timeline header card at the top of leaderboard content.
+- `Decision Timeline` appears when at least one future decision remains after
+  pause filtering.
+- `Announcement history` appears when no future valid decision remains.
+- Status text can be:
+  - local short date/time for the next valid decision
+  - `Congrats to last SZN winners!` and `Next SZN starts: <date>` when the wave
+    is in a pause, or when the next pause starts before any remaining decision
+  - `No upcoming events` when no valid future decision is available
 
-## User Journey
+## Expand and Review
 
-1. Open the wave leaderboard.
-2. Read the collapsed header summary:
-   - `Decision Timeline` when an upcoming decision is available.
-   - `Announcement history` when no upcoming decision is available.
-3. Check the status text:
-   - During pause windows: `Congrats to last SZN winners!` and
-     `Next SZN starts: <date>`.
-   - Outside pauses with an upcoming decision: next decision date/time.
-   - Without upcoming events: `No upcoming events`.
-4. Click the header to expand timeline details.
-5. Use `Show earlier` / `Show later` controls to load additional decision
-   points when those controls are available.
+1. Open `Leaderboard`.
+2. Tap/click the timeline header row to expand or collapse.
+3. In expanded view, review decision points:
+   - `Next` badge on the next upcoming decision.
+   - `Completed` badge on past decisions.
+4. Use `Show earlier` or `Show later` when present.
+5. Some labels include counts (for example `Show 6 earlier`).
+6. Infinite rolling timelines can show `Show later` without a count.
 
-## Common Scenarios
+## Scrolling and Loading
 
-- Users see the next decision time without opening the full timeline.
-- During a pause between seasons, users see season-transition messaging plus
-  the next season start date.
-- Expanding the timeline auto-focuses near the next upcoming decision when one
-  is present.
-- When no future decision is currently visible, the summary remains in
-  announcement mode until future decision points become available.
+- On expand, the strip auto-scrolls near the next decision when it is loaded.
+- If the next decision is outside the initial future window, future points
+  auto-load in short bursts until found or capped.
+- After `Show earlier` or `Show later`, the strip scrolls toward the newly
+  loaded edge.
 
-## Edge Cases
+## Edge Behavior
 
-- If the next decision is outside the initial visible window, the timeline
-  attempts short auto-expansion of future items before settling.
-- In pause mode, the start date shown in `Next SZN starts` uses the pause-aware
-  minting date when available, and falls back to the pause end date.
-- `Show earlier` / `Show later` can appear without explicit counts when
-  remaining counts are unavailable.
-- If no decision points are available, expanding the timeline shows no decision
-  markers.
-
-## Failure and Recovery
-
-- If users cannot load additional past/future decision points, already loaded
-  timeline items stay visible and users can retry with the same controls.
-- If no valid upcoming decision exists, the header remains readable with
-  `No upcoming events` instead of a broken timestamp.
-- If the page is refreshed, the timeline reverts to collapsed state; users can
-  expand it again from the header.
-
-## Limitations / Notes
-
-- This timeline is shown only for multi-decision leaderboard waves.
-- Date/time formatting follows the browser locale.
-- Expanded/collapsed state is per-session UI state and is not persisted in URL
-  parameters.
+- Decisions inside configured pause windows are excluded from both rendering and
+  next-decision selection.
+- If no decision points exist, expand still opens and shows an empty strip.
+- Expanded state is local UI state and resets when the leaderboard unmounts
+  (refresh, tab switch, or wave switch).
+- Single-decision waves do not render this timeline:
+  - non-curation waves show compact dropping and voting phase cards
+  - curation waves show no timing card in this slot
 
 ## Related Pages
 
 - [Waves Index](../README.md)
+- [Wave Leaderboards Index](README.md)
+- [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
 - [Wave Winners Tab](feature-winners-tab.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
-- [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Docs Home](../../README.md)
