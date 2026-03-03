@@ -2,74 +2,78 @@
 
 ## Overview
 
-The right sidebar `About` view shows a `Trending` section powered by boost
-activity in the active wave.
+The `About` section includes `Trending`, a ranked list of boosted drops for the
+current thread.
 
-Users can switch `Day`, `Week`, and `Month` windows, then jump directly to a
-drop in the same thread.
-
-The list shows up to five cards. `#1` gets the strongest visual emphasis.
-Rank labels use `#1` (yellow), `#2` (silver), and `#3` (amber).
+This page owns `Trending` rendering, time-window filtering, and card-level
+actions. Cross-section jump ownership stays in
+[Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md).
 
 ## Location in the Site
 
-- Wave threads on `/waves/{waveId}` when the right sidebar is open.
-- Direct-message threads on `/messages?wave={waveId}` when the right sidebar is
-  open.
-- Right sidebar `About` content:
-  - rank waves: `About` tab
-  - non-rank waves: default about content
+- `/waves/{waveId}` and `/messages?wave={waveId}`
+- Web right sidebar:
+  - rank waves: `About` tab content
+  - non-rank waves: default sidebar content (no tab row)
+- Hidden while single-drop overlay is open (`drop={dropId}`)
 
 ## Entry Points
 
-- Open a wave thread and keep the right sidebar open.
-- Open `About`.
+- Open a wave or direct-message thread.
+- Open the `About` section (`About` tab on rank waves).
 - Select `Day`, `Week`, or `Month`.
-- Select a trending card.
+- Select a card to jump in chat, or select the boost button to toggle boost.
 
-## User Journey
+## Time Window and Ranking Rules
 
-1. Open `/waves/{waveId}` or `/messages?wave={waveId}`.
-2. Open right sidebar `About`.
-3. Choose `Day` (default), `Week`, or `Month`.
-4. Review up to five boosted-drop cards.
-5. Select a card to jump to that drop in the current thread.
+- Default window on mount: `Day`.
+- Window ranges are fixed rolling windows:
+  - `Day`: last 24 hours
+  - `Week`: last 7 days
+  - `Month`: last 30 days
+- Cards are sorted by boost count (highest first) for the selected window.
+- Maximum list size is five cards.
+- `#1` has stronger highlight styling than lower ranks.
 
-## Common Scenarios
+## Card Content and Actions
 
-- The section loads with skeleton placeholders.
-- Changing time windows recalculates ranking for that window.
-- Empty windows show `No boosted drops yet`.
-- Jumping uses serial navigation in the same thread:
-  - already loaded target: immediate scroll
-  - older target: pagination loads until reachable
+- Card shows rank, author identity, preview text, and current boost count.
+- Selecting a card requests an in-thread serial jump in the same wave context.
+- Selecting the boost button toggles boost/unboost and does not trigger jump.
+- Boost button is disabled when the viewer wallet is not connected.
 
-## Edge Cases
+## Loading, Empty, and Error States
 
-- The section stays visible even when there are no boosted drops.
-- The list stays capped at five cards.
-- Only the top row gets the stronger card highlight.
-- This section complements, not replaces, boosted cards in the message list.
+- First load for an uncached window shows three skeleton rows.
+- Empty results show `No boosted drops yet`.
+- There is no dedicated inline error banner in this panel.
+- After retries fail, first-load failures can present as the same empty state.
 
-## Failure and Recovery
+## Refresh and Recovery
 
-- Boosted-drop fetches retry automatically while the section is visible.
-- Polling continues in the background.
-- Users can continue using other sidebar sections while data refreshes.
+- Requests retry failed fetches (`retry: 2`).
+- While mounted, data refreshes every ~30 seconds.
+- Changing `Day`/`Week`/`Month` fetches the selected window immediately.
+- Leaving `About` or closing the sidebar remounts this panel and resets window
+  state to `Day`.
+- If the jump target is older than loaded history, older pages load before
+  scroll completes.
+- If overlay is open (`drop={dropId}`), close overlay to make `Trending`
+  actions available again.
 
 ## Limitations / Notes
 
-- Time windows are fixed rolling ranges (1 day, 7 days, 30 days).
+- Fixed time windows only (`Day`, `Week`, `Month`).
 - No custom date range.
-- No manual refresh button for this section.
-- Maximum visible ranking depth is five items.
-- Canonical wave route is `/waves/{waveId}` (`/waves?wave={waveId}` is legacy
-  and redirects).
+- No manual refresh button in this panel.
+- Maximum visible ranking depth is five cards.
+- Ranking scope is the active thread only (no cross-wave ranking).
 
 ## Related Pages
 
-- [Waves Index](../README.md)
+- [Wave Sidebars Index](README.md)
 - [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md)
-- [Wave Right Sidebar Group and Curation Management](feature-right-sidebar-group-management.md)
+- [Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md)
 - [Wave Drop Boosting](../drop-actions/feature-drop-boosting.md)
+- [Waves Index](../README.md)
 - [Docs Home](../../README.md)
