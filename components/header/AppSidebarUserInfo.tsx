@@ -51,6 +51,10 @@ export default function AppSidebarUserInfo() {
   const avatarSrc =
     resolvedPfp ??
     (shouldShowFallbackPfp ? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP : null);
+  const trimmedHandleOrWallet = handleOrWallet.trim();
+  const avatarAltText = trimmedHandleOrWallet
+    ? `${trimmedHandleOrWallet}'s profile picture`
+    : "User's profile picture";
 
   const source = activeProfileProxy?.created_by ?? profile;
 
@@ -72,7 +76,7 @@ export default function AppSidebarUserInfo() {
           >
             <Image
               src={avatarSrc}
-              alt={`${handleOrWallet}'s profile picture`}
+              alt={avatarAltText}
               fill
               sizes="48px"
               className={`tw-rounded-full tw-bg-iron-900 ${

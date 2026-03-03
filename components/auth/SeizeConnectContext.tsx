@@ -626,7 +626,12 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (!isAddingConnectedAccount) {
+      isAddingConnectedAccountRef.current = false;
       addFlowOriginAddressRef.current = null;
+      if (retryConnectTimeoutRef.current) {
+        clearTimeout(retryConnectTimeoutRef.current);
+        retryConnectTimeoutRef.current = null;
+      }
       return;
     }
 
@@ -992,7 +997,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
               }
               try {
                 seizeConnect();
-                clearAddConnectedAccountGuard();
               } catch (error: unknown) {
                 clearAddConnectedAccountGuard();
                 setIsAddingConnectedAccount(false);
@@ -1030,7 +1034,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       seizeConnect();
-      clearAddConnectedAccountGuard();
     } catch (error: unknown) {
       clearAddConnectedAccountGuard();
       setIsAddingConnectedAccount(false);
