@@ -1,67 +1,82 @@
 # Wave Drop Reply Preview Rows
 
+Parent: [Wave Drop Actions Index](README.md)
+
 ## Overview
 
-Reply rows in wave timelines use a compact, fixed-height presentation so grouped
-replies remain visually stable while content resolves.
-Rows can switch to media-preview mode when the reply body is exactly one standalone
-URL, but stay in text mode when any extra text or punctuation is present.
+When a drop replies to another drop, chat and standard winner cards can render a
+compact preview row above the body.
+
+The row stays fixed at `24px` and keeps a single-line preview.
+URLs in this row are intentionally not linkified, so selecting the preview jumps
+to the replied drop instead of opening that URL.
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Drop-card reply preview rows in shared timeline and single-drop contexts.
+- Thread cards: chat drops and standard winner drops.
 
 ## Entry Points
 
-- Open a thread with replies under a parent drop.
-- Open reply-heavy conversations with consecutive replies to the same parent.
-- Open a thread where reply body contains exactly one media URL.
+- Open a wave or DM thread with drops that include `reply_to`.
+- Open a thread with grouped replies to the same parent drop.
+- Open a thread in single-drop mode (`?drop={dropId}`).
 
 ## User Journey
 
-1. Open a thread and find replies rendered below parent context.
-2. Reply rows render in constrained-height preview lines while loading.
-3. If reply content is one standalone URL, row may switch to media-preview mode.
-4. Activate the row to open the replied-to drop target.
+1. Open a thread and find a drop that replies to another drop.
+2. A compact row appears above the drop body with avatar, handle, and preview.
+3. If referenced drop data is not loaded yet, the row shows `Loading...`.
+4. Select the preview body to jump to the replied drop serial.
+5. Select the handle to open that profile.
 
 ## Common Scenarios
 
-- Reply rows keep a fixed 24-pixel height while loading.
-- Consecutive replies to the same parent can suppress repeated parent-preview
-  headers to stay visually compact.
-- URL-only image replies (`.gif`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.avif`, and
-  Tenor/Giphy GIF links) can render inline thumbnail media.
-- URL-only video replies (`.mp4`, `.webm`, `.ogg`, `.mov`, `.avi`, `.wmv`, `.flv`,
-  `.mkv`) can render compact video placeholders.
-- Inline URL text in reply previews remains non-linkified so tapping the row always
-  opens the replied-to drop target.
+- The row keeps `24px` height in loading, loaded, and not-found states.
+- In grouped chat replies, repeated headers to the same parent are hidden after
+  the first visible row.
+- If preview text is exactly one standalone image URL, preview switches to a
+  thumbnail (`.gif`, `.png`, `.jpg`, `.jpeg`, `.webp`, `.avif`, plus
+  `media.tenor.com` and `*.giphy.com` GIF hosts).
+- If preview text is exactly one standalone video URL, preview switches to a
+  compact video pill (`.mp4`, `.webm`, `.ogg`, `.mov`, `.avi`, `.wmv`, `.flv`,
+  `.mkv`).
+- If the reply part already has API media, preview reuses those media
+  thumbnails.
 
 ## Edge Cases
 
-- Rows switch to media mode only when reply content is exactly one URL and no
-  surrounding text.
-- Unsupported standalone link formats remain text previews.
-- URL text shown in reply rows does not open that URL directly.
+- Standalone media conversion runs only when preview content is exactly one text
+  segment and no existing API media is present.
+- Extra text or punctuation around a URL keeps the preview in plain text mode.
+- Unsupported standalone links (for example, non-media URLs) remain text.
+- If the current single-drop target matches the reply target (`drop={dropId}`),
+  the reply preview row is hidden for that card.
+- Participatory drop cards and memes winner cards do not render this reply row.
 
 ## Failure and Recovery
 
-- If media resolution fails, rows stay in text mode and remain navigable.
-- If preview content is delayed, fixed-height row layout prevents major timeline
-  reflow.
-- If row activation fails due to route/network issues, users remain in thread and
-  can retry.
+- If referenced drop fetch is pending, the row shows `Loading...`.
+- If referenced drop cannot be resolved, the row shows `Drop not found`.
+- If jump target is outside the loaded range, serial-jump logic fetches target
+  history and retries the scroll.
 
 ## Limitations / Notes
 
-- Row-level navigation intentionally takes priority over inline URL tapping.
-- Media conversion is intentionally scoped to reply preview rows, not full body
-  rendering.
+- Preview URLs are intentionally non-clickable in this row.
+- The row is excluded from custom selection mode.
+- This page covers reply-row behavior only.
+- Full drop body rendering is owned by
+  [Wave Drop Content Display](feature-content-display.md).
+- Serial jump ownership is in
+  [Wave Chat Serial Jump Navigation](../chat/feature-serial-jump-navigation.md).
 
 ## Related Pages
 
+- [Wave Drop Actions Index](README.md)
+- [Waves Index](../README.md)
 - [Wave Drop Content Display](feature-content-display.md)
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
-- [Wave Drop Image Viewer and Scaling](feature-image-viewer-and-scaling.md)
+- [Wave Chat Serial Jump Navigation](../chat/feature-serial-jump-navigation.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
