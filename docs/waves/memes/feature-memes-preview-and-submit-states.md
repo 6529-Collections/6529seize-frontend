@@ -2,69 +2,86 @@
 
 ## Overview
 
-Before final submit, the memes modal provides a read-only preview screen with
-leaderboard list and gallery render cases.
+`Additional Information` has two finish paths:
 
-Submission phase flow is:
+- open `Preview`, then submit
+- submit directly from `Additional Information`
 
-- file submit: `uploading -> signing -> processing -> success`
-- interactive URL submit: `signing -> processing -> success`
+`Preview` is read-only. It shows how your draft can appear in leaderboard list
+and gallery cards.
 
-Errors keep the user in the same modal state for retry.
+Submit phases:
+
+- file submit: `uploading -> signing -> processing -> success` (or `error`)
+- interactive URL submit: `signing -> processing -> success` (or `error`)
+
+On `success`, the modal auto-closes after a short delay.
 
 ## Location in the Site
 
-- Memes submission modal preview screen (inside `Additional Information`)
-- Memes single-drop view after successful submit
+- Memes wave route: `/waves/{waveId}`
+  - submission modal `Additional Information` action row (`Back`, `Preview`,
+    `Submit Artwork`)
+  - submission modal preview screen (`Submission Preview`)
 
 ## Entry Points
 
-- Complete required `Additional Information` fields.
-- Click `Preview`.
-- From preview, click `Back to Edit` or `Submit Artwork`.
+- Complete `Agreement` and `Artwork`.
+- Fill required `Additional Information` inputs.
+- Choose `Preview` or `Submit Artwork`.
 
 ## User Journey
 
-1. Click `Preview` to open read-only rendering.
-2. Review list and gallery card appearance.
-3. Use `Back to Edit` to keep editing with draft state preserved.
-4. Click `Submit Artwork` to run submit phases.
-5. Wait for `success`; modal closes shortly after success.
-6. Open resulting drop and verify rendered details.
+1. Complete required `Additional Information` fields.
+2. Choose a finish path:
+   - click `Preview`, then review and submit
+   - click `Submit Artwork` directly
+3. If you open preview, review both card layouts and use `Back to Edit` if
+   needed.
+4. Click `Submit Artwork`.
+5. While submit is running, action buttons show loading and block repeated
+   clicks.
+6. On `success`, the modal closes after a short delay.
 
 ## Common Scenarios
 
-- `Preview` and `Submit Artwork` stay disabled until Additional Information is
-  valid.
-- Preview cards are non-actionable and used only for layout/content checks.
-- Preview uses temporary rating/rank values to simulate leaderboard appearance.
+- `Preview` is optional; direct submit from `Additional Information` is
+  supported.
+- `Preview` stays disabled until `Additional Information` is valid.
+- `Submit Artwork` from `Additional Information` stays disabled until the form
+  is valid.
 - `Back to Edit` returns to the same draft values.
-- Submission progress UI reports `uploading`, `signing`, `processing`,
-  `success`, or `error`.
-- In `Artwork`, submit button text changes by phase (`Continue`,
-  `Uploading...`, `Processing...`, `Try Again`, `✓ Submission Complete`).
+- Preview uses temporary drop values (ID/score/rater data) for layout checks.
+- Main preview-card click handlers are inert, so card-body clicks do not open a
+  drop.
 
 ## Edge Cases
 
 - Interactive URL submissions skip upload and start at `signing`.
-- `Cancel` in `Artwork` is disabled while uploading/processing.
+- File submissions include `uploading` before signing/processing.
 - Preview image requirements for `Video`/`HTML`/`GLB` must pass before preview
   or submit actions enable.
+- `Back` (`Additional Information`) and `Back to Edit` (`Preview`) are disabled
+  while a submission request is in flight.
+- Top-level close controls (close icon, backdrop click, `Escape`) remain
+  available while submission is in flight.
 - Small viewports keep preview content scrollable with fixed action controls.
 
 ## Failure and Recovery
 
 - If preview output is wrong, return to edit, update fields, and reopen preview.
-- If authentication/signing/API submission fails, the modal keeps current draft
-  state and supports retry.
+- If upload, auth, signing, or API submission fails, the modal keeps current
+  draft state and supports retry from the current screen.
+- Errors are surfaced via toast; `Additional Information` and `Preview` do not
+  show detailed per-phase text labels.
 - If no valid media exists, submission is blocked before API post.
 
 ## Limitations / Notes
 
 - Preview is local draft rendering only; it does not guarantee final ranking or
   on-chain outcomes.
-- `success` confirms submission completion in app flow; downstream processing
-  outside this modal is out of scope.
+- `success` only confirms app-level submit completion; downstream processing is
+  outside this modal.
 
 ## Related Pages
 
