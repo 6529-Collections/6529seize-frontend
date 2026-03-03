@@ -1,23 +1,53 @@
 #!/usr/bin/env node
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 const REMOTE = "origin";
 const BRANCH = "main";
 const TARGET = `${REMOTE}/${BRANCH}`;
+const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
+const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
+const coderabbitCmd =
+  process.platform === "win32" ? "coderabbit.cmd" : "coderabbit";
 
-const args = process.argv.slice(2);
-const enableCoderabbit = args.includes("--coderabbit");
+const args = new Set(process.argv.slice(2));
+const enableCoderabbit = args.has("--coderabbit");
+const changedMode = args.has("--changed");
 
-const run = (command, options = {}) =>
-  execSync(command, {
+const runCommand = ({ command, args = [], inheritOutput = false }) => {
+  // Sonar hotspot accepted: this is a trusted local developer script.
+  const result = spawnSync(command, args, {
     encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-    ...options,
-  }).trim();
+    stdio: inheritOutput ? "inherit" : ["ignore", "pipe", "pipe"],
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result;
+};
+
+const run = (command, commandArgs = []) => {
+  const result = runCommand({ command, args: commandArgs });
+  if (result.status !== 0) {
+    const stderr = result.stderr?.trim() || "";
+    throw new Error(
+      stderr ||
+        `${command} ${commandArgs.join(" ")} failed with status ${result.status}`
+    );
+  }
+  return (result.stdout ?? "").trim();
+};
 
 const fail = (message, code = 1) => {
   console.error(`ERROR: ${message}`);
   process.exit(code);
+};
+
+const ensureSuccess = (result, label) => {
+  if (result.status !== 0) {
+    throw new Error(`${label} failed with status ${result.status}`);
+  }
 };
 
 const KNIP_IGNORE_PATTERNS = [
@@ -29,7 +59,7 @@ const KNIP_IGNORE_PATTERNS = [
 
 const isIgnoredKnipPath = (filePath) => {
   if (!filePath) return false;
-  const normalized = filePath.replace(/\\/g, "/");
+  const normalized = filePath.replaceAll("\\", "/");
   return KNIP_IGNORE_PATTERNS.some((pattern) => pattern.test(normalized));
 };
 
@@ -157,20 +187,30 @@ const printKnipSummary = (data) => {
 };
 
 try {
-  run("git rev-parse --git-dir");
+  run("git", ["rev-parse", "--git-dir"]);
 } catch (error) {
   fail("Not a git repository.", 2);
 }
 
 try {
-  execSync(`git fetch ${REMOTE} ${BRANCH} --quiet`, { stdio: "inherit" });
+  const result = runCommand({
+    command: "git",
+    args: ["fetch", REMOTE, BRANCH, "--quiet"],
+    inheritOutput: true,
+  });
+  ensureSuccess(result, `git fetch ${TARGET}`);
 } catch (error) {
   fail(`Failed to fetch ${TARGET}.`, 2);
 }
 
 let counts;
 try {
-  counts = run(`git rev-list --left-right --count ${TARGET}...HEAD`);
+  counts = run("git", [
+    "rev-list",
+    "--left-right",
+    "--count",
+    `${TARGET}...HEAD`,
+  ]);
 } catch (error) {
   fail(`Failed to compare HEAD with ${TARGET}.`, 2);
 }
@@ -190,33 +230,72 @@ if (!Number.isFinite(behind) || !Number.isFinite(ahead)) {
 // }
 
 try {
-  execSync("npm run format:uncommitted", { stdio: "inherit" });
-} catch (error) {
-  fail("Format uncommitted files failed.");
-}
-
-try {
-  execSync("npm run lint:diff", { stdio: "inherit" });
-} catch (error) {
-  fail("ESLint diff check failed.");
-}
-
-try {
-  execSync("npx --no-install tsc --noEmit -p tsconfig.typecheck.json", {
-    stdio: "inherit",
+  const result = runCommand({
+    command: npmCmd,
+    args: ["run", changedMode ? "format:changed" : "format:uncommitted"],
+    inheritOutput: true,
   });
+  ensureSuccess(result, changedMode ? "format:changed" : "format:uncommitted");
 } catch (error) {
-  fail("TypeScript check failed.");
+  fail(
+    changedMode
+      ? "Format changed files failed."
+      : "Format uncommitted files failed."
+  );
+}
+
+try {
+  const result = runCommand({
+    command: npmCmd,
+    args: ["run", changedMode ? "lint:changed" : "lint:diff"],
+    inheritOutput: true,
+  });
+  ensureSuccess(result, changedMode ? "lint:changed" : "lint:diff");
+} catch (error) {
+  fail(
+    changedMode ? "ESLint changed check failed." : "ESLint diff check failed."
+  );
+}
+
+try {
+  const result = changedMode
+    ? runCommand({
+        command: "node",
+        args: ["scripts/typecheck-changed.cjs"],
+        inheritOutput: true,
+      })
+    : runCommand({
+        command: npxCmd,
+        args: [
+          "--no-install",
+          "tsc",
+          "--noEmit",
+          "-p",
+          "tsconfig.typecheck.json",
+        ],
+        inheritOutput: true,
+      });
+  ensureSuccess(result, changedMode ? "typecheck:changed" : "typecheck");
+} catch (error) {
+  console.error(error);
+  fail(
+    changedMode
+      ? "TypeScript changed check failed."
+      : "TypeScript check failed."
+  );
 }
 
 let knipStdout = "";
 let knipStderr = "";
 let knipStatus = 0;
 try {
-  knipStdout = execSync("npx --no-install knip --reporter json", {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
+  const result = runCommand({
+    command: npxCmd,
+    args: ["--no-install", "knip", "--reporter", "json"],
   });
+  knipStdout = result.stdout ?? "";
+  knipStderr = result.stderr ?? "";
+  knipStatus = typeof result.status === "number" ? result.status : 1;
 } catch (error) {
   knipStdout = error.stdout?.toString() ?? "";
   knipStderr = error.stderr?.toString() ?? "";
@@ -257,17 +336,38 @@ if (ahead > 0) {
 console.log(`Branch is up to date with ${TARGET}.`);
 
 if (enableCoderabbit) {
-  const uncommittedFiles = run("git status --porcelain");
-  if (uncommittedFiles) {
-    console.log("\nRunning CodeRabbit review on uncommitted changes...\n");
-    try {
-      execSync("coderabbit --prompt-only --type uncommitted", {
-        stdio: "inherit",
-      });
-    } catch (error) {
-      // CodeRabbit may exit with non-zero even on success, just let output through
+  if (changedMode) {
+    if (ahead > 0) {
+      console.log(
+        `\nRunning CodeRabbit review on committed changes vs ${BRANCH}...\n`
+      );
+      try {
+        runCommand({
+          command: coderabbitCmd,
+          args: ["--prompt-only", "--type", "committed", "--base", BRANCH],
+          inheritOutput: true,
+        });
+      } catch (error) {
+        // CodeRabbit may exit with non-zero even on success, just let output through
+      }
+    } else {
+      console.log(`\nNo committed changes to review vs ${BRANCH}.`);
     }
   } else {
-    console.log("\nNo uncommitted changes to review with CodeRabbit.");
+    const uncommittedFiles = run("git", ["status", "--porcelain"]);
+    if (uncommittedFiles) {
+      console.log("\nRunning CodeRabbit review on uncommitted changes...\n");
+      try {
+        runCommand({
+          command: coderabbitCmd,
+          args: ["--prompt-only", "--type", "uncommitted"],
+          inheritOutput: true,
+        });
+      } catch (error) {
+        // CodeRabbit may exit with non-zero even on success, just let output through
+      }
+    } else {
+      console.log("\nNo uncommitted changes to review with CodeRabbit.");
+    }
   }
 }
