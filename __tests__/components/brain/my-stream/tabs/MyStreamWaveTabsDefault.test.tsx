@@ -450,9 +450,13 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Switch to gallery view" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
   });
 
-  it("keeps mobile name tap for search and still renders description subtitle trigger", () => {
+  it("toggles chat/gallery in compact mode", () => {
     mockUseBreakpoint.mockReturnValue("S");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -470,8 +474,60 @@ describe("MyStreamWaveTabsDefault", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Search messages in this wave" })
+      screen.getByRole("button", { name: "Switch to gallery view" })
     );
+
+    expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps desktop action set at medium breakpoint", () => {
+    mockUseBreakpoint.mockReturnValue("MD");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+        />
+      </SidebarProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Switch to gallery view" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Go back" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps compact subtitle trigger and search action", () => {
+    mockUseBreakpoint.mockReturnValue("S");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+        />
+      </SidebarProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
     const subtitle = screen.getByText("A chill place to discuss drops");
     expect(subtitle).toHaveClass("tw-truncate");
     expect(subtitle).not.toHaveClass("tw-line-clamp-1");
