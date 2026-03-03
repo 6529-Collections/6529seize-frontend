@@ -4,8 +4,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
   parseSeizeDropLink,
   parseSeizeQueryLink,
-  parseSeizeWaveLink,
   parseSeizeQuoteLink,
+  parseSeizeWaveLink,
   type SeizeQuoteLinkInfo,
 } from "@/helpers/SeizeLinkParser";
 
@@ -97,7 +97,7 @@ const createSeizeQueryHandler = <T,>(
   match: (href) => Boolean(extract(href)),
   render: (href) => {
     const value = extract(href);
-    if (!value) {
+    if (value === null) {
       throw new Error(onMissing);
     }
 
@@ -152,7 +152,6 @@ const createSeizeDropHandler = (
       ) {
         throw new Error("Seize drop link matches current drop");
       }
-
       const isMemesWave = config.isMemesWaveById?.(waveId) ?? false;
 
       if (!isMemesWave && waveId) {
