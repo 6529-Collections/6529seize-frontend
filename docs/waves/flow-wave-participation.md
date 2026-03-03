@@ -2,89 +2,82 @@
 
 ## Overview
 
-This flow covers the common wave journey: finding a wave, opening its thread,
-reading and interacting with drops, posting new content when allowed, and
-sharing links that reopen the same context.
+This flow covers the normal wave journey: find a wave, open its thread, read
+and interact with drops, post when eligible, and share links that reopen the
+same context.
 
-## Location in the Site
+## Routes and URL State
 
-- Wave discovery and list surfaces: `/discover`, `/waves`, and `/{user}/waves`
-- Wave thread routes: `/waves/{waveId}`
-- Direct-message wave routes: `/messages?wave={waveId}`
-- App-mode creation routes: `/waves/create` and `/messages/create`
+- Discovery and list surfaces: `/discover`, `/waves`, and `/messages`
+- Standard wave thread: `/waves/{waveId}`
+- Direct-message thread: `/messages?wave={waveId}` (no `/messages/{waveId}`
+  route)
+- App create routes: `/waves/create` and `/messages/create`
+- Web create mode uses query state on stream routes:
+  `create=wave` or `create=dm`
+- Legacy profile alias: `/{user}/waves` redirects to `/{user}`
+- Legacy wave route: `/waves?wave={waveId}` redirects to `/waves/{waveId}` and
+  keeps other query params
+- `serialNo={n}` targets a drop for initial in-thread jump
+- `divider={n}` is only used with `serialNo` to place an unread divider
+- After initial jump setup, `serialNo` and `divider` are removed from the URL
+- `drop={dropId}` opens a single-drop overlay in the current thread context
+- Closing the single-drop overlay removes `drop` from the URL
 
 ## Entry Points
 
-- Open a wave card from discover, waves, or profile wave lists.
-- Open a shared link with thread targeting:
+- Open a wave card from `/discover` or `/waves`.
+- Open a direct-message thread from `/messages`.
+- Open a shared wave link, for example:
   `/waves/{waveId}?serialNo={serialNo}` or
   `/messages?wave={waveId}&serialNo={serialNo}`.
-- Open a legacy wave URL like `/waves?wave={waveId}` and let the app normalize
-  it to `/waves/{waveId}`.
-- Start a new wave from desktop create controls or from `/waves/create` in
-  app mode.
-- Start a new direct message from desktop `create=dm` state or from
+- Open a shared single-drop link using `drop={dropId}`.
+- Start create-wave from desktop create controls (`create=wave`) or
+  `/waves/create` in app mode.
+- Start create-DM from desktop create controls (`create=dm`) or
   `/messages/create` in app mode.
 
-## User Journey
+## Main Journey
 
-1. Open a wave list and choose a wave card.
-2. The app routes to `/waves/{waveId}` for standard waves or
-   `/messages?wave={waveId}` for direct-message waves.
-3. The wave thread renders with chat-only content or tabbed content (`Chat`,
-   `Leaderboard`, `Winners`, and wave-specific tabs where available).
-4. Read and navigate drops, including unread/divider jumps and serial-target
-   link jumps.
-5. Interact with drop controls (for example vote, react, open drop, copy link,
-   curation, or media download) based on eligibility and drop type.
-6. Post new content when the active wave allows submissions, including
-   wave-specific flows like Memes artwork submission.
-7. Share copied links so others can reopen the same wave and target drop.
+1. Open a wave from a list surface.
+2. The app opens `/waves/{waveId}` (standard wave) or
+   `/messages?wave={waveId}` (direct message).
+3. The thread renders:
+   - Chat-only for chat-type waves.
+   - Tabbed views for eligible waves (`Chat`, `Leaderboard`, `Winners`,
+     `Outcome`, and wave-specific tabs).
+4. Read and navigate drops with unread markers, serial jumps, and search jump
+   actions.
+5. Use drop actions (reply, react, vote, open drop, copy link, boost, and other
+   available actions) based on wave and drop eligibility.
+6. Submit new content when participation is allowed.
+7. Share links so others can reopen the same wave or target drop.
 
-## Common Scenarios
+## Key User-Visible States
 
-- Return to a previously opened wave and continue on the last valid tab.
-- Open a shared `serialNo` link and jump to the targeted drop in-thread.
-- Open a drop overlay (`drop` query) for focused single-drop interaction while
-  staying in the same wave context.
-- Start create-wave from desktop list/header/sidebar controls using
-  `create=wave` URL state.
-- Start create-DM from desktop list/sidebar controls using `create=dm` URL
-  state.
-- Submit artwork in Memes waves from the leaderboard `Drop` action.
-
-## Edge Cases
-
-- Chat-type waves can render without the tab strip.
-- If a saved tab is no longer available, the UI falls back to the first
-  available tab for that wave.
-- If posting is blocked, thread content remains readable while the footer shows
-  a blocked state (for example `You cannot participate in this wave at the
-  moment` or `Wave is closed`).
-- Shared links with both `drop` and `serialNo` prioritize drop-open behavior.
-- Legacy `/waves?wave=...` links are normalized to canonical `/waves/{waveId}`.
+- If no wave is selected on desktop list routes, the UI shows selection
+  placeholders (`Select a Wave` or `Select a Conversation`).
+- Access requires an authenticated wallet plus a profile handle.
+- Proxy sessions cannot access wave/message participation surfaces.
+- Tab choice is stored per wave and restored when still valid for that wave.
+- If a saved tab is no longer available, the UI falls back to the wave's
+  default available tab.
+- When posting is blocked, thread content stays readable and the composer area
+  shows blocked states (for example `Wave is closed` or
+  `You cannot participate in this wave at the moment`).
+- If `drop` and `serialNo` are both present, the single-drop overlay remains
+  active while serial/divider bootstrap params are consumed and cleaned up.
 
 ## Failure and Recovery
 
-- If a serial-target jump cannot resolve immediately, users remain in the
-  thread and can continue browsing while additional data loads.
-- If chat or leaderboard pagination fails, already rendered content stays
-  visible; retry by scrolling again or refreshing.
-- If copy-link access is blocked by browser permissions, resolve permissions and
-  retry copy.
-- If content is unavailable for a tab (for example empty outcomes or empty
-  leaderboard states), the UI shows explicit empty messaging instead of an
-  indefinite loader.
-- If posting or submission validation fails, users stay in the current flow
-  until required fields are corrected.
-
-## Limitations / Notes
-
-- Tab selection is stored as UI state and is not encoded directly in the URL.
-- Available tabs and actions depend on wave type, voting state, and user
-  eligibility.
-- `drop` and `serialNo` represent different navigation behaviors and should not
-  be treated as interchangeable.
+- If a wave is not found, the app removes stale wave routing state and returns
+  to the relevant base list route.
+- If a serial-target jump is delayed or times out, users remain in the thread
+  and can continue browsing.
+- While drops are loading, the thread shows a loader; if no drops exist, it
+  shows `Start the conversation`.
+- Temporary drops (`temp-*`) keep some actions limited; link copy is disabled
+  until the drop is persisted.
 
 ## Related Pages
 
