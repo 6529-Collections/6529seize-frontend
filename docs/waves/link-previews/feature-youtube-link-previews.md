@@ -1,84 +1,101 @@
 # Wave Drop YouTube Link Previews
 
+Parent: [Wave Link Previews Index](README.md)
+
 ## Overview
 
-Wave drop markdown renders supported YouTube links as inline preview cards
-instead of plain URL text. In chat and message surfaces, the card is rendered in
-a fixed-height frame so drops keep stable spacing while metadata loads or fails.
-The preview card shows a thumbnail, video title, and channel name, with a play
-action that swaps the thumbnail for an inline player.
+Supported YouTube links render as dedicated video cards instead of plain links.
+
+This page covers:
+
+- wave and direct-message markdown drops
+- wave leaderboard cards that render markdown in home style
+- boosted cards on `/` when the first detected preview URL is a supported
+  YouTube URL
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Any drop-card context that uses the shared wave markdown renderer
+- Boosted cards on `/`
+- Wave leaderboard card content that reuses markdown rendering
+
+## Supported URL Patterns
+
+- Hosts: `youtu.be`, `youtube.com`, and `youtube-nocookie.com`, including
+  subdomains (for example `music.youtube.com`)
+- Accepted path shapes:
+  `youtu.be/{id}`, `/watch?v={id}`, `/shorts/{id}`, `/live/{id}`,
+  `/embed/{id}`, `/v/{id}`
+
+`{id}` must match `[A-Za-z0-9_-]{6,}`.
+
+Links that do not match these rules stay regular links.
 
 ## Entry Points
 
-- Open a drop that contains a supported YouTube URL.
-- Paste a supported YouTube URL in a drop and view it after publishing.
-- Open shared drop links that include a YouTube URL in markdown content.
+- Open or publish a drop that contains a supported YouTube URL.
+- Open a shared drop route where markdown contains a supported YouTube URL.
+- Open a boosted card on `/` where the first detected preview URL is supported.
+- If previews are hidden for your drop, use `Show link previews` when available.
 
 ## User Journey
 
-1. Open a wave or direct-message thread with a YouTube URL in drop text.
-2. The URL renders as a fixed-size preview card frame while metadata loads.
-3. The card updates to show thumbnail, title, and channel once metadata is
-   available.
-4. If metadata cannot be resolved, users see a fallback card with a direct link
-   and message text inside the same preview frame.
-5. Select the preview card play action to load the inline YouTube player.
-6. Continue reading the thread with playback inside the same drop card.
+1. Open a surface with a supported YouTube URL.
+2. The renderer validates the URL and starts metadata fetch with canonical
+   `https://www.youtube.com/watch?v={id}`.
+3. If `list` and `index` are present, those query values are preserved in the
+   metadata fetch URL.
+4. A loading card appears with a stable `16:9` media frame and metadata
+   skeleton rows.
+5. On success, the card shows thumbnail, title, and channel name.
+6. Select play to swap the thumbnail for an inline embed player.
+7. In wave/DM chat layouts, side actions (open/copy) are shown. Author-only
+   preview toggle actions are shown when allowed.
+8. In home-style layouts, side actions are hidden.
 
 ## Common Scenarios
 
-- Supported URLs render previews for common formats such as
-  `https://youtu.be/{id}`, `https://www.youtube.com/watch?v={id}`,
-  `https://www.youtube.com/shorts/{id}`, `https://www.youtube.com/live/{id}`,
-  `https://www.youtube.com/embed/{id}`, and
-  `https://www.youtube-nocookie.com/embed/{id}` (including YouTube subdomains
-  such as `music.youtube.com`).
-- Playlist context is preserved when present through `list` and `index`
-  parameters.
-- In chat contexts that show drop link actions, those actions remain available
-  next to the preview card.
+- Multiple supported YouTube URLs in one drop each render a separate card.
+- YouTube subdomains are supported (for example `music.youtube.com`).
+- If previews are hidden for a drop, YouTube URLs stay plain until previews are
+  shown again.
+- Hidden drops can show one inline `Show link previews` action beside the first
+  hidden link.
+- Boosted cards on `/` attempt preview rendering from the first detected URL in
+  drop text.
 
 ## Edge Cases
 
-- Invalid or unsupported YouTube paths stay as regular links instead of preview
-  cards.
-- If preview loading fails, fallback text is `Failed to load YouTube preview`.
-- If preview data is unavailable (`null` response), fallback text is
-  `YouTube preview unavailable`.
-- Multiple supported YouTube links in the same drop each render their own
-  preview card.
-- If link previews are hidden for a drop, YouTube URLs render as plain links
-  until previews are shown again.
+- Unsupported YouTube host/path shapes stay regular links.
+- Invalid or missing video IDs stay regular links.
+- Unsupported YouTube links do not fall back to generic OpenGraph cards.
+- If returned embed HTML fails safety checks, the card falls back to the same
+  error state as failed loads.
 
 ## Failure and Recovery
 
-- While preview data is loading, users see a fixed-height placeholder card.
-- If preview loading fails, the card falls back to an external link state with
-  a failure message.
-- If preview data is unavailable, the card falls back to an external link state
-  that still lets users open the original URL.
-- If inline player content cannot be safely embedded, users still get the
-  fallback external link and can continue playback on YouTube.
+- If the preview request fails, fallback card text is
+  `Failed to load YouTube preview`.
+- If metadata fetch returns no usable payload (for example non-OK oEmbed
+  response), fallback card text is `YouTube preview unavailable`.
+- Fallback cards keep `Open on YouTube` linking to the original URL.
+- There is no in-card retry action; reload or reopen the surface to retry.
 
 ## Limitations / Notes
 
-- Inline playback starts only after explicit user interaction on the preview.
-- Preview availability depends on YouTube metadata responses and network
-  conditions.
-- This page covers drop markdown rendering in wave-style chat contexts, not
-  standalone media pages.
+- Inline playback starts only after explicit user action.
+- Preview availability and card completeness depend on YouTube oEmbed responses.
+- This page covers wave/DM markdown cards plus leaderboard and boosted home
+  variants, not standalone media routes.
 
 ## Related Pages
 
-- [Waves Index](../README.md)
-- [Wave Drop Twitter/X Link Previews](feature-twitter-link-previews.md)
+- [Wave Link Previews Index](README.md)
+- [Wave Drop Link Preview Toggle](feature-link-preview-toggle.md)
 - [Wave Drop External Link Previews](feature-external-link-previews.md)
+- [Wave Drop Twitter/X Link Previews](feature-twitter-link-previews.md)
+- [Wave Drop Social Platform Previews](feature-social-platform-previews.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
+- [Waves Index](../README.md)
 - [Docs Home](../../README.md)
