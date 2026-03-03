@@ -3,7 +3,6 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { SeizeQuoteLinkInfo } from "@/helpers/SeizeLinkParser";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 import WaveDropQuoteWithDropId from "@/components/waves/drops/WaveDropQuoteWithDropId";
@@ -116,15 +115,7 @@ const renderSeizeQuote = (
 
   if (dropId) {
     return (
-      <LinkHandlerFrame
-        href={href}
-        relativeHref={getWaveRoute({
-          waveId,
-          extraParams: { drop: dropId },
-          isDirectMessage: false,
-          isApp: false,
-        })}
-      >
+      <LinkHandlerFrame href={href}>
         <WaveDropQuoteWithDropId
           dropId={dropId}
           partId={1}

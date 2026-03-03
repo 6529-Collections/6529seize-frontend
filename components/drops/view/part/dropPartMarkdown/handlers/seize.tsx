@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
-  getSeizeBaseOrigin,
+  parseSeizeDropLink,
   parseSeizeQueryLink,
   parseSeizeWaveLink,
   parseSeizeQuoteLink,
@@ -22,6 +22,9 @@ interface CreateSeizeHandlersConfig {
   readonly quotePath: readonly string[];
   readonly embedDepth: number;
   readonly maxEmbedDepth: number;
+  readonly isMemesWaveById?:
+    | ((waveId: string | undefined | null) => boolean)
+    | undefined;
 }
 
 type SeizeGuardConfig = Omit<CreateSeizeHandlersConfig, "onQuoteClick">;
@@ -128,29 +131,17 @@ const createSeizeWaveHandler = (): LinkHandler =>
     (waveId, href) => <WaveItemChat href={href} waveId={waveId} />
   );
 
-const getDropId = (href: string): string | null => {
-  const baseOrigin = getSeizeBaseOrigin();
-  if (!baseOrigin) {
-    return null;
-  }
+const getDropInfo = parseSeizeDropLink;
 
-  try {
-    const url = new URL(href, baseOrigin);
-    if (url.origin !== baseOrigin) {
-      return null;
-    }
-    const dropId = url.searchParams.get("drop");
-    return dropId ?? null;
-  } catch {
-    return null;
-  }
-};
-
-const createSeizeDropHandler = (config: SeizeGuardConfig): LinkHandler =>
+const createSeizeDropHandler = (
+  onQuoteClick: (drop: ApiDrop) => void,
+  config: SeizeGuardConfig
+): LinkHandler =>
   createSeizeQueryHandler(
-    getDropId,
+    getDropInfo,
     "Invalid seize drop link",
-    (dropId, href) => {
+    (dropInfo, href) => {
+      const { dropId, waveId } = dropInfo;
       if (config.embedDepth >= config.maxEmbedDepth) {
         throw new Error("Seize drop link exceeded max embed depth");
       }
@@ -160,6 +151,29 @@ const createSeizeDropHandler = (config: SeizeGuardConfig): LinkHandler =>
         config.embedPath.includes(dropId)
       ) {
         throw new Error("Seize drop link matches current drop");
+      }
+
+      const isMemesWave = config.isMemesWaveById?.(waveId) ?? false;
+
+      if (!isMemesWave && waveId) {
+        const content = renderSeizeQuote(
+          {
+            waveId,
+            dropId,
+          },
+          onQuoteClick,
+          href,
+          {
+            embedPath: config.embedPath,
+            quotePath: config.quotePath,
+            embedDepth: config.embedDepth + 1,
+            maxEmbedDepth: config.maxEmbedDepth,
+          }
+        );
+
+        if (content) {
+          return content;
+        }
       }
 
       return <DropItemChat href={href} dropId={dropId} />;
@@ -173,5 +187,5 @@ export const createSeizeHandlers = ({
   createSeizeQuoteHandler(onQuoteClick, config),
   createSeizeGroupHandler(),
   createSeizeWaveHandler(),
-  createSeizeDropHandler(config),
+  createSeizeDropHandler(onQuoteClick, config),
 ];

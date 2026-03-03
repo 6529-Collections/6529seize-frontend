@@ -19,6 +19,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { PluggableList } from "unified";
 
 import { useEmoji } from "@/contexts/EmojiContext";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -279,6 +280,7 @@ function DropPartMarkdown({
   const queryClient = useQueryClient();
   const isMobile = useIsMobileScreen();
   const { emojiMap, findNativeEmoji } = useEmoji();
+  const seizeSettings = useSeizeSettingsOptional();
   const tweetPreviewMode = useTweetPreviewMode();
   const { variant: linkPreviewVariant } = useLinkPreviewContext();
 
@@ -333,6 +335,7 @@ function DropPartMarkdown({
         currentDropId,
         hideLinkPreviews,
         tweetPreviewMode,
+        isMemesWaveById: seizeSettings?.isMemesWave,
         embedPath: normalizedEmbedPath,
         quotePath: normalizedQuotePath,
         embedDepth,
@@ -344,6 +347,7 @@ function DropPartMarkdown({
       currentDropId,
       hideLinkPreviews,
       tweetPreviewMode,
+      seizeSettings?.isMemesWave,
       normalizedEmbedPath,
       normalizedQuotePath,
       embedDepth,
