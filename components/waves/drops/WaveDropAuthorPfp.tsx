@@ -13,21 +13,25 @@ interface WaveDropAuthorPfpProps {
   readonly drop: ApiDrop;
 }
 
+type PfpLoadMode = "optimized" | "unoptimized" | "placeholder";
+
+type PfpLoadState = {
+  src: string | null;
+  mode: PfpLoadMode;
+};
+
 const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
   const compact = useCompactMode();
   const resolvedPfp = drop.author.pfp
     ? resolveIpfsUrlSync(drop.author.pfp)
     : null;
-  const [loadState, setLoadState] = useState<{
-    src: string | null;
-    mode: "optimized" | "unoptimized" | "placeholder";
-  }>({
+  const [loadState, setLoadState] = useState<PfpLoadState>({
     src: null,
     mode: "optimized",
   });
-  const loadMode: "optimized" | "unoptimized" | "placeholder" =
+  const loadMode: PfpLoadMode =
     loadState.src === resolvedPfp ? loadState.mode : "optimized";
-  const setLoadMode = (mode: "optimized" | "unoptimized" | "placeholder") => {
+  const setLoadMode = (mode: PfpLoadMode) => {
     setLoadState({ src: resolvedPfp, mode });
   };
 
