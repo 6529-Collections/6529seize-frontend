@@ -172,3 +172,8 @@ export const useSeizeSettings = (): SeizeSettingsContextType => {
   }
   return context;
 };
+
+export const useSeizeSettingsOptional = (): SeizeSettingsContextType | null => {
+  const context = useContext(SeizeSettingsContext);
+  return context ?? null;
+};
