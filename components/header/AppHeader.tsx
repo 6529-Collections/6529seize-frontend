@@ -1,13 +1,5 @@
 "use client";
 
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
-import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
-import { useIdentity } from "@/hooks/useIdentity";
-import { useWave } from "@/hooks/useWave";
-import { useWaveById } from "@/hooks/useWaveById";
-import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import {
   Bars3Icon,
   ChatBubbleLeftIcon,
@@ -18,8 +10,18 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { useWave } from "@/hooks/useWave";
+import { useWaveById } from "@/hooks/useWaveById";
+import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useAuth } from "../auth/Auth";
+import { getConnectionProfileIndicator } from "../auth/connection-state-indicator";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
@@ -28,6 +30,8 @@ import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
+import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
+import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -35,6 +39,7 @@ const COLLECTION_TITLES: Record<string, string> = {
   "meme-lab": "Meme Lab",
   nextgen: "NextGen",
 };
+const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
 
 const sliceString = (str: string, length: number): string => {
   if (str.length <= length) return str;
@@ -66,7 +71,16 @@ const getRememesTitle = (pathSegments: string[]): string | null => {
 export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
-  const { address } = useSeizeConnectContext();
+  const {
+    address,
+    isAuthenticated,
+    isConnected,
+    connectedAccounts,
+    seizeSwitchConnectedAccount,
+  } = useSeizeConnectContext();
+  const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const { activeProfileProxy } = useAuth();
   const pathname = usePathname();
   const params = useParams();
@@ -76,10 +90,26 @@ export default function AppHeader() {
     initialProfile: null,
   });
 
+  useEffect(
+    () => () => {
+      if (profileClickTimeoutRef.current) {
+        clearTimeout(profileClickTimeoutRef.current);
+      }
+    },
+    []
+  );
+
   const pfp = (() => {
     if (activeProfileProxy) return activeProfileProxy.created_by.pfp;
     return profile?.pfp ?? null;
   })();
+  const resolvedPfp = pfp ? resolveIpfsUrlSync(pfp) : null;
+  const menuAvatarSrc = resolvedPfp ?? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP;
+
+  const connectionIndicator = getConnectionProfileIndicator({
+    isAuthenticated,
+    isConnected,
+  });
 
   const pathSegments = pathname.split("/").filter(Boolean);
   const basePath = pathSegments.length ? pathSegments[0] : "";
@@ -98,6 +128,7 @@ export default function AppHeader() {
   const { isRankWave, isMemesWave, isDm } = useWave(activeWave);
   const showGalleryToggle = !!waveId && !isRankWave && !isMemesWave && !isDm;
   const showWaveLinkAction = Boolean(activeWave && !isDm);
+  const previewText = getWaveDescriptionPreviewText(activeWave);
   const {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
@@ -138,16 +169,26 @@ export default function AppHeader() {
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
 
-  const pfpImage = pfp ? (
-    <Image
-      src={resolveIpfsUrlSync(pfp)}
-      alt="pfp"
-      width={40}
-      height={40}
-      className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-object-contain"
-    />
-  ) : (
-    <div className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
+  const pfpImage = (
+    <div
+      className={`tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
+      title={connectionIndicator.title}
+    >
+      <Image
+        src={menuAvatarSrc}
+        alt="pfp"
+        width={40}
+        height={40}
+        className={`tw-h-full tw-w-full tw-bg-iron-900 ${
+          resolvedPfp ? "tw-object-contain" : "tw-object-cover tw-grayscale"
+        }`}
+      />
+      {connectionIndicator.overlayClassName && (
+        <div
+          className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
+        />
+      )}
+    </div>
   );
 
   const pfpElement = address ? (
@@ -155,6 +196,55 @@ export default function AppHeader() {
   ) : (
     <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
   );
+  const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
+
+  const switchToNextConnectedAccount = (): boolean => {
+    if (connectedAccounts.length < 2) {
+      return false;
+    }
+
+    const activeIndex = connectedAccounts.findIndex(
+      (account) => account.isActive
+    );
+    const currentIndex = Math.max(activeIndex, 0);
+    const nextAccount =
+      connectedAccounts[(currentIndex + 1) % connectedAccounts.length];
+    if (!nextAccount) {
+      return false;
+    }
+
+    try {
+      seizeSwitchConnectedAccount(nextAccount.address);
+      return true;
+    } catch (error) {
+      console.error("Failed to switch connected account from header", error);
+      setMenuOpen(true);
+      return false;
+    }
+  };
+
+  const onProfileActivate = () => {
+    if (!address) {
+      setMenuOpen(true);
+      return;
+    }
+
+    if (profileClickTimeoutRef.current) {
+      clearTimeout(profileClickTimeoutRef.current);
+      profileClickTimeoutRef.current = null;
+
+      const didSwitchAccount = switchToNextConnectedAccount();
+      if (!didSwitchAccount) {
+        setMenuOpen(true);
+      }
+      return;
+    }
+
+    profileClickTimeoutRef.current = setTimeout(() => {
+      profileClickTimeoutRef.current = null;
+      setMenuOpen(true);
+    }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
+  };
 
   const finalTitle: React.ReactNode = (() => {
     if (pathname === "/waves/create") return "Waves";
@@ -182,19 +272,35 @@ export default function AppHeader() {
         {!showBackButton && (
           <button
             type="button"
-            aria-label="Open menu"
-            onClick={() => setMenuOpen(true)}
-            className={`tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid ${
-              address
-                ? "tw-border-white/20 tw-bg-iron-900"
-                : "tw-border-transparent tw-bg-transparent"
-            }`}
+            aria-label={
+              hasMultipleConnectedAccounts
+                ? "Open menu (double-click to switch accounts)"
+                : "Open menu"
+            }
+            onClick={onProfileActivate}
+            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-transparent tw-bg-transparent"
           >
             {pfpElement}
           </button>
         )}
-        <div className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
-          <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
+          {activeWave !== null && !isDm && previewText !== null ? (
+            <WaveDescriptionPopover
+              wave={activeWave}
+              align="center"
+              ariaLabel="Show wave description"
+              triggerClassName="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-center"
+            >
+              <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+                {activeWave.name}
+              </span>
+              <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
+                {previewText}
+              </span>
+            </WaveDescriptionPopover>
+          ) : (
+            <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>
+          )}
           {showGalleryToggle && (
             <button
               type="button"

@@ -25,6 +25,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: jest.fn(() => ({ profile: null, isLoading: false })),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
@@ -75,7 +79,7 @@ describe("AcceptConnectionSharing page", () => {
         <AcceptConnectionSharingPage />
       </TestProvider>
     );
-    expect(screen.getByText(/Incoming Connection/)).toBeInTheDocument();
+    expect(screen.getByText(/Incoming connection/)).toBeInTheDocument();
     expect(screen.getByText(/0x123/)).toBeInTheDocument();
   });
 });
