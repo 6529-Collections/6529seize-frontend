@@ -2,62 +2,76 @@
 
 ## Overview
 
-In supported wave threads, the app header includes a compact toggle that switches the main content between:
-- Chat mode (message list with composer)
-- Gallery mode (media-first gallery layout)
+Supported waves expose a header toggle that switches thread content between:
 
-This control is available in the mobile app shell where wave tabs are not rendered in the desktop tab bar.
+- `Chat`: drop list plus composer
+- `Gallery`: media-first gallery view
+
+View mode is stored per wave on the current device.
 
 ## Location in the Site
 
-- Mobile wave views with an active wave context under `/waves/{waveId}`.
-- The toggle is not shown for direct-message threads accessed via `/messages?wave={id}`.
+- App header when a supported wave is active.
+- Desktop web wave header row on:
+  - `/waves/{waveId}`
+  - `/messages?wave={waveId}`
+- Hidden on narrow web headers and unsupported wave types.
 
 ## Entry Points
 
-- Open any supported wave that is not a rank wave, meme wave, or direct message thread.
-- Locate the header icon next to the wave title:
-  - Grid icon indicates switching to gallery mode.
-  - Chat bubble icon indicates switching to chat mode.
+- Open a supported wave.
+- Use the header icon near the wave title:
+  - grid icon: switch to gallery
+  - chat-bubble icon: switch to chat
+
+## Eligibility Rules
+
+The toggle is shown only when the active wave is:
+
+- not a rank wave
+- not a memes wave
+- not a direct-message wave
 
 ## User Journey
 
-1. Open the thread.
-2. Tap the header mode icon.
-3. The chat panel swaps between:
-   - chat list and composer (chat mode), or
-   - gallery layout (`WaveGallery` content) without the composer area (gallery mode).
-4. Repeat the action to switch back.
-5. Leave the thread and return; the selected mode is restored for that wave.
+1. Open a supported wave.
+2. Select the toggle icon.
+3. In gallery mode, chat list and composer are replaced by gallery content.
+4. Select again to return to chat mode.
+5. Reopen the same wave later; the last saved mode for that wave is restored.
 
 ## Common Scenarios
 
-- Default mode starts in chat view.
-- In mobile, this replaces the desktop tab-based view-mode controls.
-- Users can quickly inspect visual drops in gallery mode while keeping all same thread content context.
+- New waves open in chat mode.
+- Users switch to gallery to scan media, then back to chat to post/reply.
+- Mode memory is per wave, so changing one wave does not change others.
+- App and desktop headers use the same stored mode state.
 
 ## Edge Cases
 
-- The toggle is hidden for unsupported wave types:
-  - rank waves
-  - meme waves
-  - direct-message waves
-- When no wave is active, no mode toggle is shown.
-- If a wave has no gallery-ready drops, gallery mode may appear sparse compared to chat mode.
+- No active wave means no toggle.
+- Unsupported wave types never show the toggle.
+- If local storage is unavailable, mode works for the session but may not persist
+  after reload.
+- Sparse-media waves can show thin gallery results.
 
 ## Failure and Recovery
 
-- If a mode switch seems unresponsive, refreshing the thread usually restores controls and state.
-- If you still cannot switch modes, reopening the wave resets active UI context and re-enables the toggle flow.
+- If toggle response is delayed, wait for wave data load and try again.
+- If view mode looks stale, reopen the wave to reinitialize state.
+- If persistence is lost after reload, toggle mode again to rewrite saved state.
 
 ## Limitations / Notes
 
-- This control affects the active chat content view only; it does not change sidebars, search, or creator actions.
-- Gallery mode is still part of the same wave stream and uses the same wave context.
+- The toggle changes chat-panel presentation only; it does not change route,
+  sidebars, or active content tab.
+- Gallery mode hides the chat composer while active.
+- Mode state is UI preference and is not encoded in URL params.
 
 ## Related Pages
 
 - [Wave Header Index](README.md)
-- [App Header Context](../../navigation/feature-app-header-context.md)
+- [Wave Header Controls](feature-wave-header-controls.md)
 - [Wave Chat Index](../chat/README.md)
-- [Wave Gallery Content](../drop-actions/README.md)
+- [Wave Content Tabs](../chat/feature-content-tabs.md)
+- [Wave Content Display](../drop-actions/feature-content-display.md)

@@ -2,60 +2,64 @@
 
 ## Overview
 
-Signed-in users with edit rights can update a wave picture from the wave header.
+Edit-eligible users can update a wave picture from the header avatar.
 
-When allowed, the header avatar area shows an edit control that opens an update modal with an image uploader.
+The avatar pencil opens `Update wave picture` with image upload and preview.
 
 ## Location in the Site
 
-- Wave header on wave views where the header avatar is shown.
-- Desktop and mobile wave detail flows where the header `WaveHeader` component is used.
+- Wave `About` header on:
+  - `/waves/{waveId}`
+  - `/messages?wave={waveId}`
+- The avatar edit control is hover-revealed in hover-capable layouts.
 
 ## Entry Points
 
-- Open a wave you can edit and view its header image.
-- Trigger the picture edit control from the avatar area.
+- Open a wave where `canEditWave` is true (author or admin-eligible, connected,
+  non-proxy).
+- Hover the avatar and select `Edit wave picture`.
 
 ## User Journey
 
-1. Open the wave and locate the wave avatar in the header.
-2. Select the edit control to open `Update wave picture`.
-3. Choose a new file by clicking the upload box or using drag-and-drop.
-4. Confirm file preview appears in the uploader panel.
-5. Select `Save` to upload and apply the new picture.
-6. On success, the modal closes and the header picture updates.
+1. Open wave `About`.
+2. Select the avatar pencil.
+3. In `Update wave picture`, upload by click or drag-and-drop.
+4. Confirm preview.
+5. Select `Save`.
+6. Complete auth.
+7. The app uploads media, updates wave data, closes modal, and refreshes the avatar.
 
 ## Common Scenarios
 
-- `JPG`, `JPEG`, `PNG`, `GIF`, and `WEBP` are accepted file types.
-- The file size limit is 10MB.
-- `Save` remains disabled until a valid file is selected.
-- `Cancel`, clicking outside the modal, or pressing `Escape` closes without saving.
+- Accepted formats: `JPG`, `JPEG`, `PNG`, `GIF`, `WEBP`.
+- Max file size: `10MB`.
+- `Save` stays disabled until a valid file is selected.
+- `Cancel`, outside click, or `Escape` closes without saving.
 
 ## Edge Cases
 
-- Unsupported file formats display `Invalid file type`.
-- Files above 10MB display `File size must be less than 10MB`.
-- If authentication fails at save time, users see `Failed to authenticate`.
-- If upload or API update fails, users see an error toast with server text or a fallback
-  `Failed to update wave picture`.
+- Users without edit permission do not see the avatar edit control.
+- On touch-only layouts, hover-only controls might not be available.
+- Unsupported files show `Invalid file type`.
+- Oversized files show `File size must be less than 10MB`.
+- Failed auth shows `Failed to authenticate`.
+- Upload/update failures show API text or fallback `Failed to update wave picture`.
 
 ## Failure and Recovery
 
-- If upload or update fails, users can retry after correcting the file and selecting `Save` again.
-- If authentication was lost, users must sign in and reopen the modal.
-- If the form stays unresponsive, close and reopen the wave picture modal to retry.
+- If save fails, keep modal open, select a valid file again if needed, and retry.
+- If auth failed, re-authenticate and retry `Save`.
+- If modal state looks stale, close and reopen before retrying.
 
 ## Limitations / Notes
 
-- The edit control is available only when `canEditWave` conditions are met:
-  wave owner, authenticated and not in proxy profile mode, or explicit wave edit eligibility.
-- The modal used here does not provide in-modal file removal or image cropping controls.
-- If no new file is selected, save is disabled and no request is sent.
+- The modal uses wave update permissions from `canEditWave`.
+- There is no crop flow and no in-modal remove-file action.
+- If no new file is selected, no update request is sent.
 
 ## Related Pages
 
-- [Waves Header Index](README.md)
-- [Wave Header and Avatar Access](../../profiles/navigation/feature-profile-picture-editing.md)
-- [Wave Right Sidebar Controls](../sidebars/README.md)
-- [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
+- [Wave Header Index](README.md)
+- [Wave Header Controls](feature-wave-header-controls.md)
+- [Wave Notification Controls](../sidebars/feature-wave-notification-controls.md)
+- [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)

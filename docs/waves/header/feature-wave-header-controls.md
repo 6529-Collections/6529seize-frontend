@@ -1,68 +1,92 @@
-# Wave Header Membership and Owner Controls
+# Wave Header Controls
 
 ## Overview
 
-The wave header exposes membership and owner actions without leaving the active
-wave view.
-Depending on viewer permissions, users can join/unjoin, rename, mute, or delete
-from header controls.
+Wave header controls let users manage a wave from the `About` surface without
+leaving the thread.
+
+Users can:
+
+- Follow or unfollow (`Join` / `Joined`)
+- Open notification mode controls after following
+- Open wave description from the info button
+- Open followers from the `Joined` count
+- Pin or unpin the wave
+- Rename the wave or open picture edit (when edit-eligible)
+- Open author options (`Mute` / `Unmute`, `Delete`)
 
 ## Location in the Site
 
-- Wave header surfaces under `/waves/{waveId}` and `/messages?wave={waveId}`
-- Header panels rendered in desktop and mobile wave contexts
+- Right-sidebar `About` panel on:
+  - `/waves/{waveId}`
+  - `/messages?wave={waveId}`
+- Mobile/app `About` panel variants for active waves.
 
 ## Entry Points
 
-- Open a wave with header visible.
-- Use header actions near wave name and metadata.
-- Open owner options (`⋮`) when available.
+- Open an active wave and switch to `About`.
+- Use controls near the wave name, metadata, and avatar.
+- Open the owner options menu (`⋮`) when available.
+
+## Permission Rules
+
+- Anyone viewing the header can open description and followers.
+- `Join`, notification settings, and pin require a connected non-proxy profile.
+- Rename and picture edit require `canEditWave` eligibility (author or admin-eligible,
+  connected, non-proxy).
+- Owner options menu (`Mute` / `Unmute`, `Delete`) is author-only.
 
 ## User Journey
 
-1. Open a wave and review header metadata (`Joined`, creation time, name).
-2. If authenticated and not in proxy mode, use `Join` / `Joined` to follow or
-   unfollow the wave.
-3. If the user has edit rights, use the pencil action by wave name to open
-   rename modal, then save.
-4. If the user is the wave author, open `⋮` for owner options:
-   - `Mute` / `Unmute`
-   - `Delete`
-5. For `Delete`, confirm in modal; on success the app returns to `/waves`.
+1. Open `About` in an active wave.
+2. Select `Join` to follow (or `Joined` to unfollow).
+3. If followed, set notification mode (`@` mentions-only or all drops when enabled).
+4. Use the info button to open wave description.
+5. Select `Joined` count to switch between about content and followers.
+6. Use pin to keep the wave in pinned lists.
+7. If edit-eligible, use pencil actions to rename or update picture.
+8. If author, open `⋮` for `Mute` / `Unmute` and `Delete`.
+9. For `Delete`, confirm in modal. Success redirects to `/waves`.
 
 ## Common Scenarios
 
-- Join a wave directly from header while browsing thread content.
-- Rename a wave in place without leaving the current route.
-- Use owner menu to mute a noisy wave or remove the wave entirely.
-- Open followers from the `Joined` count action in header contexts that support
-  follower panel switching.
+- Follow a wave, then tune notification mode.
+- Check follower list and return to about content.
+- Pin active waves for faster return.
+- Rename a wave without leaving the thread.
+- Delete an author-owned wave from the same panel.
 
 ## Edge Cases
 
-- Unauthenticated users and proxy sessions do not get join/edit/owner actions.
-- Rename save is disabled until the name actually changes.
-- Delete option is shown only for the wave author's own wave.
-- Mute/unmute or delete failures keep current state and show error toasts.
+- Signed-out users and proxy sessions do not get follow, notification, pin,
+  edit, or owner controls.
+- Notification mode controls render only when the wave is followed.
+- `All` notifications can be disabled for high-follower waves.
+- When muted, notification mode buttons are replaced by a `Muted` unmute control.
+- Rename `Save` stays disabled until the name changes.
+- Pencil edit controls are hover-revealed and may not appear on touch-only layouts.
 
 ## Failure and Recovery
 
-- If join/unjoin fails, retry from the same header button.
-- If rename fails (for example auth expired), re-authenticate and retry save.
-- If delete is canceled or modal closes, no change is applied.
+- If auth is canceled or fails, no header action is applied.
+- If follow/unfollow, mute/unmute, or delete fails, the prior state remains and
+  an error toast is shown.
+- If rename fails, keep the modal open, fix auth/session issues, and retry.
+- If delete modal is canceled or closed, nothing is deleted.
 
 ## Limitations / Notes
 
-- Detailed mute-state behavior and sidebar indicators are owned by
+- Detailed notification and mute behavior is owned by
   [Wave Notification Controls and Mute Behavior](../sidebars/feature-wave-notification-controls.md).
-- Detailed pin behavior is owned by
+- Detailed pin limits and cross-surface pin behavior is owned by
   [Pinned Wave Controls](../sidebars/feature-pinned-wave-controls.md).
-- Header options are permission-gated and can differ by wave type and user role.
+- Header controls vary by role and active session state.
 
 ## Related Pages
 
 - [Wave Header Index](README.md)
 - [Update Wave Picture](feature-wave-picture-edit.md)
+- [Chat and Gallery View Toggle](feature-chat-gallery-toggle.md)
 - [Wave Notification Controls and Mute Behavior](../sidebars/feature-wave-notification-controls.md)
 - [Pinned Wave Controls](../sidebars/feature-pinned-wave-controls.md)
 - [Wave Right Sidebar Tabs](../sidebars/feature-right-sidebar-tabs.md)

@@ -64,8 +64,8 @@ Use this area for wave and direct-message tasks:
   mentions, emoji, uploads, and metadata submissions.
 - [Drop Actions](drop-actions/README.md): vote, react, open/copy links,
   curation, and media actions.
-- [Header](header/README.md): header controls, picture editing, and mobile
-  chat/gallery toggle.
+- [Header](header/README.md): header controls, picture editing, and
+  chat/gallery toggle behavior across supported header surfaces.
 - [Sidebars](sidebars/README.md): wave/direct-message list navigation and
   right-sidebar controls.
 - [Link Previews](link-previews/README.md): external/social/web3 preview-card
