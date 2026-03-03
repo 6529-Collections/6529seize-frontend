@@ -2,80 +2,111 @@
 
 ## Overview
 
-Wave leaderboard entry controls when users can start a new submission and which
-entry UI appears. Behavior differs for standard waves, curation waves, and
-memes waves, and it is gated by the current account's submission eligibility.
+This page explains who can start a leaderboard submission and where the start
+control appears.
+
+Entry behavior differs by wave type:
+- standard rank waves
+- curation waves
+- memes waves
 
 ## Location in the Site
 
-- Wave thread leaderboard: `/waves/{waveId}` (legacy
-  `/waves?wave={waveId}` redirects here).
-- Direct-message thread leaderboard: `/messages?wave={waveId}` (no
-  `/messages/{waveId}` route).
-- Leaderboard header, empty states, and curation inline composer row.
+- Wave thread route: `/waves/{waveId}`
+- Legacy wave route: `/waves?wave={waveId}` redirects to `/waves/{waveId}` and
+  keeps other query params
+- Direct-message wave route: `/messages?wave={waveId}` (there is no
+  `/messages/{waveId}` route)
+- Entry controls appear in leaderboard header, leaderboard empty states, meme
+  tabs header, or curation inline composer row
 
-## Entry Points
+## Entry Surfaces
 
 - Open a wave and select `Leaderboard`.
-- Use `Drop` in the header or default empty state when available.
-- In curation leaderboards, use the inline URL drop composer.
-- In memes leaderboards, use `Drop` to open the submission modal.
+- Standard waves:
+  - Header `Drop` is shown only when logged in and eligible.
+  - Empty list shows `Drop` in the `No drops to show` card.
+- Curation waves:
+  - There is no leaderboard header `Drop`.
+  - Eligible users get a persistent inline URL composer row.
+- Memes waves:
+  - Desktop: use `Submit Work to The Memes` in the meme tabs header.
+  - Mobile leaderboard: use header `Drop` when logged in and eligible.
 
 ## User Journey
 
 1. Open leaderboard content.
-2. The app evaluates login state, proxy state, and submission eligibility.
-3. In standard non-curation waves, eligible users can open a create-drop panel
-   from `Drop`.
-4. In curation waves, eligible users can get a persistent inline curation drop
-   composer instead of a header `Drop` button.
-5. In memes waves, `Drop` opens the memes submission modal flow.
-6. If not eligible, entry controls switch to restriction states (for example
-   hidden header `Drop`, disabled default empty-state `Drop`, or curation
-   restriction guidance).
+2. The app checks:
+   - login
+   - proxy mode
+   - participation eligibility
+   - submission window (`NOT_STARTED`, `ACTIVE`, `ENDED`)
+   - per-user submission limits
+3. The app renders the wave-specific entry control.
+4. If blocked, the UI uses one of these states:
+   - hidden controls
+   - disabled button states
+   - empty-state restriction message
 
 ## Common Scenarios
 
-- Default empty state shows `No drops to show` and can include a `Drop` action
-  (enabled for eligible users, disabled with restriction text otherwise).
-- Curation empty state shows `No curated drops yet`; restricted users can see
-  curation guidance and a Network Levels link.
-- Memes empty state shows `No artwork submissions yet` and keeps artwork
-  submission messaging.
-- Entry controls honor submission windows and per-user submission caps.
+- Standard empty state can show disabled `Drop` with explicit messages, such as:
+  - `Please log in to make submissions`
+  - `Proxy users cannot make submissions`
+  - `You don't have permission to submit in this wave`
+  - `You have reached the maximum number of drops allowed`
+  - `Submissions haven't started yet`
+  - `Submission period has ended`
+- Curation empty state shows `No curated drops yet` and can show restriction
+  messaging.
+- When curation eligibility fails specifically on level requirement, the helper
+  card can show:
+  - `Curation wave submissions require at least Level 10.`
+  - `Learn more about Network Levels` link
+- Memes entry on desktop can show disabled submit states (for example
+  `Not Eligible to Submit`, `Submission Limit Reached`, or closed/open timing
+  states).
+- If voting has ended, `Leaderboard` is removed from available tabs, so
+  leaderboard entry controls are no longer available.
 
 ## Edge Cases
 
-- Logged-out users are blocked with a login requirement message.
-- Profile-proxy mode blocks submission.
-- If submission has not started yet or has ended, create entry is blocked.
-- If the user has reached submission limits, create entry is blocked with
-  limit messaging.
-- Curation restriction messaging can include external Network Levels guidance
-  (for example Level 10 requirements).
+- Curation waves never show a leaderboard header `Drop` button.
+- Eligible curation users can see `No curated drops yet` and the inline
+  composer together; there is no extra empty-state `Drop` button.
+- Curation empty-state helper messaging appears only when the leaderboard list is
+  empty; populated lists can hide restriction text.
+- The curation helper link to Network Levels appears only for the Level 10
+  restriction case.
+- In non-empty leaderboards, blocked users may see no restriction text; the
+  entry controls can simply be absent.
+- Memes entry surfaces differ by viewport (`Submit Work to The Memes` on
+  desktop tabs header vs leaderboard `Drop` on mobile).
+- Memes leaderboard empty state does not show a submit button; submission starts
+  from the header/tabs controls.
 
 ## Failure and Recovery
 
-- If eligibility blocks submission, switch to an eligible profile/account state
-  and reopen `Leaderboard`.
-- If create UI opens but submission fails, retry from the same creation surface.
-- If wave timing/eligibility changes while browsing, refresh or revisit
-  leaderboard to re-evaluate entry controls.
+- If entry is blocked, use the restriction message to recover (log in, disable
+  proxy, wait for submission window, or free submission capacity).
+- If a create panel/modal opens but submit fails, retry from the same surface.
+- If wave timing or eligibility changed while viewing, refresh leaderboard to
+  re-evaluate entry controls.
 
 ## Limitations / Notes
 
-- Entry availability depends on login state, proxy state, participation
-  permissions, submission timing, and wave-specific constraints.
-- Curation waves can enforce higher participation-level requirements before
-  entry controls appear.
-- This page documents entry gating and start points; drop content/format rules
-  are documented on composer pages.
+- This page owns entry gating and start controls only.
+- Full submit format and validation rules live in curation and memes submission
+  pages.
+- Restriction helper text is most explicit in empty states; populated lists can
+  show fewer inline prompts.
 
 ## Related Pages
 
 - [Wave Leaderboards Index](README.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
 - [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
+- [Wave Content Tabs](../chat/feature-content-tabs.md)
 - [Wave Curation URL Submissions](../composer/feature-curation-url-submissions.md)
 - [Memes Submission Workflows](../memes/feature-memes-submission.md)
 - [Docs Home](../../README.md)
