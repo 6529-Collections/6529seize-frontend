@@ -1,73 +1,59 @@
 # Brain Wave List Last Drop Indicator
 
 ## Overview
-The Brain and direct-message wave lists show a `Last drop:` label below each
-wave name so users can quickly see when the latest content arrived. The label
-uses the freshest timestamp known to the client from server snapshots and live
-events, so it does not roll back to an older time after newer activity appears.
-Unread badges reflect unread-drop counts and are hidden for muted waves, which
-show a muted bell icon instead.
+Expanded wave and direct-message rows show a `Last drop:` line under the row
+name. The line uses the newest timestamp the client knows.
 
-## Location in the Site
-- Desktop Brain sidebar from the `Brain` tab on `/` and `/{user}`
-- Brain and DM wave lists in layouts that reuse the same sidebar list
+## Route Coverage
+- Waves sidebar rows on /waves and `/waves/{waveId}`
+- Messages sidebar rows on /messages and `/messages?wave={waveId}`
+- Mobile Waves and Messages list views that reuse the same row renderer
 
-## Entry Points
-- Open the Brain sidebar from the main navigation
-- Open a profile or home route that renders the Brain sidebar
-- Switch between pinned and DM wave lists in the Brain sidebar
+## Visibility Rules
+- Expanded rows show `Last drop:` only when `latestDropTimestamp` exists.
+- Collapsed desktop rows hide the line.
+- Wave rows can be pinned or unpinned; DM rows are unpinned.
+- If no timestamp exists, the line is hidden.
 
-## User Journey
-1. The sidebar loads wave metadata and renders `Last drop: ... ago` for entries
-   with timestamps.
-2. When a new drop or refresh updates a wave timestamp, the label recalculates
-   immediately to the newest value and keeps counting elapsed time.
-3. As users move between views, each wave row keeps showing the latest known
-   drop time for quick triage before opening the wave.
-4. Muted rows open normally, with muted-status iconography replacing the unread count
-   badge in the sidebar list.
+## Timestamp Source Rules
+- Overview API provides `metrics.latest_drop_timestamp`.
+- Websocket drop events provide `created_at`.
+- The row keeps the newer value from those two sources.
+- Sorting uses that merged timestamp (newest first), with muted rows kept below
+  non-muted rows.
 
-## Common Scenarios
-- A new drop arrives while Brain is open: unread badges increase and `Last
-  drop` updates immediately.
-- Muted waves can still refresh `Last drop` timing while unread counts remain
-  muted-state specific.
-- Wave data refreshes with a newer timestamp while the row is already visible: the
-  `Last drop` value updates right away, then continues to advance each minute.
-- A pinned wave updates from another participant: the list entry shows the newer
-  time without waiting for a full reload.
-- DM waves receive new messages: DM list entries follow the same `Last drop`
-  update behavior as other Brain wave entries.
-- Unread badge values are capped at `99+` and can be suppressed on muted waves.
+## Live Update Behavior
+1. Row shows the current `Last drop` value on load.
+2. A new drop in an unmuted row updates the timestamp immediately.
+3. If the row is active and the tab is visible, timestamp updates but the
+   new-drop counter does not increase.
+4. If the new drop is authored by the connected profile, timestamp updates but
+   the new-drop counter does not increase.
+5. The displayed label refreshes every minute (`Just now`, `Xm`, `Xh`,
+   `Yesterday`, `Mon D`).
 
-## Edge Cases
-- A live event arrives after a server snapshot: the label keeps the newer value
-  and never regresses to an older timestamp.
-- Server data has no timestamp but a live event has one: the label still appears
-  from the live event value.
-- Repeated renders with unchanged timestamps refresh elapsed time once per minute so
-  users see the wording evolve (`5m ago`, `6m ago`) without leaving the page.
-- Server refresh and live updates overlap: the label reflects whichever timestamp
-  is newest.
+## Mute and Unread Interaction
+- Muted rows skip websocket new-drop processing in this path.
+- Muted rows still update after overview refetches.
+- Opening a row clears its new-drop counter but preserves the newest known
+  timestamp.
 
 ## Failure and Recovery
-- No timestamp is available from either source: the `Last drop` line is hidden
-  until a timestamp becomes available.
-- Live connection drops temporarily: the last known timestamp remains visible and
-  resumes updating after reconnection.
-- Server fetch fails: the previous value remains visible; a later successful
-  refresh rehydrates current timestamps.
+- If both overview and websocket timestamps are missing, the line stays hidden.
+- If websocket disconnects, the current label stays visible until new data
+  arrives.
+- If a websocket drop references a wave missing from the current list, the list
+  triggers a throttled refetch.
 
 ## Limitations / Notes
-- If both server and live-event timestamps are missing, users only see activity
-  indicators such as unread counts, not a `Last drop` time.
-- The timestamp reflects the client-visible newest event and may differ slightly
-  from server clock display in other surfaces.
-- This page only describes Brain/DM sidebar list behavior.
+- This indicator is client-timestamp based and can differ slightly from other
+  timestamp surfaces.
+- This page covers the row timestamp indicator only.
+- Mute controls are documented separately.
 
 ## Related Pages
+- [Sidebars Index](README.md)
 - [Waves Index](../README.md)
+- [Wave List Navigation Behavior](feature-wave-list-navigation.md)
+- [Wave Notification Controls and Mute Behavior](feature-wave-notification-controls.md)
 - [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
-- [Wave Drop Media Download](../drop-actions/feature-media-download.md)
-- [Profiles Index](../../profiles/README.md)

@@ -11,9 +11,8 @@ Use this area for wave and message sidebar behavior:
 Route scope:
 
 - Thread views: `/waves/{waveId}`, `/messages?wave={waveId}`
-- List views: `/waves`, `/messages`
-- Brain list surfaces that reuse the same row behavior (for example `/` and
-  `/{user}`)
+- List/sidebar views: `/waves`, `/messages`
+- Mobile Waves/Messages list views that reuse the same row behavior
 
 ## Features
 
