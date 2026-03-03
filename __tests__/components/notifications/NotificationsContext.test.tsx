@@ -7,6 +7,20 @@ import React from "react";
 
 const push = jest.fn();
 const mockUseRouter = jest.fn(() => ({ push }));
+const mockSeizeSwitchConnectedAccount = jest.fn();
+let mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
+const mockSeizeConnectContext = {
+  address: "0xaaa",
+  connectedAccounts: [
+    {
+      address: "0xaaa",
+      role: null,
+      profileId: "test-profile-id",
+      profileHandle: "owner",
+    },
+  ],
+  seizeSwitchConnectedAccount: mockSeizeSwitchConnectedAccount,
+};
 
 let mockIsActive = true;
 jest.mock("@/hooks/useCapacitor", () => () => ({
@@ -21,11 +35,18 @@ jest.mock("next/navigation", () => ({
   useRouter: () => mockUseRouter(),
 }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ connectedProfile: { id: "test-profile-id" } }),
+  useAuth: () => ({ connectedProfile: mockConnectedProfile }),
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => mockSeizeConnectContext,
 }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
+}));
+jest.mock("@sentry/nextjs", () => ({
+  captureException: jest.fn(),
+  addBreadcrumb: jest.fn(),
 }));
 
 jest.mock("@capacitor/push-notifications", () => {
@@ -79,10 +100,22 @@ describe("NotificationsContext initialization", () => {
   beforeEach(() => {
     mockIsActive = true;
     const { PushNotifications } = require("@capacitor/push-notifications");
+    const sentry = require("@sentry/nextjs");
     jest.clearAllMocks();
+    mockSeizeConnectContext.address = "0xaaa";
+    mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
+    mockSeizeConnectContext.connectedAccounts = [
+      {
+        address: "0xaaa",
+        role: null,
+        profileId: "test-profile-id",
+        profileHandle: "owner",
+      },
+    ];
     PushNotifications.removeAllListeners.mockClear();
     PushNotifications.addListener.mockClear();
     PushNotifications.register.mockClear();
+    sentry.captureException.mockClear();
   });
 
   it("does not initialize when isActive is false", async () => {
@@ -119,13 +152,45 @@ describe("NotificationsContext initialization", () => {
       { timeout: 2000 }
     );
   });
+
+  it("captures unrecoverable initialization errors", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const {
+      getStableDeviceId,
+    } = require("@/components/notifications/stable-device-id");
+    const sentry = require("@sentry/nextjs");
+    const fatalError = new Error("fatal secure storage error");
+
+    getStableDeviceId.mockRejectedValueOnce(fatalError);
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(sentry.captureException).toHaveBeenCalledWith(
+        fatalError,
+        expect.objectContaining({
+          tags: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "initializeNotifications",
+          }),
+        })
+      );
+    });
+
+    expect(PushNotifications.register).not.toHaveBeenCalled();
+  });
 });
 
 it("removes notifications when functions called", async () => {
   const { PushNotifications } = require("@capacitor/push-notifications");
 
-  let registrationCallback: ((token: { value: string }) => Promise<void>) | null =
-    null;
+  let registrationCallback:
+    | ((token: { value: string }) => Promise<void>)
+    | null = null;
   PushNotifications.addListener.mockImplementation(
     (event: string, callback: (arg: unknown) => Promise<void>) => {
       if (event === "registration") {
@@ -181,12 +246,25 @@ it("skips notification removal when not registered", async () => {
   });
 
   expect(PushNotifications.getDeliveredNotifications).not.toHaveBeenCalled();
-  expect(PushNotifications.removeAllDeliveredNotifications).not.toHaveBeenCalled();
+  expect(
+    PushNotifications.removeAllDeliveredNotifications
+  ).not.toHaveBeenCalled();
 });
 
 describe("push notification action handling", () => {
   beforeEach(() => {
     push.mockClear();
+    mockSeizeSwitchConnectedAccount.mockReset();
+    mockSeizeConnectContext.address = "0xaaa";
+    mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
+    mockSeizeConnectContext.connectedAccounts = [
+      {
+        address: "0xaaa",
+        role: null,
+        profileId: "test-profile-id",
+        profileHandle: "owner",
+      },
+    ];
     const { PushNotifications } = require("@capacitor/push-notifications");
     PushNotifications.addListener.mockClear();
     PushNotifications.removeDeliveredNotifications.mockClear();
@@ -195,8 +273,9 @@ describe("push notification action handling", () => {
   it("redirects based on notification data", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
 
-    let registrationCallback: ((token: { value: string }) => Promise<void>) | null =
-      null;
+    let registrationCallback:
+      | ((token: { value: string }) => Promise<void>)
+      | null = null;
     let actionPerformedCallback:
       | ((action: { notification: { data: unknown } }) => Promise<void>)
       | null = null;
@@ -242,6 +321,8 @@ describe("push notification action handling", () => {
               redirect: "profile",
               handle: "abc",
               notification_id: "1",
+              target_profile_id: "test-profile-id",
+              target_profile_handle: "owner",
             },
           },
         });
@@ -253,6 +334,69 @@ describe("push notification action handling", () => {
       expect(push).toHaveBeenCalledWith("/abc");
     });
 
+    expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
+  });
+
+  it("discards notification when profile is not connected", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+
+    let registrationCallback:
+      | ((token: { value: string }) => Promise<void>)
+      | null = null;
+    let actionPerformedCallback:
+      | ((action: { notification: { data: unknown } }) => Promise<void>)
+      | null = null;
+
+    PushNotifications.addListener.mockImplementation(
+      (event: string, callback: (arg: unknown) => Promise<void>) => {
+        if (event === "registration") {
+          registrationCallback = callback as (token: {
+            value: string;
+          }) => Promise<void>;
+        }
+        if (event === "pushNotificationActionPerformed") {
+          actionPerformedCallback = callback as (action: {
+            notification: { data: unknown };
+          }) => Promise<void>;
+        }
+        return Promise.resolve();
+      }
+    );
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(PushNotifications.addListener).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(registrationCallback).not.toBeNull();
+      expect(actionPerformedCallback).not.toBeNull();
+    });
+
+    await act(async () => {
+      if (registrationCallback) {
+        await registrationCallback({ value: "test-token" });
+      }
+    });
+
+    await act(async () => {
+      if (actionPerformedCallback) {
+        await actionPerformedCallback({
+          notification: {
+            data: {
+              redirect: "profile",
+              handle: "abc",
+              target_profile_id: "missing-profile-id",
+              target_profile_handle: "missing-handle",
+            },
+          },
+        });
+      }
+      await new Promise((r) => setTimeout(r, 100));
+    });
+
+    expect(push).not.toHaveBeenCalled();
     expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
   });
 });

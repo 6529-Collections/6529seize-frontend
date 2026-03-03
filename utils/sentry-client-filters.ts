@@ -1,10 +1,19 @@
-export type SentryStackFrame = { filename?: string | undefined; abs_path?: string | undefined };
+export type SentryStackFrame = {
+  filename?: string | undefined;
+  abs_path?: string | undefined;
+};
 export type SentryEventHint = {
   originalException?: unknown | undefined;
   syntheticException?: unknown | undefined;
 };
 
-const filenameExceptions = ["inpage.js", "extensionServiceWorker.js", "injectLeap.js", "inject.chrome"];
+const filenameExceptions = [
+  "inpage.js",
+  "extensionServiceWorker.js",
+  "extensionPageScript.js",
+  "injectLeap.js",
+  "inject.chrome",
+];
 
 function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined
@@ -36,7 +45,9 @@ export function shouldFilterByFilenameExceptions(
   frames: SentryStackFrame[] | undefined,
   hint?: SentryEventHint
 ): boolean {
-  return shouldFilterFilenameExceptions(frames) || shouldFilterExceptionStack(hint);
+  return (
+    shouldFilterFilenameExceptions(frames) || shouldFilterExceptionStack(hint)
+  );
 }
 
 export const __testing = { filenameExceptions };

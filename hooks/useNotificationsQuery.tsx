@@ -8,11 +8,7 @@ import type {
   NotificationDisplayItem,
   TypedNotificationsResponse,
 } from "@/types/feed.types";
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 
 interface UseNotificationsQueryProps {
@@ -98,6 +94,7 @@ export function useNotificationsQuery({
   cause = null,
 }: UseNotificationsQueryProps) {
   const prefetch = usePrefetchNotifications();
+  const normalizedIdentity = identity?.trim().toLowerCase() ?? null;
 
   /**
    * OPTIONAL: Prefetch the first few pages of notifications.
@@ -127,7 +124,21 @@ export function useNotificationsQuery({
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
     enabled: !!identity && !activeProfileProxy,
     staleTime: 60000,
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData, previousQuery) => {
+      const previousParams = previousQuery?.queryKey?.[1] as
+        | { identity?: string | null }
+        | undefined;
+      const previousIdentity =
+        typeof previousParams?.identity === "string"
+          ? previousParams.identity.trim().toLowerCase()
+          : null;
+
+      if (previousIdentity === normalizedIdentity) {
+        return previousData;
+      }
+
+      return undefined;
+    },
     retry: (failureCount, error: unknown) => {
       const status =
         (error as any)?.status ??

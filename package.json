@@ -25,19 +25,21 @@
     "lint:quiet": "eslint . --quiet",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "typecheck:changed": "node scripts/typecheck-changed.cjs",
     "lint:csv": "node scripts/eslint-rule-summary.cjs --output eslint-rule-summary.csv",
     "lint:csv:tight": "node scripts/eslint-rule-summary.cjs --config eslint.config.tight.mjs --output eslint-rule-summary.csv",
     "lint:changed:csv": "node scripts/eslint-rule-summary.cjs --changed --output eslint-rule-summary.csv",
     "lint:changed:csv:tight": "node scripts/eslint-rule-summary.cjs --changed --config eslint.config.tight.mjs --output eslint-rule-summary.csv",
-    "lint:changed": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint  --no-warn-ignored --max-warnings=0'",
-    "lint:changed:tight": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.tight.mjs --no-warn-ignored --max-warnings=0'",
+    "lint:changed": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint  --no-warn-ignored --max-warnings=0'",
+    "lint:changed:fix": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --fix --no-warn-ignored --max-warnings=0'",
+    "lint:changed:tight": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.tight.mjs --no-warn-ignored --max-warnings=0'",
     "lint:uncommitted:tight": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.tight.mjs --no-warn-ignored --max-warnings=0'",
     "lint:fix": "npx eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "lint:single": "npx eslint --config eslint.config.single.mjs",
     "lint:diff": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.diff.mjs --no-warn-ignored --max-warnings=0'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "format:changed": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
+    "format:changed": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
     "format:uncommitted": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
     "deadcode:knip": "knip",
     "deadcode:deps": "depcheck --ignores=\"eslint,eslint-*,@types/*,jest,ts-jest,playwright,@playwright/test,tailwindcss,postcss,autoprefixer\" --ignore-patterns=\".next,coverage,public,generated,tmp_gen_outp\"",
@@ -45,7 +47,9 @@
     "cr": "coderabbit --type uncommitted --base main --prompt-only",
     "sync": "bash scripts/worktree/wt-sync.sh",
     "quality": "node scripts/quality.js",
-    "quality:cr": "node scripts/quality.js --coderabbit"
+    "quality:changed": "node scripts/quality.js --changed",
+    "quality:cr": "node scripts/quality.js --coderabbit",
+    "quality:cr:changed": "node scripts/quality.js --changed --coderabbit"
   },
   "dependencies": {
     "@adraffy/ens-normalize": "^1.11.1",
@@ -82,7 +86,7 @@
     "@reown/appkit": "^1.8.8",
     "@reown/appkit-adapter-wagmi": "^1.8.8",
     "@reown/appkit-common": "^1.8.11",
-    "@sentry/nextjs": "^10.27.0",
+    "@sentry/nextjs": "^10.41.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.7",
     "@tanstack/query-core": "^5.45.0",
@@ -90,7 +94,7 @@
     "@tanstack/react-virtual": "^3.10.7",
     "@types/lodash": "^4.17.23",
     "aws-rum-web": "^1.25.0",
-    "axios": "^1.12.2",
+    "axios": "^1.13.6",
     "bootstrap": "^5.3.3",
     "capacitor-secure-storage-plugin": "^0.11.0",
     "chart.js": "^4.4.9",
@@ -142,7 +146,7 @@
     "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.0",
     "sass": "^1.77.6",
-    "swiper": "^11.1.4",
+    "swiper": "^12.1.2",
     "three": "^0.163.0",
     "unified": "^11.0.5",
     "use-debounce": "^10.0.3",
@@ -217,6 +221,6 @@
       "react": "$react",
       "react-dom": "$react-dom"
     },
-    "zod-validation-error": "^4.0.0"
+    "serialize-javascript": "7.0.4"
   }
 }

@@ -26,7 +26,7 @@ const getBaseUrl = (): URL | null => {
   return cachedBaseUrl;
 };
 
-export const getSeizeBaseOrigin = (): string | null => {
+const getSeizeBaseOrigin = (): string | null => {
   const baseUrl = getBaseUrl();
   return baseUrl ? baseUrl.origin : null;
 };
@@ -35,6 +35,11 @@ export interface SeizeQuoteLinkInfo {
   waveId: string;
   serialNo?: string | undefined;
   dropId?: string | undefined;
+}
+
+interface SeizeDropLinkInfo {
+  waveId: string | null;
+  dropId: string;
 }
 
 const UUID_REGEX =
@@ -204,6 +209,39 @@ export function parseSeizeWaveLink(href: string): string | null {
   }
 
   return waveId;
+}
+
+export function parseSeizeDropLink(href: string): SeizeDropLinkInfo | null {
+  const configuredBaseOrigin = getSeizeBaseOrigin();
+  if (!configuredBaseOrigin) {
+    return null;
+  }
+
+  let url: URL;
+  try {
+    url = new URL(href, configuredBaseOrigin);
+  } catch {
+    return null;
+  }
+
+  if (url.origin !== configuredBaseOrigin) {
+    return null;
+  }
+
+  const dropId = sanitizeQueryValue(url.searchParams.get("drop"));
+  if (!dropId) {
+    return null;
+  }
+
+  const { waveId, isLegacyPath } = getWaveIdFromWavesUrl(url);
+  if (!waveId || isLegacyPath || !UUID_REGEX.test(waveId)) {
+    return null;
+  }
+
+  return {
+    waveId,
+    dropId,
+  };
 }
 
 export function parseSeizeQueryLink(

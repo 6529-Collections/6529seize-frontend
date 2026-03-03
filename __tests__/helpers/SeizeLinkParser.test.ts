@@ -1,5 +1,6 @@
 describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
   let parseSeizeQuoteLink: any;
+  let parseSeizeDropLink: any;
   let parseSeizeWaveLink: any;
   let parseSeizeQueryLink: any;
   let ensureStableSeizeLink: any;
@@ -14,6 +15,7 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
     // Now import the module under test AFTER the mock is in place
     ({
       parseSeizeQuoteLink,
+      parseSeizeDropLink,
       parseSeizeWaveLink,
       parseSeizeQueryLink,
       ensureStableSeizeLink,
@@ -127,6 +129,48 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
 
     it("returns null when wave links include serial query", () => {
       expect(parseSeizeWaveLink(`/waves/${uuid}?serialNo=1`)).toBeNull();
+    });
+  });
+
+  describe("parseSeizeDropLink", () => {
+    const uuid = "123e4567-e89b-12d3-a456-426614174000";
+
+    it("parses canonical wave drop links", () => {
+      expect(parseSeizeDropLink(`/waves/${uuid}?drop=drop-1`)).toEqual({
+        waveId: uuid,
+        dropId: "drop-1",
+      });
+    });
+
+    it("returns null for legacy query-based wave drop links", () => {
+      expect(parseSeizeDropLink(`/waves?wave=${uuid}&drop=drop-1`)).toBeNull();
+    });
+
+    it("returns null for drop links on non-canonical paths", () => {
+      expect(
+        parseSeizeDropLink(`/messages?wave=${uuid}&drop=drop-1`)
+      ).toBeNull();
+    });
+
+    it("sanitizes trailing slash in drop id", () => {
+      expect(parseSeizeDropLink(`/waves/${uuid}?drop=drop-1/`)).toEqual({
+        waveId: uuid,
+        dropId: "drop-1",
+      });
+    });
+
+    it("returns null when canonical wave id is missing", () => {
+      expect(parseSeizeDropLink(`/?drop=drop-1`)).toBeNull();
+    });
+
+    it("returns null when drop query is missing", () => {
+      expect(parseSeizeDropLink(`/waves/${uuid}`)).toBeNull();
+    });
+
+    it("returns null for foreign origin", () => {
+      expect(
+        parseSeizeDropLink(`https://example.com/waves/${uuid}?drop=drop-1`)
+      ).toBeNull();
     });
   });
 

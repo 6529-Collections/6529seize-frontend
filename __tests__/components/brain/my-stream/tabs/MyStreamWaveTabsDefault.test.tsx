@@ -50,8 +50,22 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
   ),
 }));
 
+jest.mock("@/components/waves/drops/search/WaveDropsSearchModal", () => ({
+  __esModule: true,
+  default: () => <div data-testid="wave-search-modal" />,
+}));
+
 jest.mock("@/components/brain/ContentTabContext", () => ({
   useContentTab: (...args: any[]) => useContentTab(...args),
+}));
+
+jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
+  __esModule: true,
+  default: ({ children, ariaLabel }: any) => (
+    <button type="button" aria-label={ariaLabel}>
+      {children}
+    </button>
+  ),
 }));
 
 describe("MyStreamWaveTabsDefault", () => {
@@ -76,8 +90,19 @@ describe("MyStreamWaveTabsDefault", () => {
       id: overrides?.id ?? "w1",
       name: overrides?.name ?? "Wave",
       picture: null,
+      description_drop: {
+        id: "drop-1",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
       contributors_overview: [],
+      voting: {
+        authenticated_user_eligible: true,
+      },
+      participation: {
+        authenticated_user_eligible: true,
+      },
       chat: {
+        authenticated_user_eligible: true,
         scope: {
           group: {
             is_direct_message: isDirectMessage,
@@ -149,6 +174,32 @@ describe("MyStreamWaveTabsDefault", () => {
     );
   });
 
+  it("renders description subtitle and trigger on desktop", () => {
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+        />
+      </SidebarProvider>
+    );
+
+    const subtitle = screen.getByText("A chill place to discuss drops");
+    expect(subtitle).toBeInTheDocument();
+    expect(subtitle).toHaveClass("tw-truncate");
+    expect(subtitle).not.toHaveClass("tw-line-clamp-1");
+    expect(
+      screen.getByRole("button", { name: "Show wave description" })
+    ).toBeInTheDocument();
+  });
+
   it("hides share action for DM waves", () => {
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -167,6 +218,9 @@ describe("MyStreamWaveTabsDefault", () => {
 
     expect(
       screen.queryByRole("button", { name: "Share wave" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show wave description" })
     ).not.toBeInTheDocument();
   });
 
@@ -395,6 +449,90 @@ describe("MyStreamWaveTabsDefault", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Switch to gallery view" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
+  });
+
+  it("toggles chat/gallery in compact mode", () => {
+    mockUseBreakpoint.mockReturnValue("S");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+        />
+      </SidebarProvider>
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Switch to gallery view" })
+    );
+
+    expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps desktop action set at medium breakpoint", () => {
+    mockUseBreakpoint.mockReturnValue("MD");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+        />
+      </SidebarProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Switch to gallery view" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Go back" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps compact subtitle trigger and search action", () => {
+    mockUseBreakpoint.mockReturnValue("S");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+        />
+      </SidebarProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
+    const subtitle = screen.getByText("A chill place to discuss drops");
+    expect(subtitle).toHaveClass("tw-truncate");
+    expect(subtitle).not.toHaveClass("tw-line-clamp-1");
+    expect(
+      screen.getByRole("button", { name: "Show wave description" })
     ).toBeInTheDocument();
   });
 

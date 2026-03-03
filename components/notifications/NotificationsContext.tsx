@@ -1,16 +1,12 @@
 "use client";
 
-import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import useCapacitor from "@/hooks/useCapacitor";
-import { commonApiPost } from "@/services/api/common-api";
-import type { DeviceInfo } from "@capacitor/device";
-import { Device } from "@capacitor/device";
-import type { PushNotificationSchema } from "@capacitor/push-notifications";
-import { PushNotifications } from "@capacitor/push-notifications";
+import { Device, type DeviceInfo } from "@capacitor/device";
+import {
+  PushNotifications,
+  type PushNotificationSchema,
+} from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import React, {
   createContext,
   useCallback,
@@ -19,13 +15,54 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
+import { type ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { commonApiPost } from "@/services/api/common-api";
 import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { getStableDeviceId } from "./stable-device-id";
+import type { DevicePushData, PushRedirect } from "./device-push.types";
+
+function parseDevicePushData(raw: unknown): DevicePushData | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  const notification_id = o["notification_id"];
+  const redirect = o["redirect"];
+  const target_profile_id = o["target_profile_id"];
+  const target_profile_handle = o["target_profile_handle"];
+  if (
+    typeof notification_id !== "string" ||
+    typeof redirect !== "string" ||
+    typeof target_profile_id !== "string" ||
+    typeof target_profile_handle !== "string"
+  )
+    return null;
+  if (redirect !== "profile" && redirect !== "waves") return null;
+  const data: DevicePushData = {
+    notification_id,
+    redirect: redirect as PushRedirect,
+    target_profile_id,
+    target_profile_handle,
+  };
+  const handle = o["handle"];
+  if (typeof handle === "string") data.handle = handle;
+  const subroute = o["subroute"];
+  if (subroute === "rep" || subroute === "identity") data.subroute = subroute;
+  const wave_id = o["wave_id"];
+  if (typeof wave_id === "string") data.wave_id = wave_id;
+  const drop_id = o["drop_id"];
+  if (typeof drop_id === "string") data.drop_id = drop_id;
+  return data;
+}
 
 const MAX_REGISTRATION_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1000;
 const MAX_RETRY_DELAY_MS = 5000;
 const IOS_INITIALIZATION_DELAY_MS = 500;
+const PROFILE_SWITCH_SETTLE_TIMEOUT_MS = 3000;
+const PROFILE_SWITCH_POLL_INTERVAL_MS = 50;
 
 const DELEGATE_ERROR_PATTERNS = [
   "capacitorDidRegisterForRemoteNotifications",
@@ -100,26 +137,31 @@ const redirectConfig = {
   },
 };
 
-interface NotificationData {
-  redirect?: keyof typeof redirectConfig | undefined;
-  profile_id?: string | undefined;
-  path?: string | undefined;
-  handle?: string | undefined;
-  subroute?: string | undefined;
-  id?: string | undefined;
-  wave_id?: string | undefined;
-  drop_id?: string | undefined;
-  [key: string]: unknown;
-}
-
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor, isIos, isActive } = useCapacitor();
   const { connectedProfile } = useAuth();
+  const { address, connectedAccounts, seizeSwitchConnectedAccount } =
+    useSeizeConnectContext();
   const router = useRouter();
   const initializationRef = useRef<string | null>(null);
   const isRegisteredRef = useRef(false);
+  const connectedProfileRef = useRef<ApiIdentity | null>(connectedProfile);
+  const connectedAccountsRef = useRef(connectedAccounts);
+  const activeAddressRef = useRef(address);
+
+  useEffect(() => {
+    connectedProfileRef.current = connectedProfile;
+  }, [connectedProfile]);
+
+  useEffect(() => {
+    connectedAccountsRef.current = connectedAccounts;
+  }, [connectedAccounts]);
+
+  useEffect(() => {
+    activeAddressRef.current = address;
+  }, [address]);
 
   const removeDeliveredNotifications = useCallback(
     async (notifications: PushNotificationSchema[]) => {
@@ -136,29 +178,168 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     [isIos]
   );
 
+  const resolveAddressForNotificationProfile = useCallback(
+    ({
+      target_profile_id,
+      target_profile_handle,
+    }: Pick<DevicePushData, "target_profile_id" | "target_profile_handle">):
+      | string
+      | null => {
+      if (
+        connectedProfileRef.current?.id === target_profile_id &&
+        activeAddressRef.current
+      ) {
+        return activeAddressRef.current;
+      }
+
+      const profileMatchedAccount = connectedAccountsRef.current.find(
+        (account) => account.profileId === target_profile_id
+      );
+      if (profileMatchedAccount) {
+        return profileMatchedAccount.address;
+      }
+
+      const roleMatchedAccount = connectedAccountsRef.current.find(
+        (account) => account.role === target_profile_id
+      );
+      if (roleMatchedAccount) {
+        return roleMatchedAccount.address;
+      }
+
+      const normalizedHandle = target_profile_handle.toLowerCase();
+      const handleMatchedAccount = connectedAccountsRef.current.find(
+        (account) => account.profileHandle?.toLowerCase() === normalizedHandle
+      );
+      if (handleMatchedAccount) {
+        return handleMatchedAccount.address;
+      }
+
+      return null;
+    },
+    []
+  );
+
+  const switchToMatchedAddress = useCallback(
+    async (
+      notificationProfileId: string,
+      matchedAddress: string
+    ): Promise<boolean> => {
+      const isMatchedProfileActive = (): boolean => {
+        const activeAddress = activeAddressRef.current;
+        if (!activeAddress) {
+          return false;
+        }
+
+        const normalizedActiveAddress = activeAddress.toLowerCase();
+        const normalizedMatchedAddress = matchedAddress.toLowerCase();
+        if (normalizedActiveAddress !== normalizedMatchedAddress) {
+          return false;
+        }
+
+        return connectedProfileRef.current?.id === notificationProfileId;
+      };
+
+      const waitForProfileSwitchSettlement = async (): Promise<boolean> => {
+        const timeoutAt = Date.now() + PROFILE_SWITCH_SETTLE_TIMEOUT_MS;
+
+        while (Date.now() < timeoutAt) {
+          if (isMatchedProfileActive()) {
+            return true;
+          }
+          await new Promise((resolve) =>
+            setTimeout(resolve, PROFILE_SWITCH_POLL_INTERVAL_MS)
+          );
+        }
+
+        return isMatchedProfileActive();
+      };
+
+      if (isMatchedProfileActive()) {
+        return true;
+      }
+
+      if (
+        activeAddressRef.current?.toLowerCase() === matchedAddress.toLowerCase()
+      ) {
+        return await waitForProfileSwitchSettlement();
+      }
+
+      try {
+        await Promise.resolve(seizeSwitchConnectedAccount(matchedAddress));
+        const didSettle = await waitForProfileSwitchSettlement();
+        if (!didSettle) {
+          console.warn(
+            "Ignoring notification: switched wallet account but profile did not settle in time",
+            { notificationProfileId, matchedAddress }
+          );
+        }
+        return didSettle;
+      } catch (error) {
+        console.warn(
+          "Ignoring notification: failed to switch to matched connected profile",
+          { notificationProfileId, matchedAddress, error }
+        );
+        return false;
+      }
+    },
+    [seizeSwitchConnectedAccount]
+  );
+
   const handlePushNotificationAction = useCallback(
     async (
       routerInstance: ReturnType<typeof useRouter>,
-      notification: PushNotificationSchema,
-      profileInstance?: ApiIdentity
+      notification: PushNotificationSchema
     ) => {
-      const notificationData = notification.data ?? {};
-      const notificationProfileId = notificationData.profile_id;
+      const raw = notification.data ?? {};
+      const notificationData = parseDevicePushData(raw);
+      if (!notificationData) {
+        await removeDeliveredNotifications([notification]);
+        console.warn("Ignoring notification: invalid payload shape", { raw });
+        return;
+      }
+      const targetProfileId = notificationData.target_profile_id.trim();
+      const targetProfileHandle = notificationData.target_profile_handle.trim();
 
-      if (
-        profileInstance &&
-        notificationProfileId &&
-        notificationProfileId !== profileInstance.id
-      ) {
+      if (targetProfileId.length === 0 || targetProfileHandle.length === 0) {
+        await removeDeliveredNotifications([notification]);
+        console.warn("Ignoring notification: missing target profile metadata", {
+          targetProfileId,
+          targetProfileHandle,
+        });
+        return;
+      }
+
+      const matchedAddress = resolveAddressForNotificationProfile({
+        target_profile_id: targetProfileId,
+        target_profile_handle: targetProfileHandle,
+      });
+
+      if (!matchedAddress) {
+        await removeDeliveredNotifications([notification]);
         console.warn(
-          "Notification profile id does not match connected profile"
+          "Ignoring notification: target profile is not one of connected accounts",
+          { targetProfileId, targetProfileHandle }
         );
+        return;
+      }
+
+      const didSwitch = await switchToMatchedAddress(
+        targetProfileId,
+        matchedAddress
+      );
+      if (!didSwitch) {
         return;
       }
 
       await removeDeliveredNotifications([notification]);
 
-      const redirectUrl = resolveRedirectUrl(notificationData);
+      const { handle: rawHandle, ...notificationDataWithoutHandle } =
+        notificationData;
+      const handle = typeof rawHandle === "string" ? rawHandle.trim() : "";
+      const redirectData: DevicePushData = handle
+        ? { ...notificationDataWithoutHandle, handle }
+        : notificationDataWithoutHandle;
+      const redirectUrl = resolveRedirectUrl(redirectData);
       if (redirectUrl) {
         routerInstance.push(redirectUrl);
       } else {
@@ -168,7 +349,11 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         );
       }
     },
-    [removeDeliveredNotifications]
+    [
+      removeDeliveredNotifications,
+      resolveAddressForNotificationProfile,
+      switchToMatchedAddress,
+    ]
   );
 
   const initializePushNotifications = useCallback(
@@ -212,11 +397,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         await PushNotifications.addListener(
           "pushNotificationActionPerformed",
           async (action) => {
-            await handlePushNotificationAction(
-              router,
-              action.notification,
-              profile
-            );
+            await handlePushNotificationAction(router, action.notification);
           }
         );
 
@@ -348,7 +529,7 @@ const registerPushNotification = async (
   }
 };
 
-const resolveRedirectUrl = (notificationData: NotificationData) => {
+const resolveRedirectUrl = (notificationData: DevicePushData) => {
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {

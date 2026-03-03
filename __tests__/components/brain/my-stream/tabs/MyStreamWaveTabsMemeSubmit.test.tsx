@@ -1,39 +1,74 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import MyStreamWaveTabsMemeSubmit from '@/components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit';
-import { SubmissionStatus } from '@/hooks/useWave';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import MyStreamWaveTabsMemeSubmit from "@/components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit";
+import { SubmissionStatus } from "@/hooks/useWave";
 
 const useWave = jest.fn();
 const useCountdown = jest.fn();
 
-jest.mock('@/hooks/useWave', () => ({
+jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
-  SubmissionStatus: jest.requireActual('../../../../../hooks/useWave').SubmissionStatus,
+  SubmissionStatus: jest.requireActual("../../../../../hooks/useWave")
+    .SubmissionStatus,
 }));
 
-jest.mock('@/hooks/useCountdown', () => ({
+jest.mock("@/hooks/useCountdown", () => ({
   useCountdown: (...args: any[]) => useCountdown(...args),
 }));
 
-jest.mock('@/components/utils/button/PrimaryButton', () => ({
+jest.mock("@/components/utils/button/PrimaryButton", () => ({
   __esModule: true,
-  default: ({ children, ...props }: any) => <button data-testid="primary" {...props}>{children}</button>,
+  default: ({ children, ...props }: any) => (
+    <button data-testid="primary" {...props}>
+      {children}
+    </button>
+  ),
 }));
 
-jest.mock('@/components/utils/button/InfoButton', () => ({
+jest.mock("@/components/utils/button/InfoButton", () => ({
   __esModule: true,
-  default: ({ children, ...props }: any) => <button data-testid="info" {...props}>{children}</button>,
+  default: ({ children, fullWidth, className, ...props }: any) => (
+    <button
+      data-testid="info"
+      data-full-width={String(fullWidth)}
+      className={className}
+      {...props}
+    >
+      {children}
+    </button>
+  ),
 }));
 
-jest.mock('@/components/utils/button/ClosedButton', () => ({
+jest.mock("@/components/utils/button/ClosedButton", () => ({
   __esModule: true,
-  default: ({ children, ...props }: any) => <button data-testid="closed" {...props}>{children}</button>,
+  default: ({ children, fullWidth, className, ...props }: any) => (
+    <button
+      data-testid="closed"
+      data-full-width={String(fullWidth)}
+      className={className}
+      {...props}
+    >
+      {children}
+    </button>
+  ),
 }));
 
-jest.mock('@/components/utils/icons/ClockIcon', () => ({ __esModule: true, default: () => <svg data-testid="clock" /> }));
-jest.mock('@/components/utils/icons/CalendarClosedIcon', () => ({ __esModule: true, default: () => <svg data-testid="calendar" /> }));
-jest.mock('@/components/utils/icons/LimitIcon', () => ({ __esModule: true, default: () => <svg data-testid="limit" /> }));
-jest.mock('@/components/utils/icons/PermissionIcon', () => ({ __esModule: true, default: () => <svg data-testid="permission" /> }));
+jest.mock("@/components/utils/icons/ClockIcon", () => ({
+  __esModule: true,
+  default: () => <svg data-testid="clock" />,
+}));
+jest.mock("@/components/utils/icons/CalendarClosedIcon", () => ({
+  __esModule: true,
+  default: () => <svg data-testid="calendar" />,
+}));
+jest.mock("@/components/utils/icons/LimitIcon", () => ({
+  __esModule: true,
+  default: () => <svg data-testid="limit" />,
+}));
+jest.mock("@/components/utils/icons/PermissionIcon", () => ({
+  __esModule: true,
+  default: () => <svg data-testid="permission" />,
+}));
 
 const baseInfo = {
   voting: {},
@@ -45,20 +80,22 @@ const baseInfo = {
   isDm: false,
 } as any;
 
-const wave = { id: 'w1' } as any;
+const wave = { id: "w1" } as any;
 
 function renderComponent(info: any) {
   useWave.mockReturnValue(info);
-  return render(<MyStreamWaveTabsMemeSubmit wave={wave} handleMemesSubmit={() => {}} />);
+  return render(
+    <MyStreamWaveTabsMemeSubmit wave={wave} handleMemesSubmit={() => {}} />
+  );
 }
 
-describe('MyStreamWaveTabsMemeSubmit', () => {
+describe("MyStreamWaveTabsMemeSubmit", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useCountdown.mockReturnValue('soon');
+    useCountdown.mockReturnValue("soon");
   });
 
-  it('renders closed state', () => {
+  it("renders closed state", () => {
     const now = Date.now();
     renderComponent({
       ...baseInfo,
@@ -68,13 +105,22 @@ describe('MyStreamWaveTabsMemeSubmit', () => {
         endTime: now - 500,
       },
     });
-    expect(screen.getByTestId('closed')).toHaveAttribute('title', expect.stringContaining('Submissions closed'));
-    expect(screen.getByText('Submissions Closed')).toBeInTheDocument();
+    expect(screen.getByTestId("closed")).toHaveAttribute(
+      "title",
+      expect.stringContaining("Submissions closed")
+    );
+    expect(screen.getByTestId("closed")).toHaveAttribute(
+      "data-full-width",
+      "false"
+    );
+    expect(screen.getByTestId("closed")).toHaveClass("tw-whitespace-nowrap");
+    expect(screen.getByText("Submissions Closed")).toBeInTheDocument();
+    expect(screen.getByText("Closed")).toBeInTheDocument();
   });
 
-  it('renders coming soon state', () => {
+  it("renders coming soon state", () => {
     const now = Date.now();
-    useCountdown.mockReturnValue('in 1h');
+    useCountdown.mockReturnValue("in 1h");
     renderComponent({
       ...baseInfo,
       participation: {
@@ -83,11 +129,20 @@ describe('MyStreamWaveTabsMemeSubmit', () => {
         endTime: now + 7200,
       },
     });
-    expect(screen.getByTestId('info')).toHaveAttribute('title', expect.stringContaining('Submissions open'));
-    expect(screen.getByText('Submissions Open in 1h')).toBeInTheDocument();
+    expect(screen.getByTestId("info")).toHaveAttribute(
+      "title",
+      expect.stringContaining("Submissions open")
+    );
+    expect(screen.getByTestId("info")).toHaveAttribute(
+      "data-full-width",
+      "false"
+    );
+    expect(screen.getByTestId("info")).toHaveClass("tw-whitespace-nowrap");
+    expect(screen.getByText("Submissions Open in 1h")).toBeInTheDocument();
+    expect(screen.getByText("Opens in 1h")).toBeInTheDocument();
   });
 
-  it('renders not eligible state', () => {
+  it("renders not eligible state", () => {
     renderComponent({
       ...baseInfo,
       participation: {
@@ -97,11 +152,15 @@ describe('MyStreamWaveTabsMemeSubmit', () => {
         endTime: 0,
       },
     });
-    expect(screen.getByTestId('info')).toHaveAttribute('title', expect.stringContaining("don't have permission"));
-    expect(screen.getByText('Not Eligible to Submit')).toBeInTheDocument();
+    expect(screen.getByTestId("info")).toHaveAttribute(
+      "title",
+      expect.stringContaining("don't have permission")
+    );
+    expect(screen.getByText("Not Eligible")).toBeInTheDocument();
+    expect(screen.getByText("Not Eligible to Submit")).toBeInTheDocument();
   });
 
-  it('renders limit reached state', () => {
+  it("renders limit reached state", () => {
     renderComponent({
       ...baseInfo,
       participation: {
@@ -113,13 +172,19 @@ describe('MyStreamWaveTabsMemeSubmit', () => {
         endTime: 0,
       },
     });
-    expect(screen.getByTestId('info')).toHaveAttribute('title', expect.stringContaining('maximum'));
-    expect(screen.getByText('Submission Limit Reached (2)')).toBeInTheDocument();
+    expect(screen.getByTestId("info")).toHaveAttribute(
+      "title",
+      expect.stringContaining("maximum")
+    );
+    expect(screen.getByText("Limit Reached")).toBeInTheDocument();
+    expect(
+      screen.getByText("Submission Limit Reached (2)")
+    ).toBeInTheDocument();
   });
 
-  it('renders active state with urgency and remaining badge', () => {
+  it("renders active state with urgency and remaining badge", () => {
     const now = Date.now();
-    useCountdown.mockReturnValueOnce('3h').mockReturnValueOnce('3h');
+    useCountdown.mockReturnValueOnce("3h").mockReturnValueOnce("3h");
     renderComponent({
       ...baseInfo,
       participation: {
@@ -134,11 +199,14 @@ describe('MyStreamWaveTabsMemeSubmit', () => {
         endTime: now + 3 * 60 * 60 * 1000,
       },
     });
-    const button = screen.getByTestId('primary');
-    expect(button).toHaveAttribute('title', expect.stringContaining('You have'));
+    const button = screen.getByTestId("primary");
+    expect(button).toHaveAttribute(
+      "title",
+      expect.stringContaining("You have")
+    );
     expect(button).not.toBeDisabled();
-    expect(screen.getByText('Submit Meme')).toBeInTheDocument();
-    expect(screen.getByText('Closing 3h')).toBeInTheDocument();
-    expect(screen.getByText('2 Left')).toBeInTheDocument();
+    expect(screen.getByText("Submit Meme")).toBeInTheDocument();
+    expect(screen.getByText("Closing 3h")).toHaveClass("tw-hidden");
+    expect(screen.getByText("2 Left")).toHaveClass("tw-hidden");
   });
 });
