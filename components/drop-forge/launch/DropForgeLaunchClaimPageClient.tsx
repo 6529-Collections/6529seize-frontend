@@ -22,7 +22,7 @@ import {
   normalizeHexValue,
   parseLocalDateTimeToUnixSeconds,
   summarizeAirdrops,
-} from "@/components/drop-forge/launch/dropForgeLaunchClaimPageClient.helpers";
+} from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import {
   DropForgeLaunchClaimPageView,
   DropForgeLaunchClaimPermissionFallbackView,

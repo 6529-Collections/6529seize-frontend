@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { getClaimTxModalEmoji } from "@/components/drop-forge/launch/dropForgeLaunchClaimPageClient.helpers";
+import { getClaimTxModalEmoji } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import { getTransactionLink } from "@/helpers/Helpers";
 import type { Chain } from "viem";
 

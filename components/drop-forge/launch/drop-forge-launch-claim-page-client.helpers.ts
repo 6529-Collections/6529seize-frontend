@@ -335,6 +335,32 @@ function getAnimationInfo(
   return { kind: "video" };
 }
 
+const FORMAT_TO_MIME: Record<string, string> = {
+  HTML: "text/html",
+  GLB: "model/gltf-binary",
+  WEBM: "video/webm",
+  MP4: "video/mp4",
+  MOV: "video/quicktime",
+  M4V: "video/x-m4v",
+};
+
+const VIDEO_EXTENSION_TO_MIME: Record<string, string> = {
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mov: "video/quicktime",
+  qt: "video/quicktime",
+  m4v: "video/x-m4v",
+  ogv: "video/ogg",
+  ogg: "video/ogg",
+};
+
+const NON_VIDEO_EXTENSION_TO_MIME: Record<string, string> = {
+  glb: "model/gltf-binary",
+  gltf: "model/gltf+json",
+  html: "text/html",
+  htm: "text/html",
+};
+
 export function getMediaTypeLabel(
   claim: MintingClaim,
   tab: LaunchMediaTab
@@ -363,33 +389,18 @@ export function getAnimationMimeType(claim: MintingClaim): string | null {
   const normalizedFormat = (
     claim.animation_details as { format?: string } | null | undefined
   )?.format?.toUpperCase();
-  if (normalizedFormat === "HTML") return "text/html";
-  if (normalizedFormat === "GLB") return "model/gltf-binary";
+
   if (normalizedFormat) {
-    const formatMimeMap: Record<string, string> = {
-      WEBM: "video/webm",
-      MP4: "video/mp4",
-      MOV: "video/quicktime",
-      M4V: "video/x-m4v",
-    };
-    return formatMimeMap[normalizedFormat] ?? "video/mp4";
+    return FORMAT_TO_MIME[normalizedFormat] ?? "video/mp4";
   }
+
   if (isVideoUrl(animationUrl)) {
-    if (extension === "mp4") return "video/mp4";
-    if (extension === "webm") return "video/webm";
-    if (extension === "mov" || extension === "qt") {
-      return "video/quicktime";
-    }
-    if (extension === "m4v") return "video/x-m4v";
-    if (extension === "ogv" || extension === "ogg") {
-      return "video/ogg";
-    }
-    return "video/*";
+    return extension ? (VIDEO_EXTENSION_TO_MIME[extension] ?? "video/*") : "video/*";
   }
-  if (extension === "glb") return "model/gltf-binary";
-  if (extension === "gltf") return "model/gltf+json";
-  if (extension === "html" || extension === "htm") return "text/html";
-  return "application/octet-stream";
+
+  return extension
+    ? (NON_VIDEO_EXTENSION_TO_MIME[extension] ?? "application/octet-stream")
+    : "application/octet-stream";
 }
 
 export function getSafeExternalUrl(

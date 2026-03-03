@@ -33,7 +33,10 @@ export function formatWeiToEth(wei: bigint, decimals = 5): string {
   const fractionalRaw = fractionalPart.toString().padStart(decimals, "0");
   let trimmedLength = fractionalRaw.length;
 
-  while (trimmedLength > 0 && fractionalRaw.charCodeAt(trimmedLength - 1) === 48) {
+  while (
+    trimmedLength > 0 &&
+    fractionalRaw.codePointAt(trimmedLength - 1) === 48
+  ) {
     trimmedLength -= 1;
   }
 

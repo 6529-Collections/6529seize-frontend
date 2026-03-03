@@ -30,7 +30,7 @@ import {
   getRootAddressesCount,
   getRootTotalSpots,
   toArweaveUrl,
-} from "@/components/drop-forge/launch/dropForgeLaunchClaimPageClient.helpers";
+} from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
