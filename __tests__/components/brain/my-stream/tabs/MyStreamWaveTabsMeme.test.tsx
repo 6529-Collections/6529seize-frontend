@@ -252,4 +252,53 @@ describe("MyStreamWaveTabsMeme", () => {
       screen.queryByRole("button", { name: "Show wave description" })
     ).not.toBeInTheDocument();
   });
+
+  it("keeps desktop action set at medium breakpoint", () => {
+    mockUseBreakpoint.mockReturnValue("MD");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Share wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Go back" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps compact actions right-aligned with subtitle trigger", () => {
+    mockUseBreakpoint.mockReturnValue("S");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
+
+    expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Share wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show wave description" })
+    ).toBeInTheDocument();
+  });
 });
