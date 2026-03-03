@@ -3,56 +3,72 @@
 ## Overview
 
 The right-sidebar `Leaderboard` tab shows a compact ranked-drop list for rank
-waves. It supports quick scan, inline vote actions on standard rows, and
-drop-overlay open actions from each row.
+waves.
+
+Use it for quick in-thread review without leaving the current wave route.
+
+This page owns compact-list behavior only. Drop-open action ownership stays in
+[Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md).
 
 ## Location in the Site
 
 - Right sidebar on `/waves/{waveId}` and `/messages?wave={waveId}`
-- Rank-wave `Leaderboard` tab (shown while voting is active)
-- Inline and overlay right-sidebar variants
+- Rank-wave `Leaderboard` tab in inline and overlay sidebar variants
+- Available until voting is completed (includes pre-vote and in-progress time)
+- Hidden while a full drop overlay is open (`drop={dropId}`)
 
 ## Entry Points
 
-- Open a rank wave and open the right sidebar.
-- Select `Leaderboard` in the tab row.
+- Open a rank wave thread.
+- Open the right sidebar.
+- Select `Leaderboard`.
 
 ## User Journey
 
 1. Open a rank wave with the right sidebar visible.
 2. Select `Leaderboard`.
-3. Review ranked rows:
-   - top-three rows use winner styling
-   - row content includes preview media/text plus author and score details
-4. Select a row to open that drop in the overlay (`drop` query).
-5. Close the overlay to return to the same wave and sidebar tab.
-6. Scroll to fetch more rows when available.
+3. Wait for ranked rows to load.
+4. Review row preview, author info, score, and outcome details.
+5. Select a row to open that drop in the overlay (`drop` query).
+6. Close the overlay to return to the same thread and sidebar context.
+7. Scroll to load more rows when available.
 
-## Common Scenarios
+## Row Content and Actions
 
-- Use the sidebar list to compare top drops without leaving the wave route.
-- Standard rows include inline vote controls.
-- Top-three rows prioritize winner display and do not show the inline vote
-  control.
-- Rows with outcome data show an `Outcome` badge with tooltip details.
+- Top-three rows use winner-style cards and do not show the inline vote button.
+- Non-top-three rows can show inline vote controls when voting UI is allowed
+  for the viewer/drop.
+- Rows can show preview image/media/text content.
+- Rows can show `Storm`, `Metadata`, and media indicators with tooltips.
+- Rows with configured rewards can show an `Outcome` badge with tooltip
+  details.
 
-## Edge Cases
+## States and Edge Cases
 
-- If no drops are available, the tab shows `No drops have been made yet in this wave`.
-- Drops with no preview media still render text and metadata summaries.
-- While a full drop overlay is open, the right sidebar is hidden.
+- First load has no dedicated inline loading message, so the panel can appear
+  blank until data arrives.
+- Empty result shows `No drops have been made yet in this wave`.
+- Pagination uses bottom intersection loading with a thin loading bar.
+- The list auto-refreshes while open and can pick up newly created drops.
+- If voting completes while this tab is active, the sidebar switches to
+  `About` and removes `Leaderboard` from tabs.
+- Non-rank waves never show this tab.
 
 ## Failure and Recovery
 
-- If leaderboard fetch fails or stalls, reopen the tab or reload the wave.
-- If pagination fails mid-list, already loaded rows remain visible and you can
-  retry by scrolling again.
+- Leaderboard requests retry automatically.
+- This compact tab has no dedicated inline error banner.
+- If first-page fetches keep failing, the tab can remain blank while retries
+  continue.
+- If pagination fails, already loaded rows remain visible.
+- Retry by scrolling again, switching tabs and returning, or reloading the
+  thread route.
 
 ## Limitations / Notes
 
-- `Leaderboard` is hidden after voting completes.
-- This sidebar list is a compact summary; use full leaderboard surfaces for
-  broader filtering and views.
+- This is a compact summary surface with rank-order rows only.
+- No sidebar sort/group/view controls in this tab.
+- Use full leaderboard surfaces for broader sorting, filtering, and view modes.
 
 ## Related Pages
 
