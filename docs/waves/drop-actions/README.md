@@ -15,7 +15,8 @@ threads.
 
 - Owns posted-drop action controls: voting, reactions, boosting, curation,
   open/copy, media download, and mark-as-unread.
-- Owns action-entry behavior across desktop `More` menus and touch action menus.
+- Owns action-entry behavior across desktop `More` menus and touch action menus
+  where applicable.
 - Owns in-thread drop presentation behaviors tied to actions: content display,
   reply preview rows, quote-link cards, image viewer/scaling, and selection copy.
 - Reply composer behavior after selecting `Reply` is owned by
@@ -41,7 +42,7 @@ threads.
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
 - [Wave Drop Quote Link Cards](feature-quote-link-cards.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)
-- [Wave Drop Media Download](feature-media-download.md)
+- [Wave Drop Media Download (Desktop `More` Menu)](feature-media-download.md)
 
 ### Menus and thread-state actions
 

@@ -1,65 +1,58 @@
 # Wave Drop Media Download
 
+Parent: [Wave Drop Actions Index](README.md)
+
 ## Overview
 
-Wave drop actions include a media download option in the desktop `More` menu
-when a drop has a downloadable media attachment.
+Use `Download media` to save a drop attachment from the desktop `More` menu.
+This action is not available in the touch drop menu.
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Desktop drop action bar: `More` menu on each drop card
+- Full drop cards with desktop action controls (`More` menu)
 
 ## Entry Points
 
 - Open a wave or direct-message thread.
-- Hover a drop to reveal actions.
-- Select `More` (three-dot button) and look for `Download media`.
+- Hover a full drop card and open `More` (`...`).
+- Select `Download media` when the row is available.
 
-## User Journey
+## What Happens
 
-1. Open a drop with media in a wave or direct-message thread.
-2. Open the drop `More` menu.
-3. Select `Download media`.
-4. The browser starts downloading the media file using the filename parsed from
-   the media URL.
-5. If a download is still running when the action is available, selecting it
-   again cancels the current transfer.
+1. Open `More` on a drop with downloadable media.
+2. Select `Download media`.
+3. The menu closes and the browser download starts.
+4. The downloaded filename is derived from the media URL path.
 
-## Common Scenarios
+## Availability and Edge Cases
 
-- Drops with media show `Download media` in the `More` menu.
-- Drops without media do not show a download action.
-- Download is started directly from the drop without opening the full media
-  detail view.
-
-## Edge Cases
-
-- The action is derived from the first media item on the first drop part.
-  Additional attachments in the same drop do not get separate download entries.
-- If the media URL does not contain a parseable file name and extension, the
-  download action is hidden.
-- Temporary or text-only drops usually do not show the action because they
-  typically do not provide a downloadable media URL.
+- The row is shown only when the first media item on the first drop part has a
+  parseable filename and extension.
+- If no media URL exists, or the URL has no parseable extension, the row is
+  hidden.
+- Only one row is exposed (`parts[0].media[0]`); additional attachments do not
+  get separate download rows.
+- Temporary or text-only drops usually do not show this action.
+- The touch long-press/header-button menu does not include `Download media`.
 
 ## Failure and Recovery
 
-- If download start is blocked by the browser/network, the UI does not show a
-  dedicated inline error in the drop action menu.
-- If a transfer is active, users can retry by reopening `More` and selecting
-  the download action again (which cancels/restarts based on current state).
+- If the browser blocks download start, or the media URL fails, there is no
+  dedicated drop-menu error state.
+- Retry from `More` after fixing browser permission or network blockers.
 
-## Limitations / Notes
+## Notes
 
-- This action is currently documented for the desktop drop `More` menu.
-- The non-hover long-press menu does not expose a matching `Download media`
-  action.
-- Download naming depends on the media URL path format.
+- This page covers thread drop-menu download behavior only.
+- Other download surfaces are documented in their own feature pages.
 
 ## Related Pages
 
+- [Wave Drop Actions Index](README.md)
+- [Wave Drop Touch Menu](feature-touch-drop-menu.md)
+- [Wave Drop Image Viewer and Scaling](feature-image-viewer-and-scaling.md)
+- [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
 - [Waves Index](../README.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
 - [Media Index](../../media/README.md)
-- [Docs Home](../../README.md)
