@@ -149,7 +149,7 @@ export default function LatestDropNextMintSection({
                     allowWrap
                     value={
                       <Link
-                        href={`/waves?wave=${drop.wave.id}`}
+                        href={`/waves/${drop.wave.id}`}
                         className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-100 tw-no-underline desktop-hover:hover:tw-text-iron-200"
                       >
                         {drop.wave.picture && (

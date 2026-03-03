@@ -208,13 +208,13 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
               </h1>
             )}
           </div>
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch">
-            <div className="tw-hidden md:tw-block">
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 md:tw-shrink-0">
+            {!isCompact && (
               <MyStreamWaveTabsMemeSubmit
                 handleMemesSubmit={handleMemesSubmit}
                 wave={wave}
               />
-            </div>
+            )}
             {showShareAction && (
               <button
                 type="button"
@@ -252,7 +252,6 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             </button>
           </div>
         </div>
-
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800">
           <MyStreamWaveDesktopTabs
             activeTab={activeContentTab}
