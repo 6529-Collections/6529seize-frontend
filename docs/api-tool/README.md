@@ -1,7 +1,7 @@
 # API Tool
 
 API Tool docs cover user-facing guidance for `/tools` routes: the API guide,
-Block Finder, and The Memes subscriptions report.
+Block Finder, The Memes subscriptions report, and App Wallet management routes.
 
 ## Overview
 
@@ -11,12 +11,15 @@ Block Finder, and The Memes subscriptions report.
   sequences.
 - `/tools/subscriptions-report` shows upcoming and redeemed The Memes
   subscription counts.
+- `/tools/app-wallets*` manages locally stored app wallets on supported native
+  devices.
 
 ## Features
 
 - [API Authentication and Media Drop Flow](feature-api-authentication-and-media-drop-flow.md)
 - [Block Finder](feature-block-finder.md)
 - [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
+- [App Wallets Management](feature-app-wallets.md)
 
 ## Flows
 
@@ -34,6 +37,6 @@ Block Finder, and The Memes subscriptions report.
 ## Related Areas
 
 - [Docs Home](../README.md)
-- [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
+- [Web Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Profile Subscriptions Tab](../profiles/tabs/feature-subscriptions-tab.md)
 - [Waves Index](../waves/README.md)

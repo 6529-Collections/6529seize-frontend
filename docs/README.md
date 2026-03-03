@@ -1,63 +1,130 @@
 # Documentation
 
-This index points to user-facing behavior docs: routes, flows, and recovery paths.
+This index maps current user-visible behavior: routes, actions, loading and
+error states, and recovery paths.
 
-Editorial and content routes are out of scope (for example `/about/*`, `/museum/*`,
-`/blog/*`, `/news/*`, and `/city/*`).  
-Profile `about/*` behavior is documented under [Profiles](profiles/README.md).
+## Scope
 
-## Start here
+### In-Scope Routes
 
-1. Pick your goal area from the index below.
-2. Open that area `README.md` for scope and ownership.
-3. Open the feature or flow page for exact behavior and recovery details.
-4. Open troubleshooting if a route, action, or state fails.
-5. Open a shared-page in [Shared](shared/README.md) or [Navigation](navigation/README.md) when behavior is reused.
+- `/`, `/discover`, `/waves`, `/waves/{id}`, `/messages`, `/messages/create`
+- `/{user}` profile routes and `/about/primary-address`
+- `/the-memes*`, `/6529-gradient*`, `/meme-lab*`, `/rememes*`, `/meme-calendar`
+- `/notifications`
+- `/network/*` and `/network/groups`
+- `/delegation/*`
+- `/nextgen/*`
+- `/nft-activity`
+- `/tools/*`
+- `/open-data/*`
+- `/emma/*`
+- Cross-area shell behavior is owned by [Navigation](navigation/README.md) and
+  [Shared](shared/README.md)
 
-## Documentation scope map
+### Out-of-Scope Routes
 
-### Core journey (high-frequency tasks)
+- Content/editorial/legal routes: `/about/*` (except `/about/primary-address`),
+  `/museum/*`, `/blog/*`, `/news/*`, `/city/*`, `/om/*`, `/education/*`,
+  `/capital/*`
+- Standalone utility routes: `/access`, `/restricted`, `/dispute-resolution`,
+  `/accept-connection-sharing`, `/email-signatures`,
+  `/consolidation-mapping-tool`, `/delegation-mapping-tool`
 
-- [Home](home/README.md): first-run and landing flow at `/`.
-- [Navigation](navigation/README.md): route switching, app-shell controls, and search at `/discover`, `/waves`, `/messages`, and `/network`.
-- [Waves](waves/README.md): discover, create, chat, and interact with drops at `/discover`, `/waves`, `/waves/{id}`, and `/messages`.
-- [Profiles](profiles/README.md): profile routes and tabs at `/{user}` plus `About -> Primary Address` at `/about/primary-address`.
-- [Media](media/README.md): NFT/media surfaces, minting, and rendering at `/6529-gradient`, `/the-memes`, `/meme-lab`, `/rememes`, and `/meme-calendar`.
-- [Notifications](notifications/README.md): `/notifications` feed behavior, filtering, and push settings.
-- [Network](network/README.md): scoring, leaderboards, health, and TDH/xTDH rules.
+## Start Here
 
-### Product operations
+1. Find the route family in the quick map below.
+2. Open that area `README.md`.
+3. Open feature/flow pages for exact behavior.
+4. Use troubleshooting pages when a route or action fails.
 
-- [Groups](groups/README.md): `/network/groups` listing, creation, and edits.
-- [Delegation](delegation/README.md): `/delegation/*` routing, onchain action flows, and wallet diagnostics.
-- [NextGen](nextgen/README.md): `/nextgen` browsing, collection routes, mint/distribution operations, token media, and admin access.
-- [Realtime](realtime/README.md): `/nft-activity` transaction feed browsing plus authenticated websocket live-update health.
-- [API Tool](api-tool/README.md): `/tools/*` API access, block finder, and subscription reports.
-- [EMMA](emma/README.md): `/emma/*` distribution-plan operations.
-- [Open Data](open-data/README.md): `/open-data/*` dataset routes and download surfaces.
-- [Shared](shared/README.md): reusable patterns shared across multiple areas.
+## Route-to-Area Quick Map
 
-## Fast path tasks
+- `/` -> [Home](home/README.md)
+- `/discover`, `/waves`, `/waves/{id}`, `/messages`, `/messages/create` ->
+  [Waves](waves/README.md)
+- `/{user}` and `/about/primary-address` -> [Profiles](profiles/README.md)
+- `/the-memes*`, `/6529-gradient*`, `/meme-lab*`, `/rememes*`,
+  `/meme-calendar` -> [Media](media/README.md)
+- `/notifications` -> [Notifications](notifications/README.md)
+- `/network/*` -> [Network](network/README.md)
+- `/network/groups` -> [Groups](groups/README.md)
+- `/delegation/*` -> [Delegation](delegation/README.md)
+- `/nextgen/*` -> [NextGen](nextgen/README.md)
+- `/nft-activity` -> [Realtime](realtime/README.md)
+- `/tools/*` -> [API Tool](api-tool/README.md)
+- `/open-data/*` -> [Open Data](open-data/README.md)
+- `/emma/*` -> [EMMA](emma/README.md)
+- Shared shell and route behavior -> [Navigation](navigation/README.md) and
+  [Shared](shared/README.md)
 
-Use this when you need the shortest route to the right page.
+## Area Index
 
-- Wave discovery flow: [Wave Discovery Index](waves/discovery/README.md)
-- Wave thread flow: [Wave Chat Index](waves/chat/README.md)
-- Wave creation flow: [Wave Creation Index](waves/create/README.md)
-- Meme submission flow: [Memes Submission Flow](waves/memes/feature-memes-submission.md)
-- xTDH dashboard plus TDH/xTDH rules: [xTDH Network Overview](network/feature-xtdh-network-overview.md), [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md), [Network Definitions](network/feature-network-definitions.md), [TDH Boost Rules](network/feature-tdh-boost-rules.md)
-- Search from any route: [Header Search Modal](navigation/feature-header-search-modal.md)
-- Navigate instantly between app areas: [Navigation Entry and Switching Flow](navigation/flow-navigation-entry-and-switching.md)
-- Read notifications feed flow: [Notifications Feed Browsing Flow](notifications/flow-notifications-feed-browsing.md)
-- Follow network groups to filtered scope: [Group to Network Scope Flow](network/flow-network-group-scope.md)
-- Mint and schedule meme flows: [The Memes Mint Flow](media/memes/feature-mint-flow.md)
-- Debug live updates: [Authenticated Live Updates](realtime/feature-authenticated-live-updates.md)
-- Open mobile app handoff links: [Mobile App Landing Page](navigation/feature-mobile-app-landing.md)
+### Core Product Journeys
 
-## Troubleshooting entry point
+- [Home](home/README.md): landing route behavior at `/`
+- [Waves](waves/README.md): discovery, creation, chat, and drop actions at
+  `/discover`, `/waves`, `/waves/{id}`, and `/messages`
+- [Profiles](profiles/README.md): `/{user}` profile routes and
+  `/about/primary-address`
+- [Media](media/README.md): `/the-memes`, `/6529-gradient`, `/meme-lab`,
+  `/rememes`, and `/meme-calendar`
+- [Notifications](notifications/README.md): `/notifications` feed and push
+  controls
+- [Network](network/README.md): `/network/*` score, health, and rules views
+
+### Operations and Data
+
+- [Groups](groups/README.md): `/network/groups` list, create, and edit flows
+- [Delegation](delegation/README.md): `/delegation/*` action routes, wallet
+  checks, and onchain feedback
+- [NextGen](nextgen/README.md): `/nextgen/*` browsing, mint/distribution, token
+  media, and manager access
+- [Realtime](realtime/README.md): `/nft-activity` feed plus live-update
+  connectivity behavior
+- [API Tool](api-tool/README.md): `/tools/api`, `/tools/block-finder`,
+  `/tools/subscriptions-report`, and optional `/tools/app-wallets*`
+- [EMMA](emma/README.md): `/emma/*` plan and distribution operations
+- [Open Data](open-data/README.md): `/open-data/*` datasets and downloads
+
+### Shared Cross-Area Behavior
+
+- [Navigation](navigation/README.md): cross-route switching, shell controls,
+  search, and `/open-mobile` handoff
+- [Shared](shared/README.md): route-level and UI behavior reused by multiple
+  areas
+
+## Fast Paths
+
+- Open wave discovery docs: [Wave Discovery Index](waves/discovery/README.md)
+- Open wave thread docs: [Wave Chat Index](waves/chat/README.md)
+- Open wave creation docs: [Wave Creation Index](waves/create/README.md)
+- Submit memes in waves:
+  [Memes Submission Flow](waves/memes/feature-memes-submission.md)
+- Review xTDH and TDH rules:
+  [xTDH Network Overview](network/feature-xtdh-network-overview.md),
+  [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md),
+  [Network Definitions](network/feature-network-definitions.md),
+  [TDH Boost Rules](network/feature-tdh-boost-rules.md)
+- Search from shell routes:
+  [Header Search Modal](navigation/feature-header-search-modal.md)
+- Switch routes quickly:
+  [Navigation Entry and Switching Flow](navigation/flow-navigation-entry-and-switching.md)
+- Read notification flow:
+  [Notifications Feed Browsing Flow](notifications/flow-notifications-feed-browsing.md)
+- Jump from groups into network scope:
+  [Group to Network Scope Flow](network/flow-network-group-scope.md)
+- Manage app wallets on supported devices:
+  [App Wallets Management](api-tool/feature-app-wallets.md)
+- Mint and schedule memes:
+  [The Memes Mint Flow](media/memes/feature-mint-flow.md)
+- Debug live updates:
+  [Authenticated Live Updates](realtime/feature-authenticated-live-updates.md)
+
+## Troubleshooting Entry Point
 
 Use this when a route is blocked, data is missing, or an action fails.
 
+- [Home Route and Section Visibility](home/troubleshooting-home-route-and-section-visibility.md)
 - [Navigation and Shell Controls](navigation/troubleshooting-navigation-and-shell-controls.md)
 - [Wave Navigation and Posting](waves/troubleshooting-wave-navigation-and-posting.md)
 - [Profile Routes and Tabs](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
