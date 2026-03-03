@@ -106,11 +106,21 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       predicate: (query) => {
         // Only invalidate main waves queries, not pinned waves
         const [key, params] = query.queryKey;
-        if (key !== QueryKey.WAVES_OVERVIEW || (params as any)?.pinned) {
+        if (
+          key !== QueryKey.WAVES_OVERVIEW ||
+          typeof params !== "object" ||
+          params === null
+        ) {
           return false;
         }
 
-        const queryViewerIdentity = (params as any)?.viewer_identity ?? null;
+        if (Boolean(Reflect.get(params, "pinned"))) {
+          return false;
+        }
+
+        const viewerIdentityParam = Reflect.get(params, "viewer_identity");
+        const queryViewerIdentity =
+          typeof viewerIdentityParam === "string" ? viewerIdentityParam : null;
         return queryViewerIdentity === viewerIdentityKey;
       },
     });
