@@ -8,10 +8,12 @@ shown on memes single-drop views after submit.
 ## Route and Surface Coverage
 
 - Wave thread route: `/waves/{waveId}`
-- Desktop meme tabs header (not leaderboard header): `Submit Work to The Memes`
-- Mobile leaderboard header: `Drop`
-- Mobile chat view: floating submit button
-- Memes single-drop view: post-submit metadata sections
+- Desktop memes header action: `Submit Work to The Memes` (label can vary with
+  deadline state)
+- Mobile leaderboard header action: `Drop`
+- Mobile chat view: floating submit button (`+`, top-right)
+- Memes single-drop route: `/waves/{waveId}?drop={dropId}` with post-submit
+  metadata sections
 
 ## Ownership
 
@@ -21,7 +23,7 @@ This area owns:
 - artwork source selection (`Upload File` or `Interactive HTML`)
 - submit/retry states (`uploading`, `signing`, `processing`, `success`,
   `error`)
-- Additional Information rendering on memes single-drop views (`Technical details`,
+- Additional Information validation and single-drop rendering (`Technical details`,
   `Preview Image`, `Promo Video`, `Additional Media`, `About the Artist`,
   `Artwork Commentary`)
 
