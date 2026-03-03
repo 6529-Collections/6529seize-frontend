@@ -13,7 +13,6 @@ import { commonApiPost } from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "../auth/Auth";
-import { useProgressiveDebounce } from "@/hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { CurationComposerVariant } from "./PrivilegedDropCreator";
@@ -215,27 +214,7 @@ export default function CreateDrop({
   // Use refs to avoid stale closures - fixes the stream unmounting issue
   const queueRef = useRef<DropMutationBody[]>([]);
   const isProcessingRef = useRef(false);
-  const [hasQueueChanged, setHasQueueChanged] = useState(false);
-
-  useProgressiveDebounce(
-    () => {
-      if (
-        queueRef.current.length === 0 &&
-        !isProcessingRef.current &&
-        hasQueueChanged
-      ) {
-        waitAndInvalidateDrops();
-        onAllDropsAdded?.();
-      }
-    },
-    [hasQueueChanged],
-    {
-      minDelay: 1000,
-      maxDelay: 4000,
-      increaseFactor: 1.5,
-      decreaseFactor: 1.2,
-    }
-  );
+  const hasBatchErrorsRef = useRef(false);
 
   const processNextDrop = useCallback(async () => {
     if (isProcessingRef.current || queueRef.current.length === 0) {
@@ -249,6 +228,7 @@ export default function CreateDrop({
       try {
         await addDropMutation.mutateAsync(dropRequest);
       } catch (error) {
+        hasBatchErrorsRef.current = true;
         console.error("Error processing drop:", error);
       }
     }
@@ -258,14 +238,21 @@ export default function CreateDrop({
     // Process next item if queue has more
     if (queueRef.current.length > 0) {
       processNextDrop();
+      return;
     }
-  }, [addDropMutation]);
+
+    const shouldNotifyAllDropsAdded = !hasBatchErrorsRef.current;
+    hasBatchErrorsRef.current = false;
+    void waitAndInvalidateDrops();
+    if (shouldNotifyAllDropsAdded) {
+      onAllDropsAdded?.();
+    }
+  }, [addDropMutation, onAllDropsAdded, waitAndInvalidateDrops]);
 
   const submitDrop = useCallback(
     (dropRequest: DropMutationBody) => {
       // Add to queue
       queueRef.current.push(dropRequest);
-      setHasQueueChanged(true);
 
       // Process immediately - avoids state update timing issues
       processNextDrop();

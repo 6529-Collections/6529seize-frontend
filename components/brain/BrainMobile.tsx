@@ -279,7 +279,11 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     [BrainView.DEFAULT]: children,
     [BrainView.LEADERBOARD]:
       isRankWave && !!wave ? (
-        <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
+        <MyStreamWaveLeaderboard
+          key={wave.id}
+          wave={wave}
+          onDropClick={onDropClick}
+        />
       ) : null,
     [BrainView.WINNERS]:
       isRankWave && !!wave ? (
