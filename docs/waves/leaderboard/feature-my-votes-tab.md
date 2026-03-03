@@ -2,83 +2,84 @@
 
 ## Overview
 
-The `My Votes` tab shows drops you have already voted on in a wave. From this
-tab, you can change individual vote values and reset selected votes in one action.
-This tab is available in memes and curation waves.
+`My Votes` lists drops where your current vote is not `0`.
+You can update votes one row at a time or reset selected rows to `0`.
+
+The tab is available only on eligible rank-wave layouts:
+- memes waves
+- curation waves
 
 ## Location in the Site
 
-- Waves where `My Votes` is enabled: `/waves/{waveId}`
-- Direct messages with a selected wave: `/messages?wave={waveId}`
-- Desktop and app wave surfaces that render the shared wave tab layout
+- Rank-wave thread routes: `/waves/{waveId}`
+- Rank-wave direct-message routes: `/messages?wave={waveId}`
+- Desktop and mobile wave tab rows when `My Votes` is available
 
 ## Entry Points
 
-- Open a wave that offers the `My Votes` tab.
-- Select the `My Votes` tab from the wave tab strip.
-- In the list, click a row to open the drop, or use the inline controls to edit
-  and reset votes.
+- Open an eligible wave.
+- Switch to `My Votes` from the wave tab row.
+- Use row checkboxes and vote inputs in the list.
 
 ## User Journey
 
 1. Open a wave and switch to `My Votes`.
-2. If you have no voted drops, the tab shows an empty-state message.
-3. For each voted drop row, review the media, author, and current vote context.
-4. Edit your vote with the numeric field and submit with `Vote`.
-5. In the tab header, use `Select All` / `Deselect All` to pick visible rows.
-6. Use `Reset Votes` to clear votes for the selected rows.
-7. Scroll near the bottom of the list to load more rows when more results are
-   available.
+2. If no rows are found, the tab shows:
+   `You haven't voted on any submissions in this wave yet.`
+3. Review each row: preview, title, rank (when available), author, total vote
+   value, voter count, and your current vote input.
+4. Optional: click a row to open that drop in the current wave route.
+5. Edit a vote, then submit with `Vote` or `Enter`.
+6. Use `Select All` or `Deselect All`, then `Reset Votes` to set selected rows
+   to `0`.
+7. Scroll to the bottom to load more rows.
 
 ## Common Scenarios
 
-- The tab shows an empty state when no drops in that wave are currently in your
-  voted set.
-- Each row shows a `Max` value next to the vote input, and the input enforces the
-  same minimum and maximum bounds.
-- You can submit a new vote only when the value differs from the current value.
-- Typed vote values outside the current min/max range are constrained into range
-  before submit.
-- If you type `Enter` in the field, it submits the vote using the same rules as
-  clicking `Vote`.
-- The `Vote` button shows a loading state while the request is in flight.
-- During a reset operation, row-level vote inputs are disabled and a reset progress
-  bar appears.
-- The header can show `Available` credits when the wave provides that budget
-  value, and it is hidden when the value is not available.
+- Vote input accepts numeric text, including temporary empty and `-` while you
+  edit.
+- Submitted values are clamped to that row's current min/max range.
+- `Vote` is enabled only when the input is valid and changed.
+- `Vote` shows a spinner while the row request is running.
+- During bulk reset, `Select All` and `Reset Votes` are disabled.
+- During bulk reset, row vote inputs are disabled and a
+  `Resetting votes...` progress bar shows progress.
+- `Available` is shown only when vote context includes a numeric max rating.
 
 ## Edge Cases
 
-- Returning rows from the backend can carry updated vote maxima. The row label and
-  input clamp logic reflect the latest live context.
-- If a value is edited and then blurred without a valid change, the field keeps the
-  current vote value and does not submit.
-- The `Vote` action is blocked while a vote update is already processing.
-- Bulk reset is disabled when no items are selected.
+- Rows with personal vote `0` are excluded from this tab.
+- If wave vote context changes (current or max), draft input resets to live
+  values.
+- If input blurs with empty, `-`, or unchanged value, it resets without submitting.
+- The tab can remain visible even when `Leaderboard` is no longer available.
+- `Select All` affects loaded rows only; rows loaded later are not auto-selected.
+- Bulk reset runs one selected row at a time.
 
 ## Failure and Recovery
 
-- If authentication fails before voting, an error toast is shown and the row remains
-  editable.
-- If a vote request fails, an error toast is shown and you can try again from the
-  same row.
-- If a reset request fails, an error toast is shown.
-- If reset progress stays active after an error, refresh the wave and retry
-  from `My Votes`.
+- If wallet authentication fails before single-row submit,
+  `Authentication failed` appears and the row stays editable.
+- If single-row vote submit fails, an error toast appears; edit and retry in
+  the same row.
+- If bulk reset fails on any selected row, an error toast appears and reset stops immediately.
+- If reset UI stays stuck after a failed reset row, refresh the wave route and
+  reopen `My Votes`.
 
 ## Limitations / Notes
 
-- This tab is currently shown in memes and curation waves.
-- Vote behavior here is inline and does not replace other vote entry points in
-  drop modals or single-drop summaries.
-- `Available` and `Max` values come from wave vote context and are formatted for
-  readability with comma separators.
+- This tab does not show drops where your current vote is already `0`.
+- Editing and reset still depend on wave voting permissions and backend
+  validation.
+- `Available` and `Max` use comma formatting.
+- Tab selection is UI state and is not encoded in a URL tab parameter.
 
 ## Related Pages
 
 - [Wave Leaderboards Index](README.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
-- [Wave Discovery Index](../discovery/README.md)
+- [Wave Leaderboard Drop States](feature-drop-states.md)
+- [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)
 - [Wave Drop Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
 - [Docs Home](../../README.md)
