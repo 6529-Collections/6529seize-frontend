@@ -8,6 +8,7 @@ import {
   type QueryObserverResult,
 } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
@@ -40,6 +41,7 @@ interface UsePinnedWavesServerReturn {
 
 export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { address } = useSeizeConnectContext();
   const queryClient = useQueryClient();
 
   // Track ongoing operations to prevent concurrent pins
@@ -47,12 +49,20 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
 
   // Only fetch if user is authenticated
   const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
+  const viewerIdentityKey = address?.toLowerCase() ?? null;
 
   // Define the specific query key as a constant
-  const PINNED_WAVES_QUERY_KEY = [
-    QueryKey.WAVES_OVERVIEW,
-    { pinned: ApiWavesPinFilter.Pinned },
-  ];
+  const PINNED_WAVES_QUERY_KEY = useMemo(
+    () =>
+      [
+        QueryKey.WAVES_OVERVIEW,
+        {
+          pinned: ApiWavesPinFilter.Pinned,
+          ...(viewerIdentityKey ? { viewer_identity: viewerIdentityKey } : {}),
+        },
+      ] as const,
+    [viewerIdentityKey]
+  );
 
   // Fetch pinned waves
   const {
@@ -96,10 +106,15 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       predicate: (query) => {
         // Only invalidate main waves queries, not pinned waves
         const [key, params] = query.queryKey;
-        return key === QueryKey.WAVES_OVERVIEW && !(params as any)?.pinned;
+        if (key !== QueryKey.WAVES_OVERVIEW || (params as any)?.pinned) {
+          return false;
+        }
+
+        const queryViewerIdentity = (params as any)?.viewer_identity ?? null;
+        return queryViewerIdentity === viewerIdentityKey;
       },
     });
-  }, [queryClient, PINNED_WAVES_QUERY_KEY]);
+  }, [queryClient, PINNED_WAVES_QUERY_KEY, viewerIdentityKey]);
 
   // Pin wave mutation
   const pinMutation = useMutation({

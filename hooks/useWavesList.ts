@@ -2,6 +2,7 @@
 
 import { useContext, useMemo, useCallback } from "react";
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useWavesOverview } from "./useWavesOverview";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
@@ -20,6 +21,7 @@ interface EnhancedWave extends ApiWave {
  */
 const useWavesList = () => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { address } = useSeizeConnectContext();
   const {
     pinnedIds,
     pinnedWaves: serverPinnedWaves,
@@ -35,6 +37,18 @@ const useWavesList = () => {
   const isConnectedIdentity = useMemo(() => {
     return !!connectedProfile?.handle && !activeProfileProxy;
   }, [connectedProfile?.handle, activeProfileProxy]);
+  const viewerIdentityKey = useMemo(() => {
+    if (!address) {
+      return null;
+    }
+
+    const normalizedAddress = address.toLowerCase();
+    if (activeProfileProxy?.id) {
+      return `${normalizedAddress}:proxy:${activeProfileProxy.id}`;
+    }
+
+    return `${normalizedAddress}:primary`;
+  }, [address, activeProfileProxy?.id]);
 
   // Fetch main waves list
   const {
@@ -49,6 +63,7 @@ const useWavesList = () => {
     type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity && following,
+    viewerIdentityKey,
   });
 
   // Create a map of mainWaves by ID for easy lookup

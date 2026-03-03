@@ -51,6 +51,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
   setActiveWalletAccount: jest.fn(() => true),
   removeAuthJwt: jest.fn(),
   WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
+  PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 
 // Don't mock security logger - we want to test actual logging behavior

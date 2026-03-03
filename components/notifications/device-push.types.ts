@@ -10,12 +10,3 @@ export interface DevicePushData {
   wave_id?: string;
   drop_id?: string;
 }
-
-export interface DevicePushPayload {
-  notification: {
-    title: string;
-    body: string;
-    imageUrl?: string;
-  };
-  data: DevicePushData;
-}
