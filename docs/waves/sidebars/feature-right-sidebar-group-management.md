@@ -2,100 +2,98 @@
 
 ## Overview
 
-The wave right sidebar `About` content shows wave metadata (`Type`, `Creator`)
-and editable scope rows for who can view, drop, vote, chat, and administer a
-wave.
+The right-sidebar `About` content lets users manage wave access groups in place.
 
-For chat waves, the `Voting` metadata row is hidden, so the `About` block shows
-`Type` and `Creator` without a vote summary.
+Users can:
 
-Eligible editors can use `Group options` to add, change, or remove scope groups
-and to include or exclude individual identities without leaving the current
-wave view.
-
-For non-chat waves, the same panel also includes `Curation Groups` management.
-Curated groups drive curation tagging in curation-capable leaderboard waves.
+- review `View`, `Drop`, `Vote`, `Chat`, and `Admin` scopes
+- add, change, or remove scope groups from row menus
+- include or exclude one identity from a scoped group
+- manage non-chat `Curation Groups` without leaving the thread
 
 ## Location in the Site
 
-- Wave routes: `/waves/{waveId}`
-- Messages with a selected wave: `/messages?wave={waveId}`
-- Mobile wave `About` view uses the same group-management content.
-- In rank waves, this appears inside the right-sidebar `About` tab.
+- Wave thread: `/waves/{waveId}`
+- Direct-message thread: `/messages?wave={waveId}`
+- Rank waves: open the right-sidebar `About` tab
+- Non-rank waves: same content in default non-tabbed sidebar layout
+- Mobile `About` view reuses the same group-management content
 
 ## Entry Points
 
-- Open a wave and open the right sidebar.
+- Open a wave thread and open the right sidebar.
 - On rank waves, select `About`.
-- In `General` or `Curation Groups`, open the gear menu (`Group options`) on a
-  row.
+- In `General`, open `Group options` on a row.
+- In `Curation Groups` (non-chat waves), use `Add group` or row options.
 
 ## User Journey
 
-1. Open the right-sidebar groups area.
-2. Review `General` scope rows (`View`, `Drop`, `Vote`, `Chat`, `Admin`).
-3. Open `Group options` for the scope row you want to edit.
-4. Choose one action:
-   - `Include identity`
-   - `Exclude identity`
-   - `Add group` / `Change group`
-   - `Remove group` (not available for `Admin`)
-5. For include/exclude, search for an identity and confirm.
-6. The row refreshes after success and shows updated scope state.
-7. On non-chat waves, use `Curation Groups` rows and `Add group` for additional
-   curation-group management.
+1. Open right-sidebar `About`.
+2. Review the `General` rows.
+3. Check current scope value:
+   - no group: `Anyone`
+   - hidden group: `Hidden`
+   - visible group: linked name to `/network?page=1&group={groupId}`
+4. Open `Group options` on the row to update.
+5. Choose an available action:
+   - `Add group` or `Change group`
+   - `Remove group` (not shown for `Admin`)
+   - `Include identity` or `Exclude identity` (permission-gated)
+6. Complete the modal:
+   - group picker for add/change
+   - identity search modal for include/exclude
+   - confirmation modal for remove
+7. Authenticate when prompted.
+8. After success, the row refreshes.
+9. On non-chat waves, use the same actions under `Curation Groups`.
 
 ## Common Scenarios
 
-- Restrict `Drop` or `Vote` to a specific group from the right sidebar.
-- Add one identity quickly to a scoped group without opening full group-edit
-  workflows.
-- Exclude an identity from an existing scoped group.
-- Return a scope to open access by removing its assigned group.
-- Add or update curation groups in non-chat waves.
+- Restrict `Drop` or `Vote` to a specific group.
+- Remove a scope group to return that scope to `Anyone`.
+- Include or exclude a specific identity from a scope group.
+- Add or replace curation groups on non-chat waves.
 
 ## Edge Cases
 
-- `Admin` scope does not offer `Remove group`.
-- If a scope uses a direct-message group, edit controls are not shown for that
-  row.
-- In `General`, `Include identity` and `Exclude identity` are shown only when
-  the user can edit the wave and is either a wave admin or the current scope
-  group's author.
-- Hidden groups display `Hidden` instead of a linked group name.
-- `Curation Groups` is not shown on chat waves.
-- The `Voting` metadata row in the `About` block is omitted for chat waves.
-- Identity suggestions open after at least 3 typed characters.
-- Keyboard navigation is supported in identity suggestions (`ArrowUp`,
-  `ArrowDown`, `Enter`).
-- Curation groups are managed separately from access scope rows and do not alter
-  general wave visibility by themselves.
+- Chat waves show only `View`, `Chat`, and `Admin`.
+- Chat waves do not show `Curation Groups`.
+- General-row edit controls are hidden for direct-message groups.
+- `Admin` does not show `Remove group`.
+- In `General`, `Include identity` and `Exclude identity` show only when the
+  user can edit the wave and is either wave admin or the scope-group author.
+- In `Curation Groups`, edit controls show only when the user can edit the wave.
+- Curation rows fall back to plain text names when full group data is missing.
+- If no curation groups exist:
+  - editors see only `Add group`
+  - read-only viewers see no curation rows or actions
+- Identity suggestions start after at least 3 typed characters.
+- Identity selection supports `ArrowUp`, `ArrowDown`, and `Enter`.
 
 ## Failure and Recovery
 
-- If authentication is canceled or fails, no group change is applied.
-- If an update request fails, an error toast is shown and current scope settings
-  remain unchanged.
-- If curation-group loading fails, the section shows `Unavailable`; users can
-  retry by reloading the wave.
-- When include/exclude identity limits are reached, users see validation errors
-  instead of a partial update.
+- While curation groups load, the section shows `Loading groups`.
+- If curation-group fetch fails, the section shows `Unavailable`.
+- If authentication fails or is canceled, users see `Failed to authenticate`
+  and no changes are applied.
+- If a save request fails, an error toast is shown and existing settings stay as-is.
+- If include/exclude limits are hit, validation blocks the change before apply.
 
 ## Limitations / Notes
 
-- Editing controls are unavailable in proxy profile sessions.
-- Curation-group actions (`Add group`, include/exclude, change, remove) are
-  available only when the user can edit that wave.
-- Include/exclude identity limits are enforced per group:
-  - Include list max: `10,000` identities
-  - Exclude list max: `1,000` identities
-- Include/exclude actions update group configuration and then re-apply that
-  group to the wave scope.
+- Editing controls require a non-proxy profile with wave edit permission.
+- Curation-group actions are separate from `View`/`Drop`/`Vote`/`Chat`/`Admin`
+  access scope rows.
+- Include/exclude limits are enforced per group:
+  - include list max: `10,000`
+  - exclude list max: `1,000`
 
 ## Related Pages
 
 - [Waves Index](../README.md)
 - [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md)
+- [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md)
 - [Wave Creation Group Access and Permissions](../create/feature-groups-step.md)
-- [Groups List Filters](../../groups/feature-groups-list-filters.md)
+- [Group to Network Scope Flow](../../network/flow-network-group-scope.md)
+- [Group Create and Edit](../../groups/feature-group-create-and-edit.md)
 - [Docs Home](../../README.md)
