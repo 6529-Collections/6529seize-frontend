@@ -37,7 +37,7 @@ import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
 import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
-import { formatWeiToEth } from "@/helpers/manifoldDisplayHelpers";
+import { formatWeiToEth } from "@/helpers/manifold-display-helpers";
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 

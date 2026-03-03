@@ -4,7 +4,22 @@ import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 const WEI_PER_ETH = 1_000_000_000_000_000_000n;
 
 function formatBigIntWithCommas(value: bigint): string {
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const digits = value.toString();
+  const length = digits.length;
+
+  if (length <= 3) {
+    return digits;
+  }
+
+  let grouped = "";
+  const firstGroupLength = length % 3 || 3;
+  grouped += digits.slice(0, firstGroupLength);
+
+  for (let index = firstGroupLength; index < length; index += 3) {
+    grouped += `,${digits.slice(index, index + 3)}`;
+  }
+
+  return grouped;
 }
 
 export function formatWeiToEth(wei: bigint, decimals = 5): string {
@@ -16,7 +31,13 @@ export function formatWeiToEth(wei: bigint, decimals = 5): string {
   const integerPart = roundedScaled / scale;
   const fractionalPart = roundedScaled % scale;
   const fractionalRaw = fractionalPart.toString().padStart(decimals, "0");
-  const trimmedFractional = fractionalRaw.replace(/0+$/, "");
+  let trimmedLength = fractionalRaw.length;
+
+  while (trimmedLength > 0 && fractionalRaw.charCodeAt(trimmedLength - 1) === 48) {
+    trimmedLength -= 1;
+  }
+
+  const trimmedFractional = fractionalRaw.slice(0, trimmedLength);
   if (!trimmedFractional) {
     return formatBigIntWithCommas(integerPart);
   }

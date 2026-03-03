@@ -8,7 +8,7 @@ import {
   formatClaimCost,
   formatClaimStatus,
   formatEditionSize,
-} from "@/helpers/manifoldDisplayHelpers";
+} from "@/helpers/manifold-display-helpers";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useNftBalance } from "@/hooks/useNftBalance";
 import NowMintingStatsItem from "./NowMintingStatsItem";
