@@ -6,6 +6,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
 import { fetchNftLink } from "@/services/api/nft-link-api";
 import {
+  deriveMarketplaceDataHealth,
   fromNftLink,
   mergeOpenGraphFallback,
   needsOpenGraphFallback,
@@ -107,6 +108,9 @@ export const useMarketplacePreviewState = ({
       resolvedPriceCurrency:
         marketplacePreviewQuery.data?.priceCurrency ?? undefined,
       resolvedTitle: toNonEmptyString(marketplacePreviewQuery.data?.title),
+      resolvedDataHealth: deriveMarketplaceDataHealth(
+        marketplacePreviewQuery.data
+      ),
     };
   }
 

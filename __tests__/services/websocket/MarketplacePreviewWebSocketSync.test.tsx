@@ -78,6 +78,9 @@ describe("MarketplacePreviewWebSocketSync", () => {
       },
       price: "1.0",
       priceCurrency: "ETH",
+      lastErrorMessage: null,
+      lastSuccessfullyUpdatedMs: null,
+      failedSinceMs: null,
     });
     queryClient.setQueryData<MarketplacePreviewData>(nonMatchingQueryKey, {
       href: "https://example.com/2",
@@ -91,6 +94,9 @@ describe("MarketplacePreviewWebSocketSync", () => {
       },
       price: "3.0",
       priceCurrency: "USDC",
+      lastErrorMessage: null,
+      lastSuccessfullyUpdatedMs: null,
+      failedSinceMs: null,
     });
 
     render(
@@ -119,6 +125,9 @@ describe("MarketplacePreviewWebSocketSync", () => {
       },
       price: "1.5",
       priceCurrency: "ETH",
+      lastErrorMessage: null,
+      lastSuccessfullyUpdatedMs: 1771516351724,
+      failedSinceMs: null,
     });
 
     expect(
@@ -135,6 +144,9 @@ describe("MarketplacePreviewWebSocketSync", () => {
       },
       price: "3.0",
       priceCurrency: "USDC",
+      lastErrorMessage: null,
+      lastSuccessfullyUpdatedMs: null,
+      failedSinceMs: null,
     });
   });
 
@@ -157,6 +169,9 @@ describe("MarketplacePreviewWebSocketSync", () => {
       },
       price: "2.0",
       priceCurrency: "ETH",
+      lastErrorMessage: null,
+      lastSuccessfullyUpdatedMs: null,
+      failedSinceMs: null,
     });
 
     render(
@@ -198,6 +213,9 @@ describe("MarketplacePreviewWebSocketSync", () => {
       },
       price: "1.0",
       priceCurrency: "ETH",
+      lastErrorMessage: null,
+      lastSuccessfullyUpdatedMs: null,
+      failedSinceMs: null,
     });
 
     render(
@@ -229,6 +247,9 @@ describe("MarketplacePreviewWebSocketSync", () => {
       },
       price: "1.5",
       priceCurrency: "ETH",
+      lastErrorMessage: null,
+      lastSuccessfullyUpdatedMs: 1771516351724,
+      failedSinceMs: null,
     });
   });
 });

@@ -83,6 +83,45 @@ describe("useMarketplacePreviewState", () => {
     expect(mockedFetchLinkPreview).not.toHaveBeenCalled();
   });
 
+  it("resolves fresh data health when nft-link update is recent", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+    mockedFetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: {
+        canonical_id: "manifold:123",
+        platform: "manifold",
+        chain: "ethereum",
+        contract: "0x123",
+        token: "1",
+        name: "Wave Artifact",
+        description: "Some description",
+        media_uri: "https://cdn.example.com/nft-image.png",
+        last_error_message: null,
+        price: "1.25 ETH",
+        price_currency: "ETH",
+        last_successfully_updated: Math.floor(Date.now() / 1000),
+        failed_since: null,
+      },
+    });
+
+    const { result } = renderHook(() => useMarketplacePreviewState({ href }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          type: "success",
+          href,
+          resolvedDataHealth: expect.objectContaining({
+            state: "fresh",
+          }),
+        })
+      )
+    );
+  });
+
   it("falls back to link preview title when nft-link title is missing", async () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
     mockedFetchNftLink.mockResolvedValue({
@@ -282,6 +321,51 @@ describe("useMarketplacePreviewState", () => {
     );
   });
 
+  it("returns error health state when nft-link includes last_error_message", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+    mockedFetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: {
+        canonical_id: "manifold:123",
+        platform: "manifold",
+        chain: "ethereum",
+        contract: "0x123",
+        token: "1",
+        name: "Wave Artifact",
+        description: "Some description",
+        media_uri: "https://cdn.example.com/nft-image.png",
+        last_error_message: "Metadata provider timeout",
+        price: "1.25 ETH",
+        price_currency: "ETH",
+        last_successfully_updated: Math.floor(Date.now() / 1000),
+        failed_since: Math.floor(Date.now() / 1000),
+      },
+    });
+
+    const { result } = renderHook(() => useMarketplacePreviewState({ href }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          type: "success",
+          href,
+          resolvedDataHealth: expect.objectContaining({
+            state: "error",
+          }),
+        })
+      )
+    );
+
+    if (result.current.type === "success") {
+      expect(result.current.resolvedDataHealth.details).toContain(
+        "Metadata provider timeout"
+      );
+    }
+  });
+
   it("returns success from open-graph when nft-link request fails", async () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
     mockedFetchNftLink.mockRejectedValue(new Error("nft-link unavailable"));
@@ -330,5 +414,38 @@ describe("useMarketplacePreviewState", () => {
     );
     expect(mockedFetchNftLink).not.toHaveBeenCalled();
     expect(mockedFetchLinkPreview).not.toHaveBeenCalled();
+  });
+
+  it("returns unknown data health when metadata fields are missing", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+    mockedFetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: null,
+    });
+    mockedFetchLinkPreview.mockResolvedValue({
+      title: "Open graph title",
+      image: {
+        url: "https://arweave.net/og-image.png",
+        type: "image/png",
+      },
+    });
+
+    const { result } = renderHook(() => useMarketplacePreviewState({ href }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          type: "success",
+          href,
+          resolvedDataHealth: {
+            state: "unknown",
+            details: "NFT data update status unavailable",
+          },
+        })
+      )
+    );
   });
 });
