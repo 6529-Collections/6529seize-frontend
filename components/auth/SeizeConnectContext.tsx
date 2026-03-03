@@ -200,9 +200,8 @@ const isCapacitorPlatform = (): boolean => {
 };
 
 const normalizeAddress = (address: string): string => address.toLowerCase();
-// 5000ms allows wallet connectors enough time to settle transient state changes
-// so we do not treat successful account transitions as cancelled add flows.
-export const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
+
+const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
 
 const validateStoredAddress = (
   storedAddress: string
@@ -924,6 +923,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const checksummedAddress = getAddress(address);
+      if (
+        activeAddress &&
+        normalizeAddress(activeAddress) === normalizeAddress(checksummedAddress)
+      ) {
+        return;
+      }
+
       const didSwitch = setActiveWalletAccount(checksummedAddress);
       if (!didSwitch) {
         throw new AuthenticationError(
@@ -934,7 +940,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       refreshStoredConnectedAccounts();
       setConnected(checksummedAddress);
     },
-    [refreshStoredConnectedAccounts, setConnected]
+    [activeAddress, refreshStoredConnectedAccounts, setConnected]
   );
 
   const canAddConnectedAccount = useMemo(() => {

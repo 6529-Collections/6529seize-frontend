@@ -1,4 +1,4 @@
-export type ConnectionProfileState =
+type ConnectionProfileState =
   | "disconnected"
   | "authorized_only"
   | "authorized_connected";

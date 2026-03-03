@@ -6,6 +6,7 @@ import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const WALLET_ACCOUNTS_UPDATED_EVENT = "6529-wallet-accounts-updated";
+export const PROFILE_SWITCHED_EVENT = "6529-profile-switched";
 
 const WALLET_ADDRESS_STORAGE_KEY = "6529-wallet-address";
 const WALLET_REFRESH_TOKEN_STORAGE_KEY = "6529-wallet-refresh-token";
@@ -43,6 +44,12 @@ const normalizeAddress = (address: string): string => address.toLowerCase();
 const emitWalletAccountsUpdated = (): void => {
   if (globalThis.window !== undefined) {
     globalThis.dispatchEvent(new CustomEvent(WALLET_ACCOUNTS_UPDATED_EVENT));
+  }
+};
+
+const emitProfileSwitched = (): void => {
+  if (globalThis.window !== undefined) {
+    globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
   }
 };
 
@@ -280,8 +287,18 @@ export const setActiveWalletAccount = (address: string): boolean => {
   );
   if (!account) return false;
 
+  const previousActiveAddress = getActiveAddressFromStorage();
   persistAccountsWithActive(accounts, account.address);
   emitWalletAccountsUpdated();
+
+  if (
+    previousActiveAddress &&
+    normalizeAddress(previousActiveAddress) !==
+      normalizeAddress(account.address)
+  ) {
+    emitProfileSwitched();
+  }
+
   return true;
 };
 

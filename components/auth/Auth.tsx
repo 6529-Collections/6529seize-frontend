@@ -2,6 +2,7 @@
 
 import "react-toastify/dist/ReactToastify.css";
 import { useQuery } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -24,6 +25,7 @@ import type { ApiLoginRequest } from "@/generated/models/ApiLoginRequest";
 import type { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
 import type { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -38,6 +40,7 @@ import {
   canStoreAnotherWalletAccount,
   getAuthJwt,
   getWalletAddress,
+  PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
   setActiveWalletAccount,
   setAuthJwt,
@@ -129,6 +132,9 @@ export default function Auth({
   readonly children: React.ReactNode;
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     address,
@@ -703,6 +709,12 @@ export default function Auth({
   const onActiveProfileProxy = async (
     profileProxy: ApiProfileProxy | null
   ): Promise<void> => {
+    const isSameSelection =
+      (profileProxy?.id ?? null) === (activeProfileProxy?.id ?? null);
+    if (isSameSelection) {
+      return;
+    }
+
     removeAuthJwt();
     if (!address) {
       setActiveProfileProxy(null);
@@ -716,6 +728,9 @@ export default function Auth({
       });
       if (success) {
         setActiveProfileProxy(profileProxy);
+        if (globalThis.window !== undefined) {
+          globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+        }
       }
     } catch (error) {
       // Handle InvalidRoleStateError specifically
@@ -745,6 +760,48 @@ export default function Auth({
       throw error;
     }
   };
+
+  const navigateAfterProfileSwitch = useCallback(() => {
+    const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
+    if (!activeWaveId) {
+      return;
+    }
+
+    const isMessagesRoute =
+      pathname === "/messages" || pathname.startsWith("/messages/");
+    if (isMessagesRoute) {
+      router.replace("/messages");
+      return;
+    }
+
+    const isWavesRoute =
+      pathname === "/waves" || pathname.startsWith("/waves/");
+    if (isWavesRoute || pathname === "/") {
+      router.replace("/waves");
+    }
+  }, [pathname, router, searchParams]);
+
+  useEffect(() => {
+    const onProfileSwitched = () => {
+      invalidateAll();
+      navigateAfterProfileSwitch();
+    };
+
+    if (globalThis.window === undefined) {
+      return;
+    }
+
+    globalThis.window.addEventListener(
+      PROFILE_SWITCHED_EVENT,
+      onProfileSwitched
+    );
+    return () => {
+      globalThis.window.removeEventListener(
+        PROFILE_SWITCHED_EVENT,
+        onProfileSwitched
+      );
+    };
+  }, [invalidateAll, navigateAfterProfileSwitch]);
 
   const showWaves = useMemo(() => {
     return !!connectedProfile?.handle && !activeProfileProxy && !!address;

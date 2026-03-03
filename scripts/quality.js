@@ -7,6 +7,7 @@ const TARGET = `${REMOTE}/${BRANCH}`;
 
 const args = process.argv.slice(2);
 const enableCoderabbit = args.includes("--coderabbit");
+const changedMode = args.includes("--changed");
 
 const run = (command, options = {}) =>
   execSync(command, {
@@ -190,23 +191,45 @@ if (!Number.isFinite(behind) || !Number.isFinite(ahead)) {
 // }
 
 try {
-  execSync("npm run format:uncommitted", { stdio: "inherit" });
+  execSync(
+    changedMode ? "npm run format:changed" : "npm run format:uncommitted",
+    {
+      stdio: "inherit",
+    }
+  );
 } catch (error) {
-  fail("Format uncommitted files failed.");
+  fail(
+    changedMode
+      ? "Format changed files failed."
+      : "Format uncommitted files failed."
+  );
 }
 
 try {
-  execSync("npm run lint:diff", { stdio: "inherit" });
-} catch (error) {
-  fail("ESLint diff check failed.");
-}
-
-try {
-  execSync("npx --no-install tsc --noEmit -p tsconfig.typecheck.json", {
+  execSync(changedMode ? "npm run lint:changed" : "npm run lint:diff", {
     stdio: "inherit",
   });
 } catch (error) {
-  fail("TypeScript check failed.");
+  fail(
+    changedMode ? "ESLint changed check failed." : "ESLint diff check failed."
+  );
+}
+
+try {
+  execSync(
+    changedMode
+      ? "node scripts/typecheck-changed.cjs"
+      : "npx --no-install tsc --noEmit -p tsconfig.typecheck.json",
+    {
+      stdio: "inherit",
+    }
+  );
+} catch (error) {
+  fail(
+    changedMode
+      ? "TypeScript changed check failed."
+      : "TypeScript check failed."
+  );
 }
 
 let knipStdout = "";

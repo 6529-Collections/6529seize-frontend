@@ -25,11 +25,13 @@
     "lint:quiet": "eslint . --quiet",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "typecheck:changed": "npm run lint:changed:fix && npm run format:changed && node scripts/typecheck-changed.cjs",
     "lint:csv": "node scripts/eslint-rule-summary.cjs --output eslint-rule-summary.csv",
     "lint:csv:tight": "node scripts/eslint-rule-summary.cjs --config eslint.config.tight.mjs --output eslint-rule-summary.csv",
     "lint:changed:csv": "node scripts/eslint-rule-summary.cjs --changed --output eslint-rule-summary.csv",
     "lint:changed:csv:tight": "node scripts/eslint-rule-summary.cjs --changed --config eslint.config.tight.mjs --output eslint-rule-summary.csv",
     "lint:changed": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint  --no-warn-ignored --max-warnings=0'",
+    "lint:changed:fix": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --fix --no-warn-ignored --max-warnings=0'",
     "lint:changed:tight": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.tight.mjs --no-warn-ignored --max-warnings=0'",
     "lint:uncommitted:tight": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.tight.mjs --no-warn-ignored --max-warnings=0'",
     "lint:fix": "npx eslint . --ext .ts,.tsx,.js,.jsx --fix",
@@ -45,7 +47,9 @@
     "cr": "coderabbit --type uncommitted --base main --prompt-only",
     "sync": "bash scripts/worktree/wt-sync.sh",
     "quality": "node scripts/quality.js",
-    "quality:cr": "node scripts/quality.js --coderabbit"
+    "quality:changed": "node scripts/quality.js --changed",
+    "quality:cr": "node scripts/quality.js --coderabbit",
+    "quality:cr:changed": "node scripts/quality.js --changed --coderabbit"
   },
   "dependencies": {
     "@adraffy/ens-normalize": "^1.11.1",
@@ -217,7 +221,6 @@
       "react": "$react",
       "react-dom": "$react-dom"
     },
-    "minimatch": "^10.2.4",
     "serialize-javascript": "7.0.4"
   }
 }

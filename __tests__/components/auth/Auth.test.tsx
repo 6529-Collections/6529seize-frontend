@@ -33,6 +33,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
   setAuthJwt: jest.fn(),
   syncConnectedWalletProfile: jest.fn(),
   getAuthJwt: jest.fn(() => null),
+  PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 
 // Using jwt-validation.utils instead of direct jwt-decode
@@ -80,6 +81,15 @@ jest.mock("react-bootstrap", () => ({
 jest.mock("@/services/auth/jwt-validation.utils", () => ({
   validateJwt: jest.fn(async () => ({ isValid: true, wasCancelled: false })),
   getRole: jest.fn(() => null),
+}));
+
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(() => "/"),
+  useRouter: jest.fn(() => ({
+    replace: jest.fn(),
+    push: jest.fn(),
+  })),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }));
 
 jest.mock("@/services/auth/immediate-validation.utils", () => ({
