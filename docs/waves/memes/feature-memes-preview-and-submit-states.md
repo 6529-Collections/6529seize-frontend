@@ -2,60 +2,69 @@
 
 ## Overview
 
-Before final submit, memes modal provides a read-only preview mode that renders
-leaderboard and gallery card variants.
-Submission progresses through `uploading` -> `processing` -> `success` and keeps
-users in the same modal flow when retry is needed.
+Before final submit, the memes modal provides a read-only preview screen with
+leaderboard list and gallery render cases.
+
+Submission phase flow is:
+
+- file submit: `uploading -> signing -> processing -> success`
+- interactive URL submit: `signing -> processing -> success`
+
+Errors keep the user in the same modal state for retry.
 
 ## Location in the Site
 
-- Memes submission modal preview screen
-- Memes leaderboard/gallery cards after successful submission
+- Memes submission modal preview screen (inside `Additional Information`)
+- Memes single-drop view after successful submit
 
 ## Entry Points
 
-- Complete required Additional Information fields.
-- Click `Preview` from Additional Information.
-- Click `Back to Edit` or `Submit Artwork` from preview.
+- Complete required `Additional Information` fields.
+- Click `Preview`.
+- From preview, click `Back to Edit` or `Submit Artwork`.
 
 ## User Journey
 
-1. Fill required fields in Additional Information.
-2. Click `Preview` to open read-only draft render.
-3. Review leaderboard and gallery card appearance.
-4. Use `Back to Edit` to continue editing with draft state preserved.
-5. Use `Submit Artwork` to begin upload/signing/submission progression.
-6. On success, verify rendered sections in resulting memes drop detail view.
+1. Click `Preview` to open read-only rendering.
+2. Review list and gallery card appearance.
+3. Use `Back to Edit` to keep editing with draft state preserved.
+4. Click `Submit Artwork` to run submit phases.
+5. Wait for `success`; modal closes shortly after success.
+6. Open resulting drop and verify rendered details.
 
 ## Common Scenarios
 
-- `Preview` action appears only after required fields validate.
-- Preview cards are non-actionable and intended only for layout verification.
-- Preview uses temporary score/rating values to mimic live leaderboard appearance.
-- Returning from preview preserves current draft values.
-- Post-submit single-drop view can render process sections for preview image,
-  promo video, additional media, about-artist text, and commentary.
+- `Preview` and `Submit Artwork` stay disabled until Additional Information is
+  valid.
+- Preview cards are non-actionable and used only for layout/content checks.
+- Preview uses temporary rating/rank values to simulate leaderboard appearance.
+- `Back to Edit` returns to the same draft values.
+- Submission progress UI reports `uploading`, `signing`, `processing`,
+  `success`, or `error`.
+- In `Artwork`, submit button text changes by phase (`Continue`,
+  `Uploading...`, `Processing...`, `Try Again`, `✓ Submission Complete`).
 
 ## Edge Cases
 
-- Preview media is required for `video`, `text/html`, and `model/gltf-binary`
-  submissions.
-- Promo video option appears only for `text/html` and `model/gltf-binary`
-  submissions.
-- Very small viewports keep content scrollable while retaining action controls.
+- Interactive URL submissions skip upload and start at `signing`.
+- `Cancel` in `Artwork` is disabled while uploading/processing.
+- Preview image requirements for `Video`/`HTML`/`GLB` must pass before preview
+  or submit actions enable.
+- Small viewports keep preview content scrollable with fixed action controls.
 
 ## Failure and Recovery
 
-- If Additional Information validation fails, `Preview` and `Submit Artwork` remain
-  disabled.
-- If preview output looks incorrect, return to edit, adjust fields, and reopen
-  preview.
-- If signing/API submission fails, users can retry from existing modal state.
+- If preview output is wrong, return to edit, update fields, and reopen preview.
+- If authentication/signing/API submission fails, the modal keeps current draft
+  state and supports retry.
+- If no valid media exists, submission is blocked before API post.
 
 ## Limitations / Notes
 
-- Preview is a local draft render and does not imply final ranking/on-chain outcome.
-- Social-share fallback uses preview image when promo video is not provided.
+- Preview is local draft rendering only; it does not guarantee final ranking or
+  on-chain outcomes.
+- `success` confirms submission completion in app flow; downstream processing
+  outside this modal is out of scope.
 
 ## Related Pages
 

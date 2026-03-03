@@ -72,7 +72,8 @@ Use this area for wave and direct-message tasks:
   rendering in thread content and home-style drop-card variants.
 - [Leaderboard](leaderboard/README.md): leaderboard states, filters, timeline,
   winners-tab behavior, `My Votes` tab behavior, and top-voter views.
-- [Memes](memes/README.md): memes submission flow and submission-state behavior.
+- [Memes](memes/README.md): memes submission flow, preview/submit states, and
+  single-drop additional-info rendering.
 - [Outcome Lists](feature-outcome-lists.md): `Outcome` tab cards plus ranked-drop
   reward summaries in leaderboard and winners surfaces.
 

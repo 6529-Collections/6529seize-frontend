@@ -2,66 +2,75 @@
 
 ## Overview
 
-The Additional Information step captures operational fields used for memes drop
-metadata and post-submission rendering.
-When signed in, payment address and initial airdrop row are seeded from the
-connected profile primary wallet.
+The `Additional Information` step captures payout/distribution metadata and
+creator context shown on memes single-drop views.
+
+When available, the connected profile's primary wallet seeds both:
+
+- `Payment Address`
+- initial `Airdrop Distribution` row (`20` total count)
 
 ## Location in the Site
 
-- Memes submission modal Additional Information step
-- Memes single-drop detail view where process/technical sections are rendered
+- Memes submission modal: `Additional Information` step
+- Memes single-drop detail view:
+  - `Technical details` accordion
+  - additional content sections (`Preview Image`, `Promo Video`,
+    `Additional Media`, `About the Artist`, `Artwork Commentary`)
 
 ## Entry Points
 
-- Complete Agreement + Artwork steps and continue to Additional Information.
-- Open existing memes single-drop view to inspect rendered process/technical fields.
+- Complete `Agreement` and `Artwork`, then continue to `Additional Information`.
+- Open a submitted memes drop to review rendered metadata sections.
 
 ## User Journey
 
-1. Open Additional Information in submission modal.
-2. Complete required artist + payment + distribution inputs.
-3. Optionally configure allowlist and supplemental media.
-4. Submit and open resulting drop to verify process/technical rendering.
+1. Review/edit `Airdrop Distribution`.
+2. Review/edit `Payment`, optionally enabling `Designated Payee`.
+3. Add optional `Allowlist Configuration` batches.
+4. Add optional media and required text under `Supplemental Media & Commentary`.
+5. Continue to `Preview` and submit.
+6. Open the resulting drop to verify rendered technical/detail sections.
 
 ## Common Scenarios
 
-- Airdrop distribution starts with one prefilled wallet row totaling `20` tokens.
-- Users can add/remove distribution rows.
-- Total distribution must equal `20` before submission can pass.
-- Payment address accepts `0x...` or ENS formats.
-- Profile primary wallet preloads payment address and airdrop defaults.
-- Enabling designated payee reveals required payee name and relabels address field.
-- Allowlist supports multiple batches with required contract address per batch.
-- Token ranges accept formats like `1,2,3` and `10-20`.
+- Airdrop totals must equal `20` before `Preview`/`Submit Artwork` is enabled.
+- Users can add/remove airdrop rows and allowlist batches.
+- Address inputs accept ENS input, but submission requires resolved strict `0x`
+  addresses.
+- Enabling `Designated Payee` makes payee name required and relabels address
+  field.
+- Allowlist batches require contract address; token IDs are optional.
+- Token IDs support formats like `1,2,3` and `10-20`.
 - `About the Artist` and `Artwork Commentary` are required.
 - `About the Artist` auto-loads profile bio when available.
-- Supporting media accepts up to 4 files.
-- `Preview` media accepts one image/GIF and is required for video/HTML/GLB
-  submissions.
-- `Promo Video` accepts one video for HTML/GLB and is optional.
+- Supporting media allows up to `4` uploads.
+- `Preview` image is required for `Video`, `HTML`, and `GLB` submissions.
+- `Promo Video` is optional and shown for `HTML`/`GLB` submissions.
 
 ## Edge Cases
 
-- Count values must be integers and cannot exceed total target `20`.
-- Rows with positive count must have valid `0x...` addresses.
-- Invalid ENS or malformed addresses block submission.
-- Allowlist batch with missing contract address blocks submission.
-- Invalid token ID range/list formats block submission.
-- If profile has no bio, `About the Artist` starts empty and must be filled manually.
+- Airdrop counts must be non-negative integers.
+- Any row with `count > 0` needs a valid address.
+- Valid addresses with `count <= 0` also block submit.
+- Invalid ENS resolution or malformed addresses block submit.
+- Invalid token ID range/list formats block submit.
+- If profile bio is unavailable, `About the Artist` starts empty.
 
 ## Failure and Recovery
 
-- Missing required payment/artist/commentary/preview fields keep submission blocked
-  until corrected.
-- If supplemental media upload fails, remove failed item, re-upload, and continue.
+- Missing payment/address/commentary/artist/preview requirements keep actions
+  disabled until fixed.
+- Failed supplemental uploads can be removed and retried.
+- If a stored drop has malformed additional-media JSON, only valid parsed
+  fields render.
 
 ## Limitations / Notes
 
-- Payment/distribution prefill is editable by the submitter.
-- Technical details block in single-drop view appears only when metadata contains
-  payment/distribution/allowlist details.
-- Process sections appear only when corresponding metadata exists.
+- Prefilled payment/airdrop values remain editable.
+- `Technical details` appears only when payment, airdrop, or allowlist metadata
+  exists.
+- Detail sections render only when their metadata fields are present.
 
 ## Related Pages
 

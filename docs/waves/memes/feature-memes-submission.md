@@ -2,71 +2,80 @@
 
 ## Overview
 
-Memes submission uses a three-step modal workflow:
+Memes submission uses a three-step modal:
 
-- Agreement
-- Artwork
-- Additional Information
+- `Agreement`
+- `Artwork`
+- `Additional Information`
 
-Artists can submit by file upload or by referencing interactive media via IPFS or
-Arweave.
-The modal enforces required fields and only enables completion when inputs are valid.
+Creators can submit by uploading a file or by referencing interactive HTML from
+IPFS/Arweave. The modal blocks forward progress until required inputs are valid.
 
 ## Location in the Site
 
-- Memes wave route: `/waves/{waveId}` (leaderboard view)
-- Submission modal opened from leaderboard `Drop` control
+- Memes wave thread route: `/waves/{waveId}`
+- Memes submission modal start controls:
+  - Desktop meme tabs header: `Submit Work to The Memes`
+  - Mobile leaderboard header: `Drop`
+  - Mobile chat view: floating submit button
 
 ## Entry Points
 
-- Open a Memes wave leaderboard and click `Drop`.
-- Progress through Agreement -> Artwork -> Additional Information.
+- Open a memes wave where submit is enabled.
+- Start submission from any submit control.
+- In `Agreement`, check the certification box and click `I Agree & Continue`.
 
 ## User Journey
 
-1. Start the modal from Memes leaderboard `Drop`.
-2. Accept terms in Agreement step.
-3. In Artwork, choose source type:
-   - **Upload File**: drag/drop or select supported local file.
-   - **Interactive URL**: choose `IPFS` or `Arweave` and enter root hash or tx ID.
-4. If interactive input validates, artwork preview appears.
-5. Continue to Additional Information and complete required fields.
-6. Move to preview/submission states once validation passes.
+1. Open the modal and accept terms in `Agreement`.
+2. In `Artwork`, complete `Artwork Details` (`Title`, `Description`) and trait
+   fields.
+3. Choose media source:
+   - `Upload File`: drag/drop or file picker.
+   - `Interactive HTML`: choose `IPFS` or `Arweave`, then enter root CID/tx ID.
+4. Continue to `Additional Information` after Artwork validation passes.
+5. Continue to preview and submit states from Additional Information.
 
 ## Common Scenarios
 
-- Upload mode shows local previews after file selection.
-- Supported upload labels are `PNG`, `JPG`, `GIF`, `VIDEO`, and `GLB`.
-- Files larger than `200MB` are rejected before upload.
-- Upload progress stays within `0%` to `100%` during multipart retries.
-- Interactive mode sanitizes gateway input and blocks invalid hashes/unsafe URLs.
-- On small screens, modal stays within viewport and artwork step scrolls internally.
-- Upload and interactive panels keep minimum heights on small screens to avoid
-  collapsing controls.
+- Upload mode supports `PNG`, `JPG`, `GIF`, `VIDEO`, and `GLB` categories.
+- Uploads above `200MB` are blocked before submit.
+- Interactive mode accepts only root identifiers (no path/query/fragment
+  suffixes).
+- Interactive preview validation checks allowed HTTPS gateways and HTML content
+  type.
+- Switching between `Upload File` and `Interactive HTML` keeps each source's
+  draft state.
+- `Escape`, backdrop click, and close button close the modal.
 
 ## Edge Cases
 
-- Switching from upload to interactive mode does not discard prepared local artwork
-  until URL mode is explicitly cleared.
-- Switching back to upload restores previously prepared local upload state.
-- If interactive hash validation fails, users remain on Artwork step until corrected.
+- `Agreement` cannot continue until certification is checked.
+- `Artwork` cannot continue until required text/trait fields and media are
+  valid.
+- Number-based trait fields reject `0`.
+- Interactive validation pending/invalid states keep users on `Artwork` until
+  corrected.
 
 ## Failure and Recovery
 
-- If no valid artwork exists (missing file and missing valid media URL), submission
-  stops before API call.
-- Empty selected files fail validation and require reselection.
-- Unsupported file formats keep validation errors visible on Artwork step.
-- If signing or submission fails, users can retry from the same modal state.
+- Unsupported file type or oversize file shows validation errors in `Artwork`.
+- If no valid media source exists, submit is blocked before API call.
+- Interactive validation failures show inline errors; fix hash/provider and
+  retry.
+- Signing/API failures keep modal state; users can retry without restarting.
 
 ## Limitations / Notes
 
-- Interactive URL mode requires supported gateway hosts and root-style hashes.
-- Interactive URLs block query strings, unsafe schemes, and path suffixes.
+- Interactive mode is fixed to `text/html` media type.
+- Final submit requires wallet authentication and signature against wave terms.
+- Entry gating (eligibility, limits, open/close windows) is documented in
+  [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md).
 
 ## Related Pages
 
 - [Memes Additional Information Fields](feature-memes-additional-info-fields.md)
 - [Memes Preview and Submit States](feature-memes-preview-and-submit-states.md)
+- [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Interactive HTML Media Rendering](../../media/rendering/feature-interactive-html-rendering.md)
