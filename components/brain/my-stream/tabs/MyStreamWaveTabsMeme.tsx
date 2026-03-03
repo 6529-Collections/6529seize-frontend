@@ -115,7 +115,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   });
 
   useEffect(() => {
-    if (!nextDecisionTime) return;
+    if (typeof nextDecisionTime !== "number") return;
 
     setTimeLeft(calculateTimeLeft(nextDecisionTime));
     const intervalId = setInterval(() => {
@@ -310,11 +310,12 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             wave={wave}
             setActiveTab={setActiveContentTab}
           />
-          {(isMemesWave || isRankWave) && nextDecisionTime && (
-            <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4">
-              <CompactTimeCountdown timeLeft={timeLeft} />
-            </div>
-          )}
+          {(isMemesWave || isRankWave) &&
+            typeof nextDecisionTime === "number" && (
+              <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4">
+                <CompactTimeCountdown timeLeft={timeLeft} />
+              </div>
+            )}
         </div>
       </div>
       <MemesArtSubmissionModal
