@@ -73,8 +73,8 @@ Use this area for wave and direct-message tasks:
 - [Leaderboard](leaderboard/README.md): leaderboard states, filters, timeline,
   winners-tab behavior, `My Votes` tab behavior, and top-voter views.
 - [Memes](memes/README.md): memes submission flow and submission-state behavior.
-- [Outcome Lists](feature-outcome-lists.md): outcome cards, winner rows, and
-  distribution loading states.
+- [Outcome Lists](feature-outcome-lists.md): `Outcome` tab cards plus ranked-drop
+  reward summaries in leaderboard and winners surfaces.
 
 ## Flows
 
