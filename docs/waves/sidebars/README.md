@@ -21,7 +21,9 @@ Route scope:
 
 - [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md)
 - [Wave Right Sidebar Leaderboard](feature-right-sidebar-leaderboard.md)
-- [Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md)
+- [Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md):
+  canonical owner for serial-jump and drop-overlay open actions from
+  `Trending`, `Activity`, `Leaderboard`, and `Winners`.
 - [Wave Right Sidebar Group and Curation Management](feature-right-sidebar-group-management.md)
 - [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md):
   boosted-drop ranking cards (`Day`, `Week`, `Month`) in `About`.
