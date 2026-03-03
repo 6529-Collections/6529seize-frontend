@@ -16,6 +16,7 @@ const canonicalPath = (filePath) => {
 };
 
 const runGitCommand = (args) => {
+  // Sonar hotspot accepted: this is a trusted local developer script.
   const result = spawnSync("git", args, EXEC_OPTIONS);
   if (result.error) {
     throw result.error;
