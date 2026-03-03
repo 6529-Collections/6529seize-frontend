@@ -11851,6 +11851,7 @@ components:
         bytes:
           type: integer
           format: int64
+          minimum: 0
         format:
           type: string
           enum:
@@ -11880,18 +11881,22 @@ components:
         bytes:
           type: integer
           format: int64
+          minimum: 0
         format:
           type: string
         duration:
           type: number
+          minimum: 0
         sha256:
           type: string
         width:
           type: integer
           format: int32
+          minimum: 0
         height:
           type: integer
           format: int32
+          minimum: 0
         codecs:
           type: array
           items:
@@ -11924,6 +11929,7 @@ components:
         bytes:
           type: integer
           format: int64
+          minimum: 0
         format:
           type: string
         sha256:
@@ -11931,9 +11937,11 @@ components:
         width:
           type: integer
           format: int32
+          minimum: 0
         height:
           type: integer
           format: int32
+          minimum: 0
     MintingClaimsPageResponse:
       type: object
       required:
@@ -12149,10 +12157,11 @@ components:
         - amount
       properties:
         wallet:
-          type: string
+          $ref: "#/components/schemas/ApiEthereumAddress"
         amount:
           type: integer
           format: int64
+          minimum: 0
     RedeemedSubscription:
       type: object
       required:

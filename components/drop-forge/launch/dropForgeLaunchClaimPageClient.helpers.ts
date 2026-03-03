@@ -158,7 +158,7 @@ export function summarizeAirdrops(entries: PhaseAirdrop[] | null): {
       .map((wallet) => wallet.toLowerCase())
   );
   const totalAirdrops = entries.reduce(
-    (sum, item) => sum + Number(item.amount ?? 0),
+    (sum, item) => sum + normalizeAirdropAmount(item.amount),
     0
   );
 
@@ -286,7 +286,10 @@ function isVideoUrl(url: string | null | undefined): boolean {
     lower.includes(".mp4") ||
     lower.includes(".webm") ||
     lower.includes(".mov") ||
-    lower.includes(".m4v")
+    lower.includes(".m4v") ||
+    lower.includes(".qt") ||
+    lower.includes(".ogv") ||
+    lower.includes(".ogg")
   );
 }
 
@@ -356,7 +359,7 @@ export function getMediaTypeLabel(
 export function getAnimationMimeType(claim: MintingClaim): string | null {
   const animationUrl = claim.animation_url ?? null;
   if (!animationUrl) return null;
-  const lowerUrl = animationUrl.toLowerCase();
+  const extension = getUrlExtension(animationUrl);
   const normalizedFormat = (
     claim.animation_details as { format?: string } | null | undefined
   )?.format?.toUpperCase();
@@ -372,20 +375,20 @@ export function getAnimationMimeType(claim: MintingClaim): string | null {
     return formatMimeMap[normalizedFormat] ?? "video/mp4";
   }
   if (isVideoUrl(animationUrl)) {
-    if (lowerUrl.endsWith(".mp4")) return "video/mp4";
-    if (lowerUrl.endsWith(".webm")) return "video/webm";
-    if (lowerUrl.endsWith(".mov") || lowerUrl.endsWith(".qt")) {
+    if (extension === "mp4") return "video/mp4";
+    if (extension === "webm") return "video/webm";
+    if (extension === "mov" || extension === "qt") {
       return "video/quicktime";
     }
-    if (lowerUrl.endsWith(".m4v")) return "video/x-m4v";
-    if (lowerUrl.endsWith(".ogv") || lowerUrl.endsWith(".ogg")) {
+    if (extension === "m4v") return "video/x-m4v";
+    if (extension === "ogv" || extension === "ogg") {
       return "video/ogg";
     }
     return "video/*";
   }
-  if (lowerUrl.endsWith(".glb")) return "model/gltf-binary";
-  if (lowerUrl.endsWith(".gltf")) return "model/gltf+json";
-  if (lowerUrl.endsWith(".html")) return "text/html";
+  if (extension === "glb") return "model/gltf-binary";
+  if (extension === "gltf") return "model/gltf+json";
+  if (extension === "html" || extension === "htm") return "text/html";
   return "application/octet-stream";
 }
 

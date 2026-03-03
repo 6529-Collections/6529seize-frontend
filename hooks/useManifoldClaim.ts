@@ -11,7 +11,7 @@ import {
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
-import type { Abi } from "viem";
+import { isAddress, type Abi } from "viem";
 
 export enum ManifoldClaimStatus {
   UPCOMING = "upcoming",
@@ -79,6 +79,62 @@ const PHASE_DEFINITIONS: PhaseDefinition[] = [
 
 const ACTIVE_CLAIM_REFETCH_INTERVAL_MS = 5000;
 const INACTIVE_CLAIM_REFETCH_INTERVAL_MS = 10000;
+const UINT_256_MAX = (1n << 256n) - 1n;
+
+function parseUnknownBigInt(value: unknown): bigint | null {
+  if (typeof value === "bigint") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    if (!Number.isFinite(value) || !Number.isInteger(value)) {
+      return null;
+    }
+    return BigInt(value);
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    try {
+      return BigInt(trimmed);
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+function toValidatedAddress(value: unknown): `0x${string}` {
+  if (typeof value === "string" && isAddress(value)) {
+    return value as `0x${string}`;
+  }
+  return NULL_ADDRESS;
+}
+
+function toValidatedMerkleRoot(value: unknown): `0x${string}` {
+  if (typeof value === "string" && /^0x[a-fA-F0-9]{64}$/.test(value)) {
+    return value as `0x${string}`;
+  }
+  return NULL_MERKLE;
+}
+
+function toValidatedTokenId(value: unknown): number {
+  const parsed = parseUnknownBigInt(value);
+  if (
+    parsed === null ||
+    parsed < 0n ||
+    parsed > UINT_256_MAX ||
+    parsed > BigInt(Number.MAX_SAFE_INTEGER)
+  ) {
+    return 0;
+  }
+  return Number(parsed);
+}
 
 export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
   const resolveTime = ({
@@ -224,9 +280,15 @@ export function useManifoldClaim({
           : identifier;
       const startDate = Number(claimData.startDate ?? 0);
       const endDate = Number(claimData.endDate ?? 0);
-      const costWei = BigInt(claimData.cost ?? 0);
+      const costRaw = parseUnknownBigInt(claimData.cost);
+      const costWei = costRaw !== null && costRaw >= 0n ? costRaw : 0n;
+      const merkleRoot = toValidatedMerkleRoot(claimData.merkleRoot);
+      const tokenId = toValidatedTokenId(claimData.tokenId);
+      const paymentReceiver = toValidatedAddress(claimData.paymentReceiver);
+      const erc20 = toValidatedAddress(claimData.erc20);
+      const signingAddress = toValidatedAddress(claimData.signingAddress);
       const status = getStatus(startDate, endDate);
-      const publicMerkle = areEqualAddresses(NULL_MERKLE, claimData.merkleRoot);
+      const publicMerkle = areEqualAddresses(NULL_MERKLE, merkleRoot);
       const phase =
         publicMerkle && claimData.total > 0
           ? ManifoldPhase.PUBLIC
@@ -243,17 +305,11 @@ export function useManifoldClaim({
         costWei,
         walletMax: Number(claimData.walletMax ?? 0),
         storageProtocol: Number(claimData.storageProtocol ?? 0),
-        merkleRoot: String(
-          claimData.merkleRoot ?? NULL_MERKLE
-        ) as `0x${string}`,
-        tokenId: Number(claimData.tokenId ?? 0),
-        paymentReceiver: String(
-          claimData.paymentReceiver ?? NULL_ADDRESS
-        ) as `0x${string}`,
-        erc20: String(claimData.erc20 ?? NULL_ADDRESS) as `0x${string}`,
-        signingAddress: String(
-          claimData.signingAddress ?? NULL_ADDRESS
-        ) as `0x${string}`,
+        merkleRoot,
+        tokenId,
+        paymentReceiver,
+        erc20,
+        signingAddress,
         startDate,
         endDate,
         status: status,

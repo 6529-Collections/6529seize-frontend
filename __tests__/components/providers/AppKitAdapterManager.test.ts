@@ -800,13 +800,14 @@ describe("AppKitAdapterManager", () => {
       );
     });
 
-    it("should propagate requestPassword errors", async () => {
+    it("should not call requestPassword during adapter creation", () => {
       mockRequestPassword.mockRejectedValueOnce(
         new Error("Password request failed")
       );
       const adapter = manager.createAdapter([mockWallet]);
 
       expect(adapter).toBeDefined();
+      expect(mockRequestPassword).not.toHaveBeenCalled();
     });
   });
 
