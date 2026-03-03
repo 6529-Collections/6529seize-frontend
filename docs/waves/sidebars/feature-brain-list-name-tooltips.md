@@ -1,20 +1,27 @@
 # Brain Wave List Name Tooltips
 
-## Overview
+## Status
 
-Tooltip behavior for wave/DM list rows now lives with `Last drop` metadata in a
-single canonical page.
+Legacy deep-link alias. Tooltip ownership moved to
+[Brain Wave Row Metadata and Last Drop Indicator](feature-brain-list-last-drop-indicator.md).
+Old links to this page are kept so existing bookmarks still resolve.
 
-## Canonical Page
+## Location in the Site
 
-- [Brain Wave List Row Metadata](feature-brain-list-last-drop-indicator.md)
+- Web left sidebar rows on `/waves`, `/waves/{waveId}`, `/messages`, and
+  `/messages?wave={waveId}`.
+- Applies to both wave rows and direct-message rows in the web sidebar list.
 
-## Why This Page Still Exists
+## Current User Behavior
 
-- Preserves old links that pointed directly to tooltip behavior.
-- Redirects readers to the merged row-metadata journey page.
+- Collapsed web rows: hover the row avatar to read the full name.
+- Expanded web rows: tooltip appears only when the visible name is truncated.
+- Touch/mobile rows: no hover tooltip; names stay inline.
+
+## Canonical Owner
+
+- [Brain Wave Row Metadata and Last Drop Indicator](feature-brain-list-last-drop-indicator.md)
 
 ## Related Pages
 
-- [Brain Wave List Row Metadata](feature-brain-list-last-drop-indicator.md)
 - [Wave Sidebars Index](README.md)

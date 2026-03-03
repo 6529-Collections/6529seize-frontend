@@ -32,10 +32,10 @@ Route scope:
   row open/clear behavior, unread `divider` routing, and stale `wave` query
   cleanup.
 - [Brain Wave Row Metadata and Last Drop Indicator](feature-brain-list-last-drop-indicator.md):
-  canonical owner for expanded/collapsed name labels, tooltip behavior,
-  `Last drop` timestamp source, live refresh, and ordering behavior.
+  canonical owner for row-name labels, web tooltip rules, `Last drop` timestamp
+  source, live refresh, and sorting behavior across wave and DM lists.
 - [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md):
-  legacy pointer kept for older tooltip-only deep links.
+  legacy deep-link alias that points to the canonical row-metadata page.
 - [Pinned Wave Controls](feature-pinned-wave-controls.md)
 - [Wave Notification Controls and Mute Behavior](feature-wave-notification-controls.md)
 - [Wave Left Sidebar Expand Control](feature-left-sidebar-expand-control.md):
