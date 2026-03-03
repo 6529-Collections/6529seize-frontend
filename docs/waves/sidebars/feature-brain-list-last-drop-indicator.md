@@ -1,63 +1,60 @@
 # Brain Wave List Last Drop Indicator
 
-## Overview
-Expanded wave and direct-message rows can show a `Last drop:` line under the
-name. The value is a relative timestamp from the newest known drop for that
-row.
+## What This Shows
 
-## Location in the Site
+Expanded wave and direct-message rows can show `Last drop:` under the row name.
 
-- Expanded left-list rows on `/waves`, `/waves/{waveId}`, `/messages`, and
+The value uses the newest known drop time for that row from list data plus live
+updates.
+
+## Where You See It
+
+- Expanded list rows on `/waves`, `/waves/{waveId}`, `/messages`, and
   `/messages?wave={waveId}`
-- Mobile Waves and Messages list views that reuse the same row component
-- Hidden in collapsed desktop sidebar rows
+- Mobile Waves and Messages list screens that reuse the same row behavior
+- Not shown in collapsed desktop sidebar rows
 
-## Entry Points
+## When It Appears
 
-- Open Waves or Messages list views.
-- Keep the list in expanded row mode.
-- Look for a row with a known drop timestamp.
+1. You are authenticated and can access Waves/Messages content.
+2. The row is in expanded mode.
+3. The row has a known latest-drop timestamp.
 
-## User Journey
+If no timestamp is known, the `Last drop` line stays hidden.
 
-1. The row starts from the newest known timestamp
-   (`metrics.latest_drop_timestamp` merged with cached websocket time).
-2. The label renders as relative time and refreshes every minute.
-3. New websocket drops in unmuted rows update the timestamp immediately.
-4. Opening a row clears new-drop counters for that row but keeps the newest
-   timestamp.
+## How It Updates
 
-## Common Scenarios
+1. Initial value comes from list overview timestamps.
+2. New live drops in unmuted rows can move `Last drop` forward immediately.
+3. The label refreshes every minute.
+4. Opening a row clears its live new-drop counter, but keeps the newest `Last drop` time.
+
+## Unread and Mute Behavior
 
 - Your own new drop updates `Last drop` but does not increase unread count.
-- If the row is active and the tab is visible, timestamp still updates but
-  unread count does not increase.
-- If the row is active while the tab is hidden, unread count can increase until
-  the tab becomes visible.
+- If a row is active and the tab is visible, `Last drop` updates but unread does
+  not increase.
+- If a row is active and the tab is hidden, unread can increase until the tab is
+  visible again.
+- Muted rows ignore live timestamp/unread updates. Later list refreshes can still
+  update `Last drop`.
 
-## Edge Cases
+## Sorting Behavior
 
-- Muted rows skip websocket timestamp and unread updates; overview refetch can
-  still refresh the timestamp.
-- If both overview and websocket timestamps are missing, the line stays hidden.
-- If a websocket drop arrives for a wave missing from this list, the list runs
-  a throttled refetch unless that wave already exists in the opposite list.
-- Pinned and regular wave rows can both show `Last drop`; ordering inside each
-  section follows newest merged timestamp, with muted rows after non-muted rows.
+- Rows sort by newest `Last drop` time.
+- Non-muted rows stay above muted rows.
+- Pinned and regular sections both follow this ordering.
 - Direct-message rows show `Last drop` but do not show pin controls.
 
-## Failure and Recovery
+## Recovery and Edge Cases
 
-- If websocket delivery pauses, the current label stays until a later websocket
-  event or refetch updates the timestamp.
-- If refetch still returns no timestamp, the line remains hidden.
-
-## Limitations / Notes
-
-- Relative labels use `getTimeAgoShort` (`Just now`, `Xm`, `Xh`, `Yesterday`,
-  `Mon D`).
-- This page covers the row timestamp indicator only.
-- Mute controls and unread badge behavior are documented separately.
+- If a live drop arrives for a wave missing from this list, the list refetches
+  with a cooldown (about every 3 seconds) unless that wave is already in the
+  opposite list.
+- If websocket delivery pauses, the current label stays until the next live
+  update or list refresh.
+- Reconnect/refetch can refresh stale timestamps.
+- If no timestamp is returned after refresh, the line remains hidden.
 
 ## Related Pages
 

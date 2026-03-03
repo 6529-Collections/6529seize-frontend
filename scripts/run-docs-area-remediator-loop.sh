@@ -15,6 +15,37 @@ read_last_target_from_meta() {
   jq -r '.docs_area_remediator_loop.last_target // empty' "$META_FILE" 2>/dev/null
 }
 
+run_monotonic_recovery_pass() {
+  local target_path="$1"
+  local target_area="$2"
+
+  local monotonic_instruction=""
+  monotonic_instruction=$(
+    cat <<EOF
+Use docs-area-remediator.
+Target file: ${target_path}
+Run in strict stateless mode: do not rely on previous or next iterations.
+Validator failed on monotonic-quality for docs/${target_area} because the area score regressed.
+Primary objective: reduce docs/${target_area} quality score by resolving signals that increased it.
+If merge/split candidates exist, merge or restructure micro-pages when they represent a single user journey.
+Keep scope local to docs/${target_area} and related indexes, and keep links coherent.
+EOF
+  )
+  codex exec -- "${monotonic_instruction}"
+
+  local second_view_instruction=""
+  second_view_instruction=$(
+    cat <<EOF
+Use docs-area-remediator.
+Target file: ${target_path}
+Run in strict stateless mode: do not rely on previous or next iterations.
+Perform a second-view refinement pass focused on monotonic-quality recovery for docs/${target_area}.
+Finalize local structure and discoverability so quality score signals do not regress.
+EOF
+  )
+  codex exec -- "${second_view_instruction}"
+}
+
 write_last_target_to_meta() {
   local target="$1"
   local tmp_meta_file="${META_FILE}.tmp"
@@ -161,6 +192,12 @@ EOF
         echo ""
         echo "Detected stale-route backlog in docs/${target_area}; running auto-remediation."
         python3 .codex/skills/docs-area-remediator/scripts/run_stale_route_remediation.py --area "${target_area}"
+        git add -A "docs/${target_area}" docs/README.md
+        python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --area "${target_area}" --strict --enforce-monotonic
+      elif printf '%s\n' "${area_validation_output}" | grep -q "score regressed from"; then
+        echo ""
+        echo "Detected monotonic-quality regression in docs/${target_area}; running auto-remediation."
+        run_monotonic_recovery_pass "${target_path}" "${target_area}"
         git add -A "docs/${target_area}" docs/README.md
         python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --area "${target_area}" --strict --enforce-monotonic
       else
