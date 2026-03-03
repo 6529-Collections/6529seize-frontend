@@ -20,7 +20,8 @@ Internal Seize embed cards (wave/group/drop/quote) are documented in
 - home-style preview variants inside wave leaderboard card content
 
 Preview toggle actions are available in wave and direct-message thread drops.
-Home-style variants do not show link-preview toggle actions.
+Home-style variants suppress side-action controls; if an authored drop is already
+hidden, one inline `Show link previews` action can still appear.
 
 ## Features
 
