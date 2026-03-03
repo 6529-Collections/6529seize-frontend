@@ -1,66 +1,84 @@
 # Wave Winners Tab
 
-## Overview
+## What This Covers
 
-The `Winners` tab shows announced winning drops for a wave after the first
-decision time is reached.
-Single-decision waves show a podium plus winner rows.
-Multi-decision waves show winner groups in a dated timeline.
+This page covers when `Winners` appears, how winners render in main thread and
+right sidebar, and what users see for loading and empty states.
 
-## Location in the Site
+## Where Users See It
 
 - Rank-wave thread routes: `/waves/{waveId}`
 - Rank-wave direct-message routes: `/messages?wave={waveId}`
-- Desktop and mobile wave tab layouts when `Winners` is available
+- Main thread tab row on desktop and mobile
+- Right-sidebar `Winners` tab on rank waves
 
-## Entry Points
+## Availability Rules
 
-- Open a rank wave and switch to `Winners` once the tab appears.
-- Open a direct-message wave and switch to `Winners`.
-- From right-sidebar rank-wave tabs, switch to `Winners` without leaving the
-  current route.
+- `Winners` appears only after the first decision time passes.
+- If first decision time is missing or still in the future, `Winners` is
+  hidden.
+- Before voting ends, `Leaderboard` and `Winners` can both be visible.
+- After voting ends, `Leaderboard` is removed; `Winners` can remain.
+- Tab choice is UI state and is not encoded in URL tab parameters.
 
-## User Journey
+## Open and Use Winners
 
-1. Open a rank wave.
-2. After first decision time passes, select `Winners`.
-3. Review winners in the active layout:
-   - Single decision: podium (top placements) plus winner rows.
-   - Multi decision: timeline groups ordered newest-first by decision time.
-4. Click a winner row/card to open the drop in the current wave context.
-5. Close the drop and continue browsing winners without leaving the route.
+1. Open a rank wave and switch to `Winners`.
+2. Review winner cards/rows in the current surface (main thread or sidebar).
+3. Select a winner to open that drop in the current thread context.
+4. Close the drop and continue from `Winners`.
+
+## Main Thread Behavior
+
+### Single-decision waves
+
+- Podium shows first, second, and third place when available.
+- Winner rows render below the podium.
+- If no winners exist, empty state shows:
+  - `No Winners to Display`
+  - `This wave ended without any submissions`
+- Podium can render fewer than three winners.
+
+### Multi-decision waves
+
+- Winners render in decision-time groups.
+- Groups are ordered newest decision first.
+- Decision groups with zero winners are hidden.
+- If no decision has winners, empty state shows:
+  - `No Winners Yet`
+  - `No winners have been announced for this wave yet. Check back later!`
+
+## Right Sidebar Behavior
+
+- `Winners` appears in sidebar tabs only after first decision time passes.
+- Loading state shows compact skeleton placeholders.
+- If no decision points are returned, sidebar empty state shows `No Winners
+  Yet`.
+- Single-decision waves render compact winners from the first decision.
+- Multi-decision waves show a decision selector with date/time and winner
+  counts.
+- The selector defaults to the first returned decision point.
+- If the selected decision has zero winners, the list area is empty with no
+  extra message.
+- Single-decision waves can show the same empty list behavior when the first
+  decision exists but has zero winners.
 
 ## Common Scenarios
 
-- `Leaderboard` is hidden after voting ends, while `Winners` remains available.
-- Memes waves render media-rich winner cards with traits and vote context.
-- Non-memes waves render compact winner rows with rank, vote totals, voter
+- Memes waves show media-rich winner cards with traits and vote context.
+- Non-memes waves show compact winner rows with rank, vote totals, voter
   counts, and outcome summaries.
-- Winner rows can show your own vote context when you have voted on that drop.
+- Winner rows can show your vote value when you voted on that drop.
+- On touch devices, winner-card actions use the touch action sheet instead of
+  desktop hover/open controls.
 
-## Edge Cases
+## Loading, Failure, and Recovery
 
-- `Winners` does not appear before first decision time.
-- If no winners are announced yet, the tab shows a no-winners empty state.
-- Single-decision podium can render fewer than three winners when only some
-  places are available.
-- On touch devices, winner-card actions route through the touch action sheet
-  instead of hover controls.
-
-## Failure and Recovery
-
-- While decisions are loading, winners surfaces show loading placeholders.
-- If decision data is unavailable, the winners tab can resolve to empty-state
-  messaging; refresh the wave and retry.
-- If opening a winner drop fails, close the drop panel and reopen another
-  winner row from the same tab.
-
-## Limitations / Notes
-
-- `Winners` availability is controlled by wave timing and type.
-- Tab selection is UI state and is not encoded in URL tab parameters.
-- Winners are grouped by decision and sorted by decision timestamp in
-  multi-decision views.
+- While decisions load, winners surfaces show loading placeholders.
+- There is no dedicated winners error panel.
+- If decision data is unavailable, winners can resolve to empty-state messaging.
+- Refresh the current wave route and retry.
+- If one winner drop fails to open, close that overlay and open another winner.
 
 ## Related Pages
 

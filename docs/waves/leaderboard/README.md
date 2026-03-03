@@ -31,7 +31,8 @@ This area covers:
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md): collapsed
   header, pause messaging, and expandable decision history.
 - [Wave Winners Tab](feature-winners-tab.md): when winners appear and how
-  single-decision vs multi-decision winners render.
+  main-thread and right-sidebar winners render in single-decision vs
+  multi-decision waves.
 - [Wave My Votes Tab](feature-my-votes-tab.md): voted-drop list, inline vote
   edits, select-all controls, and bulk reset behavior.
 - [Wave Top Voters Lists](feature-top-voters-lists.md): wave-level and
