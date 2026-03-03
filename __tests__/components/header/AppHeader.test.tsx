@@ -42,6 +42,14 @@ jest.mock("@/components/header/HeaderActionButtons", () => ({
   __esModule: true,
   default: () => <div data-testid="actions" />,
 }));
+jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
+  __esModule: true,
+  default: ({ children, ariaLabel }: any) => (
+    <button type="button" aria-label={ariaLabel}>
+      {children}
+    </button>
+  ),
+}));
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
   useNavigationHistoryContext: jest.fn(),
 }));
@@ -219,6 +227,10 @@ describe("AppHeader", () => {
     const wave = {
       id: "w1",
       name: "WaveOne",
+      description_drop: {
+        id: "drop-1",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
       chat: { scope: { group: { is_direct_message: false } } },
     };
     setup({
@@ -238,6 +250,10 @@ describe("AppHeader", () => {
     const wave = {
       id: "w1",
       name: "WaveOne",
+      description_drop: {
+        id: "drop-1",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
       chat: { scope: { group: { is_direct_message: false } } },
     };
     setup({
@@ -255,6 +271,10 @@ describe("AppHeader", () => {
     const staleWave = {
       id: "w1",
       name: "WaveOne",
+      description_drop: {
+        id: "drop-1",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
       chat: { scope: { group: { is_direct_message: false } } },
     };
 
@@ -276,6 +296,10 @@ describe("AppHeader", () => {
     const wave = {
       id: "w2",
       name: "WaveTwo",
+      description_drop: {
+        id: "drop-1",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
       chat: { scope: { group: { is_direct_message: false } } },
     };
     setup({
@@ -299,6 +323,10 @@ describe("AppHeader", () => {
     const wave = {
       id: "w1",
       name: "WaveOne",
+      description_drop: {
+        id: "drop-1",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
       chat: { scope: { group: { is_direct_message: true } } },
     };
     setup({
@@ -310,5 +338,32 @@ describe("AppHeader", () => {
     expect(
       screen.queryByRole("button", { name: /copy wave link|share wave/i })
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show wave description" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders description subtitle trigger for non-DM active wave", () => {
+    const wave = {
+      id: "w3",
+      name: "WaveThree",
+      description_drop: {
+        id: "drop-3",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
+      chat: { scope: { group: { is_direct_message: false } } },
+    };
+    setup({
+      wave,
+      asPath: "/waves/w3",
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Show wave description" })
+    ).toBeInTheDocument();
+    const subtitle = screen.getByText("A chill place to discuss drops");
+    expect(subtitle).toBeInTheDocument();
+    expect(subtitle).toHaveClass("tw-truncate");
   });
 });

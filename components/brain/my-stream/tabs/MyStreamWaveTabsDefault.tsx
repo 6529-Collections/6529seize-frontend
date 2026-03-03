@@ -23,6 +23,8 @@ import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
+import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
+import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
@@ -51,6 +53,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
   const showShareAction = !isDirectMessage;
+  const previewText = getWaveDescriptionPreviewText(wave);
+  const showDescriptionPreview = showShareAction && !!previewText;
   const {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
@@ -120,25 +124,39 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
             </button>
           )}
           {isMobile ? (
-            <button
-              type="button"
-              onClick={() => setIsSearchOpen(true)}
-              aria-label="Search messages in this wave"
-              className="tw-flex tw-min-w-0 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
-            >
-              <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950 lg:tw-size-9">
-                <WavePicture
-                  name={wave.name}
-                  picture={wave.picture}
-                  contributors={wave.contributors_overview.map((c) => ({
-                    pfp: c.contributor_pfp,
-                  }))}
-                />
-              </div>
-              <h1 className="tw-mb-0 tw-ml-3 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-                {wave.name}
-              </h1>
-            </button>
+            <div className="tw-flex tw-min-w-0 tw-flex-col">
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(true)}
+                aria-label="Search messages in this wave"
+                className="tw-flex tw-min-w-0 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+              >
+                <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950 lg:tw-size-9">
+                  <WavePicture
+                    name={wave.name}
+                    picture={wave.picture}
+                    contributors={wave.contributors_overview.map((c) => ({
+                      pfp: c.contributor_pfp,
+                    }))}
+                  />
+                </div>
+                <h1 className="tw-mb-0 tw-ml-3 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+                  {wave.name}
+                </h1>
+              </button>
+              {showDescriptionPreview && (
+                <WaveDescriptionPopover
+                  wave={wave}
+                  align="left"
+                  ariaLabel="Show wave description"
+                  triggerClassName="tw-ml-9 tw-mt-0.5 tw-max-w-[220px] tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+                >
+                  <span className="tw-block tw-truncate tw-text-xs tw-text-iron-400">
+                    {previewText}
+                  </span>
+                </WaveDescriptionPopover>
+              )}
+            </div>
           ) : (
             <>
               <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950 lg:tw-size-9">
@@ -150,9 +168,25 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
                   }))}
                 />
               </div>
-              <h1 className="tw-mb-0 tw-ml-3 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-                {wave.name}
-              </h1>
+              {showDescriptionPreview ? (
+                <WaveDescriptionPopover
+                  wave={wave}
+                  align="left"
+                  ariaLabel="Show wave description"
+                  triggerClassName="tw-ml-3 tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+                >
+                  <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+                    {wave.name}
+                  </h1>
+                  <span className="tw-mt-0.5 tw-block tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
+                    {previewText}
+                  </span>
+                </WaveDescriptionPopover>
+              ) : (
+                <h1 className="tw-mb-0 tw-ml-3 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+                  {wave.name}
+                </h1>
+              )}
               {showGalleryToggle && (
                 <button
                   type="button"
