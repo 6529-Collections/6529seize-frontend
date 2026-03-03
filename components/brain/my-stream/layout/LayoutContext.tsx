@@ -1,18 +1,17 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useCallback,
-  useMemo,
 } from "react";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import useCapacitor from "@/hooks/useCapacitor";
+import type { ReactNode } from "react";
 
 // Define the different spaces that need to be measured
 interface LayoutSpaces {
@@ -155,8 +154,11 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { isAndroid, isIos, keyboardVisible: isIosKeyboardVisible } =
-    useCapacitor();
+  const {
+    isAndroid,
+    isIos,
+    keyboardVisible: isIosKeyboardVisible,
+  } = useCapacitor();
   const { isVisible: isAndroidKeyboardVisible } = useAndroidKeyboard();
 
   // Internal ref storage (source of truth)
@@ -366,14 +368,10 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
 
   const isNavHiddenForKeyboard =
-    (isAndroid && isAndroidKeyboardVisible) ||
-    (isIos && isIosKeyboardVisible);
+    (isAndroid && isAndroidKeyboardVisible) || (isIos && isIosKeyboardVisible);
 
   const navAdjustedSpaces = useMemo(
-    () =>
-      isNavHiddenForKeyboard
-        ? { ...spaces, mobileNavSpace: 0 }
-        : spaces,
+    () => (isNavHiddenForKeyboard ? { ...spaces, mobileNavSpace: 0 } : spaces),
     [spaces, isNavHiddenForKeyboard]
   );
 
@@ -384,7 +382,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     let navSpace = navAdjustedSpaces.mobileNavSpace;
 
     if (isAndroid) {
-      navSpace = isAndroidKeyboardVisible ? 0 : navAdjustedSpaces.mobileNavSpace;
+      navSpace = isAndroidKeyboardVisible
+        ? 0
+        : navAdjustedSpaces.mobileNavSpace;
       capSpace = isAndroidKeyboardVisible ? 0 : Math.max(0, 128 - navSpace);
     }
 

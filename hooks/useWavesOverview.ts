@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import type { WavesOverviewParams } from "@/types/waves.types";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
@@ -14,6 +14,7 @@ interface UseWavesOverviewProps {
   readonly type: ApiWavesOverviewType;
   readonly limit?: number | undefined;
   readonly following?: boolean | undefined;
+  readonly viewerIdentityKey?: string | null | undefined;
   /**
    * If true, fetch only direct message waves. If false, exclude them. Undefined -> no filter.
    */
@@ -25,6 +26,7 @@ export const useWavesOverview = ({
   type,
   limit = 20,
   following = false,
+  viewerIdentityKey,
   directMessage,
   refetchInterval = Infinity,
 }: UseWavesOverviewProps) => {
@@ -34,13 +36,25 @@ export const useWavesOverview = ({
     only_waves_followed_by_authenticated_user: following,
     ...(directMessage !== undefined ? { direct_message: directMessage } : {}),
   };
+  const normalizedViewerIdentityKey =
+    viewerIdentityKey?.trim().toLowerCase() ?? null;
+  const queryKeyParams = useMemo(() => {
+    if (!normalizedViewerIdentityKey) {
+      return params;
+    }
+
+    return {
+      ...params,
+      viewer_identity: normalizedViewerIdentityKey,
+    };
+  }, [normalizedViewerIdentityKey, params]);
 
   const [lastErrorTimestamp, setLastErrorTimestamp] = useState<number | null>(
     null
   );
 
   const query = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES_OVERVIEW, params],
+    queryKey: [QueryKey.WAVES_OVERVIEW, queryKeyParams],
     queryFn: async ({ pageParam }: { pageParam: number }) => {
       const queryParams: Record<string, string> = {
         limit: `${params.limit}`,
@@ -61,7 +75,21 @@ export const useWavesOverview = ({
     initialPageParam: 0,
     getNextPageParam: (_, allPages) =>
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData, previousQuery) => {
+      const previousParams = previousQuery?.queryKey?.[1] as
+        | { viewer_identity?: string | null }
+        | undefined;
+      const previousViewerIdentity =
+        typeof previousParams?.viewer_identity === "string"
+          ? previousParams.viewer_identity
+          : null;
+
+      if (previousViewerIdentity === normalizedViewerIdentityKey) {
+        return previousData;
+      }
+
+      return undefined;
+    },
     refetchInterval,
     ...getDefaultQueryRetry(() => setLastErrorTimestamp(Date.now())),
   });

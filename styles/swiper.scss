@@ -1,5 +1,5 @@
 @use "variables.scss";
-@use "../node_modules/swiper/swiper.scss";
+@import "swiper/css";
 
 .swiper {
   position: relative;
