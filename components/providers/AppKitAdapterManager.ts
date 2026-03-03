@@ -306,7 +306,7 @@ export class AppKitAdapterManager {
       .map((chain) => {
         if (!chain || typeof chain.id !== "number") {
           throw new AdapterError(
-            "ADAPTER_021: chains must be a non-empty array"
+            "ADAPTER_022: each chain must be an object with a numeric id"
           );
         }
         return `${chain.id}`;

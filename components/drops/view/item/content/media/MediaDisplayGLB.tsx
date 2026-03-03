@@ -48,7 +48,7 @@ export default function MediaDisplayGLB({
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [isActive, hasTouchScreen]);
+  }, [isActive]);
 
   useEffect(() => {
     if (disableMediaInteractions) {

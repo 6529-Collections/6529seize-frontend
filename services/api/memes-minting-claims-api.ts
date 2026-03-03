@@ -199,6 +199,8 @@ export async function uploadClaimMedia(
   _field: ClaimMediaField,
   file: File
 ): Promise<string> {
+  // Claim/field linkage is persisted by the subsequent patchClaim call.
+  // This upload endpoint is intentionally generic and only returns media_url.
   return multipartUploadCore({
     file,
     endpoints: {

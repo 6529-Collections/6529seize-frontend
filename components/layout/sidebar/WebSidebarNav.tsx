@@ -37,13 +37,12 @@ import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
 
 interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
-  readonly isMobile?: boolean;
 }
 
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
->(({ isCollapsed = false, isMobile: _isMobile = false }, ref) => {
+>(({ isCollapsed = false }, ref) => {
   const pathname = usePathname();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();

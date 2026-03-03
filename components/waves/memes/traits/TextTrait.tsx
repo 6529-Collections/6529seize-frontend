@@ -89,6 +89,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
     React.useEffect(() => {
       const traitValue = ((traits[field] as string) ?? "").toString();
       setCurrentInputValue(traitValue);
+      setDebouncedValue(traitValue);
     }, [traits, field]);
 
     const isFieldFilled = useMemo(() => {

@@ -51,6 +51,7 @@ export default function DropForgePageClient() {
             if (!canAccessCraft) e.preventDefault();
           }}
           aria-disabled={!canAccessCraft}
+          tabIndex={canAccessCraft ? 0 : -1}
         >
           <div
             className={`tw-flex tw-h-12 tw-w-12 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 sm:tw-h-16 sm:tw-w-16 ${
@@ -80,6 +81,7 @@ export default function DropForgePageClient() {
             if (!canAccessLaunch) e.preventDefault();
           }}
           aria-disabled={!canAccessLaunch}
+          tabIndex={canAccessLaunch ? 0 : -1}
         >
           <div
             className={`tw-flex tw-h-12 tw-w-12 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 sm:tw-h-16 sm:tw-w-16 ${

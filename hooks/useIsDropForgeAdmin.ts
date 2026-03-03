@@ -24,7 +24,10 @@ export function useIsDropForgeAdmin(): {
   });
 
   return {
-    isDropForgeAdmin: areEqualAddresses(readResult.data, address),
+    isDropForgeAdmin:
+      Boolean(address) &&
+      Boolean(readResult.data) &&
+      areEqualAddresses(readResult.data, address),
     isFetching: Boolean(address) && readResult.isFetching,
   };
 }

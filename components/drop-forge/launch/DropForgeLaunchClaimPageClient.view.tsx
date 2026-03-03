@@ -36,7 +36,8 @@ import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
 import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
-import { capitalizeEveryWord, fromGWEI } from "@/helpers/Helpers";
+import { capitalizeEveryWord } from "@/helpers/Helpers";
+import { formatWeiToEth } from "@/helpers/manifoldDisplayHelpers";
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
@@ -636,7 +637,7 @@ function DropForgeOnChainClaimSection({
             {manifoldClaim.instanceId.toLocaleString()}
           </DropForgeFieldBox>
           <DropForgeFieldBox label="Cost (ETH)">
-            {fromGWEI(Number(manifoldClaim.costWei ?? 0n)).toFixed(5)}
+            {formatWeiToEth(manifoldClaim.costWei ?? 0n)}
           </DropForgeFieldBox>
           <DropForgeFieldBox label="Claim Phase">
             {manifoldClaim.memePhase?.name ?? "—"}

@@ -75,14 +75,13 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
           <Section key={`section-${sectionIndex}`} title={section.title}>
             <div className="tw-flex tw-flex-col tw-gap-6">
               {section.fields.map((field, fieldIndex) => {
-                const hasReadOnlyOverride =
-                  readOnlyOverrides?.[field.field] !== undefined;
+                const readOnlyOverride = readOnlyOverrides?.[field.field];
                 return (
                   <TraitField
                     key={`field-${field.field}-${fieldIndex}`}
                     definition={field}
-                    {...(hasReadOnlyOverride
-                      ? { readOnlyOverride: Boolean(field.readOnly) }
+                    {...(readOnlyOverride !== undefined
+                      ? { readOnlyOverride: Boolean(readOnlyOverride) }
                       : {})}
                     traits={traits}
                     updateText={updateText}

@@ -106,7 +106,15 @@ export function claimToTraitsData(claim: MintingClaim): TraitsData {
     if (!rawKey) return;
     const resolvedKey = labelToField.get(rawKey) ?? keyToField.get(rawKey);
     if (!resolvedKey) return;
-    attrMap.set(resolvedKey, a.value as TraitPrimitive);
+    const rawValue = a.value;
+    if (
+      typeof rawValue !== "string" &&
+      typeof rawValue !== "number" &&
+      typeof rawValue !== "boolean"
+    ) {
+      return;
+    }
+    attrMap.set(resolvedKey, rawValue);
   });
   const traitsRecord: Record<string, unknown> = traits as unknown as Record<
     string,

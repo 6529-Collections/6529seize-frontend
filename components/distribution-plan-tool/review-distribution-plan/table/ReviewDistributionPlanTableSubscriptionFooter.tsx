@@ -312,12 +312,12 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
   const { seizeSettings } = useSeizeSettings();
-  const distributionAdminWalletsKey = JSON.stringify(
-    seizeSettings.distribution_admin_wallets
-  );
   const distributionAdminWallets = useMemo(
-    () => JSON.parse(distributionAdminWalletsKey) as string[],
-    [distributionAdminWalletsKey]
+    () =>
+      Array.isArray(seizeSettings.distribution_admin_wallets)
+        ? seizeSettings.distribution_admin_wallets
+        : [],
+    [seizeSettings.distribution_admin_wallets]
   );
 
   const [showUploadPhotos, setShowUploadPhotos] = useState(false);
@@ -539,12 +539,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     [setToast, refreshOverview]
   );
 
-  if (
-    !isSubscriptionsAdmin(
-      connectedProfile,
-      seizeSettings.distribution_admin_wallets
-    )
-  ) {
+  if (!isSubscriptionsAdmin(connectedProfile, distributionAdminWallets)) {
     return <></>;
   }
 

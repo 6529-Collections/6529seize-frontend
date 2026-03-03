@@ -51,6 +51,7 @@ const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
     }
     if (!haveUnreadNotifications) {
       removeAllDeliveredNotifications();
+      setTitle("Notifications | 6529.io");
     }
   }, [
     haveUnreadNotifications,

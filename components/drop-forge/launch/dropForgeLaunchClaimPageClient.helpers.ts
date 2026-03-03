@@ -36,7 +36,7 @@ export function parseLocalDateTimeToUnixSeconds(value: string): number | null {
   if (timeParts.length !== 2 && timeParts.length !== 3) return null;
   const hour = timeParts[0];
   const minute = timeParts[1];
-  const second = timeParts[2] ?? "0";
+  const second = (timeParts[2] ?? "00").padStart(2, "0");
   if (!hour || !minute) return null;
 
   if (
@@ -356,6 +356,7 @@ export function getMediaTypeLabel(
 export function getAnimationMimeType(claim: MintingClaim): string | null {
   const animationUrl = claim.animation_url ?? null;
   if (!animationUrl) return null;
+  const lowerUrl = animationUrl.toLowerCase();
   const normalizedFormat = (
     claim.animation_details as { format?: string } | null | undefined
   )?.format?.toUpperCase();
@@ -370,11 +371,22 @@ export function getAnimationMimeType(claim: MintingClaim): string | null {
     };
     return formatMimeMap[normalizedFormat] ?? "video/mp4";
   }
-  if (isVideoUrl(animationUrl)) return "video/mp4";
-  if (animationUrl.toLowerCase().endsWith(".glb")) return "model/gltf-binary";
-  if (animationUrl.toLowerCase().endsWith(".gltf")) return "model/gltf+json";
-  if (animationUrl.toLowerCase().endsWith(".html")) return "text/html";
-  return "video/mp4";
+  if (isVideoUrl(animationUrl)) {
+    if (lowerUrl.endsWith(".mp4")) return "video/mp4";
+    if (lowerUrl.endsWith(".webm")) return "video/webm";
+    if (lowerUrl.endsWith(".mov") || lowerUrl.endsWith(".qt")) {
+      return "video/quicktime";
+    }
+    if (lowerUrl.endsWith(".m4v")) return "video/x-m4v";
+    if (lowerUrl.endsWith(".ogv") || lowerUrl.endsWith(".ogg")) {
+      return "video/ogg";
+    }
+    return "video/*";
+  }
+  if (lowerUrl.endsWith(".glb")) return "model/gltf-binary";
+  if (lowerUrl.endsWith(".gltf")) return "model/gltf+json";
+  if (lowerUrl.endsWith(".html")) return "text/html";
+  return "application/octet-stream";
 }
 
 export function getSafeExternalUrl(

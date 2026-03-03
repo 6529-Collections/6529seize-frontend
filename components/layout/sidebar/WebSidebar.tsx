@@ -172,11 +172,7 @@ function WebSidebar({
               data-sidebar-scroll="true"
             >
               <div className="tw-flex-1">
-                <WebSidebarNav
-                  ref={navRef}
-                  isCollapsed={shouldShowCollapsed}
-                  isMobile={isMobile}
-                />
+                <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
               </div>
 
               {profilePath && (

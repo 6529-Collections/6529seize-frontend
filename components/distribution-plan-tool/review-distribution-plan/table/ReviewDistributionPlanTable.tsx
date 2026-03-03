@@ -92,7 +92,7 @@ export default function ReviewDistributionPlanTable() {
     if (
       isSubscriptionsAdmin(
         connectedProfile,
-        seizeSettings.distribution_admin_wallets
+        seizeSettings.distribution_admin_wallets ?? []
       )
     ) {
       const publicRow: ReviewDistributionPlanTablePhase = {
