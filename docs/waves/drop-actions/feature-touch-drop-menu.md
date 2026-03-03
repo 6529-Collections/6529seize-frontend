@@ -2,78 +2,66 @@
 
 ## Overview
 
-On small touch layouts, users open per-drop actions by pressing and holding a
-drop card for a short duration. On touch-capable medium+ layouts, users open the
-same menu from the drop header action button because long-press is disabled.
+Use the touch drop menu to run drop actions without leaving the thread.
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Any drop card that uses touch menu support (including winner, outcome, and
-  participation card variants).
+- Single-drop overlay in the current thread route: `?drop={dropId}`
 
-## Entry Points
+## Menu Entry Rules
 
-- Open a wave or direct-message thread.
-- On touch-capable small screens, press and hold a non-temporary drop card to open
-  the overflow action sheet.
-- On touch-capable medium+ screens, users tap the header action button to open
-  the same menu because long-press is intentionally disabled there.
-- Choose an action from the drop action menu.
+- Chat drops, touch small layouts: press and hold for about `500ms`.
+- Chat drops, touch medium+ layouts: tap `Open drop actions` in the drop
+  header. Long-press does not open the menu in this layout.
+- Winner and participation drops (including memes variants): press and hold the
+  drop on touch layouts, including medium+ touch widths.
+- If a chat drop is in edit mode, touch-menu entry is blocked for that drop.
 
-## User Journey
+## What the Menu Can Show
 
-1. Open a thread and locate a target drop.
-2. Press and hold the drop card (small touch layouts) or tap the header action
-   button (medium+ touch layouts).
-3. When the hold duration is long enough, or the header button opens, the action
-   menu opens.
-4. Select a menu action available in that context, such as:
-   - quick react
-   - add or update reaction
-   - `Reply`
-   - `Boost` / `Remove Boost`
-   - `Open`
-   - `Copy link`
-   - `Mark as unread`
-   - vote controls
-   - `Edit Message` / `Delete` (author-only contexts)
-5. Confirm the action to continue in the same thread.
+- quick react buttons
+- `Add Reaction` / `Update Reaction`
+- `Reply`
+- `Boost` / `Remove Boost`
+- `Open drop` (non-chat drops only)
+- `Copy link`
+- `Mark as unread`
+- vote controls (when voting is available)
+- `Edit Message` / `Delete` (when allowed)
 
-## Common Scenarios
+## Availability Rules
 
-- On non-hover small touch layouts (for example phones and narrow tablets), the
-  drop action menu opens by long-press instead of hover.
-- On touch-capable medium+ layouts, users use the header action button because
-  long-press does not trigger the menu.
-- Users can access actions without leaving the thread.
-- The menu stays consistent with the device-appropriate action surface used in
-  the same area of the app.
-- `Hide link previews` and `Show link previews` are no longer available from this
-  menu; use the link-level controls in the drop body.
+- `Open drop` is hidden for chat drops.
+- `Mark as unread` is hidden on your own drops and when no profile is
+  connected.
+- `Edit Message` and `Delete` require connected non-proxy author context.
+- `Edit Message` is hidden for participatory drops.
+- Temporary drops (`temp-*`) show a reduced menu:
+  - `Reply` and `Copy link` are disabled.
+  - reaction and vote controls are disabled or hidden.
+  - `Boost`, `Edit Message`, and `Delete` are hidden.
 
 ## Edge Cases
 
-- Temporary (unsent) drops do not open the long-press action menu.
-- Quick movement during hold can cancel the gesture, and the menu will not open.
-- Some actions are hidden when conditions are not met (for example no connected
-  wallet, drop ownership restrictions, or ineligible voting states).
+- Moving about `10px` or more while holding cancels long-press.
+- If the hold becomes a scroll gesture, the menu does not open.
+- Some menu rows stay hidden when ownership, wallet, or voting requirements are
+  not met.
 
 ## Failure and Recovery
 
-- If the menu does not open because the hold is too short, users can hold again
-  for a little longer, or use the header action button on medium+ touch layouts.
-- If the gesture is interpreted as a scroll, users can release and retry when the
-  feed is stable.
-- If a specific action fails after selection, standard action-level error feedback
-  remains visible while users stay in the thread.
+- If the menu does not open, hold a little longer.
+- If the hold is treated as scroll, release and retry when the feed is stable.
+- If a selected action fails, action-level error feedback stays in the thread
+  and you can retry from the menu.
 
 ## Limitations / Notes
 
-- The drop menu is intentionally disabled for temporary draft drops.
-- The touch menu is one of multiple action entry options. It may be a long-press
-  path or header button depending on device input and layout.
+- Menu composition differs by drop type and current user/session state.
+- `Hide link previews` / `Show link previews` are not in this menu. Use inline
+  link controls in drop content.
 
 ## Related Pages
 
@@ -81,4 +69,5 @@ same menu from the drop header action button because long-press is disabled.
 - [Wave Drop Reactions and Rating Actions](feature-reactions-and-ratings.md)
 - [Wave Drop Mark as Unread](feature-mark-as-unread.md)
 - [Wave Drop Boosting](feature-drop-boosting.md)
+- [Wave Drop Actions Index](README.md)
 - [Docs Home](../../README.md)

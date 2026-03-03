@@ -17,8 +17,9 @@ jump back to that spot later.
 - Open a wave or direct-message thread.
 - Open the drop action menu:
   - Desktop: `More` (`...`).
-  - Touch small layouts: long-press a drop.
-  - Touch medium+ layouts: use the drop header action button.
+  - Chat drops, touch small layouts: long-press a drop.
+  - Chat drops, touch medium+ layouts: use the drop header action button.
+  - Winner/participation drops, touch layouts: long-press the drop content.
 - Select `Mark as unread`.
 
 ## What Happens
