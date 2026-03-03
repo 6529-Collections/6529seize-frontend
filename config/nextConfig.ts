@@ -45,7 +45,7 @@ export function sharedConfig(
       return [
         {
           source: "/:path*",
-          headers: createSecurityHeaders(publicEnv["API_ENDPOINT"]),
+          headers: createSecurityHeaders(),
         },
       ];
     },

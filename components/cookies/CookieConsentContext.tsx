@@ -56,6 +56,13 @@ type CookieConsentProviderProps = {
 
 type CookieConsent = boolean | undefined;
 
+const getCspNonceFromDom = (): string | undefined => {
+  const el = document.querySelector<HTMLMetaElement>('meta[name="csp-nonce"]');
+  if (!el) return undefined;
+  const value = el.content.trim();
+  return value.length > 0 ? value : undefined;
+};
+
 export const getCookieConsentByName = (name: string): CookieConsent => {
   const cookie = Cookies.get(name);
   if (cookie === "true") {
@@ -75,13 +82,21 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const [country, setCountry] = useState("");
 
   const loadPerformanceCookies = useCallback(() => {
+    const nonce = getCspNonceFromDom();
+
     const script1 = document.createElement("script");
+    script1.id = "gtag-js";
     script1.src = `https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`;
     script1.async = true;
-    document.head.appendChild(script1);
+    if (nonce) script1.nonce = nonce;
+    if (!document.getElementById(script1.id)) {
+      document.head.appendChild(script1);
+    }
 
     const script2 = document.createElement("script");
-    script2.innerHTML = `
+    script2.id = "gtag-init";
+    if (nonce) script2.nonce = nonce;
+    script2.text = `
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
@@ -89,7 +104,9 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
             'cookie_expires': 31536000
         });
       `;
-    document.head.appendChild(script2);
+    if (!document.getElementById(script2.id)) {
+      document.head.appendChild(script2);
+    }
   }, []);
 
   const getCookieConsent = useCallback(
