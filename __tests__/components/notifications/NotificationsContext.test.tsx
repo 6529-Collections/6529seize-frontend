@@ -27,6 +27,10 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
+jest.mock("@sentry/nextjs", () => ({
+  captureException: jest.fn(),
+  addBreadcrumb: jest.fn(),
+}));
 
 jest.mock("@capacitor/push-notifications", () => {
   return {
@@ -79,10 +83,12 @@ describe("NotificationsContext initialization", () => {
   beforeEach(() => {
     mockIsActive = true;
     const { PushNotifications } = require("@capacitor/push-notifications");
+    const sentry = require("@sentry/nextjs");
     jest.clearAllMocks();
     PushNotifications.removeAllListeners.mockClear();
     PushNotifications.addListener.mockClear();
     PushNotifications.register.mockClear();
+    sentry.captureException.mockClear();
   });
 
   it("does not initialize when isActive is false", async () => {
@@ -119,13 +125,45 @@ describe("NotificationsContext initialization", () => {
       { timeout: 2000 }
     );
   });
+
+  it("captures unrecoverable initialization errors", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const {
+      getStableDeviceId,
+    } = require("@/components/notifications/stable-device-id");
+    const sentry = require("@sentry/nextjs");
+    const fatalError = new Error("fatal secure storage error");
+
+    getStableDeviceId.mockRejectedValueOnce(fatalError);
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(sentry.captureException).toHaveBeenCalledWith(
+        fatalError,
+        expect.objectContaining({
+          tags: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "initializeNotifications",
+          }),
+        })
+      );
+    });
+
+    expect(PushNotifications.register).not.toHaveBeenCalled();
+  });
 });
 
 it("removes notifications when functions called", async () => {
   const { PushNotifications } = require("@capacitor/push-notifications");
 
-  let registrationCallback: ((token: { value: string }) => Promise<void>) | null =
-    null;
+  let registrationCallback:
+    | ((token: { value: string }) => Promise<void>)
+    | null = null;
   PushNotifications.addListener.mockImplementation(
     (event: string, callback: (arg: unknown) => Promise<void>) => {
       if (event === "registration") {
@@ -181,7 +219,9 @@ it("skips notification removal when not registered", async () => {
   });
 
   expect(PushNotifications.getDeliveredNotifications).not.toHaveBeenCalled();
-  expect(PushNotifications.removeAllDeliveredNotifications).not.toHaveBeenCalled();
+  expect(
+    PushNotifications.removeAllDeliveredNotifications
+  ).not.toHaveBeenCalled();
 });
 
 describe("push notification action handling", () => {
@@ -195,8 +235,9 @@ describe("push notification action handling", () => {
   it("redirects based on notification data", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
 
-    let registrationCallback: ((token: { value: string }) => Promise<void>) | null =
-      null;
+    let registrationCallback:
+      | ((token: { value: string }) => Promise<void>)
+      | null = null;
     let actionPerformedCallback:
       | ((action: { notification: { data: unknown } }) => Promise<void>)
       | null = null;
