@@ -1,63 +1,78 @@
 # Wave Drop Image Viewer and Scaling
 
+Parent: [Wave Drop Actions Index](README.md)
+
 ## Overview
 
-Image attachments follow inline card rendering in timeline views, but single-drop
-contexts request larger scaled variants for clearer artwork viewing.
-Opening an attachment launches a modal image viewer with zoom/fullscreen/open-source
-controls.
+Drop attachments and markdown images render inline in wave and DM threads.
+Clicking or tapping an image opens a modal viewer with zoom and quick actions.
+Attachment images use larger scaling in single-drop views than in thread cards.
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Single-drop detail surfaces and competition artwork panels.
+- Single-drop overlay in the same route context via `?drop={dropId}`
+- Image attachments and markdown-embedded images in drop bodies
 
 ## Entry Points
 
-- Open a thread with image attachments in drop cards.
-- Open single-drop detail view from timeline cards.
-- Open artwork-focused panels in competition contexts.
+- Open a wave or DM thread with image media in a drop.
+- Click or tap an attachment image or markdown image in drop content.
+- Open a single-drop overlay from `Open drop` action or a `?drop=` URL.
 
 ## User Journey
 
-1. Open a thread and locate a drop with image media.
-2. Timeline cards load standard scaled image sources for feed performance.
-3. Open drop detail or artwork detail panel for clearer media rendering.
-4. Single-drop/detail contexts request larger scaled image variants.
-5. Open an attachment to launch the modal viewer and use zoom/fullscreen/source
-   controls.
+1. Open a thread and find a drop that contains image media.
+2. The image renders inline with a loading placeholder.
+3. Click or tap the image to open the modal viewer.
+4. Zoom the image and use modal controls:
+   - `Open in Browser` opens the source URL in a new tab.
+   - `Full screen` enters browser fullscreen when supported and not in native app.
+   - `Reset zoom` appears after zooming in.
+   - `Close` exits the modal.
+5. Close with the close button, backdrop click, or `Escape`.
 
 ## Common Scenarios
 
-- Attachments show loading placeholders while source images resolve.
-- Touch devices keep placeholder treatment static to protect gesture scrolling;
-  non-touch layouts can show animated pulse placeholders.
-- Single-drop detail surfaces favor higher-resolution scaled image variants.
-- Modal viewer supports opening source media in a new browser tab.
+- Thread attachment images request `AUTOx450` scaled URLs.
+- Single-drop attachment views request `AUTOx1080` scaled URLs.
+- Markdown image embeds use the same modal controls but keep `AUTOx450` scaling,
+  including inside single-drop views.
+- Touch devices show a static loading placeholder for attachment images.
+- Non-touch devices show an animated pulse placeholder for attachment images.
+- Competition-style artwork panels center image content in the frame.
 
 ## Edge Cases
 
-- If fullscreen is entered from the modal, fullscreen targets the modal image, not
-  the background timeline card.
-- If attachment loads slowly, timeline layout remains stable while placeholder state
-  is visible.
+- Fullscreen control is hidden in native app sessions and when browser fullscreen
+  APIs are unavailable.
+- `Open in Browser` stays available even when fullscreen is hidden.
+- Scaled URL rewriting applies only to supported hosted raster image URLs
+  (`gif`, `webp`, `jpg`, `jpeg`, `png` under supported media prefixes).
+- Fullscreen is requested on the current rendered image element, which can differ
+  between attachment and markdown rendering paths.
 
 ## Failure and Recovery
 
-- If a higher-resolution scaled URL is unavailable or fails, viewer falls back to
-  the original attachment media URL.
-- If modal launch fails due to transient UI state, users can retry from the same
-  attachment.
+- If a scaled attachment URL fails, the viewer falls back to the original media URL.
+- If image loading still fails, users see `Couldn’t load image.` and can press
+  `Retry`.
+- If fullscreen is unavailable, users can still open the source in a new tab.
+- If media is slow to load, card layout stays stable behind placeholder UI.
 
 ## Limitations / Notes
 
-- Higher-resolution scaling is applied in detail contexts, not default timeline rows.
-- Fullscreen behavior depends on browser fullscreen support and permissions.
+- This viewer behavior is for image media. Other media types use their own
+  players.
+- Larger detail-scale behavior applies to attachment media in single-drop/detail
+  contexts, not every image render path.
+- Browser/page zoom behavior is documented separately.
 
 ## Related Pages
 
+- [Wave Drop Actions Index](README.md)
 - [Wave Drop Content Display](feature-content-display.md)
+- [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
 - [Wave Drop Media Download](feature-media-download.md)
-- [Wave Drop Reply Preview Rows](feature-reply-preview-rows.md)
-- [Media Index](../../media/README.md)
+- [Browser Zoom and Pinch Scaling](../../shared/feature-browser-zoom-and-pinch-scaling.md)
