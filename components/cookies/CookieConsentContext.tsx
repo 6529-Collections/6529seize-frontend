@@ -24,6 +24,22 @@ import CookiesBanner from "./CookiesBanner";
 
 const GTM_ID = "G-71NLVV3KY3";
 
+const getConsentCookieOptions = () => {
+  const isSecure = globalThis.location?.protocol === "https:";
+  return {
+    secure: isSecure,
+    sameSite: "lax" as const,
+  };
+};
+
+const setConsentCookie = (
+  name: string,
+  value: string,
+  expires: number | Date
+) => {
+  Cookies.set(name, value, { expires, ...getConsentCookieOptions() });
+};
+
 type CookieConsentContextType = {
   showCookieConsent: boolean;
   country: string;
@@ -123,8 +139,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
             essentialCookies == undefined && performanceCookies == undefined
           );
         } else {
-          Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 7 });
-          Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 7 });
+          setConsentCookie(CONSENT_ESSENTIAL_COOKIE, "true", 7);
+          setConsentCookie(CONSENT_PERFORMANCE_COOKIE, "true", 7);
           getCookieConsent();
         }
       } catch (error) {
@@ -137,8 +153,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const consent = useCallback(async () => {
     try {
       await commonApiPost({ endpoint: `policies/cookies-consent`, body: {} });
-      Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
-      Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 365 });
+      setConsentCookie(CONSENT_ESSENTIAL_COOKIE, "true", 365);
+      setConsentCookie(CONSENT_PERFORMANCE_COOKIE, "true", 365);
       getCookieConsent();
     } catch (error) {
       console.error("Failed to post cookie consent", error);
@@ -152,8 +168,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const reject = useCallback(async () => {
     try {
       await commonApiDelete({ endpoint: `policies/cookies-consent` });
-      Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
-      Cookies.set(CONSENT_PERFORMANCE_COOKIE, "false", { expires: 365 });
+      setConsentCookie(CONSENT_ESSENTIAL_COOKIE, "true", 365);
+      setConsentCookie(CONSENT_PERFORMANCE_COOKIE, "false", 365);
       setToast({
         type: "success",
         message: "Cookie preferences updated",
