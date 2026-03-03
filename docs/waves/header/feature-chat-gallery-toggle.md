@@ -2,29 +2,22 @@
 
 ## Overview
 
-Supported waves expose a header toggle that switches thread content between:
+In supported waves, a header icon switches thread view between:
 
-- `Chat`: drop list plus composer
-- `Gallery`: media-first gallery view
+- `Chat`: drop list and composer
+- `Gallery`: media-only grid
 
-View mode is stored per wave on the current device.
+The selected mode is saved per wave on the current device.
 
 ## Location in the Site
 
-- App header when a supported wave is active.
+- App header when an active supported wave is open.
 - Desktop web wave header row on:
   - `/waves/{waveId}`
   - `/messages?wave={waveId}`
-- Hidden on narrow web headers and unsupported wave types.
+- Hidden on mobile/tablet web headers (`<1024px`).
 
-## Entry Points
-
-- Open a supported wave.
-- Use the header icon near the wave title:
-  - grid icon: switch to gallery
-  - chat-bubble icon: switch to chat
-
-## Eligibility Rules
+## Availability Rules
 
 The toggle is shown only when the active wave is:
 
@@ -32,41 +25,58 @@ The toggle is shown only when the active wave is:
 - not a memes wave
 - not a direct-message wave
 
+When hidden, wave content stays in chat mode.
+
+## Entry Points
+
+1. Open a supported wave.
+2. Select the header icon next to the wave title.
+
+Icon behavior:
+
+- grid icon: switch to gallery
+- chat-bubble icon: switch to chat
+
 ## User Journey
 
 1. Open a supported wave.
 2. Select the toggle icon.
-3. In gallery mode, chat list and composer are replaced by gallery content.
-4. Select again to return to chat mode.
-5. Reopen the same wave later; the last saved mode for that wave is restored.
+3. Content updates in place without route change.
+4. In gallery mode:
+   - drop list and composer are replaced by gallery cards
+   - first fetch shows `Loading gallery...`
+   - no media result shows `No media drops yet`
+5. Select again to return to chat.
 
-## Common Scenarios
+## Persistence and Sync
 
-- New waves open in chat mode.
-- Users switch to gallery to scan media, then back to chat to post/reply.
-- Mode memory is per wave, so changing one wave does not change others.
-- App and desktop headers use the same stored mode state.
+- Each wave starts in chat mode until changed.
+- Mode is stored per wave, so changing one wave does not change others.
+- App header and desktop web header read the same saved mode on the device.
+- Desktop browser tabs sync mode changes for the same wave.
+- If browser storage is unavailable, mode still works for the open session but
+  may reset after reload.
 
 ## Edge Cases
 
-- No active wave means no toggle.
-- Unsupported wave types never show the toggle.
-- If local storage is unavailable, mode works for the session but may not persist
-  after reload.
-- Sparse-media waves can show thin gallery results.
+- No active wave: toggle is hidden.
+- Unsupported wave types (rank, memes, direct-message): toggle is hidden.
+- Gallery can be empty when a wave has text-only drops.
 
 ## Failure and Recovery
 
-- If toggle response is delayed, wait for wave data load and try again.
-- If view mode looks stale, reopen the wave to reinitialize state.
-- If persistence is lost after reload, toggle mode again to rewrite saved state.
+- Toggle missing: confirm wave type and web viewport width.
+- Mode not persisting after reload: check browser storage/privacy settings and
+  retry.
+- Gallery appears empty: confirm the wave has media drops.
+- Gallery has no dedicated fetch-error panel; failed loads can appear as a
+  non-updating or empty gallery.
 
 ## Limitations / Notes
 
-- The toggle changes chat-panel presentation only; it does not change route,
-  sidebars, or active content tab.
-- Gallery mode hides the chat composer while active.
-- Mode state is UI preference and is not encoded in URL params.
+- This control changes chat-panel presentation only.
+- URL, sidebars, and active tab do not change when toggling.
+- Composer is hidden while gallery mode is active.
 
 ## Related Pages
 
