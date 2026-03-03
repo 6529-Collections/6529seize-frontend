@@ -82,7 +82,7 @@
     "@reown/appkit": "^1.8.8",
     "@reown/appkit-adapter-wagmi": "^1.8.8",
     "@reown/appkit-common": "^1.8.11",
-    "@sentry/nextjs": "^10.27.0",
+    "@sentry/nextjs": "^10.41.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.7",
     "@tanstack/query-core": "^5.45.0",
@@ -90,7 +90,7 @@
     "@tanstack/react-virtual": "^3.10.7",
     "@types/lodash": "^4.17.23",
     "aws-rum-web": "^1.25.0",
-    "axios": "^1.12.2",
+    "axios": "^1.13.6",
     "bootstrap": "^5.3.3",
     "capacitor-secure-storage-plugin": "^0.11.0",
     "chart.js": "^4.4.9",
@@ -142,7 +142,7 @@
     "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.0",
     "sass": "^1.77.6",
-    "swiper": "^11.1.4",
+    "swiper": "^12.1.2",
     "three": "^0.163.0",
     "unified": "^11.0.5",
     "use-debounce": "^10.0.3",
@@ -217,6 +217,7 @@
       "react": "$react",
       "react-dom": "$react-dom"
     },
-    "zod-validation-error": "^4.0.0"
+    "minimatch": "^10.2.4",
+    "serialize-javascript": "7.0.4"
   }
 }
