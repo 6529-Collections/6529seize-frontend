@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 
 // React Compiler plugin is optional; keep linting resilient if dependency is missing.
 let reactCompilerPlugin;
+let reactCompilerPluginLoadError = null;
 try {
   ({ default: reactCompilerPlugin } =
     await import("eslint-plugin-react-compiler"));
@@ -27,15 +28,48 @@ try {
   if (!moduleNotFound) {
     throw error;
   }
+
+  reactCompilerPluginLoadError = error;
+  const loadErrorMessage =
+    error instanceof Error ? error.message : "Unknown module load failure";
+  console.warn(
+    `[eslint.config] Optional plugin "eslint-plugin-react-compiler" could not be loaded: ${loadErrorMessage}`
+  );
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const deepFreezeRuleConfig = (value, seen = new WeakSet()) => {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) {
+    return value;
+  }
+
+  if (seen.has(value)) {
+    return value;
+  }
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    for (const nestedValue of value) {
+      deepFreezeRuleConfig(nestedValue, seen);
+    }
+    return Object.freeze(value);
+  }
+
+  if (Object.getPrototypeOf(value) === Object.prototype) {
+    for (const nestedValue of Object.values(value)) {
+      deepFreezeRuleConfig(nestedValue, seen);
+    }
+  }
+
+  return Object.freeze(value);
+};
 
 // =============================================================================
 // PLUGINS
 // =============================================================================
 // Note: jsx-a11y is already included via eslint-config-next, so we don't register it again
-const plugins = {
+export const basePlugins = Object.freeze({
   "unused-imports": unusedImports,
   "react-hooks": reactHooks,
   "@typescript-eslint": tseslint.plugin,
@@ -44,16 +78,12 @@ const plugins = {
   security: security,
   promise: promise,
   tailwindcss: tailwindcss,
-};
-
-if (reactCompilerPlugin) {
-  plugins["react-compiler"] = reactCompilerPlugin;
-}
+});
 
 // =============================================================================
 // RULES
 // =============================================================================
-const rules = {
+export const baseRules = deepFreezeRuleConfig({
   // -------------------------------------------------------------------------
   // Next.js Rules - Production Grade
   // -------------------------------------------------------------------------
@@ -247,6 +277,42 @@ const rules = {
   // Organization
   "import/first": "off",
   "import/no-useless-path-segments": ["off", { noUselessIndex: true }],
+  "import/order": [
+    "error",
+    {
+      groups: [
+        "builtin",
+        "external",
+        "internal",
+        "parent",
+        "sibling",
+        "index",
+        "object",
+        "type",
+      ],
+      pathGroups: [
+        {
+          pattern: "@/**",
+          group: "internal",
+          position: "before",
+        },
+      ],
+      pathGroupsExcludedImportTypes: ["builtin"],
+      alphabetize: {
+        order: "asc",
+        caseInsensitive: true,
+      },
+    },
+  ],
+  "sort-imports": [
+    "error",
+    {
+      ignoreCase: true,
+      ignoreDeclarationSort: true,
+      ignoreMemberSort: false,
+      allowSeparatedGroups: true,
+    },
+  ],
 
   // -------------------------------------------------------------------------
   // Accessibility (jsx-a11y) - handled by eslint-config-next
@@ -393,95 +459,130 @@ const rules = {
   // Arrays
   "array-callback-return": ["off", { allowImplicit: true }],
   "no-array-constructor": "error",
-};
-
-// Add React Compiler rule if available
-if (reactCompilerPlugin) {
-  rules["react-compiler/react-compiler"] = "off";
-}
+});
 
 // =============================================================================
 // EXPORT CONFIG
 // =============================================================================
-export default defineConfig([
-  // Global ignores
-  globalIgnores([
-    "**/node_modules",
-    "**/.next",
-    "**/dist",
-    "**/out",
-    "**/public",
-    "**/coverage",
-    "**/generated",
-    "**/__tests__/**",
-    "**/tests/**",
-    "**/__mocks__/**",
-    "**/e2e/**",
-    "**/test-results/**",
-    "config/**",
-    "*.js",
-    "*.mjs",
-    "*.ts",
-    "*.tsx",
-    "scripts/**",
-    "stubs/**",
-    ".claude/**",
-    ".codex/**",
-  ]),
+const DEFAULT_GLOBAL_IGNORES = [
+  "**/node_modules",
+  "**/.next",
+  "**/dist",
+  "**/out",
+  "**/public",
+  "**/coverage",
+  "**/generated",
+  "**/__tests__/**",
+  "**/tests/**",
+  "**/__mocks__/**",
+  "**/e2e/**",
+  "config/**/*.js",
+  "config/**/*.mjs",
+  "config/**/*.ts",
+  "*.config.js",
+  "*.config.mjs",
+  "*.config.ts",
+  "scripts/**",
+  "stubs/**",
+  ".claude/**",
+  ".codex/**",
+];
 
-  // Base config with Next.js rules
-  {
-    extends: [...nextCoreWebVitals],
-    plugins,
-    rules,
-    settings: {
-      "import/resolver": {
-        typescript: {
-          alwaysTryTypes: true,
+const TYPECHECKED_FILE_IGNORES = [
+  "scripts/**",
+  "**/next.config.*",
+  "config/env.ts",
+  "config/serverEnv.ts",
+  "config/alchemyEnv.ts",
+  "__tests__/config/env.base-endpoint.test.ts",
+  "**/playwright.config.ts",
+  "tests/**",
+];
+
+export const createEslintConfig = ({
+  rulesOverride = {},
+  extraPlugins = {},
+  additionalConfigs = [],
+  includeTestResultsIgnore = true,
+  reactCompilerRule = "off",
+} = {}) => {
+  if (reactCompilerRule !== "off" && !reactCompilerPlugin) {
+    const loadErrorMessage =
+      reactCompilerPluginLoadError instanceof Error
+        ? reactCompilerPluginLoadError.message
+        : "Module was not found";
+    throw new Error(
+      `Cannot apply reactCompilerRule="${reactCompilerRule}" because "eslint-plugin-react-compiler" is unavailable. Install the plugin or set reactCompilerRule to "off". Load error: ${loadErrorMessage}`
+    );
+  }
+
+  const plugins = { ...basePlugins, ...extraPlugins };
+  if (reactCompilerPlugin) {
+    plugins["react-compiler"] = reactCompilerPlugin;
+  }
+
+  const rules = { ...baseRules, ...rulesOverride };
+  if (reactCompilerPlugin) {
+    rules["react-compiler/react-compiler"] = reactCompilerRule;
+  }
+
+  const globalIgnorePatterns = includeTestResultsIgnore
+    ? [...DEFAULT_GLOBAL_IGNORES, "**/test-results/**"]
+    : [...DEFAULT_GLOBAL_IGNORES];
+
+  return defineConfig([
+    // Global ignores
+    globalIgnores(globalIgnorePatterns),
+
+    // Base config with Next.js rules
+    {
+      extends: [...nextCoreWebVitals],
+      plugins,
+      rules,
+      settings: {
+        "import/resolver": {
+          typescript: {
+            alwaysTryTypes: true,
+            project: `${__dirname}/tsconfig.json`,
+          },
+          node: true,
+        },
+        tailwindcss: {
+          config: `${__dirname}/tailwind.config.js`,
+          callees: ["classnames", "clsx", "cn", "cva"],
+        },
+      },
+    },
+
+    // TypeScript-specific rules with type-checking
+    {
+      files: ["**/*.{ts,tsx}"],
+      ignores: TYPECHECKED_FILE_IGNORES,
+      languageOptions: {
+        parser: tseslint.parser,
+        parserOptions: {
           project: `${__dirname}/tsconfig.json`,
+          tsconfigRootDir: __dirname,
         },
-        node: true,
       },
-      tailwindcss: {
-        config: `${__dirname}/tailwind.config.js`,
-        callees: ["classnames", "clsx", "cn", "cva"],
+      rules: {
+        "no-restricted-syntax": [
+          "error",
+          {
+            selector:
+              "MemberExpression[object.name='process'][property.name='env']",
+            message:
+              "Accessing process.env is restricted. Use environment variables safely.",
+          },
+        ],
       },
     },
-  },
 
-  // TypeScript-specific rules with type-checking
-  {
-    files: ["**/*.{ts,tsx}"],
-    ignores: [
-      "scripts/**",
-      "**/next.config.*",
-      "config/env.ts",
-      "config/serverEnv.ts",
-      "config/alchemyEnv.ts",
-      "__tests__/config/env.base-endpoint.test.ts",
-      "**/playwright.config.ts",
-      "tests/**",
-    ],
-    languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        project: `${__dirname}/tsconfig.json`,
-        tsconfigRootDir: __dirname,
-      },
-    },
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        {
-          selector:
-            "MemberExpression[object.name='process'][property.name='env']",
-          message:
-            "Accessing process.env is restricted. Use environment variables safely.",
-        },
-      ],
-    },
-  },
+    ...additionalConfigs,
 
-  // Prettier - MUST be last to override formatting rules
-  eslintConfigPrettier,
-]);
+    // Prettier - MUST be last to override formatting rules
+    eslintConfigPrettier,
+  ]);
+};
+
+export default createEslintConfig();
