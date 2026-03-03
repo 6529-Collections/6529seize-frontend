@@ -85,7 +85,7 @@ Use this area for wave and direct-message tasks:
 
 ## Troubleshooting
 
-- [Wave Troubleshooting](troubleshooting-wave-navigation-and-posting.md):
+- [Wave Navigation and Posting Troubleshooting](troubleshooting-wave-navigation-and-posting.md):
   route, tab, posting, and deep-link recovery for `/waves/{waveId}` and
   `/messages?wave={waveId}` thread contexts.
 

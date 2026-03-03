@@ -1,90 +1,113 @@
-# Wave Troubleshooting
+# Wave Navigation and Posting Troubleshooting
 
 ## Overview
 
-Use this page when wave links open the wrong place, jump links miss their
-target, tabs look wrong, or posting is unavailable.
+Use this page when wave links open the wrong thread, serial jump links miss the
+target drop, tabs look wrong, or posting/submission is blocked.
 
 ## Location in the Site
 
-- Wave thread route: `/waves/{waveId}`
-- Direct-message thread route: `/messages?wave={waveId}`
-- Legacy wave route: `/waves?wave={waveId}` redirects to `/waves/{waveId}` and
-  keeps other query values
-- Deep-link query values: `drop`, `serialNo`, `divider`
-- `serialNo` and `divider` are one-time hints and are removed after initial
-  load
+- Wave thread: `/waves/{waveId}`
+- Direct-message thread: `/messages?wave={waveId}`
+- Legacy wave link: `/waves?wave={waveId}` (redirects to `/waves/{waveId}`)
+- Thread query values: `drop`, `serialNo`, `divider`
 
-## Entry Points
+## Fast Recovery Flow
 
-- A shared link opens the wrong route or thread.
-- A target drop does not appear after opening a `serialNo` link.
-- Posting is blocked when you expected to post.
-- Leaderboard, outcomes, or submission surfaces look empty.
+1. Confirm route family first: `/waves/{waveId}` or `/messages?wave={waveId}`.
+2. Reopen the thread from the sidebar/list and copy a fresh link.
+3. Remove stale query keys (`drop`, `serialNo`, `divider`) and retry from the
+   thread root.
+4. Refresh once.
+5. If posting is blocked, match the exact footer message in
+   [Posting and Submission Checks](#posting-and-submission-checks).
 
-## User Journey
+## Route and Link Checks
 
-1. Confirm route format and whether the thread is wave or direct message.
-2. Confirm that current wave state allows your action.
-3. Confirm tab visibility and drop-target behavior for this wave type.
-4. Retry from canonical links or refresh the thread.
-
-## Common Scenarios
-
-- Shared link opened the wrong route:
-  verify whether it should be `/waves/{waveId}` or `/messages?wave={waveId}`.
+- Link opens the wrong thread:
+  verify whether the target is a wave thread (`/waves/{waveId}`) or a direct
+  message thread (`/messages?wave={waveId}`), then update saved/shared links.
 - Legacy link uses `/waves?wave={waveId}`:
-  open it and let it normalize to `/waves/{waveId}`.
+  expected behavior is redirect to `/waves/{waveId}` while preserving other
+  query values. Save the normalized URL after load.
+- Thread URL opens, then returns to `/waves` or `/messages`:
+  the selected wave id is unavailable or stale. Reopen from sidebar/list and
+  copy a fresh link.
+- Thread does not load and shows access/setup gates:
+  resolve the shown state first (`Connect wallet`, profile setup prompt, or
+  `This content is not available`), then reopen the thread.
+- URL has `drop={dropId}` but no single-drop view opens:
+  remove `drop`, then reopen from thread actions. When both `drop` and
+  `serialNo` exist, drop-open handling takes precedence.
 - `serialNo` link does not jump immediately:
-  wait for older-drop fetch to finish, then retry jump controls.
-- `serialNo`/`divider` disappeared from the URL:
-  expected; those query values are consumed once on load.
-- Cannot post in thread:
-  if footer shows `You cannot participate in this wave at the moment`, both
-  chat and submission are blocked for your current context; if footer shows
-  `Wave is closed`, chat is disabled in that thread context.
+  older targets can require history fetch first. Keep the thread open until
+  loading settles, then retry the jump action.
+- `serialNo` and `divider` disappear after load:
+  expected when `serialNo` parses as a valid integer. They are one-time setup
+  values.
+- `serialNo` is ignored:
+  invalid values are ignored. `divider` applies only when `serialNo` is valid.
+
+## Posting and Submission Checks
+
+- Footer shows `You cannot participate in this wave at the moment`:
+  both chat and submission are blocked for your current context.
+- Footer shows `Wave is closed`:
+  chat is disabled for the current chat-type wave context.
+- Footer shows a chat restriction:
+  `Please log in to participate in chat`, `Proxy users cannot participate in chat`,
+  `You don't have permission to chat in this wave`, or
+  `Chat is currently disabled for this wave`.
+- Footer shows a submission restriction:
+  `Please log in to make submissions`, `Proxy users cannot make submissions`,
+  `You don't have permission to submit in this wave`,
+  `Submissions haven't started yet`, `Submission period has ended`, or
+  `You have reached the maximum number of drops allowed`.
+- Memes submission cannot continue:
+  upload artwork, complete required fields, fix inline validation errors, then
+  submit again.
+
+## Tabs and Empty-State Checks
+
 - Expected tab is missing:
-  wave type/state can hide tabs; use the available tab set.
-- `Copy link` is unavailable:
-  temporary drops (`temp-*`) do not support copy.
-- Memes submission is blocked:
-  fix required Artwork or Additional Information fields, then retry.
-- Leaderboard or outcomes look empty:
-  confirm the wave currently has eligible data, then refresh.
+  tab availability changes by wave type and voting state. Chat-type waves hide
+  the desktop tab row (`Chat`, `Leaderboard`, `Winners`, and related tabs).
+- `Winners` is missing:
+  it appears only after the first decision has passed.
+- `Leaderboard` is missing:
+  it can disappear after voting ends.
+- Leaderboard looks empty:
+  `No drops to show`, `No curated drops yet`, and
+  `No artwork submissions yet` are valid empty states.
+- Winners/Outcome looks empty:
+  `No Winners Yet`, `No winners yet`, and `No outcomes to show.` are valid
+  until results are available.
+- `/messages` shows no thread content:
+  `Select a Conversation` is expected when no `wave` query is active.
 
 ## Edge Cases
 
-- Chat-only waves do not render the desktop tab strip.
-- Direct-message wave actions can keep the thread URL as
-  `/messages?wave={waveId}`.
-- `drop` links open drop context in-thread; closing that view removes `drop`
-  from the URL.
-- Unread-divider and pending-message controls can appear together on mobile.
-
-## Failure and Recovery
-
-- If wave loading looks stale, refresh to resync metadata and tab availability.
-- If older-drop pagination fails, keep thread open and retry by scrolling.
-- If a `serialNo` jump stalls, keep browsing and retry after data backfills.
-- If posting or submission fails due to validation, fix required fields and
-  retry.
-- If route-level rendering fails entirely, use
-  [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
-  for fallback behavior.
+- Temporary drops (`temp-*`) disable `Copy link`.
+- Closing single-drop view removes `drop` from the URL.
+- Unread-jump and pending-message controls can merge into one stacked control
+  when both states are active.
 
 ## Limitations / Notes
 
-- Route failures and in-thread state issues use different recovery paths.
-- Action availability can change by wave type, voting state, and user
-  permissions.
+- Posting availability changes in real time by auth, proxy state, wave
+  eligibility, submission period, and per-user limits.
+- Serial jump depends on the target serial being reachable in available history.
+- `drop` overlays and `serialNo` jump navigation are separate mechanisms.
 
 ## Related Pages
 
 - [Waves Index](README.md)
 - [Wave Participation Flow](flow-wave-participation.md)
+- [Wave Chat Serial Jump Navigation](chat/feature-serial-jump-navigation.md)
 - [Wave Chat Scroll Behavior](chat/feature-scroll-behavior.md)
 - [Wave Chat Composer Availability](chat/feature-chat-composer-availability.md)
 - [Wave Content Tabs](chat/feature-content-tabs.md)
 - [Wave Drop Open and Copy Links](drop-actions/feature-open-and-copy-links.md)
 - [Wave Leaderboard Drop States](leaderboard/feature-drop-states.md)
 - [Memes Submission Workflows](memes/feature-memes-submission.md)
+- [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
