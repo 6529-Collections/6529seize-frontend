@@ -69,7 +69,7 @@ Use this area for wave and direct-message tasks:
 - [Sidebars](sidebars/README.md): wave/direct-message list navigation and
   right-sidebar controls.
 - [Link Previews](link-previews/README.md): external/social/web3 preview-card
-  rendering in thread content.
+  rendering in thread content and home-style drop-card variants.
 - [Leaderboard](leaderboard/README.md): leaderboard states, filters, timeline,
   winners-tab behavior, `My Votes` tab behavior, and top-voter views.
 - [Memes](memes/README.md): memes submission flow and submission-state behavior.
