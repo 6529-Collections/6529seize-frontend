@@ -11,7 +11,7 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 - `/tools/subscriptions-report`: read-only aggregate counts for upcoming and
   redeemed The Memes subscriptions.
 - `/tools/app-wallets*`: create, import, and manage app-local wallets when
-  app-wallet support is available.
+  runtime app-wallet support is available (supported native app environments).
 
 ## Read Order
 
@@ -19,7 +19,8 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
    upload, and drop creation examples.
 2. Read `Block Finder` for timestamp and block-include tooling.
 3. Read `Memes Subscriptions Report` for aggregate subscription reporting.
-4. Read `App Wallets Management` for app-local wallet setup and recovery.
+4. Read `App Wallets Management` for native app-wallet setup, recovery, and
+   unsupported-state behavior.
 
 ## Route Coverage
 
@@ -43,6 +44,8 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
   - `Tools -> Block Finder`
   - `Tools -> The Memes Tools -> Memes Subscriptions`
   - `Tools -> App Wallets` (only when app-wallet support is enabled)
+- When app-wallet support is unavailable, direct `/tools/app-wallets*` routes
+  still load but show an unsupported message panel instead of wallet controls.
 - On iOS outside the US, `Subscriptions Report` is hidden in web sidebar and
   search.
 - On native app, the Tools drawer still lists `Memes Subscriptions`.
