@@ -158,6 +158,11 @@ function isProbeLikeRequest(
   );
 }
 
+function getStringTagValue(event: Event, key: string): string | undefined {
+  const value = event.tags?.[key];
+  return typeof value === "string" ? value : undefined;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -272,7 +277,7 @@ function isProbeLikeServerActionRequest(event: Event): boolean {
   if (isMalformedNextActionProbe(event)) {
     return true;
   }
-  return isProbeLikeRequest(url, event.tags?.["security_probe"]);
+  return isProbeLikeRequest(url, getStringTagValue(event, "security_probe"));
 }
 
 function isWebStreamsTransformAlgorithmError(event: Event): boolean {
@@ -292,7 +297,7 @@ function isWebStreamsTransformAlgorithmError(event: Event): boolean {
 
 function isProbeLikeWebStreamsRequest(event: Event): boolean {
   const url = (event.request?.url || "").toLowerCase();
-  return isProbeLikeRequest(url, event.tags?.["security_probe"]);
+  return isProbeLikeRequest(url, getStringTagValue(event, "security_probe"));
 }
 
 export function filterServerActionProbeErrors<T extends Event>(
