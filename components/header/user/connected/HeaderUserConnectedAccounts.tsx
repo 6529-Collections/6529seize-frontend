@@ -10,7 +10,10 @@ interface ConnectedAccountItem {
   readonly address: string;
   readonly isActive: boolean;
   readonly isConnected: boolean;
+  readonly unreadNotificationsCount?: number | undefined;
 }
+
+const MAX_BADGE_COUNT = 99;
 
 function ConnectedAccountRow({
   account,
@@ -38,6 +41,10 @@ function ConnectedAccountRow({
     profile?.handle ??
     `${account.address.slice(0, 6)}...${account.address.slice(-4)}`;
   const walletLabel = formatAddress(account.address);
+  const unreadCount = account.unreadNotificationsCount ?? 0;
+  const showUnreadBadge = unreadCount > 0;
+  const unreadBadgeLabel =
+    unreadCount > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : unreadCount;
 
   return (
     <button
@@ -50,23 +57,32 @@ function ConnectedAccountRow({
       }`}
       aria-label={`Switch to ${label} (${walletLabel})`}
     >
-      <div
-        className={`tw-relative tw-size-8 tw-flex-none tw-overflow-hidden tw-rounded-lg ${connectionIndicator.avatarClassName}`}
-        title={connectionIndicator.title}
-      >
-        {avatarSrc && (
-          <img
-            src={avatarSrc}
-            alt={label}
-            className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out ${
-              resolvedPfp ? "tw-object-contain" : "tw-object-cover tw-grayscale"
-            }`}
-          />
-        )}
-        {connectionIndicator.overlayClassName && (
-          <div
-            className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-lg ${connectionIndicator.overlayClassName}`}
-          />
+      <div className="tw-relative tw-size-8 tw-flex-none">
+        <div
+          className={`tw-relative tw-size-8 tw-overflow-hidden tw-rounded-lg ${connectionIndicator.avatarClassName}`}
+          title={connectionIndicator.title}
+        >
+          {avatarSrc && (
+            <img
+              src={avatarSrc}
+              alt={label}
+              className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out ${
+                resolvedPfp
+                  ? "tw-object-contain"
+                  : "tw-object-cover tw-grayscale"
+              }`}
+            />
+          )}
+          {connectionIndicator.overlayClassName && (
+            <div
+              className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-lg ${connectionIndicator.overlayClassName}`}
+            />
+          )}
+        </div>
+        {showUnreadBadge && (
+          <div className="tw-absolute tw-right-[-8px] tw-top-[-8px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
+            {unreadBadgeLabel}
+          </div>
         )}
       </div>
 
