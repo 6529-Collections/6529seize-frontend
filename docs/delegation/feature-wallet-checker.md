@@ -20,9 +20,11 @@ It checks delegations, delegation managers, and consolidation relationships.
 ## What It Shows
 
 - `Delegations`: rows with `From`, `To`, `Collection`, `Use Case`, `Tokens`, and `Expiry`.
-- `Active Minting Delegation for The Memes`: shown only when an active matching delegation exists.
+- `Active Minting Delegation for The Memes`: shown when a matching active row is
+  found for `The Memes` or `Any Collection` with use case `#2` (or `#1` fallback).
 - `Delegation Managers`: manager rows (`From`, `To`, `Collection`).
-- `Consolidations`: directional consolidation pairs.
+- `Consolidations`: directional consolidation pairs (can include related-wallet
+  rows fetched from one linked consolidation wallet).
 - `Active Consolidation`: shown only when a resolved multi-wallet consolidation set is found.
 - `Incomplete Consolidation`: shown only when reverse-direction consolidation is missing.
 
@@ -45,10 +47,12 @@ It checks delegations, delegation managers, and consolidation relationships.
 ## Edge Cases
 
 - Invalid input shows `Invalid address`.
+- ENS input support is `.eth` names. Non-`.eth` name input is treated as invalid.
 - If `?address=<wallet-or-ens>` is present, an initial check starts
   automatically after resolution to a valid address.
 - Successful `.eth` resolution rewrites `?address=` to the resolved `0x...` address.
 - ENS resolution blocks submit while address resolution is still loading.
+- `Check` stays disabled while input is invalid or resolution is still loading.
 - While a check is in progress, `Check` and `Enter` do not start another request.
 - After results load, the input is disabled until `Clear` is selected.
 - `Clear` resets input/results and removes the `address` query param.
@@ -71,7 +75,8 @@ It checks delegations, delegation managers, and consolidation relationships.
 
 - Wallet Checker is diagnostic only and does not submit writes.
 - ENS/display labels depend on resolver/API availability.
-- ENS input support is `.eth` names.
+- Consolidation output is directional and may look partial until reverse writes
+  are completed.
 
 ## Related Pages
 

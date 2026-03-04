@@ -37,7 +37,8 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
 - Collection tables stay on `Fetching incoming ...` / `Fetching outgoing ...`:
   wallet is disconnected, so collection reads do not run.
 - Manager actions do not open a form:
-  no incoming `Delegation Managers` row is selected.
+  no incoming `Delegation Managers` row is selected (button click is a no-op
+  until one row is selected).
 - `Assign Primary Address` stays blocked:
   `Connect Wallet to continue` or
   `You must have a consolidation to assign a Primary Address`.
@@ -50,7 +51,8 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
 - Toast shows `Switch to Ethereum Mainnet` or `Switch to Sepolia Network`:
   wallet chain does not match the delegation contract chain.
 - Wallet Checker shows `Invalid address`, empty results, or blocked next run:
-  enter a valid `0x...` or `.eth`, then use `Clear` before the next check.
+  enter a valid `0x...` or `.eth` (non-`.eth` names are invalid), then use
+  `Clear` before the next check.
 
 ## Edge Cases
 

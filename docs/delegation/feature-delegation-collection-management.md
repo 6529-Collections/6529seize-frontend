@@ -46,6 +46,10 @@ delegations for one collection scope.
   - `consolidation incomplete` with tooltip (`Incoming consolidation missing` or
     `Outgoing consolidation missing`)
 - Revoke multiple stale outgoing rows at once with `Batch Revoke`.
+- Use outgoing `Edit` to open an inline update form:
+  - standard delegations: update `New Delegate Address`, optional `Expiry Date`,
+    and optional `Tokens`
+  - consolidation and delegation-manager rows: update delegate address only
 - Use manager actions for a selected original delegator:
   - `Register Delegation`
   - `Register Delegation Manager`
@@ -53,6 +57,7 @@ delegations for one collection scope.
   - `Assign Primary Address` (only on `Any Collection` and `The Memes`)
   - `Revoke`
 - Manager actions open inline forms on the same route.
+- Manager `Revoke` requires `Collection`, `Revoke Address`, and `Use Case`.
 
 ## Edge Cases
 
@@ -66,6 +71,8 @@ delegations for one collection scope.
 - `Batch Revoke` selection cap is 5 rows; extra checkboxes disable at max.
 - Manager action buttons render only when incoming manager rows exist and stay
   disabled until one delegator is selected.
+- Manager actions are single-delegator actions: selecting one incoming manager
+  row replaces any previous row selection.
 - `Lock/Unlock Use Case` excludes use case `#1`.
 - If current collection wallet is locked, use-case controls are disabled until
   wallet unlock.
@@ -86,7 +93,8 @@ delegations for one collection scope.
 ## Failure and Recovery
 
 - If tables remain on `Fetching ...`, connect wallet and reload the same route.
-- If manager actions stay disabled, select one incoming manager row first.
+- If manager action clicks appear to do nothing, select one incoming
+  `Delegation Managers` row first.
 - If `Batch Revoke` is disabled, select at least 2 outgoing rows.
 - If lock controls show `*` notes, unlock from `/delegation/any-collection`
   first.

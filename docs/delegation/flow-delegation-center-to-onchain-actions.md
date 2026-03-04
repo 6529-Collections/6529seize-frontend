@@ -55,6 +55,7 @@ verify the result in Wallet Checker.
    a successful connect.
 4. Complete your action:
    - write forms on `register-*` or `assign-primary-address`
+   - enter wallet targets as `0x...` or `.eth` where address input is shown
    - collection actions: `Edit`, `Revoke`, `Batch Revoke`, manager actions,
      `Lock Wallet`, and `Lock/Unlock Use Case`
 5. Submit and confirm in wallet.
@@ -74,6 +75,8 @@ verify the result in Wallet Checker.
   for an original delegator.
 - Use manager `Assign Primary Address` from incoming rows on `Any Collection`
   or `The Memes`.
+- Use manager `Revoke` to remove a delegation for a selected original delegator
+  by collection/use-case/address.
 - Revoke stale outgoing delegations in batch (2-5 rows).
 
 ## Edge Cases

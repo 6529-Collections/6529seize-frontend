@@ -1,25 +1,77 @@
 # Delegation
 
+Delegation docs cover user-facing behavior under `/delegation/*`: route
+switching, onchain write actions, collection management, and Wallet Checker
+diagnostics.
+
 ## Overview
 
-Delegation docs cover user-facing behavior for `/delegation/*`.
+- Start from `/delegation/delegation-center` for most flows.
+- Bare `/delegation` is not a valid page route.
+- Use this area for section routing, write actions, collection routes, manager
+  actions, lock controls, and Wallet Checker checks.
+- Unknown or multi-segment delegation paths use HTML fallback by final segment.
 
-This area includes:
+## Quick Start
 
-- section navigation and HTML-backed content routes
-- write routes for delegation, consolidation, sub-delegation, and primary-address assignment
-- collection management (`Outgoing`/`Incoming`, edit, revoke, batch revoke, lock/unlock)
-- wallet diagnostics in Wallet Checker (`/delegation/wallet-checker`)
+1. Need feature behavior by route family: start in **Features**.
+2. Need end-to-end execution (center to write to verify): open **Flows**.
+3. Need failure recovery: open **Troubleshooting**.
 
-Use this area when you need route behavior, action requirements, wallet/network
-prerequisites, transaction feedback states, or checker recovery paths.
+## Start by Goal
+
+- Understand section routing, menu behavior, query carry/clear rules, or HTML
+  fallback:
+  [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md)
+- Complete write routes (`register-*`, `assign-primary-address`) and confirm
+  required fields/prefills:
+  [Delegation Write Action Routes](feature-delegation-action-flows.md)
+- Manage collection rows, batch revoke, manager actions, and lock controls:
+  [Delegation Collection Management](feature-delegation-collection-management.md)
+- Run read-only wallet diagnostics and consolidation checks:
+  [Wallet Checker](feature-wallet-checker.md)
+- Run one continuous journey from center to onchain result verification:
+  [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
+- Recover from not-found/fallback issues, blocked manager actions, validation
+  failures, or chain mismatch:
+  [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)
+
+## Route Coverage
+
+- Section routes: `/delegation/delegation-center`,
+  `/delegation/wallet-architecture`, `/delegation/delegation-faq`,
+  `/delegation/consolidation-use-cases`, `/delegation/wallet-checker`
+- Write routes: `/delegation/register-delegation`,
+  `/delegation/register-consolidation`, `/delegation/register-sub-delegation`,
+  `/delegation/assign-primary-address`
+- Collection routes: `/delegation/any-collection`, `/delegation/the-memes`,
+  `/delegation/meme-lab`, `/delegation/6529-gradient`
+- Bare route: `/delegation` resolves to not-found (no page route).
+- Unknown or multi-segment delegation paths use HTML fallback by final segment.
+
+## Read In This Order
+
+1. [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md)
+2. [Delegation Write Action Routes](feature-delegation-action-flows.md)
+3. [Delegation Collection Management](feature-delegation-collection-management.md)
+4. [Wallet Checker](feature-wallet-checker.md)
+5. [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
+6. [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)
 
 ## Features
 
-- [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md): section routes, desktop/mobile menu behavior, HTML fallback mapping, and query-param cleanup rules.
-- [Delegation Write Action Routes](feature-delegation-action-flows.md): write forms, query-prefill behavior, manager write variants, and onchain feedback states.
-- [Delegation Collection Management](feature-delegation-collection-management.md): collection route accordions, row actions, batch revoke limits, manager actions, and locks.
-- [Wallet Checker](feature-wallet-checker.md): read-only diagnostics, deep-link checks, and consolidation recommendations.
+### Routing and Entry
+
+- [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md): section routes, menu behavior, query-param carry rules, and fallback HTML behavior.
+
+### Write and Management
+
+- [Delegation Write Action Routes](feature-delegation-action-flows.md): write-route entry points, required fields, query-prefill behavior, and manager variants.
+- [Delegation Collection Management](feature-delegation-collection-management.md): collection-scoped reads, row actions, manager actions, and lock controls.
+
+### Diagnostics
+
+- [Wallet Checker](feature-wallet-checker.md): read-only wallet diagnostics, deep-link behavior, and consolidation checks.
 
 ## Flows
 

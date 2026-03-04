@@ -2,7 +2,7 @@
 
 ## Overview
 
-Write action routes under `/delegation/*` create or update delegation state onchain.
+Write action routes under `/delegation/*` register delegation state onchain.
 Use this page for required inputs, query prefills, manager-launched variants,
 and submit/recovery behavior.
 
@@ -46,6 +46,18 @@ and submit/recovery behavior.
   - If consolidation is missing, route shows
     `You must have a consolidation to assign a Primary Address`
 
+## Input and Validation Rules
+
+- Address fields on write forms accept `0x...` or `.eth`.
+- If address resolution does not produce a valid `0x...` wallet, submit shows
+  `Missing or invalid Address`.
+- Write forms reject self-targeting and show
+  `Invalid Address - cannot delegate to your own wallet`.
+- `register-delegation` supports all listed use cases in the selector, but the
+  UI note calls out current 6529.io support for `#1`, `#2`, and `#3`.
+- `register-consolidation` shows an on-page note that TDH consolidation should
+  use `Any Collection` or `The Memes`.
+
 ## Query Parameter Behavior
 
 - `register-delegation` accepts:
@@ -65,6 +77,8 @@ and submit/recovery behavior.
   `Collection` is restricted to that route collection.
 - `Assign Primary Address` manager action is shown only on
   `Any Collection` and `The Memes`.
+- Manager `Revoke` opens a dedicated revoke form that requires `Collection`,
+  `Revoke Address`, and `Use Case`.
 
 ## Feedback and Transaction States
 
