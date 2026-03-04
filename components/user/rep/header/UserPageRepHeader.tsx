@@ -6,7 +6,7 @@ import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import RepCategoryPill from "../RepCategoryPill";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
@@ -34,10 +34,11 @@ export default function UserPageRepHeader({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const [visibleCount, setVisibleCount] = useState(5);
-
-  useEffect(() => {
+  const [prevCategories, setPrevCategories] = useState(categories);
+  if (categories !== prevCategories) {
+    setPrevCategories(categories);
     setVisibleCount(5);
-  }, [categories]);
+  }
 
   const visibleCategories = categories.slice(0, visibleCount);
   const hasMore = categories.length > visibleCount;
@@ -141,31 +142,33 @@ export default function UserPageRepHeader({
 
           {(visibleCategories.length > 0 ||
             (canEditRep && repDirection === "received")) && (
-            <div className="tw-mt-6 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-6">
-              <div className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                Rep Categories
-              </div>
-              <div className="tw-flex tw-flex-wrap tw-gap-3">
+            <div className="tw-mt-4 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
+              <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
+                <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+                  Rep Categories
+                </div>
                 {canEditRep && repDirection === "received" && (
                   <button
                     type="button"
                     onClick={() => setIsGrantRepOpen(true)}
-                    className="tw-group tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-white/15 tw-bg-white/[0.03] tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/[0.05] hover:tw-text-iron-300"
+                    className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-400 hover:tw-bg-primary-400"
                   >
                     <svg
-                      className="-tw-ml-1 tw-h-4 tw-w-4 tw-text-iron-400 tw-transition-colors group-hover:tw-text-white"
+                      className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="2"
+                      strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
                       <path d="M12 5v14M5 12h14" />
                     </svg>
-                    <span>Add new</span>
+                    Grant Rep
                   </button>
                 )}
+              </div>
+              <div className="tw-flex tw-flex-wrap tw-gap-3">
                 {visibleCategories.map((cat) => (
                   <RepCategoryPill
                     key={cat.category}

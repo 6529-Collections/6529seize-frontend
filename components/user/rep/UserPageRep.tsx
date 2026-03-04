@@ -7,10 +7,15 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPage";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { amIUser } from "@/helpers/Helpers";
 import { RateMatter } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
@@ -29,9 +34,24 @@ export default function UserPageRep({
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   const params = useParams();
-  const user = (params?.["user"] as string)?.toLowerCase();
+  const user = (params["user"] as string).toLowerCase();
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { address } = useSeizeConnectContext();
 
   const [repDirection, setRepDirection] = useState<RepDirection>("received");
+  const [isNicRateOpen, setIsNicRateOpen] = useState(false);
+
+  const canEditNic = useMemo((): boolean => {
+    if (!connectedProfile?.handle) return false;
+    if (activeProfileProxy) {
+      if (profile.handle === activeProfileProxy.created_by.handle) return false;
+      return activeProfileProxy.actions.some(
+        (action) => action.action_type === ApiProfileProxyActionType.AllocateCic
+      );
+    }
+    if (amIUser({ profile, address })) return false;
+    return true;
+  }, [connectedProfile, profile, activeProfileProxy, address]);
 
   // --- Incoming (received) rep ---
   const { data: repOverview, isFetching: isFetchingOverview } =
@@ -166,25 +186,43 @@ export default function UserPageRep({
                 <UserPageIdentityHeader
                   profile={profile}
                   cicOverview={cicOverview ?? null}
+                  {...(canEditNic
+                    ? { onRateClick: () => setIsNicRateOpen(true) }
+                    : {})}
                 />
                 <UserPageIdentityStatements profile={profile} />
-                <div className="tw-px-6 tw-pb-8">
-                  <UserPageRateWrapper
-                    profile={profile}
-                    type={RateMatter.NIC}
-                    hideOwnProfileMessage
-                  >
-                    <UserPageIdentityHeaderCICRate
-                      profile={profile}
-                      isTooltip={false}
-                    />
-                  </UserPageRateWrapper>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <MobileWrapperDialog
+        title="Rate NIC"
+        isOpen={isNicRateOpen}
+        onClose={() => setIsNicRateOpen(false)}
+        tabletModal
+        maxWidthClass="md:tw-max-w-md"
+      >
+        <div className="tw-px-4 sm:tw-px-6">
+          <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
+            <UserPageIdentityHeaderCICRate
+              profile={profile}
+              isTooltip={false}
+              onSuccess={() => setIsNicRateOpen(false)}
+            />
+          </UserPageRateWrapper>
+          <div className="tw-mt-3">
+            <button
+              onClick={() => setIsNicRateOpen(false)}
+              type="button"
+              className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </MobileWrapperDialog>
     </div>
   );
 }
