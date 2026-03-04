@@ -6,6 +6,7 @@ import { publicEnv } from "@/config/env";
 import {
   filterServerActionProbeErrors,
   filterTunnelRouteErrors,
+  filterWebStreamsProbeErrors,
   tagSecurityProbes,
 } from "@/config/sentryProbes";
 import {
@@ -51,7 +52,12 @@ Sentry.init({
       return null;
     }
 
-    return sanitizeSentryEvent(actionFiltered);
+    const webStreamsFiltered = filterWebStreamsProbeErrors(actionFiltered);
+    if (webStreamsFiltered === null) {
+      return null;
+    }
+
+    return sanitizeSentryEvent(webStreamsFiltered);
   },
 
   beforeSendTransaction(event) {

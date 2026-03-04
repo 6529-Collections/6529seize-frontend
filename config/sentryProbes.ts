@@ -19,6 +19,8 @@ const probeTags = {
 };
 
 const SERVER_ACTION_NOT_FOUND = "Failed to find Server Action";
+const WEBSTREAMS_TRANSFORM_ALGORITHM_ERROR =
+  "controller[kState].transformAlgorithm is not a function";
 
 const CONNECTION_ERROR_PATTERNS = ["aborted", "ECONNRESET", "socket hang up"];
 
@@ -132,10 +134,11 @@ function isServerActionNotFoundError(event: Event): boolean {
   );
 }
 
-function isProbeLikeServerActionRequest(event: Event): boolean {
-  const url = (event.request?.url || "").toLowerCase();
-
-  if (event.tags?.["security_probe"] === "true") {
+function isProbeLikeRequest(
+  url: string,
+  securityProbeTag: string | undefined
+): boolean {
+  if (securityProbeTag === "true") {
     return true;
   }
 
@@ -143,6 +146,31 @@ function isProbeLikeServerActionRequest(event: Event): boolean {
     PROBE_PATTERNS.some((pattern) => url.includes(pattern)) ||
     url.includes("jquery-file-upload")
   );
+}
+
+function isProbeLikeServerActionRequest(event: Event): boolean {
+  const url = (event.request?.url || "").toLowerCase();
+  return isProbeLikeRequest(url, event.tags?.["security_probe"]);
+}
+
+function isWebStreamsTransformAlgorithmError(event: Event): boolean {
+  const value = event.exception?.values?.[0];
+  const message =
+    typeof value?.value === "string" ? value.value : event.message || "";
+
+  if (value?.type && value.type !== "TypeError") {
+    return false;
+  }
+
+  return (
+    typeof message === "string" &&
+    message.includes(WEBSTREAMS_TRANSFORM_ALGORITHM_ERROR)
+  );
+}
+
+function isProbeLikeWebStreamsRequest(event: Event): boolean {
+  const url = (event.request?.url || "").toLowerCase();
+  return isProbeLikeRequest(url, event.tags?.["security_probe"]);
 }
 
 export function filterServerActionProbeErrors<T extends Event>(
@@ -153,6 +181,20 @@ export function filterServerActionProbeErrors<T extends Event>(
   }
 
   if (isProbeLikeServerActionRequest(event)) {
+    return null;
+  }
+
+  return event;
+}
+
+export function filterWebStreamsProbeErrors<T extends Event>(
+  event: T
+): T | null {
+  if (!isWebStreamsTransformAlgorithmError(event)) {
+    return event;
+  }
+
+  if (isProbeLikeWebStreamsRequest(event)) {
     return null;
   }
 
