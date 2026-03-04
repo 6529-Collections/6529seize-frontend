@@ -34,7 +34,6 @@ describe("commonApiFetch", () => {
           "x-6529-auth": "s",
           Authorization: "Bearer jwt",
         }),
-        signal: undefined,
       })
     );
     expect(result).toEqual({ result: 1 });
@@ -55,7 +54,6 @@ describe("commonApiFetch", () => {
       "https://api.test.6529.io/api/bad",
       expect.objectContaining({
         headers: {},
-        signal: undefined,
       })
     );
   });
@@ -116,5 +114,45 @@ describe("commonApiPost", () => {
         body: JSON.stringify({}),
       })
     );
+  });
+
+  it("rejects with structured metadata when requested", async () => {
+    (getStagingAuth as jest.Mock).mockReturnValue(null);
+    (getAuthJwt as jest.Mock).mockReturnValue(null);
+    const responseHeaders = new Headers({ "retry-after": "2" });
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 429,
+      statusText: "Too Many Requests",
+      headers: responseHeaders,
+      json: async () => ({ error: "rate limited" }),
+    });
+
+    const error = await commonApiPost({
+      endpoint: "e",
+      body: {},
+      errorMode: "structured",
+    }).catch(
+      (error) =>
+        error as {
+          message: string;
+          status: number;
+          headers: Headers;
+          response: {
+            status: number;
+            headers: Headers;
+            body?: unknown;
+          };
+        }
+    );
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toBe("rate limited");
+    expect(error.status).toBe(429);
+    expect(error.headers).toBe(responseHeaders);
+    expect(error.headers.get("retry-after")).toBe("2");
+    expect(error.response.status).toBe(429);
+    expect(error.response.headers).toBe(responseHeaders);
+    expect(error.response.body).toEqual({ error: "rate limited" });
   });
 });

@@ -134,12 +134,22 @@ const extractErrorStatusCode = (error: unknown): number | null => {
     response?: {
       status?: unknown;
     };
+    cause?: {
+      status?: unknown;
+      code?: unknown;
+      response?: {
+        status?: unknown;
+      };
+    };
   };
 
   return (
     parseStatusCode(typedError.status) ??
     parseStatusCode(typedError.response?.status) ??
-    parseStatusCode(typedError.code)
+    parseStatusCode(typedError.code) ??
+    parseStatusCode(typedError.cause?.status) ??
+    parseStatusCode(typedError.cause?.response?.status) ??
+    parseStatusCode(typedError.cause?.code)
   );
 };
 
@@ -191,11 +201,19 @@ const extractRetryAfterMs = (error: unknown): number | null => {
       response?: {
         headers?: unknown;
       };
+      cause?: {
+        headers?: unknown;
+        response?: {
+          headers?: unknown;
+        };
+      };
     };
 
     const retryAfterFromHeaders =
       extractRetryAfterFromHeaders(typedError.response?.headers) ??
-      extractRetryAfterFromHeaders(typedError.headers);
+      extractRetryAfterFromHeaders(typedError.headers) ??
+      extractRetryAfterFromHeaders(typedError.cause?.response?.headers) ??
+      extractRetryAfterFromHeaders(typedError.cause?.headers);
     if (retryAfterFromHeaders !== null) {
       return Math.min(
         retryAfterFromHeaders,
@@ -217,12 +235,15 @@ const extractRetryAfterMs = (error: unknown): number | null => {
 
   const unit = (match[2] ?? "seconds").toLowerCase();
   let multiplier = 1000;
-  if (unit.startsWith("m") && unit !== "ms" && unit !== "millisecond") {
+  if (unit === "ms" || unit === "millisecond" || unit === "milliseconds") {
+    multiplier = 1;
+  } else if (
+    unit === "m" ||
+    unit === "min" ||
+    unit === "minute" ||
+    unit === "minutes"
+  ) {
     multiplier = 60_000;
-  } else if (unit.startsWith("ms")) {
-    multiplier = 1;
-  } else if (unit.startsWith("millisecond")) {
-    multiplier = 1;
   }
 
   return Math.min(value * multiplier, PUSH_REGISTRATION_MAX_RETRY_AFTER_MS);
@@ -613,6 +634,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
               platform: deviceInfo.platform,
               profile_id: profile?.id,
             },
+            errorMode: "structured",
           });
 
           return true;

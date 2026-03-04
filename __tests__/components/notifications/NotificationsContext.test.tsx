@@ -269,6 +269,81 @@ describe("push registration behavior", () => {
     );
   });
 
+  it("parses milliseconds retry hints as milliseconds", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    const rateLimitError = new Error(
+      "Rate limit exceeded. Try again in 500 milliseconds"
+    );
+
+    PushNotifications.requestPermissions.mockResolvedValueOnce({
+      receive: "denied",
+    });
+    commonApiPost
+      .mockRejectedValueOnce(rateLimitError)
+      .mockResolvedValueOnce({});
+
+    const { registrationCallback } = await setupRegistrationCallback();
+
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+
+    expect(commonApiPost).toHaveBeenCalledTimes(2);
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push registration attempt failed. Retrying.",
+        data: expect.objectContaining({
+          delay_ms: 500,
+          rate_limited: true,
+        }),
+      })
+    );
+    expect(sentry.captureException).not.toHaveBeenCalled();
+  });
+
+  it("uses retry-after header metadata from structured API errors", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    const rateLimitHeaders = new Headers({ "Retry-After": "2" });
+    const rateLimitError = Object.assign(new Error("Too Many Requests"), {
+      status: 429,
+      headers: rateLimitHeaders,
+      response: {
+        status: 429,
+        headers: rateLimitHeaders,
+      },
+    });
+
+    commonApiPost
+      .mockRejectedValueOnce(rateLimitError)
+      .mockResolvedValueOnce({});
+
+    const { registrationCallback } = await setupRegistrationCallback();
+
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+
+    expect(commonApiPost).toHaveBeenCalledTimes(2);
+    expect(commonApiPost).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ errorMode: "structured" })
+    );
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push registration attempt failed. Retrying.",
+        data: expect.objectContaining({
+          delay_ms: 2000,
+          status_code: 429,
+          rate_limited: true,
+        }),
+      })
+    );
+    expect(sentry.captureException).not.toHaveBeenCalled();
+  });
+
   it("skips duplicate registration for identical fingerprint", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const sentry = require("@sentry/nextjs");
