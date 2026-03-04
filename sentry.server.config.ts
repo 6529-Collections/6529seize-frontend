@@ -4,6 +4,7 @@
 
 import { publicEnv } from "@/config/env";
 import {
+  filterServerActionProbeErrors,
   filterTunnelRouteErrors,
   tagSecurityProbes,
 } from "@/config/sentryProbes";
@@ -39,11 +40,18 @@ Sentry.init({
   // Handle obvious bot / exploit probes more gently
   // ------------------------------------------------------------
   beforeSend(event, hint) {
-    const filtered = filterTunnelRouteErrors(event, hint);
-    if (filtered === null) {
+    const tunnelFiltered = filterTunnelRouteErrors(event, hint);
+    if (tunnelFiltered === null) {
       return null;
     }
-    return sanitizeSentryEvent(tagSecurityProbes(filtered));
+
+    const tagged = tagSecurityProbes(tunnelFiltered);
+    const actionFiltered = filterServerActionProbeErrors(tagged);
+    if (actionFiltered === null) {
+      return null;
+    }
+
+    return sanitizeSentryEvent(actionFiltered);
   },
 
   beforeSendTransaction(event) {

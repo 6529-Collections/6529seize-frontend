@@ -18,6 +18,8 @@ const probeTags = {
   probe_type: "generic-exploit-scan",
 };
 
+const SERVER_ACTION_NOT_FOUND = "Failed to find Server Action";
+
 const CONNECTION_ERROR_PATTERNS = ["aborted", "ECONNRESET", "socket hang up"];
 
 const HTTP_SERVER_STACK_PATTERNS = [
@@ -117,6 +119,41 @@ export function filterTunnelRouteErrors<T extends Event>(
     if (checkSecondErrorPath(event, message, hint)) {
       return null;
     }
+  }
+
+  return event;
+}
+
+function isServerActionNotFoundError(event: Event): boolean {
+  const value = event.exception?.values?.[0]?.value;
+  const message = typeof value === "string" ? value : event.message;
+  return (
+    typeof message === "string" && message.includes(SERVER_ACTION_NOT_FOUND)
+  );
+}
+
+function isProbeLikeServerActionRequest(event: Event): boolean {
+  const url = (event.request?.url || "").toLowerCase();
+
+  if (event.tags?.["security_probe"] === "true") {
+    return true;
+  }
+
+  return (
+    PROBE_PATTERNS.some((pattern) => url.includes(pattern)) ||
+    url.includes("jquery-file-upload")
+  );
+}
+
+export function filterServerActionProbeErrors<T extends Event>(
+  event: T
+): T | null {
+  if (!isServerActionNotFoundError(event)) {
+    return event;
+  }
+
+  if (isProbeLikeServerActionRequest(event)) {
+    return null;
   }
 
   return event;
