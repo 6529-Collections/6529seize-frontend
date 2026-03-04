@@ -4,6 +4,7 @@
 
 import { publicEnv } from "@/config/env";
 import {
+  filterMalformedNextActionProbeErrors,
   filterServerActionProbeErrors,
   filterTunnelRouteErrors,
   filterWebStreamsProbeErrors,
@@ -52,7 +53,15 @@ Sentry.init({
       return null;
     }
 
-    const webStreamsFiltered = filterWebStreamsProbeErrors(actionFiltered);
+    const malformedNextActionFiltered =
+      filterMalformedNextActionProbeErrors(actionFiltered);
+    if (malformedNextActionFiltered === null) {
+      return null;
+    }
+
+    const webStreamsFiltered = filterWebStreamsProbeErrors(
+      malformedNextActionFiltered
+    );
     if (webStreamsFiltered === null) {
       return null;
     }
