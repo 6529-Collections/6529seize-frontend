@@ -1,26 +1,48 @@
 # Documentation
 
-This index points to current user-facing behavior: routes, actions, loading
-states, failures, and recovery paths.
+This index covers current user-facing behavior: routes, actions,
+loading/empty/error states, and recovery paths.
 
 ## Start Here
 
-1. Find your route family in the quick map.
+1. Find your route family in the route map below.
 2. Open that area `README.md`.
-3. Open `feature-*`, `flow-*`, and `troubleshooting-*` pages for exact behavior.
+3. Read `feature-*` pages first, then `flow-*`, then `troubleshooting-*`.
+
+## I Need To...
+
+- Browse waves and open threads:
+  [Waves Discovery](waves/discovery/README.md), [Waves Chat](waves/chat/README.md)
+- Create a wave or direct message: [Waves Create](waves/create/README.md)
+- Post, edit, and submit drop content: [Waves Composer](waves/composer/README.md)
+- Vote, react, curate, and copy/share links:
+  [Waves Drop Actions](waves/drop-actions/README.md)
+- Open profile tabs or fix profile route issues:
+  [Profiles](profiles/README.md),
+  [Profile Troubleshooting](profiles/troubleshooting/README.md)
+- Check network metrics, definitions, and xTDH/TDH rules: [Network](network/README.md)
+- Manage groups and group-scoped network views:
+  [Groups](groups/README.md),
+  [Network Group Scope Flow](network/flow-network-group-scope.md)
+- Run delegation actions and wallet checks: [Delegation](delegation/README.md)
+- Run EMMA plan and distribution operations: [EMMA](emma/README.md)
+- Download Open Data datasets: [Open Data](open-data/README.md)
+- Use app shell navigation and mobile handoff: [Navigation](navigation/README.md)
+- Use `/tools/*` routes for API and utility workflows: [API Tool](api-tool/README.md)
 
 ## Scope
 
 ### In-Scope Routes
 
-- Home, waves, and messaging routes: `/`, `/discover`, `/waves`,
-  `/waves/{waveId}`, `/waves/create`, `/messages`, `/messages/create`
-- Profile routes: `/{user}`, `/{user}/*`, and `/about/primary-address`
-- Media routes: `/the-memes*`, `/6529-gradient*`, `/meme-lab*`, `/rememes*`,
-  `/meme-calendar`
-- Ops and data routes: `/notifications`, `/network/*`, `/network/groups`,
+- Home and waves: `/`, `/discover`, `/waves`, `/waves/{waveId}`,
+  `/waves/create`, `/messages`, `/messages/create`,
+  `/messages?wave={waveId}`
+- Profiles: `/{user}`, `/{user}/*`, and `/about/primary-address`
+- Media: `/the-memes*`, `/6529-gradient*`, `/meme-lab*`, `/rememes*`,
+  and `/meme-calendar`
+- Ops and data: `/notifications`, `/network`, `/network/*`, `/network/groups`,
   `/xtdh`, `/delegation/*`, `/nextgen/*`, `/nft-activity`, `/tools/*`,
-  `/open-data/*`, `/emma/*`, `/open-mobile`
+  `/open-data`, `/open-data/*`, `/emma/*`, and `/open-mobile`
 - Cross-area shell behavior:
   [Navigation](navigation/README.md) and [Shared](shared/README.md)
 
@@ -36,44 +58,25 @@ states, failures, and recovery paths.
 - Legacy feed redirect route: `/feed` redirects to `/index.xml`
 - Legacy and diagnostics routes: `/slide-page/*`, `/element_category/*`,
   `/gm-or-die-small-mp4`, `/cdn-cgi/l/email-protection`, `/error`,
-  `/sentry-example-page`
+  and `/sentry-example-page`
 
-## Common Tasks
-
-- Browse waves and open threads:
-  [Waves Discovery](waves/discovery/README.md), [Waves Chat](waves/chat/README.md)
-- Create a wave or direct message: [Waves Create](waves/create/README.md)
-- Post, edit, and submit drop content: [Waves Composer](waves/composer/README.md)
-- Vote, react, curate, and copy/share links:
-  [Waves Drop Actions](waves/drop-actions/README.md)
-- Open profile tabs and recover from route issues:
-  [Profiles](profiles/README.md), [Profile Troubleshooting](profiles/troubleshooting/README.md)
-- Check network metrics, definitions, and xTDH/TDH rules: [Network](network/README.md)
-- Manage groups and group-scoped network views:
-  [Groups](groups/README.md), [Network Group Scope Flow](network/flow-network-group-scope.md)
-- Run delegation actions and wallet checks: [Delegation](delegation/README.md)
-- Run EMMA plan and distribution steps: [EMMA](emma/README.md)
-- Download Open Data datasets: [Open Data](open-data/README.md)
-- Use app shell navigation and mobile handoff: [Navigation](navigation/README.md)
-- Use `/tools/*` routes for API and utility workflows: [API Tool](api-tool/README.md)
-
-## Route-to-Area Quick Map
+## Route-to-Area Map
 
 - `/` -> [Home](home/README.md)
 - `/discover`, `/waves`, `/waves/{waveId}`, `/waves/create`, `/messages`,
-  `/messages/create` -> [Waves](waves/README.md)
+  `/messages/create`, `/messages?wave={waveId}` -> [Waves](waves/README.md)
 - `/{user}`, `/{user}/*`, and `/about/primary-address` ->
   [Profiles](profiles/README.md)
 - `/the-memes*`, `/6529-gradient*`, `/meme-lab*`, `/rememes*`,
-  `/meme-calendar` -> [Media](media/README.md)
+  and `/meme-calendar` -> [Media](media/README.md)
 - `/notifications` -> [Notifications](notifications/README.md)
-- `/network/*` and `/xtdh` -> [Network](network/README.md)
+- `/network`, `/network/*`, and `/xtdh` -> [Network](network/README.md)
 - `/network/groups` -> [Groups](groups/README.md)
 - `/delegation/*` -> [Delegation](delegation/README.md)
 - `/nextgen/*` -> [NextGen](nextgen/README.md)
 - `/nft-activity` -> [Realtime](realtime/README.md)
 - `/tools/*` -> [API Tool](api-tool/README.md)
-- `/open-data/*` -> [Open Data](open-data/README.md)
+- `/open-data` and `/open-data/*` -> [Open Data](open-data/README.md)
 - `/emma/*` -> [EMMA](emma/README.md)
 - `/open-mobile` -> [Navigation](navigation/README.md)
 - Shared shell and route behavior -> [Navigation](navigation/README.md) and
@@ -85,12 +88,14 @@ states, failures, and recovery paths.
 
 - [Home](home/README.md): `/` landing behavior
 - [Waves](waves/README.md): discovery, creation, chat, and drop actions for
-  `/discover`, `/waves`, `/waves/{waveId}`, `/waves/create`, and `/messages`
+  `/discover`, `/waves`, `/waves/{waveId}`, `/waves/create`, `/messages`,
+  `/messages?wave={waveId}`, and `/messages/create`
 - [Profiles](profiles/README.md): `/{user}` routes and `/about/primary-address`
 - [Media](media/README.md): `/the-memes`, `/6529-gradient`, `/meme-lab`,
   `/rememes`, and `/meme-calendar`
 - [Notifications](notifications/README.md): `/notifications` feed and push controls
-- [Network](network/README.md): `/network/*` score, health, and rules views
+- [Network](network/README.md): `/network` and `/network/*` score, health, and
+  rules views
 
 ### Operations and Data
 
@@ -104,7 +109,8 @@ states, failures, and recovery paths.
 - [API Tool](api-tool/README.md): `/tools/api`, `/tools/block-finder`,
   `/tools/subscriptions-report`, and optional `/tools/app-wallets*`
 - [EMMA](emma/README.md): `/emma/*` plan and distribution operations
-- [Open Data](open-data/README.md): `/open-data/*` datasets and downloads
+- [Open Data](open-data/README.md): `/open-data` and `/open-data/*` datasets
+  and downloads
 
 ### Shared Cross-Area Behavior
 
@@ -113,29 +119,26 @@ states, failures, and recovery paths.
 - [Shared](shared/README.md): route-level and UI behavior reused by multiple
   areas
 
-## Fast Paths
+### Subarea Indexes
 
-- Open wave discovery docs: [Wave Discovery Index](waves/discovery/README.md)
-- Open wave thread docs: [Wave Chat Index](waves/chat/README.md)
-- Open wave creation docs: [Wave Creation Index](waves/create/README.md)
-- Submit memes in waves: [Memes Submission Flow](waves/memes/feature-memes-submission.md)
-- Review xTDH and TDH rules:
-  [xTDH Network Overview](network/feature-xtdh-network-overview.md),
-  [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md),
-  [Network Definitions](network/feature-network-definitions.md),
-  [TDH Boost Rules](network/feature-tdh-boost-rules.md)
-- Search from shell routes: [Header Search Modal](navigation/feature-header-search-modal.md)
-- Switch routes quickly:
-  [Navigation Entry and Switching Flow](navigation/flow-navigation-entry-and-switching.md)
-- Read notifications flow: [Notifications Feed Browsing Flow](notifications/flow-notifications-feed-browsing.md)
-- Jump from groups into network scope: [Group to Network Scope Flow](network/flow-network-group-scope.md)
-- Manage app wallets on supported devices: [App Wallets Management](api-tool/feature-app-wallets.md)
-- Mint and schedule memes: [The Memes Mint Flow](media/memes/feature-mint-flow.md)
-- Debug live updates: [Authenticated Live Updates](realtime/feature-authenticated-live-updates.md)
+- Waves subareas: [Discovery](waves/discovery/README.md),
+  [Create](waves/create/README.md), [Chat](waves/chat/README.md),
+  [Composer](waves/composer/README.md),
+  [Drop Actions](waves/drop-actions/README.md),
+  [Header](waves/header/README.md), [Sidebars](waves/sidebars/README.md),
+  [Link Previews](waves/link-previews/README.md),
+  [Leaderboard](waves/leaderboard/README.md),
+  [Memes](waves/memes/README.md)
+- Profiles subareas: [Navigation](profiles/navigation/README.md),
+  [Tabs](profiles/tabs/README.md), [About](profiles/about/README.md),
+  [Troubleshooting](profiles/troubleshooting/README.md)
+- Media subareas: [Memes](media/memes/README.md),
+  [Collections](media/collections/README.md), [NFT](media/nft/README.md),
+  and [Rendering](media/rendering/README.md)
 
 ## Troubleshooting Entry Point
 
-Use this when a route is blocked, data is missing, or an action fails.
+Use this section when a route is blocked, data is missing, or an action fails.
 
 - [Home Route and Section Visibility](home/troubleshooting-home-route-and-section-visibility.md)
 - [Navigation and Shell Controls](navigation/troubleshooting-navigation-and-shell-controls.md)

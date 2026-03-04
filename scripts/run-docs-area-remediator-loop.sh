@@ -46,6 +46,34 @@ EOF
   codex exec -- "${second_view_instruction}"
 }
 
+run_route_ownership_recovery_pass() {
+  local target_path="$1"
+
+  local remediation_instruction=""
+  remediation_instruction=$(
+    cat <<EOF
+Use docs-route-ownership-remediator.
+Target file: ${target_path}
+Run in strict stateless mode: do not rely on previous or next iterations.
+Validator failed on route-ownership during strict global validation.
+Resolve missing_owner_routes and stale_documented_routes by first fixing validator parsing/canonicalization issues, then remediating docs ownership sections only where still required.
+Do not relax strict validation or skip route-ownership checks.
+EOF
+  )
+  codex exec -- "${remediation_instruction}"
+
+  local second_view_instruction=""
+  second_view_instruction=$(
+    cat <<EOF
+Use docs-route-ownership-remediator.
+Target file: ${target_path}
+Run in strict stateless mode: do not rely on previous or next iterations.
+Perform a second-view refinement pass for route-ownership remediation and ensure global strict validation can pass.
+EOF
+  )
+  codex exec -- "${second_view_instruction}"
+}
+
 write_last_target_to_meta() {
   local target="$1"
   local tmp_meta_file="${META_FILE}.tmp"
@@ -183,7 +211,23 @@ EOF
   fi
 
   if [[ "${is_root_target}" == "true" ]]; then
-    python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --all --strict --enforce-monotonic
+    root_validation_output=""
+    if ! root_validation_output="$(python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --all --strict --enforce-monotonic 2>&1)"; then
+      printf '%s\n' "${root_validation_output}"
+      if printf '%s\n' "${root_validation_output}" | grep -q "\\[route-ownership\\]"; then
+        echo ""
+        echo "Detected route-ownership validation failure; running auto-remediation."
+        run_route_ownership_recovery_pass "${target_path}"
+        git add docs
+        python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --all --strict --enforce-monotonic
+      else
+        echo ""
+        echo "Global validation failed."
+        exit 1
+      fi
+    else
+      printf '%s\n' "${root_validation_output}"
+    fi
   else
     area_validation_output=""
     if ! area_validation_output="$(python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --area "${target_area}" --strict --enforce-monotonic 2>&1)"; then
@@ -217,6 +261,21 @@ done
 
 if [[ "${run_final_validation}" == "true" ]]; then
   echo "=== Final global validation ==="
-  python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --all --strict
+  final_validation_output=""
+  if ! final_validation_output="$(python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --all --strict 2>&1)"; then
+    printf '%s\n' "${final_validation_output}"
+    if printf '%s\n' "${final_validation_output}" | grep -q "\\[route-ownership\\]"; then
+      echo ""
+      echo "Detected route-ownership validation failure; running auto-remediation."
+      run_route_ownership_recovery_pass "docs/README.md"
+      python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --all --strict
+    else
+      echo ""
+      echo "Final global validation failed."
+      exit 1
+    fi
+  else
+    printf '%s\n' "${final_validation_output}"
+  fi
   python3 .codex/skills/commit-docs-updater/scripts/validate_docs_links.py
 fi
