@@ -2,86 +2,122 @@
 
 ## Overview
 
-`/tools/api` is a static guide page with copyable Node.js examples for:
+`/tools/api` is a read-only guide for the 6529 REST API.
 
-- Ethereum-signature authentication (`nonce -> sign -> login -> bearer token`)
-- Multipart media upload and drop creation
-- Common API vocabulary used in payloads
+- It explains wallet-signature authentication (`nonce -> sign -> login -> token`).
+- It shows a multipart media upload flow and drop creation flow.
+- It defines key API terms used in routes and payloads.
+- It links to the full external API reference: `https://api.6529.io/docs/`.
 
 ## Location in the Site
 
 - Route: `/tools/api`
 - Web sidebar path: `Tools -> Other Tools -> API`
 - Native app sidebar path: `Tools -> API`
-- Also linked from site footer as `API`
-- External reference: `https://api.6529.io/docs/`
+- Footer link: `API`
 
 ## Entry Points
 
-- Open `API` from the Tools menu.
+- Open `API` from Tools navigation.
 - Open `/tools/api` directly.
-- Open the footer `API` link.
+- Open `API` from the site footer.
 
-## Page Behavior
+## Page Structure and Behavior
 
-- The page is read-only content with code examples.
-- No API calls execute from this page.
-- No interactive API console is embedded.
+- The page is static content. It does not execute API calls.
+- It has four sections: `Introduction`, `Key terminology`, `Authentication`,
+  and `Creating drops with embedded media`.
+- It includes two Node.js snippets:
+  - auth and bearer-token usage
+  - multipart upload and drop creation
+- Each snippet has a `Copy` button with temporary `Copied!` feedback.
+- The introduction includes an inline note that some routes are still
+  undocumented.
 
 ## Authentication Example Flow
 
 1. Request nonce:
    - `GET https://api.6529.io/api/auth/nonce?signer_address=<address>&short_nonce=true`
-2. Sign returned `nonce` with the same wallet.
-3. Login:
+2. Read `nonce` and `server_signature` from the response.
+3. Sign `nonce` with the same wallet private key.
+4. Login:
    - `POST https://api.6529.io/api/auth/login?signer_address=<address>`
-   - Body: `client_address`, `client_signature`, `server_signature`
-4. Read `token` from response.
-5. Use `Authorization: Bearer <token>` for protected requests
-   (example shows `GET https://api.6529.io/api/feed`).
+   - JSON body: `client_address`, `client_signature`, `server_signature`
+5. Read `token` from the login response.
+6. Call protected routes with `Authorization: Bearer <token>`.
+   - The snippet uses `GET https://api.6529.io/api/feed` as the example.
+
+### Nonce Format Note
+
+- `short_nonce=true`: short nonce string (script-friendly).
+- `short_nonce=false`: long multiline nonce message.
 
 ## Multipart Media-Drop Example Flow
 
-1. Start multipart upload:
+1. Authenticate first and keep the bearer token.
+2. Read local file bytes.
+3. Derive MIME type from file extension (`content_type`).
+4. Start multipart upload:
    - `POST https://api.6529.io/api/drop-media/multipart-upload`
    - Body: `file_name`, `content_type`
-2. Request per-part upload URL:
+5. Request an upload URL for a part:
    - `POST https://api.6529.io/api/drop-media/multipart-upload/part`
    - Body: `upload_id`, `key`, `part_no`
-3. Upload bytes with `PUT` to `upload_url` (no API bearer header).
-4. Save each part `ETag` (without surrounding quotes).
-5. Complete upload:
+6. Upload bytes to the returned `upload_url` with `PUT`.
+   - Send file bytes and content type.
+   - Do not send API bearer auth to the S3 upload URL.
+7. Save the returned part `ETag` and strip wrapping quotes.
+8. Complete multipart upload:
    - `POST https://api.6529.io/api/drop-media/multipart-upload/completion`
    - Body: `upload_id`, `key`, `parts: [{ part_no, etag }]`
-6. Create drop with returned `media_url`:
+9. Create drop with the returned `media_url`:
    - `POST https://api.6529.io/api/drops`
-   - Payload includes `drop_type: "CHAT"`, `wave_id`, and media URL/mime type.
+   - Body includes `drop_type`, `parts`, `signer_address`, `wave_id`,
+     `mentioned_users`, `referenced_nfts`, `metadata`, `signature`,
+     `is_safe_signature`.
 
-## Failure and Recovery
+### Media-Drop Payload Notes
 
-- Route-level failures do not apply here because the page itself does not send requests.
-- In your script, re-run nonce/login on authentication failure.
-- Retry failed multipart parts only, then complete upload again.
-- If upload completion succeeds but `/drops` fails, reuse the same `media_url`.
-- Invalid signatures or signer data fail at login.
+- The snippet uses one part (`part_no = 1`) for readability.
+- Large files can be split and uploaded as multiple parts.
+- `wave_id` is a placeholder in the snippet:
+  `TARGET_WAVE_ID_GOES_HERE`.
+- The snippet expects `token` and `wallet.address` to already exist.
 
 ## Key Terms in the Page
 
-- Identity: one or more Ethereum addresses.
-- Profile: user data linked to an identity.
-- Brain: 6529 social namespace containing waves.
-- Wave: chat/participation space.
-- Drop: one message inside a wave.
-- Groups: identity filters (for example TDH, REP, NIC).
+- Identity: one or more Ethereum addresses representing a user.
+- Profile: user properties linked to an identity.
+- Brain: 6529 social namespace that contains waves.
+- Wave: channel/chat space with its own participation rules.
+- Drop: message in a wave (`CHAT`, `PARTICIPATORY`, `WINNER`).
+- Groups: identity filters used for access and discovery (for example TDH, REP,
+  NIC).
 - REP: reputation signal.
 - NIC: trust signal.
 
-## Limits and Notes
+## Failure and Recovery
 
-- `short_nonce=true` returns a short nonce format; `short_nonce=false` returns a longer message nonce.
-- Examples are Node.js-oriented and use placeholders.
-- The page notes that some API routes are still undocumented.
-- Current auth example parses JSON directly; production scripts should gate on `response.ok` first.
+- Route-level loading, empty, and API-error states do not apply; the route is
+  static documentation.
+- If clipboard access is blocked, `Copy` may not switch to `Copied!`.
+- The auth snippet parses JSON directly and does not guard with `response.ok`.
+  Add status checks in production scripts.
+- The multipart snippet throws on non-OK responses for:
+  `multipart-upload`, `multipart-upload/part`, S3 `PUT`,
+  `multipart-upload/completion`, and `/api/drops`.
+- If a multipart part fails, retry failed part uploads, then retry completion.
+- If completion succeeds but `/api/drops` fails, retry `/api/drops` with the
+  same `media_url`.
+
+## Limits / Notes
+
+- Examples are Node.js-oriented and include placeholders (`0x...`, private key,
+  `TARGET_WAVE_ID_GOES_HERE`).
+- The media snippet uses `node-fetch`, `fs/promises`, `path`, and
+  `mime-types`.
+- Some API routes are still undocumented; use the external API docs for broader
+  endpoint coverage.
 
 ## Related Pages
 

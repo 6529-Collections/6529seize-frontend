@@ -1,6 +1,6 @@
 # API Tool
 
-API Tool docs cover utility routes under `/tools/*`.
+API Tool docs cover user-facing utility routes under `/tools/*`.
 
 ## Overview
 
@@ -12,6 +12,14 @@ API Tool docs cover utility routes under `/tools/*`.
   redeemed The Memes subscriptions.
 - `/tools/app-wallets*`: create, import, and manage app-local wallets when
   app-wallet support is available.
+
+## Read Order
+
+1. Start with `API Authentication and Media Drop Flow` for API auth, multipart
+   upload, and drop creation examples.
+2. Read `Block Finder` for timestamp and block-include tooling.
+3. Read `Memes Subscriptions Report` for aggregate subscription reporting.
+4. Read `App Wallets Management` for app-local wallet setup and recovery.
 
 ## Route Coverage
 
