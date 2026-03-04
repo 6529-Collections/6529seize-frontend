@@ -63,8 +63,18 @@ export function useConnectedAccountsUnreadNotifications(
       );
       const nextCounts: Record<string, number> = {};
 
-      results.forEach((result, index) => {
-        const addressKey = toAddressKey(accounts[index].address);
+      accounts.forEach((account, index) => {
+        const addressKey = toAddressKey(account.address);
+        const result = results[index];
+
+        if (!result) {
+          const previousCount = previousCounts[addressKey];
+          if (typeof previousCount === "number") {
+            nextCounts[addressKey] = previousCount;
+          }
+          return;
+        }
+
         if (result.status === "fulfilled") {
           nextCounts[addressKey] = result.value;
           return;
