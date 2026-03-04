@@ -1,6 +1,7 @@
 "use client";
 
 import { getNotificationsRoute } from "@/helpers/navigation.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import React, { useCallback, useMemo, useRef } from "react";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
@@ -72,10 +73,9 @@ interface BottomNavigationProps {
   readonly hidden?: boolean | undefined;
 }
 
-const BottomNavigation: React.FC<BottomNavigationProps> = ({
-  hidden = false,
-}) => {
+const BottomNavigation: React.FC<BottomNavigationProps> = ({ hidden = false }) => {
   const { registerRef } = useLayout();
+  const { isAndroid, isIos } = useCapacitor();
   const { isApp } = useDeviceInfo();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
@@ -101,6 +101,9 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
     [isApp]
   );
 
+  const paddingClass =
+    isAndroid || isIos ? "tw-pb-[env(safe-area-inset-bottom,0px)]" : "";
+
   const hiddenStyle = hidden
     ? "tw-opacity-0 tw-translate-y-full tw-pointer-events-none"
     : "tw-opacity-100 tw-translate-y-0";
@@ -108,15 +111,17 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
   return (
     <nav
       ref={setMobileNavRef}
-      className={`${hiddenStyle} tw-fixed tw-bottom-0 tw-left-0 tw-z-50 tw-h-20 tw-w-full tw-bg-black tw-shadow-inner tw-transition-[opacity,transform] tw-duration-75 tw-relative before:tw-absolute before:tw-inset-x-0 before:tw-top-0 before:tw-h-px before:tw-bg-iron-900 before:tw-content-['']`}
-    >
+      className={`${paddingClass} ${hiddenStyle} tw-fixed tw-left-0 tw-w-full tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-z-50 tw-transition-[opacity,transform] tw-duration-75`}>
       <div className="tw-h-full">
-        <ul className="tw-mx-auto tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)] tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl">
+        <ul
+          className="tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)]
+    tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl tw-mx-auto">
           {navItems.map((item) => (
             <li
               key={item.name}
-              className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
-            >
+              className={`tw-flex tw-flex-1 tw-justify-center tw-items-end ${
+                item.name === "Home" ? "-tw-translate-y-1" : ""
+              } tw-h-full tw-min-w-0`}>
               <NavItem item={item} />
             </li>
           ))}

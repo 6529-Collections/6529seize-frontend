@@ -91,7 +91,7 @@ export default function AppLayout({ children }: Props) {
         <main>{children}</main>
       )}
       {!isSingleDropOpen && !isStreamRoute && (
-        <div className="tw-h-20 tw-w-full" />
+        <div className="tw-h-16 tw-w-full" />
       )}
       {!isSingleDropOpen && !isEditingOnMobile && (
         <BottomNavigation hidden={shouldHideBottomNav} />
