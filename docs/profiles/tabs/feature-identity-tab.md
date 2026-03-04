@@ -13,7 +13,7 @@ It combines `Rep` and `NIC` on one route.
 - Canonical route: `/{user}`
 - Legacy alias: `/{user}/identity` (permanent redirect to `/{user}` and keeps
   query params)
-- Unsupported legacy route: `/{user}/rep` (not found)
+- Unsupported legacy route: /{user}/rep (not found)
 
 Desktop (`>= lg`):
 - Left: Rep summary, rep categories, grant/edit actions, activity log
