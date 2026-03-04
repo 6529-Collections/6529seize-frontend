@@ -7,6 +7,10 @@ export function formatCount(value: number | null | undefined): string | null {
 }
 
 export function formatOrdinal(value: number): string {
+  if (!Number.isFinite(value)) {
+    return String(value);
+  }
+
   const normalized = Math.trunc(value);
   const absoluteValue = Math.abs(normalized);
   const mod100 = absoluteValue % 100;
