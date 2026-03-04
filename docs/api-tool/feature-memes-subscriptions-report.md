@@ -2,70 +2,71 @@
 
 ## Overview
 
-`/tools/subscriptions-report` is a read-only view of aggregate The Memes
-subscription counts.
+`/tools/subscriptions-report` is a read-only aggregate report for The Memes
+subscriptions.
 
-- `Upcoming Drops`: counts for upcoming cards.
-- `Past Drops`: counts for redeemed cards.
+- `Upcoming Drops`: subscription counts for upcoming cards.
+- `Past Drops`: redeemed subscription counts by card.
 
 ## Location in the Site
 
 - Route: `/tools/subscriptions-report`
-- Desktop sidebar/search path (when visible): `Tools -> The Memes Tools -> Subscriptions Report`
-- Drawer path (mobile shell): `Tools -> The Memes Tools -> Memes Subscriptions`
+- Web sidebar/search path (when visible):
+  `Tools -> The Memes Tools -> Subscriptions Report`
+- Native app drawer path:
+  `Tools -> The Memes Tools -> Memes Subscriptions`
 - Related open-data route: `/open-data/meme-subscriptions`
 
 ## Entry Points
 
-- Open the route from `The Memes Tools` navigation.
+- Open from `The Memes Tools`.
 - Open `/tools/subscriptions-report` directly.
-- Use `My Subscriptions` (when shown) to open `/{your-handle}/subscriptions`.
-- Use `Learn More` to open `/about/subscriptions`.
+- Use header actions:
+  - `My Subscriptions` -> `/{your-handle}/subscriptions` (when shown)
+  - `Learn More` -> `/about/subscriptions`
 
 ## Page Flow
 
 1. Open `/tools/subscriptions-report`.
-2. Review header actions (`My Subscriptions`, `Learn More`).
-3. Wait for `Upcoming Drops` to load, then review card rows and counts.
-4. Use `Show More` or `Show Less` when upcoming rows are greater than 10.
-5. Review `Past Drops` rows (image, token link, season/date, count).
-6. Use pagination when redeemed totals are above 20.
+2. Review header actions.
+3. Wait for `Upcoming Drops` and `Past Drops` data.
+4. Expand/collapse upcoming rows with `Show More` / `Show Less` when available.
+5. Browse past rows (image, token link, season/date, count).
+6. Use pagination for past rows when total redeemed count is above 20.
 
-## Data and Row Labels
+## Data and Labels
 
-- Upcoming API: `subscriptions/upcoming-memes-counts?card_count=<count>`.
-- Past API: `subscriptions/redeemed-memes-counts?page_size=20&page=<page>`.
-- Upcoming rows use mint-calendar order for `SZN <number> / <date>` labels.
-- Past rows show an image, token link (`/the-memes/{token_id}`), season/date,
-  and count.
+- Upcoming endpoint: `subscriptions/upcoming-memes-counts?card_count=<count>`
+- Past endpoint: `subscriptions/redeemed-memes-counts?page_size=20&page=<page>`
+- Upcoming labels use mint-calendar ordering and `SZN <number> / <date>`.
+- Past rows link each token to `/the-memes/{token_id}`.
 
-## States and Visibility Rules
+## Visibility and State Rules
 
 - `My Subscriptions` is hidden when no profile is connected.
-- On iOS, `My Subscriptions` is shown only when country resolves to `US`.
-- In desktop sidebar/search, the route is hidden on iOS outside the US.
-- The mobile drawer still lists `Memes Subscriptions`.
-- `Show More`/`Show Less` appears only when upcoming rows are greater than 10.
-- `Past Drops` pagination appears only when redeemed count is greater than 20.
-- Changing redeemed pages updates table data in place (no route transition).
+- On iOS, `My Subscriptions` is shown only when country is `US`.
+- On iOS outside the US, this route is hidden from web sidebar/search.
+- Native app drawer still lists `Memes Subscriptions`.
+- `Show More` / `Show Less` appears only when upcoming rows are greater than 10.
+- Past pagination appears only when redeemed total count is greater than 20.
 - Empty sections render `No Subscriptions Found`.
 
 ## Failure and Recovery
 
-- First load shows section-level spinner/copy (`Loading upcoming drops...`,
-  `Loading past drops...`).
-- No dedicated API-failure banner or toast is shown for this page.
-- Initial or pagination fetch failures can fall back to
+- Initial load shows section loading copy:
+  `Loading upcoming drops...` and `Loading past drops...`.
+- No dedicated API-failure banner/toast is shown.
+- If first-load requests fail before data renders, section output falls back to
   `No Subscriptions Found`.
+- If a later pagination fetch fails, previously rendered past rows remain.
 - Retry by changing page, reopening the route, or refreshing.
 
 ## Limitations / Notes
 
-- The page is informational only and cannot edit subscriptions.
+- This page does not edit subscriptions.
 - Counts are aggregate totals, not wallet-specific allocations.
-- `Past Drops` uses fixed-size pages of 20 rows.
-- `My Subscriptions` is a shortcut; subscription management stays on profile
-  subscriptions pages.
+- Past rows use fixed page size `20`.
+- `My Subscriptions` is a shortcut into profile subscriptions routes.
 
 ## Related Pages
 

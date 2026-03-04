@@ -1,34 +1,60 @@
 # API Tool
 
-API Tool docs cover user-facing guidance for `/tools` routes: the API guide,
-Block Finder, The Memes subscriptions report, and App Wallet management routes.
+API Tool docs cover utility routes under `/tools/*`.
 
 ## Overview
 
-- `/tools/api` explains authentication, key terminology, and multipart media
-  drop requests.
-- `/tools/block-finder` predicts block numbers for timestamps and inclusion
-  sequences.
-- `/tools/subscriptions-report` shows upcoming and redeemed The Memes
-  subscription counts.
-- `/tools/app-wallets*` manages locally stored app wallets on supported native
-  devices.
+- `/tools/api`: static guide for API authentication and multipart media-drop
+  requests.
+- `/tools/block-finder`: estimate the closest block for a timestamp, or find
+  block numbers that include selected sequences.
+- `/tools/subscriptions-report`: read-only aggregate counts for upcoming and
+  redeemed The Memes subscriptions.
+- `/tools/app-wallets*`: create, import, and manage app-local wallets when
+  app-wallet support is available.
+
+## Route Coverage
+
+- `/tools/api`
+- `/tools/block-finder`
+- `/tools/subscriptions-report`
+- `/tools/app-wallets`
+- `/tools/app-wallets/import-wallet`
+- `/tools/app-wallets/{appWalletAddress}`
+
+## Navigation and Visibility
+
+- Web sidebar paths:
+  - `Tools -> Other Tools -> API`
+  - `Tools -> Other Tools -> Block Finder`
+  - `Tools -> The Memes Tools -> Subscriptions Report`
+  - `Tools -> Other Tools -> App Wallets` (only when app-wallet support is
+    enabled)
+- Native app sidebar paths:
+  - `Tools -> API`
+  - `Tools -> Block Finder`
+  - `Tools -> The Memes Tools -> Memes Subscriptions`
+  - `Tools -> App Wallets` (only when app-wallet support is enabled)
+- On iOS outside the US, `Subscriptions Report` is hidden in web sidebar and
+  search.
+- On native app, the Tools drawer still lists `Memes Subscriptions`.
+- Direct route access still works when a menu row is hidden.
 
 ## Features
 
-- [API Authentication and Media Drop Flow](feature-api-authentication-and-media-drop-flow.md)
-- [Block Finder](feature-block-finder.md)
-- [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
-- [App Wallets Management](feature-app-wallets.md)
+1. [API Authentication and Media Drop Flow](feature-api-authentication-and-media-drop-flow.md)
+2. [Block Finder](feature-block-finder.md)
+3. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
+4. [App Wallets Management](feature-app-wallets.md)
 
 ## Flows
 
-- Route-specific user journeys are documented in each feature page in this area.
+- Route flows are documented inside each feature page.
 
 ## Troubleshooting
 
-- Each feature page owns its loading, empty, failure, and retry guidance because
-  backend dependencies differ by route.
+- Loading, empty, error, and retry behavior is documented inside each feature
+  page.
 
 ## Stubs
 
@@ -38,5 +64,6 @@ Block Finder, The Memes subscriptions report, and App Wallet management routes.
 
 - [Docs Home](../README.md)
 - [Web Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
+- [App Sidebar Menu](../navigation/feature-app-sidebar-menu.md)
 - [Profile Subscriptions Tab](../profiles/tabs/feature-subscriptions-tab.md)
-- [Waves Index](../waves/README.md)
+- [Meme Subscriptions Open Data](../open-data/feature-meme-subscriptions.md)

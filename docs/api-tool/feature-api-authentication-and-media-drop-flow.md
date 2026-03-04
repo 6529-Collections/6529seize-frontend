@@ -2,89 +2,88 @@
 
 ## Overview
 
-`/tools/api` is a code-first guide for working with backend endpoints from Node.js:
+`/tools/api` is a static guide page with copyable Node.js examples for:
 
-- Authenticate with an Ethereum wallet and get a bearer token.
-- Upload media via multipart and create a media drop.
-- Keep a common vocabulary for API payloads.
+- Ethereum-signature authentication (`nonce -> sign -> login -> bearer token`)
+- Multipart media upload and drop creation
+- Common API vocabulary used in payloads
 
-Route: `/tools/api`
+## Location in the Site
 
-Sidebar path: `Tools -> API`
+- Route: `/tools/api`
+- Web sidebar path: `Tools -> Other Tools -> API`
+- Native app sidebar path: `Tools -> API`
+- Also linked from site footer as `API`
+- External reference: `https://api.6529.io/docs/`
 
-API reference: `https://api.6529.io/docs/`
+## Entry Points
 
-## What this page is
+- Open `API` from the Tools menu.
+- Open `/tools/api` directly.
+- Open the footer `API` link.
 
+## Page Behavior
+
+- The page is read-only content with code examples.
+- No API calls execute from this page.
 - No interactive API console is embedded.
-- The page currently focuses on two runnable examples and the API terms they use.
 
-## Authentication flow
+## Authentication Example Flow
 
-1. Request a nonce:
+1. Request nonce:
    - `GET https://api.6529.io/api/auth/nonce?signer_address=<address>&short_nonce=true`
-   - `short_nonce` defaults to `false`.
-   - Response includes `nonce` and `server_signature`.
-2. Sign `nonce` with the same wallet.
-3. Exchange the signature:
+2. Sign returned `nonce` with the same wallet.
+3. Login:
    - `POST https://api.6529.io/api/auth/login?signer_address=<address>`
-   - JSON body: `client_address`, `client_signature`, `server_signature`.
-4. Read `token` and send it as `Authorization: Bearer <token>` on protected calls.
-5. Use the token in the `/tools/api` sample feed request:
-   - `GET https://api.6529.io/api/feed`
+   - Body: `client_address`, `client_signature`, `server_signature`
+4. Read `token` from response.
+5. Use `Authorization: Bearer <token>` for protected requests
+   (example shows `GET https://api.6529.io/api/feed`).
 
-Example note from implementation:
+## Multipart Media-Drop Example Flow
 
-- The embedded auth/feed sample parses `resp.json()` directly. In production, check `resp.ok` before parsing JSON so non-2xx responses surface clear errors.
-- Invalid signature, signer address, or server signature returns an error at login.
-
-## Multipart media drop flow
-
-1. Start upload:
+1. Start multipart upload:
    - `POST https://api.6529.io/api/drop-media/multipart-upload`
-   - Header: `Authorization: Bearer <token>`
    - Body: `file_name`, `content_type`
-   - Response: `upload_id`, `key`
-2. Get a pre-signed part URL for each part:
+2. Request per-part upload URL:
    - `POST https://api.6529.io/api/drop-media/multipart-upload/part`
-   - Body: `upload_id`, `key`, `part_no` (1-based)
-   - Response: `upload_url`
-3. Upload bytes directly to `upload_url` using `PUT`.
-   - Do **not** include API auth on this request.
-   - Save returned `ETag` (strip quotes) for each successful part.
-4. Complete multipart upload:
+   - Body: `upload_id`, `key`, `part_no`
+3. Upload bytes with `PUT` to `upload_url` (no API bearer header).
+4. Save each part `ETag` (without surrounding quotes).
+5. Complete upload:
    - `POST https://api.6529.io/api/drop-media/multipart-upload/completion`
    - Body: `upload_id`, `key`, `parts: [{ part_no, etag }]`
-   - Response: `media_url`
-5. Create the drop:
+6. Create drop with returned `media_url`:
    - `POST https://api.6529.io/api/drops`
-   - `drop_type: "CHAT"`, `wave_id`, and `parts[0].media[0]` with `url` + `mime_type`.
+   - Payload includes `drop_type: "CHAT"`, `wave_id`, and media URL/mime type.
 
-## Error recovery
+## Failure and Recovery
 
-- Re-run nonce/login if either auth step fails.
-- Retry only the failed media part and keep successful `ETag`s.
-- Retry completion after a part failure before submitting the drop.
-- If `complete` succeeds but `/drops` fails, reuse the same `media_url` on retry.
+- Route-level failures do not apply here because the page itself does not send requests.
+- In your script, re-run nonce/login on authentication failure.
+- Retry failed multipart parts only, then complete upload again.
+- If upload completion succeeds but `/drops` fails, reuse the same `media_url`.
+- Invalid signatures or signer data fail at login.
 
-## Key terms used in API payloads
+## Key Terms in the Page
 
 - Identity: one or more Ethereum addresses.
-- Profile: data linked to an identity, including handle and metadata.
-- Brain: the social namespace containing waves.
+- Profile: user data linked to an identity.
+- Brain: 6529 social namespace containing waves.
 - Wave: chat/participation space.
-- Drop: a single message inside a wave.
-- Groups: filters for identities (including TDH, REP, NIC).
-- REP: reputation tag.
-- NIC: trust tags.
+- Drop: one message inside a wave.
+- Groups: identity filters (for example TDH, REP, NIC).
+- REP: reputation signal.
+- NIC: trust signal.
 
-## Limits and notes
+## Limits and Notes
 
-- `short_nonce=true` is easier for programmatic callers; `short_nonce=false` returns a longer nonce.
-- Examples are Node.js-focused and use placeholder keys and addresses.
-- Not every public endpoint is demonstrated in this page.
+- `short_nonce=true` returns a short nonce format; `short_nonce=false` returns a longer message nonce.
+- Examples are Node.js-oriented and use placeholders.
+- The page notes that some API routes are still undocumented.
+- Current auth example parses JSON directly; production scripts should gate on `response.ok` first.
 
-## Related pages
+## Related Pages
 
 - [API Tool Index](README.md)
 - [Block Finder](feature-block-finder.md)
