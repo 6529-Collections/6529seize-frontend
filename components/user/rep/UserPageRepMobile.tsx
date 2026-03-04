@@ -8,8 +8,7 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import { amIUser, formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RateMatter } from "@/types/enums";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useMemo, useState } from "react";
@@ -18,7 +17,7 @@ import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
 import type { RepDirection } from "./UserPageRep.helpers";
-import { getCanEditRep } from "./UserPageRep.helpers";
+import { getCanEditRep, getCanEditNic } from "./UserPageRep.helpers";
 import MobileTabCards from "./MobileTabCards";
 import MobileRepTabContent from "./MobileRepTabContent";
 import MobileIdentityTabContent from "./MobileIdentityTabContent";
@@ -68,17 +67,16 @@ export default function UserPageRepMobile({
     [connectedProfile, profile, activeProfileProxy]
   );
 
-  const canEditNic = useMemo((): boolean => {
-    if (!connectedProfile?.handle) return false;
-    if (activeProfileProxy) {
-      if (profile.handle === activeProfileProxy.created_by.handle) return false;
-      return activeProfileProxy.actions.some(
-        (action) => action.action_type === ApiProfileProxyActionType.AllocateCic
-      );
-    }
-    if (amIUser({ profile, address })) return false;
-    return true;
-  }, [connectedProfile, profile, activeProfileProxy, address]);
+  const canEditNic = useMemo(
+    () =>
+      getCanEditNic({
+        connectedProfile,
+        targetProfile: profile,
+        activeProfileProxy,
+        address,
+      }),
+    [connectedProfile, profile, activeProfileProxy, address]
+  );
 
   const canEditStatements =
     !activeProfileProxy &&

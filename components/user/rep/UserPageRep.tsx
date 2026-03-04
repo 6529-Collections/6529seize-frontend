@@ -10,8 +10,6 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import { amIUser } from "@/helpers/Helpers";
 import { RateMatter } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -23,6 +21,7 @@ import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import type { RepDirection } from "./UserPageRep.helpers";
+import { getCanEditNic } from "./UserPageRep.helpers";
 import UserPageRepHeader from "./header/UserPageRepHeader";
 import UserPageRepMobile from "./UserPageRepMobile";
 
@@ -41,17 +40,16 @@ export default function UserPageRep({
   const [repDirection, setRepDirection] = useState<RepDirection>("received");
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
 
-  const canEditNic = useMemo((): boolean => {
-    if (!connectedProfile?.handle) return false;
-    if (activeProfileProxy) {
-      if (profile.handle === activeProfileProxy.created_by.handle) return false;
-      return activeProfileProxy.actions.some(
-        (action) => action.action_type === ApiProfileProxyActionType.AllocateCic
-      );
-    }
-    if (amIUser({ profile, address })) return false;
-    return true;
-  }, [connectedProfile, profile, activeProfileProxy, address]);
+  const canEditNic = useMemo(
+    () =>
+      getCanEditNic({
+        connectedProfile,
+        targetProfile: profile,
+        activeProfileProxy,
+        address,
+      }),
+    [connectedProfile, profile, activeProfileProxy, address]
+  );
 
   // --- Incoming (received) rep ---
   const { data: repOverview, isFetching: isFetchingOverview } =
