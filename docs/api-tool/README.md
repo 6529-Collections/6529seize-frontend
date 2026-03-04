@@ -7,7 +7,8 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 - `/tools/api`: static guide for API authentication and multipart media-drop
   requests.
 - `/tools/block-finder`: estimate the closest block for a timestamp, or find
-  block numbers that include selected sequences.
+  block numbers that include selected sequences across a configurable window
+  (`1 minute` to `2 days`).
 - `/tools/subscriptions-report`: read-only aggregate counts for upcoming and
   redeemed The Memes subscriptions.
 - `/tools/app-wallets*`: create, import, and manage app-local wallets when
@@ -17,7 +18,8 @@ API Tool docs cover user-facing utility routes under `/tools/*`.
 
 1. Start with `API Authentication and Media Drop Flow` for API auth, multipart
    upload, and drop creation examples.
-2. Read `Block Finder` for timestamp and block-include tooling.
+2. Read `Block Finder` for timestamp lookup, include-sequence windows, and
+   result detail actions.
 3. Read `Memes Subscriptions Report` for aggregate subscription reporting.
 4. Read `App Wallets Management` for native app-wallet setup, recovery, and
    unsupported-state behavior.
