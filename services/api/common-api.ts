@@ -86,37 +86,37 @@ const handleApiError = async (
   res: Response,
   errorMode: ApiErrorMode
 ): Promise<never> => {
-  let errorMessage: string;
+  const fallbackErrorMessage = res.statusText || "Something went wrong";
+  let errorMessage = fallbackErrorMessage;
   let errorBody: unknown = undefined;
 
   try {
-    const body: unknown = await res.json();
-    errorBody = body;
-    const bodyRecord =
-      body && typeof body === "object"
-        ? (body as Record<string, unknown>)
-        : null;
-    const bodyError = bodyRecord?.error;
-    const bodyMessage = bodyRecord?.message;
-    if (typeof bodyError === "string") {
-      errorMessage = bodyError;
-    } else if (typeof bodyMessage === "string") {
-      errorMessage = bodyMessage;
-    } else if (typeof body === "string") {
-      errorMessage = body;
-    } else {
-      errorMessage = res.statusText || "Something went wrong";
+    const rawContent = await res.text();
+
+    if (rawContent) {
+      errorBody = rawContent;
+      try {
+        const parsedBody: unknown = JSON.parse(rawContent);
+        const bodyRecord =
+          parsedBody && typeof parsedBody === "object"
+            ? (parsedBody as Record<string, unknown>)
+            : null;
+        const bodyError = bodyRecord?.["error"];
+        const bodyMessage = bodyRecord?.["message"];
+
+        if (typeof bodyError === "string") {
+          errorMessage = bodyError;
+        } else if (typeof bodyMessage === "string") {
+          errorMessage = bodyMessage;
+        } else {
+          errorMessage = rawContent;
+        }
+      } catch {
+        errorMessage = rawContent;
+      }
     }
   } catch {
-    try {
-      const rawContent = await res.text();
-      if (rawContent) {
-        errorBody = rawContent;
-      }
-      errorMessage = rawContent || res.statusText || "Something went wrong";
-    } catch {
-      errorMessage = res.statusText || "Something went wrong";
-    }
+    errorMessage = fallbackErrorMessage;
   }
 
   if (errorMode === "structured") {

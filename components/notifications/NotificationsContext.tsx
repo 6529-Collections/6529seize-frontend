@@ -737,11 +737,19 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       token: string,
       profile?: ApiIdentity
     ): Promise<void> => {
-      const fingerprint = createPushRegistrationFingerprint({
+      const fingerprintInput: {
+        deviceId: string;
+        token: string;
+        profile?: ApiIdentity;
+      } = {
         deviceId,
         token,
-        profile,
-      });
+      };
+      if (profile !== undefined) {
+        fingerprintInput.profile = profile;
+      }
+
+      const fingerprint = createPushRegistrationFingerprint(fingerprintInput);
       const previousSuccess = lastSuccessfulRegistrationRef.current;
 
       if (
