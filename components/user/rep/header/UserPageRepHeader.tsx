@@ -154,6 +154,7 @@ export default function UserPageRepHeader({
                     className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-400 hover:tw-bg-primary-400"
                   >
                     <svg
+                      aria-hidden="true"
                       className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
                       viewBox="0 0 24 24"
                       fill="none"

@@ -31,6 +31,7 @@ export default function MobileTabCards({
     <div className="tw-grid tw-grid-cols-2 tw-gap-3">
       <button
         type="button"
+        aria-pressed={activeTab === "rep"}
         onClick={() => onTabChange("rep")}
         className={`tw-relative tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-p-4 tw-text-left tw-transition-all tw-duration-300 tw-ease-out ${
           activeTab === "rep" ? "tw-bg-[#0f1014]" : "tw-bg-white/[0.02]"
@@ -84,6 +85,7 @@ export default function MobileTabCards({
       {/* NIC Score */}
       <button
         type="button"
+        aria-pressed={activeTab === "identity"}
         onClick={() => onTabChange("identity")}
         className={`tw-relative tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-p-4 tw-text-left tw-transition-all tw-duration-300 tw-ease-out ${
           activeTab === "identity" ? "tw-bg-[#0f1014]" : "tw-bg-white/[0.02]"
