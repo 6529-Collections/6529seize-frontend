@@ -2,11 +2,12 @@
 
 ## Overview
 
-`/tools/subscriptions-report` is a read-only aggregate report for The Memes
-subscriptions.
+`/tools/subscriptions-report` is a read-only report for aggregate The Memes
+subscription counts.
 
-- `Upcoming Drops`: subscription counts for upcoming cards.
-- `Past Drops`: redeemed subscription counts by card.
+- `Upcoming Drops`: aggregate counts for upcoming cards.
+- `Past Drops`: aggregate redeemed counts for minted cards.
+- Header actions: `My Subscriptions` (conditional) and `Learn More`.
 
 ## Location in the Site
 
@@ -19,54 +20,62 @@ subscriptions.
 
 ## Entry Points
 
-- Open from `The Memes Tools`.
-- Open `/tools/subscriptions-report` directly.
+- Open from `Tools -> The Memes Tools` (when visible in current nav).
+- Open `/tools/subscriptions-report` directly (route always loads).
 - Use header actions:
   - `My Subscriptions` -> `/{your-handle}/subscriptions` (when shown)
   - `Learn More` -> `/about/subscriptions`
 
-## Page Flow
+## User Journey
 
 1. Open `/tools/subscriptions-report`.
-2. Review header actions.
-3. Wait for `Upcoming Drops` and `Past Drops` data.
-4. Expand/collapse upcoming rows with `Show More` / `Show Less` when available.
-5. Browse past rows (image, token link, season/date, count).
-6. Use pagination for past rows when total redeemed count is above 20.
+2. Wait for initial load to finish.
+3. Review `Upcoming Drops` and optionally expand with `Show More`.
+4. Review `Past Drops` rows (thumbnail, token link, season/date, count).
+5. Use past pagination when total redeemed count is above 20.
+6. Use header actions (`My Subscriptions`, `Learn More`) as needed.
 
-## Data and Labels
+## Data and Rendering Rules
 
-- Upcoming endpoint: `subscriptions/upcoming-memes-counts?card_count=<count>`
-- Past endpoint: `subscriptions/redeemed-memes-counts?page_size=20&page=<page>`
+- Initial load fetches past page `1` first, then fetches upcoming counts.
+- Upcoming endpoint: `subscriptions/upcoming-memes-counts?card_count=<count>`.
+- Past endpoint: `subscriptions/redeemed-memes-counts?page_size=20&page=<page>`.
+- Past page size is fixed at `20`.
 - Upcoming labels use mint-calendar ordering and `SZN <number> / <date>`.
-- Past rows link each token to `/the-memes/{token_id}`.
+- Upcoming table shows first `10` rows until expanded.
+- Past rows include image thumbnail and token link to `/the-memes/{token_id}`.
 
 ## Visibility and State Rules
 
+- The route itself is not geo-blocked.
+- On iOS outside the US, this route is hidden from web sidebar and search.
+- Native app drawer still lists `Memes Subscriptions`.
 - `My Subscriptions` is hidden when no profile is connected.
 - On iOS, `My Subscriptions` is shown only when country is `US`.
-- On iOS outside the US, this route is hidden from web sidebar/search.
-- Native app drawer still lists `Memes Subscriptions`.
 - `Show More` / `Show Less` appears only when upcoming rows are greater than 10.
 - Past pagination appears only when redeemed total count is greater than 20.
 - Empty sections render `No Subscriptions Found`.
 
-## Failure and Recovery
+## Loading, Failure, and Recovery
 
 - Initial load shows section loading copy:
   `Loading upcoming drops...` and `Loading past drops...`.
+- Section headers also show a spinner while loading.
 - No dedicated API-failure banner/toast is shown.
-- If first-load requests fail before data renders, section output falls back to
-  `No Subscriptions Found`.
+- Initial data is committed only after both first-load requests succeed.
+- If either first-load request fails before render, both sections can fall back
+  to `No Subscriptions Found`.
 - If a later pagination fetch fails, previously rendered past rows remain.
-- Retry by changing page, reopening the route, or refreshing.
+- Retry by reopening or refreshing the route.
+- For pagination errors, switch page and retry.
 
 ## Limitations / Notes
 
 - This page does not edit subscriptions.
 - Counts are aggregate totals, not wallet-specific allocations.
-- Past rows use fixed page size `20`.
 - `My Subscriptions` is a shortcut into profile subscriptions routes.
+- `/open-data/meme-subscriptions` is a dataset-download list, not this live
+  aggregate report.
 
 ## Related Pages
 
