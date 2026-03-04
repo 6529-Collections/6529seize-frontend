@@ -12,6 +12,9 @@ interface WaveLeaderboardGalleryProps {
   readonly sort: WaveDropsLeaderboardSort;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly curatedByGroupId?: string | undefined;
+  readonly minPrice?: number | undefined;
+  readonly maxPrice?: number | undefined;
+  readonly priceCurrency?: string | undefined;
 }
 
 export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
@@ -19,12 +22,18 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   sort,
   onDropClick,
   curatedByGroupId,
+  minPrice,
+  maxPrice,
+  priceCurrency,
 }) => {
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort,
       curatedByGroupId,
+      minPrice,
+      maxPrice,
+      priceCurrency,
     });
 
   // Track when sort changes to signal animation

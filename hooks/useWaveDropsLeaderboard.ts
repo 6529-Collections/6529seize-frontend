@@ -22,6 +22,7 @@ import useCapacitor from "./useCapacitor";
 
 export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
+  PRICE = "PRICE",
   RATING_PREDICTION = "RATING_PREDICTION",
   TREND = "TREND",
   MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
@@ -33,6 +34,9 @@ interface UseWaveDropsLeaderboardProps {
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly pausePolling?: boolean | undefined;
   readonly curatedByGroupId?: string | undefined;
+  readonly minPrice?: number | undefined;
+  readonly maxPrice?: number | undefined;
+  readonly priceCurrency?: string | undefined;
 }
 
 const SORT_DIRECTION_MAP: Record<
@@ -40,6 +44,7 @@ const SORT_DIRECTION_MAP: Record<
   "ASC" | "DESC" | undefined
 > = {
   [WaveDropsLeaderboardSort.RANK]: undefined,
+  [WaveDropsLeaderboardSort.PRICE]: undefined,
   [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
   [WaveDropsLeaderboardSort.TREND]: "DESC",
   [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
@@ -68,6 +73,9 @@ export function useWaveDropsLeaderboard({
   sort = WaveDropsLeaderboardSort.RANK,
   pausePolling = false,
   curatedByGroupId,
+  minPrice,
+  maxPrice,
+  priceCurrency,
 }: UseWaveDropsLeaderboardProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -82,6 +90,41 @@ export function useWaveDropsLeaderboard({
     () => curatedByGroupId?.trim() ?? undefined,
     [curatedByGroupId]
   );
+  const canonicalPriceFilters = useMemo(() => {
+    const normalizedPriceCurrency = priceCurrency?.trim() ?? undefined;
+    const normalizedMinPrice =
+      typeof minPrice === "number" && Number.isFinite(minPrice) && minPrice >= 0
+        ? minPrice
+        : undefined;
+    const normalizedMaxPrice =
+      typeof maxPrice === "number" && Number.isFinite(maxPrice) && maxPrice >= 0
+        ? maxPrice
+        : undefined;
+
+    let normalizedPriceLower = normalizedMinPrice;
+    let normalizedPriceUpper = normalizedMaxPrice;
+
+    if (
+      typeof normalizedPriceLower === "number" &&
+      typeof normalizedPriceUpper === "number" &&
+      normalizedPriceLower > normalizedPriceUpper
+    ) {
+      normalizedPriceLower = normalizedMaxPrice;
+      normalizedPriceUpper = normalizedMinPrice;
+    }
+
+    return {
+      normalizedPriceCurrency,
+      normalizedPriceLower:
+        typeof normalizedPriceLower === "number"
+          ? normalizedPriceLower.toString()
+          : undefined,
+      normalizedPriceUpper:
+        typeof normalizedPriceUpper === "number"
+          ? normalizedPriceUpper.toString()
+          : undefined,
+    };
+  }, [maxPrice, minPrice, priceCurrency]);
 
   const queryKey = useMemo(
     () =>
@@ -93,9 +136,20 @@ export function useWaveDropsLeaderboard({
           sort,
           sort_direction: sortDirection,
           curated_by_group: normalizedCuratedByGroupId ?? null,
+          min_price: canonicalPriceFilters.normalizedPriceLower ?? null,
+          max_price: canonicalPriceFilters.normalizedPriceUpper ?? null,
+          price_currency: canonicalPriceFilters.normalizedPriceCurrency ?? null,
         },
       ] as const,
-    [waveId, sort, sortDirection, normalizedCuratedByGroupId]
+    [
+      waveId,
+      sort,
+      sortDirection,
+      normalizedCuratedByGroupId,
+      canonicalPriceFilters.normalizedPriceLower,
+      canonicalPriceFilters.normalizedPriceUpper,
+      canonicalPriceFilters.normalizedPriceCurrency,
+    ]
   );
 
   const buildLeaderboardParams = useCallback(
@@ -126,10 +180,20 @@ export function useWaveDropsLeaderboard({
       if (normalizedCuratedByGroupId) {
         params["curated_by_group"] = normalizedCuratedByGroupId;
       }
+      if (canonicalPriceFilters.normalizedPriceLower) {
+        params["min_price"] = canonicalPriceFilters.normalizedPriceLower;
+      }
+      if (canonicalPriceFilters.normalizedPriceUpper) {
+        params["max_price"] = canonicalPriceFilters.normalizedPriceUpper;
+      }
+      if (canonicalPriceFilters.normalizedPriceCurrency) {
+        params["price_currency"] =
+          canonicalPriceFilters.normalizedPriceCurrency;
+      }
 
       return params;
     },
-    [normalizedCuratedByGroupId]
+    [normalizedCuratedByGroupId, canonicalPriceFilters]
   );
 
   const fetchLeaderboardPage = useCallback(

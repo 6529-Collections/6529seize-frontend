@@ -199,11 +199,30 @@ describe("MyStreamWaveTabsMeme", () => {
 
     const subtitle = screen.getByText("A chill place to discuss drops");
     expect(subtitle).toBeInTheDocument();
+    expect(subtitle).toHaveClass("tw-block");
     expect(subtitle).toHaveClass("tw-truncate");
     expect(subtitle).not.toHaveClass("tw-line-clamp-1");
     expect(
       screen.getByRole("button", { name: "Show wave description" })
     ).toBeInTheDocument();
+  });
+
+  it("hides submit action in compact mode", () => {
+    mockUseBreakpoint.mockReturnValue("S");
+    const setActiveContentTab = jest.fn();
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab,
+    });
+    const wave = createWave(false);
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={wave} />
+      </SidebarProvider>
+    );
+
+    expect(screen.queryByText("submit")).not.toBeInTheDocument();
   });
 
   it("renders copy-mode action when native share is unavailable", () => {
@@ -251,5 +270,54 @@ describe("MyStreamWaveTabsMeme", () => {
     expect(
       screen.queryByRole("button", { name: "Show wave description" })
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps desktop action set at medium breakpoint", () => {
+    mockUseBreakpoint.mockReturnValue("MD");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Share wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Go back" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps compact actions right-aligned with subtitle trigger", () => {
+    mockUseBreakpoint.mockReturnValue("S");
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme wave={createWave(false)} />
+      </SidebarProvider>
+    );
+
+    expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Share wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show wave description" })
+    ).toBeInTheDocument();
   });
 });

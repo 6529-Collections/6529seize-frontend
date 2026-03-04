@@ -93,4 +93,29 @@ describe("WaveleaderboardSort", () => {
       "Newest",
     ]);
   });
+
+  it("uses provided custom sort items", () => {
+    const customItems = [
+      {
+        key: WaveDropsLeaderboardSort.PRICE,
+        label: "Price",
+        value: WaveDropsLeaderboardSort.PRICE,
+      },
+    ] as const;
+
+    render(
+      <WaveleaderboardSort
+        sort={WaveDropsLeaderboardSort.PRICE}
+        onSortChange={jest.fn()}
+        items={customItems}
+      />
+    );
+
+    expect(commonDropdownMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activeItem: WaveDropsLeaderboardSort.PRICE,
+        items: customItems,
+      })
+    );
+  });
 });

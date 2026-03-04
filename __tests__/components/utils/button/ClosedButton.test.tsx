@@ -1,17 +1,40 @@
-import { render, screen } from '@testing-library/react';
-import ClosedButton from '@/components/utils/button/ClosedButton';
+import { render, screen } from "@testing-library/react";
+import ClosedButton from "@/components/utils/button/ClosedButton";
 
-jest.mock('@/components/distribution-plan-tool/common/CircleLoader', () => ({
+jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({
   __esModule: true,
-  default: () => <div data-testid="loader" />
+  default: () => <div data-testid="loader" />,
 }));
 
-describe('ClosedButton', () => {
-  it('displays loader and disables button when loading', () => {
-    render(<ClosedButton loading title="closed">Done</ClosedButton>);
-    const button = screen.getByRole('button', { name: 'closed' });
+describe("ClosedButton", () => {
+  it("displays loader and disables button when loading", () => {
+    render(
+      <ClosedButton loading title="closed">
+        Done
+      </ClosedButton>
+    );
+    const button = screen.getByRole("button", { name: "closed" });
     expect(button).toBeDisabled();
-    expect(screen.getByTestId('loader')).toBeInTheDocument();
-    expect(screen.getByText('Done')).toBeInTheDocument();
+    expect(screen.getByTestId("loader")).toBeInTheDocument();
+    expect(screen.getByText("Done")).toBeInTheDocument();
+  });
+
+  it("uses full width by default", () => {
+    render(<ClosedButton title="closed">Done</ClosedButton>);
+    expect(screen.getByRole("button", { name: "closed" })).toHaveClass(
+      "tw-w-full"
+    );
+  });
+
+  it("supports auto width", () => {
+    render(
+      <ClosedButton title="closed" fullWidth={false}>
+        Done
+      </ClosedButton>
+    );
+
+    expect(screen.getByRole("button", { name: "closed" })).toHaveClass(
+      "tw-w-auto"
+    );
   });
 });

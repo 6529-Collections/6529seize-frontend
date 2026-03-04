@@ -233,10 +233,10 @@ export function parseSeizeDropLink(href: string): SeizeDropLinkInfo | null {
     return null;
   }
 
-  const { waveId: waveIdFromPath } = getWaveIdFromWavesUrl(url);
-  const waveIdFromQuery = sanitizeQueryValue(url.searchParams.get("wave"));
-  const rawWaveId = waveIdFromPath ?? waveIdFromQuery;
-  const waveId = rawWaveId && UUID_REGEX.test(rawWaveId) ? rawWaveId : null;
+  const { waveId, isLegacyPath } = getWaveIdFromWavesUrl(url);
+  if (!waveId || isLegacyPath || !UUID_REGEX.test(waveId)) {
+    return null;
+  }
 
   return {
     waveId,

@@ -31,6 +31,7 @@ import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
+import WavePicture from "@/components/waves/WavePicture";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 
 const COLLECTION_TITLES: Record<string, string> = {
@@ -187,6 +188,8 @@ export default function AppHeader() {
 
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
+  const isWaveResolving =
+    !!waveId && (isLoading || isFetching || wave?.id !== waveId);
 
   const pfpImage = (
     <div
@@ -271,8 +274,8 @@ export default function AppHeader() {
     if (isWavesRoute && !waveId) return "Waves";
     if (isMessagesRoute && !waveId) return "Messages";
     if (waveId) {
-      if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
-      return wave.name;
+      if (isWaveResolving) return <Spinner />;
+      return wave?.name;
     }
 
     const collectionTitle = getCollectionTitle(basePath!, pageTitle!);
@@ -306,23 +309,42 @@ export default function AppHeader() {
           </button>
         )}
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
-          {activeWave !== null && !isDm && previewText !== null ? (
-            <WaveDescriptionPopover
-              wave={activeWave}
-              align="center"
-              ariaLabel="Show wave description"
-              triggerClassName="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-center"
-            >
-              <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
-                {activeWave.name}
-              </span>
-              <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
-                {previewText}
-              </span>
-            </WaveDescriptionPopover>
+          {activeWave !== null && !isWaveResolving ? (
+            <div className="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-items-center tw-gap-2">
+              <div className="tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
+                <WavePicture
+                  name={activeWave.name}
+                  picture={activeWave.picture ?? null}
+                  contributors={activeWave.contributors_overview.map((c) => ({
+                    pfp: c.contributor_pfp,
+                  }))}
+                />
+              </div>
+              {!isDm && previewText !== null ? (
+                <WaveDescriptionPopover
+                  wave={activeWave}
+                  align="center"
+                  ariaLabel="Show wave description"
+                  triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+                >
+                  <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+                    {activeWave.name}
+                  </span>
+                  <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
+                    {previewText}
+                  </span>
+                </WaveDescriptionPopover>
+              ) : (
+                <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
+                  {activeWave.name}
+                </span>
+              )}
+            </div>
           ) : (
             <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>
           )}
+        </div>
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-x-1">
           {showGalleryToggle && (
             <button
               type="button"
@@ -332,18 +354,18 @@ export default function AppHeader() {
                   ? "Switch to gallery view"
                   : "Switch to chat view"
               }
-              className="tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300"
+              className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300"
             >
               {viewMode === "chat" ? (
-                <Squares2X2Icon className="tw-h-4 tw-w-4" />
+                <Squares2X2Icon className="tw-h-5 tw-w-5" />
               ) : (
-                <ChatBubbleLeftIcon className="tw-h-4 tw-w-4" />
+                <ChatBubbleLeftIcon className="tw-h-5 tw-w-5" />
               )}
             </button>
           )}
-        </div>
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <HeaderActionButtons />
+          <div className="tw-flex-shrink-0">
+            <HeaderActionButtons />
+          </div>
           {isHomeRoute && <NetworkHealthCTA className="md:tw-hidden" />}
           {showWaveLinkAction && (
             <button
@@ -352,18 +374,20 @@ export default function AppHeader() {
               aria-label={waveLinkActionLabel}
               title={waveLinkActionLabel}
               data-wave-link-action-mode={waveLinkActionMode}
-              className={`tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 ${waveLinkActionIconColor}`}
+              className={`tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 ${waveLinkActionIconColor}`}
             >
               {renderWaveLinkActionIcon()}
             </button>
           )}
-          <HeaderSearchButton
-            wave={
-              isInsideWave && (isWavesRoute || isMessagesRoute)
-                ? (wave ?? null)
-                : null
-            }
-          />
+          <div className="tw-flex-shrink-0">
+            <HeaderSearchButton
+              wave={
+                isInsideWave && (isWavesRoute || isMessagesRoute)
+                  ? (wave ?? null)
+                  : null
+              }
+            />
+          </div>
         </div>
       </div>
       <AppSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />

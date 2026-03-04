@@ -7,6 +7,7 @@ import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatOrdinal } from "@/helpers/format.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -87,9 +88,9 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
       <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-transition-colors group-hover:tw-border-white/10">
         <div className="tw-flex tw-flex-col tw-items-start tw-gap-1 tw-border-b tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 @sm:tw-flex-row @sm:tw-items-center @sm:tw-justify-between sm:tw-px-3 sm:tw-py-2">
           <span
-            className={`tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide ${rankLabelClass}`}
+            className={`tw-text-[11px] tw-font-semibold tw-leading-5 tw-tracking-wide ${rankLabelClass}`}
           >
-            {rank === 1 ? "LEADING" : `CURRENT TOP ${rank}`}
+            {rank === 1 ? "LEADING" : `CURRENT ${formatOrdinal(rank)} PLACE`}
           </span>
           <span className="tw-font-mono tw-text-xs">
             <span className="tw-text-white/80">

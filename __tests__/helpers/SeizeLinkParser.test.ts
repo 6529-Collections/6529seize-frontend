@@ -142,18 +142,14 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
       });
     });
 
-    it("parses legacy query-based wave drop links", () => {
-      expect(parseSeizeDropLink(`/waves?wave=${uuid}&drop=drop-1`)).toEqual({
-        waveId: uuid,
-        dropId: "drop-1",
-      });
+    it("returns null for legacy query-based wave drop links", () => {
+      expect(parseSeizeDropLink(`/waves?wave=${uuid}&drop=drop-1`)).toBeNull();
     });
 
-    it("parses drop links rebased to messages route with wave query", () => {
-      expect(parseSeizeDropLink(`/messages?wave=${uuid}&drop=drop-1`)).toEqual({
-        waveId: uuid,
-        dropId: "drop-1",
-      });
+    it("returns null for drop links on non-canonical paths", () => {
+      expect(
+        parseSeizeDropLink(`/messages?wave=${uuid}&drop=drop-1`)
+      ).toBeNull();
     });
 
     it("sanitizes trailing slash in drop id", () => {
@@ -161,6 +157,10 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
         waveId: uuid,
         dropId: "drop-1",
       });
+    });
+
+    it("returns null when canonical wave id is missing", () => {
+      expect(parseSeizeDropLink(`/?drop=drop-1`)).toBeNull();
     });
 
     it("returns null when drop query is missing", () => {

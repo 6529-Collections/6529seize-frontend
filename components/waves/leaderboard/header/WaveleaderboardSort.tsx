@@ -9,6 +9,9 @@ interface WaveleaderboardSortProps {
   readonly sort: WaveDropsLeaderboardSort;
   readonly onSortChange: (sort: WaveDropsLeaderboardSort) => void;
   readonly mode?: WaveleaderboardSortMode;
+  readonly items?:
+    | readonly CommonSelectItem<WaveDropsLeaderboardSort>[]
+    | undefined;
 }
 
 type WaveleaderboardSortMode = "tabs" | "dropdown";
@@ -37,10 +40,21 @@ export const WAVE_LEADERBOARD_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLea
     },
   ];
 
+export const WAVE_LEADERBOARD_CURATION_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
+  [
+    ...WAVE_LEADERBOARD_SORT_ITEMS,
+    {
+      key: WaveDropsLeaderboardSort.PRICE,
+      label: "Price",
+      value: WaveDropsLeaderboardSort.PRICE,
+    },
+  ];
+
 export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   sort,
   onSortChange,
   mode = "dropdown",
+  items = WAVE_LEADERBOARD_SORT_ITEMS,
 }) => {
   const getTabClassName = (value: WaveDropsLeaderboardSort): string => {
     const baseClass =
@@ -60,7 +74,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         aria-label="Sort options"
         className="tw-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700"
       >
-        {WAVE_LEADERBOARD_SORT_ITEMS.map((item) => (
+        {items.map((item) => (
           <button
             key={item.key}
             type="button"
@@ -81,7 +95,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   return (
     <div className="tw-min-w-0 tw-flex-shrink-0">
       <CommonDropdown<WaveDropsLeaderboardSort>
-        items={WAVE_LEADERBOARD_SORT_ITEMS}
+        items={items}
         activeItem={sort}
         filterLabel="Sort"
         setSelected={onSortChange}
