@@ -11,7 +11,12 @@ import AppSidebarConnectedAccounts from "./AppSidebarConnectedAccounts";
 import AppSidebarUserStats from "./AppSidebarUserStats";
 
 export default function AppSidebarUserInfo() {
-  const { address, isAuthenticated, isConnected } = useSeizeConnectContext();
+  const {
+    address,
+    isAuthenticated,
+    isConnected,
+    connectedAccountUnreadNotifications,
+  } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
@@ -57,6 +62,12 @@ export default function AppSidebarUserInfo() {
     : "User's profile picture";
 
   const source = activeProfileProxy?.created_by ?? profile;
+  const unreadNotificationsCount = address
+    ? connectedAccountUnreadNotifications[address.toLowerCase()] ?? 0
+    : 0;
+  const showUnreadBadge = unreadNotificationsCount > 0;
+  const unreadBadgeLabel =
+    unreadNotificationsCount > 99 ? "99+" : unreadNotificationsCount;
 
   const level = source?.level ?? 0;
   const tdh = source?.tdh ?? 0;
@@ -70,25 +81,32 @@ export default function AppSidebarUserInfo() {
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-3 tw-py-2">
       <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
         {avatarSrc ? (
-          <div
-            className={`tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
-            title={connectionIndicator.title}
-          >
-            <Image
-              src={avatarSrc}
-              alt={avatarAltText}
-              fill
-              sizes="48px"
-              className={`tw-rounded-full tw-bg-iron-900 ${
-                resolvedPfp
-                  ? "tw-object-contain"
-                  : "tw-object-cover tw-grayscale"
-              }`}
-            />
-            {connectionIndicator.overlayClassName && (
-              <div
-                className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
+          <div className="tw-relative tw-h-12 tw-w-12">
+            <div
+              className={`tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
+              title={connectionIndicator.title}
+            >
+              <Image
+                src={avatarSrc}
+                alt={avatarAltText}
+                fill
+                sizes="48px"
+                className={`tw-rounded-full tw-bg-iron-900 ${
+                  resolvedPfp
+                    ? "tw-object-contain"
+                    : "tw-object-cover tw-grayscale"
+                }`}
               />
+              {connectionIndicator.overlayClassName && (
+                <div
+                  className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
+                />
+              )}
+            </div>
+            {showUnreadBadge && (
+              <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
+                {unreadBadgeLabel}
+              </div>
             )}
           </div>
         ) : (

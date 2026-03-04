@@ -9,10 +9,12 @@ import { useIdentity } from "@/hooks/useIdentity";
 function AppSidebarConnectedAccountAvatar({
   address,
   isConnected,
+  unreadNotificationsCount,
   onSelect,
 }: {
   readonly address: string;
   readonly isConnected: boolean;
+  readonly unreadNotificationsCount: number;
   readonly onSelect: (address: string) => void;
 }) {
   const { profile, isLoading: isProfileLoading } = useIdentity({
@@ -30,6 +32,9 @@ function AppSidebarConnectedAccountAvatar({
     (shouldShowFallbackPfp ? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP : null);
   const label =
     profile?.handle ?? `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const showUnreadBadge = unreadNotificationsCount > 0;
+  const unreadBadgeLabel =
+    unreadNotificationsCount > 99 ? "99+" : unreadNotificationsCount;
 
   return (
     <button
@@ -39,22 +44,31 @@ function AppSidebarConnectedAccountAvatar({
       aria-label={`Switch to ${label}`}
       title={`${label} • ${connectionIndicator.title}`}
     >
-      <div
-        className={`tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
-      >
-        {avatarSrc && (
-          <img
-            src={avatarSrc}
-            alt={label}
-            className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-full tw-bg-iron-900 ${
-              resolvedPfp ? "tw-object-contain" : "tw-object-cover tw-grayscale"
-            }`}
-          />
-        )}
-        {connectionIndicator.overlayClassName && (
-          <div
-            className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
-          />
+      <div className="tw-relative tw-h-12 tw-w-12">
+        <div
+          className={`tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
+        >
+          {avatarSrc && (
+            <img
+              src={avatarSrc}
+              alt={label}
+              className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-full tw-bg-iron-900 ${
+                resolvedPfp
+                  ? "tw-object-contain"
+                  : "tw-object-cover tw-grayscale"
+              }`}
+            />
+          )}
+          {connectionIndicator.overlayClassName && (
+            <div
+              className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
+            />
+          )}
+        </div>
+        {showUnreadBadge && (
+          <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
+            {unreadBadgeLabel}
+          </div>
         )}
       </div>
     </button>
@@ -64,6 +78,7 @@ function AppSidebarConnectedAccountAvatar({
 export default function AppSidebarConnectedAccounts() {
   const {
     connectedAccounts,
+    connectedAccountUnreadNotifications,
     canAddConnectedAccount,
     seizeAddConnectedAccount,
     seizeSwitchConnectedAccount,
@@ -84,6 +99,11 @@ export default function AppSidebarConnectedAccounts() {
           key={account.address.toLowerCase()}
           address={account.address}
           isConnected={account.isConnected}
+          unreadNotificationsCount={
+            connectedAccountUnreadNotifications[
+              account.address.toLowerCase()
+            ] ?? 0
+          }
           onSelect={seizeSwitchConnectedAccount}
         />
       ))}

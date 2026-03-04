@@ -36,6 +36,7 @@ function WebSidebarUser({
     isAuthenticated,
     isConnected,
     connectedAccounts,
+    connectedAccountUnreadNotifications,
     seizeSwitchConnectedAccount,
   } = useSeizeConnectContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -140,6 +141,12 @@ function WebSidebarUser({
     isAuthenticated,
     isConnected,
   });
+  const hasUnreadOnOtherConnectedProfiles = connectedAccounts.some(
+    (account) =>
+      !account.isActive &&
+      (connectedAccountUnreadNotifications[account.address.toLowerCase()] ?? 0) >
+        0
+  );
 
   const switchToNextConnectedAccount = (): boolean => {
     if (connectedAccounts.length < 2) {
@@ -205,32 +212,40 @@ function WebSidebarUser({
             isCollapsed ? "" : "tw-gap-x-2"
           }`}
         >
-          <div
-            className={`tw-relative tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl ${connectionIndicator.avatarClassName}`}
-            title={connectionIndicator.title}
-          >
-            <img
-              src={avatarSrc}
-              alt={displayHandle || "Connected account"}
-              onError={(event) => {
-                if (
-                  event.currentTarget.src.endsWith(
-                    DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP
-                  )
-                ) {
-                  return;
-                }
-                setAvatarSrc(DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP);
-              }}
-              className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-xl tw-bg-iron-900 ${
-                isResolvedAvatar
-                  ? "tw-object-contain"
-                  : "tw-object-cover tw-grayscale"
-              }`}
-            />
-            {connectionIndicator.overlayClassName && (
+          <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
+            <div
+              className={`tw-relative tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl ${connectionIndicator.avatarClassName}`}
+              title={connectionIndicator.title}
+            >
+              <img
+                src={avatarSrc}
+                alt={displayHandle || "Connected account"}
+                onError={(event) => {
+                  if (
+                    event.currentTarget.src.endsWith(
+                      DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP
+                    )
+                  ) {
+                    return;
+                  }
+                  setAvatarSrc(DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP);
+                }}
+                className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-xl tw-bg-iron-900 ${
+                  isResolvedAvatar
+                    ? "tw-object-contain"
+                    : "tw-object-cover tw-grayscale"
+                }`}
+              />
+              {connectionIndicator.overlayClassName && (
+                <div
+                  className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-xl ${connectionIndicator.overlayClassName}`}
+                />
+              )}
+            </div>
+            {hasUnreadOnOtherConnectedProfiles && (
               <div
-                className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-xl ${connectionIndicator.overlayClassName}`}
+                className="tw-absolute tw-right-[-6px] tw-top-[-6px] tw-size-3 tw-rounded-full tw-bg-indigo-500 tw-shadow-sm"
+                aria-hidden="true"
               />
             )}
           </div>
