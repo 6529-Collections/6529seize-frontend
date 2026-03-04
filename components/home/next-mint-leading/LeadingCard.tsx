@@ -7,6 +7,7 @@ import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatOrdinal } from "@/helpers/format.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -89,7 +90,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
           <span
             className={`tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide ${rankLabelClass}`}
           >
-            {rank === 1 ? "LEADING" : `CURRENT TOP ${rank}`}
+            {rank === 1 ? "LEADING" : `CURRENT ${formatOrdinal(rank)} PLACE`}
           </span>
           <span className="tw-font-mono tw-text-xs">
             <span className="tw-text-white/80">

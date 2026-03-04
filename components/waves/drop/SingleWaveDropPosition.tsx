@@ -1,4 +1,5 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { formatOrdinal } from "@/helpers/format.helpers";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { FC } from "react";
@@ -69,26 +70,13 @@ const SimpleRankDisplay: FC<{ rank: number; size?: "sm" | "md" }> = ({ rank, siz
       color = "tw-text-iron-500";
   }
 
-  const formatRank = (r: number) => {
-    switch (r) {
-      case 1:
-        return "1st";
-      case 2:
-        return "2nd";
-      case 3:
-        return "3rd";
-      default:
-        return `#${r}`;
-    }
-  };
-
   const iconSize = size === "md" ? "tw-w-4 tw-h-4" : "tw-w-3.5 tw-h-3.5";
   const textSize = size === "md" ? "tw-text-md" : "tw-text-sm";
 
   return (
     <div className={`tw-flex tw-items-center tw-gap-1.5 ${color}`}>
       <FontAwesomeIcon icon={faTrophy} className={iconSize} />
-      <span className={`${textSize} tw-font-semibold`}>{formatRank(rank)}</span>
+      <span className={`${textSize} tw-font-semibold`}>{formatOrdinal(rank)}</span>
     </div>
   );
 };
