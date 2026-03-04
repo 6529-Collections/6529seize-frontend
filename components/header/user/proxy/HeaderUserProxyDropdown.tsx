@@ -31,6 +31,7 @@ export default function HeaderUserProxyDropdown({
     address,
     isConnected,
     connectedAccounts,
+    connectedAccountUnreadNotifications,
     canAddConnectedAccount,
     seizeConnect,
     seizeAddConnectedAccount,
@@ -143,7 +144,13 @@ export default function HeaderUserProxyDropdown({
                   {availableConnectedAccounts.length > 0 && (
                     <div className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
                       <HeaderUserConnectedAccounts
-                        accounts={availableConnectedAccounts}
+                        accounts={availableConnectedAccounts.map((account) => ({
+                          ...account,
+                          unreadNotificationsCount:
+                            connectedAccountUnreadNotifications[
+                              account.address.toLowerCase()
+                            ] ?? 0,
+                        }))}
                         onSelectAccount={onSelectConnectedAccount}
                         canAddAccount={canAddConnectedAccount}
                         onAddAccount={() => {

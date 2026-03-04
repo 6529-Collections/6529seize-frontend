@@ -96,6 +96,7 @@ export default function AppHeader() {
     isAuthenticated,
     isConnected,
     connectedAccounts,
+    connectedAccountUnreadNotifications,
     seizeSwitchConnectedAccount,
   } = useSeizeConnectContext();
   const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -130,6 +131,12 @@ export default function AppHeader() {
     isAuthenticated,
     isConnected,
   });
+  const hasUnreadOnOtherConnectedProfiles = connectedAccounts.some(
+    (account) =>
+      !account.isActive &&
+      (connectedAccountUnreadNotifications[account.address.toLowerCase()] ?? 0) >
+        0
+  );
 
   const pathSegments = pathname.split("/").filter(Boolean);
   const basePath = pathSegments.length ? pathSegments[0] : "";
@@ -192,22 +199,30 @@ export default function AppHeader() {
     !!waveId && (isLoading || isFetching || wave?.id !== waveId);
 
   const pfpImage = (
-    <div
-      className={`tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
-      title={connectionIndicator.title}
-    >
-      <Image
-        src={menuAvatarSrc}
-        alt="pfp"
-        width={40}
-        height={40}
-        className={`tw-h-full tw-w-full tw-bg-iron-900 ${
-          resolvedPfp ? "tw-object-contain" : "tw-object-cover tw-grayscale"
-        }`}
-      />
-      {connectionIndicator.overlayClassName && (
+    <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
+      <div
+        className={`tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
+        title={connectionIndicator.title}
+      >
+        <Image
+          src={menuAvatarSrc}
+          alt="pfp"
+          width={40}
+          height={40}
+          className={`tw-h-full tw-w-full tw-bg-iron-900 ${
+            resolvedPfp ? "tw-object-contain" : "tw-object-cover tw-grayscale"
+          }`}
+        />
+        {connectionIndicator.overlayClassName && (
+          <div
+            className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
+          />
+        )}
+      </div>
+      {hasUnreadOnOtherConnectedProfiles && (
         <div
-          className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
+          className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-3 tw-rounded-full tw-bg-indigo-500 tw-shadow-sm"
+          aria-hidden="true"
         />
       )}
     </div>
