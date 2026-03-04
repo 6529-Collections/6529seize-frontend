@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
@@ -28,44 +28,55 @@ const fetchUnreadCountForAccount = async (
     return 0;
   }
 
-  try {
-    const notifications = await commonApiFetch<ApiNotificationsResponse>({
-      endpoint: "notifications",
-      params: { limit: "1" },
-      headers: {
-        Authorization: `Bearer ${account.jwt}`,
-      },
-    });
-    return clampUnreadCount(notifications.unread_count);
-  } catch {
-    return 0;
-  }
+  const notifications = await commonApiFetch<ApiNotificationsResponse>({
+    endpoint: "notifications",
+    params: { limit: "1" },
+    headers: {
+      Authorization: `Bearer ${account.jwt}`,
+    },
+  });
+  return clampUnreadCount(notifications.unread_count);
 };
 
 export function useConnectedAccountsUnreadNotifications(
   accounts: readonly ConnectedWalletAccount[]
 ): ConnectedAccountUnreadCounts {
   const { isCapacitor } = useCapacitor();
+  const queryClient = useQueryClient();
+  const queryKey = [
+    QueryKey.IDENTITY_NOTIFICATIONS,
+    "connected-account-unread-counts",
+    accounts.map((account) => toAddressKey(account.address)),
+  ] as const;
 
   const { data } = useQuery<ConnectedAccountUnreadCounts>({
-    queryKey: [
-      QueryKey.IDENTITY_NOTIFICATIONS,
-      "connected-account-unread-counts",
-      accounts.map((account) => toAddressKey(account.address)),
-    ],
+    queryKey,
     queryFn: async () => {
       if (accounts.length === 0) {
         return {};
       }
 
-      const unreadPairs = await Promise.all(
-        accounts.map(async (account) => [
-          toAddressKey(account.address),
-          await fetchUnreadCountForAccount(account),
-        ])
+      const previousCounts =
+        queryClient.getQueryData<ConnectedAccountUnreadCounts>(queryKey) ?? {};
+      const results = await Promise.allSettled(
+        accounts.map((account) => fetchUnreadCountForAccount(account))
       );
+      const nextCounts: Record<string, number> = {};
 
-      return Object.fromEntries(unreadPairs);
+      results.forEach((result, index) => {
+        const addressKey = toAddressKey(accounts[index].address);
+        if (result.status === "fulfilled") {
+          nextCounts[addressKey] = result.value;
+          return;
+        }
+
+        const previousCount = previousCounts[addressKey];
+        if (typeof previousCount === "number") {
+          nextCounts[addressKey] = previousCount;
+        }
+      });
+
+      return nextCounts;
     },
     enabled: accounts.length > 0,
     refetchInterval: POLL_INTERVAL_MS,
