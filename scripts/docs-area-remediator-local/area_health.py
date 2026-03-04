@@ -438,12 +438,12 @@ def print_pick(audit: AreaAudit, max_items: int) -> None:
         print(f"- {item}")
     print("")
     print("next_commands:")
-    print(f"- python3 .codex/skills/docs-area-remediator/scripts/area_health.py --area {audit.area}")
+    print(f"- python3 scripts/docs-area-remediator-local/area_health.py --area {audit.area}")
     print(
-        "- python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py "
+        "- python3 scripts/docs-area-remediator-local/validate_docs_optimizations.py "
         f"--area {audit.area} --strict"
     )
-    print("- python3 .codex/skills/commit-docs-updater/scripts/validate_docs_links.py")
+    print("- python3 scripts/docs-area-remediator-local/validate_docs_links.py")
 
 
 def print_list(title: str, values: list[str], max_items: int) -> None:
