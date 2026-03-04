@@ -122,9 +122,9 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
   return (
     <nav
       ref={setMobileNavRef}
-      className={`${hiddenStyle} tw-fixed tw-bottom-0 tw-left-0 tw-z-50 tw-h-20 tw-w-full tw-bg-black tw-shadow-inner tw-transition-[opacity,transform] tw-duration-75 tw-relative before:tw-absolute before:tw-inset-x-0 before:tw-top-0 before:tw-h-px before:tw-bg-iron-900 before:tw-content-['']`}
+      className={`${hiddenStyle} tw-fixed tw-bottom-0 tw-left-0 tw-z-50 tw-h-[85px] tw-w-full tw-bg-black tw-shadow-inner tw-transition-[opacity,transform] tw-duration-75`}
     >
-      <div className="tw-h-full">
+      <div className="tw-relative tw-h-full before:tw-absolute before:tw-inset-x-0 before:tw-top-0 before:tw-h-px before:tw-bg-iron-900 before:tw-content-['']">
         <ul className="tw-mx-auto tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)] tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl">
           {navItems.map((item) => (
             <li
