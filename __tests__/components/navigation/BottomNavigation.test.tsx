@@ -40,10 +40,11 @@ describe("BottomNavigation", () => {
     const navItemCalls = (NavItem as jest.Mock).mock.calls;
 
     expect(rendered).toHaveLength(navItemCalls.length);
-    expect(navItemCalls).toHaveLength(6);
+    expect(navItemCalls).toHaveLength(7);
 
     const passedItems = navItemCalls.map((call) => call[0].item);
     expect(passedItems.map((item: { name: string }) => item.name)).toEqual([
+      "Profile",
       "Waves",
       "Messages",
       "Home",
