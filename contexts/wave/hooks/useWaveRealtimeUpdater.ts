@@ -1,7 +1,7 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { WsDropUpdateMessage} from "@/helpers/Types";
+import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -10,9 +10,10 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater } from "./types";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -54,6 +55,7 @@ export function useWaveRealtimeUpdater({
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
   const { refreshEligibility } = useWaveEligibility();
+  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const tabJustBecameVisibleRef = useRef<boolean>(false);
 
   // Function to cleanup abort controllers
@@ -128,10 +130,11 @@ export function useWaveRealtimeUpdater({
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
-      const markWaveAsRead = (waveId: string) => {
-        return commonApiPostWithoutBodyAndResponse({
+      const markWaveAsRead = async (waveId: string) => {
+        await commonApiPostWithoutBodyAndResponse({
           endpoint: `notifications/wave/${waveId}/read`,
         });
+        invalidateNotifications();
       };
 
       if (!drop?.wave?.id) {
@@ -202,28 +205,28 @@ export function useWaveRealtimeUpdater({
           ...drop.author,
           subscribed_actions: existingDrop
             ? existingDrop.author.subscribed_actions
-            : drop.author.subscribed_actions ?? [],
+            : (drop.author.subscribed_actions ?? []),
         },
         wave: {
           ...drop.wave,
           authenticated_user_eligible_to_participate: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_participate
-            : drop.wave.authenticated_user_eligible_to_participate ?? false,
+            : (drop.wave.authenticated_user_eligible_to_participate ?? false),
           authenticated_user_eligible_to_vote: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_vote
-            : drop.wave.authenticated_user_eligible_to_vote ?? false,
+            : (drop.wave.authenticated_user_eligible_to_vote ?? false),
           authenticated_user_eligible_to_chat: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_chat
-            : drop.wave.authenticated_user_eligible_to_chat ?? false,
+            : (drop.wave.authenticated_user_eligible_to_chat ?? false),
           authenticated_user_admin: existingDrop
             ? existingDrop.wave.authenticated_user_admin
-            : drop.wave.authenticated_user_admin ?? false,
+            : (drop.wave.authenticated_user_admin ?? false),
         }, // Assuming message structure matches ApiDrop + ApiWaveMin
         stableKey: drop.id,
         stableHash: drop.id, // Use ID for hash temporarily
         context_profile_context: existingDrop
           ? existingDrop.context_profile_context
-          : drop.context_profile_context ?? null,
+          : (drop.context_profile_context ?? null),
       };
 
       // Important: Identify the serial number *before* adding the optimistic drop
@@ -257,6 +260,7 @@ export function useWaveRealtimeUpdater({
       removeWaveDeliveredNotifications,
       refreshEligibility,
       isWaveMuted,
+      invalidateNotifications,
     ]
   );
 
