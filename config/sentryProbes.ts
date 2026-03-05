@@ -17,6 +17,10 @@ const probeTags = {
   security_probe: "true",
   probe_type: "generic-exploit-scan",
 };
+const serverActionProbeTags = {
+  security_probe: "true",
+  probe_type: "server-action-probe",
+};
 
 const SERVER_ACTION_NOT_FOUND = "Failed to find Server Action";
 const WEBSTREAMS_TRANSFORM_ALGORITHM_ERROR =
@@ -256,6 +260,24 @@ function isMalformedNextActionProbe(event: Event): boolean {
   return method === "POST" && contentType.includes("text/plain");
 }
 
+function isMozillaMultipartProbe(event: Event): boolean {
+  const method = (event.request?.method || "").toUpperCase();
+  if (method !== "POST") {
+    return false;
+  }
+
+  const contentType = getRequestContentType(event);
+  if (!contentType.includes("multipart/form-data")) {
+    return false;
+  }
+
+  if (getNextActionHeader(event)) {
+    return false;
+  }
+
+  return /boundary\s*=\s*"?mozilla/.test(contentType);
+}
+
 function hasServerActionProbeSignature(event: Event): boolean {
   const value = event.exception?.values?.[0];
   const message =
@@ -274,7 +296,7 @@ function hasServerActionProbeSignature(event: Event): boolean {
 
 function isProbeLikeServerActionRequest(event: Event): boolean {
   const url = (event.request?.url || "").toLowerCase();
-  if (isMalformedNextActionProbe(event)) {
+  if (isMalformedNextActionProbe(event) || isMozillaMultipartProbe(event)) {
     return true;
   }
   return isProbeLikeRequest(url, getStringTagValue(event, "security_probe"));
@@ -346,10 +368,12 @@ export function tagSecurityProbes<T extends Event>(event: T): T {
   try {
     const url = (event?.request?.url || "").toLowerCase();
 
-    if (
-      PROBE_PATTERNS.some((p) => url.includes(p)) ||
-      isMalformedNextActionProbe(event)
-    ) {
+    if (isMalformedNextActionProbe(event) || isMozillaMultipartProbe(event)) {
+      event.level = "info";
+      event.tags = event.tags
+        ? { ...event.tags, ...serverActionProbeTags }
+        : { ...serverActionProbeTags };
+    } else if (PROBE_PATTERNS.some((p) => url.includes(p))) {
       event.level = "info";
       event.tags = event.tags
         ? { ...event.tags, ...probeTags }

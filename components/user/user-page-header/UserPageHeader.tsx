@@ -1,5 +1,3 @@
-"use server";
-
 import { notFound } from "next/navigation";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
