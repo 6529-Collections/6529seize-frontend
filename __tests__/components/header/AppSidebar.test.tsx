@@ -37,10 +37,8 @@ jest.mock("@/components/app-wallets/AppWalletsContext");
         appWalletsSupported: true,
       });
       render(<AppSidebar open={true} onClose={onClose} />);
-      expect(menuProps.menu).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ label: "Profile", path: "/profile" }),
-        ])
+      expect(menuProps.menu.some((item: any) => item.path === "/profile")).toBe(
+        false
       );
       expect(
         menuProps.menu.find((m: any) => m.label === "Tools").children[0]

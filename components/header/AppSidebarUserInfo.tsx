@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { formatAddress } from "@/helpers/Helpers";
@@ -10,7 +11,13 @@ import UserLevel from "../user/utils/level/UserLevel";
 import AppSidebarConnectedAccounts from "./AppSidebarConnectedAccounts";
 import AppSidebarUserStats from "./AppSidebarUserStats";
 
-export default function AppSidebarUserInfo() {
+interface AppSidebarUserInfoProps {
+  readonly onNavigate?: (() => void) | undefined;
+}
+
+export default function AppSidebarUserInfo({
+  onNavigate,
+}: AppSidebarUserInfoProps) {
   const {
     address,
     isAuthenticated,
@@ -63,11 +70,17 @@ export default function AppSidebarUserInfo() {
 
   const source = activeProfileProxy?.created_by ?? profile;
   const unreadNotificationsCount = address
-    ? connectedAccountUnreadNotifications[address.toLowerCase()] ?? 0
+    ? (connectedAccountUnreadNotifications[address.toLowerCase()] ?? 0)
     : 0;
   const showUnreadBadge = unreadNotificationsCount > 0;
   const unreadBadgeLabel =
     unreadNotificationsCount > 99 ? "99+" : unreadNotificationsCount;
+  const profileRouteHandleOrWallet = trimmedHandleOrWallet.toLowerCase();
+  const profileHref = profileRouteHandleOrWallet
+    ? `/${encodeURIComponent(profileRouteHandleOrWallet)}`
+    : "/profile";
+  const profileLinkLabel = label ?? "user";
+  const profileLinkClickProps = onNavigate ? { onClick: onNavigate } : {};
 
   const level = source?.level ?? 0;
   const tdh = source?.tdh ?? 0;
@@ -79,56 +92,67 @@ export default function AppSidebarUserInfo() {
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-3 tw-py-2">
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
-        {avatarSrc ? (
-          <div className="tw-relative tw-h-12 tw-w-12">
-            <div
-              className={`tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
-              title={connectionIndicator.title}
+      <div className="tw-flex tw-w-full tw-items-start tw-gap-2">
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3">
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
+            <Link
+              href={profileHref}
+              {...profileLinkClickProps}
+              aria-label={`Open ${profileLinkLabel} profile`}
+              className="tw-rounded-full tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900"
             >
-              <Image
-                src={avatarSrc}
-                alt={avatarAltText}
-                fill
-                sizes="48px"
-                className={`tw-rounded-full tw-bg-iron-900 ${
-                  resolvedPfp
-                    ? "tw-object-contain"
-                    : "tw-object-cover tw-grayscale"
-                }`}
-              />
-              {connectionIndicator.overlayClassName && (
+              {avatarSrc ? (
+                <div className="tw-relative tw-h-12 tw-w-12">
+                  <div
+                    className={`tw-relative tw-h-12 tw-w-12 tw-overflow-hidden tw-rounded-full ${connectionIndicator.avatarClassName}`}
+                    title={connectionIndicator.title}
+                  >
+                    <Image
+                      src={avatarSrc}
+                      alt={avatarAltText}
+                      fill
+                      sizes="48px"
+                      className={`tw-rounded-full tw-bg-iron-900 ${
+                        resolvedPfp
+                          ? "tw-object-contain"
+                          : "tw-object-cover tw-grayscale"
+                      }`}
+                    />
+                    {connectionIndicator.overlayClassName && (
+                      <div
+                        className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
+                      />
+                    )}
+                  </div>
+                  {showUnreadBadge && (
+                    <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
+                      {unreadBadgeLabel}
+                    </div>
+                  )}
+                </div>
+              ) : (
                 <div
-                  className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-full ${connectionIndicator.overlayClassName}`}
+                  className={`tw-h-12 tw-w-12 tw-rounded-full ${connectionIndicator.avatarClassName}`}
+                  title={connectionIndicator.title}
                 />
               )}
-            </div>
-            {showUnreadBadge && (
-              <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
-                {unreadBadgeLabel}
-              </div>
-            )}
+            </Link>
           </div>
-        ) : (
-          <div
-            className={`tw-h-12 tw-w-12 tw-rounded-full ${connectionIndicator.avatarClassName}`}
-            title={connectionIndicator.title}
-          />
-        )}
-        <AppSidebarConnectedAccounts />
-      </div>
-      <div className="tw-flex tw-flex-col tw-items-start">
-        <span className="tw-truncate tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
-          {label}
-        </span>
-        {connectedWalletLabel && (
-          <span className="tw-my-1 tw-block tw-truncate tw-text-xs tw-font-medium tw-text-iron-400">
-            {connectedWalletLabel}
-          </span>
-        )}
-        <div className="tw-my-1">
-          <UserLevel level={level} size="xs" />
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start">
+            <span className="tw-truncate tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
+              {label}
+            </span>
+            {connectedWalletLabel && (
+              <span className="tw-my-1 tw-block tw-truncate tw-text-xs tw-font-medium tw-text-iron-400">
+                {connectedWalletLabel}
+              </span>
+            )}
+            <div className="tw-my-1">
+              <UserLevel level={level} size="xs" />
+            </div>
+          </div>
         </div>
+        <AppSidebarConnectedAccounts />
       </div>
       <AppSidebarUserStats
         handle={handleOrWallet}
