@@ -1,5 +1,3 @@
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-
 export const FingerprintIcon = ({
   className,
 }: {
@@ -39,29 +37,5 @@ export function RateNicButton({
     >
       Rate NIC
     </button>
-  );
-}
-
-export function RateNicInfo({
-  userContribution,
-}: {
-  readonly userContribution: number;
-}) {
-  return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-500/5 tw-px-3 tw-py-2">
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <FingerprintIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-emerald-400" />
-        <span className="tw-text-xs tw-font-normal tw-text-iron-400">
-          Your Rate
-        </span>
-      </div>
-      <span
-        className={`tw-text-sm tw-font-semibold ${
-          userContribution >= 0 ? "tw-text-emerald-400" : "tw-text-rose-400"
-        }`}
-      >
-        {formatNumberWithCommas(userContribution)}
-      </span>
-    </div>
   );
 }
