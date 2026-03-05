@@ -22,6 +22,14 @@ type FactoryArgs = {
 
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
+const PROBE_USER_SUFFIXES = [
+  ".html",
+  ".htm",
+  ".php",
+  ".asp",
+  ".aspx",
+  ".jsp",
+] as const;
 
 const normalizeSearchParams = (
   params?: UserSearchParams | URLSearchParams
@@ -59,9 +67,10 @@ const isNotFoundError = (error: unknown): boolean => {
 
   const status =
     typeof error === "object" && error !== null
-      ? (error as { status?: number | undefined }).status ??
+      ? ((error as { status?: number | undefined }).status ??
         (error as { statusCode?: number | undefined }).statusCode ??
-        (error as { response?: { status?: number | undefined } | undefined }).response?.status
+        (error as { response?: { status?: number | undefined } | undefined })
+          .response?.status)
       : undefined;
 
   if (status === 404) {
@@ -79,6 +88,11 @@ const isNotFoundError = (error: unknown): boolean => {
   return !!message && message.toLowerCase().includes("not found");
 };
 
+const isProbeLikeUserSlug = (user: string): boolean => {
+  const normalized = user.trim().toLowerCase();
+  return PROBE_USER_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
+};
+
 export function createUserTabPage({
   subroute,
   metaLabel,
@@ -94,10 +108,14 @@ export function createUserTabPage({
   }) {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
-      notFound();
+      return notFound();
     }
 
     const user = resolvedParams.user;
+    if (isProbeLikeUserSlug(user)) {
+      return notFound();
+    }
+
     const normalizedUser = user.toLowerCase();
     const resolvedSearchParams = searchParams ? await searchParams : undefined;
     const query: UserSearchParams = normalizeSearchParams(resolvedSearchParams);
@@ -142,7 +160,11 @@ export function createUserTabPage({
   }): Promise<Metadata> {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
-      notFound();
+      return notFound();
+    }
+
+    if (isProbeLikeUserSlug(resolvedParams.user)) {
+      return notFound();
     }
 
     const normalizedUser = resolvedParams.user.toLowerCase();

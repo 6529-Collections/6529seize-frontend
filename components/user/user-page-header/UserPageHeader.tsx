@@ -54,13 +54,13 @@ async function fetchFollowersCount(
     headers,
   });
 
-  return response.count ?? null;
+  return response.count;
 }
 
 function extractProfileEnabledAt(
   logPage: CountlessPage<ProfileActivityLog> | null
 ): string | null {
-  if (!logPage?.data?.length) {
+  if (!logPage?.data.length) {
     return null;
   }
   const createdAt = logPage.data[0]?.created_at;

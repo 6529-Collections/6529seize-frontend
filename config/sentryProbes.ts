@@ -319,7 +319,16 @@ function isWebStreamsTransformAlgorithmError(event: Event): boolean {
 
 function isProbeLikeWebStreamsRequest(event: Event): boolean {
   const url = (event.request?.url || "").toLowerCase();
-  return isProbeLikeRequest(url, getStringTagValue(event, "security_probe"));
+  if (isProbeLikeRequest(url, getStringTagValue(event, "security_probe"))) {
+    return true;
+  }
+
+  const method = (event.request?.method || "").toUpperCase();
+  if (method && method !== "GET" && method !== "HEAD") {
+    return false;
+  }
+
+  return /(?:^|\/)[^/?#]+\.(?:html?)(?:$|[?#])/.test(url);
 }
 
 export function filterServerActionProbeErrors<T extends Event>(
