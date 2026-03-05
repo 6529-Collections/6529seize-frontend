@@ -3,7 +3,6 @@
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
-import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -99,7 +98,6 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
     section: "Main",
     icon: ChatBubbleIcon,
   },
-  { name: "Discover", href: "/discover", section: "Main", icon: DiscoverIcon },
   {
     name: "Notifications",
     href: "/notifications",

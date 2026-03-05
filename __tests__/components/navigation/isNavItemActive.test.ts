@@ -21,30 +21,9 @@ describe("isNavItemActive", () => {
       href: "/",
       icon: "",
     } as any;
-    expect(
-      isNavItemActive(item, "/", new URLSearchParams(), null, false)
-    ).toBe(true);
-  });
-
-  it("returns true for Discover item when on discover routes with no active view", () => {
-    const item: NavItem = {
-      kind: "route",
-      name: "Discover",
-      href: "/discover",
-      icon: "",
-    } as any;
-    expect(
-      isNavItemActive(item, "/discover", new URLSearchParams(), null, false)
-    ).toBe(true);
-    expect(
-      isNavItemActive(
-        item,
-        "/discover/something",
-        new URLSearchParams(),
-        null,
-        false
-      )
-    ).toBe(true);
+    expect(isNavItemActive(item, "/", new URLSearchParams(), null, false)).toBe(
+      true
+    );
   });
 
   it("returns true for waves view when viewing non-DM wave sub route", () => {
