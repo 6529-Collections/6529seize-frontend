@@ -70,6 +70,7 @@ describe("MarketplaceManifoldListingPreview", () => {
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "1.25 ETH",
+        price_currency: "ETH",
         last_successfully_updated: 1735689600,
         failed_since: null,
       },
@@ -86,7 +87,11 @@ describe("MarketplaceManifoldListingPreview", () => {
           mediaUrl: "https://cdn.example.com/nft-image.png",
           mediaMimeType: "image/png",
           price: "1.25 ETH",
+          priceCurrency: "ETH",
           title: "Wave Artifact",
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
           compact: true,
           hideActions: true,
         })
@@ -148,6 +153,9 @@ describe("MarketplaceManifoldListingPreview", () => {
           href,
           mediaUrl: "https://arweave.net/test-image",
           mediaMimeType: "image/*",
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );
@@ -180,6 +188,9 @@ describe("MarketplaceManifoldListingPreview", () => {
           mediaUrl: "https://arweave.net/test-image.webp",
           mediaMimeType: "image/webp",
           price: undefined,
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );
@@ -207,6 +218,9 @@ describe("MarketplaceManifoldListingPreview", () => {
           mediaUrl: "https://arweave.net/test-image.webp",
           mediaMimeType: "image/webp",
           price: undefined,
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );

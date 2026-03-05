@@ -368,8 +368,23 @@ export interface WsMediaLinkUpdatedData {
   readonly name: string | null;
   readonly description: string | null;
   readonly media_uri: string | null;
+  readonly media_preview?: {
+    readonly status?: string | null;
+    readonly mime_type?: string | null;
+    readonly card_url?: string | null;
+    readonly small_url?: string | null;
+    readonly thumb_url?: string | null;
+  } | null;
+  readonly media_preview_mime_type?: string | null;
+  readonly media_preview_card_url?: string | null;
+  readonly media_preview_small_url?: string | null;
+  readonly media_preview_thumb_url?: string | null;
+  readonly card_url?: string | null;
+  readonly small_url?: string | null;
+  readonly thumb_url?: string | null;
   readonly last_error_message: string | null;
   readonly price: string | null;
+  readonly price_currency: string | null;
   readonly last_successfully_updated: string | number | null;
   readonly failed_since: string | number | null;
 }

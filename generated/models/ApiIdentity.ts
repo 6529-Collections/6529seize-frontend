@@ -38,6 +38,7 @@ export class ApiIdentity {
     'wallets'?: Array<ApiWallet>;
     'active_main_stage_submission_ids': Array<string>;
     'winner_main_stage_drop_ids': Array<string>;
+    'artist_of_prevote_cards': Array<number>;
     'is_wave_creator': boolean;
 
     static readonly discriminator: string | undefined = undefined;
@@ -176,6 +177,12 @@ export class ApiIdentity {
             "baseName": "winner_main_stage_drop_ids",
             "type": "Array<string>",
             "format": ""
+        },
+        {
+            "name": "artist_of_prevote_cards",
+            "baseName": "artist_of_prevote_cards",
+            "type": "Array<number>",
+            "format": "int64"
         },
         {
             "name": "is_wave_creator",

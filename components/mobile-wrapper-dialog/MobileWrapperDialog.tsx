@@ -6,6 +6,7 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
+import clsx from "clsx";
 import { Fragment } from "react";
 
 export default function MobileWrapperDialog({
@@ -20,6 +21,7 @@ export default function MobileWrapperDialog({
   fixedHeight,
   tabletModal,
   showScrollbar,
+  maxWidthClass,
 }: {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
@@ -32,6 +34,7 @@ export default function MobileWrapperDialog({
   readonly fixedHeight?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
+  readonly maxWidthClass?: string | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
 
@@ -47,15 +50,34 @@ export default function MobileWrapperDialog({
     return `calc(${viewportHeight} - 10rem)`;
   };
 
-  const panelClassNames = `mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen${
-    tabletModal ? "" : " md:tw-max-w-screen-md"
-  }${isIos ? "" : " tw-transform-gpu tw-will-change-transform"}${
-    tabletModal ? " md:tw-w-full md:tw-max-w-md" : ""
-  }`;
+  const panelClassNames = clsx(
+    "mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen",
+    !tabletModal && "md:tw-max-w-screen-md",
+    !isIos && "tw-transform-gpu tw-will-change-transform",
+    tabletModal && ["md:tw-w-full", maxWidthClass ?? "md:tw-max-w-md"]
+  );
 
-  const containerClassNames = `tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10${
-    tabletModal ? " md:tw-inset-0 md:tw-items-center md:tw-pt-0 md:tw-p-6" : ""
-  }`;
+  const containerClassNames = clsx(
+    "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10",
+    tabletModal && "md:tw-inset-0 md:tw-items-center md:tw-pt-0 md:tw-p-6"
+  );
+
+  const slideTransition = {
+    enter:
+      "tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out",
+    enterFrom: clsx(
+      "tw-translate-y-full",
+      tabletModal && "md:tw-translate-y-4 md:tw-opacity-0"
+    ),
+    enterTo: clsx("tw-translate-y-0", tabletModal && "md:tw-opacity-100"),
+    leave:
+      "tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out",
+    leaveFrom: clsx("tw-translate-y-0", tabletModal && "md:tw-opacity-100"),
+    leaveTo: clsx(
+      "tw-translate-y-full",
+      tabletModal && "md:tw-translate-y-4 md:tw-opacity-0"
+    ),
+  };
 
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
@@ -90,23 +112,7 @@ export default function MobileWrapperDialog({
             onClick={(e) => e.stopPropagation()}
           >
             <div className={containerClassNames}>
-              <TransitionChild
-                as={Fragment}
-                enter="tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out"
-                enterFrom={`tw-translate-y-full${
-                  tabletModal ? " md:tw-translate-y-4 md:tw-opacity-0" : ""
-                }`}
-                enterTo={`tw-translate-y-0${
-                  tabletModal ? " md:tw-opacity-100" : ""
-                }`}
-                leave="tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out"
-                leaveFrom={`tw-translate-y-0${
-                  tabletModal ? " md:tw-opacity-100" : ""
-                }`}
-                leaveTo={`tw-translate-y-full${
-                  tabletModal ? " md:tw-translate-y-4 md:tw-opacity-0" : ""
-                }`}
-              >
+              <TransitionChild as={Fragment} {...slideTransition}>
                 <DialogPanel
                   className={panelClassNames}
                   style={{ touchAction: "manipulation" }}
@@ -148,9 +154,10 @@ export default function MobileWrapperDialog({
                     </div>
                   </TransitionChild>
                   <div
-                    className={`tw-flex tw-flex-col tw-overflow-hidden tw-rounded-t-xl tw-bg-iron-950${
-                      tabletModal ? " md:tw-rounded-xl" : ""
-                    }`}
+                    className={clsx(
+                      "tw-flex tw-flex-col tw-overflow-hidden tw-rounded-t-xl tw-bg-iron-950",
+                      tabletModal && "md:tw-rounded-xl"
+                    )}
                     style={{
                       ...(fixedHeight
                         ? { height: getHeight() }
@@ -158,13 +165,12 @@ export default function MobileWrapperDialog({
                     }}
                   >
                     <div
-                      className={`tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-flex-1 tw-min-h-0 ${
-                        noPadding ? "tw-py-0" : "tw-py-6"
-                      }${
-                        showScrollbar
-                          ? " tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-                          : ""
-                      }`}
+                      className={clsx(
+                        "tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-flex-1 tw-min-h-0",
+                        noPadding ? "tw-py-0" : "tw-py-6",
+                        showScrollbar &&
+                          "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+                      )}
                       style={{ paddingBottom: bottomPadding }}
                     >
                       <div className="tw-px-4 sm:tw-px-6">

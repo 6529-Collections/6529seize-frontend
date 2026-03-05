@@ -1,0 +1,49 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - text: Seer now catches issues in PRs, explains what broke in prod, and fixes what you missed.
+    - link "Learn More" [ref=e5] [cursor=pointer]:
+      - /url: https://blog.sentry.io/seer-debug-with-ai-at-every-stage-of-development/?utm_source=website
+  - generic [ref=e9]:
+    - link "" [ref=e11] [cursor=pointer]:
+      - /url: https://sentry.io/welcome/
+      - generic [ref=e12]: 
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - img [ref=e16]
+        - heading "Seize" [level=3] [ref=e17]
+      - list [ref=e19]:
+        - listitem [ref=e20]:
+          - link "Sign In" [ref=e21] [cursor=pointer]:
+            - /url: "#login"
+        - listitem [ref=e22]:
+          - link "Request to Join" [ref=e23] [cursor=pointer]:
+            - /url: /join-request/seize-ff/?referrer=issue-stream
+            - img [ref=e24]
+            - text: Request to Join
+      - generic [ref=e36]:
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e40]: Account [required]
+            - textbox "Account [required]" [ref=e42]:
+              - /placeholder: username or email
+          - generic [ref=e43]:
+            - generic [ref=e44]: Password [required]
+            - textbox "Password [required]" [ref=e46]:
+              - /placeholder: password
+          - generic [ref=e47]:
+            - button "Sign In" [ref=e48] [cursor=pointer]
+            - link "Lost your password?" [ref=e49] [cursor=pointer]:
+              - /url: /account/recover/
+        - generic [ref=e50]:
+          - paragraph [ref=e51]:
+            - link "Sign in with Google" [ref=e52] [cursor=pointer]:
+              - /url: /identity/login/google/?referrer=login&href=http%3A%2F%2Fseize-ff.sentry.io%2Fauth%2Flogin%2Fseize-ff%2F%3Freferrer%3Dissue-stream
+              - text: Sign in with Google
+          - paragraph [ref=e54]:
+            - link "Sign in with GitHub" [ref=e55] [cursor=pointer]:
+              - /url: /identity/login/github/?referrer=login&href=http%3A%2F%2Fseize-ff.sentry.io%2Fauth%2Flogin%2Fseize-ff%2F%3Freferrer%3Dissue-stream
+              - text: Sign in with GitHub
+          - paragraph [ref=e57]:
+            - link "Sign in with Azure DevOps" [ref=e58] [cursor=pointer]:
+              - /url: /identity/login/vsts/?referrer=login&href=http%3A%2F%2Fseize-ff.sentry.io%2Fauth%2Flogin%2Fseize-ff%2F%3Freferrer%3Dissue-stream
+              - text: Sign in with Azure DevOps

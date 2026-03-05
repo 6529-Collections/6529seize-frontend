@@ -3,6 +3,7 @@
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getTrophyArtworkCount } from "@/helpers/artist-activity.helpers";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -27,10 +28,7 @@ export const ArtistPreviewModal = ({
   const { isApp } = useDeviceInfo();
   const [activeTab, setActiveTab] = useState<ArtistPreviewTab>(initialTab);
 
-  // Check if user has winning artworks
-  const hasWinningArtworks =
-    user.winner_main_stage_drop_ids &&
-    user.winner_main_stage_drop_ids.length > 0;
+  const hasTrophyArtworks = getTrophyArtworkCount(user) > 0;
 
   // Reset tab when modal opens with different initial tab
   useEffect(() => {
@@ -65,7 +63,7 @@ export const ArtistPreviewModal = ({
           isApp={true}
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          hasWinningArtworks={hasWinningArtworks}
+          hasTrophyArtworks={hasTrophyArtworks}
         />
       </ArtistPreviewAppWrapper>
     );
@@ -81,10 +79,10 @@ export const ArtistPreviewModal = ({
         {/* Backdrop */}
         <Transition.Child
           as={Fragment}
-          enter="tw-ease-out tw-duration-200"
+          enter="tw-duration-200 tw-ease-out"
           enterFrom="tw-opacity-0"
           enterTo="tw-opacity-100"
-          leave="tw-ease-in tw-duration-200"
+          leave="tw-duration-200 tw-ease-in"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
@@ -126,7 +124,7 @@ export const ArtistPreviewModal = ({
                   isApp={false}
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
-                  hasWinningArtworks={hasWinningArtworks}
+                  hasTrophyArtworks={hasTrophyArtworks}
                 />
               </Dialog.Panel>
             </Transition.Child>
@@ -139,10 +137,10 @@ export const ArtistPreviewModal = ({
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
               <Transition.Child
                 as={Fragment}
-                enter="tw-transform tw-transition tw-ease-out tw-duration-300"
+                enter="tw-transform tw-transition tw-duration-300 tw-ease-out"
                 enterFrom="tw-translate-y-full"
                 enterTo="tw-translate-y-0"
-                leave="tw-transform tw-transition tw-ease-in tw-duration-300"
+                leave="tw-transform tw-transition tw-duration-300 tw-ease-in"
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
@@ -154,7 +152,7 @@ export const ArtistPreviewModal = ({
                     isApp={false}
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
-                    hasWinningArtworks={hasWinningArtworks}
+                    hasTrophyArtworks={hasTrophyArtworks}
                   />
                 </Dialog.Panel>
               </Transition.Child>

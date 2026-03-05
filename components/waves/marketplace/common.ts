@@ -1,5 +1,6 @@
 import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
+import { getTimeAgo } from "@/helpers/Helpers";
 import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
@@ -16,6 +17,13 @@ type MediaCandidate =
   | null
   | undefined;
 
+type WsMediaPreviewCandidate = {
+  readonly card_url?: string | null | undefined;
+  readonly small_url?: string | null | undefined;
+  readonly thumb_url?: string | null | undefined;
+  readonly mime_type?: string | null | undefined;
+};
+
 export interface MarketplaceTypePreviewProps {
   readonly href: string;
   readonly compact?: boolean | undefined;
@@ -30,7 +38,9 @@ export type MarketplacePreviewState =
       readonly href: string;
       readonly resolvedMedia?: PickedMedia | undefined;
       readonly resolvedPrice?: string | undefined;
+      readonly resolvedPriceCurrency?: string | undefined;
       readonly resolvedTitle?: string | undefined;
+      readonly resolvedDataHealth: MarketplaceDataHealth;
     }
   | { readonly type: "error"; readonly href: string; readonly error: Error };
 
@@ -38,6 +48,17 @@ type PickedMedia = {
   readonly url: string;
   readonly mimeType: string;
 };
+
+export type MarketplaceDataHealthState =
+  | "fresh"
+  | "stale"
+  | "error"
+  | "unknown";
+
+export interface MarketplaceDataHealth {
+  readonly state: MarketplaceDataHealthState;
+  readonly details: string;
+}
 
 export interface MarketplacePreviewData {
   readonly href: string;
@@ -47,10 +68,15 @@ export interface MarketplacePreviewData {
   readonly description: string | null;
   readonly media: PickedMedia | null;
   readonly price: string | null;
+  readonly priceCurrency: string | null;
+  readonly lastErrorMessage: string | null;
+  readonly lastSuccessfullyUpdatedMs: number | null;
+  readonly failedSinceMs: number | null;
 }
 
 const OPENSEA_HOST = "opensea.io";
 const MARKETPLACE_PREVIEW_QUERY_KEY = "MARKETPLACE_PREVIEW";
+const MARKETPLACE_DATA_STALE_AFTER_MS = 3 * 24 * 60 * 60 * 1000;
 const MARKETPLACE_PREVIEW_MODES: readonly MarketplacePreviewMode[] = [
   "default",
   "opensea-sanitized",
@@ -80,6 +106,34 @@ const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
 
 const asNullableString = (value: unknown): string | null =>
   asNonEmptyString(value) ?? null;
+
+const asNullableTimestampMs = (value: unknown): number | null => {
+  let numericValue: number;
+  if (typeof value === "number") {
+    numericValue = value;
+  } else if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) {
+      return null;
+    }
+    numericValue = Number(trimmed);
+  } else {
+    return null;
+  }
+
+  if (!Number.isFinite(numericValue)) {
+    return null;
+  }
+
+  const normalizedValue =
+    numericValue < 100_000_000_000 ? numericValue * 1000 : numericValue;
+
+  if (normalizedValue <= 0) {
+    return null;
+  }
+
+  return Math.trunc(normalizedValue);
+};
 
 const normalizeCanonicalId = (canonicalId: unknown): string | null => {
   const value = asNonEmptyString(canonicalId);
@@ -168,6 +222,57 @@ const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
   };
 };
 
+const asWsMediaPreviewCandidate = (
+  value: unknown
+): WsMediaPreviewCandidate | undefined => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as WsMediaPreviewCandidate;
+};
+
+const pickWsMediaPreview = (
+  update: WsMediaLinkUpdatedData
+): PickedMedia | undefined => {
+  const preview = asWsMediaPreviewCandidate(update.media_preview);
+  const url =
+    asNonEmptyString(preview?.card_url) ??
+    asNonEmptyString(preview?.small_url) ??
+    asNonEmptyString(preview?.thumb_url) ??
+    asNonEmptyString(update.card_url) ??
+    asNonEmptyString(update.small_url) ??
+    asNonEmptyString(update.thumb_url) ??
+    asNonEmptyString(update.media_preview_card_url) ??
+    asNonEmptyString(update.media_preview_small_url) ??
+    asNonEmptyString(update.media_preview_thumb_url);
+
+  if (!url) {
+    return undefined;
+  }
+
+  return {
+    url,
+    mimeType:
+      asNonEmptyString(preview?.mime_type) ??
+      asNonEmptyString(update.media_preview_mime_type) ??
+      inferMimeTypeFromUrl(url) ??
+      "image/*",
+  };
+};
+
+const pickWsMediaLinkUpdatedMedia = ({
+  current,
+  update,
+}: {
+  readonly current: MarketplacePreviewData;
+  readonly update: WsMediaLinkUpdatedData;
+}): PickedMedia | null =>
+  pickWsMediaPreview(update) ??
+  current.media ??
+  pickMediaFromUrl(update.media_uri) ??
+  null;
+
 const pickMedia = (data: LinkPreviewResponse): PickedMedia | undefined => {
   const primary = toPickedMedia(data.image);
   if (primary) {
@@ -225,6 +330,10 @@ const pickNftLinkPrice = (
   response: ApiNftLinkResponse | undefined
 ): string | undefined => asNonEmptyString(response?.data?.price);
 
+const pickNftLinkPriceCurrency = (
+  response: ApiNftLinkResponse | undefined
+): string | undefined => asNonEmptyString(response?.data?.price_currency);
+
 const pickNftLinkTitle = (
   response: ApiNftLinkResponse | undefined
 ): string | undefined => asNonEmptyString(response?.data?.name);
@@ -232,6 +341,19 @@ const pickNftLinkTitle = (
 const pickNftLinkDescription = (
   response: ApiNftLinkResponse | undefined
 ): string | undefined => asNonEmptyString(response?.data?.description);
+
+const pickNftLinkLastErrorMessage = (
+  response: ApiNftLinkResponse | undefined
+): string | null => asNullableString(response?.data?.last_error_message);
+
+const pickNftLinkLastSuccessfullyUpdatedMs = (
+  response: ApiNftLinkResponse | undefined
+): number | null =>
+  asNullableTimestampMs(response?.data?.last_successfully_updated);
+
+const pickNftLinkFailedSinceMs = (
+  response: ApiNftLinkResponse | undefined
+): number | null => asNullableTimestampMs(response?.data?.failed_since);
 
 export const fromNftLink = ({
   href,
@@ -247,6 +369,10 @@ export const fromNftLink = ({
   description: pickNftLinkDescription(response) ?? null,
   media: pickNftLinkMedia(response) ?? null,
   price: pickNftLinkPrice(response) ?? null,
+  priceCurrency: pickNftLinkPriceCurrency(response) ?? null,
+  lastErrorMessage: pickNftLinkLastErrorMessage(response),
+  lastSuccessfullyUpdatedMs: pickNftLinkLastSuccessfullyUpdatedMs(response),
+  failedSinceMs: pickNftLinkFailedSinceMs(response),
 });
 
 const fromApiDropNftLink = ({
@@ -284,6 +410,11 @@ const mergeSeededMarketplacePreviewData = ({
     description: current.description ?? seeded.description,
     media: current.media ?? seeded.media,
     price: current.price ?? seeded.price,
+    priceCurrency: current.priceCurrency ?? seeded.priceCurrency,
+    lastErrorMessage: current.lastErrorMessage ?? seeded.lastErrorMessage,
+    lastSuccessfullyUpdatedMs:
+      current.lastSuccessfullyUpdatedMs ?? seeded.lastSuccessfullyUpdatedMs,
+    failedSinceMs: current.failedSinceMs ?? seeded.failedSinceMs,
   };
 };
 
@@ -388,7 +519,13 @@ export const patchFromMediaLinkUpdate = ({
   const nextTitle = asNonEmptyString(update.name);
   const nextDescription = asNonEmptyString(update.description);
   const nextPrice = asNonEmptyString(update.price);
-  const nextMedia = pickMediaFromUrl(update.media_uri) ?? current.media;
+  const nextPriceCurrency = asNonEmptyString(update.price_currency);
+  const nextMedia = pickWsMediaLinkUpdatedMedia({ current, update });
+  const nextLastErrorMessage = asNullableString(update.last_error_message);
+  const nextLastSuccessfullyUpdatedMs = asNullableTimestampMs(
+    update.last_successfully_updated
+  );
+  const nextFailedSinceMs = asNullableTimestampMs(update.failed_since);
 
   const patched: MarketplacePreviewData = {
     ...current,
@@ -398,6 +535,10 @@ export const patchFromMediaLinkUpdate = ({
     description: nextDescription ?? current.description,
     media: nextMedia,
     price: nextPrice ?? current.price,
+    priceCurrency: nextPriceCurrency ?? current.priceCurrency,
+    lastErrorMessage: nextLastErrorMessage,
+    lastSuccessfullyUpdatedMs: nextLastSuccessfullyUpdatedMs,
+    failedSinceMs: nextFailedSinceMs,
   };
 
   const didChange =
@@ -406,9 +547,67 @@ export const patchFromMediaLinkUpdate = ({
     patched.title !== current.title ||
     patched.description !== current.description ||
     patched.price !== current.price ||
+    patched.priceCurrency !== current.priceCurrency ||
+    patched.lastErrorMessage !== current.lastErrorMessage ||
+    patched.lastSuccessfullyUpdatedMs !== current.lastSuccessfullyUpdatedMs ||
+    patched.failedSinceMs !== current.failedSinceMs ||
     !isSameMedia(patched.media, current.media);
 
   return didChange ? patched : current;
+};
+
+const toDataHealthDetails = ({
+  prefix,
+  timestampMs,
+}: {
+  readonly prefix: string;
+  readonly timestampMs: number;
+}): string => {
+  const localDateTime = new Date(timestampMs).toLocaleString();
+  return `${prefix} ${getTimeAgo(timestampMs)} (${localDateTime})`;
+};
+
+export const deriveMarketplaceDataHealth = (
+  data: MarketplacePreviewData | null | undefined
+): MarketplaceDataHealth => {
+  const lastErrorMessage = asNonEmptyString(data?.lastErrorMessage) ?? null;
+  const hasFailedSince =
+    data?.failedSinceMs !== null && data?.failedSinceMs !== undefined;
+  if (lastErrorMessage || hasFailedSince) {
+    return {
+      state: "error",
+      details: lastErrorMessage
+        ? `NFT data update error: ${lastErrorMessage}`
+        : "NFT data update error",
+    };
+  }
+
+  const updatedAt = data?.lastSuccessfullyUpdatedMs ?? null;
+  if (updatedAt === null) {
+    return {
+      state: "unknown",
+      details: "NFT data update status unavailable",
+    };
+  }
+
+  const isStale = Date.now() - updatedAt > MARKETPLACE_DATA_STALE_AFTER_MS;
+  if (isStale) {
+    return {
+      state: "stale",
+      details: toDataHealthDetails({
+        prefix: "NFT data stale: last successful update",
+        timestampMs: updatedAt,
+      }),
+    };
+  }
+
+  return {
+    state: "fresh",
+    details: toDataHealthDetails({
+      prefix: "NFT data fresh: last successful update",
+      timestampMs: updatedAt,
+    }),
+  };
 };
 
 const sanitizeOpenSeaOverlayMedia = (

@@ -3,9 +3,10 @@
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import Image from "next/image";
 import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { Tooltip } from "react-tooltip";
 
 interface OverlappingAvatarItem {
@@ -34,6 +35,42 @@ const SIZE_CLASS = {
   md: "tw-h-7 tw-w-7",
 } as const;
 
+function AvatarContent({
+  pfpUrl,
+  ariaLabel,
+  fallback,
+  avatarRing,
+}: {
+  readonly pfpUrl: string | null;
+  readonly ariaLabel?: string | undefined;
+  readonly fallback?: string | undefined;
+  readonly avatarRing: string;
+}) {
+  const [imgError, setImgError] = useState(false);
+
+  if (!pfpUrl || imgError) {
+    return (
+      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black">
+        <span className="tw-text-[0.625rem] tw-font-semibold tw-text-iron-300">
+          {fallback ?? "?"}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
+      alt={ariaLabel ?? "Profile"}
+      fill
+      sizes="28px"
+      unoptimized
+      onError={() => setImgError(true)}
+      className={`tw-object-cover tw-rounded-full ${avatarRing}`}
+    />
+  );
+}
+
 export default function OverlappingAvatars({
   items,
   maxCount = 5,
@@ -60,20 +97,13 @@ export default function OverlappingAvatars({
         else if (index === slice.length - 1) transformOrigin = "right center";
         else transformOrigin = "center center";
 
-        const content = item.pfpUrl ? (
-          <img
-            src={getScaledImageUri(item.pfpUrl, ImageScale.W_AUTO_H_50)}
-            alt={item.ariaLabel ?? "Profile"}
-            loading="lazy"
-            decoding="async"
-            className={`tw-h-full tw-w-full tw-flex-shrink-0 tw-rounded-full ${avatarRing}`}
+        const content = (
+          <AvatarContent
+            pfpUrl={item.pfpUrl}
+            ariaLabel={item.ariaLabel}
+            fallback={item.fallback}
+            avatarRing={avatarRing}
           />
-        ) : (
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black">
-            <span className="tw-text-[0.625rem] tw-font-semibold tw-text-iron-300">
-              {item.fallback ?? "?"}
-            </span>
-          </div>
         );
 
         const showTooltip =

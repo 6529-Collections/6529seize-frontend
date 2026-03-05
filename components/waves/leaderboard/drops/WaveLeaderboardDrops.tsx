@@ -17,6 +17,9 @@ interface WaveLeaderboardDropsProps {
   readonly sort: WaveDropsLeaderboardSort;
   readonly onCreateDrop?: (() => void) | undefined;
   readonly curatedByGroupId?: string | undefined;
+  readonly minPrice?: number | undefined;
+  readonly maxPrice?: number | undefined;
+  readonly priceCurrency?: string | undefined;
 }
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
@@ -24,6 +27,9 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   sort,
   onCreateDrop,
   curatedByGroupId,
+  minPrice,
+  maxPrice,
+  priceCurrency,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -33,6 +39,9 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
       waveId: wave.id,
       sort,
       curatedByGroupId,
+      minPrice,
+      maxPrice,
+      priceCurrency,
     });
 
   const intersectionElementRef = useIntersectionObserver(async () => {

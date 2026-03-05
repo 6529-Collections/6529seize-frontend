@@ -47,6 +47,7 @@ export const profileAndConsolidationsToProfileMin = ({
           archived: false,
           primary_address: profile.primary_wallet,
           is_wave_creator: profile.is_wave_creator,
+          artist_of_prevote_cards: profile.artist_of_prevote_cards,
         };
       })()
     : null;

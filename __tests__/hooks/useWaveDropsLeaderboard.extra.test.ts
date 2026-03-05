@@ -82,17 +82,24 @@ describe("useWaveDropsLeaderboard extra", () => {
     expect(call.queryKey[1].sort).toBe(WaveDropsLeaderboardSort.CREATED_AT);
   });
 
-  it("includes curated_by_group in query key and request params", async () => {
+  it("includes curation and price params in query key and request params", async () => {
     renderHook(() =>
       useWaveDropsLeaderboard({
         waveId: "2",
         curatedByGroupId: "curation-group-1",
+        minPrice: 0.5,
+        maxPrice: 2.75,
+        priceCurrency: "ETH",
+        sort: WaveDropsLeaderboardSort.PRICE,
       })
     );
 
     const call = (queryClientMock.prefetchInfiniteQuery as jest.Mock).mock
       .calls[0][0];
     expect(call.queryKey[1].curated_by_group).toBe("curation-group-1");
+    expect(call.queryKey[1].min_price).toBe("0.5");
+    expect(call.queryKey[1].max_price).toBe("2.75");
+    expect(call.queryKey[1].price_currency).toBe("ETH");
 
     await call.queryFn({ pageParam: null });
 
@@ -100,8 +107,69 @@ describe("useWaveDropsLeaderboard extra", () => {
       expect.objectContaining({
         endpoint: "waves/2/leaderboard",
         params: expect.objectContaining({
-          sort: WaveDropsLeaderboardSort.RANK,
+          sort: WaveDropsLeaderboardSort.PRICE,
           curated_by_group: "curation-group-1",
+          min_price: "0.5",
+          max_price: "2.75",
+          price_currency: "ETH",
+        }),
+      })
+    );
+  });
+
+  it("swaps inverted min and max price bounds for query key and request params", async () => {
+    renderHook(() =>
+      useWaveDropsLeaderboard({
+        waveId: "2",
+        minPrice: 2.75,
+        maxPrice: 0.5,
+        priceCurrency: "ETH",
+        sort: WaveDropsLeaderboardSort.PRICE,
+      })
+    );
+
+    const call = (queryClientMock.prefetchInfiniteQuery as jest.Mock).mock
+      .calls[0][0];
+    expect(call.queryKey[1].min_price).toBe("0.5");
+    expect(call.queryKey[1].max_price).toBe("2.75");
+
+    await call.queryFn({ pageParam: null });
+
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "waves/2/leaderboard",
+        params: expect.objectContaining({
+          sort: WaveDropsLeaderboardSort.PRICE,
+          min_price: "0.5",
+          max_price: "2.75",
+          price_currency: "ETH",
+        }),
+      })
+    );
+  });
+
+  it("normalizes whitespace-only currency to null in key and omits request param", async () => {
+    renderHook(() =>
+      useWaveDropsLeaderboard({
+        waveId: "2",
+        minPrice: 0.5,
+        maxPrice: 2.75,
+        priceCurrency: "   ",
+        sort: WaveDropsLeaderboardSort.PRICE,
+      })
+    );
+
+    const call = (queryClientMock.prefetchInfiniteQuery as jest.Mock).mock
+      .calls[0][0];
+    expect(call.queryKey[1].price_currency).toBeNull();
+
+    await call.queryFn({ pageParam: null });
+
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "waves/2/leaderboard",
+        params: expect.not.objectContaining({
+          price_currency: expect.any(String),
         }),
       })
     );

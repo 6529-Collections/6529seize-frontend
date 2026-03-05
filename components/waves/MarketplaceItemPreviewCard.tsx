@@ -3,6 +3,7 @@
 import { useLinkPreviewVariant } from "./LinkPreviewContext";
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 import MarketplaceCompactCta from "./marketplace/MarketplaceCompactCta";
+import MarketplaceDataHealthIcon from "./marketplace/MarketplaceDataHealthIcon";
 import MarketplaceFullFooter from "./marketplace/MarketplaceFullFooter";
 import MarketplaceItemPreviewMediaLink from "./marketplace/MarketplaceItemPreviewMediaLink";
 import { DEFAULT_MARKETPLACE_TITLE } from "./marketplace/MarketplaceItemPreviewCard.constants";
@@ -15,27 +16,88 @@ import {
 import MarketplaceOverlayActionButtons from "./marketplace/MarketplaceOverlayActionButtons";
 import { getMarketplaceContainerClass } from "./marketplace/previewLayout";
 
+const normalizeSpaceSeparatedText = (value: string): string =>
+  value.trim().replace(/\s+/g, " ");
+
+const buildDisplayPriceParts = ({
+  price,
+  priceCurrency,
+}: {
+  readonly price: string;
+  readonly priceCurrency: string;
+}) => {
+  if (price.length === 0) {
+    return {
+      priceValueText: "",
+      priceCurrencyText: "",
+      ariaPriceText: "",
+    };
+  }
+
+  let priceValueText = price;
+  if (priceCurrency.length > 0) {
+    const tokens = price.split(" ");
+    const lastToken = tokens[tokens.length - 1];
+
+    if (
+      typeof lastToken === "string" &&
+      tokens.length > 1 &&
+      lastToken.toUpperCase() === priceCurrency.toUpperCase()
+    ) {
+      const strippedPrice = tokens.slice(0, -1).join(" ").trim();
+      if (strippedPrice.length > 0) {
+        priceValueText = strippedPrice;
+      }
+    }
+  }
+
+  const ariaPriceText =
+    priceCurrency.length > 0
+      ? `${priceValueText} ${priceCurrency}`
+      : priceValueText;
+
+  return {
+    priceValueText,
+    priceCurrencyText: priceCurrency,
+    ariaPriceText,
+  };
+};
+
 export default function MarketplaceItemPreviewCard({
   href,
   mediaUrl,
   mediaMimeType,
   price,
+  priceCurrency,
   title,
+  dataHealth,
   compact = false,
   hideActions = false,
 }: MarketplaceItemPreviewCardProps) {
   const variant = useLinkPreviewVariant();
   const resolvedPreviewHref = resolvePreviewHref(href);
-  const normalizedPrice = typeof price === "string" ? price.trim() : "";
+  const normalizedPrice =
+    typeof price === "string" ? normalizeSpaceSeparatedText(price) : "";
+  const normalizedPriceCurrency =
+    typeof priceCurrency === "string"
+      ? normalizeSpaceSeparatedText(priceCurrency)
+      : "";
+  const { priceValueText, priceCurrencyText, ariaPriceText } =
+    buildDisplayPriceParts({
+      price: normalizedPrice,
+      priceCurrency: normalizedPriceCurrency,
+    });
   const normalizedTitle = typeof title === "string" ? title.trim() : "";
-  const hasPrice = normalizedPrice.length > 0;
+  const hasPrice = priceValueText.length > 0;
   const hasTitle = normalizedTitle.length > 0;
   const displayTitle = hasTitle ? normalizedTitle : DEFAULT_MARKETPLACE_TITLE;
   const marketplaceBrand = getMarketplaceBrand(href);
   const ctaAriaLabel = buildMarketplaceCtaLabel({
-    normalizedPrice,
+    normalizedPrice: ariaPriceText,
     marketplaceBrand,
   });
+  const shouldShowDataHealthIcon =
+    dataHealth !== undefined && dataHealth.state !== "fresh";
 
   if (compact) {
     return (
@@ -44,6 +106,9 @@ export default function MarketplaceItemPreviewCard({
           className={`${getMarketplaceContainerClass(variant, compact)} tw-relative`}
           data-testid="manifold-item-card"
         >
+          {shouldShowDataHealthIcon && (
+            <MarketplaceDataHealthIcon dataHealth={dataHealth} />
+          )}
           <MarketplaceItemPreviewMediaLink
             mediaMimeType={mediaMimeType}
             mediaUrl={mediaUrl}
@@ -54,7 +119,8 @@ export default function MarketplaceItemPreviewCard({
             ctaAriaLabel={ctaAriaLabel}
             hideActions={hideActions}
             hasPrice={hasPrice}
-            normalizedPrice={normalizedPrice}
+            priceValueText={priceValueText}
+            priceCurrencyText={priceCurrencyText || undefined}
             marketplaceBrand={marketplaceBrand}
           />
           {!hideActions && (
@@ -74,6 +140,9 @@ export default function MarketplaceItemPreviewCard({
         className={`${getMarketplaceContainerClass(variant, compact)} tw-relative`}
         data-testid="manifold-item-card"
       >
+        {shouldShowDataHealthIcon && (
+          <MarketplaceDataHealthIcon dataHealth={dataHealth} />
+        )}
         <MarketplaceItemPreviewMediaLink
           mediaMimeType={mediaMimeType}
           mediaUrl={mediaUrl}
@@ -86,7 +155,8 @@ export default function MarketplaceItemPreviewCard({
           ctaAriaLabel={ctaAriaLabel}
           hideActions={hideActions}
           hasPrice={hasPrice}
-          normalizedPrice={normalizedPrice}
+          priceValueText={priceValueText}
+          priceCurrencyText={priceCurrencyText || undefined}
           marketplaceBrand={marketplaceBrand}
         />
       </div>

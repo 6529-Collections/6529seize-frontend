@@ -1,65 +1,57 @@
 "use client";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
 import UserCICStatus from "@/components/user/utils/user-cic-status/UserCICStatus";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
+import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type { Page } from "@/helpers/Types";
-import { commonApiFetch } from "@/services/api/common-api";
-import { ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import TopRaterAvatars from "../../rep/header/TopRaterAvatars";
+import { useMemo } from "react";
+import OverlappingAvatars from "@/components/common/OverlappingAvatars";
+import { RateNicButton } from "./RateNicCta";
 
 const TOP_RATERS_COUNT = 5;
 
 export default function UserPageIdentityHeaderCIC({
   profile,
+  cicOverview,
+  onRateClick,
 }: {
   readonly profile: ApiIdentity;
+  readonly cicOverview: ApiCicOverview | null;
+  readonly onRateClick?: () => void;
 }) {
-  const [cicRating, setCicRating] = useState<number>(profile.cic);
+  const cicRating = cicOverview?.total_cic ?? profile.cic;
+  const raterCount = cicOverview?.contributor_count ?? 0;
 
-  const { data: ratings } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
-    queryKey: [
-      QueryKey.PROFILE_RATERS,
-      {
-        handleOrWallet: profile.handle,
-        matter: RateMatter.NIC,
-        page: 1,
-        pageSize: 1,
-        order: SortDirection.DESC,
-        orderBy: ProfileRatersParamsOrderBy.RATING,
-        given: false,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-        endpoint: `profiles/${profile.handle}/cic/ratings/by-rater`,
-        params: {
-          page: `${1}`,
-          page_size: `${1}`,
-          order: SortDirection.DESC.toLowerCase(),
-          order_by: ProfileRatersParamsOrderBy.RATING.toLowerCase(),
-          given: "false",
-        },
-      }),
-    enabled: !!profile.handle,
-  });
-
-  useEffect(() => {
-    setCicRating(profile.cic);
-  }, [profile]);
+  const avatarItems = useMemo(
+    () =>
+      (cicOverview?.contributors.data ?? [])
+        .slice(0, TOP_RATERS_COUNT)
+        .map((c) => ({
+          key: c.profile.handle ?? c.profile.primary_address,
+          pfpUrl: c.profile.pfp ?? null,
+          href: `/${c.profile.handle ?? c.profile.primary_address}`,
+          ariaLabel: c.profile.handle ?? c.profile.primary_address,
+          fallback: c.profile.handle
+            ? c.profile.handle.charAt(0).toUpperCase()
+            : "?",
+          title: c.profile.handle ?? c.profile.primary_address,
+          tooltipContent: (
+            <span>
+              {c.profile.handle ?? c.profile.primary_address} &middot;{" "}
+              {formatNumberWithCommas(c.contribution)}
+            </span>
+          ),
+        })),
+    [cicOverview?.contributors.data]
+  );
 
   return (
-    <div className="tw-mb-8">
+    <div className="tw-mb-6">
       <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
         NIC
       </div>
-      <div className="tw-mt-1 tw-flex tw-items-start tw-justify-between tw-gap-6">
+      <div className="tw-flex tw-items-start tw-justify-between tw-gap-6">
         <div className="tw-flex tw-flex-col tw-items-start">
           <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white">
             {formatNumberWithCommas(cicRating)}
@@ -72,18 +64,39 @@ export default function UserPageIdentityHeaderCIC({
           </div>
         </div>
         <div className="tw-flex tw-shrink-0 tw-flex-col tw-items-end tw-gap-2.5">
-          <TopRaterAvatars
-            handleOrWallet={profile.handle ?? ""}
-            matter={RateMatter.NIC}
-            count={TOP_RATERS_COUNT}
-            size="md"
-          />
+          {avatarItems.length > 0 && (
+            <OverlappingAvatars
+              items={avatarItems}
+              size="md"
+              maxCount={TOP_RATERS_COUNT}
+            />
+          )}
           <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-            {formatNumberWithCommas(ratings?.count ?? 0)}{" "}
-            {(ratings?.count ?? 0) === 1 ? "rater" : "raters"}
+            {formatNumberWithCommas(raterCount)}{" "}
+            {raterCount === 1 ? "rater" : "raters"}
           </span>
         </div>
       </div>
+      {onRateClick && (
+        <div className="tw-mt-4 tw-flex tw-items-center tw-gap-3">
+          <RateNicButton onRateClick={onRateClick} />
+          {cicOverview !== null &&
+            cicOverview.authenticated_user_contribution !== null &&
+            cicOverview.authenticated_user_contribution !== 0 && (
+              <div className="tw-flex tw-items-center tw-gap-x-1.5">
+                <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+                  Your Rating:
+                </span>
+                <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
+                  {cicOverview.authenticated_user_contribution > 0 && "+"}
+                  {formatNumberWithCommas(
+                    cicOverview.authenticated_user_contribution
+                  )}
+                </span>
+              </div>
+            )}
+        </div>
+      )}
     </div>
   );
 }

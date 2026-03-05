@@ -1,40 +1,51 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import type { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
+import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { PlusIcon } from "@heroicons/react/24/solid";
+import { useContext, useMemo, useState } from "react";
+import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import RepCategoryPill from "../RepCategoryPill";
+import RepDirectionToggle from "../RepDirectionToggle";
+import { buildRepAvatarItems } from "../buildRepAvatarItems";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
 import {
   getCanEditRep,
-  sortRepsByRatingAndContributors,
+  getContributorLabel,
+  type RepDirection,
 } from "../UserPageRep.helpers";
 
 export default function UserPageRepHeader({
-  repRates,
+  overview,
+  categories,
   profile,
+  repDirection,
+  onRepDirectionChange,
+  loading,
 }: {
-  readonly repRates: ApiProfileRepRatesState | null;
+  readonly overview: ApiRepOverview | null;
+  readonly categories: ApiRepCategory[];
   readonly profile: ApiIdentity;
+  readonly repDirection: RepDirection;
+  readonly onRepDirectionChange: (direction: RepDirection) => void;
+  readonly loading: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const allReps = useMemo(
-    () => sortRepsByRatingAndContributors(repRates?.rating_stats ?? []),
-    [repRates?.rating_stats]
-  );
-
   const [visibleCount, setVisibleCount] = useState(5);
 
-  useEffect(() => {
+  const [prevCategories, setPrevCategories] = useState(categories);
+  if (categories !== prevCategories) {
+    setPrevCategories(categories);
     setVisibleCount(5);
-  }, [repRates?.rating_stats]);
+  }
 
-  const visibleReps = allReps.slice(0, visibleCount);
-  const hasMore = allReps.length > visibleCount;
+  const visibleCategories = categories.slice(0, visibleCount);
+  const hasMore = categories.length > visibleCount;
 
   const canEditRep = useMemo(
     () =>
@@ -44,6 +55,17 @@ export default function UserPageRepHeader({
         activeProfileProxy,
       }),
     [connectedProfile, profile, activeProfileProxy]
+  );
+
+  const TOP_CONTRIBUTORS_COUNT = 5;
+
+  const avatarItems = useMemo(
+    () =>
+      buildRepAvatarItems(
+        overview?.contributors.data ?? [],
+        TOP_CONTRIBUTORS_COUNT
+      ),
+    [overview?.contributors.data]
   );
 
   const [editCategory, setEditCategory] = useState<string | null>(null);
@@ -58,14 +80,22 @@ export default function UserPageRepHeader({
         <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-[1px] tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
 
         <div className="tw-relative tw-p-6">
-          <div className="tw-flex tw-items-start tw-justify-between tw-gap-6">
+          <div className="tw-flex tw-items-end tw-justify-between tw-gap-6">
             <div className="tw-min-w-0">
               <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-100">
                 Rep
               </h2>
               <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
-                What others recognize this identity for.
+                {repDirection === "received"
+                  ? "What others recognize this identity for."
+                  : "What this identity recognizes others for."}
               </p>
+              <div className="tw-mt-4">
+                <RepDirectionToggle
+                  repDirection={repDirection}
+                  onRepDirectionChange={onRepDirectionChange}
+                />
+              </div>
             </div>
 
             <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-end tw-text-right">
@@ -73,52 +103,77 @@ export default function UserPageRepHeader({
                 Total Rep
               </div>
               <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-                {repRates
-                  ? formatNumberWithCommas(repRates.total_rep_rating)
-                  : ""}
+                {overview
+                  ? formatNumberWithCommas(overview.total_rep)
+                  : "—"}
               </div>
-              {repRates && (
-                <span className="tw-mt-1 tw-text-sm tw-font-normal tw-text-iron-400">
-                  {formatNumberWithCommas(repRates.number_of_raters)}{" "}
-                  {repRates.number_of_raters === 1 ? "rater" : "raters"}
-                </span>
+              {overview && (
+                <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2">
+                  {avatarItems.length > 0 && (
+                    <OverlappingAvatars
+                      items={avatarItems}
+                      size="md"
+                      maxCount={TOP_CONTRIBUTORS_COUNT}
+                    />
+                  )}
+                  <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+                    {formatNumberWithCommas(overview.contributor_count)}{" "}
+                    {getContributorLabel(
+                      repDirection,
+                      overview.contributor_count
+                    )}
+                  </span>
+                </div>
               )}
             </div>
           </div>
 
-          {(visibleReps.length > 0 || canEditRep) && (
-            <div className="tw-mt-6 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-6">
-              <div className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                Rep Categories
+          {(visibleCategories.length > 0 ||
+            (canEditRep && repDirection === "received")) && (
+            <div className="tw-mt-5 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
+              <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
+                <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+                  Rep Categories
+                </div>
+                {overview !== null &&
+                  overview.authenticated_user_contribution !== null &&
+                  overview.authenticated_user_contribution !== 0 && (
+                    <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
+                      <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+                        {repDirection === "given"
+                          ? "Assigned To You:"
+                          : "You Assigned:"}
+                      </span>
+                      <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
+                        {overview.authenticated_user_contribution > 0 && "+"}
+                        {formatNumberWithCommas(
+                          overview.authenticated_user_contribution
+                        )}
+                      </span>
+                    </div>
+                  )}
               </div>
-              <div className="tw-flex tw-flex-wrap tw-gap-3">
-                {canEditRep && (
+              <div className="tw-flex tw-flex-wrap tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
+                {canEditRep && repDirection === "received" && (
                   <button
                     type="button"
                     onClick={() => setIsGrantRepOpen(true)}
-                    className="tw-group tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-white/10 tw-bg-transparent tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/30 hover:tw-bg-white/5 hover:tw-text-white"
+                    className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-primary-400/45 tw-bg-primary-500/5 tw-px-4 tw-text-sm tw-font-medium tw-text-primary-300/85 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-primary-300/70 hover:tw-bg-primary-500/10 hover:tw-text-primary-200/90"
                   >
-                    <svg
-                      className="-tw-ml-1 tw-h-4 tw-w-4 tw-text-iron-500 tw-transition-colors group-hover:tw-text-white"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 5v14M5 12h14" />
-                    </svg>
+                    <PlusIcon
+                      aria-hidden="true"
+                      className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
+                    />
                     <span>Add new</span>
                   </button>
                 )}
-                {visibleReps.map((rep) => (
+                {visibleCategories.map((cat) => (
                   <RepCategoryPill
-                    key={rep.category}
-                    rep={rep}
-                    profileHandle={profile.handle ?? ""}
-                    canEdit={canEditRep}
+                    key={cat.category}
+                    category={cat}
+                    canEdit={canEditRep && repDirection === "received"}
                     onEdit={setEditCategory}
+                    direction={repDirection}
                   />
                 ))}
                 {hasMore && (
@@ -127,12 +182,32 @@ export default function UserPageRepHeader({
                     onClick={() => setVisibleCount((prev) => prev + 10)}
                     className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white"
                   >
-                    +{allReps.length - visibleCount} more
+                    +{categories.length - visibleCount} more
                   </button>
                 )}
               </div>
             </div>
           )}
+
+          {categories.length === 0 &&
+            !loading &&
+            !(canEditRep && repDirection === "received") && (
+              <div className="tw-mt-4 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
+                <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-500">
+                  {repDirection === "given"
+                    ? "This identity hasn't given any rep yet."
+                    : "This identity hasn't received any rep yet."}
+                </p>
+              </div>
+            )}
+
+          {categories.length === 0 &&
+            loading &&
+            !(canEditRep && repDirection === "received") && (
+              <div className="tw-mt-4 tw-flex tw-justify-center tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-4">
+                <div className="tw-h-6 tw-w-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-700 tw-border-t-iron-400" />
+              </div>
+            )}
         </div>
       </div>
 
@@ -146,7 +221,7 @@ export default function UserPageRepHeader({
 
       <GrantRepDialog
         profile={profile}
-        repRates={repRates}
+        overview={overview}
         isOpen={isGrantRepOpen}
         onClose={() => setIsGrantRepOpen(false)}
       />

@@ -81,6 +81,9 @@ describe("MarketplaceOpenseaAssetPreview", () => {
           href,
           mediaUrl: "https://i.seadn.io/s/raw/files/radar-dome.png",
           mediaMimeType: "image/png",
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );
@@ -106,6 +109,7 @@ describe("MarketplaceOpenseaAssetPreview", () => {
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "0.5 ETH",
+        price_currency: "ETH",
         last_successfully_updated: 1735689600,
         failed_since: null,
       },
@@ -120,7 +124,11 @@ describe("MarketplaceOpenseaAssetPreview", () => {
           mediaUrl: "https://cdn.example.com/nft-image.png",
           mediaMimeType: "image/png",
           price: "0.5 ETH",
+          priceCurrency: "ETH",
           title: "OpenSea Asset #42",
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );

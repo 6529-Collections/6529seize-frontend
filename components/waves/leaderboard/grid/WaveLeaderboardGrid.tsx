@@ -15,6 +15,9 @@ interface WaveLeaderboardGridProps {
   readonly mode: WaveLeaderboardGridMode;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly curatedByGroupId?: string | undefined;
+  readonly minPrice?: number | undefined;
+  readonly maxPrice?: number | undefined;
+  readonly priceCurrency?: string | undefined;
 }
 
 export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
@@ -23,12 +26,18 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   mode,
   onDropClick,
   curatedByGroupId,
+  minPrice,
+  maxPrice,
+  priceCurrency,
 }) => {
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort,
       curatedByGroupId,
+      minPrice,
+      maxPrice,
+      priceCurrency,
     });
 
   if (isFetching && drops.length === 0) {
@@ -42,8 +51,8 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
             >
               <div className="tw-aspect-[16/9] tw-min-h-[14rem] tw-animate-pulse tw-bg-iron-900/80 md:tw-min-h-[15rem]" />
               <div className="tw-space-y-2 tw-px-3 tw-py-3">
-                <div className="tw-h-4 tw-w-3/4 tw-rounded tw-animate-pulse tw-bg-iron-800/50" />
-                <div className="tw-h-3 tw-w-1/3 tw-rounded tw-animate-pulse tw-bg-iron-800/40" />
+                <div className="tw-h-4 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
+                <div className="tw-h-3 tw-w-1/3 tw-animate-pulse tw-rounded tw-bg-iron-800/40" />
               </div>
             </div>
           ))}

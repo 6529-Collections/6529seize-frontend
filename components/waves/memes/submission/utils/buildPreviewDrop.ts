@@ -200,6 +200,7 @@ export const buildPreviewDrop = ({
       winner_main_stage_drop_ids:
         connectedProfile?.winner_main_stage_drop_ids ?? [],
       is_wave_creator: connectedProfile?.is_wave_creator ?? false,
+      artist_of_prevote_cards: connectedProfile?.artist_of_prevote_cards ?? [],
     },
     created_at: now,
     updated_at: null,

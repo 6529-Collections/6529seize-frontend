@@ -1,78 +1,92 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
-import MyStreamWave from '@/components/brain/my-stream/MyStreamWave';
-import { MyStreamWaveTab } from '@/types/waves.types';
+import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
+import { MyStreamWaveTab } from "@/types/waves.types";
 
-jest.mock('@/components/brain/my-stream/MyStreamWaveChat', () => ({
+const mockSetQueryData = jest.fn();
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({
+    setQueryData: mockSetQueryData,
+  }),
+}));
+
+const useWave = jest.fn();
+jest.mock("@/hooks/useWave", () => ({
+  useWave: (...args: any[]) => useWave(...args),
+}));
+
+jest.mock("@/components/brain/my-stream/MyStreamWaveChat", () => ({
   __esModule: true,
   default: () => <div data-testid="chat" />,
 }));
 
-jest.mock('@/components/brain/my-stream/MyStreamWaveLeaderboard', () => ({
+jest.mock("@/components/brain/my-stream/MyStreamWaveLeaderboard", () => ({
   __esModule: true,
   default: ({ onDropClick }: any) => (
-    <button data-testid="leaderboard" onClick={() => onDropClick({ id: 'd1' })}>
+    <button data-testid="leaderboard" onClick={() => onDropClick({ id: "d1" })}>
       leaderboard
     </button>
   ),
 }));
 
-jest.mock('@/components/brain/my-stream/MyStreamWaveOutcome', () => ({
+jest.mock("@/components/brain/my-stream/MyStreamWaveOutcome", () => ({
   __esModule: true,
   default: () => <div data-testid="outcome" />,
 }));
 
-jest.mock('@/components/waves/winners/WaveWinners', () => ({
+jest.mock("@/components/waves/winners/WaveWinners", () => ({
   __esModule: true,
   WaveWinners: ({ onDropClick }: any) => (
-    <button data-testid="winners" onClick={() => onDropClick({ id: 'd1' })}>
+    <button data-testid="winners" onClick={() => onDropClick({ id: "d1" })}>
       winners
     </button>
   ),
 }));
 
-jest.mock('@/components/brain/my-stream/votes/MyStreamWaveMyVotes', () => ({
+jest.mock("@/components/brain/my-stream/votes/MyStreamWaveMyVotes", () => ({
   __esModule: true,
   default: () => <div data-testid="myvotes" />,
 }));
 
-jest.mock('@/components/brain/my-stream/MyStreamWaveFAQ', () => ({
+jest.mock("@/components/brain/my-stream/MyStreamWaveFAQ", () => ({
   __esModule: true,
   default: () => <div data-testid="faq" />,
 }));
 
-jest.mock('@/components/brain/my-stream/tabs/MyStreamWaveTabs', () => ({
+jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
   __esModule: true,
   MyStreamWaveTabs: ({ wave }: any) => <div data-testid="tabs">{wave.id}</div>,
 }));
 
 const useContentTab = jest.fn();
-jest.mock('@/components/brain/ContentTabContext', () => ({
+jest.mock("@/components/brain/ContentTabContext", () => ({
   useContentTab: (...args: any[]) => useContentTab(...args),
 }));
 
 const useWaveData = jest.fn();
-jest.mock('@/hooks/useWaveData', () => ({
+jest.mock("@/hooks/useWaveData", () => ({
   useWaveData: (...args: any[]) => useWaveData(...args),
 }));
 
 const mockRouterPush = jest.fn();
-const mockSearchParams = new URLSearchParams('wave=1');
-const mockPathname = '/path';
+const mockSearchParams = new URLSearchParams("wave=1");
+const mockPathname = "/path";
 
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
   useSearchParams: () => mockSearchParams,
   usePathname: () => mockPathname,
 }));
 
-let mockBreakpoint = 'LG';
-jest.mock('react-use', () => ({ createBreakpoint: () => () => mockBreakpoint }));
+let mockBreakpoint = "LG";
+jest.mock("react-use", () => ({
+  createBreakpoint: () => () => mockBreakpoint,
+}));
 
 // Mock TitleContext
-jest.mock('@/contexts/TitleContext', () => ({
+jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
-    title: 'Test Title',
+    title: "Test Title",
     setTitle: jest.fn(),
     notificationCount: 0,
     setNotificationCount: jest.fn(),
@@ -85,7 +99,7 @@ jest.mock('@/contexts/TitleContext', () => ({
 }));
 
 // Mock MyStreamContext if needed
-jest.mock('@/contexts/wave/MyStreamContext', () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     waveId: null,
     setWaveId: jest.fn(),
@@ -97,38 +111,46 @@ jest.mock('@/contexts/wave/MyStreamContext', () => ({
   MyStreamProvider: ({ children }) => children,
 }));
 
+const wave = { id: "1", wave: {} } as any;
 
-const wave = { id: '1', wave: {} } as any;
-
-describe('MyStreamWave', () => {
+describe("MyStreamWave", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRouterPush.mockClear();
-    mockSearchParams.set('wave', '1');
-    mockBreakpoint = 'LG';
+    mockSearchParams.set("wave", "1");
+    mockBreakpoint = "LG";
+    useWave.mockReturnValue({
+      isRankWave: true,
+      isMemesWave: false,
+      isDm: false,
+    });
   });
 
-  it('returns null when no wave data', () => {
+  it("returns null when no wave data", () => {
     useWaveData.mockReturnValue({ data: undefined });
     useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.CHAT });
     const { container } = render(<MyStreamWave waveId="1" />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders leaderboard tab and handles drop click', () => {
+  it("renders leaderboard tab and handles drop click", () => {
     useWaveData.mockReturnValue({ data: wave });
-    useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.LEADERBOARD });
+    useContentTab.mockReturnValue({
+      activeContentTab: MyStreamWaveTab.LEADERBOARD,
+    });
     render(<MyStreamWave waveId="1" />);
-    expect(screen.getByTestId('tabs')).toHaveTextContent('1');
-    fireEvent.click(screen.getByTestId('leaderboard'));
-    expect(mockRouterPush).toHaveBeenCalledWith('/path?wave=1&drop=d1', { scroll: false });
+    expect(screen.getByTestId("tabs")).toHaveTextContent("1");
+    fireEvent.click(screen.getByTestId("leaderboard"));
+    expect(mockRouterPush).toHaveBeenCalledWith("/path?wave=1&drop=d1", {
+      scroll: false,
+    });
   });
 
-  it('still renders tabs when breakpoint is small', () => {
-    mockBreakpoint = 'S';
+  it("still renders tabs when breakpoint is small", () => {
+    mockBreakpoint = "S";
     useWaveData.mockReturnValue({ data: wave });
     useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.CHAT });
     render(<MyStreamWave waveId="1" />);
-    expect(screen.getByTestId('tabs')).toHaveTextContent('1');
+    expect(screen.getByTestId("tabs")).toHaveTextContent("1");
   });
 });

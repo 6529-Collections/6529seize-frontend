@@ -29,7 +29,9 @@ export default function MarketplaceTransientMintPreview({
         mediaUrl={media.url}
         mediaMimeType={media.mimeType}
         price={state.resolvedPrice}
+        priceCurrency={state.resolvedPriceCurrency}
         title={state.resolvedTitle}
+        dataHealth={state.resolvedDataHealth}
         compact={compact}
         hideActions={compact}
       />

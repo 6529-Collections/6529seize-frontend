@@ -106,6 +106,9 @@ export enum QueryKey {
   COMMUNITY_METRICS_SERIES = "COMMUNITY_METRICS_SERIES",
   MINT_METRICS = "MINT_METRICS",
   MARKETPLACE_PREVIEW = "MARKETPLACE_PREVIEW",
+  REP_OVERVIEW = "REP_OVERVIEW",
+  REP_CATEGORIES = "REP_CATEGORIES",
+  CIC_OVERVIEW = "CIC_OVERVIEW",
 }
 
 interface ProfileRatersParams {
@@ -540,6 +543,9 @@ const createReactQueryContextValue = (
   }) => {
     invalidateProfile(targetProfile);
     invalidateLogs();
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.CIC_OVERVIEW],
+    });
     invalidateProfileRaters({
       profile: targetProfile,
       matter: RateMatter.NIC,
@@ -620,6 +626,12 @@ const createReactQueryContextValue = (
     invalidateProfile(targetProfile);
     invalidateProfileRepRatings(targetProfile);
     invalidateLogs();
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.REP_OVERVIEW],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.REP_CATEGORIES],
+    });
     invalidateProfileRaters({
       profile: targetProfile,
       matter: RateMatter.REP,
@@ -865,6 +877,15 @@ const createReactQueryContextValue = (
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_REP_RATINGS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.REP_OVERVIEW],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.REP_CATEGORIES],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.CIC_OVERVIEW],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.COMMUNITY_MEMBERS_TOP],
