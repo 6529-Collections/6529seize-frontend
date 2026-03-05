@@ -5,11 +5,7 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import {
-  DocumentTextIcon,
-  UserIcon,
-  WrenchIcon,
-} from "@heroicons/react/24/outline";
+import { DocumentTextIcon, WrenchIcon } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import UsersIcon from "../common/icons/UsersIcon";
@@ -18,7 +14,6 @@ import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
 
 const MENU = [
-  { label: "Profile", path: "/profile", icon: UserIcon },
   {
     label: "Network",
     icon: UsersIcon,

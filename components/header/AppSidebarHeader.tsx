@@ -27,7 +27,7 @@ const AppSidebarHeader: FC<AppSidebarHeaderProps> = ({ onClose }) => {
       </div>
       <div className="tw-mt-1">
         {address ? (
-          <AppSidebarUserInfo />
+          <AppSidebarUserInfo onNavigate={onClose} />
         ) : (
           <Link
             href="/"
