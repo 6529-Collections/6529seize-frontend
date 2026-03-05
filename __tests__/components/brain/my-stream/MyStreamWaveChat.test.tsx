@@ -1,12 +1,22 @@
 import MyStreamWaveChat from "@/components/brain/my-stream/MyStreamWaveChat";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { editSlice } from "@/store/editSlice";
 import { configureStore } from "@reduxjs/toolkit";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 
 const replaceMock = jest.fn();
 const searchParamsMock = { get: jest.fn(), toString: jest.fn() };
+const mockSetUnreadDividerSerialNo = jest.fn();
+const mockRemoveWaveDeliveredNotifications = jest
+  .fn()
+  .mockResolvedValue(undefined);
+const mockRemoveAllDeliveredNotifications = jest
+  .fn()
+  .mockResolvedValue(undefined);
+const invalidateNotificationsMock = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
@@ -62,7 +72,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
   UnreadDividerProvider: ({ children }: any) => <>{children}</>,
   useUnreadDivider: () => ({
-    setUnreadDividerSerialNo: jest.fn(),
+    setUnreadDividerSerialNo: mockSetUnreadDividerSerialNo,
   }),
 }));
 
@@ -72,9 +82,13 @@ jest.mock("@/components/waves/gallery", () => ({
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: () => ({
-    removeWaveDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
-    removeAllDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
+    removeWaveDeliveredNotifications: mockRemoveWaveDeliveredNotifications,
+    removeAllDeliveredNotifications: mockRemoveAllDeliveredNotifications,
   }),
+}));
+
+jest.mock("@/services/api/common-api", () => ({
+  commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
 }));
 
 const wave = { id: "10", metrics: { muted: false } } as any;
@@ -91,13 +105,28 @@ describe("MyStreamWaveChat", () => {
     searchParamsMock.toString.mockReturnValue("");
     mockIsMemesWave = false;
     mockOnDropClick.mockClear();
+    mockSetUnreadDividerSerialNo.mockClear();
+    mockRemoveWaveDeliveredNotifications.mockClear();
+    mockRemoveAllDeliveredNotifications.mockClear();
+    invalidateNotificationsMock.mockClear();
+    (
+      commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
+        typeof commonApiPostWithoutBodyAndResponse
+      >
+    ).mockClear();
     store = configureStore({
       reducer: { edit: editSlice.reducer },
     });
   });
 
   const renderWithProvider = (component: React.ReactElement) => {
-    return render(<Provider store={store}>{component}</Provider>);
+    return render(
+      <ReactQueryWrapperContext.Provider
+        value={{ invalidateNotifications: invalidateNotificationsMock } as any}
+      >
+        <Provider store={store}>{component}</Provider>
+      </ReactQueryWrapperContext.Provider>
+    );
   };
 
   it("handles serialNo param and shows memes button", async () => {
@@ -135,5 +164,31 @@ describe("MyStreamWaveChat", () => {
     expect(replaceMock).not.toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBeNull();
     expect(screen.queryByTestId("memes-btn")).toBeNull();
+  });
+
+  it("invalidates notifications on unmount", async () => {
+    searchParamsMock.get.mockReturnValueOnce("5").mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
+
+    const { unmount } = renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    await act(async () => {
+      unmount();
+    });
+
+    await waitFor(() => {
+      expect(mockRemoveWaveDeliveredNotifications).toHaveBeenCalledWith("10");
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+        endpoint: "notifications/wave/10/read",
+      });
+      expect(invalidateNotificationsMock).toHaveBeenCalled();
+    });
   });
 });

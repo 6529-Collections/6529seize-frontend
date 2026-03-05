@@ -59,6 +59,14 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
       void (async () => {
         try {
           await Promise.resolve(removeWaveDeliveredNotifications(waveId));
+        } catch (error: unknown) {
+          console.error(
+            "Failed to remove wave delivered notifications:",
+            error
+          );
+        }
+
+        try {
           await commonApiPostWithoutBodyAndResponse({
             endpoint: `notifications/wave/${waveId}/read`,
           });
