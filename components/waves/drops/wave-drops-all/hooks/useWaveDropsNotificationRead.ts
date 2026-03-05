@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useContext, useEffect } from "react";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 
 interface UseWaveDropsNotificationReadParams {
@@ -12,12 +13,16 @@ export const useWaveDropsNotificationRead = ({
   waveId,
   removeWaveDeliveredNotifications,
 }: UseWaveDropsNotificationReadParams) => {
+  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+
   useEffect(() => {
     removeWaveDeliveredNotifications(waveId);
     commonApiPostWithoutBodyAndResponse({
       endpoint: `notifications/wave/${waveId}/read`,
-    }).catch((error) =>
-      console.error("Failed to mark feed as read:", error)
-    );
-  }, [waveId, removeWaveDeliveredNotifications]);
+    })
+      .then(() => {
+        invalidateNotifications();
+      })
+      .catch((error) => console.error("Failed to mark feed as read:", error));
+  }, [waveId, removeWaveDeliveredNotifications, invalidateNotifications]);
 };

@@ -10,9 +10,10 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater } from "./types";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -54,6 +55,7 @@ export function useWaveRealtimeUpdater({
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
   const { refreshEligibility } = useWaveEligibility();
+  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const tabJustBecameVisibleRef = useRef<boolean>(false);
 
   // Function to cleanup abort controllers
@@ -128,10 +130,11 @@ export function useWaveRealtimeUpdater({
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
-      const markWaveAsRead = (waveId: string) => {
-        return commonApiPostWithoutBodyAndResponse({
+      const markWaveAsRead = async (waveId: string) => {
+        await commonApiPostWithoutBodyAndResponse({
           endpoint: `notifications/wave/${waveId}/read`,
         });
+        invalidateNotifications();
       };
 
       if (!drop?.wave?.id) {
@@ -257,6 +260,7 @@ export function useWaveRealtimeUpdater({
       removeWaveDeliveredNotifications,
       refreshEligibility,
       isWaveMuted,
+      invalidateNotifications,
     ]
   );
 

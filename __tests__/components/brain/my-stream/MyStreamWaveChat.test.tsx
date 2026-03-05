@@ -6,7 +6,7 @@ import React from "react";
 import { Provider } from "react-redux";
 
 const replaceMock = jest.fn();
-const searchParamsMock = { get: jest.fn() };
+const searchParamsMock = { get: jest.fn(), toString: jest.fn() };
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
@@ -61,10 +61,20 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 
 jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
   UnreadDividerProvider: ({ children }: any) => <>{children}</>,
+  useUnreadDivider: () => ({
+    setUnreadDividerSerialNo: jest.fn(),
+  }),
 }));
 
 jest.mock("@/components/waves/gallery", () => ({
   WaveGallery: () => <div data-testid="gallery" />,
+}));
+
+jest.mock("@/components/notifications/NotificationsContext", () => ({
+  useNotificationsContext: () => ({
+    removeWaveDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
+    removeAllDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
+  }),
 }));
 
 const wave = { id: "10", metrics: { muted: false } } as any;
@@ -77,6 +87,8 @@ describe("MyStreamWaveChat", () => {
     capturedPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
+    searchParamsMock.toString.mockReset();
+    searchParamsMock.toString.mockReturnValue("");
     mockIsMemesWave = false;
     mockOnDropClick.mockClear();
     store = configureStore({
@@ -90,6 +102,7 @@ describe("MyStreamWaveChat", () => {
 
   it("handles serialNo param and shows memes button", async () => {
     searchParamsMock.get.mockReturnValueOnce("5").mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
     mockIsMemesWave = true;
     await act(async () => {
       renderWithProvider(
@@ -108,6 +121,7 @@ describe("MyStreamWaveChat", () => {
 
   it("sets initialDrop null when no param", async () => {
     searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
     await act(async () => {
       renderWithProvider(
         <MyStreamWaveChat
