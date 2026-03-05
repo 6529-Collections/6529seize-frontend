@@ -23,7 +23,7 @@ export default function UserPageCombinedActivityLog({
         withFilters={true}
         withMatterFilter={withMatterFilter}
       >
-        <h3 className="tw-mb-0 tw-flex tw-items-center tw-gap-1.5 lg:tw-gap-2 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-100 lg:tw-text-xl lg:tw-normal-case lg:tw-tracking-normal tw-font-semibold">
+        <h3 className="tw-mb-0 tw-flex tw-items-center tw-gap-1.5 lg:tw-gap-2 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-500 lg:tw-text-iron-100 lg:tw-text-xl lg:tw-normal-case lg:tw-tracking-normal tw-font-semibold">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"

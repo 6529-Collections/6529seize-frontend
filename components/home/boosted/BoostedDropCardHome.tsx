@@ -221,7 +221,7 @@ const BoostedDropCardHome = memo(
 
         <div className={headerClasses}>
           <div className="tw-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60">
-            <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-zinc-300">
+            <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-iron-300">
               {getTimeAgoShort(drop.created_at)}
             </span>
           </div>
@@ -293,7 +293,7 @@ const BoostedDropCardHome = memo(
           </div>
         )}
 
-        <div className="tw-relative tw-z-10 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-zinc-900 tw-bg-black/70 tw-px-4 tw-py-3">
+        <div className="tw-relative tw-z-10 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black/70 tw-px-4 tw-py-3">
           <Link
             href={author.handle ? `/${author.handle}` : "#"}
             onClick={(event) => event.stopPropagation()}
