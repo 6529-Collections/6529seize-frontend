@@ -7,7 +7,9 @@ import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { TraitWrapper } from "../../traits/TraitWrapper";
 import { MediaUploadItem, useMediaUpload } from "../hooks/useMediaUpload";
 import FormSection from "../ui/FormSection";
+import MetadataLengthHint from "../ui/MetadataLengthHint";
 import ValidationError from "../ui/ValidationError";
+import type { MetadataValueLengthStatus } from "../utils/submissionMetadata";
 
 interface AdditionalMediaUploadProps {
   readonly supportingMedia: string[];
@@ -23,6 +25,11 @@ interface AdditionalMediaUploadProps {
   readonly onPromoVideoChange: (url: string) => void;
   readonly onArtworkCommentaryChange: (commentary: string) => void;
   readonly onAboutArtistChange: (aboutArtist: string) => void;
+  readonly artworkCommentaryLengthStatus?:
+    | MetadataValueLengthStatus
+    | undefined;
+  readonly aboutArtistLengthStatus?: MetadataValueLengthStatus | undefined;
+  readonly additionalMediaLengthStatus?: MetadataValueLengthStatus | undefined;
   readonly errors?: {
     supportingMedia?: string;
     previewImage?: string;
@@ -46,6 +53,9 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
   onPromoVideoChange,
   onArtworkCommentaryChange,
   onAboutArtistChange,
+  artworkCommentaryLengthStatus,
+  aboutArtistLengthStatus,
+  additionalMediaLengthStatus,
   errors,
 }) => {
   const mediaInputRef = useRef<HTMLInputElement>(null);
@@ -239,7 +249,9 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
       </div>
 
       {description && (
-        <p className="tw-mb-0 tw-whitespace-pre-line tw-text-xs tw-text-amber-400">{description}</p>
+        <p className="tw-mb-0 tw-whitespace-pre-line tw-text-xs tw-text-amber-400">
+          {description}
+        </p>
       )}
 
       {upload.items.length > 0 && (
@@ -291,42 +303,49 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
             errors?.supportingMedia,
             "image/*,video/*"
           )}
+          <MetadataLengthHint status={additionalMediaLengthStatus} />
         </div>
 
         <div className="tw-flex tw-flex-col tw-gap-y-6">
-          <TraitWrapper
-            label="About the Artist *"
-            id="about-artist"
-            error={errors?.aboutArtist}
-            isFieldFilled={!!aboutArtist.trim()}
-            className="tw-pb-0"
-          >
-            <textarea
-              placeholder="Tell us about yourself as an artist..."
-              value={aboutArtist}
-              onChange={(e) => onAboutArtistChange(e.target.value)}
-              className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
-                errors?.aboutArtist ? "tw-ring-red" : "tw-ring-iron-700"
-              }`}
-            />
-          </TraitWrapper>
+          <div className="tw-flex tw-flex-col tw-gap-y-1">
+            <TraitWrapper
+              label="About the Artist *"
+              id="about-artist"
+              error={errors?.aboutArtist}
+              isFieldFilled={!!aboutArtist.trim()}
+              className="tw-pb-0"
+            >
+              <textarea
+                placeholder="Tell us about yourself as an artist..."
+                value={aboutArtist}
+                onChange={(e) => onAboutArtistChange(e.target.value)}
+                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
+                  errors?.aboutArtist ? "tw-ring-red" : "tw-ring-iron-700"
+                }`}
+              />
+            </TraitWrapper>
+            <MetadataLengthHint status={aboutArtistLengthStatus} />
+          </div>
 
-          <TraitWrapper
-            label="Artwork Commentary *"
-            id="artwork-commentary"
-            error={errors?.artworkCommentary}
-            isFieldFilled={!!artworkCommentary.trim()}
-            className="tw-pb-0"
-          >
-            <textarea
-              placeholder="Tell us more about the artwork..."
-              value={artworkCommentary}
-              onChange={(e) => onArtworkCommentaryChange(e.target.value)}
-              className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
-                errors?.artworkCommentary ? "tw-ring-red" : "tw-ring-iron-700"
-              }`}
-            />
-          </TraitWrapper>
+          <div className="tw-flex tw-flex-col tw-gap-y-1">
+            <TraitWrapper
+              label="Artwork Commentary *"
+              id="artwork-commentary"
+              error={errors?.artworkCommentary}
+              isFieldFilled={!!artworkCommentary.trim()}
+              className="tw-pb-0"
+            >
+              <textarea
+                placeholder="Tell us more about the artwork..."
+                value={artworkCommentary}
+                onChange={(e) => onArtworkCommentaryChange(e.target.value)}
+                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
+                  errors?.artworkCommentary ? "tw-ring-red" : "tw-ring-iron-700"
+                }`}
+              />
+            </TraitWrapper>
+            <MetadataLengthHint status={artworkCommentaryLengthStatus} />
+          </div>
         </div>
       </div>
     </FormSection>

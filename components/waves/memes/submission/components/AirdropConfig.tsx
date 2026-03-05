@@ -2,20 +2,24 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import FormSection from "../ui/FormSection";
+import MetadataLengthHint from "../ui/MetadataLengthHint";
 import { TraitWrapper } from "../../traits/TraitWrapper";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { type AirdropEntry, AIRDROP_TOTAL } from "../types/OperationalData";
 import { validateStrictAddress } from "../utils/addressValidation";
+import type { MetadataValueLengthStatus } from "../utils/submissionMetadata";
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 
 interface AirdropConfigProps {
   readonly entries: AirdropEntry[];
   readonly onEntriesChange: (entries: AirdropEntry[]) => void;
+  readonly airdropLengthStatus?: MetadataValueLengthStatus | undefined;
 }
 
 const AirdropConfig: React.FC<AirdropConfigProps> = ({
   entries,
   onEntriesChange,
+  airdropLengthStatus,
 }) => {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
     {}
@@ -86,9 +90,12 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
     [entries, onEntriesChange]
   );
 
-  const handleLoadingChange = useCallback((entryId: string, isLoading: boolean) => {
-    setLoadingStates((prev) => ({ ...prev, [entryId]: isLoading }));
-  }, []);
+  const handleLoadingChange = useCallback(
+    (entryId: string, isLoading: boolean) => {
+      setLoadingStates((prev) => ({ ...prev, [entryId]: isLoading }));
+    },
+    []
+  );
 
   const handleEnsError = useCallback((entryId: string, hasError: boolean) => {
     setEnsErrorStates((prev) => ({ ...prev, [entryId]: hasError }));
@@ -156,6 +163,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
           </span>
         )}
       </div>
+      <MetadataLengthHint status={airdropLengthStatus} className="tw-mb-4" />
 
       <div className="tw-flex tw-flex-col tw-gap-y-6">
         {entries.map((entry, index) => {
