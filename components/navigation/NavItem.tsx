@@ -7,6 +7,7 @@ import { useViewContext } from "./ViewContext";
 import type { NavItem as NavItemData } from "./navTypes";
 import { motion } from "framer-motion";
 import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
@@ -27,6 +28,7 @@ const NavItem = ({ item }: Props) => {
 
   const { name } = item;
   const { icon } = item;
+  const { address, seizeConnect } = useSeizeConnectContext();
 
   const isLogoItem = name === "Home";
 
@@ -41,6 +43,12 @@ const NavItem = ({ item }: Props) => {
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
+  const normalizedConnectedHandle = (
+    connectedProfile?.normalised_handle ?? connectedProfile?.handle
+  )?.toLowerCase();
+  const normalizedConnectedAddress = address?.toLowerCase();
+  const profileSlug = normalizedConnectedHandle ?? normalizedConnectedAddress;
+  const profileHref = profileSlug ? `/${profileSlug}` : null;
   const { setTitle } = useTitle();
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
     item.name === "Notifications" ? (connectedProfile?.handle ?? null) : null
@@ -100,20 +108,48 @@ const NavItem = ({ item }: Props) => {
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
-  const isActive = isNavItemActive(
-    item,
-    pathname ?? "",
-    searchParams ?? new URLSearchParams(),
-    activeView,
-    isCurrentWaveDmValue
-  );
+  const isProfileItem = item.kind === "route" && item.name === "Profile";
+  const normalizedPathname = pathname.toLowerCase();
+  const isProfileActive =
+    isProfileItem &&
+    activeView === null &&
+    profileHref !== null &&
+    (normalizedPathname === profileHref ||
+      normalizedPathname.startsWith(`${profileHref}/`));
+
+  const isActive = isProfileItem
+    ? isProfileActive
+    : isNavItemActive(
+        item,
+        pathname,
+        searchParams,
+        activeView,
+        isCurrentWaveDmValue
+      );
+
+  const handleClick = () => {
+    if (item.kind === "route" && item.name === "Profile") {
+      if (!address) {
+        seizeConnect();
+        return;
+      }
+
+      handleNavClick({
+        ...item,
+        href: profileHref ?? item.href,
+      });
+      return;
+    }
+
+    handleNavClick(item);
+  };
 
   return (
     <button
       type="button"
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
-      onClick={() => handleNavClick(item)}
+      onClick={handleClick}
       className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
     >
       {isActive && (
