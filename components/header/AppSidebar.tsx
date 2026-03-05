@@ -29,6 +29,7 @@ const MENU = [
       { label: "NFT Activity", path: "/nft-activity" },
       { label: "Memes Calendar", path: "/meme-calendar" },
       { label: "TDH", path: "/network/tdh" },
+      { label: "xTDH", path: "/xtdh" },
       { label: "Metrics", section: true },
       { label: "Health", path: "/network/health" },
       { label: "Definitions", path: "/network/definitions" },
