@@ -5,6 +5,7 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 
+const mockCloseAllCustomTooltips = jest.fn();
 const mockArtistHandleBadgeClick = jest.fn();
 const mockArtistHandleModalClose = jest.fn();
 const mockWaveCreatorHandleBadgeClick = jest.fn();
@@ -29,7 +30,8 @@ type ArtistPreviewModalProps = {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly user: ApiProfileMin;
-  readonly initialTab?: ArtistPreviewTab;
+  readonly activeTab: ArtistPreviewTab;
+  readonly onTabChange: (tab: ArtistPreviewTab) => void;
 };
 
 type WaveCreatorPreviewModalProps = {
@@ -44,6 +46,11 @@ jest.mock("@/hooks/useArtistPreviewModal", () => ({
 
 jest.mock("@/hooks/useWaveCreatorPreviewModal", () => ({
   useWaveCreatorPreviewModal: () => mockUseWaveCreatorPreviewModal(),
+}));
+
+jest.mock("@/helpers/tooltip.helpers", () => ({
+  ...jest.requireActual("@/helpers/tooltip.helpers"),
+  closeAllCustomTooltips: () => mockCloseAllCustomTooltips(),
 }));
 
 jest.mock("@/components/waves/drops/ArtistActivityBadge", () => ({
@@ -83,13 +90,13 @@ jest.mock("@/components/waves/drops/ArtistPreviewModal", () => ({
   ArtistPreviewModal: ({
     isOpen,
     user,
-    initialTab,
+    activeTab,
   }: ArtistPreviewModalProps) => (
     <div
       data-testid="artist-preview-modal"
       data-open={String(isOpen)}
       data-user-primary-address={user.primary_address}
-      data-initial-tab={initialTab ?? "active"}
+      data-active-tab={activeTab}
     />
   ),
 }));
@@ -120,8 +127,9 @@ describe("DropAuthorBadges", () => {
     jest.clearAllMocks();
     mockUseArtistPreviewModal.mockReturnValue({
       isModalOpen: false,
-      modalInitialTab: "active",
+      activeTab: "active",
       handleBadgeClick: mockArtistHandleBadgeClick,
+      handleTabChange: jest.fn(),
       handleModalClose: mockArtistHandleModalClose,
     });
     mockUseWaveCreatorPreviewModal.mockReturnValue({
@@ -206,8 +214,50 @@ describe("DropAuthorBadges", () => {
     fireEvent.click(screen.getByTestId("artist-activity-badge"));
     fireEvent.click(screen.getByTestId("wave-creator-badge"));
 
+    expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(2);
     expect(mockArtistHandleBadgeClick).toHaveBeenCalledWith("active");
     expect(mockWaveCreatorHandleBadgeClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("delegates preview opening to external handlers when provided", () => {
+    const onArtistPreviewOpen = jest.fn();
+    const onWaveCreatorPreviewOpen = jest.fn();
+
+    render(
+      <DropAuthorBadges
+        profile={{
+          ...baseProfile,
+          active_main_stage_submission_ids: ["s1"],
+          is_wave_creator: true,
+        }}
+        onArtistPreviewOpen={onArtistPreviewOpen}
+        onWaveCreatorPreviewOpen={onWaveCreatorPreviewOpen}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("artist-activity-badge"));
+    fireEvent.click(screen.getByTestId("wave-creator-badge"));
+
+    expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(2);
+    expect(mockArtistHandleBadgeClick).not.toHaveBeenCalled();
+    expect(mockWaveCreatorHandleBadgeClick).not.toHaveBeenCalled();
+    expect(onArtistPreviewOpen).toHaveBeenCalledWith({
+      user: expect.objectContaining({
+        id: "profile-1",
+        handle: "artist",
+        primary_address: "0xabc",
+      }),
+      initialTab: "active",
+    });
+    expect(onWaveCreatorPreviewOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "profile-1",
+        handle: "artist",
+        primary_address: "0xabc",
+      })
+    );
+    expect(screen.queryByTestId("artist-preview-modal")).toBeNull();
+    expect(screen.queryByTestId("wave-creator-preview-modal")).toBeNull();
   });
 
   it("normalizes ApiIdentity-like primary_wallet for modal user profile", () => {

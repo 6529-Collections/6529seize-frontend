@@ -4,8 +4,13 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getTrophyArtworkCount } from "@/helpers/artist-activity.helpers";
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogPanel,
+  Transition,
+  TransitionChild,
+} from "@headlessui/react";
+import { Fragment, useEffect } from "react";
 import { createPortal } from "react-dom";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 import { ArtistPreviewModalContent } from "./ArtistPreviewModalContent";
@@ -16,26 +21,20 @@ interface ArtistPreviewModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly user: ApiProfileMin;
-  readonly initialTab?: ArtistPreviewTab | undefined;
+  readonly activeTab: ArtistPreviewTab;
+  readonly onTabChange: (tab: ArtistPreviewTab) => void;
 }
 
 export const ArtistPreviewModal = ({
   isOpen,
   onClose,
   user,
-  initialTab = "active",
+  activeTab,
+  onTabChange,
 }: ArtistPreviewModalProps) => {
   const { isApp } = useDeviceInfo();
-  const [activeTab, setActiveTab] = useState<ArtistPreviewTab>(initialTab);
 
   const hasTrophyArtworks = getTrophyArtworkCount(user) > 0;
-
-  // Reset tab when modal opens with different initial tab
-  useEffect(() => {
-    if (isOpen) {
-      setActiveTab(initialTab);
-    }
-  }, [isOpen, initialTab]);
 
   // Cleanup body overflow
   useEffect(() => {
@@ -47,7 +46,6 @@ export const ArtistPreviewModal = ({
         document.body.style.overflow = originalOverflow;
       };
     }
-    return;
   }, [isOpen, isApp]);
 
   if (!isOpen) return null;
@@ -62,7 +60,7 @@ export const ArtistPreviewModal = ({
           onClose={onClose}
           isApp={true}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={onTabChange}
           hasTrophyArtworks={hasTrophyArtworks}
         />
       </ArtistPreviewAppWrapper>
@@ -70,14 +68,14 @@ export const ArtistPreviewModal = ({
   }
 
   return createPortal(
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tw-relative tw-z-[9999] tw-cursor-default"
+        className="tw-relative tw-z-[1000001] tw-cursor-default"
         onClose={() => {}}
       >
         {/* Backdrop */}
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="tw-duration-200 tw-ease-out"
           enterFrom="tw-opacity-0"
@@ -93,7 +91,7 @@ export const ArtistPreviewModal = ({
               onClose();
             }}
           />
-        </Transition.Child>
+        </TransitionChild>
 
         {/* Desktop modal */}
         <div
@@ -104,7 +102,7 @@ export const ArtistPreviewModal = ({
           }}
         >
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="tw-duration-0"
               enterFrom="tw-opacity-100"
@@ -113,7 +111,7 @@ export const ArtistPreviewModal = ({
               leaveFrom="tw-opacity-100"
               leaveTo="tw-opacity-100"
             >
-              <Dialog.Panel
+              <DialogPanel
                 className="tw-relative tw-m-0 tw-max-h-[90vh] tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-shadow-2xl tw-shadow-black/25"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -123,11 +121,11 @@ export const ArtistPreviewModal = ({
                   onClose={onClose}
                   isApp={false}
                   activeTab={activeTab}
-                  onTabChange={setActiveTab}
+                  onTabChange={onTabChange}
                   hasTrophyArtworks={hasTrophyArtworks}
                 />
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
 
@@ -135,7 +133,7 @@ export const ArtistPreviewModal = ({
         <div className="tw-fixed tw-inset-0 tw-block tw-overflow-hidden sm:tw-hidden">
           <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="tw-transform tw-transition tw-duration-300 tw-ease-out"
                 enterFrom="tw-translate-y-full"
@@ -144,23 +142,23 @@ export const ArtistPreviewModal = ({
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
-                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform">
+                <DialogPanel className="tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform">
                   <ArtistPreviewModalContent
                     user={user}
                     isOpen={isOpen}
                     onClose={onClose}
                     isApp={false}
                     activeTab={activeTab}
-                    onTabChange={setActiveTab}
+                    onTabChange={onTabChange}
                     hasTrophyArtworks={hasTrophyArtworks}
                   />
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>,
+    </Transition>,
     document.body
   );
 };

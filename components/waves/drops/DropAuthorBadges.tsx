@@ -6,8 +6,12 @@ import {
   getSubmissionCount,
   getTrophyArtworkCount,
 } from "@/helpers/artist-activity.helpers";
-import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
+import {
+  useArtistPreviewModal,
+  type ArtistPreviewTab,
+} from "@/hooks/useArtistPreviewModal";
 import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
+import { closeAllCustomTooltips } from "@/helpers/tooltip.helpers";
 import { ArtistActivityBadge } from "./ArtistActivityBadge";
 import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { WaveCreatorBadge } from "./WaveCreatorBadge";
@@ -39,6 +43,15 @@ interface DropAuthorBadgesProps {
   readonly profile: DropAuthorBadgesProfile;
   readonly tooltipIdPrefix?: string | undefined;
   readonly className?: string | undefined;
+  readonly onArtistPreviewOpen?:
+    | ((params: {
+        readonly user: ApiProfileMin;
+        readonly initialTab: ArtistPreviewTab;
+      }) => void)
+    | undefined;
+  readonly onWaveCreatorPreviewOpen?:
+    | ((user: ApiProfileMin) => void)
+    | undefined;
 }
 
 const DEFAULT_CONTAINER_CLASS = "tw-inline-flex tw-items-center tw-gap-x-1";
@@ -87,6 +100,8 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   profile,
   tooltipIdPrefix = "author-badges",
   className = DEFAULT_CONTAINER_CLASS,
+  onArtistPreviewOpen,
+  onWaveCreatorPreviewOpen,
 }) => {
   const submissionCount = getSubmissionCount(profile);
   const trophyCount = getTrophyArtworkCount(profile);
@@ -97,8 +112,9 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
 
   const {
     isModalOpen: isArtistPreviewOpen,
-    modalInitialTab,
+    activeTab,
     handleBadgeClick: handleArtistBadgeClick,
+    handleTabChange: handleArtistTabChange,
     handleModalClose: handleArtistModalClose,
   } = useArtistPreviewModal();
 
@@ -107,6 +123,27 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
     handleBadgeClick: handleWaveCreatorBadgeClick,
     handleModalClose: handleWaveCreatorModalClose,
   } = useWaveCreatorPreviewModal();
+
+  const onArtistBadgeClick = React.useCallback(
+    (tab: ArtistPreviewTab) => {
+      closeAllCustomTooltips();
+      if (onArtistPreviewOpen) {
+        onArtistPreviewOpen({ user: modalUser, initialTab: tab });
+        return;
+      }
+      handleArtistBadgeClick(tab);
+    },
+    [handleArtistBadgeClick, modalUser, onArtistPreviewOpen]
+  );
+
+  const onWaveCreatorBadgeClick = React.useCallback(() => {
+    closeAllCustomTooltips();
+    if (onWaveCreatorPreviewOpen) {
+      onWaveCreatorPreviewOpen(modalUser);
+      return;
+    }
+    handleWaveCreatorBadgeClick();
+  }, [handleWaveCreatorBadgeClick, modalUser, onWaveCreatorPreviewOpen]);
 
   if (!hasActivityBadge && !isWaveCreator) {
     return null;
@@ -119,27 +156,28 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
           <ArtistActivityBadge
             submissionCount={submissionCount}
             trophyCount={trophyCount}
-            onBadgeClick={handleArtistBadgeClick}
+            onBadgeClick={onArtistBadgeClick}
             tooltipId={`${tooltipIdPrefix}-activity`}
           />
         )}
         {isWaveCreator && (
           <WaveCreatorBadge
             tooltipId={`${tooltipIdPrefix}-wave-creator`}
-            onBadgeClick={handleWaveCreatorBadgeClick}
+            onBadgeClick={onWaveCreatorBadgeClick}
           />
         )}
       </div>
 
-      {hasActivityBadge && (
+      {hasActivityBadge && !onArtistPreviewOpen && (
         <ArtistPreviewModal
           isOpen={isArtistPreviewOpen}
           onClose={handleArtistModalClose}
           user={modalUser}
-          initialTab={modalInitialTab}
+          activeTab={activeTab}
+          onTabChange={handleArtistTabChange}
         />
       )}
-      {isWaveCreator && (
+      {isWaveCreator && !onWaveCreatorPreviewOpen && (
         <WaveCreatorPreviewModal
           isOpen={isWaveCreatorPreviewOpen}
           onClose={handleWaveCreatorModalClose}
