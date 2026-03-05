@@ -59,7 +59,7 @@ export default function AppSidebarUserInfo({
   })();
 
   const resolvedPfp = pfp && resolveIpfsUrlSync(pfp);
-  const shouldShowFallbackPfp = Boolean(address || activeProfileProxy);
+  const shouldShowFallbackPfp = Boolean(address ?? activeProfileProxy);
   const avatarSrc =
     resolvedPfp ??
     (shouldShowFallbackPfp ? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP : null);

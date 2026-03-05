@@ -131,7 +131,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       ? ""
       : "tw-transition-all tw-duration-300 tw-ease-out";
     const groupClasses = artFocused ? `tw-group ${transitionClasses}` : "";
-    const containerClass = `${groupClasses} tw-relative tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
+    const containerClass = `${groupClasses} tw-relative tw-w-full tw-min-w-0 tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
 
     const highlightAnimation =
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
@@ -167,7 +167,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           </div>
         </button>
         <div className="tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
-          <div className="tw-mb-3 tw-flex tw-items-start tw-justify-between">
+          <div className="tw-mb-3 tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
             <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
               <div className="tw-flex tw-items-center tw-gap-1.5">
                 <MediaTypeBadge
@@ -188,7 +188,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                   <Link
                     onClick={(e) => e.stopPropagation()}
                     href={`/${drop.author?.handle}`}
-                    className="tw-mt-0.5 tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                    className="tw-mt-0.5 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
                   >
                     {drop.author?.handle}
                   </Link>
@@ -202,12 +202,14 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               />
             )}
           </div>
-          <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-text-xs">
-            <WaveLeaderboardGalleryItemVotes
-              drop={drop}
-              variant={artFocused ? "subtle" : "default"}
-            />
-            <div className="tw-ml-4 tw-flex tw-items-center tw-gap-1 tw-text-iron-500">
+          <div className="tw-mb-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-y-2 tw-text-xs">
+            <div className="tw-min-w-0 tw-flex-1">
+              <WaveLeaderboardGalleryItemVotes
+                drop={drop}
+                variant={artFocused ? "subtle" : "default"}
+              />
+            </div>
+            <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-iron-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -228,9 +230,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               </span>
             </div>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
             {hasUserVoted && (
-              <span className="tw-font-mono tw-text-[11px] tw-text-iron-500">
+              <span className="tw-min-w-0 tw-break-words tw-font-mono tw-text-[11px] tw-text-iron-500">
                 {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
                 <span className={voteStyle}>
                   {isNegativeVote && "-"}
@@ -240,7 +242,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               </span>
             )}
             {canShowVote && (
-              <div className="tw-flex tw-flex-1 tw-justify-end">
+              <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
