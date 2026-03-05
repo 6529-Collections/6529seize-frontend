@@ -63,11 +63,263 @@ const MAX_RETRY_DELAY_MS = 5000;
 const IOS_INITIALIZATION_DELAY_MS = 500;
 const PROFILE_SWITCH_SETTLE_TIMEOUT_MS = 3000;
 const PROFILE_SWITCH_POLL_INTERVAL_MS = 50;
+const PUSH_REGISTRATION_TOTAL_ATTEMPTS = 3;
+const PUSH_REGISTRATION_BASE_DELAY_MS = 500;
+const PUSH_REGISTRATION_MAX_DELAY_MS = 4000;
+const PUSH_REGISTRATION_JITTER_FACTOR = 0.2;
+const PUSH_REGISTRATION_MAX_RETRY_AFTER_MS = 10000;
 
 const DELEGATE_ERROR_PATTERNS = [
   "capacitorDidRegisterForRemoteNotifications",
   "didRegisterForRemoteNotifications",
 ];
+
+const PUSH_REGISTRATION_RETRY_MESSAGE_PATTERN =
+  /(?:retry[-\s]?after|try again in)\s*(\d+)\s*(millisecond|milliseconds|ms|second|seconds|sec|s|minute|minutes|min|m)?/i;
+const RATE_LIMIT_ERROR_PATTERNS = ["rate limit", "too many requests", "429"];
+const TRANSIENT_ERROR_PATTERNS = [
+  "failed to fetch",
+  "load failed",
+  "network request failed",
+  "network error",
+  "timeout",
+];
+
+type PushRegistrationFingerprint = {
+  deviceId: string;
+  token: string;
+  profileId: string | null;
+};
+
+const toErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === "string") {
+    return error;
+  }
+  if (typeof error === "object" && error) {
+    const typedError = error as {
+      message?: unknown;
+      error?: unknown;
+    };
+    if (typeof typedError.message === "string") {
+      return typedError.message;
+    }
+    if (typeof typedError.error === "string") {
+      return typedError.error;
+    }
+  }
+  return String(error);
+};
+
+const parseStatusCode = (status: unknown): number | null => {
+  if (typeof status === "number" && Number.isFinite(status)) {
+    return status;
+  }
+  if (typeof status === "string") {
+    const parsed = Number.parseInt(status, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+  return null;
+};
+
+const extractErrorStatusCode = (error: unknown): number | null => {
+  if (!error || typeof error !== "object") {
+    return null;
+  }
+  const typedError = error as {
+    status?: unknown;
+    code?: unknown;
+    response?: {
+      status?: unknown;
+    };
+    cause?: {
+      status?: unknown;
+      code?: unknown;
+      response?: {
+        status?: unknown;
+      };
+    };
+  };
+
+  return (
+    parseStatusCode(typedError.status) ??
+    parseStatusCode(typedError.response?.status) ??
+    parseStatusCode(typedError.code) ??
+    parseStatusCode(typedError.cause?.status) ??
+    parseStatusCode(typedError.cause?.response?.status) ??
+    parseStatusCode(typedError.cause?.code)
+  );
+};
+
+const parseRetryAfterHeaderValue = (value: string): number | null => {
+  const seconds = Number.parseFloat(value);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.round(seconds * 1000);
+  }
+
+  const retryAt = Date.parse(value);
+  if (!Number.isNaN(retryAt)) {
+    return Math.max(0, retryAt - Date.now());
+  }
+
+  return null;
+};
+
+const toRecord = (value: unknown): Record<string, unknown> | null => {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  return value as Record<string, unknown>;
+};
+
+const extractRetryAfterFromHeaders = (headers: unknown): number | null => {
+  if (headers instanceof Headers) {
+    const retryAfter = headers.get("retry-after");
+    return retryAfter ? parseRetryAfterHeaderValue(retryAfter) : null;
+  }
+
+  const typedHeaders = toRecord(headers);
+  if (!typedHeaders) {
+    return null;
+  }
+
+  const retryAfter =
+    typedHeaders["retry-after"] ?? typedHeaders["Retry-After"] ?? null;
+  if (typeof retryAfter === "string") {
+    return parseRetryAfterHeaderValue(retryAfter);
+  }
+
+  return null;
+};
+
+const extractRetryAfterMs = (error: unknown): number | null => {
+  if (error && typeof error === "object") {
+    const typedError = error as {
+      headers?: unknown;
+      response?: {
+        headers?: unknown;
+      };
+      cause?: {
+        headers?: unknown;
+        response?: {
+          headers?: unknown;
+        };
+      };
+    };
+
+    const retryAfterFromHeaders =
+      extractRetryAfterFromHeaders(typedError.response?.headers) ??
+      extractRetryAfterFromHeaders(typedError.headers) ??
+      extractRetryAfterFromHeaders(typedError.cause?.response?.headers) ??
+      extractRetryAfterFromHeaders(typedError.cause?.headers);
+    if (retryAfterFromHeaders !== null) {
+      return Math.min(
+        retryAfterFromHeaders,
+        PUSH_REGISTRATION_MAX_RETRY_AFTER_MS
+      );
+    }
+  }
+
+  const message = toErrorMessage(error);
+  const match = PUSH_REGISTRATION_RETRY_MESSAGE_PATTERN.exec(message);
+  if (!match) {
+    return null;
+  }
+
+  const value = Number.parseInt(match[1] ?? "", 10);
+  if (!Number.isFinite(value) || value < 0) {
+    return null;
+  }
+
+  const unit = (match[2] ?? "seconds").toLowerCase();
+  let multiplier = 1000;
+  if (unit === "ms" || unit === "millisecond" || unit === "milliseconds") {
+    multiplier = 1;
+  } else if (
+    unit === "m" ||
+    unit === "min" ||
+    unit === "minute" ||
+    unit === "minutes"
+  ) {
+    multiplier = 60_000;
+  }
+
+  return Math.min(value * multiplier, PUSH_REGISTRATION_MAX_RETRY_AFTER_MS);
+};
+
+const isRateLimitError = (error: unknown): boolean => {
+  if (extractErrorStatusCode(error) === 429) {
+    return true;
+  }
+  const normalizedMessage = toErrorMessage(error).toLowerCase();
+  return RATE_LIMIT_ERROR_PATTERNS.some((pattern) =>
+    normalizedMessage.includes(pattern)
+  );
+};
+
+const isTransientPushRegistrationError = (error: unknown): boolean => {
+  if (isRateLimitError(error)) {
+    return true;
+  }
+
+  const statusCode = extractErrorStatusCode(error);
+  if (statusCode !== null) {
+    return statusCode === 408 || (statusCode >= 500 && statusCode < 600);
+  }
+
+  const normalizedMessage = toErrorMessage(error).toLowerCase();
+  return TRANSIENT_ERROR_PATTERNS.some((pattern) =>
+    normalizedMessage.includes(pattern)
+  );
+};
+
+const computePushRegistrationRetryDelayMs = (
+  attempt: number,
+  retryAfterMs: number | null
+): number => {
+  if (retryAfterMs !== null) {
+    return Math.max(0, retryAfterMs);
+  }
+
+  const baseDelay = Math.min(
+    PUSH_REGISTRATION_BASE_DELAY_MS * Math.pow(2, attempt),
+    PUSH_REGISTRATION_MAX_DELAY_MS
+  );
+  const jitterMultiplier =
+    1 + (Math.random() * 2 - 1) * PUSH_REGISTRATION_JITTER_FACTOR;
+  return Math.max(0, Math.round(baseDelay * jitterMultiplier));
+};
+
+const toCaptureExceptionInput = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error;
+  }
+  return new Error(toErrorMessage(error));
+};
+
+const createPushRegistrationFingerprint = ({
+  deviceId,
+  token,
+  profile,
+}: {
+  deviceId: string;
+  token: string;
+  profile?: ApiIdentity;
+}): PushRegistrationFingerprint => ({
+  deviceId,
+  token,
+  profileId: profile?.id ?? null,
+});
+
+const isSamePushRegistrationFingerprint = (
+  left: PushRegistrationFingerprint,
+  right: PushRegistrationFingerprint
+): boolean =>
+  left.deviceId === right.deviceId &&
+  left.token === right.token &&
+  left.profileId === right.profileId;
 
 const isDelegateError = (error: unknown): boolean => {
   const errorMessage = error instanceof Error ? error.message : String(error);
@@ -147,6 +399,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const router = useRouter();
   const initializationRef = useRef<string | null>(null);
   const isRegisteredRef = useRef(false);
+  const lastSuccessfulRegistrationRef =
+    useRef<PushRegistrationFingerprint | null>(null);
+  const inFlightRegistrationRef = useRef<Promise<void> | null>(null);
   const connectedProfileRef = useRef<ApiIdentity | null>(connectedProfile);
   const connectedAccountsRef = useRef(connectedAccounts);
   const activeAddressRef = useRef(address);
@@ -356,6 +611,212 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     ]
   );
 
+  const registerPushNotificationWithRetry = useCallback(
+    async (
+      deviceId: string,
+      deviceInfo: DeviceInfo,
+      token: string,
+      profile?: ApiIdentity
+    ): Promise<boolean> => {
+      const profileId = profile?.id ?? null;
+
+      for (
+        let attempt = 0;
+        attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
+        attempt++
+      ) {
+        try {
+          await commonApiPost({
+            endpoint: `push-notifications/register`,
+            body: {
+              device_id: deviceId,
+              token,
+              platform: deviceInfo.platform,
+              profile_id: profile?.id,
+            },
+            errorMode: "structured",
+          });
+
+          return true;
+        } catch (error) {
+          const attemptNumber = attempt + 1;
+          const statusCode = extractErrorStatusCode(error);
+          const rateLimited = isRateLimitError(error);
+          const retryAfterMs = extractRetryAfterMs(error);
+          const hasRetriesLeft =
+            attemptNumber < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
+          const shouldRetry =
+            hasRetriesLeft && isTransientPushRegistrationError(error);
+
+          if (shouldRetry) {
+            const delayMs = computePushRegistrationRetryDelayMs(
+              attempt,
+              retryAfterMs
+            );
+
+            console.warn("Push registration attempt failed. Retrying...", {
+              attempt: attemptNumber,
+              maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+              delayMs,
+              rateLimited,
+              statusCode,
+              profileId,
+            });
+            Sentry.addBreadcrumb({
+              category: "notifications",
+              level: "warning",
+              message: "Push registration attempt failed. Retrying.",
+              data: {
+                component: "NotificationsProvider",
+                operation: "registerPushNotification",
+                attempt: attemptNumber,
+                max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+                delay_ms: delayMs,
+                rate_limited: rateLimited,
+                status_code: statusCode ?? undefined,
+                profile_id: profileId ?? undefined,
+                platform: deviceInfo.platform,
+              },
+            });
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+            continue;
+          }
+
+          if (rateLimited) {
+            console.warn("Push registration rate limited", {
+              attempt: attemptNumber,
+              maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+              statusCode,
+              profileId,
+            });
+            Sentry.addBreadcrumb({
+              category: "notifications",
+              level: "warning",
+              message: "Push registration rate limited.",
+              data: {
+                component: "NotificationsProvider",
+                operation: "registerPushNotification",
+                attempt: attemptNumber,
+                max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+                delay_ms: retryAfterMs ?? undefined,
+                status_code: statusCode ?? undefined,
+                profile_id: profileId ?? undefined,
+                platform: deviceInfo.platform,
+              },
+            });
+            return false;
+          }
+
+          console.error("Push registration error", error);
+          Sentry.captureException(toCaptureExceptionInput(error), {
+            tags: {
+              component: "NotificationsProvider",
+              operation: "registerPushNotification",
+            },
+            extra: {
+              attempt: attemptNumber,
+              max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+              status_code: statusCode ?? undefined,
+              profile_id: profileId ?? undefined,
+              platform: deviceInfo.platform,
+            },
+          });
+          return false;
+        }
+      }
+
+      return false;
+    },
+    []
+  );
+
+  const handlePushRegistration = useCallback(
+    async (
+      deviceId: string,
+      deviceInfo: DeviceInfo,
+      token: string,
+      profile?: ApiIdentity
+    ): Promise<void> => {
+      const fingerprintInput: {
+        deviceId: string;
+        token: string;
+        profile?: ApiIdentity;
+      } = {
+        deviceId,
+        token,
+      };
+      if (profile !== undefined) {
+        fingerprintInput.profile = profile;
+      }
+
+      const fingerprint = createPushRegistrationFingerprint(fingerprintInput);
+      const previousSuccess = lastSuccessfulRegistrationRef.current;
+
+      if (
+        previousSuccess &&
+        isSamePushRegistrationFingerprint(previousSuccess, fingerprint)
+      ) {
+        Sentry.addBreadcrumb({
+          category: "notifications",
+          level: "info",
+          message: "Push registration skipped (already registered in session).",
+          data: {
+            component: "NotificationsProvider",
+            operation: "registerPushNotification",
+            profile_id: fingerprint.profileId ?? undefined,
+            platform: deviceInfo.platform,
+          },
+        });
+        return;
+      }
+
+      if (inFlightRegistrationRef.current) {
+        await inFlightRegistrationRef.current;
+        const latestSuccess = lastSuccessfulRegistrationRef.current;
+        if (
+          latestSuccess &&
+          isSamePushRegistrationFingerprint(latestSuccess, fingerprint)
+        ) {
+          Sentry.addBreadcrumb({
+            category: "notifications",
+            level: "info",
+            message:
+              "Push registration skipped (already handled by in-flight registration).",
+            data: {
+              component: "NotificationsProvider",
+              operation: "registerPushNotification",
+              profile_id: fingerprint.profileId ?? undefined,
+              platform: deviceInfo.platform,
+            },
+          });
+          return;
+        }
+      }
+
+      const registrationTask = (async () => {
+        const didRegister = await registerPushNotificationWithRetry(
+          deviceId,
+          deviceInfo,
+          token,
+          profile
+        );
+        if (didRegister) {
+          lastSuccessfulRegistrationRef.current = fingerprint;
+        }
+      })();
+
+      inFlightRegistrationRef.current = registrationTask;
+      try {
+        await registrationTask;
+      } finally {
+        if (inFlightRegistrationRef.current === registrationTask) {
+          inFlightRegistrationRef.current = null;
+        }
+      }
+    },
+    [registerPushNotificationWithRetry]
+  );
+
   const initializePushNotifications = useCallback(
     async (profile?: ApiIdentity) => {
       try {
@@ -368,7 +829,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         await PushNotifications.addListener("registration", async (token) => {
           isRegisteredRef.current = true;
-          await registerPushNotification(
+          await handlePushRegistration(
             stableDeviceId,
             deviceInfo,
             token.value,
@@ -418,7 +879,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         throw error;
       }
     },
-    [isIos, router, handlePushNotificationAction]
+    [isIos, router, handlePushNotificationAction, handlePushRegistration]
   );
 
   const initializeNotifications = useCallback(
@@ -500,33 +961,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </NotificationsContext.Provider>
   );
-};
-
-const registerPushNotification = async (
-  deviceId: string,
-  deviceInfo: DeviceInfo,
-  token: string,
-  profile?: ApiIdentity
-) => {
-  try {
-    await commonApiPost({
-      endpoint: `push-notifications/register`,
-      body: {
-        device_id: deviceId,
-        token,
-        platform: deviceInfo.platform,
-        profile_id: profile?.id,
-      },
-    });
-  } catch (error) {
-    console.error("Push registration error", error);
-    Sentry.captureException(error, {
-      tags: {
-        component: "NotificationsProvider",
-        operation: "registerPushNotification",
-      },
-    });
-  }
 };
 
 const resolveRedirectUrl = (notificationData: DevicePushData) => {

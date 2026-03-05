@@ -1,6 +1,18 @@
 import { publicEnv } from "@/config/env";
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
+type ApiErrorMode = "legacy-string" | "structured";
+
+type StructuredApiError = Error & {
+  status: number;
+  headers: Headers;
+  response: {
+    status: number;
+    headers: Headers;
+    body?: unknown;
+  };
+};
+
 const getHeaders = (
   headers?: Record<string, string>,
   contentType: boolean = true
@@ -36,23 +48,95 @@ const buildUrl = (
   return url;
 };
 
-const handleApiError = async (res: Response): Promise<never> => {
-  let errorMessage: string;
+const normalizeHeaders = (value: unknown): Headers => {
+  if (value instanceof Headers) {
+    return value;
+  }
+  try {
+    return new Headers(value as HeadersInit);
+  } catch {
+    return new Headers();
+  }
+};
+
+const createStructuredApiError = ({
+  message,
+  status,
+  headers,
+  body,
+}: {
+  message: string;
+  status: number;
+  headers: Headers;
+  body?: unknown;
+}): StructuredApiError => {
+  const error = new Error(message) as StructuredApiError;
+  error.name = "ApiError";
+  error.status = status;
+  error.headers = headers;
+  error.response = {
+    status,
+    headers,
+    ...(body !== undefined ? { body } : {}),
+  };
+  return error;
+};
+
+const handleApiError = async (
+  res: Response,
+  errorMode: ApiErrorMode
+): Promise<never> => {
+  const fallbackErrorMessage = res.statusText || "Something went wrong";
+  let errorMessage = fallbackErrorMessage;
+  let errorBody: unknown = undefined;
 
   try {
-    const body: any = await res.json();
-    errorMessage =
-      body?.error ??
-      body?.message ??
-      body?.details?.[0]?.message ??
-      (res.statusText || "Something went wrong");
-  } catch {
-    try {
-      const rawContent = await res.text();
-      errorMessage = rawContent || res.statusText || "Something went wrong";
-    } catch {
-      errorMessage = res.statusText || "Something went wrong";
+    const rawContent = await res.text();
+
+    if (rawContent) {
+      errorBody = rawContent;
+      try {
+        const parsedBody: unknown = JSON.parse(rawContent);
+        const bodyRecord =
+          parsedBody && typeof parsedBody === "object"
+            ? (parsedBody as Record<string, unknown>)
+            : null;
+        const bodyError = bodyRecord?.["error"];
+        const bodyMessage = bodyRecord?.["message"];
+        const bodyDetails = bodyRecord?.["details"];
+        const detailsFirstMessage =
+          Array.isArray(bodyDetails) &&
+          typeof bodyDetails[0] === "object" &&
+          bodyDetails[0] !== null &&
+          "message" in bodyDetails[0] &&
+          typeof (bodyDetails[0] as { message?: unknown }).message === "string"
+            ? (bodyDetails[0] as { message: string }).message
+            : undefined;
+
+        if (typeof bodyError === "string") {
+          errorMessage = bodyError;
+        } else if (typeof bodyMessage === "string") {
+          errorMessage = bodyMessage;
+        } else if (typeof detailsFirstMessage === "string") {
+          errorMessage = detailsFirstMessage;
+        } else {
+          errorMessage = rawContent;
+        }
+      } catch {
+        errorMessage = rawContent;
+      }
     }
+  } catch {
+    errorMessage = fallbackErrorMessage;
+  }
+
+  if (errorMode === "structured") {
+    throw createStructuredApiError({
+      message: errorMessage,
+      status: res.status,
+      headers: normalizeHeaders((res as { headers?: unknown }).headers),
+      body: errorBody,
+    });
   }
 
   return Promise.reject(errorMessage);
@@ -64,7 +148,8 @@ const executeApiRequest = async <T>(
   headers: Record<string, string>,
   body?: BodyInit,
   signal?: AbortSignal,
-  parseJson: boolean = true
+  parseJson: boolean = true,
+  errorMode: ApiErrorMode = "legacy-string"
 ): Promise<T> => {
   try {
     const res = await fetch(url, {
@@ -75,7 +160,7 @@ const executeApiRequest = async <T>(
     });
 
     if (!res.ok) {
-      return handleApiError(res);
+      return handleApiError(res, errorMode);
     }
 
     if (!parseJson) {
@@ -266,6 +351,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   headers?: Record<string, string> | undefined;
   params?: Z | undefined;
   signal?: AbortSignal | undefined;
+  errorMode?: ApiErrorMode | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -277,7 +363,9 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
     "POST",
     getHeaders(param.headers, true),
     JSON.stringify(param.body),
-    param.signal
+    param.signal,
+    true,
+    param.errorMode ?? "legacy-string"
   );
 };
 

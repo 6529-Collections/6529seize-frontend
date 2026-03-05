@@ -34,7 +34,6 @@ describe("commonApiFetch", () => {
           "x-6529-auth": "s",
           Authorization: "Bearer jwt",
         }),
-        signal: undefined,
       })
     );
     expect(result).toEqual({ result: 1 });
@@ -47,7 +46,7 @@ describe("commonApiFetch", () => {
       ok: false,
       status: 400,
       statusText: "Bad",
-      json: async () => ({ error: "err" }),
+      text: async () => JSON.stringify({ error: "err" }),
     });
 
     await expect(commonApiFetch({ endpoint: "bad" })).rejects.toBe("err");
@@ -55,7 +54,6 @@ describe("commonApiFetch", () => {
       "https://api.test.6529.io/api/bad",
       expect.objectContaining({
         headers: {},
-        signal: undefined,
       })
     );
   });
@@ -100,7 +98,7 @@ describe("commonApiPost", () => {
       ok: false,
       status: 400,
       statusText: "B",
-      json: async () => ({ error: "err" }),
+      text: async () => JSON.stringify({ error: "err" }),
     });
 
     await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
@@ -115,6 +113,97 @@ describe("commonApiPost", () => {
         }),
         body: JSON.stringify({}),
       })
+    );
+  });
+
+  it("rejects with structured metadata when requested", async () => {
+    (getStagingAuth as jest.Mock).mockReturnValue(null);
+    (getAuthJwt as jest.Mock).mockReturnValue(null);
+    const responseHeaders = new Headers({ "retry-after": "2" });
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 429,
+      statusText: "Too Many Requests",
+      headers: responseHeaders,
+      text: async () => JSON.stringify({ error: "rate limited" }),
+    });
+
+    let error: {
+      message: string;
+      status: number;
+      headers: Headers;
+      response: {
+        status: number;
+        headers: Headers;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        status: number;
+        headers: Headers;
+        response: {
+          status: number;
+          headers: Headers;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("rate limited");
+    expect(error?.status).toBe(429);
+    expect(error?.headers).toBe(responseHeaders);
+    expect(error?.headers.get("retry-after")).toBe("2");
+    expect(error?.response.status).toBe(429);
+    expect(error?.response.headers).toBe(responseHeaders);
+    expect(error?.response.body).toBe('{"error":"rate limited"}');
+  });
+
+  it("prefers message when error key is missing", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 400,
+      statusText: "Bad Request",
+      text: async () => JSON.stringify({ message: "from message field" }),
+    });
+
+    await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
+      "from message field"
+    );
+  });
+
+  it("falls back to raw text when body is non-json", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: "Internal Server Error",
+      text: async () => "plain error text",
+    });
+
+    await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
+      "plain error text"
+    );
+  });
+
+  it("falls back to statusText when response body is empty", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: "Service Unavailable",
+      text: async () => "",
+    });
+
+    await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
+      "Service Unavailable"
     );
   });
 });
