@@ -1,18 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AllowlistBatchManager from "@/components/waves/memes/submission/components/AllowlistBatchManager";
+import type { MetadataValueLengthStatus } from "@/components/waves/memes/submission/utils/submissionMetadata";
 
 describe("AllowlistBatchManager", () => {
   it("renders with no batches and allows adding one", async () => {
     const user = userEvent.setup();
     const onBatchesChange = jest.fn();
-    render(<AllowlistBatchManager batches={[]} onBatchesChange={onBatchesChange} />);
+    render(
+      <AllowlistBatchManager batches={[]} onBatchesChange={onBatchesChange} />
+    );
 
     expect(screen.getByText(/No allowlist batches added/i)).toBeInTheDocument();
-    
+
     const addButton = screen.getByText(/Add Batch/i);
     await user.click(addButton);
-    
+
     expect(onBatchesChange).toHaveBeenCalledWith([
       expect.objectContaining({ contract: "", token_ids_raw: "" }),
     ]);
@@ -23,7 +26,9 @@ describe("AllowlistBatchManager", () => {
       { id: "batch-1", contract: "0x1", token_ids_raw: "1-10" },
       { id: "batch-2", contract: "0x2", token_ids_raw: "20,21" },
     ];
-    render(<AllowlistBatchManager batches={batches} onBatchesChange={jest.fn()} />);
+    render(
+      <AllowlistBatchManager batches={batches} onBatchesChange={jest.fn()} />
+    );
 
     expect(screen.getByDisplayValue("0x1")).toBeInTheDocument();
     expect(screen.getByDisplayValue("1-10")).toBeInTheDocument();
@@ -35,13 +40,20 @@ describe("AllowlistBatchManager", () => {
     const user = userEvent.setup();
     const onBatchesChange = jest.fn();
     const batches = [{ id: "batch-1", contract: "0x1", token_ids_raw: "1" }];
-    render(<AllowlistBatchManager batches={batches} onBatchesChange={onBatchesChange} />);
+    render(
+      <AllowlistBatchManager
+        batches={batches}
+        onBatchesChange={onBatchesChange}
+      />
+    );
 
     const contractInput = screen.getByDisplayValue("0x1");
     await user.type(contractInput, "2");
     await user.tab();
 
-    expect(onBatchesChange).toHaveBeenCalledWith([{ id: "batch-1", contract: "0x12", token_ids_raw: "1" }]);
+    expect(onBatchesChange).toHaveBeenCalledWith([
+      { id: "batch-1", contract: "0x12", token_ids_raw: "1" },
+    ]);
   });
 
   it("allows removing a batch", async () => {
@@ -51,11 +63,40 @@ describe("AllowlistBatchManager", () => {
       { id: "batch-1", contract: "0x1", token_ids_raw: "1" },
       { id: "batch-2", contract: "0x2", token_ids_raw: "2" },
     ];
-    render(<AllowlistBatchManager batches={batches} onBatchesChange={onBatchesChange} />);
+    render(
+      <AllowlistBatchManager
+        batches={batches}
+        onBatchesChange={onBatchesChange}
+      />
+    );
 
     const removeButtons = screen.getAllByRole("button", { name: /Remove/i });
     await user.click(removeButtons[0]);
 
-    expect(onBatchesChange).toHaveBeenCalledWith([{ id: "batch-2", contract: "0x2", token_ids_raw: "2" }]);
+    expect(onBatchesChange).toHaveBeenCalledWith([
+      { id: "batch-2", contract: "0x2", token_ids_raw: "2" },
+    ]);
+  });
+
+  it("shows allowlist metadata warning when near limit", () => {
+    const status: MetadataValueLengthStatus = {
+      dataKey: "allowlist_batches",
+      length: 4800,
+      maxLength: 5000,
+      warningThreshold: 4500,
+      remaining: 200,
+      isWarning: true,
+      isError: false,
+    };
+
+    render(
+      <AllowlistBatchManager
+        batches={[]}
+        onBatchesChange={jest.fn()}
+        allowlistLengthStatus={status}
+      />
+    );
+
+    expect(screen.getByText("4800/5000 characters.")).toBeInTheDocument();
   });
 });

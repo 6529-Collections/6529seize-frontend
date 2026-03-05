@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import PaymentConfig from "@/components/waves/memes/submission/components/PaymentConfig";
+import type { MetadataValueLengthStatus } from "@/components/waves/memes/submission/utils/submissionMetadata";
 
 jest.mock(
   "@/components/utils/input/ens-address/EnsAddressInput",
@@ -115,7 +116,9 @@ describe("PaymentConfig", () => {
       />
     );
 
-    const nameInput = screen.getByPlaceholderText(/enter designated payee name/i);
+    const nameInput = screen.getByPlaceholderText(
+      /enter designated payee name/i
+    );
     fireEvent.change(nameInput, { target: { value: "Red Cross" } });
 
     expect(onPaymentInfoChange).toHaveBeenCalledWith({
@@ -162,9 +165,9 @@ describe("PaymentConfig", () => {
     expect(screen.getByPlaceholderText(/0x.*or ENS/i)).toHaveValue(address);
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
     expect(checkbox.checked).toBe(true);
-    expect(screen.getByPlaceholderText(/enter designated payee name/i)).toHaveValue(
-      "Red Cross"
-    );
+    expect(
+      screen.getByPlaceholderText(/enter designated payee name/i)
+    ).toHaveValue("Red Cross");
   });
 
   it("clears designated payee name when checkbox is unchecked", () => {
@@ -188,5 +191,23 @@ describe("PaymentConfig", () => {
       has_designated_payee: false,
       designated_payee_name: "",
     });
+  });
+
+  it("shows metadata warning for payment info near limit", () => {
+    const status: MetadataValueLengthStatus = {
+      dataKey: "payment_info",
+      length: 4600,
+      maxLength: 5000,
+      warningThreshold: 4500,
+      remaining: 400,
+      isWarning: true,
+      isError: false,
+    };
+
+    render(
+      <PaymentConfig {...defaultProps} paymentInfoLengthStatus={status} />
+    );
+
+    expect(screen.getByText("4600/5000 characters.")).toBeInTheDocument();
   });
 });

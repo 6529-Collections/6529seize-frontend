@@ -1,7 +1,6 @@
 "use client";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
@@ -9,8 +8,7 @@ import { DropSize, getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
-import { validateStrictAddress } from "./addressValidation";
-import { objectEntries } from "./objectEntries";
+import { buildSubmissionMetadata } from "./submissionMetadata";
 
 interface PreviewMediaSelection {
   readonly mediaSource: "upload" | "url";
@@ -31,70 +29,6 @@ interface BuildPreviewDropInput {
 
 const FALLBACK_MEDIA_URL =
   "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-const buildMetadata = (
-  traits: TraitsData,
-  operationalData?: OperationalData
-): ApiDropMetadata[] => {
-  const metadata: ApiDropMetadata[] = objectEntries(traits)
-    .map(([key, value]) => ({
-      data_key: String(key),
-      data_value: value.toString(),
-    }))
-    .filter((item) => item.data_value.length > 0);
-
-  if (!operationalData) {
-    return metadata;
-  }
-
-  metadata.push(
-    {
-      data_key: "payment_info",
-      data_value: JSON.stringify(operationalData.payment_info),
-    },
-    {
-      data_key: "commentary",
-      data_value: operationalData.commentary,
-    },
-    {
-      data_key: "about_artist",
-      data_value: operationalData.about_artist,
-    }
-  );
-
-  if (operationalData.airdrop_config.length > 0) {
-    const validEntries = operationalData.airdrop_config.filter((entry) => {
-      const trimmedAddress = entry.address.trim();
-      return validateStrictAddress(trimmedAddress) && entry.count > 0;
-    });
-
-    if (validEntries.length > 0) {
-      metadata.push({
-        data_key: "airdrop_config",
-        data_value: JSON.stringify(validEntries),
-      });
-    }
-  }
-
-  if (operationalData.allowlist_batches.length > 0) {
-    metadata.push({
-      data_key: "allowlist_batches",
-      data_value: JSON.stringify(
-        operationalData.allowlist_batches.map((batch) => ({
-          contract: batch.contract,
-          token_ids: batch.token_ids_raw || "",
-        }))
-      ),
-    });
-  }
-
-  metadata.push({
-    data_key: "additional_media",
-    data_value: JSON.stringify(operationalData.additional_media),
-  });
-
-  return metadata;
-};
 
 const buildPreviewMedia = ({
   mediaSelection,
@@ -142,7 +76,10 @@ export const buildPreviewDrop = ({
   const id = getOptimisticDropId();
   const now = Date.now();
   const media = buildPreviewMedia({ mediaSelection, uploadArtworkUrl });
-  const metadata = buildMetadata(traits, operationalData);
+  const metadata = buildSubmissionMetadata({
+    traits,
+    operationalData,
+  });
   const primaryAddress =
     connectedProfile?.primary_wallet ??
     "0x0000000000000000000000000000000000000000";
