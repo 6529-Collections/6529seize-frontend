@@ -17,7 +17,6 @@ import {
 } from "@/components/drop-forge/drop-forge.constants";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
-import DiscoverIcon from "../common/icons/DiscoverIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
@@ -26,7 +25,6 @@ import AppUserConnect from "./AppUserConnect";
 
 const MENU = [
   { label: "Profile", path: "/profile", icon: UserIcon },
-  { label: "Discover", path: "/discover", icon: DiscoverIcon },
   {
     label: "Network",
     icon: UsersIcon,

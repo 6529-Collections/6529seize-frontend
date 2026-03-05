@@ -34,14 +34,19 @@ jest.mock("@/components/user/layout/UserPageLayout", () => ({
 
 // Mock redirect from next/navigation so we can assert it
 const redirectMock = jest.fn();
+const notFoundMock = jest.fn();
 jest.mock("next/navigation", () => ({
   redirect: (url: string) => redirectMock(url),
+  notFound: () => notFoundMock(),
 }));
 
 // Import after mocks
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { userPageNeedsRedirect } from "@/helpers/server.helpers";
+import {
+  getUserProfile,
+  userPageNeedsRedirect,
+} from "@/helpers/server.helpers";
 
 // Dummy tabs for index and proxy
 function DummyHomeTab({ profile }: { readonly profile: any }) {
@@ -67,6 +72,8 @@ const buildProxyFactory = () =>
 describe("user index page via createUserTabPage", () => {
   beforeEach(() => {
     redirectMock.mockClear();
+    notFoundMock.mockClear();
+    (getUserProfile as jest.Mock).mockClear();
     (userPageNeedsRedirect as jest.Mock).mockReturnValue(null);
   });
 
@@ -105,11 +112,36 @@ describe("user index page via createUserTabPage", () => {
     );
     expect(getAppMetadata).toHaveBeenCalled();
   });
+
+  it("calls notFound early for probe-like user slugs in Page", async () => {
+    const { Page } = buildHomeFactory();
+
+    await Page({
+      params: Promise.resolve({ user: "vt-test-non-existent.html" }),
+      searchParams: Promise.resolve({}),
+    } as any);
+
+    expect(notFoundMock).toHaveBeenCalled();
+    expect(getUserProfile).not.toHaveBeenCalled();
+  });
+
+  it("calls notFound early for probe-like user slugs in generateMetadata", async () => {
+    const { generateMetadata } = buildHomeFactory();
+
+    await generateMetadata({
+      params: Promise.resolve({ user: "vt-test-non-existent.html" }),
+    } as any);
+
+    expect(notFoundMock).toHaveBeenCalled();
+    expect(getUserProfile).not.toHaveBeenCalled();
+  });
 });
 
 describe("proxy page via createUserTabPage", () => {
   beforeEach(() => {
     redirectMock.mockClear();
+    notFoundMock.mockClear();
+    (getUserProfile as jest.Mock).mockClear();
     (userPageNeedsRedirect as jest.Mock).mockReturnValue(null);
   });
 

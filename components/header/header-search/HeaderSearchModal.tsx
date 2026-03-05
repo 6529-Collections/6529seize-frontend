@@ -10,7 +10,6 @@ import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
-import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
@@ -108,7 +107,6 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
     section: "Main",
     icon: ChatBubbleIcon,
   },
-  { name: "Discover", href: "/discover", section: "Main", icon: DiscoverIcon },
   {
     name: "Notifications",
     href: "/notifications",

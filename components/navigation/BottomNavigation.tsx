@@ -13,8 +13,8 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
-import DiscoverIcon from "../common/icons/DiscoverIcon";
 import LogoIcon from "../common/icons/LogoIcon";
+import ProfileIcon from "../common/icons/ProfileIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
@@ -23,10 +23,10 @@ import type { NavItem as NavItemData } from "./navTypes";
 const items: NavItemData[] = [
   {
     kind: "route",
-    name: "Discover",
-    href: "/discover",
-    icon: "discover",
-    iconComponent: DiscoverIcon,
+    name: "Profile",
+    href: "/profile",
+    icon: "profile",
+    iconComponent: ProfileIcon,
   },
   {
     kind: "view",

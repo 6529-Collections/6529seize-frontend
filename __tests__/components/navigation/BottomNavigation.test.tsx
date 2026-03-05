@@ -2,7 +2,6 @@ import { render } from "@testing-library/react";
 import BottomNavigation from "@/components/navigation/BottomNavigation";
 import NavItem from "@/components/navigation/NavItem";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
-import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -14,10 +13,6 @@ jest.mock("@/components/navigation/NavItem", () => ({
 }));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: jest.fn(),
-}));
-jest.mock("@/hooks/useCapacitor", () => ({
-  __esModule: true,
-  default: jest.fn(),
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -32,7 +27,6 @@ jest.mock("next/navigation", () => ({
 
 const registerRef = jest.fn();
 (useLayout as jest.Mock).mockReturnValue({ registerRef });
-(useCapacitor as jest.Mock).mockReturnValue({ isAndroid: false });
 (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
 (useWaveData as jest.Mock).mockReturnValue({ data: null });
 (useWave as jest.Mock).mockReturnValue({ isDm: false });
@@ -44,7 +38,6 @@ const { usePathname, useSearchParams } = require("next/navigation");
 beforeEach(() => {
   jest.clearAllMocks();
   (useLayout as jest.Mock).mockReturnValue({ registerRef });
-  (useCapacitor as jest.Mock).mockReturnValue({ isAndroid: false });
   (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
   (useWaveData as jest.Mock).mockReturnValue({ data: null });
   (useWave as jest.Mock).mockReturnValue({ isDm: false });
@@ -69,7 +62,7 @@ describe("BottomNavigation", () => {
 
     const passedItems = navItemCalls.map((call) => call[0].item);
     expect(passedItems.map((item: { name: string }) => item.name)).toEqual([
-      "Discover",
+      "Profile",
       "Waves",
       "Messages",
       "Home",
