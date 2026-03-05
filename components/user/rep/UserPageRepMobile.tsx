@@ -8,7 +8,7 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { buildRepAvatarItems } from "./buildRepAvatarItems";
 import { RateMatter } from "@/types/enums";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useMemo, useState } from "react";
@@ -51,6 +51,7 @@ export default function UserPageRepMobile({
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(5);
   const [editCategory, setEditCategory] = useState<string | null>(null);
+
   const [prevCategories, setPrevCategories] = useState(categories);
   if (categories !== prevCategories) {
     setPrevCategories(categories);
@@ -85,24 +86,11 @@ export default function UserPageRepMobile({
       (w) => w.wallet.toLowerCase() === address?.toLowerCase()
     );
 
-  // Build CIC avatar items from overview contributors
   const cicAvatarItems = useMemo(
     () =>
-      (cicOverview?.contributors.data ?? []).slice(0, 3).map((c) => ({
-        key: c.profile.handle ?? c.profile.primary_address,
-        pfpUrl: c.profile.pfp ?? null,
-        ariaLabel: c.profile.handle ?? c.profile.primary_address,
-        fallback: c.profile.handle
-          ? c.profile.handle.charAt(0).toUpperCase()
-          : "?",
-        title: c.profile.handle ?? c.profile.primary_address,
-        tooltipContent: (
-          <span>
-            {c.profile.handle ?? c.profile.primary_address} &middot;{" "}
-            {formatNumberWithCommas(c.contribution)}
-          </span>
-        ),
-      })),
+      buildRepAvatarItems(cicOverview?.contributors.data ?? [], 3, {
+        omitHref: true,
+      }),
     [cicOverview?.contributors.data]
   );
 

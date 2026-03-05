@@ -5,14 +5,12 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import {
-  ArrowDownLeftIcon,
-  ArrowUpRightIcon,
-  PlusIcon,
-} from "@heroicons/react/24/solid";
+import { PlusIcon } from "@heroicons/react/24/solid";
 import { useContext, useMemo, useState } from "react";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import RepCategoryPill from "../RepCategoryPill";
+import RepDirectionToggle from "../RepDirectionToggle";
+import { buildRepAvatarItems } from "../buildRepAvatarItems";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
 import {
@@ -39,6 +37,7 @@ export default function UserPageRepHeader({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const [visibleCount, setVisibleCount] = useState(5);
+
   const [prevCategories, setPrevCategories] = useState(categories);
   if (categories !== prevCategories) {
     setPrevCategories(categories);
@@ -62,24 +61,10 @@ export default function UserPageRepHeader({
 
   const avatarItems = useMemo(
     () =>
-      (overview?.contributors.data ?? [])
-        .slice(0, TOP_CONTRIBUTORS_COUNT)
-        .map((c) => ({
-          key: c.profile.handle ?? c.profile.primary_address,
-          pfpUrl: c.profile.pfp ?? null,
-          href: `/${c.profile.handle ?? c.profile.primary_address}`,
-          ariaLabel: c.profile.handle ?? c.profile.primary_address,
-          fallback: c.profile.handle
-            ? c.profile.handle.charAt(0).toUpperCase()
-            : "?",
-          title: c.profile.handle ?? c.profile.primary_address,
-          tooltipContent: (
-            <span>
-              {c.profile.handle ?? c.profile.primary_address} &middot;{" "}
-              {formatNumberWithCommas(c.contribution)}
-            </span>
-          ),
-        })),
+      buildRepAvatarItems(
+        overview?.contributors.data ?? [],
+        TOP_CONTRIBUTORS_COUNT
+      ),
     [overview?.contributors.data]
   );
 
@@ -105,39 +90,11 @@ export default function UserPageRepHeader({
                   ? "What others recognize this identity for."
                   : "What this identity recognizes others for."}
               </p>
-              <div className="tw-mt-4 tw-flex tw-items-center tw-gap-4">
-                <button
-                  type="button"
-                  aria-pressed={repDirection === "received"}
-                  onClick={() => onRepDirectionChange("received")}
-                  className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-medium tw-transition-colors tw-duration-200 ${
-                    repDirection === "received"
-                      ? "tw-text-iron-100"
-                      : "tw-text-iron-500 hover:tw-text-iron-300"
-                  }`}
-                >
-                  <ArrowDownLeftIcon
-                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
-                    aria-hidden="true"
-                  />
-                  Received
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={repDirection === "given"}
-                  onClick={() => onRepDirectionChange("given")}
-                  className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-medium tw-transition-colors tw-duration-200 ${
-                    repDirection === "given"
-                      ? "tw-text-iron-100"
-                      : "tw-text-iron-500 hover:tw-text-iron-300"
-                  }`}
-                >
-                  <ArrowUpRightIcon
-                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
-                    aria-hidden="true"
-                  />
-                  Given
-                </button>
+              <div className="tw-mt-4">
+                <RepDirectionToggle
+                  repDirection={repDirection}
+                  onRepDirectionChange={onRepDirectionChange}
+                />
               </div>
             </div>
 

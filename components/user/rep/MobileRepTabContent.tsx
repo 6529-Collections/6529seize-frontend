@@ -4,8 +4,8 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RateMatter } from "@/types/enums";
-import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
 import type { RepDirection } from "./UserPageRep.helpers";
+import RepDirectionToggle from "./RepDirectionToggle";
 import RepCategoryPill from "./RepCategoryPill";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
@@ -115,39 +115,12 @@ export default function MobileRepTabContent({
         </div>
 
         {/* Received / Given toggle */}
-        <div className="tw-mb-3 tw-flex tw-items-center tw-gap-4">
-          <button
-            type="button"
-            aria-pressed={repDirection === "received"}
-            onClick={() => onRepDirectionChange("received")}
-            className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
-              repDirection === "received"
-                ? "tw-font-semibold tw-text-iron-100"
-                : "tw-text-iron-500 hover:tw-text-iron-300"
-            }`}
-          >
-            <ArrowDownLeftIcon
-              className="tw-h-3 tw-w-3 tw-flex-shrink-0"
-              aria-hidden="true"
-            />
-            Received
-          </button>
-          <button
-            type="button"
-            aria-pressed={repDirection === "given"}
-            onClick={() => onRepDirectionChange("given")}
-            className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
-              repDirection === "given"
-                ? "tw-text-iron-100 tw-font-semibold"
-                : "tw-text-iron-500 hover:tw-text-iron-300"
-            }`}
-          >
-            <ArrowUpRightIcon
-              className="tw-h-3 tw-w-3 tw-flex-shrink-0"
-              aria-hidden="true"
-            />
-            Given
-          </button>
+        <div className="tw-mb-3">
+          <RepDirectionToggle
+            repDirection={repDirection}
+            onRepDirectionChange={onRepDirectionChange}
+            compact
+          />
         </div>
       </div>
 
