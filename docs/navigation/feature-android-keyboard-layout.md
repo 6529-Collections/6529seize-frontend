@@ -5,8 +5,9 @@ Parent: [Navigation Index](README.md)
 ## Overview
 
 In native app mode on iOS and Android, opening the on-screen keyboard hides
-the fixed bottom navigation and removes bottom-nav reserve space. This keeps
-inputs and composers close to the keyboard and avoids blank space.
+the fixed bottom navigation and removes the normal bottom-nav reserve space
+(`85px`). This keeps inputs and composers close to the keyboard and avoids
+blank space.
 
 ## Location in the Site
 
@@ -27,7 +28,8 @@ inputs and composers close to the keyboard and avoids blank space.
 1. User focuses an input on an app-shell route.
 2. Keyboard visibility updates from native keyboard events.
 3. Bottom navigation slides out and ignores taps.
-4. Layout height recalculates without bottom-nav reserve space.
+4. Layout height recalculates without the normal `85px` bottom-nav reserve
+   space.
 5. User types with composer/input controls kept in the visible area.
 6. User closes keyboard; bottom navigation and normal spacing return unless
    another hide condition is active.
@@ -35,7 +37,7 @@ inputs and composers close to the keyboard and avoids blank space.
 ## Common Scenarios
 
 - Wave or message composing: bottom navigation hides while typing and returns
-  after keyboard close.
+  after keyboard close, restoring reserve spacing.
 - Single-drop reply on Android: composer bottom safe-area padding becomes `0`
   while keyboard is open.
 - Create Wave flow on iOS: extra bottom margin used in non-keyboard state is

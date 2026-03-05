@@ -11,7 +11,7 @@ outcomes, but they expose different controls.
 - Web sidebar account area (expanded rail, collapsed rail, and small-screen
   overlay sidebar).
 - Web user dropdown opened from the connected user row.
-- App sidebar footer opened from the app header menu/avatar button.
+- App sidebar account section opened from the app header menu/avatar button.
 
 ## Entry Points
 
@@ -28,12 +28,15 @@ outcomes, but they expose different controls.
   - expanded sidebar button: `Connect`
   - collapsed sidebar icon button tooltip: `Connect Wallet`
 - Connected: user row opens the account dropdown.
+  - avatar can show a small unread dot when another connected account has
+    unread notifications.
 
 ### Web Account Dropdown
 
 - Identity rows:
   - base identity row is always present
   - received proxy rows appear when available
+  - connected-account rows can show unread count badges (`1-99+`)
 - Session actions:
   - wallet connected: `Disconnect Wallet`, `Switch Account`,
     `Disconnect & Logout`
@@ -43,6 +46,10 @@ outcomes, but they expose different controls.
 
 - Disconnected: `Connect`
 - Connected: `Push Notifications`, `Switch Account`, `Disconnect & Logout`
+  - connected profile card avatar can show unread count badge (`1-99+`) for
+    the active account
+  - additional connected account avatars can show unread count badges (`1-99+`)
+    and can be selected for account switch
 - `Scan QR Code` appears only in Capacitor runtime with scanner support.
 
 ## User Journey
@@ -53,11 +60,17 @@ outcomes, but they expose different controls.
    - `Switch Account`: disconnect wallet, clear session auth, reopen connect.
    - `Disconnect Wallet` (web only): disconnect wallet without full logout.
    - `Disconnect & Logout` / `Logout`: full sign-out.
-4. Optional web proxy switch:
+4. During known-account switch handoff, active account state stays pinned to
+   the stored active wallet until the new selection settles.
+5. Review unread indicators in account selectors:
+   - web/account avatars can show a dot for unread activity on other connected
+     accounts,
+   - account rows can show unread count badges (`1-99+`).
+6. Optional web proxy switch:
    - select base identity to act as yourself,
    - select proxy identity to act as that profile,
    - select the active row again to return to base identity.
-5. Continue navigation with updated account/proxy state.
+7. Continue navigation with updated account/proxy state.
 
 ## Common Scenarios
 
@@ -69,6 +82,8 @@ outcomes, but they expose different controls.
   logout.
 - Open app `Push Notifications` settings from the account footer.
 - Switch between base identity and a received proxy in web dropdown.
+- Use unread count badges to identify which connected account has pending
+  notifications before switching.
 
 ## Edge Cases
 
@@ -79,6 +94,12 @@ outcomes, but they expose different controls.
 - Web dropdown always includes the base identity row.
 - Proxy rows appear only when active received proxies exist.
 - Proxy switching is not available in app footer.
+- Unread count badges are capped at `99+`.
+- Avatar unread dots are shown only for unread activity on non-active connected
+  accounts.
+- While provider/account signals settle during switch-account transitions, the
+  active account remains anchored to the stored active wallet to avoid brief
+  flips to another already-known account.
 - After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`
   and `Logout`.
 
@@ -87,6 +108,8 @@ outcomes, but they expose different controls.
 - If wallet connect is canceled, stay on the same surface and retry `Connect`.
 - If account state looks stale after proxy/account changes, run
   `Disconnect & Logout`, then reconnect.
+- If unread account dots/badges look stale, open `/notifications` for the
+  target account, then revisit account controls.
 - If wallet controls crash, use wallet error-boundary actions: `Try Again`,
   then `Clear Storage & Reload`.
 
@@ -96,6 +119,8 @@ outcomes, but they expose different controls.
 - Proxy switching is available only in the web dropdown.
 - `Disconnect Wallet` exists only in web dropdown; app footer uses full logout
   actions.
+- Unread dots/badges are notification-count indicators only; they do not show
+  notification category.
 
 ## Related Pages
 

@@ -72,7 +72,8 @@ Use this area for wave and direct-message tasks:
 - [Link Previews](link-previews/README.md): external/social/web3 preview-card
   rendering in thread content and home-style drop-card variants.
 - [Leaderboard](leaderboard/README.md): leaderboard states, filters, timeline,
-  winners-tab behavior, `My Votes` tab behavior, and top-voter views.
+  winners-tab behavior, `My Votes` tab behavior, top-voter views, and curation
+  `Drop Art` / price-filter controls.
 - [Memes](memes/README.md): memes submission flow, preview/submit states, and
   single-drop additional-info rendering.
 - [Outcome Lists](feature-outcome-lists.md): `Outcome` tab cards plus ranked-drop

@@ -25,8 +25,10 @@ rebuilding them.
    caret at the end.
 3. Continue typing. Mention suggestion menus still work for new user and wave
    mentions.
-4. Save with `Enter` (or `Save` in app controls). Use `Shift+Enter` for a
-   newline.
+4. Save behavior depends on surface:
+   - desktop web: press `Enter`, or click `save`
+   - mobile web and app: use `save`/`Save` buttons (`Enter` does not submit)
+   - use `Shift+Enter` for a newline
 5. If content is unchanged after normalization, edit mode closes without an
    update request.
 6. If content changed, edit mode closes immediately and sends the update
@@ -40,6 +42,7 @@ rebuilding them.
 - Incomplete or malformed mention text stays plain text until corrected.
 - `Enter` does not submit while mention menus are open; it confirms the
   selected suggestion first.
+- On mobile web and app edit surfaces, `Enter` is consumed and does not submit.
 - Blank-line placeholders are ignored in change detection, so placeholder-only
   differences do not trigger a save.
 - For storm drops, only the currently active part content is updated.

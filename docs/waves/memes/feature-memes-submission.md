@@ -14,9 +14,12 @@ submit states are documented separately.
 
 - Memes wave thread route: `/waves/{waveId}`
 - Submit controls that open this modal:
-  - Desktop memes tabs header: `Submit Work to The Memes`
+  - Desktop memes tabs header (non-compact header mode only):
+    `Submit Work to The Memes`
     - urgent windows can relabel this to `Submit Meme` or
       `Submit Meme (Closes Soon!)`
+    - narrower desktop widths can show compact labels (for example
+      `Submit Work`)
   - Mobile leaderboard header: `Drop`
   - Mobile chat thread: floating `+` button (top-right)
 

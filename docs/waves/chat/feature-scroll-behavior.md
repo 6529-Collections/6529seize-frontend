@@ -41,6 +41,8 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - Pending and unread count labels cap at `99+` when shown as standalone controls.
 - When unread and bottom controls are stacked, both render as icon controls.
 - Temporary outgoing drops can trigger short auto-scroll when users are pinned.
+- When older-page loading toggles on/off, scroll controls stay attached to the
+  same thread container, so jump-to-latest/unread controls do not reset.
 
 ## Edge Cases
 
@@ -48,6 +50,8 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - Bottom control hides when you are at latest and no pending drops exist.
 - Layout changes can shift pin detection briefly; pin state recalculates as container size changes.
 - On Apple mobile, pending count starts from the newest visible serial when you leave bottom and clears after re-pin.
+- Rapid pagination state flips can briefly toggle the top loading bar, but do
+  not replace the active scroll container.
 
 ## Failure and Recovery
 

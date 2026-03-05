@@ -49,6 +49,10 @@ Hash links jump to a section when the target ID exists.
   show one inline `Show link previews` control.
 - Same-origin quote/drop preview rendering has cycle and depth guards; guarded
   links fall back to usable plain links.
+- Same-origin drop smart-link handling expects canonical wave-drop paths
+  (`/waves/{waveId}?drop={dropId}`); legacy query-style wave-drop links (for
+  example `/waves?wave={waveId}&drop={dropId}`) and DM `drop` links are treated
+  as regular navigation links.
 - Preview fetch or rendering failures fall back to a generic preview or plain
   link.
 - Hash links only scroll when the destination ID exists.
@@ -69,6 +73,8 @@ Hash links jump to a section when the target ID exists.
 - Hash jumping depends on stable section IDs in rendered page content.
 - Route-level access rules and redirects still apply after link navigation.
 - Drop markdown link behavior is origin-aware.
+- Smart-link matching for same-origin wave/drop links uses the original href
+  before compatibility normalization.
 - Markdown links must be valid URLs to render as clickable links.
 
 ## Related Pages

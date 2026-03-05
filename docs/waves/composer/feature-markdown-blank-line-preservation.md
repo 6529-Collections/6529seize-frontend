@@ -2,11 +2,11 @@
 
 ## Overview
 
-Wave and DM markdown drops keep intentional extra blank spacing through compose,
-edit, and rendering.
+Wave and DM markdown drops keep paragraph boundaries through compose, edit, and
+rendering, with intentionally tight default paragraph spacing.
 
-Runs of empty lines created with repeated `Shift+Enter` or pasted markdown keep
-visible vertical spacing after posting and after edit saves.
+Runs of extra empty lines created with repeated `Shift+Enter` or pasted
+markdown keep visible vertical spacing after posting and after edit saves.
 
 ## Location in the Site
 
@@ -36,7 +36,10 @@ visible vertical spacing after posting and after edit saves.
 ## Common Scenarios
 
 - Writers separate sections with extra vertical space for readability.
-- Multi-paragraph drops keep visible spacing between sections after publishing.
+- Single blank-line paragraph breaks stay compact (no extra paragraph bottom
+  margin).
+- Multi-paragraph drops with extra blank lines keep visible spacing between
+  sections after publishing.
 - Existing drops with blank-line spacing can be edited without flattening
   spacing.
 - Markdown copied with Windows-style line endings keeps expected line breaks.
@@ -45,6 +48,7 @@ visible vertical spacing after posting and after edit saves.
 
 - Runs of three or more newline characters keep visible blank spacing instead
   of collapsing to a single break.
+- Triple-newline content renders one visible blank row between text paragraphs.
 - Edit mode keeps intentional blank rows visible while typing.
 - Line endings are normalized (`CRLF` to `LF`) before save/change checks, so
   pasted Windows line endings keep expected visible spacing.
@@ -64,7 +68,8 @@ visible vertical spacing after posting and after edit saves.
 
 ## Limitations / Notes
 
-- A single blank line still behaves as standard markdown paragraph separation.
+- A single blank line still behaves as standard markdown paragraph separation,
+  but uses tight visual spacing.
 - This page covers wave and DM thread composer/edit behavior plus drop-card
   rendering surfaces.
 - Wave creation description-step behavior is documented in

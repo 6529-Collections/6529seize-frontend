@@ -8,8 +8,9 @@ shown on memes single-drop views after submit.
 ## Route and Surface Coverage
 
 - Wave thread route: `/waves/{waveId}`
-- Desktop memes header action: `Submit Work to The Memes` (label can vary with
-  deadline state)
+- Desktop memes header action (non-compact header mode):
+  `Submit Work to The Memes` (label can vary with deadline state; compact
+  desktop widths can use shorter labels such as `Submit Work`)
 - Mobile leaderboard header action: `Drop`
 - Mobile chat view: floating submit button (`+`, top-right)
 - Memes single-drop route: `/waves/{waveId}?drop={dropId}` with post-submit

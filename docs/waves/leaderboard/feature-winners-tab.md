@@ -68,6 +68,8 @@ right sidebar, and what users see for loading and empty states.
 - Memes waves show media-rich winner cards with traits and vote context.
 - Non-memes waves show compact winner rows with rank, vote totals, voter
   counts, and outcome summaries.
+- Winner rank labels use ordinal place formatting (`1st`, `2nd`, `3rd`,
+  `4th`, and so on).
 - Winner rows can show your vote value when you voted on that drop.
 - On touch devices, winner-card actions use the touch action sheet instead of
   desktop hover/open controls.

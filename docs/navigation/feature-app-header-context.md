@@ -33,6 +33,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 3. Menu/avatar button state:
    - Disconnected: menu icon.
    - Connected: profile avatar when available, otherwise a circle placeholder.
+     If another connected account has unread notifications, the avatar shows a
+     small unread dot.
    - Tap opens [App Sidebar Menu](feature-app-sidebar-menu.md).
 4. Title resolves in this order:
    - `/waves/create` -> `Waves`
@@ -71,6 +73,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 - If active-wave metadata is still loading (or does not match active wave ID),
   title remains a spinner.
 - Profile routes show `Back` only when in-app history can resolve a target.
+- Menu/avatar unread dot appears only when a non-active connected account has
+  unread notifications.
 - Rememes formatting applies only when both `contract` and `tokenId` are
   present.
 - Fallback title uses the last segment only and truncates long values.
@@ -82,6 +86,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 - If create action is missing, verify you are in waves/messages list context
   and not inside an active thread.
 - If menu does not open, retry from the same top-left control.
+- If the menu/avatar unread dot looks stale, open account controls and switch
+  to the target account, then revisit `/notifications`.
 - If search closes unexpectedly, reopen it from the header search button.
 
 ## Limitations / Notes

@@ -8,7 +8,7 @@ supported NFT marketplace URL.
 This flow appears in two places:
 
 - Curation `Drop` mode in the thread composer.
-- Curation leaderboard inline composer row with a `Supported URLs` helper.
+- Curation leaderboard `Drop Artwork` modal.
 
 ## Location in the Site
 
@@ -21,18 +21,33 @@ This flow appears in two places:
 
 1. Open a curation wave thread.
 2. In thread composer, switch to `Drop` mode when chat/drop toggles are shown.
-3. In `Leaderboard`, use the inline URL composer row when eligible.
-4. Paste one supported URL and submit with `Enter` or `Drop`.
+3. Or, while still in `Post` mode, enter one supported curation URL and use
+   `Switch to Drop mode` when the inline prompt appears.
+4. In `Leaderboard`, use header `Drop Art` (or empty-state `Drop`) to open
+   `Drop Artwork` modal.
+5. Paste one supported URL and submit with `Enter` or `Submit to Curation`.
 
 ## Composer Variants
 
-- Both variants use input placeholder `Enter supported curation URL`.
+- Thread-composer variant uses input placeholder
+  `Enter supported curation URL`.
+- Leaderboard modal variant uses input placeholder `https://...`.
 - Default thread composer shows helper text:
   `Use one supported HTTPS URL only, without extra text.`
-- Leaderboard variant shows a `Supported URLs` button that opens a modal with
-  accepted URL examples.
+- Leaderboard variant shows `View Supported URLs` / `Hide Supported URLs`.
+- Supported URL examples expand inline inside the modal (no separate
+  `Supported URLs` dialog).
+- Leaderboard modal variant uses submit button label `Submit to Curation`.
 - If the value can be normalized, both variants show:
   `Will submit as: {canonicalUrl}`.
+- In curation-wave thread `Post` mode, entering one supported curation URL
+  shows:
+  `This looks like a curation URL. Switch to Drop mode`.
+- Selecting `Switch to Drop mode` opens curation `Drop` mode and seeds the URL
+  input with the normalized URL.
+- Prefill is scoped to the current wave/thread context. Switching context (for
+  example, opening another wave thread) resets mode and does not carry the old
+  prefill forward.
 - In thread composer, active reply/quote context is preserved, but drop content
   still submits as URL-only.
 
@@ -40,12 +55,14 @@ This flow appears in two places:
 
 1. Enter one URL token (no extra text).
 2. Validation appears after blur or submit attempt.
-3. Submit with `Enter` or `Drop` (button stays disabled until valid).
+3. Submit with `Enter` or composer submit button (`Drop` in thread composer,
+   `Submit to Curation` in leaderboard modal).
 4. If auth/signature/terms are required, complete that step.
 5. If auth/signature/terms is canceled, the typed URL remains in the input.
 6. When submission is queued, the input clears.
 7. In leaderboard variant only, success toast appears after server success:
    `Drop submitted successfully`.
+8. In leaderboard modal variant, successful submission also closes the modal.
 
 ## Supported URL Formats
 
@@ -97,6 +114,8 @@ rejected.
 - If server submission fails after queueing, users get an error toast and can
   retry by re-entering the URL.
 - If validation fails, users can correct the URL and resubmit immediately.
+- If leaderboard modal is closed before submission, reopen with `Drop Art` (or
+  empty-state `Drop`) and continue.
 
 ## Limitations / Notes
 

@@ -5,6 +5,7 @@ Parent: [Navigation Index](README.md)
 ## Overview
 
 In native app layout, primary section switching uses a fixed bottom icon bar.
+The bar uses a fixed `85px` shell height with centered icon buttons.
 
 Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
 `Notifications`.
@@ -63,7 +64,8 @@ Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
 - `Messages` and `Notifications` unread dots show only when a connected profile
   has unread items.
 - On non-stream routes (for example `/discover`, `/network`, `/the-memes`),
-  layout adds bottom spacing so content is not hidden behind the bar.
+  layout adds `85px` bottom reserve spacing so content is not hidden behind the
+  bar.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
   view and is non-interactive.
 - While a single drop is open (`?drop=...`) or an inline drop edit is active,
@@ -75,12 +77,15 @@ Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
 - If `Waves` or `Messages` keeps reopening a stale thread, tap that tab from an
   active thread once to reset to section root, then retry.
 - If the bar is hidden, dismiss keyboard and close drop/edit overlays first.
+- If content appears clipped under the bar, return to a section root route once
+  to reapply bottom reserve spacing.
 - If unread dots look stale, reopen the section after unread state refresh.
 
 ## Limitations / Notes
 
 - This page documents app-shell behavior only.
 - Bottom navigation uses icon buttons (no visible text labels in the bar).
+- Standard shell reserve height is `85px` when the bar is visible.
 - Secondary destinations (network/tools/about/profile/account actions) are in
   [App Sidebar Menu](feature-app-sidebar-menu.md).
 - Web desktop/small-screen routing is documented in

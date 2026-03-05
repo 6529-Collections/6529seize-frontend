@@ -5,6 +5,8 @@
 In app layout, the top-left menu/avatar button opens a left drawer for
 secondary route jumps and account actions. Primary section switching stays in
 bottom navigation.
+Connected account surfaces in this drawer can show unread notification
+indicators (dot/count badges) to help account switching.
 
 ## Location in the Site
 
@@ -28,7 +30,8 @@ bottom navigation.
 1. Open the menu/avatar button from the app header.
 2. Drawer opens from the left over the current route.
 3. Header shows:
-   - connected: profile card (avatar, handle/wallet label, level, stats)
+   - connected: profile card (avatar, handle/wallet label, level, stats, and
+     unread count badge when present)
    - disconnected: `6529` logo linking to `/`
 4. Choose `Discover` or connected `Profile`, or expand `Network`, `Tools`, or
    `About` and choose a nested route.
@@ -59,6 +62,8 @@ bottom navigation.
 - Use `Scan QR Code` for `https://6529.io/*` links and `mobile6529://` deep
   links (`navigate/*` and `share-connection` scopes).
 - Open `Push Notifications`, review per-device toggles, then save changes.
+- Use unread count badges in connected account avatars to pick the account with
+  pending notification activity.
 
 ## Edge Cases
 
@@ -71,6 +76,7 @@ bottom navigation.
   available.
 - `Scan QR Code` appears only when running in Capacitor with scanner support.
 - `Push Notifications` appears only when connected and opens an in-app modal.
+- Connected profile/account unread badges are capped at `99+`.
 - Invalid or unsupported QR content shows `Invalid QR code`.
 - Push settings save is disabled until at least one toggle changes.
 
@@ -82,6 +88,9 @@ bottom navigation.
   needed, or navigate manually.
 - If push settings fail to load/save, close and reopen `Push Notifications`, then
   retry save.
+- Opening the target wave/DM thread should clear that wave's unread state and
+  refresh unread badges after read sync. If badges still look stale, switch to
+  the target account and open `/notifications`, then reopen the drawer.
 
 ## Limitations / Notes
 

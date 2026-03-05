@@ -48,7 +48,8 @@ This page covers:
 
 - Gallery can be empty even when list rows exist if none of those drops include
   media.
-- Sort and curation-group filters can produce valid empty states.
+- Sort, curation-group, and curation price filters can produce valid empty
+  states.
 - Curation empty state can show restriction guidance (including the Level 10
   helper link) instead of drop-entry actions.
 - Empty-state drop actions can be hidden or disabled when the viewer is not

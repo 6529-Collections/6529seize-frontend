@@ -71,11 +71,19 @@ with cause filters, grouped reactions, and inline drop previews.
 
 - Opening `/notifications` marks notifications read for the active authenticated
   profile.
+- When the active identity changes (for example after account/profile switch),
+  the feed query does not reuse previous-profile rows as placeholder data.
+- During switch-account handoff between already known connected accounts,
+  notifications stay scoped to the stored active account until the new account
+  settles, preventing transient rows from an interim provider account.
 - Opening a grouped `New reactions` row drop marks that row's grouped
   notification IDs as read.
 - Opening a drop context routes to the matching wave/DM thread with serial
   context.
 - Opening a wave/DM thread marks notifications read for that wave only.
+- After a successful wave/DM read request, notifications queries are
+  invalidated so unread indicators can refresh for the active account without
+  reopening `/notifications`.
 - Older pages load from the top edge with `Loading older notifications...` and
   a top progress bar.
 - `/notifications?reload=true` triggers one refetch/read pass, then removes the

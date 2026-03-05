@@ -52,6 +52,9 @@ load older notifications.
   pass, then removes `reload` from the URL.
 - If unauthenticated, `/notifications?reload=true` removes `reload` without
   running that pass.
+- Opening a wave/DM thread from a notifications row triggers wave-level read
+  sync; after successful read sync, notifications queries invalidate so unread
+  indicators refresh for the active account.
 - Unknown causes render with a generic row so feed browsing continues.
 - Priority alerts without related drops stay text-only.
 

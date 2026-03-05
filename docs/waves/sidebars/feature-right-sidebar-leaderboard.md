@@ -38,6 +38,8 @@ This page owns compact-list behavior only. Drop-open action ownership stays in
 - Top-three rows use winner-style cards and do not show the inline vote button.
 - Non-top-three rows can show inline vote controls when voting UI is allowed
   for the viewer/drop.
+- Rank labels use ordinal place formatting across rows (`1st`, `2nd`, `3rd`,
+  `4th`, and so on).
 - Rows can show preview image/media/text content.
 - Rows can show `Storm`, `Metadata`, and media indicators with tooltips.
 - Rows with configured rewards can show an `Outcome` badge with tooltip

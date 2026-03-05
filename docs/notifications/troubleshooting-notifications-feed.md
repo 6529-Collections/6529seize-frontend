@@ -49,6 +49,8 @@ Use this page when `/notifications` is blocked, rows look missing, or read/follo
 - Opening `/notifications` marks notifications read for the active profile.
 - Opening a grouped `New reactions` drop marks that group’s notification IDs read.
 - Opening a wave/DM thread marks read for that wave/thread context only.
+- Wave/thread read sync also invalidates notifications queries for the active
+  account; if unread dots stay stale, verify the wave read request succeeded.
 - If older-page loading fails after rows are visible, visible rows stay in place and failure appears as toast feedback.
 
 ## Limitations / Notes

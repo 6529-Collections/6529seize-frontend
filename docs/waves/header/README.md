@@ -15,6 +15,10 @@ Use this area for wave-header behavior in `About` surfaces:
 - [Wave Header Controls](feature-wave-header-controls.md): `Join` / `Joined`,
   notification settings, description, followers switch, pin, rename, and owner
   options.
+- [Wave Description Preview Popover](feature-wave-description-preview-popover.md):
+  header subtitle preview + full description popover on active non-DM waves.
+- [Wave Link Share and Copy](feature-wave-link-share-copy.md): share/copy wave
+  link action behavior across supported header surfaces.
 - [Update Wave Picture](feature-wave-picture-edit.md): avatar-based picture
   update flow, file rules, and error handling.
 - [Chat and Gallery View Toggle](feature-chat-gallery-toggle.md): switch chat

@@ -19,7 +19,7 @@ Use this page for visibility rules, state switches, and route targets.
   - Mint action: `/the-memes/mint` (countdown state only)
 - `Next Drop` actions (top-section replacement mode):
   - Drop title: `/waves?wave={waveId}&drop={dropId}`
-  - Wave row link: `/waves?wave={waveId}`
+  - Wave row link: `/waves/{waveId}`
   - Artist link: `/{handle}` (only when handle exists)
 - `Coming up` actions:
   - Card title: `/waves/{waveId}?drop={dropId}`
@@ -67,6 +67,10 @@ Use this page for visibility rules, state switches, and route targets.
   - Three skeleton cards render until data is ready.
 - `Coming up` after load with no cards:
   - The full section is hidden.
+- In `Coming up` leader cards:
+  - first place can show `LEADING`
+  - other positions use `CURRENT {ordinal} PLACE` (for example
+    `CURRENT 2nd PLACE`)
 
 ## Edge Cases
 
@@ -91,7 +95,9 @@ Use this page for visibility rules, state switches, and route targets.
 - If `Coming up` card links fail, open:
   - `/waves/{waveId}`
   - `/waves/{waveId}?drop={dropId}`
-- If `Next Drop` links fail, open `/waves?wave={waveId}` directly.
+- If `Next Drop` links fail, open:
+  - `/waves/{waveId}`
+  - `/waves?wave={waveId}&drop={dropId}` (single-drop target)
 
 ## Limitations / Notes
 
@@ -99,8 +105,10 @@ Use this page for visibility rules, state switches, and route targets.
 - Leader count is capped:
   - With `NEXT MINT` card: up to 2 leader cards
   - Without `NEXT MINT` card: up to 3 leader cards
-- Top `Next Drop` links use query-style wave routes (`/waves?wave=...`), while
-  `Coming up` cards use path-style routes (`/waves/{waveId}?drop=...`).
+- `Next Drop` uses mixed route styles:
+  - title link: `/waves?wave={waveId}&drop={dropId}` (single-drop target)
+  - wave row link: `/waves/{waveId}` (canonical wave route)
+- `Coming up` cards use path-style routes (`/waves/{waveId}?drop=...`).
 - `NEXT MINT` timestamps are displayed in the viewer's local timezone/locale.
 - No auth or wallet gate is required to view these sections.
 

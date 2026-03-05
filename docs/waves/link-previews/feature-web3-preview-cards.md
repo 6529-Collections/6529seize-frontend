@@ -89,7 +89,31 @@ Only `https://` URLs match. Host must be apex or `www`.
 ## Common Scenarios
 
 - ENS cards show name/address context, records, ownership, and ENS/Etherscan links.
-- Marketplace cards show title/media/price; missing media can use fallback sources.
+- Marketplace cards show title/media/price.
+- Marketplace cards can also show a data-health status badge when metadata is
+  stale, errored, or unavailable.
+- On live `MEDIA_LINK_UPDATED` patches, marketplace cards prefer preview-image
+  URLs when present (card, then small, then thumb variants across nested and
+  flat payload shapes).
+- Marketplace data-health state is derived from resolver metadata:
+  `fresh` (recent successful update), `stale` (successful update is old),
+  `error` (failure metadata present), or `unknown` (no status metadata).
+- The data-health badge is hidden for `fresh` state and shown for
+  `stale`/`error`/`unknown` in both compact and full marketplace card layouts.
+- The badge exposes a hover/focus detail message (for example stale age or
+  resolver error reason) and uses that same text for accessibility labels.
+- If a live patch contains only `media_uri` (full asset URL) and the card
+  already has preview media, the existing preview media is retained.
+- If a card has no media cached and no preview URL is provided, `media_uri` is
+  used as the media fallback.
+- When marketplace metadata includes both `price` and `price_currency`, cards
+  render value and currency separately. If `price` already ends with the same
+  currency token, the duplicate suffix is removed from the displayed value.
+- Marketplace `Open` CTA labels use normalized price text plus currency (when
+  available) so assistive labels match the visible amount/currency state.
+- In click-through containers (for example boosted and leaderboard card
+  variants), marketplace preview interactions stay within the preview and do not
+  trigger parent-card navigation.
 - OpenSea cards filter blocked OpenGraph-overlay image URLs.
 - Art Blocks cards show project/token context with `View live` and
   `Open on Art Blocks`.
@@ -110,6 +134,8 @@ Only `https://` URLs match. Host must be apex or `www`.
 - While data loads, cards show loading placeholders/skeletons.
 - Marketplace cards can fall back to `Preview unavailable` cards with open-link
   actions.
+- Marketplace cards can surface stale or failed resolver status directly on-card
+  via the data-health badge, even when media/title/price are otherwise present.
 - ENS links can fall back to plain links when ENS preview resolution fails.
 - Art Blocks cards can keep rendering with placeholder media when metadata/media
   is missing.

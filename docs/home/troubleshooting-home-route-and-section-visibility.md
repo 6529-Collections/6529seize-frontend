@@ -73,7 +73,9 @@ This page covers:
 - `Coming up` leader count changes with `NEXT MINT`:
   - With `NEXT MINT`: up to 2 leaders.
   - Without `NEXT MINT`: up to 3 leaders.
-- Top `Next Drop` links use query-style wave routes (`/waves?wave=...`).
+- Top `Next Drop` uses mixed route styles:
+  - drop title: `/waves?wave={waveId}&drop={dropId}`
+  - wave row: `/waves/{waveId}`
 - Lower home sections use path-style wave routes (`/waves/{waveId}` with
   optional query params).
 - Discovery cards can route to `/messages` for direct-message waves.

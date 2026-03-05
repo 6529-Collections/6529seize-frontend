@@ -6,6 +6,7 @@
 It combines `Rep` and `NIC` on one route.
 
 - Desktop shows both surfaces at the same time.
+- Rep supports direction toggles: `Received` and `Given`.
 - Mobile switches between `Rep` and `Identity` subviews inside the same URL.
 
 ## Location in the Site
@@ -16,12 +17,14 @@ It combines `Rep` and `NIC` on one route.
 - Unsupported legacy route: /{user}/rep (not found)
 
 Desktop (`>= lg`):
-- Left: Rep summary, rep categories, grant/edit actions, activity log
-- Right: NIC summary, ID statements, NIC rating panel
+- Left: Rep direction toggle, summary, categories, received-only grant/edit
+  actions, activity log
+- Right: NIC summary, ID statements, and `Rate NIC` entry point
 
 Mobile (`< lg`):
-- Top cards: `Total Rep` and `NIC`
-- `Rep` subview: rep categories, `Grant Rep`, REP activity log
+- Top cards: direction-aware `Total Rep` and `NIC`
+- `Rep` subview: rep direction toggle, categories, received-only `Grant Rep`,
+  REP activity log
 - `Identity` subview: `Rate NIC`, ID statements, NIC activity log
 
 ## Entry Points
@@ -35,19 +38,35 @@ Mobile (`< lg`):
 
 1. Open a profile at `/{user}`.
 2. Read rep and NIC summaries.
-3. If actions are available, open `Grant Rep` or `Rate NIC`.
-4. Review activity logs and apply filters.
-5. On mobile, switch between `Rep` and `NIC` cards as needed.
+3. In `Rep`, switch between `Received` and `Given` as needed.
+4. If actions are available, open `Grant Rep` (received only) or `Rate NIC`.
+5. `Rate NIC` opens a modal; submit to save or select `Cancel` to close.
+6. Review activity logs and apply filters.
+7. On mobile, switch between `Rep` and `NIC` cards as needed.
 
 ## Rep Behavior
 
-- Rep categories are sorted by rating, then by contributor count.
-- Each category pill shows category, score, top-rater avatars, and rater count.
-- `My Rate` shows when your contribution for that category is non-zero.
-- Category list starts at 5 items and expands in `+N more` batches.
-- If editing is allowed:
+- Rep has two directions:
+  - `Received`: incoming rep to the viewed profile
+  - `Given`: outgoing rep from the viewed profile
+- `Total Rep` and contributor counts update with the active direction.
+- Direction-specific contributor labels:
+  - `Received`: `rater` / `raters`
+  - `Given`: `receiver` / `receivers`
+- Each category pill shows category, score, top-contributor avatars, and
+  direction-aware contributor count.
+- Contribution badge copy is direction-aware:
+  - `Received`: `My Rate`
+  - `Given`: `To Me`
+- Category list starts at 5 items and expands in `+N more` batches of 10.
+- If editing is allowed in `Received`:
   - category pill opens edit for that category
   - `Add new` (desktop) or `Grant Rep` (mobile) opens grant dialog
+- In `Given`, grant/edit controls are hidden.
+- Empty states are direction-aware:
+  - Desktop: `This identity hasn't received any rep yet.` /
+    `This identity hasn't given any rep yet.`
+  - Mobile: `No rep received yet.` / `No rep given yet.`
 
 ### Grant Rep Dialog
 
@@ -64,10 +83,12 @@ Mobile (`< lg`):
 
 ## NIC and Statements Behavior
 
-- NIC panel shows NIC value, NIC status, top-rater avatars, and rater count.
-- Desktop keeps NIC rating UI in the right column.
-- Mobile shows `Rate NIC` only in the `Identity` subview and only when rating
-  is allowed.
+- NIC panel shows NIC value, NIC status, top-contributor avatars, and rater
+  count.
+- Desktop shows a `Rate NIC` CTA in the NIC section when rating is allowed.
+- Mobile shows `Rate NIC` only in the `Identity` subview when rating is
+  allowed.
+- Desktop and mobile rating flows open a modal with `Save` and `Cancel`.
 - `Rate` is enabled only when the value changed and is valid.
 
 Statement ownership in this tab:
@@ -98,6 +119,7 @@ Statement ownership in this tab:
 
 - Rep submit failures show an error toast and keep dialog values.
 - NIC submit failures show an error toast and keep entered value.
+- Selecting `Cancel` closes NIC rating without applying changes.
 - Statement or rating fetch failures can leave empty/partial sections; refresh
   to retry.
 - Replace old `/{user}/rep` bookmarks with `/{user}`.

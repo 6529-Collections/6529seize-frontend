@@ -16,9 +16,23 @@ the `/notifications` feed and app-only push notification controls.
   proxy-profile blocking, and retry states (`Try again`).
 - Opening `/notifications` marks the feed read; opening grouped `New reactions`
   rows marks those grouped notification IDs read.
+- Opening a wave/DM thread marks that wave/thread read and invalidates
+  notifications queries so unread indicators refresh for the active account.
 - In Capacitor app builds, `Push Notifications` opens device-level toggles and
-  push tap routing that ignores payloads whose `profile_id` conflicts with the
-  connected profile.
+  push tap routing that validates target profile metadata, matches the target
+  against connected accounts, and switches to the matched account/profile
+  before navigating when possible.
+- Stable push `device_id` recovery now handles missing/invalid secure-storage
+  values by regenerating and persisting a new ID, so registration can continue
+  without a manual reset in common storage-failure cases.
+- Push registration retries transient failures automatically (for example
+  network interruption, `429`, `408`, and `5xx` responses), and applies server
+  retry hints when available.
+- Duplicate push registration attempts with the same `device_id`, token, and
+  profile in one active app session are skipped.
+- When the active connected profile changes, the `/notifications` feed reloads
+  for the new identity without reusing previous-profile rows as placeholder
+  content.
 - Use this area when notifications fail to load, rows appear stale, or mobile
   push settings/tap routing fail.
 

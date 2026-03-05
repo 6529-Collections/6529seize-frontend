@@ -10,6 +10,8 @@ On web layouts, route switching is sidebar-first.
 - Narrow desktop web: collapsed icon rail that can open as an overlay panel.
 - Touch small-screen web: header menu button opens the same sidebar as overlay.
 - `Messages` and `Notifications` can show unread dots for connected profiles.
+- Connected account avatar in the sidebar account area can show an unread dot
+  when another connected account has unread notifications.
 
 ## Location in the Site
 
@@ -60,6 +62,8 @@ On web layouts, route switching is sidebar-first.
 
 - `Messages` and `Notifications` unread dots require connected profile handle
   plus unread state.
+- Connected user avatar unread dot reflects unread notifications on other
+  connected accounts (not the active one).
 - Active grouped route auto-expands its section on route load/change.
 - In collapsed mode, selecting the same group toggles flyout open/closed.
 - Flyouts close on outside click, `Escape`, or when rail exits collapsed mode.
@@ -77,6 +81,9 @@ On web layouts, route switching is sidebar-first.
 - If profile handle is missing, `Profile` route falls back to wallet address.
 - If overlay looks stuck, close with backdrop, `Escape`, or route change.
 - If submenu state looks stale, toggle the group or rail again.
+- Opening the target wave/DM thread should clear that wave's unread state and
+  refresh unread indicators after read sync. If indicators still look stale,
+  open `/notifications` for the target account and retry after refresh.
 - If a row is missing, verify auth/device/country/app-wallet gating.
 
 ## Limitations / Notes

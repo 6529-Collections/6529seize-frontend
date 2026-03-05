@@ -32,10 +32,12 @@ This step is user-reachable for `Chat` and `Rank`.
   `Admin`
 - `Rank` only:
   - `Enable chat` toggle controls whether `Who can chat` is editable
-  - `Allow admins to delete drops` toggle sets admin delete permission
+- `Chat` and `Rank`:
+  - `Allow admins to delete posts` toggle sets admin delete permission
 - Defaults:
   - `Anyone` for view/drop/vote/chat
   - `Only me` for admin
+  - `Allow admins to delete posts` is enabled by default
 
 ## Group Picker Behavior
 
@@ -59,8 +61,7 @@ This step is user-reachable for `Chat` and `Rank`.
 - If both `Who can view` and `Admin` are set to explicit groups, `Warning:
   Limited Access` appears.
 - On `Rank`, turning `Enable chat` off disables editing for `Who can chat`.
-- On `Rank`, turning on `Allow admins to delete drops` shows:
-  `Admins will be able to delete drops after they've been submitted.`
+- `Allow admins to delete posts` does not show extra helper text when enabled.
 
 ## Failure and Recovery
 

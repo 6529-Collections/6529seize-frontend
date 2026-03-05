@@ -90,6 +90,8 @@ Users can:
 
 - Detailed notification and mute behavior is owned by
   [Wave Notification Controls and Mute Behavior](../sidebars/feature-wave-notification-controls.md).
+- Active thread-header title/subtitle preview + popover behavior is owned by
+  [Wave Description Preview Popover](feature-wave-description-preview-popover.md).
 - Detailed pin limits and cross-surface pin behavior is owned by
   [Pinned Wave Controls](../sidebars/feature-pinned-wave-controls.md).
 - Direct-message route behavior is owned by
@@ -99,6 +101,7 @@ Users can:
 ## Related Pages
 
 - [Wave Header Index](README.md)
+- [Wave Description Preview Popover](feature-wave-description-preview-popover.md)
 - [Update Wave Picture](feature-wave-picture-edit.md)
 - [Chat and Gallery View Toggle](feature-chat-gallery-toggle.md)
 - [Wave Notification Controls and Mute Behavior](../sidebars/feature-wave-notification-controls.md)

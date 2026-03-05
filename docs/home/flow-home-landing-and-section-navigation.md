@@ -24,7 +24,7 @@ next route.
   - `Mint` action: `/the-memes/mint` (when countdown shows the button)
 - `Next Drop` (top slot replacement):
   - Title: `/waves?wave={waveId}&drop={dropId}`
-  - Wave row: `/waves?wave={waveId}`
+  - Wave row: `/waves/{waveId}`
   - Artist: `/{handleOrPrimaryAddress}`
 - `Coming up`:
   - Card title: `/waves/{waveId}?drop={dropId}`
@@ -75,8 +75,9 @@ next route.
 - `Most active waves` shows skeleton cards while fetching, then hides on error
   or empty data.
 - Home uses mixed wave route styles:
-  - Query style (`/waves?wave=...`) in top `Next Drop`.
-  - Path style (`/waves/{waveId}`) in lower sections.
+  - Top `Next Drop` title uses query style (`/waves?wave=...&drop=...`).
+  - Top `Next Drop` wave row uses path style (`/waves/{waveId}`).
+  - Lower home sections also use path style (`/waves/{waveId}`).
 - On touch devices, interactive HTML cards in `Coming up` can show `Tap to
   load` before media activation.
 - The health shortcut stays available on `/`, but placement changes by layout

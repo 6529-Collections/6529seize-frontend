@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ -z "${BASH_VERSION:-}" ]; then
+  if command -v bash >/dev/null 2>&1; then
+    exec bash "$0" "$@"
+  fi
+  printf '%s\n' "This script requires bash, but bash was not found in PATH." >&2
+  exit 1
+fi
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 META_FILE="$REPO_ROOT/docs/meta.json"
@@ -135,20 +143,25 @@ while true; do
   if [ "$pending_count" -eq 0 ]; then
     queue_head_commit="$(git -C "$REPO_ROOT" rev-parse HEAD)"
 
-    if ! mapfile -t pending_commits < <(git -C "$REPO_ROOT" rev-list --topo-order --reverse "${last_commit}..${queue_head_commit}" 2>/dev/null); then
+    if ! pending_json="$(
+      git -C "$REPO_ROOT" rev-list --topo-order --reverse "${last_commit}..${queue_head_commit}" 2>/dev/null | jq -R . | jq -s .
+    )"; then
       error "Failed to query git history."
       exit 4
     fi
 
-    if [ "${#pending_commits[@]}" -eq 0 ]; then
+    if ! pending_count="$(jq -r 'length' <<<"$pending_json" 2>/dev/null)"; then
+      error "Failed to parse queued commits."
+      exit 4
+    fi
+
+    if [ "$pending_count" -eq 0 ]; then
       printf "No newer commit exists after '%s'. Queue exhausted.\n" "$last_commit"
       printf 'Processed %d commit(s) from docs queue.\n' "$processed_count"
       exit 0
     fi
 
-    pending_json="$(printf '%s\n' "${pending_commits[@]}" | jq -R . | jq -s .)"
     update_commit_queue "$last_commit" "$queue_head_commit" "$pending_json"
-    pending_count="${#pending_commits[@]}"
     printf "Queued %d commit(s) from '%s' to '%s'.\n" "$pending_count" "$last_commit" "$queue_head_commit"
   fi
 
