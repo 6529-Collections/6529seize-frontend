@@ -526,7 +526,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         if (isKnownStoredAccount && activeStoredAddress) {
           const isActiveStoredAddressValid = isAddress(activeStoredAddress);
           if (isActiveStoredAddressValid) {
-            const checksummedStoredActiveAddress = getAddress(activeStoredAddress);
+            const checksummedStoredActiveAddress =
+              getAddress(activeStoredAddress);
             const isStoredActiveKnownAccount = storedConnectedAccounts.some(
               (storedAccount) =>
                 normalizeAddress(storedAccount.address) ===
