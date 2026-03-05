@@ -16,13 +16,22 @@ export const useWaveDropsNotificationRead = ({
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
 
   useEffect(() => {
-    removeWaveDeliveredNotifications(waveId);
-    commonApiPostWithoutBodyAndResponse({
-      endpoint: `notifications/wave/${waveId}/read`,
-    })
-      .then(() => {
-        invalidateNotifications();
+    const syncReadState = async () => {
+      try {
+        await Promise.resolve(removeWaveDeliveredNotifications(waveId));
+      } catch (error) {
+        console.error("Failed to remove wave delivered notifications:", error);
+      }
+
+      commonApiPostWithoutBodyAndResponse({
+        endpoint: `notifications/wave/${waveId}/read`,
       })
-      .catch((error) => console.error("Failed to mark feed as read:", error));
+        .then(() => {
+          invalidateNotifications();
+        })
+        .catch((error) => console.error("Failed to mark feed as read:", error));
+    };
+
+    syncReadState();
   }, [waveId, removeWaveDeliveredNotifications, invalidateNotifications]);
 };
