@@ -135,7 +135,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   return (
     <div
-      className="tailwind-scope tw-relative tw-flex tw-h-full tw-flex-col"
+      className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-w-0 tw-flex-col"
       key={stableWaveKey}
     >
       {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
@@ -147,7 +147,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       />
 
       <div
-        className="tw-relative tw-flex-grow tw-overflow-hidden"
+        className="tw-relative tw-min-w-0 tw-flex-grow tw-overflow-hidden"
         role="tabpanel"
         id={getContentTabPanelId(activeContentTab)}
       >
