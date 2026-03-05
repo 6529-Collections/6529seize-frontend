@@ -3,28 +3,43 @@ import { useIdentity } from "@/hooks/useIdentity";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
+import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
 import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
 import type {
   ApiProfileRepRatesState,
-  CicStatement} from "@/entities/IProfile";
-import {
-  CLASSIFICATIONS
+  CicStatement,
 } from "@/entities/IProfile";
+import { CLASSIFICATIONS } from "@/entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useId, useMemo, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
+
+interface UserProfileTooltipProps {
+  readonly user: string;
+  readonly onArtistPreviewOpen?:
+    | ((params: {
+        readonly user: ApiProfileMin;
+        readonly initialTab: ArtistPreviewTab;
+      }) => void)
+    | undefined;
+  readonly onWaveCreatorPreviewOpen?:
+    | ((user: ApiProfileMin) => void)
+    | undefined;
+}
 
 export default function UserProfileTooltip({
   user,
-}: {
-  readonly user: string;
-}) {
+  onArtistPreviewOpen,
+  onWaveCreatorPreviewOpen,
+}: UserProfileTooltipProps) {
   const { profile } = useIdentity({
     handleOrWallet: user,
     initialProfile: null,
@@ -51,18 +66,19 @@ export default function UserProfileTooltip({
     enabled: !!user && !!profile?.handle,
   });
 
-  const { data: followersData } = useQuery<ApiIncomingIdentitySubscriptionsPage>({
-    queryKey: [
-      QueryKey.IDENTITY_FOLLOWERS,
-      { profile_id: profile?.id, page_size: 1 },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
-        endpoint: `identity-subscriptions/incoming/IDENTITY/${profile?.id}`,
-        params: { page_size: "1" },
-      }),
-    enabled: !!profile?.id,
-  });
+  const { data: followersData } =
+    useQuery<ApiIncomingIdentitySubscriptionsPage>({
+      queryKey: [
+        QueryKey.IDENTITY_FOLLOWERS,
+        { profile_id: profile?.id, page_size: 1 },
+      ],
+      queryFn: async () =>
+        await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
+          endpoint: `identity-subscriptions/incoming/IDENTITY/${profile?.id ?? profile?.primary_wallet}`,
+          params: { page_size: "1" },
+        }),
+      enabled: !!profile?.id,
+    });
 
   const followersCount = followersData?.count ?? 0;
 
@@ -97,17 +113,23 @@ export default function UserProfileTooltip({
     normalizedProfileHandle &&
     normalizedProfileHandle !== normalizedConnectedHandle
   );
+  const tooltipInstanceId = useId();
+  const badgesTooltipIdPrefix = useMemo(
+    () =>
+      `user-profile-tooltip-author-badges-${tooltipInstanceId.replace(/:/g, "")}`,
+    [tooltipInstanceId]
+  );
 
   return (
-    <div className="tailwind-scope tw-bg-iron-950 tw-min-w-[280px] tw-max-w-[320px]">
+    <div className="tailwind-scope tw-min-w-[280px] tw-max-w-[320px] tw-bg-iron-950">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-flex-1 tw-min-w-0">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
           <div className="tw-flex-shrink-0">
             <DropPfp pfpUrl={profile?.pfp} />
           </div>
-          <div className="tw-flex tw-flex-col tw-min-w-0">
+          <div className="tw-flex tw-min-w-0 tw-flex-col">
             <div className="tw-flex tw-items-center tw-gap-x-2">
-              <span className="tw-text-base tw-font-bold tw-text-iron-50 tw-truncate tw-max-w-[180px]">
+              <span className="tw-max-w-[180px] tw-truncate tw-text-base tw-font-bold tw-text-iron-50">
                 {profile?.handle ?? profile?.display}
               </span>
               {profile && (
@@ -116,9 +138,19 @@ export default function UserProfileTooltip({
                   size={UserCICAndLevelSize.SMALL}
                 />
               )}
+              {profile && (
+                <DropAuthorBadges
+                  profile={profile}
+                  tooltipIdPrefix={badgesTooltipIdPrefix}
+                  onArtistPreviewOpen={onArtistPreviewOpen}
+                  onWaveCreatorPreviewOpen={onWaveCreatorPreviewOpen}
+                />
+              )}
             </div>
             {description && (
-              <p className="tw-text-xs tw-text-iron-400 tw-mb-0">{description}</p>
+              <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+                {description}
+              </p>
             )}
           </div>
         </div>
@@ -132,7 +164,7 @@ export default function UserProfileTooltip({
         )}
       </div>
       {aboutStatement && (
-        <p className="tw-text-sm tw-text-iron-200 tw-line-clamp-2 tw-mb-0 tw-mt-4">
+        <p className="tw-mb-0 tw-mt-4 tw-line-clamp-2 tw-text-sm tw-text-iron-200">
           {aboutStatement.statement_value}
         </p>
       )}

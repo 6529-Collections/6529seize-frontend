@@ -1,13 +1,30 @@
-import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import UserProfileTooltip from '@/components/user/utils/profile/UserProfileTooltip';
+import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
 
-jest.mock('@/components/drops/create/utils/DropPfp', () => ({ __esModule: true, default: () => <div data-testid="pfp" /> }));
-jest.mock('@/hooks/useIdentity', () => ({
+let capturedDropAuthorBadgesProps: any = null;
+
+jest.mock("@/components/drops/create/utils/DropPfp", () => ({
+  __esModule: true,
+  default: () => <div data-testid="pfp" />,
+}));
+jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
+  DropAuthorBadges: (props: any) => {
+    capturedDropAuthorBadgesProps = props;
+    return (
+      <div
+        data-testid="author-badges"
+        data-profile-handle={props.profile?.handle ?? ""}
+        data-tooltip-prefix={props.tooltipIdPrefix ?? ""}
+      />
+    );
+  },
+}));
+jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: () => ({
     profile: {
-      handle: 'alice',
-      pfp: 'a',
+      handle: "alice",
+      pfp: "a",
       tdh: 1,
       tdh_rate: 2.9,
       xtdh: 7.4,
@@ -15,16 +32,19 @@ jest.mock('@/hooks/useIdentity', () => ({
       level: 2,
       cic: 3,
       rep: 4,
-      consolidation_key: 'key'
-    }
-  })
+      consolidation_key: "key",
+    },
+  }),
 }));
-jest.mock('@/hooks/useIdentityBalance', () => ({ useIdentityBalance: () => ({ data: { total_balance: 5 } }) }));
+jest.mock("@/hooks/useIdentityBalance", () => ({
+  useIdentityBalance: () => ({ data: { total_balance: 5 } }),
+}));
 
-describe('UserProfileTooltip', () => {
+describe("UserProfileTooltip", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
+    capturedDropAuthorBadgesProps = null;
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -32,30 +52,57 @@ describe('UserProfileTooltip', () => {
     });
   });
 
-  it('renders profile information', () => {
+  it("renders profile information", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <UserProfileTooltip user="alice" />
       </QueryClientProvider>
     );
-    expect(screen.getByTestId('pfp')).toBeInTheDocument();
-    expect(screen.getByText('alice')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('TDH')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
-    expect(screen.getByText('NIC')).toBeInTheDocument();
-    const tdhRateLabel = screen.getByText('TDH Rate');
+    expect(screen.getByTestId("pfp")).toBeInTheDocument();
+    expect(screen.getByText("alice")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText("TDH")).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
+    expect(screen.getByText("NIC")).toBeInTheDocument();
+    const tdhRateLabel = screen.getByText("TDH Rate");
     expect(tdhRateLabel).toBeInTheDocument();
-    expect(tdhRateLabel.previousElementSibling?.textContent).toBe('2');
-    expect(screen.queryByText('2.9')).not.toBeInTheDocument();
-    const xtdhRateLabel = screen.getByText('xTDH Rate');
-    expect(xtdhRateLabel.previousElementSibling?.textContent).toBe('9');
-    expect(screen.queryByText('9.2')).not.toBeInTheDocument();
-    const xtdhLabel = screen.getByText('xTDH');
-    expect(xtdhLabel.previousElementSibling?.textContent).toBe('7');
-    expect(screen.getByText('4')).toBeInTheDocument();
-    expect(screen.getByText('REP')).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('Balance')).toBeInTheDocument();
+    expect(tdhRateLabel.previousElementSibling?.textContent).toBe("2");
+    expect(screen.queryByText("2.9")).not.toBeInTheDocument();
+    const xtdhRateLabel = screen.getByText("xTDH Rate");
+    expect(xtdhRateLabel.previousElementSibling?.textContent).toBe("9");
+    expect(screen.queryByText("9.2")).not.toBeInTheDocument();
+    const xtdhLabel = screen.getByText("xTDH");
+    expect(xtdhLabel.previousElementSibling?.textContent).toBe("7");
+    expect(screen.getByText("4")).toBeInTheDocument();
+    expect(screen.getByText("REP")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getByText("Balance")).toBeInTheDocument();
+    const badges = screen.getByTestId("author-badges");
+    expect(badges).toHaveAttribute("data-profile-handle", "alice");
+    expect(badges.getAttribute("data-tooltip-prefix")).toContain(
+      "user-profile-tooltip-author-badges-"
+    );
+  });
+
+  it("passes preview-open callbacks to author badges when provided", () => {
+    const onArtistPreviewOpen = jest.fn();
+    const onWaveCreatorPreviewOpen = jest.fn();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <UserProfileTooltip
+          user="alice"
+          onArtistPreviewOpen={onArtistPreviewOpen}
+          onWaveCreatorPreviewOpen={onWaveCreatorPreviewOpen}
+        />
+      </QueryClientProvider>
+    );
+
+    expect(capturedDropAuthorBadgesProps.onArtistPreviewOpen).toBe(
+      onArtistPreviewOpen
+    );
+    expect(capturedDropAuthorBadgesProps.onWaveCreatorPreviewOpen).toBe(
+      onWaveCreatorPreviewOpen
+    );
   });
 });
