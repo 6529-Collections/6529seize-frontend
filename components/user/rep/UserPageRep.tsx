@@ -76,7 +76,7 @@ export default function UserPageRep({
           endpoint: `profiles/${user}/rep/categories`,
           params: {
             page: "1",
-            page_size: "20",
+            page_size: "100",
             top_contributors_limit: "5",
           },
         }),
@@ -110,7 +110,7 @@ export default function UserPageRep({
           params: {
             direction: "outgoing",
             page: "1",
-            page_size: "20",
+            page_size: "100",
             top_contributors_limit: "5",
           },
         }),
