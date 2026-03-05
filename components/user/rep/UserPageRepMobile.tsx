@@ -129,6 +129,7 @@ export default function UserPageRepMobile({
           >
             <MobileRepTabContent
               profile={profile}
+              overview={overview}
               categories={categories}
               repDirection={repDirection}
               onRepDirectionChange={onRepDirectionChange}
@@ -181,17 +182,9 @@ export default function UserPageRepMobile({
               profile={profile}
               isTooltip={false}
               onSuccess={() => setIsNicRateOpen(false)}
+              onCancel={() => setIsNicRateOpen(false)}
             />
           </UserPageRateWrapper>
-          <div className="tw-mt-3">
-            <button
-              onClick={() => setIsNicRateOpen(false)}
-              type="button"
-              className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
-            >
-              Cancel
-            </button>
-          </div>
         </div>
       </MobileWrapperDialog>
 

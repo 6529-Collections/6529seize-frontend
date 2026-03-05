@@ -26,7 +26,6 @@ export default function MobileIdentityTabContent({
 }) {
   return (
     <>
-      {/* Rate NIC CTA */}
       {canEditNic && (
         <div className="tw-mt-4">
           <UserPageRateWrapper
@@ -34,15 +33,18 @@ export default function MobileIdentityTabContent({
             type={RateMatter.NIC}
             hideOwnProfileMessage
           >
-            <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-500/5 tw-px-5 tw-py-3">
+            <button
+              type="button"
+              onClick={onRateNic}
+              className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-500/5 tw-px-4 tw-py-2.5 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-emerald-500/10"
+            >
               {cicOverview !== null && cicOverview.authenticated_user_contribution !== null &&
               cicOverview.authenticated_user_contribution !== 0 ? (
                 <span className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-500">
                   <FingerprintIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-emerald-400" />
-                  Your Rate:{" "}
-                  <span
-                    className={`tw-font-semibold ${cicOverview.authenticated_user_contribution >= 0 ? "tw-text-emerald-400" : "tw-text-rose-400"}`}
-                  >
+                  Your Rating:{" "}
+                  <span className="tw-font-semibold tw-text-iron-300">
+                    {cicOverview.authenticated_user_contribution > 0 && "+"}
                     {formatNumberWithCommas(
                       cicOverview.authenticated_user_contribution
                     )}
@@ -53,13 +55,10 @@ export default function MobileIdentityTabContent({
                   Verify this identity
                 </span>
               )}
-              <button
-                onClick={onRateNic}
-                className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-500 tw-bg-emerald-500 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-zinc-950 tw-transition tw-duration-300 tw-ease-out hover:tw-border-emerald-400 hover:tw-bg-emerald-400"
-              >
+              <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-600 tw-bg-emerald-600 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white">
                 Rate NIC
-              </button>
-            </div>
+              </span>
+            </button>
           </UserPageRateWrapper>
         </div>
       )}

@@ -7,7 +7,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useMemo } from "react";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
-import { RateNicButton, RateNicInfo } from "./RateNicCta";
+import { RateNicButton } from "./RateNicCta";
 
 const TOP_RATERS_COUNT = 5;
 
@@ -47,12 +47,9 @@ export default function UserPageIdentityHeaderCIC({
   );
 
   return (
-    <div className="tw-mb-8">
-      <div className="tw-mb-5 tw-flex tw-items-center tw-justify-between">
-        <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-          NIC
-        </div>
-        {onRateClick && <RateNicButton onRateClick={onRateClick} />}
+    <div className="tw-mb-6">
+      <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+        NIC
       </div>
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-6">
         <div className="tw-flex tw-flex-col tw-items-start">
@@ -80,14 +77,26 @@ export default function UserPageIdentityHeaderCIC({
           </span>
         </div>
       </div>
-      {cicOverview !== null && cicOverview.authenticated_user_contribution !== null &&
-        cicOverview.authenticated_user_contribution !== 0 && (
-          <div className="tw-mt-4">
-            <RateNicInfo
-              userContribution={cicOverview.authenticated_user_contribution}
-            />
-          </div>
-        )}
+      {onRateClick && (
+        <div className="tw-mt-4 tw-flex tw-items-center tw-gap-3">
+          <RateNicButton onRateClick={onRateClick} />
+          {cicOverview !== null &&
+            cicOverview.authenticated_user_contribution !== null &&
+            cicOverview.authenticated_user_contribution !== 0 && (
+              <div className="tw-flex tw-items-center tw-gap-x-1.5">
+                <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+                  Your Rating:
+                </span>
+                <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
+                  {cicOverview.authenticated_user_contribution > 0 && "+"}
+                  {formatNumberWithCommas(
+                    cicOverview.authenticated_user_contribution
+                  )}
+                </span>
+              </div>
+            )}
+        </div>
+      )}
     </div>
   );
 }

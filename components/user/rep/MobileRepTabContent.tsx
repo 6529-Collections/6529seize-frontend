@@ -1,6 +1,8 @@
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RateMatter } from "@/types/enums";
 import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
 import type { RepDirection } from "./UserPageRep.helpers";
@@ -31,6 +33,7 @@ function RepEmptyState({
 
 export default function MobileRepTabContent({
   profile,
+  overview,
   categories,
   repDirection,
   onRepDirectionChange,
@@ -43,6 +46,7 @@ export default function MobileRepTabContent({
   onEditCategory,
 }: {
   readonly profile: ApiIdentity;
+  readonly overview: ApiRepOverview | null;
   readonly categories: ApiRepCategory[];
   readonly repDirection: RepDirection;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
@@ -63,14 +67,29 @@ export default function MobileRepTabContent({
             type={RateMatter.REP}
             hideOwnProfileMessage
           >
-            <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/30 tw-bg-blue-400/5 tw-px-5 tw-py-3">
-              <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
-                Add rep to this identity
-              </span>
-              <button
-                onClick={onGrantRep}
-                className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-400 hover:tw-bg-primary-400"
-              >
+            <button
+              type="button"
+              onClick={onGrantRep}
+              className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/30 tw-bg-blue-400/5 tw-px-4 tw-py-2.5 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-blue-400/10"
+            >
+              {overview !== null &&
+              overview.authenticated_user_contribution !== null &&
+              overview.authenticated_user_contribution !== 0 ? (
+                <span className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
+                  You Assigned:{" "}
+                  <span className="tw-font-semibold tw-text-iron-300">
+                    {overview.authenticated_user_contribution > 0 && "+"}
+                    {formatNumberWithCommas(
+                      overview.authenticated_user_contribution
+                    )}
+                  </span>
+                </span>
+              ) : (
+                <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
+                  Add rep to this identity
+                </span>
+              )}
+              <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white">
                 <svg
                   className="-tw-ml-1 tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
                   viewBox="0 0 24 24"
@@ -84,15 +103,14 @@ export default function MobileRepTabContent({
                   <path d="M12 5v14M5 12h14" />
                 </svg>
                 Grant Rep
-              </button>
-            </div>
+              </span>
+            </button>
           </UserPageRateWrapper>
         </div>
       )}
 
-      {/* Rep Categories */}
       <div className="tw-mt-4">
-        <div className="tw-mb-4 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-100">
+        <div className="tw-mb-4 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
           Rep Categories
         </div>
 
@@ -120,7 +138,7 @@ export default function MobileRepTabContent({
             onClick={() => onRepDirectionChange("given")}
             className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
               repDirection === "given"
-                ? "tw-text-iron-100"
+                ? "tw-text-iron-100 tw-font-semibold"
                 : "tw-text-iron-500 hover:tw-text-iron-300"
             }`}
           >

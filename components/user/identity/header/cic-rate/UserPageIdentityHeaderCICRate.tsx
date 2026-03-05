@@ -36,10 +36,12 @@ export default function UserPageIdentityHeaderCICRate({
   profile,
   isTooltip,
   onSuccess,
+  onCancel,
 }: {
   readonly profile: ApiIdentity;
   readonly isTooltip: boolean;
   readonly onSuccess?: () => void;
+  readonly onCancel?: () => void;
 }) {
   const { address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
@@ -317,17 +319,28 @@ export default function UserPageIdentityHeaderCICRate({
 
             {adjustmentHelper}
 
-            <button
-              type="submit"
-              disabled={isSaveDisabled}
-              className={`${
-                isSaveDisabled
-                  ? "tw-cursor-not-allowed tw-opacity-50"
-                  : "hover:tw-border-emerald-400 hover:tw-bg-emerald-400 active:tw-scale-[0.98]"
-              } tw-mt-4 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-emerald-500 tw-bg-emerald-500 tw-py-3.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out`}
-            >
-              {fullButtonContent}
-            </button>
+            <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 md:tw-flex-row-reverse">
+              <button
+                type="submit"
+                disabled={isSaveDisabled}
+                className={`${
+                  isSaveDisabled
+                    ? "tw-cursor-not-allowed tw-opacity-40"
+                    : "hover:tw-border-emerald-500 hover:tw-bg-emerald-500 active:tw-scale-[0.98]"
+                } tw-w-full md:tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-600 tw-bg-emerald-600 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out`}
+              >
+                {fullButtonContent}
+              </button>
+              {onCancel && (
+                <button
+                  onClick={onCancel}
+                  type="button"
+                  className="tw-w-full md:tw-flex-1 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </>
         )}
       </form>
