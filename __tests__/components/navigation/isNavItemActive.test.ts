@@ -14,6 +14,30 @@ describe("isNavItemActive", () => {
     ).toBe(true);
   });
 
+  it("returns true for Network item when on /xtdh with no active view", () => {
+    const item: NavItem = {
+      kind: "route",
+      name: "Network",
+      href: "/network",
+      icon: "",
+    } as any;
+    expect(
+      isNavItemActive(item, "/xtdh", new URLSearchParams(), null, false)
+    ).toBe(true);
+  });
+
+  it("returns false for Collections item when on /xtdh", () => {
+    const item: NavItem = {
+      kind: "route",
+      name: "Collections",
+      href: "/the-memes",
+      icon: "",
+    } as any;
+    expect(
+      isNavItemActive(item, "/xtdh", new URLSearchParams(), null, false)
+    ).toBe(false);
+  });
+
   it("marks Home active on root with no overlay", () => {
     const item: NavItem = {
       kind: "route",
