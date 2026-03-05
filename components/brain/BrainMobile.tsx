@@ -344,7 +344,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="tw-flex-1"
+          className="tw-min-w-0 tw-flex-1"
         >
           {viewComponents[activeView]}
         </motion.div>
