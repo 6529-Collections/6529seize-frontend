@@ -3,7 +3,7 @@
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import { motion } from "framer-motion";
-import type { FC } from "react";
+import { useMemo, type FC } from "react";
 import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
 import AirdropConfig from "../components/AirdropConfig";
 import AllowlistBatchManager, {
@@ -15,10 +15,17 @@ import {
   type AirdropEntry,
   type PaymentInfo,
 } from "../types/OperationalData";
+import type { TraitsData } from "../types/TraitsData";
 import { validateStrictAddress } from "../utils/addressValidation";
+import {
+  METADATA_VALUE_MAX_LENGTH,
+  getSubmissionMetadataLengthValidation,
+  type MetadataValueLengthStatus,
+} from "../utils/submissionMetadata";
 import { validateTokenIdFormat } from "../utils/tokenParsing";
 
 interface AdditionalInfoStepProps {
+  readonly traits: TraitsData;
   readonly airdropEntries: AirdropEntry[];
   readonly onAirdropEntriesChange: (entries: AirdropEntry[]) => void;
   readonly paymentInfo: PaymentInfo;
@@ -45,6 +52,7 @@ interface AdditionalInfoStepProps {
 }
 
 const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
+  traits,
   airdropEntries,
   onAirdropEntriesChange,
   paymentInfo,
@@ -69,6 +77,54 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
+  const metadataLengthValidation = useMemo(
+    () =>
+      getSubmissionMetadataLengthValidation({
+        traits,
+        operationalData: {
+          airdrop_config: airdropEntries,
+          payment_info: paymentInfo,
+          allowlist_batches: allowlistBatches,
+          additional_media: {
+            artist_profile_media: [],
+            artwork_commentary_media: supportingMedia,
+            preview_image: previewImage,
+            promo_video: promoVideo,
+          },
+          commentary: artworkCommentary,
+          about_artist: aboutArtist,
+        },
+      }),
+    [
+      traits,
+      airdropEntries,
+      paymentInfo,
+      allowlistBatches,
+      supportingMedia,
+      previewImage,
+      promoVideo,
+      artworkCommentary,
+      aboutArtist,
+    ]
+  );
+
+  const metadataStatuses = metadataLengthValidation.statusesByKey;
+  const aboutArtistStatus = metadataStatuses["about_artist"];
+  const commentaryStatus = metadataStatuses["commentary"];
+
+  const metadataLengthError = (
+    status: MetadataValueLengthStatus | undefined
+  ): string | undefined => {
+    if (!status?.isError) {
+      return undefined;
+    }
+
+    return `${status.length}/${METADATA_VALUE_MAX_LENGTH} characters exceeds limit`;
+  };
+
+  const aboutArtistError = metadataLengthError(aboutArtistStatus);
+  const artworkCommentaryError = metadataLengthError(commentaryStatus);
+
   const getContractError = (address: string) => {
     // Only show error if user has typed something invalid
     // Empty fields are handled by submit button being disabled
@@ -142,6 +198,8 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
     // If video/HTML submission, require a preview image
     if (requiresPreviewImage && !previewImage) return false;
 
+    if (metadataLengthValidation.hasErrors) return false;
+
     return true;
   };
 
@@ -163,16 +221,19 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
         <AirdropConfig
           entries={airdropEntries}
           onEntriesChange={onAirdropEntriesChange}
+          airdropLengthStatus={metadataStatuses["airdrop_config"]}
         />
 
         <PaymentConfig
           paymentInfo={paymentInfo}
           onPaymentInfoChange={onPaymentInfoChange}
+          paymentInfoLengthStatus={metadataStatuses["payment_info"]}
         />
 
         <AllowlistBatchManager
           batches={allowlistBatches}
           onBatchesChange={onBatchesChange}
+          allowlistLengthStatus={metadataStatuses["allowlist_batches"]}
           errors={allowlistBatches.map((batch) => {
             const contractError = getContractError(batch.contract);
             const tokenIdsError = getTokenIdsError(batch.token_ids_raw);
@@ -197,6 +258,23 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
           onPromoVideoChange={onPromoVideoChange}
           onArtworkCommentaryChange={onArtworkCommentaryChange}
           onAboutArtistChange={onAboutArtistChange}
+          aboutArtistLengthStatus={
+            aboutArtistStatus?.isWarning && !aboutArtistStatus.isError
+              ? aboutArtistStatus
+              : undefined
+          }
+          artworkCommentaryLengthStatus={
+            commentaryStatus?.isWarning && !commentaryStatus.isError
+              ? commentaryStatus
+              : undefined
+          }
+          additionalMediaLengthStatus={metadataStatuses["additional_media"]}
+          errors={{
+            ...(aboutArtistError ? { aboutArtist: aboutArtistError } : {}),
+            ...(artworkCommentaryError
+              ? { artworkCommentary: artworkCommentaryError }
+              : {}),
+          }}
         />
       </div>
 

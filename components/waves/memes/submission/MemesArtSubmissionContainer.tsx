@@ -266,6 +266,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         />
       ) : (
         <AdditionalInfoStep
+          traits={form.traits}
           airdropEntries={form.operationalData.airdrop_config}
           onAirdropEntriesChange={form.setAirdropConfig}
           paymentInfo={form.operationalData.payment_info}

@@ -5,16 +5,20 @@ import React, { useCallback, useState } from "react";
 import { TraitWrapper } from "../../traits/TraitWrapper";
 import type { PaymentInfo } from "../types/OperationalData";
 import FormSection from "../ui/FormSection";
+import MetadataLengthHint from "../ui/MetadataLengthHint";
 import { validateStrictAddress } from "../utils/addressValidation";
+import type { MetadataValueLengthStatus } from "../utils/submissionMetadata";
 
 interface PaymentConfigProps {
   readonly paymentInfo: PaymentInfo;
   readonly onPaymentInfoChange: (paymentInfo: PaymentInfo) => void;
+  readonly paymentInfoLengthStatus?: MetadataValueLengthStatus | undefined;
 }
 
 const PaymentConfig: React.FC<PaymentConfigProps> = ({
   paymentInfo,
   onPaymentInfoChange,
+  paymentInfoLengthStatus,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasEnsError, setHasEnsError] = useState(false);
@@ -74,6 +78,10 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
       <p className="-tw-mt-1 tw-mb-3 tw-text-sm tw-text-iron-500">
         Address to receive split of minting proceeds.
       </p>
+      <MetadataLengthHint
+        status={paymentInfoLengthStatus}
+        className="-tw-mt-2 tw-mb-3"
+      />
 
       <div className="tw-mb-5">
         <label className="tw-flex tw-cursor-pointer tw-items-center tw-gap-3">
