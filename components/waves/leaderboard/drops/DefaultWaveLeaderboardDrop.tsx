@@ -37,6 +37,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   // Use the hook for long press interactions
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
+    preventDefault: false,
   });
 
   const getBorderClasses = () => {
