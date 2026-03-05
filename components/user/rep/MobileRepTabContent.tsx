@@ -109,6 +109,23 @@ export default function MobileRepTabContent({
         </div>
       )}
 
+      {repDirection === "given" &&
+        overview !== null &&
+        overview.authenticated_user_contribution !== null &&
+        overview.authenticated_user_contribution !== 0 && (
+          <div className="tw-mt-4 tw-flex tw-items-center tw-gap-1.5 tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-4 tw-py-2.5">
+            <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+              Assigned To You:
+            </span>
+            <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
+              {overview.authenticated_user_contribution > 0 && "+"}
+              {formatNumberWithCommas(
+                overview.authenticated_user_contribution
+              )}
+            </span>
+          </div>
+        )}
+
       <div className="tw-mt-4">
         <div className="tw-mb-4 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
           Rep Categories
