@@ -509,6 +509,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
+      const activeStoredAddress = getWalletAddress();
+
       if (
         account.address &&
         account.isConnected &&
@@ -520,6 +522,32 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
             normalizeAddress(storedAccount.address) ===
             normalizeAddress(checksummedConnectedAddress)
         );
+
+        if (isKnownStoredAccount && activeStoredAddress) {
+          const isActiveStoredAddressValid = isAddress(activeStoredAddress);
+          if (isActiveStoredAddressValid) {
+            const checksummedStoredActiveAddress =
+              getAddress(activeStoredAddress);
+            const isStoredActiveKnownAccount = storedConnectedAccounts.some(
+              (storedAccount) =>
+                normalizeAddress(storedAccount.address) ===
+                normalizeAddress(checksummedStoredActiveAddress)
+            );
+            const isSwitchTransition =
+              normalizeAddress(checksummedConnectedAddress) !==
+              normalizeAddress(checksummedStoredActiveAddress);
+
+            if (isStoredActiveKnownAccount && isSwitchTransition) {
+              const isAlreadyConnected =
+                walletState.status === "connected" &&
+                walletState.address === checksummedStoredActiveAddress;
+              if (!isAlreadyConnected) {
+                setConnected(checksummedStoredActiveAddress);
+              }
+              return;
+            }
+          }
+        }
 
         // If wallet is connected to an address that is not in stored profiles yet,
         // prefer the live wallet address so auth can prompt and add it.
@@ -556,8 +584,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
       }
-
-      const activeStoredAddress = getWalletAddress();
 
       if (activeStoredAddress && isAddress(activeStoredAddress)) {
         const checksummedStoredAddress = getAddress(activeStoredAddress);
