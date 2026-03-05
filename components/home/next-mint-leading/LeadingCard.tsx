@@ -90,7 +90,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
           <span
             className={`tw-text-[11px] tw-font-semibold tw-leading-5 tw-tracking-wide ${rankLabelClass}`}
           >
-            {rank === 1 ? "LEADING" : `CURRENT ${formatOrdinal(rank)} PLACE`}
+            {rank === 1 ? "LEADING" : `${formatOrdinal(rank)} PLACE`}
           </span>
           <span className="tw-font-mono tw-text-xs">
             <span className="tw-text-white/80">
