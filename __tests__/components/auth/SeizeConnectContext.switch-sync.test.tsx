@@ -54,9 +54,13 @@ const AddressProbe: React.FC = () => {
   return <div data-testid="active-address">{address ?? "undefined"}</div>;
 };
 
-const buildStoredAccount = (address: string) => ({
+const buildStoredAccount = (
+  address: string
+): authUtils.ConnectedWalletAccount => ({
   address,
+  refreshToken: "dummy-refresh-token",
   role: null,
+  jwt: null,
   profileId: null,
   profileHandle: null,
 });
