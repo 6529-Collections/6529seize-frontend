@@ -23,8 +23,10 @@ import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
+import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
+import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 
-const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
+const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
   readonly wave: ApiWave;
   readonly viewMode: WaveViewMode;
@@ -46,11 +48,13 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const breakpoint = useBreakpoint();
-  const isMobile = breakpoint === "S";
+  const isCompact = breakpoint === "S";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
   const showShareAction = !isDirectMessage;
+  const previewText = getWaveDescriptionPreviewText(wave);
+  const showDescriptionPreview = showShareAction && !!previewText;
   const {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
@@ -109,8 +113,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-bg-iron-950">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 sm:tw-px-4">
-        <div className="tw-flex tw-min-w-0 tw-items-center">
-          {isMobile && (
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-3">
+          {isCompact && (
             <button
               onClick={handleMobileBack}
               className="-tw-ml-2.5 tw-mr-1.5 tw-flex tw-h-full tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-px-2.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50"
@@ -119,83 +123,55 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
               <ArrowLeftIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
             </button>
           )}
-          {isMobile ? (
-            <button
-              type="button"
-              onClick={() => setIsSearchOpen(true)}
-              aria-label="Search messages in this wave"
-              className="tw-flex tw-min-w-0 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+          <div className="tw-size-9 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
+            <WavePicture
+              name={wave.name}
+              picture={wave.picture}
+              contributors={wave.contributors_overview.map((c) => ({
+                pfp: c.contributor_pfp,
+              }))}
+            />
+          </div>
+          {showDescriptionPreview ? (
+            <WaveDescriptionPopover
+              wave={wave}
+              align="left"
+              ariaLabel="Show wave description"
+              triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
             >
-              <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950 lg:tw-size-9">
-                <WavePicture
-                  name={wave.name}
-                  picture={wave.picture}
-                  contributors={wave.contributors_overview.map((c) => ({
-                    pfp: c.contributor_pfp,
-                  }))}
-                />
-              </div>
-              <h1 className="tw-mb-0 tw-ml-3 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+              <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
                 {wave.name}
               </h1>
-            </button>
+              <span className="tw-mt-0.5 tw-block tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
+                {previewText}
+              </span>
+            </WaveDescriptionPopover>
           ) : (
-            <>
-              <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950 lg:tw-size-9">
-                <WavePicture
-                  name={wave.name}
-                  picture={wave.picture}
-                  contributors={wave.contributors_overview.map((c) => ({
-                    pfp: c.contributor_pfp,
-                  }))}
-                />
-              </div>
-              <h1 className="tw-mb-0 tw-ml-3 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-                {wave.name}
-              </h1>
-              {showGalleryToggle && (
-                <button
-                  type="button"
-                  onClick={onToggleViewMode}
-                  aria-label={
-                    viewMode === "chat"
-                      ? "Switch to gallery view"
-                      : "Switch to chat view"
-                  }
-                  className="tw-ml-2 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
-                >
-                  {viewMode === "chat" ? (
-                    <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                  ) : (
-                    <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                  )}
-                </button>
-              )}
-              {showShareAction && (
-                <button
-                  type="button"
-                  onClick={handleWaveLinkActionClick}
-                  aria-label={waveLinkActionLabel}
-                  title={waveLinkActionLabel}
-                  data-wave-link-action-mode={waveLinkActionMode}
-                  className={`tw-ml-2 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white ${waveLinkActionIconColor}`}
-                >
-                  {renderWaveLinkActionIcon()}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setIsSearchOpen(true)}
-                aria-label="Search messages in this wave"
-                className="tw-ml-2 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
-              >
-                <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-              </button>
-            </>
+            <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+              {wave.name}
+            </h1>
           )}
         </div>
-        <div className="tw-flex tw-items-center tw-gap-x-2 tw-self-stretch">
-          {isMobile && showShareAction && (
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch">
+          {showGalleryToggle && (
+            <button
+              type="button"
+              onClick={onToggleViewMode}
+              aria-label={
+                viewMode === "chat"
+                  ? "Switch to gallery view"
+                  : "Switch to chat view"
+              }
+              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+            >
+              {viewMode === "chat" ? (
+                <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+              ) : (
+                <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+              )}
+            </button>
+          )}
+          {showShareAction && (
             <button
               type="button"
               onClick={handleWaveLinkActionClick}
@@ -207,6 +183,14 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
               {renderWaveLinkActionIcon()}
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            aria-label="Search messages in this wave"
+            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+          >
+            <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+          </button>
           <button
             type="button"
             onClick={toggleRightSidebar}

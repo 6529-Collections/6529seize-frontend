@@ -5,9 +5,11 @@ import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 export default function UserPageIdentityHeader({
   profile,
   cicOverview,
+  onRateClick,
 }: {
   readonly profile: ApiIdentity;
   readonly cicOverview: ApiCicOverview | null;
+  readonly onRateClick?: () => void;
 }) {
   return (
     <div className="tw-px-6 tw-pt-6">
@@ -20,7 +22,11 @@ export default function UserPageIdentityHeader({
           identity?
         </p>
       </div>
-      <UserPageIdentityHeaderCIC profile={profile} cicOverview={cicOverview} />
+      <UserPageIdentityHeaderCIC
+        profile={profile}
+        cicOverview={cicOverview}
+        {...(onRateClick ? { onRateClick } : {})}
+      />
     </div>
   );
 }

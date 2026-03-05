@@ -85,13 +85,11 @@ export default function UserPageIdentityStatements({
   }, [statements]);
 
   return (
-    <div className="lg:tw-border-t lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-solid lg:tw-border-white/10 tw-pt-6 tw-px-6">
+    <div className="tw-px-4 tw-pt-4 lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-t lg:tw-border-solid lg:tw-border-white/10 lg:tw-px-6 lg:tw-pt-6">
       <div>
-        <UserPageIdentityAddStatementsHeader
-          profile={profile}
-        />
-        <div className="tw-mt-2 lg:tw-mt-4 tw-scroll-py-3 tw-overflow-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-transparent desktop-hover:hover:tw-scrollbar-thumb-iron-500">
-          <div className="tw-relative tw-pb-6 lg:tw-pb-8 tw-mx-auto tw-grid tw-grid-cols-1 xl:tw-gap-x-8 xl:tw-gap-y-2 lg:tw-mx-0 xl:tw-grid-cols-5">
+        <UserPageIdentityAddStatementsHeader profile={profile} />
+        <div className="tw-scroll-py-3 tw-overflow-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500 lg:tw-mt-4">
+          <div className="tw-relative tw-mx-auto tw-grid tw-grid-cols-1 tw-pb-6 lg:tw-mx-0 lg:tw-pb-8 xl:tw-grid-cols-5 xl:tw-gap-x-8 xl:tw-gap-y-2">
             <div className="tw-col-span-full tw-space-y-6 md:tw-space-y-8">
               <div className="tw-grid tw-grid-cols-1 tw-gap-y-6">
                 <div>
@@ -138,8 +136,9 @@ export default function UserPageIdentityStatements({
           positionStrategy="fixed"
           offset={8}
           opacity={1}
-          style={TOOLTIP_STYLES}>
-          <ul className="tw-m-0 tw-py-2 tw-pl-4 tw-list-disc tw-text-iron-300 tw-font-normal tw-space-y-1">
+          style={TOOLTIP_STYLES}
+        >
+          <ul className="tw-m-0 tw-list-disc tw-space-y-1 tw-py-2 tw-pl-4 tw-font-normal tw-text-iron-300">
             <li>All statements are optional.</li>
             <li>All statements are fully and permanently public.</li>
             <li>

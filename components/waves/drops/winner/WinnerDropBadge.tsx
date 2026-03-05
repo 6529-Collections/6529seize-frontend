@@ -1,4 +1,5 @@
 import React from "react";
+import { formatOrdinal } from "@/helpers/format.helpers";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,16 +22,6 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
 
   const rankNumber = effectiveRank;
 
-  function getOrdinalSuffix(n: number): string {
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-
-    if (mod10 === 1 && mod100 !== 11) return "st";
-    if (mod10 === 2 && mod100 !== 12) return "nd";
-    if (mod10 === 3 && mod100 !== 13) return "rd";
-    return "th";
-  }
-
   const dateTime =
     decisionTime !== null && decisionTime !== 0 && !Number.isNaN(decisionTime)
       ? new Date(decisionTime)
@@ -52,30 +43,26 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
 
   let colorClasses = "";
   let textColorClass = "";
-  let rankText = "";
+  const rankText = formatOrdinal(rankNumber);
 
   switch (rankNumber) {
     case 1:
       colorClasses =
         "tw-bg-yellow-500/10 tw-text-yellow-400 tw-border-yellow-500/20";
       textColorClass = "tw-text-amber-400";
-      rankText = "1st";
       break;
     case 2:
       colorClasses = "tw-bg-iron-400/10 tw-text-iron-300 tw-border-iron-400/20";
       textColorClass = "tw-text-iron-300";
-      rankText = "2nd";
       break;
     case 3:
       colorClasses =
         "tw-bg-amber-600/10 tw-text-amber-500 tw-border-amber-600/20";
       textColorClass = "tw-text-amber-600";
-      rankText = "3rd";
       break;
     default:
       colorClasses = "tw-bg-iron-600/20 tw-text-iron-400 tw-border-iron-600/20";
       textColorClass = "tw-text-iron-500";
-      rankText = `${rankNumber}${getOrdinalSuffix(rankNumber)}`;
   }
 
   if (variant === "simple") {

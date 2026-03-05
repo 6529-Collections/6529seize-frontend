@@ -29,6 +29,9 @@ interface LinkRendererConfig {
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
   readonly tweetPreviewMode?: TweetPreviewMode | undefined;
+  readonly isMemesWaveById?:
+    | ((waveId: string | undefined | null) => boolean)
+    | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -70,6 +73,7 @@ export const createLinkRenderer = ({
   currentDropId,
   hideLinkPreviews = false,
   tweetPreviewMode = "auto",
+  isMemesWaveById,
   embedPath,
   quotePath,
   embedDepth = 0,
@@ -83,6 +87,7 @@ export const createLinkRenderer = ({
     quotePath: quotePath ?? [],
     embedDepth,
     maxEmbedDepth,
+    isMemesWaveById,
   });
   const handlers = createLinkHandlers({
     tweetPreviewMode,
@@ -104,7 +109,8 @@ export const createLinkRenderer = ({
       return null;
     }
 
-    const stableHref = ensureStableSeizeLink(href);
+    const rawHref = href;
+    const stableHref = ensureStableSeizeLink(rawHref);
     if (!isValidLink(stableHref)) {
       return null;
     }
@@ -113,7 +119,7 @@ export const createLinkRenderer = ({
     const anchorProps = { ...props, href: stableHref };
     const renderFallbackAnchor = () =>
       renderExternalOrInternalLink(stableHref, anchorProps);
-    const matchSeize = findMatch(seizeHandlers, stableHref);
+    const matchSeize = findMatch(seizeHandlers, rawHref);
     const renderOpenGraph = () => {
       if (!shouldUseOpenGraphPreview(stableHref, parsedUrl)) {
         return renderFallbackAnchor();
@@ -151,9 +157,12 @@ export const createLinkRenderer = ({
       </ErrorBoundary>
     );
 
-    const renderFromHandler = (handler: LinkHandler): ReactElement | null => {
+    const renderFromHandler = (
+      handler: LinkHandler,
+      targetHref: string
+    ): ReactElement | null => {
       try {
-        const rendered = handler.render(stableHref);
+        const rendered = handler.render(targetHref);
         return renderHandlerContent(rendered);
       } catch {
         const ogContent = tryRenderOpenGraph();
@@ -209,7 +218,7 @@ export const createLinkRenderer = ({
     }
 
     if (matchSeize) {
-      const rendered = renderFromHandler(matchSeize);
+      const rendered = renderFromHandler(matchSeize, rawHref);
       if (rendered) {
         return rendered;
       }
@@ -218,7 +227,7 @@ export const createLinkRenderer = ({
     const matchExternal = findMatch(handlers, stableHref);
 
     if (matchExternal) {
-      const rendered = renderFromHandler(matchExternal);
+      const rendered = renderFromHandler(matchExternal, stableHref);
       if (rendered) {
         return rendered;
       }
@@ -241,13 +250,14 @@ export const createLinkRenderer = ({
       return false;
     }
 
-    const stableHref = ensureStableSeizeLink(href);
+    const rawHref = href;
+    const stableHref = ensureStableSeizeLink(rawHref);
     if (!isValidLink(stableHref)) {
       return false;
     }
 
     const parsedUrl = parseUrl(stableHref);
-    const seizeMatch = findMatch(seizeHandlers, stableHref);
+    const seizeMatch = findMatch(seizeHandlers, rawHref);
     if (seizeMatch) {
       return seizeMatch.display === "block";
     }

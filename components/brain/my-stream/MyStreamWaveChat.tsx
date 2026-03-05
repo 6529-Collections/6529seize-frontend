@@ -8,6 +8,7 @@ import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -24,7 +25,7 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
 
@@ -50,6 +51,7 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
 }) => {
   const { setUnreadDividerSerialNo } = useUnreadDivider();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
+  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
 
   useEffect(() => {
     return () => {
@@ -57,15 +59,29 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
       void (async () => {
         try {
           await Promise.resolve(removeWaveDeliveredNotifications(waveId));
+        } catch (error: unknown) {
+          console.error(
+            "Failed to remove wave delivered notifications:",
+            error
+          );
+        }
+
+        try {
           await commonApiPostWithoutBodyAndResponse({
             endpoint: `notifications/wave/${waveId}/read`,
           });
+          invalidateNotifications();
         } catch (error: unknown) {
           console.error("Failed to mark feed as read:", error);
         }
       })();
     };
-  }, [waveId, setUnreadDividerSerialNo, removeWaveDeliveredNotifications]);
+  }, [
+    waveId,
+    setUnreadDividerSerialNo,
+    removeWaveDeliveredNotifications,
+    invalidateNotifications,
+  ]);
 
   return null;
 };

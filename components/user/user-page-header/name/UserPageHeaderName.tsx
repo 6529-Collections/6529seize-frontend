@@ -85,17 +85,17 @@ export default function UserPageHeaderName({
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           {profile?.classification && (
             <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
-              <div className="tw-block tw-text-sm tw-font-medium tw-leading-4 tw-text-zinc-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-white">
+              <div className="tw-block tw-text-sm tw-font-medium tw-leading-4 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-white">
                 {CLASSIFICATIONS[profile.classification].title}
               </div>
             </UserPageClassificationWrapper>
           )}
           {profileEnabledLabel && (
-            <span className="tw-text-zinc-600 sm:tw-text-zinc-700">&bull;</span>
+            <span className="tw-text-iron-600 sm:tw-text-iron-700">&bull;</span>
           )}
           {profileEnabledLabel && (
             <p
-              className="tw-mb-0 tw-text-sm tw-font-medium tw-text-zinc-500"
+              className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-500"
               suppressHydrationWarning
             >
               Profile enabled: {profileEnabledLabel}

@@ -20,7 +20,10 @@ export default function RepCategoryPill({
   readonly compact?: boolean;
   readonly direction?: RepDirection;
 }) {
-  const paddingClass = compact ? "tw-px-3 tw-py-2" : "tw-px-4 tw-py-2.5";
+  const paddingClass = compact ? "tw-px-3 tw-py-2" : "tw-px-4 tw-h-11";
+  const layoutClass = compact
+    ? "tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2.5 tw-gap-y-1.5"
+    : "tw-inline-flex tw-items-center tw-gap-2.5";
 
   const avatarItems = useMemo(
     () =>
@@ -46,14 +49,14 @@ export default function RepCategoryPill({
   const content = (
     <>
       <span className="tw-inline-flex tw-items-center tw-gap-1.5">
-        <span className="tw-text-left tw-text-sm tw-font-medium tw-text-white">
+        <span className="tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-white">
           {category.category}
         </span>
         <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors group-hover:tw-text-iron-300">
           {formatNumberWithCommas(category.total_rep)}
         </span>
       </span>
-      <span className="tw-text-xs tw-text-white/20">&middot;</span>
+      <span className={`tw-text-xs tw-text-white/20 ${compact ? "tw-hidden sm:tw-inline" : ""}`}>&middot;</span>
       <span className="tw-inline-flex tw-items-center tw-gap-1.5">
         {avatarItems.length > 0 && (
           <span
@@ -74,12 +77,16 @@ export default function RepCategoryPill({
           {getContributorLabel(direction, category.contributor_count)}
         </span>
       </span>
-      {!!category.authenticated_user_contribution && (
+      {category.authenticated_user_contribution !== null &&
+        category.authenticated_user_contribution !== 0 && (
         <>
           <span className="tw-text-xs tw-text-white/20">&middot;</span>
           <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
-            {direction === "given" ? "To Me:" : "My Rate:"}{" "}
+            {direction === "given"
+              ? "Assigned To You:"
+              : "You Assigned:"}{" "}
             <span className="tw-font-medium tw-text-primary-400">
+              {category.authenticated_user_contribution > 0 && "+"}
               {formatNumberWithCommas(category.authenticated_user_contribution)}
             </span>
           </span>
@@ -88,7 +95,7 @@ export default function RepCategoryPill({
     </>
   );
 
-  const baseClasses = `group tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out ${paddingClass}`;
+  const baseClasses = `group ${layoutClass} tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#18191B] tw-transition-all tw-duration-300 tw-ease-out ${paddingClass}`;
 
   if (canEdit) {
     return (

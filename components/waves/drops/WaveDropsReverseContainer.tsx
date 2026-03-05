@@ -88,7 +88,7 @@ export const WaveDropsReverseContainer = forwardRef<
       };
     }, []);
 
-    React.useImperativeHandle(ref, () => scrollContainerRef.current!);
+    React.useImperativeHandle(ref, () => scrollContainerRef.current!, []);
 
     return (
       <div

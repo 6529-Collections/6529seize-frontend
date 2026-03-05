@@ -6,6 +6,7 @@ import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.scss";
 import "@/styles/Home.module.scss";
 import "@/styles/seize-bootstrap.scss";
+import "swiper/css";
 import "@/styles/swiper.scss";
 //keep this last so that we can override the styles of the above css files
 import "@/styles/animations.scss";

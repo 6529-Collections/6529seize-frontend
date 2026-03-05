@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useMemo } from "react";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
@@ -17,6 +17,56 @@ interface MyStreamWaveTabsMemeSubmitProps {
   readonly handleMemesSubmit: () => void;
 }
 
+const HEADER_ACTION_BUTTON_CLASS =
+  "tw-max-w-[11.5rem] tw-whitespace-nowrap lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
+const HEADER_ACTION_BUTTON_TEXT_CLASS = "tw-min-w-0 tw-truncate";
+const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
+
+const getActiveLabels = ({
+  canSubmit,
+  isEndingVerySoon,
+  isEndingHighlyUrgent,
+  isEndingSoon,
+}: {
+  canSubmit: boolean;
+  isEndingVerySoon: boolean;
+  isEndingHighlyUrgent: boolean;
+  isEndingSoon: boolean;
+}): { activeLabelFull: string; activeLabelCompact: string } => {
+  if (!canSubmit) {
+    return {
+      activeLabelFull: "Submit Work to The Memes",
+      activeLabelCompact: "Submit Work",
+    };
+  }
+
+  if (isEndingVerySoon) {
+    return {
+      activeLabelFull: ACTIVE_LABEL_SUBMIT_MEME,
+      activeLabelCompact: ACTIVE_LABEL_SUBMIT_MEME,
+    };
+  }
+
+  if (isEndingHighlyUrgent) {
+    return {
+      activeLabelFull: ACTIVE_LABEL_SUBMIT_MEME,
+      activeLabelCompact: ACTIVE_LABEL_SUBMIT_MEME,
+    };
+  }
+
+  if (isEndingSoon) {
+    return {
+      activeLabelFull: "Submit Meme (Closes Soon!)",
+      activeLabelCompact: ACTIVE_LABEL_SUBMIT_MEME,
+    };
+  }
+
+  return {
+    activeLabelFull: "Submit Work to The Memes",
+    activeLabelCompact: "Submit Work",
+  };
+};
+
 /**
  * Button component for The Memes submissions with multiple states:
  * - Coming soon (blue info button with countdown)
@@ -34,10 +84,9 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   wave,
   handleMemesSubmit,
 }) => {
-  
   // Get wave information including participation status
   const waveInfo = useWave(wave);
-  
+
   // Call hooks before any conditional returns
   // This ensures hooks are called consistently in the same order
   const targetTime =
@@ -45,7 +94,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       ? waveInfo?.participation.startTime
       : null;
   const countdown = useCountdown(targetTime);
-  
+
   // Get end time for ending soon countdown - must be called before any returns
   const endTimeForCountdown = waveInfo?.participation.endTime ?? null;
   const endingCountdown = useCountdown(endTimeForCountdown);
@@ -59,7 +108,6 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   if (!waveInfo) {
     return null;
   }
-
 
   // Determine submission status
   const submissionStatus = waveInfo.participation.status;
@@ -77,9 +125,16 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       : "Submissions are closed";
 
     return (
-      <ClosedButton title={tooltipText}>
-        <CalendarClosedIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
-        <span>Submissions Closed</span>
+      <ClosedButton
+        title={tooltipText}
+        fullWidth={false}
+        className={HEADER_ACTION_BUTTON_CLASS}
+      >
+        <CalendarClosedIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
+          <span className="xl:tw-hidden">Closed</span>
+          <span className="tw-hidden xl:tw-inline">Submissions Closed</span>
+        </span>
       </ClosedButton>
     );
   }
@@ -91,21 +146,41 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       : "Submissions will open soon";
 
     return (
-      <InfoButton disabled={true} title={tooltipText} variant="info">
-        <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
-        <span>Submissions Open {countdown}</span>
+      <InfoButton
+        disabled={true}
+        title={tooltipText}
+        variant="info"
+        fullWidth={false}
+        className={HEADER_ACTION_BUTTON_CLASS}
+      >
+        <ClockIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
+          <span className="xl:tw-hidden">Opens {countdown}</span>
+          <span className="tw-hidden xl:tw-inline">
+            Submissions Open {countdown}
+          </span>
+        </span>
       </InfoButton>
     );
   }
-  
+
   // Not eligible state - user doesn't have permission to submit
   if (waveInfo.participation.isEligible === false) {
     const tooltipText = "You don't have permission to submit to this wave";
-    
+
     return (
-      <InfoButton disabled={true} title={tooltipText} variant="muted">
-        <PermissionIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
-        <span>Not Eligible to Submit</span>
+      <InfoButton
+        disabled={true}
+        title={tooltipText}
+        variant="muted"
+        fullWidth={false}
+        className={HEADER_ACTION_BUTTON_CLASS}
+      >
+        <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
+          <span className="xl:tw-hidden">Not Eligible</span>
+          <span className="tw-hidden xl:tw-inline">Not Eligible to Submit</span>
+        </span>
       </InfoButton>
     );
   }
@@ -119,12 +194,21 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
     const tooltipText = `You have already submitted the maximum allowed (${submissionText})`;
 
     return (
-      <InfoButton disabled={true} title={tooltipText} variant="muted">
-        <LimitIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
-        <span>
-          {maxSubmissions === 1
-            ? "Submission Limit Reached (1)"
-            : `Submission Limit Reached (${maxSubmissions})`}
+      <InfoButton
+        disabled={true}
+        title={tooltipText}
+        variant="muted"
+        fullWidth={false}
+        className={HEADER_ACTION_BUTTON_CLASS}
+      >
+        <LimitIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
+          <span className="xl:tw-hidden">Limit Reached</span>
+          <span className="tw-hidden xl:tw-inline">
+            {maxSubmissions === 1
+              ? "Submission Limit Reached (1)"
+              : `Submission Limit Reached (${maxSubmissions})`}
+          </span>
         </span>
       </InfoButton>
     );
@@ -135,34 +219,34 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
     waveInfo.participation.remainingSubmissions !== null &&
     waveInfo.participation.remainingSubmissions <= 3 &&
     waveInfo.participation.remainingSubmissions > 0;
-    
+
   // Define time thresholds for different urgency levels
   const ONE_HOUR_MS = 60 * 60 * 1000; // 1 hour in milliseconds
   const SIX_HOURS_MS = 6 * ONE_HOUR_MS; // 6 hours in milliseconds
   const ONE_DAY_MS = 24 * ONE_HOUR_MS; // 24 hours in milliseconds
   const now = Date.now();
-  
+
   // Calculate time remaining until submissions end
   const endTime = waveInfo.participation.endTime;
   const timeRemaining = endTime ? endTime - now : null;
-  
+
   // Check urgency levels based on time remaining
-  const isEndingVerySoon = 
-    waveInfo.participation.isWithinPeriod && 
-    timeRemaining !== null && 
-    timeRemaining < ONE_HOUR_MS && 
+  const isEndingVerySoon =
+    waveInfo.participation.isWithinPeriod &&
+    timeRemaining !== null &&
+    timeRemaining < ONE_HOUR_MS &&
     timeRemaining > 0;
-    
-  const isEndingHighlyUrgent = 
-    waveInfo.participation.isWithinPeriod && 
-    timeRemaining !== null && 
-    timeRemaining < SIX_HOURS_MS && 
+
+  const isEndingHighlyUrgent =
+    waveInfo.participation.isWithinPeriod &&
+    timeRemaining !== null &&
+    timeRemaining < SIX_HOURS_MS &&
     timeRemaining > 0;
-    
-  const isEndingSoon = 
-    waveInfo.participation.isWithinPeriod && 
-    timeRemaining !== null && 
-    timeRemaining < ONE_DAY_MS && 
+
+  const isEndingSoon =
+    waveInfo.participation.isWithinPeriod &&
+    timeRemaining !== null &&
+    timeRemaining < ONE_DAY_MS &&
     timeRemaining > 0;
 
   // Format tooltip text based on state
@@ -179,6 +263,13 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
             ? `Submissions closing soon! Ends on ${new Date(endTime).toLocaleString()}`
             : "Submit your art for The Memes"
     : "You cannot submit at this time";
+  const { activeLabelFull, activeLabelCompact } = getActiveLabels({
+    canSubmit,
+    isEndingVerySoon,
+    isEndingHighlyUrgent,
+    isEndingSoon,
+  });
+  const showSplitActiveLabels = activeLabelCompact !== activeLabelFull;
 
   // Active state - submissions are open
   return (
@@ -190,14 +281,14 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       title={tooltipText}
     >
       {isEndingVerySoon && canSubmit ? (
-        <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-red-500 tw-animate-pulse" />
+        <ClockIcon className="tw-text-red-500 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-animate-pulse" />
       ) : isEndingHighlyUrgent && canSubmit ? (
-        <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-amber-500 tw-animate-pulse" />
+        <ClockIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-animate-pulse tw-text-amber-500" />
       ) : isEndingSoon && canSubmit ? (
-        <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-amber-400" />
+        <ClockIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-amber-400" />
       ) : (
         <svg
-          className="tw-w-5 tw-h-5 tw-flex-shrink-0"
+          className="tw-h-5 tw-w-5 tw-flex-shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -226,36 +317,32 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
           />
         </svg>
       )}
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <span>
-          {!canSubmit
-            ? "Submit Work to The Memes"
-            : isEndingVerySoon 
-              ? "Submit Meme" 
-              : isEndingHighlyUrgent
-                ? "Submit Meme"
-                : isEndingSoon 
-                  ? "Submit Meme (Closes Soon!)" 
-                  : "Submit Work to The Memes"
-          }
-        </span>
-        
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap">
+        {showSplitActiveLabels ? (
+          <>
+            <span className="xl:tw-hidden">{activeLabelCompact}</span>
+            <span className="tw-hidden xl:tw-inline">{activeLabelFull}</span>
+          </>
+        ) : (
+          <span>{activeLabelFull}</span>
+        )}
+
         {/* Show appropriate badges based on state */}
         {isEndingVerySoon && canSubmit && (
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-red-600 tw-border tw-border-white/30 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-white tw-animate-pulse">
+          <span className="tw-bg-red-600 tw-hidden tw-animate-pulse tw-items-center tw-rounded-full tw-border tw-border-white/30 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-white xl:tw-inline-flex">
             Closing {endingCountdown}!
           </span>
         )}
-        
+
         {isEndingHighlyUrgent && !isEndingVerySoon && canSubmit && (
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-amber-600 tw-border tw-border-white/30 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-white">
+          <span className="tw-hidden tw-items-center tw-rounded-full tw-border tw-border-white/30 tw-bg-amber-600 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-white xl:tw-inline-flex">
             Closing {endingCountdown}
           </span>
         )}
-        
+
         {/* Show remaining submissions badge - only show if not very urgent */}
         {hasLimitedRemaining && !isEndingVerySoon && canSubmit && (
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-600 tw-border tw-border-white/30 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-white">
+          <span className="tw-hidden tw-items-center tw-rounded-full tw-border tw-border-white/30 tw-bg-primary-600 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-white xl:tw-inline-flex">
             {waveInfo.participation.remainingSubmissions === 1
               ? "Last One!"
               : `${waveInfo.participation.remainingSubmissions} Left`}
