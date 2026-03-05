@@ -189,7 +189,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   return (
     <li>
-      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/40">
+      <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/40">
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-px-3 tw-py-2">
           <div className="tw-min-w-0 tw-flex-1">
             <div className="tw-flex tw-items-center tw-gap-1">
@@ -291,7 +291,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         {isOpen && (
           <div
             id={`consolidated-address-panel-${address.wallet}`}
-            className="tw-border-t tw-border-solid tw-border-white/10 tw-px-3 tw-pb-3 tw-pt-2"
+            className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-3 tw-pb-3 tw-pt-2"
           >
             <div className="tw-space-y-2.5">
               <div>
