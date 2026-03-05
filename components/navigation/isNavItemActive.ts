@@ -57,12 +57,6 @@ export const isNavItemActive = (
         !isMessagesView
       );
     }
-    if (item.name === "Discover") {
-      return (
-        (pathname === "/discover" || pathname.startsWith("/discover/")) &&
-        activeView === null
-      );
-    }
     return pathname === item.href && activeView === null;
   }
 

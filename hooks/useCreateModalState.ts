@@ -1,15 +1,11 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import {
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useDeviceInfo from "./useDeviceInfo";
 
-export const CREATE_QUERY_KEY = "create";
-export const CREATE_WAVE_VALUE = "wave";
+const CREATE_QUERY_KEY = "create";
+const CREATE_WAVE_VALUE = "wave";
 export const CREATE_DIRECT_MESSAGE_VALUE = "dm";
 
 type CreateModalMode =
@@ -41,7 +37,7 @@ export default function useCreateModalState() {
         params.delete(CREATE_QUERY_KEY);
       }
 
-      const basePath = pathname || "/discover";
+      const basePath = pathname || "/waves";
       const query = params.toString();
 
       return query ? `${basePath}?${query}` : basePath;
@@ -85,7 +81,7 @@ export default function useCreateModalState() {
         if (value === CREATE_DIRECT_MESSAGE_VALUE) {
           return "/messages/create";
         }
-        return pathname || "/discover";
+        return pathname || "/waves";
       }
 
       return buildDestination(value);
