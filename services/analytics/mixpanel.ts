@@ -10,6 +10,7 @@ const MIXPANEL_TOKEN = publicEnv.NEXT_PUBLIC_MIXPANEL_TOKEN;
 
 let hasInitialized = false;
 let identifiedDistinctId: string | null = null;
+let isTrackingAllowed = false;
 
 const sanitizeProperties = (
   properties: AnalyticsProperties = {}
@@ -24,9 +25,9 @@ const sanitizeProperties = (
   }, {});
 };
 
-const isAnalyticsEnabled = (): boolean => {
+const isAnalyticsEnvironmentSupported = (): boolean => {
   return (
-    typeof globalThis.window !== "undefined" &&
+    Reflect.has(globalThis, "window") &&
     publicEnv.NODE_ENV === "production" &&
     typeof MIXPANEL_TOKEN === "string" &&
     MIXPANEL_TOKEN.length > 0
@@ -34,12 +35,19 @@ const isAnalyticsEnabled = (): boolean => {
 };
 
 const isAnalyticsReady = (): boolean => {
-  return hasInitialized && isAnalyticsEnabled();
+  return (
+    hasInitialized && isTrackingAllowed && isAnalyticsEnvironmentSupported()
+  );
 };
 
 export const initAnalytics = (): boolean => {
   const token = MIXPANEL_TOKEN;
-  if (!isAnalyticsEnabled() || hasInitialized || !token) {
+  if (!isAnalyticsEnvironmentSupported() || !token) {
+    return false;
+  }
+  isTrackingAllowed = true;
+
+  if (hasInitialized) {
     return false;
   }
 
@@ -80,10 +88,21 @@ export const identify = (
   }
 };
 
-export const reset = (): void => {
+export const clearIdentity = (): void => {
   identifiedDistinctId = null;
 
   if (!isAnalyticsReady()) {
+    return;
+  }
+
+  mixpanel.reset();
+};
+
+export const disableAnalytics = (): void => {
+  isTrackingAllowed = false;
+  identifiedDistinctId = null;
+
+  if (!hasInitialized || !isAnalyticsEnvironmentSupported()) {
     return;
   }
 
@@ -94,8 +113,11 @@ export const trackPageView = (
   path: string,
   properties?: AnalyticsProperties
 ): void => {
+  const sanitizedProperties = sanitizeProperties(properties);
+  const { path: _ignoredPath, ...pageViewProperties } = sanitizedProperties;
+
   track("Page Viewed", {
+    ...pageViewProperties,
     path,
-    ...properties,
   });
 };

@@ -50,9 +50,9 @@ describe("mixpanel analytics wrapper", () => {
     });
 
     analytics.initAnalytics();
-    analytics.track("Button Clicked", { button_name: "create_wave" });
+    analytics.trackPageView("/waves");
     analytics.identify("42");
-    analytics.reset();
+    analytics.disableAnalytics();
 
     expect(initMock).not.toHaveBeenCalled();
     expect(trackMock).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe("mixpanel analytics wrapper", () => {
     });
 
     analytics.initAnalytics();
-    analytics.track("Button Clicked", { button_name: "create_wave" });
+    analytics.trackPageView("/waves");
 
     expect(initMock).not.toHaveBeenCalled();
     expect(trackMock).not.toHaveBeenCalled();
@@ -86,7 +86,8 @@ describe("mixpanel analytics wrapper", () => {
     analytics.identify("42");
     analytics.identify("42");
     analytics.identify("42", { handle: "alice" });
-    analytics.reset();
+    analytics.clearIdentity();
+    analytics.trackPageView("/after-logout");
 
     expect(initMock).toHaveBeenCalledTimes(1);
     expect(initMock).toHaveBeenCalledWith("public-token", {
@@ -102,5 +103,45 @@ describe("mixpanel analytics wrapper", () => {
     expect(identifyMock).toHaveBeenCalledWith("42");
     expect(peopleSetMock).toHaveBeenCalledWith({ handle: "alice" });
     expect(resetMock).toHaveBeenCalledTimes(1);
+    expect(trackMock).toHaveBeenLastCalledWith("Page Viewed", {
+      path: "/after-logout",
+    });
+  });
+
+  it("disables tracking until analytics is re-enabled", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+
+    analytics.initAnalytics();
+    analytics.disableAnalytics();
+    analytics.trackPageView("/blocked");
+    analytics.initAnalytics();
+    analytics.trackPageView("/allowed");
+
+    expect(trackMock).toHaveBeenCalledTimes(1);
+    expect(trackMock).toHaveBeenCalledWith("Page Viewed", {
+      path: "/allowed",
+    });
+    expect(resetMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the page view path authoritative", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+
+    analytics.initAnalytics();
+    analytics.trackPageView("/waves", {
+      has_connected_profile: true,
+      path: "/poisoned",
+    });
+
+    expect(trackMock).toHaveBeenCalledWith("Page Viewed", {
+      has_connected_profile: true,
+      path: "/waves",
+    });
   });
 });

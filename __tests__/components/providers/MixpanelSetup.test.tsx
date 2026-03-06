@@ -2,9 +2,10 @@ import MixpanelSetup from "@/components/providers/MixpanelSetup";
 import { render } from "@testing-library/react";
 import React from "react";
 
+const clearIdentityMock = jest.fn();
+const disableAnalyticsMock = jest.fn();
 const identifyMock = jest.fn();
 const initAnalyticsMock = jest.fn();
-const resetMock = jest.fn();
 const trackPageViewMock = jest.fn();
 
 let connectedProfile: { id: number } | null = null;
@@ -28,9 +29,10 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@/services/analytics/mixpanel", () => ({
+  clearIdentity: (...args: unknown[]) => clearIdentityMock(...args),
+  disableAnalytics: (...args: unknown[]) => disableAnalyticsMock(...args),
   identify: (...args: unknown[]) => identifyMock(...args),
   initAnalytics: (...args: unknown[]) => initAnalyticsMock(...args),
-  reset: (...args: unknown[]) => resetMock(...args),
   trackPageView: (...args: unknown[]) => trackPageViewMock(...args),
 }));
 
@@ -39,18 +41,37 @@ describe("MixpanelSetup", () => {
     connectedProfile = null;
     pathname = "/";
     performanceConsent = undefined;
+    clearIdentityMock.mockReset();
+    disableAnalyticsMock.mockReset();
     identifyMock.mockReset();
     initAnalyticsMock.mockReset();
-    resetMock.mockReset();
     trackPageViewMock.mockReset();
   });
 
   it("does not initialize or track without consent", () => {
     render(<MixpanelSetup />);
 
+    expect(disableAnalyticsMock).toHaveBeenCalledTimes(1);
     expect(initAnalyticsMock).not.toHaveBeenCalled();
     expect(trackPageViewMock).not.toHaveBeenCalled();
     expect(identifyMock).not.toHaveBeenCalled();
+  });
+
+  it("identifies before the first tracked page view", () => {
+    performanceConsent = true;
+    pathname = "/waves";
+    connectedProfile = { id: 42 };
+
+    render(<MixpanelSetup />);
+
+    expect(initAnalyticsMock).toHaveBeenCalledTimes(1);
+    expect(identifyMock).toHaveBeenCalledWith("42");
+    expect(trackPageViewMock).toHaveBeenCalledWith("/waves", {
+      has_connected_profile: true,
+    });
+    expect(identifyMock.mock.invocationCallOrder[0]).toBeLessThan(
+      trackPageViewMock.mock.invocationCallOrder[0]
+    );
   });
 
   it("initializes once and tracks page views when consent is granted", () => {
@@ -87,7 +108,7 @@ describe("MixpanelSetup", () => {
     performanceConsent = false;
     rerender(<MixpanelSetup />);
 
-    expect(resetMock).toHaveBeenCalledTimes(1);
+    expect(disableAnalyticsMock).toHaveBeenCalledTimes(1);
   });
 
   it("resets when an identified profile is cleared", () => {
@@ -102,6 +123,6 @@ describe("MixpanelSetup", () => {
     connectedProfile = null;
     rerender(<MixpanelSetup />);
 
-    expect(resetMock).toHaveBeenCalledTimes(1);
+    expect(clearIdentityMock).toHaveBeenCalledTimes(1);
   });
 });

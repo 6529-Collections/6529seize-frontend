@@ -3,9 +3,10 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
+  clearIdentity,
+  disableAnalytics,
   identify,
   initAnalytics,
-  reset,
   trackPageView,
 } from "@/services/analytics/mixpanel";
 import { usePathname } from "next/navigation";
@@ -21,7 +22,7 @@ export default function MixpanelSetup() {
 
   useEffect(() => {
     if (!hasConsent) {
-      reset();
+      disableAnalytics();
       lastTrackedPathRef.current = null;
       identifiedProfileIdRef.current = null;
       return;
@@ -29,6 +30,32 @@ export default function MixpanelSetup() {
 
     initAnalytics();
   }, [hasConsent]);
+
+  useEffect(() => {
+    if (!hasConsent) {
+      return;
+    }
+
+    const profileId =
+      connectedProfile?.id !== undefined && connectedProfile.id !== null
+        ? String(connectedProfile.id)
+        : null;
+
+    if (!profileId) {
+      if (identifiedProfileIdRef.current !== null) {
+        clearIdentity();
+        identifiedProfileIdRef.current = null;
+      }
+      return;
+    }
+
+    if (identifiedProfileIdRef.current === profileId) {
+      return;
+    }
+
+    identify(profileId);
+    identifiedProfileIdRef.current = profileId;
+  }, [connectedProfile?.id, hasConsent]);
 
   useEffect(() => {
     if (!hasConsent || !pathname) {
@@ -45,32 +72,6 @@ export default function MixpanelSetup() {
         connectedProfile?.id !== undefined && connectedProfile.id !== null,
     });
   }, [connectedProfile?.id, hasConsent, pathname]);
-
-  useEffect(() => {
-    if (!hasConsent) {
-      return;
-    }
-
-    const profileId =
-      connectedProfile?.id !== undefined && connectedProfile.id !== null
-        ? String(connectedProfile.id)
-        : null;
-
-    if (!profileId) {
-      if (identifiedProfileIdRef.current !== null) {
-        reset();
-        identifiedProfileIdRef.current = null;
-      }
-      return;
-    }
-
-    if (identifiedProfileIdRef.current === profileId) {
-      return;
-    }
-
-    identify(profileId);
-    identifiedProfileIdRef.current = profileId;
-  }, [connectedProfile?.id, hasConsent]);
 
   return null;
 }
