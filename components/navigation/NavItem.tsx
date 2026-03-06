@@ -84,7 +84,7 @@ const NavItem = ({ item }: Props) => {
         disabled
         className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
       >
-        <div className="tw-mt-5 tw-flex tw-items-center tw-justify-center">
+        <div className="tw-mt-3 tw-flex tw-items-center tw-justify-center">
           {item.iconComponent ? (
             <item.iconComponent
               className={`${
@@ -160,7 +160,7 @@ const NavItem = ({ item }: Props) => {
           }`}
         />
       )}
-      <div className="tw-relative tw-mt-5 tw-flex tw-items-center tw-justify-center">
+      <div className="tw-relative tw-mt-3 tw-flex tw-items-center tw-justify-center">
         {item.iconComponent ? (
           <item.iconComponent
             className={`${iconSizeClass} ${
