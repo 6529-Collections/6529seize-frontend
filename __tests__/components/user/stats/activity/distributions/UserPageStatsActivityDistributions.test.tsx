@@ -4,42 +4,25 @@ import userEvent from "@testing-library/user-event";
 
 jest.mock(
   "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableWrapper",
-  () => (props: any) =>
-    (
+  () => (props: any) => (
+    <div data-testid="wrapper" data-page={props.page}>
       <button data-testid="set-page" onClick={() => props.setPage(3)}>
         set
       </button>
-    )
+    </div>
+  )
 );
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(() => ({
     isFetching: false,
     isLoading: false,
-    data: { count: 0, page: 1, data: [] },
+    data: { count: 20, page: 1, data: [] },
   })),
   keepPreviousData: {},
 }));
 
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-  usePathname: jest.fn(),
-  useSearchParams: jest.fn(),
-}));
-
-const { useRouter, usePathname, useSearchParams } =
-  jest.requireMock("next/navigation");
-
-beforeEach(() => {
-  (useRouter as jest.Mock).mockReturnValue({ replace: jest.fn() });
-  (usePathname as jest.Mock).mockReturnValue("/profile");
-  (useSearchParams as jest.Mock).mockReturnValue({
-    get: (k: string) => (k === "page" ? "2" : null),
-    toString: () => "page=2",
-  });
-});
-
-test("calls router replace on page change", async () => {
+test("updates local page state", async () => {
   const profile = { wallets: [] } as any;
   render(
     <UserPageStatsActivityDistributions
@@ -47,9 +30,7 @@ test("calls router replace on page change", async () => {
       activeAddress={null}
     />
   );
+  expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "1");
   await userEvent.click(screen.getByTestId("set-page"));
-  const router = useRouter();
-  expect(router.replace).toHaveBeenCalledWith("/profile?page=3", {
-    scroll: false,
-  });
+  expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
 });

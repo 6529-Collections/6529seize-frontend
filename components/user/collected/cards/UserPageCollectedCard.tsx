@@ -13,6 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import Image from "next/image";
 import { useId, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
@@ -213,9 +214,9 @@ export default function UserPageCollectedCard({
       return "tw-ring-2 tw-ring-primary-500 tw-ring-inset";
     }
     if (isDisabled) {
-      return "tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-opacity-60";
+      return "tw-opacity-60";
     }
-    return "tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60 hover:tw-to-white/10";
+    return "";
   };
 
   const getCursorClasses = () => {
@@ -259,7 +260,7 @@ export default function UserPageCollectedCard({
         : {})}
       className={[
         "tw-group tw-relative",
-        "tw-flex tw-flex-col tw-overflow-hidden tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-px-0.5 tw-pt-0.5 tw-transition tw-duration-300 tw-ease-out",
+        "tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-shadow-xl tw-transition-all tw-duration-300 hover:tw-border-white/30",
         getRingClasses(),
         getCursorClasses(),
       ]
@@ -268,88 +269,87 @@ export default function UserPageCollectedCard({
     >
       {OverlayControls}
 
-      <div className="tw-flex tw-flex-wrap">
-        <div className="tw-w-full tw-max-w-full">
-          <div className="tw-relative tw-flex tw-h-[200px] tw-w-full tw-items-center tw-justify-center tw-text-center min-[800px]:tw-h-[250px] min-[1200px]:tw-h-[18.75rem]">
-            {!isImageLoaded && (
-              <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-rounded-lg tw-bg-iron-800" />
-            )}
-            <img
-              src={card.img}
-              alt={card.collection}
-              onLoad={() => setIsImageLoaded(true)}
-              className={`tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain ${
-                !isImageLoaded ? "tw-opacity-0" : "tw-opacity-100"
-              } tw-transition-opacity tw-duration-300`}
-            />
-          </div>
-        </div>
+      {/* Image container */}
+      <div className="tw-relative tw-flex tw-aspect-square tw-items-center tw-justify-center tw-overflow-hidden tw-bg-white/[0.02]">
+        {!isImageLoaded && (
+          <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-bg-iron-800" />
+        )}
+        <Image
+          unoptimized
+          src={card.img}
+          alt={card.token_name || collectionMeta.label}
+          width={800}
+          height={800}
+          sizes="(max-width: 640px) 100vw, 33vw"
+          onLoad={() => setIsImageLoaded(true)}
+          className={`tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain ${
+            !isImageLoaded ? "tw-opacity-0" : "tw-opacity-100"
+          } tw-transition-opacity tw-duration-300`}
+        />
+      </div>
 
-        <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-px-2 tw-pt-3">
-          <span className="tw-text-sm tw-font-medium tw-text-iron-400 min-[1200px]:tw-text-md">
+      {/* Content */}
+      <div className="tw-flex tw-flex-col tw-gap-1.5 tw-p-4">
+        <div className="tw-flex tw-items-center tw-justify-between">
+          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-white/40">
             {collectionMeta.label}
           </span>
-          <span className="tw-text-sm tw-font-medium tw-text-iron-500 min-[1200px]:tw-text-md">
+          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-white/50">
             #{card.token_id}
           </span>
         </div>
-      </div>
 
-      <div className="tw-h-full tw-w-full tw-self-end tw-px-2 tw-pb-4 tw-pt-2">
-        <div className="tw-flex tw-h-full tw-flex-col tw-justify-between tw-gap-y-2.5 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
-          <div className="tw-flex tw-justify-between tw-gap-x-2">
-            <span className="tw-block tw-w-full tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 min-[1200px]:tw-text-md">
-              {card.token_name}
+        <div className="tw-flex tw-justify-between tw-gap-x-2">
+          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-[14px] tw-font-semibold tw-leading-snug tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
+            {card.token_name}
+          </h3>
+          {showSeizedCount && (
+            <span className="tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-text-white/50">
+              {getSeizedCountDisplay()}x
+              {hasBalanceMismatch && (
+                <>
+                  <span
+                    className="tw-cursor-help tw-text-primary-400"
+                    data-tooltip-id={tooltipId}
+                  >
+                    *
+                  </span>
+                  <Tooltip
+                    id={tooltipId}
+                    variant="light"
+                    className="tw-z-[9999]"
+                    style={{
+                      padding: "6px 10px",
+                      fontSize: "12px",
+                      maxWidth: "85%",
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
+                    }}
+                  >
+                    Only the balance of the connected wallet is available for
+                    transfer
+                  </Tooltip>
+                </>
+              )}
             </span>
-            {showSeizedCount && (
-              <span className="tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 min-[1200px]:tw-text-md">
-                {getSeizedCountDisplay()}x
-                {hasBalanceMismatch && (
-                  <>
-                    <span
-                      className="tw-cursor-help tw-text-primary-400"
-                      data-tooltip-id={tooltipId}
-                    >
-                      *
-                    </span>
-                    <Tooltip
-                      id={tooltipId}
-                      variant="light"
-                      className="tw-z-[9999]"
-                      style={{
-                        padding: "6px 10px",
-                        fontSize: "12px",
-                        maxWidth: "85%",
-                        whiteSpace: "normal",
-                        wordWrap: "break-word",
-                      }}
-                    >
-                      Only the balance of the connected wallet is available for
-                      transfer
-                    </Tooltip>
-                  </>
-                )}
-              </span>
-            )}
-          </div>
-
-          {showDataRow && (
-            <div className="tw-flex tw-items-center tw-justify-between tw-pt-2">
-              <span className="tw-text-sm tw-font-medium min-[1200px]:tw-text-md">
-                <span className="tw-text-iron-400">TDH</span>
-                <span className="tw-ml-1 tw-text-iron-50">
-                  {getTdhDisplay()}
-                </span>
-              </span>
-              <span className="tw-text-sm tw-font-medium min-[1200px]:tw-text-md">
-                <span className="tw-text-iron-400">Rank</span>
-                <span className="tw-ml-1 tw-text-iron-50">
-                  {getRankDisplay()}
-                </span>
-              </span>
-            </div>
           )}
         </div>
+
+        {showDataRow && (
+          <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
+            <div className="tw-flex tw-items-baseline tw-gap-1.5">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-white/80">
+                {getTdhDisplay()}
+              </span>
+              <span className="tw-text-[13px] tw-font-semibold tw-text-white/30">
+                TDH
+              </span>
+            </div>
+            <span className="tw-rounded-md tw-bg-white/[0.05] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-white/60">
+              Rank {getRankDisplay()}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
