@@ -19,7 +19,9 @@ import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
 
-const MENU = [
+type SidebarMenu = Parameters<typeof AppSidebarMenuItems>[0]["menu"];
+
+const MENU: SidebarMenu = [
   {
     label: "Network",
     icon: UsersIcon,
@@ -127,7 +129,7 @@ export default function AppSidebar({
       const aboutIndex = updatedMenu.findIndex(
         (item) => item.label === "About"
       );
-      const dropForgeItem = {
+      const dropForgeItem: SidebarMenu[number] = {
         label: DROP_FORGE_TITLE,
         path: DROP_FORGE_PATH,
         icon: DropForgeIcon,
