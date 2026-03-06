@@ -18,7 +18,8 @@ export const isNavItemActive = (
     if (
       pathname === "/network" ||
       pathname.startsWith("/network/") ||
-      pathname === "/nft-activity"
+      pathname === "/nft-activity" ||
+      pathname === "/xtdh"
     ) {
       return true;
     }
@@ -32,7 +33,6 @@ export const isNavItemActive = (
       "/nextgen",
       "/meme-lab",
       "/rememes",
-      "/xtdh",
     ];
     return relatedHrefs.some((href) => pathname.startsWith(href));
   }
