@@ -28,10 +28,14 @@ jest.mock(
   )
 );
 jest.mock("@/components/auth/SeizeConnectContext");
+jest.mock("@/components/header/useChainSwitcher", () => ({
+  useChainSwitcher: jest.fn(),
+}));
 
 const {
   useSeizeConnectContext: mockConnect,
 } = require("@/components/auth/SeizeConnectContext");
+const { useChainSwitcher } = require("@/components/header/useChainSwitcher");
 
 const profileBase = {
   handle: "alice",
@@ -49,7 +53,12 @@ function renderDropdown(options: any) {
     seizeConnect: options.seizeConnect || jest.fn(),
     seizeDisconnect:
       options.seizeDisconnect || jest.fn().mockResolvedValue(undefined),
-    seizeDisconnectAndLogout: jest.fn().mockResolvedValue(undefined),
+    seizeDisconnectAndLogout:
+      options.seizeDisconnectAndLogout ||
+      jest.fn().mockResolvedValue(undefined),
+    seizeDisconnectAndLogoutAll:
+      options.seizeDisconnectAndLogoutAll ||
+      jest.fn().mockResolvedValue(undefined),
     seizeSwitchConnectedAccount:
       options.seizeSwitchConnectedAccount || jest.fn(),
   });
@@ -59,6 +68,12 @@ function renderDropdown(options: any) {
     receivedProfileProxies: [{ id: "proxy-1" }],
     setToast: jest.fn(),
   } as any;
+  (useChainSwitcher as jest.Mock).mockReturnValue({
+    chains: options.chains ?? [],
+    currentChainName: options.currentChainName ?? "Ethereum",
+    nextChainName: options.nextChainName ?? "Polygon",
+    switchToNextChain: options.switchToNextChain || jest.fn(() => false),
+  });
   const onClose = jest.fn();
   render(
     <AuthContext.Provider value={authValue}>
@@ -112,6 +127,28 @@ describe("HeaderUserProxyDropdown", () => {
       expect(seizeDisconnect).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
+  });
+
+  it("shows switch chain control when wallet is connected and multiple chains exist", () => {
+    const switchToNextChain = jest.fn(() => true);
+    const { onClose } = renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+      chains: [
+        { id: 1, name: "Ethereum" },
+        { id: 137, name: "Polygon" },
+      ],
+      currentChainName: "Ethereum",
+      nextChainName: "Polygon",
+      switchToNextChain,
+    });
+
+    expect(screen.getByText("Network: Ethereum")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Switch Chain" }));
+
+    expect(switchToNextChain).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("falls back to wallet display when no handle", () => {

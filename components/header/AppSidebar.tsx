@@ -7,13 +7,21 @@ import {
 } from "@headlessui/react";
 import { DocumentTextIcon, WrenchIcon } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
+import DropForgeIcon from "../common/icons/DropForgeIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
 
-const MENU = [
+type SidebarMenu = Parameters<typeof AppSidebarMenuItems>[0]["menu"];
+
+const MENU: SidebarMenu = [
   {
     label: "Network",
     icon: UsersIcon,
@@ -93,10 +101,11 @@ export default function AppSidebar({
   readonly onClose: () => void;
 }) {
   const { appWalletsSupported } = useAppWallets();
+  const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const handleClose = useCallback(() => onClose(), [onClose]);
 
   const menu = useMemo(() => {
-    return MENU.map((item) => {
+    const updatedMenu = MENU.map((item) => {
       if (item.label === "Tools" && item.children) {
         const updatedChildren = [...item.children];
 
@@ -115,7 +124,26 @@ export default function AppSidebar({
 
       return item;
     });
-  }, [appWalletsSupported]);
+
+    if (showDropForge) {
+      const aboutIndex = updatedMenu.findIndex(
+        (item) => item.label === "About"
+      );
+      const dropForgeItem: SidebarMenu[number] = {
+        label: DROP_FORGE_TITLE,
+        path: DROP_FORGE_PATH,
+        icon: DropForgeIcon,
+      };
+
+      if (aboutIndex >= 0) {
+        updatedMenu.splice(aboutIndex + 1, 0, dropForgeItem);
+      } else {
+        updatedMenu.push(dropForgeItem);
+      }
+    }
+
+    return updatedMenu;
+  }, [appWalletsSupported, showDropForge]);
 
   // Close on right-to-left swipe
   useEffect(() => {

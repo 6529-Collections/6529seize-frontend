@@ -1,7 +1,7 @@
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
-import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
-import { useNowMinting } from "@/hooks/useNowMinting";
+import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import type { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
+import { useNowMinting } from "@/hooks/useNowMinting";
 
 type NowMintingStatus = {
   readonly nft: NFTWithMemesExtendedData | undefined;
@@ -13,7 +13,7 @@ type NowMintingStatus = {
 
 export const useNowMintingStatus = (): NowMintingStatus => {
   const { nft, isFetching, error } = useNowMinting();
-  const claim = useMemesManifoldClaim(nft?.id ?? -1);
+  const { claim } = useDropForgeManifoldClaim(nft?.id ?? -1);
 
   return {
     nft,
