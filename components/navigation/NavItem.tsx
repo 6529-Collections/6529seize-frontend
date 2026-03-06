@@ -28,7 +28,7 @@ const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
   const { icon } = item;
   const { address, seizeConnect } = useSeizeConnectContext();
 
-  const iconSlotClass = "tw-mt-3 tw-flex tw-h-9 tw-items-center tw-justify-center";
+  const iconSlotClass = "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
