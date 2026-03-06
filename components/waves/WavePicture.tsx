@@ -1,8 +1,8 @@
 "use client";
 
-import { useContext, useMemo } from "react";
-import { AuthContext } from "@/components/auth/Auth";
+import { useMemo } from "react";
 import { FallbackImage } from "@/components/common/FallbackImage";
+import { useAuth } from "@/components/auth/Auth";
 
 interface WavePictureProps {
   readonly name: string;
@@ -132,7 +132,7 @@ export default function WavePicture({
   picture,
   contributors,
 }: WavePictureProps) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useAuth();
 
   const authenticatedIdentityCandidates = useMemo(() => {
     const candidates = new Set<string>();

@@ -151,7 +151,7 @@ export default function UserFollowBtn({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
-      {onDirectMessage && following && (
+      {onDirectMessage && (
         <>
           <button
             onClick={onDirectMessage}
