@@ -53,9 +53,8 @@ export default function CommonTabsTab<T, U = unknown>(
     return response;
   };
 
-  const [dynamicClasses, setDynamicClasses] = useState<string>(
-    getDynamicClasses()
-  );
+  const [dynamicClasses, setDynamicClasses] =
+    useState<string>(getDynamicClasses());
   useEffect(() => {
     setDynamicClasses(getDynamicClasses());
   }, [isActive]);
@@ -78,11 +77,9 @@ export default function CommonTabsTab<T, U = unknown>(
   return (
     <div
       className={clsx(
-        "tw-p-[1px] tw-flex tw-rounded-lg",
+        "tw-flex tw-rounded-lg tw-p-[1px]",
         fill ? "tw-flex-1" : undefined,
-        isActive
-          ? "tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800"
-          : undefined
+        undefined
       )}
     >
       <button
@@ -99,15 +96,15 @@ export default function CommonTabsTab<T, U = unknown>(
         onMouseLeave={() => !disabled && setShouldRotate(false)}
         className={`${dynamicClasses} ${
           disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
-        } ${
-          fill ? "tw-flex-1" : ""
-        } ${
-          size === "sm" ? "tw-px-2 tw-py-1 tw-text-xs" : "tw-px-3 tw-py-1.5 tw-text-sm"
-        } tw-whitespace-nowrap tw-leading-5 tw-font-medium tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2`}
+        } ${fill ? "tw-flex-1" : ""} ${
+          size === "sm"
+            ? "tw-px-3 tw-py-1.5 tw-text-xs"
+            : "tw-px-3 tw-py-1.5 tw-text-sm"
+        } tw-flex tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out`}
       >
         {item.label}
         {!!item.badge && item.badge > 0 && (
-          <span className="tw-bg-primary-500 tw-text-white tw-text-[10px] tw-font-bold tw-px-1.5 tw-py-0.5 tw-rounded-full tw-min-w-[18px] tw-h-[18px] tw-flex tw-items-center tw-justify-center">
+          <span className="tw-flex tw-h-[18px] tw-min-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-bold tw-text-white">
             {item.badge}
           </span>
         )}

@@ -61,6 +61,7 @@ describe("UserPageTabs", () => {
     renderTabs(false, false);
     const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.BRAIN);
+    expect(tabs).not.toContain("stats");
     expect(tabs).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
   });
 

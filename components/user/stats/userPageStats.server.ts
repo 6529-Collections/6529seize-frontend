@@ -1,11 +1,21 @@
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
-import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
-import { getStatsPath } from "./userPageStats.helpers";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import UserPageStatsClient from "./UserPageStatsClient";
+import { getStatsPath } from "./userPageStats.helpers";
+import type { UserPageStatsInitialData } from "./userPageStats.types";
+
+function normalizeAddress(value: string | string[] | undefined): string | null {
+  const address = Array.isArray(value) ? value[0] : value;
+
+  if (!address?.trim()) {
+    return null;
+  }
+
+  return address.trim().toLowerCase();
+}
 
 async function fetchSeasons(headers: Record<string, string>) {
   return await commonApiFetch<MemeSeason[]>({
@@ -14,10 +24,7 @@ async function fetchSeasons(headers: Record<string, string>) {
   });
 }
 
-async function fetchTdh(
-  headers: Record<string, string>,
-  statsPath: string
-) {
+async function fetchTdh(headers: Record<string, string>, statsPath: string) {
   return await commonApiFetch<ConsolidatedTDH | TDH>({
     endpoint: `tdh/${statsPath}`,
     headers,
@@ -44,13 +51,16 @@ async function fetchOwnerBalanceMemes(
   });
 }
 
-export default async function UserPageStats({
+export async function getUserPageStatsInitialData({
   profile,
+  activeAddress,
 }: {
   readonly profile: ApiIdentity;
-}) {
+  readonly activeAddress?: string | string[] | null | undefined;
+}): Promise<UserPageStatsInitialData> {
+  const normalizedAddress = normalizeAddress(activeAddress ?? undefined);
   const headers = await getAppCommonHeaders();
-  const statsPath = getStatsPath(profile, null);
+  const statsPath = getStatsPath(profile, normalizedAddress);
 
   const [seasons, tdh, ownerBalance, balanceMemes] = await Promise.all([
     fetchSeasons(headers).catch(() => []),
@@ -59,13 +69,11 @@ export default async function UserPageStats({
     fetchOwnerBalanceMemes(headers, statsPath).catch(() => []),
   ]);
 
-  return (
-    <UserPageStatsClient
-      profile={profile}
-      initialSeasons={seasons}
-      initialTdh={tdh}
-      initialOwnerBalance={ownerBalance}
-      initialBalanceMemes={balanceMemes}
-    />
-  );
+  return {
+    initialActiveAddress: normalizedAddress,
+    initialSeasons: seasons,
+    initialTdh: tdh,
+    initialOwnerBalance: ownerBalance,
+    initialBalanceMemes: balanceMemes,
+  };
 }

@@ -6,10 +6,15 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
+import { useMemo, useState } from "react";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
+
+const PAGE_SIZE = 10;
+
+const getTotalPages = (count: number | undefined, pageSize: number) =>
+  typeof count === "number" && count > 0
+    ? Math.max(1, Math.ceil(count / pageSize))
+    : 1;
 
 export default function UserPageStatsActivityDistributions({
   profile,
@@ -18,54 +23,21 @@ export default function UserPageStatsActivityDistributions({
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
-  const PAGE_SIZE = 10;
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const page = searchParams?.get(WALLET_DISTRIBUTION_PAGE_PARAM);
-
-  const [pageFilter, setPageFilter] = useState(
-    page && !isNaN(+page) ? +page : 1
-  );
-
-  useEffect(() => {
-    setPageFilter(page && !isNaN(+page) ? +page : 1);
-  }, [page]);
-
-  const createQueryString = (
-    config: {
-      name: string;
-      value: string;
-    }[]
-  ): string => {
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    for (const { name, value } of config) {
-      params.set(name, value);
-    }
-    return params.toString();
-  };
+  const [pageFilter, setPageFilter] = useState(1);
 
   const onPageFilter = (page: number) => {
-    router.replace(
-      `${pathname}?${createQueryString([
-        { name: WALLET_DISTRIBUTION_PAGE_PARAM, value: `${page}` },
-      ])}`,
-      { scroll: false }
-    );
+    setPageFilter(page);
   };
 
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const walletsParam = useMemo(() => {
+    if (activeAddress) {
+      return activeAddress.toLowerCase();
+    }
 
-  const getWalletsParam = () =>
-    [
-      activeAddress?.toLowerCase() ??
-        profile.wallets?.map((w) => w.wallet.toLowerCase()),
-    ].join(",");
-
-  const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());
-  useEffect(() => {
-    setWalletsParam(getWalletsParam());
-  }, [activeAddress, profile]);
+    return (profile.wallets ?? [])
+      .map((wallet) => wallet.wallet.toLowerCase())
+      .join(",");
+  }, [activeAddress, profile.wallets]);
 
   const {
     isFetching,
@@ -88,23 +60,30 @@ export default function UserPageStatsActivityDistributions({
           page: `${pageFilter}`,
           wallet: walletsParam,
         },
+      }).then(async (response) => {
+        const totalPages = getTotalPages(response.count, PAGE_SIZE);
+        if (response.count > 0 && pageFilter > totalPages) {
+          return await commonApiFetch<Page<Distribution>>({
+            endpoint: "distributions",
+            params: {
+              page_size: `${PAGE_SIZE}`,
+              page: `${totalPages}`,
+              wallet: walletsParam,
+            },
+          });
+        }
+
+        return response;
       }),
     placeholderData: keepPreviousData,
   });
 
-  useEffect(() => {
-    if (isFetching) return;
-    if (!data?.count) {
-      onPageFilter(1);
-      setTotalPages(1);
-      return;
-    }
-    const totalPages = Math.ceil(data.count / PAGE_SIZE);
-    if (totalPages < pageFilter) {
-      onPageFilter(totalPages);
-    }
-    setTotalPages(totalPages);
-  }, [data?.count, data?.page, isFetching]);
+  const totalPages = getTotalPages(data?.count, PAGE_SIZE);
+  const responsePage = typeof data?.page === "number" ? data.page : pageFilter;
+  const currentPage =
+    typeof data?.count === "number" && data.count > 0
+      ? Math.min(responsePage, totalPages)
+      : 1;
 
   return (
     <div className="tw-mt-4 md:tw-mt-5">
@@ -118,7 +97,7 @@ export default function UserPageStatsActivityDistributions({
         profile={profile}
         isFirstLoading={isFirstLoading}
         loading={isFetching}
-        page={pageFilter}
+        page={currentPage}
         totalPages={totalPages}
         setPage={onPageFilter}
       />

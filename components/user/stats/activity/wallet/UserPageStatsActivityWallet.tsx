@@ -8,12 +8,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  WALLET_ACTIVITY_FILTER_PARAM,
-  WALLET_ACTIVITY_PAGE_PARAM,
-} from "../UserPageActivityWrapper";
+import { useMemo, useState } from "react";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
 
 export enum UserPageStatsActivityWalletFilterType {
@@ -26,28 +21,12 @@ export enum UserPageStatsActivityWalletFilterType {
   BURNS = "BURNS",
 }
 
-const ENUM_AND_PATH: {
-  type: UserPageStatsActivityWalletFilterType;
-  path: string;
-}[] = [
-  { type: UserPageStatsActivityWalletFilterType.ALL, path: "all" },
-  { type: UserPageStatsActivityWalletFilterType.AIRDROPS, path: "airdrops" },
-  { type: UserPageStatsActivityWalletFilterType.MINTS, path: "mints" },
-  { type: UserPageStatsActivityWalletFilterType.SALES, path: "sales" },
-  { type: UserPageStatsActivityWalletFilterType.PURCHASES, path: "purchases" },
-  { type: UserPageStatsActivityWalletFilterType.TRANSFERS, path: "transfers" },
-  { type: UserPageStatsActivityWalletFilterType.BURNS, path: "burns" },
-];
+const PAGE_SIZE = 10;
 
-const enumToPath = (type: UserPageStatsActivityWalletFilterType): string => {
-  const found = ENUM_AND_PATH.find((e) => e.type === type);
-  return found?.path ?? "";
-};
-
-const pathToEnum = (path: string): UserPageStatsActivityWalletFilterType => {
-  const found = ENUM_AND_PATH.find((e) => e.path === path);
-  return found?.type ?? UserPageStatsActivityWalletFilterType.ALL;
-};
+const getTotalPages = (count: number | undefined, pageSize: number) =>
+  typeof count === "number" && count > 0
+    ? Math.max(1, Math.ceil(count / pageSize))
+    : 1;
 
 export default function UserPageStatsActivityWallet({
   profile,
@@ -67,77 +46,35 @@ export default function UserPageStatsActivityWallet({
       [UserPageStatsActivityWalletFilterType.BURNS]: "burns",
     };
 
-  const PAGE_SIZE = 10;
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const activity = searchParams?.get(WALLET_ACTIVITY_FILTER_PARAM);
-  const page = searchParams?.get(WALLET_ACTIVITY_PAGE_PARAM);
-
   const [activeFilter, setActiveFilter] =
     useState<UserPageStatsActivityWalletFilterType>(
       UserPageStatsActivityWalletFilterType.ALL
     );
 
-  const [pageFilter, setPageFilter] = useState(
-    page && !isNaN(+page) ? +page : 1
-  );
-
-  useEffect(() => {
-    setActiveFilter(pathToEnum(activity ?? ""));
-  }, [activity]);
-
-  useEffect(() => {
-    setPageFilter(page && !isNaN(+page) ? +page : 1);
-  }, [page]);
-
-  const createQueryString = (
-    config: {
-      name: string;
-      value: string;
-    }[]
-  ): string => {
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    for (const { name, value } of config) {
-      params.set(name, value);
-    }
-    return params.toString();
-  };
+  const [pageFilter, setPageFilter] = useState(1);
 
   const onActiveFilter = (filter: UserPageStatsActivityWalletFilterType) => {
     const targetFilter =
       filter === activeFilter
         ? UserPageStatsActivityWalletFilterType.ALL
         : filter;
-    router.replace(
-      `${pathname}?${createQueryString([
-        { name: WALLET_ACTIVITY_FILTER_PARAM, value: enumToPath(targetFilter) },
-        { name: WALLET_ACTIVITY_PAGE_PARAM, value: "1" },
-      ])}`
-    );
+    setActiveFilter(targetFilter);
+    setPageFilter(1);
   };
 
   const onPageFilter = (page: number) => {
-    router.replace(
-      `${pathname}?${createQueryString([
-        { name: WALLET_ACTIVITY_PAGE_PARAM, value: `${page}` },
-      ])}`,
-      { scroll: false }
-    );
+    setPageFilter(page);
   };
 
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const walletsParam = useMemo(() => {
+    if (activeAddress) {
+      return activeAddress.toLowerCase();
+    }
 
-  const getWalletsParam = () =>
-    [
-      activeAddress?.toLowerCase() ??
-        profile.wallets?.map((w) => w.wallet.toLowerCase()),
-    ].join(",");
-
-  const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());
-  useEffect(() => {
-    setWalletsParam(getWalletsParam());
-  }, [activeAddress, profile]);
+    return (profile.wallets ?? [])
+      .map((wallet) => wallet.wallet.toLowerCase())
+      .join(",");
+  }, [activeAddress, profile.wallets]);
 
   const {
     isFetching,
@@ -159,33 +96,39 @@ export default function UserPageStatsActivityWallet({
         page_size: `${PAGE_SIZE}`,
         page: `${pageFilter}`,
       };
+      const activeFilterParam = FILTER_TO_PARAM[activeFilter];
 
-      if (activeFilter) {
-        params["filter"] = FILTER_TO_PARAM[activeFilter];
+      if (activeFilterParam) {
+        params["filter"] = activeFilterParam;
       }
 
-      return await commonApiFetch<Page<Transaction>>({
+      const response = await commonApiFetch<Page<Transaction>>({
         endpoint: "transactions",
         params,
       });
+
+      const totalPages = getTotalPages(response.count, PAGE_SIZE);
+      if (response.count > 0 && pageFilter > totalPages) {
+        return await commonApiFetch<Page<Transaction>>({
+          endpoint: "transactions",
+          params: {
+            ...params,
+            page: `${totalPages}`,
+          },
+        });
+      }
+
+      return response;
     },
     placeholderData: keepPreviousData,
   });
 
-  useEffect(() => {
-    if (isFetching) return;
-    if (!data?.count) {
-      onPageFilter(1);
-      setTotalPages(1);
-      return;
-    }
-    const pagesCount = Math.ceil(data.count / PAGE_SIZE);
-    if (pagesCount < pageFilter) {
-      onPageFilter(pagesCount);
-      return;
-    }
-    setTotalPages(pagesCount);
-  }, [data?.count, data?.page, isFetching]);
+  const totalPages = getTotalPages(data?.count, PAGE_SIZE);
+  const responsePage = typeof data?.page === "number" ? data.page : pageFilter;
+  const currentPage =
+    typeof data?.count === "number" && data.count > 0
+      ? Math.min(responsePage, totalPages)
+      : 1;
 
   const { isFetching: isFirstLoadingMemes, data: memes } = useQuery({
     queryKey: [QueryKey.MEMES_LITE],
@@ -247,7 +190,7 @@ export default function UserPageStatsActivityWallet({
         memeLab={memeLab ?? []}
         nextgenCollections={nextgenCollections ?? []}
         totalPages={totalPages}
-        page={pageFilter}
+        page={currentPage}
         isFirstLoading={
           isFirstLoading || isFirstLoadingMemes || isFirstLoadingMemeLab
         }

@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-// Mocks for helpers used by the factory
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn(async () => ({ "x-test": "1" })),
 }));
@@ -21,10 +20,8 @@ jest.mock("@/components/providers/metadata", () => ({
   getAppMetadata: jest.fn((v: any) => v),
 }));
 
-// Use the real helpers impl for metadata but we'll spy on the call
 import * as Helpers from "@/helpers/Helpers";
 
-// Mock layout to avoid React Query provider requirements
 jest.mock("@/components/user/layout/UserPageLayout", () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
@@ -32,13 +29,11 @@ jest.mock("@/components/user/layout/UserPageLayout", () => ({
   ),
 }));
 
-// Mock redirect from next/navigation so we can assert it
 const redirectMock = jest.fn();
 jest.mock("next/navigation", () => ({
   redirect: (url: string) => redirectMock(url),
 }));
 
-// Import after mocks
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import { getAppMetadata } from "@/components/providers/metadata";
 import {
@@ -46,35 +41,36 @@ import {
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
 
-// A super simple Tab to verify rendering
-function DummyStatsTab({ profile }: { readonly profile: any }) {
-  return <div data-testid="stats">STATS:{profile.handle}</div>;
+function DummyCollectedTab({ profile }: { readonly profile: any }) {
+  return <div data-testid="collected">COLLECTED:{profile.handle}</div>;
 }
 
 const buildFactory = () =>
   createUserTabPage({
-    subroute: "stats",
-    metaLabel: "Stats",
-    Tab: DummyStatsTab,
+    subroute: "collected",
+    metaLabel: "Collected",
+    Tab: DummyCollectedTab,
   });
 
-describe("stats page via createUserTabPage", () => {
+describe("user tab page via createUserTabPage", () => {
   beforeEach(() => {
     redirectMock.mockClear();
     (userPageNeedsRedirect as jest.Mock).mockReturnValue(null);
   });
 
-  it("renders layout + tab when no redirect needed", async () => {
+  it("renders layout + tab when no redirect is needed", async () => {
     const { Page } = buildFactory();
 
     const element = await Page({
       params: Promise.resolve({ user: "Alice" }),
-      searchParams: Promise.resolve({ foo: "bar" }),
+      searchParams: Promise.resolve({ address: "0x1" }),
     } as any);
 
     render(element);
 
-    expect(await screen.findByTestId("stats")).toHaveTextContent("STATS:alice");
+    expect(await screen.findByTestId("collected")).toHaveTextContent(
+      "COLLECTED:alice"
+    );
 
     expect(getUserProfile).toHaveBeenCalledWith({
       user: "alice",
@@ -82,25 +78,37 @@ describe("stats page via createUserTabPage", () => {
     });
     expect(userPageNeedsRedirect).toHaveBeenCalledWith({
       profile: expect.any(Object),
-      req: { query: { user: "Alice", foo: "bar" } },
-      subroute: "stats",
+      req: { query: { user: "Alice", address: "0x1" } },
+      subroute: "collected",
     });
     expect(redirectMock).not.toHaveBeenCalled();
   });
 
-  it("redirects when userPageNeedsRedirect returns destination", async () => {
-    (userPageNeedsRedirect as jest.Mock).mockReturnValue({
-      redirect: { destination: "/bob/stats" },
+  it("does not invoke the tab component while composing the page", async () => {
+    const clientTab = jest.fn(
+      ({ profile }: { readonly profile: { handle: string } }) => (
+        <div data-testid="client-tab">CLIENT:{profile.handle}</div>
+      )
+    );
+
+    const { Page } = createUserTabPage({
+      subroute: "collected",
+      metaLabel: "Collected",
+      Tab: clientTab,
     });
 
-    const { Page } = buildFactory();
-
-    await Page({
-      params: Promise.resolve({ user: "Carol" }),
+    const element = await Page({
+      params: Promise.resolve({ user: "Alice" }),
       searchParams: Promise.resolve({}),
     } as any);
 
-    expect(redirectMock).toHaveBeenCalledWith("/bob/stats");
+    expect(clientTab).not.toHaveBeenCalled();
+
+    render(element);
+
+    expect(await screen.findByTestId("client-tab")).toHaveTextContent(
+      "CLIENT:alice"
+    );
   });
 
   it("generateMetadata uses helpers", async () => {
@@ -113,7 +121,7 @@ describe("stats page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      "Stats"
+      "Collected"
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(

@@ -4,6 +4,12 @@ import { CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ImgHTMLAttributes } from "react";
+
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: ImgHTMLAttributes<HTMLImageElement>) => <img {...props} />,
+}));
 
 const memeCard: CollectedCard = {
   collection: CollectedCollectionType.MEMES,
