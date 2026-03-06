@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -53,12 +53,15 @@ export default function UserFollowBtn({
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize | undefined;
-  readonly onDirectMessage?: (() => void) | undefined;
+  readonly onDirectMessage?: (() => void | Promise<void>) | undefined;
   readonly directMessageLoading?: boolean | undefined;
 }) {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
+  const [directMessageMutating, setDirectMessageMutating] =
+    useState<boolean>(false);
+  const directMessageMutatingRef = useRef(false);
 
   const { data: subscriptions, isFetching } =
     useQuery<ApiIdentitySubscriptionActions>({
@@ -149,17 +152,42 @@ export default function UserFollowBtn({
     await followMutation.mutateAsync();
   };
 
+  const isDirectMessagePending =
+    directMessageMutating || !!directMessageLoading;
+
+  const onDirectMessageClick = async (): Promise<void> => {
+    if (
+      !onDirectMessage ||
+      directMessageMutatingRef.current ||
+      directMessageLoading
+    ) {
+      return;
+    }
+
+    directMessageMutatingRef.current = true;
+    setDirectMessageMutating(true);
+
+    try {
+      await onDirectMessage();
+    } finally {
+      directMessageMutatingRef.current = false;
+      setDirectMessageMutating(false);
+    }
+  };
+
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
-      {onDirectMessage && following && (
+      {onDirectMessage && (
         <>
           <button
-            onClick={onDirectMessage}
+            onClick={onDirectMessageClick}
+            disabled={isDirectMessagePending}
+            type="button"
             aria-label="Send direct message"
-            className="tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-3 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-ring-iron-700"
+            className="tw-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-3 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-700 enabled:hover:tw-ring-iron-700 disabled:tw-cursor-default disabled:tw-opacity-70"
             data-tooltip-id={`dm-${handle}`}
           >
-            {directMessageLoading ? (
+            {isDirectMessagePending ? (
               <CircleLoader size={CircleLoaderSize.SMALL} />
             ) : (
               <FontAwesomeIcon icon={faPaperPlane} className="tw-h-4 tw-w-4" />
