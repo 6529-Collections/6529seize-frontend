@@ -28,7 +28,7 @@ const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
   const { icon } = item;
   const { address, seizeConnect } = useSeizeConnectContext();
 
-  const isLogoItem = name === "Home";
+  const iconSlotClass = "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
@@ -76,9 +76,9 @@ const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
         aria-label={name}
         aria-disabled="true"
         disabled
-        className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
+        className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
       >
-        <div className="tw-flex tw-items-center tw-justify-center">
+        <div className={iconSlotClass}>
           {item.iconComponent ? (
             <item.iconComponent
               className={`${
@@ -144,17 +144,15 @@ const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
       onClick={handleClick}
-      className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
+      className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
     >
       {isActive && (
         <motion.div
           layoutId="nav-indicator"
-          className={`tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white ${
-            isLogoItem ? "tw-top-1" : ""
-          }`}
+          className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
         />
       )}
-      <div className="tw-relative tw-flex tw-items-center tw-justify-center">
+      <div className={`tw-relative ${iconSlotClass}`}>
         {item.iconComponent ? (
           <item.iconComponent
             className={`${iconSizeClass} ${
