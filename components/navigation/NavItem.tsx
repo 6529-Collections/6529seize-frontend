@@ -76,9 +76,9 @@ const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
         aria-label={name}
         aria-disabled="true"
         disabled
-        className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
+        className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
       >
-        <div className="tw-flex tw-items-center tw-justify-center">
+        <div className="tw-mt-5 tw-flex tw-items-center tw-justify-center">
           {item.iconComponent ? (
             <item.iconComponent
               className={`${
@@ -144,7 +144,7 @@ const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
       onClick={handleClick}
-      className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
+      className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
     >
       {isActive && (
         <motion.div
@@ -154,7 +154,7 @@ const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
           }`}
         />
       )}
-      <div className="tw-relative tw-flex tw-items-center tw-justify-center">
+      <div className="tw-relative tw-mt-5 tw-flex tw-items-center tw-justify-center">
         {item.iconComponent ? (
           <item.iconComponent
             className={`${iconSizeClass} ${
