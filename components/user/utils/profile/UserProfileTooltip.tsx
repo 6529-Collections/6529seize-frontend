@@ -17,8 +17,8 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { AuthContext } from "@/components/auth/Auth";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/auth/Auth";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
@@ -96,7 +96,7 @@ export default function UserProfileTooltip({
     : null;
 
   const { connectedProfile, activeProfileProxy, setToast } =
-    useContext(AuthContext);
+    useAuth();
   const profileHandle = profile?.handle ?? null;
   const normalizedProfileHandle = useMemo(
     () => profileHandle?.toLowerCase() ?? null,
