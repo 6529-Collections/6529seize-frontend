@@ -26,7 +26,7 @@ const sanitizeProperties = (
 
 const isAnalyticsEnabled = (): boolean => {
   return (
-    typeof window !== "undefined" &&
+    typeof globalThis.window !== "undefined" &&
     publicEnv.NODE_ENV === "production" &&
     typeof MIXPANEL_TOKEN === "string" &&
     MIXPANEL_TOKEN.length > 0
