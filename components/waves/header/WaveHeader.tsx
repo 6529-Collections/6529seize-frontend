@@ -41,9 +41,12 @@ export default function WaveHeader({
   const created = getTimeAgo(wave.created_at);
   const firstXContributors = wave.contributors_overview.slice(0, 10);
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
+  const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
   const canEdit = useMemo(
-    () => canEditWave({ connectedProfile, activeProfileProxy, wave }),
-    [activeProfileProxy, connectedProfile, wave]
+    () =>
+      !isDirectMessage &&
+      canEditWave({ connectedProfile, activeProfileProxy, wave }),
+    [activeProfileProxy, connectedProfile, isDirectMessage, wave]
   );
 
   let ringClasses = "";
@@ -87,6 +90,7 @@ export default function WaveHeader({
                 picture={wave.picture}
                 contributors={wave.contributors_overview.map((c) => ({
                   pfp: c.contributor_pfp,
+                  identity: c.contributor_identity,
                 }))}
               />
             </div>

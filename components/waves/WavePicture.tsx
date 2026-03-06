@@ -1,3 +1,7 @@
+"use client";
+
+import { useContext, useMemo } from "react";
+import { AuthContext } from "@/components/auth/Auth";
 import { FallbackImage } from "@/components/common/FallbackImage";
 
 interface WavePictureProps {
@@ -5,7 +9,18 @@ interface WavePictureProps {
   readonly picture: string | null;
   readonly contributors: {
     readonly pfp: string;
+    readonly identity?: string | null;
   }[];
+}
+
+interface IdentitySource {
+  readonly id?: string | null;
+  readonly handle?: string | null;
+  readonly normalised_handle?: string | null;
+  readonly primary_wallet?: string | null;
+  readonly primary_address?: string | null;
+  readonly query?: string | null;
+  readonly wallets?: ReadonlyArray<{ readonly wallet?: string | null }> | null;
 }
 
 const polygonsByCount: Record<number, string[]> = {
@@ -59,14 +74,78 @@ const polygonsByCount: Record<number, string[]> = {
   ],
 };
 
+const normalizeIdentity = (value: string | null | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) {
+    return null;
+  }
+
+  return trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+};
+
+const addIdentityCandidate = (
+  candidates: Set<string>,
+  value: string | null | undefined
+) => {
+  const normalized = normalizeIdentity(value);
+  if (!normalized) {
+    return;
+  }
+
+  candidates.add(normalized);
+
+  if (normalized.startsWith("0x")) {
+    candidates.add(`id-${normalized}`);
+  }
+
+  if (normalized.startsWith("id-0x")) {
+    candidates.add(normalized.slice(3));
+  }
+};
+
+const addIdentitySourceCandidates = (
+  candidates: Set<string>,
+  identity: IdentitySource | null | undefined
+) => {
+  if (!identity) {
+    return;
+  }
+
+  addIdentityCandidate(candidates, identity.id);
+  addIdentityCandidate(candidates, identity.handle);
+  addIdentityCandidate(candidates, identity.normalised_handle);
+  addIdentityCandidate(candidates, identity.primary_wallet);
+  addIdentityCandidate(candidates, identity.primary_address);
+  addIdentityCandidate(candidates, identity.query);
+
+  identity.wallets?.forEach((wallet) =>
+    addIdentityCandidate(candidates, wallet.wallet)
+  );
+};
+
 export default function WavePicture({
   name,
   picture,
   contributors,
 }: WavePictureProps) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+
+  const authenticatedIdentityCandidates = useMemo(() => {
+    const candidates = new Set<string>();
+
+    addIdentitySourceCandidates(candidates, connectedProfile);
+    addIdentitySourceCandidates(candidates, activeProfileProxy?.created_by);
+
+    return candidates;
+  }, [activeProfileProxy, connectedProfile]);
+
   if (picture) {
     return (
-      <div className="tw-w-full tw-h-full tw-relative tw-rounded-full tw-overflow-hidden">
+      <div className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-full">
         <FallbackImage
           primarySrc={picture}
           fallbackSrc={picture}
@@ -79,12 +158,29 @@ export default function WavePicture({
     );
   }
 
-  const pfps = contributors.map((c) => c.pfp).filter(Boolean);
+  const pfps = contributors
+    .filter((contributor) => {
+      if (!contributor.pfp) {
+        return false;
+      }
+
+      const normalizedContributorIdentity = normalizeIdentity(
+        contributor.identity
+      );
+      if (!normalizedContributorIdentity) {
+        return true;
+      }
+
+      return !authenticatedIdentityCandidates.has(
+        normalizedContributorIdentity
+      );
+    })
+    .map((contributor) => contributor.pfp);
 
   // 3) If no PFPS, show fallback background
   if (pfps.length === 0) {
     return (
-      <div className="tw-w-full tw-h-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700 tw-rounded-full" />
+      <div className="tw-h-full tw-w-full tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700" />
     );
   }
 
@@ -96,7 +192,7 @@ export default function WavePicture({
   const polygons = polygonsByCount[sliceCount];
 
   return (
-    <div className="tw-relative tw-w-full tw-h-full">
+    <div className="tw-relative tw-h-full tw-w-full">
       {pfps.slice(0, sliceCount).map((pfp, i) => {
         const clip = polygons?.[i];
         return (
@@ -111,7 +207,7 @@ export default function WavePicture({
               alt={`Contributor-${i}`}
               fill
               sizes="64px"
-              className="tw-object-cover tw-block tw-rounded-full"
+              className="tw-block tw-rounded-full tw-object-cover"
             />
           </div>
         );
