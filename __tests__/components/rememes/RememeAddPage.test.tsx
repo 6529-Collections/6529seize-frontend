@@ -20,7 +20,16 @@ jest.mock("next/image", () => ({
 
 // Mock wagmi hooks
 jest.mock("wagmi", () => ({
-  useSignMessage: jest.fn(),
+  useSignTypedData: jest.fn(),
+}));
+jest.mock("@/services/signing/privileged-action-challenge", () => ({
+  getPrivilegedActionChallenge: jest.fn(() =>
+    Promise.resolve({
+      nonce: "nonce",
+      expiresAt: 123,
+      serverSignature: "serverSig",
+    })
+  ),
 }));
 
 // Mock components
@@ -34,7 +43,11 @@ jest.mock(
             props.verifiedRememe(
               {
                 valid: true,
-                contract: { address: "0xtest", contractDeployer: "0xdeployer" },
+                contract: {
+                  address: "0x00000000000000000000000000000000000000aa",
+                  contractDeployer:
+                    "0x00000000000000000000000000000000000000bb",
+                },
                 nfts: [{ tokenId: "1", name: "Test NFT" }],
               },
               [1, 2]
@@ -81,7 +94,7 @@ jest.mock("@/helpers/Helpers", () => ({
 }));
 
 // Get mocked functions
-const mockUseSignMessage = require("wagmi").useSignMessage as jest.Mock;
+const mockUseSignTypedData = require("wagmi").useSignTypedData as jest.Mock;
 const mockUseAuth = require("@/components/auth/Auth")
   .useAuth as jest.Mock;
 const mockUseSeizeConnectContext =
@@ -109,8 +122,8 @@ const renderComponent = () => {
 };
 
 describe("RememeAddPage", () => {
-  const defaultSignMessage = {
-    signMessage: jest.fn(),
+  const defaultSignTypedData = {
+    signTypedData: jest.fn(),
     reset: jest.fn(),
     isPending: false,
     isSuccess: false,
@@ -122,10 +135,10 @@ describe("RememeAddPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseSignMessage.mockReturnValue(defaultSignMessage);
+    mockUseSignTypedData.mockReturnValue(defaultSignTypedData);
     mockUseAuth.mockReturnValue({ connectedProfile: null });
     mockUseSeizeConnectContext.mockReturnValue({
-      address: "0x123",
+      address: "0x0000000000000000000000000000000000000123",
       isConnected: true,
       seizeConnect: jest.fn(),
       seizeConnectOpen: false,
@@ -199,7 +212,7 @@ describe("RememeAddPage", () => {
 
   it("shows deployer privilege when user is contract deployer", async () => {
     mockUseSeizeConnectContext.mockReturnValue({
-      address: "0xdeployer",
+      address: "0x00000000000000000000000000000000000000bb",
       isConnected: true,
       seizeConnect: jest.fn(),
       seizeConnectOpen: false,
@@ -241,11 +254,11 @@ describe("RememeAddPage", () => {
     expect(screen.getByTestId("check-circle")).toBeInTheDocument();
   });
 
-  it("handles signing message flow", async () => {
-    const mockSignMessage = jest.fn();
-    mockUseSignMessage.mockReturnValue({
-      ...defaultSignMessage,
-      signMessage: mockSignMessage,
+  it("handles signing typed data flow", async () => {
+    const mockSignTypedData = jest.fn();
+    mockUseSignTypedData.mockReturnValue({
+      ...defaultSignTypedData,
+      signTypedData: mockSignTypedData,
     });
 
     mockUseAuth.mockReturnValue({
@@ -263,29 +276,29 @@ describe("RememeAddPage", () => {
 
     fireEvent.click(screen.getByText("Add Rememe"));
 
-    expect(mockSignMessage).toHaveBeenCalledWith({
-      message: JSON.stringify({
-        contract: "0xtest",
-        token_ids: ["1"],
-        references: [1, 2],
-      }),
-    });
+    await waitFor(() =>
+      expect(mockSignTypedData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          primaryType: "RememeAdd",
+        })
+      )
+    );
   });
 
-  it("shows signing state when message is pending", () => {
-    mockUseSignMessage.mockReturnValue({
-      ...defaultSignMessage,
+  it("shows signing state when request is pending", () => {
+    mockUseSignTypedData.mockReturnValue({
+      ...defaultSignTypedData,
       isPending: true,
     });
 
     renderComponent();
 
-    expect(screen.getByText("Signing Message")).toBeInTheDocument();
+    expect(screen.getByText("Signing request")).toBeInTheDocument();
   });
 
   it("shows submitting state during submission", async () => {
-    mockUseSignMessage.mockReturnValue({
-      ...defaultSignMessage,
+    mockUseSignTypedData.mockReturnValue({
+      ...defaultSignTypedData,
       isSuccess: true,
       data: "signature",
     });
@@ -297,7 +310,18 @@ describe("RememeAddPage", () => {
         })
     );
 
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { consolidation_key: "test-key" },
+    });
+    mockCommonApiFetch.mockResolvedValue({ boosted_tdh: 10000 });
+
     renderComponent();
+
+    fireEvent.click(screen.getByText("Verify Rememe"));
+    await waitFor(() => {
+      expect(screen.getByText("Add Rememe")).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByText("Add Rememe"));
 
     await waitFor(() => {
       expect(screen.getByText("Adding Rememe")).toBeInTheDocument();
@@ -305,11 +329,16 @@ describe("RememeAddPage", () => {
   });
 
   it("handles successful submission", async () => {
-    mockUseSignMessage.mockReturnValue({
-      ...defaultSignMessage,
+    mockUseSignTypedData.mockReturnValue({
+      ...defaultSignTypedData,
       isSuccess: true,
       data: "signature",
     });
+
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { consolidation_key: "test-key" },
+    });
+    mockCommonApiFetch.mockResolvedValue({ boosted_tdh: 10000 });
 
     mockPostData.mockResolvedValue({
       status: 201,
@@ -323,6 +352,10 @@ describe("RememeAddPage", () => {
 
     // First verify rememe to set up the rememe data
     fireEvent.click(screen.getByText("Verify Rememe"));
+    await waitFor(() => {
+      expect(screen.getByText("Add Rememe")).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByText("Add Rememe"));
 
     await waitFor(() => {
       expect(screen.getByText("Status: Success")).toBeInTheDocument();
@@ -333,11 +366,16 @@ describe("RememeAddPage", () => {
   });
 
   it("handles submission errors", async () => {
-    mockUseSignMessage.mockReturnValue({
-      ...defaultSignMessage,
+    mockUseSignTypedData.mockReturnValue({
+      ...defaultSignTypedData,
       isSuccess: true,
       data: "signature",
     });
+
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { consolidation_key: "test-key" },
+    });
+    mockCommonApiFetch.mockResolvedValue({ boosted_tdh: 10000 });
 
     mockPostData.mockResolvedValue({
       status: 400,
@@ -351,6 +389,10 @@ describe("RememeAddPage", () => {
 
     // First verify rememe to set up the rememe data
     fireEvent.click(screen.getByText("Verify Rememe"));
+    await waitFor(() => {
+      expect(screen.getByText("Add Rememe")).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByText("Add Rememe"));
 
     await waitFor(() => {
       expect(screen.getByText("Status: Fail")).toBeInTheDocument();
@@ -358,9 +400,9 @@ describe("RememeAddPage", () => {
     });
   });
 
-  it("handles sign message errors", () => {
-    mockUseSignMessage.mockReturnValue({
-      ...defaultSignMessage,
+  it("handles sign errors", () => {
+    mockUseSignTypedData.mockReturnValue({
+      ...defaultSignTypedData,
       isError: true,
       error: { message: "User rejected. Something else." },
     });
@@ -372,11 +414,16 @@ describe("RememeAddPage", () => {
 
   it("handles add another button click", async () => {
     const signMessageMock = {
-      ...defaultSignMessage,
+      ...defaultSignTypedData,
       isSuccess: true,
       data: "signature",
     };
-    mockUseSignMessage.mockReturnValue(signMessageMock);
+    mockUseSignTypedData.mockReturnValue(signMessageMock);
+
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { consolidation_key: "test-key" },
+    });
+    mockCommonApiFetch.mockResolvedValue({ boosted_tdh: 10000 });
 
     mockPostData.mockResolvedValue({
       status: 201,
@@ -390,6 +437,10 @@ describe("RememeAddPage", () => {
 
     // First trigger the verification to set up the rememe
     fireEvent.click(screen.getByText("Verify Rememe"));
+    await waitFor(() => {
+      expect(screen.getByText("Add Rememe")).not.toBeDisabled();
+    });
+    fireEvent.click(screen.getByText("Add Rememe"));
 
     // Wait for API call to complete and submission to succeed
     await waitFor(() => {
@@ -416,18 +467,17 @@ describe("RememeAddPage", () => {
   });
 
   it("clears errors when signing new message", async () => {
-    const mockSignMessage = jest.fn();
     const mockReset = jest.fn();
 
-    mockUseSignMessage.mockReturnValue({
-      ...defaultSignMessage,
-      signMessage: mockSignMessage,
+    mockUseSignTypedData.mockReturnValue({
+      ...defaultSignTypedData,
       reset: mockReset,
     });
 
     mockUseAuth.mockReturnValue({
       connectedProfile: { consolidation_key: "test-key" },
     });
+    mockCommonApiFetch.mockResolvedValue({ boosted_tdh: 10000 });
 
     renderComponent();
 

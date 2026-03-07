@@ -1,6 +1,6 @@
 // @ts-nocheck
 import NextGenAdminInitializeBurn from "@/components/nextGen/admin/NextGenAdminInitializeBurn";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@/components/nextGen/NextGenContractWriteStatus", () => () => (
@@ -27,7 +27,16 @@ jest.mock("uuid", () => ({ v4: () => "test-uuid" }));
 
 jest.mock("wagmi", () => ({
   useReadContract: jest.fn(),
-  useSignMessage: jest.fn(),
+  useSignTypedData: jest.fn(),
+}));
+jest.mock("@/services/signing/privileged-action-challenge", () => ({
+  getPrivilegedActionChallenge: jest.fn(() =>
+    Promise.resolve({
+      nonce: "nonce",
+      expiresAt: 123,
+      serverSignature: "serverSig",
+    })
+  ),
 }));
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -41,15 +50,11 @@ import {
   useParsedCollectionIndex,
 } from "@/components/nextGen/nextgen_helpers";
 import { postData } from "@/services/6529api";
-import { useReadContract, useSignMessage } from "wagmi";
+import { useReadContract, useSignTypedData } from "wagmi";
 
 const signMessageState: any = {
-  signMessage: jest.fn(),
+  signTypedDataAsync: jest.fn(() => Promise.resolve("sig")),
   reset: jest.fn(),
-  isError: false,
-  isSuccess: false,
-  data: undefined,
-  error: undefined,
 };
 
 const contractWriteState: any = {
@@ -70,14 +75,16 @@ const contractWriteState: any = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: "0x1" });
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({
+    address: "0x0000000000000000000000000000000000000001",
+  });
   (useGlobalAdmin as jest.Mock).mockReturnValue({ data: true });
   (useFunctionAdmin as jest.Mock).mockReturnValue({ data: true });
   (useCollectionIndex as jest.Mock).mockReturnValue({ data: 3 });
   (useParsedCollectionIndex as jest.Mock).mockReturnValue(3);
   (useCollectionAdmin as jest.Mock).mockReturnValue({ data: [] });
   (getCollectionIdsForAddress as jest.Mock).mockReturnValue(["1", "2"]);
-  (useSignMessage as jest.Mock).mockImplementation(() => signMessageState);
+  (useSignTypedData as jest.Mock).mockImplementation(() => signMessageState);
   (useReadContract as jest.Mock).mockReturnValue({ data: false });
   (useMinterContractWrite as jest.Mock).mockReturnValue(contractWriteState);
 });
@@ -106,30 +113,28 @@ test("calls signMessage when form is valid", async () => {
   const radios = screen.getAllByRole("radio");
   await user.click(radios[0]);
   await user.click(screen.getByText("Submit"));
-  expect(signMessageState.signMessage).toHaveBeenCalledWith({
-    message: "test-uuid",
-  });
+  await waitFor(() =>
+    expect(signMessageState.signTypedDataAsync).toHaveBeenCalled()
+  );
 });
 
 test("writes contract after successful sign message and api call", async () => {
   (postData as jest.Mock).mockResolvedValue({ status: 200, response: {} });
   const user = userEvent.setup();
-  const { rerender } = renderComponent();
+  renderComponent();
   const selects = screen.getAllByRole("combobox");
   await user.selectOptions(selects[0], "1");
   await user.selectOptions(selects[1], "2");
   const radios = screen.getAllByRole("radio");
   await user.click(radios[0]);
-  await user.click(screen.getByText("Submit"));
-  signMessageState.isSuccess = true;
-  signMessageState.data = "sig";
   await act(async () => {
-    rerender(<NextGenAdminInitializeBurn close={() => {}} />);
+    fireEvent.click(screen.getByText("Submit"));
   });
-  expect(postData).toHaveBeenCalled();
-  await act(async () => {});
-  expect(contractWriteState.writeContract).toHaveBeenCalledWith({
-    ...contractWriteState.params,
-    args: ["1", "2", true],
-  });
+  await waitFor(() => expect(postData).toHaveBeenCalled());
+  await waitFor(() =>
+    expect(contractWriteState.writeContract).toHaveBeenCalledWith({
+      ...contractWriteState.params,
+      args: ["1", "2", true],
+    })
+  );
 });
