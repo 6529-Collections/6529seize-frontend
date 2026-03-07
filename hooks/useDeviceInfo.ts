@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import useCapacitor from "./useCapacitor";
 
 interface DeviceInfo {
@@ -12,10 +12,9 @@ interface DeviceInfo {
 
 export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
-  const touchDetectedRef = useRef(false);
 
   const getInfo = useCallback(
-    (touchDetected: boolean): DeviceInfo => {
+    (): DeviceInfo => {
       if (
         typeof globalThis === "undefined" ||
         typeof navigator === "undefined"
@@ -32,19 +31,19 @@ export default function useDeviceInfo(): DeviceInfo {
         matchMedia: (query: string) => MediaQueryList;
       };
       const nav = navigator as Navigator & {
-        msMaxTouchPoints?: number | undefined;
         userAgentData?: { mobile?: boolean | undefined } | undefined;
         standalone?: boolean | undefined;
       };
 
-      const maxTouchPoints = nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0;
-      const hasTouchScreen = touchDetected || maxTouchPoints > 0;
+      const hasTouchCapability =
+        nav.maxTouchPoints > 0 ||
+        "ontouchstart" in (typeof window !== "undefined" ? window : ({} as Window));
 
       const ua = nav.userAgent;
       const uaDataMobile = nav.userAgentData?.mobile;
       const classicMobile =
         /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      const iPadDesktopUA = ua.includes("Macintosh") && hasTouchScreen;
+      const iPadDesktopUA = ua.includes("Macintosh") && hasTouchCapability;
       const appleMobile = /(iPhone|iPad|iPod)/i.test(ua) || iPadDesktopUA;
       const widthMobile =
         win.matchMedia?.("(max-width: 768px)")?.matches ?? false;
@@ -55,7 +54,7 @@ export default function useDeviceInfo(): DeviceInfo {
 
       return {
         isMobileDevice,
-        hasTouchScreen,
+        hasTouchScreen: hasTouchCapability,
         isApp: isCapacitor,
         isAppleMobile: appleMobile,
       };
@@ -63,7 +62,7 @@ export default function useDeviceInfo(): DeviceInfo {
     [isCapacitor]
   );
 
-  const [info, setInfo] = useState<DeviceInfo>(() => getInfo(false));
+  const [info, setInfo] = useState<DeviceInfo>(() => getInfo());
 
   useEffect(() => {
     const hasEventListenerApi =
@@ -72,7 +71,7 @@ export default function useDeviceInfo(): DeviceInfo {
 
     const update = () =>
       setInfo((prev) => {
-        const next = getInfo(touchDetectedRef.current);
+        const next = getInfo();
         if (
           prev.isMobileDevice === next.isMobileDevice &&
           prev.hasTouchScreen === next.hasTouchScreen &&
@@ -84,23 +83,14 @@ export default function useDeviceInfo(): DeviceInfo {
         return next;
       });
 
-    const onceTouch = () => {
-      touchDetectedRef.current = true;
-      update();
-      if (hasEventListenerApi) {
-        globalThis.removeEventListener("touchstart", onceTouch);
-      }
-    };
-
+    update();
     if (hasEventListenerApi) {
       globalThis.addEventListener("resize", update);
-      globalThis.addEventListener("touchstart", onceTouch, { passive: true });
     }
 
     return () => {
       if (hasEventListenerApi) {
         globalThis.removeEventListener("resize", update);
-        globalThis.removeEventListener("touchstart", onceTouch);
       }
     };
   }, [getInfo]);

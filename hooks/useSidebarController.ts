@@ -7,6 +7,7 @@ import {
   SIDEBAR_MOBILE_BREAKPOINT,
 } from "../constants/sidebar";
 import { safeSessionStorage } from "../helpers/safeSessionStorage";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 
 const getBrowserWindow = () => {
   const { window: browserWindow } = globalThis as typeof globalThis & {
@@ -44,15 +45,15 @@ export function useSidebarController() {
     () => createMediaQuery(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`),
     [createMediaQuery]
   );
-  const coarseMql = useMemo(() => createMediaQuery("(pointer: coarse)"), [createMediaQuery]);
   const mobileWidthMql = useMemo(
     () => createMediaQuery(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`),
     [createMediaQuery]
   );
 
   const [isNarrow, setIsNarrow] = useState(() => narrowMql?.matches ?? false);
-  const [isTouchScreen, setIsTouchScreen] = useState(() => coarseMql?.matches ?? false);
   const [isMobileWidth, setIsMobileWidth] = useState(() => mobileWidthMql?.matches ?? false);
+  const { enableHoverUI } = useInteractionMode();
+  const isTouchScreen = !enableHoverUI;
 
   const lastIsNarrowRef = useRef(isNarrow);
 
@@ -112,16 +113,6 @@ export function useSidebarController() {
     narrowMql.addEventListener("change", handleChange);
     return () => narrowMql.removeEventListener("change", handleChange);
   }, [narrowMql]);
-
-  useEffect(() => {
-    if (!coarseMql) {
-      return;
-    }
-    const handleChange = (event: MediaQueryListEvent) => setIsTouchScreen(event.matches);
-    setIsTouchScreen(coarseMql.matches);
-    coarseMql.addEventListener("change", handleChange);
-    return () => coarseMql.removeEventListener("change", handleChange);
-  }, [coarseMql]);
 
   useEffect(() => {
     if (!mobileWidthMql) {

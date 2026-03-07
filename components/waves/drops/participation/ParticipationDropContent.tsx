@@ -1,7 +1,7 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropContent from "../WaveDropContent";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 
 interface ParticipationDropContentProps {
   readonly drop: ExtendedDrop;
@@ -24,7 +24,7 @@ export default function ParticipationDropContent({
   setLongPressTriggered,
   isCompetitionDrop = false,
 }: ParticipationDropContentProps) {
-  const hasTouch = useIsTouchDevice();
+  const { enableLongPress: hasTouch } = useInteractionMode();
 
   return (
     <div className="tw-mt-1">

@@ -5,6 +5,7 @@ import BrainContentPinnedWave from "./BrainContentPinnedWave";
 import { usePinnedWaves } from "@/hooks/usePinnedWaves";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
@@ -25,6 +26,7 @@ const BrainContentPinnedWaves: React.FC = () => {
   const rightArrowRef = useRef<HTMLButtonElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
+  const { enableHoverUI } = useInteractionMode();
 
   const scrollHorizontally = (direction: "left" | "right") => {
     const container = containerRef.current;
@@ -38,7 +40,7 @@ const BrainContentPinnedWaves: React.FC = () => {
   };
 
   const checkScrollArrows = () => {
-    if (window.matchMedia("(pointer: coarse)").matches) {
+    if (!enableHoverUI) {
       setShowLeftArrow(false);
       setShowRightArrow(false);
       return;
@@ -94,7 +96,7 @@ const BrainContentPinnedWaves: React.FC = () => {
         img.removeEventListener("load", checkScrollArrows);
       });
     };
-  }, [pinnedIds]);
+  }, [enableHoverUI, pinnedIds]);
 
   useEffect(() => {
     const wave =

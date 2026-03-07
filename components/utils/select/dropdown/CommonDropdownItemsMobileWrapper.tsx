@@ -9,7 +9,7 @@ import {
 } from "@headlessui/react";
 import type { ReactNode } from "react";
 import { Fragment } from "react";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 
 export default function CommonDropdownItemsMobileWrapper({
   isOpen,
@@ -24,7 +24,7 @@ export default function CommonDropdownItemsMobileWrapper({
   readonly hideOnDesktopHover?: boolean | undefined;
   readonly children: ReactNode;
 }) {
-  const hasTouchInput = useHasTouchInput();
+  const { enableLongPress: hasTouchInput } = useInteractionMode();
   const shouldHideOnDesktopHover = hideOnDesktopHover && !hasTouchInput;
 
   return (

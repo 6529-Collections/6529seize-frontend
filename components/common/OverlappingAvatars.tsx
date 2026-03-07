@@ -2,7 +2,7 @@
 
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import Image from "next/image";
 import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
@@ -79,7 +79,8 @@ export default function OverlappingAvatars({
   onItemClick,
 }: OverlappingAvatarsProps) {
   const baseId = useId();
-  const isTouchDevice = useIsTouchDevice();
+  const { enableHoverUI } = useInteractionMode();
+  const showTooltip = enableHoverUI;
   const slice = items.slice(0, maxCount);
   const sizeClass = SIZE_CLASS[size];
   const avatarRing =
@@ -106,9 +107,9 @@ export default function OverlappingAvatars({
           />
         );
 
-        const showTooltip =
-          !isTouchDevice && item.title !== undefined && item.title !== "";
-        const tooltipId = showTooltip ? `${baseId}-${index}` : undefined;
+        const showTooltipForItem =
+          showTooltip && item.title !== undefined && item.title !== "";
+        const tooltipId = showTooltipForItem ? `${baseId}-${index}` : undefined;
         const wrapper = (
           <div
             key={item.key}
@@ -137,7 +138,7 @@ export default function OverlappingAvatars({
           wrapper
         );
 
-        if (showTooltip && tooltipId !== undefined) {
+        if (showTooltipForItem && tooltipId !== undefined) {
           return (
             <span key={item.key} className="tw-inline-flex">
               {anchor}
