@@ -79,6 +79,8 @@ export default function AppWalletComponent(
   const [addressCopied, setAddressCopied] = useState(false);
   const [mnemonicCopied, setMnemonicCopied] = useState(false);
   const [privateKeyCopied, setPrivateKeyCopied] = useState(false);
+  const [mnemonicCopyArmed, setMnemonicCopyArmed] = useState(false);
+  const [privateKeyCopyArmed, setPrivateKeyCopyArmed] = useState(false);
 
   function setEncryptedPhrase() {
     setPhrase(Array(12).fill("x".repeat(8)));
@@ -360,6 +362,7 @@ export default function AppWalletComponent(
                     if (revealPhrase) {
                       setRevealPhrase(false);
                       setEncryptedPhrase();
+                      setMnemonicCopyArmed(false);
                     } else {
                       setIsRevealingPhrase(true);
                     }
@@ -395,32 +398,44 @@ export default function AppWalletComponent(
                 <>
                   <FontAwesomeIcon
                     className="cursor-pointer unselectable"
-                    icon={faCopy}
-                    height={22}
-                    data-tooltip-id={`copy-mnemonic-${appWallet.address}`}
-                    onClick={() => {
-                      navigator.clipboard.writeText(phrase.join(" "));
-                      setMnemonicCopied(true);
+                  icon={faCopy}
+                  height={22}
+                  data-tooltip-id={`copy-mnemonic-${appWallet.address}`}
+                  onClick={() => {
+                    if (!mnemonicCopyArmed) {
+                      setMnemonicCopyArmed(true);
                       setTimeout(() => {
-                        setMnemonicCopied(false);
-                      }, 1500);
-                    }}
-                  />
-                  <Tooltip
-                    id={`copy-mnemonic-${appWallet.address}`}
-                    place="top"
+                        setMnemonicCopyArmed(false);
+                      }, 2500);
+                      return;
+                    }
+                    setMnemonicCopyArmed(false);
+                    navigator.clipboard.writeText(phrase.join(" "));
+                    setMnemonicCopied(true);
+                    setTimeout(() => {
+                      setMnemonicCopied(false);
+                    }, 1500);
+                  }}
+                />
+                <Tooltip
+                  id={`copy-mnemonic-${appWallet.address}`}
+                  place="top"
                     style={{
                       backgroundColor: "#1F2937",
                       color: "white",
                       padding: "4px 8px",
                     }}
-                  >
-                    {mnemonicCopied ? "Copied!" : "Copy to clipboard"}
-                  </Tooltip>
-                </>
-              )}
-            </span>
-          )}
+                >
+                  {mnemonicCopied
+                    ? "Copied!"
+                    : mnemonicCopyArmed
+                      ? "Click again to copy"
+                      : "Copy to clipboard"}
+                </Tooltip>
+              </>
+            )}
+          </span>
+        )}
         </Col>
       </Row>
       <Row className="pt-2">
@@ -453,6 +468,7 @@ export default function AppWalletComponent(
                   if (revealPrivateKey) {
                     setRevealPrivateKey(false);
                     setEncryptedPrivateKey();
+                    setPrivateKeyCopyArmed(false);
                   } else {
                     setIsRevealingPrivateKey(true);
                   }
@@ -494,6 +510,14 @@ export default function AppWalletComponent(
                   height={22}
                   data-tooltip-id={`copy-private-key-${appWallet.address}`}
                   onClick={() => {
+                    if (!privateKeyCopyArmed) {
+                      setPrivateKeyCopyArmed(true);
+                      setTimeout(() => {
+                        setPrivateKeyCopyArmed(false);
+                      }, 2500);
+                      return;
+                    }
+                    setPrivateKeyCopyArmed(false);
                     navigator.clipboard.writeText(privateKey);
                     setPrivateKeyCopied(true);
                     setTimeout(() => {
@@ -510,7 +534,11 @@ export default function AppWalletComponent(
                     padding: "4px 8px",
                   }}
                 >
-                  {privateKeyCopied ? "Copied!" : "Copy to clipboard"}
+                  {privateKeyCopied
+                    ? "Copied!"
+                    : privateKeyCopyArmed
+                      ? "Click again to copy"
+                      : "Copy to clipboard"}
                 </Tooltip>
               </>
             )}

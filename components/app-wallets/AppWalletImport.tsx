@@ -8,6 +8,8 @@ import Link from "next/link";
 import {
   faCheckCircle,
   faCircleArrowLeft,
+  faEye,
+  faEyeSlash,
   faPlusCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -136,6 +138,9 @@ function AppWalletImportMnemonic() {
                       placeholder={`word ${i + 1}`}
                       value={w}
                       className={styles["importWalletWordInput"]}
+                      autoComplete="off"
+                      spellCheck={false}
+                      autoCapitalize="none"
                       onChange={(e) => {
                         const newPhrase = e.target.value;
                         if (/^[a-z]*$/.test(newPhrase)) {
@@ -190,6 +195,7 @@ function AppWalletImportMnemonic() {
 function AppWalletImportPrivateKey() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [privateKey, setPrivateKey] = useState("");
+  const [privateKeyHidden, setPrivateKeyHidden] = useState(true);
   const [isReadonly, setIsReadonly] = useState(false);
 
   const [error, setError] = useState("");
@@ -197,11 +203,23 @@ function AppWalletImportPrivateKey() {
     ethers.Wallet | ethers.HDNodeWallet
   >();
 
+  const normalizePrivateKey = (value: string) => {
+    const noWhitespace = value.replace(/\s+/g, "").trim();
+    if (/^0x[0-9a-fA-F]{64}$/.test(noWhitespace)) {
+      return `0x${noWhitespace.slice(2).toLowerCase()}`;
+    }
+    if (/^[0-9a-fA-F]{64}$/.test(noWhitespace)) {
+      return `0x${noWhitespace.toLowerCase()}`;
+    }
+    return noWhitespace;
+  };
+
   const clear = () => {
     setPrivateKey("");
     setError("");
     setIsReadonly(false);
     setValidatedWallet(undefined);
+    setPrivateKeyHidden(true);
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
@@ -210,7 +228,9 @@ function AppWalletImportPrivateKey() {
   const validate = () => {
     setIsReadonly(true);
     try {
-      const wallet = new ethers.Wallet(privateKey);
+      const normalized = normalizePrivateKey(privateKey);
+      setPrivateKey(normalized);
+      const wallet = new ethers.Wallet(normalized);
       setValidatedWallet(wallet);
     } catch (e: any) {
       setError(`Error: ${e.message}`);
@@ -228,11 +248,20 @@ function AppWalletImportPrivateKey() {
                   ref={inputRef}
                   autoFocus
                   disabled={isReadonly}
-                  type="text"
+                  type={privateKeyHidden ? "password" : "text"}
                   placeholder="private key"
                   value={privateKey}
                   className={styles["importWalletWordInput"]}
+                  autoComplete="off"
+                  spellCheck={false}
+                  autoCapitalize="none"
                   onChange={(e) => setPrivateKey(e.target.value)}
+                />
+                <FontAwesomeIcon
+                  className="cursor-pointer unselectable"
+                  icon={privateKeyHidden ? faEyeSlash : faEye}
+                  height={18}
+                  onClick={() => setPrivateKeyHidden((v) => !v)}
                 />
               </Col>
             </Row>
