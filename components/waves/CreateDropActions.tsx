@@ -109,6 +109,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 {isDropMode && (
                   <>
                     <button
+                      aria-label="Add metadata"
                       onClick={onAddMetadataClick}
                       className={`tw-flex-shrink-0 ${
                         isRequiredMetadataMissing
