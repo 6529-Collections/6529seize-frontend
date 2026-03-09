@@ -47,7 +47,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
         <div className="tw-inline-flex tw-items-center tw-gap-x-2">
           <div className="tw-inline-flex tw-items-center tw-gap-x-1">
             <UserProfileTooltipWrapper
-              user={drop.author.handle ?? drop.author.id}
+              user={drop.author.handle ?? drop.author.primary_address}
             >
               <span className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80">
                 {drop.author.handle}
