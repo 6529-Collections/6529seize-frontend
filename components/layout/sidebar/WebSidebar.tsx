@@ -215,9 +215,7 @@ function WebSidebar({
 
               {address && (
                 <div
-                  className={
-                    showDesktopSearch ? "tw-px-3" : "tw-px-3 tw-pt-2"
-                  }
+                  className={showDesktopSearch ? "tw-px-3" : "tw-px-3 tw-pt-2"}
                 >
                   <WebSidebarNavItem
                     href="/notifications"
