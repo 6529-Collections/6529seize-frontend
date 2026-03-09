@@ -15,6 +15,7 @@ import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
+import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -28,7 +29,7 @@ export default function WaveDropActionsMore({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { canDelete } = useDropInteractionRules(drop);
+  const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
 
   const handleOpenChange = (newIsOpen: boolean) => {
     setIsOpen(newIsOpen);
@@ -113,6 +114,12 @@ export default function WaveDropActionsMore({
                 tooltipId={`download-media-${drop.id}`}
                 isDropdownItem={true}
                 onDownload={closeDropdown}
+              />
+            )}
+            {canSetPinnedDrop && (
+              <WaveDropActionsSetPinnedDrop
+                drop={drop}
+                onPinnedDropSet={closeDropdown}
               />
             )}
             {canDelete && (

@@ -4939,6 +4939,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
+  /waves/{id}/pinned-drop:
+    post:
+      tags:
+        - Waves
+      summary: Change pinned drop in a wave
+      operationId: setWavePinnedDrop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSetPinnedDropRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWave"
+        "403":
+          description: Only wave creators or admins can change pinned drop
+        "400":
+          description: Invalid request
+        "404":
+          description: Wave or drop not found
   /waves/{id}/pins:
     post:
       tags:
@@ -10060,6 +10091,13 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         wave:
           $ref: "#/components/schemas/ApiCreateWaveConfig"
+    ApiSetPinnedDropRequest:
+      type: object
+      required:
+        - drop_id
+      properties:
+        drop_id:
+          type: string
     ApiUploadItem:
       type: object
       required:
