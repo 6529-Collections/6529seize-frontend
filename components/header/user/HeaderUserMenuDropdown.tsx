@@ -6,9 +6,9 @@ import {
   faPlugCircleXmark,
   faRightFromBracket,
   faShuffle,
+  faShareNodes,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ShareIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -261,8 +261,8 @@ export default function HeaderUserMenuDropdown({
                       >
                         <FontAwesomeIcon
                           icon={faPlugCircleMinus}
-                          height={16}
-                          width={16}
+                          height={20}
+                          width={20}
                         />
                         <span>Disconnect Wallet</span>
                       </button>
@@ -284,8 +284,8 @@ export default function HeaderUserMenuDropdown({
                       >
                         <FontAwesomeIcon
                           icon={faPlugCirclePlus}
-                          height={16}
-                          width={16}
+                          height={20}
+                          width={20}
                         />
                         <span>Connect Wallet</span>
                       </button>
@@ -321,7 +321,11 @@ export default function HeaderUserMenuDropdown({
                         title="Share"
                         className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
-                        <ShareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                        <FontAwesomeIcon
+                          icon={faShareNodes}
+                          height={20}
+                          width={20}
+                        />
                         <span>Share</span>
                       </button>
                     </li>
@@ -343,8 +347,8 @@ export default function HeaderUserMenuDropdown({
                     >
                       <FontAwesomeIcon
                         icon={faRightFromBracket}
-                        height={16}
-                        width={16}
+                        height={20}
+                        width={20}
                       />
                       <span>{isConnected && `Disconnect & `}Logout</span>
                     </button>
@@ -366,8 +370,8 @@ export default function HeaderUserMenuDropdown({
                       >
                         <FontAwesomeIcon
                           icon={faPlugCircleXmark}
-                          height={16}
-                          width={16}
+                          height={20}
+                          width={20}
                         />
                         <span>Sign Out All Profiles</span>
                       </button>
