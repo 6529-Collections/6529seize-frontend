@@ -12,6 +12,7 @@ interface DropInteractionRules {
   canVote: boolean; // determines if voting is enabled
   voteState: DropVoteState; // reason for current vote state
   canDelete: boolean; // determines if delete is allowed
+  canSetPinnedDrop: boolean; // determines if wave pinned drop can be changed
   isAuthor: boolean; // determines if current user is the author
   isWinner: boolean; // determines if drop is a winner
   isVotingEnded: boolean; // determines if the voting period has ended for this drop's wave
@@ -119,6 +120,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   const canDeleteAsAdmin = isAdmin && adminDropDeletionEnabled;
   // Delete rules
   const canDelete = baseRules && (isAuthor || canDeleteAsAdmin);
+  const canSetPinnedDrop = baseRules && isAdmin;
 
   // Check if voting has ended by comparing current time with voting period end time
   const now = Time.currentMillis();
@@ -132,6 +134,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     canVote,
     voteState,
     canDelete,
+    canSetPinnedDrop,
     isAuthor,
     isWinner,
     isVotingEnded,
