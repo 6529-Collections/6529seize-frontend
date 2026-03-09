@@ -44,7 +44,7 @@ describe("BottomNavigation", () => {
 
     const passedItems = navItemCalls.map((call) => call[0].item);
     expect(passedItems.map((item: { name: string }) => item.name)).toEqual([
-      "Profile",
+      "Discovery",
       "Waves",
       "Messages",
       "Home",
