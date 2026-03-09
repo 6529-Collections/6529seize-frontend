@@ -151,9 +151,8 @@ function WebSidebarUser({
   const hasUnreadOnOtherConnectedProfiles = connectedAccounts.some(
     (account) =>
       !account.isActive &&
-      ((connectedAccountUnreadNotifications ?? {})[
-        account.address.toLowerCase()
-      ] ?? 0) > 0
+      (connectedAccountUnreadNotifications?.[account.address.toLowerCase()] ??
+        0) > 0
   );
 
   const switchToNextConnectedAccount = (): boolean => {
