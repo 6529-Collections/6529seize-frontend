@@ -35,7 +35,7 @@ import React, {
   useState,
 } from "react";
 import { useSelector } from "react-redux";
-import { AuthContext } from "../auth/Auth";
+import { useAuth } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
 import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
@@ -359,7 +359,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const prevWaveIdRef = useRef(wave.id);
   const [isWideContainer, setIsWideContainer] = useState(false);
   const editingDropId = useSelector(selectEditingDropId);
-  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile } = useAuth();
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
@@ -1069,6 +1069,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setIsMetadataOpen(false);
   };
 
+  const handleDropModeChange = useCallback(
+    (newIsDropMode: boolean) => {
+      if (!newIsDropMode) {
+        setIsMetadataOpen(false);
+      }
+      onDropModeChange(newIsDropMode);
+    },
+    [onDropModeChange]
+  );
+
   const onChangeKey = (params: { index: number; newKey: string }) => {
     setMetadata((prev) =>
       prev.map((item, i) =>
@@ -1166,6 +1176,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         >
           <CreateDropActions
             isStormMode={isStormModeActive}
+            isDropMode={isDropMode}
             canAddPart={canAddPart}
             submitting={submitting}
             showOptions={showOptions}
@@ -1219,7 +1230,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             {isParticipatory && !dropId && !isMemesWave && (
               <CreateDropDropModeToggle
                 isDropMode={isDropMode}
-                onDropModeChange={onDropModeChange}
+                onDropModeChange={handleDropModeChange}
                 privileges={privileges}
               />
             )}
@@ -1244,7 +1255,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         />
       )}
       <AnimatePresence>
-        {isMetadataOpen && (
+        {isDropMode && isMetadataOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
