@@ -1,27 +1,11 @@
 import type React from "react";
 
-const ARWEAVE_GATEWAYS_PRIORITY: readonly string[] = [
+const ARWEAVE_GATEWAYS: readonly string[] = [
   "arweave.net",
   "gateway.arweave.net",
-  "g8way.io",
-] as const;
-
-const ARWEAVE_GATEWAYS_LONG_TAIL: readonly string[] = [
-  "arweave.org",
-  "arweave.dev",
+  "gateway.ar.io",
   "ar-io.net",
-  "arweave.live",
-  "arweave.surf",
-  "arweave.team",
-  "arweavetoday.com",
-  "arweave.fyi",
-  "arweave.guide",
 ] as const;
-
-const ARWEAVE_GATEWAYS: readonly string[] = dedupe([
-  ...ARWEAVE_GATEWAYS_PRIORITY,
-  ...ARWEAVE_GATEWAYS_LONG_TAIL,
-]);
 
 function dedupe(list: readonly string[]): string[] {
   return Array.from(new Set(list));
