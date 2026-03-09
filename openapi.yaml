@@ -1985,6 +1985,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMemesMintStatsPage"
+  /collected-stats/{identityKey}:
+    get:
+      tags:
+        - Collected Stats
+      summary: Get consolidated collection stats for an identity
+      operationId: getCollectedStats
+      parameters:
+        - name: identityKey
+          in: path
+          description: Profile handle, wallet address, or ENS name
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectedStats"
+        "404":
+          description: Identity not found
   /memes-mint-stats/total:
     get:
       tags:
@@ -9558,6 +9580,58 @@ components:
         platform:
           type: string
           description: Optional platform (ios, android, web)
+    ApiCollectedStats:
+      type: object
+      required:
+        - boost
+        - nextgen_balance
+        - gradients_balance
+        - memes_balance
+        - unique_memes
+        - seasons
+      properties:
+        boost:
+          type: number
+          format: double
+        nextgen_balance:
+          type: integer
+          format: int64
+        gradients_balance:
+          type: integer
+          format: int64
+        memes_balance:
+          type: integer
+          format: int64
+        unique_memes:
+          type: integer
+          format: int64
+        seasons:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectedStatsSeason"
+    ApiCollectedStatsSeason:
+      type: object
+      required:
+        - season
+        - total_cards_in_season
+        - sets_held
+        - partial_set_unique_cards_held
+        - total_cards_held
+      properties:
+        season:
+          type: string
+        total_cards_in_season:
+          type: integer
+          format: int64
+        sets_held:
+          type: integer
+          format: int64
+        partial_set_unique_cards_held:
+          type: integer
+          format: int64
+        total_cards_held:
+          type: integer
+          format: int64
     ApiRepCategoriesPage:
       type: object
       required:

@@ -21,7 +21,7 @@ export default function CommonTablePagination({
     <div
       className={`${
         small && showTopBorder
-          ? "tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800"
+          ? "tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-px-4 sm:tw-px-6"
           : ""
       } tw-pt-4 tw-pb-3 ${className ?? ""}`}
     >

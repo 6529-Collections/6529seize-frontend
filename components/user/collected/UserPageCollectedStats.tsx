@@ -11,15 +11,15 @@ import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ChartBarIcon } from "@heroicons/react/24/outline";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useId, useMemo, useState } from "react";
 
 const isAbortError = (error: unknown): boolean =>
   error instanceof Error && error.name === "AbortError";
 const STATS_QUERY_KEY = "user-page-collected-stats";
-const DETAILS_TRANSITION = {
-  duration: 0.28,
-  ease: [0.22, 1, 0.36, 1],
+const DETAILS_OPEN_TRANSITION = {
+  duration: 0.3,
+  ease: [0.04, 0.62, 0.23, 0.98],
 } as const;
 const NO_MOTION_TRANSITION = { duration: 0 } as const;
 
@@ -168,7 +168,6 @@ function useCollectedStatsData({
 function UserPageCollectedStatsDetailsPanel({
   isOpen,
   detailsId,
-  shouldReduceMotion,
   statsPath,
   profile,
   activeAddress,
@@ -179,7 +178,6 @@ function UserPageCollectedStatsDetailsPanel({
 }: {
   readonly isOpen: boolean;
   readonly detailsId: string;
-  readonly shouldReduceMotion: boolean;
   readonly statsPath: string | null;
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
@@ -194,19 +192,17 @@ function UserPageCollectedStatsDetailsPanel({
         <motion.div
           id={detailsId}
           key="stats-details"
-          initial={
-            shouldReduceMotion
-              ? { opacity: 1, height: "auto" }
-              : { opacity: 0, height: 0 }
-          }
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={
-            shouldReduceMotion ? NO_MOTION_TRANSITION : DETAILS_TRANSITION
-          }
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{
+            height: 0,
+            opacity: 0,
+            transition: NO_MOTION_TRANSITION,
+          }}
+          transition={DETAILS_OPEN_TRANSITION}
           className="tw-overflow-hidden"
         >
-          <div className="tw-border-t tw-border-solid tw-border-iron-800/90 tw-bg-gradient-to-b tw-from-iron-900/30 tw-to-transparent tw-px-4 tw-pb-5 tw-pt-4 sm:tw-px-6 sm:tw-pb-6 sm:tw-pt-5">
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/90 tw-bg-gradient-to-b tw-from-iron-900/30 tw-to-transparent tw-px-4 tw-pb-5 tw-pt-4 sm:tw-px-6 sm:tw-pb-6 sm:tw-pt-5">
             {statsPath === null ? (
               <div className="tw-py-2 tw-text-sm tw-text-iron-400">
                 Stats are unavailable for this profile.
@@ -238,7 +234,6 @@ export default function UserPageCollectedStats({
   readonly initialStatsData: UserPageStatsInitialData;
 }) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const shouldReduceMotion = useReducedMotion() ?? false;
   const detailsId = useId();
   const { statsPath, seasons, tdh, ownerBalance, balanceMemes } =
     useCollectedStatsData({
@@ -280,7 +275,6 @@ export default function UserPageCollectedStats({
       <UserPageCollectedStatsDetailsPanel
         isOpen={isDetailsOpen}
         detailsId={detailsId}
-        shouldReduceMotion={shouldReduceMotion}
         statsPath={statsPath}
         profile={profile}
         activeAddress={activeAddress}
