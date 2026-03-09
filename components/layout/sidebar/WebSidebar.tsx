@@ -61,8 +61,14 @@ function WebSidebar({
   const showDesktopSearch = !isMobile;
 
   useKey(
-    (event) => event.metaKey && event.key === "k",
-    () => {
+    (event) => event.key === "k",
+    (event) => {
+      if (!(event.metaKey || event.ctrlKey)) {
+        return;
+      }
+
+      event.preventDefault();
+
       if (showDesktopSearch) {
         setIsSearchOpen(true);
       }
