@@ -211,110 +211,106 @@ const WebSidebarNav = React.forwardRef<
   );
 
   return (
-    <>
-      <nav
-        className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-        aria-label="Desktop navigation"
-      >
-        <ul className="tw-m-0 tw-list-none tw-p-0">
-          <li>
-            <WebSidebarNavItem
-              href="/"
-              icon={HomeIcon}
-              active={pathname === "/"}
+    <nav
+      className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+      aria-label="Desktop navigation"
+    >
+      <ul className="tw-m-0 tw-list-none tw-p-0">
+        <li>
+          <WebSidebarNavItem
+            href="/"
+            icon={HomeIcon}
+            active={pathname === "/"}
+            collapsed={isCollapsed}
+            label="Home"
+          />
+        </li>
+
+        <li>
+          <WebSidebarNavItem
+            href="/waves"
+            icon={WavesIcon}
+            active={pathname?.startsWith("/waves") || false}
+            collapsed={isCollapsed}
+            label="Waves"
+          />
+        </li>
+
+        <li>
+          <WebSidebarNavItem
+            href="/messages"
+            icon={ChatBubbleIcon}
+            active={pathname?.startsWith("/messages") || false}
+            collapsed={isCollapsed}
+            label="Messages"
+            hasIndicator={hasUnreadMessages}
+          />
+        </li>
+
+        {networkSection && (
+          <li className={isCollapsed ? "tw-relative" : undefined}>
+            <WebSidebarExpandable
+              section={networkSection}
+              expanded={expandedKeys.includes("network")}
+              onToggle={(event) => handleSectionToggle("network", event)}
               collapsed={isCollapsed}
-              label="Home"
+              pathname={pathname}
+              data-section="network"
             />
+            {renderCollapsedSubmenu("network")}
           </li>
+        )}
 
-          <li>
-            <WebSidebarNavItem
-              href="/waves"
-              icon={WavesIcon}
-              active={pathname?.startsWith("/waves") || false}
+        {collectionsSection && (
+          <li className={isCollapsed ? "tw-relative" : undefined}>
+            <WebSidebarExpandable
+              section={collectionsSection}
+              expanded={expandedKeys.includes("collections")}
+              onToggle={(event) => handleSectionToggle("collections", event)}
               collapsed={isCollapsed}
-              label="Waves"
+              pathname={pathname}
+              data-section="collections"
             />
+            {renderCollapsedSubmenu("collections")}
           </li>
+        )}
 
-          <li>
-            <WebSidebarNavItem
-              href="/messages"
-              icon={ChatBubbleIcon}
-              active={pathname?.startsWith("/messages") || false}
-              collapsed={isCollapsed}
-              label="Messages"
-              hasIndicator={hasUnreadMessages}
-            />
-          </li>
-
-          {networkSection && (
-            <li className={isCollapsed ? "tw-relative" : undefined}>
-              <WebSidebarExpandable
-                section={networkSection}
-                expanded={expandedKeys.includes("network")}
-                onToggle={(event) => handleSectionToggle("network", event)}
-                collapsed={isCollapsed}
-                pathname={pathname}
-                data-section="network"
-              />
-              {renderCollapsedSubmenu("network")}
-            </li>
-          )}
-
-          {collectionsSection && (
-            <li className={isCollapsed ? "tw-relative" : undefined}>
-              <WebSidebarExpandable
-                section={collectionsSection}
-                expanded={expandedKeys.includes("collections")}
-                onToggle={(event) => handleSectionToggle("collections", event)}
-                collapsed={isCollapsed}
-                pathname={pathname}
-                data-section="collections"
-              />
-              {renderCollapsedSubmenu("collections")}
-            </li>
-          )}
-
-          {sections
-            .filter(
-              (section) =>
-                section.key !== "network" && section.key !== "collections"
-            )
-            .map((section) => (
-              <React.Fragment key={section.key}>
-                <li className={isCollapsed ? "tw-relative" : undefined}>
-                  <WebSidebarExpandable
-                    section={section}
-                    expanded={expandedKeys.includes(section.key)}
-                    onToggle={(event) =>
-                      handleSectionToggle(section.key, event)
+        {sections
+          .filter(
+            (section) =>
+              section.key !== "network" && section.key !== "collections"
+          )
+          .map((section) => (
+            <React.Fragment key={section.key}>
+              <li className={isCollapsed ? "tw-relative" : undefined}>
+                <WebSidebarExpandable
+                  section={section}
+                  expanded={expandedKeys.includes(section.key)}
+                  onToggle={(event) => handleSectionToggle(section.key, event)}
+                  collapsed={isCollapsed}
+                  pathname={pathname}
+                  data-section={section.key}
+                />
+                {renderCollapsedSubmenu(section.key)}
+              </li>
+              {section.key === "about" && showDropForge && (
+                <li>
+                  <WebSidebarNavItem
+                    href={DROP_FORGE_PATH}
+                    icon={DropForgeIcon}
+                    active={
+                      pathname === DROP_FORGE_PATH ||
+                      pathname?.startsWith(`${DROP_FORGE_PATH}/`)
                     }
                     collapsed={isCollapsed}
-                    pathname={pathname}
-                    data-section={section.key}
+                    label={DROP_FORGE_TITLE}
                   />
-                  {renderCollapsedSubmenu(section.key)}
                 </li>
-                {section.key === "about" && showDropForge && (
-                  <li>
-                    <WebSidebarNavItem
-                      href={DROP_FORGE_PATH}
-                      icon={DropForgeIcon}
-                      active={
-                        pathname === DROP_FORGE_PATH ||
-                        pathname?.startsWith(`${DROP_FORGE_PATH}/`)
-                      }
-                      collapsed={isCollapsed}
-                      label={DROP_FORGE_TITLE}
-                    />
-                  </li>
-                )}
-              </React.Fragment>
-            ))}
-        </ul>
-      </nav>
-    </>
+              )}
+            </React.Fragment>
+          ))}
+      </ul>
+    </nav>
   );
 });
 
