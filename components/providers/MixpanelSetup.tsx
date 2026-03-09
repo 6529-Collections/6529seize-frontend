@@ -9,21 +9,27 @@ import {
   initAnalytics,
   trackPageView,
 } from "@/services/analytics/mixpanel";
-import { usePathname } from "next/navigation";
+import { classifyPageView } from "@/services/analytics/pageClassification";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 export default function MixpanelSetup() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const { performanceConsent } = useCookieConsent();
-  const lastTrackedPathRef = useRef<string | null>(null);
+  const lastTrackedPageKeyRef = useRef<string | null>(null);
   const identifiedProfileIdRef = useRef<string | null>(null);
   const hasConsent = performanceConsent === true;
+  const pageView = classifyPageView({
+    pathname,
+    searchParams,
+  });
 
   useEffect(() => {
     if (!hasConsent) {
       disableAnalytics();
-      lastTrackedPathRef.current = null;
+      lastTrackedPageKeyRef.current = null;
       identifiedProfileIdRef.current = null;
       return;
     }
@@ -58,20 +64,23 @@ export default function MixpanelSetup() {
   }, [connectedProfile?.id, hasConsent]);
 
   useEffect(() => {
-    if (!hasConsent || !pathname) {
+    if (!hasConsent) {
       return;
     }
 
-    if (lastTrackedPathRef.current === pathname) {
+    if (lastTrackedPageKeyRef.current === pageView.trackingKey) {
       return;
     }
 
-    lastTrackedPathRef.current = pathname;
+    lastTrackedPageKeyRef.current = pageView.trackingKey;
     trackPageView(pathname, {
       has_connected_profile:
         connectedProfile?.id !== undefined && connectedProfile.id !== null,
+      logical_page: pageView.logicalPage,
+      page_group: pageView.pageGroup,
+      route_pattern: pageView.routePattern,
     });
-  }, [connectedProfile?.id, hasConsent, pathname]);
+  }, [connectedProfile?.id, hasConsent, pageView, pathname]);
 
   return null;
 }
