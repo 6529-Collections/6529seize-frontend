@@ -3,10 +3,9 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { AuthContext } from "@/components/auth/Auth";
 
-jest.mock(
-  "@/components/header/user/HeaderUserProxyDropdownItem",
-  () => () => <div data-testid="item" />
-);
+jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
+  <div data-testid="item" />
+));
 jest.mock(
   "@/components/header/user/connected/HeaderUserConnectedAccounts",
   () => (props: any) => (
