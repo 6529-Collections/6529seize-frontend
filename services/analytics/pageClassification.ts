@@ -223,7 +223,7 @@ export function classifyPageView(args: {
   const normalizedPathname = pathname.startsWith("/")
     ? pathname
     : `/${pathname}`;
-  const segments = normalizedPathname.split("/").filter((segment) => segment);
+  const segments = normalizedPathname.split("/").filter(Boolean);
   const firstSegment = segments[0]?.toLowerCase();
 
   if (firstSegment === "waves") {
