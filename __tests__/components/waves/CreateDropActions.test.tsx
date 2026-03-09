@@ -26,10 +26,16 @@ jest.mock("framer-motion", () => {
   return {
     __esModule: true,
     motion: {
-      div: React.forwardRef(function Div({ children, ...props }: { children: React.ReactNode }, ref: React.Ref<HTMLDivElement>) {
+      div: React.forwardRef(function Div(
+        { children, ...props }: { children: React.ReactNode },
+        ref: React.Ref<HTMLDivElement>
+      ) {
         return React.createElement("div", { ...props, ref }, children);
       }),
-      button: React.forwardRef(function Btn({ children, ...props }: { children: React.ReactNode }, ref: React.Ref<HTMLButtonElement>) {
+      button: React.forwardRef(function Btn(
+        { children, ...props }: { children: React.ReactNode },
+        ref: React.Ref<HTMLButtonElement>
+      ) {
         return React.createElement("button", { ...props, ref }, children);
       }),
     },
@@ -51,7 +57,8 @@ jest.mock("@/components/waves/StormButton", () => {
       <button
         data-testid="storm-button"
         onClick={breakIntoStorm}
-        disabled={submitting || !canAddPart}>
+        disabled={submitting || !canAddPart}
+      >
         {isStormMode ? "Storm Mode" : "Storm"}
       </button>
     );
@@ -64,7 +71,8 @@ jest.mock("@/components/waves/CreateDropGifPicker", () => {
       <div data-testid="gif-picker">
         <button
           onClick={() => onSelect("test-gif.gif")}
-          data-testid="select-gif">
+          data-testid="select-gif"
+        >
           Select GIF
         </button>
         <button onClick={() => setShow(false)} data-testid="close-gif">
@@ -83,6 +91,7 @@ jest.mock("@/hooks/isMobileScreen", () => ({
 describe("CreateDropActions", () => {
   const defaultProps = {
     isStormMode: false,
+    isDropMode: true,
     canAddPart: true,
     submitting: false,
     isRequiredMetadataMissing: false,
@@ -109,8 +118,8 @@ describe("CreateDropActions", () => {
 
     // Find and click the chevron button (the one without aria-label in narrow container)
     const buttons = screen.getAllByRole("button");
-    const chevronButton = buttons.find(
-      (btn) => btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
+    const chevronButton = buttons.find((btn) =>
+      btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
     );
 
     if (chevronButton) {
@@ -131,24 +140,24 @@ describe("CreateDropActions", () => {
   it("calls onAddMetadataClick when metadata button is clicked", async () => {
     render(<CreateDropActions {...defaultProps} />);
 
-    // Find metadata buttons (the ones with the code icon, without aria-label)
-    const buttons = screen.getAllByRole("button");
-    const metadataButton = buttons.find(
-      (button) =>
-        button.querySelector('path[d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"]')
-    );
+    await userEvent.click(screen.getByLabelText("Add metadata"));
 
-    if (metadataButton) {
-      await userEvent.click(metadataButton);
-      expect(defaultProps.onAddMetadataClick).toHaveBeenCalled();
-    }
+    expect(defaultProps.onAddMetadataClick).toHaveBeenCalled();
+  });
+
+  it("does not render metadata button in chat mode", () => {
+    render(<CreateDropActions {...defaultProps} isDropMode={false} />);
+
+    expect(screen.queryByLabelText("Add metadata")).not.toBeInTheDocument();
   });
 
   it("handles file upload", async () => {
     render(<CreateDropActions {...defaultProps} />);
 
     const fileInputs = screen.getAllByLabelText("Upload a file");
-    const fileInput = fileInputs[0]?.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = fileInputs[0]?.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
 
     await userEvent.upload(fileInput, file);
@@ -218,26 +227,16 @@ describe("CreateDropActions", () => {
 
   it("highlights metadata button when metadata is missing", () => {
     render(
-      <CreateDropActions
-        {...defaultProps}
-        isRequiredMetadataMissing={true}
-      />
+      <CreateDropActions {...defaultProps} isRequiredMetadataMissing={true} />
     );
 
-    const buttons = screen.getAllByRole("button");
-    const metadataButton = buttons.find(
-      (button) =>
-        button.querySelector('path[d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"]')
-    );
+    const metadataButton = screen.getByLabelText("Add metadata");
     expect(metadataButton).toHaveClass("tw-text-[#FEDF89]");
   });
 
   it("highlights upload button when media is missing", () => {
     render(
-      <CreateDropActions
-        {...defaultProps}
-        isRequiredMediaMissing={true}
-      />
+      <CreateDropActions {...defaultProps} isRequiredMediaMissing={true} />
     );
 
     const uploadLabels = screen.getAllByLabelText("Upload a file");
@@ -255,8 +254,8 @@ describe("CreateDropActions", () => {
     );
 
     const buttons = screen.getAllByRole("button");
-    const chevronButton = buttons.find(
-      (btn) => btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
+    const chevronButton = buttons.find((btn) =>
+      btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
     );
     expect(chevronButton).toHaveClass("tw-text-[#FEDF89]");
   });
@@ -298,7 +297,9 @@ describe("CreateDropActions", () => {
     render(<CreateDropActions {...defaultProps} />);
 
     const fileInputs = screen.getAllByLabelText("Upload a file");
-    const fileInput = fileInputs[0]?.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = fileInputs[0]?.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const files = [
       new File(["test1"], "test1.jpg", { type: "image/jpeg" }),
       new File(["test2"], "test2.png", { type: "image/png" }),
@@ -315,9 +316,7 @@ describe("CreateDropActions", () => {
       "removeEventListener"
     );
 
-    const { unmount } = render(
-      <CreateDropActions {...defaultProps} />
-    );
+    const { unmount } = render(<CreateDropActions {...defaultProps} />);
 
     const gifButtons = screen.getAllByLabelText("Add GIF");
     await userEvent.click(gifButtons[0]);
@@ -345,8 +344,8 @@ describe("CreateDropActions", () => {
 
     // When showOptions is false, only the chevron button should be visible
     const buttons = screen.getAllByRole("button");
-    const chevronButton = buttons.find(
-      (btn) => btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
+    const chevronButton = buttons.find((btn) =>
+      btn.querySelector('path[d="m8.25 4.5 7.5 7.5-7.5 7.5"]')
     );
     expect(chevronButton).toBeInTheDocument();
   });
