@@ -177,15 +177,10 @@ function WebSidebar({
               data-sidebar-scroll="true"
             >
               <div className="tw-flex-1">
-                <WebSidebarNav
-                  ref={navRef}
-                  isCollapsed={shouldShowCollapsed}
-                  isMobile={isMobile}
-                  showNotifications={Boolean(address)}
-                />
+                <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
               </div>
 
-              {!isMobile && address && (
+              {address && (
                 <div className="tw-px-3 tw-pt-2">
                   <WebSidebarNavItem
                     href="/notifications"
@@ -199,7 +194,7 @@ function WebSidebar({
               )}
 
               {profilePath && (
-                <div className="tw-px-3 tw-pt-2">
+                <div className="tw-px-3">
                   <WebSidebarNavItem
                     href={profilePath}
                     icon={UserIcon}
@@ -211,7 +206,7 @@ function WebSidebar({
                 </div>
               )}
 
-              {!isMobile && !address && (
+              {!address && (
                 <HeaderShare isCollapsed={shouldShowCollapsed} />
               )}
 

@@ -2,7 +2,6 @@
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
-import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
@@ -13,7 +12,6 @@ import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimation
 import useCapacitor from "@/hooks/useCapacitor";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
-import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
@@ -30,26 +28,21 @@ import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
 
 interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
-  readonly isMobile: boolean;
-  readonly showNotifications: boolean;
 }
 
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
->(({ isCollapsed = false, isMobile, showNotifications }, ref) => {
-  const pathname = usePathname();
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
-  const { connectedProfile } = useAuth();
-  const { appWalletsSupported } = useAppWallets();
-  const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.handle ?? null
-  );
-  const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
-    type: "messages",
-    handle: connectedProfile?.handle ?? null,
-  });
+>(({ isCollapsed = false }, ref) => {
+    const pathname = usePathname();
+    const capacitor = useCapacitor();
+    const { country } = useCookieConsent();
+    const { connectedProfile } = useAuth();
+    const { appWalletsSupported } = useAppWallets();
+    const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
+      type: "messages",
+      handle: connectedProfile?.handle ?? null,
+    });
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -285,19 +278,6 @@ const WebSidebarNav = React.forwardRef<
                 data-section="collections"
               />
               {renderCollapsedSubmenu("collections")}
-            </li>
-          )}
-
-          {isMobile && showNotifications && (
-            <li>
-              <WebSidebarNavItem
-                href="/notifications"
-                icon={BellIcon}
-                active={pathname?.startsWith("/notifications") || false}
-                collapsed={isCollapsed}
-                label="Notifications"
-                hasIndicator={haveUnreadNotifications}
-              />
             </li>
           )}
 
