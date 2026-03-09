@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -16,6 +17,7 @@ interface ExploreWavesSectionProps {
   readonly limit?: number | undefined;
   readonly endpoint?: string | undefined;
   readonly viewAllHref?: string | null | undefined;
+  readonly excludeFollowed?: boolean | undefined;
 }
 
 export function ExploreWavesSection({
@@ -24,23 +26,38 @@ export function ExploreWavesSection({
   limit = DEFAULT_WAVES_LIMIT,
   endpoint = "waves-overview/hot",
   viewAllHref = "/waves",
+  excludeFollowed = false,
 }: ExploreWavesSectionProps) {
+  const { connectedProfile } = useAuth();
+  const userScope =
+    connectedProfile?.id ??
+    connectedProfile?.normalised_handle ??
+    connectedProfile?.handle ??
+    null;
+
   const {
     data: waves,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["explore-waves", endpoint, limit],
+  } = useQuery<ApiWave[]>({
+    queryKey: [
+      "explore-waves",
+      endpoint,
+      limit,
+      excludeFollowed,
+      excludeFollowed ? userScope : null,
+    ],
     queryFn: async () => {
       const data = await commonApiFetch<ApiWave[]>({
         endpoint,
+        params: excludeFollowed ? { exclude_followed: "true" } : undefined,
       });
       return data.slice(0, limit);
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: excludeFollowed ? 0 : 5 * 60 * 1000,
+    ...(excludeFollowed ? { gcTime: 0 } : {}),
   });
 
-  // Hide section on error or if no waves
   if (isError) {
     return null;
   }

@@ -11,6 +11,7 @@ export default function DiscoverPage() {
         limit={20}
         endpoint="waves-overview/hot"
         viewAllHref={null}
+        excludeFollowed={true}
       />
     </main>
   );
