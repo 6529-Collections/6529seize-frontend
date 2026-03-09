@@ -204,95 +204,93 @@ const WebSidebarNav = React.forwardRef<
   );
 
   return (
-    <>
-      <nav
-        className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-        aria-label="Desktop navigation"
-      >
-        <ul className="tw-m-0 tw-list-none tw-p-0">
-          <li>
-            <WebSidebarNavItem
-              href="/"
-              icon={HomeIcon}
-              active={pathname === "/"}
-              collapsed={isCollapsed}
-              label="Home"
-            />
-          </li>
+    <nav
+      className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+      aria-label="Desktop navigation"
+    >
+      <ul className="tw-m-0 tw-list-none tw-p-0">
+        <li>
+          <WebSidebarNavItem
+            href="/"
+            icon={HomeIcon}
+            active={pathname === "/"}
+            collapsed={isCollapsed}
+            label="Home"
+          />
+        </li>
 
-          <li>
-            <WebSidebarNavItem
-              href="/waves"
-              icon={WavesIcon}
-              active={pathname?.startsWith("/waves") || false}
-              collapsed={isCollapsed}
-              label="Waves"
-            />
-          </li>
+        <li>
+          <WebSidebarNavItem
+            href="/waves"
+            icon={WavesIcon}
+            active={pathname?.startsWith("/waves") || false}
+            collapsed={isCollapsed}
+            label="Waves"
+          />
+        </li>
 
-          <li>
-            <WebSidebarNavItem
-              href="/messages"
-              icon={ChatBubbleIcon}
-              active={pathname?.startsWith("/messages") || false}
-              collapsed={isCollapsed}
-              label="Messages"
-              hasIndicator={hasUnreadMessages}
-            />
-          </li>
+        <li>
+          <WebSidebarNavItem
+            href="/messages"
+            icon={ChatBubbleIcon}
+            active={pathname?.startsWith("/messages") || false}
+            collapsed={isCollapsed}
+            label="Messages"
+            hasIndicator={hasUnreadMessages}
+          />
+        </li>
 
-          {networkSection && (
-            <li className={isCollapsed ? "tw-relative" : undefined}>
+        {networkSection && (
+          <li className={isCollapsed ? "tw-relative" : undefined}>
+            <WebSidebarExpandable
+              section={networkSection}
+              expanded={expandedKeys.includes("network")}
+              onToggle={(event) => handleSectionToggle("network", event)}
+              collapsed={isCollapsed}
+              pathname={pathname}
+              data-section="network"
+            />
+            {renderCollapsedSubmenu("network")}
+          </li>
+        )}
+
+        {collectionsSection && (
+          <li className={isCollapsed ? "tw-relative" : undefined}>
+            <WebSidebarExpandable
+              section={collectionsSection}
+              expanded={expandedKeys.includes("collections")}
+              onToggle={(event) => handleSectionToggle("collections", event)}
+              collapsed={isCollapsed}
+              pathname={pathname}
+              data-section="collections"
+            />
+            {renderCollapsedSubmenu("collections")}
+          </li>
+        )}
+
+        {sections
+          .filter(
+            (section) =>
+              section.key !== "network" && section.key !== "collections"
+          )
+          .map((section) => (
+            <li
+              key={section.key}
+              className={isCollapsed ? "tw-relative" : undefined}
+            >
               <WebSidebarExpandable
-                section={networkSection}
-                expanded={expandedKeys.includes("network")}
-                onToggle={(event) => handleSectionToggle("network", event)}
+                section={section}
+                expanded={expandedKeys.includes(section.key)}
+                onToggle={(event) => handleSectionToggle(section.key, event)}
                 collapsed={isCollapsed}
                 pathname={pathname}
-                data-section="network"
+                data-section={section.key}
               />
-              {renderCollapsedSubmenu("network")}
+              {renderCollapsedSubmenu(section.key)}
             </li>
-          )}
-
-          {collectionsSection && (
-            <li className={isCollapsed ? "tw-relative" : undefined}>
-              <WebSidebarExpandable
-                section={collectionsSection}
-                expanded={expandedKeys.includes("collections")}
-                onToggle={(event) => handleSectionToggle("collections", event)}
-                collapsed={isCollapsed}
-                pathname={pathname}
-                data-section="collections"
-              />
-              {renderCollapsedSubmenu("collections")}
-            </li>
-          )}
-
-          {sections
-            .filter(
-              (section) =>
-                section.key !== "network" && section.key !== "collections"
-            )
-            .map((section) => (
-              <li
-                key={section.key}
-                className={isCollapsed ? "tw-relative" : undefined}
-              >
-                <WebSidebarExpandable
-                  section={section}
-                  expanded={expandedKeys.includes(section.key)}
-                  onToggle={(event) => handleSectionToggle(section.key, event)}
-                  collapsed={isCollapsed}
-                  pathname={pathname}
-                  data-section={section.key}
-                />
-                {renderCollapsedSubmenu(section.key)}
-              </li>
-            ))}
-        </ul>
-      </nav>
-    </>
+          ))}
+      </ul>
+    </nav>
   );
 });
 
