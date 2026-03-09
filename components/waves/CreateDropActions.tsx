@@ -10,6 +10,7 @@ import StormButton from "./StormButton";
 
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;
+  readonly isDropMode: boolean;
   readonly canAddPart: boolean;
   readonly submitting: boolean;
   readonly showOptions: boolean;
@@ -26,6 +27,7 @@ interface CreateDropActionsProps {
 const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
   ({
     isStormMode,
+    isDropMode,
     canAddPart,
     submitting,
     showOptions,
@@ -104,47 +106,50 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 {...expandMotionProps}
                 className="tw-flex tw-items-center tw-gap-x-2 tw-overflow-hidden"
               >
-                <>
-                  <button
-                    onClick={onAddMetadataClick}
-                    className={`tw-flex-shrink-0 ${
-                      isRequiredMetadataMissing
-                        ? "tw-text-[#FEDF89]"
-                        : "tw-text-iron-300"
-                    } tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/80 lg:tw-size-7`}
-                    data-tooltip-id="add-metadata-tooltip"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
-                      aria-hidden="true"
+                {isDropMode && (
+                  <>
+                    <button
+                      aria-label="Add metadata"
+                      onClick={onAddMetadataClick}
+                      className={`tw-flex-shrink-0 ${
+                        isRequiredMetadataMissing
+                          ? "tw-text-[#FEDF89]"
+                          : "tw-text-iron-300"
+                      } tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/80 lg:tw-size-7`}
+                      data-tooltip-id="add-metadata-tooltip"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
-                      />
-                    </svg>
-                  </button>
-                  {!isMobile && (
-                    <Tooltip
-                      id="add-metadata-tooltip"
-                      place="top"
-                      positionStrategy="fixed"
-                      style={{
-                        backgroundColor: "#1F2937",
-                        color: "white",
-                        padding: "4px 8px",
-                      }}
-                    >
-                      <span className="tw-text-xs">Add metadata</span>
-                    </Tooltip>
-                  )}
-                </>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                        />
+                      </svg>
+                    </button>
+                    {!isMobile && (
+                      <Tooltip
+                        id="add-metadata-tooltip"
+                        place="top"
+                        positionStrategy="fixed"
+                        style={{
+                          backgroundColor: "#1F2937",
+                          color: "white",
+                          padding: "4px 8px",
+                        }}
+                      >
+                        <span className="tw-text-xs">Add metadata</span>
+                      </Tooltip>
+                    )}
+                  </>
+                )}
                 <motion.div
                   {...fadeMotionProps}
                   className="tw-flex tw-items-center tw-gap-x-2"
@@ -267,7 +272,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 key="chevron-button"
                 onClick={onSetShowIconsClick}
                 className={`tw-flex-shrink-0 ${
-                  isRequiredMetadataMissing || isRequiredMediaMissing
+                  (isDropMode && isRequiredMetadataMissing) ||
+                  isRequiredMediaMissing
                     ? "tw-text-[#FEDF89]"
                     : "tw-text-iron-400"
                 } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
