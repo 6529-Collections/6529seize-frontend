@@ -283,8 +283,8 @@ export default function HeaderUserProxyDropdown({
                       </button>
                     )}
                   </div>
-                  <div className="tw-h-full tw-px-2 tw-pt-2">
-                    {onOpenShare && (
+                  {onOpenShare && (
+                    <div className="tw-h-full tw-px-2 tw-pt-2">
                       <button
                         onClick={onOpenShare}
                         type="button"
@@ -295,8 +295,8 @@ export default function HeaderUserProxyDropdown({
                         <ShareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
                         <span>Share</span>
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="tw-h-full tw-px-2 tw-pt-2">
                     <button
                       onClick={() => {
