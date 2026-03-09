@@ -1,26 +1,32 @@
-import DropPfp from "@/components/drops/create/utils/DropPfp";
-import { useIdentity } from "@/hooks/useIdentity";
+import { useRouter } from "next/navigation";
+import { useEffect, useId, useMemo, useState } from "react";
+
+import { useAuth } from "@/components/auth/Auth";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
+import DropPfp from "@/components/drops/create/utils/DropPfp";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
-import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
-import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
 import type {
   ApiProfileRepRatesState,
   CicStatement,
 } from "@/entities/IProfile";
 import { CLASSIFICATIONS } from "@/entities/IProfile";
-import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
-import { useContext, useEffect, useId, useMemo, useState } from "react";
-import { AuthContext } from "@/components/auth/Auth";
-import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
+import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useIdentity } from "@/hooks/useIdentity";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useQuery } from "@tanstack/react-query";
+
+import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
+import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
+import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
 
 interface UserProfileTooltipProps {
   readonly user: string;
@@ -40,10 +46,13 @@ export default function UserProfileTooltip({
   onArtistPreviewOpen,
   onWaveCreatorPreviewOpen,
 }: UserProfileTooltipProps) {
+  const router = useRouter();
+  const { isApp } = useDeviceInfo();
   const { profile } = useIdentity({
     handleOrWallet: user,
     initialProfile: null,
   });
+  const profileId = profile?.id ?? null;
 
   const { data: repRates } = useQuery<ApiProfileRepRatesState>({
     queryKey: [
@@ -70,14 +79,19 @@ export default function UserProfileTooltip({
     useQuery<ApiIncomingIdentitySubscriptionsPage>({
       queryKey: [
         QueryKey.IDENTITY_FOLLOWERS,
-        { profile_id: profile?.id, page_size: 1 },
+        { profile_id: profileId, page_size: 1 },
       ],
-      queryFn: async () =>
-        await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
-          endpoint: `identity-subscriptions/incoming/IDENTITY/${profile?.id ?? profile?.primary_wallet}`,
+      queryFn: async () => {
+        if (!profileId) {
+          throw new Error("Profile id is required");
+        }
+
+        return await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
+          endpoint: `identity-subscriptions/incoming/IDENTITY/${profileId}`,
           params: { page_size: "1" },
-        }),
-      enabled: !!profile?.id,
+        });
+      },
+      enabled: !!profileId,
     });
 
   const followersCount = followersData?.count ?? 0;
@@ -85,6 +99,7 @@ export default function UserProfileTooltip({
   const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
     null
   );
+  const [directMessageLoading, setDirectMessageLoading] = useState(false);
 
   useEffect(() => {
     const about = statements?.find(
@@ -99,7 +114,7 @@ export default function UserProfileTooltip({
     ? CLASSIFICATIONS[profile.classification]?.title
     : null;
 
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const profileHandle = profile?.handle ?? null;
   const normalizedProfileHandle = useMemo(
     () => profileHandle?.toLowerCase() ?? null,
@@ -119,6 +134,35 @@ export default function UserProfileTooltip({
       `user-profile-tooltip-author-badges-${tooltipInstanceId.replace(/:/g, "")}`,
     [tooltipInstanceId]
   );
+
+  const handleCreateDirectMessage = async (
+    primaryWallet: string | undefined
+  ) => {
+    if (!primaryWallet) {
+      return;
+    }
+
+    setDirectMessageLoading(true);
+
+    try {
+      const wave = await createDirectMessageWave({
+        addresses: [primaryWallet],
+      });
+      navigateToDirectMessage({ waveId: wave.id, router, isApp });
+    } catch (error) {
+      console.error(error);
+      const errorMessage =
+        error instanceof Error
+          ? `Failed to create direct message: ${error.message}`
+          : "Failed to create direct message. Please try again.";
+      setToast({
+        message: errorMessage,
+        type: "error",
+      });
+    } finally {
+      setDirectMessageLoading(false);
+    }
+  };
 
   return (
     <div className="tailwind-scope tw-min-w-[280px] tw-max-w-[320px] tw-bg-iron-950">
@@ -159,6 +203,14 @@ export default function UserProfileTooltip({
             <UserFollowBtn
               handle={profileHandle}
               size={UserFollowBtnSize.SMALL}
+              onDirectMessage={
+                connectedProfile?.handle &&
+                !activeProfileProxy &&
+                profile?.primary_wallet
+                  ? () => handleCreateDirectMessage(profile.primary_wallet)
+                  : undefined
+              }
+              directMessageLoading={directMessageLoading}
             />
           </div>
         )}
