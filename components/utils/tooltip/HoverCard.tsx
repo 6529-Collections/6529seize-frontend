@@ -24,6 +24,7 @@ import {
 interface HoverCardProps {
   readonly children: React.ReactElement;
   readonly content: React.ReactNode;
+  readonly ariaLabel: string;
   readonly placement?: TooltipPlacement | undefined;
   readonly delayShow?: number | undefined;
   readonly delayHide?: number | undefined;
@@ -34,6 +35,7 @@ interface HoverCardProps {
 export default function HoverCard({
   children,
   content,
+  ariaLabel,
   placement = "top",
   delayShow = 700,
   delayHide = 0,
@@ -416,6 +418,7 @@ export default function HoverCard({
             <div
               ref={syncCardRef}
               role="dialog"
+              aria-label={ariaLabel}
               aria-modal="false"
               tabIndex={-1}
               className={joinTooltipClassNames(

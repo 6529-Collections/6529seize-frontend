@@ -20,6 +20,8 @@ export default function WaveProfileTooltipWrapper({
   placement = "auto",
 }: WaveProfileTooltipWrapperProps) {
   const { hasTouchScreen } = useDeviceInfo();
+  const waveLabelSource =
+    initialWave?.name.trim() ?? fallbackName?.trim() ?? `Wave ${waveId}`;
 
   // If it's a touch device, just render the children without the tooltip
   if (hasTouchScreen) {
@@ -35,6 +37,7 @@ export default function WaveProfileTooltipWrapper({
           fallbackName={fallbackName}
         />
       }
+      ariaLabel={`Wave details for ${waveLabelSource}`}
       placement={placement}
       delayShow={500}
       delayHide={0}

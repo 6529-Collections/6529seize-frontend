@@ -38,14 +38,16 @@ export const ArtistPreviewModal = ({
 
   // Cleanup body overflow
   useEffect(() => {
-    if (isOpen && !isApp) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
+    if (!isOpen || isApp) {
+      return undefined;
     }
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
   }, [isOpen, isApp]);
 
   if (!isOpen) return null;

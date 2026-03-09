@@ -21,6 +21,10 @@ export default function UserProfileTooltipWrapper({
   placement = "auto",
 }: UserProfileTooltipWrapperProps) {
   const { hasTouchScreen } = useDeviceInfo();
+  const trimmedUser = user.trim();
+  const ariaLabel = trimmedUser
+    ? `User profile for ${trimmedUser}`
+    : "User profile";
   const [artistPreview, setArtistPreview] = useState<{
     readonly user: ApiProfileMin;
     readonly activeTab: ArtistPreviewTab;
@@ -87,6 +91,7 @@ export default function UserProfileTooltipWrapper({
             onWaveCreatorPreviewOpen={handleWaveCreatorPreviewOpen}
           />
         }
+        ariaLabel={ariaLabel}
         placement={placement}
         delayShow={500}
         delayHide={0}

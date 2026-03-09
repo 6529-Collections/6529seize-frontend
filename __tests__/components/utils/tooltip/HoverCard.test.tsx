@@ -15,6 +15,8 @@ jest.mock("react-dom", () => ({
   createPortal: (children: React.ReactNode) => children,
 }));
 
+const hoverCardAriaLabel = "Test hover card";
+
 describe("HoverCard", () => {
   afterEach(() => {
     jest.useRealTimers();
@@ -24,7 +26,11 @@ describe("HoverCard", () => {
     const buttonRef = React.createRef<HTMLButtonElement>();
 
     render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <button ref={buttonRef} type="button">
           Trigger
         </button>
@@ -36,13 +42,19 @@ describe("HoverCard", () => {
     fireEvent.mouseEnter(buttonRef.current!);
 
     await waitFor(() => {
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(
+        screen.getByRole("dialog", { name: hoverCardAriaLabel })
+      ).toBeInTheDocument();
     });
   });
 
   it("shows on hover after the configured delay", async () => {
     render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -57,7 +69,11 @@ describe("HoverCard", () => {
 
   it("opens when the trigger child is a link-like element", async () => {
     render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <a href="/test">Trigger Link</a>
       </HoverCard>
     );
@@ -71,7 +87,12 @@ describe("HoverCard", () => {
 
   it("does not open when disabled", async () => {
     render(
-      <HoverCard content="Card content" delayShow={0} disabled>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+        disabled
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -87,6 +108,7 @@ describe("HoverCard", () => {
     render(
       <HoverCard
         content={<button type="button">Inside Action</button>}
+        ariaLabel={hoverCardAriaLabel}
         delayShow={0}
         delayHide={0}
         hoverTransitionDelay={0}
@@ -110,7 +132,11 @@ describe("HoverCard", () => {
 
   it("stays open when focus moves from the trigger into the card", async () => {
     render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -127,7 +153,11 @@ describe("HoverCard", () => {
 
   it("focuses the card when opened with ArrowDown", async () => {
     render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -136,14 +166,20 @@ describe("HoverCard", () => {
     fireEvent.focus(trigger);
     fireEvent.keyDown(trigger, { key: "ArrowDown" });
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("dialog", {
+      name: hoverCardAriaLabel,
+    });
 
     expect(dialog).toHaveFocus();
   });
 
   it("closes on outside pointer interaction", async () => {
     render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -163,7 +199,11 @@ describe("HoverCard", () => {
 
   it("closes on escape", async () => {
     render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -183,7 +223,11 @@ describe("HoverCard", () => {
 
   it("closes an open card when it becomes disabled", async () => {
     const { rerender } = render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -195,7 +239,12 @@ describe("HoverCard", () => {
     });
 
     rerender(
-      <HoverCard content="Card content" delayShow={0} disabled>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+        disabled
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -209,7 +258,11 @@ describe("HoverCard", () => {
     jest.useFakeTimers();
 
     const { rerender } = render(
-      <HoverCard content="Card content" delayShow={100}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={100}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -218,7 +271,12 @@ describe("HoverCard", () => {
     fireEvent.mouseEnter(trigger);
 
     rerender(
-      <HoverCard content="Card content" delayShow={100} disabled>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={100}
+        disabled
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -230,7 +288,11 @@ describe("HoverCard", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     rerender(
-      <HoverCard content="Card content" delayShow={100}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={100}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );
@@ -252,7 +314,11 @@ describe("HoverCard", () => {
 
   it("closes when the global close-all event is dispatched", async () => {
     render(
-      <HoverCard content="Card content" delayShow={0}>
+      <HoverCard
+        content="Card content"
+        ariaLabel={hoverCardAriaLabel}
+        delayShow={0}
+      >
         <button type="button">Trigger</button>
       </HoverCard>
     );

@@ -18,6 +18,7 @@ interface SingleWaveDropAuthorProps {
 export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
   drop,
 }) => {
+  const authorIdentity = drop.author.handle ?? drop.author.primary_address;
   const resolvedPfp = drop.author.pfp
     ? resolveIpfsUrlSync(drop.author.pfp)
     : null;
@@ -46,11 +47,9 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
         )}
         <div className="tw-inline-flex tw-items-center tw-gap-x-2">
           <div className="tw-inline-flex tw-items-center tw-gap-x-1">
-            <UserProfileTooltipWrapper
-              user={drop.author.handle ?? drop.author.primary_address}
-            >
+            <UserProfileTooltipWrapper user={authorIdentity}>
               <span className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80">
-                {drop.author.handle}
+                {authorIdentity}
               </span>
             </UserProfileTooltipWrapper>
             <UserCICAndLevel

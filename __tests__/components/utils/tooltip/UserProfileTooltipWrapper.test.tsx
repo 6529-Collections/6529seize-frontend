@@ -17,12 +17,14 @@ jest.mock("@/components/utils/tooltip/HoverCard", () => {
   return function MockHoverCard({
     children,
     content,
+    ariaLabel,
     placement,
     delayShow,
     delayHide,
   }: {
     children: React.ReactElement;
     content: React.ReactNode;
+    ariaLabel: string;
     placement?: string | undefined;
     delayShow?: number | undefined;
     delayHide?: number | undefined;
@@ -43,6 +45,7 @@ jest.mock("@/components/utils/tooltip/HoverCard", () => {
     return (
       <div
         data-testid="hover-card"
+        data-aria-label={ariaLabel}
         data-placement={placement}
         data-delay-show={delayShow}
         data-delay-hide={delayHide}
@@ -159,6 +162,10 @@ describe("UserProfileTooltipWrapper", () => {
       "data-delay-hide",
       "0"
     );
+    expect(screen.getByTestId("hover-card")).toHaveAttribute(
+      "data-aria-label",
+      "User profile for testuser"
+    );
     expect(screen.getByText("Profile for testuser")).toBeInTheDocument();
   });
 
@@ -225,5 +232,18 @@ describe("UserProfileTooltipWrapper", () => {
 
     expect(screen.getByText("Test Button")).toBeInTheDocument();
     expect(screen.queryByTestId("hover-card")).not.toBeInTheDocument();
+  });
+
+  it("uses a generic aria label when the user identity is blank", () => {
+    render(
+      <UserProfileTooltipWrapper user="">
+        <button>Test Button</button>
+      </UserProfileTooltipWrapper>
+    );
+
+    expect(screen.getByTestId("hover-card")).toHaveAttribute(
+      "data-aria-label",
+      "User profile"
+    );
   });
 });
