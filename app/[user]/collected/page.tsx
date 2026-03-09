@@ -21,7 +21,9 @@ const { Page, generateMetadata } = createUserTabPage({
     }).catch((error: unknown) => {
       if (
         error instanceof Error &&
-        error.message === "getStatsPath: no wallet available on profile"
+        (error.message === "getStatsPath: no wallet available on profile" ||
+          error.message ===
+            "getCollectedStatsIdentityKey: no identity key available on profile")
       ) {
         return EMPTY_USER_PAGE_STATS_INITIAL_DATA;
       }

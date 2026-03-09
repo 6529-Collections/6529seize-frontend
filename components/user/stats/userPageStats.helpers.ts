@@ -21,3 +21,30 @@ export function getStatsPath(
 
   return `wallet/${fallbackWallet.toLowerCase()}`;
 }
+
+export function getCollectedStatsIdentityKey(
+  profile: ApiIdentity,
+  activeAddress: string | null
+) {
+  const normalizedActiveAddress = activeAddress?.trim();
+  if (normalizedActiveAddress) {
+    return normalizedActiveAddress.toLowerCase();
+  }
+
+  const profileHandle = profile.handle?.trim();
+  if (profileHandle) {
+    return profileHandle.toLowerCase();
+  }
+
+  const fallbackWallet =
+    profile.primary_wallet?.trim() ||
+    profile.wallets?.[0]?.wallet?.trim();
+
+  if (!fallbackWallet) {
+    throw new Error(
+      "getCollectedStatsIdentityKey: no identity key available on profile"
+    );
+  }
+
+  return fallbackWallet.toLowerCase();
+}
