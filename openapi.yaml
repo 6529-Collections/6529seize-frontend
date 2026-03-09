@@ -227,6 +227,28 @@ paths:
                 $ref: "#/components/schemas/ApiRedeemRefreshTokenResponse"
         "400":
           description: Invalid request
+  /collected-stats/{identityKey}:
+    get:
+      tags:
+        - Collected Stats
+      summary: Get consolidated collection stats for an identity
+      operationId: getCollectedStats
+      parameters:
+        - name: identityKey
+          in: path
+          description: Profile handle, wallet address, or ENS name
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectedStats"
+        "404":
+          description: Identity not found
   /community-members:
     get:
       tags:
@@ -2047,28 +2069,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMemesMintStatsPage"
-  /collected-stats/{identityKey}:
-    get:
-      tags:
-        - Collected Stats
-      summary: Get consolidated collection stats for an identity
-      operationId: getCollectedStats
-      parameters:
-        - name: identityKey
-          in: path
-          description: Profile handle, wallet address, or ENS name
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiCollectedStats"
-        "404":
-          description: Identity not found
   /memes-mint-stats/total:
     get:
       tags:
@@ -5110,6 +5110,15 @@ paths:
       summary: Get hot waves overview.
       description: Returns up to 25 public waves ranked by activity in the last 24 hours.
       operationId: getHotWavesOverview
+      parameters:
+        - name: exclude_followed
+          in: query
+          description: >-
+            If true then result excludes waves the authenticated user already
+            follows
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -5352,6 +5361,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
+  /waves/{id}/pinned-drop:
+    post:
+      tags:
+        - Waves
+      summary: Change pinned drop in a wave
+      operationId: setWavePinnedDrop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSetPinnedDropRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWave"
+        "400":
+          description: Invalid request
+        "403":
+          description: Only wave creators or admins can change pinned drop
+        "404":
+          description: Wave or drop not found
   /waves/{id}/pins:
     post:
       tags:
@@ -6835,6 +6875,58 @@ components:
           format: int64
         contributors:
           $ref: "#/components/schemas/ApiCicContributorsPage"
+    ApiCollectedStats:
+      type: object
+      required:
+        - boost
+        - nextgen_balance
+        - gradients_balance
+        - memes_balance
+        - unique_memes
+        - seasons
+      properties:
+        boost:
+          type: number
+          format: double
+        nextgen_balance:
+          type: integer
+          format: int64
+        gradients_balance:
+          type: integer
+          format: int64
+        memes_balance:
+          type: integer
+          format: int64
+        unique_memes:
+          type: integer
+          format: int64
+        seasons:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectedStatsSeason"
+    ApiCollectedStatsSeason:
+      type: object
+      required:
+        - season
+        - total_cards_in_season
+        - sets_held
+        - partial_set_unique_cards_held
+        - total_cards_held
+      properties:
+        season:
+          type: string
+        total_cards_in_season:
+          type: integer
+          format: int64
+        sets_held:
+          type: integer
+          format: int64
+        partial_set_unique_cards_held:
+          type: integer
+          format: int64
+        total_cards_held:
+          type: integer
+          format: int64
     ApiCommunityMemberMinimal:
       type: object
       required:
@@ -10016,58 +10108,6 @@ components:
         platform:
           type: string
           description: Optional platform (ios, android, web)
-    ApiCollectedStats:
-      type: object
-      required:
-        - boost
-        - nextgen_balance
-        - gradients_balance
-        - memes_balance
-        - unique_memes
-        - seasons
-      properties:
-        boost:
-          type: number
-          format: double
-        nextgen_balance:
-          type: integer
-          format: int64
-        gradients_balance:
-          type: integer
-          format: int64
-        memes_balance:
-          type: integer
-          format: int64
-        unique_memes:
-          type: integer
-          format: int64
-        seasons:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiCollectedStatsSeason"
-    ApiCollectedStatsSeason:
-      type: object
-      required:
-        - season
-        - total_cards_in_season
-        - sets_held
-        - partial_set_unique_cards_held
-        - total_cards_held
-      properties:
-        season:
-          type: string
-        total_cards_in_season:
-          type: integer
-          format: int64
-        sets_held:
-          type: integer
-          format: int64
-        partial_set_unique_cards_held:
-          type: integer
-          format: int64
-        total_cards_held:
-          type: integer
-          format: int64
     ApiRepCategoriesPage:
       type: object
       required:
@@ -10216,6 +10256,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiEthereumAddress"
+    ApiSetPinnedDropRequest:
+      type: object
+      required:
+        - drop_id
+      properties:
+        drop_id:
+          type: string
     ApiStartMultipartMediaUploadResponse:
       required:
         - upload_id

@@ -247,6 +247,16 @@ const WebSidebarNav = React.forwardRef<
           />
         </li>
 
+        <li>
+          <WebSidebarNavItem
+            href="/discover"
+            icon={DiscoverIcon}
+            active={pathname.startsWith("/discover")}
+            collapsed={isCollapsed}
+            label="Discovery"
+          />
+        </li>
+
         {networkSection && (
           <li className={isCollapsed ? "tw-relative" : undefined}>
             <WebSidebarExpandable
