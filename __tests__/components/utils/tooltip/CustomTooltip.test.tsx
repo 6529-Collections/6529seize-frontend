@@ -182,7 +182,7 @@ describe("CustomTooltip", () => {
     });
   });
 
-  it("closes when clicking inside tooltip content", async () => {
+  it("stays open when clicking inside passive tooltip content", async () => {
     render(
       <CustomTooltip
         content={<button type="button">Inside Tooltip</button>}
@@ -201,7 +201,7 @@ describe("CustomTooltip", () => {
     fireEvent.click(screen.getByText("Inside Tooltip"));
 
     await waitFor(() => {
-      expect(screen.queryByText("Inside Tooltip")).not.toBeInTheDocument();
+      expect(screen.getByText("Inside Tooltip")).toBeInTheDocument();
     });
   });
 });

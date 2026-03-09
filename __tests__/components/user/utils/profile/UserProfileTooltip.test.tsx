@@ -6,6 +6,8 @@ import type { ComponentProps, ContextType } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
+import type { CicStatement } from "@/entities/IProfile";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -145,6 +147,21 @@ const useRouterMock = useRouter as jest.Mock;
 let queryClient: QueryClient;
 let mockRouter: { push: jest.Mock; replace: jest.Mock };
 let mockProfile: Record<string, unknown>;
+let mockStatements: CicStatement[];
+
+const createStatement = (
+  overrides: Partial<CicStatement> = {}
+): CicStatement => ({
+  id: "statement-1",
+  profile_id: "profile-1",
+  statement_group: STATEMENT_GROUP.GENERAL,
+  statement_type: STATEMENT_TYPE.BIO,
+  statement_comment: null,
+  statement_value: "About Bob",
+  crated_at: new Date("2024-01-01T00:00:00.000Z"),
+  updated_at: null,
+  ...overrides,
+});
 
 const renderTooltip = ({
   authOverrides = {},
@@ -184,6 +201,7 @@ describe("UserProfileTooltip", () => {
       push: jest.fn(),
       replace: jest.fn(),
     };
+    mockStatements = [];
 
     mockProfile = {
       id: "profile-1",
@@ -207,7 +225,7 @@ describe("UserProfileTooltip", () => {
     commonApiFetchMock.mockImplementation(
       async ({ endpoint }: { readonly endpoint: string }) => {
         if (endpoint.includes("/cic/statements")) {
-          return [];
+          return mockStatements;
         }
         if (endpoint.includes("/rep/ratings/received")) {
           return { rating_stats: [] };
@@ -273,6 +291,48 @@ describe("UserProfileTooltip", () => {
       router: mockRouter,
       isApp: false,
     });
+  });
+
+  it("renders the about statement when the bio statement is present", async () => {
+    mockStatements = [
+      createStatement({ statement_value: "About Bob from CIC" }),
+      createStatement({
+        id: "statement-2",
+        statement_type: STATEMENT_TYPE.WEBSITE,
+        statement_value: "https://example.com",
+      }),
+    ];
+
+    renderTooltip();
+
+    expect(await screen.findByText("About Bob from CIC")).toBeInTheDocument();
+  });
+
+  it("does not render the about statement when there is no general bio", async () => {
+    mockStatements = [
+      createStatement({
+        statement_group: STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT,
+        statement_value: "@bob",
+      }),
+      createStatement({
+        id: "statement-2",
+        statement_type: STATEMENT_TYPE.WEBSITE,
+        statement_value: "https://example.com",
+      }),
+    ];
+
+    renderTooltip();
+
+    await waitFor(() => {
+      expect(commonApiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "profiles/bob/cic/statements",
+        })
+      );
+    });
+
+    expect(screen.queryByText("@bob")).not.toBeInTheDocument();
+    expect(screen.queryByText("https://example.com")).not.toBeInTheDocument();
   });
 
   it("passes preview-open callbacks to author badges when provided", () => {

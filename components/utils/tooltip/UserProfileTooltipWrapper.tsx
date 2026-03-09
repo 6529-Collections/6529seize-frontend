@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import CustomTooltip from "./CustomTooltip";
+import HoverCard from "./HoverCard";
 import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
@@ -79,7 +79,7 @@ export default function UserProfileTooltipWrapper({
 
   return (
     <>
-      <CustomTooltip
+      <HoverCard
         content={
           <UserProfileTooltip
             user={user}
@@ -92,7 +92,7 @@ export default function UserProfileTooltipWrapper({
         delayHide={0}
       >
         {children}
-      </CustomTooltip>
+      </HoverCard>
       {artistPreview && (
         <ArtistPreviewModal
           isOpen

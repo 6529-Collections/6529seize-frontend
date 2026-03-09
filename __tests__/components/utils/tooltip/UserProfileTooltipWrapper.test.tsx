@@ -7,14 +7,14 @@ const mockUseDeviceInfo = jest.fn(() => ({
   hasTouchScreen: false,
 }));
 
-// Mock the CustomTooltip component
-jest.mock("@/components/utils/tooltip/CustomTooltip", () => {
+// Mock the HoverCard component
+jest.mock("@/components/utils/tooltip/HoverCard", () => {
   const React = require("react");
   const {
     CUSTOM_TOOLTIP_CLOSE_ALL_EVENT,
   } = require("@/helpers/tooltip.helpers");
 
-  return function MockCustomTooltip({
+  return function MockHoverCard({
     children,
     content,
     placement,
@@ -42,7 +42,7 @@ jest.mock("@/components/utils/tooltip/CustomTooltip", () => {
 
     return (
       <div
-        data-testid="custom-tooltip"
+        data-testid="hover-card"
         data-placement={placement}
         data-delay-show={delayShow}
         data-delay-hide={delayHide}
@@ -147,15 +147,15 @@ describe("UserProfileTooltipWrapper", () => {
     );
 
     expect(screen.getByText("Test Button")).toBeInTheDocument();
-    expect(screen.getByTestId("custom-tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("hover-card")).toHaveAttribute(
       "data-placement",
       "auto"
     );
-    expect(screen.getByTestId("custom-tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("hover-card")).toHaveAttribute(
       "data-delay-show",
       "500"
     );
-    expect(screen.getByTestId("custom-tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("hover-card")).toHaveAttribute(
       "data-delay-hide",
       "0"
     );
@@ -170,7 +170,7 @@ describe("UserProfileTooltipWrapper", () => {
     );
 
     expect(screen.getByText("Test Button")).toBeInTheDocument();
-    expect(screen.getByTestId("custom-tooltip")).toHaveAttribute(
+    expect(screen.getByTestId("hover-card")).toHaveAttribute(
       "data-placement",
       "top"
     );
@@ -224,6 +224,6 @@ describe("UserProfileTooltipWrapper", () => {
     );
 
     expect(screen.getByText("Test Button")).toBeInTheDocument();
-    expect(screen.queryByTestId("custom-tooltip")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("hover-card")).not.toBeInTheDocument();
   });
 });

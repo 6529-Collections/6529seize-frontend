@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import UserFollowBtn, {
@@ -96,23 +96,21 @@ export default function UserProfileTooltip({
 
   const followersCount = followersData?.count ?? 0;
 
-  const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
-    null
+  const aboutStatement = useMemo(
+    () =>
+      statements?.find(
+        (statement) =>
+          statement.statement_type === STATEMENT_TYPE.BIO &&
+          statement.statement_group === STATEMENT_GROUP.GENERAL
+      ) ?? null,
+    [statements]
   );
   const [directMessageLoading, setDirectMessageLoading] = useState(false);
 
-  useEffect(() => {
-    const about = statements?.find(
-      (statement) =>
-        statement.statement_type === STATEMENT_TYPE.BIO &&
-        statement.statement_group === STATEMENT_GROUP.GENERAL
-    );
-    setAboutStatement(about ?? null);
-  }, [statements]);
-
-  const description = profile?.classification
-    ? CLASSIFICATIONS[profile.classification]?.title
-    : null;
+  const description =
+    profile?.classification === undefined
+      ? null
+      : CLASSIFICATIONS[profile.classification].title;
 
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const profileHandle = profile?.handle ?? null;
@@ -131,7 +129,7 @@ export default function UserProfileTooltip({
   const tooltipInstanceId = useId();
   const badgesTooltipIdPrefix = useMemo(
     () =>
-      `user-profile-tooltip-author-badges-${tooltipInstanceId.replace(/:/g, "")}`,
+      `user-profile-tooltip-author-badges-${tooltipInstanceId.replaceAll(":", "")}`,
     [tooltipInstanceId]
   );
 

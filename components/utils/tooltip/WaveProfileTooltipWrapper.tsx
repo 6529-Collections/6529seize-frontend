@@ -1,5 +1,5 @@
 import React from "react";
-import CustomTooltip from "./CustomTooltip";
+import HoverCard from "./HoverCard";
 import WaveProfileTooltip from "@/components/waves/utils/profile/WaveProfileTooltip";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
@@ -27,7 +27,7 @@ export default function WaveProfileTooltipWrapper({
   }
 
   return (
-    <CustomTooltip
+    <HoverCard
       content={
         <WaveProfileTooltip
           waveId={waveId}
@@ -40,6 +40,6 @@ export default function WaveProfileTooltipWrapper({
       delayHide={0}
     >
       {children}
-    </CustomTooltip>
+    </HoverCard>
   );
 }
