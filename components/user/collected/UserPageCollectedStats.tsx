@@ -10,7 +10,7 @@ import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useId, useMemo, useState } from "react";
 
@@ -196,23 +196,15 @@ function UserPageCollectedStatsDetailsPanel({
           key="stats-details"
           initial={
             shouldReduceMotion
-              ? { opacity: 1 }
-              : { opacity: 0, y: -10, scaleY: 0.985 }
+              ? { opacity: 1, height: "auto" }
+              : { opacity: 0, height: 0 }
           }
-          animate={
-            shouldReduceMotion
-              ? { opacity: 1 }
-              : { opacity: 1, y: 0, scaleY: 1 }
-          }
-          exit={
-            shouldReduceMotion
-              ? { opacity: 0 }
-              : { opacity: 0, y: -8, scaleY: 0.99 }
-          }
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
           transition={
             shouldReduceMotion ? NO_MOTION_TRANSITION : DETAILS_TRANSITION
           }
-          className="tw-origin-top tw-transform-gpu tw-will-change-transform"
+          className="tw-overflow-hidden"
         >
           <div className="tw-border-t tw-border-solid tw-border-iron-800/90 tw-bg-gradient-to-b tw-from-iron-900/30 tw-to-transparent tw-px-4 tw-pb-5 tw-pt-4 sm:tw-px-6 sm:tw-pb-6 sm:tw-pt-5">
             {statsPath === null ? (
@@ -248,8 +240,6 @@ export default function UserPageCollectedStats({
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion() ?? false;
   const detailsId = useId();
-  const expandedChevronRotate = isDetailsOpen ? 180 : 0;
-  const detailsChevronRotate = shouldReduceMotion ? 0 : expandedChevronRotate;
   const { statsPath, seasons, tdh, ownerBalance, balanceMemes } =
     useCollectedStatsData({
       profile,
@@ -258,11 +248,7 @@ export default function UserPageCollectedStats({
     });
 
   return (
-    <motion.section
-      layout
-      transition={shouldReduceMotion ? { duration: 0 } : DETAILS_TRANSITION}
-      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/80"
-    >
+    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black">
       <div className="tw-p-4 sm:tw-p-5">
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
           <div className="tw-min-w-0 tw-flex-1">
@@ -276,18 +262,17 @@ export default function UserPageCollectedStats({
             aria-expanded={isDetailsOpen}
             aria-controls={detailsId}
             onClick={() => setIsDetailsOpen((current) => !current)}
-            className="tw-inline-flex tw-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-500 hover:tw-text-white"
+            className={[
+              "tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-5 tw-py-2 tw-text-[12px] tw-font-semibold tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30",
+              isDetailsOpen
+                ? "tw-border-white tw-bg-white tw-text-black"
+                : "tw-border-white/10 tw-bg-white/5 tw-text-white hover:tw-border-white/20 hover:tw-bg-white/10",
+            ].join(" ")}
           >
-            Details
-            <motion.span
-              animate={{ rotate: detailsChevronRotate }}
-              transition={
-                shouldReduceMotion ? { duration: 0 } : DETAILS_TRANSITION
-              }
-              className="tw-ml-1.5 tw-inline-flex tw-transform-gpu"
-            >
-              <ChevronDownIcon className="tw-h-4 tw-w-4" />
-            </motion.span>
+            <span className="tw-inline-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0">
+              <ChartBarIcon className="tw-h-full tw-w-full" />
+            </span>
+            <span>{isDetailsOpen ? "Hide Details" : "Details"}</span>
           </button>
         </div>
       </div>
@@ -304,6 +289,6 @@ export default function UserPageCollectedStats({
         ownerBalance={ownerBalance}
         balanceMemes={balanceMemes}
       />
-    </motion.section>
+    </section>
   );
 }

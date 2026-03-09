@@ -8,7 +8,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
 
 export enum UserPageStatsActivityWalletFilterType {
@@ -27,6 +27,38 @@ const getTotalPages = (count: number | undefined, pageSize: number) =>
   typeof count === "number" && count > 0
     ? Math.max(1, Math.ceil(count / pageSize))
     : 1;
+
+type PageFilterAction =
+  | {
+      readonly type: "set";
+      readonly page: number;
+    }
+  | {
+      readonly type: "sync";
+      readonly count: number | undefined;
+      readonly pageSize: number;
+    };
+
+const pageFilterReducer = (state: number, action: PageFilterAction): number => {
+  switch (action.type) {
+    case "set":
+      return action.page;
+    case "sync": {
+      if (action.count === undefined) {
+        return state;
+      }
+
+      if (action.count === 0) {
+        return state === 1 ? state : 1;
+      }
+
+      const totalPages = getTotalPages(action.count, action.pageSize);
+      return state > totalPages ? totalPages : state;
+    }
+    default:
+      return state;
+  }
+};
 
 export default function UserPageStatsActivityWallet({
   profile,
@@ -51,7 +83,7 @@ export default function UserPageStatsActivityWallet({
       UserPageStatsActivityWalletFilterType.ALL
     );
 
-  const [pageFilter, setPageFilter] = useState(1);
+  const [pageFilter, dispatchPageFilter] = useReducer(pageFilterReducer, 1);
 
   const onActiveFilter = (filter: UserPageStatsActivityWalletFilterType) => {
     const targetFilter =
@@ -59,11 +91,11 @@ export default function UserPageStatsActivityWallet({
         ? UserPageStatsActivityWalletFilterType.ALL
         : filter;
     setActiveFilter(targetFilter);
-    setPageFilter(1);
+    dispatchPageFilter({ type: "set", page: 1 });
   };
 
   const onPageFilter = (page: number) => {
-    setPageFilter(page);
+    dispatchPageFilter({ type: "set", page });
   };
 
   const walletsParam = useMemo(() => {
@@ -102,26 +134,25 @@ export default function UserPageStatsActivityWallet({
         params["filter"] = activeFilterParam;
       }
 
-      const response = await commonApiFetch<Page<Transaction>>({
+      return commonApiFetch<Page<Transaction>>({
         endpoint: "transactions",
         params,
       });
-
-      const totalPages = getTotalPages(response.count, PAGE_SIZE);
-      if (response.count > 0 && pageFilter > totalPages) {
-        return await commonApiFetch<Page<Transaction>>({
-          endpoint: "transactions",
-          params: {
-            ...params,
-            page: `${totalPages}`,
-          },
-        });
-      }
-
-      return response;
     },
     placeholderData: keepPreviousData,
   });
+
+  useEffect(() => {
+    if (isFetching) {
+      return;
+    }
+
+    dispatchPageFilter({
+      type: "sync",
+      count: data?.count,
+      pageSize: PAGE_SIZE,
+    });
+  }, [data?.count, isFetching, pageFilter]);
 
   const totalPages = getTotalPages(data?.count, PAGE_SIZE);
   const responsePage = typeof data?.page === "number" ? data.page : pageFilter;

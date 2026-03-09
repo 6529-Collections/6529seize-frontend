@@ -6,7 +6,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
 const PAGE_SIZE = 10;
@@ -16,6 +16,38 @@ const getTotalPages = (count: number | undefined, pageSize: number) =>
     ? Math.max(1, Math.ceil(count / pageSize))
     : 1;
 
+type PageFilterAction =
+  | {
+      readonly type: "set";
+      readonly page: number;
+    }
+  | {
+      readonly type: "sync";
+      readonly count: number | undefined;
+      readonly pageSize: number;
+    };
+
+const pageFilterReducer = (state: number, action: PageFilterAction): number => {
+  switch (action.type) {
+    case "set":
+      return action.page;
+    case "sync": {
+      if (action.count === undefined) {
+        return state;
+      }
+
+      if (action.count === 0) {
+        return state === 1 ? state : 1;
+      }
+
+      const totalPages = getTotalPages(action.count, action.pageSize);
+      return state > totalPages ? totalPages : state;
+    }
+    default:
+      return state;
+  }
+};
+
 export default function UserPageStatsActivityDistributions({
   profile,
   activeAddress,
@@ -23,10 +55,10 @@ export default function UserPageStatsActivityDistributions({
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
-  const [pageFilter, setPageFilter] = useState(1);
+  const [pageFilter, dispatchPageFilter] = useReducer(pageFilterReducer, 1);
 
   const onPageFilter = (page: number) => {
-    setPageFilter(page);
+    dispatchPageFilter({ type: "set", page });
   };
 
   const walletsParam = useMemo(() => {
@@ -52,31 +84,29 @@ export default function UserPageStatsActivityDistributions({
         wallet: walletsParam,
       },
     ],
-    queryFn: async () =>
-      await commonApiFetch<Page<Distribution>>({
+    queryFn: () =>
+      commonApiFetch<Page<Distribution>>({
         endpoint: "distributions",
         params: {
           page_size: `${PAGE_SIZE}`,
           page: `${pageFilter}`,
           wallet: walletsParam,
         },
-      }).then(async (response) => {
-        const totalPages = getTotalPages(response.count, PAGE_SIZE);
-        if (response.count > 0 && pageFilter > totalPages) {
-          return await commonApiFetch<Page<Distribution>>({
-            endpoint: "distributions",
-            params: {
-              page_size: `${PAGE_SIZE}`,
-              page: `${totalPages}`,
-              wallet: walletsParam,
-            },
-          });
-        }
-
-        return response;
       }),
     placeholderData: keepPreviousData,
   });
+
+  useEffect(() => {
+    if (isFetching) {
+      return;
+    }
+
+    dispatchPageFilter({
+      type: "sync",
+      count: data?.count,
+      pageSize: PAGE_SIZE,
+    });
+  }, [data?.count, isFetching, pageFilter]);
 
   const totalPages = getTotalPages(data?.count, PAGE_SIZE);
   const responsePage = typeof data?.page === "number" ? data.page : pageFilter;

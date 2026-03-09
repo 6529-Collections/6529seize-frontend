@@ -92,13 +92,13 @@ describe("UserPageCollectedStats", () => {
     expect(screen.queryByTestId("details")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Details" }));
-    expect(screen.getByRole("button", { name: "Details" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Hide Details" })).toHaveAttribute(
       "aria-expanded",
       "true"
     );
     expect(screen.getByTestId("details")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Details" }));
+    await user.click(screen.getByRole("button", { name: "Hide Details" }));
     expect(screen.getByRole("button", { name: "Details" })).toHaveAttribute(
       "aria-expanded",
       "false"

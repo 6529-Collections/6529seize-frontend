@@ -111,6 +111,38 @@ describe("user tab page via createUserTabPage", () => {
     );
   });
 
+  it("passes extra props from getTabProps to the Tab", async () => {
+    function TabWithExtra({
+      profile,
+      extra,
+    }: {
+      readonly profile: any;
+      readonly extra: string;
+    }) {
+      return (
+        <div data-testid="extra">
+          {extra}:{profile.handle}
+        </div>
+      );
+    }
+    const { Page } = createUserTabPage({
+      subroute: "test",
+      metaLabel: "Test",
+      Tab: TabWithExtra,
+      getTabProps: async ({ profile }) => ({
+        extra: `hello-${profile.handle}`,
+      }),
+    });
+    const element = await Page({
+      params: Promise.resolve({ user: "Alice" }),
+      searchParams: Promise.resolve({}),
+    } as any);
+    render(element);
+    expect(await screen.findByTestId("extra")).toHaveTextContent(
+      "hello-alice:alice"
+    );
+  });
+
   it("generateMetadata uses helpers", async () => {
     const { generateMetadata } = buildFactory();
     const spy = jest.spyOn(Helpers, "getMetadataForUserPage");

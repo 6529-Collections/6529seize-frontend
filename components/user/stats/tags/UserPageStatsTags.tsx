@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import UserPageStatsTagsSet from "./UserPageStatsTagsSet";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
@@ -11,6 +10,13 @@ export interface UserPageStatsTag {
   readonly classes: string;
 }
 
+interface UserPageStatsMainMetric {
+  readonly id: string;
+  readonly label: string;
+  readonly val: string;
+  readonly sub?: string;
+}
+
 export default function UserPageStatsTags({
   ownerBalance,
   balanceMemes,
@@ -18,8 +24,8 @@ export default function UserPageStatsTags({
   readonly ownerBalance: OwnerBalance | undefined;
   readonly balanceMemes: OwnerBalanceMemes[];
 }) {
-  const getMainTags = (): UserPageStatsTag[] => {
-    const result: UserPageStatsTag[] = [];
+  const getMainMetrics = (): UserPageStatsMainMetric[] => {
+    const result: UserPageStatsMainMetric[] = [];
 
     if (!ownerBalance) {
       return result;
@@ -28,59 +34,46 @@ export default function UserPageStatsTags({
     if (ownerBalance.nextgen_balance) {
       result.push({
         id: "nextgen",
-        title: `NextGen x${formatNumberWithCommasOrDash(
-          ownerBalance.nextgen_balance
-        )}`,
-        classes:
-          "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
+        label: "NextGen",
+        val: `x${formatNumberWithCommasOrDash(ownerBalance.nextgen_balance)}`,
       });
     }
 
     if (ownerBalance.memes_cards_sets) {
       result.push({
         id: "memes_sets",
-        title: `Meme Sets x${formatNumberWithCommasOrDash(
-          ownerBalance.memes_cards_sets
-        )}`,
-        classes:
-          "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
+        label: "Meme Sets",
+        val: `x${formatNumberWithCommasOrDash(ownerBalance.memes_cards_sets)}`,
       });
     }
 
     if (ownerBalance.memes_balance) {
+      const memesSub =
+        ownerBalance.unique_memes === ownerBalance.memes_balance
+          ? null
+          : `unique x${formatNumberWithCommasOrDash(ownerBalance.unique_memes)}`;
+
       result.push({
         id: "memes",
-        title: `Memes x${formatNumberWithCommasOrDash(
-          ownerBalance.memes_balance
-        )} ${
-          ownerBalance.unique_memes === ownerBalance.memes_balance
-            ? ""
-            : `(unique x${formatNumberWithCommasOrDash(
-                ownerBalance.unique_memes
-              )})`
-        }`,
-        classes:
-          "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
+        label: "Memes",
+        val: `x${formatNumberWithCommasOrDash(ownerBalance.memes_balance)}`,
+        ...(memesSub ? { sub: memesSub } : {}),
       });
     }
 
     if (ownerBalance.gradients_balance) {
       result.push({
         id: "gradients",
-        title: `Gradients x${formatNumberWithCommasOrDash(
-          ownerBalance.gradients_balance
-        )}`,
-        classes:
-          "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
+        label: "Gradients",
+        val: `x${formatNumberWithCommasOrDash(ownerBalance.gradients_balance)}`,
       });
     }
 
     if (ownerBalance.boost) {
       result.push({
         id: "boost",
-        title: `Boost x${formatNumberWithCommasOrDash(ownerBalance.boost)}`,
-        classes:
-          "tw-whitespace-nowrap tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-400/10 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-400/20",
+        label: "Boost",
+        val: `x${formatNumberWithCommasOrDash(ownerBalance.boost)}`,
       });
     }
 
@@ -110,16 +103,9 @@ export default function UserPageStatsTags({
     return result;
   };
 
-  const mainTags = getMainTags();
+  const mainMetrics = getMainMetrics();
   const seasonTags = getSeasonTags();
-
-  const [haveAnyTags, setHaveAnyTags] = useState<boolean>(
-    !!mainTags.length || !!seasonTags.length
-  );
-
-  useEffect(() => {
-    setHaveAnyTags(!!mainTags.length || !!seasonTags.length);
-  }, [mainTags, seasonTags]);
+  const haveAnyTags = mainMetrics.length > 0 || seasonTags.length > 0;
 
   if (!haveAnyTags) {
     return <div></div>;
@@ -127,8 +113,36 @@ export default function UserPageStatsTags({
 
   return (
     <div className="tw-space-y-2 sm:tw-space-y-3">
-      <UserPageStatsTagsSet tags={mainTags} />
-      <UserPageStatsTagsSet tags={seasonTags} />
+      {mainMetrics.length > 0 && (
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 md:tw-gap-6">
+          {mainMetrics.map((metric, index) => (
+            <div
+              key={metric.id}
+              className="tw-flex tw-items-center tw-gap-4 md:tw-gap-6"
+            >
+              <div className="tw-flex tw-flex-col">
+                <span className="tw-mb-0.5 tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-white/30">
+                  {metric.label}
+                </span>
+                <div className="tw-flex tw-items-baseline tw-gap-1.5">
+                  <span className="tw-text-[15px] tw-font-semibold tw-text-white/90">
+                    {metric.val}
+                  </span>
+                  {metric.sub && (
+                    <span className="tw-text-[10px] tw-font-medium tw-text-white/30">
+                      {metric.sub}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {index < mainMetrics.length - 1 && (
+                <div className="tw-hidden tw-h-6 tw-w-px tw-bg-white/10 sm:tw-block" />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {seasonTags.length > 0 && <UserPageStatsTagsSet tags={seasonTags} />}
     </div>
   );
 }
