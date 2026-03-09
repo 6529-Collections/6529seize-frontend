@@ -1,9 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useIdentity } from "../../../hooks/useIdentity";
 import { useAuth } from "../../auth/Auth";
@@ -13,7 +17,7 @@ import WebSidebarHeader from "./WebSidebarHeader";
 import WebSidebarNav from "./WebSidebarNav";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarUser from "./WebSidebarUser";
-import { UserIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, UserIcon } from "@heroicons/react/24/outline";
 
 interface WebSidebarProps {
   readonly isCollapsed: boolean;
@@ -52,6 +56,20 @@ function WebSidebar({
   }, [connectedProfile?.handle, address]);
 
   const [isTouchScreen, setIsTouchScreen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const showDesktopSearch = !isMobile;
+
+  useKey(
+    (event) => event.metaKey && event.key === "k",
+    () => {
+      if (showDesktopSearch) {
+        setIsSearchOpen(true);
+      }
+    },
+    { event: "keydown" }
+  );
+
   useEffect(() => {
     const { window: browserWindow } = globalThis as typeof globalThis & {
       window?: Window | undefined;
@@ -180,8 +198,27 @@ function WebSidebar({
                 <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
               </div>
 
-              {address && (
+              {showDesktopSearch && (
                 <div className="tw-px-3 tw-pt-2">
+                  <WebSidebarNavItem
+                    onClick={(event?: MouseEvent) => {
+                      event?.stopPropagation();
+                      setIsSearchOpen(true);
+                    }}
+                    icon={MagnifyingGlassIcon}
+                    active={false}
+                    collapsed={shouldShowCollapsed}
+                    label="Search"
+                  />
+                </div>
+              )}
+
+              {address && (
+                <div
+                  className={
+                    showDesktopSearch ? "tw-px-3" : "tw-px-3 tw-pt-2"
+                  }
+                >
                   <WebSidebarNavItem
                     href="/notifications"
                     icon={BellIcon}
@@ -216,6 +253,21 @@ function WebSidebar({
           </div>
         </div>
       </div>
+      <CommonAnimationWrapper mode="sync" initial>
+        {isSearchOpen && (
+          <CommonAnimationOpacity
+            key="search-modal"
+            elementClasses="tw-fixed tw-inset-0 tw-z-50"
+            elementRole="dialog"
+            onClicked={(event) => event.stopPropagation()}
+          >
+            <HeaderSearchModal
+              onClose={() => setIsSearchOpen(false)}
+              wave={null}
+            />
+          </CommonAnimationOpacity>
+        )}
+      </CommonAnimationWrapper>
       {!isTouchScreen && (
         <ReactTooltip
           id="sidebar-tooltip"

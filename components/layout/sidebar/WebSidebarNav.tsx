@@ -6,13 +6,9 @@ import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
   useCallback,
@@ -21,7 +17,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useKey } from "react-use";
 import WebSidebarExpandable from "./nav/WebSidebarExpandable";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
@@ -44,7 +39,6 @@ const WebSidebarNav = React.forwardRef<
     handle: connectedProfile?.handle ?? null,
   });
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
   const [submenuAnchor, setSubmenuAnchor] = useState<{
@@ -54,12 +48,6 @@ const WebSidebarNav = React.forwardRef<
   } | null>(null);
   const [submenuTrigger, setSubmenuTrigger] = useState<HTMLElement | null>(
     null
-  );
-
-  useKey(
-    (event) => event.metaKey && event.key === "k",
-    () => setIsSearchOpen(true),
-    { event: "keydown" }
   );
 
   const sections = useSidebarSections(
@@ -281,19 +269,6 @@ const WebSidebarNav = React.forwardRef<
             </li>
           )}
 
-          <li>
-            <WebSidebarNavItem
-              onClick={(event?: React.MouseEvent) => {
-                event?.stopPropagation();
-                setIsSearchOpen(true);
-              }}
-              icon={MagnifyingGlassIcon}
-              active={false}
-              collapsed={isCollapsed}
-              label="Search"
-            />
-          </li>
-
           {sections
             .filter(
               (section) =>
@@ -317,22 +292,6 @@ const WebSidebarNav = React.forwardRef<
             ))}
         </ul>
       </nav>
-
-      <CommonAnimationWrapper mode="sync" initial>
-        {isSearchOpen && (
-          <CommonAnimationOpacity
-            key="search-modal"
-            elementClasses="tw-fixed tw-inset-0 tw-z-50"
-            elementRole="dialog"
-            onClicked={(event) => event.stopPropagation()}
-          >
-            <HeaderSearchModal
-              onClose={() => setIsSearchOpen(false)}
-              wave={null}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
     </>
   );
 });
