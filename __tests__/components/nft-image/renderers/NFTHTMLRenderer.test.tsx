@@ -13,7 +13,8 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => {
         data-testid="nft-image-balance"
         data-height={height}
         data-contract={contract}
-        data-token-id={tokenId}>
+        data-token-id={tokenId}
+      >
         {mockBalance > 0 && (
           <span data-testid="seized-text">SEIZED x{mockBalance}</span>
         )}
@@ -43,7 +44,7 @@ const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT =>
       animation_url: "https://example.com/animation_url.html",
     },
     ...overrides,
-  } as BaseNFT);
+  }) as BaseNFT;
 
 const createMockNFTLite = (overrides: any = {}) => ({
   id: 1,
@@ -118,8 +119,27 @@ describe("NFTHTMLRenderer", () => {
   });
 
   describe("Animation Source Selection", () => {
-    it("uses metadata.animation when available on BaseNFT", () => {
+    it("uses top-level animation when available on BaseNFT", () => {
       const nft = createMockNFT({
+        animation: "https://example.com/top-level-animation.html",
+        metadata: {
+          animation: "https://example.com/priority-animation.html",
+          animation_url: "https://example.com/fallback-animation.html",
+        },
+      });
+      const props = createDefaultProps({ nft, id: "test-iframe" });
+      render(<NFTHTMLRenderer {...props} />);
+
+      const iframe = screen.getByTitle("test-iframe");
+      expect(iframe).toHaveAttribute(
+        "src",
+        "https://example.com/top-level-animation.html"
+      );
+    });
+
+    it("falls back to metadata.animation when top-level animation is not available", () => {
+      const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation: "https://example.com/priority-animation.html",
           animation_url: "https://example.com/fallback-animation.html",
@@ -135,8 +155,9 @@ describe("NFTHTMLRenderer", () => {
       );
     });
 
-    it("falls back to metadata.animation_url when metadata.animation is not available", () => {
+    it("falls back to metadata.animation_url when earlier sources are not available", () => {
       const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation_url: "https://example.com/fallback-animation.html",
         },
@@ -153,6 +174,7 @@ describe("NFTHTMLRenderer", () => {
 
     it("uses metadata.animation_url for NFTLite without metadata.animation", () => {
       const nft = createMockNFTLite({
+        animation: "",
         metadata: {
           animation_url: "https://example.com/nftlite-animation.html",
         },
@@ -169,6 +191,7 @@ describe("NFTHTMLRenderer", () => {
 
     it("handles undefined animation sources gracefully", () => {
       const nft = createMockNFT({
+        animation: undefined as any,
         metadata: {
           animation: undefined,
           animation_url: undefined,
@@ -187,6 +210,7 @@ describe("NFTHTMLRenderer", () => {
 
     it("handles null animation sources gracefully", () => {
       const nft = createMockNFT({
+        animation: null as any,
         metadata: {
           animation: null,
           animation_url: null,
@@ -287,7 +311,9 @@ describe("NFTHTMLRenderer", () => {
 
   describe("Edge Cases and Error Handling", () => {
     it("crashes when metadata is undefined (IMPLEMENTATION BUG)", () => {
-      const nft = createMockNFT({ ...(undefined !== undefined ? { metadata: undefined } : {}) });
+      const nft = createMockNFT({
+        ...(undefined !== undefined ? { metadata: undefined } : {}),
+      });
       const props = createDefaultProps({ nft, id: "test-iframe" });
 
       // The getSrc function has a bug - it checks "metadata" in nft but doesn't check if metadata is null/undefined
