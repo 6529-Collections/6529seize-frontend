@@ -14,10 +14,10 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import HeaderUserConnectedAccounts from "../connected/HeaderUserConnectedAccounts";
+import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 
-export default function HeaderUserProxyDropdown({
+export default function HeaderUserMenuDropdown({
   isOpen,
   profile,
   onClose,

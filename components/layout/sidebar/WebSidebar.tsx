@@ -206,9 +206,7 @@ function WebSidebar({
                 </div>
               )}
 
-              {!address && (
-                <HeaderShare isCollapsed={shouldShowCollapsed} />
-              )}
+              {!address && <HeaderShare isCollapsed={shouldShowCollapsed} />}
 
               <WebSidebarUser
                 isCollapsed={shouldShowCollapsed}

@@ -10,7 +10,7 @@ import { getConnectionProfileIndicator } from "@/components/auth/connection-stat
 import { HeaderQRModal } from "@/components/header/share/HeaderShare";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
-import HeaderUserProxyDropdown from "@/components/header/user/proxy/HeaderUserProxyDropdown";
+import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserLevel from "@/components/user/utils/level/UserLevel";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
@@ -281,7 +281,7 @@ function WebSidebarUser({
       </button>
       {showUserMenu && profile && (
         <div ref={dropdownRef}>
-          <HeaderUserProxyDropdown
+          <HeaderUserMenuDropdown
             profile={profile}
             isOpen={showUserMenu}
             onClose={() => setShowUserMenu(false)}

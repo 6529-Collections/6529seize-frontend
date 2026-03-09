@@ -34,15 +34,15 @@ const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
 >(({ isCollapsed = false }, ref) => {
-    const pathname = usePathname();
-    const capacitor = useCapacitor();
-    const { country } = useCookieConsent();
-    const { connectedProfile } = useAuth();
-    const { appWalletsSupported } = useAppWallets();
-    const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
-      type: "messages",
-      handle: connectedProfile?.handle ?? null,
-    });
+  const pathname = usePathname();
+  const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
+  const { connectedProfile } = useAuth();
+  const { appWalletsSupported } = useAppWallets();
+  const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
+    type: "messages",
+    handle: connectedProfile?.handle ?? null,
+  });
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
