@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { CUSTOM_TOOLTIP_CLOSE_ALL_EVENT } from "@/helpers/tooltip.helpers";
@@ -9,6 +15,30 @@ jest.mock("react-dom", () => ({
   ...jest.requireActual("react-dom"),
   createPortal: (children: React.ReactNode) => children,
 }));
+
+function createDomRect({
+  left,
+  top = 0,
+  width = 120,
+  height = 40,
+}: {
+  left: number;
+  top?: number;
+  width?: number;
+  height?: number;
+}): DOMRect {
+  return {
+    x: left,
+    y: top,
+    top,
+    left,
+    width,
+    height,
+    bottom: top + height,
+    right: left + width,
+    toJSON: () => ({}),
+  } as DOMRect;
+}
 
 describe("CustomTooltip", () => {
   beforeEach(() => {
@@ -304,5 +334,115 @@ describe("CustomTooltip", () => {
     await waitFor(() => {
       expect(screen.getByText("Inside Tooltip")).toBeInTheDocument();
     });
+  });
+
+  it("rebinds the trigger resize observer and measures the live trigger after swapping children", async () => {
+    const originalResizeObserver = globalThis.ResizeObserver;
+    const resizeObserverCallbacks: ResizeObserverCallback[] = [];
+    const observeMocks: jest.Mock[] = [];
+    const unobserveMocks: jest.Mock[] = [];
+    let firstTriggerRectSpy: jest.SpyInstance | undefined;
+    let secondTriggerRectSpy: jest.SpyInstance | undefined;
+    let tooltipRectSpy: jest.SpyInstance | undefined;
+
+    globalThis.ResizeObserver = jest
+      .fn()
+      .mockImplementation((callback: ResizeObserverCallback) => {
+        resizeObserverCallbacks.push(callback);
+
+        const observe = jest.fn();
+        const unobserve = jest.fn();
+
+        observeMocks.push(observe);
+        unobserveMocks.push(unobserve);
+
+        return {
+          observe,
+          unobserve,
+          disconnect: jest.fn(),
+        };
+      }) as unknown as typeof ResizeObserver;
+
+    function TriggerSwapHarness() {
+      const [triggerLabel, setTriggerLabel] = React.useState("First Trigger");
+
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => setTriggerLabel("Second Trigger")}
+          >
+            Swap Trigger
+          </button>
+          <CustomTooltip
+            content="Test tooltip"
+            delayShow={0}
+            delayHide={0}
+            hoverTransitionDelay={0}
+          >
+            <button type="button">{triggerLabel}</button>
+          </CustomTooltip>
+        </>
+      );
+    }
+
+    try {
+      render(<TriggerSwapHarness />);
+
+      const firstTrigger = screen.getByRole("button", {
+        name: "First Trigger",
+      });
+      firstTriggerRectSpy = jest
+        .spyOn(firstTrigger, "getBoundingClientRect")
+        .mockImplementation(() => createDomRect({ left: 16 }));
+
+      fireEvent.mouseEnter(firstTrigger);
+
+      const tooltip = await screen.findByRole("tooltip");
+      tooltipRectSpy = jest
+        .spyOn(tooltip, "getBoundingClientRect")
+        .mockImplementation(() =>
+          createDomRect({ left: 0, top: 0, width: 180, height: 60 })
+        );
+
+      await waitFor(() => {
+        expect(observeMocks).toHaveLength(2);
+      });
+
+      expect(observeMocks[1]).toHaveBeenCalledWith(firstTrigger);
+
+      fireEvent.click(screen.getByRole("button", { name: "Swap Trigger" }));
+
+      const secondTrigger = await screen.findByRole("button", {
+        name: "Second Trigger",
+      });
+      secondTriggerRectSpy = jest
+        .spyOn(secondTrigger, "getBoundingClientRect")
+        .mockImplementation(() => createDomRect({ left: 220 }));
+
+      await waitFor(() => {
+        expect(unobserveMocks[1]).toHaveBeenCalledWith(firstTrigger);
+        expect(observeMocks[1]).toHaveBeenCalledWith(secondTrigger);
+      });
+
+      const firstMeasureCount = firstTriggerRectSpy.mock.calls.length;
+      const secondMeasureCount = secondTriggerRectSpy.mock.calls.length;
+
+      act(() => {
+        resizeObserverCallbacks[1]?.([], {} as ResizeObserver);
+      });
+
+      await waitFor(() => {
+        expect(secondTriggerRectSpy).toHaveBeenCalledTimes(
+          secondMeasureCount + 1
+        );
+      });
+      expect(firstTriggerRectSpy).toHaveBeenCalledTimes(firstMeasureCount);
+    } finally {
+      tooltipRectSpy?.mockRestore();
+      firstTriggerRectSpy?.mockRestore();
+      secondTriggerRectSpy?.mockRestore();
+      globalThis.ResizeObserver = originalResizeObserver;
+    }
   });
 });

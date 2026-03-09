@@ -96,6 +96,7 @@ export default function CustomTooltip({
 
   const triggerBoundaryRef = useRef<HTMLSpanElement>(null);
   const childNodeRef = useRef<HTMLElement | null>(null);
+  const observedChildNodeRef = useRef<HTMLElement | null>(null);
   const describedTriggerRef = useRef<HTMLElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const showTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -161,8 +162,32 @@ export default function CustomTooltip({
     describedTriggerRef.current = nextTriggerNode;
   }, [clearTooltipDescription, getCurrentTriggerNode, isVisible, tooltipId]);
 
+  const syncChildObserverNode = useCallback(
+    (observer?: ResizeObserver | null) => {
+      const nextChildNode = getCurrentTriggerNode() ?? resolveTriggerNode();
+      const observedChildNode = observedChildNodeRef.current;
+
+      if (observedChildNode && observedChildNode !== nextChildNode) {
+        observer?.unobserve(observedChildNode);
+        observedChildNodeRef.current = null;
+      }
+
+      if (!observer || !nextChildNode) {
+        return nextChildNode;
+      }
+
+      if (observedChildNode !== nextChildNode) {
+        observer.observe(nextChildNode);
+        observedChildNodeRef.current = nextChildNode;
+      }
+
+      return nextChildNode;
+    },
+    [getCurrentTriggerNode, resolveTriggerNode]
+  );
+
   const calculatePosition = useCallback(() => {
-    const childNode = childNodeRef.current ?? resolveTriggerNode();
+    const childNode = getCurrentTriggerNode() ?? resolveTriggerNode();
     if (!childNode || !tooltipRef.current) return;
     if (getTooltipWindow() === null) return;
 
@@ -178,7 +203,7 @@ export default function CustomTooltip({
     setPosition(layout.position);
     setArrowPosition(layout.arrowPosition);
     setActualPlacement(layout.placement);
-  }, [offset, placement, resolveTriggerNode]);
+  }, [getCurrentTriggerNode, offset, placement, resolveTriggerNode]);
 
   const cancelShowTimer = useCallback(() => {
     if (showTimer.current !== undefined) {
@@ -250,6 +275,19 @@ export default function CustomTooltip({
   useLayoutEffect(() => {
     if (!isVisible) return;
 
+    const observer = childObserverRef.current;
+    if (!observer) return;
+
+    const previousObservedChildNode = observedChildNodeRef.current;
+    const childNode = syncChildObserverNode(observer);
+    if (!childNode || previousObservedChildNode === childNode) return;
+
+    calculatePosition();
+  });
+
+  useLayoutEffect(() => {
+    if (!isVisible) return;
+
     const frame = requestAnimationFrame(() => {
       calculatePosition();
     });
@@ -284,7 +322,7 @@ export default function CustomTooltip({
     if (!isVisible) return;
     if (getTooltipWindow() === null) return;
 
-    const childNode = childNodeRef.current ?? resolveTriggerNode();
+    const childNode = getCurrentTriggerNode() ?? resolveTriggerNode();
     if (!childNode) return;
 
     if (typeof ResizeObserver === "undefined") {
@@ -293,17 +331,31 @@ export default function CustomTooltip({
     }
 
     const observer = new ResizeObserver(() => {
+      const nextChildNode = syncChildObserverNode(observer);
+      if (!nextChildNode) return;
+
       calculatePosition();
     });
 
     childObserverRef.current = observer;
+    observedChildNodeRef.current = childNode;
     observer.observe(childNode);
 
     return () => {
+      if (observedChildNodeRef.current) {
+        observer.unobserve(observedChildNodeRef.current);
+        observedChildNodeRef.current = null;
+      }
       observer.disconnect();
       childObserverRef.current = null;
     };
-  }, [isVisible, calculatePosition, resolveTriggerNode]);
+  }, [
+    isVisible,
+    calculatePosition,
+    getCurrentTriggerNode,
+    resolveTriggerNode,
+    syncChildObserverNode,
+  ]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -336,6 +388,7 @@ export default function CustomTooltip({
       cancelShowTimer();
       cancelHideTimer();
       childObserverRef.current?.disconnect();
+      observedChildNodeRef.current = null;
       tooltipObserverRef.current?.disconnect();
       clearTooltipDescription();
     };
