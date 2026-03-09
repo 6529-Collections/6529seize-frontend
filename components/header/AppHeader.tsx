@@ -134,8 +134,8 @@ export default function AppHeader() {
   const hasUnreadOnOtherConnectedProfiles = connectedAccounts.some(
     (account) =>
       !account.isActive &&
-      (connectedAccountUnreadNotifications[account.address.toLowerCase()] ?? 0) >
-        0
+      (connectedAccountUnreadNotifications[account.address.toLowerCase()] ??
+        0) > 0
   );
 
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -332,6 +332,7 @@ export default function AppHeader() {
                   picture={activeWave.picture ?? null}
                   contributors={activeWave.contributors_overview.map((c) => ({
                     pfp: c.contributor_pfp,
+                    identity: c.contributor_identity,
                   }))}
                 />
               </div>

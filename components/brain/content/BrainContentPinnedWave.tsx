@@ -110,6 +110,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
                 picture={wave.picture}
                 contributors={wave.contributors_overview.map((c) => ({
                   pfp: c.contributor_pfp,
+                  identity: c.contributor_identity,
                 }))}
               />
             ) : (
