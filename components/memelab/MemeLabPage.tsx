@@ -979,9 +979,9 @@ export default function MemeLabPageComponent({
   const animationFormat = getAnimationFileTypeFromMetadata(nft?.metadata);
   const fileType = getFileTypeFromMetadata(nft?.metadata);
   const dimensions = getDimensionsFromMetadata(nft?.metadata);
-  const imageHref = nft?.metadata?.image;
+  const imageHref = nft?.metadata?.image ?? nft?.image;
   const animationHref =
-    nft?.metadata?.animation ?? nft?.metadata?.animation_url;
+    nft?.metadata?.animation ?? nft?.metadata?.animation_url ?? nft?.animation;
   const currentFormat = hasAnimation
     ? currentSlide === 0
       ? (animationFormat ?? "")

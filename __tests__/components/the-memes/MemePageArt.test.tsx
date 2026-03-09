@@ -80,4 +80,36 @@ describe("MemePageArt", () => {
     expect(screen.getByText("Stats")).toBeInTheDocument();
     expect(screen.getByText("Boosts")).toBeInTheDocument();
   });
+
+  it("falls back to top-level media URLs for art links", () => {
+    const nftWithTopLevelMedia = {
+      ...nft,
+      image: "https://top-level.example/image.png",
+      animation: "https://top-level.example/animation.mp4",
+      metadata: {
+        image_details: { format: "png", width: 1, height: 2 },
+        animation_details: { format: "gif", width: 1, height: 2 },
+        attributes: nft.metadata.attributes,
+      },
+    };
+
+    render(
+      <MemePageArt
+        show={true}
+        nft={nftWithTopLevelMedia as any}
+        nftMeta={nftMeta as any}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "https://top-level.example/image.png",
+      })
+    ).toHaveAttribute("href", "https://top-level.example/image.png");
+    expect(
+      screen.getByRole("link", {
+        name: "https://top-level.example/animation.mp4",
+      })
+    ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
+  });
 });

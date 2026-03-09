@@ -36,6 +36,32 @@ describe("nft.helpers", () => {
     expect(getImageFileTypeFromMetadata(metadata)).toBe("PNG");
   });
 
+  it("returns null for empty, whitespace-only, and non-string formats", () => {
+    expect(
+      getAnimationFileTypeFromMetadata({
+        animation_details: { format: "   " },
+      })
+    ).toBeNull();
+
+    expect(
+      getImageFileTypeFromMetadata({
+        image_details: { format: "" },
+      })
+    ).toBeNull();
+
+    expect(
+      getAnimationFileTypeFromMetadata({
+        animation_details: { format: null as any },
+      })
+    ).toBeNull();
+
+    expect(
+      getImageFileTypeFromMetadata({
+        image_details: { format: 123 as any },
+      })
+    ).toBeNull();
+  });
+
   it("returns null when no usable media metadata is present", () => {
     expect(getFileTypeFromMetadata({})).toBeNull();
     expect(getDimensionsFromMetadata({})).toBeNull();

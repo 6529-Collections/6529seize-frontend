@@ -23,7 +23,12 @@ type NFTMediaMetadata =
 const getMediaFormat = (
   details: NFTMediaDetails | null | undefined
 ): string | null => {
-  const format = details?.format?.trim();
+  const rawFormat = details?.format;
+  if (typeof rawFormat !== "string") {
+    return null;
+  }
+
+  const format = rawFormat.trim();
   return format ? format : null;
 };
 

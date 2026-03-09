@@ -45,9 +45,11 @@ export function MemePageArt(props: {
   const animationFormat = getAnimationFileTypeFromMetadata(props.nft?.metadata);
   const fileType = getFileTypeFromMetadata(props.nft?.metadata);
   const dimensions = getDimensionsFromMetadata(props.nft?.metadata);
-  const imageHref = props.nft?.metadata?.image;
+  const imageHref = props.nft?.metadata?.image ?? props.nft?.image;
   const animationHref =
-    props.nft?.metadata?.animation ?? props.nft?.metadata?.animation_url;
+    props.nft?.metadata?.animation ??
+    props.nft?.metadata?.animation_url ??
+    props.nft?.animation;
 
   const distributionPlanLink = (() => {
     const id = props.nft?.id;

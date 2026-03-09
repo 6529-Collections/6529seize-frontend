@@ -25,6 +25,13 @@ jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
   default: () => <div data-testid="marketplace-links" />,
 }));
+
+jest.mock("@/components/download/Download", () => ({
+  __esModule: true,
+  default: ({ href }: { href: string }) => (
+    <div data-testid="download" data-href={href} />
+  ),
+}));
 // Mock Next.js components
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -299,9 +306,9 @@ function createMockTransactions(balance: number) {
   };
 }
 
-function setupMockApiCalls(balance = 1) {
+function setupMockApiCalls(balance = 1, nftOverrides: any = {}) {
   const meta = createMockMeta();
-  const nft = createMockNft();
+  const nft = createMockNft(nftOverrides);
   const transactions = createMockTransactions(balance);
   const activity = { data: [], count: 0 };
 
@@ -465,6 +472,42 @@ describe("MemeLabPageComponent", () => {
     expect(mockUseRouter().replace).toHaveBeenCalledWith(
       expect.stringContaining(`focus=${MEME_FOCUS.ACTIVITY}`)
     );
+  });
+
+  it("falls back to top-level media URLs for art links", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      image: "https://top-level.example/image.png",
+      animation: "https://top-level.example/animation.mp4",
+      metadata: {
+        attributes: [],
+        image_details: { format: "PNG" },
+        animation_details: { format: "MP4" },
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", {
+          name: "https://top-level.example/image.png",
+        })
+      ).toHaveAttribute("href", "https://top-level.example/image.png");
+      expect(
+        screen.getByRole("link", {
+          name: "https://top-level.example/animation.mp4",
+        })
+      ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
+    });
   });
 
   it("handles empty metadata response", async () => {
