@@ -30,7 +30,8 @@ const NavItem = ({ item }: Props) => {
   const { icon } = item;
   const { address, seizeConnect } = useSeizeConnectContext();
 
-  const iconSlotClass = "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
+  const iconSlotClass =
+    "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
 
   // Determine if the current wave (if any) is a DM
   const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
