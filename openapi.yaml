@@ -5049,13 +5049,15 @@ paths:
               - TREND
         - name: price_currency
           in: query
-          description: Optional currency filter used when sorting by PRICE
+          description: >-
+            Optional currency used for min_price/max_price filtering and PRICE
+            sorting
           required: false
           schema:
             type: string
         - name: min_price
           in: query
-          description: Optional minimum price filter used when sorting by PRICE
+          description: Optional minimum price filter applied to leaderboard results
           required: false
           schema:
             type: number
@@ -5063,7 +5065,7 @@ paths:
             minimum: 0
         - name: max_price
           in: query
-          description: Optional maximum price filter used when sorting by PRICE
+          description: Optional maximum price filter applied to leaderboard results
           required: false
           schema:
             type: number
@@ -10659,14 +10661,8 @@ components:
     ApiWavesOverviewType:
       type: string
       enum:
-        - LATEST
         - MOST_SUBSCRIBED
-        - HIGH_LEVEL_AUTHOR
-        - AUTHOR_YOU_HAVE_REPPED
-        - MOST_DROPPED
-        - MOST_DROPPED_BY_YOU
         - RECENTLY_DROPPED_TO
-        - RECENTLY_DROPPED_TO_BY_YOU
     ApiWavesPinFilter:
       type: string
       enum:

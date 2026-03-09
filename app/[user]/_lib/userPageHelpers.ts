@@ -1,7 +1,7 @@
 export type UserRouteParams = { user: string };
 export type UserSearchParams = Record<string, string | string[] | undefined>;
 
-export const PROBE_USER_SUFFIXES = [
+const PROBE_USER_SUFFIXES = [
   ".html",
   ".htm",
   ".php",
@@ -40,12 +40,16 @@ export const normalizeSearchParams = (
 };
 
 export const isNotFoundError = (error: unknown): boolean => {
-  if (!error || (typeof error !== "object" && typeof error !== "string")) {
+  if (
+    error === null ||
+    error === undefined ||
+    (typeof error !== "object" && typeof error !== "string")
+  ) {
     return false;
   }
 
   const status =
-    typeof error === "object" && error !== null
+    typeof error === "object"
       ? ((error as { status?: number | undefined }).status ??
         (error as { statusCode?: number | undefined }).statusCode ??
         (error as { response?: { status?: number | undefined } | undefined })
@@ -64,7 +68,7 @@ export const isNotFoundError = (error: unknown): boolean => {
     message = error.message;
   }
 
-  return !!message && message.toLowerCase().includes("not found");
+  return message !== undefined && message.toLowerCase().includes("not found");
 };
 
 export const isProbeLikeUserSlug = (user: string): boolean => {

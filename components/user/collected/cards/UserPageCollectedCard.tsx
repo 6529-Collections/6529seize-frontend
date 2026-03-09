@@ -58,6 +58,7 @@ export default function UserPageCollectedCard({
     isSelectMode && copiesMax !== (card.seized_count ?? 0);
 
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const handleImageSettled = () => setIsImageLoaded(true);
 
   const hasSeizedCountValue = card.seized_count !== null;
   const showSeizedCount =
@@ -281,7 +282,8 @@ export default function UserPageCollectedCard({
           width={800}
           height={800}
           sizes="(max-width: 640px) 100vw, 33vw"
-          onLoad={() => setIsImageLoaded(true)}
+          onLoad={handleImageSettled}
+          onError={handleImageSettled}
           className={`tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain ${
             !isImageLoaded ? "tw-opacity-0" : "tw-opacity-100"
           } tw-transition-opacity tw-duration-300`}
