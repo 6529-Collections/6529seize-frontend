@@ -8,6 +8,7 @@ import {
   faShuffle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ShareIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -15,17 +16,19 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useChainSwitcher } from "@/components/header/useChainSwitcher";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import HeaderUserConnectedAccounts from "../connected/HeaderUserConnectedAccounts";
+import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 
-export default function HeaderUserProxyDropdown({
+export default function HeaderUserMenuDropdown({
   isOpen,
   profile,
   onClose,
+  onOpenShare,
 }: {
   readonly isOpen: boolean;
   readonly profile: ApiIdentity;
   readonly onClose: () => void;
+  readonly onOpenShare?: (() => void) | undefined;
 }) {
   const {
     address,
@@ -147,7 +150,7 @@ export default function HeaderUserProxyDropdown({
                         accounts={availableConnectedAccounts.map((account) => ({
                           ...account,
                           unreadNotificationsCount:
-                            connectedAccountUnreadNotifications[
+                            (connectedAccountUnreadNotifications ?? {})[
                               account.address.toLowerCase()
                             ] ?? 0,
                         }))}
@@ -309,6 +312,20 @@ export default function HeaderUserProxyDropdown({
                           width={16}
                         />
                         <span>Switch to {nextChainName}</span>
+                      </button>
+                    </div>
+                  )}
+                  {onOpenShare && (
+                    <div className="tw-h-full tw-px-2 tw-pt-2">
+                      <button
+                        onClick={onOpenShare}
+                        type="button"
+                        aria-label="Share"
+                        title="Share"
+                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <ShareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                        <span>Share</span>
                       </button>
                     </div>
                   )}

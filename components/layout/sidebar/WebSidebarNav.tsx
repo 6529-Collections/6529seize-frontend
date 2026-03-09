@@ -12,7 +12,6 @@ import React, {
 import { useKey } from "react-use";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
-import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
@@ -29,7 +28,6 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
-import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import WebSidebarExpandable from "./nav/WebSidebarExpandable";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
@@ -48,9 +46,6 @@ const WebSidebarNav = React.forwardRef<
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
-  const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.handle ?? null
-  );
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
@@ -292,17 +287,6 @@ const WebSidebarNav = React.forwardRef<
               {renderCollapsedSubmenu("collections")}
             </li>
           )}
-
-          <li>
-            <WebSidebarNavItem
-              href="/notifications"
-              icon={BellIcon}
-              active={pathname?.startsWith("/notifications") || false}
-              collapsed={isCollapsed}
-              label="Notifications"
-              hasIndicator={haveUnreadNotifications}
-            />
-          </li>
 
           <li>
             <WebSidebarNavItem
