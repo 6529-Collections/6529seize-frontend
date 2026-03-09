@@ -10,6 +10,24 @@ import { withArweaveFallback } from "../utils/arweave-fallback";
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   const animationSrc = getResolvedAnimationSrc(props.nft);
   const animationClassName = styles["nftAnimation"] ?? "";
+  const compressedAnimationSrc =
+    "metadata" in props.nft ? props.nft.compressed_animation : undefined;
+  const normalizedCompressedAnimationSrc = (() => {
+    if (compressedAnimationSrc == null || compressedAnimationSrc === "") {
+      return undefined;
+    }
+
+    try {
+      return new URL(
+        compressedAnimationSrc,
+        typeof window === "undefined"
+          ? "http://localhost"
+          : window.location.href
+      ).href;
+    } catch {
+      return undefined;
+    }
+  })();
 
   return (
     <Col
@@ -41,7 +59,7 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         onError={withArweaveFallback(({ currentTarget }) => {
           if (
             "metadata" in props.nft &&
-            currentTarget.src === props.nft.compressed_animation &&
+            currentTarget.src === normalizedCompressedAnimationSrc &&
             animationSrc
           ) {
             currentTarget.src = animationSrc;

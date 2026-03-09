@@ -51,9 +51,9 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import {
+  getAnimationDimensionsFromMetadata,
   getAnimationFileTypeFromMetadata,
-  getDimensionsFromMetadata,
-  getFileTypeFromMetadata,
+  getImageDimensionsFromMetadata,
   getImageFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
@@ -979,14 +979,13 @@ export default function MemeLabPageComponent({
 
   const imageFormat = getImageFileTypeFromMetadata(nft?.metadata);
   const animationFormat = getAnimationFileTypeFromMetadata(nft?.metadata);
-  const fileType = getFileTypeFromMetadata(nft?.metadata);
-  const dimensions = getDimensionsFromMetadata(nft?.metadata);
+  const imageDimensions = getImageDimensionsFromMetadata(nft?.metadata);
+  const animationDimensions = getAnimationDimensionsFromMetadata(nft?.metadata);
   const imageHref = nft?.metadata?.image ?? nft?.image;
-  const currentFormat = hasAnimation
-    ? currentSlide === 0
-      ? (animationFormat ?? "")
-      : (imageFormat ?? "")
-    : (imageFormat ?? "");
+  const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
+  const fileType = isShowingAnimation ? animationFormat : imageFormat;
+  const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
+  const currentFormat = fileType ?? "";
 
   function printTheArt() {
     if (nft && nftMeta) {

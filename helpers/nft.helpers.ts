@@ -29,7 +29,7 @@ const getMediaFormat = (
   }
 
   const format = rawFormat.trim();
-  return format ? format : null;
+  return format.length > 0 ? format : null;
 };
 
 const isValidDimension = (
@@ -63,6 +63,18 @@ export function getImageFileTypeFromMetadata(
   return getMediaFormat(metadata?.image_details);
 }
 
+export function getAnimationDimensionsFromMetadata(
+  metadata: NFTMediaMetadata
+): string | null {
+  return getMediaDimensions(metadata?.animation_details);
+}
+
+export function getImageDimensionsFromMetadata(
+  metadata: NFTMediaMetadata
+): string | null {
+  return getMediaDimensions(metadata?.image_details);
+}
+
 export function getFileTypeFromMetadata(metadata: NFTMediaMetadata) {
   return (
     getAnimationFileTypeFromMetadata(metadata) ??
@@ -72,8 +84,8 @@ export function getFileTypeFromMetadata(metadata: NFTMediaMetadata) {
 
 export function getDimensionsFromMetadata(metadata: NFTMediaMetadata) {
   return (
-    getMediaDimensions(metadata?.animation_details) ??
-    getMediaDimensions(metadata?.image_details)
+    getAnimationDimensionsFromMetadata(metadata) ??
+    getImageDimensionsFromMetadata(metadata)
   );
 }
 

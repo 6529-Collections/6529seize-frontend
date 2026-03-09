@@ -1,5 +1,33 @@
 import { MemePageArt } from "@/components/the-memes/MemePageArt";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+
+jest.mock("react-bootstrap", () => {
+  const actual = jest.requireActual("react-bootstrap");
+  const Carousel = ({ children, onSlide, ...props }: any) => (
+    <div data-testid="carousel" {...props}>
+      <button
+        type="button"
+        data-testid="carousel-slide-0"
+        onClick={() => onSlide?.(0)}
+      />
+      <button
+        type="button"
+        data-testid="carousel-slide-1"
+        onClick={() => onSlide?.(1)}
+      />
+      {children}
+    </div>
+  );
+
+  Carousel.Item = ({ children, ...props }: any) => (
+    <div {...props}>{children}</div>
+  );
+
+  return {
+    ...actual,
+    Carousel,
+  };
+});
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -26,15 +54,22 @@ jest.mock("@/helpers/Helpers", () => ({
   printMintDate: (d: string) => d,
 }));
 jest.mock("@/helpers/nft.helpers", () => ({
-  getAnimationFileTypeFromMetadata: () => "gif",
-  getFileTypeFromMetadata: () => "png",
-  getDimensionsFromMetadata: () => "100x100",
-  getImageFileTypeFromMetadata: () => "png",
+  getAnimationDimensionsFromMetadata: jest.fn(),
+  getAnimationFileTypeFromMetadata: jest.fn(),
+  getImageDimensionsFromMetadata: jest.fn(),
+  getImageFileTypeFromMetadata: jest.fn(),
 }));
 jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   __esModule: true,
   default: () => <div data-testid="attrs" />,
 }));
+
+const mockNftHelpers = jest.requireMock("@/helpers/nft.helpers") as {
+  getAnimationDimensionsFromMetadata: jest.Mock;
+  getAnimationFileTypeFromMetadata: jest.Mock;
+  getImageDimensionsFromMetadata: jest.Mock;
+  getImageFileTypeFromMetadata: jest.Mock;
+};
 
 const nft = {
   id: 5,
@@ -60,6 +95,23 @@ const nft = {
 };
 const nftMeta = { season: 1, meme_name: "meme" };
 
+const getCardDetailValue = (label: string): string => {
+  const labelCell = screen.getByText(label);
+  const row = labelCell.closest("tr");
+  const value = row?.querySelectorAll("td")[1]?.textContent;
+
+  expect(value).toBeTruthy();
+  return value ?? "";
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockNftHelpers.getAnimationFileTypeFromMetadata.mockReturnValue("gif");
+  mockNftHelpers.getImageFileTypeFromMetadata.mockReturnValue("png");
+  mockNftHelpers.getAnimationDimensionsFromMetadata.mockReturnValue("200x300");
+  mockNftHelpers.getImageDimensionsFromMetadata.mockReturnValue("100x100");
+});
+
 describe("MemePageArt", () => {
   it("returns empty when missing data", () => {
     const { container } = render(
@@ -79,6 +131,8 @@ describe("MemePageArt", () => {
     expect(screen.getByText("Properties")).toBeInTheDocument();
     expect(screen.getByText("Stats")).toBeInTheDocument();
     expect(screen.getByText("Boosts")).toBeInTheDocument();
+    expect(getCardDetailValue("File type")).toBe("png");
+    expect(getCardDetailValue("Dimensions")).toBe("100x100");
   });
 
   it("falls back to top-level media URLs for art links", () => {
@@ -140,5 +194,34 @@ describe("MemePageArt", () => {
         name: "https://metadata.example/animation.gif",
       })
     ).toHaveAttribute("href", "https://metadata.example/animation.gif");
+    expect(getCardDetailValue("File type")).toBe("gif");
+    expect(getCardDetailValue("Dimensions")).toBe("200x300");
+  });
+
+  it("switches card details to image metadata on the image slide", () => {
+    const nftWithAnimationUrlOnly = {
+      ...nft,
+      animation: "",
+      metadata: {
+        image_details: { format: "png", width: 1, height: 2 },
+        animation_details: { format: "gif", width: 1, height: 2 },
+        animation_url: "https://metadata.example/animation.gif",
+        attributes: nft.metadata.attributes,
+        image: "img",
+      },
+    };
+
+    render(
+      <MemePageArt
+        show={true}
+        nft={nftWithAnimationUrlOnly as any}
+        nftMeta={nftMeta as any}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("carousel-slide-1"));
+
+    expect(getCardDetailValue("File type")).toBe("png");
+    expect(getCardDetailValue("Dimensions")).toBe("100x100");
   });
 });

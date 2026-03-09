@@ -13,9 +13,9 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import {
+  getAnimationDimensionsFromMetadata,
   getAnimationFileTypeFromMetadata,
-  getDimensionsFromMetadata,
-  getFileTypeFromMetadata,
+  getImageDimensionsFromMetadata,
   getImageFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
@@ -43,9 +43,14 @@ export function MemePageArt(props: {
       : "the-art-fullscreen-img";
   const imageFormat = getImageFileTypeFromMetadata(props.nft?.metadata);
   const animationFormat = getAnimationFileTypeFromMetadata(props.nft?.metadata);
-  const fileType = getFileTypeFromMetadata(props.nft?.metadata);
-  const dimensions = getDimensionsFromMetadata(props.nft?.metadata);
+  const imageDimensions = getImageDimensionsFromMetadata(props.nft?.metadata);
+  const animationDimensions = getAnimationDimensionsFromMetadata(
+    props.nft?.metadata
+  );
   const imageHref = props.nft?.metadata?.image ?? props.nft?.image;
+  const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
+  const fileType = isShowingAnimation ? animationFormat : imageFormat;
+  const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
 
   const distributionPlanLink = (() => {
     const id = props.nft?.id;
@@ -68,11 +73,7 @@ export function MemePageArt(props: {
     setCurrentSlide(event);
   }
 
-  const currentFormat = hasAnimation
-    ? currentSlide === 0
-      ? (animationFormat ?? "")
-      : (imageFormat ?? "")
-    : (imageFormat ?? "");
+  const currentFormat = fileType ?? "";
 
   if (props.show && props.nft && props.nftMeta) {
     return (

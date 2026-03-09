@@ -2,10 +2,44 @@ import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
+
+jest.mock("react-bootstrap", () => {
+  const actual = jest.requireActual("react-bootstrap");
+  const Carousel = ({ children, onSlide, ...props }: any) => (
+    <div data-testid="carousel" {...props}>
+      <button
+        type="button"
+        data-testid="carousel-slide-0"
+        onClick={() => onSlide?.(0)}
+      />
+      <button
+        type="button"
+        data-testid="carousel-slide-1"
+        onClick={() => onSlide?.(1)}
+      />
+      {children}
+    </div>
+  );
+
+  Carousel.Item = ({ children, ...props }: any) => (
+    <div {...props}>{children}</div>
+  );
+
+  return {
+    ...actual,
+    Carousel,
+  };
+});
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -324,6 +358,15 @@ function setupMockApiCalls(balance = 1, nftOverrides: any = {}) {
   });
 }
 
+function getCardDetailValue(label: string): string {
+  const labelCell = screen.getByText(label);
+  const row = labelCell.closest("tr");
+  const value = row?.querySelectorAll("td")[1]?.textContent;
+
+  expect(value).toBeTruthy();
+  return value ?? "";
+}
+
 describe("MemeLabPageComponent", () => {
   it("renders without crashing", async () => {
     setupMockApiCalls();
@@ -522,9 +565,10 @@ describe("MemeLabPageComponent", () => {
       animation: "",
       metadata: {
         attributes: [],
-        image_details: { format: "PNG" },
-        animation_details: { format: "HTML" },
+        image_details: { format: "PNG", width: 1200, height: 800 },
+        animation_details: { format: "HTML", width: 1920, height: 1080 },
         animation_url: "https://metadata.example/animation.html",
+        image: "https://metadata.example/image.png",
       },
     });
 
@@ -539,6 +583,43 @@ describe("MemeLabPageComponent", () => {
           name: "https://metadata.example/animation.html",
         })
       ).toHaveAttribute("href", "https://metadata.example/animation.html");
+      expect(getCardDetailValue("File type")).toBe("HTML");
+      expect(getCardDetailValue("Dimensions")).toBe("1,920 x 1,080");
+    });
+  });
+
+  it("switches card details to image metadata on the image slide", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      animation: "",
+      metadata: {
+        attributes: [],
+        image_details: { format: "PNG", width: 1200, height: 800 },
+        animation_details: { format: "HTML", width: 1920, height: 1080 },
+        animation_url: "https://metadata.example/animation.html",
+        image: "https://metadata.example/image.png",
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
+    });
+
+    fireEvent.click(screen.getByTestId("carousel-slide-1"));
+
+    await waitFor(() => {
+      expect(getCardDetailValue("File type")).toBe("PNG");
+      expect(getCardDetailValue("Dimensions")).toBe("1,200 x 800");
     });
   });
 
