@@ -7,6 +7,10 @@ import type { BaseRendererProps } from "../types/renderer-props";
 import { getResolvedAnimationSrc } from "../utils/animation-source";
 import { withArweaveFallback } from "../utils/arweave-fallback";
 
+const globalScope = globalThis as typeof globalThis & {
+  window?: Window | undefined;
+};
+
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   const animationSrc = getResolvedAnimationSrc(props.nft);
   const animationClassName = styles["nftAnimation"] ?? "";
@@ -18,12 +22,8 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
     }
 
     try {
-      return new URL(
-        compressedAnimationSrc,
-        typeof window === "undefined"
-          ? "http://localhost"
-          : window.location.href
-      ).href;
+      const baseUrl = globalScope.window.location.href;
+      return new URL(compressedAnimationSrc, baseUrl).href;
     } catch {
       return undefined;
     }

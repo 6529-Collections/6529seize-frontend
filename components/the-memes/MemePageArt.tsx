@@ -4,6 +4,7 @@ import Download from "@/components/download/Download";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
+import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
 import {
   enterArtFullScreen,
@@ -37,18 +38,21 @@ export function MemePageArt(props: {
 
   const animationHref = getResolvedAnimationSrc(props.nft);
   const hasAnimation = Boolean(animationHref);
-  const fullscreenElementId =
-    hasAnimation && currentSlide === 0
-      ? "the-art-fullscreen-animation"
-      : "the-art-fullscreen-img";
   const imageFormat = getImageFileTypeFromMetadata(props.nft?.metadata);
   const animationFormat = getAnimationFileTypeFromMetadata(props.nft?.metadata);
   const imageDimensions = getImageDimensionsFromMetadata(props.nft?.metadata);
   const animationDimensions = getAnimationDimensionsFromMetadata(
     props.nft?.metadata
   );
-  const imageHref = props.nft?.metadata?.image ?? props.nft?.image;
+  const imageHref = getResolvedImageSrc(props.nft);
+  const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
+  let fullscreenElementId = "";
+  if (isShowingAnimation) {
+    fullscreenElementId = "the-art-fullscreen-animation";
+  } else if (hasImage) {
+    fullscreenElementId = "the-art-fullscreen-img";
+  }
   const fileType = isShowingAnimation ? animationFormat : imageFormat;
   const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
 
@@ -117,17 +121,19 @@ export function MemePageArt(props: {
                       id="the-art-fullscreen-animation"
                     />
                   </Carousel.Item>
-                  <Carousel.Item className="text-center">
-                    <NFTImage
-                      nft={props.nft}
-                      animation={false}
-                      height={650}
-                      showBalance={false}
-                      transparentBG={true}
-                      showOriginal={true}
-                      id="the-art-fullscreen-img"
-                    />
-                  </Carousel.Item>
+                  {hasImage && (
+                    <Carousel.Item className="text-center">
+                      <NFTImage
+                        nft={props.nft}
+                        animation={false}
+                        height={650}
+                        showBalance={false}
+                        transparentBG={true}
+                        showOriginal={true}
+                        id="the-art-fullscreen-img"
+                      />
+                    </Carousel.Item>
+                  )}
                 </Carousel>
               </>
             ) : (
@@ -149,15 +155,17 @@ export function MemePageArt(props: {
                     )}
                   </div>
                 </Col>
-                <NFTImage
-                  nft={props.nft}
-                  animation={false}
-                  height={650}
-                  transparentBG={true}
-                  showOriginal={true}
-                  showBalance={false}
-                  id="the-art-fullscreen-img"
-                />
+                {hasImage && (
+                  <NFTImage
+                    nft={props.nft}
+                    animation={false}
+                    height={650}
+                    transparentBG={true}
+                    showOriginal={true}
+                    showBalance={false}
+                    id="the-art-fullscreen-img"
+                  />
+                )}
               </>
             )}
           </Row>

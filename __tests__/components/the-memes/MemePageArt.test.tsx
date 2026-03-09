@@ -33,6 +33,11 @@ jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
 }));
+jest.mock("@fortawesome/react-fontawesome", () => ({
+  FontAwesomeIcon: (props: any) => (
+    <svg data-testid="fullscreen-icon" onClick={props.onClick} />
+  ),
+}));
 
 jest.mock("@/components/nft-image/NFTImage", () => ({
   __esModule: true,
@@ -40,7 +45,9 @@ jest.mock("@/components/nft-image/NFTImage", () => ({
 }));
 jest.mock("@/components/download/Download", () => ({
   __esModule: true,
-  default: () => <div data-testid="download" />,
+  default: ({ href }: { href: string }) => (
+    <div data-testid="download" data-href={href} />
+  ),
 }));
 jest.mock("@/components/the-memes/ArtistProfileHandle", () => ({
   __esModule: true,
@@ -64,6 +71,9 @@ jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   default: () => <div data-testid="attrs" />,
 }));
 
+const mockHelpers = jest.requireMock("@/helpers/Helpers") as {
+  enterArtFullScreen: jest.Mock;
+};
 const mockNftHelpers = jest.requireMock("@/helpers/nft.helpers") as {
   getAnimationDimensionsFromMetadata: jest.Mock;
   getAnimationFileTypeFromMetadata: jest.Mock;
@@ -96,7 +106,9 @@ const nft = {
 const nftMeta = { season: 1, meme_name: "meme" };
 
 const getCardDetailValue = (label: string): string => {
-  const labelCell = screen.getByText(label);
+  const labelCell = screen.getByText((_, element) => {
+    return element?.textContent?.toLowerCase() === label.toLowerCase();
+  });
   const row = labelCell.closest("tr");
   const value = row?.querySelectorAll("td")[1]?.textContent;
 
@@ -167,6 +179,35 @@ describe("MemePageArt", () => {
     ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
   });
 
+  it("ignores whitespace metadata.image and falls back to the top-level image", () => {
+    const nftWithWhitespaceMetadataImage = {
+      ...nft,
+      image: "  https://top-level.example/image.png  ",
+      metadata: {
+        ...nft.metadata,
+        image: "   ",
+      },
+    };
+
+    render(
+      <MemePageArt
+        show={true}
+        nft={nftWithWhitespaceMetadataImage as any}
+        nftMeta={nftMeta as any}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "https://top-level.example/image.png",
+      })
+    ).toHaveAttribute("href", "https://top-level.example/image.png");
+    expect(screen.getByTestId("download")).toHaveAttribute(
+      "data-href",
+      "https://top-level.example/image.png"
+    );
+  });
+
   it("treats metadata.animation_url-only NFTs as animated", () => {
     const nftWithAnimationUrlOnly = {
       ...nft,
@@ -223,5 +264,44 @@ describe("MemePageArt", () => {
 
     expect(getCardDetailValue("File type")).toBe("png");
     expect(getCardDetailValue("Dimensions")).toBe("100x100");
+  });
+
+  it("keeps animation active when the NFT has no image slide", () => {
+    const nftWithAnimationOnly = {
+      ...nft,
+      image: "",
+      animation: "",
+      metadata: {
+        image_details: undefined,
+        animation_details: { format: "gif", width: 1, height: 2 },
+        animation_url: "https://metadata.example/animation.gif",
+        attributes: nft.metadata.attributes,
+        image: "",
+      },
+    };
+
+    render(
+      <MemePageArt
+        show={true}
+        nft={nftWithAnimationOnly as any}
+        nftMeta={nftMeta as any}
+      />
+    );
+
+    expect(screen.getAllByTestId("nft")).toHaveLength(1);
+    expect(getCardDetailValue("File type")).toBe("gif");
+    expect(getCardDetailValue("Dimensions")).toBe("200x300");
+
+    fireEvent.click(screen.getByTestId("carousel-slide-1"));
+
+    expect(screen.getAllByTestId("nft")).toHaveLength(1);
+    expect(getCardDetailValue("File type")).toBe("gif");
+    expect(getCardDetailValue("Dimensions")).toBe("200x300");
+
+    fireEvent.click(screen.getByTestId("fullscreen-icon"));
+
+    expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
+      "the-art-fullscreen-animation"
+    );
   });
 });

@@ -553,6 +553,40 @@ describe("MemeLabPageComponent", () => {
     });
   });
 
+  it("ignores whitespace metadata.image and falls back to the top-level image", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      image: "  https://top-level.example/image.png  ",
+      metadata: {
+        attributes: [],
+        image: "   ",
+        image_details: { format: "PNG" },
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", {
+          name: "https://top-level.example/image.png",
+        })
+      ).toHaveAttribute("href", "https://top-level.example/image.png");
+      expect(screen.getByTestId("download")).toHaveAttribute(
+        "data-href",
+        "https://top-level.example/image.png"
+      );
+    });
+  });
+
   it("treats metadata.animation_url-only NFTs as animated", async () => {
     mockUseSearchParams.mockReturnValue({
       get: jest.fn((key: string) => {
