@@ -2,17 +2,30 @@
 
 import { useEffect, useState } from "react";
 
-export default function useIsMobileDevice() {
-  const [isMobile, setIsMobile] = useState(false);
+const MOBILE_DEVICE_REGEX =
+  /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i;
+
+const detectIsMobileDevice = (): boolean => {
+  const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent;
+  return MOBILE_DEVICE_REGEX.test(userAgent);
+};
+
+export function useIsMobileDeviceStatus() {
+  const [status, setStatus] = useState({
+    isMobileDevice: false,
+    isDeviceDetectionResolved: false,
+  });
 
   useEffect(() => {
-    const userAgent =
-      typeof navigator === "undefined" ? "" : navigator.userAgent;
-    const regex =
-      /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i;
-    const mobile = regex.exec(userAgent) !== null;
-    setIsMobile(mobile);
+    setStatus({
+      isMobileDevice: detectIsMobileDevice(),
+      isDeviceDetectionResolved: true,
+    });
   }, []);
 
-  return isMobile;
+  return status;
+}
+
+export default function useIsMobileDevice() {
+  return useIsMobileDeviceStatus().isMobileDevice;
 }

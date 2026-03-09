@@ -7,23 +7,26 @@ import {
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ShareIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import HeaderUserConnectedAccounts from "../connected/HeaderUserConnectedAccounts";
+import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 
-export default function HeaderUserProxyDropdown({
+export default function HeaderUserMenuDropdown({
   isOpen,
   profile,
   onClose,
+  onOpenShare,
 }: {
   readonly isOpen: boolean;
   readonly profile: ApiIdentity;
   readonly onClose: () => void;
+  readonly onOpenShare?: (() => void) | undefined;
 }) {
   const {
     address,
@@ -126,17 +129,14 @@ export default function HeaderUserProxyDropdown({
           >
             <div className="tw-mt-1 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl">
               <div className="tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-2">
-                <div
-                  role="list"
-                  className="tw-flex tw-flex-col tw-gap-y-2 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700"
-                >
+                <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-y-2 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-p-0">
                   {availableConnectedAccounts.length > 0 && (
-                    <div className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
+                    <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
                       <HeaderUserConnectedAccounts
                         accounts={availableConnectedAccounts.map((account) => ({
                           ...account,
                           unreadNotificationsCount:
-                            connectedAccountUnreadNotifications[
+                            connectedAccountUnreadNotifications?.[
                               account.address.toLowerCase()
                             ] ?? 0,
                         }))}
@@ -151,10 +151,10 @@ export default function HeaderUserProxyDropdown({
                           });
                         }}
                       />
-                    </div>
+                    </li>
                   )}
                   {hasProxySection && (
-                    <div className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
+                    <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
                       <p className="tw-m-0 tw-px-3 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
                         Proxy Profile
                       </p>
@@ -179,16 +179,16 @@ export default function HeaderUserProxyDropdown({
                             >
                               <img
                                 src={profile.pfp}
-                                alt="Profile Picture"
+                                alt={`${label} avatar`}
                                 className="tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-object-cover tw-transition tw-duration-300 tw-ease-out"
                               />
                             </div>
                           ) : (
                             <div
                               className={`${
-                                !activeProfileProxy
-                                  ? "tw-bg-iron-600"
-                                  : "tw-bg-iron-700 group-hover:tw-bg-iron-600"
+                                activeProfileProxy
+                                  ? "tw-bg-iron-700 group-hover:tw-bg-iron-600"
+                                  : "tw-bg-iron-600"
                               } tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
                               title={
                                 activeProfileProxy
@@ -229,9 +229,9 @@ export default function HeaderUserProxyDropdown({
                           onActivateProfileProxy={onActivateProfileProxy}
                         />
                       ))}
-                    </div>
+                    </li>
                   )}
-                  <div className="tw-h-full tw-px-2 tw-pt-2">
+                  <li className="tw-h-full tw-px-2 tw-pt-2">
                     {isConnected ? (
                       <button
                         onClick={() => {
@@ -279,8 +279,22 @@ export default function HeaderUserProxyDropdown({
                         <span>Connect Wallet</span>
                       </button>
                     )}
-                  </div>
-                  <div className="tw-h-full tw-px-2 tw-pt-2">
+                  </li>
+                  {onOpenShare && (
+                    <li className="tw-h-full tw-px-2 tw-pt-2">
+                      <button
+                        onClick={onOpenShare}
+                        type="button"
+                        aria-label="Share"
+                        title="Share"
+                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <ShareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                        <span>Share</span>
+                      </button>
+                    </li>
+                  )}
+                  <li className="tw-h-full tw-px-2 tw-pt-2">
                     <button
                       onClick={() => {
                         void runMenuAction({
@@ -326,8 +340,8 @@ export default function HeaderUserProxyDropdown({
                         <span>Sign Out All Profiles</span>
                       </button>
                     )}
-                  </div>
-                </div>
+                  </li>
+                </ul>
               </div>
             </div>
           </motion.div>
