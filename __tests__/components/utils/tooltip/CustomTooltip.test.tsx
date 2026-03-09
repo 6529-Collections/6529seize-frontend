@@ -161,6 +161,107 @@ describe("CustomTooltip", () => {
     expect(onBlur).toHaveBeenCalledTimes(1);
   });
 
+  it("merges the tooltip id into an existing aria-describedby value", async () => {
+    render(
+      <>
+        <span id="existing-description">Existing description</span>
+        <CustomTooltip
+          content="Test tooltip"
+          delayShow={0}
+          delayHide={0}
+          hoverTransitionDelay={0}
+        >
+          <button aria-describedby="existing-description">Test Button</button>
+        </CustomTooltip>
+      </>
+    );
+
+    const button = screen.getByRole("button", { name: "Test Button" });
+    fireEvent.focus(button);
+
+    const tooltip = await screen.findByRole("tooltip");
+    expect(tooltip).toHaveAttribute("id");
+
+    const tooltipId = tooltip.getAttribute("id");
+    expect(tooltipId).toBeTruthy();
+    expect(button.getAttribute("aria-describedby")?.split(/\s+/)).toEqual(
+      expect.arrayContaining(["existing-description", tooltipId ?? ""])
+    );
+
+    fireEvent.blur(button);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+
+    expect(button).toHaveAttribute("aria-describedby", "existing-description");
+  });
+
+  it("removes only the tooltip id when the tooltip hides", async () => {
+    render(
+      <CustomTooltip
+        content="Test tooltip"
+        delayShow={0}
+        delayHide={0}
+        hoverTransitionDelay={0}
+      >
+        <button>Test Button</button>
+      </CustomTooltip>
+    );
+
+    const button = screen.getByRole("button", { name: "Test Button" });
+    fireEvent.mouseEnter(button);
+
+    const tooltip = await screen.findByRole("tooltip");
+    expect(button).toHaveAttribute(
+      "aria-describedby",
+      tooltip.getAttribute("id") ?? ""
+    );
+
+    fireEvent.mouseLeave(button);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+
+    expect(button).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("does not duplicate the tooltip id across repeated opens", async () => {
+    render(
+      <CustomTooltip
+        content="Test tooltip"
+        delayShow={0}
+        delayHide={0}
+        hoverTransitionDelay={0}
+      >
+        <button>Test Button</button>
+      </CustomTooltip>
+    );
+
+    const button = screen.getByRole("button", { name: "Test Button" });
+
+    fireEvent.focus(button);
+    const firstTooltip = await screen.findByRole("tooltip");
+    const tooltipId = firstTooltip.getAttribute("id");
+
+    fireEvent.blur(button);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+
+    fireEvent.focus(button);
+
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip")).toBeInTheDocument();
+    });
+
+    const describedByIds =
+      button.getAttribute("aria-describedby")?.split(/\s+/) ?? [];
+    expect(describedByIds.filter((id) => id === tooltipId)).toHaveLength(1);
+  });
+
   it("closes when close-all tooltip event is dispatched", async () => {
     render(
       <CustomTooltip content="Test tooltip" delayShow={100}>

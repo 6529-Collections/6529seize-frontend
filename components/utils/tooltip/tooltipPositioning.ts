@@ -93,11 +93,11 @@ function calculateInitialPosition(
 
   switch (placement) {
     case "top":
-      x = childRect.left;
+      x = childRect.left + (childRect.width - tooltipRect.width) / 2;
       y = childRect.top - tooltipRect.height - offset;
       break;
     case "bottom":
-      x = childRect.left;
+      x = childRect.left + (childRect.width - tooltipRect.width) / 2;
       y = childRect.bottom + offset;
       break;
     case "left":
@@ -148,6 +148,9 @@ function adjustPositionForViewport(
     resolvedPlacement = "left";
     x = childRect.left - tooltipRect.width - offset;
   }
+
+  const maxY = viewportHeight - tooltipRect.height - VIEWPORT_PADDING;
+  y = Math.max(VIEWPORT_PADDING, Math.min(y, maxY));
 
   return { x, y, placement: resolvedPlacement };
 }

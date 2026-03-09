@@ -4,6 +4,7 @@ import type { RefObject } from "react";
 import React, {
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -30,6 +31,47 @@ interface CustomTooltipProps {
   readonly offset?: number | undefined;
   readonly hoverTransitionDelay?: number | undefined;
 }
+
+const ARIA_DESCRIBED_BY_ATTRIBUTE = "aria-describedby";
+
+function getAriaDescribedByIds(element: HTMLElement): string[] {
+  return (element.getAttribute(ARIA_DESCRIBED_BY_ATTRIBUTE) ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function addAriaDescribedById(
+  element: HTMLElement,
+  descriptionId: string
+): void {
+  const describedByIds = getAriaDescribedByIds(element);
+
+  if (describedByIds.includes(descriptionId)) {
+    return;
+  }
+
+  element.setAttribute(
+    ARIA_DESCRIBED_BY_ATTRIBUTE,
+    [...describedByIds, descriptionId].join(" ")
+  );
+}
+
+function removeAriaDescribedById(
+  element: HTMLElement,
+  descriptionId: string
+): void {
+  const describedByIds = getAriaDescribedByIds(element).filter(
+    (describedById) => describedById !== descriptionId
+  );
+
+  if (describedByIds.length === 0) {
+    element.removeAttribute(ARIA_DESCRIBED_BY_ATTRIBUTE);
+    return;
+  }
+
+  element.setAttribute(ARIA_DESCRIBED_BY_ATTRIBUTE, describedByIds.join(" "));
+}
+
 export default function CustomTooltip({
   children,
   content,
@@ -50,9 +92,11 @@ export default function CustomTooltip({
     useState<ResolvedTooltipPlacement>(
       placement === "auto" ? "bottom" : placement
     );
+  const tooltipId = `${useId()}-tooltip`;
 
   const triggerBoundaryRef = useRef<HTMLSpanElement>(null);
   const childNodeRef = useRef<HTMLElement | null>(null);
+  const describedTriggerRef = useRef<HTMLElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const showTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
@@ -70,6 +114,52 @@ export default function CustomTooltip({
     childNodeRef.current = nextTriggerNode;
     return nextTriggerNode;
   }, []);
+
+  const getCurrentTriggerNode = useCallback(() => {
+    const currentTriggerNode = childNodeRef.current;
+
+    if (
+      currentTriggerNode &&
+      triggerBoundaryRef.current?.contains(currentTriggerNode)
+    ) {
+      return currentTriggerNode;
+    }
+
+    return resolveTriggerNode();
+  }, [resolveTriggerNode]);
+
+  const clearTooltipDescription = useCallback(
+    (target?: HTMLElement | null) => {
+      const describedTrigger = target ?? describedTriggerRef.current;
+      if (!describedTrigger) {
+        return;
+      }
+
+      removeAriaDescribedById(describedTrigger, tooltipId);
+
+      if (describedTriggerRef.current === describedTrigger) {
+        describedTriggerRef.current = null;
+      }
+    },
+    [tooltipId]
+  );
+
+  const syncTooltipDescription = useCallback(() => {
+    const nextTriggerNode = getCurrentTriggerNode();
+    const previousTriggerNode = describedTriggerRef.current;
+
+    if (previousTriggerNode && previousTriggerNode !== nextTriggerNode) {
+      clearTooltipDescription(previousTriggerNode);
+    }
+
+    if (!isVisible || !tooltipRef.current || !nextTriggerNode) {
+      clearTooltipDescription();
+      return;
+    }
+
+    addAriaDescribedById(nextTriggerNode, tooltipId);
+    describedTriggerRef.current = nextTriggerNode;
+  }, [clearTooltipDescription, getCurrentTriggerNode, isVisible, tooltipId]);
 
   const calculatePosition = useCallback(() => {
     const childNode = childNodeRef.current ?? resolveTriggerNode();
@@ -152,6 +242,10 @@ export default function CustomTooltip({
     cancelHideTimer();
     setIsVisible(false);
   }, [cancelShowTimer, cancelHideTimer]);
+
+  useLayoutEffect(() => {
+    syncTooltipDescription();
+  });
 
   useLayoutEffect(() => {
     if (!isVisible) return;
@@ -243,8 +337,9 @@ export default function CustomTooltip({
       cancelHideTimer();
       childObserverRef.current?.disconnect();
       tooltipObserverRef.current?.disconnect();
+      clearTooltipDescription();
     };
-  }, [cancelShowTimer, cancelHideTimer]);
+  }, [cancelShowTimer, cancelHideTimer, clearTooltipDescription]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -280,6 +375,7 @@ export default function CustomTooltip({
         createPortal(
           <div
             ref={tooltipRef}
+            id={tooltipId}
             role="tooltip"
             className={joinTooltipClassNames(
               styles["tooltip"],
