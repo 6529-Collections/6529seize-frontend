@@ -510,6 +510,38 @@ describe("MemeLabPageComponent", () => {
     });
   });
 
+  it("treats metadata.animation_url-only NFTs as animated", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      animation: "",
+      metadata: {
+        attributes: [],
+        image_details: { format: "PNG" },
+        animation_details: { format: "HTML" },
+        animation_url: "https://metadata.example/animation.html",
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
+      expect(
+        screen.getByRole("link", {
+          name: "https://metadata.example/animation.html",
+        })
+      ).toHaveAttribute("href", "https://metadata.example/animation.html");
+    });
+  });
+
   it("handles empty metadata response", async () => {
     mockFetchUrl.mockImplementation((url: string) => {
       if (url.includes("lab_extended_data"))

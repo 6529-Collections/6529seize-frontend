@@ -13,7 +13,8 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => {
         data-testid="nft-image-balance"
         data-height={height}
         data-contract={contract}
-        data-token-id={tokenId}>
+        data-token-id={tokenId}
+      >
         {mockBalance > 0 && (
           <span data-testid="seized-text">SEIZED x{mockBalance}</span>
         )}
@@ -166,6 +167,26 @@ describe("NFTVideoRenderer", () => {
       const video = container.querySelector("video");
       expect(video).toHaveAttribute("src", "https://example.com/video.mp4");
     });
+
+    it("falls back to metadata.animation_url when top-level animation is empty", () => {
+      const nft = createMockNFT({
+        animation: "",
+        compressed_animation: undefined,
+        metadata: {
+          ...createMockNFT().metadata,
+          animation: "",
+          animation_url: "https://example.com/metadata-fallback.mp4",
+        },
+      });
+      const props = createDefaultProps({ nft });
+      const { container } = render(<NFTVideoRenderer {...props} />);
+
+      const video = container.querySelector("video");
+      expect(video).toHaveAttribute(
+        "src",
+        "https://example.com/metadata-fallback.mp4"
+      );
+    });
   });
 
   describe("Video Attributes", () => {
@@ -284,7 +305,9 @@ describe("NFTVideoRenderer", () => {
     });
 
     it("handles missing metadata gracefully", () => {
-      const nft = createMockNFT({ ...(undefined !== undefined ? { metadata: undefined } : {}) });
+      const nft = createMockNFT({
+        ...(undefined !== undefined ? { metadata: undefined } : {}),
+      });
       const props = createDefaultProps({ nft });
 
       expect(() => {

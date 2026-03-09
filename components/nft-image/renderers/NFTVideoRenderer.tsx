@@ -4,12 +4,17 @@ import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import type { BaseRendererProps } from "../types/renderer-props";
+import { getResolvedAnimationSrc } from "../utils/animation-source";
 import { withArweaveFallback } from "../utils/arweave-fallback";
 
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
+  const animationSrc = getResolvedAnimationSrc(props.nft);
+  const animationClassName = styles["nftAnimation"] ?? "";
+
   return (
     <Col
-      className={`${styles["nftAnimation"]} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
+      className={`${animationClassName} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}
+    >
       {props.showBalance && (
         <NFTImageBalance
           contract={props.nft.contract}
@@ -30,19 +35,19 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
           "metadata" in props.nft &&
           props.nft.compressed_animation
             ? props.nft.compressed_animation
-            : props.nft.animation
+            : animationSrc
         }
         className={props.imageStyle}
         onError={withArweaveFallback(({ currentTarget }) => {
           if (
             "metadata" in props.nft &&
-            currentTarget.src === props.nft.compressed_animation
+            currentTarget.src === props.nft.compressed_animation &&
+            animationSrc
           ) {
-            currentTarget.src = props.nft.animation;
-          } else if ("metadata" in props.nft) {
-            currentTarget.src = props.nft.metadata.animation;
+            currentTarget.src = animationSrc;
           }
-        })}></video>
+        })}
+      ></video>
     </Col>
   );
 }

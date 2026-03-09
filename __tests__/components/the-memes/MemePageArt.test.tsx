@@ -112,4 +112,33 @@ describe("MemePageArt", () => {
       })
     ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
   });
+
+  it("treats metadata.animation_url-only NFTs as animated", () => {
+    const nftWithAnimationUrlOnly = {
+      ...nft,
+      animation: "",
+      metadata: {
+        image_details: { format: "png", width: 1, height: 2 },
+        animation_details: { format: "gif", width: 1, height: 2 },
+        animation_url: "https://metadata.example/animation.gif",
+        attributes: nft.metadata.attributes,
+        image: "img",
+      },
+    };
+
+    render(
+      <MemePageArt
+        show={true}
+        nft={nftWithAnimationUrlOnly as any}
+        nftMeta={nftMeta as any}
+      />
+    );
+
+    expect(screen.getAllByTestId("nft")).toHaveLength(2);
+    expect(
+      screen.getByRole("link", {
+        name: "https://metadata.example/animation.gif",
+      })
+    ).toHaveAttribute("href", "https://metadata.example/animation.gif");
+  });
 });

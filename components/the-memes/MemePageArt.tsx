@@ -3,6 +3,7 @@
 import Download from "@/components/download/Download";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
 import {
   enterArtFullScreen,
@@ -34,9 +35,8 @@ export function MemePageArt(props: {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const hasAnimation = Boolean(
-    props.nft?.animation || props.nft?.metadata?.animation
-  );
+  const animationHref = getResolvedAnimationSrc(props.nft);
+  const hasAnimation = Boolean(animationHref);
   const fullscreenElementId =
     hasAnimation && currentSlide === 0
       ? "the-art-fullscreen-animation"
@@ -46,10 +46,6 @@ export function MemePageArt(props: {
   const fileType = getFileTypeFromMetadata(props.nft?.metadata);
   const dimensions = getDimensionsFromMetadata(props.nft?.metadata);
   const imageHref = props.nft?.metadata?.image ?? props.nft?.image;
-  const animationHref =
-    props.nft?.metadata?.animation ??
-    props.nft?.metadata?.animation_url ??
-    props.nft?.animation;
 
   const distributionPlanLink = (() => {
     const id = props.nft?.id;

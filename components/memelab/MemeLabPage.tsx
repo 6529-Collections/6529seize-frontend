@@ -14,6 +14,7 @@ import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
@@ -96,7 +97,8 @@ export default function MemeLabPageComponent({
 
   const [nft, setNft] = useState<LabNFT>();
 
-  const hasAnimation = Boolean(nft?.animation ?? nft?.metadata?.animation);
+  const animationHref = getResolvedAnimationSrc(nft);
+  const hasAnimation = Boolean(animationHref);
   const fullscreenElementId =
     hasAnimation && currentSlide === 0
       ? "the-art-fullscreen-animation"
@@ -980,8 +982,6 @@ export default function MemeLabPageComponent({
   const fileType = getFileTypeFromMetadata(nft?.metadata);
   const dimensions = getDimensionsFromMetadata(nft?.metadata);
   const imageHref = nft?.metadata?.image ?? nft?.image;
-  const animationHref =
-    nft?.metadata?.animation ?? nft?.metadata?.animation_url ?? nft?.animation;
   const currentFormat = hasAnimation
     ? currentSlide === 0
       ? (animationFormat ?? "")
