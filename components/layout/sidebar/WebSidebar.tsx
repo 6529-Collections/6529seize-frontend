@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import BellIcon from "@/components/common/icons/BellIcon";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useIdentity } from "../../../hooks/useIdentity";
 import { useAuth } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
@@ -40,6 +42,9 @@ function WebSidebar({
     handleOrWallet: address || "",
     initialProfile: null,
   });
+  const { haveUnreadNotifications } = useUnreadNotifications(
+    connectedProfile?.handle ?? null
+  );
   const profilePath = useMemo(() => {
     if (connectedProfile?.handle) return `/${connectedProfile.handle}`;
     if (address) return `/${address}`;
@@ -172,8 +177,26 @@ function WebSidebar({
               data-sidebar-scroll="true"
             >
               <div className="tw-flex-1">
-                <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
+                <WebSidebarNav
+                  ref={navRef}
+                  isCollapsed={shouldShowCollapsed}
+                  isMobile={isMobile}
+                  showNotifications={Boolean(address)}
+                />
               </div>
+
+              {!isMobile && address && (
+                <div className="tw-px-3 tw-pt-2">
+                  <WebSidebarNavItem
+                    href="/notifications"
+                    icon={BellIcon}
+                    active={pathname?.startsWith("/notifications") || false}
+                    collapsed={shouldShowCollapsed}
+                    label="Notifications"
+                    hasIndicator={haveUnreadNotifications}
+                  />
+                </div>
+              )}
 
               {profilePath && (
                 <div className="tw-px-3 tw-pt-2">
@@ -188,7 +211,9 @@ function WebSidebar({
                 </div>
               )}
 
-              <HeaderShare isCollapsed={shouldShowCollapsed} />
+              {!isMobile && !address && (
+                <HeaderShare isCollapsed={shouldShowCollapsed} />
+              )}
 
               <WebSidebarUser
                 isCollapsed={shouldShowCollapsed}

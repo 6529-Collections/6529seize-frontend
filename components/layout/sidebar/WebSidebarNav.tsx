@@ -30,12 +30,14 @@ import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
 
 interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
+  readonly isMobile: boolean;
+  readonly showNotifications: boolean;
 }
 
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
->(({ isCollapsed = false }, ref) => {
+>(({ isCollapsed = false, isMobile, showNotifications }, ref) => {
   const pathname = usePathname();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -286,16 +288,18 @@ const WebSidebarNav = React.forwardRef<
             </li>
           )}
 
-          <li>
-            <WebSidebarNavItem
-              href="/notifications"
-              icon={BellIcon}
-              active={pathname?.startsWith("/notifications") || false}
-              collapsed={isCollapsed}
-              label="Notifications"
-              hasIndicator={haveUnreadNotifications}
-            />
-          </li>
+          {isMobile && showNotifications && (
+            <li>
+              <WebSidebarNavItem
+                href="/notifications"
+                icon={BellIcon}
+                active={pathname?.startsWith("/notifications") || false}
+                collapsed={isCollapsed}
+                label="Notifications"
+                hasIndicator={haveUnreadNotifications}
+              />
+            </li>
+          )}
 
           <li>
             <WebSidebarNavItem
