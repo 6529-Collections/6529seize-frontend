@@ -6,16 +6,70 @@ import {
 } from "@/constants/constants";
 import { numberWithCommas } from "./Helpers";
 
-export function getFileTypeFromMetadata(metadata: any) {
-  return metadata.animation_details?.format ?? metadata.image_details.format;
+interface NFTMediaDetails {
+  readonly format?: string | null | undefined;
+  readonly width?: number | null | undefined;
+  readonly height?: number | null | undefined;
 }
 
-export function getDimensionsFromMetadata(metadata: any) {
-  return `${numberWithCommas(
-    metadata.animation_details?.width ?? metadata.image_details.width
-  )} x ${numberWithCommas(
-    metadata.animation_details?.height ?? metadata.image_details.height
-  )}`;
+type NFTMediaMetadata =
+  | {
+      readonly animation_details?: NFTMediaDetails | null | undefined;
+      readonly image_details?: NFTMediaDetails | null | undefined;
+    }
+  | null
+  | undefined;
+
+const getMediaFormat = (
+  details: NFTMediaDetails | null | undefined
+): string | null => {
+  const format = details?.format?.trim();
+  return format ? format : null;
+};
+
+const isValidDimension = (
+  value: number | null | undefined
+): value is number => {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+};
+
+const getMediaDimensions = (
+  details: NFTMediaDetails | null | undefined
+): string | null => {
+  const width = details?.width;
+  const height = details?.height;
+
+  if (!isValidDimension(width) || !isValidDimension(height)) {
+    return null;
+  }
+
+  return `${numberWithCommas(width)} x ${numberWithCommas(height)}`;
+};
+
+export function getAnimationFileTypeFromMetadata(
+  metadata: NFTMediaMetadata
+): string | null {
+  return getMediaFormat(metadata?.animation_details);
+}
+
+export function getImageFileTypeFromMetadata(
+  metadata: NFTMediaMetadata
+): string | null {
+  return getMediaFormat(metadata?.image_details);
+}
+
+export function getFileTypeFromMetadata(metadata: NFTMediaMetadata) {
+  return (
+    getAnimationFileTypeFromMetadata(metadata) ??
+    getImageFileTypeFromMetadata(metadata)
+  );
+}
+
+export function getDimensionsFromMetadata(metadata: NFTMediaMetadata) {
+  return (
+    getMediaDimensions(metadata?.animation_details) ??
+    getMediaDimensions(metadata?.image_details)
+  );
 }
 
 export const isMemesEcosystemContract = (contract: string): boolean => {

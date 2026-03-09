@@ -26,8 +26,10 @@ jest.mock("@/helpers/Helpers", () => ({
   printMintDate: (d: string) => d,
 }));
 jest.mock("@/helpers/nft.helpers", () => ({
+  getAnimationFileTypeFromMetadata: () => "gif",
   getFileTypeFromMetadata: () => "png",
   getDimensionsFromMetadata: () => "100x100",
+  getImageFileTypeFromMetadata: () => "png",
 }));
 jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   __esModule: true,
