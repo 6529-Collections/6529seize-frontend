@@ -3,6 +3,7 @@
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
+import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -237,6 +238,16 @@ const WebSidebarNav = React.forwardRef<
             collapsed={isCollapsed}
             label="Messages"
             hasIndicator={hasUnreadMessages}
+          />
+        </li>
+
+        <li>
+          <WebSidebarNavItem
+            href="/discover"
+            icon={DiscoverIcon}
+            active={pathname.startsWith("/discover")}
+            collapsed={isCollapsed}
+            label="Discovery"
           />
         </li>
 
