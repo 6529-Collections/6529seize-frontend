@@ -14,7 +14,7 @@ const VIEWPORT_PADDING = 8;
 const ARROW_SIZE = 8;
 const ARROW_EDGE_PADDING = 16;
 
-export const getTooltipWindow = (): Window | null => globalThis.window;
+export const getTooltipWindow = (): Window | null => globalThis.window ?? null;
 
 export const joinTooltipClassNames = (
   ...classNames: ReadonlyArray<string | undefined>
