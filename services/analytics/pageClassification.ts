@@ -76,11 +76,35 @@ const PROFILE_ROUTE_CLASSIFICATIONS = new Map(
 );
 
 function toAnalyticsIdentifier(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, "_")
-    .replaceAll(/^_+|_+$/g, "");
+  const normalized = value.trim().toLowerCase();
+  let result = "";
+  let previousWasUnderscore = false;
+
+  for (const character of normalized) {
+    const isLowercaseLetter = character >= "a" && character <= "z";
+    const isDigit = character >= "0" && character <= "9";
+
+    if (isLowercaseLetter || isDigit) {
+      result += character;
+      previousWasUnderscore = false;
+      continue;
+    }
+
+    if (!previousWasUnderscore) {
+      result += "_";
+      previousWasUnderscore = true;
+    }
+  }
+
+  while (result.startsWith("_")) {
+    result = result.slice(1);
+  }
+
+  while (result.endsWith("_")) {
+    result = result.slice(0, -1);
+  }
+
+  return result;
 }
 
 function classifyHomePage(): PageViewClassification {
