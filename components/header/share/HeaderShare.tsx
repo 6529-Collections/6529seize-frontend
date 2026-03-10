@@ -152,6 +152,8 @@ export function HeaderQRModal({
 
   const handleEscapeKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
+      event.stopPropagation();
+      event.preventDefault();
       onCloseRef.current();
     }
   }, []);
@@ -236,7 +238,7 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
-  }, [show]);
+  }, [show, isAuthenticated]);
 
   useEffect(() => {
     if (show) {
