@@ -214,12 +214,14 @@ describe("UserPageCollectedStats", () => {
     const clientWidthSpy = jest
       .spyOn(HTMLElement.prototype, "clientWidth", "get")
       .mockImplementation(function (this: HTMLElement) {
-        return this.dataset.seasonTile !== undefined ? 72 : 372;
+        const isSeasonTile = Object.hasOwn(this.dataset, "seasonTile");
+        return isSeasonTile ? 72 : 372;
       });
     const getBoundingClientRectSpy = jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
-        const width = this.dataset.seasonTile !== undefined ? 72 : 372;
+        const isSeasonTile = Object.hasOwn(this.dataset, "seasonTile");
+        const width = isSeasonTile ? 72 : 372;
         return {
           width,
           height: 0,

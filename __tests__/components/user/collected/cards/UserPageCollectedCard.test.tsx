@@ -40,8 +40,7 @@ describe("UserPageCollectedCard", () => {
     expect(screen.getByText("#1")).toBeInTheDocument();
     expect(screen.getByText("TDH")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
-    expect(screen.getByText("Rank")).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
+    expect(screen.getByText("Rank 3")).toBeInTheDocument();
     expect(
       screen.getByText((content, element) => {
         const text = element?.textContent?.replaceAll(" ", "").trim() || "";
@@ -88,7 +87,7 @@ describe("UserPageCollectedCard", () => {
     expect(
       screen.getByText((_, element) => {
         const text = element?.textContent?.replaceAll(" ", "").trim() || "";
-        return /^0\s*x$/.test(text);
+        return /^-\s*x$/.test(text);
       })
     ).toBeInTheDocument();
   });
@@ -111,7 +110,8 @@ describe("UserPageCollectedCard", () => {
         copiesMax={0}
       />
     );
-    expect(screen.getAllByText("N/A").length).toBe(2);
+    expect(screen.getByText("N/A")).toBeInTheDocument();
+    expect(screen.getByText("Rank N/A")).toBeInTheDocument();
   });
 
   it("calls onToggle when selection button is clicked in select mode", async () => {

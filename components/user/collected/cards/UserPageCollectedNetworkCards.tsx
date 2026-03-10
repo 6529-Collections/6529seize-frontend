@@ -2,6 +2,8 @@ import CommonTablePagination from "@/components/utils/table/paginator/CommonTabl
 import type { ApiXTdhToken } from "@/generated/models/ApiXTdhToken";
 import { formatStatFloor } from "@/helpers/Helpers";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
+import type { TokenMetadata } from "@/types/nft";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 export default function UserPageCollectedNetworkCards({
@@ -15,14 +17,6 @@ export default function UserPageCollectedNetworkCards({
   readonly setPage: (page: number) => void;
   readonly next: boolean;
 }) {
-  if (!cards.length) {
-    return (
-      <div className="tw-w-full tw-py-10 tw-text-center tw-text-iron-400">
-        No tokens found
-      </div>
-    );
-  }
-
   const tokens = useMemo(
     () =>
       cards.map((card) => ({
@@ -36,6 +30,14 @@ export default function UserPageCollectedNetworkCards({
     tokens,
     enabled: cards.length > 0,
   });
+
+  if (cards.length === 0) {
+    return (
+      <div className="tw-w-full tw-py-10 tw-text-center tw-text-iron-400">
+        No tokens found
+      </div>
+    );
+  }
 
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6">
@@ -65,7 +67,7 @@ function NetworkCard({
   metadata,
 }: {
   readonly card: ApiXTdhToken;
-  readonly metadata: any[] | undefined;
+  readonly metadata: TokenMetadata[] | undefined;
 }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -76,6 +78,7 @@ function NetworkCard({
   );
 
   const imageUrl = tokenMetadata?.imageUrl;
+  const hasImageUrl = typeof imageUrl === "string" && imageUrl.length > 0;
 
   return (
     <div className="tw-group tw-relative tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-shadow-xl tw-transition-all tw-duration-300 hover:tw-border-white/30">
@@ -85,13 +88,16 @@ function NetworkCard({
             {!isImageLoaded && (
               <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-bg-iron-800" />
             )}
-            {imageUrl && (
-              <img
+            {hasImageUrl && (
+              <Image
                 src={imageUrl}
                 alt={tokenMetadata?.collectionName ?? "Network Token"}
+                fill
                 onLoad={() => setIsImageLoaded(true)}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                unoptimized
                 className={[
-                  "tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain",
+                  "tw-bg-transparent tw-object-contain",
                   isImageLoaded ? "tw-opacity-100" : "tw-opacity-0",
                   "tw-transition-opacity tw-duration-300",
                 ].join(" ")}
