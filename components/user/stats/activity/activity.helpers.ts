@@ -2,6 +2,10 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useCallback, useEffect, useReducer } from "react";
 
 export const ACTIVITY_PAGE_SIZE = 10;
+export const SEARCH_PARAM_ACTIVITY = "activity";
+export const WALLET_ACTIVITY_FILTER_PARAM = "wallet-activity";
+export const WALLET_ACTIVITY_PAGE_PARAM = "page";
+export const WALLET_DISTRIBUTION_PAGE_PARAM = "page";
 
 const getTotalPages = (count: number | undefined, pageSize: number) =>
   typeof count === "number" && count > 0

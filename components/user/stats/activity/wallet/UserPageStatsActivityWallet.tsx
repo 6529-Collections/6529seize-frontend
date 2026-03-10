@@ -8,16 +8,40 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 import {
   ACTIVITY_PAGE_SIZE,
   getActivityPaginationState,
   getActivityWalletsParam,
-  useActivityPageFilter,
-  useSyncActivityPageFilter,
+  WALLET_ACTIVITY_FILTER_PARAM,
+  WALLET_ACTIVITY_PAGE_PARAM,
 } from "../activity.helpers";
 import { UserPageStatsActivityWalletFilterType } from "./UserPageStatsActivityWallet.types";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
+
+const ENUM_AND_PATH: {
+  type: UserPageStatsActivityWalletFilterType;
+  path: string;
+}[] = [
+  { type: UserPageStatsActivityWalletFilterType.ALL, path: "all" },
+  { type: UserPageStatsActivityWalletFilterType.AIRDROPS, path: "airdrops" },
+  { type: UserPageStatsActivityWalletFilterType.MINTS, path: "mints" },
+  { type: UserPageStatsActivityWalletFilterType.SALES, path: "sales" },
+  { type: UserPageStatsActivityWalletFilterType.PURCHASES, path: "purchases" },
+  { type: UserPageStatsActivityWalletFilterType.TRANSFERS, path: "transfers" },
+  { type: UserPageStatsActivityWalletFilterType.BURNS, path: "burns" },
+];
+
+const enumToPath = (type: UserPageStatsActivityWalletFilterType): string => {
+  const found = ENUM_AND_PATH.find((entry) => entry.type === type);
+  return found?.path ?? "";
+};
+
+const pathToEnum = (path: string): UserPageStatsActivityWalletFilterType => {
+  const found = ENUM_AND_PATH.find((entry) => entry.path === path);
+  return found?.type ?? UserPageStatsActivityWalletFilterType.ALL;
+};
 
 export default function UserPageStatsActivityWallet({
   profile,
@@ -37,20 +61,55 @@ export default function UserPageStatsActivityWallet({
       [UserPageStatsActivityWalletFilterType.BURNS]: "burns",
     };
 
-  const [activeFilter, setActiveFilter] =
-    useState<UserPageStatsActivityWalletFilterType>(
-      UserPageStatsActivityWalletFilterType.ALL
-    );
-  const { pageFilter, setPage, syncPageFilter } = useActivityPageFilter();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activity = searchParams.get(WALLET_ACTIVITY_FILTER_PARAM);
+  const page = searchParams.get(WALLET_ACTIVITY_PAGE_PARAM);
+  const activeFilter = pathToEnum(activity ?? "");
+  const pageFilter = page && !Number.isNaN(+page) ? +page : 1;
+
+  const createQueryString = useCallback(
+    (
+      config: {
+        name: string;
+        value: string;
+      }[]
+    ): string => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const { name, value } of config) {
+        params.set(name, value);
+      }
+      return params.toString();
+    },
+    [searchParams]
+  );
 
   const onActiveFilter = (filter: UserPageStatsActivityWalletFilterType) => {
     const targetFilter =
       filter === activeFilter
         ? UserPageStatsActivityWalletFilterType.ALL
         : filter;
-    setActiveFilter(targetFilter);
-    setPage(1);
+    router.replace(
+      `${pathname}?${createQueryString([
+        { name: WALLET_ACTIVITY_FILTER_PARAM, value: enumToPath(targetFilter) },
+        { name: WALLET_ACTIVITY_PAGE_PARAM, value: "1" },
+      ])}`,
+      { scroll: false }
+    );
   };
+
+  const onPageFilter = useCallback(
+    (nextPage: number) => {
+      router.replace(
+        `${pathname}?${createQueryString([
+          { name: WALLET_ACTIVITY_PAGE_PARAM, value: `${nextPage}` },
+        ])}`,
+        { scroll: false }
+      );
+    },
+    [createQueryString, pathname, router]
+  );
 
   const walletsParam = useMemo(
     () =>
@@ -80,12 +139,8 @@ export default function UserPageStatsActivityWallet({
         wallet: walletsParam,
         page_size: `${ACTIVITY_PAGE_SIZE}`,
         page: `${pageFilter}`,
+        filter: FILTER_TO_PARAM[activeFilter],
       };
-      const activeFilterParam = FILTER_TO_PARAM[activeFilter];
-
-      if (activeFilterParam) {
-        params["filter"] = activeFilterParam;
-      }
 
       return commonApiFetch<Page<Transaction>>({
         endpoint: "transactions",
@@ -93,14 +148,6 @@ export default function UserPageStatsActivityWallet({
       });
     },
     placeholderData: keepPreviousData,
-  });
-
-  useSyncActivityPageFilter({
-    count: data?.count,
-    isFetching,
-    pageFilter,
-    pageSize: ACTIVITY_PAGE_SIZE,
-    syncPageFilter,
   });
 
   const { currentPage, totalPages } = getActivityPaginationState({
@@ -175,7 +222,7 @@ export default function UserPageStatsActivityWallet({
           isFirstLoading || isFirstLoadingMemes || isFirstLoadingMemeLab
         }
         loading={isFetching}
-        setPage={setPage}
+        setPage={onPageFilter}
         onActiveFilter={onActiveFilter}
       />
     </div>

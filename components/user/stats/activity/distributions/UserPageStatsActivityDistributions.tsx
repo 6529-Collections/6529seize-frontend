@@ -6,13 +6,13 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 import {
   ACTIVITY_PAGE_SIZE,
   getActivityPaginationState,
   getActivityWalletsParam,
-  useActivityPageFilter,
-  useSyncActivityPageFilter,
+  WALLET_DISTRIBUTION_PAGE_PARAM,
 } from "../activity.helpers";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
@@ -23,7 +23,39 @@ export default function UserPageStatsActivityDistributions({
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
-  const { pageFilter, setPage, syncPageFilter } = useActivityPageFilter();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const page = searchParams.get(WALLET_DISTRIBUTION_PAGE_PARAM);
+  const pageFilter = page && !Number.isNaN(+page) ? +page : 1;
+
+  const createQueryString = useCallback(
+    (
+      config: {
+        name: string;
+        value: string;
+      }[]
+    ): string => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const { name, value } of config) {
+        params.set(name, value);
+      }
+      return params.toString();
+    },
+    [searchParams]
+  );
+
+  const onPageFilter = useCallback(
+    (nextPage: number) => {
+      router.replace(
+        `${pathname}?${createQueryString([
+          { name: WALLET_DISTRIBUTION_PAGE_PARAM, value: `${nextPage}` },
+        ])}`,
+        { scroll: false }
+      );
+    },
+    [createQueryString, pathname, router]
+  );
 
   const walletsParam = useMemo(
     () =>
@@ -59,14 +91,6 @@ export default function UserPageStatsActivityDistributions({
     placeholderData: keepPreviousData,
   });
 
-  useSyncActivityPageFilter({
-    count: data?.count,
-    isFetching,
-    pageFilter,
-    pageSize: ACTIVITY_PAGE_SIZE,
-    syncPageFilter,
-  });
-
   const { currentPage, totalPages } = getActivityPaginationState({
     count: data?.count,
     page: data?.page,
@@ -88,7 +112,7 @@ export default function UserPageStatsActivityDistributions({
         loading={isFetching}
         page={currentPage}
         totalPages={totalPages}
-        setPage={setPage}
+        setPage={onPageFilter}
       />
     </div>
   );

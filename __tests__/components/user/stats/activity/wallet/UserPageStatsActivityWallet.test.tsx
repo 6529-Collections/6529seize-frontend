@@ -1,11 +1,22 @@
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserPageStatsActivityWallet from "@/components/user/stats/activity/wallet/UserPageStatsActivityWallet";
 import { UserPageStatsActivityWalletFilterType } from "@/components/user/stats/activity/wallet/UserPageStatsActivityWallet.types";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "@/services/api/common-api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+const replace = jest.fn();
+const search = new Map<string, string>();
 const mockUseQuery = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ replace }),
+  usePathname: () => "/path",
+  useSearchParams: () => ({
+    get: (key: string) => search.get(key) ?? null,
+    toString: () =>
+      new URLSearchParams(Array.from(search.entries())).toString(),
+  }),
+}));
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (...args: unknown[]) => mockUseQuery(...args),
@@ -18,8 +29,13 @@ jest.mock("@/services/api/common-api", () => ({
 
 jest.mock(
   "@/components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTableWrapper",
-  () => (props: any) => {
-    return (
+  () =>
+    (props: {
+      filter: UserPageStatsActivityWalletFilterType;
+      page: number;
+      onActiveFilter: (filter: UserPageStatsActivityWalletFilterType) => void;
+      setPage: (page: number) => void;
+    }) => (
       <div
         data-testid="wrapper"
         data-filter={props.filter}
@@ -37,48 +53,34 @@ jest.mock(
           page
         </button>
       </div>
-    );
-  }
+    )
 );
 
-const mockedCommonApiFetch = jest.mocked(commonApiFetch);
-
 beforeEach(() => {
+  replace.mockClear();
+  search.clear();
   mockUseQuery.mockReset();
-  mockUseQuery.mockImplementation(() => ({
-    isFetching: false,
-    isLoading: false,
-    data: { count: 20, data: [] },
-  }));
-  mockedCommonApiFetch.mockReset();
+  mockUseQuery.mockImplementation((config: { queryKey: unknown[] }) => {
+    if (config.queryKey[0] === QueryKey.PROFILE_TRANSACTIONS) {
+      return {
+        isFetching: false,
+        isLoading: false,
+        data: { count: 20, page: 2, data: [] },
+      };
+    }
+
+    return {
+      isFetching: false,
+      isLoading: false,
+      data: [],
+    };
+  });
 });
 
 describe("UserPageStatsActivityWallet", () => {
-  it("updates local filter and page state", async () => {
-    const user = userEvent.setup();
-    render(
-      <UserPageStatsActivityWallet
-        profile={{ wallets: [] } as any}
-        activeAddress={null}
-      />
-    );
-
-    expect(screen.getByTestId("wrapper")).toHaveAttribute("data-filter", "ALL");
-    expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "1");
-
-    await user.click(screen.getByTestId("set-page"));
-    expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
-
-    await user.click(screen.getByTestId("set-filter"));
-    expect(screen.getByTestId("wrapper")).toHaveAttribute(
-      "data-filter",
-      "MINTS"
-    );
-    expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "1");
-  });
-
-  it("fetches only the requested page for the current query key", async () => {
-    const user = userEvent.setup();
+  it("hydrates filter and page state from the query string", async () => {
+    search.set("wallet-activity", "mints");
+    search.set("page", "2");
 
     render(
       <UserPageStatsActivityWallet
@@ -86,42 +88,34 @@ describe("UserPageStatsActivityWallet", () => {
         activeAddress={null}
       />
     );
-
-    await user.click(screen.getByTestId("set-page"));
 
     await waitFor(() =>
-      expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2")
+      expect(screen.getByTestId("wrapper")).toHaveAttribute(
+        "data-filter",
+        "MINTS"
+      )
+    );
+    expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
+  });
+
+  it("updates the url when the filter or page changes", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <UserPageStatsActivityWallet
+        profile={{ wallets: [] } as any}
+        activeAddress={null}
+      />
     );
 
-    const transactionsQuery = mockUseQuery.mock.calls
-      .map(([config]) => config)
-      .find(
-        (config) =>
-          config.queryKey[0] === QueryKey.PROFILE_TRANSACTIONS &&
-          config.queryKey[1].page === "3"
-      );
-
-    if (!transactionsQuery) {
-      throw new Error("Expected a transactions query for page 3");
-    }
-
-    mockedCommonApiFetch.mockResolvedValueOnce({
-      count: 20,
-      page: 3,
-      next: null,
-      data: [],
-    } as any);
-
-    await transactionsQuery.queryFn();
-
-    expect(mockedCommonApiFetch).toHaveBeenCalledTimes(1);
-    expect(mockedCommonApiFetch).toHaveBeenCalledWith({
-      endpoint: "transactions",
-      params: {
-        wallet: "",
-        page_size: "10",
-        page: "3",
-      },
+    await user.click(screen.getByTestId("set-filter"));
+    expect(replace).toHaveBeenCalledWith("/path?wallet-activity=mints&page=1", {
+      scroll: false,
     });
+
+    replace.mockClear();
+
+    await user.click(screen.getByTestId("set-page"));
+    expect(replace).toHaveBeenCalledWith("/path?page=3", { scroll: false });
   });
 });
