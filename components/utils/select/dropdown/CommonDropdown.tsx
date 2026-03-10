@@ -68,7 +68,7 @@ export default function CommonDropdown<T, U = unknown>(
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   return (
-    <div className="tailwind-scope tw-w-full tw-h-full">
+    <div className="tailwind-scope tw-h-full tw-w-full">
       <div className="tw-relative tw-w-full">
         <button
           ref={buttonRef}
@@ -80,8 +80,8 @@ export default function CommonDropdown<T, U = unknown>(
           disabled={disabled}
           className={`${
             disabled
-              ? "tw-opacity-50 tw-text-iron-400"
-              : "hover:tw-ring-iron-600 tw-text-iron-300"
+              ? "tw-text-iron-400 tw-opacity-50"
+              : "tw-text-iron-300 hover:tw-ring-iron-700"
           } ${
             theme === "dark"
               ? "tw-bg-iron-800 lg:tw-bg-iron-900"
@@ -90,13 +90,14 @@ export default function CommonDropdown<T, U = unknown>(
             size === "md"
               ? "tw-py-3 tw-text-sm"
               : size === "tabs"
-              ? "tw-py-[11px] tw-text-sm"
-              : "tw-py-2.5 tw-text-xs"
-          } tw-w-full tw-truncate tw-text-left tw-relative tw-block tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-8 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}
+                ? "tw-py-[11px] tw-text-sm"
+                : "tw-py-2.5 tw-text-xs"
+          } tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-8 tw-text-left tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400`}
         >
           {showFilterLabel && (
-            <span className="tw-font-semibold tw-text-iron-500">{filterLabel}: </span>
+            <span className="tw-font-semibold tw-text-iron-500">
+              {filterLabel}:{" "}
+            </span>
           )}
           {computedLabel}
           {sortDirection && (
@@ -104,7 +105,7 @@ export default function CommonDropdown<T, U = unknown>(
               <CommonTableSortIcon direction={sortDirection} isActive={true} />
             </span>
           )}
-          <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center -tw-mr-1 tw-pr-3.5">
+          <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5">
             <svg
               ref={iconScope}
               className="tw-h-4 tw-w-4"

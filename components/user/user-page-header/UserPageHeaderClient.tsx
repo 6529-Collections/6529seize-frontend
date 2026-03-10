@@ -167,7 +167,7 @@ export default function UserPageHeaderClient({
           />
         </div>
 
-        <div className="tw-relative tw-bg-iron-950">
+        <div className="tw-relative tw-bg-black">
           <div className="tw-relative tw-z-10 tw-px-6 md:tw-px-9">
             <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-x-4 md:tw-pt-2">
               <div className="tw-relative tw-order-1 -tw-mt-10 tw-flex-shrink-0 tw-self-start sm:-tw-mt-[58px]">

@@ -1,6 +1,11 @@
 import { TransactionType } from "@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow";
 import UserPageStatsActivityWalletTableRowSecondAddress from "@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowSecondAddress";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { render, screen } from "@testing-library/react";
+
+const getProfileTargetRoute = jest.fn(
+  ({ handleOrWallet }: { handleOrWallet: string }) => `/p/${handleOrWallet}`
+);
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -9,7 +14,7 @@ jest.mock("next/link", () => ({
 
 jest.mock("@/helpers/Helpers", () => ({
   formatAddress: (a: string) => `fmt-${a}`,
-  getProfileTargetRoute: ({ handleOrWallet }: any) => `/p/${handleOrWallet}`,
+  getProfileTargetRoute: (input: any) => getProfileTargetRoute(input),
 }));
 
 describe("UserPageStatsActivityWalletTableRowSecondAddress", () => {
@@ -30,6 +35,11 @@ describe("UserPageStatsActivityWalletTableRowSecondAddress", () => {
     expect(screen.getByText("from")).toBeInTheDocument();
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/p/0xabc");
+    expect(getProfileTargetRoute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        defaultPath: USER_PAGE_TAB_IDS.COLLECTED,
+      })
+    );
     expect(link).toHaveTextContent("Alice");
   });
 
