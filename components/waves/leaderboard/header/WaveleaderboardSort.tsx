@@ -72,7 +72,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       <div
         role="tablist"
         aria-label="Sort options"
-        className="tw-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700"
+        className="tw-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800"
       >
         {items.map((item) => (
           <button
