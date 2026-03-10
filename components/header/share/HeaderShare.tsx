@@ -7,7 +7,7 @@ import { ShareIcon } from "@heroicons/react/24/outline";
 import yaml from "js-yaml";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -144,6 +144,17 @@ export function HeaderQRModal({
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
 
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  const handleEscapeKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      onCloseRef.current();
+    }
+  }, []);
 
   function generateSources(
     refreshToken: string | null,
@@ -245,20 +256,15 @@ export function HeaderQRModal({
     }
 
     const previousOverflow = document.body.style.overflow;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
 
     document.body.style.overflow = "hidden";
-    globalThis.addEventListener("keydown", onKeyDown);
+    globalThis.addEventListener("keydown", handleEscapeKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      globalThis.removeEventListener("keydown", onKeyDown);
+      globalThis.removeEventListener("keydown", handleEscapeKeyDown);
     };
-  }, [shouldRender, onClose]);
+  }, [shouldRender, handleEscapeKeyDown]);
 
   const renderQRCodeImage = (src: string, alt: string) => {
     const normalizedSrc = src?.trim();
@@ -458,6 +464,7 @@ export function HeaderQRModal({
       />
       <dialog
         open
+        aria-labelledby="header-share-title"
         data-testid="header-share-modal"
         className={`tw-relative tw-flex tw-w-full tw-max-w-md tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${
           isVisible
@@ -466,6 +473,9 @@ export function HeaderQRModal({
         }`}
       >
         <div className="tw-flex tw-flex-col tw-gap-2 tw-p-3">
+          <h2 id="header-share-title" className="tw-sr-only">
+            Share
+          </h2>
           <ModalMenu
             isShareConnection={!!getRefreshToken()}
             activeTab={activeTab}
@@ -561,6 +571,7 @@ function ModalMenu({
         >
           <button
             type="button"
+            disabled={activeSubTab === SubMode.APP}
             className={getMenuButtonClass(activeSubTab === SubMode.APP)}
             onClick={() => onTabChange(activeTab, SubMode.APP)}
           >
@@ -569,6 +580,7 @@ function ModalMenu({
           {activeTab === Mode.NAVIGATE && (
             <button
               type="button"
+              disabled={activeSubTab === SubMode.BROWSER}
               className={getMenuButtonClass(activeSubTab === SubMode.BROWSER)}
               onClick={() => onTabChange(activeTab, SubMode.BROWSER)}
             >
@@ -578,6 +590,7 @@ function ModalMenu({
           {!isElectron && (
             <button
               type="button"
+              disabled={activeSubTab === SubMode.CORE}
               className={getMenuButtonClass(activeSubTab === SubMode.CORE)}
               onClick={() => onTabChange(activeTab, SubMode.CORE)}
             >
@@ -655,17 +668,24 @@ function CoreAppsDownload() {
 
     const loadVersions = async () => {
       const versions: OSInfo[] = [];
-      for (const osConfig of osConfigs.filter((config) => config.enabled)) {
-        try {
-          const ymlData = await fetchYml(osConfig.url);
-          versions.push({ ...osConfig, version: ymlData.version });
-        } catch (error) {
-          console.error(
-            `Failed to fetch or process ${osConfig.displayName}:`,
-            error
-          );
+      const enabledConfigs = osConfigs.filter((config) => config.enabled);
+      const results = await Promise.allSettled(
+        enabledConfigs.map((config) => fetchYml(config.url))
+      );
+
+      results.forEach((result, index) => {
+        const osConfig = enabledConfigs[index];
+        if (result.status === "fulfilled") {
+          versions.push({ ...osConfig, version: result.value.version });
+          return;
         }
-      }
+
+        console.error(
+          `Failed to fetch or process ${osConfig.displayName}:`,
+          result.reason
+        );
+      });
+
       setVersions(versions);
     };
 
