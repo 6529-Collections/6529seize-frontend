@@ -262,7 +262,7 @@ export function HeaderQRModal({
     }
 
     const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
+    const lastElement = focusableElements.at(-1);
     if (!firstElement || !lastElement) {
       event.preventDefault();
       dialog.focus();
