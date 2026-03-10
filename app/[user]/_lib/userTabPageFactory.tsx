@@ -12,16 +12,9 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 type TabProps = { readonly profile: ApiIdentity };
-
-type FactoryArgs = {
-  subroute: string;
-  metaLabel: string;
-  Tab: (props: Readonly<TabProps>) => React.JSX.Element;
-  enableTransfer?: boolean | undefined;
-};
-
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
+
 const PROBE_USER_SUFFIXES = [
   ".html",
   ".htm",
@@ -61,12 +54,16 @@ const normalizeSearchParams = (
 };
 
 const isNotFoundError = (error: unknown): boolean => {
-  if (!error || (typeof error !== "object" && typeof error !== "string")) {
+  if (
+    error === null ||
+    error === undefined ||
+    (typeof error !== "object" && typeof error !== "string")
+  ) {
     return false;
   }
 
   const status =
-    typeof error === "object" && error !== null
+    typeof error === "object"
       ? ((error as { status?: number | undefined }).status ??
         (error as { statusCode?: number | undefined }).statusCode ??
         (error as { response?: { status?: number | undefined } | undefined })
@@ -85,7 +82,7 @@ const isNotFoundError = (error: unknown): boolean => {
     message = error.message;
   }
 
-  return !!message && message.toLowerCase().includes("not found");
+  return message?.toLowerCase().includes("not found") ?? false;
 };
 
 const isProbeLikeUserSlug = (user: string): boolean => {
@@ -93,12 +90,24 @@ const isProbeLikeUserSlug = (user: string): boolean => {
   return PROBE_USER_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
 };
 
-export function createUserTabPage({
+export function createUserTabPage<
+  TExtra extends Record<string, unknown> = Record<string, never>,
+>({
   subroute,
   metaLabel,
   Tab,
   enableTransfer,
-}: FactoryArgs) {
+  getTabProps,
+}: {
+  subroute: string;
+  metaLabel: string;
+  Tab: (props: Readonly<TabProps & TExtra>) => React.JSX.Element;
+  enableTransfer?: boolean | undefined;
+  getTabProps?: (ctx: {
+    profile: ApiIdentity;
+    query: UserSearchParams;
+  }) => Promise<TExtra>;
+}) {
   async function Page({
     params,
     searchParams,
@@ -140,9 +149,13 @@ export function createUserTabPage({
       redirect(needsRedirect.redirect.destination);
     }
 
+    const extraProps = getTabProps
+      ? await getTabProps({ profile, query })
+      : ({} as TExtra);
+
     const TabComponent = (
       <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
-        <Tab profile={profile} />
+        <Tab profile={profile} {...extraProps} />
       </UserPageLayout>
     );
 

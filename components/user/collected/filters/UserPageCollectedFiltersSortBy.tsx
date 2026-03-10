@@ -1,15 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type {
-  CollectedCollectionType} from "@/entities/IProfile";
-import {
-  CollectionSort,
-} from "@/entities/IProfile";
+import type { CollectedCollectionType } from "@/entities/IProfile";
+import { CollectionSort } from "@/entities/IProfile";
 import type { SortDirection } from "@/entities/ISort";
-import type {
-  CommonSelectItem,
-} from "@/components/utils/select/CommonSelect";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 
@@ -54,9 +49,8 @@ export default function UserPageCollectedFiltersSortBy({
       );
     });
   };
-  const [items, setItems] = useState<CommonSelectItem<CollectionSort>[]>(
-    getItems()
-  );
+  const [items, setItems] =
+    useState<CommonSelectItem<CollectionSort>[]>(getItems());
 
   useEffect(() => {
     setItems(getItems());
@@ -69,6 +63,7 @@ export default function UserPageCollectedFiltersSortBy({
       filterLabel="Sort By"
       setSelected={setSelected}
       sortDirection={direction}
+      size="sm"
     />
   );
 }

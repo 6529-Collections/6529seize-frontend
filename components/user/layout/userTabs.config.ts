@@ -39,11 +39,6 @@ const TAB_DEFINITIONS = [
     badge: "Beta",
   },
   {
-    id: "stats",
-    title: "Stats",
-    route: "stats",
-  },
-  {
     id: "subscriptions",
     title: "Subscriptions",
     route: "subscriptions",
