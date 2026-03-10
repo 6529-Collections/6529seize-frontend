@@ -240,6 +240,7 @@ export function HeaderQRModal({
 
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
   const onCloseRef = useRef(onClose);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
@@ -268,10 +269,16 @@ export function HeaderQRModal({
       return;
     }
     const activeElement = document.activeElement as HTMLElement | null;
-    const activeInsideDialog = activeElement ? dialog.contains(activeElement) : false;
+    const activeInsideDialog = activeElement
+      ? dialog.contains(activeElement)
+      : false;
 
     if (event.shiftKey) {
-      if (!activeInsideDialog || activeElement === firstElement || activeElement === dialog) {
+      if (
+        !activeInsideDialog ||
+        activeElement === firstElement ||
+        activeElement === dialog
+      ) {
         event.preventDefault();
         lastElement.focus();
       }
@@ -288,18 +295,30 @@ export function HeaderQRModal({
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  const handleEscapeKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === "Tab") {
-      trapFocusInDialog(event);
-      return;
-    }
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+        copyTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
-    if (event.key === "Escape") {
-      event.stopPropagation();
-      event.preventDefault();
-      onCloseRef.current();
-    }
-  }, [trapFocusInDialog]);
+  const handleEscapeKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        trapFocusInDialog(event);
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        event.preventDefault();
+        onCloseRef.current();
+      }
+    },
+    [trapFocusInDialog]
+  );
 
   function generateSources(
     refreshToken: string | null,
@@ -601,7 +620,13 @@ export function HeaderQRModal({
                 try {
                   await navigator.clipboard.writeText(url);
                   setUrlCopied(true);
-                  setTimeout(() => setUrlCopied(false), 500);
+                  if (copyTimeoutRef.current) {
+                    clearTimeout(copyTimeoutRef.current);
+                  }
+                  copyTimeoutRef.current = setTimeout(() => {
+                    setUrlCopied(false);
+                    copyTimeoutRef.current = null;
+                  }, 500);
                 } catch (error) {
                   console.error("Failed to copy share URL to clipboard", error);
                 }
