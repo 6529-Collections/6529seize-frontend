@@ -41,7 +41,7 @@ export default function UserPageStatsActivityWallet({
     useState<UserPageStatsActivityWalletFilterType>(
       UserPageStatsActivityWalletFilterType.ALL
     );
-  const { pageFilter, setPage } = useActivityPageFilter();
+  const { pageFilter, setPage, syncPageFilter } = useActivityPageFilter();
 
   const onActiveFilter = (filter: UserPageStatsActivityWalletFilterType) => {
     const targetFilter =
@@ -100,7 +100,7 @@ export default function UserPageStatsActivityWallet({
     isFetching,
     pageFilter,
     pageSize: ACTIVITY_PAGE_SIZE,
-    setPage,
+    syncPageFilter,
   });
 
   const { currentPage, totalPages } = getActivityPaginationState({

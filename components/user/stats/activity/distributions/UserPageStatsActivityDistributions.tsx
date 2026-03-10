@@ -23,7 +23,7 @@ export default function UserPageStatsActivityDistributions({
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
-  const { pageFilter, setPage } = useActivityPageFilter();
+  const { pageFilter, setPage, syncPageFilter } = useActivityPageFilter();
 
   const walletsParam = useMemo(
     () =>
@@ -64,7 +64,7 @@ export default function UserPageStatsActivityDistributions({
     isFetching,
     pageFilter,
     pageSize: ACTIVITY_PAGE_SIZE,
-    setPage,
+    syncPageFilter,
   });
 
   const { currentPage, totalPages } = getActivityPaginationState({
