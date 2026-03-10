@@ -318,7 +318,10 @@ export function HeaderQRModal({
   const getNavigateContent = () => {
     if (activeSubTab === SubMode.BROWSER) {
       return {
-        content: renderQRCodeImage(navigateBrowserSrc, "Browser Link - QR Code"),
+        content: renderQRCodeImage(
+          navigateBrowserSrc,
+          "Browser Link - QR Code"
+        ),
         url: navigateBrowserUrl,
       };
     }
@@ -346,7 +349,10 @@ export function HeaderQRModal({
 
     if (activeSubTab === SubMode.APP) {
       return {
-        content: renderQRCodeImage(shareConnectionSrc, "Share Connection - QR Code"),
+        content: renderQRCodeImage(
+          shareConnectionSrc,
+          "Share Connection - QR Code"
+        ),
         url: shareConnectionAppUrl,
       };
     }
@@ -472,7 +478,7 @@ export function HeaderQRModal({
             : "tw-translate-y-1 tw-scale-95 tw-opacity-0"
         }`}
       >
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-p-3">
+        <div className="tw-flex tw-flex-col tw-gap-2">
           <h2 id="header-share-title" className="tw-sr-only">
             Share
           </h2>
