@@ -14,6 +14,8 @@ import UserPageActivityTabs from "./tabs/UserPageActivityTabs";
 import UserPageStatsActivityTDHHistory from "./tdh-history/UserPageStatsActivityTDHHistory";
 import UserPageStatsActivityWallet from "./wallet/UserPageStatsActivityWallet";
 
+export { USER_PAGE_ACTIVITY_TAB } from "./activity.types";
+
 const ENUM_AND_PATH: { type: USER_PAGE_ACTIVITY_TAB; path: string }[] = [
   { type: USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY, path: "wallet-activity" },
   { type: USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS, path: "distributions" },
@@ -29,8 +31,6 @@ const pathToEnum = (path: string): USER_PAGE_ACTIVITY_TAB => {
   const found = ENUM_AND_PATH.find((entry) => entry.path === path);
   return found?.type ?? USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY;
 };
-
-export { USER_PAGE_ACTIVITY_TAB };
 
 export default function UserPageActivityWrapper({
   profile,
