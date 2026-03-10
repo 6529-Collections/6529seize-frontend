@@ -4,6 +4,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import TransferPanel from "@/components/nft-transfer/TransferPanel";
 import { useTransfer } from "@/components/nft-transfer/TransferState";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  EMPTY_USER_PAGE_STATS_INITIAL_DATA,
+  type UserPageStatsInitialData,
+} from "@/components/user/stats/userPageStats.types";
 import { publicEnv } from "@/config/env";
 import type { CollectedCard } from "@/entities/IProfile";
 import {
@@ -36,6 +40,7 @@ import {
 import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
 import { useXtdhTokensQuery } from "./hooks/useXtdhTokensQuery";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
+import UserPageCollectedStats from "./UserPageCollectedStats";
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
   readonly accountForConsolidations: boolean;
@@ -68,8 +73,10 @@ const SEARCH_PARAMS_FIELDS = {
 
 export default function UserPageCollected({
   profile,
+  initialStatsData = EMPTY_USER_PAGE_STATS_INITIAL_DATA,
 }: {
   readonly profile: ApiIdentity;
+  readonly initialStatsData?: UserPageStatsInitialData | undefined;
 }) {
   const { address: connectedAddress } = useSeizeConnectContext();
   const isMobile = useIsMobileScreen();
@@ -525,11 +532,21 @@ export default function UserPageCollected({
 
   return (
     <div className="tailwind-scope">
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={
+          filters.accountForConsolidations ? null : filters.handleOrWallet
+        }
+        initialStatsData={initialStatsData}
+      />
+
       {isLoading ? (
-        <UserPageCollectedFirstLoading />
+        <div className="tw-mt-6">
+          <UserPageCollectedFirstLoading />
+        </div>
       ) : (
         <>
-          <div ref={scrollContainer}>
+          <div ref={scrollContainer} className="tw-mt-6">
             <UserPageCollectedFilters
               profile={profile}
               filters={filters}
