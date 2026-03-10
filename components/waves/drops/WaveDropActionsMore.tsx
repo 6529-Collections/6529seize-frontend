@@ -15,6 +15,7 @@ import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
+import WaveDropActionsRestoreLinkPreviews from "./WaveDropActionsRestoreLinkPreviews";
 import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
 
 interface WaveDropActionsMoreProps {
@@ -100,6 +101,10 @@ export default function WaveDropActionsMore({
               drop={drop}
               isDropdownItem={true}
               onCopy={closeDropdown}
+            />
+            <WaveDropActionsRestoreLinkPreviews
+              drop={drop}
+              onRestored={closeDropdown}
             />
             <WaveDropActionsOpen
               drop={drop}
