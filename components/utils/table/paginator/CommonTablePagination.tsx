@@ -21,13 +21,13 @@ export default function CommonTablePagination({
     <div
       className={`${
         small && showTopBorder
-          ? "tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-px-4 sm:tw-px-6"
+          ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 sm:tw-px-6"
           : ""
-      } tw-pt-4 tw-pb-3 ${className ?? ""}`}
+      } tw-pb-3 tw-pt-4 ${className ?? ""}`}
     >
-      <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
+      <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
         {typeof totalPages === "number" ? (
-          <div className="tw-text-sm tw-text-iron-300 tw-font-medium tw-mr-3">
+          <div className="tw-mr-3 tw-text-sm tw-font-medium tw-text-iron-300">
             Page {currentPage} of {totalPages}
           </div>
         ) : (
@@ -40,7 +40,7 @@ export default function CommonTablePagination({
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={loading}
               type="button"
-              className="tw-relative tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
             >
               <svg
                 className="-tw-ml-1.5 tw-h-5 tw-w-5"
@@ -62,7 +62,7 @@ export default function CommonTablePagination({
               disabled={loading}
               onClick={() => setCurrentPage(currentPage + 1)}
               type="button"
-              className="tw-relative tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
             >
               <span>Next</span>
               <svg

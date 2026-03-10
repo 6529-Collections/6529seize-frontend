@@ -21,7 +21,7 @@ import {
 type TabProps = { readonly profile: ApiIdentity };
 
 export function createUserTabPage<
-  TExtra extends Record<string, unknown> = Record<string, never>
+  TExtra extends Record<string, unknown> = Record<string, never>,
 >({
   subroute,
   metaLabel,

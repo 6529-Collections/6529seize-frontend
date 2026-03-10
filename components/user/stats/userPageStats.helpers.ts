@@ -12,8 +12,7 @@ export function getStatsPath(
     return `consolidation/${profile.consolidation_key}`;
   }
   const fallbackWallet =
-    profile.primary_wallet?.trim() ||
-    profile.wallets?.[0]?.wallet?.trim();
+    profile.primary_wallet.trim() || profile.wallets?.[0]?.wallet.trim();
 
   if (!fallbackWallet) {
     throw new Error("getStatsPath: no wallet available on profile");
@@ -37,8 +36,7 @@ export function getCollectedStatsIdentityKey(
   }
 
   const fallbackWallet =
-    profile.primary_wallet?.trim() ||
-    profile.wallets?.[0]?.wallet?.trim();
+    profile.primary_wallet.trim() || profile.wallets?.[0]?.wallet.trim();
 
   if (!fallbackWallet) {
     throw new Error(

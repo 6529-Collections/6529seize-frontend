@@ -182,6 +182,154 @@ describe("UserPageCollectedStats", () => {
     expect(screen.getByText("2/3 started")).toBeInTheDocument();
   });
 
+  it("collapses overflowing started seasons behind a see more control on desktop", async () => {
+    const user = userEvent.setup();
+    const originalInnerWidth = window.innerWidth;
+    const originalGetComputedStyle = window.getComputedStyle;
+    const clientWidthSpy = jest
+      .spyOn(HTMLElement.prototype, "clientWidth", "get")
+      .mockImplementation(function (this: HTMLElement) {
+        return this.hasAttribute("data-season-tile") ? 72 : 372;
+      });
+    const getBoundingClientRectSpy = jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        const width = this.hasAttribute("data-season-tile") ? 72 : 372;
+        return {
+          width,
+          height: 0,
+          top: 0,
+          left: 0,
+          right: width,
+          bottom: 0,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      });
+    const getComputedStyleSpy = jest
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation((element) => {
+        const styles = originalGetComputedStyle(element);
+        return {
+          ...styles,
+          columnGap: "12px",
+          gap: "12px",
+          getPropertyValue: (property: string) => {
+            if (property === "column-gap" || property === "gap") {
+              return "12px";
+            }
+            return styles.getPropertyValue(property);
+          },
+        } as CSSStyleDeclaration;
+      });
+
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      writable: true,
+      value: 1280,
+    });
+
+    try {
+      renderWithQueryClient(
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData({
+            initialCollectedStats: {
+              ...collectedStats,
+              seasons: [
+                {
+                  season: "Season 1",
+                  total_cards_in_season: 47,
+                  sets_held: 1,
+                  partial_set_unique_cards_held: 0,
+                  total_cards_held: 748,
+                },
+                {
+                  season: "Season 2",
+                  total_cards_in_season: 39,
+                  sets_held: 1,
+                  partial_set_unique_cards_held: 26,
+                  total_cards_held: 1413,
+                },
+                {
+                  season: "Season 3",
+                  total_cards_in_season: 32,
+                  sets_held: 1,
+                  partial_set_unique_cards_held: 0,
+                  total_cards_held: 320,
+                },
+                {
+                  season: "Season 4",
+                  total_cards_in_season: 33,
+                  sets_held: 1,
+                  partial_set_unique_cards_held: 5,
+                  total_cards_held: 333,
+                },
+                {
+                  season: "Season 5",
+                  total_cards_in_season: 34,
+                  sets_held: 1,
+                  partial_set_unique_cards_held: 9,
+                  total_cards_held: 340,
+                },
+                {
+                  season: "Season 6",
+                  total_cards_in_season: 35,
+                  sets_held: 1,
+                  partial_set_unique_cards_held: 12,
+                  total_cards_held: 350,
+                },
+              ],
+            } as any,
+          })}
+        />
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", {
+            name: "Show 2 more started seasons",
+          })
+        ).toBeInTheDocument();
+      });
+
+      expect(screen.getByText("+2 more")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", {
+          name: /szn6/i,
+        })
+      ).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", {
+          name: "Show 2 more started seasons",
+        })
+      );
+
+      expect(
+        screen.getByRole("button", {
+          name: /szn6/i,
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", {
+          name: "Show less",
+        })
+      ).toBeInTheDocument();
+    } finally {
+      clientWidthSpy.mockRestore();
+      getBoundingClientRectSpy.mockRestore();
+      getComputedStyleSpy.mockRestore();
+      Object.defineProperty(window, "innerWidth", {
+        configurable: true,
+        writable: true,
+        value: originalInnerWidth,
+      });
+    }
+  });
+
   it("fetches only collected-stats when the collected address changes while details are closed", async () => {
     const queryClient = new QueryClient({
       defaultOptions: {
