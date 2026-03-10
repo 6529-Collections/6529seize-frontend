@@ -315,19 +315,6 @@ function DropPartMarkdown({
     [quotePath]
   );
 
-  const inlineShowControl = useMemo(() => {
-    if (!linkPreviewToggleControl) {
-      return undefined;
-    }
-
-    return {
-      enabled: linkPreviewToggleControl.isHidden,
-      isLoading: linkPreviewToggleControl.isLoading,
-      onToggle: linkPreviewToggleControl.onToggle,
-      label: linkPreviewToggleControl.label,
-    };
-  }, [linkPreviewToggleControl]);
-
   const { renderAnchor, isSmartLink, renderImage } = useMemo(
     () =>
       createLinkRenderer({
@@ -340,7 +327,6 @@ function DropPartMarkdown({
         quotePath: normalizedQuotePath,
         embedDepth,
         maxEmbedDepth,
-        inlineShowControl,
       }),
     [
       onQuoteClick,
@@ -352,7 +338,6 @@ function DropPartMarkdown({
       normalizedQuotePath,
       embedDepth,
       maxEmbedDepth,
-      inlineShowControl,
     ]
   );
 
@@ -445,7 +430,6 @@ function DropPartMarkdown({
     <LinkPreviewProvider
       variant={linkPreviewVariant}
       previewToggle={linkPreviewToggleControl}
-      inlineShowControl={inlineShowControl}
     >
       <Markdown
         rehypePlugins={rehypePlugins}
