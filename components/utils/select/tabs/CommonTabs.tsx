@@ -7,17 +7,11 @@ import CommonTabsTab from "./CommonTabsTab";
 export default function CommonTabs<T, U = unknown>(
   props: Readonly<CommonSelectProps<T, U>>
 ) {
-  const {
-    items,
-    activeItem,
-    setSelected,
-    filterLabel,
-  } = props;
+  const { items, activeItem, setSelected, filterLabel } = props;
   const sortDirection =
     "sortDirection" in props ? props.sortDirection : undefined;
-  const disabled = "disabled" in props ? props.disabled ?? false : false;
+  const disabled = "disabled" in props ? (props.disabled ?? false) : false;
   const size = "size" in props ? props.size : undefined;
-
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
@@ -92,7 +86,7 @@ export default function CommonTabs<T, U = unknown>(
       const tab = tabRefs.current.get(targetItem.key);
       tab?.focus();
     },
-    [items],
+    [items]
   );
 
   const handleKeyDown = useCallback(
@@ -124,7 +118,7 @@ export default function CommonTabs<T, U = unknown>(
           break;
       }
     },
-    [focusTab, items.length],
+    [focusTab, items.length]
   );
 
   return (
@@ -134,12 +128,14 @@ export default function CommonTabs<T, U = unknown>(
         role="tablist"
         aria-label={filterLabel ?? "Filter options"}
         aria-orientation="horizontal"
-        className="tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 horizontal-menu-hide-scrollbar"
+        className="horizontal-menu-hide-scrollbar tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
       >
-        <div className={clsx(
-          "tw-flex tw-flex-nowrap tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700",
-          props.fill ?? true ? "tw-min-w-full" : "tw-w-fit"
-        )}>
+        <div
+          className={clsx(
+            "tw-flex tw-flex-nowrap tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800",
+            (props.fill ?? true) ? "tw-min-w-full" : "tw-w-fit"
+          )}
+        >
           {items.map((item, i) => (
             <CommonTabsTab
               key={item.key}
