@@ -13,6 +13,7 @@ import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
+import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -106,6 +107,12 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
     href: "/messages",
     section: "Main",
     icon: ChatBubbleIcon,
+  },
+  {
+    name: "Discovery",
+    href: "/discover",
+    section: "Main",
+    icon: DiscoverIcon,
   },
   {
     name: "Notifications",

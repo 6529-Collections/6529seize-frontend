@@ -65,12 +65,15 @@ export const increaseWavesOverviewDropsCount = async (
           },
         };
 
-        const updatedPages = pages.flat().filter((wave) => wave.id !== waveId).splice(
+        const updatedPages = pages
+          .flat()
+          .filter((wave) => wave.id !== waveId)
+          .splice(
             matchingWaveIndex +
-            matchingWavePage * WAVE_FOLLOWING_WAVES_PARAMS.limit,
+              matchingWavePage * WAVE_FOLLOWING_WAVES_PARAMS.limit,
             0,
             updatedMatchingWave
-        );
+          );
 
         const newPages: ApiWave[][] = [];
         for (

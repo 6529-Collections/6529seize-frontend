@@ -43,6 +43,7 @@ jest.mock("@/components/app-wallets/AppWalletsContext");
       expect(menuProps.menu).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ label: "Profile", path: "/profile" }),
+          expect.objectContaining({ label: "Discovery", path: "/discover" }),
         ])
       );
       expect(networkChildren).toEqual(

@@ -5,7 +5,11 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { DocumentTextIcon, WrenchIcon } from "@heroicons/react/24/outline";
+import {
+  DocumentTextIcon,
+  UserIcon,
+  WrenchIcon,
+} from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import {
   DROP_FORGE_PATH,
@@ -14,6 +18,7 @@ import {
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
+import DiscoverIcon from "../common/icons/DiscoverIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
@@ -22,6 +27,8 @@ import AppUserConnect from "./AppUserConnect";
 type SidebarMenu = Parameters<typeof AppSidebarMenuItems>[0]["menu"];
 
 const MENU: SidebarMenu = [
+  { label: "Profile", path: "/profile", icon: UserIcon },
+  { label: "Discovery", path: "/discover", icon: DiscoverIcon },
   {
     label: "Network",
     icon: UsersIcon,
