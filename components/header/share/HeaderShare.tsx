@@ -675,6 +675,10 @@ function CoreAppsDownload() {
 
       results.forEach((result, index) => {
         const osConfig = enabledConfigs[index];
+        if (!osConfig) {
+          return;
+        }
+
         if (result.status === "fulfilled") {
           versions.push({ ...osConfig, version: result.value.version });
           return;
