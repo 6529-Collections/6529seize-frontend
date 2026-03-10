@@ -110,10 +110,6 @@ export function useDropLinkPreviewToggleControl(
     }
   }, []);
 
-  const onToggle = useCallback(() => {
-    void handleToggleLinkPreviews();
-  }, [handleToggleLinkPreviews]);
-
   return useMemo(() => {
     if (!isAuthor || !hasLinks || !dropId) {
       return undefined;
@@ -124,7 +120,7 @@ export function useDropLinkPreviewToggleControl(
       isHidden: previewsHidden,
       isLoading,
       label: previewsHidden ? "Show link previews" : "Hide link previews",
-      onToggle,
+      onToggle: handleToggleLinkPreviews,
     };
   }, [
     isAuthor,
@@ -133,6 +129,6 @@ export function useDropLinkPreviewToggleControl(
     canToggle,
     previewsHidden,
     isLoading,
-    onToggle,
+    handleToggleLinkPreviews,
   ]);
 }
