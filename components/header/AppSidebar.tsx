@@ -18,6 +18,7 @@ import {
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
+import DiscoverIcon from "../common/icons/DiscoverIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
