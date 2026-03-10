@@ -5,8 +5,7 @@ import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCI
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
-import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
+import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 
@@ -17,9 +16,6 @@ export default function UserPageHeaderName({
   level,
   profileEnabledAt,
   variant = "full",
-  submissionCount = 0,
-  trophyCount = 0,
-  onBadgeClick,
 }: {
   readonly profile: ApiIdentity;
   readonly canEdit: boolean;
@@ -27,12 +23,9 @@ export default function UserPageHeaderName({
   readonly level: number;
   readonly profileEnabledAt: string | null;
   readonly variant?: "full" | "title" | "meta";
-  readonly submissionCount?: number;
-  readonly trophyCount?: number;
-  readonly onBadgeClick?: (tab: ArtistPreviewTab) => void;
 }) {
   const getDisplayName = (): string => {
-    if (profile?.handle) {
+    if (profile.handle) {
       return profile.handle;
     }
 
@@ -64,32 +57,26 @@ export default function UserPageHeaderName({
               {displayName}
             </p>
           </UserPageHeaderNameWrapper>
-          {profile?.handle && (
+          {profile.handle && (
             <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center xl:tw-mt-1">
               <UserCICTypeIconWrapper profile={profile} />
             </div>
           )}
           <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
-          {onBadgeClick && (submissionCount > 0 || trophyCount > 0) && (
-            <ArtistActivityBadge
-              submissionCount={submissionCount}
-              trophyCount={trophyCount}
-              onBadgeClick={onBadgeClick}
-              tooltipId="profile-artist-activity-badge"
-            />
-          )}
+          <DropAuthorBadges
+            profile={profile}
+            tooltipIdPrefix="profile-author-badges"
+          />
         </div>
       )}
 
       {showMeta && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          {profile?.classification && (
-            <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
-              <div className="tw-block tw-text-sm tw-font-medium tw-leading-4 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-white">
-                {CLASSIFICATIONS[profile.classification].title}
-              </div>
-            </UserPageClassificationWrapper>
-          )}
+          <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
+            <div className="tw-block tw-text-sm tw-font-medium tw-leading-4 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-white">
+              {CLASSIFICATIONS[profile.classification].title}
+            </div>
+          </UserPageClassificationWrapper>
           {profileEnabledLabel && (
             <span className="tw-text-iron-600 sm:tw-text-iron-700">&bull;</span>
           )}

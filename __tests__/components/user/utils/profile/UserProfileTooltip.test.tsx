@@ -1,26 +1,45 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
+import type { ComponentProps, ContextType } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
-import { useIdentity } from "@/hooks/useIdentity";
-import { commonApiFetch } from "@/services/api/common-api";
+import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
+import type { CicStatement } from "@/entities/IProfile";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
+
+type TooltipProps = ComponentProps<typeof UserProfileTooltip>;
+
+type CapturedDropAuthorBadgesProps = {
+  readonly profile?: {
+    readonly handle?: string | null;
+  } | null;
+  readonly tooltipIdPrefix?: string;
+  readonly onArtistPreviewOpen?: TooltipProps["onArtistPreviewOpen"];
+  readonly onWaveCreatorPreviewOpen?: TooltipProps["onWaveCreatorPreviewOpen"];
+};
+
+let capturedDropAuthorBadgesProps: CapturedDropAuthorBadgesProps | null = null;
+
+type UserFollowBtnMockProps = {
+  readonly onDirectMessage?: (() => void | Promise<void>) | undefined;
+};
 
 const userFollowBtnMock = jest.fn(
-  ({
-    onDirectMessage,
-  }: {
-    readonly onDirectMessage?: (() => void) | undefined;
-  }) => (
+  ({ onDirectMessage }: UserFollowBtnMockProps) => (
     <div data-testid="follow-btn">
       {onDirectMessage ? (
         <button
           type="button"
           aria-label="Send direct message"
-          onClick={onDirectMessage}
+          onClick={() => {
+            void onDirectMessage();
+          }}
         >
           DM
         </button>
@@ -36,7 +55,8 @@ jest.mock("@/components/drops/create/utils/DropPfp", () => ({
 
 jest.mock("@/components/user/utils/UserFollowBtn", () => ({
   __esModule: true,
-  default: (props: unknown) => userFollowBtnMock(props as never),
+  default: (props: unknown) =>
+    userFollowBtnMock(props as UserFollowBtnMockProps),
   UserFollowBtnSize: {
     SMALL: "SMALL",
     MEDIUM: "MEDIUM",
@@ -56,8 +76,18 @@ jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
 
 jest.mock("@/components/user/utils/stats/UserStatsRow", () => ({
   __esModule: true,
-  default: ({ followersCount }: { readonly followersCount: number }) => (
-    <div data-testid="stats-row">{followersCount}</div>
+  default: ({
+    handle,
+    followersCount,
+  }: {
+    readonly handle: string;
+    readonly followersCount: number;
+  }) => (
+    <div
+      data-testid="stats-row"
+      data-handle={handle}
+      data-followers-count={followersCount}
+    />
   ),
   UserStatsRowSize: {
     SMALL: "SMALL",
@@ -68,6 +98,19 @@ jest.mock("@/components/user/utils/stats/UserStatsRow", () => ({
 jest.mock("@/components/user/utils/profile/UserProfileTooltipTopRep", () => ({
   __esModule: true,
   default: () => <div data-testid="top-rep" />,
+}));
+
+jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
+  DropAuthorBadges: (props: CapturedDropAuthorBadgesProps) => {
+    capturedDropAuthorBadgesProps = props;
+    return (
+      <div
+        data-testid="author-badges"
+        data-profile-handle={props.profile?.handle ?? ""}
+        data-tooltip-prefix={props.tooltipIdPrefix ?? ""}
+      />
+    );
+  },
 }));
 
 jest.mock("@/hooks/useIdentity", () => ({
@@ -104,19 +147,40 @@ const useRouterMock = useRouter as jest.Mock;
 let queryClient: QueryClient;
 let mockRouter: { push: jest.Mock; replace: jest.Mock };
 let mockProfile: Record<string, unknown>;
+let mockStatements: CicStatement[];
 
-const renderTooltip = (authOverrides: Record<string, unknown> = {}) => {
+const createStatement = (
+  overrides: Partial<CicStatement> = {}
+): CicStatement => ({
+  id: "statement-1",
+  profile_id: "profile-1",
+  statement_group: STATEMENT_GROUP.GENERAL,
+  statement_type: STATEMENT_TYPE.BIO,
+  statement_comment: null,
+  statement_value: "About Bob",
+  crated_at: new Date("2024-01-01T00:00:00.000Z"),
+  updated_at: null,
+  ...overrides,
+});
+
+const renderTooltip = ({
+  authOverrides = {},
+  tooltipProps = {},
+}: {
+  readonly authOverrides?: Record<string, unknown>;
+  readonly tooltipProps?: Omit<Partial<TooltipProps>, "user">;
+} = {}) => {
   const authValue = {
     connectedProfile: { handle: "alice" },
     activeProfileProxy: null,
     setToast: jest.fn(),
     ...authOverrides,
-  } as any;
+  } as ContextType<typeof AuthContext>;
 
   return render(
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider value={authValue}>
-        <UserProfileTooltip user="bob" />
+        <UserProfileTooltip user="bob" {...tooltipProps} />
       </AuthContext.Provider>
     </QueryClientProvider>
   );
@@ -126,6 +190,7 @@ describe("UserProfileTooltip", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    capturedDropAuthorBadgesProps = null;
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -136,6 +201,7 @@ describe("UserProfileTooltip", () => {
       push: jest.fn(),
       replace: jest.fn(),
     };
+    mockStatements = [];
 
     mockProfile = {
       id: "profile-1",
@@ -159,7 +225,7 @@ describe("UserProfileTooltip", () => {
     commonApiFetchMock.mockImplementation(
       async ({ endpoint }: { readonly endpoint: string }) => {
         if (endpoint.includes("/cic/statements")) {
-          return [];
+          return mockStatements;
         }
         if (endpoint.includes("/rep/ratings/received")) {
           return { rating_stats: [] };
@@ -173,13 +239,38 @@ describe("UserProfileTooltip", () => {
     );
   });
 
-  it("renders a DM action for another profile", async () => {
+  it("renders badges, stats, and a DM action for another profile", async () => {
     const user = userEvent.setup();
 
     renderTooltip();
 
     expect(screen.getByTestId("pfp")).toBeInTheDocument();
     expect(screen.getByText("bob")).toBeInTheDocument();
+    expect(screen.getByTestId("level")).toHaveTextContent("2");
+    expect(screen.getByTestId("top-rep")).toBeInTheDocument();
+
+    const badges = screen.getByTestId("author-badges");
+    expect(badges).toHaveAttribute("data-profile-handle", "bob");
+    expect(badges.getAttribute("data-tooltip-prefix")).toContain(
+      "user-profile-tooltip-author-badges-"
+    );
+
+    await waitFor(() => {
+      expect(commonApiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "identity-subscriptions/incoming/IDENTITY/profile-1",
+        })
+      );
+    });
+
+    expect(screen.getByTestId("stats-row")).toHaveAttribute(
+      "data-handle",
+      "bob"
+    );
+    expect(screen.getByTestId("stats-row")).toHaveAttribute(
+      "data-followers-count",
+      "5"
+    );
     expect(screen.getByTestId("follow-btn")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Send direct message" })
@@ -202,9 +293,72 @@ describe("UserProfileTooltip", () => {
     });
   });
 
+  it("renders the about statement when the bio statement is present", async () => {
+    mockStatements = [
+      createStatement({ statement_value: "About Bob from CIC" }),
+      createStatement({
+        id: "statement-2",
+        statement_type: STATEMENT_TYPE.WEBSITE,
+        statement_value: "https://example.com",
+      }),
+    ];
+
+    renderTooltip();
+
+    expect(await screen.findByText("About Bob from CIC")).toBeInTheDocument();
+  });
+
+  it("does not render the about statement when there is no general bio", async () => {
+    mockStatements = [
+      createStatement({
+        statement_group: STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT,
+        statement_value: "@bob",
+      }),
+      createStatement({
+        id: "statement-2",
+        statement_type: STATEMENT_TYPE.WEBSITE,
+        statement_value: "https://example.com",
+      }),
+    ];
+
+    renderTooltip();
+
+    await waitFor(() => {
+      expect(commonApiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "profiles/bob/cic/statements",
+        })
+      );
+    });
+
+    expect(screen.queryByText("@bob")).not.toBeInTheDocument();
+    expect(screen.queryByText("https://example.com")).not.toBeInTheDocument();
+  });
+
+  it("passes preview-open callbacks to author badges when provided", () => {
+    const onArtistPreviewOpen = jest.fn();
+    const onWaveCreatorPreviewOpen = jest.fn();
+
+    renderTooltip({
+      tooltipProps: {
+        onArtistPreviewOpen,
+        onWaveCreatorPreviewOpen,
+      },
+    });
+
+    expect(capturedDropAuthorBadgesProps?.onArtistPreviewOpen).toBe(
+      onArtistPreviewOpen
+    );
+    expect(capturedDropAuthorBadgesProps?.onWaveCreatorPreviewOpen).toBe(
+      onWaveCreatorPreviewOpen
+    );
+  });
+
   it("does not render follow or DM actions on your own profile", () => {
     renderTooltip({
-      connectedProfile: { handle: "bob" },
+      authOverrides: {
+        connectedProfile: { handle: "bob" },
+      },
     });
 
     expect(screen.queryByTestId("follow-btn")).not.toBeInTheDocument();
@@ -215,7 +369,9 @@ describe("UserProfileTooltip", () => {
 
   it("hides the DM action when acting through a proxy", () => {
     renderTooltip({
-      activeProfileProxy: { id: "proxy-1" },
+      authOverrides: {
+        activeProfileProxy: { id: "proxy-1" },
+      },
     });
 
     expect(screen.getByTestId("follow-btn")).toBeInTheDocument();

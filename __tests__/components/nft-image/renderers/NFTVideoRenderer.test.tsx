@@ -1,7 +1,7 @@
 import NFTVideoRenderer from "@/components/nft-image/renderers/NFTVideoRenderer";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import type { BaseNFT } from "@/entities/INFT";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 // Mock NFTImageBalance to match the new showBalance API
 jest.mock("@/components/nft-image/NFTImageBalance", () => {
@@ -13,7 +13,8 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => {
         data-testid="nft-image-balance"
         data-height={height}
         data-contract={contract}
-        data-token-id={tokenId}>
+        data-token-id={tokenId}
+      >
         {mockBalance > 0 && (
           <span data-testid="seized-text">SEIZED x{mockBalance}</span>
         )}
@@ -166,6 +167,26 @@ describe("NFTVideoRenderer", () => {
       const video = container.querySelector("video");
       expect(video).toHaveAttribute("src", "https://example.com/video.mp4");
     });
+
+    it("falls back to metadata.animation_url when top-level animation is empty", () => {
+      const nft = createMockNFT({
+        animation: "",
+        compressed_animation: undefined,
+        metadata: {
+          ...createMockNFT().metadata,
+          animation: "",
+          animation_url: "https://example.com/metadata-fallback.mp4",
+        },
+      });
+      const props = createDefaultProps({ nft });
+      const { container } = render(<NFTVideoRenderer {...props} />);
+
+      const video = container.querySelector("video");
+      expect(video).toHaveAttribute(
+        "src",
+        "https://example.com/metadata-fallback.mp4"
+      );
+    });
   });
 
   describe("Video Attributes", () => {
@@ -284,7 +305,9 @@ describe("NFTVideoRenderer", () => {
     });
 
     it("handles missing metadata gracefully", () => {
-      const nft = createMockNFT({ ...(undefined !== undefined ? { metadata: undefined } : {}) });
+      const nft = createMockNFT({
+        ...(undefined !== undefined ? { metadata: undefined } : {}),
+      });
       const props = createDefaultProps({ nft });
 
       expect(() => {
@@ -606,6 +629,81 @@ describe("NFTVideoRenderer", () => {
         "src",
         "https://example.com/compressed.mp4"
       );
+    });
+
+    it("swaps from a relative compressed_animation URL to animationSrc on error", () => {
+      const nft = createMockNFT({
+        animation: "https://example.com/original.mp4",
+        compressed_animation: "/compressed/video.mp4",
+      });
+      const props = createDefaultProps({ nft, showOriginal: false });
+      const { container } = render(<NFTVideoRenderer {...props} />);
+
+      const video = container.querySelector("video") as HTMLVideoElement;
+      expect(video.src).toBe(
+        new URL("/compressed/video.mp4", window.location.href).href
+      );
+
+      fireEvent.error(video);
+
+      expect(video.src).toBe("https://example.com/original.mp4");
+    });
+
+    it("swaps from an absolute compressed_animation URL to animationSrc on error", () => {
+      const nft = createMockNFT({
+        animation: "https://example.com/original.mp4",
+        compressed_animation: "https://example.com/compressed.mp4",
+      });
+      const props = createDefaultProps({ nft, showOriginal: false });
+      const { container } = render(<NFTVideoRenderer {...props} />);
+
+      const video = container.querySelector("video") as HTMLVideoElement;
+      expect(video.src).toBe("https://example.com/compressed.mp4");
+
+      fireEvent.error(video);
+
+      expect(video.src).toBe("https://example.com/original.mp4");
+    });
+
+    it("does not swap on error when animationSrc is missing", () => {
+      const nft = createMockNFT({
+        animation: undefined as any,
+        compressed_animation: "/compressed/video.mp4",
+        metadata: {
+          ...createMockNFT().metadata,
+          animation: undefined,
+          animation_url: undefined,
+        },
+      });
+      const props = createDefaultProps({ nft, showOriginal: false });
+      const { container } = render(<NFTVideoRenderer {...props} />);
+
+      const video = container.querySelector("video") as HTMLVideoElement;
+      const expectedCompressedSrc = new URL(
+        "/compressed/video.mp4",
+        window.location.href
+      ).href;
+      expect(video.src).toBe(expectedCompressedSrc);
+
+      fireEvent.error(video);
+
+      expect(video.src).toBe(expectedCompressedSrc);
+    });
+
+    it("does not swap on error when compressed_animation is undefined", () => {
+      const nft = createMockNFT({
+        animation: "https://example.com/original.mp4",
+        compressed_animation: undefined,
+      });
+      const props = createDefaultProps({ nft, showOriginal: false });
+      const { container } = render(<NFTVideoRenderer {...props} />);
+
+      const video = container.querySelector("video") as HTMLVideoElement;
+      expect(video.src).toBe("https://example.com/original.mp4");
+
+      fireEvent.error(video);
+
+      expect(video.src).toBe("https://example.com/original.mp4");
     });
   });
 

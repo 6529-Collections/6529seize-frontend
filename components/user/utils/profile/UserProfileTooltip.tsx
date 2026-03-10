@@ -1,33 +1,51 @@
-import DropPfp from "@/components/drops/create/utils/DropPfp";
-import { useIdentity } from "@/hooks/useIdentity";
+import { useRouter } from "next/navigation";
+import { useId, useMemo, useState } from "react";
+
+import { useAuth } from "@/components/auth/Auth";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
-import { useRouter } from "next/navigation";
-import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
-import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
+import DropPfp from "@/components/drops/create/utils/DropPfp";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import type {
   ApiProfileRepRatesState,
   CicStatement,
 } from "@/entities/IProfile";
 import { CLASSIFICATIONS } from "@/entities/IProfile";
-import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/components/auth/Auth";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useIdentity } from "@/hooks/useIdentity";
+import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useQuery } from "@tanstack/react-query";
+
+import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
 import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
-import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
+
+interface UserProfileTooltipProps {
+  readonly user: string;
+  readonly onArtistPreviewOpen?:
+    | ((params: {
+        readonly user: ApiProfileMin;
+        readonly initialTab: ArtistPreviewTab;
+      }) => void)
+    | undefined;
+  readonly onWaveCreatorPreviewOpen?:
+    | ((user: ApiProfileMin) => void)
+    | undefined;
+}
 
 export default function UserProfileTooltip({
   user,
-}: {
-  readonly user: string;
-}) {
+  onArtistPreviewOpen,
+  onWaveCreatorPreviewOpen,
+}: UserProfileTooltipProps) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const { profile } = useIdentity({
@@ -78,25 +96,23 @@ export default function UserProfileTooltip({
 
   const followersCount = followersData?.count ?? 0;
 
-  const [aboutStatement, setAboutStatement] = useState<CicStatement | null>(
-    null
+  const aboutStatement = useMemo(
+    () =>
+      statements?.find(
+        (statement) =>
+          statement.statement_type === STATEMENT_TYPE.BIO &&
+          statement.statement_group === STATEMENT_GROUP.GENERAL
+      ) ?? null,
+    [statements]
   );
+  const [directMessageLoading, setDirectMessageLoading] = useState(false);
 
-  useEffect(() => {
-    const about = statements?.find(
-      (statement) =>
-        statement.statement_type === STATEMENT_TYPE.BIO &&
-        statement.statement_group === STATEMENT_GROUP.GENERAL
-    );
-    setAboutStatement(about ?? null);
-  }, [statements]);
+  const description =
+    profile?.classification === undefined
+      ? null
+      : CLASSIFICATIONS[profile.classification].title;
 
-  const description = profile?.classification
-    ? CLASSIFICATIONS[profile.classification]?.title
-    : null;
-
-  const { connectedProfile, activeProfileProxy, setToast } =
-    useAuth();
+  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const profileHandle = profile?.handle ?? null;
   const normalizedProfileHandle = useMemo(
     () => profileHandle?.toLowerCase() ?? null,
@@ -110,10 +126,17 @@ export default function UserProfileTooltip({
     normalizedProfileHandle &&
     normalizedProfileHandle !== normalizedConnectedHandle
   );
-  const [directMessageLoading, setDirectMessageLoading] = useState(false);
+  const tooltipInstanceId = useId();
+  const badgesTooltipIdPrefix = useMemo(
+    () =>
+      `user-profile-tooltip-author-badges-${tooltipInstanceId.replaceAll(":", "")}`,
+    [tooltipInstanceId]
+  );
 
-  const handleCreateDirectMessage = async () => {
-    if (!profile?.primary_wallet) {
+  const handleCreateDirectMessage = async (
+    primaryWallet: string | undefined
+  ) => {
+    if (!primaryWallet) {
       return;
     }
 
@@ -121,7 +144,7 @@ export default function UserProfileTooltip({
 
     try {
       const wave = await createDirectMessageWave({
-        addresses: [profile.primary_wallet],
+        addresses: [primaryWallet],
       });
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
@@ -157,6 +180,14 @@ export default function UserProfileTooltip({
                   size={UserCICAndLevelSize.SMALL}
                 />
               )}
+              {profile && (
+                <DropAuthorBadges
+                  profile={profile}
+                  tooltipIdPrefix={badgesTooltipIdPrefix}
+                  onArtistPreviewOpen={onArtistPreviewOpen}
+                  onWaveCreatorPreviewOpen={onWaveCreatorPreviewOpen}
+                />
+              )}
             </div>
             {description && (
               <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
@@ -174,7 +205,7 @@ export default function UserProfileTooltip({
                 connectedProfile?.handle &&
                 !activeProfileProxy &&
                 profile?.primary_wallet
-                  ? handleCreateDirectMessage
+                  ? () => handleCreateDirectMessage(profile.primary_wallet)
                   : undefined
               }
               directMessageLoading={directMessageLoading}
