@@ -9,19 +9,10 @@ import UserCICAndLevel, {
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistPreviewModal } from "./ArtistPreviewModal";
-import { ArtistActivityBadge } from "./ArtistActivityBadge";
-import { WaveCreatorBadge } from "./WaveCreatorBadge";
-import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
+import { DropAuthorBadges } from "./DropAuthorBadges";
 import { useCallback } from "react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
-import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
 import { useCompactMode } from "@/contexts/CompactModeContext";
-import {
-  getSubmissionCount,
-  getTrophyArtworkCount,
-} from "@/helpers/artist-activity.helpers";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -48,28 +39,6 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 }) => {
   const router = useRouter();
   const compact = useCompactMode();
-  const {
-    isModalOpen: isArtistPreviewOpen,
-    modalInitialTab,
-    handleBadgeClick: handleArtistBadgeClick,
-    handleModalClose: handleArtistModalClose,
-  } = useArtistPreviewModal();
-  const {
-    isModalOpen: isWaveCreatorPreviewOpen,
-    handleBadgeClick: handleWaveCreatorBadgeClick,
-    handleModalClose: handleWaveCreatorModalClose,
-  } = useWaveCreatorPreviewModal();
-
-  const submissionCount = getSubmissionCount(drop.author);
-
-  const hasSubmissions = submissionCount > 0;
-
-  const trophyCount = getTrophyArtworkCount(drop.author);
-
-  const hasTrophyArtworks = trophyCount > 0;
-  const hasActivityBadge = hasSubmissions || hasTrophyArtworks;
-
-  const isWaveCreator = drop.author.is_wave_creator;
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleNavigation = useCallback(
@@ -110,20 +79,10 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               level={drop.author.level}
               size={UserCICAndLevelSize.SMALL}
             />
-            {hasActivityBadge && (
-              <ArtistActivityBadge
-                submissionCount={submissionCount}
-                trophyCount={trophyCount}
-                onBadgeClick={handleArtistBadgeClick}
-                tooltipId={`header-activity-badge-${drop.id}`}
-              />
-            )}
-            {isWaveCreator && (
-              <WaveCreatorBadge
-                tooltipId={`wave-creator-${drop.id}`}
-                onBadgeClick={handleWaveCreatorBadgeClick}
-              />
-            )}
+            <DropAuthorBadges
+              profile={drop.author}
+              tooltipIdPrefix={`header-author-badges-${drop.id}`}
+            />
             <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
             <WaveDropTime timestamp={drop.created_at} />
           </div>
@@ -184,19 +143,6 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           </span>
         </div>
       )}
-
-      {/* Artist Preview Modal */}
-      <ArtistPreviewModal
-        isOpen={isArtistPreviewOpen}
-        onClose={handleArtistModalClose}
-        user={drop.author}
-        initialTab={modalInitialTab}
-      />
-      <WaveCreatorPreviewModal
-        isOpen={isWaveCreatorPreviewOpen}
-        onClose={handleWaveCreatorModalClose}
-        user={drop.author}
-      />
     </>
   );
 };

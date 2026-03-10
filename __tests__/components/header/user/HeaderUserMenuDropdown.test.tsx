@@ -1,12 +1,11 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import HeaderUserProxyDropdown from "@/components/header/user/proxy/HeaderUserProxyDropdown";
+import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { AuthContext } from "@/components/auth/Auth";
 
-jest.mock(
-  "@/components/header/user/proxy/HeaderUserProxyDropdownItem",
-  () => () => <div data-testid="item" />
-);
+jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
+  <div data-testid="item" />
+));
 jest.mock(
   "@/components/header/user/connected/HeaderUserConnectedAccounts",
   () => (props: any) => (
@@ -62,7 +61,7 @@ function renderDropdown(options: any) {
   const onClose = jest.fn();
   render(
     <AuthContext.Provider value={authValue}>
-      <HeaderUserProxyDropdown
+      <HeaderUserMenuDropdown
         isOpen
         profile={options.profile}
         onClose={onClose}
@@ -74,7 +73,7 @@ function renderDropdown(options: any) {
 
 afterEach(() => jest.clearAllMocks());
 
-describe("HeaderUserProxyDropdown", () => {
+describe("HeaderUserMenuDropdown", () => {
   it("shows profile handle as label", () => {
     renderDropdown({
       profile: profileBase,

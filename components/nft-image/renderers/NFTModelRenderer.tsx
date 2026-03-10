@@ -13,9 +13,12 @@ export default function NFTModelRenderer(props: Readonly<BaseRendererProps>) {
     return null;
   }
 
+  const animationClassName = styles["nftAnimation"] ?? "";
+
   return (
     <Col
-      className={`${styles["nftAnimation"]} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
+      className={`${animationClassName} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}
+    >
       {props.showBalance && (
         <NFTImageBalance
           contract={props.nft.contract}

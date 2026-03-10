@@ -93,7 +93,9 @@ export const SeizeSettingsProvider = ({
   );
 
   useEffect(() => {
-    loadSeizeSettings();
+    // Initial load failures are exposed through `loadError`; do not leak
+    // them as unhandled promise rejections from the mount effect.
+    loadSeizeSettings().catch(() => undefined);
 
     return () => {
       isMountedRef.current = false;
