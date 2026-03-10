@@ -357,7 +357,7 @@ export function HeaderQRModal({
 
     return (
       <div className="tw-flex tw-flex-col tw-gap-2">
-        <div className="tw-relative tw-w-full tw-aspect-square tw-overflow-hidden">
+        <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden">
           <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
             {content}
           </div>
@@ -365,7 +365,7 @@ export function HeaderQRModal({
         {url ? (
           <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3">
             <div
-              className="tw-flex-1 tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-text-sm tw-text-iron-400"
+              className="tw-min-w-0 tw-flex-1 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-text-sm tw-text-iron-400"
               title={url}
             >
               {url}
@@ -375,10 +375,14 @@ export function HeaderQRModal({
               aria-label="Copy URL"
               className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-100"
               data-tooltip-id="copy-url-tooltip"
-              onClick={() => {
-                navigator.clipboard.writeText(url);
-                setUrlCopied(true);
-                setTimeout(() => setUrlCopied(false), 500);
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(url);
+                  setUrlCopied(true);
+                  setTimeout(() => setUrlCopied(false), 500);
+                } catch (error) {
+                  console.error("Failed to copy share URL to clipboard", error);
+                }
               }}
             >
               <FontAwesomeIcon
