@@ -226,7 +226,7 @@ export function HeaderQRModal({
     if (show) {
       generateSources(getRefreshToken(), getWalletAddress(), getWalletRole());
     }
-  }, [show, isAuthenticated]);
+  }, [show]);
 
   useEffect(() => {
     setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
@@ -238,7 +238,7 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
-  }, [show]);
+  }, [show, isAuthenticated]);
 
   useEffect(() => {
     if (show) {
