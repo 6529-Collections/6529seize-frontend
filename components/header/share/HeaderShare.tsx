@@ -7,7 +7,7 @@ import { ShareIcon } from "@heroicons/react/24/outline";
 import yaml from "js-yaml";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -41,6 +41,23 @@ const squareStyle = {
   alignItems: "center",
   justifyContent: "center",
 };
+
+function getSubTabCount(activeTab: Mode, isElectron: boolean): number {
+  if (activeTab === Mode.NAVIGATE) {
+    return isElectron ? 2 : 3;
+  }
+  return isElectron ? 1 : 2;
+}
+
+function getSubTabLabel(activeTab: Mode): string {
+  if (activeTab === Mode.APPS) {
+    return "Select Platform";
+  }
+  if (activeTab === Mode.SHARE) {
+    return "Open Link In";
+  }
+  return "Open URL In";
+}
 
 export default function HeaderShare({
   isCollapsed = false,
@@ -127,6 +144,17 @@ export function HeaderQRModal({
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
 
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  const handleEscapeKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      onCloseRef.current();
+    }
+  }, []);
 
   function generateSources(
     refreshToken: string | null,
@@ -228,132 +256,137 @@ export function HeaderQRModal({
     }
 
     const previousOverflow = document.body.style.overflow;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
 
     document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
+    globalThis.addEventListener("keydown", handleEscapeKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
+      globalThis.removeEventListener("keydown", handleEscapeKeyDown);
     };
-  }, [shouldRender, onClose]);
+  }, [shouldRender, handleEscapeKeyDown]);
+
+  const renderQRCodeImage = (src: string, alt: string) => {
+    const normalizedSrc = src?.trim();
+
+    return (
+      <div className="tw-relative tw-h-full tw-w-full">
+        {normalizedSrc ? (
+          <Image
+            unoptimized
+            priority
+            loading="eager"
+            src={normalizedSrc}
+            alt={alt}
+            fill
+            sizes="(max-width: 768px) 92vw, 28rem"
+            className="unselectable tw-object-contain"
+          />
+        ) : (
+          <div className="tw-h-full tw-w-full tw-animate-pulse tw-rounded-md tw-bg-iron-900/40" />
+        )}
+      </div>
+    );
+  };
+
+  const renderCoreLink = (url: string) => {
+    return (
+      <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
+        <a
+          href={url}
+          className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8"
+        >
+          <Image
+            unoptimized
+            priority
+            loading="eager"
+            src="/6529Core.png"
+            alt="6529 Desktop"
+            width={150}
+            height={150}
+            className="unselectable"
+          />
+          <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-200 tw-px-4 tw-py-3 tw-text-iron-900">
+            <FontAwesomeIcon icon={faExternalLink} />
+            <div className="no-wrap">Open in 6529 Desktop</div>
+          </div>
+        </a>
+      </div>
+    );
+  };
+
+  const getNavigateContent = () => {
+    if (activeSubTab === SubMode.BROWSER) {
+      return {
+        content: renderQRCodeImage(navigateBrowserSrc, "Browser Link - QR Code"),
+        url: navigateBrowserUrl,
+      };
+    }
+
+    if (activeSubTab === SubMode.CORE) {
+      return {
+        content: renderCoreLink(navigateCoreUrl),
+        url: navigateCoreUrl,
+      };
+    }
+
+    return {
+      content: renderQRCodeImage(navigateAppSrc, "Mobile App Link - QR Code"),
+      url: navigateAppUrl,
+    };
+  };
+
+  const getShareContent = () => {
+    if (activeSubTab === SubMode.CORE) {
+      return {
+        content: renderCoreLink(shareConnectionCoreUrl),
+        url: shareConnectionCoreUrl,
+      };
+    }
+
+    if (activeSubTab === SubMode.APP) {
+      return {
+        content: renderQRCodeImage(shareConnectionSrc, "Share Connection - QR Code"),
+        url: shareConnectionAppUrl,
+      };
+    }
+
+    return { content: <span>Invalid submode for SHARE</span>, url: "" };
+  };
+
+  const getAppsContent = () => {
+    if (activeSubTab === SubMode.CORE) {
+      return { content: <CoreAppsDownload />, url: "" };
+    }
+
+    return {
+      content: (
+        <div
+          className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-12 tw-p-10"
+          style={squareStyle}
+        >
+          <ShareMobileApp platform="ios" />
+          <ShareMobileApp platform="android" />
+        </div>
+      ),
+      url: "",
+    };
+  };
+
+  const getDisplayContent = () => {
+    if (activeTab === Mode.NAVIGATE) {
+      return getNavigateContent();
+    }
+
+    if (activeTab === Mode.SHARE) {
+      return getShareContent();
+    }
+
+    return getAppsContent();
+  };
 
   function printImage() {
-    const renderQRCodeImage = (src: string, alt: string) => {
-      const normalizedSrc = src?.trim();
-
-      return (
-        <div className="tw-relative tw-h-full tw-w-full">
-          {normalizedSrc ? (
-            <Image
-              unoptimized
-              priority
-              loading="eager"
-              src={normalizedSrc}
-              alt={alt}
-              fill
-              sizes="(max-width: 768px) 92vw, 28rem"
-              className="unselectable tw-object-contain"
-            />
-          ) : (
-            <div className="tw-h-full tw-w-full tw-animate-pulse tw-rounded-md tw-bg-iron-900/40" />
-          )}
-        </div>
-      );
-    };
-
-    const renderCoreLink = (url: string) => {
-      return (
-        <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
-          <a
-            href={url}
-            className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8"
-          >
-            <Image
-              unoptimized
-              priority
-              loading="eager"
-              src="/6529Core.png"
-              alt="6529 Desktop"
-              width={150}
-              height={150}
-              className="unselectable"
-            />
-            <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-200 tw-px-4 tw-py-3 tw-text-iron-900">
-              <FontAwesomeIcon icon={faExternalLink} />
-              <div className="no-wrap">Open in 6529 Desktop</div>
-            </div>
-          </a>
-        </div>
-      );
-    };
-
-    let content = null;
-    let url = "";
-
-    if (activeTab === Mode.NAVIGATE) {
-      switch (activeSubTab) {
-        case SubMode.BROWSER:
-          url = navigateBrowserUrl;
-          content = renderQRCodeImage(
-            navigateBrowserSrc,
-            "Browser Link - QR Code"
-          );
-          break;
-        case SubMode.APP:
-          url = navigateAppUrl;
-          content = renderQRCodeImage(
-            navigateAppSrc,
-            "Mobile App Link - QR Code"
-          );
-          break;
-        case SubMode.CORE:
-          url = navigateCoreUrl;
-          content = renderCoreLink(navigateCoreUrl);
-          break;
-        default:
-          break;
-      }
-    } else if (activeTab === Mode.SHARE) {
-      switch (activeSubTab) {
-        case SubMode.APP:
-          url = shareConnectionAppUrl;
-          content = renderQRCodeImage(
-            shareConnectionSrc,
-            "Share Connection - QR Code"
-          );
-          break;
-        case SubMode.CORE:
-          content = renderCoreLink(shareConnectionCoreUrl);
-          url = shareConnectionCoreUrl;
-          break;
-        default:
-          content = <span>Invalid submode for SHARE</span>;
-          break;
-      }
-    } else if (activeTab === Mode.APPS) {
-      switch (activeSubTab) {
-        case SubMode.APP:
-          content = (
-            <div
-              className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-12 tw-p-10"
-              style={squareStyle}
-            >
-              <ShareMobileApp platform="ios" />
-              <ShareMobileApp platform="android" />
-            </div>
-          );
-          break;
-        case SubMode.CORE:
-          content = <CoreAppsDownload />;
-          break;
-      }
-    }
+    const { content, url } = getDisplayContent();
 
     return (
       <div className="tw-flex tw-flex-col tw-gap-2">
@@ -429,18 +462,20 @@ export function HeaderQRModal({
         className="tw-absolute tw-inset-0 tw-border-0 tw-bg-transparent"
         onClick={onClose}
       />
-      <div
-        role="dialog"
-        aria-modal="true"
+      <dialog
+        open
+        aria-labelledby="header-share-title"
         data-testid="header-share-modal"
         className={`tw-relative tw-flex tw-w-full tw-max-w-md tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${
           isVisible
             ? "tw-translate-y-0 tw-scale-100 tw-opacity-100"
             : "tw-translate-y-1 tw-scale-95 tw-opacity-0"
         }`}
-        onClick={(event) => event.stopPropagation()}
       >
         <div className="tw-flex tw-flex-col tw-gap-2 tw-p-3">
+          <h2 id="header-share-title" className="tw-sr-only">
+            Share
+          </h2>
           <ModalMenu
             isShareConnection={!!getRefreshToken()}
             activeTab={activeTab}
@@ -452,7 +487,7 @@ export function HeaderQRModal({
           />
           {printImage()}
         </div>
-      </div>
+      </dialog>
     </div>
   );
 }
@@ -470,20 +505,18 @@ function ModalMenu({
 }) {
   const isElectron = useElectron();
   const topTabCount = isShareConnection ? 3 : 2;
-  const subTabCount =
-    activeTab === Mode.NAVIGATE ? (!isElectron ? 3 : 2) : !isElectron ? 2 : 1;
-  const subTabLabel =
-    activeTab === Mode.APPS
-      ? "Select Platform"
-      : activeTab === Mode.SHARE
-        ? "Open Link In"
-        : "Open URL In";
-  const getMenuButtonClass = (active: boolean) =>
-    `tw-inline-flex tw-h-10 tw-w-full tw-min-w-0 tw-items-center tw-justify-center tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-rounded-xl tw-border-0 tw-px-2 tw-text-[15px] tw-font-medium tw-transition tw-duration-200 ${
-      active
-        ? "tw-bg-iron-700 tw-text-iron-50"
-        : "tw-bg-iron-900 tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100"
-    }`;
+  const subTabCount = getSubTabCount(activeTab, isElectron);
+  const subTabLabel = getSubTabLabel(activeTab);
+  const getMenuButtonClass = (active: boolean) => {
+    const baseClassName =
+      "tw-inline-flex tw-h-10 tw-w-full tw-min-w-0 tw-items-center tw-justify-center tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-rounded-xl tw-border-0 tw-px-2 tw-text-[15px] tw-font-medium tw-transition tw-duration-200";
+
+    if (active) {
+      return `${baseClassName} tw-bg-iron-700 tw-text-iron-50`;
+    }
+
+    return `${baseClassName} tw-bg-iron-900 tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100`;
+  };
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
@@ -538,6 +571,7 @@ function ModalMenu({
         >
           <button
             type="button"
+            disabled={activeSubTab === SubMode.APP}
             className={getMenuButtonClass(activeSubTab === SubMode.APP)}
             onClick={() => onTabChange(activeTab, SubMode.APP)}
           >
@@ -546,6 +580,7 @@ function ModalMenu({
           {activeTab === Mode.NAVIGATE && (
             <button
               type="button"
+              disabled={activeSubTab === SubMode.BROWSER}
               className={getMenuButtonClass(activeSubTab === SubMode.BROWSER)}
               onClick={() => onTabChange(activeTab, SubMode.BROWSER)}
             >
@@ -555,6 +590,7 @@ function ModalMenu({
           {!isElectron && (
             <button
               type="button"
+              disabled={activeSubTab === SubMode.CORE}
               className={getMenuButtonClass(activeSubTab === SubMode.CORE)}
               onClick={() => onTabChange(activeTab, SubMode.CORE)}
             >
@@ -632,17 +668,24 @@ function CoreAppsDownload() {
 
     const loadVersions = async () => {
       const versions: OSInfo[] = [];
-      for (const osConfig of osConfigs.filter((config) => config.enabled)) {
-        try {
-          const ymlData = await fetchYml(osConfig.url);
-          versions.push({ ...osConfig, version: ymlData.version });
-        } catch (error) {
-          console.error(
-            `Failed to fetch or process ${osConfig.displayName}:`,
-            error
-          );
+      const enabledConfigs = osConfigs.filter((config) => config.enabled);
+      const results = await Promise.allSettled(
+        enabledConfigs.map((config) => fetchYml(config.url))
+      );
+
+      results.forEach((result, index) => {
+        const osConfig = enabledConfigs[index];
+        if (result.status === "fulfilled") {
+          versions.push({ ...osConfig, version: result.value.version });
+          return;
         }
-      }
+
+        console.error(
+          `Failed to fetch or process ${osConfig.displayName}:`,
+          result.reason
+        );
+      });
+
       setVersions(versions);
     };
 
