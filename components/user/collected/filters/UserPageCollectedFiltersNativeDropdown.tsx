@@ -34,6 +34,7 @@ export default function UserPageCollectedFiltersNativeDropdown({
       activeItem={selected}
       filterLabel="Collection"
       setSelected={setSelected}
+      size="sm"
     />
   );
 }

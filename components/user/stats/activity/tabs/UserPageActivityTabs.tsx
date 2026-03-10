@@ -1,4 +1,4 @@
-import { USER_PAGE_ACTIVITY_TAB } from "../UserPageActivityWrapper";
+import { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
 import UserPageActivityTab from "./UserPageActivityTab";
 
 export default function UserPageActivityTabs({
@@ -9,7 +9,7 @@ export default function UserPageActivityTabs({
   readonly setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
 }) {
   return (
-    <div className="tw-inline-flex tw-rounded-lg tw-overflow-hidden">
+    <div className="tw-inline-flex tw-overflow-hidden tw-rounded-lg">
       {Object.values(USER_PAGE_ACTIVITY_TAB).map((tab) => (
         <UserPageActivityTab
           key={tab}

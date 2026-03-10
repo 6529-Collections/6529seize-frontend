@@ -55,6 +55,14 @@ jest.mock(
     }
 );
 
+jest.mock(
+  "@/components/user/collected/UserPageCollectedStats",
+  () =>
+    function MockCollectedStats() {
+      return <div data-testid="stats-summary" />;
+    }
+);
+
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({ address: "0x123" })),
 }));
@@ -144,6 +152,7 @@ describe("UserPageCollected", () => {
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
+    expect(screen.getByTestId("stats-summary")).toBeInTheDocument();
     expect(screen.getByTestId("filters")).toBeInTheDocument();
     expect(screen.getByTestId("cards")).toBeInTheDocument();
     expect(screen.getByTestId("cards")).toHaveAttribute(

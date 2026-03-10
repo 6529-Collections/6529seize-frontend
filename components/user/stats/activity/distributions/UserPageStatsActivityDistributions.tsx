@@ -7,8 +7,13 @@ import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
+import { useCallback, useMemo } from "react";
+import {
+  ACTIVITY_PAGE_SIZE,
+  getActivityPaginationState,
+  getActivityWalletsParam,
+  WALLET_DISTRIBUTION_PAGE_PARAM,
+} from "../activity.helpers";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
 export default function UserPageStatsActivityDistributions({
@@ -18,54 +23,48 @@ export default function UserPageStatsActivityDistributions({
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
-  const PAGE_SIZE = 10;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const page = searchParams?.get(WALLET_DISTRIBUTION_PAGE_PARAM);
+  const page = searchParams.get(WALLET_DISTRIBUTION_PAGE_PARAM);
+  const pageFilter = page && !Number.isNaN(+page) ? +page : 1;
 
-  const [pageFilter, setPageFilter] = useState(
-    page && !isNaN(+page) ? +page : 1
+  const createQueryString = useCallback(
+    (
+      config: {
+        name: string;
+        value: string;
+      }[]
+    ): string => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const { name, value } of config) {
+        params.set(name, value);
+      }
+      return params.toString();
+    },
+    [searchParams]
   );
 
-  useEffect(() => {
-    setPageFilter(page && !isNaN(+page) ? +page : 1);
-  }, [page]);
+  const onPageFilter = useCallback(
+    (nextPage: number) => {
+      router.replace(
+        `${pathname}?${createQueryString([
+          { name: WALLET_DISTRIBUTION_PAGE_PARAM, value: `${nextPage}` },
+        ])}`,
+        { scroll: false }
+      );
+    },
+    [createQueryString, pathname, router]
+  );
 
-  const createQueryString = (
-    config: {
-      name: string;
-      value: string;
-    }[]
-  ): string => {
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    for (const { name, value } of config) {
-      params.set(name, value);
-    }
-    return params.toString();
-  };
-
-  const onPageFilter = (page: number) => {
-    router.replace(
-      `${pathname}?${createQueryString([
-        { name: WALLET_DISTRIBUTION_PAGE_PARAM, value: `${page}` },
-      ])}`,
-      { scroll: false }
-    );
-  };
-
-  const [totalPages, setTotalPages] = useState<number>(1);
-
-  const getWalletsParam = () =>
-    [
-      activeAddress?.toLowerCase() ??
-        profile.wallets?.map((w) => w.wallet.toLowerCase()),
-    ].join(",");
-
-  const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());
-  useEffect(() => {
-    setWalletsParam(getWalletsParam());
-  }, [activeAddress, profile]);
+  const walletsParam = useMemo(
+    () =>
+      getActivityWalletsParam({
+        activeAddress,
+        wallets: profile.wallets,
+      }),
+    [activeAddress, profile.wallets]
+  );
 
   const {
     isFetching,
@@ -75,16 +74,16 @@ export default function UserPageStatsActivityDistributions({
     queryKey: [
       QueryKey.PROFILE_DISTRIBUTIONS,
       {
-        page_size: `${PAGE_SIZE}`,
+        page_size: `${ACTIVITY_PAGE_SIZE}`,
         page: `${pageFilter}`,
         wallet: walletsParam,
       },
     ],
-    queryFn: async () =>
-      await commonApiFetch<Page<Distribution>>({
+    queryFn: () =>
+      commonApiFetch<Page<Distribution>>({
         endpoint: "distributions",
         params: {
-          page_size: `${PAGE_SIZE}`,
+          page_size: `${ACTIVITY_PAGE_SIZE}`,
           page: `${pageFilter}`,
           wallet: walletsParam,
         },
@@ -92,19 +91,12 @@ export default function UserPageStatsActivityDistributions({
     placeholderData: keepPreviousData,
   });
 
-  useEffect(() => {
-    if (isFetching) return;
-    if (!data?.count) {
-      onPageFilter(1);
-      setTotalPages(1);
-      return;
-    }
-    const totalPages = Math.ceil(data.count / PAGE_SIZE);
-    if (totalPages < pageFilter) {
-      onPageFilter(totalPages);
-    }
-    setTotalPages(totalPages);
-  }, [data?.count, data?.page, isFetching]);
+  const { currentPage, totalPages } = getActivityPaginationState({
+    count: data?.count,
+    page: data?.page,
+    pageFilter,
+    pageSize: ACTIVITY_PAGE_SIZE,
+  });
 
   return (
     <div className="tw-mt-4 md:tw-mt-5">
@@ -118,7 +110,7 @@ export default function UserPageStatsActivityDistributions({
         profile={profile}
         isFirstLoading={isFirstLoading}
         loading={isFetching}
-        page={pageFilter}
+        page={currentPage}
         totalPages={totalPages}
         setPage={onPageFilter}
       />

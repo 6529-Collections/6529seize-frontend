@@ -1,8 +1,6 @@
 import type { RefObject } from "react";
 import { CollectionSeized } from "@/entities/IProfile";
-import type {
-  CommonSelectItem,
-} from "@/components/utils/select/CommonSelect";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 
 type SelectedType = CollectionSeized | null;
@@ -42,6 +40,7 @@ export default function UserPageCollectedFiltersSeized({
       filterLabel="Seized"
       containerRef={containerRef}
       setSelected={setSelected}
+      size="sm"
     />
   );
 }
