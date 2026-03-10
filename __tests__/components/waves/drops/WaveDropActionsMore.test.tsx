@@ -1,10 +1,14 @@
 import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
+import { useDropLinkPreviewToggleControl } from "@/components/waves/drops/useDropLinkPreviewToggleControl";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
+}));
+jest.mock("@/components/waves/drops/useDropLinkPreviewToggleControl", () => ({
+  useDropLinkPreviewToggleControl: jest.fn(),
 }));
 
 jest.mock(
@@ -48,6 +52,9 @@ jest.mock("react-tooltip", () => ({
 }));
 
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
+const mockedUseDropLinkPreviewToggleControl = jest.mocked(
+  useDropLinkPreviewToggleControl
+);
 
 const drop = {
   id: "drop-1",
@@ -66,6 +73,7 @@ describe("WaveDropActionsMore", () => {
       isWinner: false,
       isVotingEnded: false,
     });
+    mockedUseDropLinkPreviewToggleControl.mockReturnValue(undefined);
   });
 
   it("shows the pinned-drop action in the desktop menu for admins", async () => {
@@ -93,5 +101,43 @@ describe("WaveDropActionsMore", () => {
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
     expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
+  });
+
+  it("shows restore link previews when the drop has hidden previews", async () => {
+    mockedUseDropLinkPreviewToggleControl.mockReturnValue({
+      canToggle: true,
+      isHidden: true,
+      isLoading: false,
+      label: "Show link previews",
+      onToggle: jest.fn(),
+    });
+
+    render(<WaveDropActionsMore drop={drop} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    expect(
+      screen.getByRole("button", { name: "Restore link previews" })
+    ).toBeInTheDocument();
+  });
+
+  it("triggers restore link previews from the desktop menu", async () => {
+    const onToggle = jest.fn();
+    mockedUseDropLinkPreviewToggleControl.mockReturnValue({
+      canToggle: true,
+      isHidden: true,
+      isLoading: false,
+      label: "Show link previews",
+      onToggle,
+    });
+
+    render(<WaveDropActionsMore drop={drop} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Restore link previews" })
+    );
+
+    expect(onToggle).toHaveBeenCalledTimes(1);
   });
 });
