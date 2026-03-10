@@ -1,6 +1,5 @@
-import UserPageStatsActivityWallet, {
-  UserPageStatsActivityWalletFilterType,
-} from "@/components/user/stats/activity/wallet/UserPageStatsActivityWallet";
+import UserPageStatsActivityWallet from "@/components/user/stats/activity/wallet/UserPageStatsActivityWallet";
+import { UserPageStatsActivityWalletFilterType } from "@/components/user/stats/activity/wallet/UserPageStatsActivityWallet.types";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "@/services/api/common-api";
 import { render, screen, waitFor } from "@testing-library/react";

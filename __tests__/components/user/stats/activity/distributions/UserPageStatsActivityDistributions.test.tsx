@@ -33,7 +33,7 @@ beforeEach(() => {
   mockUseQuery.mockImplementation(() => ({
     isFetching: false,
     isLoading: false,
-    data: { count: 20, page: 1, data: [] },
+    data: { count: 20, data: [] },
   }));
   mockedCommonApiFetch.mockReset();
 });
