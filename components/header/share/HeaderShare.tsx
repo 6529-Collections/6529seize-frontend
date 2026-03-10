@@ -152,6 +152,8 @@ export function HeaderQRModal({
 
   const handleEscapeKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
+      event.stopPropagation();
+      event.preventDefault();
       onCloseRef.current();
     }
   }, []);
@@ -224,7 +226,7 @@ export function HeaderQRModal({
     if (show) {
       generateSources(getRefreshToken(), getWalletAddress(), getWalletRole());
     }
-  }, [show]);
+  }, [show, isAuthenticated]);
 
   useEffect(() => {
     setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
