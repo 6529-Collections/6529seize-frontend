@@ -23,6 +23,84 @@ import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
 
+interface OSInfo {
+  name: "windows" | "mac" | "linux";
+  url: string;
+  displayName: string;
+  downloadPath: string;
+  image: string;
+  enabled: boolean;
+  version?: string | undefined;
+}
+
+interface FileData {
+  url: string;
+  sha512: string;
+  size: number;
+}
+
+interface LatestYml {
+  version: string;
+  files: FileData[];
+}
+
+const CORE_OS_CONFIGS: OSInfo[] = [
+  {
+    name: "windows",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/win/latest.yml",
+    displayName: "Windows",
+    downloadPath: "6529-core-app/win/links",
+    image: "/windows.png",
+    enabled: true,
+  },
+  {
+    name: "mac",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/mac/latest-mac.yml",
+    displayName: "macOS",
+    downloadPath: "6529-core-app/mac/links",
+    image: "/macos.png",
+    enabled: true,
+  },
+  {
+    name: "linux",
+    url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/linux/latest-linux.yml",
+    displayName: "Linux",
+    downloadPath: "6529-core-app/linux/links",
+    image: "/linux.png",
+    enabled: true,
+  },
+];
+
+const bodyScrollLock = (() => {
+  let lockCount = 0;
+  let previousOverflow = "";
+
+  return {
+    lock: () => {
+      if (typeof document === "undefined") {
+        return;
+      }
+
+      if (lockCount === 0) {
+        previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+      }
+
+      lockCount += 1;
+    },
+    unlock: () => {
+      if (typeof document === "undefined" || lockCount === 0) {
+        return;
+      }
+
+      lockCount -= 1;
+      if (lockCount === 0) {
+        document.body.style.overflow = previousOverflow;
+      }
+    },
+  };
+})();
+
 enum Mode {
   NAVIGATE,
   SHARE,
@@ -57,6 +135,23 @@ function getSubTabLabel(activeTab: Mode): string {
     return "Open Link In";
   }
   return "Open URL In";
+}
+
+function getFocusableElements(container: HTMLElement): HTMLElement[] {
+  const selectors = [
+    'a[href]:not([tabindex="-1"])',
+    'button:not([disabled]):not([tabindex="-1"])',
+    'textarea:not([disabled]):not([tabindex="-1"])',
+    'input:not([disabled]):not([tabindex="-1"])',
+    'select:not([disabled]):not([tabindex="-1"])',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(",");
+
+  return Array.from(container.querySelectorAll<HTMLElement>(selectors)).filter(
+    (element) =>
+      !element.hasAttribute("disabled") &&
+      element.getAttribute("aria-hidden") !== "true"
+  );
 }
 
 export default function HeaderShare({
@@ -145,18 +240,85 @@ export function HeaderQRModal({
 
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
   const onCloseRef = useRef(onClose);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+
+  const trapFocusInDialog = useCallback((event: KeyboardEvent) => {
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+
+    const focusableElements = getFocusableElements(dialog);
+    if (focusableElements.length === 0) {
+      event.preventDefault();
+      dialog.focus();
+      return;
+    }
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    if (!firstElement || !lastElement) {
+      event.preventDefault();
+      dialog.focus();
+      return;
+    }
+    const activeElement = document.activeElement as HTMLElement | null;
+    const activeInsideDialog = activeElement
+      ? dialog.contains(activeElement)
+      : false;
+
+    if (event.shiftKey) {
+      if (
+        !activeInsideDialog ||
+        activeElement === firstElement ||
+        activeElement === dialog
+      ) {
+        event.preventDefault();
+        lastElement.focus();
+      }
+      return;
+    }
+
+    if (!activeInsideDialog || activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  }, []);
 
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  const handleEscapeKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      event.stopPropagation();
-      event.preventDefault();
-      onCloseRef.current();
-    }
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+        copyTimeoutRef.current = null;
+      }
+    };
   }, []);
+
+  const handleEscapeKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        trapFocusInDialog(event);
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        event.preventDefault();
+        onCloseRef.current();
+      }
+    },
+    [trapFocusInDialog]
+  );
 
   function generateSources(
     refreshToken: string | null,
@@ -201,24 +363,33 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }
 
-    QRCode.toDataURL(browserUrl, { width: 500, margin: 0 }).then(
-      (dataUrl: string) => {
+    QRCode.toDataURL(browserUrl, { width: 500, margin: 0 })
+      .then((dataUrl: string) => {
         setNavigateBrowserSrc(dataUrl);
-      }
-    );
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to generate browser QR code", error);
+        setNavigateBrowserSrc("");
+      });
 
-    QRCode.toDataURL(appUrl, { width: 500, margin: 0 }).then(
-      (dataUrl: string) => {
+    QRCode.toDataURL(appUrl, { width: 500, margin: 0 })
+      .then((dataUrl: string) => {
         setNavigateAppSrc(dataUrl);
-      }
-    );
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to generate mobile app QR code", error);
+        setNavigateAppSrc("");
+      });
 
     if (shareConnectionAppUrl) {
-      QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 }).then(
-        (dataUrl: string) => {
+      QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 })
+        .then((dataUrl: string) => {
           setShareConnectionSrc(dataUrl);
-        }
-      );
+        })
+        .catch((error: unknown) => {
+          console.error("Failed to generate share connection QR code", error);
+          setShareConnectionSrc("");
+        });
     }
   }
 
@@ -257,16 +428,45 @@ export function HeaderQRModal({
       return;
     }
 
-    const previousOverflow = document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
+    bodyScrollLock.lock();
     globalThis.addEventListener("keydown", handleEscapeKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      bodyScrollLock.unlock();
       globalThis.removeEventListener("keydown", handleEscapeKeyDown);
     };
   }, [shouldRender, handleEscapeKeyDown]);
+
+  useEffect(() => {
+    if (!shouldRender) {
+      return;
+    }
+
+    const activeElement = document.activeElement;
+    previouslyFocusedElementRef.current =
+      activeElement instanceof HTMLElement ? activeElement : null;
+
+    const raf = requestAnimationFrame(() => {
+      const dialog = dialogRef.current;
+      if (!dialog) {
+        return;
+      }
+
+      const focusableElements = getFocusableElements(dialog);
+      const firstFocusableElement = focusableElements[0];
+      if (firstFocusableElement) {
+        firstFocusableElement.focus();
+        return;
+      }
+
+      dialog.focus();
+    });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      previouslyFocusedElementRef.current?.focus();
+    };
+  }, [shouldRender]);
 
   const renderQRCodeImage = (src: string, alt: string) => {
     const normalizedSrc = src?.trim();
@@ -420,7 +620,13 @@ export function HeaderQRModal({
                 try {
                   await navigator.clipboard.writeText(url);
                   setUrlCopied(true);
-                  setTimeout(() => setUrlCopied(false), 500);
+                  if (copyTimeoutRef.current) {
+                    clearTimeout(copyTimeoutRef.current);
+                  }
+                  copyTimeoutRef.current = setTimeout(() => {
+                    setUrlCopied(false);
+                    copyTimeoutRef.current = null;
+                  }, 500);
                 } catch (error) {
                   console.error("Failed to copy share URL to clipboard", error);
                 }
@@ -471,7 +677,10 @@ export function HeaderQRModal({
         onClick={onClose}
       />
       <dialog
+        ref={dialogRef}
         open
+        tabIndex={-1}
+        aria-modal="true"
         aria-labelledby="header-share-title"
         data-testid="header-share-modal"
         className={`tw-relative tw-flex tw-w-full tw-max-w-md tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${
@@ -511,7 +720,7 @@ function ModalMenu({
   readonly activeSubTab: SubMode;
   readonly onTabChange: (tab: Mode, subTab: SubMode) => void;
 }) {
-  const isElectron = useElectron();
+  const isElectron = useElectron() ?? false;
   const topTabCount = isShareConnection ? 3 : 2;
   const subTabCount = getSubTabCount(activeTab, isElectron);
   const subTabLabel = getSubTabLabel(activeTab);
@@ -612,54 +821,6 @@ function ModalMenu({
 }
 
 function CoreAppsDownload() {
-  interface OSInfo {
-    name: "windows" | "mac" | "linux";
-    url: string;
-    displayName: string;
-    downloadPath: string;
-    image: string;
-    enabled: boolean;
-    version?: string | undefined;
-  }
-
-  interface FileData {
-    url: string;
-    sha512: string;
-    size: number;
-  }
-
-  interface LatestYml {
-    version: string;
-    files: FileData[];
-  }
-
-  const osConfigs: OSInfo[] = [
-    {
-      name: "windows",
-      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/win/latest.yml",
-      displayName: "Windows",
-      downloadPath: "6529-core-app/win/links",
-      image: "/windows.png",
-      enabled: true,
-    },
-    {
-      name: "mac",
-      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/mac/latest-mac.yml",
-      displayName: "macOS",
-      downloadPath: "6529-core-app/mac/links",
-      image: "/macos.png",
-      enabled: true,
-    },
-    {
-      name: "linux",
-      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/linux/latest-linux.yml",
-      displayName: "Linux",
-      downloadPath: "6529-core-app/linux/links",
-      image: "/linux.png",
-      enabled: true,
-    },
-  ];
-
   const [versions, setVersions] = useState<OSInfo[]>([]);
 
   useEffect(() => {
@@ -676,7 +837,7 @@ function CoreAppsDownload() {
 
     const loadVersions = async () => {
       const versions: OSInfo[] = [];
-      const enabledConfigs = osConfigs.filter((config) => config.enabled);
+      const enabledConfigs = CORE_OS_CONFIGS.filter((config) => config.enabled);
       const results = await Promise.allSettled(
         enabledConfigs.map((config) => fetchYml(config.url))
       );
