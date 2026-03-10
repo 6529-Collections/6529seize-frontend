@@ -664,8 +664,7 @@ describe("DropPartMarkdown", () => {
     expect(paragraphs[2]).toHaveTextContent("Second");
   });
 
-  it("renders one inline show-previews action when previews are hidden", async () => {
-    const onToggle = jest.fn();
+  it("does not render an inline restore action when previews are hidden", () => {
     const content = "[first](https://google.com) [second](https://example.com)";
 
     render(
@@ -682,18 +681,14 @@ describe("DropPartMarkdown", () => {
           isHidden: true,
           isLoading: false,
           label: "Show link previews",
-          onToggle,
+          onToggle: jest.fn(),
         }}
       />
     );
 
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
-    const showButtons = screen.getAllByRole("button", {
-      name: "Show link previews",
-    });
-    expect(showButtons).toHaveLength(1);
-
-    await userEvent.click(showButtons[0]!);
-    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("button", { name: "Show link previews" })
+    ).toBeNull();
   });
 });
