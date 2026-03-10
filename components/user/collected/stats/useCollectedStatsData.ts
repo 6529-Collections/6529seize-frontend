@@ -3,7 +3,7 @@ import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { STATS_QUERY_KEY } from "./constants";
 import {
   getSafeCollectedStatsIdentityKey,
@@ -22,6 +22,8 @@ type CollectedStatsFetchState = {
   readonly shouldFetchOwnerBalance: boolean;
   readonly shouldFetchBalanceMemes: boolean;
 };
+
+type CollectedStatsTdh = ConsolidatedTDH | TDH | undefined;
 
 const DETAILS_DATA_STALE_TIME = 60_000;
 
@@ -117,7 +119,7 @@ const buildCollectedStatsDataResult = ({
   readonly shouldFetchSeasons: boolean;
   readonly shouldFetchTdh: boolean;
   readonly statsPath: string | null;
-  readonly tdh: ConsolidatedTDH | TDH | undefined;
+  readonly tdh: CollectedStatsTdh;
 }): UseCollectedStatsDataResult => ({
   statsPath,
   collectedStats: shouldFetchCollectedStats
@@ -166,7 +168,6 @@ export function useCollectedStatsData({
     queryKey: [STATS_QUERY_KEY, "collected-stats", collectedStatsIdentityKey],
     enabled: shouldFetchCollectedStats,
     retry: false,
-    placeholderData: keepPreviousData,
     queryFn: ({ signal }) =>
       fetchStatsQuery<ApiCollectedStats | undefined>({
         endpoint:
@@ -191,11 +192,10 @@ export function useCollectedStatsData({
       }),
   });
 
-  const { data: fetchedTdh } = useQuery<ConsolidatedTDH | TDH | undefined>({
+  const { data: fetchedTdh } = useQuery<CollectedStatsTdh>({
     queryKey: [STATS_QUERY_KEY, "tdh", statsPath],
     enabled: shouldFetchTdh,
     retry: false,
-    placeholderData: keepPreviousData,
     staleTime: DETAILS_DATA_STALE_TIME,
     queryFn: ({ signal }) =>
       fetchStatsQuery<ConsolidatedTDH | TDH | undefined>({
@@ -209,7 +209,6 @@ export function useCollectedStatsData({
     queryKey: [STATS_QUERY_KEY, "owner-balance", statsPath],
     enabled: shouldFetchOwnerBalance,
     retry: false,
-    placeholderData: keepPreviousData,
     staleTime: DETAILS_DATA_STALE_TIME,
     queryFn: ({ signal }) =>
       fetchStatsQuery<OwnerBalance | undefined>({
@@ -223,7 +222,6 @@ export function useCollectedStatsData({
     queryKey: [STATS_QUERY_KEY, "balance-memes", statsPath],
     enabled: shouldFetchBalanceMemes,
     retry: false,
-    placeholderData: keepPreviousData,
     staleTime: DETAILS_DATA_STALE_TIME,
     queryFn: ({ signal }) =>
       fetchStatsQuery<OwnerBalanceMemes[]>({

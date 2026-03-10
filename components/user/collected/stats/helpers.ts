@@ -47,7 +47,7 @@ const parseSeasonNumber = (season: string) => {
     return seasonNumber > 0 ? seasonNumber : null;
   }
 
-  const numberMatch = trimmed.match(/^season\s+(\d+)$/i);
+  const numberMatch = /^season\s+(\d+)$/i.exec(trimmed);
   if (numberMatch) {
     const seasonNumber = Number.parseInt(numberMatch[1]!, 10);
     return seasonNumber > 0 ? seasonNumber : null;

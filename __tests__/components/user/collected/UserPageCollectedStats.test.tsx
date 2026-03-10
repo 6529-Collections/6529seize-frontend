@@ -8,7 +8,20 @@ import type { ReactNode } from "react";
 
 jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
   __esModule: true,
-  default: () => <div data-testid="details" />,
+  default: (props: {
+    seasons: unknown[];
+    tdh: unknown;
+    ownerBalance: unknown;
+    balanceMemes: unknown[];
+  }) => (
+    <div
+      data-testid="details"
+      data-seasons={props.seasons.length}
+      data-has-tdh={String(Boolean(props.tdh))}
+      data-has-owner-balance={String(Boolean(props.ownerBalance))}
+      data-balance-memes={props.balanceMemes.length}
+    />
+  ),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -78,6 +91,18 @@ const renderWithQueryClient = (ui: ReactNode) => {
   return render(
     <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
   );
+};
+
+const createDeferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+
+  return {
+    promise,
+    resolve,
+  };
 };
 
 describe("UserPageCollectedStats", () => {
@@ -184,17 +209,17 @@ describe("UserPageCollectedStats", () => {
 
   it("collapses overflowing started seasons behind a see more control on desktop", async () => {
     const user = userEvent.setup();
-    const originalInnerWidth = window.innerWidth;
-    const originalGetComputedStyle = window.getComputedStyle;
+    const originalInnerWidth = globalThis.innerWidth;
+    const originalGetComputedStyle = globalThis.getComputedStyle;
     const clientWidthSpy = jest
       .spyOn(HTMLElement.prototype, "clientWidth", "get")
       .mockImplementation(function (this: HTMLElement) {
-        return this.hasAttribute("data-season-tile") ? 72 : 372;
+        return this.dataset.seasonTile !== undefined ? 72 : 372;
       });
     const getBoundingClientRectSpy = jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
-        const width = this.hasAttribute("data-season-tile") ? 72 : 372;
+        const width = this.dataset.seasonTile !== undefined ? 72 : 372;
         return {
           width,
           height: 0,
@@ -208,7 +233,7 @@ describe("UserPageCollectedStats", () => {
         } as DOMRect;
       });
     const getComputedStyleSpy = jest
-      .spyOn(window, "getComputedStyle")
+      .spyOn(globalThis, "getComputedStyle")
       .mockImplementation((element) => {
         const styles = originalGetComputedStyle(element);
         return {
@@ -224,7 +249,7 @@ describe("UserPageCollectedStats", () => {
         } as CSSStyleDeclaration;
       });
 
-    Object.defineProperty(window, "innerWidth", {
+    Object.defineProperty(globalThis, "innerWidth", {
       configurable: true,
       writable: true,
       value: 1280,
@@ -322,7 +347,7 @@ describe("UserPageCollectedStats", () => {
       clientWidthSpy.mockRestore();
       getBoundingClientRectSpy.mockRestore();
       getComputedStyleSpy.mockRestore();
-      Object.defineProperty(window, "innerWidth", {
+      Object.defineProperty(globalThis, "innerWidth", {
         configurable: true,
         writable: true,
         value: originalInnerWidth,
@@ -367,6 +392,66 @@ describe("UserPageCollectedStats", () => {
     );
   });
 
+  it("clears the previous collected stats while a new address fetch is in flight", async () => {
+    const nextCollectedStatsDeferred = createDeferred<typeof collectedStats>();
+    const nextCollectedStats = {
+      ...collectedStats,
+      nextgen_balance: 99,
+      memes_balance: 99,
+      unique_memes: 99,
+      seasons: [],
+    };
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+
+    apiMock.mockImplementation(({ endpoint }: { endpoint: string }) => {
+      if (
+        endpoint ===
+        "collected-stats/0x0000000000000000000000000000000000000001"
+      ) {
+        return nextCollectedStatsDeferred.promise;
+      }
+
+      return Promise.resolve({});
+    });
+
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByText("x62")).toBeInTheDocument();
+    expect(screen.getByText("2/3 started")).toBeInTheDocument();
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={"0x0000000000000000000000000000000000000001"}
+          initialStatsData={buildInitialStatsData()}
+        />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText("x62")).not.toBeInTheDocument();
+    expect(screen.queryByText("2/3 started")).not.toBeInTheDocument();
+
+    nextCollectedStatsDeferred.resolve(nextCollectedStats);
+
+    await waitFor(() => expect(screen.getAllByText("x99")).toHaveLength(2));
+  });
+
   it("starts legacy stats fetches only when details are opened", async () => {
     const user = userEvent.setup();
 
@@ -392,5 +477,100 @@ describe("UserPageCollectedStats", () => {
       "owners-balances/consolidation/key/memes",
     ]);
     expect(screen.getByTestId("details")).toBeInTheDocument();
+  });
+
+  it("clears previous detail stats while the next address detail queries are in flight", async () => {
+    const user = userEvent.setup();
+    const nextCollectedStatsDeferred = createDeferred<Record<string, never>>();
+    const nextTdhDeferred = createDeferred<{ score: number }>();
+    const nextOwnerBalanceDeferred = createDeferred<{ total: number }>();
+    const nextBalanceMemesDeferred = createDeferred<Array<{ id: number }>>();
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+
+    apiMock.mockImplementation(({ endpoint }: { endpoint: string }) => {
+      switch (endpoint) {
+        case "new_memes_seasons":
+          return Promise.resolve([{ id: 1 }]);
+        case "tdh/consolidation/key":
+          return Promise.resolve({ score: 1 });
+        case "owners-balances/consolidation/key":
+          return Promise.resolve({ total: 1 });
+        case "owners-balances/consolidation/key/memes":
+          return Promise.resolve([{ id: 1 }]);
+        case "collected-stats/0x0000000000000000000000000000000000000001":
+          return nextCollectedStatsDeferred.promise;
+        case "tdh/wallet/0x0000000000000000000000000000000000000001":
+          return nextTdhDeferred.promise;
+        case "owners-balances/wallet/0x0000000000000000000000000000000000000001":
+          return nextOwnerBalanceDeferred.promise;
+        case "owners-balances/wallet/0x0000000000000000000000000000000000000001/memes":
+          return nextBalanceMemesDeferred.promise;
+        default:
+          return Promise.resolve({});
+      }
+    });
+
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      </QueryClientProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Details" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-has-tdh",
+        "true"
+      )
+    );
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-has-owner-balance",
+      "true"
+    );
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-balance-memes",
+      "1"
+    );
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={"0x0000000000000000000000000000000000000001"}
+          initialStatsData={buildInitialStatsData()}
+        />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-has-tdh",
+        "false"
+      )
+    );
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-has-owner-balance",
+      "false"
+    );
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-balance-memes",
+      "0"
+    );
+
+    nextCollectedStatsDeferred.resolve({});
+    nextTdhDeferred.resolve({ score: 2 });
+    nextOwnerBalanceDeferred.resolve({ total: 2 });
+    nextBalanceMemesDeferred.resolve([{ id: 2 }]);
   });
 });

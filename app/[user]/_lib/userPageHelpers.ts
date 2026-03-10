@@ -68,7 +68,7 @@ export const isNotFoundError = (error: unknown): boolean => {
     message = error.message;
   }
 
-  return message !== undefined && message.toLowerCase().includes("not found");
+  return message?.toLowerCase().includes("not found") ?? false;
 };
 
 export const isProbeLikeUserSlug = (user: string): boolean => {

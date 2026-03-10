@@ -8,7 +8,9 @@ import type { ImgHTMLAttributes } from "react";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: ImgHTMLAttributes<HTMLImageElement>) => <img {...props} />,
+  default: ({ alt = "", ...props }: ImgHTMLAttributes<HTMLImageElement>) => (
+    <img {...props} alt={alt} />
+  ),
 }));
 
 const memeCard: CollectedCard = {

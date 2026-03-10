@@ -92,7 +92,7 @@ function NetworkCard({
                 onLoad={() => setIsImageLoaded(true)}
                 className={[
                   "tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain",
-                  !isImageLoaded ? "tw-opacity-0" : "tw-opacity-100",
+                  isImageLoaded ? "tw-opacity-100" : "tw-opacity-0",
                   "tw-transition-opacity tw-duration-300",
                 ].join(" ")}
               />

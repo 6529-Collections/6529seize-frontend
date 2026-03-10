@@ -13,7 +13,7 @@ const getRenderedWidth = (element: HTMLElement | null) =>
           return boundingWidth;
         }
 
-        return element.clientWidth > 0 ? element.clientWidth : 0;
+        return Math.max(element.clientWidth, 0);
       })();
 
 const getGap = (styles: CSSStyleDeclaration | undefined): number => {

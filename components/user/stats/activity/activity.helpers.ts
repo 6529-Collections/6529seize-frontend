@@ -29,7 +29,7 @@ const pageFilterReducer = (state: number, action: PageFilterAction): number => {
       }
 
       const totalPages = getTotalPages(action.count, action.pageSize);
-      return state > totalPages ? totalPages : state;
+      return Math.min(state, totalPages);
     }
   }
 };
