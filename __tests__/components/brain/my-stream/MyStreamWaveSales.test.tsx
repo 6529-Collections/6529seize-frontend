@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveSales from "@/components/brain/my-stream/MyStreamWaveSales";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -8,29 +8,57 @@ const mockSalesViewStyle = { height: "240px", maxHeight: "240px" };
 const mockMarketplacePreview = jest.fn(({ href }: { href: string }) => (
   <div data-testid="sale-preview">{href}</div>
 ));
+let intersectionCb: (() => void) | undefined;
 
 jest.mock("@/hooks/useWaveDrops", () => ({
   useWaveDrops: jest.fn(),
+}));
+
+jest.mock("@/hooks/useIntersectionObserver", () => ({
+  useIntersectionObserver: (cb: () => void) => {
+    intersectionCb = cb;
+    return { current: null };
+  },
 }));
 
 jest.mock("@/components/waves/MarketplacePreview", () => ({
   __esModule: true,
   default: (props: any) => mockMarketplacePreview(props),
 }));
+jest.mock(
+  "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar",
+  () => ({
+    WaveLeaderboardLoadingBar: () => (
+      <div data-testid="wave-sales-loading-bar" />
+    ),
+  })
+);
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ salesViewStyle: mockSalesViewStyle }),
 }));
 
 const useWaveDropsMock = useWaveDrops as jest.Mock;
+const fetchNextPage = jest.fn();
+
+const mockWaveDrops = (overrides: Record<string, unknown> = {}) => {
+  useWaveDropsMock.mockReturnValue({
+    drops: [],
+    fetchNextPage,
+    hasNextPage: false,
+    isFetching: false,
+    isFetchingNextPage: false,
+    ...overrides,
+  });
+};
 
 describe("MyStreamWaveSales", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    intersectionCb = undefined;
   });
 
   it("shows loading shell while participatory drops are fetching", () => {
-    useWaveDropsMock.mockReturnValue({
-      drops: [],
+    mockWaveDrops({
       isFetching: true,
     });
 
@@ -48,10 +76,7 @@ describe("MyStreamWaveSales", () => {
   });
 
   it("shows empty shell when there are no participatory drops", () => {
-    useWaveDropsMock.mockReturnValue({
-      drops: [],
-      isFetching: false,
-    });
+    mockWaveDrops();
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
@@ -63,7 +88,7 @@ describe("MyStreamWaveSales", () => {
   });
 
   it("shows empty shell when participatory drops have no usable sale URLs", () => {
-    useWaveDropsMock.mockReturnValue({
+    mockWaveDrops({
       drops: [
         {
           nft_links: [],
@@ -72,7 +97,6 @@ describe("MyStreamWaveSales", () => {
           nft_links: [{ url_in_text: "   " }, { url_in_text: null }],
         },
       ],
-      isFetching: false,
     });
 
     render(<MyStreamWaveSales waveId="wave-1" />);
@@ -85,7 +109,7 @@ describe("MyStreamWaveSales", () => {
   });
 
   it("renders sales previews in a responsive grid using the first usable nft link URL", () => {
-    useWaveDropsMock.mockReturnValue({
+    mockWaveDrops({
       drops: [
         {
           nft_links: [
@@ -103,7 +127,6 @@ describe("MyStreamWaveSales", () => {
           nft_links: [],
         },
       ],
-      isFetching: false,
     });
 
     render(<MyStreamWaveSales waveId="wave-1" />);
@@ -146,5 +169,67 @@ describe("MyStreamWaveSales", () => {
       href: "https://market.example/new-1",
       compact: true,
     });
+  });
+
+  it("fetches the next page when the pagination sentinel intersects", () => {
+    mockWaveDrops({
+      drops: [{ nft_links: [{ url_in_text: "https://market.example/old-1" }] }],
+      hasNextPage: true,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not fetch the next page when pagination is unavailable", () => {
+    mockWaveDrops({
+      drops: [{ nft_links: [{ url_in_text: "https://market.example/old-1" }] }],
+      hasNextPage: false,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it("does not fetch the next page while a page fetch is already in flight", () => {
+    mockWaveDrops({
+      drops: [{ nft_links: [{ url_in_text: "https://market.example/old-1" }] }],
+      hasNextPage: true,
+      isFetching: true,
+      isFetchingNextPage: true,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it("keeps the sales grid visible while fetching the next page", () => {
+    mockWaveDrops({
+      drops: [{ nft_links: [{ url_in_text: "https://market.example/old-1" }] }],
+      hasNextPage: true,
+      isFetching: true,
+      isFetchingNextPage: true,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    expect(screen.getByTestId("wave-sales-grid")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-sales-loading-bar")).toBeInTheDocument();
+    expect(screen.queryByText("Loading sales...")).not.toBeInTheDocument();
   });
 });
