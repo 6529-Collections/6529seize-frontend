@@ -61,6 +61,17 @@ interface QueryUpdateInput {
   value: string | null;
 }
 
+interface NormalizedCollectedQueryState {
+  readonly address: string | null;
+  readonly collection: CollectedCollectionType | null;
+  readonly subcollection: string | null;
+  readonly seized: CollectionSeized | null;
+  readonly sznId: number | null;
+  readonly page: number;
+  readonly sortBy: CollectionSort;
+  readonly sortDirection: SortDirection;
+}
+
 const SEARCH_PARAMS_FIELDS = {
   address: "address",
   collection: "collection",
@@ -160,6 +171,99 @@ const convertSortDirection = (sortDirection: string | null): SortDirection => {
     : DEFAULT_SORT_DIRECTION;
 };
 
+const getCanonicalCollectedQueryState = (
+  queryParams: URLSearchParams
+): NormalizedCollectedQueryState => {
+  const collection = convertCollection(
+    queryParams.get(SEARCH_PARAMS_FIELDS.collection)
+  );
+  const pageParam = queryParams.get(SEARCH_PARAMS_FIELDS.page);
+  const parsedPage = pageParam ? Number.parseInt(pageParam, 10) : 1;
+
+  return {
+    address: convertAddressToLowerCase(
+      queryParams.get(SEARCH_PARAMS_FIELDS.address)
+    ),
+    collection,
+    subcollection:
+      collection === CollectedCollectionType.NETWORK
+        ? queryParams.get(SEARCH_PARAMS_FIELDS.subcollection)
+        : null,
+    seized: convertSeized({
+      seized: queryParams.get(SEARCH_PARAMS_FIELDS.seized),
+      collection,
+    }),
+    sznId: convertSznId({
+      szn: queryParams.get(SEARCH_PARAMS_FIELDS.szn),
+      collection,
+    }),
+    page: Number.isNaN(parsedPage) ? 1 : parsedPage,
+    sortBy: convertSortedBy({
+      sortBy: queryParams.get(SEARCH_PARAMS_FIELDS.sortBy),
+      collection,
+    }),
+    sortDirection: convertSortDirection(
+      queryParams.get(SEARCH_PARAMS_FIELDS.sortDirection)
+    ),
+  };
+};
+
+const setCanonicalCollectedQueryParams = ({
+  normalizedParams,
+  state,
+}: {
+  readonly normalizedParams: URLSearchParams;
+  readonly state: NormalizedCollectedQueryState;
+}) => {
+  if (state.address !== null) {
+    normalizedParams.set(SEARCH_PARAMS_FIELDS.address, state.address);
+  }
+  if (state.collection !== null) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.collection,
+      state.collection.toLowerCase()
+    );
+  }
+  if (state.subcollection !== null) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.subcollection,
+      state.subcollection.toLowerCase()
+    );
+  }
+  if (
+    state.collection !== null &&
+    COLLECTED_COLLECTIONS_META[state.collection].filters.seized &&
+    state.seized !== null
+  ) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.seized,
+      state.seized.toLowerCase()
+    );
+  }
+  if (
+    state.collection !== null &&
+    COLLECTED_COLLECTIONS_META[state.collection].filters.szn &&
+    state.sznId !== null
+  ) {
+    normalizedParams.set(SEARCH_PARAMS_FIELDS.szn, state.sznId.toString());
+  }
+  if (state.page > 1) {
+    normalizedParams.set(SEARCH_PARAMS_FIELDS.page, state.page.toString());
+  }
+  if (state.sortBy !== getDefaultSortBy(state.collection)) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.sortBy,
+      state.sortBy.toLowerCase()
+    );
+  }
+  if (state.sortDirection !== DEFAULT_SORT_DIRECTION) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.sortDirection,
+      state.sortDirection.toLowerCase()
+    );
+  }
+};
+
 export default function UserPageCollected({
   profile,
   initialStatsData = EMPTY_USER_PAGE_STATS_INITIAL_DATA,
@@ -230,35 +334,7 @@ export default function UserPageCollected({
           queryParams.set(key, value.toLowerCase());
         }
       }
-
-      const address = convertAddressToLowerCase(
-        queryParams.get(SEARCH_PARAMS_FIELDS.address)
-      );
-      const collection = convertCollection(
-        queryParams.get(SEARCH_PARAMS_FIELDS.collection)
-      );
-      const subcollection =
-        collection === CollectedCollectionType.NETWORK
-          ? queryParams.get(SEARCH_PARAMS_FIELDS.subcollection)
-          : null;
-      const seized = convertSeized({
-        seized: queryParams.get(SEARCH_PARAMS_FIELDS.seized),
-        collection,
-      });
-      const sznId = convertSznId({
-        szn: queryParams.get(SEARCH_PARAMS_FIELDS.szn),
-        collection,
-      });
-      const pageParam = queryParams.get(SEARCH_PARAMS_FIELDS.page);
-      const parsedPage = pageParam ? Number.parseInt(pageParam, 10) : 1;
-      const page = Number.isNaN(parsedPage) ? 1 : parsedPage;
-      const sortBy = convertSortedBy({
-        sortBy: queryParams.get(SEARCH_PARAMS_FIELDS.sortBy),
-        collection,
-      });
-      const sortDirection = convertSortDirection(
-        queryParams.get(SEARCH_PARAMS_FIELDS.sortDirection)
-      );
+      const state = getCanonicalCollectedQueryState(queryParams);
       const normalizedParams = new URLSearchParams();
       const knownParamKeys = new Set<string>(
         Object.values(SEARCH_PARAMS_FIELDS)
@@ -269,48 +345,7 @@ export default function UserPageCollected({
           normalizedParams.append(key, value);
         }
       }
-
-      if (address !== null) {
-        normalizedParams.set(SEARCH_PARAMS_FIELDS.address, address);
-      }
-      if (collection !== null) {
-        normalizedParams.set(
-          SEARCH_PARAMS_FIELDS.collection,
-          collection.toLowerCase()
-        );
-      }
-      if (subcollection !== null) {
-        normalizedParams.set(
-          SEARCH_PARAMS_FIELDS.subcollection,
-          subcollection.toLowerCase()
-        );
-      }
-      if (
-        collection !== null &&
-        COLLECTED_COLLECTIONS_META[collection].filters.seized &&
-        seized !== null
-      ) {
-        normalizedParams.set(SEARCH_PARAMS_FIELDS.seized, seized.toLowerCase());
-      }
-      if (
-        collection !== null &&
-        COLLECTED_COLLECTIONS_META[collection].filters.szn &&
-        sznId !== null
-      ) {
-        normalizedParams.set(SEARCH_PARAMS_FIELDS.szn, sznId.toString());
-      }
-      if (page > 1) {
-        normalizedParams.set(SEARCH_PARAMS_FIELDS.page, page.toString());
-      }
-      if (sortBy !== getDefaultSortBy(collection)) {
-        normalizedParams.set(SEARCH_PARAMS_FIELDS.sortBy, sortBy.toLowerCase());
-      }
-      if (sortDirection !== DEFAULT_SORT_DIRECTION) {
-        normalizedParams.set(
-          SEARCH_PARAMS_FIELDS.sortDirection,
-          sortDirection.toLowerCase()
-        );
-      }
+      setCanonicalCollectedQueryParams({ normalizedParams, state });
 
       return normalizedParams.toString();
     },
@@ -335,6 +370,65 @@ export default function UserPageCollected({
 
   const { enabled: transferEnabled } = useTransfer();
 
+  const getCollectionSortUpdate = (
+    nextCollection: CollectedCollectionType | null
+  ): {
+    readonly nextSortBy: CollectionSort;
+    readonly nextSortDirection: SortDirection;
+    readonly updateItems: QueryUpdateInput[];
+  } => {
+    const isSwitchingFromNetwork =
+      filters.collection === CollectedCollectionType.NETWORK &&
+      nextCollection !== CollectedCollectionType.NETWORK;
+
+    if (
+      (nextCollection !== null &&
+        nextCollection !== CollectedCollectionType.NETWORK &&
+        !COLLECTED_COLLECTIONS_META[nextCollection].filters.sort.includes(
+          filters.sortBy
+        )) ||
+      isSwitchingFromNetwork
+    ) {
+      return {
+        nextSortBy: CollectionSort.TOKEN_ID,
+        nextSortDirection: SortDirection.DESC,
+        updateItems: [
+          {
+            name: "sortBy",
+            value: CollectionSort.TOKEN_ID,
+          },
+          {
+            name: "sortDirection",
+            value: SortDirection.DESC,
+          },
+        ],
+      };
+    }
+
+    if (nextCollection === CollectedCollectionType.NETWORK) {
+      return {
+        nextSortBy: CollectionSort.XTDH,
+        nextSortDirection: SortDirection.DESC,
+        updateItems: [
+          {
+            name: "sortBy",
+            value: CollectionSort.XTDH,
+          },
+          {
+            name: "sortDirection",
+            value: SortDirection.DESC,
+          },
+        ],
+      };
+    }
+
+    return {
+      nextSortBy: filters.sortBy,
+      nextSortDirection: filters.sortDirection,
+      updateItems: [],
+    };
+  };
+
   const getCollectionUpdate = ({
     collection,
     allowToggle,
@@ -347,6 +441,8 @@ export default function UserPageCollected({
   } => {
     const nextCollection =
       allowToggle && filters.collection === collection ? null : collection;
+    const sortUpdate = getCollectionSortUpdate(nextCollection);
+
     const updateItems: QueryUpdateInput[] = [
       {
         name: "collection",
@@ -368,44 +464,8 @@ export default function UserPageCollected({
         name: "subcollection",
         value: null,
       },
+      ...sortUpdate.updateItems,
     ];
-    let nextSortBy = filters.sortBy;
-    let nextSortDirection = filters.sortDirection;
-
-    const isSwitchingFromNetwork =
-      filters.collection === CollectedCollectionType.NETWORK &&
-      nextCollection !== CollectedCollectionType.NETWORK;
-
-    if (
-      (nextCollection !== null &&
-        nextCollection !== CollectedCollectionType.NETWORK &&
-        !COLLECTED_COLLECTIONS_META[nextCollection].filters.sort.includes(
-          filters.sortBy
-        )) ||
-      isSwitchingFromNetwork
-    ) {
-      nextSortBy = CollectionSort.TOKEN_ID;
-      nextSortDirection = SortDirection.DESC;
-      updateItems.push({
-        name: "sortBy",
-        value: CollectionSort.TOKEN_ID,
-      });
-      updateItems.push({
-        name: "sortDirection",
-        value: SortDirection.DESC,
-      });
-    } else if (nextCollection === CollectedCollectionType.NETWORK) {
-      nextSortBy = CollectionSort.XTDH;
-      nextSortDirection = SortDirection.DESC;
-      updateItems.push({
-        name: "sortBy",
-        value: CollectionSort.XTDH,
-      });
-      updateItems.push({
-        name: "sortDirection",
-        value: SortDirection.DESC,
-      });
-    }
 
     return {
       nextFilters: {
@@ -416,8 +476,8 @@ export default function UserPageCollected({
         szn: null,
         initialSznId: null,
         page: 1,
-        sortBy: nextSortBy,
-        sortDirection: nextSortDirection,
+        sortBy: sortUpdate.nextSortBy,
+        sortDirection: sortUpdate.nextSortDirection,
       },
       updateItems,
     };
