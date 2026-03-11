@@ -62,8 +62,11 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   }
 
   return (
-    <div className="tw-h-full tw-overflow-y-auto tw-p-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-p-4">
-      <div className="tw-flex tw-flex-col tw-gap-4">
+    <div className="tw-h-full tw-overflow-y-auto tw-p-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 tw-@container hover:tw-scrollbar-thumb-iron-300 sm:tw-p-4">
+      <div
+        data-testid="wave-sales-grid"
+        className="tw-grid tw-gap-4 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3"
+      >
         {salesUrls.map((url, index) => (
           <MarketplacePreview
             key={`${url}-${index}`}

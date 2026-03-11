@@ -24,7 +24,7 @@ describe("MyStreamWaveSales", () => {
     jest.clearAllMocks();
   });
 
-  it("shows loading shell while winner drops are fetching", () => {
+  it("shows loading shell while participatory drops are fetching", () => {
     useWaveDropsMock.mockReturnValue({
       drops: [],
       isFetching: true,
@@ -36,11 +36,11 @@ describe("MyStreamWaveSales", () => {
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
     expect(useWaveDropsMock).toHaveBeenCalledWith({
       waveId: "wave-1",
-      dropType: ApiDropType.Winner,
+      dropType: ApiDropType.Participatory,
     });
   });
 
-  it("shows empty shell when there are no winner drops", () => {
+  it("shows empty shell when there are no participatory drops", () => {
     useWaveDropsMock.mockReturnValue({
       drops: [],
       isFetching: false,
@@ -52,7 +52,7 @@ describe("MyStreamWaveSales", () => {
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
   });
 
-  it("shows empty shell when winner drops have no usable sale URLs", () => {
+  it("shows empty shell when participatory drops have no usable sale URLs", () => {
     useWaveDropsMock.mockReturnValue({
       drops: [
         {
@@ -71,7 +71,7 @@ describe("MyStreamWaveSales", () => {
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
   });
 
-  it("renders a flat preview list using the first usable nft link URL", () => {
+  it("renders sales previews in a responsive grid using the first usable nft link URL", () => {
     useWaveDropsMock.mockReturnValue({
       drops: [
         {
@@ -95,6 +95,12 @@ describe("MyStreamWaveSales", () => {
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
+    expect(screen.getByTestId("wave-sales-grid")).toHaveClass(
+      "tw-grid",
+      "tw-gap-4",
+      "@lg:tw-grid-cols-2",
+      "@3xl:tw-grid-cols-3"
+    );
     expect(
       screen.getAllByTestId("sale-preview").map((item) => item.textContent)
     ).toEqual([
