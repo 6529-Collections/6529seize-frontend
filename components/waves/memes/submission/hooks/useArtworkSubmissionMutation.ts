@@ -5,19 +5,20 @@ import { multiPartUpload } from "@/components/waves/create-wave/services/multiPa
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
-import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import type { InteractiveMediaMimeType } from "../constants/media";
+import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
-import { validateStrictAddress } from "../utils/addressValidation";
-import { objectEntries } from "../utils/objectEntries";
-
-import { OperationalData } from "../types/OperationalData";
+import {
+  buildSubmissionMetadata,
+  METADATA_VALUE_MAX_LENGTH,
+  getSubmissionMetadataLengthValidation,
+} from "../utils/submissionMetadata";
 
 /**
  * Interface for the artwork submission data
@@ -58,75 +59,10 @@ const transformToApiRequest = (data: {
     isSafeSignature,
   } = data;
 
-  // Create metadata array from trait data
-  const metadata: ApiDropMetadata[] = objectEntries(traits)
-    .map(([key, value]) => ({
-      data_key: String(key),
-      data_value: value?.toString(),
-    }))
-    .filter(
-      (metadata) =>
-        metadata.data_value !== undefined && metadata.data_value.length > 0
-    );
-
-  // Append operational data if provided
-  if (operationalData) {
-    const operationalMetadata: ApiDropMetadata[] = [
-      {
-        data_key: "payment_info",
-        data_value: JSON.stringify(operationalData.payment_info),
-      },
-      {
-        data_key: "commentary",
-        data_value: operationalData.commentary,
-      },
-      {
-        data_key: "about_artist",
-        data_value: operationalData.about_artist,
-      },
-    ];
-
-    if (
-      operationalData.airdrop_config &&
-      operationalData.airdrop_config.length > 0
-    ) {
-      const validEntries = operationalData.airdrop_config.filter((e) => {
-        const trimmedAddress = e.address?.trim() ?? "";
-        return validateStrictAddress(trimmedAddress) && e.count > 0;
-      });
-      if (validEntries.length > 0) {
-        operationalMetadata.push({
-          data_key: "airdrop_config",
-          data_value: JSON.stringify(validEntries),
-        });
-      }
-    }
-
-    if (
-      operationalData.allowlist_batches &&
-      operationalData.allowlist_batches.length > 0
-    ) {
-      const processedBatches = operationalData.allowlist_batches.map(
-        (batch) => ({
-          contract: batch.contract,
-          token_ids: batch.token_ids_raw || "",
-        })
-      );
-      operationalMetadata.push({
-        data_key: "allowlist_batches",
-        data_value: JSON.stringify(processedBatches),
-      });
-    }
-
-    if (operationalData.additional_media) {
-      operationalMetadata.push({
-        data_key: "additional_media",
-        data_value: JSON.stringify(operationalData.additional_media),
-      });
-    }
-
-    metadata.push(...operationalMetadata);
-  }
+  const metadata = buildSubmissionMetadata({
+    traits,
+    operationalData,
+  });
 
   // Create the request object
   const request: ApiCreateDropRequest = {
@@ -318,6 +254,22 @@ export function useArtworkSubmissionMutation() {
       if (!data.traits.title) {
         setToast({
           message: "Please provide a title for your artwork",
+          type: "error",
+        });
+        return null;
+      }
+
+      const metadataLengthValidation = getSubmissionMetadataLengthValidation({
+        traits: data.traits,
+        operationalData: data.operationalData,
+      });
+      if (metadataLengthValidation.hasErrors) {
+        const fields = metadataLengthValidation.errors
+          .map((item) => `${item.dataKey} (${item.length})`)
+          .join(", ");
+
+        setToast({
+          message: `Metadata exceeds ${METADATA_VALUE_MAX_LENGTH} characters for: ${fields}`,
           type: "error",
         });
         return null;

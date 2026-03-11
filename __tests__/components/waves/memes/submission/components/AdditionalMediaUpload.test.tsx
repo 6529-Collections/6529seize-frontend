@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AdditionalMediaUpload from "@/components/waves/memes/submission/components/AdditionalMediaUpload";
+import type { MetadataValueLengthStatus } from "@/components/waves/memes/submission/utils/submissionMetadata";
 
 describe("AdditionalMediaUpload", () => {
   const defaultProps = {
@@ -28,7 +29,13 @@ describe("AdditionalMediaUpload", () => {
   });
 
   it("shows preview section when video submission", () => {
-    render(<AdditionalMediaUpload {...defaultProps} requiresPreviewImage previewRequiredMediaType="Video" />);
+    render(
+      <AdditionalMediaUpload
+        {...defaultProps}
+        requiresPreviewImage
+        previewRequiredMediaType="Video"
+      />
+    );
     expect(screen.getByText(/Preview \*/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Video submissions require a preview image/i)
@@ -36,20 +43,38 @@ describe("AdditionalMediaUpload", () => {
   });
 
   it("does not show preview section for regular submissions", () => {
-    render(<AdditionalMediaUpload {...defaultProps} requiresPreviewImage={false} />);
+    render(
+      <AdditionalMediaUpload {...defaultProps} requiresPreviewImage={false} />
+    );
     expect(screen.queryByText(/Preview \*/i)).not.toBeInTheDocument();
   });
 
   it("shows promo video section for HTML submissions", () => {
-    render(<AdditionalMediaUpload {...defaultProps} requiresPreviewImage requiresPromoVideoOption previewRequiredMediaType="HTML" />);
+    render(
+      <AdditionalMediaUpload
+        {...defaultProps}
+        requiresPreviewImage
+        requiresPromoVideoOption
+        previewRequiredMediaType="HTML"
+      />
+    );
     expect(screen.getByText("Promo Video")).toBeInTheDocument();
     expect(
-      screen.getByText(/For HTML submissions, we recommend providing a promo video/i)
+      screen.getByText(
+        /For HTML submissions, we recommend providing a promo video/i
+      )
     ).toBeInTheDocument();
   });
 
   it("does not show promo video section for video submissions", () => {
-    render(<AdditionalMediaUpload {...defaultProps} requiresPreviewImage requiresPromoVideoOption={false} previewRequiredMediaType="Video" />);
+    render(
+      <AdditionalMediaUpload
+        {...defaultProps}
+        requiresPreviewImage
+        requiresPromoVideoOption={false}
+        previewRequiredMediaType="Video"
+      />
+    );
     expect(screen.queryByText("Promo Video")).not.toBeInTheDocument();
   });
 
@@ -69,5 +94,26 @@ describe("AdditionalMediaUpload", () => {
     await user.type(textarea, "T");
 
     expect(onArtworkCommentaryChange).toHaveBeenCalled();
+  });
+
+  it("shows metadata warning hint for about artist", () => {
+    const warningStatus: MetadataValueLengthStatus = {
+      dataKey: "about_artist",
+      length: 4700,
+      maxLength: 5000,
+      warningThreshold: 4500,
+      remaining: 300,
+      isWarning: true,
+      isError: false,
+    };
+
+    render(
+      <AdditionalMediaUpload
+        {...defaultProps}
+        aboutArtistLengthStatus={warningStatus}
+      />
+    );
+
+    expect(screen.getByText("4700/5000 characters.")).toBeInTheDocument();
   });
 });

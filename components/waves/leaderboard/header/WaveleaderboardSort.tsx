@@ -58,13 +58,13 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
 }) => {
   const getTabClassName = (value: WaveDropsLeaderboardSort): string => {
     const baseClass =
-      "tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-2.5 tw-text-xs tw-font-semibold tw-transition-colors tw-ring-1 tw-ring-inset";
+      "tw-flex tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out";
 
     if (sort === value) {
-      return `${baseClass} tw-ring-iron-600 tw-bg-iron-800 tw-text-iron-200`;
+      return `${baseClass} tw-bg-iron-800 tw-text-iron-100`;
     }
 
-    return `${baseClass} tw-ring-transparent tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-ring-iron-700 desktop-hover:hover:tw-text-iron-300`;
+    return `${baseClass} tw-bg-iron-950 tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-text-iron-100`;
   };
 
   if (mode === "tabs") {
@@ -72,7 +72,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       <div
         role="tablist"
         aria-label="Sort options"
-        className="tw-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700"
+        className="tw-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800"
       >
         {items.map((item) => (
           <button

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderNameEdit from "./WaveHeaderNameEdit";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
@@ -10,11 +10,11 @@ import { getWavePathRoute } from "@/helpers/navigation.helpers";
 
 export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const getShowEdit = () =>
+  const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const showEdit =
+    !isDirectMessage &&
     canEditWave({ connectedProfile, activeProfileProxy, wave });
 
-  const [showEdit, setShowEdit] = useState(getShowEdit());
-  useEffect(() => setShowEdit(getShowEdit()), [connectedProfile, wave]);
   return (
     <div className="tw-group tw-flex tw-items-start tw-space-x-2">
       <Link href={getWavePathRoute(wave.id)} className="tw-no-underline">

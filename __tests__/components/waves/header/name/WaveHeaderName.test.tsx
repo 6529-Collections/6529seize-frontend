@@ -39,4 +39,17 @@ describe("WaveHeaderName", () => {
     render(<WaveHeaderName wave={wave} />);
     expect(screen.queryByTestId("edit")).toBeNull();
   });
+
+  it("hides edit button for DM waves even when user can edit", () => {
+    (canEditWave as jest.Mock).mockReturnValue(true);
+    render(
+      <WaveHeaderName
+        wave={{
+          ...wave,
+          chat: { scope: { group: { is_direct_message: true } } },
+        }}
+      />
+    );
+    expect(screen.queryByTestId("edit")).toBeNull();
+  });
 });

@@ -14,6 +14,8 @@ import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
+import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
@@ -50,8 +52,10 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import {
-  getDimensionsFromMetadata,
-  getFileTypeFromMetadata,
+  getAnimationDimensionsFromMetadata,
+  getAnimationFileTypeFromMetadata,
+  getImageDimensionsFromMetadata,
+  getImageFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -94,7 +98,8 @@ export default function MemeLabPageComponent({
 
   const [nft, setNft] = useState<LabNFT>();
 
-  const hasAnimation = nft?.animation || nft?.metadata?.animation;
+  const animationHref = getResolvedAnimationSrc(nft);
+  const hasAnimation = Boolean(animationHref);
   const fullscreenElementId =
     hasAnimation && currentSlide === 0
       ? "the-art-fullscreen-animation"
@@ -973,16 +978,16 @@ export default function MemeLabPageComponent({
     setCurrentSlide(event);
   }
 
-  let currentFormat: string | undefined;
-  if (nft?.animation) {
-    if (currentSlide === 0) {
-      currentFormat = nft.metadata.animation_details.format;
-    } else {
-      currentFormat = nft.metadata.image_details.format;
-    }
-  } else {
-    currentFormat = nft?.metadata.image_details.format;
-  }
+  const imageFormat = getImageFileTypeFromMetadata(nft?.metadata);
+  const animationFormat = getAnimationFileTypeFromMetadata(nft?.metadata);
+  const imageDimensions = getImageDimensionsFromMetadata(nft?.metadata);
+  const animationDimensions = getAnimationDimensionsFromMetadata(nft?.metadata);
+  const imageHref = getResolvedImageSrc(nft);
+  const hasImage = Boolean(imageHref);
+  const isShowingAnimation = hasAnimation && (currentSlide === 0 || !hasImage);
+  const fileType = isShowingAnimation ? animationFormat : imageFormat;
+  const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
+  const currentFormat = fileType ?? "";
 
   function printTheArt() {
     if (nft && nftMeta) {
@@ -990,7 +995,7 @@ export default function MemeLabPageComponent({
         <>
           <Container className="p-0">
             <Row className="position-relative">
-              {nft.animation ? (
+              {hasAnimation ? (
                 <>
                   <Col xs={12} className={styles["artHeader"]}>
                     <div className={styles["artHeaderContent"]}>
@@ -1083,51 +1088,42 @@ export default function MemeLabPageComponent({
                           <h3>Arweave Links</h3>
                         </Col>
                       </Row>
-                      <Row>
-                        <Col className="tw-flex tw-items-center tw-gap-1">
-                          <span>{nft.metadata.image_details.format}</span>
-                          <Link
-                            className={styles["arweaveLink"]}
-                            href={nft.metadata.image}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {nft.metadata.image}
-                          </Link>
-                          <Download
-                            href={nft.metadata.image}
-                            name={nft.name}
-                            extension={nft.metadata.image_details.format}
-                          />
-                        </Col>
-                      </Row>
-                      {(nft.metadata.animation ||
-                        nft.metadata.animation_url) && (
-                        <Row className="pt-3">
+                      {imageHref && (
+                        <Row>
                           <Col className="tw-flex tw-items-center tw-gap-1">
-                            <span>{nft.metadata.animation_details.format}</span>
+                            {imageFormat && <span>{imageFormat}</span>}
                             <Link
                               className={styles["arweaveLink"]}
-                              href={
-                                nft.metadata.animation
-                                  ? nft.metadata.animation
-                                  : nft.metadata.animation_url
-                              }
+                              href={imageHref}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              {nft.metadata.animation
-                                ? nft.metadata.animation
-                                : nft.metadata.animation_url}
+                              {imageHref}
                             </Link>
                             <Download
-                              href={
-                                nft.metadata.animation
-                                  ? nft.metadata.animation
-                                  : nft.metadata.animation_url
-                              }
+                              href={imageHref}
                               name={nft.name}
-                              extension={nft.metadata.animation_details.format}
+                              extension={imageFormat ?? ""}
+                            />
+                          </Col>
+                        </Row>
+                      )}
+                      {animationHref && (
+                        <Row className="pt-3">
+                          <Col className="tw-flex tw-items-center tw-gap-1">
+                            {animationFormat && <span>{animationFormat}</span>}
+                            <Link
+                              className={styles["arweaveLink"]}
+                              href={animationHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {animationHref}
+                            </Link>
+                            <Download
+                              href={animationHref}
+                              name={nft.name}
+                              extension={animationFormat ?? ""}
                             />
                           </Col>
                         </Row>
@@ -1178,14 +1174,18 @@ export default function MemeLabPageComponent({
                             <td>Mint Date</td>
                             <td>{printMintDate(nft.mint_date)}</td>
                           </tr>
-                          <tr>
-                            <td>File Type</td>
-                            <td>{getFileTypeFromMetadata(nft.metadata)}</td>
-                          </tr>
-                          <tr>
-                            <td>Dimensions</td>
-                            <td>{getDimensionsFromMetadata(nft.metadata)}</td>
-                          </tr>
+                          {fileType && (
+                            <tr>
+                              <td>File Type</td>
+                              <td>{fileType}</td>
+                            </tr>
+                          )}
+                          {dimensions && (
+                            <tr>
+                              <td>Dimensions</td>
+                              <td>{dimensions}</td>
+                            </tr>
+                          )}
                         </tbody>
                       </Table>
                     </Col>

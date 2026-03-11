@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
+import DiscoverIcon from "../common/icons/DiscoverIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
@@ -19,6 +20,7 @@ import AppUserConnect from "./AppUserConnect";
 
 const MENU = [
   { label: "Profile", path: "/profile", icon: UserIcon },
+  { label: "Discovery", path: "/discover", icon: DiscoverIcon },
   {
     label: "Network",
     icon: UsersIcon,
@@ -29,6 +31,7 @@ const MENU = [
       { label: "NFT Activity", path: "/nft-activity" },
       { label: "Memes Calendar", path: "/meme-calendar" },
       { label: "TDH", path: "/network/tdh" },
+      { label: "xTDH", path: "/xtdh" },
       { label: "Metrics", section: true },
       { label: "Health", path: "/network/health" },
       { label: "Definitions", path: "/network/definitions" },

@@ -23,6 +23,8 @@ export * from '../models/ApiChangeProfileRepRating';
 export * from '../models/ApiCicContributor';
 export * from '../models/ApiCicContributorsPage';
 export * from '../models/ApiCicOverview';
+export * from '../models/ApiCollectedStats';
+export * from '../models/ApiCollectedStatsSeason';
 export * from '../models/ApiCommunityMemberMinimal';
 export * from '../models/ApiCommunityMemberOverview';
 export * from '../models/ApiCommunityMembersPage';
@@ -163,6 +165,7 @@ export * from '../models/ApiRepRating';
 export * from '../models/ApiReplyToDrop';
 export * from '../models/ApiReplyToDropResponse';
 export * from '../models/ApiSeizeSettings';
+export * from '../models/ApiSetPinnedDropRequest';
 export * from '../models/ApiStartMultipartMediaUploadResponse';
 export * from '../models/ApiTargetAndSubscriptionActions';
 export * from '../models/ApiTdhEdition';
@@ -296,6 +299,8 @@ import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
 import { ApiCicContributor } from '../models/ApiCicContributor';
 import { ApiCicContributorsPage } from '../models/ApiCicContributorsPage';
 import { ApiCicOverview } from '../models/ApiCicOverview';
+import { ApiCollectedStats } from '../models/ApiCollectedStats';
+import { ApiCollectedStatsSeason } from '../models/ApiCollectedStatsSeason';
 import { ApiCommunityMemberMinimal } from '../models/ApiCommunityMemberMinimal';
 import { ApiCommunityMemberOverview } from '../models/ApiCommunityMemberOverview';
 import { ApiCommunityMembersPage } from '../models/ApiCommunityMembersPage';
@@ -436,6 +441,7 @@ import { ApiRepRating } from '../models/ApiRepRating';
 import { ApiReplyToDrop } from '../models/ApiReplyToDrop';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiSeizeSettings } from '../models/ApiSeizeSettings';
+import { ApiSetPinnedDropRequest } from '../models/ApiSetPinnedDropRequest';
 import { ApiStartMultipartMediaUploadResponse } from '../models/ApiStartMultipartMediaUploadResponse';
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
 import { ApiTdhEdition } from '../models/ApiTdhEdition';
@@ -618,6 +624,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCicContributor": ApiCicContributor,
     "ApiCicContributorsPage": ApiCicContributorsPage,
     "ApiCicOverview": ApiCicOverview,
+    "ApiCollectedStats": ApiCollectedStats,
+    "ApiCollectedStatsSeason": ApiCollectedStatsSeason,
     "ApiCommunityMemberMinimal": ApiCommunityMemberMinimal,
     "ApiCommunityMemberOverview": ApiCommunityMemberOverview,
     "ApiCommunityMembersPage": ApiCommunityMembersPage,
@@ -743,6 +751,7 @@ let typeMap: {[index: string]: any} = {
     "ApiReplyToDrop": ApiReplyToDrop,
     "ApiReplyToDropResponse": ApiReplyToDropResponse,
     "ApiSeizeSettings": ApiSeizeSettings,
+    "ApiSetPinnedDropRequest": ApiSetPinnedDropRequest,
     "ApiStartMultipartMediaUploadResponse": ApiStartMultipartMediaUploadResponse,
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
     "ApiTdhEdition": ApiTdhEdition,

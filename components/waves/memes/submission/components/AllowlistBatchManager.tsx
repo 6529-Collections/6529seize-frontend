@@ -2,9 +2,11 @@
 
 import React, { useCallback } from "react";
 import FormSection from "../ui/FormSection";
+import MetadataLengthHint from "../ui/MetadataLengthHint";
 import { TraitWrapper } from "../../traits/TraitWrapper";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { AllowlistBatchRaw } from "../types/OperationalData";
+import type { MetadataValueLengthStatus } from "../utils/submissionMetadata";
 
 export type { AllowlistBatchRaw } from "../types/OperationalData";
 
@@ -12,12 +14,14 @@ interface AllowlistBatchManagerProps {
   readonly batches: AllowlistBatchRaw[];
   readonly onBatchesChange: (batches: AllowlistBatchRaw[]) => void;
   readonly errors?: { contract?: string; token_ids?: string }[];
+  readonly allowlistLengthStatus?: MetadataValueLengthStatus | undefined;
 }
 
 const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
   batches,
   onBatchesChange,
   errors,
+  allowlistLengthStatus,
 }) => {
   const handleAddBatch = useCallback(() => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
@@ -48,6 +52,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
 
   return (
     <FormSection title="Allowlist Configuration">
+      <MetadataLengthHint status={allowlistLengthStatus} className="tw-mb-3" />
       <div className="tw-flex tw-flex-col tw-gap-y-6">
         {batches.length === 0 ? (
           <div className="tw-py-2 tw-text-sm tw-italic tw-text-iron-500">
