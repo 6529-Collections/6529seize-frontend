@@ -1,6 +1,7 @@
 import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import UserPageCollected from "@/components/user/collected/UserPageCollected";
 import { CollectedCollectionType } from "@/entities/IProfile";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -20,6 +21,9 @@ jest.mock("next/navigation", () => ({
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
   keepPreviousData: jest.fn(),
+}));
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
 }));
 
 jest.mock(
@@ -70,6 +74,7 @@ jest.mock(
       return (
         <div
           data-testid="stats-summary"
+          data-active-collection={String(props.activeCollection ?? "")}
           data-active-season-number={String(props.activeSeasonNumber ?? "")}
         >
           <button
@@ -105,6 +110,7 @@ describe("UserPageCollected", () => {
   const useSearchParamsMock = useSearchParams as jest.Mock;
   const useParamsMock = useParams as jest.Mock;
   const useQueryMock = useQuery as jest.Mock;
+  const commonApiFetchMock = commonApiFetch as jest.Mock;
 
   // Reusable router mocks (Next App Router) — component uses router.replace(...)
   const routerReplace = jest.fn();
@@ -126,6 +132,11 @@ describe("UserPageCollected", () => {
     const query = path?.split("?")[1] ?? "";
     return new URLSearchParams(query);
   };
+  const getLatestProfileCollectedQueryOptions = () =>
+    [...useQueryMock.mock.calls]
+      .reverse()
+      .map((call) => call[0])
+      .find((options) => options.queryKey?.[0] === "PROFILE_COLLECTED");
 
   beforeEach(() => {
     useParamsMock.mockReturnValue({ user: "testuser" });
@@ -148,6 +159,11 @@ describe("UserPageCollected", () => {
         count: 0,
         page: 1,
       },
+    });
+    commonApiFetchMock.mockResolvedValue({
+      data: [],
+      count: 0,
+      page: 1,
     });
   });
 
@@ -357,10 +373,12 @@ describe("UserPageCollected", () => {
     );
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+    routerReplace.mockClear();
 
     await user.click(screen.getByTestId("stats-collection-shortcut"));
 
-    const params = getLastReplaceParams();
+    const path = routerReplace.mock.calls[0]?.[0] as string | undefined;
+    const params = new URLSearchParams(path?.split("?")[1] ?? "");
 
     expect(params.get("collection")).toBe("nextgen");
     expect(params.get("page")).toBeNull();
@@ -461,6 +479,105 @@ describe("UserPageCollected", () => {
           "XTDH",
           "DESC",
         ]),
+      })
+    );
+  });
+
+  it("updates collection shortcut state immediately and clears a staged season", async () => {
+    const user = userEvent.setup();
+
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "collection") return "memes";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue("collection=memes");
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("filters-set-szn"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+        "data-active-season-number",
+        "2"
+      );
+    });
+
+    await user.click(screen.getByTestId("stats-collection-shortcut"));
+
+    expect(screen.getByTestId("filters")).toHaveAttribute(
+      "data-collection",
+      "NEXTGEN"
+    );
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-active-collection",
+      "NEXTGEN"
+    );
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-active-season-number",
+      ""
+    );
+  });
+
+  it("clears a matching season shortcut when the season is only staged locally", async () => {
+    const user = userEvent.setup();
+
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "collection") return "memes";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue("collection=memes");
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("filters-set-szn"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+        "data-active-season-number",
+        "2"
+      );
+    });
+
+    await user.click(screen.getByTestId("stats-season-shortcut"));
+
+    expect(screen.getByTestId("filters")).not.toHaveAttribute(
+      "data-collection"
+    );
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-active-collection",
+      ""
+    );
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-active-season-number",
+      ""
+    );
+    expect(routerReplace).toHaveBeenLastCalledWith("/testuser/collected", {
+      scroll: false,
+    });
+  });
+
+  it("uses the effective season id in the collected query immediately after a season shortcut click", async () => {
+    const user = userEvent.setup();
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("stats-season-shortcut"));
+
+    const collectedQueryOptions = getLatestProfileCollectedQueryOptions();
+
+    expect(collectedQueryOptions).toBeDefined();
+
+    await collectedQueryOptions?.queryFn();
+
+    expect(commonApiFetchMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        endpoint: "profiles/testuser/collected",
+        params: expect.objectContaining({
+          collection: "MEMES",
+          seized: "SEIZED",
+          szn: "2",
+        }),
       })
     );
   });

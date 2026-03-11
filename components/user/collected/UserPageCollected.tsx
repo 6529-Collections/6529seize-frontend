@@ -331,19 +331,23 @@ export default function UserPageCollected({
   );
 
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+  const effectiveSeasonId = filters.szn?.id ?? filters.initialSznId;
 
   const { enabled: transferEnabled } = useTransfer();
 
-  const getCollectionUpdateItems = ({
+  const getCollectionUpdate = ({
     collection,
     allowToggle,
   }: {
     readonly collection: CollectedCollectionType | null;
     readonly allowToggle: boolean;
-  }): QueryUpdateInput[] => {
+  }): {
+    readonly nextFilters: ProfileCollectedFilters;
+    readonly updateItems: QueryUpdateInput[];
+  } => {
     const nextCollection =
       allowToggle && filters.collection === collection ? null : collection;
-    const items: QueryUpdateInput[] = [
+    const updateItems: QueryUpdateInput[] = [
       {
         name: "collection",
         value: nextCollection,
@@ -365,6 +369,8 @@ export default function UserPageCollected({
         value: null,
       },
     ];
+    let nextSortBy = filters.sortBy;
+    let nextSortDirection = filters.sortDirection;
 
     const isSwitchingFromNetwork =
       filters.collection === CollectedCollectionType.NETWORK &&
@@ -378,67 +384,98 @@ export default function UserPageCollected({
         )) ||
       isSwitchingFromNetwork
     ) {
-      items.push({
+      nextSortBy = CollectionSort.TOKEN_ID;
+      nextSortDirection = SortDirection.DESC;
+      updateItems.push({
         name: "sortBy",
         value: CollectionSort.TOKEN_ID,
       });
-      items.push({
+      updateItems.push({
         name: "sortDirection",
         value: SortDirection.DESC,
       });
     } else if (nextCollection === CollectedCollectionType.NETWORK) {
-      items.push({
+      nextSortBy = CollectionSort.XTDH;
+      nextSortDirection = SortDirection.DESC;
+      updateItems.push({
         name: "sortBy",
         value: CollectionSort.XTDH,
       });
-      items.push({
+      updateItems.push({
         name: "sortDirection",
         value: SortDirection.DESC,
       });
     }
 
-    return items;
+    return {
+      nextFilters: {
+        ...filters,
+        collection: nextCollection,
+        subcollection: null,
+        seized: DEFAULT_SEIZED,
+        szn: null,
+        initialSznId: null,
+        page: 1,
+        sortBy: nextSortBy,
+        sortDirection: nextSortDirection,
+      },
+      updateItems,
+    };
   };
 
   const setCollection = async (
     collection: CollectedCollectionType | null
   ): Promise<void> => {
     if (filters.collection === null && collection === null) return;
-    await updateFields(
-      getCollectionUpdateItems({
-        collection,
-        allowToggle: true,
-      })
-    );
+    const { nextFilters, updateItems } = getCollectionUpdate({
+      collection,
+      allowToggle: true,
+    });
+    setFilters(nextFilters);
+    await updateFields(updateItems);
   };
 
   const setCollectionShortcut = async (
     collection: CollectedCollectionType
   ): Promise<void> => {
-    await updateFields(
-      getCollectionUpdateItems({
-        collection,
-        allowToggle: true,
-      })
-    );
+    const { nextFilters, updateItems } = getCollectionUpdate({
+      collection,
+      allowToggle: true,
+    });
+    setFilters(nextFilters);
+    await updateFields(updateItems);
   };
 
   const setSeasonShortcut = async (seasonNumber: number): Promise<void> => {
     const isActiveSeasonShortcut =
       filters.collection === CollectedCollectionType.MEMES &&
-      filters.initialSznId === seasonNumber;
-    const items = getCollectionUpdateItems({
-      collection: isActiveSeasonShortcut ? null : CollectedCollectionType.MEMES,
-      allowToggle: false,
-    }).map((item) =>
+      effectiveSeasonId === seasonNumber;
+    const nextInitialSznId = isActiveSeasonShortcut ? null : seasonNumber;
+    const { nextFilters: nextCollectionFilters, updateItems } =
+      getCollectionUpdate({
+        collection: isActiveSeasonShortcut
+          ? null
+          : CollectedCollectionType.MEMES,
+        allowToggle: false,
+      });
+    const nextFilters: ProfileCollectedFilters = {
+      ...nextCollectionFilters,
+      szn:
+        nextInitialSznId !== null && filters.szn?.id === nextInitialSznId
+          ? filters.szn
+          : null,
+      initialSznId: nextInitialSznId,
+    };
+    const items = updateItems.map((item) =>
       item.name === "szn"
         ? {
             ...item,
-            value: isActiveSeasonShortcut ? null : seasonNumber.toString(),
+            value: nextInitialSznId?.toString() ?? null,
           }
         : item
     );
 
+    setFilters(nextFilters);
     await updateFields(items);
   };
 
@@ -573,8 +610,8 @@ export default function UserPageCollected({
         params["seized"] = filters.seized;
       }
 
-      if (filters.szn) {
-        params["szn"] = filters.szn.id.toString();
+      if (effectiveSeasonId !== null) {
+        params["szn"] = effectiveSeasonId.toString();
       }
 
       return await commonApiFetch<Page<CollectedCard>>({
@@ -687,7 +724,7 @@ export default function UserPageCollected({
         }
         initialStatsData={initialStatsData}
         activeCollection={filters.collection}
-        activeSeasonNumber={filters.szn?.id ?? filters.initialSznId}
+        activeSeasonNumber={effectiveSeasonId}
         onCollectionShortcut={setCollectionShortcut}
         onSeasonShortcut={setSeasonShortcut}
       />
