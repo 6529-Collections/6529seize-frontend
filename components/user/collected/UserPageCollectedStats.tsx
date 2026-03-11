@@ -59,6 +59,11 @@ interface UserPageCollectedStatsProps {
   readonly onSeasonShortcut?: ((seasonNumber: number) => void) | undefined;
 }
 
+interface PreferredSeasonPreview {
+  readonly seasonId: string;
+  readonly activeSeasonFilterId: string | null;
+}
+
 export default function UserPageCollectedStats({
   profile,
   activeAddress,
@@ -70,9 +75,8 @@ export default function UserPageCollectedStats({
 }: Readonly<UserPageCollectedStatsProps>) {
   const { hasTouchScreen } = useDeviceInfo();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [preferredActiveSeasonId, setPreferredActiveSeasonId] = useState<
-    string | null
-  >(null);
+  const [preferredSeasonPreview, setPreferredSeasonPreview] =
+    useState<PreferredSeasonPreview | null>(null);
   const [isDesktopSeasonListExpanded, setIsDesktopSeasonListExpanded] =
     useState(false);
   const detailsId = useId();
@@ -122,11 +126,14 @@ export default function UserPageCollectedStats({
       });
   const defaultActiveSeasonId =
     activeSeasonFilterId ?? startedSeasons[0]?.id ?? null;
-  const selectedActiveSeasonId = startedSeasons.some(
-    (season) => season.id === preferredActiveSeasonId
-  )
-    ? preferredActiveSeasonId
-    : defaultActiveSeasonId;
+  const selectedActiveSeasonId =
+    preferredSeasonPreview !== null &&
+    preferredSeasonPreview.activeSeasonFilterId === activeSeasonFilterId &&
+    startedSeasons.some(
+      (season) => season.id === preferredSeasonPreview.seasonId
+    )
+      ? preferredSeasonPreview.seasonId
+      : defaultActiveSeasonId;
   const fallbackVisibleActiveSeasonId =
     visibleStartedSeasons.find((season) => season.id === activeSeasonFilterId)
       ?.id ??
@@ -163,7 +170,12 @@ export default function UserPageCollectedStats({
             isDesktopLayout={isDesktopSeasonsLayout}
             isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
             desktopSeasonsRef={desktopSeasonsRef}
-            onActivateSeason={setPreferredActiveSeasonId}
+            onActivateSeason={(seasonId) =>
+              setPreferredSeasonPreview({
+                seasonId,
+                activeSeasonFilterId,
+              })
+            }
             onSeasonShortcut={onSeasonShortcut}
             onToggleExpanded={() =>
               setIsDesktopSeasonListExpanded((current) => !current)

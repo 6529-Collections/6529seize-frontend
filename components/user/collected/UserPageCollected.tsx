@@ -588,7 +588,7 @@ export default function UserPageCollected({
         }
         initialStatsData={initialStatsData}
         activeCollection={filters.collection}
-        activeSeasonNumber={filters.initialSznId}
+        activeSeasonNumber={filters.szn?.id ?? filters.initialSznId}
         onCollectionShortcut={setCollectionShortcut}
         onSeasonShortcut={setSeasonShortcut}
       />

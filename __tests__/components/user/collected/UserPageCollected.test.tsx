@@ -27,7 +27,14 @@ jest.mock(
   () =>
     function MockFilters(props: any) {
       return (
-        <div data-testid="filters" data-collection={props.filters.collection} />
+        <div data-testid="filters" data-collection={props.filters.collection}>
+          <button
+            data-testid="filters-set-szn"
+            onClick={() => props.setSzn?.({ id: 2 })}
+          >
+            Set season
+          </button>
+        </div>
       );
     }
 );
@@ -61,7 +68,10 @@ jest.mock(
   () =>
     function MockCollectedStats(props: any) {
       return (
-        <div data-testid="stats-summary">
+        <div
+          data-testid="stats-summary"
+          data-active-season-number={String(props.activeSeasonNumber ?? "")}
+        >
           <button
             data-testid="stats-collection-shortcut"
             onClick={() =>
@@ -422,5 +432,25 @@ describe("UserPageCollected", () => {
     expect(params.get("collection")).toBeNull();
     expect(params.get("szn")).toBeNull();
     expect(params.get("page")).toBe("1");
+  });
+
+  it("passes the optimistic season selection to the stats summary", async () => {
+    const user = userEvent.setup();
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-active-season-number",
+      ""
+    );
+
+    await user.click(screen.getByTestId("filters-set-szn"));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+        "data-active-season-number",
+        "2"
+      )
+    );
   });
 });

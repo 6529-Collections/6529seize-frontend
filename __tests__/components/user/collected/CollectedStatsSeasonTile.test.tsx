@@ -1,6 +1,6 @@
 import { CollectedStatsSeasonTile } from "@/components/user/collected/stats/subcomponents/CollectedStatsSeasonTile";
 import type { DisplaySeason } from "@/components/user/collected/stats/types";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 let shouldReduceMotion = false;
@@ -164,5 +164,27 @@ describe("CollectedStatsSeasonTile", () => {
       "tw-border-iron-700",
       "tw-bg-iron-950/80"
     );
+  });
+
+  it("does not trigger preview when selection is activated by click", () => {
+    const onPreview = jest.fn();
+    const onSelect = jest.fn();
+
+    render(
+      <CollectedStatsSeasonTile
+        season={buildSeason()}
+        isSelected={false}
+        showDetailText={false}
+        hasTouchScreen
+        shouldAnimateProgressOnMount
+        onPreview={onPreview}
+        onSelect={onSelect}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /szn2/i }));
+
+    expect(onPreview).not.toHaveBeenCalled();
+    expect(onSelect).toHaveBeenCalled();
   });
 });

@@ -213,6 +213,48 @@ describe("UserPageCollectedStats", () => {
     expect(onSeasonShortcut).toHaveBeenCalledWith(2);
   });
 
+  it("drops stale preview state when the active season filter changes", async () => {
+    const user = userEvent.setup();
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      </QueryClientProvider>
+    );
+
+    await user.hover(screen.getByRole("button", { name: /szn1/i }));
+
+    expect(screen.getByText("Set 1 complete")).toBeInTheDocument();
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+          activeSeasonNumber={2}
+        />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+    expect(screen.queryByText("Set 1 complete")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /szn2/i })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
   it("keeps the filtered season visible in the collapsed desktop row", () => {
     useDesktopSeasonRowCapacityMock.mockReturnValue({
       containerRef: { current: null },

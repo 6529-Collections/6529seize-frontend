@@ -119,10 +119,6 @@ export function CollectedStatsSeasonTile({
     showDetailText,
     isSelected
   );
-  const handleClick = () => {
-    onPreview();
-    onSelect?.();
-  };
 
   return (
     <button
@@ -131,7 +127,7 @@ export function CollectedStatsSeasonTile({
       aria-pressed={isSelected}
       onMouseEnter={hasTouchScreen ? undefined : onPreview}
       onFocus={onPreview}
-      onClick={handleClick}
+      onClick={onSelect}
       className={[
         "tw-flex tw-w-16 tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-xl tw-border tw-border-solid tw-px-1.5 tw-py-2 tw-text-center tw-transition-colors tw-duration-200 sm:tw-w-[72px]",
         getButtonClassName(isSelected),
