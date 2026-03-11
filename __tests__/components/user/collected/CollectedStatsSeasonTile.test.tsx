@@ -166,6 +166,27 @@ describe("CollectedStatsSeasonTile", () => {
     );
   });
 
+  it("keeps the unselected tile visually plain until it is active", () => {
+    render(
+      <CollectedStatsSeasonTile
+        season={buildSeason()}
+        isSelected={false}
+        showDetailText={false}
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    const button = screen.getByRole("button", { name: /szn2/i });
+
+    expect(button).toHaveClass("tw-border-transparent", "tw-bg-transparent");
+    expect(button).not.toHaveClass(
+      "hover:tw-border-iron-900",
+      "hover:tw-bg-iron-950/60"
+    );
+  });
+
   it("does not trigger preview when selection is activated by click", () => {
     const onPreview = jest.fn();
     const onSelect = jest.fn();

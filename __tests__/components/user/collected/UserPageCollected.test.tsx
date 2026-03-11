@@ -363,12 +363,12 @@ describe("UserPageCollected", () => {
     const params = getLastReplaceParams();
 
     expect(params.get("collection")).toBe("nextgen");
-    expect(params.get("page")).toBe("1");
-    expect(params.get("seized")).toBe("seized");
+    expect(params.get("page")).toBeNull();
+    expect(params.get("seized")).toBeNull();
     expect(params.get("szn")).toBeNull();
     expect(params.get("subcollection")).toBeNull();
-    expect(params.get("sort-by")).toBe("token_id");
-    expect(params.get("sort-direction")).toBe("desc");
+    expect(params.get("sort-by")).toBeNull();
+    expect(params.get("sort-direction")).toBeNull();
   });
 
   it("applies season shortcuts through the existing url filter flow", async () => {
@@ -381,10 +381,12 @@ describe("UserPageCollected", () => {
     const params = getLastReplaceParams();
 
     expect(params.get("collection")).toBe("memes");
-    expect(params.get("page")).toBe("1");
+    expect(params.get("page")).toBeNull();
     expect(params.get("seized")).toBe("seized");
     expect(params.get("szn")).toBe("2");
     expect(params.get("subcollection")).toBeNull();
+    expect(params.get("sort-by")).toBeNull();
+    expect(params.get("sort-direction")).toBeNull();
   });
 
   it("clears the collection shortcut when the same metric is clicked again", async () => {
@@ -407,7 +409,10 @@ describe("UserPageCollected", () => {
 
     expect(params.get("collection")).toBeNull();
     expect(params.get("szn")).toBeNull();
-    expect(params.get("page")).toBe("1");
+    expect(params.get("page")).toBeNull();
+    expect(routerReplace).toHaveBeenLastCalledWith("/testuser/collected", {
+      scroll: false,
+    });
   });
 
   it("clears the season shortcut when the same season is clicked again", async () => {
@@ -431,7 +436,33 @@ describe("UserPageCollected", () => {
 
     expect(params.get("collection")).toBeNull();
     expect(params.get("szn")).toBeNull();
-    expect(params.get("page")).toBe("1");
+    expect(params.get("page")).toBeNull();
+    expect(routerReplace).toHaveBeenLastCalledWith("/testuser/collected", {
+      scroll: false,
+    });
+  });
+
+  it("uses network as a standalone canonical url without explicit default sort params", () => {
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "collection") return "network";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue("collection=network");
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: expect.arrayContaining([
+          "XTDH_TOKENS",
+          "testuser",
+          1,
+          24,
+          "XTDH",
+          "DESC",
+        ]),
+      })
+    );
   });
 
   it("passes the optimistic season selection to the stats summary", async () => {

@@ -468,18 +468,22 @@ describe("UserPageCollectedStats", () => {
         ).toBeInTheDocument();
       });
 
-      expect(screen.getByText("+2 more")).toBeInTheDocument();
+      const showMoreButton = screen.getByRole("button", {
+        name: "Show 2 more started seasons",
+      });
+      expect(showMoreButton).toHaveTextContent("+2 more");
+      expect(showMoreButton).not.toHaveClass("tw-absolute", "tw-right-0");
+      expect(showMoreButton.parentElement).toHaveClass(
+        "tw-flex",
+        "tw-justify-center"
+      );
       expect(
         screen.queryByRole("button", {
           name: /szn6/i,
         })
       ).not.toBeInTheDocument();
 
-      await user.click(
-        screen.getByRole("button", {
-          name: "Show 2 more started seasons",
-        })
-      );
+      await user.click(showMoreButton);
 
       expect(
         screen.getByRole("button", {

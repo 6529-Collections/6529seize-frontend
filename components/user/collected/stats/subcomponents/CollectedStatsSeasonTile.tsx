@@ -80,7 +80,7 @@ const getDetailTextClassName = (
 const getButtonClassName = (isSelected: boolean): string =>
   isSelected
     ? "tw-border-iron-700 tw-bg-iron-950/80"
-    : "tw-border-transparent tw-bg-transparent hover:tw-border-iron-900 hover:tw-bg-iron-950/60";
+    : "tw-border-transparent tw-bg-transparent";
 
 const getSetsHeldLabel = (setsHeld: number): string => {
   if (setsHeld <= 0) {
@@ -129,7 +129,7 @@ export function CollectedStatsSeasonTile({
       onFocus={onPreview}
       onClick={onSelect}
       className={[
-        "tw-flex tw-w-16 tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-xl tw-border tw-border-solid tw-px-1.5 tw-py-2 tw-text-center tw-transition-colors tw-duration-200 sm:tw-w-[72px]",
+        "tw-flex tw-w-16 tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-xl tw-border tw-border-solid tw-px-1 tw-py-2 tw-text-center tw-transition-all tw-duration-200 sm:tw-w-[72px]",
         getButtonClassName(isSelected),
         "hover:tw-scale-[1.01] focus-visible:tw-scale-[1.01]",
         "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500",

@@ -72,6 +72,94 @@ const SEARCH_PARAMS_FIELDS = {
   sortDirection: "sort-direction",
 } as const;
 
+const DEFAULT_SORT_BY = CollectionSort.TOKEN_ID;
+const DEFAULT_SORT_DIRECTION = SortDirection.DESC;
+const DEFAULT_SEIZED = CollectionSeized.SEIZED;
+const PAGE_SIZE = 24;
+const COLLECTION_VALUES = Object.values(CollectedCollectionType);
+const SEIZED_VALUES = Object.values(CollectionSeized);
+const SORT_VALUES = Object.values(CollectionSort);
+const SORT_DIRECTION_VALUES = Object.values(SortDirection);
+
+const getDefaultSortBy = (
+  collection: CollectedCollectionType | null
+): CollectionSort =>
+  collection === CollectedCollectionType.NETWORK
+    ? CollectionSort.XTDH
+    : DEFAULT_SORT_BY;
+
+const convertSeized = ({
+  seized,
+  collection,
+}: {
+  readonly seized: string | null;
+  readonly collection: CollectedCollectionType | null;
+}): CollectionSeized | null => {
+  if (collection === null) return DEFAULT_SEIZED;
+  if (!COLLECTED_COLLECTIONS_META[collection].filters.seized) {
+    return DEFAULT_SEIZED;
+  }
+  if (seized === null) return null;
+  const normalizedSeized = seized.toUpperCase() as CollectionSeized;
+  return SEIZED_VALUES.includes(normalizedSeized) ? normalizedSeized : null;
+};
+
+const convertSznId = ({
+  szn,
+  collection,
+}: {
+  readonly szn: string | null;
+  readonly collection: CollectedCollectionType | null;
+}): number | null => {
+  if (collection === null) return null;
+  if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
+  if (szn === null) return null;
+  const parsed = Number.parseInt(szn, 10);
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
+const convertCollection = (
+  collection: string | null
+): CollectedCollectionType | null => {
+  if (collection === null) return null;
+  const normalizedCollection =
+    collection.toUpperCase() as CollectedCollectionType;
+  return COLLECTION_VALUES.includes(normalizedCollection)
+    ? normalizedCollection
+    : null;
+};
+
+const convertSortedBy = ({
+  sortBy,
+  collection,
+}: {
+  readonly sortBy: string | null;
+  readonly collection: CollectedCollectionType | null;
+}): CollectionSort => {
+  const defaultCollectionSortBy = getDefaultSortBy(collection);
+  if (sortBy === null) return defaultCollectionSortBy;
+  const normalizedSortBy = sortBy.toUpperCase() as CollectionSort;
+  if (
+    collection !== null &&
+    !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+      normalizedSortBy
+    )
+  ) {
+    return defaultCollectionSortBy;
+  }
+  return SORT_VALUES.includes(normalizedSortBy)
+    ? normalizedSortBy
+    : defaultCollectionSortBy;
+};
+
+const convertSortDirection = (sortDirection: string | null): SortDirection => {
+  if (sortDirection === null) return DEFAULT_SORT_DIRECTION;
+  const normalizedSortDirection = sortDirection.toUpperCase() as SortDirection;
+  return SORT_DIRECTION_VALUES.includes(normalizedSortDirection)
+    ? normalizedSortDirection
+    : DEFAULT_SORT_DIRECTION;
+};
+
 export default function UserPageCollected({
   profile,
   initialStatsData = EMPTY_USER_PAGE_STATS_INITIAL_DATA,
@@ -81,10 +169,6 @@ export default function UserPageCollected({
 }) {
   const { address: connectedAddress } = useSeizeConnectContext();
   const isMobile = useIsMobileScreen();
-  const defaultSortBy = CollectionSort.TOKEN_ID;
-  const defaultSortDirection = SortDirection.DESC;
-  const defaultSeized = CollectionSeized.SEIZED;
-  const PAGE_SIZE = 24;
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -92,128 +176,143 @@ export default function UserPageCollected({
   const router = useRouter();
   const user = params?.["user"]?.toString().toLowerCase() ?? "";
 
-  const convertSeized = ({
-    seized,
-    collection,
-  }: {
-    readonly seized: string | null;
-    readonly collection: CollectedCollectionType | null;
-  }): CollectionSeized | null => {
-    if (!collection) return defaultSeized;
-    if (!COLLECTED_COLLECTIONS_META[collection].filters.seized)
-      return defaultSeized;
-    if (!seized) return null;
-    return (
-      Object.values(CollectionSeized).find((c) => c === seized.toUpperCase()) ??
-      null
-    );
-  };
-
-  const convertSznId = ({
-    szn,
-    collection,
-  }: {
-    readonly szn: string | null;
-    readonly collection: CollectedCollectionType | null;
-  }): number | null => {
-    if (!collection) return null;
-    if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
-    if (!szn) return null;
-    const parsed = Number.parseInt(szn, 10);
-    return Number.isNaN(parsed) ? null : parsed;
-  };
-
-  const convertCollection = (
-    collection: string | null
-  ): CollectedCollectionType | null => {
-    if (!collection) return null;
-    return (
-      Object.values(CollectedCollectionType).find(
-        (c) => c === collection.toUpperCase()
-      ) ?? null
-    );
-  };
-
-  const convertSortedBy = ({
-    sortBy,
-    collection,
-  }: {
-    readonly sortBy: string | null;
-    readonly collection: CollectedCollectionType | null;
-  }): CollectionSort => {
-    if (!sortBy) return defaultSortBy;
-    if (
-      collection &&
-      collection !== CollectedCollectionType.NETWORK &&
-      !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
-        sortBy.toUpperCase() as CollectionSort
-      )
-    ) {
-      return defaultSortBy;
-    }
-    return (
-      Object.values(CollectionSort).find((c) => c === sortBy.toUpperCase()) ??
-      defaultSortBy
-    );
-  };
-
-  const convertSortDirection = (sortDirection: string | null) => {
-    if (!sortDirection) return defaultSortDirection;
-    return (
-      Object.values(SortDirection).find(
-        (c) => c === sortDirection.toUpperCase()
-      ) ?? defaultSortDirection
-    );
-  };
-
   const getFilters = useCallback((): ProfileCollectedFilters => {
-    const address = searchParams?.get(SEARCH_PARAMS_FIELDS.address);
-    const collection = searchParams?.get(SEARCH_PARAMS_FIELDS.collection);
-    const subcollection = searchParams?.get(SEARCH_PARAMS_FIELDS.subcollection);
-    const seized = searchParams?.get(SEARCH_PARAMS_FIELDS.seized);
-    const szn = searchParams?.get(SEARCH_PARAMS_FIELDS.szn);
-    const page = searchParams?.get(SEARCH_PARAMS_FIELDS.page);
-    const sortBy = searchParams?.get(SEARCH_PARAMS_FIELDS.sortBy);
-    const sortDirection = searchParams?.get(SEARCH_PARAMS_FIELDS.sortDirection);
+    const addressParam = searchParams.get(SEARCH_PARAMS_FIELDS.address);
+    const collectionParam = searchParams.get(SEARCH_PARAMS_FIELDS.collection);
+    const subcollectionParam = searchParams.get(
+      SEARCH_PARAMS_FIELDS.subcollection
+    );
+    const seizedParam = searchParams.get(SEARCH_PARAMS_FIELDS.seized);
+    const sznParam = searchParams.get(SEARCH_PARAMS_FIELDS.szn);
+    const pageParam = searchParams.get(SEARCH_PARAMS_FIELDS.page);
+    const sortByParam = searchParams.get(SEARCH_PARAMS_FIELDS.sortBy);
+    const sortDirectionParam = searchParams.get(
+      SEARCH_PARAMS_FIELDS.sortDirection
+    );
 
-    const convertedAddress = convertAddressToLowerCase(address);
-    const convertedCollection = convertCollection(collection ?? null);
+    const convertedAddress = convertAddressToLowerCase(addressParam);
+    const convertedCollection = convertCollection(collectionParam ?? null);
     return {
       handleOrWallet: convertedAddress ?? profile.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
-      subcollection: subcollection ?? null,
+      subcollection:
+        convertedCollection === CollectedCollectionType.NETWORK
+          ? (subcollectionParam ?? null)
+          : null,
       seized: convertSeized({
-        seized: seized ?? null,
+        seized: seizedParam ?? null,
         collection: convertedCollection,
       }),
       szn: null,
       initialSznId: convertSznId({
-        szn: szn ?? null,
+        szn: sznParam ?? null,
         collection: convertedCollection,
       }),
-      page: page ? Number.parseInt(page, 10) : 1,
+      page: pageParam ? Number.parseInt(pageParam, 10) : 1,
       pageSize: PAGE_SIZE,
       sortBy: convertSortedBy({
-        sortBy: sortBy ?? null,
+        sortBy: sortByParam ?? null,
         collection: convertedCollection,
       }),
-      sortDirection: convertSortDirection(sortDirection ?? null),
+      sortDirection: convertSortDirection(sortDirectionParam ?? null),
     };
   }, [searchParams, profile.handle, user]);
 
   const createQueryString = useCallback(
     (updateItems: QueryUpdateInput[]): string => {
-      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      const queryParams = new URLSearchParams(searchParams.toString());
       for (const { name, value } of updateItems) {
         const key = SEARCH_PARAMS_FIELDS[name];
         if (!value) {
-          params.delete(key);
+          queryParams.delete(key);
         } else {
-          params.set(key, value.toLowerCase());
+          queryParams.set(key, value.toLowerCase());
         }
       }
-      return params.toString();
+
+      const address = convertAddressToLowerCase(
+        queryParams.get(SEARCH_PARAMS_FIELDS.address)
+      );
+      const collection = convertCollection(
+        queryParams.get(SEARCH_PARAMS_FIELDS.collection)
+      );
+      const subcollection =
+        collection === CollectedCollectionType.NETWORK
+          ? queryParams.get(SEARCH_PARAMS_FIELDS.subcollection)
+          : null;
+      const seized = convertSeized({
+        seized: queryParams.get(SEARCH_PARAMS_FIELDS.seized),
+        collection,
+      });
+      const sznId = convertSznId({
+        szn: queryParams.get(SEARCH_PARAMS_FIELDS.szn),
+        collection,
+      });
+      const pageParam = queryParams.get(SEARCH_PARAMS_FIELDS.page);
+      const parsedPage = pageParam ? Number.parseInt(pageParam, 10) : 1;
+      const page = Number.isNaN(parsedPage) ? 1 : parsedPage;
+      const sortBy = convertSortedBy({
+        sortBy: queryParams.get(SEARCH_PARAMS_FIELDS.sortBy),
+        collection,
+      });
+      const sortDirection = convertSortDirection(
+        queryParams.get(SEARCH_PARAMS_FIELDS.sortDirection)
+      );
+      const normalizedParams = new URLSearchParams();
+      const knownParamKeys = new Set<string>(
+        Object.values(SEARCH_PARAMS_FIELDS)
+      );
+
+      for (const [key, value] of queryParams.entries()) {
+        if (!knownParamKeys.has(key)) {
+          normalizedParams.append(key, value);
+        }
+      }
+
+      if (address !== null) {
+        normalizedParams.set(SEARCH_PARAMS_FIELDS.address, address);
+      }
+      if (collection !== null) {
+        normalizedParams.set(
+          SEARCH_PARAMS_FIELDS.collection,
+          collection.toLowerCase()
+        );
+      }
+      if (subcollection !== null) {
+        normalizedParams.set(
+          SEARCH_PARAMS_FIELDS.subcollection,
+          subcollection.toLowerCase()
+        );
+      }
+      if (
+        collection !== null &&
+        COLLECTED_COLLECTIONS_META[collection].filters.seized &&
+        seized !== null
+      ) {
+        normalizedParams.set(SEARCH_PARAMS_FIELDS.seized, seized.toLowerCase());
+      }
+      if (
+        collection !== null &&
+        COLLECTED_COLLECTIONS_META[collection].filters.szn &&
+        sznId !== null
+      ) {
+        normalizedParams.set(SEARCH_PARAMS_FIELDS.szn, sznId.toString());
+      }
+      if (page > 1) {
+        normalizedParams.set(SEARCH_PARAMS_FIELDS.page, page.toString());
+      }
+      if (sortBy !== getDefaultSortBy(collection)) {
+        normalizedParams.set(SEARCH_PARAMS_FIELDS.sortBy, sortBy.toLowerCase());
+      }
+      if (sortDirection !== DEFAULT_SORT_DIRECTION) {
+        normalizedParams.set(
+          SEARCH_PARAMS_FIELDS.sortDirection,
+          sortDirection.toLowerCase()
+        );
+      }
+
+      return normalizedParams.toString();
     },
     [searchParams]
   );
@@ -255,7 +354,7 @@ export default function UserPageCollected({
       },
       {
         name: "seized",
-        value: defaultSeized,
+        value: DEFAULT_SEIZED,
       },
       {
         name: "szn",
@@ -358,7 +457,7 @@ export default function UserPageCollected({
       }
       return SortDirection.ASC;
     }
-    return defaultSortDirection;
+    return DEFAULT_SORT_DIRECTION;
   };
 
   const setSortBy = async (sortBy: CollectionSort): Promise<void> => {
