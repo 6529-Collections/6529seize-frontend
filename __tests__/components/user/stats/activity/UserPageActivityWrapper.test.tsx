@@ -1,6 +1,5 @@
-import UserPageActivityWrapper, {
-  USER_PAGE_ACTIVITY_TAB,
-} from "@/components/user/stats/activity/UserPageActivityWrapper";
+import UserPageActivityWrapper from "@/components/user/stats/activity/UserPageActivityWrapper";
+import { USER_PAGE_ACTIVITY_TAB } from "@/components/user/stats/activity/activity.types";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
