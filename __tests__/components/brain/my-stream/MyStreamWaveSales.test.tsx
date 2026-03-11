@@ -186,10 +186,91 @@ describe("MyStreamWaveSales", () => {
     expect(fetchNextPage).toHaveBeenCalledTimes(1);
   });
 
+  it("does not fetch again when the latest page adds no new renderable sales", () => {
+    mockWaveDrops({
+      drops: [{ nft_links: [{ url_in_text: "https://market.example/old-1" }] }],
+      hasNextPage: true,
+    });
+
+    const { rerender } = render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+
+    mockWaveDrops({
+      drops: [
+        { nft_links: [{ url_in_text: "https://market.example/old-1" }] },
+        { nft_links: [] },
+        { nft_links: [{ url_in_text: "   " }] },
+      ],
+      hasNextPage: true,
+    });
+
+    rerender(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("fetches again when a later page adds a new renderable sale", () => {
+    mockWaveDrops({
+      drops: [{ nft_links: [{ url_in_text: "https://market.example/old-1" }] }],
+      hasNextPage: true,
+    });
+
+    const { rerender } = render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+
+    mockWaveDrops({
+      drops: [
+        { nft_links: [{ url_in_text: "https://market.example/old-1" }] },
+        { nft_links: [{ url_in_text: "https://market.example/new-1" }] },
+      ],
+      hasNextPage: true,
+    });
+
+    rerender(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(2);
+  });
+
   it("does not fetch the next page when pagination is unavailable", () => {
     mockWaveDrops({
       drops: [{ nft_links: [{ url_in_text: "https://market.example/old-1" }] }],
       hasNextPage: false,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it("does not fetch the next page when there are no renderable sales yet", () => {
+    mockWaveDrops({
+      drops: [
+        { nft_links: [] },
+        { nft_links: [{ url_in_text: "   " }, { url_in_text: null }] },
+      ],
+      hasNextPage: true,
     });
 
     render(<MyStreamWaveSales waveId="wave-1" />);
@@ -216,6 +297,34 @@ describe("MyStreamWaveSales", () => {
     });
 
     expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it("resets the auto-pagination baseline when the wave changes", () => {
+    mockWaveDrops({
+      drops: [{ nft_links: [{ url_in_text: "https://market.example/old-1" }] }],
+      hasNextPage: true,
+    });
+
+    const { rerender } = render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+
+    mockWaveDrops({
+      drops: [{ nft_links: [{ url_in_text: "https://market.example/new-1" }] }],
+      hasNextPage: true,
+    });
+
+    rerender(<MyStreamWaveSales waveId="wave-2" />);
+
+    act(() => {
+      intersectionCb?.();
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(2);
   });
 
   it("keeps the sales grid visible while fetching the next page", () => {

@@ -6,7 +6,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveDrops } from "@/hooks/useWaveDrops";
 import { useLayout } from "./layout/LayoutContext";
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
 interface MyStreamWaveSalesProps {
   readonly waveId: string;
@@ -36,14 +36,6 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
       waveId,
       dropType: ApiDropType.Participatory,
     });
-  const intersectionElementRef = useIntersectionObserver(() => {
-    if (!hasNextPage || isFetching || isFetchingNextPage) {
-      return;
-    }
-
-    void fetchNextPage();
-  });
-
   const salesUrls = useMemo(
     () =>
       drops.flatMap((drop) => {
@@ -52,6 +44,41 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
       }),
     [drops]
   );
+  const lastAutoPaginatedRenderableCountRef = useRef(0);
+
+  useEffect(() => {
+    lastAutoPaginatedRenderableCountRef.current = 0;
+  }, [waveId]);
+
+  useEffect(() => {
+    if (salesUrls.length < lastAutoPaginatedRenderableCountRef.current) {
+      lastAutoPaginatedRenderableCountRef.current = salesUrls.length;
+    }
+  }, [salesUrls.length]);
+
+  const handleIntersection = useCallback(() => {
+    if (!hasNextPage || isFetching || isFetchingNextPage) {
+      return;
+    }
+
+    if (salesUrls.length === 0) {
+      return;
+    }
+
+    if (salesUrls.length <= lastAutoPaginatedRenderableCountRef.current) {
+      return;
+    }
+
+    lastAutoPaginatedRenderableCountRef.current = salesUrls.length;
+    void fetchNextPage();
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    salesUrls.length,
+  ]);
+  const intersectionElementRef = useIntersectionObserver(handleIntersection);
   const isInitialLoading =
     isFetching && !isFetchingNextPage && drops.length === 0;
 
