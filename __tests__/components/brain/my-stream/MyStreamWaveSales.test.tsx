@@ -4,6 +4,7 @@ import MyStreamWaveSales from "@/components/brain/my-stream/MyStreamWaveSales";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useWaveDrops } from "@/hooks/useWaveDrops";
 
+const mockSalesViewStyle = { height: "240px", maxHeight: "240px" };
 const mockMarketplacePreview = jest.fn(({ href }: { href: string }) => (
   <div data-testid="sale-preview">{href}</div>
 ));
@@ -15,6 +16,9 @@ jest.mock("@/hooks/useWaveDrops", () => ({
 jest.mock("@/components/waves/MarketplacePreview", () => ({
   __esModule: true,
   default: (props: any) => mockMarketplacePreview(props),
+}));
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ salesViewStyle: mockSalesViewStyle }),
 }));
 
 const useWaveDropsMock = useWaveDrops as jest.Mock;
@@ -32,6 +36,9 @@ describe("MyStreamWaveSales", () => {
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
+    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveStyle(
+      mockSalesViewStyle
+    );
     expect(screen.getByText("Loading sales...")).toBeInTheDocument();
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
     expect(useWaveDropsMock).toHaveBeenCalledWith({
@@ -48,6 +55,9 @@ describe("MyStreamWaveSales", () => {
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
+    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveStyle(
+      mockSalesViewStyle
+    );
     expect(screen.getByText("No sales yet.")).toBeInTheDocument();
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
   });
@@ -67,6 +77,9 @@ describe("MyStreamWaveSales", () => {
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
+    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveStyle(
+      mockSalesViewStyle
+    );
     expect(screen.getByText("No sales yet.")).toBeInTheDocument();
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
   });
@@ -95,11 +108,23 @@ describe("MyStreamWaveSales", () => {
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
+    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveClass(
+      "tw-overflow-y-auto"
+    );
+    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveStyle(
+      mockSalesViewStyle
+    );
     expect(screen.getByTestId("wave-sales-grid")).toHaveClass(
       "tw-grid",
       "tw-gap-4",
       "@lg:tw-grid-cols-2",
       "@3xl:tw-grid-cols-3"
+    );
+    expect(screen.getByTestId("wave-sales-scroll-container")).toContainElement(
+      screen.getByTestId("wave-sales-grid")
+    );
+    expect(screen.getByTestId("wave-sales-grid")).not.toHaveClass(
+      "tw-overflow-y-auto"
     );
     expect(
       screen.getAllByTestId("sale-preview").map((item) => item.textContent)
