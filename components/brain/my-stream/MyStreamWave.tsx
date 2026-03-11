@@ -15,6 +15,7 @@ import { MyStreamWaveTab } from "@/types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
+import MyStreamWaveSales from "./MyStreamWaveSales";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createBreakpoint } from "react-use";
 import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
@@ -123,6 +124,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         onDropClick={onDropClick}
       />
     ),
+    [MyStreamWaveTab.SALES]: <MyStreamWaveSales />,
     [MyStreamWaveTab.WINNERS]: (
       <WaveWinners wave={wave} onDropClick={onDropClick} />
     ),

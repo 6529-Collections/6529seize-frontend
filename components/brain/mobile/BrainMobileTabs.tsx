@@ -68,6 +68,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [BrainView.DEFAULT]: null,
     [BrainView.ABOUT]: null,
     [BrainView.LEADERBOARD]: null,
+    [BrainView.SALES]: null,
     [BrainView.WINNERS]: null,
     [BrainView.OUTCOME]: null,
     [BrainView.MY_VOTES]: null,
@@ -109,6 +110,14 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   const myVotesButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
     activeView === BrainView.MY_VOTES ? "tw-text-iron-300" : "tw-text-iron-400"
+  }`;
+
+  const salesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5 tw-gap-1 tw-flex-1 tw-rounded-md ${
+    activeView === BrainView.SALES ? "tw-bg-iron-800" : "tw-bg-iron-950"
+  }`;
+
+  const salesButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+    activeView === BrainView.SALES ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
   const chatButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5 tw-gap-1 tw-flex-1  tw-rounded-md ${
@@ -154,6 +163,19 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const onNotificationsClick = () => {
     onViewChange(BrainView.NOTIFICATIONS);
   };
+
+  const salesTabButton =
+    waveActive && wave && isRankWave && isCurationWave ? (
+      <button
+        ref={(el) => {
+          tabRefs.current[BrainView.SALES] = el;
+        }}
+        onClick={() => onViewChange(BrainView.SALES)}
+        className={salesButtonClasses}
+      >
+        <span className={salesButtonTextClasses}>Sales</span>
+      </button>
+    ) : null;
 
   return (
     <div
@@ -239,6 +261,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               registerTabRef={(view, el) => {
                 tabRefs.current[view] = el;
               }}
+              renderAfterLeaderboard={salesTabButton}
             />
             {(isMemesWave || isCurationWave) && (
               <>

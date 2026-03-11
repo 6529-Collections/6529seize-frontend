@@ -19,9 +19,9 @@ import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import MyStreamWaveMyVotes from "./my-stream/votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./my-stream/MyStreamWaveFAQ";
+import MyStreamWaveSales from "./my-stream/MyStreamWaveSales";
 import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -42,6 +42,7 @@ export enum BrainView {
   DEFAULT = "DEFAULT",
   ABOUT = "ABOUT",
   LEADERBOARD = "LEADERBOARD",
+  SALES = "SALES",
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
   MY_VOTES = "MY_VOTES",
@@ -107,7 +108,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const { isMemesWave, isCurationWave } = useWave(wave);
+  const { isMemesWave, isCurationWave, isRankWave } = useWave(wave);
 
   const {
     voting: { isCompleted },
@@ -137,8 +138,6 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     !!effectiveDropId &&
     !!drop &&
     drop.id.toLowerCase() === effectiveDropId.toLowerCase();
-
-  const isRankWave = wave?.wave.type === ApiWaveType.Rank;
 
   const hasWave = Boolean(waveId);
 
@@ -207,6 +206,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
     const shouldResetToDefault =
       (activeView === BrainView.LEADERBOARD && isCompleted) ||
+      (activeView === BrainView.SALES && (!isCurationWave || !isRankWave)) ||
       (activeView === BrainView.WINNERS && !firstDecisionDone) ||
       (activeView === BrainView.MY_VOTES && !isMemesWave && !isCurationWave) ||
       (activeView === BrainView.FAQ && !isMemesWave);
@@ -233,6 +233,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     activeView,
     isMemesWave,
     isCurationWave,
+    isRankWave,
     waveId,
     pathname,
   ]);
@@ -285,6 +286,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           onDropClick={onDropClick}
         />
       ) : null,
+    [BrainView.SALES]:
+      isRankWave && isCurationWave && !!wave ? <MyStreamWaveSales /> : null,
     [BrainView.WINNERS]:
       isRankWave && !!wave ? (
         <div className="tw-px-2 sm:tw-px-4">
