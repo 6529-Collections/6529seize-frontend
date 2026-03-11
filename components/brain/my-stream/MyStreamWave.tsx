@@ -124,7 +124,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         onDropClick={onDropClick}
       />
     ),
-    [MyStreamWaveTab.SALES]: <MyStreamWaveSales />,
+    [MyStreamWaveTab.SALES]: <MyStreamWaveSales waveId={wave.id} />,
     [MyStreamWaveTab.WINNERS]: (
       <WaveWinners wave={wave} onDropClick={onDropClick} />
     ),

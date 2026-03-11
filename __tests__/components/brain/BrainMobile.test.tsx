@@ -94,9 +94,10 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveOutcome", () => ({
   default: () => <div data-testid="outcome" />,
 }));
 
+const mockMyStreamWaveSales = jest.fn(() => <div data-testid="sales" />);
 jest.mock("@/components/brain/my-stream/MyStreamWaveSales", () => ({
   __esModule: true,
-  default: () => <div data-testid="sales" />,
+  default: (props: any) => mockMyStreamWaveSales(props),
 }));
 
 jest.mock("@/components/waves/winners/WaveWinners", () => ({
@@ -118,6 +119,7 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveFAQ", () => ({
 
 describe("BrainMobile", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     mockSearchParams = new URLSearchParams();
     mockPathname = "/";
     mockPush.mockClear();
@@ -176,6 +178,7 @@ describe("BrainMobile", () => {
     });
 
     expect(screen.getByTestId("sales")).toBeInTheDocument();
+    expect(mockMyStreamWaveSales).toHaveBeenCalledWith({ waveId: "1" });
 
     mockUseWave.mockReturnValue({
       isMemesWave: false,

@@ -287,7 +287,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         />
       ) : null,
     [BrainView.SALES]:
-      isRankWave && isCurationWave && !!wave ? <MyStreamWaveSales /> : null,
+      isRankWave && isCurationWave && !!wave ? (
+        <MyStreamWaveSales waveId={wave.id} />
+      ) : null,
     [BrainView.WINNERS]:
       isRankWave && !!wave ? (
         <div className="tw-px-2 sm:tw-px-4">
