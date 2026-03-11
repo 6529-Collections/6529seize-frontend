@@ -582,6 +582,48 @@ describe("UserPageCollected", () => {
     );
   });
 
+  it("does not clear a season shortcut when empty results are already on page 1", async () => {
+    const user = userEvent.setup();
+
+    useQueryMock.mockReturnValue({
+      isFetching: false,
+      isLoading: false,
+      data: {
+        data: [],
+        count: 0,
+        page: 1,
+      },
+    });
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+    routerReplace.mockClear();
+
+    await user.click(screen.getByTestId("stats-season-shortcut"));
+
+    await waitFor(() => {
+      expect(routerReplace).toHaveBeenCalledTimes(1);
+    });
+
+    const params = getLastReplaceParams();
+
+    expect(params.get("collection")).toBe("memes");
+    expect(params.get("szn")).toBe("2");
+  });
+
+  it("preserves the season shortcut when the season dropdown syncs afterward", async () => {
+    const user = userEvent.setup();
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("stats-season-shortcut"));
+    await user.click(screen.getByTestId("filters-set-szn"));
+
+    const params = getLastReplaceParams();
+
+    expect(params.get("collection")).toBe("memes");
+    expect(params.get("szn")).toBe("2");
+  });
+
   it("passes the optimistic season selection to the stats summary", async () => {
     const user = userEvent.setup();
 

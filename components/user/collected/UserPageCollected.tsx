@@ -594,11 +594,25 @@ export default function UserPageCollected({
   };
 
   const setSzn = async (szn: MemeSeason | null): Promise<void> => {
-    setFilters((prev) => ({ ...prev, szn }));
+    const nextInitialSznId = szn?.id ?? null;
+    setFilters((prev) => ({
+      ...prev,
+      szn,
+      initialSznId: nextInitialSznId,
+      page: 1,
+    }));
     const items: QueryUpdateInput[] = [
       {
+        name: "collection",
+        value: filters.collection,
+      },
+      {
+        name: "seized",
+        value: filters.seized,
+      },
+      {
         name: "szn",
-        value: szn ? szn.id.toString() : null,
+        value: nextInitialSznId?.toString() ?? null,
       },
       {
         name: "page",
@@ -625,6 +639,10 @@ export default function UserPageCollected({
   };
 
   const setPage = async (page: number): Promise<void> => {
+    if (page === filters.page) {
+      return;
+    }
+
     const items: QueryUpdateInput[] = [
       {
         name: "page",
