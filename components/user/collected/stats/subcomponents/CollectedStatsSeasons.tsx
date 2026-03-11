@@ -9,11 +9,13 @@ interface CollectedStatsSeasonsProps {
   readonly hiddenStartedSeasonCount: number;
   readonly notStartedSeasons: DisplaySeason[];
   readonly activeSeasonId: string | null;
+  readonly activeSeasonNumber: number | null;
   readonly hasTouchScreen: boolean;
   readonly isDesktopLayout: boolean;
   readonly isDesktopSeasonListExpanded: boolean;
   readonly desktopSeasonsRef: RefObject<HTMLDivElement | null>;
   readonly onActivateSeason: (seasonId: string) => void;
+  readonly onSeasonShortcut?: ((seasonNumber: number) => void) | undefined;
   readonly onToggleExpanded: () => void;
 }
 
@@ -24,11 +26,13 @@ export function CollectedStatsSeasons({
   hiddenStartedSeasonCount,
   notStartedSeasons,
   activeSeasonId,
+  activeSeasonNumber,
   hasTouchScreen,
   isDesktopLayout,
   isDesktopSeasonListExpanded,
   desktopSeasonsRef,
   onActivateSeason,
+  onSeasonShortcut,
   onToggleExpanded,
 }: Readonly<CollectedStatsSeasonsProps>) {
   const shouldAnimateProgressOnMount =
@@ -43,11 +47,16 @@ export function CollectedStatsSeasons({
       <CollectedStatsSeasonTile
         key={season.id}
         season={season}
-        isActive={season.id === activeSeasonId}
+        isSelected={season.seasonNumber === activeSeasonNumber}
         showDetailText={hasTouchScreen || season.id === activeSeasonId}
         hasTouchScreen={hasTouchScreen}
         shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
-        onActivate={() => onActivateSeason(season.id)}
+        onPreview={() => onActivateSeason(season.id)}
+        onSelect={
+          onSeasonShortcut
+            ? () => onSeasonShortcut(season.seasonNumber)
+            : undefined
+        }
       />
     ));
 

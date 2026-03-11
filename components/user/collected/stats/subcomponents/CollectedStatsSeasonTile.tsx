@@ -4,11 +4,12 @@ import type { DisplaySeason } from "../types";
 
 interface CollectedStatsSeasonTileProps {
   readonly season: DisplaySeason;
-  readonly isActive: boolean;
+  readonly isSelected: boolean;
   readonly showDetailText: boolean;
   readonly hasTouchScreen: boolean;
   readonly shouldAnimateProgressOnMount: boolean;
-  readonly onActivate: () => void;
+  readonly onPreview: () => void;
+  readonly onSelect?: (() => void) | undefined;
 }
 
 const PROGRESS_RADIUS = 24;
@@ -22,35 +23,35 @@ const PROGRESS_COLOR_TRANSITION_STYLE = {
 
 const getBaseTrackClass = (
   season: DisplaySeason,
-  isActive: boolean
+  isSelected: boolean
 ): string => {
   if (!season.isStarted) {
     return "tw-text-iron-900";
   }
 
-  return isActive ? "tw-text-iron-700" : "tw-text-iron-800";
+  return isSelected ? "tw-text-iron-650" : "tw-text-iron-800";
 };
 
 const getProgressStrokeClass = (
   season: DisplaySeason,
-  isActive: boolean
+  isSelected: boolean
 ): string => {
   if (season.progressPct >= 1) {
     return "tw-text-iron-200";
   }
 
-  return isActive ? "tw-text-iron-300" : "tw-text-iron-500";
+  return isSelected ? "tw-text-iron-300" : "tw-text-iron-500";
 };
 
 const getLabelClassName = (
   season: DisplaySeason,
-  isActive: boolean
+  isSelected: boolean
 ): string => {
   if (!season.isStarted) {
     return "tw-text-iron-600";
   }
 
-  return isActive ? "tw-text-iron-100" : "tw-text-iron-300";
+  return isSelected ? "tw-text-iron-100" : "tw-text-iron-300";
 };
 
 const getSetsHeldClassName = (season: DisplaySeason): string => {
@@ -67,19 +68,19 @@ const getSetsHeldClassName = (season: DisplaySeason): string => {
 
 const getDetailTextClassName = (
   showDetailText: boolean,
-  isActive: boolean
+  isSelected: boolean
 ): string => {
   if (!showDetailText) {
     return "tw-text-transparent";
   }
 
-  return isActive ? "tw-text-iron-400" : "tw-text-iron-500";
+  return isSelected ? "tw-text-iron-400" : "tw-text-iron-500";
 };
 
-const getScaleClassName = (isActive: boolean): string =>
-  isActive
-    ? "tw-scale-[1.03]"
-    : "hover:tw-scale-[1.01] focus-visible:tw-scale-[1.01]";
+const getButtonClassName = (isSelected: boolean): string =>
+  isSelected
+    ? "tw-border-iron-700 tw-bg-iron-950/80"
+    : "tw-border-transparent tw-bg-transparent hover:tw-border-iron-900 hover:tw-bg-iron-950/60";
 
 const getSetsHeldLabel = (setsHeld: number): string => {
   if (setsHeld <= 0) {
@@ -91,11 +92,12 @@ const getSetsHeldLabel = (setsHeld: number): string => {
 
 export function CollectedStatsSeasonTile({
   season,
-  isActive,
+  isSelected,
   showDetailText,
   hasTouchScreen,
   shouldAnimateProgressOnMount,
-  onActivate,
+  onPreview,
+  onSelect,
 }: Readonly<CollectedStatsSeasonTileProps>) {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const strokeDashoffset =
@@ -109,23 +111,31 @@ export function CollectedStatsSeasonTile({
         }
       : null
   );
-  const baseTrackClass = getBaseTrackClass(season, isActive);
-  const progressStrokeClass = getProgressStrokeClass(season, isActive);
-  const labelClassName = getLabelClassName(season, isActive);
+  const baseTrackClass = getBaseTrackClass(season, isSelected);
+  const progressStrokeClass = getProgressStrokeClass(season, isSelected);
+  const labelClassName = getLabelClassName(season, isSelected);
   const setsHeldClassName = getSetsHeldClassName(season);
-  const detailTextClassName = getDetailTextClassName(showDetailText, isActive);
+  const detailTextClassName = getDetailTextClassName(
+    showDetailText,
+    isSelected
+  );
+  const handleClick = () => {
+    onPreview();
+    onSelect?.();
+  };
 
   return (
     <button
       type="button"
       data-season-tile
-      aria-pressed={isActive}
-      onMouseEnter={hasTouchScreen ? undefined : onActivate}
-      onFocus={onActivate}
-      onClick={onActivate}
+      aria-pressed={isSelected}
+      onMouseEnter={hasTouchScreen ? undefined : onPreview}
+      onFocus={onPreview}
+      onClick={handleClick}
       className={[
-        "tw-flex tw-w-16 tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-center tw-transition-transform tw-duration-200 sm:tw-w-[72px]",
-        getScaleClassName(isActive),
+        "tw-flex tw-w-16 tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-xl tw-border tw-border-solid tw-px-1.5 tw-py-2 tw-text-center tw-transition-colors tw-duration-200 sm:tw-w-[72px]",
+        getButtonClassName(isSelected),
+        "hover:tw-scale-[1.01] focus-visible:tw-scale-[1.01]",
         "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500",
       ].join(" ")}
     >

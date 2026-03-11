@@ -3,6 +3,7 @@ import UserPageCollected from "@/components/user/collected/UserPageCollected";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import {
   useParams,
   usePathname,
@@ -58,8 +59,25 @@ jest.mock(
 jest.mock(
   "@/components/user/collected/UserPageCollectedStats",
   () =>
-    function MockCollectedStats() {
-      return <div data-testid="stats-summary" />;
+    function MockCollectedStats(props: any) {
+      return (
+        <div data-testid="stats-summary">
+          <button
+            data-testid="stats-collection-shortcut"
+            onClick={() =>
+              props.onCollectionShortcut?.(CollectedCollectionType.NEXTGEN)
+            }
+          >
+            NextGen shortcut
+          </button>
+          <button
+            data-testid="stats-season-shortcut"
+            onClick={() => props.onSeasonShortcut?.(2)}
+          >
+            SZN2 shortcut
+          </button>
+        </div>
+      );
     }
 );
 
@@ -93,12 +111,18 @@ describe("UserPageCollected", () => {
     toString: jest.fn(() => ""),
     entries: jest.fn(() => [].values()),
   };
+  const getLastReplaceParams = () => {
+    const path = routerReplace.mock.calls.at(-1)?.[0] as string | undefined;
+    const query = path?.split("?")[1] ?? "";
+    return new URLSearchParams(query);
+  };
 
   beforeEach(() => {
     useParamsMock.mockReturnValue({ user: "testuser" });
     usePathnameMock.mockReturnValue("/testuser/collected");
     useSearchParamsMock.mockReturnValue(mockSearchParams);
     mockSearchParams.get.mockReturnValue(null);
+    mockSearchParams.toString.mockReturnValue("");
 
     // Provide router with replace/push so component calls during mount don't crash
     useRouterMock.mockReturnValue({
@@ -307,5 +331,96 @@ describe("UserPageCollected", () => {
         ]),
       })
     );
+  });
+
+  it("applies collection shortcuts through the existing url filter flow", async () => {
+    const user = userEvent.setup();
+
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "collection") return "network";
+      if (key === "sort-by") return "xtdh";
+      if (key === "sort-direction") return "desc";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue(
+      "collection=network&sort-by=xtdh&sort-direction=desc"
+    );
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("stats-collection-shortcut"));
+
+    const params = getLastReplaceParams();
+
+    expect(params.get("collection")).toBe("nextgen");
+    expect(params.get("page")).toBe("1");
+    expect(params.get("seized")).toBe("seized");
+    expect(params.get("szn")).toBeNull();
+    expect(params.get("subcollection")).toBeNull();
+    expect(params.get("sort-by")).toBe("token_id");
+    expect(params.get("sort-direction")).toBe("desc");
+  });
+
+  it("applies season shortcuts through the existing url filter flow", async () => {
+    const user = userEvent.setup();
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("stats-season-shortcut"));
+
+    const params = getLastReplaceParams();
+
+    expect(params.get("collection")).toBe("memes");
+    expect(params.get("page")).toBe("1");
+    expect(params.get("seized")).toBe("seized");
+    expect(params.get("szn")).toBe("2");
+    expect(params.get("subcollection")).toBeNull();
+  });
+
+  it("clears the collection shortcut when the same metric is clicked again", async () => {
+    const user = userEvent.setup();
+
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "collection") return "nextgen";
+      if (key === "seized") return "seized";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue(
+      "collection=nextgen&seized=seized"
+    );
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("stats-collection-shortcut"));
+
+    const params = getLastReplaceParams();
+
+    expect(params.get("collection")).toBeNull();
+    expect(params.get("szn")).toBeNull();
+    expect(params.get("page")).toBe("1");
+  });
+
+  it("clears the season shortcut when the same season is clicked again", async () => {
+    const user = userEvent.setup();
+
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "collection") return "memes";
+      if (key === "szn") return "2";
+      if (key === "seized") return "seized";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue(
+      "collection=memes&szn=2&seized=seized"
+    );
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("stats-season-shortcut"));
+
+    const params = getLastReplaceParams();
+
+    expect(params.get("collection")).toBeNull();
+    expect(params.get("szn")).toBeNull();
+    expect(params.get("page")).toBe("1");
   });
 });

@@ -41,6 +41,7 @@ import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
 import { useXtdhTokensQuery } from "./hooks/useXtdhTokensQuery";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 import UserPageCollectedStats from "./UserPageCollectedStats";
+
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
   readonly accountForConsolidations: boolean;
@@ -234,14 +235,19 @@ export default function UserPageCollected({
 
   const { enabled: transferEnabled } = useTransfer();
 
-  const setCollection = async (
-    collection: CollectedCollectionType | null
-  ): Promise<void> => {
-    if (!filters.collection && !collection) return;
+  const getCollectionUpdateItems = ({
+    collection,
+    allowToggle,
+  }: {
+    readonly collection: CollectedCollectionType | null;
+    readonly allowToggle: boolean;
+  }): QueryUpdateInput[] => {
+    const nextCollection =
+      allowToggle && filters.collection === collection ? null : collection;
     const items: QueryUpdateInput[] = [
       {
         name: "collection",
-        value: filters.collection === collection ? null : (collection ?? null),
+        value: nextCollection,
       },
       {
         name: "page",
@@ -262,12 +268,13 @@ export default function UserPageCollected({
     ];
 
     const isSwitchingFromNetwork =
-      filters.collection === CollectedCollectionType.NETWORK;
+      filters.collection === CollectedCollectionType.NETWORK &&
+      nextCollection !== CollectedCollectionType.NETWORK;
 
     if (
-      (collection &&
-        collection !== CollectedCollectionType.NETWORK &&
-        !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+      (nextCollection !== null &&
+        nextCollection !== CollectedCollectionType.NETWORK &&
+        !COLLECTED_COLLECTIONS_META[nextCollection].filters.sort.includes(
           filters.sortBy
         )) ||
       isSwitchingFromNetwork
@@ -280,7 +287,7 @@ export default function UserPageCollected({
         name: "sortDirection",
         value: SortDirection.DESC,
       });
-    } else if (collection === CollectedCollectionType.NETWORK) {
+    } else if (nextCollection === CollectedCollectionType.NETWORK) {
       items.push({
         name: "sortBy",
         value: CollectionSort.XTDH,
@@ -290,6 +297,48 @@ export default function UserPageCollected({
         value: SortDirection.DESC,
       });
     }
+
+    return items;
+  };
+
+  const setCollection = async (
+    collection: CollectedCollectionType | null
+  ): Promise<void> => {
+    if (filters.collection === null && collection === null) return;
+    await updateFields(
+      getCollectionUpdateItems({
+        collection,
+        allowToggle: true,
+      })
+    );
+  };
+
+  const setCollectionShortcut = async (
+    collection: CollectedCollectionType
+  ): Promise<void> => {
+    await updateFields(
+      getCollectionUpdateItems({
+        collection,
+        allowToggle: true,
+      })
+    );
+  };
+
+  const setSeasonShortcut = async (seasonNumber: number): Promise<void> => {
+    const isActiveSeasonShortcut =
+      filters.collection === CollectedCollectionType.MEMES &&
+      filters.initialSznId === seasonNumber;
+    const items = getCollectionUpdateItems({
+      collection: isActiveSeasonShortcut ? null : CollectedCollectionType.MEMES,
+      allowToggle: false,
+    }).map((item) =>
+      item.name === "szn"
+        ? {
+            ...item,
+            value: isActiveSeasonShortcut ? null : seasonNumber.toString(),
+          }
+        : item
+    );
 
     await updateFields(items);
   };
@@ -538,6 +587,10 @@ export default function UserPageCollected({
           filters.accountForConsolidations ? null : filters.handleOrWallet
         }
         initialStatsData={initialStatsData}
+        activeCollection={filters.collection}
+        activeSeasonNumber={filters.initialSznId}
+        onCollectionShortcut={setCollectionShortcut}
+        onSeasonShortcut={setSeasonShortcut}
       />
 
       {isLoading ? (
