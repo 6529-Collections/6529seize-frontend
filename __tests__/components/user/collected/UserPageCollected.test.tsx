@@ -1,6 +1,6 @@
 import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import UserPageCollected from "@/components/user/collected/UserPageCollected";
-import { CollectedCollectionType } from "@/entities/IProfile";
+import { CollectedCollectionType, CollectionSort } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -37,6 +37,12 @@ jest.mock(
             onClick={() => props.setSzn?.({ id: 2 })}
           >
             Set season
+          </button>
+          <button
+            data-testid="filters-set-sort"
+            onClick={() => props.setSortBy?.(CollectionSort.RANK)}
+          >
+            Set sort
           </button>
         </div>
       );
@@ -622,6 +628,21 @@ describe("UserPageCollected", () => {
 
     expect(params.get("collection")).toBe("memes");
     expect(params.get("szn")).toBe("2");
+  });
+
+  it("preserves the local collection and season when another filter changes before the url sync catches up", async () => {
+    const user = userEvent.setup();
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("stats-season-shortcut"));
+    await user.click(screen.getByTestId("filters-set-sort"));
+
+    const params = getLastReplaceParams();
+
+    expect(params.get("collection")).toBe("memes");
+    expect(params.get("szn")).toBe("2");
+    expect(params.get("sort-by")).toBe("rank");
   });
 
   it("passes the optimistic season selection to the stats summary", async () => {

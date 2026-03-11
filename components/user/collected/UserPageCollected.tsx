@@ -62,14 +62,14 @@ interface QueryUpdateInput {
 }
 
 interface NormalizedCollectedQueryState {
-  readonly address: string | null;
-  readonly collection: CollectedCollectionType | null;
-  readonly subcollection: string | null;
-  readonly seized: CollectionSeized | null;
-  readonly sznId: number | null;
-  readonly page: number;
-  readonly sortBy: CollectionSort;
-  readonly sortDirection: SortDirection;
+  address: string | null;
+  collection: CollectedCollectionType | null;
+  subcollection: string | null;
+  seized: CollectionSeized | null;
+  sznId: number | null;
+  page: number;
+  sortBy: CollectionSort;
+  sortDirection: SortDirection;
 }
 
 const SEARCH_PARAMS_FIELDS = {
@@ -171,42 +171,8 @@ const convertSortDirection = (sortDirection: string | null): SortDirection => {
     : DEFAULT_SORT_DIRECTION;
 };
 
-const getCanonicalCollectedQueryState = (
-  queryParams: URLSearchParams
-): NormalizedCollectedQueryState => {
-  const collection = convertCollection(
-    queryParams.get(SEARCH_PARAMS_FIELDS.collection)
-  );
-  const pageParam = queryParams.get(SEARCH_PARAMS_FIELDS.page);
-  const parsedPage = pageParam ? Number.parseInt(pageParam, 10) : 1;
-
-  return {
-    address: convertAddressToLowerCase(
-      queryParams.get(SEARCH_PARAMS_FIELDS.address)
-    ),
-    collection,
-    subcollection:
-      collection === CollectedCollectionType.NETWORK
-        ? queryParams.get(SEARCH_PARAMS_FIELDS.subcollection)
-        : null,
-    seized: convertSeized({
-      seized: queryParams.get(SEARCH_PARAMS_FIELDS.seized),
-      collection,
-    }),
-    sznId: convertSznId({
-      szn: queryParams.get(SEARCH_PARAMS_FIELDS.szn),
-      collection,
-    }),
-    page: Number.isNaN(parsedPage) ? 1 : parsedPage,
-    sortBy: convertSortedBy({
-      sortBy: queryParams.get(SEARCH_PARAMS_FIELDS.sortBy),
-      collection,
-    }),
-    sortDirection: convertSortDirection(
-      queryParams.get(SEARCH_PARAMS_FIELDS.sortDirection)
-    ),
-  };
-};
+const normalizePageNumber = (page: number): number =>
+  Number.isFinite(page) && page > 0 ? page : 1;
 
 const setCanonicalCollectedQueryParams = ({
   normalizedParams,
@@ -264,6 +230,102 @@ const setCanonicalCollectedQueryParams = ({
   }
 };
 
+const getNormalizedCollectedQueryStateFromFilters = (
+  filters: ProfileCollectedFilters
+): NormalizedCollectedQueryState => ({
+  address: filters.accountForConsolidations
+    ? null
+    : convertAddressToLowerCase(filters.handleOrWallet),
+  collection: filters.collection,
+  subcollection:
+    filters.collection === CollectedCollectionType.NETWORK
+      ? filters.subcollection
+      : null,
+  seized: convertSeized({
+    seized: filters.seized,
+    collection: filters.collection,
+  }),
+  sznId: filters.szn?.id ?? filters.initialSznId,
+  page: normalizePageNumber(filters.page),
+  sortBy: convertSortedBy({
+    sortBy: filters.sortBy,
+    collection: filters.collection,
+  }),
+  sortDirection: convertSortDirection(filters.sortDirection),
+});
+
+const applyQueryUpdateItemsToState = ({
+  state,
+  updateItems,
+}: {
+  readonly state: NormalizedCollectedQueryState;
+  readonly updateItems: QueryUpdateInput[];
+}): NormalizedCollectedQueryState => {
+  const nextState: NormalizedCollectedQueryState = { ...state };
+
+  for (const { name, value } of updateItems) {
+    switch (name) {
+      case "address":
+        nextState.address = convertAddressToLowerCase(value);
+        break;
+      case "collection": {
+        nextState.collection = convertCollection(value);
+        nextState.subcollection =
+          nextState.collection === CollectedCollectionType.NETWORK
+            ? nextState.subcollection
+            : null;
+        nextState.seized = convertSeized({
+          seized: nextState.seized,
+          collection: nextState.collection,
+        });
+        nextState.sznId = convertSznId({
+          szn: nextState.sznId?.toString() ?? null,
+          collection: nextState.collection,
+        });
+        nextState.sortBy = convertSortedBy({
+          sortBy: nextState.sortBy,
+          collection: nextState.collection,
+        });
+        break;
+      }
+      case "subcollection":
+        nextState.subcollection =
+          nextState.collection === CollectedCollectionType.NETWORK ? value : null;
+        break;
+      case "seized":
+        nextState.seized = convertSeized({
+          seized: value,
+          collection: nextState.collection,
+        });
+        break;
+      case "szn":
+        nextState.sznId = convertSznId({
+          szn: value,
+          collection: nextState.collection,
+        });
+        break;
+      case "page": {
+        const parsedPage = value ? Number.parseInt(value, 10) : 1;
+        nextState.page = normalizePageNumber(parsedPage);
+        break;
+      }
+      case "sortBy":
+        nextState.sortBy = convertSortedBy({
+          sortBy: value,
+          collection: nextState.collection,
+        });
+        break;
+      case "sortDirection":
+        nextState.sortDirection = convertSortDirection(value);
+        break;
+      default:
+        break;
+    }
+  }
+
+  return nextState;
+};
+
 export default function UserPageCollected({
   profile,
   initialStatsData = EMPTY_USER_PAGE_STATS_INITIAL_DATA,
@@ -313,7 +375,9 @@ export default function UserPageCollected({
         szn: sznParam ?? null,
         collection: convertedCollection,
       }),
-      page: pageParam ? Number.parseInt(pageParam, 10) : 1,
+      page: normalizePageNumber(
+        pageParam ? Number.parseInt(pageParam, 10) : 1
+      ),
       pageSize: PAGE_SIZE,
       sortBy: convertSortedBy({
         sortBy: sortByParam ?? null,
@@ -323,18 +387,16 @@ export default function UserPageCollected({
     };
   }, [searchParams, profile.handle, user]);
 
+  const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+  const effectiveSeasonId = filters.szn?.id ?? filters.initialSznId;
+
   const createQueryString = useCallback(
     (updateItems: QueryUpdateInput[]): string => {
       const queryParams = new URLSearchParams(searchParams.toString());
-      for (const { name, value } of updateItems) {
-        const key = SEARCH_PARAMS_FIELDS[name];
-        if (!value) {
-          queryParams.delete(key);
-        } else {
-          queryParams.set(key, value.toLowerCase());
-        }
-      }
-      const state = getCanonicalCollectedQueryState(queryParams);
+      const state = applyQueryUpdateItemsToState({
+        state: getNormalizedCollectedQueryStateFromFilters(filters),
+        updateItems,
+      });
       const normalizedParams = new URLSearchParams();
       const knownParamKeys = new Set<string>(
         Object.values(SEARCH_PARAMS_FIELDS)
@@ -349,7 +411,7 @@ export default function UserPageCollected({
 
       return normalizedParams.toString();
     },
-    [searchParams]
+    [searchParams, filters]
   );
 
   const updateFields = useCallback(
@@ -364,9 +426,6 @@ export default function UserPageCollected({
     },
     [pathname, router, createQueryString]
   );
-
-  const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
-  const effectiveSeasonId = filters.szn?.id ?? filters.initialSznId;
 
   const { enabled: transferEnabled } = useTransfer();
 
