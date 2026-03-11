@@ -6,7 +6,7 @@ Use this index to find user-facing docs for routes, actions, loading states,
 empty states, failures, and recovery steps.
 
 Route coverage in this index was verified against `app/**/page.tsx` on
-March 4, 2026.
+March 5, 2026.
 
 ## Quick Start
 
@@ -19,7 +19,8 @@ March 4, 2026.
 
 - Open `/` and home sections: [Home](home/README.md)
 - Browse wave and message lists or threads:
-  [Waves](waves/README.md), [Waves Discovery](waves/discovery/README.md),
+  [Waves](waves/README.md),
+  [Waves Discovery (Legacy Route Notes)](waves/discovery/README.md),
   [Waves Chat](waves/chat/README.md)
 - Create a wave or direct message: [Waves Create](waves/create/README.md)
 - Write or edit a drop: [Waves Composer](waves/composer/README.md)
@@ -49,8 +50,8 @@ March 4, 2026.
 ## Area Index
 
 - [Home](home/README.md): `/`
-- [Waves](waves/README.md): `/discover`, `/waves`, `/waves/{waveId}`,
-  `/waves/create`, `/messages`, `/messages/create`
+- [Waves](waves/README.md): `/waves`, `/waves/{waveId}`, `/waves/create`,
+  `/messages`, `/messages/create`
 - [Profiles](profiles/README.md): `/{user}`, tab routes under `/{user}/*`, and
   `/about/primary-address`
 - [Media](media/README.md): `/the-memes`, `/the-memes/{param*}`,
@@ -80,9 +81,9 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 ### In Scope
 
 - Home and waves:
-  `/`, `/discover`, `/waves`, `/waves/{waveId}`, `/waves/create`,
-  `/messages`, `/messages/create` (thread can also be selected with
-  `wave={waveId}` query param on `/messages`)
+  `/`, `/waves`, `/waves/{waveId}`, `/waves/create`, `/messages`,
+  `/messages/create` (thread can also be selected with `wave={waveId}` query
+  param on `/messages`)
 - Profiles:
   `/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/followers`,
   `/{user}/groups`, `/{user}/identity`, `/{user}/proxy`, `/{user}/stats`,

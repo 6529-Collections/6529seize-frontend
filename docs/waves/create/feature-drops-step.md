@@ -13,7 +13,6 @@ Use `Drops` in `Rank` wave creation to define submission requirements:
 
 - Full-page create route: `/waves/create`
 - Desktop create-wave modal mode (`?create=wave`) on:
-  - `/discover`
   - `/waves`
   - `/waves/{waveId}`
   - `/messages`

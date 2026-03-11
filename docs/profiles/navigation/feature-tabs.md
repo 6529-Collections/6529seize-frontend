@@ -39,6 +39,7 @@ Profile tab routes live under `/{user}`.
 - `/{user}/identity` redirects to `/{user}` and preserves query params.
 - `/{user}/waves`, `/{user}/groups`, and `/{user}/followers` redirect to `/{user}` without query params.
 - `/{user}/rep` is unsupported and does not redirect.
+- `/{user}` values that end with probe-like suffixes (`.html`, `.htm`, `.php`, `.asp`, `.aspx`, `.jsp`) are treated as invalid profile slugs and show not-found.
 - Unknown `/{user}/<subroute>` routes show not-found.
 - Full legacy details: [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md).
 

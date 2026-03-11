@@ -16,7 +16,7 @@ On web layouts, route switching is sidebar-first.
 ## Location in the Site
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
-- Direct rows: `Home`, `Waves`, `Messages`, `Discover`, `Notifications`.
+- Direct rows: `Home`, `Waves`, `Messages`, `Notifications`.
 - Expandable groups: `Network`, `Collections`, `Tools`, `About`.
 - Utility rows: `Search`, optional `Share`, and connected-only `Profile`.
 - Bottom account area: connect action, loading placeholders, and user menu.

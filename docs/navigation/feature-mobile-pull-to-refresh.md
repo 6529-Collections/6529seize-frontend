@@ -43,7 +43,7 @@ cycle. It is not a full browser reload.
 
 ## Common Scenarios
 
-- Refresh list-heavy app routes (Discover, Waves, Messages, Notifications,
+- Refresh list-heavy app routes (Waves, Messages, Notifications,
   Network) without leaving the route.
 - Refresh deeper app routes (collections/tools/profile) in place.
 - If indicator appears but refresh does not run, pull farther before release.

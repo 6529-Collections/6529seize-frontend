@@ -9,7 +9,6 @@ context.
 ## Route Coverage
 
 - Desktop routes where `?create=wave` opens the wave-create modal:
-  - `/discover`
   - `/waves`
   - `/waves/{waveId}`
   - `/messages`
@@ -18,7 +17,6 @@ context.
 
 ## Entry Points
 
-- `/discover`: click list-header `Create Wave`.
 - `/waves` and `/waves/{waveId}`: click `+` in the left-sidebar `Waves`
   section.
 - `/waves`: click `Create Wave` in the empty-content placeholder.
@@ -27,8 +25,7 @@ context.
 
 ## URL and Modal Behavior
 
-1. Open a desktop discover, waves, or messages route with an authenticated
-   profile.
+1. Open a desktop waves or messages route with an authenticated profile.
 2. Start create-wave from an available control, or from a URL that already has
    `create=wave`.
 3. The current URL keeps the same path/context and sets `create=wave`.
@@ -42,8 +39,7 @@ context.
 
 ## Common Scenarios
 
-- Start a new wave from `/discover` and keep discover list context behind the
-  modal.
+- Start a new wave from `/waves` and keep waves-list context behind the modal.
 - Start a new wave from desktop waves sidebar while browsing existing waves.
 - Open `/messages?create=wave` or `/messages?wave={waveId}&create=wave` to open
   create-wave inside messages layout.
@@ -74,7 +70,7 @@ context.
 
 ## Scope Notes
 
-- This page documents desktop discover/waves/messages shell behavior only.
+- This page documents desktop waves/messages shell behavior only.
 - App create actions route to `/waves/create` instead of this desktop modal.
 - Create-wave visibility depends on the URL create mode and connected-profile
   availability.
@@ -85,7 +81,7 @@ context.
 
 - [Waves Index](../README.md)
 - [Direct Message Creation](feature-direct-message-creation.md)
-- [Wave Discover Cards](../discovery/feature-discover-cards.md)
+- [Wave List Navigation](../sidebars/feature-wave-list-navigation.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Dates and Timeline](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)

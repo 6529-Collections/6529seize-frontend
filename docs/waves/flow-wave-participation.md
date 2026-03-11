@@ -8,7 +8,7 @@ same context.
 
 ## Routes and URL State
 
-- Discovery and list surfaces: `/discover`, `/waves`, and `/messages`
+- Discovery and list surfaces: `/`, `/waves`, and `/messages`
 - Standard wave thread: `/waves/{waveId}`
 - Direct-message thread: `/messages?wave={waveId}` (no `/messages/{waveId}`
   route)
@@ -26,7 +26,7 @@ same context.
 
 ## Entry Points
 
-- Open a wave card from `/discover` or `/waves`.
+- Open a wave card from `/` (home sections) or `/waves`.
 - Open a direct-message thread from `/messages`.
 - Open a shared wave link, for example:
   `/waves/{waveId}?serialNo={serialNo}` or
@@ -82,7 +82,7 @@ same context.
 ## Related Pages
 
 - [Waves Index](README.md)
-- [Wave Discovery Index](discovery/README.md)
+- [Home Boosted Drops and Most Active Waves](../home/feature-home-discovery-grids.md)
 - [Wave Chat Index](chat/README.md)
 - [Wave Drop Actions Index](drop-actions/README.md)
 - [Wave Creation Index](create/README.md)

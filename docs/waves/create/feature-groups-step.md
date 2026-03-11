@@ -8,7 +8,7 @@ This step is user-reachable for `Chat` and `Rank`.
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
-- Desktop modal create route mode: `?create=wave` on `/discover`, `/waves`,
+- Desktop modal create route mode: `?create=wave` on `/waves`,
   `/waves/{waveId}`, `/messages`, and `/messages?wave={waveId}`
 - Step label: `Groups`
 - `Approve` is shown in `Overview` but disabled

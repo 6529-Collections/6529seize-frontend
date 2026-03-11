@@ -11,7 +11,6 @@ identities.
 ## Location in the Site
 
 - Desktop DM-create mode (`?create=dm`) is supported in these layouts:
-  - `/discover`
   - `/messages`
   - `/messages?wave={waveId}`
 - App create route: `/messages/create`.
@@ -19,7 +18,6 @@ identities.
 
 ## Entry Points
 
-- Click `Create DM` in the `/discover` list header.
 - Click `Create DM` in the desktop `/messages` placeholder panel.
 - Click the paper-plane create action in desktop messages sidebar layouts.
 - Click app-header `Create DM` while in app `/messages` list context.
@@ -49,7 +47,8 @@ identities.
 ## Common Scenarios
 
 - Start a DM from `/messages` without leaving the messages layout.
-- Start from `/discover`, then move directly into the created DM thread.
+- Start from `/waves` or `/messages`, then move directly into the created DM
+  thread.
 - Open `/messages/create` in app mode, then return to `/messages` with back.
 
 ## Edge Cases

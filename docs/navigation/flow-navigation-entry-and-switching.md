@@ -16,10 +16,10 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar rows (`Home`, `Waves`, `Messages`, `Discover`, `Notifications`)
+- Web sidebar rows (`Home`, `Waves`, `Messages`, `Notifications`)
   and section groups (`Network`, `Collections`, `Tools`, `About`).
 - Small-screen header menu button (opens the sidebar in overlay mode).
-- App bottom navigation tabs (`Discover`, `Waves`, `Messages`, `Home`,
+- App bottom navigation tabs (`Profile`, `Waves`, `Messages`, `Home`,
   `Network`, `Collections`, `Notifications`).
 - App header menu/avatar button for drawer routes and account actions (when
   `Back` is not active).
@@ -57,12 +57,15 @@ context-aware `Back`).
   page/profile/NFT/wave result.
 - In-wave search jump: switch to `In this Wave`, type at least 2 characters,
   then jump to a matching message.
+- App profile jump: tap bottom-nav `Profile`; if disconnected, complete wallet
+  connect, then retry to route into your profile.
 
 ## Edge Cases
 
 - App top-left control switches between menu/avatar and `Back`; when `Back` is
   shown, sidebar drawer entry is not available.
-- `Profile` shortcuts are connected-only and resolve handle-first, then wallet
+- Bottom-nav `Profile` is always visible: disconnected taps open wallet
+  connect, and connected taps resolve handle-first profile route with wallet
   fallback.
 - Web sidebar and search-page catalogs can vary by runtime constraints:
   iOS non-US hides subscription-related entries, and `App Wallets` appears only

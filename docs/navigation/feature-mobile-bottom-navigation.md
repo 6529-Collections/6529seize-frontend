@@ -7,10 +7,12 @@ Parent: [Navigation Index](README.md)
 In native app layout, primary section switching uses a fixed bottom icon bar.
 The bar uses a fixed `85px` shell height with centered icon buttons.
 
-Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
-`Notifications`.
+Tabs render left-to-right as `Profile`, `Waves`, `Messages`, `Home`,
+`Network`, `Collections`, and `Notifications`.
 
 `Messages` and `Notifications` can show unread dots for connected profiles.
+`Profile` is always shown; disconnected taps open wallet connect, and connected
+taps route to the active profile slug.
 
 ## Location in the Site
 
@@ -29,7 +31,8 @@ Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
 
 1. Open an app-shell route.
 2. Tap a tab:
-   - `Discover` -> `/discover`
+   - `Profile` -> disconnected: open wallet connect; connected:
+     `/{normalised-handle}` with `/{handle}` then `/{walletAddress}` fallback
    - `Waves` -> `/waves`, or cached non-DM thread (`/waves/{waveId}`)
    - `Messages` -> `/messages`, or cached DM thread (`/messages?wave={waveId}`)
    - `Home` -> `/`
@@ -41,7 +44,11 @@ Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
 
 ## Common Scenarios
 
-- From `/discover`, tap `Home` to return to `/`.
+- From `/waves` or `/messages`, tap `Home` to return to `/`.
+- Tap `Profile` while disconnected to start wallet connect before opening a
+  profile route.
+- Tap `Profile` while connected to jump to your own profile route using handle-
+  first slug resolution.
 - From `/waves/{waveId}`, tap `Waves` once to clear cached wave thread state
   and return to `/waves`.
 - From `/messages?wave={id}`, tap `Messages` once to clear cached DM thread
@@ -51,9 +58,11 @@ Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
 
 ## Edge Cases
 
-- `Discover` is active on `/discover` and `/discover/*`.
 - `Waves` and `Messages` can be active from `?view=waves` or `?view=messages`
   even when path is not `/waves` or `/messages`.
+- `Profile` active state uses connected identity context and marks active only
+  for own-profile paths (`/{slug}` or `/{slug}/*`, including nested paths like
+  `/proxy`) when no alternate view override is active.
 - `Network` is active on `/network`, `/network/*`, and `/nft-activity`.
 - `Collections` is active on `/the-memes`, `/6529-gradient`, `/nextgen`,
   `/meme-lab`, `/rememes`, and `/xtdh`.
@@ -63,7 +72,7 @@ Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
   `/messages/create`).
 - `Messages` and `Notifications` unread dots show only when a connected profile
   has unread items.
-- On non-stream routes (for example `/discover`, `/network`, `/the-memes`),
+- On non-stream routes (for example `/network`, `/the-memes`),
   layout adds `85px` bottom reserve spacing so content is not hidden behind the
   bar.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
@@ -98,4 +107,4 @@ Tabs: `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
 - [Mobile Pull-to-Refresh Behavior](feature-mobile-pull-to-refresh.md)
 - [Mobile Keyboard and Bottom Navigation Layout](feature-android-keyboard-layout.md)
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
-- [Discover Cards](../waves/discovery/feature-discover-cards.md)
+- [Waves Index](../waves/README.md)

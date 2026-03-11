@@ -61,6 +61,9 @@ This page covers:
 - `Most active waves` missing:
   - While loading, section shows skeleton cards.
   - Hidden when hot-waves is empty or request fails.
+- A stale `/discover` bookmark was used:
+  - `/discover` is a removed legacy route and no longer hosts wave discovery.
+  - Use `/` for home discovery cards or `/waves` for the canonical waves list.
 - Health heart shortcut missing:
   - It appears only on `/`.
   - Larger layouts: fixed in the hero region.
@@ -91,6 +94,7 @@ This page covers:
   card links fail.
 - Open `/waves` when `Coming up`, `Boosted Drops`, or `Most active waves`
   routes fail.
+- If a stale link targets `/discover`, restart from `/` or `/waves`.
 - For direct-message wave targets, retry from:
   - `/messages?wave={waveId}`
   - `/messages?wave={waveId}&serialNo={serialNo}` for boosted-drop deep links.

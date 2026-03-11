@@ -41,6 +41,9 @@ handoff does not behave as expected.
 - Sidebar rows are missing on web:
   expand `Network`, `Collections`, `Tools`, or `About`; in collapsed rail,
   open the flyout first.
+- `Discover` row/tab is missing:
+  expected behavior. `/discover` is removed, and primary wave navigation uses
+  `/waves` (plus `/messages` for DM routes).
 - `Profile` shortcut is missing:
   connect wallet first; profile rows in web/app sidebars are hidden while
   disconnected.
@@ -87,7 +90,8 @@ handoff does not behave as expected.
 ## Failure and Recovery
 
 - If route switching stalls, jump to a stable root and retry:
-  `/`, `/discover`, `/waves`, `/messages`, `/notifications`, or `/network`.
+  `/`, `/waves`, `/messages`, `/notifications`, or `/network`.
+- If a stale bookmark points to `/discover`, restart from `/` or `/waves`.
 - If a drop stays stuck open, use app-header `Back` once to clear `drop` state.
 - If wave/message context looks stale, go to `/waves` or `/messages` root, then
   reopen the target thread.

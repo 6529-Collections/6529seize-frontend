@@ -15,8 +15,9 @@ and mobile app layouts.
 
 ## Route Coverage
 
-- Primary section switching: `/`, `/discover`, `/waves`, `/messages`,
-  `/network`, `/the-memes`, `/notifications`.
+- Primary section switching: `/`, `/waves`, `/messages`,
+  `/network`, `/the-memes`, `/notifications`, and connected profile routes
+  (`/{normalized-handle}` with wallet-address fallback).
 - Secondary jumps: `/network/*`, `/nft-activity`, `/meme-calendar`,
   collections routes, tools routes, and about routes.
 
@@ -27,10 +28,11 @@ and mobile app layouts.
 - [Web Sidebar Navigation](feature-sidebar-navigation.md): web route switching
   from the desktop rail and overlay sidebar modes on narrow web layouts.
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): app primary
-  tabs for `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`,
-  and `Notifications`.
+  tabs for `Profile`, `Waves`, `Messages`, `Home`, `Network`, `Collections`,
+  and `Notifications`; disconnected profile taps open wallet connect, and
+  connected profile taps route to the active profile slug.
 - [App Sidebar Menu](feature-app-sidebar-menu.md): app drawer with direct rows
-  (`Discover`, connected `Profile`), grouped links (`Network`, `Tools`,
+  (connected `Profile`), grouped links (`Network`, `Tools`,
   `About`), and footer account actions.
 
 ### Shared Shell Controls

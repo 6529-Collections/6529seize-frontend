@@ -12,7 +12,7 @@ indicators (dot/count badges) to help account switching.
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Direct rows: `Discover`, plus connected-only `Profile`.
+- Direct rows: connected-only `Profile`.
 - Collapsible groups: `Network`, `Tools`, `About`.
 - Footer actions: `Scan QR Code` (Capacitor + scanner support), then either
   `Connect` (disconnected) or connected actions (`Push Notifications`,
@@ -33,8 +33,8 @@ indicators (dot/count badges) to help account switching.
    - connected: profile card (avatar, handle/wallet label, level, stats, and
      unread count badge when present)
    - disconnected: `6529` logo linking to `/`
-4. Choose `Discover` or connected `Profile`, or expand `Network`, `Tools`, or
-   `About` and choose a nested route.
+4. Choose connected `Profile`, or expand `Network`, `Tools`, or `About` and
+   choose a nested route.
 5. Drawer closes and route navigation runs.
 6. Use footer actions for QR scan, connect/session actions, or push settings.
 

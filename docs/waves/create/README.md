@@ -14,16 +14,15 @@ Use this area to create:
 ### Route and Mode Coverage
 
 - Desktop wave create mode (`create=wave`) can open on:
-  `/discover`, `/waves`, `/waves/{waveId}`, `/messages`, or
+  `/waves`, `/waves/{waveId}`, `/messages`, or
   `/messages?wave={waveId}`.
 - Desktop wave-create controls are available on:
-  - `/discover` list header (`Create Wave`)
   - `/waves` and `/waves/{waveId}` left-sidebar `Waves` section (`+`)
   - `/waves` empty-content placeholder (`Create Wave`)
 - Desktop `/messages` routes support wave-create mode by URL only
   (`?create=wave`).
-- Desktop direct-message mode (`create=dm`) is supported on `/discover`,
-  `/messages`, and `/messages?wave={waveId}`.
+- Desktop direct-message mode (`create=dm`) is supported on `/messages` and
+  `/messages?wave={waveId}`.
 - App create routes:
   - wave: `/waves/create`
   - direct message: `/messages/create`
@@ -63,7 +62,7 @@ Use this area to create:
 ## Flows
 
 - [Wave Participation Flow](../flow-wave-participation.md): end-to-end wave
-  discovery, thread participation, and sharing flow.
+  entry, thread participation, and sharing flow.
 
 ## Troubleshooting
 

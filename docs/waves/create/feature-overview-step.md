@@ -8,8 +8,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
-- Desktop create-wave modal mode: `?create=wave` on supported discover, waves,
-  and messages routes
+- Desktop create-wave modal mode: `?create=wave` on supported waves and
+  messages routes
   - route ownership: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - Step label: `Overview`
 - Create form renders only when a connected profile is available.

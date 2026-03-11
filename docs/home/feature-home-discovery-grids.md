@@ -83,6 +83,6 @@ why a section can disappear.
 - [Home Index](README.md)
 - [Home Latest Drop and Coming Up](feature-home-latest-drop-and-coming-up.md)
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
-- [Wave Discovery Index](../waves/discovery/README.md)
+- [Waves Index](../waves/README.md)
 - [Wave Navigation and Posting](../waves/troubleshooting-wave-navigation-and-posting.md)
 - [Docs Home](../README.md)

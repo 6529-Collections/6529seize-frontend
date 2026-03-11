@@ -11,7 +11,7 @@ In the app layout, the header adapts to route and thread state. It controls:
 ## Location in the Site
 
 - App routes rendered through `AppLayout` (native app shell).
-- Common route families: `/`, `/discover`, `/waves*`, `/messages*`,
+- Common route families: `/`, `/waves*`, `/messages*`,
   `/network*`, collection routes, tool routes, and profile routes.
 - Excluded routes: `/access*` and `/restricted*` (no layout wrapper).
 

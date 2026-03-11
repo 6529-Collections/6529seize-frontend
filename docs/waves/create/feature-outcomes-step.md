@@ -8,7 +8,7 @@ You must save at least one outcome before `Next` can move to `Description`.
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
-- Desktop modal create mode: `?create=wave` on discover/waves/messages shells
+- Desktop modal create mode: `?create=wave` on waves/messages shells
 - Step label: `Outcomes`
 - User-reachable only in `Rank` creation (`Approve` is disabled in `Overview`)
 

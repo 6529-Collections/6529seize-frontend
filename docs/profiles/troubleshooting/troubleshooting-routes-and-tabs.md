@@ -31,6 +31,13 @@ Scope:
   - Action: correct the URL and use a supported route.
   - Shared behavior: [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
 
+- Symptom: `/{user}.html` (or `.htm`, `.php`, `.asp`, `.aspx`, `.jsp`) shows
+  `USER OR PAGE`.
+  - Meaning: profile routes treat file-extension probe suffixes as invalid user
+    slugs.
+  - Action: remove the suffix and open a valid handle or wallet route (for
+    example `/{user}`).
+
 - Symptom: URL redirects to another handle.
   - Meaning: canonical-handle normalization.
   - Action: save the canonical URL.

@@ -9,7 +9,6 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 
 - Full-page create route: `/waves/create`
 - Desktop create-wave modal mode (`?create=wave`) on:
-  - `/discover`
   - `/waves`
   - `/waves/{waveId}`
   - `/messages`

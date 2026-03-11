@@ -12,7 +12,6 @@ Use this area for wave and direct-message tasks:
 
 ## Route Coverage
 
-- Discover list: `/discover`
 - Waves list: `/waves`
 - Wave thread: `/waves/{waveId}`
 - Messages list: `/messages`
@@ -23,10 +22,10 @@ Use this area for wave and direct-message tasks:
 ## Query Coverage
 
 - Web wave-create mode (`create=wave`) uses the current stream route
-  (for example `/discover`, `/waves`, `/waves/{waveId}`, `/messages`, or
+  (for example `/waves`, `/waves/{waveId}`, `/messages`, or
   `/messages?wave={waveId}`).
-- Web direct-message mode (`create=dm`) is supported on `/discover`,
-  `/messages`, and `/messages?wave={waveId}`.
+- Web direct-message mode (`create=dm`) is supported on `/messages` and
+  `/messages?wave={waveId}`.
 - `drop={dropId}` opens a single-drop overlay in the current thread context.
 - If a URL contains both `drop` and `serialNo`, drop-open behavior is handled
   first.
@@ -38,7 +37,7 @@ Use this area for wave and direct-message tasks:
 
 ## Access and Availability
 
-- `/discover`, `/waves`, and `/messages` require authenticated wallet access.
+- `/waves` and `/messages` require authenticated wallet access.
 - A profile handle is required before route content renders.
 - Proxy sessions cannot access wave/message content and show unavailable states.
 - Wave and direct-message creation requires a connected non-proxy profile.
@@ -54,8 +53,8 @@ Use this area for wave and direct-message tasks:
 
 ## Features
 
-- [Discovery](discovery/README.md): find and open waves from discover and list
-  surfaces.
+- [Discovery](discovery/README.md): legacy discover-route notes and current
+  replacement entry points.
 - [Create](create/README.md): wave and direct-message creation entry points and
   form/step behavior.
 - [Chat](chat/README.md): in-thread tab behavior, thread scroll/pinning, serial
@@ -82,7 +81,7 @@ Use this area for wave and direct-message tasks:
 ## Flows
 
 - [Wave Participation Flow](flow-wave-participation.md): end-to-end journey from
-  wave discovery to in-thread actions and shared links.
+  wave entry points to in-thread actions and shared links.
 
 ## Troubleshooting
 
