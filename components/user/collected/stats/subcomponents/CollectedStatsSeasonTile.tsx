@@ -129,9 +129,9 @@ export function CollectedStatsSeasonTile({
       onFocus={onPreview}
       onClick={onSelect}
       className={[
-        "tw-flex tw-w-[78px] tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-xl tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-center tw-transition-all tw-duration-200 sm:tw-w-[88px]",
+        "tw-flex tw-w-[78px] tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-xl tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-center tw-transition-all tw-duration-300 sm:tw-w-[88px]",
         getButtonClassName(isSelected),
-        "hover:tw-scale-[1.01] focus-visible:tw-scale-[1.01]",
+        "desktop-hover:hover:tw-scale-105",
         "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500",
       ].join(" ")}
     >
