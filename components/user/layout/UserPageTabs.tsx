@@ -1,7 +1,8 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
   faChevronLeft,
@@ -14,19 +15,12 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 import {
   DEFAULT_USER_PAGE_TAB,
   USER_PAGE_TABS,
-  type UserPageTabConfig,
+  USER_PAGE_TAB_IDS,
   type UserPageTabKey,
   type UserPageVisibilityContext,
   getUserPageTabByRoute,
@@ -72,11 +66,6 @@ const resolveTabFromPath = (pathname: string): UserPageTabKey => {
   return match?.id ?? DEFAULT_TAB;
 };
 
-const filterVisibleTabs = (
-  tabs: readonly UserPageTabConfig[],
-  context: UserPageVisibilityContext
-) => tabs.filter((tab) => (tab.isVisible ? tab.isVisible(context) : true));
-
 export default function UserPageTabs() {
   const pathname = usePathname() ?? "";
   const router = useRouter();
@@ -86,16 +75,13 @@ export default function UserPageTabs() {
   const searchString = searchParams?.toString() ?? "";
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const { showWaves, connectedProfile } = useContext(AuthContext);
+  const { showWaves, connectedProfile, fetchingProfile } = useAuth();
 
   const isOwnProfile = useMemo(() => {
-    if (!connectedProfile || !handleOrWallet) return false;
-    const lower = handleOrWallet.toLowerCase();
-    if (connectedProfile.normalised_handle === lower) return true;
-    return (
-      connectedProfile.wallets?.some((w) => w.wallet.toLowerCase() === lower) ??
-      false
-    );
+    return isOwnProfileRoute({
+      connectedProfile,
+      handleOrWallet,
+    });
   }, [connectedProfile, handleOrWallet]);
 
   const visibilityContext = useMemo(
@@ -119,9 +105,24 @@ export default function UserPageTabs() {
     [pathname]
   );
 
+  const preserveProxyTabWhileOwnershipLoads =
+    fetchingProfile &&
+    !connectedProfile &&
+    resolvedTabFromPath === USER_PAGE_TAB_IDS.PROXY;
+
   const visibleTabs = useMemo(
-    () => filterVisibleTabs(USER_PAGE_TABS, visibilityContext),
-    [visibilityContext]
+    () =>
+      USER_PAGE_TABS.filter((tab) => {
+        if (
+          preserveProxyTabWhileOwnershipLoads &&
+          tab.id === USER_PAGE_TAB_IDS.PROXY
+        ) {
+          return true;
+        }
+
+        return tab.isVisible ? tab.isVisible(visibilityContext) : true;
+      }),
+    [preserveProxyTabWhileOwnershipLoads, visibilityContext]
   );
 
   const resolvedTabIsVisible = useMemo(
