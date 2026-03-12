@@ -56,6 +56,16 @@ function installSafeEthereumProxy(): void {
     return;
   }
 
+  const ethereumDescriptor = getPropertyDescriptor(w, "ethereum");
+  if (ethereumDescriptor && !canAssignProperty(ethereumDescriptor)) {
+    logErrorSecurely(
+      "[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum",
+      new Error("window.ethereum cannot be reassigned")
+    );
+    w.__6529_safeEthereumProxyInstalled = true;
+    return;
+  }
+
   try {
     let hasLoggedProxyGetError = false;
     const proxy = new Proxy(ethereum, {
@@ -90,6 +100,42 @@ function installSafeEthereumProxy(): void {
     );
     w.__6529_safeEthereumProxyInstalled = true;
   }
+}
+
+function getPropertyDescriptor(
+  target: object,
+  property: PropertyKey
+): PropertyDescriptor | undefined {
+  let currentTarget: object | null = target;
+  while (currentTarget) {
+    const descriptor = Object.getOwnPropertyDescriptor(currentTarget, property);
+    if (descriptor) {
+      return descriptor;
+    }
+    currentTarget = getPrototype(currentTarget);
+  }
+  return undefined;
+}
+
+function getPrototype(target: object): object | null {
+  const prototype: unknown = Object.getPrototypeOf(target);
+  if (
+    prototype === null ||
+    typeof prototype === "object" ||
+    typeof prototype === "function"
+  ) {
+    return prototype;
+  }
+
+  return null;
+}
+
+function canAssignProperty(descriptor: PropertyDescriptor): boolean {
+  if ("get" in descriptor || "set" in descriptor) {
+    return typeof descriptor.set === "function";
+  }
+
+  return descriptor.writable !== false;
 }
 
 export default function WagmiSetup({
