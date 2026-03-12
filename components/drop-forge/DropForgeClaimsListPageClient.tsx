@@ -29,7 +29,7 @@ import { getClaimsPage } from "@/services/api/memes-minting-claims-api";
 const CARD_CLASS =
   "tw-flex tw-flex-col tw-min-h-[7rem] tw-overflow-hidden tw-rounded-xl tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-iron-800 hover:tw-ring-iron-600 tw-p-4 sm:tw-p-5 tw-no-underline tw-transition-all tw-duration-300";
 const CARD_STATUS_CONTAINER_CLASS =
-  "tw-static tw-mb-3 tw-flex tw-w-full tw-justify-end tw-gap-2 min-[480px]:tw-absolute min-[480px]:tw-right-4 min-[480px]:tw-top-4 min-[480px]:tw-mb-0 min-[480px]:tw-w-auto min-[480px]:tw-justify-start min-[480px]:tw-flex-col min-[480px]:tw-items-end";
+  "tw-absolute tw-right-4 tw-top-4 tw-z-10 tw-flex tw-flex-col tw-items-end tw-gap-2";
 
 type MediaKind = "image" | "video" | "glb" | "html" | "unknown";
 
@@ -323,8 +323,8 @@ function ClaimCardContent({
   return (
     <div className="tw-flex tw-min-h-full tw-flex-1 tw-items-stretch tw-gap-3 sm:tw-gap-5">
       <ClaimCardThumbnail claim={claim} />
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-2 tw-self-stretch min-[480px]:tw-pr-36 sm:tw-gap-3 lg:tw-pr-40">
-        <div className="tw-min-w-0 tw-font-mono tw-text-[11px] tw-tracking-wide tw-text-iron-400 min-[480px]:tw-truncate sm:tw-text-xs">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-2 tw-self-stretch tw-pr-32 sm:tw-gap-3 lg:tw-pr-40">
+        <div className="tw-min-w-0 tw-truncate tw-font-mono tw-text-[11px] tw-tracking-wide tw-text-iron-400 sm:tw-text-xs">
           {metadataLabel}
         </div>
         <div className="tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-tight tw-text-iron-50 min-[480px]:tw-truncate sm:tw-text-base">
