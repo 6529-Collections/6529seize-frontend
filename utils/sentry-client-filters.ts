@@ -201,7 +201,11 @@ function hasInjectedAppUriSignature(
     return false;
   }
 
-  return !frames || hasOnlyAppUriFrames(frames);
+  if (!Array.isArray(frames) || frames.length === 0) {
+    return true;
+  }
+
+  return hasOnlyAppUriFrames(frames);
 }
 
 function hasWalletCollisionSignature(

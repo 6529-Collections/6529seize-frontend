@@ -334,6 +334,38 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters injected wallet collisions when stack frames are empty", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Some wrapper error",
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+      breadcrumbs: {
+        values: [],
+      },
+    });
+    const error = new Error(
+      "Cannot set property ethereum of #<Window> which has only a getter"
+    );
+    error.stack = `TypeError: Cannot set property ethereum of #<Window> which has only a getter\n    at injected (app:///injected/injected.js:1:1)`;
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters injected wallet collisions when only abs_path has the injected app URI", () => {
     // Arrange
     const event = createInjectedWalletCollisionEvent({
