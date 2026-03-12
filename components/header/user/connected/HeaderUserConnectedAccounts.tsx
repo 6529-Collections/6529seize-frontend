@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
@@ -32,8 +33,10 @@ function ConnectedAccountRow({
     isConnected: account.isConnected,
   });
 
+  const [hasPfpError, setHasPfpError] = useState(false);
   const resolvedPfp = profile?.pfp ? resolveIpfsUrlSync(profile.pfp) : null;
-  const shouldShowFallbackPfp = !isProfileLoading && !resolvedPfp;
+  const shouldShowFallbackPfp =
+    hasPfpError || (!isProfileLoading && !resolvedPfp);
   const avatarSrc =
     resolvedPfp ??
     (shouldShowFallbackPfp ? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP : null);
@@ -45,6 +48,10 @@ function ConnectedAccountRow({
   const showUnreadBadge = unreadCount > 0;
   const unreadBadgeLabel =
     unreadCount > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : unreadCount;
+
+  useEffect(() => {
+    setHasPfpError(false);
+  }, [account.address, resolvedPfp]);
 
   return (
     <button
@@ -66,6 +73,13 @@ function ConnectedAccountRow({
             <img
               src={avatarSrc}
               alt={label}
+              onError={(event) => {
+                if (!hasPfpError) {
+                  setHasPfpError(true);
+                  event.currentTarget.src =
+                    DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP;
+                }
+              }}
               className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out ${
                 resolvedPfp
                   ? "tw-object-contain"

@@ -103,11 +103,22 @@ const handleApiError = async (
             : null;
         const bodyError = bodyRecord?.["error"];
         const bodyMessage = bodyRecord?.["message"];
+        const bodyDetails = bodyRecord?.["details"];
+        const detailsFirstMessage =
+          Array.isArray(bodyDetails) &&
+          typeof bodyDetails[0] === "object" &&
+          bodyDetails[0] !== null &&
+          "message" in bodyDetails[0] &&
+          typeof (bodyDetails[0] as { message?: unknown }).message === "string"
+            ? (bodyDetails[0] as { message: string }).message
+            : undefined;
 
         if (typeof bodyError === "string") {
           errorMessage = bodyError;
         } else if (typeof bodyMessage === "string") {
           errorMessage = bodyMessage;
+        } else if (typeof detailsFirstMessage === "string") {
+          errorMessage = detailsFirstMessage;
         } else {
           errorMessage = rawContent;
         }
@@ -418,6 +429,7 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
   body: T;
   headers?: Record<string, string> | undefined;
   params?: Z | undefined;
+  signal?: AbortSignal | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -428,7 +440,29 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
     url,
     "PUT",
     getHeaders(param.headers, true),
-    JSON.stringify(param.body)
+    JSON.stringify(param.body),
+    param.signal
+  );
+};
+
+export const commonApiPatch = async <T, U, Z = Record<string, string>>(param: {
+  endpoint: string;
+  body: T;
+  headers?: Record<string, string> | undefined;
+  params?: Z | undefined;
+  signal?: AbortSignal | undefined;
+}): Promise<U> => {
+  const url = buildUrl(
+    param.endpoint,
+    param.params as Record<string, string> | undefined
+  );
+
+  return executeApiRequest<U>(
+    url,
+    "PATCH",
+    getHeaders(param.headers, true),
+    JSON.stringify(param.body),
+    param.signal
   );
 };
 

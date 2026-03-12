@@ -1,5 +1,14 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { mainnet, sepolia } from "viem/chains";
+import { WagmiProvider } from "wagmi";
+import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
+import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { useAuth } from "@/components/auth/Auth";
+import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
+import { publicEnv } from "@/config/env";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { AppKitValidationError } from "@/src/errors/appkit-initialization";
 import type { AppKitInitializationConfig } from "@/utils/appkit-initialization.utils";
@@ -12,14 +21,8 @@ import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
-import { Capacitor } from "@capacitor/core";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { WagmiProvider } from "wagmi";
-import type { AppWallet } from "../app-wallets/AppWalletsContext";
-import { useAppWallets } from "../app-wallets/AppWalletsContext";
-import { useAuth } from "../auth/Auth";
-import { AppKitAdapterManager } from "./AppKitAdapterManager";
+import type { Chain } from "viem";
 
 /**
  * Installs a defensive wrapper around `window.ethereum` (EIP-1193 provider).
@@ -97,6 +100,8 @@ export default function WagmiSetup({
 }: {
   readonly children: React.ReactNode;
 }) {
+  const enableTestnet = publicEnv.DROP_FORGE_TESTNET === true;
+
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
   const { appWallets } = useAppWallets();
@@ -135,15 +140,21 @@ export default function WagmiSetup({
         throw new AppKitValidationError("Internal API failed");
       }
 
+      const chains: Chain[] = [mainnet];
+      if (enableTestnet) {
+        chains.push(sepolia);
+      }
+
       const config: AppKitInitializationConfig = {
         wallets,
         adapterManager: adapterManager as AppKitAdapterManager,
         isCapacitor,
+        chains,
       };
 
       return initializeAppKit(config);
     },
-    [adapterManager, isCapacitor]
+    [adapterManager, isCapacitor, enableTestnet]
   );
 
   // Initialize AppKit with fail-fast approach
