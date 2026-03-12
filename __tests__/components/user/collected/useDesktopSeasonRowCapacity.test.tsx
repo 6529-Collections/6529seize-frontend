@@ -2,8 +2,8 @@ import { useDesktopSeasonRowCapacity } from "@/components/user/collected/stats/u
 import { render, screen, waitFor } from "@testing-library/react";
 
 const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
-const originalGetComputedStyle = window.getComputedStyle;
-const originalInnerWidth = window.innerWidth;
+const originalGetComputedStyle = globalThis.getComputedStyle;
+const originalInnerWidth = globalThis.innerWidth;
 
 function SeasonRowCapacityHarness({
   seasonCount,
@@ -22,11 +22,14 @@ function SeasonRowCapacityHarness({
         data-testid={isDesktopLayout ? "desktop-row" : "mobile-row"}
         data-gap={isDesktopLayout ? "4px" : "12px"}
       >
-        {Array.from({ length: renderedSeasonCount }).map((_, index) => (
+        {Array.from(
+          { length: renderedSeasonCount },
+          (_, index) => index + 1
+        ).map((seasonNumber) => (
           <div
-            key={index}
+            key={seasonNumber}
             data-season-tile
-            data-testid={`season-tile-${index + 1}`}
+            data-testid={`season-tile-${seasonNumber}`}
             data-width="88"
           />
         ))}
@@ -40,16 +43,14 @@ function SeasonRowCapacityHarness({
 
 describe("useDesktopSeasonRowCapacity", () => {
   beforeEach(() => {
-    Object.defineProperty(window, "innerWidth", {
+    Object.defineProperty(globalThis, "innerWidth", {
       configurable: true,
       writable: true,
       value: 1024,
     });
 
     HTMLElement.prototype.getBoundingClientRect = function () {
-      const width = Number.parseFloat(
-        (this as HTMLElement).dataset.width ?? "0"
-      );
+      const width = Number.parseFloat(this.dataset.width ?? "0");
 
       return {
         width,
@@ -64,7 +65,7 @@ describe("useDesktopSeasonRowCapacity", () => {
       } as DOMRect;
     };
 
-    window.getComputedStyle = ((element: Element) => {
+    globalThis.getComputedStyle = ((element: Element) => {
       const gap = (element as HTMLElement).dataset.gap ?? "0px";
 
       return {
@@ -73,13 +74,13 @@ describe("useDesktopSeasonRowCapacity", () => {
         getPropertyValue: (property: string) =>
           property.includes("gap") ? gap : "",
       } as CSSStyleDeclaration;
-    }) as typeof window.getComputedStyle;
+    }) as typeof globalThis.getComputedStyle;
   });
 
   afterEach(() => {
     HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
-    window.getComputedStyle = originalGetComputedStyle;
-    Object.defineProperty(window, "innerWidth", {
+    globalThis.getComputedStyle = originalGetComputedStyle;
+    Object.defineProperty(globalThis, "innerWidth", {
       configurable: true,
       writable: true,
       value: originalInnerWidth,
