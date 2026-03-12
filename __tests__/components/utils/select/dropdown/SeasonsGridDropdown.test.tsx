@@ -233,7 +233,10 @@ describe("SeasonsGridDropdown", () => {
     );
     await flushPromises();
 
-    expect(setSelected).toHaveBeenCalledWith(mockSeasons[1]);
+    expect(
+      screen.getByRole("button", { name: /Season: SZN 2/i })
+    ).toBeInTheDocument();
+    expect(setSelected).not.toHaveBeenCalled();
   });
 
   it("does not apply initial season when initialSeasonId is null", async () => {

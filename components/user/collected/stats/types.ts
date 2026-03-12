@@ -1,5 +1,6 @@
 import type { UserPageStatsInitialData } from "@/components/user/stats/userPageStats.types";
 import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
+import type { CollectedCollectionType } from "@/entities/IProfile";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
@@ -9,12 +10,14 @@ export type CollectedHeaderMetric = {
   readonly id: string;
   readonly label: string;
   readonly val: string;
+  readonly collection?: CollectedCollectionType;
   readonly sub?: string;
 };
 
 export type DisplaySeason = {
   readonly id: string;
   readonly label: string;
+  readonly seasonNumber: number;
   readonly totalCards: number;
   readonly setsHeld: number;
   readonly nextSetCards: number;

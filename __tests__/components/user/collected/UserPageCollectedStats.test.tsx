@@ -1,10 +1,12 @@
 import UserPageCollectedStats from "@/components/user/collected/UserPageCollectedStats";
 import type { UserPageStatsInitialData } from "@/components/user/stats/userPageStats.types";
+import { CollectedCollectionType } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
+import { useDesktopSeasonRowCapacity } from "@/components/user/collected/stats/useDesktopSeasonRowCapacity";
 
 jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
   __esModule: true,
@@ -28,7 +30,16 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
+jest.mock(
+  "@/components/user/collected/stats/useDesktopSeasonRowCapacity",
+  () => ({
+    useDesktopSeasonRowCapacity: jest.fn(),
+  })
+);
+
 const apiMock = commonApiFetch as jest.Mock;
+const useDesktopSeasonRowCapacityMock =
+  useDesktopSeasonRowCapacity as jest.Mock;
 
 const profile = {
   handle: "punk6529",
@@ -109,6 +120,11 @@ describe("UserPageCollectedStats", () => {
   beforeEach(() => {
     apiMock.mockClear();
     apiMock.mockResolvedValue({});
+    useDesktopSeasonRowCapacityMock.mockReturnValue({
+      containerRef: { current: null },
+      visibleSeasonCount: null,
+      isDesktopLayout: false,
+    });
   });
 
   it("renders the new collected header metrics and season states", async () => {
@@ -138,6 +154,131 @@ describe("UserPageCollectedStats", () => {
 
     await user.click(screen.getByRole("button", { name: /szn2/i }));
     expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+  });
+
+  it("uses collection shortcuts for collection-backed metrics and keeps boost informational", async () => {
+    const user = userEvent.setup();
+    const onCollectionShortcut = jest.fn();
+
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+        activeCollection={CollectedCollectionType.NEXTGEN}
+        onCollectionShortcut={onCollectionShortcut}
+      />
+    );
+
+    const nextGenButton = screen.getByRole("button", { name: /nextgen/i });
+
+    expect(nextGenButton).toHaveAttribute("aria-pressed", "true");
+
+    await user.click(nextGenButton);
+
+    expect(onCollectionShortcut).toHaveBeenCalledWith(
+      CollectedCollectionType.NEXTGEN
+    );
+    expect(
+      screen.queryByRole("button", { name: /boost/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("only applies the season shortcut on click while hover still previews details", async () => {
+    const user = userEvent.setup();
+    const onSeasonShortcut = jest.fn();
+
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+        activeSeasonNumber={2}
+        onSeasonShortcut={onSeasonShortcut}
+      />
+    );
+
+    const seasonButton = screen.getByRole("button", { name: /szn2/i });
+
+    expect(seasonButton).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+
+    await user.hover(seasonButton);
+
+    expect(onSeasonShortcut).not.toHaveBeenCalled();
+    expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+
+    await user.click(seasonButton);
+
+    expect(onSeasonShortcut).toHaveBeenCalledWith(2);
+  });
+
+  it("drops stale preview state when the active season filter changes", async () => {
+    const user = userEvent.setup();
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      </QueryClientProvider>
+    );
+
+    await user.hover(screen.getByRole("button", { name: /szn1/i }));
+
+    expect(screen.getByText("Set 1 complete")).toBeInTheDocument();
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+          activeSeasonNumber={2}
+        />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+    expect(screen.queryByText("Set 1 complete")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /szn2/i })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
+  it("keeps the filtered season visible in the collapsed desktop row", () => {
+    useDesktopSeasonRowCapacityMock.mockReturnValue({
+      containerRef: { current: null },
+      visibleSeasonCount: 1,
+      isDesktopLayout: true,
+    });
+
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+        activeSeasonNumber={2}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: /szn2/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /szn1/i })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show 1 more started seasons" })
+    ).toBeInTheDocument();
   });
 
   it("derives Meme Sets as the minimum full-set count across valid seasons", () => {
@@ -209,6 +350,11 @@ describe("UserPageCollectedStats", () => {
 
   it("collapses overflowing started seasons behind a see more control on desktop", async () => {
     const user = userEvent.setup();
+    useDesktopSeasonRowCapacityMock.mockReturnValue({
+      containerRef: { current: null },
+      visibleSeasonCount: 4,
+      isDesktopLayout: true,
+    });
     const originalInnerWidth = globalThis.innerWidth;
     const originalGetComputedStyle = globalThis.getComputedStyle;
     const clientWidthSpy = jest
@@ -322,18 +468,22 @@ describe("UserPageCollectedStats", () => {
         ).toBeInTheDocument();
       });
 
-      expect(screen.getByText("+2 more")).toBeInTheDocument();
+      const showMoreButton = screen.getByRole("button", {
+        name: "Show 2 more started seasons",
+      });
+      expect(showMoreButton).toHaveTextContent("+2 more");
+      expect(showMoreButton).not.toHaveClass("tw-absolute", "tw-right-0");
+      expect(showMoreButton.parentElement).toHaveClass(
+        "tw-flex",
+        "tw-justify-center"
+      );
       expect(
         screen.queryByRole("button", {
           name: /szn6/i,
         })
       ).not.toBeInTheDocument();
 
-      await user.click(
-        screen.getByRole("button", {
-          name: "Show 2 more started seasons",
-        })
-      );
+      await user.click(showMoreButton);
 
       expect(
         screen.getByRole("button", {
