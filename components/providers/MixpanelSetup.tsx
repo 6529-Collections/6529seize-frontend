@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { getProfileViewerContext } from "@/helpers/ProfileHelpers";
 import {
   clearIdentity,
   disableAnalytics,
@@ -13,10 +14,14 @@ import { classifyPageView } from "@/services/analytics/pageClassification";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+const getProfileRouteTarget = (pathname: string): string | null => {
+  return pathname.split("/").find((segment) => segment.length > 0) ?? null;
+};
+
 export default function MixpanelSetup() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, fetchingProfile } = useAuth();
   const { performanceConsent } = useCookieConsent();
   const lastTrackedPageKeyRef = useRef<string | null>(null);
   const identifiedProfileIdRef = useRef<string | null>(null);
@@ -25,6 +30,12 @@ export default function MixpanelSetup() {
     pathname,
     searchParams,
   });
+  const profileViewerContext = pageView.logicalPage.startsWith("profile_")
+    ? getProfileViewerContext({
+        connectedProfile,
+        handleOrWallet: getProfileRouteTarget(pathname),
+      })
+    : null;
 
   useEffect(() => {
     if (!hasConsent) {
@@ -68,6 +79,10 @@ export default function MixpanelSetup() {
       return;
     }
 
+    if (pageView.logicalPage.startsWith("profile_") && fetchingProfile) {
+      return;
+    }
+
     if (lastTrackedPageKeyRef.current === pageView.trackingKey) {
       return;
     }
@@ -78,9 +93,17 @@ export default function MixpanelSetup() {
         connectedProfile?.id !== undefined && connectedProfile.id !== null,
       logical_page: pageView.logicalPage,
       page_group: pageView.pageGroup,
+      profile_viewer_context: profileViewerContext ?? undefined,
       route_pattern: pageView.routePattern,
     });
-  }, [connectedProfile?.id, hasConsent, pageView, pathname]);
+  }, [
+    connectedProfile?.id,
+    fetchingProfile,
+    hasConsent,
+    pageView,
+    pathname,
+    profileViewerContext,
+  ]);
 
   return null;
 }
