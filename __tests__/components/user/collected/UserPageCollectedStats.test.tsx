@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { useDesktopSeasonRowCapacity } from "@/components/user/collected/stats/useDesktopSeasonRowCapacity";
 
 jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
@@ -30,6 +31,10 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
+jest.mock("next/navigation", () => ({
+  useSearchParams: jest.fn(),
+}));
+
 jest.mock(
   "@/components/user/collected/stats/useDesktopSeasonRowCapacity",
   () => ({
@@ -38,6 +43,7 @@ jest.mock(
 );
 
 const apiMock = commonApiFetch as jest.Mock;
+const useSearchParamsMock = useSearchParams as jest.Mock;
 const useDesktopSeasonRowCapacityMock =
   useDesktopSeasonRowCapacity as jest.Mock;
 
@@ -120,6 +126,9 @@ describe("UserPageCollectedStats", () => {
   beforeEach(() => {
     apiMock.mockClear();
     apiMock.mockResolvedValue({});
+    useSearchParamsMock.mockReturnValue({
+      get: () => null,
+    });
     useDesktopSeasonRowCapacityMock.mockReturnValue({
       containerRef: { current: null },
       visibleSeasonCount: null,
@@ -628,6 +637,25 @@ describe("UserPageCollectedStats", () => {
       "owners-balances/consolidation/key",
       "owners-balances/consolidation/key/memes",
     ]);
+    expect(screen.getByTestId("details")).toBeInTheDocument();
+  });
+
+  it("starts with details open when an activity query param is present", async () => {
+    useSearchParamsMock.mockReturnValue({
+      get: (key: string) => (key === "activity" ? "distributions" : null),
+    });
+
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+      />
+    );
+
+    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
+
+    expect(screen.getByRole("button", { name: "Hide Details" })).toBeInTheDocument();
     expect(screen.getByTestId("details")).toBeInTheDocument();
   });
 

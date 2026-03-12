@@ -1,9 +1,11 @@
 "use client";
 
 import type { UserPageStatsInitialData } from "@/components/user/stats/userPageStats.types";
+import { SEARCH_PARAM_ACTIVITY } from "@/components/user/stats/activity/activity.helpers";
 import type { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useSearchParams } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
 import { CollectedStatsDetailsPanel } from "./stats/subcomponents/CollectedStatsDetailsPanel";
@@ -74,12 +76,17 @@ export default function UserPageCollectedStats({
   onSeasonShortcut,
 }: Readonly<UserPageCollectedStatsProps>) {
   const { hasTouchScreen } = useDeviceInfo();
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const shouldAutoOpenDetails = Boolean(
+    searchParams.get(SEARCH_PARAM_ACTIVITY)
+  );
+  const [isDetailsOpen, setIsDetailsOpen] = useState(shouldAutoOpenDetails);
   const [preferredSeasonPreview, setPreferredSeasonPreview] =
     useState<PreferredSeasonPreview | null>(null);
   const [isDesktopSeasonListExpanded, setIsDesktopSeasonListExpanded] =
     useState(false);
   const detailsId = useId();
+
   const {
     statsPath,
     collectedStats,
