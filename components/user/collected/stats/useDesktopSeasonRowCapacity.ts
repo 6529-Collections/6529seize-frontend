@@ -36,6 +36,7 @@ export function useDesktopSeasonRowCapacity(seasonCount: number) {
   const [visibleSeasonCount, setVisibleSeasonCount] = useState<number | null>(
     null
   );
+  const isDesktopLayout = visibleSeasonCount !== null;
 
   useLayoutEffect(() => {
     if (typeof globalThis === "undefined") {
@@ -110,21 +111,8 @@ export function useDesktopSeasonRowCapacity(seasonCount: number) {
         ? new ResizeObserver(scheduleMeasure)
         : null;
 
-    const container = containerRef.current;
-    const firstTile =
-      container?.querySelector<HTMLElement>(SEASON_TILE_SELECTOR) ?? null;
-    const tileRow = firstTile?.parentElement ?? null;
-
-    if (container && resizeObserver) {
-      resizeObserver.observe(container);
-    }
-
-    if (firstTile && resizeObserver) {
-      resizeObserver.observe(firstTile);
-    }
-
-    if (tileRow && resizeObserver) {
-      resizeObserver.observe(tileRow);
+    if (containerRef.current && resizeObserver) {
+      resizeObserver.observe(containerRef.current);
     }
 
     globalThis.addEventListener("resize", scheduleMeasure);
@@ -134,11 +122,11 @@ export function useDesktopSeasonRowCapacity(seasonCount: number) {
       resizeObserver?.disconnect();
       globalThis.removeEventListener("resize", scheduleMeasure);
     };
-  }, [seasonCount]);
+  }, [seasonCount, isDesktopLayout]);
 
   return {
     containerRef,
     visibleSeasonCount,
-    isDesktopLayout: visibleSeasonCount !== null,
+    isDesktopLayout,
   };
 }
