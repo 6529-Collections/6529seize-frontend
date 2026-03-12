@@ -160,6 +160,28 @@ function normalizeDistributionPhase(value: string): string {
   return value.replaceAll(/[\s_-]+/g, "").toLowerCase();
 }
 
+function matchesTeamArtistAirdropPhase(
+  phase: string,
+  keyword: "team" | "artist"
+): boolean {
+  const normalizedPhase = normalizeDistributionPhase(phase);
+  const tokens = normalizedPhase
+    .split("+")
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  if (tokens.length !== 1) return false;
+
+  const [token] = tokens;
+  return (
+    token === keyword ||
+    token === `airdrop${keyword}` ||
+    token === `${keyword}airdrop` ||
+    token === `airdrops${keyword}` ||
+    token === `${keyword}airdrops`
+  );
+}
+
 function normalizeRootPhase(value: string): string {
   return value.replaceAll(/\s+/g, "").toLowerCase();
 }
@@ -1810,13 +1832,9 @@ function DistributionSection({
   function getAggregatedAirdropSummary(
     keyword: "team" | "artist"
   ): { addresses: number; total: number } | null {
-    const matching = airdropSummaries.filter((item) => {
-      const tokens = normalizeDistributionPhase(item.phase)
-        .split("+")
-        .map((token) => token.trim())
-        .filter(Boolean);
-      return tokens.length === 1 && tokens[0] === keyword;
-    });
+    const matching = airdropSummaries.filter((item) =>
+      matchesTeamArtistAirdropPhase(item.phase, keyword)
+    );
 
     if (matching.length === 0) {
       return null;
