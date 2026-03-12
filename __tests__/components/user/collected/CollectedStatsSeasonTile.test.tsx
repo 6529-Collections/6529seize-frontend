@@ -208,4 +208,30 @@ describe("CollectedStatsSeasonTile", () => {
     expect(onPreview).not.toHaveBeenCalled();
     expect(onSelect).toHaveBeenCalled();
   });
+
+  it("keeps detail text constrained to a single centered line", () => {
+    render(
+      <CollectedStatsSeasonTile
+        season={buildSeason({
+          detailText: "Set 1 complete",
+        })}
+        isSelected={false}
+        showDetailText
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("Set 1 complete")).toHaveClass(
+      "tw-w-full",
+      "tw-whitespace-nowrap",
+      "tw-text-center"
+    );
+    expect(screen.getByRole("button", { name: /szn2/i })).toHaveClass(
+      "tw-w-[78px]",
+      "sm:tw-w-[88px]",
+      "tw-px-2"
+    );
+  });
 });

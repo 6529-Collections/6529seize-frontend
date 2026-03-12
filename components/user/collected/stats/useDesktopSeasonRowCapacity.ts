@@ -110,8 +110,21 @@ export function useDesktopSeasonRowCapacity(seasonCount: number) {
         ? new ResizeObserver(scheduleMeasure)
         : null;
 
-    if (containerRef.current && resizeObserver) {
-      resizeObserver.observe(containerRef.current);
+    const container = containerRef.current;
+    const firstTile =
+      container?.querySelector<HTMLElement>(SEASON_TILE_SELECTOR) ?? null;
+    const tileRow = firstTile?.parentElement ?? null;
+
+    if (container && resizeObserver) {
+      resizeObserver.observe(container);
+    }
+
+    if (firstTile && resizeObserver) {
+      resizeObserver.observe(firstTile);
+    }
+
+    if (tileRow && resizeObserver) {
+      resizeObserver.observe(tileRow);
     }
 
     globalThis.addEventListener("resize", scheduleMeasure);
