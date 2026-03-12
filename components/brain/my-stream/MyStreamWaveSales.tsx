@@ -1,12 +1,9 @@
 "use client";
 
-import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
 import MarketplacePreview from "@/components/waves/MarketplacePreview";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
-import { useWaveDrops } from "@/hooks/useWaveDrops";
+import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import { useLayout } from "./layout/LayoutContext";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 
 interface MyStreamWaveSalesProps {
   readonly waveId: string;
@@ -31,56 +28,21 @@ const getFirstSaleUrl = (
 
 const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   const { salesViewStyle } = useLayout();
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDrops({
-      waveId,
-      dropType: ApiDropType.Participatory,
-    });
+  const { decisionPoints, isFetching } = useWaveDecisions({ waveId });
   const salesUrls = useMemo(
     () =>
-      drops.flatMap((drop) => {
-        const url = getFirstSaleUrl(drop.nft_links);
-        return url ? [url] : [];
-      }),
-    [drops]
+      decisionPoints
+        .slice()
+        .reverse()
+        .flatMap((decisionPoint) =>
+          decisionPoint.winners.flatMap((winner) => {
+            const url = getFirstSaleUrl(winner.drop.nft_links);
+            return url ? [url] : [];
+          })
+        ),
+    [decisionPoints]
   );
-  const lastAutoPaginatedRenderableCountRef = useRef(0);
-
-  useEffect(() => {
-    lastAutoPaginatedRenderableCountRef.current = 0;
-  }, [waveId]);
-
-  useEffect(() => {
-    if (salesUrls.length < lastAutoPaginatedRenderableCountRef.current) {
-      lastAutoPaginatedRenderableCountRef.current = salesUrls.length;
-    }
-  }, [salesUrls.length]);
-
-  const handleIntersection = useCallback(() => {
-    if (!hasNextPage || isFetching || isFetchingNextPage) {
-      return;
-    }
-
-    if (salesUrls.length === 0) {
-      return;
-    }
-
-    if (salesUrls.length <= lastAutoPaginatedRenderableCountRef.current) {
-      return;
-    }
-
-    lastAutoPaginatedRenderableCountRef.current = salesUrls.length;
-    void fetchNextPage();
-  }, [
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    salesUrls.length,
-  ]);
-  const intersectionElementRef = useIntersectionObserver(handleIntersection);
-  const isInitialLoading =
-    isFetching && !isFetchingNextPage && drops.length === 0;
+  const isInitialLoading = isFetching && salesUrls.length === 0;
 
   let salesContent: React.ReactNode;
   if (isInitialLoading) {
@@ -91,7 +53,7 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
         </p>
       </div>
     );
-  } else if (salesUrls.length === 0 && !hasNextPage) {
+  } else if (salesUrls.length === 0) {
     salesContent = (
       <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-p-6">
         <p className="tw-text-sm tw-font-medium tw-text-iron-200">
@@ -102,39 +64,14 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   } else {
     salesContent = (
       <div className="tw-p-2 sm:tw-p-4 lg:tw-pr-2">
-        {salesUrls.length > 0 ? (
-          <div
-            data-testid="wave-sales-grid"
-            className="tw-grid tw-gap-4 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3"
-          >
-            {salesUrls.map((url, index) => (
-              <MarketplacePreview
-                key={`${url}-${index}`}
-                href={url}
-                compact={true}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-p-6">
-            <p className="tw-text-sm tw-font-medium tw-text-iron-200">
-              No sales yet.
-            </p>
-          </div>
-        )}
-
-        {isFetchingNextPage && (
-          <div className="tw-mt-4">
-            <WaveLeaderboardLoadingBar />
-          </div>
-        )}
-        {hasNextPage && (
-          <div
-            ref={intersectionElementRef}
-            aria-hidden="true"
-            className="tw-h-px"
-          />
-        )}
+        <div
+          data-testid="wave-sales-grid"
+          className="tw-grid tw-gap-4 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3"
+        >
+          {salesUrls.map((url, index) => (
+            <MarketplacePreview key={`${url}-${index}`} href={url} compact />
+          ))}
+        </div>
       </div>
     );
   }
