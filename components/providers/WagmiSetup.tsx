@@ -57,7 +57,7 @@ function installSafeEthereumProxy(): void {
   }
 
   const ethereumDescriptor = getPropertyDescriptor(w, "ethereum");
-  if (ethereumDescriptor && !canAssignProperty(ethereumDescriptor)) {
+  if (ethereumDescriptor?.configurable === false) {
     logErrorSecurely(
       "[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum",
       new Error("window.ethereum cannot be reassigned")
@@ -91,7 +91,12 @@ function installSafeEthereumProxy(): void {
       },
     });
 
-    w.ethereum = proxy;
+    Object.defineProperty(w, "ethereum", {
+      configurable: true,
+      enumerable: ethereumDescriptor?.enumerable ?? true,
+      writable: true,
+      value: proxy,
+    });
     w.__6529_safeEthereumProxyInstalled = true;
   } catch (error) {
     logErrorSecurely(
@@ -128,14 +133,6 @@ function getPrototype(target: object): object | null {
   }
 
   return null;
-}
-
-function canAssignProperty(descriptor: PropertyDescriptor): boolean {
-  if ("get" in descriptor || "set" in descriptor) {
-    return typeof descriptor.set === "function";
-  }
-
-  return descriptor.writable !== false;
 }
 
 export default function WagmiSetup({

@@ -69,7 +69,7 @@ function shouldFilterFilenameExceptions(
   return frames.some((frame) =>
     filenameExceptions.some(
       (pattern) =>
-        frame?.filename?.includes(pattern) || frame?.abs_path?.includes(pattern)
+        frame.filename?.includes(pattern) ?? frame.abs_path?.includes(pattern)
     )
   );
 }

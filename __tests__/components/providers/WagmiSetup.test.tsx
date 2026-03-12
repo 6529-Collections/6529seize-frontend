@@ -115,13 +115,22 @@ describe("WagmiSetup Security Tests", () => {
     globalThis,
     "ethereum"
   );
+  const originalGlobalPrototype = Object.getPrototypeOf(globalThis);
   const originalSafeEthereumProxyInstalled = (
     globalThis as {
       __6529_safeEthereumProxyInstalled?: boolean | undefined;
     }
   ).__6529_safeEthereumProxyInstalled;
 
+  const restoreGlobalPrototype = () => {
+    if (Object.getPrototypeOf(globalThis) !== originalGlobalPrototype) {
+      Object.setPrototypeOf(globalThis, originalGlobalPrototype);
+    }
+  };
+
   const restoreEthereumState = () => {
+    restoreGlobalPrototype();
+
     if (originalEthereumDescriptor) {
       Object.defineProperty(globalThis, "ethereum", originalEthereumDescriptor);
     } else {
@@ -263,7 +272,7 @@ describe("WagmiSetup Security Tests", () => {
     const readOnlyEthereumLogContext =
       "[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum";
 
-    it("skips proxy installation when window.ethereum is getter-only", async () => {
+    it("installs the proxy when window.ethereum is configurable getter-only", async () => {
       const provider = {
         request() {
           return this;
@@ -274,6 +283,51 @@ describe("WagmiSetup Security Tests", () => {
         configurable: true,
         get: () => provider,
       });
+
+      await renderAndWaitForMount();
+
+      const proxiedEthereum = (globalThis as { ethereum?: any }).ethereum;
+      const proxiedEthereumDescriptor = Object.getOwnPropertyDescriptor(
+        globalThis,
+        "ethereum"
+      );
+
+      expect(mockInitializeAppKit).toHaveBeenCalled();
+      expect(proxiedEthereum).toBeDefined();
+      expect(proxiedEthereum).not.toBe(provider);
+      expect(proxiedEthereum.request()).toBe(provider);
+      expect(proxiedEthereumDescriptor).toMatchObject({
+        configurable: true,
+        writable: true,
+        value: proxiedEthereum,
+      });
+      expect(mockLogErrorSecurely).not.toHaveBeenCalledWith(
+        readOnlyEthereumLogContext,
+        expect.any(Error)
+      );
+      const safeEthereumProxyInstalled = (
+        globalThis as {
+          __6529_safeEthereumProxyInstalled?: boolean | undefined;
+        }
+      ).__6529_safeEthereumProxyInstalled;
+      expect(safeEthereumProxyInstalled).toBe(true);
+    });
+
+    it("skips proxy installation when window.ethereum is non-configurable", async () => {
+      const provider = {
+        request() {
+          return this;
+        },
+      };
+      const prototypeWithEthereum = Object.create(
+        Object.getPrototypeOf(globalThis)
+      );
+
+      Object.defineProperty(prototypeWithEthereum, "ethereum", {
+        configurable: false,
+        get: () => provider,
+      });
+      Object.setPrototypeOf(globalThis, prototypeWithEthereum);
 
       await renderAndWaitForMount();
 
@@ -318,17 +372,21 @@ describe("WagmiSetup Security Tests", () => {
       );
     });
 
-    it("logs the read-only ethereum skip once across mounts", async () => {
+    it("logs the read-only ethereum skip once across mounts for non-configurable descriptors", async () => {
       const provider = {
         request() {
           return this;
         },
       };
+      const prototypeWithEthereum = Object.create(
+        Object.getPrototypeOf(globalThis)
+      );
 
-      Object.defineProperty(globalThis, "ethereum", {
-        configurable: true,
+      Object.defineProperty(prototypeWithEthereum, "ethereum", {
+        configurable: false,
         get: () => provider,
       });
+      Object.setPrototypeOf(globalThis, prototypeWithEthereum);
 
       const firstRender = await renderAndWaitForMount();
       firstRender.unmount();
