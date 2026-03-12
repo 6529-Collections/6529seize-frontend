@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import useCapacitor from "./useCapacitor";
+import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
@@ -115,93 +116,11 @@ export function useDropMessages(waveId: string, dropId: string | null) {
     setInit(true);
   }, [data]);
 
-  const lastRefetchTimeRef = useRef<number>(0);
-  const pendingRefetchRef = useRef<boolean>(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const onRefetch = useCallback(() => {
-    const now = Date.now();
-    const timeSinceLastRefetch = now - lastRefetchTimeRef.current;
-    const minDebounceTime = 1000; // 1 second debounce
-
-    // Function to execute the actual refetch
-    const executeRefetch = () => {
-      lastRefetchTimeRef.current = Date.now();
-      pendingRefetchRef.current = false;
-      refetch();
-    };
-
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-
-    // If already fetching, set pending flag to refetch when done
-    if (isFetching || isFetchingNextPage) {
-      pendingRefetchRef.current = true;
-      return;
-    }
-
-    // If debounce time hasn't passed, wait
-    if (timeSinceLastRefetch < minDebounceTime) {
-      if (!pendingRefetchRef.current) {
-        pendingRefetchRef.current = true;
-        timeoutRef.current = setTimeout(() => {
-          timeoutRef.current = null;
-          // When timeout completes, check if we're still fetching
-          if (isFetching || isFetchingNextPage) {
-            // Keep the pending flag true, it will be picked up by the effect
-            return;
-          }
-          executeRefetch();
-        }, minDebounceTime - timeSinceLastRefetch);
-      }
-      return;
-    }
-
-    // If we get here, execute immediately
-    executeRefetch();
-  }, [refetch, isFetching, isFetchingNextPage, waveId]);
-
-  // Effect to check if we need to refetch after a fetch operation completes
-  useEffect(() => {
-    // Only run when fetching completes and there's a pending refetch
-    if (!isFetching && !isFetchingNextPage && pendingRefetchRef.current) {
-      const now = Date.now();
-      const timeSinceLastRefetch = now - lastRefetchTimeRef.current;
-      const minDebounceTime = 1000; // 1 second debounce
-
-      // If enough time has passed since last refetch, execute immediately
-      if (timeSinceLastRefetch >= minDebounceTime) {
-        lastRefetchTimeRef.current = now;
-        pendingRefetchRef.current = false;
-        refetch();
-      } else {
-        // Otherwise wait for the remaining time
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-
-        timeoutRef.current = setTimeout(() => {
-          timeoutRef.current = null;
-          if (pendingRefetchRef.current) {
-            lastRefetchTimeRef.current = Date.now();
-            pendingRefetchRef.current = false;
-            refetch();
-          }
-        }, minDebounceTime - timeSinceLastRefetch);
-      }
-    }
-
-    // Cleanup function to clear any timeouts when component unmounts
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-    };
-  }, [isFetching, isFetchingNextPage, refetch]);
+  const requestRefetch = useDebouncedQueryRefetch({
+    refetch,
+    isFetching,
+    isFetchingNextPage,
+  });
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
@@ -214,9 +133,9 @@ export function useDropMessages(waveId: string, dropId: string | null) {
           return;
         }
 
-        onRefetch();
+        requestRefetch();
       },
-      [waveId, dropId, onRefetch]
+      [dropId, requestRefetch, waveId]
     )
   );
 

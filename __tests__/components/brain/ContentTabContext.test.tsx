@@ -89,7 +89,7 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
-  it("omits OUTCOME for curation waves", () => {
+  it("adds SALES and omits OUTCOME for curation waves", () => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -105,6 +105,7 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.SALES,
       MyStreamWaveTab.MY_VOTES,
     ]);
   });

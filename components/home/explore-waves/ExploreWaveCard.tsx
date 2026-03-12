@@ -3,13 +3,15 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import ContentDisplay from "@/components/waves/drops/ContentDisplay";
-import type { ProcessedContent } from "@/components/waves/drops/media-utils";
+import {
+  buildProcessedContent,
+  type ProcessedContent,
+} from "@/components/waves/drops/media-utils";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Image from "next/image";
 import Link from "next/link";
 import { ChatBubbleBottomCenterIcon } from "@heroicons/react/24/outline";
-import { extractDropPreview, useWaveLatestDrop } from "./useWaveLatestDrop";
 
 interface ExploreWaveCardProps {
   readonly wave: ApiWave;
@@ -33,15 +35,9 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
       }
     : undefined;
 
-  const lastMessageTime = wave.metrics.latest_drop_timestamp;
+  const lastMessageTime = wave.last_drop_time;
   const hasDrops = wave.metrics.drops_count > 0;
-
-  // Fetch latest drop for message preview
-  const { data: latestDrop, isLoading: isLoadingDrop } = useWaveLatestDrop(
-    wave.id,
-    hasDrops
-  );
-  const latestMessagePreview = extractDropPreview(latestDrop ?? null);
+  const descriptionPreview = getWavePreviewContent(wave);
 
   return (
     <Link
@@ -88,7 +84,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
           </div>
         )}
 
-        {hasDrops && (
+        {descriptionPreview && (
           <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-iron-800/60 tw-p-1 tw-shadow-inner sm:tw-gap-3 sm:tw-p-2">
             <div className="tw-flex tw-h-5 tw-w-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700/40 sm:tw-h-7 sm:tw-w-7">
               <ChatBubbleBottomCenterIcon
@@ -96,10 +92,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
                 aria-hidden="true"
               />
             </div>
-            <MessagePreviewContent
-              isLoading={isLoadingDrop}
-              previewContent={latestMessagePreview}
-            />
+            <MessagePreviewContent previewContent={descriptionPreview} />
           </div>
         )}
       </div>
@@ -108,18 +101,10 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
 }
 
 function MessagePreviewContent({
-  isLoading,
   previewContent,
 }: {
-  readonly isLoading: boolean;
   readonly previewContent: ProcessedContent | null;
 }) {
-  if (isLoading) {
-    return (
-      <div className="tw-h-6 tw-min-w-0 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
-    );
-  }
-
   if (!previewContent) {
     return null;
   }
@@ -133,4 +118,19 @@ function MessagePreviewContent({
       linkify={false}
     />
   );
+}
+
+function getWavePreviewContent(wave: ApiWave): ProcessedContent | null {
+  const descriptionParts = wave.description_drop.parts;
+  const combinedText = descriptionParts
+    .map((part) => part.content?.trim())
+    .filter((content): content is string => Boolean(content))
+    .join("\n\n");
+  const media = descriptionParts.flatMap((part) => part.media);
+
+  if (!combinedText && media.length === 0) {
+    return null;
+  }
+
+  return buildProcessedContent(combinedText || null, media);
 }

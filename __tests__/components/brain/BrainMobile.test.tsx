@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import BrainMobile from "@/components/brain/BrainMobile";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import BrainMobile, { BrainView } from "@/components/brain/BrainMobile";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -34,12 +34,9 @@ jest.mock("@/hooks/useWaveData", () => ({
   useWaveData: () => ({ data: waveData }),
 }));
 
+const mockUseWave = jest.fn();
 jest.mock("@/hooks/useWave", () => ({
-  useWave: () => ({
-    isMemesWave: false,
-    isCurationWave: false,
-    isRankWave: true,
-  }),
+  useWave: (...args: any[]) => mockUseWave(...args),
 }));
 
 jest.mock("@/hooks/useWaveTimers", () => ({
@@ -58,9 +55,13 @@ jest.mock("@/components/brain/BrainDesktopDrop", () => ({
   ),
 }));
 
+let latestTabsProps: any = null;
 jest.mock("@/components/brain/mobile/BrainMobileTabs", () => ({
   __esModule: true,
-  default: () => <div data-testid="tabs" />,
+  default: (props: any) => {
+    latestTabsProps = props;
+    return <div data-testid="tabs" />;
+  },
 }));
 
 jest.mock("@/components/brain/mobile/BrainMobileAbout", () => ({
@@ -93,6 +94,12 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveOutcome", () => ({
   default: () => <div data-testid="outcome" />,
 }));
 
+const mockMyStreamWaveSales = jest.fn(() => <div data-testid="sales" />);
+jest.mock("@/components/brain/my-stream/MyStreamWaveSales", () => ({
+  __esModule: true,
+  default: (props: any) => mockMyStreamWaveSales(props),
+}));
+
 jest.mock("@/components/waves/winners/WaveWinners", () => ({
   __esModule: true,
   WaveWinners: () => <div data-testid="winners" />,
@@ -112,12 +119,19 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveFAQ", () => ({
 
 describe("BrainMobile", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     mockSearchParams = new URLSearchParams();
     mockPathname = "/";
     mockPush.mockClear();
     dropData = null;
     waveData = null;
     isApp = true;
+    latestTabsProps = null;
+    mockUseWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: true,
+    });
   });
 
   it("renders BrainDesktopDrop when drop is open", () => {
@@ -144,5 +158,38 @@ describe("BrainMobile", () => {
     const { rerender } = render(<BrainMobile>child</BrainMobile>);
     await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
     rerender(<div />);
+  });
+
+  it("renders the Sales view for non-rank curation waves and falls back when unavailable", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = { id: "1", wave: { type: "APPROVE" } };
+    mockUseWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      isRankWave: false,
+    });
+
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.SALES);
+    });
+
+    expect(screen.getByTestId("sales")).toBeInTheDocument();
+    expect(mockMyStreamWaveSales).toHaveBeenCalledWith({ waveId: "1" });
+
+    mockUseWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+    });
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("sales")).toBeNull();
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
   });
 });

@@ -10,11 +10,18 @@ interface MyStreamWaveTabsLeaderboardProps {
   readonly activeView: BrainView;
   readonly onViewChange: (view: BrainView) => void;
   readonly registerTabRef?: RegisterTabRef | undefined;
+  readonly renderAfterLeaderboard?: React.ReactNode;
 }
 
 const MyStreamWaveTabsLeaderboard: React.FC<
   MyStreamWaveTabsLeaderboardProps
-> = ({ wave, activeView, onViewChange, registerTabRef }) => {
+> = ({
+  wave,
+  activeView,
+  onViewChange,
+  registerTabRef,
+  renderAfterLeaderboard,
+}) => {
   const {
     voting: { isCompleted },
     decisions: { firstDecisionDone },
@@ -43,7 +50,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
       {/* Show Leaderboard tab always except when voting has ended */}
       {!isCompleted && (
         <button
-          ref={el => {
+          ref={(el) => {
             registerTabRef?.(BrainView.LEADERBOARD, el);
           }}
           onClick={() => onViewChange(BrainView.LEADERBOARD)}
@@ -52,10 +59,11 @@ const MyStreamWaveTabsLeaderboard: React.FC<
           <span className={leaderboardButtonTextClasses}>Leaderboard</span>
         </button>
       )}
+      {renderAfterLeaderboard}
       {/* Show Winners tab if first decision has passed */}
       {firstDecisionDone && (
         <button
-          ref={el => {
+          ref={(el) => {
             registerTabRef?.(BrainView.WINNERS, el);
           }}
           onClick={() => onViewChange(BrainView.WINNERS)}
