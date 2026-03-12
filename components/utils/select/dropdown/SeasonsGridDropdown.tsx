@@ -3,7 +3,7 @@
 import type { MemeSeason } from "@/entities/ISeason";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useAnimate } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import SeasonsGridDropdownItemsWrapper from "./SeasonsGridDropdownItemsWrapper";
 
 interface SeasonsGridDropdownProps {
@@ -23,7 +23,6 @@ export default function SeasonsGridDropdown({
   const [iconScope, animateIcon] = useAnimate();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [seasons, setSeasons] = useState<MemeSeason[]>([]);
-  const [initialApplied, setInitialApplied] = useState(false);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -45,17 +44,11 @@ export default function SeasonsGridDropdown({
     };
   }, []);
 
-  useEffect(() => {
-    if (seasons.length === 0) return;
-    if (initialApplied) return;
-    if (selected !== null) return;
-    if (!initialSeasonId) return;
-    const matchedSeason = seasons.find((s) => s.id === initialSeasonId);
-    if (matchedSeason) {
-      setSelected(matchedSeason);
-      setInitialApplied(true);
-    }
-  }, [initialSeasonId, seasons, initialApplied, setSelected, selected]);
+  const activeSeasonId = selected?.id ?? initialSeasonId ?? null;
+  const activeSeason = useMemo(
+    () => seasons.find((season) => season.id === activeSeasonId) ?? null,
+    [activeSeasonId, seasons]
+  );
 
   useEffect(() => {
     if (!iconScope.current) return;
@@ -67,8 +60,9 @@ export default function SeasonsGridDropdown({
   }, [animateIcon, iconScope, isOpen]);
 
   const getLabel = () => {
-    if (selected === null) return "All Seasons";
-    return selected.display;
+    if (selected !== null) return selected.display;
+    if (activeSeason !== null) return activeSeason.display;
+    return "All Seasons";
   };
 
   const onSelect = (season: MemeSeason | null) => {
@@ -92,7 +86,7 @@ export default function SeasonsGridDropdown({
               ? "tw-opacity-50 tw-text-iron-400"
               : "hover:tw-ring-iron-600 tw-text-iron-300"
           } tw-bg-iron-800 lg:tw-bg-iron-900 tw-py-3 tw-w-full tw-truncate tw-text-left tw-relative tw-block tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-10 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}>
+          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-xs hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}>
           {getLabel()}
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center -tw-mr-1 tw-pr-3.5">
             <svg
@@ -122,7 +116,7 @@ export default function SeasonsGridDropdown({
           type="button"
           onClick={() => onSelect(null)}
           className={`tw-col-span-full tw-w-full tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
-            selected === null
+            activeSeasonId === null
               ? "tw-bg-primary-500/20 tw-border-primary-500 tw-text-primary-300"
               : "tw-bg-transparent tw-border-iron-700 tw-text-iron-200 hover:tw-bg-iron-800"
           }`}
@@ -135,7 +129,7 @@ export default function SeasonsGridDropdown({
             type="button"
             onClick={() => onSelect(season)}
             className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
-              selected?.id === season.id
+              activeSeasonId === season.id
                 ? "tw-bg-primary-500/20 tw-border-primary-500 tw-text-primary-300"
                 : "tw-bg-transparent tw-border-iron-700 tw-text-iron-200 hover:tw-bg-iron-800"
             }`}
