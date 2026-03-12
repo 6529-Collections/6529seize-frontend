@@ -318,6 +318,35 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters injected wallet collisions when only abs_path has the injected app URI", () => {
+    // Arrange
+    const event = createInjectedWalletCollisionEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "'set' on proxy: trap returned falsish for property 'tronlinkParams'",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "https://example.com/injected.js",
+                  abs_path: "app:///injected/injected.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter injected wallet collisions when a web frame is present", () => {
     // Arrange
     const event = createInjectedWalletCollisionEvent({
@@ -465,6 +494,26 @@ describe("sentry-client-filters", () => {
   it("detects app URI-only frame stacks in testing helpers", () => {
     // Arrange
     const frames = [{ filename: "app:///" }, { abs_path: "app:///" }] as any;
+
+    // Act
+    const result = __testing.hasOnlyAppUriFrames(frames);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("detects app URI-only frame stacks when only abs_path has the app URI", () => {
+    // Arrange
+    const frames = [
+      {
+        filename: "https://example.com/main.js",
+        abs_path: "app:///main.js",
+      },
+      {
+        filename: "app:///bootstrap.js",
+        abs_path: "https://example.com/bootstrap.js",
+      },
+    ] as any;
 
     // Act
     const result = __testing.hasOnlyAppUriFrames(frames);

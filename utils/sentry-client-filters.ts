@@ -40,8 +40,8 @@ export type SentryClientEvent = {
 };
 
 export type SentryEventHint = {
-  originalException?: unknown | undefined;
-  syntheticException?: unknown | undefined;
+  originalException?: unknown;
+  syntheticException?: unknown;
 };
 
 const filenameExceptions = [
@@ -87,13 +87,15 @@ function shouldFilterExceptionStack(hint?: SentryEventHint): boolean {
 }
 
 function isAppUriFrame(frame: SentryStackFrame): boolean {
-  const path = frame.filename ?? frame.abs_path;
-  return typeof path === "string" && path.startsWith("app:///");
+  return [frame.filename, frame.abs_path].some(
+    (path) => typeof path === "string" && path.startsWith("app:///")
+  );
 }
 
 function isInjectedAppUriFrame(frame: SentryStackFrame): boolean {
-  const path = frame.filename ?? frame.abs_path;
-  return typeof path === "string" && path.includes(injectedAppUriPath);
+  return [frame.filename, frame.abs_path].some(
+    (path) => typeof path === "string" && path.includes(injectedAppUriPath)
+  );
 }
 
 function hasOnlyAppUriFrames(frames: SentryStackFrame[] | undefined): boolean {
