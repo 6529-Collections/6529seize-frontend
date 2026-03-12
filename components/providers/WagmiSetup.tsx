@@ -56,8 +56,11 @@ function installSafeEthereumProxy(): void {
     return;
   }
 
-  const ethereumDescriptor = getPropertyDescriptor(w, "ethereum");
-  if (ethereumDescriptor?.configurable === false) {
+  const ownEthereumDescriptor = Object.getOwnPropertyDescriptor(w, "ethereum");
+  if (
+    ownEthereumDescriptor?.configurable === false &&
+    !canAssignProperty(ownEthereumDescriptor)
+  ) {
     logErrorSecurely(
       "[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum",
       new Error("window.ethereum cannot be reassigned")
@@ -91,12 +94,16 @@ function installSafeEthereumProxy(): void {
       },
     });
 
-    Object.defineProperty(w, "ethereum", {
-      configurable: true,
-      enumerable: ethereumDescriptor?.enumerable ?? true,
-      writable: true,
-      value: proxy,
-    });
+    if (ownEthereumDescriptor?.configurable === false) {
+      w.ethereum = proxy;
+    } else {
+      Object.defineProperty(w, "ethereum", {
+        configurable: true,
+        enumerable: ownEthereumDescriptor?.enumerable ?? true,
+        writable: true,
+        value: proxy,
+      });
+    }
     w.__6529_safeEthereumProxyInstalled = true;
   } catch (error) {
     logErrorSecurely(
@@ -107,32 +114,12 @@ function installSafeEthereumProxy(): void {
   }
 }
 
-function getPropertyDescriptor(
-  target: object,
-  property: PropertyKey
-): PropertyDescriptor | undefined {
-  let currentTarget: object | null = target;
-  while (currentTarget) {
-    const descriptor = Object.getOwnPropertyDescriptor(currentTarget, property);
-    if (descriptor) {
-      return descriptor;
-    }
-    currentTarget = getPrototype(currentTarget);
-  }
-  return undefined;
-}
-
-function getPrototype(target: object): object | null {
-  const prototype: unknown = Object.getPrototypeOf(target);
-  if (
-    prototype === null ||
-    typeof prototype === "object" ||
-    typeof prototype === "function"
-  ) {
-    return prototype;
+function canAssignProperty(descriptor: PropertyDescriptor): boolean {
+  if ("get" in descriptor || "set" in descriptor) {
+    return typeof descriptor.set === "function";
   }
 
-  return null;
+  return descriptor.writable !== false;
 }
 
 export default function WagmiSetup({

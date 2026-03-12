@@ -127,6 +127,22 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters events when only abs_path matches a filename exception", () => {
+    // Arrange
+    const frames = [
+      {
+        filename: "https://example.com/main.js",
+        abs_path: "chrome-extension://wallet/extensionServiceWorker.js",
+      },
+    ] as any;
+
+    // Act
+    const result = shouldFilterByFilenameExceptions(frames);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter when frames do not match any filename exception", () => {
     // Arrange
     const frames = [{ filename: "app:///main.js" } as any];
