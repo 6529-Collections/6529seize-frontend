@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageActivityTab from "@/components/user/stats/activity/tabs/UserPageActivityTab";
-import { USER_PAGE_ACTIVITY_TAB } from "@/components/user/stats/activity/UserPageActivityWrapper";
+import { USER_PAGE_ACTIVITY_TAB } from "@/components/user/stats/activity/activity.types";
 
 describe("UserPageActivityTab", () => {
   it("renders label and handles click", async () => {
@@ -17,7 +17,9 @@ describe("UserPageActivityTab", () => {
     const btn = screen.getByRole("button", { name: "Distributions" });
     expect(btn).toHaveClass("tw-bg-iron-950", { exact: false });
     await user.click(btn);
-    expect(setActive).toHaveBeenCalledWith(USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS);
+    expect(setActive).toHaveBeenCalledWith(
+      USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS
+    );
   });
 
   it("highlights when active", () => {
