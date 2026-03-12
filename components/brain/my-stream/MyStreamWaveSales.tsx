@@ -28,12 +28,26 @@ const getFirstSaleUrl = (
   return null;
 };
 
+const getSalesErrorMessage = (error: unknown): string | null => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return null;
+};
+
 const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   const { salesViewStyle } = useLayout();
   const {
     decisionPoints,
+    error,
     fetchNextPage,
     hasNextPage,
+    isError,
     isFetching,
     isFetchingNextPage,
   } = useWaveDecisions({ waveId });
@@ -64,6 +78,7 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   const intersectionElementRef = useIntersectionObserver(handleIntersection);
   const isInitialLoading =
     isFetching && !isFetchingNextPage && decisionPoints.length === 0;
+  const salesErrorMessage = getSalesErrorMessage(error);
 
   let salesContent: React.ReactNode;
   if (isInitialLoading) {
@@ -71,6 +86,15 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
       <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-p-6">
         <p className="tw-text-sm tw-font-medium tw-text-iron-200">
           Loading sales...
+        </p>
+      </div>
+    );
+  } else if (isError) {
+    salesContent = (
+      <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-p-6">
+        <p className="tw-text-sm tw-font-medium tw-text-iron-200">
+          Failed to load sales
+          {salesErrorMessage ? `: ${salesErrorMessage}` : "."}
         </p>
       </div>
     );

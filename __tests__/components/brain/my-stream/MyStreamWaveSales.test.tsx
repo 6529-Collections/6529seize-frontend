@@ -55,6 +55,13 @@ const mockWaveDecisions = (overrides: Record<string, unknown> = {}) => {
   });
 };
 
+const expectMockSalesViewStyle = () => {
+  const scrollContainer = screen.getByTestId("wave-sales-scroll-container");
+  expect(scrollContainer.style.height).toBe(mockSalesViewStyle.height);
+  expect(scrollContainer.style.maxHeight).toBe(mockSalesViewStyle.maxHeight);
+  return scrollContainer;
+};
+
 describe("MyStreamWaveSales", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,9 +75,7 @@ describe("MyStreamWaveSales", () => {
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
-    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveStyle(
-      mockSalesViewStyle
-    );
+    expectMockSalesViewStyle();
     expect(screen.getByText("Loading sales...")).toBeInTheDocument();
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
     expect(useWaveDecisionsMock).toHaveBeenCalledWith({
@@ -78,14 +83,28 @@ describe("MyStreamWaveSales", () => {
     });
   });
 
+  it.each([
+    ["an Error instance", new Error("boom"), "Failed to load sales: boom"],
+    ["a string error", "boom", "Failed to load sales: boom"],
+    ["an unknown error", null, "Failed to load sales."],
+  ])("shows the error state for %s", (_label, error, expectedText) => {
+    mockWaveDecisions({
+      isError: true,
+      error,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    expect(screen.getByText(expectedText)).toBeInTheDocument();
+    expect(mockMarketplacePreview).not.toHaveBeenCalled();
+  });
+
   it("shows empty shell when there are no decision winners and no further pages", () => {
     mockWaveDecisions();
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
-    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveStyle(
-      mockSalesViewStyle
-    );
+    expectMockSalesViewStyle();
     expect(screen.getByText("No sales yet.")).toBeInTheDocument();
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
   });
@@ -113,9 +132,7 @@ describe("MyStreamWaveSales", () => {
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
-    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveStyle(
-      mockSalesViewStyle
-    );
+    expectMockSalesViewStyle();
     expect(screen.getByText("No sales yet.")).toBeInTheDocument();
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
   });
@@ -171,12 +188,8 @@ describe("MyStreamWaveSales", () => {
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
-    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveClass(
-      "tw-overflow-y-auto"
-    );
-    expect(screen.getByTestId("wave-sales-scroll-container")).toHaveStyle(
-      mockSalesViewStyle
-    );
+    const scrollContainer = expectMockSalesViewStyle();
+    expect(scrollContainer).toHaveClass("tw-overflow-y-auto");
     expect(screen.getByTestId("wave-sales-grid")).toHaveClass(
       "tw-grid",
       "tw-gap-4",
