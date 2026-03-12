@@ -15,8 +15,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 const getProfileRouteTarget = (pathname: string): string | null => {
-  const [profileRouteTarget] = pathname.split("/").filter(Boolean);
-  return profileRouteTarget ?? null;
+  return pathname.split("/").find((segment) => segment.length > 0) ?? null;
 };
 
 export default function MixpanelSetup() {
