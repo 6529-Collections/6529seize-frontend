@@ -77,7 +77,7 @@ export function CollectedStatsSeasons({
         {isDesktopLayout ? (
           <>
             <div className="tw-w-full tw-pt-3">
-              <div className="tw-flex tw-w-full tw-flex-wrap tw-items-start tw-gap-x-3 tw-gap-y-2">
+              <div className="tw-flex tw-w-full tw-flex-wrap tw-items-start tw-gap-x-1 tw-gap-y-2">
                 {renderTiles(visibleStartedSeasons)}
               </div>
             </div>
