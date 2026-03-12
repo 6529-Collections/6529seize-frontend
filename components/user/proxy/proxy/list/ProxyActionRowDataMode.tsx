@@ -81,7 +81,7 @@ export default function ProxyActionRowDataMode({
           <p className="tw-mb-0 tw-flex tw-items-center tw-space-x-1 tw-whitespace-nowrap tw-text-md tw-font-normal tw-leading-6 tw-text-iron-500">
             <span>Start:</span>
             <span className="tw-font-normal tw-text-iron-300">
-              {getTimeAgo(action.created_at)}
+              {getTimeAgo(action.start_time)}
             </span>
           </p>
           <div className="tw-flex tw-items-center tw-space-x-1">

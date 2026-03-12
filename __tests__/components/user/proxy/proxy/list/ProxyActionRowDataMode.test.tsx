@@ -4,6 +4,7 @@ import ProxyActionRowDataMode from "@/components/user/proxy/proxy/list/ProxyActi
 import { PROXY_ACTION_ROW_VIEW_MODE } from "@/components/user/proxy/proxy/list/ProxyActionRow";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { PROFILE_PROXY_ACTION_LABELS } from "@/entities/IProxy";
+import { getTimeAgo } from "@/helpers/Helpers";
 
 jest.mock("@/helpers/profile-proxy.helpers", () => ({
   getProfileProxyActionStatus: jest.fn(() => "status"),
@@ -52,7 +53,7 @@ function renderComp(
   isSelf = false,
   actionType = ApiProfileProxyActionType.AllocateRep
 ) {
-  const action: any = { action_type: actionType, created_at: 1 };
+  const action: any = { action_type: actionType, created_at: 1, start_time: 2 };
   const proxy: any = { created_by: {}, granted_to: {} };
   const profile: any = {};
   const setViewMode = jest.fn();
@@ -80,6 +81,7 @@ test("renders labels and statuses", () => {
   expect(screen.getByTestId("credit")).toBeInTheDocument();
   expect(screen.getByTestId("spent")).toBeInTheDocument();
   expect(screen.getByText("time")).toBeInTheDocument();
+  expect(getTimeAgo).toHaveBeenCalledWith(2);
 });
 
 test("calls setViewMode on credit and end edits", () => {
