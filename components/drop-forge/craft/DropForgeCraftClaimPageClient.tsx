@@ -1582,6 +1582,11 @@ function ArweaveSection({
         )}
       {(isDraft || isPublishing) && (
         <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-4">
+          {isPublishing && (
+            <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
+              Publishing to Arweave…
+            </p>
+          )}
           {isDraft && (
             <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
               Publish this claim&apos;s media and metadata to Arweave.
