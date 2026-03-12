@@ -1,4 +1,3 @@
-import { AuthContext } from "@/components/auth/Auth";
 import UserPageTabs from "@/components/user/layout/UserPageTabs";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { render, screen } from "@testing-library/react";
@@ -14,6 +13,10 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
   useParams: jest.fn(),
+}));
+const useAuthMock = jest.fn();
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => useAuthMock(),
 }));
 const capacitorMock = jest.fn();
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -49,11 +52,8 @@ const renderTabs = (
     consent: jest.fn(),
     reject: jest.fn(),
   });
-  return render(
-    <AuthContext.Provider value={{ showWaves, connectedProfile } as any}>
-      <UserPageTabs />
-    </AuthContext.Provider>
-  );
+  useAuthMock.mockReturnValue({ showWaves, connectedProfile });
+  return render(<UserPageTabs />);
 };
 
 describe("UserPageTabs", () => {

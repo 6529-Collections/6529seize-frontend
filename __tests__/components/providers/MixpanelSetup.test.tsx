@@ -8,7 +8,12 @@ const identifyMock = jest.fn();
 const initAnalyticsMock = jest.fn();
 const trackPageViewMock = jest.fn();
 
-let connectedProfile: { id: number } | null = null;
+let connectedProfile: {
+  id: number;
+  normalised_handle?: string | null;
+  wallets?: Array<{ wallet: string }>;
+} | null = null;
+let fetchingProfile = false;
 let pathname = "/";
 let performanceConsent: boolean | undefined = undefined;
 let searchParams = new URLSearchParams();
@@ -16,6 +21,7 @@ let searchParams = new URLSearchParams();
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile,
+    fetchingProfile,
   }),
 }));
 
@@ -41,6 +47,7 @@ jest.mock("@/services/analytics/mixpanel", () => ({
 describe("MixpanelSetup", () => {
   beforeEach(() => {
     connectedProfile = null;
+    fetchingProfile = false;
     pathname = "/";
     performanceConsent = undefined;
     searchParams = new URLSearchParams();
@@ -131,6 +138,88 @@ describe("MixpanelSetup", () => {
       logical_page: "wave_drop_detail",
       page_group: "waves",
       route_pattern: "/waves/:waveId?drop=:dropId",
+    });
+  });
+
+  it("tracks anonymous profile views separately from signed-in viewers", () => {
+    performanceConsent = true;
+    pathname = "/alice/collected";
+
+    render(<MixpanelSetup />);
+
+    expect(trackPageViewMock).toHaveBeenCalledWith("/alice/collected", {
+      has_connected_profile: false,
+      logical_page: "profile_collected",
+      page_group: "profile",
+      profile_viewer_context: "anonymous",
+      route_pattern: "/:handle/collected",
+    });
+  });
+
+  it("marks own profile tabs as self views", () => {
+    performanceConsent = true;
+    pathname = "/alice/collected";
+    connectedProfile = {
+      id: 42,
+      normalised_handle: "alice",
+      wallets: [],
+    };
+
+    render(<MixpanelSetup />);
+
+    expect(trackPageViewMock).toHaveBeenCalledWith("/alice/collected", {
+      has_connected_profile: true,
+      logical_page: "profile_collected",
+      page_group: "profile",
+      profile_viewer_context: "self",
+      route_pattern: "/:handle/collected",
+    });
+  });
+
+  it("marks other users' profile tabs as other views", () => {
+    performanceConsent = true;
+    pathname = "/bob/collected";
+    connectedProfile = {
+      id: 42,
+      normalised_handle: "alice",
+      wallets: [{ wallet: "0xabc" }],
+    };
+
+    render(<MixpanelSetup />);
+
+    expect(trackPageViewMock).toHaveBeenCalledWith("/bob/collected", {
+      has_connected_profile: true,
+      logical_page: "profile_collected",
+      page_group: "profile",
+      profile_viewer_context: "other",
+      route_pattern: "/:handle/collected",
+    });
+  });
+
+  it("waits for profile ownership data before tracking profile page views", () => {
+    performanceConsent = true;
+    pathname = "/alice/collected";
+    fetchingProfile = true;
+
+    const { rerender } = render(<MixpanelSetup />);
+
+    expect(trackPageViewMock).not.toHaveBeenCalled();
+
+    fetchingProfile = false;
+    connectedProfile = {
+      id: 42,
+      normalised_handle: "alice",
+      wallets: [],
+    };
+    rerender(<MixpanelSetup />);
+
+    expect(trackPageViewMock).toHaveBeenCalledTimes(1);
+    expect(trackPageViewMock).toHaveBeenCalledWith("/alice/collected", {
+      has_connected_profile: true,
+      logical_page: "profile_collected",
+      page_group: "profile",
+      profile_viewer_context: "self",
+      route_pattern: "/:handle/collected",
     });
   });
 

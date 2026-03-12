@@ -1,7 +1,8 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
   faChevronLeft,
@@ -14,14 +15,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 import {
   DEFAULT_USER_PAGE_TAB,
@@ -86,16 +80,13 @@ export default function UserPageTabs() {
   const searchString = searchParams?.toString() ?? "";
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const { showWaves, connectedProfile } = useContext(AuthContext);
+  const { showWaves, connectedProfile } = useAuth();
 
   const isOwnProfile = useMemo(() => {
-    if (!connectedProfile || !handleOrWallet) return false;
-    const lower = handleOrWallet.toLowerCase();
-    if (connectedProfile.normalised_handle === lower) return true;
-    return (
-      connectedProfile.wallets?.some((w) => w.wallet.toLowerCase() === lower) ??
-      false
-    );
+    return isOwnProfileRoute({
+      connectedProfile,
+      handleOrWallet,
+    });
   }, [connectedProfile, handleOrWallet]);
 
   const visibilityContext = useMemo(
