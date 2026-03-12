@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import UserPageBrainSidebar from "@/components/user/brain/UserPageBrainSidebar";
+import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
 import { useWaves } from "@/hooks/useWaves";
 
 jest.mock("next/image", () => ({
@@ -19,8 +20,15 @@ jest.mock("next/link", () => ({
 jest.mock("@/hooks/useWaves", () => ({
   useWaves: jest.fn(),
 }));
+jest.mock("@/hooks/useFavouriteWavesOfIdentity", () => ({
+  useFavouriteWavesOfIdentity: jest.fn(),
+}));
 
 const mockedUseWaves = useWaves as jest.MockedFunction<typeof useWaves>;
+const mockedUseFavouriteWavesOfIdentity =
+  useFavouriteWavesOfIdentity as jest.MockedFunction<
+    typeof useFavouriteWavesOfIdentity
+  >;
 
 const baseProfile = {
   handle: "kanetix",
@@ -56,6 +64,7 @@ const makeWave = (overrides: Record<string, unknown> = {}) =>
 describe("UserPageBrainSidebar", () => {
   beforeEach(() => {
     mockedUseWaves.mockReset();
+    mockedUseFavouriteWavesOfIdentity.mockReset();
     mockedUseWaves.mockReturnValue({
       waves: [],
       isFetching: false,
@@ -66,9 +75,16 @@ describe("UserPageBrainSidebar", () => {
       error: null,
       refetch: jest.fn(),
     });
+    mockedUseFavouriteWavesOfIdentity.mockReturnValue({
+      waves: [],
+      status: "success",
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    });
   });
 
-  it("renders created waves and the empty most-active placeholder", () => {
+  it("renders created waves and most active waves", () => {
     mockedUseWaves.mockReturnValue({
       waves: [makeWave()],
       isFetching: false,
@@ -79,12 +95,25 @@ describe("UserPageBrainSidebar", () => {
       error: null,
       refetch: jest.fn(),
     });
+    mockedUseFavouriteWavesOfIdentity.mockReturnValue({
+      waves: [
+        makeWave({
+          id: "wave-2",
+          name: "Meme Card Curation",
+        }),
+      ],
+      status: "success",
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    });
 
     render(<UserPageBrainSidebar profile={baseProfile} />);
 
     expect(screen.getByText("Created Waves")).toBeInTheDocument();
     expect(screen.getByText("TDH Name Vote")).toBeInTheDocument();
     expect(screen.getByText("Most Active In")).toBeInTheDocument();
+    expect(screen.getByText("Meme Card Curation")).toBeInTheDocument();
     expect(mockedUseWaves).toHaveBeenCalledTimes(1);
     expect(mockedUseWaves).toHaveBeenCalledWith({
       identity: "kanetix",
@@ -92,6 +121,11 @@ describe("UserPageBrainSidebar", () => {
       enabled: true,
       directMessage: false,
       limit: 20,
+    });
+    expect(mockedUseFavouriteWavesOfIdentity).toHaveBeenCalledWith({
+      identityKey: "kanetix",
+      limit: 3,
+      enabled: true,
     });
   });
 
@@ -109,13 +143,45 @@ describe("UserPageBrainSidebar", () => {
       directMessage: false,
       limit: 20,
     });
+    expect(mockedUseFavouriteWavesOfIdentity).toHaveBeenCalledWith({
+      identityKey: "0xdef",
+      limit: 3,
+      enabled: true,
+    });
   });
 
   it("hides the created section when there are no created waves", () => {
+    mockedUseFavouriteWavesOfIdentity.mockReturnValue({
+      waves: [makeWave({ id: "wave-2", name: "Meme Card Curation" })],
+      status: "success",
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    });
+
     render(<UserPageBrainSidebar profile={baseProfile} />);
 
     expect(screen.queryByText("Created Waves")).toBeNull();
+    expect(screen.getByText("Most Active In")).toBeInTheDocument();
     expect(mockedUseWaves).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides the most active section when there are no favourite waves", () => {
+    mockedUseWaves.mockReturnValue({
+      waves: [makeWave()],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    render(<UserPageBrainSidebar profile={baseProfile} />);
+
+    expect(screen.getByText("Created Waves")).toBeInTheDocument();
+    expect(screen.queryByText("Most Active In")).toBeNull();
   });
 
   it("expands and collapses the created waves list", () => {

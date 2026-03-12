@@ -2,7 +2,7 @@
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageBrainSidebarCreated from "./UserPageBrainSidebarCreated";
-import UserPageBrainSidebarMostActivePlaceholder from "./UserPageBrainSidebarMostActivePlaceholder";
+import UserPageBrainSidebarMostActive from "./UserPageBrainSidebarMostActive";
 
 export default function UserPageBrainSidebar({
   profile,
@@ -15,7 +15,7 @@ export default function UserPageBrainSidebar({
       data-testid="brain-sidebar"
     >
       <UserPageBrainSidebarCreated profile={profile} />
-      <UserPageBrainSidebarMostActivePlaceholder />
+      <UserPageBrainSidebarMostActive profile={profile} />
     </aside>
   );
 }
