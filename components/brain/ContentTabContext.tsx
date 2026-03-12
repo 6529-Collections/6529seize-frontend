@@ -78,6 +78,9 @@ const buildDefaultTabs = (
   if (votingState !== WaveVotingState.ENDED) {
     tabs.push(MyStreamWaveTab.LEADERBOARD);
   }
+  if (isCurationWave) {
+    tabs.push(MyStreamWaveTab.SALES);
+  }
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }

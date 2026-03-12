@@ -5103,6 +5103,50 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiWave"
+  /waves-overview/favourites-of-identity/{identityKey}:
+    get:
+      tags:
+        - Waves
+      summary: Get waves where a profile has written the most messages.
+      description: >-
+        Returns non-DM waves ranked by how many chat messages the resolved
+        profile has written in them. Results only include waves the requester
+        can access.
+      operationId: getFavouriteWavesOfIdentity
+      parameters:
+        - name: identityKey
+          in: path
+          description: Profile id, wallet, ENS, or handle to resolve
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: How many waves to return (50 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Used to find next waves
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWave"
   /waves-overview/hot:
     get:
       tags:
@@ -10627,6 +10671,7 @@ components:
         - chat
         - wave
         - created_at
+        - last_drop_time
         - contributors_overview
         - subscribed_actions
         - metrics
@@ -10651,6 +10696,10 @@ components:
           example: https://example.com/picture.jpg
           nullable: true
         created_at:
+          type: number
+          format: int64
+        last_drop_time:
+          description: Unix timestamp in milliseconds of the most recent drop in this wave
           type: number
           format: int64
         description_drop:
@@ -11017,6 +11066,7 @@ components:
         - name
         - picture
         - description_drop_id
+        - last_drop_time
         - authenticated_user_eligible_to_vote
         - authenticated_user_eligible_to_participate
         - authenticated_user_eligible_to_chat
@@ -11042,6 +11092,10 @@ components:
           nullable: true
         description_drop_id:
           type: string
+        last_drop_time:
+          description: Unix timestamp in milliseconds of the most recent drop in this wave
+          type: number
+          format: int64
         authenticated_user_eligible_to_vote:
           type: boolean
         authenticated_user_eligible_to_participate:
