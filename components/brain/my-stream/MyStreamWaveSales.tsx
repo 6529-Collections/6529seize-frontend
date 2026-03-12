@@ -1,9 +1,11 @@
 "use client";
 
+import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
 import MarketplacePreview from "@/components/waves/MarketplacePreview";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import { useLayout } from "./layout/LayoutContext";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 
 interface MyStreamWaveSalesProps {
   readonly waveId: string;
@@ -28,7 +30,13 @@ const getFirstSaleUrl = (
 
 const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   const { salesViewStyle } = useLayout();
-  const { decisionPoints, isFetching } = useWaveDecisions({ waveId });
+  const {
+    decisionPoints,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useWaveDecisions({ waveId });
   const salesUrls = useMemo(
     () =>
       decisionPoints
@@ -42,7 +50,20 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
         ),
     [decisionPoints]
   );
-  const isInitialLoading = isFetching && salesUrls.length === 0;
+
+  const handleIntersection = useCallback(
+    (isIntersecting: boolean) => {
+      if (!isIntersecting || !hasNextPage || isFetching || isFetchingNextPage) {
+        return;
+      }
+
+      void fetchNextPage();
+    },
+    [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]
+  );
+  const intersectionElementRef = useIntersectionObserver(handleIntersection);
+  const isInitialLoading =
+    isFetching && !isFetchingNextPage && decisionPoints.length === 0;
 
   let salesContent: React.ReactNode;
   if (isInitialLoading) {
@@ -53,7 +74,7 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
         </p>
       </div>
     );
-  } else if (salesUrls.length === 0) {
+  } else if (salesUrls.length === 0 && !hasNextPage) {
     salesContent = (
       <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-p-6">
         <p className="tw-text-sm tw-font-medium tw-text-iron-200">
@@ -64,14 +85,35 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
   } else {
     salesContent = (
       <div className="tw-p-2 sm:tw-p-4 lg:tw-pr-2">
-        <div
-          data-testid="wave-sales-grid"
-          className="tw-grid tw-gap-4 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3"
-        >
-          {salesUrls.map((url, index) => (
-            <MarketplacePreview key={`${url}-${index}`} href={url} compact />
-          ))}
-        </div>
+        {salesUrls.length > 0 ? (
+          <div
+            data-testid="wave-sales-grid"
+            className="tw-grid tw-gap-4 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3"
+          >
+            {salesUrls.map((url, index) => (
+              <MarketplacePreview key={`${url}-${index}`} href={url} compact />
+            ))}
+          </div>
+        ) : (
+          <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-p-6">
+            <p className="tw-text-sm tw-font-medium tw-text-iron-200">
+              No sales yet.
+            </p>
+          </div>
+        )}
+
+        {isFetchingNextPage && (
+          <div className="tw-mt-4">
+            <WaveLeaderboardLoadingBar />
+          </div>
+        )}
+        {hasNextPage && (
+          <div
+            ref={intersectionElementRef}
+            aria-hidden="true"
+            className="tw-h-px"
+          />
+        )}
       </div>
     );
   }

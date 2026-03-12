@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveSales from "@/components/brain/my-stream/MyStreamWaveSales";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
@@ -7,9 +7,17 @@ const mockSalesViewStyle = { height: "240px", maxHeight: "240px" };
 const mockMarketplacePreview = jest.fn(({ href }: { href: string }) => (
   <div data-testid="sale-preview">{href}</div>
 ));
+let intersectionCb: ((isIntersecting: boolean) => void) | undefined;
 
 jest.mock("@/hooks/waves/useWaveDecisions", () => ({
   useWaveDecisions: jest.fn(),
+}));
+
+jest.mock("@/hooks/useIntersectionObserver", () => ({
+  useIntersectionObserver: (cb: (isIntersecting: boolean) => void) => {
+    intersectionCb = cb;
+    return { current: null };
+  },
 }));
 
 jest.mock("@/components/waves/MarketplacePreview", () => ({
@@ -17,16 +25,29 @@ jest.mock("@/components/waves/MarketplacePreview", () => ({
   default: (props: any) => mockMarketplacePreview(props),
 }));
 
+jest.mock(
+  "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar",
+  () => ({
+    WaveLeaderboardLoadingBar: () => (
+      <div data-testid="wave-sales-loading-bar" />
+    ),
+  })
+);
+
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ salesViewStyle: mockSalesViewStyle }),
 }));
 
 const useWaveDecisionsMock = useWaveDecisions as jest.Mock;
+const fetchNextPage = jest.fn();
 
 const mockWaveDecisions = (overrides: Record<string, unknown> = {}) => {
   useWaveDecisionsMock.mockReturnValue({
     decisionPoints: [],
+    fetchNextPage,
+    hasNextPage: false,
     isFetching: false,
+    isFetchingNextPage: false,
     isError: false,
     error: null,
     refetch: jest.fn(),
@@ -37,6 +58,7 @@ const mockWaveDecisions = (overrides: Record<string, unknown> = {}) => {
 describe("MyStreamWaveSales", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    intersectionCb = undefined;
   });
 
   it("shows loading shell while decisions are fetching", () => {
@@ -56,7 +78,7 @@ describe("MyStreamWaveSales", () => {
     });
   });
 
-  it("shows empty shell when there are no decision winners", () => {
+  it("shows empty shell when there are no decision winners and no further pages", () => {
     mockWaveDecisions();
 
     render(<MyStreamWaveSales waveId="wave-1" />);
@@ -68,7 +90,7 @@ describe("MyStreamWaveSales", () => {
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
   });
 
-  it("shows empty shell when winner drops have no usable sale URLs", () => {
+  it("shows empty shell when winner drops have no usable sale URLs and pagination is exhausted", () => {
     mockWaveDecisions({
       decisionPoints: [
         {
@@ -98,7 +120,7 @@ describe("MyStreamWaveSales", () => {
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
   });
 
-  it("renders a flat sales grid from all decision rounds with latest rounds first", () => {
+  it("renders a flat sales grid from loaded decision pages with latest rounds first", () => {
     mockWaveDecisions({
       decisionPoints: [
         {
@@ -169,26 +191,9 @@ describe("MyStreamWaveSales", () => {
       "https://market.example/old-1",
       "https://market.example/shared",
     ]);
-
-    expect(mockMarketplacePreview).toHaveBeenNthCalledWith(1, {
-      href: "https://market.example/new-1",
-      compact: true,
-    });
-    expect(mockMarketplacePreview).toHaveBeenNthCalledWith(2, {
-      href: "https://market.example/shared",
-      compact: true,
-    });
-    expect(mockMarketplacePreview).toHaveBeenNthCalledWith(3, {
-      href: "https://market.example/old-1",
-      compact: true,
-    });
-    expect(mockMarketplacePreview).toHaveBeenNthCalledWith(4, {
-      href: "https://market.example/shared",
-      compact: true,
-    });
   });
 
-  it("keeps the sales grid visible while decisions refetch", () => {
+  it("fetches the next page when the pagination sentinel intersects", () => {
     mockWaveDecisions({
       decisionPoints: [
         {
@@ -203,12 +208,114 @@ describe("MyStreamWaveSales", () => {
           ],
         },
       ],
+      hasNextPage: true,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.(true);
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("continues paging when loaded decisions have no renderable sales yet", () => {
+    mockWaveDecisions({
+      decisionPoints: [
+        {
+          decision_time: 2,
+          winners: [
+            {
+              place: 1,
+              drop: {
+                nft_links: [],
+              },
+            },
+          ],
+        },
+      ],
+      hasNextPage: true,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    expect(screen.getByText("No sales yet.")).toBeInTheDocument();
+
+    act(() => {
+      intersectionCb?.(true);
+    });
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not fetch the next page when pagination is unavailable", () => {
+    mockWaveDecisions({
+      hasNextPage: false,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.(true);
+    });
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it("does not fetch the next page while a page fetch is already in flight", () => {
+    mockWaveDecisions({
+      decisionPoints: [
+        {
+          decision_time: 2,
+          winners: [
+            {
+              place: 1,
+              drop: {
+                nft_links: [{ url_in_text: "https://market.example/new-1" }],
+              },
+            },
+          ],
+        },
+      ],
+      hasNextPage: true,
       isFetching: true,
+      isFetchingNextPage: true,
+    });
+
+    render(<MyStreamWaveSales waveId="wave-1" />);
+
+    act(() => {
+      intersectionCb?.(true);
+    });
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it("keeps the sales content visible while fetching the next page", () => {
+    mockWaveDecisions({
+      decisionPoints: [
+        {
+          decision_time: 2,
+          winners: [
+            {
+              place: 1,
+              drop: {
+                nft_links: [{ url_in_text: "https://market.example/new-1" }],
+              },
+            },
+          ],
+        },
+      ],
+      hasNextPage: true,
+      isFetching: true,
+      isFetchingNextPage: true,
     });
 
     render(<MyStreamWaveSales waveId="wave-1" />);
 
     expect(screen.getByTestId("wave-sales-grid")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-sales-loading-bar")).toBeInTheDocument();
     expect(screen.queryByText("Loading sales...")).not.toBeInTheDocument();
   });
 });
