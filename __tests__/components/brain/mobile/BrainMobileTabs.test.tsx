@@ -202,4 +202,27 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(screen.queryByText("FAQ")).toBeNull();
   });
+
+  it("renders Sales for non-rank curation waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      isRankWave: false,
+    });
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={{ id: "1" } as any}
+      />
+    );
+
+    expect(screen.getByText("Sales")).toBeInTheDocument();
+    expect(screen.queryByTestId("leaderboard")).toBeNull();
+  });
 });

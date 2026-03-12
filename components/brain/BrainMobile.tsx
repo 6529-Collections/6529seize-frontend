@@ -206,7 +206,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
     const shouldResetToDefault =
       (activeView === BrainView.LEADERBOARD && isCompleted) ||
-      (activeView === BrainView.SALES && (!isCurationWave || !isRankWave)) ||
+      (activeView === BrainView.SALES && !isCurationWave) ||
       (activeView === BrainView.WINNERS && !firstDecisionDone) ||
       (activeView === BrainView.MY_VOTES && !isMemesWave && !isCurationWave) ||
       (activeView === BrainView.FAQ && !isMemesWave);
@@ -287,9 +287,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         />
       ) : null,
     [BrainView.SALES]:
-      isRankWave && isCurationWave && !!wave ? (
-        <MyStreamWaveSales waveId={wave.id} />
-      ) : null,
+      isCurationWave && !!wave ? <MyStreamWaveSales waveId={wave.id} /> : null,
     [BrainView.WINNERS]:
       isRankWave && !!wave ? (
         <div className="tw-px-2 sm:tw-px-4">

@@ -160,13 +160,13 @@ describe("BrainMobile", () => {
     rerender(<div />);
   });
 
-  it("renders the Sales view for curation waves and falls back when unavailable", async () => {
+  it("renders the Sales view for non-rank curation waves and falls back when unavailable", async () => {
     mockSearchParams.set("wave", "1");
-    waveData = { id: "1", wave: { type: "RANK" } };
+    waveData = { id: "1", wave: { type: "APPROVE" } };
     mockUseWave.mockReturnValue({
       isMemesWave: false,
       isCurationWave: true,
-      isRankWave: true,
+      isRankWave: false,
     });
 
     const { rerender } = render(<BrainMobile>child</BrainMobile>);
@@ -183,7 +183,7 @@ describe("BrainMobile", () => {
     mockUseWave.mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
-      isRankWave: true,
+      isRankWave: false,
     });
     rerender(<BrainMobile>child</BrainMobile>);
 

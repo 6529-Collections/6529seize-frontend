@@ -165,7 +165,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   };
 
   const salesTabButton =
-    waveActive && wave && isRankWave && isCurationWave ? (
+    waveActive && wave && isCurationWave ? (
       <button
         ref={(el) => {
           tabRefs.current[BrainView.SALES] = el;
@@ -252,6 +252,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <span className={aboutButtonTextClasses}>About</span>
           </button>
         )}
+        {!isRankWave && salesTabButton}
         {waveActive && wave && isRankWave && (
           <>
             <MyStreamWaveTabsLeaderboard

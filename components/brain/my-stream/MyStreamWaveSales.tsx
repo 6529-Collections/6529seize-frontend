@@ -3,7 +3,7 @@
 import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
 import MarketplacePreview from "@/components/waves/MarketplacePreview";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { useWaveSalesDecisions } from "@/hooks/waves/useWaveSalesDecisions";
 import { useLayout } from "./layout/LayoutContext";
 import React, { useCallback, useMemo } from "react";
 
@@ -50,7 +50,7 @@ const MyStreamWaveSales: React.FC<MyStreamWaveSalesProps> = ({ waveId }) => {
     isError,
     isFetching,
     isFetchingNextPage,
-  } = useWaveDecisions({ waveId });
+  } = useWaveSalesDecisions({ waveId });
   const salesUrls = useMemo(
     () =>
       decisionPoints

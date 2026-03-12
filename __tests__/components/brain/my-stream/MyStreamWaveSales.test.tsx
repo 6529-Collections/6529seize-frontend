@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveSales from "@/components/brain/my-stream/MyStreamWaveSales";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { useWaveSalesDecisions } from "@/hooks/waves/useWaveSalesDecisions";
 
 const mockSalesViewStyle = { height: "240px", maxHeight: "240px" };
 const mockMarketplacePreview = jest.fn(({ href }: { href: string }) => (
@@ -9,8 +9,8 @@ const mockMarketplacePreview = jest.fn(({ href }: { href: string }) => (
 ));
 let intersectionCb: ((isIntersecting: boolean) => void) | undefined;
 
-jest.mock("@/hooks/waves/useWaveDecisions", () => ({
-  useWaveDecisions: jest.fn(),
+jest.mock("@/hooks/waves/useWaveSalesDecisions", () => ({
+  useWaveSalesDecisions: jest.fn(),
 }));
 
 jest.mock("@/hooks/useIntersectionObserver", () => ({
@@ -38,11 +38,11 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ salesViewStyle: mockSalesViewStyle }),
 }));
 
-const useWaveDecisionsMock = useWaveDecisions as jest.Mock;
+const useWaveSalesDecisionsMock = useWaveSalesDecisions as jest.Mock;
 const fetchNextPage = jest.fn();
 
 const mockWaveDecisions = (overrides: Record<string, unknown> = {}) => {
-  useWaveDecisionsMock.mockReturnValue({
+  useWaveSalesDecisionsMock.mockReturnValue({
     decisionPoints: [],
     fetchNextPage,
     hasNextPage: false,
@@ -78,7 +78,7 @@ describe("MyStreamWaveSales", () => {
     expectMockSalesViewStyle();
     expect(screen.getByText("Loading sales...")).toBeInTheDocument();
     expect(mockMarketplacePreview).not.toHaveBeenCalled();
-    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+    expect(useWaveSalesDecisionsMock).toHaveBeenCalledWith({
       waveId: "wave-1",
     });
   });
