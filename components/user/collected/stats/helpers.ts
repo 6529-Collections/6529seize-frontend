@@ -2,6 +2,7 @@ import {
   getCollectedStatsIdentityKey,
   getStatsPath,
 } from "@/components/user/stats/userPageStats.helpers";
+import { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
 import type { ApiCollectedStatsSeason } from "@/generated/models/ApiCollectedStatsSeason";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
@@ -78,6 +79,7 @@ const buildMainMetrics = (
       id: "nextgen",
       label: "NextGen",
       val: formatMetricValue(collectedStats.nextgen_balance),
+      collection: CollectedCollectionType.NEXTGEN,
     });
   }
 
@@ -86,6 +88,7 @@ const buildMainMetrics = (
       id: "memes_sets",
       label: "Meme Sets",
       val: formatMetricValue(memeSets),
+      collection: CollectedCollectionType.MEMES,
     });
   }
 
@@ -99,6 +102,7 @@ const buildMainMetrics = (
       id: "memes",
       label: "Memes",
       val: formatMetricValue(collectedStats.memes_balance),
+      collection: CollectedCollectionType.MEMES,
       ...(uniqueSub ? { sub: uniqueSub } : {}),
     });
   }
@@ -108,6 +112,7 @@ const buildMainMetrics = (
       id: "gradients",
       label: "Gradients",
       val: formatMetricValue(collectedStats.gradients_balance),
+      collection: CollectedCollectionType.GRADIENTS,
     });
   }
 
@@ -156,6 +161,7 @@ const buildDisplaySeason = (
   return {
     id: season.season,
     label: `SZN${seasonNumber}`,
+    seasonNumber,
     totalCards,
     setsHeld,
     nextSetCards,

@@ -14,8 +14,6 @@ import UserPageActivityTabs from "./tabs/UserPageActivityTabs";
 import UserPageStatsActivityTDHHistory from "./tdh-history/UserPageStatsActivityTDHHistory";
 import UserPageStatsActivityWallet from "./wallet/UserPageStatsActivityWallet";
 
-export { USER_PAGE_ACTIVITY_TAB } from "./activity.types";
-
 const ENUM_AND_PATH: { type: USER_PAGE_ACTIVITY_TAB; path: string }[] = [
   { type: USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY, path: "wallet-activity" },
   { type: USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS, path: "distributions" },

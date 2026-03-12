@@ -41,6 +41,7 @@ import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
 import { useXtdhTokensQuery } from "./hooks/useXtdhTokensQuery";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 import UserPageCollectedStats from "./UserPageCollectedStats";
+
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
   readonly accountForConsolidations: boolean;
@@ -60,6 +61,17 @@ interface QueryUpdateInput {
   value: string | null;
 }
 
+interface NormalizedCollectedQueryState {
+  address: string | null;
+  collection: CollectedCollectionType | null;
+  subcollection: string | null;
+  seized: CollectionSeized | null;
+  sznId: number | null;
+  page: number;
+  sortBy: CollectionSort;
+  sortDirection: SortDirection;
+}
+
 const SEARCH_PARAMS_FIELDS = {
   address: "address",
   collection: "collection",
@@ -71,6 +83,249 @@ const SEARCH_PARAMS_FIELDS = {
   sortDirection: "sort-direction",
 } as const;
 
+const DEFAULT_SORT_BY = CollectionSort.TOKEN_ID;
+const DEFAULT_SORT_DIRECTION = SortDirection.DESC;
+const DEFAULT_SEIZED = CollectionSeized.SEIZED;
+const PAGE_SIZE = 24;
+const COLLECTION_VALUES = Object.values(CollectedCollectionType);
+const SEIZED_VALUES = Object.values(CollectionSeized);
+const SORT_VALUES = Object.values(CollectionSort);
+const SORT_DIRECTION_VALUES = Object.values(SortDirection);
+
+const getDefaultSortBy = (
+  collection: CollectedCollectionType | null
+): CollectionSort =>
+  collection === CollectedCollectionType.NETWORK
+    ? CollectionSort.XTDH
+    : DEFAULT_SORT_BY;
+
+const convertSeized = ({
+  seized,
+  collection,
+}: {
+  readonly seized: string | null;
+  readonly collection: CollectedCollectionType | null;
+}): CollectionSeized | null => {
+  if (collection === null) return DEFAULT_SEIZED;
+  if (!COLLECTED_COLLECTIONS_META[collection].filters.seized) {
+    return DEFAULT_SEIZED;
+  }
+  if (seized === null) return null;
+  const normalizedSeized = seized.toUpperCase() as CollectionSeized;
+  return SEIZED_VALUES.includes(normalizedSeized) ? normalizedSeized : null;
+};
+
+const convertSznId = ({
+  szn,
+  collection,
+}: {
+  readonly szn: string | null;
+  readonly collection: CollectedCollectionType | null;
+}): number | null => {
+  if (collection === null) return null;
+  if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
+  if (szn === null) return null;
+  const parsed = Number.parseInt(szn, 10);
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
+const convertCollection = (
+  collection: string | null
+): CollectedCollectionType | null => {
+  if (collection === null) return null;
+  const normalizedCollection =
+    collection.toUpperCase() as CollectedCollectionType;
+  return COLLECTION_VALUES.includes(normalizedCollection)
+    ? normalizedCollection
+    : null;
+};
+
+const convertSortedBy = ({
+  sortBy,
+  collection,
+}: {
+  readonly sortBy: string | null;
+  readonly collection: CollectedCollectionType | null;
+}): CollectionSort => {
+  const defaultCollectionSortBy = getDefaultSortBy(collection);
+  if (sortBy === null) return defaultCollectionSortBy;
+  const normalizedSortBy = sortBy.toUpperCase() as CollectionSort;
+  if (
+    collection !== null &&
+    !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+      normalizedSortBy
+    )
+  ) {
+    return defaultCollectionSortBy;
+  }
+  return SORT_VALUES.includes(normalizedSortBy)
+    ? normalizedSortBy
+    : defaultCollectionSortBy;
+};
+
+const convertSortDirection = (sortDirection: string | null): SortDirection => {
+  if (sortDirection === null) return DEFAULT_SORT_DIRECTION;
+  const normalizedSortDirection = sortDirection.toUpperCase() as SortDirection;
+  return SORT_DIRECTION_VALUES.includes(normalizedSortDirection)
+    ? normalizedSortDirection
+    : DEFAULT_SORT_DIRECTION;
+};
+
+const normalizePageNumber = (page: number): number =>
+  Number.isFinite(page) && page > 0 ? page : 1;
+
+const setCanonicalCollectedQueryParams = ({
+  normalizedParams,
+  state,
+}: {
+  readonly normalizedParams: URLSearchParams;
+  readonly state: NormalizedCollectedQueryState;
+}) => {
+  if (state.address !== null) {
+    normalizedParams.set(SEARCH_PARAMS_FIELDS.address, state.address);
+  }
+  if (state.collection !== null) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.collection,
+      state.collection.toLowerCase()
+    );
+  }
+  if (state.subcollection !== null) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.subcollection,
+      state.subcollection.toLowerCase()
+    );
+  }
+  if (
+    state.collection !== null &&
+    COLLECTED_COLLECTIONS_META[state.collection].filters.seized &&
+    state.seized !== null
+  ) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.seized,
+      state.seized.toLowerCase()
+    );
+  }
+  if (
+    state.collection !== null &&
+    COLLECTED_COLLECTIONS_META[state.collection].filters.szn &&
+    state.sznId !== null
+  ) {
+    normalizedParams.set(SEARCH_PARAMS_FIELDS.szn, state.sznId.toString());
+  }
+  if (state.page > 1) {
+    normalizedParams.set(SEARCH_PARAMS_FIELDS.page, state.page.toString());
+  }
+  if (state.sortBy !== getDefaultSortBy(state.collection)) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.sortBy,
+      state.sortBy.toLowerCase()
+    );
+  }
+  if (state.sortDirection !== DEFAULT_SORT_DIRECTION) {
+    normalizedParams.set(
+      SEARCH_PARAMS_FIELDS.sortDirection,
+      state.sortDirection.toLowerCase()
+    );
+  }
+};
+
+const getNormalizedCollectedQueryStateFromFilters = (
+  filters: ProfileCollectedFilters
+): NormalizedCollectedQueryState => ({
+  address: filters.accountForConsolidations
+    ? null
+    : convertAddressToLowerCase(filters.handleOrWallet),
+  collection: filters.collection,
+  subcollection:
+    filters.collection === CollectedCollectionType.NETWORK
+      ? filters.subcollection
+      : null,
+  seized: convertSeized({
+    seized: filters.seized,
+    collection: filters.collection,
+  }),
+  sznId: filters.szn?.id ?? filters.initialSznId,
+  page: normalizePageNumber(filters.page),
+  sortBy: convertSortedBy({
+    sortBy: filters.sortBy,
+    collection: filters.collection,
+  }),
+  sortDirection: convertSortDirection(filters.sortDirection),
+});
+
+const applyQueryUpdateItemsToState = ({
+  state,
+  updateItems,
+}: {
+  readonly state: NormalizedCollectedQueryState;
+  readonly updateItems: QueryUpdateInput[];
+}): NormalizedCollectedQueryState => {
+  const nextState: NormalizedCollectedQueryState = { ...state };
+
+  for (const { name, value } of updateItems) {
+    switch (name) {
+      case "address":
+        nextState.address = convertAddressToLowerCase(value);
+        break;
+      case "collection": {
+        nextState.collection = convertCollection(value);
+        nextState.subcollection =
+          nextState.collection === CollectedCollectionType.NETWORK
+            ? nextState.subcollection
+            : null;
+        nextState.seized = convertSeized({
+          seized: nextState.seized,
+          collection: nextState.collection,
+        });
+        nextState.sznId = convertSznId({
+          szn: nextState.sznId?.toString() ?? null,
+          collection: nextState.collection,
+        });
+        nextState.sortBy = convertSortedBy({
+          sortBy: nextState.sortBy,
+          collection: nextState.collection,
+        });
+        break;
+      }
+      case "subcollection":
+        nextState.subcollection =
+          nextState.collection === CollectedCollectionType.NETWORK ? value : null;
+        break;
+      case "seized":
+        nextState.seized = convertSeized({
+          seized: value,
+          collection: nextState.collection,
+        });
+        break;
+      case "szn":
+        nextState.sznId = convertSznId({
+          szn: value,
+          collection: nextState.collection,
+        });
+        break;
+      case "page": {
+        const parsedPage = value ? Number.parseInt(value, 10) : 1;
+        nextState.page = normalizePageNumber(parsedPage);
+        break;
+      }
+      case "sortBy":
+        nextState.sortBy = convertSortedBy({
+          sortBy: value,
+          collection: nextState.collection,
+        });
+        break;
+      case "sortDirection":
+        nextState.sortDirection = convertSortDirection(value);
+        break;
+      default:
+        break;
+    }
+  }
+
+  return nextState;
+};
+
 export default function UserPageCollected({
   profile,
   initialStatsData = EMPTY_USER_PAGE_STATS_INITIAL_DATA,
@@ -80,10 +335,6 @@ export default function UserPageCollected({
 }) {
   const { address: connectedAddress } = useSeizeConnectContext();
   const isMobile = useIsMobileScreen();
-  const defaultSortBy = CollectionSort.TOKEN_ID;
-  const defaultSortDirection = SortDirection.DESC;
-  const defaultSeized = CollectionSeized.SEIZED;
-  const PAGE_SIZE = 24;
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -91,130 +342,76 @@ export default function UserPageCollected({
   const router = useRouter();
   const user = params?.["user"]?.toString().toLowerCase() ?? "";
 
-  const convertSeized = ({
-    seized,
-    collection,
-  }: {
-    readonly seized: string | null;
-    readonly collection: CollectedCollectionType | null;
-  }): CollectionSeized | null => {
-    if (!collection) return defaultSeized;
-    if (!COLLECTED_COLLECTIONS_META[collection].filters.seized)
-      return defaultSeized;
-    if (!seized) return null;
-    return (
-      Object.values(CollectionSeized).find((c) => c === seized.toUpperCase()) ??
-      null
-    );
-  };
-
-  const convertSznId = ({
-    szn,
-    collection,
-  }: {
-    readonly szn: string | null;
-    readonly collection: CollectedCollectionType | null;
-  }): number | null => {
-    if (!collection) return null;
-    if (!COLLECTED_COLLECTIONS_META[collection].filters.szn) return null;
-    if (!szn) return null;
-    const parsed = Number.parseInt(szn, 10);
-    return Number.isNaN(parsed) ? null : parsed;
-  };
-
-  const convertCollection = (
-    collection: string | null
-  ): CollectedCollectionType | null => {
-    if (!collection) return null;
-    return (
-      Object.values(CollectedCollectionType).find(
-        (c) => c === collection.toUpperCase()
-      ) ?? null
-    );
-  };
-
-  const convertSortedBy = ({
-    sortBy,
-    collection,
-  }: {
-    readonly sortBy: string | null;
-    readonly collection: CollectedCollectionType | null;
-  }): CollectionSort => {
-    if (!sortBy) return defaultSortBy;
-    if (
-      collection &&
-      collection !== CollectedCollectionType.NETWORK &&
-      !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
-        sortBy.toUpperCase() as CollectionSort
-      )
-    ) {
-      return defaultSortBy;
-    }
-    return (
-      Object.values(CollectionSort).find((c) => c === sortBy.toUpperCase()) ??
-      defaultSortBy
-    );
-  };
-
-  const convertSortDirection = (sortDirection: string | null) => {
-    if (!sortDirection) return defaultSortDirection;
-    return (
-      Object.values(SortDirection).find(
-        (c) => c === sortDirection.toUpperCase()
-      ) ?? defaultSortDirection
-    );
-  };
-
   const getFilters = useCallback((): ProfileCollectedFilters => {
-    const address = searchParams?.get(SEARCH_PARAMS_FIELDS.address);
-    const collection = searchParams?.get(SEARCH_PARAMS_FIELDS.collection);
-    const subcollection = searchParams?.get(SEARCH_PARAMS_FIELDS.subcollection);
-    const seized = searchParams?.get(SEARCH_PARAMS_FIELDS.seized);
-    const szn = searchParams?.get(SEARCH_PARAMS_FIELDS.szn);
-    const page = searchParams?.get(SEARCH_PARAMS_FIELDS.page);
-    const sortBy = searchParams?.get(SEARCH_PARAMS_FIELDS.sortBy);
-    const sortDirection = searchParams?.get(SEARCH_PARAMS_FIELDS.sortDirection);
+    const addressParam = searchParams.get(SEARCH_PARAMS_FIELDS.address);
+    const collectionParam = searchParams.get(SEARCH_PARAMS_FIELDS.collection);
+    const subcollectionParam = searchParams.get(
+      SEARCH_PARAMS_FIELDS.subcollection
+    );
+    const seizedParam = searchParams.get(SEARCH_PARAMS_FIELDS.seized);
+    const sznParam = searchParams.get(SEARCH_PARAMS_FIELDS.szn);
+    const pageParam = searchParams.get(SEARCH_PARAMS_FIELDS.page);
+    const sortByParam = searchParams.get(SEARCH_PARAMS_FIELDS.sortBy);
+    const sortDirectionParam = searchParams.get(
+      SEARCH_PARAMS_FIELDS.sortDirection
+    );
 
-    const convertedAddress = convertAddressToLowerCase(address);
-    const convertedCollection = convertCollection(collection ?? null);
+    const convertedAddress = convertAddressToLowerCase(addressParam);
+    const convertedCollection = convertCollection(collectionParam ?? null);
     return {
       handleOrWallet: convertedAddress ?? profile.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
-      subcollection: subcollection ?? null,
+      subcollection:
+        convertedCollection === CollectedCollectionType.NETWORK
+          ? (subcollectionParam ?? null)
+          : null,
       seized: convertSeized({
-        seized: seized ?? null,
+        seized: seizedParam ?? null,
         collection: convertedCollection,
       }),
       szn: null,
       initialSznId: convertSznId({
-        szn: szn ?? null,
+        szn: sznParam ?? null,
         collection: convertedCollection,
       }),
-      page: page ? Number.parseInt(page, 10) : 1,
+      page: normalizePageNumber(
+        pageParam ? Number.parseInt(pageParam, 10) : 1
+      ),
       pageSize: PAGE_SIZE,
       sortBy: convertSortedBy({
-        sortBy: sortBy ?? null,
+        sortBy: sortByParam ?? null,
         collection: convertedCollection,
       }),
-      sortDirection: convertSortDirection(sortDirection ?? null),
+      sortDirection: convertSortDirection(sortDirectionParam ?? null),
     };
   }, [searchParams, profile.handle, user]);
 
+  const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+  const effectiveSeasonId = filters.szn?.id ?? filters.initialSznId;
+
   const createQueryString = useCallback(
     (updateItems: QueryUpdateInput[]): string => {
-      const params = new URLSearchParams(searchParams?.toString() ?? "");
-      for (const { name, value } of updateItems) {
-        const key = SEARCH_PARAMS_FIELDS[name];
-        if (!value) {
-          params.delete(key);
-        } else {
-          params.set(key, value.toLowerCase());
+      const queryParams = new URLSearchParams(searchParams.toString());
+      const state = applyQueryUpdateItemsToState({
+        state: getNormalizedCollectedQueryStateFromFilters(filters),
+        updateItems,
+      });
+      const normalizedParams = new URLSearchParams();
+      const knownParamKeys = new Set<string>(
+        Object.values(SEARCH_PARAMS_FIELDS)
+      );
+
+      for (const [key, value] of queryParams.entries()) {
+        if (!knownParamKeys.has(key)) {
+          normalizedParams.append(key, value);
         }
       }
-      return params.toString();
+      setCanonicalCollectedQueryParams({ normalizedParams, state });
+
+      return normalizedParams.toString();
     },
-    [searchParams]
+    [searchParams, filters]
   );
 
   const updateFields = useCallback(
@@ -230,18 +427,85 @@ export default function UserPageCollected({
     [pathname, router, createQueryString]
   );
 
-  const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
-
   const { enabled: transferEnabled } = useTransfer();
 
-  const setCollection = async (
-    collection: CollectedCollectionType | null
-  ): Promise<void> => {
-    if (!filters.collection && !collection) return;
-    const items: QueryUpdateInput[] = [
+  const getCollectionSortUpdate = (
+    nextCollection: CollectedCollectionType | null
+  ): {
+    readonly nextSortBy: CollectionSort;
+    readonly nextSortDirection: SortDirection;
+    readonly updateItems: QueryUpdateInput[];
+  } => {
+    const isSwitchingFromNetwork =
+      filters.collection === CollectedCollectionType.NETWORK &&
+      nextCollection !== CollectedCollectionType.NETWORK;
+
+    if (
+      (nextCollection !== null &&
+        nextCollection !== CollectedCollectionType.NETWORK &&
+        !COLLECTED_COLLECTIONS_META[nextCollection].filters.sort.includes(
+          filters.sortBy
+        )) ||
+      isSwitchingFromNetwork
+    ) {
+      return {
+        nextSortBy: CollectionSort.TOKEN_ID,
+        nextSortDirection: SortDirection.DESC,
+        updateItems: [
+          {
+            name: "sortBy",
+            value: CollectionSort.TOKEN_ID,
+          },
+          {
+            name: "sortDirection",
+            value: SortDirection.DESC,
+          },
+        ],
+      };
+    }
+
+    if (nextCollection === CollectedCollectionType.NETWORK) {
+      return {
+        nextSortBy: CollectionSort.XTDH,
+        nextSortDirection: SortDirection.DESC,
+        updateItems: [
+          {
+            name: "sortBy",
+            value: CollectionSort.XTDH,
+          },
+          {
+            name: "sortDirection",
+            value: SortDirection.DESC,
+          },
+        ],
+      };
+    }
+
+    return {
+      nextSortBy: filters.sortBy,
+      nextSortDirection: filters.sortDirection,
+      updateItems: [],
+    };
+  };
+
+  const getCollectionUpdate = ({
+    collection,
+    allowToggle,
+  }: {
+    readonly collection: CollectedCollectionType | null;
+    readonly allowToggle: boolean;
+  }): {
+    readonly nextFilters: ProfileCollectedFilters;
+    readonly updateItems: QueryUpdateInput[];
+  } => {
+    const nextCollection =
+      allowToggle && filters.collection === collection ? null : collection;
+    const sortUpdate = getCollectionSortUpdate(nextCollection);
+
+    const updateItems: QueryUpdateInput[] = [
       {
         name: "collection",
-        value: filters.collection === collection ? null : (collection ?? null),
+        value: nextCollection,
       },
       {
         name: "page",
@@ -249,7 +513,7 @@ export default function UserPageCollected({
       },
       {
         name: "seized",
-        value: defaultSeized,
+        value: DEFAULT_SEIZED,
       },
       {
         name: "szn",
@@ -259,38 +523,78 @@ export default function UserPageCollected({
         name: "subcollection",
         value: null,
       },
+      ...sortUpdate.updateItems,
     ];
 
-    const isSwitchingFromNetwork =
-      filters.collection === CollectedCollectionType.NETWORK;
+    return {
+      nextFilters: {
+        ...filters,
+        collection: nextCollection,
+        subcollection: null,
+        seized: DEFAULT_SEIZED,
+        szn: null,
+        initialSznId: null,
+        page: 1,
+        sortBy: sortUpdate.nextSortBy,
+        sortDirection: sortUpdate.nextSortDirection,
+      },
+      updateItems,
+    };
+  };
 
-    if (
-      (collection &&
-        collection !== CollectedCollectionType.NETWORK &&
-        !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
-          filters.sortBy
-        )) ||
-      isSwitchingFromNetwork
-    ) {
-      items.push({
-        name: "sortBy",
-        value: CollectionSort.TOKEN_ID,
-      });
-      items.push({
-        name: "sortDirection",
-        value: SortDirection.DESC,
-      });
-    } else if (collection === CollectedCollectionType.NETWORK) {
-      items.push({
-        name: "sortBy",
-        value: CollectionSort.XTDH,
-      });
-      items.push({
-        name: "sortDirection",
-        value: SortDirection.DESC,
-      });
-    }
+  const setCollection = async (
+    collection: CollectedCollectionType | null
+  ): Promise<void> => {
+    if (filters.collection === null && collection === null) return;
+    const { nextFilters, updateItems } = getCollectionUpdate({
+      collection,
+      allowToggle: true,
+    });
+    setFilters(nextFilters);
+    await updateFields(updateItems);
+  };
 
+  const setCollectionShortcut = async (
+    collection: CollectedCollectionType
+  ): Promise<void> => {
+    const { nextFilters, updateItems } = getCollectionUpdate({
+      collection,
+      allowToggle: true,
+    });
+    setFilters(nextFilters);
+    await updateFields(updateItems);
+  };
+
+  const setSeasonShortcut = async (seasonNumber: number): Promise<void> => {
+    const isActiveSeasonShortcut =
+      filters.collection === CollectedCollectionType.MEMES &&
+      effectiveSeasonId === seasonNumber;
+    const nextInitialSznId = isActiveSeasonShortcut ? null : seasonNumber;
+    const { nextFilters: nextCollectionFilters, updateItems } =
+      getCollectionUpdate({
+        collection: isActiveSeasonShortcut
+          ? null
+          : CollectedCollectionType.MEMES,
+        allowToggle: false,
+      });
+    const nextFilters: ProfileCollectedFilters = {
+      ...nextCollectionFilters,
+      szn:
+        nextInitialSznId !== null && filters.szn?.id === nextInitialSznId
+          ? filters.szn
+          : null,
+      initialSznId: nextInitialSznId,
+    };
+    const items = updateItems.map((item) =>
+      item.name === "szn"
+        ? {
+            ...item,
+            value: nextInitialSznId?.toString() ?? null,
+          }
+        : item
+    );
+
+    setFilters(nextFilters);
     await updateFields(items);
   };
 
@@ -309,7 +613,7 @@ export default function UserPageCollected({
       }
       return SortDirection.ASC;
     }
-    return defaultSortDirection;
+    return DEFAULT_SORT_DIRECTION;
   };
 
   const setSortBy = async (sortBy: CollectionSort): Promise<void> => {
@@ -349,11 +653,25 @@ export default function UserPageCollected({
   };
 
   const setSzn = async (szn: MemeSeason | null): Promise<void> => {
-    setFilters((prev) => ({ ...prev, szn }));
+    const nextInitialSznId = szn?.id ?? null;
+    setFilters((prev) => ({
+      ...prev,
+      szn,
+      initialSznId: nextInitialSznId,
+      page: 1,
+    }));
     const items: QueryUpdateInput[] = [
       {
+        name: "collection",
+        value: filters.collection,
+      },
+      {
+        name: "seized",
+        value: filters.seized,
+      },
+      {
         name: "szn",
-        value: szn ? szn.id.toString() : null,
+        value: nextInitialSznId?.toString() ?? null,
       },
       {
         name: "page",
@@ -380,6 +698,10 @@ export default function UserPageCollected({
   };
 
   const setPage = async (page: number): Promise<void> => {
+    if (page === filters.page) {
+      return;
+    }
+
     const items: QueryUpdateInput[] = [
       {
         name: "page",
@@ -425,8 +747,8 @@ export default function UserPageCollected({
         params["seized"] = filters.seized;
       }
 
-      if (filters.szn) {
-        params["szn"] = filters.szn.id.toString();
+      if (effectiveSeasonId !== null) {
+        params["szn"] = effectiveSeasonId.toString();
       }
 
       return await commonApiFetch<Page<CollectedCard>>({
@@ -538,6 +860,10 @@ export default function UserPageCollected({
           filters.accountForConsolidations ? null : filters.handleOrWallet
         }
         initialStatsData={initialStatsData}
+        activeCollection={filters.collection}
+        activeSeasonNumber={effectiveSeasonId}
+        onCollectionShortcut={setCollectionShortcut}
+        onSeasonShortcut={setSeasonShortcut}
       />
 
       {isLoading ? (
