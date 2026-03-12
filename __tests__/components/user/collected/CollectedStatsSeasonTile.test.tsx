@@ -166,7 +166,7 @@ describe("CollectedStatsSeasonTile", () => {
     );
   });
 
-  it("keeps the unselected tile visually plain until it is active", () => {
+  it("uses hover-only scaling for the season tile", () => {
     render(
       <CollectedStatsSeasonTile
         season={buildSeason()}
@@ -181,9 +181,10 @@ describe("CollectedStatsSeasonTile", () => {
     const button = screen.getByRole("button", { name: /szn2/i });
 
     expect(button).toHaveClass("tw-border-transparent", "tw-bg-transparent");
+    expect(button).toHaveClass("desktop-hover:hover:tw-scale-[1.03]");
     expect(button).not.toHaveClass(
-      "hover:tw-border-iron-900",
-      "hover:tw-bg-iron-950/60"
+      "hover:tw-scale-[1.01]",
+      "focus-visible:tw-scale-[1.01]"
     );
   });
 
