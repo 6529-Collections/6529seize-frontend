@@ -577,7 +577,11 @@ function ManifoldMemesMintingPhases(
   }>
 ) {
   const [distribution, setDistribution] = useState<Distribution>();
-  const phases = buildMemesPhases(props.mint_date);
+  const phaseAnchorDate =
+    props.claim.startDate > 0
+      ? Time.seconds(props.claim.startDate)
+      : props.mint_date;
+  const phases = buildMemesPhases(phaseAnchorDate);
 
   useEffect(() => {
     if (props.address) {
