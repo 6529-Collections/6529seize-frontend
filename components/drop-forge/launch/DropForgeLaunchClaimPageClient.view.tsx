@@ -65,6 +65,7 @@ type LaunchClaimPrimaryStatus = ClaimPrimaryStatus | null;
 type LaunchClaimMintTimeline = NonNullable<
   ReturnType<typeof getClaimTimelineDetails>
 >;
+type LaunchMintingClaimActionKind = LaunchPhaseKey | "artist" | "team";
 type LaunchAirdropActionLabel =
   | "Airdrop Artist"
   | "Airdrop Team"
@@ -135,7 +136,7 @@ interface DropForgeLaunchClaimPageViewProps {
   researchTargetEditionSize: number;
   onResearchTargetEditionSizeChange: (value: string) => void;
   researchAirdropCount: number;
-  runResearchAirdropWrite: () => void;
+  runResearchAirdropWrite: (mintingClaimAction?: string | null) => void;
   selectedPhaseDiffs: LaunchPhaseDiffsView;
   changedFieldBoxClassName: string;
   changedFieldBoxLabelClassName: string;
@@ -170,6 +171,108 @@ interface DropForgeLaunchClaimPageViewProps {
     action: string,
     completed: boolean
   ) => Promise<void>;
+}
+
+function normalizeMintingClaimActionName(actionName: string): string {
+  return actionName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function getMintingClaimActionTerms(kind: LaunchMintingClaimActionKind): {
+  required: string[];
+  preferred: string[];
+  excluded: string[];
+} {
+  switch (kind) {
+    case "artist":
+      return {
+        required: ["artist"],
+        preferred: ["airdrop"],
+        excluded: ["team", "research", "phase0", "phase1", "phase2", "public"],
+      };
+    case "team":
+      return {
+        required: ["team"],
+        preferred: ["airdrop"],
+        excluded: [
+          "artist",
+          "research",
+          "phase0",
+          "phase1",
+          "phase2",
+          "public",
+        ],
+      };
+    case "research":
+      return {
+        required: ["research"],
+        preferred: ["airdrop"],
+        excluded: ["artist", "team", "phase0", "phase1", "phase2", "public"],
+      };
+    case "phase0":
+      return {
+        required: ["phase0"],
+        preferred: ["airdrop"],
+        excluded: ["artist", "team", "research", "public"],
+      };
+    case "phase1":
+      return {
+        required: ["phase1"],
+        preferred: ["airdrop"],
+        excluded: ["artist", "team", "research", "public"],
+      };
+    case "phase2":
+      return {
+        required: ["phase2"],
+        preferred: ["airdrop"],
+        excluded: ["artist", "team", "research", "public"],
+      };
+    case "publicphase":
+      return {
+        required: ["public"],
+        preferred: ["phase", "airdrop"],
+        excluded: ["artist", "team", "research", "phase0", "phase1", "phase2"],
+      };
+    default:
+      return {
+        required: [],
+        preferred: [],
+        excluded: [],
+      };
+  }
+}
+
+function findBestMatchingMintingClaimActionName(
+  actionNames: readonly string[],
+  kind: LaunchMintingClaimActionKind
+): string | null {
+  const { required, preferred, excluded } = getMintingClaimActionTerms(kind);
+  let bestMatch: string | null = null;
+  let bestScore = -1;
+
+  for (const actionName of actionNames) {
+    const normalized = normalizeMintingClaimActionName(actionName);
+    if (excluded.some((term) => normalized.includes(term))) {
+      continue;
+    }
+    if (!required.every((term) => normalized.includes(term))) {
+      continue;
+    }
+
+    const score =
+      required.length * 10 +
+      preferred.filter((term) => normalized.includes(term)).length * 2 +
+      (normalized.endsWith("airdrop") ? 1 : 0);
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = actionName;
+    }
+  }
+
+  return bestMatch;
 }
 
 function DropForgeLaunchPageTitleRight() {
@@ -697,6 +800,7 @@ function DropForgeAirdropSummaryActionRow({
   buttonLabel,
   onClick,
   action,
+  claimWritePending,
   actionPending,
   onActionToggle,
 }: Readonly<{
@@ -707,10 +811,12 @@ function DropForgeAirdropSummaryActionRow({
   buttonLabel: string;
   onClick: () => void;
   action?: ApiMintingClaimAction | null;
+  claimWritePending: boolean;
   actionPending: string | null;
   onActionToggle: (action: string, completed: boolean) => Promise<void>;
 }>) {
   const isCompleted = action?.completed ?? false;
+  const isActionToggleDisabled = claimWritePending || actionPending !== null;
 
   return (
     <div className="tw-space-y-5">
@@ -721,7 +827,7 @@ function DropForgeAirdropSummaryActionRow({
             <span className="tw-text-sm tw-text-iron-400">Completed</span>
             <Toggle
               checked={action.completed}
-              disabled={actionPending !== null}
+              disabled={isActionToggleDisabled}
               icons={false}
               aria-label={`${title} completed`}
               onChange={() => {
@@ -788,6 +894,16 @@ function DropForgePhase0AirdropsSection({
     return null;
   }
 
+  const availableActionNames = Object.keys(mintingClaimActionsByName);
+  const artistActionName = findBestMatchingMintingClaimActionName(
+    availableActionNames,
+    "artist"
+  );
+  const teamActionName = findBestMatchingMintingClaimActionName(
+    availableActionNames,
+    "team"
+  );
+
   return (
     <div className="tw-space-y-5 tw-pt-3">
       {phase0AirdropsError && (
@@ -811,10 +927,13 @@ function DropForgePhase0AirdropsSection({
           runAirdropWrite({
             entries: artistAirdrops,
             actionLabel: "Airdrop Artist",
-            mintingClaimAction: "ARTIST_AIRDROP",
+            mintingClaimAction: artistActionName,
           })
         }
-        action={mintingClaimActionsByName["ARTIST_AIRDROP"] ?? null}
+        action={
+          artistActionName ? mintingClaimActionsByName[artistActionName] : null
+        }
+        claimWritePending={claimWritePending}
         actionPending={mintingClaimActionPending}
         onActionToggle={onMintingClaimActionToggle}
       />
@@ -834,10 +953,13 @@ function DropForgePhase0AirdropsSection({
           runAirdropWrite({
             entries: teamAirdrops,
             actionLabel: "Airdrop Team",
-            mintingClaimAction: "TEAM_AIRDROP",
+            mintingClaimAction: teamActionName,
           })
         }
-        action={mintingClaimActionsByName["TEAM_AIRDROP"] ?? null}
+        action={
+          teamActionName ? mintingClaimActionsByName[teamActionName] : null
+        }
+        claimWritePending={claimWritePending}
         actionPending={mintingClaimActionPending}
         onActionToggle={onMintingClaimActionToggle}
       />
@@ -869,6 +991,8 @@ function DropForgeSubscriptionAirdropSections({
     return null;
   }
 
+  const availableActionNames = Object.keys(mintingClaimActionsByName);
+
   return (
     <div className="tw-space-y-5 tw-pt-3">
       {sections.map((section) => (
@@ -879,17 +1003,15 @@ function DropForgeSubscriptionAirdropSections({
             </p>
           ) : null}
           {(() => {
-            const actionName =
-              section.phaseKey === "phase0"
-                ? "PHASE0_AIRDROP"
-                : section.phaseKey === "phase1"
-                  ? "PHASE1_AIRDROP"
-                  : section.phaseKey === "publicphase"
-                    ? "PUBLIC_PHASE_AIRDROP"
-                    : null;
+            const actionName = findBestMatchingMintingClaimActionName(
+              availableActionNames,
+              section.phaseKey
+            );
             const action = actionName
               ? mintingClaimActionsByName[actionName]
               : null;
+            const isActionToggleDisabled =
+              claimWritePending || mintingClaimActionPending !== null;
 
             return (
               <>
@@ -904,7 +1026,7 @@ function DropForgeSubscriptionAirdropSections({
                       </span>
                       <Toggle
                         checked={action.completed}
-                        disabled={mintingClaimActionPending !== null}
+                        disabled={isActionToggleDisabled}
                         icons={false}
                         aria-label={`${section.title} completed`}
                         onChange={() => {
@@ -1031,7 +1153,7 @@ function DropForgeResearchAirdropSection({
   claimWritePending: boolean;
   isInitialized: boolean;
   researchAirdropCount: number;
-  runResearchAirdropWrite: () => void;
+  runResearchAirdropWrite: (mintingClaimAction?: string | null) => void;
   researchAction?: ApiMintingClaimAction | null;
   mintingClaimActionPending: string | null;
   onMintingClaimActionToggle: (
@@ -1040,6 +1162,9 @@ function DropForgeResearchAirdropSection({
   ) => Promise<void>;
 }>) {
   const isCompleted = researchAction?.completed ?? false;
+  const isActionToggleDisabled =
+    claimWritePending || mintingClaimActionPending !== null;
+  const researchActionName = researchAction?.action ?? null;
 
   return (
     <div className="tw-space-y-3 tw-pt-4">
@@ -1052,7 +1177,7 @@ function DropForgeResearchAirdropSection({
             <span className="tw-text-sm tw-text-iron-400">Completed</span>
             <Toggle
               checked={researchAction.completed}
-              disabled={mintingClaimActionPending !== null}
+              disabled={isActionToggleDisabled}
               icons={false}
               aria-label="Research airdrop completed"
               onChange={() => {
@@ -1089,7 +1214,7 @@ function DropForgeResearchAirdropSection({
               researchAirdropCount <= 0 ||
               isCompleted
             }
-            onClick={runResearchAirdropWrite}
+            onClick={() => runResearchAirdropWrite(researchActionName)}
             className={BTN_SUBSCRIPTIONS_AIRDROP}
           >
             {claimWritePending
@@ -1391,7 +1516,7 @@ function DropForgePhaseSelectionSection({
   onResearchTargetEditionSizeChange: (value: string) => void;
   claimWritePending: boolean;
   researchAirdropCount: number;
-  runResearchAirdropWrite: () => void;
+  runResearchAirdropWrite: (mintingClaimAction?: string | null) => void;
   mintingClaimActionsByName: Record<string, ApiMintingClaimAction>;
   mintingClaimActionPending: string | null;
   onMintingClaimActionToggle: (
@@ -1424,6 +1549,11 @@ function DropForgePhaseSelectionSection({
   runAirdropWrite: DropForgeLaunchClaimPageViewProps["runAirdropWrite"];
   subscriptionAirdropSections: LaunchSubscriptionAirdropSectionView[];
 }>) {
+  const researchActionName = findBestMatchingMintingClaimActionName(
+    Object.keys(mintingClaimActionsByName),
+    "research"
+  );
+
   return (
     <>
       <label
@@ -1467,7 +1597,11 @@ function DropForgePhaseSelectionSection({
           isInitialized={isInitialized}
           researchAirdropCount={researchAirdropCount}
           runResearchAirdropWrite={runResearchAirdropWrite}
-          researchAction={mintingClaimActionsByName["RESEARCH_AIRDROP"] ?? null}
+          researchAction={
+            researchActionName
+              ? mintingClaimActionsByName[researchActionName]
+              : null
+          }
           mintingClaimActionPending={mintingClaimActionPending}
           onMintingClaimActionToggle={onMintingClaimActionToggle}
         />
@@ -1587,7 +1721,7 @@ function DropForgeLaunchClaimActionsSection({
   researchTargetEditionSize: number;
   onResearchTargetEditionSizeChange: (value: string) => void;
   researchAirdropCount: number;
-  runResearchAirdropWrite: () => void;
+  runResearchAirdropWrite: (mintingClaimAction?: string | null) => void;
   selectedPhaseDiffs: LaunchPhaseDiffsView;
   changedFieldBoxClassName: string;
   changedFieldBoxLabelClassName: string;

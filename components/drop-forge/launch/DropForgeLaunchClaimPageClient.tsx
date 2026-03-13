@@ -68,13 +68,6 @@ type LaunchPhaseKey =
   | "publicphase"
   | "research";
 type ClaimTxModalStatus = "confirm_wallet" | "submitted" | "success" | "error";
-type MemesMintingClaimActionName =
-  | "ARTIST_AIRDROP"
-  | "TEAM_AIRDROP"
-  | "PHASE0_AIRDROP"
-  | "PHASE1_AIRDROP"
-  | "PUBLIC_PHASE_AIRDROP"
-  | "RESEARCH_AIRDROP";
 
 interface ClaimTxModalState {
   status: ClaimTxModalStatus;
@@ -105,16 +98,6 @@ function formatMintingClaimActionLabel(action: string): string {
       .map((segment) => segment[0]?.toUpperCase() + segment.slice(1))
       .join(" ")
   );
-}
-
-function getMintingClaimActionForPhase(
-  phaseKey: LaunchPhaseKey
-): MemesMintingClaimActionName | null {
-  if (phaseKey === "phase0") return "PHASE0_AIRDROP";
-  if (phaseKey === "phase1") return "PHASE1_AIRDROP";
-  if (phaseKey === "publicphase") return "PUBLIC_PHASE_AIRDROP";
-  if (phaseKey === "research") return "RESEARCH_AIRDROP";
-  return null;
 }
 
 function getSelectedPhaseFormValues({
@@ -1400,30 +1383,33 @@ export default function DropForgeLaunchClaimPageClient({
       claimId,
     ]
   );
-  const runResearchAirdropWrite = useCallback(() => {
-    if (!isInitialized) {
-      setToast({
-        message: "Claim must be initialized before airdropping",
-        type: "error",
-      });
-      return;
-    }
-    if (researchAirdropCount <= 0) {
-      setToast({
-        message: "No research airdrop needed",
-        type: "error",
-      });
-      return;
-    }
+  const runResearchAirdropWrite = useCallback(
+    (mintingClaimAction?: string | null) => {
+      if (!isInitialized) {
+        setToast({
+          message: "Claim must be initialized before airdropping",
+          type: "error",
+        });
+        return;
+      }
+      if (researchAirdropCount <= 0) {
+        setToast({
+          message: "No research airdrop needed",
+          type: "error",
+        });
+        return;
+      }
 
-    runAirdropWrite({
-      entries: [
-        { wallet: RESEARCH_AIRDROP_ADDRESS, amount: researchAirdropCount },
-      ],
-      actionLabel: "Airdrop to Research",
-      mintingClaimAction: getMintingClaimActionForPhase("research"),
-    });
-  }, [isInitialized, researchAirdropCount, runAirdropWrite, setToast]);
+      runAirdropWrite({
+        entries: [
+          { wallet: RESEARCH_AIRDROP_ADDRESS, amount: researchAirdropCount },
+        ],
+        actionLabel: "Airdrop to Research",
+        mintingClaimAction,
+      });
+    },
+    [isInitialized, researchAirdropCount, runAirdropWrite, setToast]
+  );
 
   const handleSelectedPhaseChange = useCallback((value: string) => {
     setSelectedPhase(value as "" | LaunchPhaseKey);
