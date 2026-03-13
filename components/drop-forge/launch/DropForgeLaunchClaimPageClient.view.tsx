@@ -903,6 +903,12 @@ function DropForgePhase0AirdropsSection({
     availableActionNames,
     "team"
   );
+  const artistAction = artistActionName
+    ? (mintingClaimActionsByName[artistActionName] ?? null)
+    : null;
+  const teamAction = teamActionName
+    ? (mintingClaimActionsByName[teamActionName] ?? null)
+    : null;
 
   return (
     <div className="tw-space-y-5 tw-pt-3">
@@ -930,9 +936,7 @@ function DropForgePhase0AirdropsSection({
             mintingClaimAction: artistActionName,
           })
         }
-        action={
-          artistActionName ? mintingClaimActionsByName[artistActionName] : null
-        }
+        action={artistAction}
         claimWritePending={claimWritePending}
         actionPending={mintingClaimActionPending}
         onActionToggle={onMintingClaimActionToggle}
@@ -956,9 +960,7 @@ function DropForgePhase0AirdropsSection({
             mintingClaimAction: teamActionName,
           })
         }
-        action={
-          teamActionName ? mintingClaimActionsByName[teamActionName] : null
-        }
+        action={teamAction}
         claimWritePending={claimWritePending}
         actionPending={mintingClaimActionPending}
         onActionToggle={onMintingClaimActionToggle}
@@ -1008,7 +1010,7 @@ function DropForgeSubscriptionAirdropSections({
               section.phaseKey
             );
             const action = actionName
-              ? mintingClaimActionsByName[actionName]
+              ? (mintingClaimActionsByName[actionName] ?? null)
               : null;
             const isActionToggleDisabled =
               claimWritePending || mintingClaimActionPending !== null;
@@ -1553,6 +1555,9 @@ function DropForgePhaseSelectionSection({
     Object.keys(mintingClaimActionsByName),
     "research"
   );
+  const researchAction = researchActionName
+    ? (mintingClaimActionsByName[researchActionName] ?? null)
+    : null;
 
   return (
     <>
@@ -1597,11 +1602,7 @@ function DropForgePhaseSelectionSection({
           isInitialized={isInitialized}
           researchAirdropCount={researchAirdropCount}
           runResearchAirdropWrite={runResearchAirdropWrite}
-          researchAction={
-            researchActionName
-              ? mintingClaimActionsByName[researchActionName]
-              : null
-          }
+          researchAction={researchAction}
           mintingClaimActionPending={mintingClaimActionPending}
           onMintingClaimActionToggle={onMintingClaimActionToggle}
         />

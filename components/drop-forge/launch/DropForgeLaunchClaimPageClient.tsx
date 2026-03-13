@@ -667,8 +667,12 @@ export default function DropForgeLaunchClaimPageClient({
       return [];
     }
 
+    const currentActions = mintingClaimActions?.actions;
+    if (!currentActions) {
+      return [];
+    }
+
     const supportedTypes = new Set(mintingClaimActionTypes);
-    const currentActions = mintingClaimActions?.actions ?? [];
     const seenActions = new Set<string>();
     const orderedActions = currentActions.filter((action) => {
       if (
