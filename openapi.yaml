@@ -2433,6 +2433,123 @@ paths:
           description: Claim not found
         "409":
           description: Conflict - claim already synced or upload already in progress
+  /minting-claims/actions/{contract}/types:
+    get:
+      tags:
+        - Minting Claims
+      summary: >-
+        Get supported minting claim action types for a contract (claims admin
+        only)
+      description: >
+        Returns the supported minting claim action names for the given contract.
+        Only CLAIMS_ADMIN_WALLETS can call this. Unsupported contracts return
+        400.
+      operationId: getMintingClaimActionTypes
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionTypesResponse"
+        "400":
+          description: Unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can access
+  /minting-claims/actions/{contract}/{claim_id}:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get minting claim actions (claims admin only)
+      description: >
+        Returns the current action state for a minting claim. All supported
+        actions for the contract are always returned; missing records are
+        represented as completed=false. Only CLAIMS_ADMIN_WALLETS can call this.
+        Unsupported contracts return 400.
+      operationId: getMintingClaimActions
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionsResponse"
+        "400":
+          description: Invalid request or unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can access
+        "404":
+          description: Claim not found
+    post:
+      tags:
+        - Minting Claims
+      summary: Upsert minting claim action state (claims admin only)
+      description: >
+        Creates or updates the current state of a minting claim action for the
+        given claim. The caller wallet is recorded as the actor. Only
+        CLAIMS_ADMIN_WALLETS can call this. Unsupported contracts or unsupported
+        action names for the given contract return 400.
+      operationId: postMintingClaimAction
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMintingClaimActionUpdateRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionsResponse"
+        "400":
+          description: Invalid request or unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can update
+        "404":
+          description: Claim not found
   /nft-link:
     get:
       tags:
@@ -9058,6 +9175,74 @@ components:
           type: string
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
+    ApiMintingClaimAction:
+      type: object
+      required:
+        - action
+        - completed
+      properties:
+        action:
+          type: string
+          minLength: 1
+          description: Contract-specific minting claim action name
+        completed:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: Unix epoch milliseconds when this action record was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix epoch milliseconds when this action record was last updated
+        created_by_wallet:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+          description: Wallet that first created this action record
+        updated_by_wallet:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+          description: Wallet that last updated this action record
+    ApiMintingClaimActionsResponse:
+      type: object
+      required:
+        - contract
+        - claim_id
+        - actions
+      properties:
+        contract:
+          type: string
+        claim_id:
+          type: integer
+          format: int64
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMintingClaimAction"
+    ApiMintingClaimActionTypesResponse:
+      type: object
+      required:
+        - contract
+        - action_types
+      properties:
+        contract:
+          type: string
+        action_types:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            description: Contract-specific minting claim action name
+    ApiMintingClaimActionUpdateRequest:
+      type: object
+      required:
+        - action
+        - completed
+      properties:
+        action:
+          type: string
+          minLength: 1
+          description: Contract-specific minting claim action name
+        completed:
+          type: boolean
     ApiMintingClaimsPhaseTotalItem:
       type: object
       required:

@@ -35,9 +35,19 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
+  const resizeDescriptionTextarea = useCallback(
+    (textarea: HTMLTextAreaElement | null) => {
+      if (!textarea) return;
+
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    },
+    []
+  );
+
   // Sync refs with props when they change
   React.useEffect(() => {
-    if (titleRef.current && title && titleRef.current.value !== title) {
+    if (titleRef.current && titleRef.current.value !== title) {
       titleRef.current.value = title;
     }
   }, [title]);
@@ -45,36 +55,43 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   React.useEffect(() => {
     if (
       descriptionRef.current &&
-      description &&
       descriptionRef.current.value !== description
     ) {
       descriptionRef.current.value = description;
     }
-  }, [description]);
+
+    resizeDescriptionTextarea(descriptionRef.current);
+  }, [description, resizeDescriptionTextarea]);
 
   // Handle blur events - only update parent state when user finishes typing
   const handleTitleBlur = useCallback(() => {
-    if (titleRef.current && titleRef.current.value !== title) {
-      onTitleChange(titleRef.current.value);
-    }
     // Call parent blur handler for validation
     if (onTitleBlur) {
       onTitleBlur();
     }
-  }, [onTitleChange, title, onTitleBlur]);
+  }, [onTitleBlur]);
 
   const handleDescriptionBlur = useCallback(() => {
-    if (
-      descriptionRef.current &&
-      descriptionRef.current.value !== description
-    ) {
-      onDescriptionChange(descriptionRef.current.value);
-    }
     // Call parent blur handler for validation
     if (onDescriptionBlur) {
       onDescriptionBlur();
     }
-  }, [onDescriptionChange, description, onDescriptionBlur]);
+  }, [onDescriptionBlur]);
+
+  const handleTitleInput = useCallback(
+    (event: React.FormEvent<HTMLInputElement>) => {
+      onTitleChange(event.currentTarget.value);
+    },
+    [onTitleChange]
+  );
+
+  const handleDescriptionInput = useCallback(
+    (event: React.FormEvent<HTMLTextAreaElement>) => {
+      onDescriptionChange(event.currentTarget.value);
+      resizeDescriptionTextarea(event.currentTarget);
+    },
+    [onDescriptionChange, resizeDescriptionTextarea]
+  );
 
   // Check if fields are filled
   const isTitleFilled = useMemo(() => title.trim().length > 0, [title]);
@@ -111,6 +128,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 type="text"
                 maxLength={500}
                 defaultValue={title || ""}
+                onInput={handleTitleInput}
                 onBlur={handleTitleBlur}
                 aria-invalid={!!titleError}
                 aria-describedby={titleError ? "title-error" : undefined}
@@ -158,6 +176,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 id="field-description"
                 name="description"
                 defaultValue={description || ""}
+                onInput={handleDescriptionInput}
                 onBlur={handleDescriptionBlur}
                 rows={4}
                 maxLength={500}
@@ -167,7 +186,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 }
                 data-field="description"
                 className={`tw-form-textarea tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out
-                  tw-bg-iron-900 tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-resize-none tw-cursor-text tw-ring-1
+                  tw-bg-iron-900 tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-cursor-text tw-overflow-hidden tw-ring-1
                   ${
                     descriptionError
                       ? "tw-ring-red"
