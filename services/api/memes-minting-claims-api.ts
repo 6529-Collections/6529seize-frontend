@@ -1,4 +1,7 @@
 import { MEMES_CONTRACT } from "@/constants/constants";
+import type { ApiMintingClaimActionTypesResponse } from "@/generated/models/ApiMintingClaimActionTypesResponse";
+import type { ApiMintingClaimActionsResponse } from "@/generated/models/ApiMintingClaimActionsResponse";
+import type { ApiMintingClaimActionUpdateRequest } from "@/generated/models/ApiMintingClaimActionUpdateRequest";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsPageResponse } from "@/generated/models/MintingClaimsPageResponse";
 import type { MintingClaimsProofsResponse } from "@/generated/models/MintingClaimsProofsResponse";
@@ -8,6 +11,7 @@ import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import {
   commonApiFetch,
   commonApiPatch,
+  commonApiPost,
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { multipartUploadCore } from "@/services/uploads/multipartUploadCore";
@@ -70,6 +74,33 @@ export async function getClaimsPage(
 export async function getClaim(claimId: number): Promise<MintingClaim> {
   return commonApiFetch<MintingClaim>({
     endpoint: `${MINTING_CLAIMS_BASE_CLAIMS}/${claimId}`,
+  });
+}
+
+export async function getMemesMintingClaimActionTypes(): Promise<ApiMintingClaimActionTypesResponse> {
+  return commonApiFetch<ApiMintingClaimActionTypesResponse>({
+    endpoint: `minting-claims/actions/${encodeURIComponent(MEMES_CONTRACT)}/types`,
+  });
+}
+
+export async function getMemesMintingClaimActions(
+  claimId: number
+): Promise<ApiMintingClaimActionsResponse> {
+  return commonApiFetch<ApiMintingClaimActionsResponse>({
+    endpoint: `minting-claims/actions/${encodeURIComponent(MEMES_CONTRACT)}/${claimId}`,
+  });
+}
+
+export async function upsertMemesMintingClaimAction(
+  claimId: number,
+  body: ApiMintingClaimActionUpdateRequest
+): Promise<ApiMintingClaimActionsResponse> {
+  return commonApiPost<
+    ApiMintingClaimActionUpdateRequest,
+    ApiMintingClaimActionsResponse
+  >({
+    endpoint: `minting-claims/actions/${encodeURIComponent(MEMES_CONTRACT)}/${claimId}`,
+    body,
   });
 }
 
