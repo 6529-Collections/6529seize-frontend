@@ -210,7 +210,10 @@ function SubscriptionFooterMain({
                 <CircleLoader />
               </span>
             ) : (
-              <FontAwesomeIcon icon={faDownload} className="tw-h-3.5 tw-w-3.5" />
+              <FontAwesomeIcon
+                icon={faDownload}
+                className="tw-h-3.5 tw-w-3.5"
+              />
             )}
           </button>
         </div>

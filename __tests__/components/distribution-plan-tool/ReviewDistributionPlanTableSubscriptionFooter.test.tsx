@@ -44,7 +44,8 @@ jest.mock(
             data-testid="upload-airdrops-button"
             onClick={() =>
               props.onUpload("contract", "123", "0x123,5\n0x456,10")
-            }>
+            }
+          >
             Upload
           </button>
         </div>
@@ -60,7 +61,8 @@ jest.mock(
         <div data-testid="Confirm Token ID">
           <button
             data-testid="confirm-token-id-button"
-            onClick={() => props.onConfirm("123")}>
+            onClick={() => props.onConfirm("123")}
+          >
             Confirm
           </button>
         </div>
