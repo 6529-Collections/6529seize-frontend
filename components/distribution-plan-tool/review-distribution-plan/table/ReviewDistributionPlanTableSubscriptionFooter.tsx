@@ -368,7 +368,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   );
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
-  const automaticAirdropsDownloadHeaders = useMemo(() => {
+  const buildAutomaticAirdropsDownloadHeaders = useCallback(() => {
     const headers: Record<string, string> = {};
     const apiAuth = getStagingAuth();
     const walletAuth = getAuthJwt();
@@ -386,9 +386,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     download: downloadAutomaticAirdropsCsv,
     isInProgress: isDownloadingAutomaticAirdrops,
     error: automaticAirdropsDownloadError,
-  } = useDownloader({
-    headers: automaticAirdropsDownloadHeaders,
-  });
+  } = useDownloader();
 
   const githubUploadTooltip = getGithubUploadTooltip(overview);
 
@@ -607,10 +605,14 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     async (contract: string, tokenId: string) => {
       await downloadAutomaticAirdropsCsv(
         `${publicEnv.API_ENDPOINT}/api/distributions/${contract}/${tokenId}/automatic_airdrops`,
-        `automatic_airdrops_${tokenId}.csv`
+        `automatic_airdrops_${tokenId}.csv`,
+        undefined,
+        {
+          headers: buildAutomaticAirdropsDownloadHeaders(),
+        }
       );
     },
-    [downloadAutomaticAirdropsCsv]
+    [buildAutomaticAirdropsDownloadHeaders, downloadAutomaticAirdropsCsv]
   );
 
   if (!isSubscriptionsAdmin(connectedProfile, distributionAdminWallets)) {

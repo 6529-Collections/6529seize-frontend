@@ -11,8 +11,10 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
 }));
 
+const fetchMock = jest.fn() as jest.MockedFunction<typeof fetch>;
+global.fetch = fetchMock;
+
 describe("memes-minting-claims-api", () => {
-  const fetchMock = global.fetch as jest.Mock;
   const encodedContract = encodeURIComponent(MEMES_CONTRACT);
 
   beforeEach(() => {

@@ -7,6 +7,8 @@ import { useMemo, useState } from "react";
 
 const mockDownload = jest.fn();
 const mockUseDownloader = jest.fn();
+const mockGetStagingAuth = jest.fn();
+const mockGetAuthJwt = jest.fn();
 
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
@@ -14,8 +16,8 @@ jest.mock("react-use-downloader", () => ({
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
-  getStagingAuth: () => null,
-  getAuthJwt: () => null,
+  getStagingAuth: () => mockGetStagingAuth(),
+  getAuthJwt: () => mockGetAuthJwt(),
 }));
 
 jest.mock(
@@ -92,7 +94,11 @@ beforeEach(() => {
   authCtx.setToast.mockClear();
   mockDownload.mockReset();
   mockUseDownloader.mockReset();
+  mockGetStagingAuth.mockReset();
+  mockGetAuthJwt.mockReset();
   mockDownload.mockResolvedValue(undefined);
+  mockGetStagingAuth.mockReturnValue(null);
+  mockGetAuthJwt.mockReturnValue(null);
   mockUseDownloader.mockReturnValue({
     download: mockDownload,
     isInProgress: false,
@@ -418,6 +424,8 @@ test("disables automatic airdrops csv download when there are no values", async 
 test("downloads automatic airdrops csv with the response filename", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  mockGetStagingAuth.mockReturnValue("staging-token");
+  mockGetAuthJwt.mockReturnValue("wallet-token");
 
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiFetch")
@@ -438,10 +446,17 @@ test("downloads automatic airdrops csv with the response filename", async () => 
   await user.click(downloadButton);
 
   await waitFor(() => {
-    expect(mockUseDownloader).toHaveBeenCalledWith({ headers: {} });
+    expect(mockUseDownloader).toHaveBeenCalledWith();
     expect(mockDownload).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/distributions/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123/automatic_airdrops",
-      "automatic_airdrops_123.csv"
+      "automatic_airdrops_123.csv",
+      undefined,
+      {
+        headers: {
+          "x-6529-auth": "staging-token",
+          Authorization: "Bearer wallet-token",
+        },
+      }
     );
   });
 });
