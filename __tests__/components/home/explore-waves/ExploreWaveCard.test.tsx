@@ -83,6 +83,9 @@ describe("ExploreWaveCard", () => {
 
     expect(lastContentDisplayProps).toMatchObject({
       linkify: false,
+      shouldClamp: false,
+      className: expect.stringContaining("tw-items-start"),
+      textClassName: expect.stringContaining("tw-line-clamp-2"),
       content: {
         segments: [{ type: "text", content: "Description preview" }],
         apiMedia: [],
