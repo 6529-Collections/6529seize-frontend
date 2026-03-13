@@ -71,7 +71,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         )}
 
         {hasDrops && (
-          <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-[11px] tw-text-iron-500 sm:tw-text-xs">
+          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-[11px] tw-text-iron-500 sm:tw-text-xs">
             <span className="tw-relative tw-flex tw-h-2 tw-w-2">
               <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/60" />
               <span className="tw-relative tw-inline-flex tw-h-2 tw-w-2 tw-rounded-full tw-bg-success" />
