@@ -19,6 +19,10 @@ export class ApiWaveMin {
     'name': string;
     'picture': string | null;
     'description_drop_id': string;
+    /**
+    * Unix timestamp in milliseconds of the most recent drop in this wave
+    */
+    'last_drop_time': number;
     'authenticated_user_eligible_to_vote': boolean;
     'authenticated_user_eligible_to_participate': boolean;
     'authenticated_user_eligible_to_chat': boolean;
@@ -63,6 +67,12 @@ export class ApiWaveMin {
             "baseName": "description_drop_id",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "last_drop_time",
+            "baseName": "last_drop_time",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "authenticated_user_eligible_to_vote",

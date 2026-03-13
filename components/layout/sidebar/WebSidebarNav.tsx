@@ -3,11 +3,17 @@
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
+import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { usePathname } from "next/navigation";
@@ -35,6 +41,7 @@ const WebSidebarNav = React.forwardRef<
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
+  const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
@@ -285,20 +292,33 @@ const WebSidebarNav = React.forwardRef<
               section.key !== "network" && section.key !== "collections"
           )
           .map((section) => (
-            <li
-              key={section.key}
-              className={isCollapsed ? "tw-relative" : undefined}
-            >
-              <WebSidebarExpandable
-                section={section}
-                expanded={expandedKeys.includes(section.key)}
-                onToggle={(event) => handleSectionToggle(section.key, event)}
-                collapsed={isCollapsed}
-                pathname={pathname}
-                data-section={section.key}
-              />
-              {renderCollapsedSubmenu(section.key)}
-            </li>
+            <React.Fragment key={section.key}>
+              <li className={isCollapsed ? "tw-relative" : undefined}>
+                <WebSidebarExpandable
+                  section={section}
+                  expanded={expandedKeys.includes(section.key)}
+                  onToggle={(event) => handleSectionToggle(section.key, event)}
+                  collapsed={isCollapsed}
+                  pathname={pathname}
+                  data-section={section.key}
+                />
+                {renderCollapsedSubmenu(section.key)}
+              </li>
+              {section.key === "about" && showDropForge && (
+                <li>
+                  <WebSidebarNavItem
+                    href={DROP_FORGE_PATH}
+                    icon={DropForgeIcon}
+                    active={
+                      pathname === DROP_FORGE_PATH ||
+                      pathname?.startsWith(`${DROP_FORGE_PATH}/`)
+                    }
+                    collapsed={isCollapsed}
+                    label={DROP_FORGE_TITLE}
+                  />
+                </li>
+              )}
+            </React.Fragment>
           ))}
       </ul>
     </nav>

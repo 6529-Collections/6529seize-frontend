@@ -1,13 +1,16 @@
 "use client";
 
+import { useCallback, useMemo, useState } from "react";
+import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
   ManifoldClaimStatus,
   ManifoldPhase,
-  useMemesManifoldClaim,
+  useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import { useMemo, useState } from "react";
+import type { Abi } from "viem";
 
 export interface CountdownData {
   readonly title: string;
@@ -25,14 +28,23 @@ export type MintCountdownState =
   | { type: "countdown"; countdown: CountdownData };
 
 interface UseMintCountdownStateOptions {
-  hideMintBtn?: boolean;
+  hideMintBtn?: boolean | undefined;
+  contract: string;
+  chainId: number;
+  abi?: Abi | undefined;
 }
 
 export function useMintCountdownState(
   nftId: number,
-  opts?: UseMintCountdownStateOptions
+  opts: UseMintCountdownStateOptions
 ): MintCountdownState {
   const [errorFromCallback, setErrorFromCallback] = useState(false);
+  const {
+    contract,
+    chainId,
+    abi = MEMES_MANIFOLD_PROXY_ABI,
+    hideMintBtn,
+  } = opts;
 
   // Reset error state when nftId changes (during render, not in effect)
   const [prevNftId, setPrevNftId] = useState(nftId);
@@ -41,8 +53,17 @@ export function useMintCountdownState(
     setErrorFromCallback(false);
   }
 
-  const manifoldClaim = useMemesManifoldClaim(nftId, () => {
+  const handleManifoldClaimError = useCallback(() => {
     setErrorFromCallback(true);
+  }, []);
+
+  const { claim: manifoldClaim } = useManifoldClaim({
+    chainId,
+    contract,
+    proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
+    abi,
+    identifier: nftId,
+    onError: handleManifoldClaimError,
   });
 
   // Derive error state: callback fired AND (no data OR data has error)
@@ -52,7 +73,7 @@ export function useMintCountdownState(
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
 
-  const showMintBtn = !opts?.hideMintBtn && !(isIos && country !== "US");
+  const showMintBtn = !hideMintBtn && !(isIos && country !== "US");
 
   return useMemo((): MintCountdownState => {
     if (isError) {

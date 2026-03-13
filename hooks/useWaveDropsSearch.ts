@@ -19,6 +19,7 @@ const toWaveMin = (wave: ApiWave): ApiWaveMin => {
     name: wave.name,
     picture: wave.picture,
     description_drop_id: wave.description_drop.id,
+    last_drop_time: wave.last_drop_time,
     authenticated_user_eligible_to_vote:
       wave.voting.authenticated_user_eligible,
     authenticated_user_eligible_to_participate:
