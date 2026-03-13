@@ -136,7 +136,7 @@ interface DropForgeLaunchClaimPageViewProps {
   researchTargetEditionSize: number;
   onResearchTargetEditionSizeChange: (value: string) => void;
   researchAirdropCount: number;
-  runResearchAirdropWrite: (mintingClaimAction?: string | null) => void;
+  runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
   selectedPhaseDiffs: LaunchPhaseDiffsView;
   changedFieldBoxClassName: string;
   changedFieldBoxLabelClassName: string;
@@ -177,7 +177,7 @@ function normalizeMintingClaimActionName(actionName: string): string {
   return actionName
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "");
+    .replaceAll(/[^a-z0-9]+/g, "");
 }
 
 function getMintingClaimActionTerms(kind: LaunchMintingClaimActionKind): {
@@ -1153,7 +1153,7 @@ function DropForgeResearchAirdropSection({
   claimWritePending: boolean;
   isInitialized: boolean;
   researchAirdropCount: number;
-  runResearchAirdropWrite: (mintingClaimAction?: string | null) => void;
+  runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
   researchAction?: ApiMintingClaimAction | null;
   mintingClaimActionPending: string | null;
   onMintingClaimActionToggle: (
@@ -1516,7 +1516,7 @@ function DropForgePhaseSelectionSection({
   onResearchTargetEditionSizeChange: (value: string) => void;
   claimWritePending: boolean;
   researchAirdropCount: number;
-  runResearchAirdropWrite: (mintingClaimAction?: string | null) => void;
+  runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
   mintingClaimActionsByName: Record<string, ApiMintingClaimAction>;
   mintingClaimActionPending: string | null;
   onMintingClaimActionToggle: (
@@ -1721,7 +1721,7 @@ function DropForgeLaunchClaimActionsSection({
   researchTargetEditionSize: number;
   onResearchTargetEditionSizeChange: (value: string) => void;
   researchAirdropCount: number;
-  runResearchAirdropWrite: (mintingClaimAction?: string | null) => void;
+  runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
   selectedPhaseDiffs: LaunchPhaseDiffsView;
   changedFieldBoxClassName: string;
   changedFieldBoxLabelClassName: string;

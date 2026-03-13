@@ -1384,7 +1384,7 @@ export default function DropForgeLaunchClaimPageClient({
     ]
   );
   const runResearchAirdropWrite = useCallback(
-    (mintingClaimAction?: string | null) => {
+    (mintingClaimAction: string | null) => {
       if (!isInitialized) {
         setToast({
           message: "Claim must be initialized before airdropping",
