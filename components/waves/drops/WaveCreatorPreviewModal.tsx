@@ -1,6 +1,5 @@
 "use client";
 
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   Dialog,
@@ -12,11 +11,12 @@ import { Fragment, useEffect } from "react";
 import { createPortal } from "react-dom";
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 import { WaveCreatorPreviewModalContent } from "./WaveCreatorPreviewModalContent";
+import type { WaveCreatorPreviewUser } from "./waveCreatorPreview.types";
 
 interface WaveCreatorPreviewModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly user: ApiProfileMin;
+  readonly user: WaveCreatorPreviewUser;
 }
 
 export const WaveCreatorPreviewModal = ({
