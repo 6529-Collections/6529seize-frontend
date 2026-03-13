@@ -14,6 +14,13 @@ jest.mock("@/services/auth/auth.utils", () => ({
 const fetchMock = jest.fn() as jest.MockedFunction<typeof fetch>;
 globalThis.fetch = fetchMock;
 
+function mockFetchOk<T>(body: T): Response {
+  return {
+    ok: true,
+    json: async () => body,
+  } as Response;
+}
+
 describe("memes-minting-claims-api", () => {
   const encodedContract = encodeURIComponent(MEMES_CONTRACT);
 
@@ -25,13 +32,12 @@ describe("memes-minting-claims-api", () => {
   });
 
   it("fetches supported MEMES claim action types", async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({
+    fetchMock.mockResolvedValue(
+      mockFetchOk({
         contract: MEMES_CONTRACT,
         action_types: ["ARTIST_AIRDROP", "TEAM_AIRDROP"],
-      }),
-    });
+      })
+    );
 
     const response = await getMemesMintingClaimActionTypes();
 
@@ -45,16 +51,16 @@ describe("memes-minting-claims-api", () => {
   });
 
   it("fetches MEMES claim actions by claim id", async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({
+    fetchMock.mockResolvedValue(
+      mockFetchOk({
         contract: MEMES_CONTRACT,
         claim_id: 123,
         actions: [{ action: "ARTIST_AIRDROP", completed: false }],
-      }),
-    });
+      })
+    );
 
     const response = await getMemesMintingClaimActions(123);
+    const [firstAction] = response.actions;
 
     expect(fetchMock).toHaveBeenCalledWith(
       `https://api.test.6529.io/api/minting-claims/actions/${encodedContract}/123`,
@@ -63,24 +69,24 @@ describe("memes-minting-claims-api", () => {
       })
     );
     expect(response.actions).toHaveLength(1);
-    expect(response.actions[0].action).toBe("ARTIST_AIRDROP");
+    expect(firstAction?.action).toBe("ARTIST_AIRDROP");
   });
 
   it("upserts a MEMES claim action", async () => {
     (getAuthJwt as jest.Mock).mockReturnValue("jwt");
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({
+    fetchMock.mockResolvedValue(
+      mockFetchOk({
         contract: MEMES_CONTRACT,
         claim_id: 123,
         actions: [{ action: "ARTIST_AIRDROP", completed: true }],
-      }),
-    });
+      })
+    );
 
     const response = await upsertMemesMintingClaimAction(123, {
       action: "ARTIST_AIRDROP",
       completed: true,
     });
+    const [firstAction] = response.actions;
 
     expect(fetchMock).toHaveBeenCalledWith(
       `https://api.test.6529.io/api/minting-claims/actions/${encodedContract}/123`,
@@ -96,6 +102,6 @@ describe("memes-minting-claims-api", () => {
         }),
       })
     );
-    expect(response.actions[0].completed).toBe(true);
+    expect(firstAction?.completed).toBe(true);
   });
 });

@@ -394,6 +394,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     isInProgress: isDownloadingAutomaticAirdrops,
     error: automaticAirdropsDownloadError,
   } = useDownloader();
+  const isDownloadingAutomaticAirdropsRef = useRef(false);
 
   const githubUploadTooltip = getGithubUploadTooltip(overview);
   const overviewRequestIdRef = useRef(0);
@@ -629,14 +630,23 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
   const handleDownloadAutomaticAirdrops = useCallback(
     async (contract: string, tokenId: string) => {
-      await downloadAutomaticAirdropsCsv(
-        `${publicEnv.API_ENDPOINT}/api/distributions/${contract}/${tokenId}/automatic_airdrops`,
-        `automatic_airdrops_${tokenId}.csv`,
-        undefined,
-        {
-          headers: buildAutomaticAirdropsDownloadHeaders(),
-        }
-      );
+      if (isDownloadingAutomaticAirdropsRef.current) {
+        return;
+      }
+
+      isDownloadingAutomaticAirdropsRef.current = true;
+      try {
+        await downloadAutomaticAirdropsCsv(
+          `${publicEnv.API_ENDPOINT}/api/distributions/${contract}/${tokenId}/automatic_airdrops`,
+          `automatic_airdrops_${tokenId}.csv`,
+          undefined,
+          {
+            headers: buildAutomaticAirdropsDownloadHeaders(),
+          }
+        );
+      } finally {
+        isDownloadingAutomaticAirdropsRef.current = false;
+      }
     },
     [buildAutomaticAirdropsDownloadHeaders, downloadAutomaticAirdropsCsv]
   );
