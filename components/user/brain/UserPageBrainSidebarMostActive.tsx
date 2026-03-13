@@ -7,17 +7,14 @@ import UserPageBrainSidebarWaveItem from "./UserPageBrainSidebarWaveItem";
 interface UserPageBrainSidebarMostActiveProps {
   readonly waves: ApiWave[];
   readonly status: QueryStatus;
-  readonly error: unknown;
 }
 
 export default function UserPageBrainSidebarMostActive({
   waves,
   status,
-  error,
 }: UserPageBrainSidebarMostActiveProps) {
-  const shouldShowLoading = status === "pending";
-  const shouldShowWaves =
-    (error === null || error === undefined) && waves.length > 0;
+  const shouldShowLoading = status === "pending" && waves.length === 0;
+  const shouldShowWaves = waves.length > 0;
   if (!shouldShowLoading && !shouldShowWaves) {
     return null;
   }

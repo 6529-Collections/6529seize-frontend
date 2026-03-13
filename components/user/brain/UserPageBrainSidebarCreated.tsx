@@ -9,14 +9,12 @@ interface UserPageBrainSidebarCreatedProps {
   readonly identity: string;
   readonly waves: ApiWave[];
   readonly status: QueryStatus;
-  readonly error: unknown;
 }
 
 export default function UserPageBrainSidebarCreated({
   identity,
   waves,
   status,
-  error,
 }: UserPageBrainSidebarCreatedProps) {
   const [expandedIdentity, setExpandedIdentity] = useState<string | null>(null);
   const showAllWaves = expandedIdentity === identity;
@@ -26,9 +24,8 @@ export default function UserPageBrainSidebarCreated({
     remainingWavesCount === 1
       ? "Show 1 more"
       : `Show ${remainingWavesCount} more`;
-  const shouldShowLoading = status === "pending";
-  const shouldShowWaves =
-    (error === null || error === undefined) && waves.length > 0;
+  const shouldShowLoading = status === "pending" && waves.length === 0;
+  const shouldShowWaves = waves.length > 0;
   if (!shouldShowLoading && !shouldShowWaves) {
     return null;
   }

@@ -13,10 +13,8 @@ import WavesIcon from "@/components/common/icons/WavesIcon";
 interface UserPageBrainSidebarMobileStripProps {
   readonly createdWaves: ApiWave[];
   readonly createdStatus: QueryStatus;
-  readonly createdError: unknown;
   readonly mostActiveWaves: ApiWave[];
   readonly mostActiveStatus: QueryStatus;
-  readonly mostActiveError: unknown;
   readonly onOpenCreatedWaves: () => void;
 }
 
@@ -77,20 +75,16 @@ function MobileWavePillSkeleton({ keyId }: { readonly keyId: string }) {
 export default function UserPageBrainSidebarMobileStrip({
   createdWaves,
   createdStatus,
-  createdError,
   mostActiveWaves,
   mostActiveStatus,
-  mostActiveError,
   onOpenCreatedWaves,
 }: UserPageBrainSidebarMobileStripProps) {
-  const shouldShowCreatedLoading = createdStatus === "pending";
-  const shouldShowCreatedWaves =
-    (createdError === null || createdError === undefined) &&
-    createdWaves.length > 0;
-  const shouldShowMostActiveLoading = mostActiveStatus === "pending";
-  const shouldShowMostActiveWaves =
-    (mostActiveError === null || mostActiveError === undefined) &&
-    mostActiveWaves.length > 0;
+  const shouldShowCreatedLoading =
+    createdStatus === "pending" && createdWaves.length === 0;
+  const shouldShowCreatedWaves = createdWaves.length > 0;
+  const shouldShowMostActiveLoading =
+    mostActiveStatus === "pending" && mostActiveWaves.length === 0;
+  const shouldShowMostActiveWaves = mostActiveWaves.length > 0;
   const shouldShowCreatedSection =
     shouldShowCreatedLoading || shouldShowCreatedWaves;
   const shouldShowMostActiveSection =

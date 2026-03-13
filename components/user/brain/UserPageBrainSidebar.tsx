@@ -18,26 +18,19 @@ export default function UserPageBrainSidebar({
 }) {
   const identity = getProfileWaveIdentity(profile);
   const hasIdentity = identity.length > 0;
-  const {
-    waves: createdWaves,
-    status: createdStatus,
-    error: createdError,
-  } = useWaves({
+  const { waves: createdWaves, status: createdStatus } = useWaves({
     identity,
     waveName: null,
     enabled: hasIdentity,
     directMessage: false,
     limit: 20,
   });
-  const {
-    waves: mostActiveWaves,
-    status: mostActiveStatus,
-    error: mostActiveError,
-  } = useFavouriteWavesOfIdentity({
-    identityKey: identity,
-    limit: 3,
-    enabled: hasIdentity,
-  });
+  const { waves: mostActiveWaves, status: mostActiveStatus } =
+    useFavouriteWavesOfIdentity({
+      identityKey: identity,
+      limit: 3,
+      enabled: hasIdentity,
+    });
   const { isModalOpen, handleBadgeClick, handleModalClose } =
     useWaveCreatorPreviewModal();
   const modalUser = useMemo(
@@ -64,10 +57,8 @@ export default function UserPageBrainSidebar({
       <UserPageBrainSidebarMobileStrip
         createdWaves={createdWaves}
         createdStatus={createdStatus}
-        createdError={createdError}
         mostActiveWaves={mostActiveWaves}
         mostActiveStatus={mostActiveStatus}
-        mostActiveError={mostActiveError}
         onOpenCreatedWaves={handleBadgeClick}
       />
 
@@ -79,12 +70,10 @@ export default function UserPageBrainSidebar({
           identity={identity}
           waves={createdWaves}
           status={createdStatus}
-          error={createdError}
         />
         <UserPageBrainSidebarMostActive
           waves={mostActiveWaves}
           status={mostActiveStatus}
-          error={mostActiveError}
         />
       </div>
 
