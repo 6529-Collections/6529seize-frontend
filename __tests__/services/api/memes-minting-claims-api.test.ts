@@ -12,7 +12,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 
 const fetchMock = jest.fn() as jest.MockedFunction<typeof fetch>;
-global.fetch = fetchMock;
+globalThis.fetch = fetchMock;
 
 describe("memes-minting-claims-api", () => {
   const encodedContract = encodeURIComponent(MEMES_CONTRACT);

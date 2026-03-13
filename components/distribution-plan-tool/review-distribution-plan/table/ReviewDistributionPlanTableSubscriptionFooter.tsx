@@ -1,7 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -389,26 +396,42 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   } = useDownloader();
 
   const githubUploadTooltip = getGithubUploadTooltip(overview);
+  const overviewRequestIdRef = useRef(0);
+
+  const clearOverviewState = useCallback(() => {
+    overviewRequestIdRef.current += 1;
+    setOverview(null);
+    setIsLoadingOverview(false);
+  }, []);
 
   const refreshOverview = useCallback(
     async (contract: string, tokenId?: string) => {
       if (!tokenId) {
+        clearOverviewState();
         return;
       }
 
+      const requestId = overviewRequestIdRef.current + 1;
+      overviewRequestIdRef.current = requestId;
+      setOverview(null);
       setIsLoadingOverview(true);
       try {
         const data = await commonApiFetch<DistributionOverview>({
           endpoint: `distributions/${contract}/${tokenId}/overview`,
         });
+        if (overviewRequestIdRef.current !== requestId) {
+          return;
+        }
         setOverview(data);
       } catch (error) {
         console.error("Failed to fetch distribution overview:", error);
       } finally {
-        setIsLoadingOverview(false);
+        if (overviewRequestIdRef.current === requestId) {
+          setIsLoadingOverview(false);
+        }
       }
     },
-    []
+    [clearOverviewState]
   );
 
   useEffect(() => {
@@ -446,11 +469,14 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   }, [automaticAirdropsDownloadError, setToast]);
 
   const handleConfirmTokenId = (tokenId: string) => {
+    clearOverviewState();
     setConfirmedTokenId(tokenId);
     setShowConfirmTokenId(false);
   };
 
   const handleChangeTokenId = () => {
+    clearOverviewState();
+    setConfirmedTokenId(null);
     setShowConfirmTokenId(true);
   };
 
