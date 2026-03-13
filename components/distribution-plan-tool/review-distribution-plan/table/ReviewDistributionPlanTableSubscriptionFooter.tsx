@@ -1,17 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { DistributionOverview } from "@/generated/models/DistributionOverview";
 import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import useDownloader from "react-use-downloader";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import { AutomaticAirdropsModal } from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
@@ -63,6 +75,7 @@ function SubscriptionFooterMain({
   isResetting,
   isUploading,
   isUploadingAirdrops,
+  isDownloadingAutomaticAirdrops,
   isFinalizing,
   isUploadingToGithub,
   showGithubModal,
@@ -73,10 +86,12 @@ function SubscriptionFooterMain({
   showAutomaticAirdrops,
   canPublish,
   githubUploadTooltip,
+  isAutomaticAirdropsDownloadDisabled,
   onConfirmTokenId,
   onChangeTokenId,
   onResetSubscriptions,
   onShowAutomaticAirdrops,
+  onDownloadAutomaticAirdrops,
   onShowUploadPhotos,
   onFinalize,
   onUploadToGithub,
@@ -94,6 +109,7 @@ function SubscriptionFooterMain({
   isResetting: boolean;
   isUploading: boolean;
   isUploadingAirdrops: boolean;
+  isDownloadingAutomaticAirdrops: boolean;
   isFinalizing: boolean;
   isUploadingToGithub: boolean;
   showGithubModal: boolean;
@@ -104,10 +120,12 @@ function SubscriptionFooterMain({
   showAutomaticAirdrops: boolean;
   canPublish: boolean;
   githubUploadTooltip: string | null;
+  isAutomaticAirdropsDownloadDisabled: boolean;
   onConfirmTokenId: (tokenId: string) => void;
   onChangeTokenId: () => void;
   onResetSubscriptions: () => void;
   onShowAutomaticAirdrops: () => void;
+  onDownloadAutomaticAirdrops: () => void;
   onShowUploadPhotos: () => void;
   onFinalize: () => void;
   onUploadToGithub: () => void;
@@ -158,33 +176,54 @@ function SubscriptionFooterMain({
         </div>
       </div>
       <div className="mt-5 d-flex align-items-center justify-content-end gap-2">
-        <button
-          onClick={onShowAutomaticAirdrops}
-          disabled={isUploadingAirdrops}
-          type="button"
-          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-400/20 hover:tw-text-iron-100"
-        >
-          {isUploadingAirdrops ? (
-            <span className="d-flex gap-2 align-items-center">
-              <CircleLoader />
-              <span>Uploading</span>
-            </span>
-          ) : (
-            <>
-              Upload Automatic Airdrops
-              {isLoadingOverview ? (
-                <span className="tw-ml-2">
-                  <CircleLoader />
-                </span>
-              ) : (
-                <span className="tw-ml-2">
-                  (Addresses: {overview?.automatic_airdrops_addresses ?? 0} |
-                  Count: {overview?.automatic_airdrops_count ?? 0})
-                </span>
-              )}
-            </>
-          )}
-        </button>
+        <div className="tw-flex tw-h-8 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-iron-400/20">
+          <button
+            onClick={onShowAutomaticAirdrops}
+            disabled={isUploadingAirdrops}
+            type="button"
+            className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition tw-duration-300 tw-ease-out enabled:hover:tw-bg-iron-400/20 enabled:hover:tw-text-iron-100 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          >
+            {isUploadingAirdrops ? (
+              <span className="d-flex gap-2 align-items-center">
+                <CircleLoader />
+                <span>Uploading</span>
+              </span>
+            ) : (
+              <>
+                Upload Automatic Airdrops
+                {isLoadingOverview ? (
+                  <span className="tw-ml-2">
+                    <CircleLoader />
+                  </span>
+                ) : (
+                  <span className="tw-ml-2">
+                    (Addresses: {overview?.automatic_airdrops_addresses ?? 0} |
+                    Count: {overview?.automatic_airdrops_count ?? 0})
+                  </span>
+                )}
+              </>
+            )}
+          </button>
+          <button
+            onClick={onDownloadAutomaticAirdrops}
+            disabled={isAutomaticAirdropsDownloadDisabled}
+            aria-label="Download Automatic Airdrops CSV"
+            title="Download Automatic Airdrops CSV"
+            type="button"
+            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-border-0 tw-border-l tw-border-solid tw-border-l-iron-500/40 tw-bg-white tw-text-sm tw-font-medium tw-text-iron-900 tw-transition tw-duration-300 tw-ease-out enabled:hover:tw-bg-iron-400/20 enabled:hover:tw-text-iron-100 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          >
+            {isDownloadingAutomaticAirdrops ? (
+              <span className="d-flex align-items-center justify-content-center">
+                <CircleLoader />
+              </span>
+            ) : (
+              <FontAwesomeIcon
+                icon={faDownload}
+                className="tw-h-3.5 tw-w-3.5"
+              />
+            )}
+          </button>
+        </div>
         <button
           onClick={onShowUploadPhotos}
           disabled={isUploading}
@@ -336,28 +375,64 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   );
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
+  const buildAutomaticAirdropsDownloadHeaders = useCallback(() => {
+    const headers: Record<string, string> = {};
+    const apiAuth = getStagingAuth();
+    const walletAuth = getAuthJwt();
+
+    if (apiAuth) {
+      headers["x-6529-auth"] = apiAuth;
+    }
+    if (walletAuth) {
+      headers["Authorization"] = `Bearer ${walletAuth}`;
+    }
+
+    return headers;
+  }, []);
+  const {
+    download: downloadAutomaticAirdropsCsv,
+    isInProgress: isDownloadingAutomaticAirdrops,
+    error: automaticAirdropsDownloadError,
+  } = useDownloader();
+  const isDownloadingAutomaticAirdropsRef = useRef(false);
 
   const githubUploadTooltip = getGithubUploadTooltip(overview);
+  const overviewRequestIdRef = useRef(0);
+
+  const clearOverviewState = useCallback(() => {
+    overviewRequestIdRef.current += 1;
+    setOverview(null);
+    setIsLoadingOverview(false);
+  }, []);
 
   const refreshOverview = useCallback(
     async (contract: string, tokenId?: string) => {
       if (!tokenId) {
+        clearOverviewState();
         return;
       }
 
+      const requestId = overviewRequestIdRef.current + 1;
+      overviewRequestIdRef.current = requestId;
+      setOverview(null);
       setIsLoadingOverview(true);
       try {
         const data = await commonApiFetch<DistributionOverview>({
           endpoint: `distributions/${contract}/${tokenId}/overview`,
         });
+        if (overviewRequestIdRef.current !== requestId) {
+          return;
+        }
         setOverview(data);
       } catch (error) {
         console.error("Failed to fetch distribution overview:", error);
       } finally {
-        setIsLoadingOverview(false);
+        if (overviewRequestIdRef.current === requestId) {
+          setIsLoadingOverview(false);
+        }
       }
     },
-    []
+    [clearOverviewState]
   );
 
   useEffect(() => {
@@ -383,12 +458,26 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     distributionAdminWallets,
   ]);
 
+  useEffect(() => {
+    if (!automaticAirdropsDownloadError?.errorMessage) {
+      return;
+    }
+
+    setToast({
+      type: "error",
+      message: automaticAirdropsDownloadError.errorMessage,
+    });
+  }, [automaticAirdropsDownloadError, setToast]);
+
   const handleConfirmTokenId = (tokenId: string) => {
+    clearOverviewState();
     setConfirmedTokenId(tokenId);
     setShowConfirmTokenId(false);
   };
 
   const handleChangeTokenId = () => {
+    clearOverviewState();
+    setConfirmedTokenId(null);
     setShowConfirmTokenId(true);
   };
 
@@ -539,6 +628,29 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     [setToast, refreshOverview]
   );
 
+  const handleDownloadAutomaticAirdrops = useCallback(
+    async (contract: string, tokenId: string) => {
+      if (isDownloadingAutomaticAirdropsRef.current) {
+        return;
+      }
+
+      isDownloadingAutomaticAirdropsRef.current = true;
+      try {
+        await downloadAutomaticAirdropsCsv(
+          `${publicEnv.API_ENDPOINT}/api/distributions/${contract}/${tokenId}/automatic_airdrops`,
+          `automatic_airdrops_${tokenId}.csv`,
+          undefined,
+          {
+            headers: buildAutomaticAirdropsDownloadHeaders(),
+          }
+        );
+      } finally {
+        isDownloadingAutomaticAirdropsRef.current = false;
+      }
+    },
+    [buildAutomaticAirdropsDownloadHeaders, downloadAutomaticAirdropsCsv]
+  );
+
   if (!isSubscriptionsAdmin(connectedProfile, distributionAdminWallets)) {
     return <></>;
   }
@@ -574,6 +686,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       isResetting={isResetting}
       isUploading={isUploading}
       isUploadingAirdrops={isUploadingAirdrops}
+      isDownloadingAutomaticAirdrops={isDownloadingAutomaticAirdrops}
       isFinalizing={isFinalizing}
       isUploadingToGithub={isUploadingToGithub}
       showGithubModal={showGithubModal}
@@ -584,10 +697,18 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       showAutomaticAirdrops={showAutomaticAirdrops}
       canPublish={canPublishToGithub(overview)}
       githubUploadTooltip={githubUploadTooltip}
+      isAutomaticAirdropsDownloadDisabled={
+        isLoadingOverview ||
+        isDownloadingAutomaticAirdrops ||
+        (overview?.automatic_airdrops_count ?? 0) === 0
+      }
       onConfirmTokenId={handleConfirmTokenId}
       onChangeTokenId={handleChangeTokenId}
       onResetSubscriptions={handleResetSubscriptions}
       onShowAutomaticAirdrops={() => setShowAutomaticAirdrops(true)}
+      onDownloadAutomaticAirdrops={() =>
+        handleDownloadAutomaticAirdrops(contract, confirmedTokenId)
+      }
       onShowUploadPhotos={() => setShowUploadPhotos(true)}
       onFinalize={() => finalizeDistribution(contract, confirmedTokenId)}
       onUploadToGithub={() => uploadToGithub(contract, confirmedTokenId)}

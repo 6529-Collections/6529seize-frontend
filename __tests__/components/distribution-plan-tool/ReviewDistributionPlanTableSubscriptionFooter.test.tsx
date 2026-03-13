@@ -5,6 +5,21 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useMemo, useState } from "react";
 
+const mockDownload = jest.fn();
+const mockUseDownloader = jest.fn();
+const mockGetStagingAuth = jest.fn();
+const mockGetAuthJwt = jest.fn();
+
+jest.mock("react-use-downloader", () => ({
+  __esModule: true,
+  default: (...args: any[]) => mockUseDownloader(...args),
+}));
+
+jest.mock("@/services/auth/auth.utils", () => ({
+  getStagingAuth: () => mockGetStagingAuth(),
+  getAuthJwt: () => mockGetAuthJwt(),
+}));
+
 jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription",
   () => ({
@@ -31,7 +46,8 @@ jest.mock(
             data-testid="upload-airdrops-button"
             onClick={() =>
               props.onUpload("contract", "123", "0x123,5\n0x456,10")
-            }>
+            }
+          >
             Upload
           </button>
         </div>
@@ -47,13 +63,22 @@ jest.mock(
         <div data-testid="Confirm Token ID">
           <button
             data-testid="confirm-token-id-button"
-            onClick={() => props.onConfirm("123")}>
+            onClick={() => props.onConfirm("123")}
+          >
             Confirm
           </button>
         </div>
       ) : null,
   })
 );
+
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettings: () => ({
+    seizeSettings: {
+      distribution_admin_wallets: ["0x1"],
+    },
+  }),
+}));
 
 const {
   isSubscriptionsAdmin,
@@ -63,6 +88,35 @@ const authCtx = {
   connectedProfile: { wallets: [{ wallet: "0x1" }] },
   setToast: jest.fn(),
 } as any;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  authCtx.setToast.mockClear();
+  mockDownload.mockReset();
+  mockUseDownloader.mockReset();
+  mockGetStagingAuth.mockReset();
+  mockGetAuthJwt.mockReset();
+  mockDownload.mockResolvedValue(undefined);
+  mockGetStagingAuth.mockReturnValue(null);
+  mockGetAuthJwt.mockReturnValue(null);
+  mockUseDownloader.mockReturnValue({
+    download: mockDownload,
+    isInProgress: false,
+    error: null,
+  });
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue({
+      photos_count: 0,
+      is_normalized: false,
+      automatic_airdrops_addresses: 0,
+      automatic_airdrops_count: 0,
+    });
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 function TestWrapper({
   initialTokenId = null,
@@ -114,6 +168,9 @@ test("renders admin buttons after token id is confirmed", async () => {
     expect(screen.getByText("Reset Subscriptions")).toBeInTheDocument();
     expect(screen.getByText("Upload Distribution Photos")).toBeInTheDocument();
     expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /download automatic airdrops csv/i })
+    ).toBeInTheDocument();
     expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
   });
 });
@@ -260,7 +317,8 @@ test("uploadAutomaticAirdrops posts CSV data and shows success toast", async () 
     .mockResolvedValue({
       photos_count: 0,
       is_normalized: false,
-      automatic_airdrops: 5,
+      automatic_airdrops_addresses: 2,
+      automatic_airdrops_count: 15,
     });
 
   render(<TestWrapper initialTokenId="123" />);
@@ -347,6 +405,86 @@ test("uploadAutomaticAirdrops handles exceptions", async () => {
     expect(authCtx.setToast).toHaveBeenCalledWith({
       type: "error",
       message: "Network error",
+    });
+  });
+});
+
+test("disables automatic airdrops csv download when there are no values", async () => {
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  const downloadButton = await screen.findByRole("button", {
+    name: /download automatic airdrops csv/i,
+  });
+
+  expect(downloadButton).toBeDisabled();
+});
+
+test("downloads automatic airdrops csv with the response filename", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  mockGetStagingAuth.mockReturnValue("staging-token");
+  mockGetAuthJwt.mockReturnValue("wallet-token");
+
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue({
+      photos_count: 0,
+      is_normalized: false,
+      automatic_airdrops_addresses: 2,
+      automatic_airdrops_count: 15,
+    });
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  const downloadButton = await screen.findByRole("button", {
+    name: /download automatic airdrops csv/i,
+  });
+
+  await waitFor(() => expect(downloadButton).toBeEnabled());
+  await user.click(downloadButton);
+
+  await waitFor(() => {
+    expect(mockUseDownloader).toHaveBeenCalledWith();
+    expect(mockDownload).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/distributions/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123/automatic_airdrops",
+      "automatic_airdrops_123.csv",
+      undefined,
+      {
+        headers: {
+          "x-6529-auth": "staging-token",
+          Authorization: "Bearer wallet-token",
+        },
+      }
+    );
+  });
+});
+
+test("shows an admin-facing error when the downloader reports one", async () => {
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue({
+      photos_count: 0,
+      is_normalized: false,
+      automatic_airdrops_addresses: 1,
+      automatic_airdrops_count: 5,
+    });
+
+  mockUseDownloader.mockReturnValue({
+    download: mockDownload,
+    isInProgress: false,
+    error: { errorMessage: "wallet is not authorized" },
+  });
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  await waitFor(() => {
+    expect(authCtx.setToast).toHaveBeenCalledWith({
+      type: "error",
+      message: "wallet is not authorized",
     });
   });
 });
