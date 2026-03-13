@@ -2,22 +2,28 @@
 
 import type { ReactNode } from "react";
 import { LockClosedIcon } from "@heroicons/react/24/solid";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Link from "next/link";
-import WavePicture from "@/components/waves/WavePicture";
+import Image from "next/image";
+import WavesIcon from "@/components/common/icons/WavesIcon";
 
 type BrainSidebarWaveItemDisplay = {
   readonly href: string;
   readonly isPrivate: boolean;
+  readonly isDirectMessage: boolean;
   readonly dropsCount: string;
   readonly lastDropTimestamp: ApiWave["metrics"]["latest_drop_timestamp"];
+  readonly imageSrc: string | null;
 };
 
 const getBrainSidebarWaveItemDisplay = (
   wave: ApiWave
 ): BrainSidebarWaveItemDisplay => ({
+  isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
   href: getWaveRoute({
     waveId: wave.id,
     isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
@@ -28,6 +34,9 @@ const getBrainSidebarWaveItemDisplay = (
     !(wave.chat.scope.group?.is_direct_message ?? false),
   dropsCount: numberWithCommas(wave.metrics.drops_count),
   lastDropTimestamp: wave.metrics.latest_drop_timestamp,
+  imageSrc: wave.picture
+    ? getScaledImageUri(wave.picture, ImageScale.W_AUTO_H_50)
+    : null,
 });
 
 export default function UserPageBrainSidebarWaveItem({
@@ -35,12 +44,15 @@ export default function UserPageBrainSidebarWaveItem({
 }: {
   readonly wave: ApiWave;
 }) {
-  const contributors = wave.contributors_overview.map((contributor) => ({
-    pfp: contributor.contributor_pfp,
-    identity: contributor.contributor_identity,
-  }));
-  const { href, isPrivate, dropsCount, lastDropTimestamp } =
-    getBrainSidebarWaveItemDisplay(wave);
+  const {
+    href,
+    isPrivate,
+    isDirectMessage,
+    dropsCount,
+    lastDropTimestamp,
+    imageSrc,
+  } = getBrainSidebarWaveItemDisplay(wave);
+  const FallbackIcon = isDirectMessage ? ChatBubbleLeftRightIcon : WavesIcon;
   let metaContent: ReactNode = <span>No drops yet</span>;
 
   if (lastDropTimestamp) {
@@ -61,11 +73,19 @@ export default function UserPageBrainSidebarWaveItem({
     >
       <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0 tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/10">
         <div className="tw-absolute tw-inset-0 tw-z-10 tw-bg-black/20 tw-transition-colors desktop-hover:group-hover:tw-bg-transparent" />
-        <WavePicture
-          name={wave.name}
-          picture={wave.picture}
-          contributors={contributors}
-        />
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
+            fill
+            sizes="40px"
+            className="tw-object-cover"
+          />
+        ) : (
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-900">
+            <FallbackIcon className="tw-h-4 tw-w-4 tw-text-iron-300" />
+          </div>
+        )}
       </div>
 
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center">

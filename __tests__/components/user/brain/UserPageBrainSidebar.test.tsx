@@ -136,6 +136,7 @@ describe("UserPageBrainSidebar", () => {
         makeWave({
           id: "wave-2",
           name: "Pinned Private Wave",
+          picture: "https://example.com/wave.png",
           pinned: true,
           visibility: {
             scope: {

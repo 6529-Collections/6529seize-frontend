@@ -1,8 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import UserPageBrainSidebarWaveItem from "@/components/user/brain/UserPageBrainSidebarWaveItem";
 
-const mockedWavePicture = jest.fn(() => <div data-testid="wave-picture" />);
-
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ children, href, prefetch, ...props }: any) => (
@@ -12,39 +10,21 @@ jest.mock("next/link", () => ({
   ),
 }));
 
-jest.mock("@/components/waves/WavePicture", () => ({
+jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => mockedWavePicture(props),
+  default: ({ alt, fill, ...props }: any) => <img alt={alt ?? ""} {...props} />,
 }));
 
 describe("UserPageBrainSidebarWaveItem", () => {
-  beforeEach(() => {
-    mockedWavePicture.mockClear();
-  });
-
-  it("passes shared wave avatar data to WavePicture when picture is missing", () => {
-    render(
+  it("shows the wave icon fallback when picture is missing", () => {
+    const { container } = render(
       <UserPageBrainSidebarWaveItem
         wave={
           {
             id: "wave-1",
             name: "TDH Name Vote",
             picture: null,
-            author: {
-              handle: "creator",
-              banner1_color: "#112233",
-              banner2_color: "#445566",
-            },
-            contributors_overview: [
-              {
-                contributor_identity: "alice",
-                contributor_pfp: "alice.png",
-              },
-              {
-                contributor_identity: "bob",
-                contributor_pfp: "bob.png",
-              },
-            ],
+            contributors_overview: [],
             visibility: {
               scope: {
                 group: null,
@@ -60,14 +40,7 @@ describe("UserPageBrainSidebarWaveItem", () => {
       />
     );
 
-    expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
-    expect(mockedWavePicture).toHaveBeenCalledWith({
-      name: "TDH Name Vote",
-      picture: null,
-      contributors: [
-        { pfp: "alice.png", identity: "alice" },
-        { pfp: "bob.png", identity: "bob" },
-      ],
-    });
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(container.querySelector("svg")).toBeInTheDocument();
   });
 });
