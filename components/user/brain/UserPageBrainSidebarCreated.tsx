@@ -69,7 +69,7 @@ export default function UserPageBrainSidebarCreated({
                   current === identity ? null : identity
                 )
               }
-              className="tw-mt-2 tw-cursor-pointer tw-border-none tw-bg-black tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-white/30 tw-transition-colors desktop-hover:hover:tw-text-white/60"
+              className="tw-mt-2 tw-cursor-pointer tw-border-none tw-bg-black tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-transition-colors desktop-hover:hover:tw-text-iron-300"
             >
               {showAllWaves ? "Show less" : showMoreLabel}
             </button>

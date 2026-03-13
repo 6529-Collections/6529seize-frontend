@@ -41,6 +41,7 @@ const makeWave = (overrides: Record<string, unknown> = {}) =>
     id: "wave-1",
     name: "TDH Name Vote",
     picture: null,
+    contributors_overview: [],
     pinned: false,
     author: {
       handle: null,
@@ -127,6 +128,36 @@ describe("UserPageBrainSidebar", () => {
       limit: 3,
       enabled: true,
     });
+  });
+
+  it("does not show a pinned star in the sidebar wave rows", () => {
+    mockedUseFavouriteWavesOfIdentity.mockReturnValue({
+      waves: [
+        makeWave({
+          id: "wave-2",
+          name: "Pinned Private Wave",
+          pinned: true,
+          visibility: {
+            scope: {
+              group: {
+                id: "group-1",
+              },
+            },
+          },
+        }),
+      ],
+      status: "success",
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    });
+
+    const { container } = render(
+      <UserPageBrainSidebar profile={baseProfile} />
+    );
+
+    expect(screen.getByText("Pinned Private Wave")).toBeInTheDocument();
+    expect(container.querySelectorAll("svg")).toHaveLength(1);
   });
 
   it("uses the primary wallet when the profile has no handle", () => {
