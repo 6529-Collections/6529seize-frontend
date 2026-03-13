@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import UserPageBrainSidebar from "@/components/user/brain/UserPageBrainSidebar";
 import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
 import { useWaves } from "@/hooks/useWaves";
@@ -22,6 +22,15 @@ jest.mock("@/hooks/useWaves", () => ({
 }));
 jest.mock("@/hooks/useFavouriteWavesOfIdentity", () => ({
   useFavouriteWavesOfIdentity: jest.fn(),
+}));
+jest.mock("@/components/waves/drops/WaveCreatorPreviewModal", () => ({
+  WaveCreatorPreviewModal: ({ isOpen, user }: any) =>
+    isOpen ? (
+      <div
+        data-testid="wave-creator-preview-modal"
+        data-user-primary-address={user.primary_address}
+      />
+    ) : null,
 }));
 
 const mockedUseWaves = useWaves as jest.MockedFunction<typeof useWaves>;
@@ -110,11 +119,23 @@ describe("UserPageBrainSidebar", () => {
     });
 
     render(<UserPageBrainSidebar profile={baseProfile} />);
+    const desktopSidebar = screen.getByTestId("brain-sidebar-desktop");
+    const mobileStrip = screen.getByTestId("brain-sidebar-mobile-strip");
 
-    expect(screen.getByText("Created Waves")).toBeInTheDocument();
-    expect(screen.getByText("TDH Name Vote")).toBeInTheDocument();
-    expect(screen.getByText("Most Active In")).toBeInTheDocument();
-    expect(screen.getByText("Meme Card Curation")).toBeInTheDocument();
+    expect(
+      within(desktopSidebar).getByText("Created Waves")
+    ).toBeInTheDocument();
+    expect(
+      within(desktopSidebar).getByText("TDH Name Vote")
+    ).toBeInTheDocument();
+    expect(
+      within(desktopSidebar).getByText("Most Active In")
+    ).toBeInTheDocument();
+    expect(
+      within(desktopSidebar).getByText("Meme Card Curation")
+    ).toBeInTheDocument();
+    expect(within(mobileStrip).getByText("Created")).toBeInTheDocument();
+    expect(within(mobileStrip).getByText("Active In")).toBeInTheDocument();
     expect(mockedUseWaves).toHaveBeenCalledTimes(1);
     expect(mockedUseWaves).toHaveBeenCalledWith({
       identity: "kanetix",
@@ -153,12 +174,13 @@ describe("UserPageBrainSidebar", () => {
       isFetching: false,
     });
 
-    const { container } = render(
-      <UserPageBrainSidebar profile={baseProfile} />
-    );
+    render(<UserPageBrainSidebar profile={baseProfile} />);
+    const desktopSidebar = screen.getByTestId("brain-sidebar-desktop");
 
-    expect(screen.getByText("Pinned Private Wave")).toBeInTheDocument();
-    expect(container.querySelectorAll("svg")).toHaveLength(1);
+    expect(
+      within(desktopSidebar).getByText("Pinned Private Wave")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-creator-preview-modal")).toBeNull();
   });
 
   it("uses the primary wallet when the profile has no handle", () => {
@@ -192,9 +214,12 @@ describe("UserPageBrainSidebar", () => {
     });
 
     render(<UserPageBrainSidebar profile={baseProfile} />);
+    const desktopSidebar = screen.getByTestId("brain-sidebar-desktop");
 
-    expect(screen.queryByText("Created Waves")).toBeNull();
-    expect(screen.getByText("Most Active In")).toBeInTheDocument();
+    expect(within(desktopSidebar).queryByText("Created Waves")).toBeNull();
+    expect(
+      within(desktopSidebar).getByText("Most Active In")
+    ).toBeInTheDocument();
     expect(mockedUseWaves).toHaveBeenCalledTimes(1);
   });
 
@@ -211,9 +236,12 @@ describe("UserPageBrainSidebar", () => {
     });
 
     render(<UserPageBrainSidebar profile={baseProfile} />);
+    const desktopSidebar = screen.getByTestId("brain-sidebar-desktop");
 
-    expect(screen.getByText("Created Waves")).toBeInTheDocument();
-    expect(screen.queryByText("Most Active In")).toBeNull();
+    expect(
+      within(desktopSidebar).getByText("Created Waves")
+    ).toBeInTheDocument();
+    expect(within(desktopSidebar).queryByText("Most Active In")).toBeNull();
   });
 
   it("expands and collapses the created waves list", () => {
@@ -240,15 +268,56 @@ describe("UserPageBrainSidebar", () => {
     });
 
     render(<UserPageBrainSidebar profile={baseProfile} />);
+    const desktopSidebar = screen.getByTestId("brain-sidebar-desktop");
 
-    expect(screen.getByText("Show 1 more")).toBeInTheDocument();
-    expect(screen.queryByText("Meme Card Curation")).toBeNull();
+    expect(within(desktopSidebar).getByText("Show 1 more")).toBeInTheDocument();
+    expect(within(desktopSidebar).queryByText("Meme Card Curation")).toBeNull();
 
-    fireEvent.click(screen.getByText("Show 1 more"));
-    expect(screen.getByText("Meme Card Curation")).toBeInTheDocument();
-    expect(screen.getByText("Show less")).toBeInTheDocument();
+    fireEvent.click(within(desktopSidebar).getByText("Show 1 more"));
+    expect(
+      within(desktopSidebar).getByText("Meme Card Curation")
+    ).toBeInTheDocument();
+    expect(within(desktopSidebar).getByText("Show less")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText("Show less"));
-    expect(screen.queryByText("Meme Card Curation")).toBeNull();
+    fireEvent.click(within(desktopSidebar).getByText("Show less"));
+    expect(within(desktopSidebar).queryByText("Meme Card Curation")).toBeNull();
+  });
+
+  it("opens the created waves modal from the compact strip overflow chip", () => {
+    mockedUseWaves.mockReturnValue({
+      waves: [
+        makeWave(),
+        makeWave({
+          id: "wave-2",
+          name: "Meme Card Curation",
+          metrics: {
+            drops_count: 8,
+            subscribers_count: 10,
+            latest_drop_timestamp: Date.now(),
+          },
+        }),
+      ],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    render(<UserPageBrainSidebar profile={baseProfile} />);
+    const mobileStrip = screen.getByTestId("brain-sidebar-mobile-strip");
+
+    fireEvent.click(
+      within(mobileStrip).getByRole("button", {
+        name: /view all created waves/i,
+      })
+    );
+
+    expect(screen.getByTestId("wave-creator-preview-modal")).toHaveAttribute(
+      "data-user-primary-address",
+      "0xabc"
+    );
   });
 });

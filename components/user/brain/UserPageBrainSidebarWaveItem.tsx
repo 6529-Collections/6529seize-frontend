@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { LockClosedIcon } from "@heroicons/react/24/solid";
+import { LockClosedIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
@@ -35,7 +35,7 @@ const getBrainSidebarWaveItemDisplay = (
   dropsCount: numberWithCommas(wave.metrics.drops_count),
   lastDropTimestamp: wave.metrics.latest_drop_timestamp,
   imageSrc: wave.picture
-    ? getScaledImageUri(wave.picture, ImageScale.W_AUTO_H_50)
+    ? getScaledImageUri(wave.picture, ImageScale.W_200_H_200)
     : null,
 });
 
@@ -59,7 +59,7 @@ export default function UserPageBrainSidebarWaveItem({
     metaContent = (
       <>
         <span>{getTimeAgoShort(lastDropTimestamp)}</span>
-        <span className="tw-h-1 tw-w-1 tw-rounded-full tw-bg-white/25" />
+        <span className="tw-h-0.5 tw-w-0.5 tw-rounded-full tw-bg-white/30" />
         <span>{dropsCount} drops</span>
       </>
     );
@@ -69,21 +69,21 @@ export default function UserPageBrainSidebarWaveItem({
     <Link
       href={href}
       prefetch={false}
-      className="tw-group tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3 tw-no-underline tw-shadow-inner tw-transition-all desktop-hover:hover:tw-border-white/[0.1] desktop-hover:hover:tw-bg-white/[0.04]"
+      className="tw-group tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-no-underline tw-shadow-inner tw-transition-all desktop-hover:hover:tw-border-white/10"
     >
       <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0 tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/10">
-        <div className="tw-absolute tw-inset-0 tw-z-10 tw-bg-black/20 tw-transition-colors desktop-hover:group-hover:tw-bg-transparent" />
+        <div className="tw-absolute tw-inset-0 tw-z-10 tw-transition-colors desktop-hover:group-hover:tw-bg-transparent" />
         {imageSrc ? (
           <Image
             src={imageSrc}
             alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
             fill
             sizes="40px"
-            className="tw-object-cover"
+            className="tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-110"
           />
         ) : (
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-900">
-            <FallbackIcon className="tw-h-4 tw-w-4 tw-text-iron-300" />
+            <FallbackIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-110" />
           </div>
         )}
       </div>
@@ -104,6 +104,8 @@ export default function UserPageBrainSidebarWaveItem({
           {metaContent}
         </div>
       </div>
+
+      <ChevronRightIcon className="tw-h-4 tw-w-4 tw-shrink-0 -tw-translate-x-1 tw-text-iron-600 tw-opacity-0 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-translate-x-0 desktop-hover:group-hover:tw-text-iron-400 desktop-hover:group-hover:tw-opacity-100" />
     </Link>
   );
 }

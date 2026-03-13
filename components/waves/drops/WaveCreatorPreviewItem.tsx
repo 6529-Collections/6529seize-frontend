@@ -47,14 +47,14 @@ export const WaveCreatorPreviewItem: React.FC<WaveCreatorPreviewItemProps> = ({
       }}
       className="tw-group tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800/70 tw-bg-iron-950/60 tw-px-4 tw-py-3 tw-no-underline tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900/60"
     >
-      <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+      <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
         {imageSrc ? (
           <Image
             src={imageSrc}
             alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
             width={40}
             height={40}
-            className="tw-h-full tw-w-full tw-object-cover"
+            className="tw-h-full tw-w-full tw-rounded-full tw-object-cover"
           />
         ) : (
           <FallbackIcon className="tw-h-4 tw-w-4 tw-text-iron-300" />
