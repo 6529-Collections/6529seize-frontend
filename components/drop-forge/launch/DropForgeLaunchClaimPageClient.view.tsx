@@ -1574,7 +1574,7 @@ function DropForgePhaseSelectionSection({
           id="phase-selection"
           value={selectedPhase}
           onChange={(e) => onSelectedPhaseChange(e.target.value)}
-          className="tw-h-16 tw-w-full tw-appearance-none tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-pl-4 tw-pr-12 tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-iron-600"
+          className="tw-h-16 tw-w-full tw-appearance-none tw-rounded-xl tw-border-0 tw-bg-[#03002e] tw-pl-4 tw-pr-12 tw-text-lg tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-[#010048] focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-[#090088]"
         >
           <option value="" disabled>
             Phase Selection
