@@ -7,8 +7,9 @@ jest.mock("@/hooks/useIdentityActivity", () => ({
   useIdentityActivity: jest.fn(),
 }));
 
-const mockedUseIdentityActivity =
-  useIdentityActivity as jest.MockedFunction<typeof useIdentityActivity>;
+const mockedUseIdentityActivity = useIdentityActivity as jest.MockedFunction<
+  typeof useIdentityActivity
+>;
 const DAY_MS = Time.days(1).toMillis();
 
 function buildActivityResponse() {
@@ -23,9 +24,9 @@ function buildActivityResponse() {
         .slice(0, 10);
 
       switch (isoDate) {
-        case "2026-03-01":
+        case "2026-01-01":
           return 1;
-        case "2026-03-02":
+        case "2026-02-01":
           return 2;
         case "2026-03-03":
           return 3;
@@ -95,13 +96,18 @@ describe("UserPageBrainActivity", () => {
       identity: "alice",
       enabled: true,
     });
-    expect(screen.getByText("12 drops in the last year")).toBeInTheDocument();
+    expect(screen.getByText("12 drops in 2026")).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "Mar 1, 2026: 1 drop" })
+      screen.getByRole("img", { name: "Jan 1, 2026: 1 drop" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("img", { name: "Mar 16, 2026: 2 drops" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Activity heatmap for 2026")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Jan")).toBeInTheDocument();
+    expect(screen.getByText("Feb")).toBeInTheDocument();
     expect(screen.getByText("Mar")).toBeInTheDocument();
   });
 

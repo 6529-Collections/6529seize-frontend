@@ -69,7 +69,7 @@ export default function UserPageBrainSidebarWaveItem({
     <Link
       href={href}
       prefetch={false}
-      className="tw-group tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-no-underline tw-shadow-inner tw-transition-all desktop-hover:hover:tw-border-white/15"
+      className="tw-group tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/80 tw-p-3 tw-no-underline tw-shadow-inner tw-transition-all desktop-hover:hover:tw-border-white/15"
     >
       <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0 tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/10">
         <div className="tw-absolute tw-inset-0 tw-z-10 tw-transition-colors desktop-hover:group-hover:tw-bg-transparent" />
