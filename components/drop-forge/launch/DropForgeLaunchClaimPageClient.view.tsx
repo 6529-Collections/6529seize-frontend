@@ -846,7 +846,7 @@ function DropForgeAirdropSummaryActionRow({
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-end">
           <button
             type="button"
-            disabled={disabled || isCompleted}
+            disabled={disabled || isCompleted || actionPending !== null}
             onClick={onClick}
             className={BTN_SUBSCRIPTIONS_AIRDROP}
           >
@@ -1053,6 +1053,7 @@ function DropForgeSubscriptionAirdropSections({
                       disabled={
                         !isInitialized ||
                         claimWritePending ||
+                        mintingClaimActionPending !== null ||
                         section.loading ||
                         section.airdropCount <= 0 ||
                         (action?.completed ?? false)
@@ -1212,6 +1213,7 @@ function DropForgeResearchAirdropSection({
             type="button"
             disabled={
               claimWritePending ||
+              mintingClaimActionPending !== null ||
               !isInitialized ||
               researchAirdropCount <= 0 ||
               isCompleted
