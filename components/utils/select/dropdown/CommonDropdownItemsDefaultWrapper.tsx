@@ -20,12 +20,14 @@ export default function CommonDropdownItemsDefaultWrapper({
   setOpen,
   buttonRef,
   dynamicPosition = true,
+  closeOnFocusOutside = true,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement | null>;
   readonly dynamicPosition?: boolean | undefined;
+  readonly closeOnFocusOutside?: boolean | undefined;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -107,7 +109,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   }, [dynamicPosition, isOpen, position]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || !closeOnFocusOutside) {
       return;
     }
 
@@ -131,7 +133,7 @@ export default function CommonDropdownItemsDefaultWrapper({
     return () => {
       document.removeEventListener("focusin", handleFocusIn);
     };
-  }, [buttonRef, isOpen, setOpen]);
+  }, [buttonRef, closeOnFocusOutside, isOpen, setOpen]);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {

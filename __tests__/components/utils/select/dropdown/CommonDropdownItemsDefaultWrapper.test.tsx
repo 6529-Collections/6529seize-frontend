@@ -162,7 +162,7 @@ test("positions the dropdown above the trigger near the viewport bottom", async 
   });
 });
 
-test("closes when focus moves outside the trigger and portaled menu", async () => {
+test("closes when focus moves outside the trigger and portaled menu by default", async () => {
   const setOpen = jest.fn();
   const buttonRef = React.createRef<HTMLButtonElement>();
 
@@ -189,4 +189,34 @@ test("closes when focus moves outside the trigger and portaled menu", async () =
   fireEvent.focusIn(screen.getByRole("button", { name: "Outside" }));
 
   expect(setOpen).toHaveBeenCalledWith(false);
+});
+
+test("does not close when opted out and focus moves outside the trigger and portaled menu", async () => {
+  const setOpen = jest.fn();
+  const buttonRef = React.createRef<HTMLButtonElement>();
+
+  render(
+    <>
+      <button ref={buttonRef} type="button">
+        Trigger
+      </button>
+      <button type="button">Outside</button>
+      <CommonDropdownItemsDefaultWrapper
+        isOpen={true}
+        setOpen={setOpen}
+        buttonRef={buttonRef}
+        closeOnFocusOutside={false}
+      >
+        <li>
+          <button type="button">Item</button>
+        </li>
+      </CommonDropdownItemsDefaultWrapper>
+    </>
+  );
+
+  await screen.findByRole("menu");
+
+  fireEvent.focusIn(screen.getByRole("button", { name: "Outside" }));
+
+  expect(setOpen).not.toHaveBeenCalled();
 });
