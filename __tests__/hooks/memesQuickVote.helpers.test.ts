@@ -4,6 +4,7 @@ import {
   addRecentQuickVoteAmount,
   appendSkippedSerial,
   buildMemesQuickVoteQueue,
+  deriveMemesQuickVoteEffectiveDrops,
   deriveMemesQuickVoteStats,
   getDisplayQuickVoteAmounts,
   sanitizeStoredAmounts,
@@ -80,6 +81,50 @@ describe("memesQuickVote.helpers", () => {
     });
   });
 
+  it("removes voted drops from the effective quick-vote list", () => {
+    const effectiveDrops = deriveMemesQuickVoteEffectiveDrops(
+      [
+        createDrop({ id: "drop-30", serialNo: 30 }),
+        createDrop({ id: "drop-20", serialNo: 20 }),
+        createDrop({ id: "drop-10", serialNo: 10 }),
+      ],
+      [20],
+      null
+    );
+
+    expect(effectiveDrops.map((drop) => drop.serial_no)).toEqual([30, 10]);
+  });
+
+  it("clamps remaining unrated drops to the optimistic remaining power", () => {
+    const effectiveDrops = deriveMemesQuickVoteEffectiveDrops(
+      [
+        createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+        createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
+        createDrop({
+          id: "drop-10",
+          serialNo: 10,
+          rating: 100,
+          maxRating: 900,
+        }),
+      ],
+      [30],
+      4_000
+    );
+
+    expect(
+      effectiveDrops.map((drop) => drop.context_profile_context?.max_rating)
+    ).toEqual([4_000, 900]);
+  });
+
+  it("returns the original drops when there is no live optimistic vote", () => {
+    const drops = [
+      createDrop({ id: "drop-30", serialNo: 30 }),
+      createDrop({ id: "drop-20", serialNo: 20 }),
+    ];
+
+    expect(deriveMemesQuickVoteEffectiveDrops(drops, [], null)).toBe(drops);
+  });
+
   it("keeps the last five unique quick-vote amounts but renders them ascending", () => {
     const recent = [50, 125, 250, 500];
     const withDuplicate = addRecentQuickVoteAmount(recent, 125);
@@ -109,7 +154,7 @@ describe("memesQuickVote.helpers", () => {
         4000,
         5000,
       ])
-    ).toEqual([500, 250, 1000, 2000, 3000]);
+    ).toEqual([1000, 2000, 3000, 4000, 5000]);
     expect(appendSkippedSerial([30, 10, 20], 10)).toEqual([30, 20, 10]);
   });
 });

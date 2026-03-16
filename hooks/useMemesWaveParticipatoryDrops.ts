@@ -104,8 +104,8 @@ export const useMemesWaveParticipatoryDrops = () => {
     queryFn: async () =>
       await fetchAllParticipatoryDrops(memesWaveId!, contextProfile!),
     staleTime: 60_000,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   return {

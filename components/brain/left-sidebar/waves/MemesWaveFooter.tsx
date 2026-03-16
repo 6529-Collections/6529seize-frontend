@@ -92,7 +92,6 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
       </AnimatePresence>
 
       <MemesQuickVoteDialog
-        key={quickVoteSessionId}
         isOpen={isQuickVoteOpen}
         sessionId={quickVoteSessionId}
         onClose={() => setIsQuickVoteOpen(false)}

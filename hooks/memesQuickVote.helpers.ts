@@ -142,6 +142,54 @@ export const deriveMemesQuickVoteStats = (
   };
 };
 
+export const deriveMemesQuickVoteEffectiveDrops = (
+  drops: readonly ApiDrop[],
+  votedSerials: readonly number[],
+  optimisticRemainingPower: number | null
+): readonly ApiDrop[] => {
+  if (votedSerials.length === 0 && optimisticRemainingPower === null) {
+    return drops;
+  }
+
+  const votedSet = new Set(votedSerials);
+
+  return drops.flatMap((drop) => {
+    if (votedSet.has(drop.serial_no)) {
+      return [];
+    }
+
+    const profileContext = drop.context_profile_context;
+    const maxRating = profileContext?.max_rating;
+
+    if (
+      optimisticRemainingPower === null ||
+      profileContext?.rating !== 0 ||
+      typeof maxRating !== "number"
+    ) {
+      return [drop];
+    }
+
+    const nextMaxRating = Math.max(
+      0,
+      Math.min(maxRating, optimisticRemainingPower)
+    );
+
+    if (nextMaxRating === maxRating) {
+      return [drop];
+    }
+
+    return [
+      {
+        ...drop,
+        context_profile_context: {
+          ...profileContext,
+          max_rating: nextMaxRating,
+        },
+      },
+    ];
+  });
+};
+
 export const buildMemesQuickVoteQueue = (
   drops: readonly ApiDrop[],
   skippedSerials: readonly number[]

@@ -57,6 +57,10 @@ function MemesQuickVoteDialogContent({
     latestUsedAmount === null
       ? null
       : normalizeQuickVoteAmount(latestUsedAmount, maxRating);
+  const normalizedCustomAmount = normalizeQuickVoteAmount(
+    customValue,
+    maxRating
+  );
   const visibleQuickAmounts = useMemo(() => {
     if (maxRating <= 0) {
       return [];
@@ -71,9 +75,9 @@ function MemesQuickVoteDialogContent({
     ).sort((left, right) => left - right);
   }, [maxRating, recentAmounts]);
 
-  const swipeVoteAmount =
-    normalizedLatestUsedAmount ??
-    normalizeQuickVoteAmount(customValue, maxRating);
+  const swipeVoteAmount = isCustomOpen
+    ? normalizedCustomAmount
+    : (normalizedLatestUsedAmount ?? normalizedCustomAmount);
 
   const handleVoteAmount = async (amount: number | string) => {
     await submitVote(activeDrop, amount);
@@ -269,7 +273,7 @@ export default function MemesQuickVoteDialog({
           </header>
 
           <div className="tw-flex-1 tw-overflow-y-auto tw-p-4 md:tw-p-6">
-            {isLoading || !activeDrop ? (
+            {!activeDrop ? (
               <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
                 <div className="tw-text-center">
                   <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
@@ -282,7 +286,7 @@ export default function MemesQuickVoteDialog({
               </div>
             ) : (
               <MemesQuickVoteDialogContent
-                key={activeDrop.serial_no}
+                key={`${sessionId}:${activeDrop.serial_no}`}
                 activeDrop={activeDrop}
                 isMobile={isMobile}
                 isVoting={isVoting}

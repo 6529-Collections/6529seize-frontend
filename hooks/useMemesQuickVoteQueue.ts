@@ -2,24 +2,19 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { DropRateChangeRequest } from "@/entities/IDrop";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
-  addRecentQuickVoteAmount,
   appendSkippedSerial,
   buildMemesQuickVoteQueue,
+  deriveMemesQuickVoteEffectiveDrops,
   deriveMemesQuickVoteStats,
+  getMemesQuickVoteEligibleDrops,
   getDisplayQuickVoteAmounts,
-  normalizeQuickVoteAmount,
 } from "@/hooks/memesQuickVote.helpers";
+import { useMemesQuickVoteSubmit } from "@/hooks/useMemesQuickVoteSubmit";
 import { useMemesWaveParticipatoryDrops } from "@/hooks/useMemesWaveParticipatoryDrops";
 import { useMemesQuickVoteStorage } from "@/hooks/useMemesQuickVoteStorage";
-import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
 import { useCallback, useContext, useMemo, useState } from "react";
-
-const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 
 type UseMemesQuickVoteQueueResult = {
   readonly activeDrop: ExtendedDrop | null;
@@ -41,16 +36,13 @@ type UseMemesQuickVoteQueueResult = {
 export const useMemesQuickVoteQueue = (): UseMemesQuickVoteQueueResult => {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const {
-    drops,
-    contextProfile,
-    isPending,
-    isRefetching,
-    memesWaveId,
-    refetch,
-  } = useMemesWaveParticipatoryDrops();
+  const { drops, contextProfile, isPending, isRefetching, memesWaveId } =
+    useMemesWaveParticipatoryDrops();
 
-  const [dismissedSerials, setDismissedSerials] = useState<number[]>([]);
+  const [votedSerials, setVotedSerials] = useState<number[]>([]);
+  const [optimisticRemainingPower, setOptimisticRemainingPower] = useState<
+    number | null
+  >(null);
   const {
     liveSkippedSerials,
     recentAmountsByRecency,
@@ -62,21 +54,41 @@ export const useMemesQuickVoteQueue = (): UseMemesQuickVoteQueueResult => {
     memesWaveId,
   });
 
-  const rawQueue = useMemo(
-    () => buildMemesQuickVoteQueue(drops, liveSkippedSerials),
-    [drops, liveSkippedSerials]
+  const liveEligibleSerials = useMemo(
+    () =>
+      new Set(
+        getMemesQuickVoteEligibleDrops(drops).map((drop) => drop.serial_no)
+      ),
+    [drops]
   );
 
-  const queue = useMemo(() => {
-    if (dismissedSerials.length === 0) {
-      return rawQueue;
-    }
+  const liveVotedSerials = useMemo(
+    () => votedSerials.filter((serialNo) => liveEligibleSerials.has(serialNo)),
+    [liveEligibleSerials, votedSerials]
+  );
+  const hasPendingOptimisticVote = liveVotedSerials.length > 0;
+  const activeOptimisticRemainingPower = hasPendingOptimisticVote
+    ? optimisticRemainingPower
+    : null;
+  const effectiveDrops = useMemo(
+    () =>
+      deriveMemesQuickVoteEffectiveDrops(
+        drops,
+        liveVotedSerials,
+        activeOptimisticRemainingPower
+      ),
+    [activeOptimisticRemainingPower, drops, liveVotedSerials]
+  );
 
-    const dismissedSet = new Set(dismissedSerials);
-    return rawQueue.filter((drop) => !dismissedSet.has(drop.serial_no));
-  }, [dismissedSerials, rawQueue]);
+  const queue = useMemo(
+    () => buildMemesQuickVoteQueue(effectiveDrops, liveSkippedSerials),
+    [effectiveDrops, liveSkippedSerials]
+  );
 
-  const stats = useMemo(() => deriveMemesQuickVoteStats(drops), [drops]);
+  const stats = useMemo(
+    () => deriveMemesQuickVoteStats(effectiveDrops),
+    [effectiveDrops]
+  );
   const activeDrop = queue[0] ?? null;
   const recentAmounts = useMemo(
     () => getDisplayQuickVoteAmounts(recentAmountsByRecency),
@@ -84,90 +96,37 @@ export const useMemesQuickVoteQueue = (): UseMemesQuickVoteQueueResult => {
   );
   const latestUsedAmount = recentAmountsByRecency.at(-1) ?? null;
 
-  const voteMutation = useMutation({
-    mutationFn: async ({
-      dropId,
-      amount,
-    }: {
-      readonly dropId: string;
-      readonly amount: number;
-    }) =>
-      await commonApiPost<DropRateChangeRequest, ApiDrop>({
-        endpoint: `drops/${dropId}/ratings`,
-        body: {
-          rating: amount,
-          category: DEFAULT_DROP_RATE_CATEGORY,
-        },
-      }),
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
+  const handleVoteSuccess = useCallback(
+    (drop: ExtendedDrop, nextRemainingPower: number) => {
+      setVotedSerials((current) => {
+        const liveCurrent = current.filter((serialNo) =>
+          liveEligibleSerials.has(serialNo)
+        );
+
+        return liveCurrent.includes(drop.serial_no)
+          ? liveCurrent
+          : [...liveCurrent, drop.serial_no];
       });
+      setOptimisticRemainingPower(nextRemainingPower);
     },
-  });
-
-  const markDismissed = useCallback((serialNo: number) => {
-    setDismissedSerials((current) =>
-      current.includes(serialNo) ? current : [...current, serialNo]
-    );
-  }, []);
-
-  const submitVote = useCallback(
-    async (drop: ExtendedDrop, amount: number | string) => {
-      const maxRating = drop.context_profile_context?.max_rating ?? 0;
-      const normalizedAmount = normalizeQuickVoteAmount(amount, maxRating);
-
-      if (normalizedAmount === null) {
-        return false;
-      }
-
-      const { success } = await requestAuth();
-
-      if (!success) {
-        return false;
-      }
-
-      try {
-        await voteMutation.mutateAsync({
-          dropId: drop.id,
-          amount: normalizedAmount,
-        });
-      } catch {
-        return false;
-      }
-
-      markDismissed(drop.serial_no);
-      setAndPersistRecentAmounts((current) =>
-        addRecentQuickVoteAmount(current, normalizedAmount)
-      );
-      setAndPersistSkippedSerials((current) =>
-        current.filter((serialNo) => serialNo !== drop.serial_no)
-      );
-      invalidateDrops();
-      void refetch();
-
-      return true;
-    },
-    [
-      invalidateDrops,
-      markDismissed,
-      refetch,
-      requestAuth,
-      setAndPersistRecentAmounts,
-      setAndPersistSkippedSerials,
-      voteMutation,
-    ]
+    [liveEligibleSerials]
   );
+  const { isVoting, submitVote } = useMemesQuickVoteSubmit({
+    requestAuth,
+    setToast,
+    invalidateDrops,
+    setAndPersistRecentAmounts,
+    setAndPersistSkippedSerials,
+    onVoteSuccess: handleVoteSuccess,
+  });
 
   const skipDrop = useCallback(
     (drop: ExtendedDrop) => {
-      markDismissed(drop.serial_no);
       setAndPersistSkippedSerials((current) =>
         appendSkippedSerial(current, drop.serial_no)
       );
     },
-    [markDismissed, setAndPersistSkippedSerials]
+    [setAndPersistSkippedSerials]
   );
 
   return {
@@ -175,7 +134,7 @@ export const useMemesQuickVoteQueue = (): UseMemesQuickVoteQueueResult => {
     queue,
     isReady: typeof stats.uncastPower === "number" && queue.length > 0,
     isLoading: isPending || isRefetching,
-    isVoting: voteMutation.isPending,
+    isVoting,
     latestUsedAmount,
     recentAmounts,
     uncastPower: stats.uncastPower,

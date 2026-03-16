@@ -114,6 +114,17 @@ const readSkippedStorage = (key = getSkippedStorageKey()): number[] =>
 const readAmountsStorage = (key = getAmountsStorageKey()): number[] =>
   readStoredNumbers(key);
 
+const createDeferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (error?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+};
+
 describe("useMemesQuickVoteQueue", () => {
   let currentDrops: any[] = [];
   let currentContextProfile = DEFAULT_CONTEXT_PROFILE;
@@ -269,7 +280,7 @@ describe("useMemesQuickVoteQueue", () => {
     expect(readSkippedStorage()).toEqual([30]);
   });
 
-  it("persists skipped ordering and advances the visible queue when skipping the active drop", () => {
+  it("persists skipped ordering and moves the skipped drop to the session tail", () => {
     currentDrops = [
       createDrop({ id: "drop-40", serialNo: 40 }),
       createDrop({ id: "drop-30", serialNo: 30 }),
@@ -290,11 +301,11 @@ describe("useMemesQuickVoteQueue", () => {
     expect(readSkippedStorage()).toEqual([20, 40]);
     expect(result.current.activeDrop?.serial_no).toBe(30);
     expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      30, 20,
+      30, 20, 40,
     ]);
   });
 
-  it("restores dismissed items after the quick-vote session remounts", () => {
+  it("keeps skipped items reachable after the quick-vote session remounts", () => {
     currentDrops = [
       createDrop({ id: "drop-40", serialNo: 40 }),
       createDrop({ id: "drop-30", serialNo: 30 }),
@@ -313,7 +324,7 @@ describe("useMemesQuickVoteQueue", () => {
 
     expect(
       firstSession.result.current.queue.map((drop) => drop.serial_no)
-    ).toEqual([30, 20]);
+    ).toEqual([30, 20, 40]);
 
     firstSession.unmount();
 
@@ -324,6 +335,229 @@ describe("useMemesQuickVoteQueue", () => {
     expect(
       nextSession.result.current.queue.map((drop) => drop.serial_no)
     ).toEqual([30, 20, 40]);
+  });
+
+  it("updates remaining power immediately after a successful vote", async () => {
+    currentDrops = [
+      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
+      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+      createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
+    ];
+    commonApiPostMock.mockResolvedValue({
+      context_profile_context: {
+        rating: 1_000,
+        max_rating: 4_000,
+      },
+    } as any);
+
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
+      wrapper: createWrapper({ requestAuth }),
+    });
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 1_000);
+    });
+
+    expect(result.current.activeDrop?.serial_no).toBe(30);
+    expect(result.current.activeDrop?.context_profile_context?.max_rating).toBe(
+      4_000
+    );
+    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
+      30, 20,
+    ]);
+    expect(
+      result.current.queue.map(
+        (drop) => drop.context_profile_context?.max_rating
+      )
+    ).toEqual([4_000, 4_000]);
+    expect(result.current.uncastPower).toBe(4_000);
+  });
+
+  it("stops applying optimistic remaining power once the voted drop disappears", async () => {
+    currentDrops = [
+      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
+      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+      createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
+    ];
+    commonApiPostMock.mockResolvedValue({
+      context_profile_context: {
+        rating: 1_000,
+        max_rating: 4_000,
+      },
+    } as any);
+
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+    const { result, rerender } = renderHook(() => useMemesQuickVoteQueue(), {
+      wrapper: createWrapper({ requestAuth }),
+    });
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 1_000);
+    });
+
+    currentDrops = [
+      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+      createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
+    ];
+
+    rerender();
+
+    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
+      30, 20,
+    ]);
+    expect(
+      result.current.queue.map(
+        (drop) => drop.context_profile_context?.max_rating
+      )
+    ).toEqual([5_000, 5_000]);
+    expect(result.current.uncastPower).toBe(5_000);
+  });
+
+  it("normalizes back-to-back votes against optimistic remaining power", async () => {
+    currentDrops = [
+      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
+      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+      createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
+    ];
+    commonApiPostMock
+      .mockResolvedValueOnce({
+        context_profile_context: {
+          rating: 1_000,
+          max_rating: 4_000,
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        context_profile_context: {
+          rating: 4_000,
+          max_rating: 0,
+        },
+      } as any);
+
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
+      wrapper: createWrapper({ requestAuth }),
+    });
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 1_000);
+    });
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 4_500);
+    });
+
+    expect(commonApiPostMock).toHaveBeenNthCalledWith(2, {
+      endpoint: "drops/drop-30/ratings",
+      body: {
+        rating: 4_000,
+        category: "Rep",
+      },
+    });
+  });
+
+  it("blocks overlapping submits while auth is pending", async () => {
+    currentDrops = [
+      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
+      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+    ];
+    const authDeferred = createDeferred<{ success: boolean }>();
+    const requestAuth = jest.fn().mockReturnValue(authDeferred.promise);
+
+    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
+      wrapper: createWrapper({ requestAuth }),
+    });
+
+    let firstSubmitPromise: Promise<boolean> | undefined;
+
+    await act(async () => {
+      firstSubmitPromise = result.current.submitVote(
+        result.current.activeDrop!,
+        1_000
+      );
+    });
+
+    expect(result.current.isVoting).toBe(true);
+    expect(requestAuth).toHaveBeenCalledTimes(1);
+
+    let secondSubmitResult = true;
+
+    await act(async () => {
+      secondSubmitResult = await result.current.submitVote(
+        result.current.activeDrop!,
+        500
+      );
+    });
+
+    expect(secondSubmitResult).toBe(false);
+    expect(requestAuth).toHaveBeenCalledTimes(1);
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+
+    commonApiPostMock.mockResolvedValue({
+      context_profile_context: {
+        rating: 1_000,
+        max_rating: 4_000,
+      },
+    } as any);
+
+    await act(async () => {
+      authDeferred.resolve({ success: true });
+      await firstSubmitPromise!;
+    });
+
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+    expect(result.current.isVoting).toBe(false);
+  });
+
+  it("clears the submit lock after auth fails", async () => {
+    currentDrops = [
+      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
+    ];
+    const authDeferred = createDeferred<{ success: boolean }>();
+    const requestAuth = jest.fn().mockReturnValue(authDeferred.promise);
+
+    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
+      wrapper: createWrapper({ requestAuth }),
+    });
+
+    let firstSubmitPromise: Promise<boolean> | undefined;
+
+    await act(async () => {
+      firstSubmitPromise = result.current.submitVote(
+        result.current.activeDrop!,
+        1_000
+      );
+    });
+
+    expect(result.current.isVoting).toBe(true);
+
+    await act(async () => {
+      authDeferred.resolve({ success: false });
+      await firstSubmitPromise!;
+    });
+
+    expect(result.current.isVoting).toBe(false);
+
+    commonApiPostMock.mockResolvedValue({
+      context_profile_context: {
+        rating: 250,
+        max_rating: 4_750,
+      },
+    } as any);
+    requestAuth.mockResolvedValue({ success: true });
+
+    let didSubmit = false;
+
+    await act(async () => {
+      didSubmit = await result.current.submitVote(
+        result.current.activeDrop!,
+        250
+      );
+    });
+
+    expect(didSubmit).toBe(true);
+    expect(requestAuth).toHaveBeenCalledTimes(2);
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
   });
 
   it("persists recent quick-vote amounts to the active storage key after a successful vote", async () => {
@@ -370,6 +604,6 @@ describe("useMemesQuickVoteQueue", () => {
       },
     });
     expect(invalidateDrops).toHaveBeenCalledTimes(1);
-    expect(currentRefetch).toHaveBeenCalledTimes(1);
+    expect(currentRefetch).not.toHaveBeenCalled();
   });
 });

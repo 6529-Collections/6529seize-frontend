@@ -13,10 +13,33 @@ jest.mock(
     __esModule: true,
     default: ({
       isOpen,
+      onClose,
+      sessionId,
     }: {
       readonly isOpen: boolean;
       readonly sessionId: number;
-    }) => (isOpen ? <div>Quick Vote Modal</div> : null),
+      readonly onClose: () => void;
+    }) => {
+      const React = require("react");
+
+      React.useEffect(() => {
+        mockDialogMountCount += 1;
+
+        return () => {
+          mockDialogUnmountCount += 1;
+        };
+      }, []);
+
+      return isOpen ? (
+        <div>
+          <div>Quick Vote Modal</div>
+          <div>Session {sessionId}</div>
+          <button type="button" onClick={onClose}>
+            Close Quick Vote
+          </button>
+        </div>
+      ) : null;
+    },
   })
 );
 
@@ -24,10 +47,14 @@ const useMemesWaveFooterStatsMock =
   useMemesWaveFooterStats as jest.MockedFunction<
     typeof useMemesWaveFooterStats
   >;
+let mockDialogMountCount = 0;
+let mockDialogUnmountCount = 0;
 
 describe("MemesWaveFooter", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDialogMountCount = 0;
+    mockDialogUnmountCount = 0;
     useMemesWaveFooterStatsMock.mockReturnValue({
       uncastPower: null,
       unratedCount: 0,
@@ -111,5 +138,43 @@ describe("MemesWaveFooter", () => {
     );
 
     expect(screen.getByText("Quick Vote Modal")).toBeInTheDocument();
+  });
+
+  it("keeps the quick-vote dialog mounted across close and reopen", () => {
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      uncastPower: 5000,
+      unratedCount: 3,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+
+    render(<MemesWaveFooter />);
+
+    expect(mockDialogMountCount).toBe(1);
+    expect(mockDialogUnmountCount).toBe(0);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Uncast Power, 5,000 TDH, 3 left",
+      })
+    );
+
+    expect(screen.getByText("Session 1")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Close Quick Vote" }));
+
+    expect(screen.queryByText("Quick Vote Modal")).not.toBeInTheDocument();
+    expect(mockDialogMountCount).toBe(1);
+    expect(mockDialogUnmountCount).toBe(0);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Uncast Power, 5,000 TDH, 3 left",
+      })
+    );
+
+    expect(screen.getByText("Session 2")).toBeInTheDocument();
+    expect(mockDialogMountCount).toBe(1);
+    expect(mockDialogUnmountCount).toBe(0);
   });
 });
