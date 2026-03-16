@@ -114,7 +114,7 @@ describe("getAutoSelectedLaunchPhase", () => {
     ).toBe("research");
   });
 
-  it("falls back to phase0 when phase0's schedule is null", () => {
+  it("does not fall back to phase0 when phase0's schedule is null but later phases still exist", () => {
     expect(
       getAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
@@ -124,6 +124,19 @@ describe("getAutoSelectedLaunchPhase", () => {
           index === 0 ? { ...phase, schedule: null } : phase
         ),
       })
-    ).toBe("phase0");
+    ).toBe("research");
+  });
+
+  it("ignores a null schedule on a later phase when an earlier valid phase still matches", () => {
+    expect(
+      getAutoSelectedLaunchPhase({
+        hasPublishedMetadata: true,
+        isInitialized: true,
+        nowMs: 3_500,
+        phases: phases.map((phase, index) =>
+          index === 2 ? { ...phase, schedule: null } : phase
+        ),
+      })
+    ).toBe("phase1");
   });
 });

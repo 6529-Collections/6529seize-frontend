@@ -204,7 +204,7 @@ export function getAutoSelectedLaunchPhase({
     return "phase0";
   }
 
-  if (phases.length === 0 || phases.some((phase) => !phase.schedule)) {
+  if (phases.length === 0 || phases.every((phase) => !phase.schedule)) {
     return "phase0";
   }
 

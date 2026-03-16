@@ -79,27 +79,6 @@ interface ClaimTxModalState {
 
 const DEFAULT_PHASE_PRICE_ETH = "0.06529";
 type LaunchMediaTab = "image" | "animation";
-const MEMES_MINTING_CLAIM_ACTION_LABELS: Record<string, string> = {
-  ARTIST_AIRDROP: "Artist Airdrop",
-  TEAM_AIRDROP: "Team Airdrop",
-  PHASE0_AIRDROP: "Phase0 Airdrop",
-  PHASE1_AIRDROP: "Phase1 Airdrop",
-  PUBLIC_PHASE_AIRDROP: "Public Phase Airdrop",
-  RESEARCH_AIRDROP: "Research Airdrop",
-};
-
-function formatMintingClaimActionLabel(action: string): string {
-  return (
-    MEMES_MINTING_CLAIM_ACTION_LABELS[action] ??
-    action
-      .trim()
-      .toLowerCase()
-      .split("_")
-      .filter(Boolean)
-      .map((segment) => segment[0]?.toUpperCase() + segment.slice(1))
-      .join(" ")
-  );
-}
 
 function getSelectedPhaseFormValues({
   selectedPhase,
@@ -1123,7 +1102,7 @@ export default function DropForgeLaunchClaimPageClient({
         }
         const msg = getErrorMessage(
           e,
-          `Failed to update ${formatMintingClaimActionLabel(action)}`
+          `Failed to update ${action}`
         );
         showErrorToast(msg);
       } finally {
