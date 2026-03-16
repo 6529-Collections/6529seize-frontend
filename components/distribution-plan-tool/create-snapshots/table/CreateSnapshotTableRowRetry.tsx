@@ -5,15 +5,17 @@ import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 import { useContext, useState } from "react";
 import { DistributionPlanToolContext } from "../../DistributionPlanToolContext";
 
+type CreateSnapshotTableRowRetryProps = Readonly<{
+  allowlistId: string;
+  tokenPoolId: string;
+  refreshDownloads: () => Promise<void>;
+}>;
+
 export default function CreateSnapshotTableRowRetry({
   allowlistId,
   tokenPoolId,
   refreshDownloads,
-}: {
-  allowlistId: string;
-  tokenPoolId: string;
-  refreshDownloads: () => Promise<void>;
-}) {
+}: CreateSnapshotTableRowRetryProps) {
   const { setToasts } = useContext(DistributionPlanToolContext);
   const [loading, setLoading] = useState(false);
 

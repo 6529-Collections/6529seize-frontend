@@ -173,7 +173,7 @@ export default function CreateSnapshots() {
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
+    const timeoutId = globalThis.setTimeout(() => {
       void (async () => {
         const data = await loadTokenPoolDownloads(distributionPlan.id);
         if (data !== null) {
@@ -183,7 +183,7 @@ export default function CreateSnapshots() {
     }, 0);
 
     return () => {
-      window.clearTimeout(timeoutId);
+      globalThis.clearTimeout(timeoutId);
     };
   }, [distributionPlan]);
 
@@ -198,8 +198,7 @@ export default function CreateSnapshots() {
 
   const unresolvedSnapshots = snapshots.filter(
     (snapshot) =>
-      !snapshot.download ||
-      snapshot.download.status !==
+      snapshot.download?.status !==
         DistributionPlanTokenPoolDownloadStatus.COMPLETED
   );
 

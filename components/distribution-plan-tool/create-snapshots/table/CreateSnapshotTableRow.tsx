@@ -19,6 +19,7 @@ import CreateSnapshotTableRowDownload from "./CreateSnapshotTableRowDownload";
 import CreateSnapshotTableRowRetry from "./CreateSnapshotTableRowRetry";
 
 type CopyableField = "contract" | "blockNo" | "consolidatedBlockNo" | null;
+type ExecutionPath = "FAST" | "SLOW";
 
 const truncateMessage = (message: string, max = 110): string =>
   message.length > max ? `${message.slice(0, max - 3)}...` : message;
@@ -129,7 +130,7 @@ const getProgressNumber = (
 
 const getExecutionPath = (
   download: DistributionPlanTokenPoolDownload | null
-): "FAST" | "SLOW" | null => {
+): ExecutionPath | null => {
   if (!download?.progress) {
     return null;
   }
@@ -141,7 +142,7 @@ const getExecutionPath = (
 };
 
 const getExecutionPathLabel = (
-  executionPath: "FAST" | "SLOW" | null
+  executionPath: ExecutionPath | null
 ): string | null => {
   if (executionPath === "FAST") {
     return "Fast path";
@@ -153,7 +154,7 @@ const getExecutionPathLabel = (
 };
 
 const getExecutionPathClasses = (
-  executionPath: "FAST" | "SLOW" | null
+  executionPath: ExecutionPath | null
 ): string => {
   if (executionPath === "FAST") {
     return "tw-bg-[#203425] tw-text-[#8CE8A4]";
@@ -265,9 +266,9 @@ const getPreviousFailure = (
     return null;
   }
   const failureTime =
-    download.lastFailureAt !== undefined
-      ? ` at ${formatActivityTime(download.lastFailureAt)}`
-      : "";
+    download.lastFailureAt === undefined
+      ? ""
+      : ` at ${formatActivityTime(download.lastFailureAt)}`;
   return `Previous failure${failureTime}: ${truncateMessage(
     download.lastFailureReason
   )}`;
@@ -315,7 +316,7 @@ export default function CreateSnapshotTableRow({
 
   const setCopied = (field: Exclude<CopyableField, null>) => {
     setCopiedField(field);
-    window.setTimeout(() => {
+    globalThis.setTimeout(() => {
       setCopiedField((currentField) =>
         currentField === field ? null : currentField
       );
