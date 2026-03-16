@@ -39,13 +39,18 @@ jest.mock(
 jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops",
   () => ({
-    AutomaticAirdropsModal: (props: any) =>
+    DistributionPhaseAirdropsModal: (props: any) =>
       props.show ? (
-        <div data-testid="Automatic Airdrops">
+        <div data-testid={`${props.phase}-airdrops-modal`}>
           <button
-            data-testid="upload-airdrops-button"
+            data-testid={`upload-${props.phase}-airdrops-button`}
             onClick={() =>
-              props.onUpload("contract", "123", "0x123,5\n0x456,10")
+              props.onUpload(
+                "contract",
+                "123",
+                props.phase,
+                "0x123,5\n0x456,10"
+              )
             }
           >
             Upload
@@ -89,6 +94,18 @@ const authCtx = {
   setToast: jest.fn(),
 } as any;
 
+function createOverview(overrides?: Record<string, unknown>) {
+  return {
+    photos_count: 0,
+    is_normalized: false,
+    artist_airdrops_addresses: 0,
+    artist_airdrops_count: 0,
+    team_airdrops_addresses: 0,
+    team_airdrops_count: 0,
+    ...overrides,
+  };
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   authCtx.setToast.mockClear();
@@ -101,17 +118,11 @@ beforeEach(() => {
   mockGetAuthJwt.mockReturnValue(null);
   mockUseDownloader.mockReturnValue({
     download: mockDownload,
-    isInProgress: false,
     error: null,
   });
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiFetch")
-    .mockResolvedValue({
-      photos_count: 0,
-      is_normalized: false,
-      automatic_airdrops_addresses: 0,
-      automatic_airdrops_count: 0,
-    });
+    .mockResolvedValue(createOverview());
 });
 
 afterEach(() => {
@@ -156,7 +167,7 @@ test("shows confirm token id modal on mount for admin", () => {
   expect(screen.getByTestId("Confirm Token ID")).toBeInTheDocument();
 });
 
-test("renders admin buttons after token id is confirmed", async () => {
+test("renders split admin controls after token id is confirmed", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   render(<TestWrapper />);
@@ -166,12 +177,17 @@ test("renders admin buttons after token id is confirmed", async () => {
   await waitFor(() => {
     expect(screen.getByText("Change Token ID")).toBeInTheDocument();
     expect(screen.getByText("Reset Subscriptions")).toBeInTheDocument();
+    expect(screen.getByText("Upload Artist Airdrops")).toBeInTheDocument();
+    expect(screen.getByText("Upload Team Airdrops")).toBeInTheDocument();
     expect(screen.getByText("Upload Distribution Photos")).toBeInTheDocument();
-    expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /download automatic airdrops csv/i })
-    ).toBeInTheDocument();
     expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
+    expect(screen.getByText("Publish to GitHub")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /download artist airdrops csv/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /download team airdrops csv/i })
+    ).toBeInTheDocument();
   });
 });
 
@@ -206,9 +222,14 @@ test("shows upload modals when upload buttons clicked", async () => {
     ).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Automatic Airdrops"));
+  await user.click(screen.getByText("Upload Artist Airdrops"));
   await waitFor(() => {
-    expect(screen.getByTestId("Automatic Airdrops")).toBeInTheDocument();
+    expect(screen.getByTestId("artist-airdrops-modal")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByText("Upload Team Airdrops"));
+  await waitFor(() => {
+    expect(screen.getByTestId("team-airdrops-modal")).toBeInTheDocument();
   });
 });
 
@@ -240,7 +261,7 @@ test("resetSubscriptions posts data and shows toast directly", async () => {
 
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiFetch")
-    .mockResolvedValue({ photos_count: 0, is_normalized: false });
+    .mockResolvedValue(createOverview());
 
   render(<TestWrapper />);
 
@@ -277,7 +298,7 @@ test("finalizeDistribution posts data and shows toast directly", async () => {
 
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiFetch")
-    .mockResolvedValue({ photos_count: 0, is_normalized: false });
+    .mockResolvedValue(createOverview());
 
   render(<TestWrapper />);
 
@@ -302,54 +323,91 @@ test("finalizeDistribution posts data and shows toast directly", async () => {
   });
 });
 
-test("uploadAutomaticAirdrops posts CSV data and shows success toast", async () => {
+test("upload artist airdrops posts csv data and shows success toast", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   const commonApiPost = jest
     .fn()
-    .mockResolvedValue({ success: true, message: "Airdrops uploaded" });
+    .mockResolvedValue({ success: true, message: "Artist uploaded" });
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiPost")
     .mockImplementation(commonApiPost);
 
   const commonApiFetch = jest
     .spyOn(require("@/services/api/common-api"), "commonApiFetch")
-    .mockResolvedValue({
-      photos_count: 0,
-      is_normalized: false,
-      automatic_airdrops_addresses: 2,
-      automatic_airdrops_count: 15,
-    });
+    .mockResolvedValue(
+      createOverview({
+        artist_airdrops_addresses: 2,
+        artist_airdrops_count: 15,
+      })
+    );
 
   render(<TestWrapper initialTokenId="123" />);
 
   await waitFor(() => {
-    expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
+    expect(screen.getByText("Upload Artist Airdrops")).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Automatic Airdrops"));
+  await user.click(screen.getByText("Upload Artist Airdrops"));
   await waitFor(() => {
-    expect(screen.getByTestId("Automatic Airdrops")).toBeInTheDocument();
+    expect(screen.getByTestId("artist-airdrops-modal")).toBeInTheDocument();
   });
 
-  await user.click(screen.getByTestId("upload-airdrops-button"));
+  await user.click(screen.getByTestId("upload-artist-airdrops-button"));
 
   await waitFor(() => {
     expect(commonApiPost).toHaveBeenCalledWith(
       expect.objectContaining({
-        endpoint: expect.stringContaining("/automatic_airdrops"),
+        endpoint: expect.stringContaining("/artist-airdrops"),
         body: { csv: "0x123,5\n0x456,10" },
       })
     );
     expect(authCtx.setToast).toHaveBeenCalledWith({
       type: "success",
-      message: "Airdrops uploaded",
+      message: "Artist uploaded",
     });
     expect(commonApiFetch).toHaveBeenCalled();
   });
 });
 
-test("uploadAutomaticAirdrops shows error toast on failure", async () => {
+test("upload team airdrops posts csv data and shows success toast", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  const commonApiPost = jest
+    .fn()
+    .mockResolvedValue({ success: true, message: "Team uploaded" });
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiPost")
+    .mockImplementation(commonApiPost);
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  await waitFor(() => {
+    expect(screen.getByText("Upload Team Airdrops")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByText("Upload Team Airdrops"));
+  await waitFor(() => {
+    expect(screen.getByTestId("team-airdrops-modal")).toBeInTheDocument();
+  });
+
+  await user.click(screen.getByTestId("upload-team-airdrops-button"));
+
+  await waitFor(() => {
+    expect(authCtx.setToast).toHaveBeenCalledWith({
+      type: "success",
+      message: "Team uploaded",
+    });
+    expect(commonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: expect.stringContaining("/team-airdrops"),
+        body: { csv: "0x123,5\n0x456,10" },
+      })
+    );
+  });
+});
+
+test("upload artist airdrops shows error toast on failure", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   const commonApiPost = jest
@@ -362,15 +420,15 @@ test("uploadAutomaticAirdrops shows error toast on failure", async () => {
   render(<TestWrapper initialTokenId="123" />);
 
   await waitFor(() => {
-    expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
+    expect(screen.getByText("Upload Artist Airdrops")).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Automatic Airdrops"));
+  await user.click(screen.getByText("Upload Artist Airdrops"));
   await waitFor(() => {
-    expect(screen.getByTestId("Automatic Airdrops")).toBeInTheDocument();
+    expect(screen.getByTestId("artist-airdrops-modal")).toBeInTheDocument();
   });
 
-  await user.click(screen.getByTestId("upload-airdrops-button"));
+  await user.click(screen.getByTestId("upload-artist-airdrops-button"));
 
   await waitFor(() => {
     expect(authCtx.setToast).toHaveBeenCalledWith({
@@ -380,7 +438,7 @@ test("uploadAutomaticAirdrops shows error toast on failure", async () => {
   });
 });
 
-test("uploadAutomaticAirdrops handles exceptions", async () => {
+test("upload artist airdrops handles exceptions", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   const commonApiPost = jest.fn().mockRejectedValue(new Error("Network error"));
@@ -391,15 +449,15 @@ test("uploadAutomaticAirdrops handles exceptions", async () => {
   render(<TestWrapper initialTokenId="123" />);
 
   await waitFor(() => {
-    expect(screen.getByText("Upload Automatic Airdrops")).toBeInTheDocument();
+    expect(screen.getByText("Upload Artist Airdrops")).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Automatic Airdrops"));
+  await user.click(screen.getByText("Upload Artist Airdrops"));
   await waitFor(() => {
-    expect(screen.getByTestId("Automatic Airdrops")).toBeInTheDocument();
+    expect(screen.getByTestId("artist-airdrops-modal")).toBeInTheDocument();
   });
 
-  await user.click(screen.getByTestId("upload-airdrops-button"));
+  await user.click(screen.getByTestId("upload-artist-airdrops-button"));
 
   await waitFor(() => {
     expect(authCtx.setToast).toHaveBeenCalledWith({
@@ -409,19 +467,23 @@ test("uploadAutomaticAirdrops handles exceptions", async () => {
   });
 });
 
-test("disables automatic airdrops csv download when there are no values", async () => {
+test("disables phase csv downloads when there are no values", async () => {
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
 
   render(<TestWrapper initialTokenId="123" />);
 
-  const downloadButton = await screen.findByRole("button", {
-    name: /download automatic airdrops csv/i,
+  const artistDownloadButton = await screen.findByRole("button", {
+    name: /download artist airdrops csv/i,
+  });
+  const teamDownloadButton = await screen.findByRole("button", {
+    name: /download team airdrops csv/i,
   });
 
-  expect(downloadButton).toBeDisabled();
+  expect(artistDownloadButton).toBeDisabled();
+  expect(teamDownloadButton).toBeDisabled();
 });
 
-test("downloads automatic airdrops csv with the response filename", async () => {
+test("downloads artist airdrops csv with the response filename", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   mockGetStagingAuth.mockReturnValue("staging-token");
@@ -429,17 +491,17 @@ test("downloads automatic airdrops csv with the response filename", async () => 
 
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiFetch")
-    .mockResolvedValue({
-      photos_count: 0,
-      is_normalized: false,
-      automatic_airdrops_addresses: 2,
-      automatic_airdrops_count: 15,
-    });
+    .mockResolvedValue(
+      createOverview({
+        artist_airdrops_addresses: 2,
+        artist_airdrops_count: 15,
+      })
+    );
 
   render(<TestWrapper initialTokenId="123" />);
 
   const downloadButton = await screen.findByRole("button", {
-    name: /download automatic airdrops csv/i,
+    name: /download artist airdrops csv/i,
   });
 
   await waitFor(() => expect(downloadButton).toBeEnabled());
@@ -448,13 +510,50 @@ test("downloads automatic airdrops csv with the response filename", async () => 
   await waitFor(() => {
     expect(mockUseDownloader).toHaveBeenCalledWith();
     expect(mockDownload).toHaveBeenCalledWith(
-      "https://api.test.6529.io/api/distributions/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123/automatic_airdrops",
-      "automatic_airdrops_123.csv",
+      "https://api.test.6529.io/api/distributions/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123/artist-airdrops",
+      "artist_airdrops_123.csv",
       undefined,
       {
         headers: {
+          Accept: "text/csv",
           "x-6529-auth": "staging-token",
           Authorization: "Bearer wallet-token",
+        },
+      }
+    );
+  });
+});
+
+test("downloads team airdrops csv with the response filename", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue(
+      createOverview({
+        team_airdrops_addresses: 1,
+        team_airdrops_count: 5,
+      })
+    );
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  const downloadButton = await screen.findByRole("button", {
+    name: /download team airdrops csv/i,
+  });
+
+  await waitFor(() => expect(downloadButton).toBeEnabled());
+  await user.click(downloadButton);
+
+  await waitFor(() => {
+    expect(mockDownload).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/distributions/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123/team-airdrops",
+      "team_airdrops_123.csv",
+      undefined,
+      {
+        headers: {
+          Accept: "text/csv",
         },
       }
     );
@@ -466,16 +565,15 @@ test("shows an admin-facing error when the downloader reports one", async () => 
 
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiFetch")
-    .mockResolvedValue({
-      photos_count: 0,
-      is_normalized: false,
-      automatic_airdrops_addresses: 1,
-      automatic_airdrops_count: 5,
-    });
+    .mockResolvedValue(
+      createOverview({
+        artist_airdrops_addresses: 1,
+        artist_airdrops_count: 5,
+      })
+    );
 
   mockUseDownloader.mockReturnValue({
     download: mockDownload,
-    isInProgress: false,
     error: { errorMessage: "wallet is not authorized" },
   });
 

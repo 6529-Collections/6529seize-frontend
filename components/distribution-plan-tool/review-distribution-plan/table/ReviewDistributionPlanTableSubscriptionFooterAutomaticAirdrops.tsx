@@ -7,21 +7,111 @@ import {
   formatAddress,
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
-import { useRef, useState } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+
+export type DistributionAirdropsPhase = "artist" | "team";
 
 interface CsvRow {
   address: string;
   count: number;
 }
 
-export function AutomaticAirdropsModal(
+const PHASE_COPY: Record<
+  DistributionAirdropsPhase,
+  {
+    title: string;
+    submitLabel: string;
+    successLabel: string;
+  }
+> = {
+  artist: {
+    title: "Upload Artist Airdrops",
+    submitLabel: "Upload Artist Airdrops",
+    successLabel: "artist",
+  },
+  team: {
+    title: "Upload Team Airdrops",
+    submitLabel: "Upload Team Airdrops",
+    successLabel: "team",
+  },
+};
+
+function getErrorMessage(error: unknown): string {
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Invalid CSV content";
+}
+
+function isValidAddress(address: string): boolean {
+  return /^0x[a-f0-9]{40}$/i.test(address.trim());
+}
+
+function isHeaderRow(line: string): boolean {
+  const parts = line.split(",").map((part) => part.trim().toLowerCase());
+  return parts.length === 2 && parts[0] === "address" && parts[1] === "count";
+}
+
+function parseCsv(csvContent: string): CsvRow[] {
+  const lines = csvContent.split(/\r?\n/).filter((line) => line.trim());
+
+  if (lines.length === 0) {
+    throw new Error("Enter at least one address,count row.");
+  }
+
+  if (isHeaderRow(lines[0]!)) {
+    throw new Error(
+      'Do not include a header row. Use raw "address,count" lines only.'
+    );
+  }
+
+  return lines.map((line, index) => {
+    const trimmedLine = line.trim();
+    const parts = trimmedLine.split(",").map((part) => part.trim());
+
+    if (parts.length !== 2) {
+      throw new Error(
+        `Line ${index + 1}: Expected exactly one wallet address and one count in "address,count" format.`
+      );
+    }
+
+    const [address, countValue] = parts;
+
+    if (!isValidAddress(address!)) {
+      throw new Error(
+        `Line ${index + 1}: Invalid Ethereum address "${address}".`
+      );
+    }
+
+    if (!/^[1-9]\d*$/.test(countValue!)) {
+      throw new Error(`Line ${index + 1}: Count must be a positive integer.`);
+    }
+
+    return {
+      address: address!.toLowerCase(),
+      count: Number.parseInt(countValue!, 10),
+    };
+  });
+}
+
+export function DistributionPhaseAirdropsModal(
   props: Readonly<{
     plan: AllowlistDescription;
+    phase: DistributionAirdropsPhase;
     show: boolean;
+    isUploading: boolean;
     handleClose(): void;
     confirmedTokenId?: string | null | undefined;
-    onUpload(contract: string, tokenId: string, csvContent: string): void;
+    onUpload(
+      contract: string,
+      tokenId: string,
+      phase: DistributionAirdropsPhase,
+      csvContent: string
+    ): Promise<boolean>;
   }>
 ) {
   const numbers = extractAllNumbers(props.plan.name);
@@ -33,162 +123,115 @@ export function AutomaticAirdropsModal(
     props.confirmedTokenId ?? defaultTokenId
   );
   const displayTokenId = props.confirmedTokenId ?? tokenId;
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [parsedRows, setParsedRows] = useState<CsvRow[]>([]);
+  const [csvContent, setCsvContent] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [inputError, setInputError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const contract = MEMES_CONTRACT;
-
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const copy = PHASE_COPY[props.phase];
 
-  const isValidAddress = (address: string): boolean => {
-    return /^0x[a-f0-9]{40}$/i.test(address.trim());
-  };
-
-  const isHeaderRow = (line: string): boolean => {
-    const parts = line.split(",").map((part) => part.trim().toLowerCase());
-    if (parts.length < 2) return false;
-    const validFirstCol = parts[0] === "address" || parts[0] === "wallet";
-    const validSecondCol = parts[1] === "count" || parts[1] === "value";
-    return validFirstCol && validSecondCol;
-  };
-
-  const parseCsv = (
-    csvContent: string
-  ): { rows: CsvRow[]; hadHeader: boolean } => {
-    let lines = csvContent.split(/\r?\n/).filter((line) => line.trim());
-    const rows: CsvRow[] = [];
-    let hadHeader = false;
-
-    const firstLine = lines[0];
-    if (firstLine && isHeaderRow(firstLine)) {
-      hadHeader = true;
-      lines = lines.slice(1);
+  let parsedRows: CsvRow[] = [];
+  let previewError: string | null = null;
+  if (csvContent.trim()) {
+    try {
+      parsedRows = parseCsv(csvContent);
+    } catch (error) {
+      previewError = getErrorMessage(error);
     }
+  }
 
-    const lineOffset = hadHeader ? 2 : 1;
-
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) return;
-
-      const parts = trimmedLine.split(",").map((part) => part.trim());
-      if (parts.length < 2) {
-        throw new Error(
-          `Line ${
-            index + lineOffset
-          }: Expected format "address,count" but found "${trimmedLine}"`
-        );
-      }
-
-      const address = parts[0];
-      const countStr = parts[1];
-
-      if (!isValidAddress(address!)) {
-        throw new Error(
-          `Line ${index + lineOffset}: Invalid Ethereum address "${address}"`
-        );
-      }
-
-      const count = Number.parseInt(countStr!, 10);
-      if (Number.isNaN(count) || count < 0) {
-        throw new Error(
-          `Line ${
-            index + lineOffset
-          }: Invalid count "${countStr}". Must be a non-negative integer.`
-        );
-      }
-
-      rows.push({
-        address: address!.toLowerCase(),
-        count,
-      });
-    });
-
-    return { rows, hadHeader };
+  const resetState = () => {
+    setCsvContent("");
+    setSelectedFileName(null);
+    setInputError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleClose = () => {
+    if (props.isUploading) {
+      return;
+    }
+    resetState();
+    props.handleClose();
+  };
+
+  const handleFileChange = async (
+    e: ChangeEvent<HTMLInputElement>
+  ): Promise<void> => {
     const file = e.target.files?.[0];
+
     if (!file) {
-      setSelectedFile(null);
-      setParsedRows([]);
-      setFileError(null);
+      setSelectedFileName(null);
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      setFileError(`File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit.`);
-      setSelectedFile(null);
-      setParsedRows([]);
+      setInputError(
+        `File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit.`
+      );
+      setSelectedFileName(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
       return;
     }
 
-    file
-      .text()
-      .then((csvContent) => {
-        try {
-          const { rows } = parseCsv(csvContent);
-          setSelectedFile(file);
-          setParsedRows(rows);
-          setFileError(null);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Failed to parse CSV file";
-          setFileError(errorMessage);
-          setSelectedFile(null);
-          setParsedRows([]);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-          }
-        }
-      })
-      .catch(() => {
-        setFileError("Failed to read file");
-        setSelectedFile(null);
-        setParsedRows([]);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-      });
+    try {
+      const nextCsvContent = await file.text();
+      setCsvContent(nextCsvContent);
+      setSelectedFileName(file.name);
+      setInputError(null);
+    } catch {
+      setInputError("Failed to read file.");
+      setSelectedFileName(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
-  const handleUpload = () => {
-    if (!selectedFile || parsedRows.length === 0) {
-      setFileError("Please select a valid CSV file");
-      return;
-    }
+  const handleUpload = async () => {
+    setInputError(null);
 
     if (!isValidPositiveInteger(displayTokenId)) {
+      setInputError("Enter a valid positive token ID.");
       return;
     }
 
-    const csvContent = parsedRows
+    let rows: CsvRow[];
+    try {
+      rows = parseCsv(csvContent);
+    } catch (error) {
+      setInputError(getErrorMessage(error));
+      return;
+    }
+
+    const normalizedCsvContent = rows
       .map((row) => `${row.address},${row.count}`)
       .join("\n");
-    props.onUpload(contract, displayTokenId, csvContent);
-    handleClose();
-  };
 
-  const handleClose = () => {
-    setSelectedFile(null);
-    setParsedRows([]);
-    setFileError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    const didUpload = await props.onUpload(
+      contract,
+      displayTokenId,
+      props.phase,
+      normalizedCsvContent
+    );
+
+    if (didUpload) {
+      resetState();
+      props.handleClose();
     }
-    props.handleClose();
   };
 
   return (
     <Modal show={props.show} onHide={handleClose}>
-      <Modal.Header closeButton>
+      <Modal.Header closeButton={!props.isUploading}>
         <Modal.Title className="tw-text-lg tw-font-semibold">
-          Upload Automatic Airdrops
+          {copy.title}
         </Modal.Title>
       </Modal.Header>
       <hr className="mb-0 mt-0" />
@@ -224,60 +267,84 @@ export function AutomaticAirdropsModal(
           </Row>
           <Row className="pt-2 pb-2">
             <Col>
-              <div className="alert alert-info mb-2 border border-dark">
+              <div className="alert alert-info mb-0 border border-dark">
                 <div className="mb-2">
                   <strong>CSV format:</strong>{" "}
                   <code
                     className="p-1 bg-dark text-light rounded"
-                    style={{
-                      fontSize: "12px",
-                    }}
+                    style={{ fontSize: "12px" }}
                   >
-                    address,value
+                    address,count
                   </code>
                 </div>
                 <div className="mb-2">
-                  <strong>Example:</strong>
+                  Do not include a header row. Each line must contain exactly
+                  one wallet address and one positive integer count.
                 </div>
                 <pre
                   className="mb-0 p-2 bg-dark text-light rounded"
-                  style={{
-                    fontSize: "12px",
-                    overflowX: "auto",
-                  }}
+                  style={{ fontSize: "12px", overflowX: "auto" }}
                 >
                   <code>
-                    {`0x33FD426905F149f8376e227d0C9D3340AaD17aF1,5
-0x9f6ae0370d74f0e591c64cec4a8ae0d627817014,10`}
+                    {`0x33fd426905f149f8376e227d0c9d3340aad17af1,2
+0x9f6ae0370d74f0e591c64cec4a8ae0d627817014,1`}
                   </code>
                 </pre>
               </div>
             </Col>
           </Row>
+          <Row className="pt-3 pb-2">
+            <Col>
+              <label className="form-label mb-2" htmlFor="airdrop-csv-textarea">
+                Paste CSV
+              </label>
+              <textarea
+                id="airdrop-csv-textarea"
+                value={csvContent}
+                onChange={(e) => {
+                  setCsvContent(e.target.value);
+                  setInputError(null);
+                }}
+                placeholder="0x...,2&#10;0x...,1"
+                rows={8}
+                className="form-control"
+                style={{ color: "black" }}
+              />
+            </Col>
+          </Row>
           <Row className="pt-2 pb-2">
             <Col>
-              Select CSV File:{" "}
+              <label className="form-label mb-2" htmlFor="airdrop-csv-file">
+                Or upload a CSV file
+              </label>
               <input
+                id="airdrop-csv-file"
                 ref={fileInputRef}
                 type="file"
                 accept=".csv,text/csv,text/plain"
                 onChange={handleFileChange}
-                style={{
-                  color: "black",
-                }}
+                style={{ color: "black" }}
               />
-              {fileError && (
-                <div className="mt-2">
-                  <div className="text-danger">{fileError}</div>
-                </div>
+              {selectedFileName && (
+                <div className="mt-2 text-muted">{selectedFileName}</div>
               )}
             </Col>
           </Row>
-          {parsedRows.length > 0 && (
+          {(inputError || previewError) && (
+            <Row className="pt-2 pb-2">
+              <Col>
+                <div className="text-danger">{inputError ?? previewError}</div>
+              </Col>
+            </Row>
+          )}
+          {parsedRows.length > 0 && !previewError && (
             <Row className="pt-2 pb-2">
               <Col>
                 <div className="alert alert-success mb-0 border border-dark">
-                  ✓ Successfully parsed {parsedRows.length} row(s)
+                  Ready to upload {copy.successLabel} airdrops:{" "}
+                  {parsedRows.length} address(es) |{" "}
+                  {parsedRows.reduce((total, row) => total + row.count, 0)}{" "}
+                  count
                 </div>
               </Col>
             </Row>
@@ -285,19 +352,25 @@ export function AutomaticAirdropsModal(
         </Container>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <Button
+          variant="secondary"
+          onClick={handleClose}
+          disabled={props.isUploading}
+        >
           Close
         </Button>
         <Button
           disabled={
+            props.isUploading ||
             !isValidPositiveInteger(displayTokenId) ||
-            !selectedFile ||
+            !csvContent.trim() ||
+            !!previewError ||
             parsedRows.length === 0
           }
           variant="primary"
           onClick={handleUpload}
         >
-          Upload Airdrops
+          {props.isUploading ? "Uploading..." : copy.submitLabel}
         </Button>
       </Modal.Footer>
     </Modal>

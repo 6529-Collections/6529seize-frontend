@@ -1,5 +1,7 @@
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
+  getDistributionAirdropsArtist,
+  getDistributionAirdropsTeam,
   getMemesMintingClaimActions,
   getMemesMintingClaimActionTypes,
   upsertMemesMintingClaimAction,
@@ -103,5 +105,35 @@ describe("memes-minting-claims-api", () => {
       })
     );
     expect(firstAction?.completed).toBe(true);
+  });
+
+  it("fetches artist airdrops from the split json endpoint", async () => {
+    fetchMock.mockResolvedValue(mockFetchOk([{ wallet: "0xabc", amount: 2 }]));
+
+    const response = await getDistributionAirdropsArtist(MEMES_CONTRACT, 123);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `https://api.test.6529.io/api/distributions/${MEMES_CONTRACT}/123/artist-airdrops`,
+      expect.objectContaining({
+        method: "GET",
+        headers: {},
+      })
+    );
+    expect(response).toEqual([{ wallet: "0xabc", amount: 2 }]);
+  });
+
+  it("fetches team airdrops from the split json endpoint", async () => {
+    fetchMock.mockResolvedValue(mockFetchOk([{ wallet: "0xdef", amount: 1 }]));
+
+    const response = await getDistributionAirdropsTeam(MEMES_CONTRACT, 123);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `https://api.test.6529.io/api/distributions/${MEMES_CONTRACT}/123/team-airdrops`,
+      expect.objectContaining({
+        method: "GET",
+        headers: {},
+      })
+    );
+    expect(response).toEqual([{ wallet: "0xdef", amount: 1 }]);
   });
 });
