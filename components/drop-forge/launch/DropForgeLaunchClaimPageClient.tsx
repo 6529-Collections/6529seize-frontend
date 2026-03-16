@@ -1127,12 +1127,11 @@ export default function DropForgeLaunchClaimPageClient({
         );
         showErrorToast(msg);
       } finally {
-        if (isStaleClaimActionRequest()) {
-          return;
+        if (!isStaleClaimActionRequest()) {
+          setMintingClaimActionPending((current) =>
+            current === action ? null : current
+          );
         }
-        setMintingClaimActionPending((current) =>
-          current === action ? null : current
-        );
       }
     },
     [
