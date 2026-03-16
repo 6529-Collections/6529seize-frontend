@@ -23,12 +23,12 @@ export default function LinkHandlerFrame({
     relativeHref ??
     (() => {
       const relative = removeBaseEndpoint(href);
-      return relative?.startsWith("/") ? relative : undefined;
+      return relative.startsWith("/") ? relative : undefined;
     })();
 
   return (
-    <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
+    <div className="tw-group/link-card tw-relative tw-w-full tw-min-w-0 tw-max-w-full">
+      <div className="tw-min-w-0 tw-max-w-full tw-overflow-hidden focus-within:tw-overflow-visible">
         {children}
       </div>
       {!hideActions && (
@@ -36,6 +36,7 @@ export default function LinkHandlerFrame({
           href={href}
           hideLink={hideLink}
           relativeHref={effectiveRelativeHref}
+          layout="overlay"
         />
       )}
     </div>
