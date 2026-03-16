@@ -3,6 +3,12 @@ export type SentryStackFrame = {
   abs_path?: string | undefined;
 };
 
+export type SentryTransactionSpan = {
+  op?: string | undefined;
+  description?: string | undefined;
+  data?: Record<string, unknown> | undefined;
+};
+
 type SentryContext = Record<string, unknown>;
 
 type SentryBreadcrumb = {
@@ -59,6 +65,28 @@ const walletCollisionPatterns = [
   'cannot assign to read only property "ethereum"',
   "cannot redefine property: ethereum",
 ];
+const noisyThirdPartyTelemetryTargets = new Set([
+  "cca-lite.coinbase.com/amp",
+  "cca-lite.coinbase.com/metrics",
+  "region1.google-analytics.com/g/collect",
+]);
+
+function getStringValue(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function getNumericValue(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
 
 function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined
@@ -186,6 +214,117 @@ function getContextString(
   return typeof value === "string" ? value : undefined;
 }
 
+function isFirstPartyHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return normalized === "6529.io" || normalized.endsWith(".6529.io");
+}
+
+function getSpanUrlString(span: SentryTransactionSpan): string | undefined {
+  const data = span.data;
+  const urlCandidates = [
+    getStringValue(data?.["http.url"]),
+    getStringValue(data?.["url"]),
+  ];
+
+  for (const candidate of urlCandidates) {
+    if (candidate) {
+      return candidate;
+    }
+  }
+
+  const description = span.description?.trim();
+  if (!description) {
+    return undefined;
+  }
+
+  const strippedDescription = description.replace(/^[A-Z]+\s+/, "");
+  return strippedDescription.startsWith("http://") ||
+    strippedDescription.startsWith("https://")
+    ? strippedDescription
+    : undefined;
+}
+
+function getSpanUrl(span: SentryTransactionSpan): URL | null {
+  const urlString = getSpanUrlString(span);
+  if (!urlString) {
+    return null;
+  }
+
+  try {
+    return new URL(urlString);
+  } catch {
+    return null;
+  }
+}
+
+function isCrossOriginSpan(
+  span: SentryTransactionSpan,
+  url: URL | null
+): boolean {
+  const sameOrigin = span.data?.["url.same_origin"];
+  if (typeof sameOrigin === "boolean") {
+    return !sameOrigin;
+  }
+
+  if (!url) {
+    return false;
+  }
+
+  return !isFirstPartyHost(url.hostname);
+}
+
+function getSpanStatusCode(span: SentryTransactionSpan): number | null {
+  const data = span.data;
+  return (
+    getNumericValue(data?.["http.response.status_code"]) ??
+    getNumericValue(data?.["status_code"])
+  );
+}
+
+function getSpanTransferSize(span: SentryTransactionSpan): number | null {
+  const data = span.data;
+  return (
+    getNumericValue(data?.["http.response_transfer_size"]) ??
+    getNumericValue(data?.["http.response.transfer_size"])
+  );
+}
+
+export function getThirdPartyTelemetrySpanTargetKey(
+  span: SentryTransactionSpan
+): string | null {
+  const url = getSpanUrl(span);
+  if (!url) {
+    return null;
+  }
+
+  return `${url.hostname.toLowerCase()}${url.pathname}`;
+}
+
+export function shouldFilterThirdPartyTelemetrySpan(
+  span: SentryTransactionSpan
+): boolean {
+  const targetKey = getThirdPartyTelemetrySpanTargetKey(span);
+  if (!targetKey || !noisyThirdPartyTelemetryTargets.has(targetKey)) {
+    return false;
+  }
+
+  const url = getSpanUrl(span);
+  if (!isCrossOriginSpan(span, url)) {
+    return false;
+  }
+
+  const statusCode = getSpanStatusCode(span);
+  if (span.op === "http.client") {
+    return statusCode === 0;
+  }
+
+  if (span.op === "resource.beacon") {
+    return statusCode === 0 && getSpanTransferSize(span) === 0;
+  }
+
+  return false;
+}
+
 function hasInjectedAppUriSignature(
   frames: SentryStackFrame[] | undefined,
   hint?: SentryEventHint
@@ -287,4 +426,6 @@ export const __testing = {
   hasInjectedAppUriFrame,
   isTwitterBrowser,
   matchesWalletCollisionPattern,
+  noisyThirdPartyTelemetryTargets,
+  shouldFilterThirdPartyTelemetrySpan,
 };
