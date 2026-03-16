@@ -106,6 +106,33 @@ export default function CommonDropdownItemsDefaultWrapper({
     };
   }, [dynamicPosition, isOpen, position]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleFocusIn = (event: FocusEvent) => {
+      if (!(event.target instanceof Node)) {
+        return;
+      }
+
+      if (
+        buttonRef.current?.contains(event.target) ||
+        listRef.current?.contains(event.target)
+      ) {
+        return;
+      }
+
+      setOpen(false);
+    };
+
+    document.addEventListener("focusin", handleFocusIn);
+
+    return () => {
+      document.removeEventListener("focusin", handleFocusIn);
+    };
+  }, [buttonRef, isOpen, setOpen]);
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);

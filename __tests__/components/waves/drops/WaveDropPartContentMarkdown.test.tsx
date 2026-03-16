@@ -55,6 +55,7 @@ it("renders quoted drop", () => {
     quoted_drop: { drop_id: "d", drop_part_id: 1, drop: null },
   } as any;
   const drop = { id: "root-drop", serial_no: 7 } as any;
+  const onLinkCardActionsActiveChange = jest.fn();
   render(
     <WaveDropPartContentMarkdown
       mentionedUsers={[]}
@@ -63,6 +64,7 @@ it("renders quoted drop", () => {
       wave={wave}
       drop={drop}
       onQuoteClick={jest.fn()}
+      onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
     />
   );
   expect(screen.getByTestId("quote")).toHaveAttribute("data-id", "d");
@@ -70,6 +72,9 @@ it("renders quoted drop", () => {
   expect(quoteProps.embedPath).toEqual(["root-drop"]);
   expect(quoteProps.quotePath).toEqual(["w:7"]);
   expect(quoteProps.embedDepth).toBe(1);
+  expect(quoteProps.onLinkCardActionsActiveChange).toBe(
+    onLinkCardActionsActiveChange
+  );
 });
 
 it("passes link preview toggle control for author drops with links", () => {

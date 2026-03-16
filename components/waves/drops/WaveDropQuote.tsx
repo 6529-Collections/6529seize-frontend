@@ -12,6 +12,7 @@ import WaveDropTime from "./time/WaveDropTime";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { useLinkPreviewContext } from "@/components/waves/LinkPreviewContext";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -21,6 +22,9 @@ interface WaveDropQuoteProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly onLinkCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
 }
 
 const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
@@ -31,7 +35,9 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  onLinkCardActionsActiveChange,
 }) => {
+  const { onCardActionsActiveChange } = useLinkPreviewContext();
   const quotedPart = useMemo<ApiDropPart | null>(() => {
     if (!drop) {
       return null;
@@ -115,6 +121,9 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     return path;
   }, [drop, quotePath]);
 
+  const resolvedOnLinkCardActionsActiveChange =
+    onLinkCardActionsActiveChange ?? onCardActionsActiveChange;
+
   return (
     <div
       className="tw-mt-1 tw-cursor-pointer tw-rounded-xl tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800"
@@ -190,6 +199,9 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
                 quotePath={effectiveQuotePath}
                 embedDepth={embedDepth}
                 maxEmbedDepth={maxEmbedDepth}
+                onLinkCardActionsActiveChange={
+                  resolvedOnLinkCardActionsActiveChange
+                }
               />
             </div>
           </div>

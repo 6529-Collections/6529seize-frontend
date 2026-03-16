@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
@@ -252,7 +252,136 @@ describe("ChatItemHrefButtons", () => {
 
     await user.keyboard("{Enter}");
 
+    expect(
+      screen.getByRole("button", { name: "Hide link previews" })
+    ).toBeDisabled();
     expect(screen.getByRole("button", { name: "Copy link" })).toHaveFocus();
+  });
+
+  it("reports overlay actions as inactive after pointer-driven trigger close", () => {
+    const onCardActionsActiveChange = jest.fn();
+
+    render(
+      <div className="tw-group/link-card tw-relative">
+        <LinkPreviewProvider
+          onCardActionsActiveChange={onCardActionsActiveChange}
+        >
+          <ChatItemHrefButtons href="https://a" layout="overlay" />
+        </LinkPreviewProvider>
+      </div>
+    );
+
+    const trigger = screen.getByRole("button", { name: "Link actions" });
+
+    fireEvent.pointerDown(trigger);
+    fireEvent.mouseDown(trigger);
+    fireEvent.focus(trigger);
+    fireEvent.click(trigger);
+
+    const actionSurfaceId = onCardActionsActiveChange.mock.calls[0]?.[0];
+    expect(onCardActionsActiveChange).toHaveBeenNthCalledWith(
+      1,
+      actionSurfaceId,
+      true
+    );
+
+    fireEvent.pointerDown(trigger);
+    fireEvent.mouseDown(trigger);
+    fireEvent.focus(trigger);
+    fireEvent.click(trigger);
+
+    expect(onCardActionsActiveChange).toHaveBeenNthCalledWith(
+      2,
+      actionSurfaceId,
+      false
+    );
+  });
+
+  it("returns focus to the trigger after a keyboard-activated overlay action", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <div className="tw-group/link-card tw-relative">
+        <ChatItemHrefButtons href="https://a" layout="overlay" />
+      </div>
+    );
+
+    const trigger = screen.getByRole("button", { name: "Link actions" });
+    trigger.focus();
+
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("button", { name: "Copy link" })).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
+  });
+
+  it("returns focus to the trigger when escape closes the overlay menu", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <div className="tw-group/link-card tw-relative">
+        <ChatItemHrefButtons href="https://a" layout="overlay" />
+      </div>
+    );
+
+    const trigger = screen.getByRole("button", { name: "Link actions" });
+    trigger.focus();
+
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("button", { name: "Copy link" })).toHaveFocus();
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
+  });
+
+  it("closes the overlay menu when keyboard focus tabs past the last action", async () => {
+    const user = userEvent.setup();
+    const onCardActionsActiveChange = jest.fn();
+
+    render(
+      <div>
+        <div className="tw-group/link-card tw-relative">
+          <LinkPreviewProvider
+            onCardActionsActiveChange={onCardActionsActiveChange}
+          >
+            <ChatItemHrefButtons href="https://a" layout="overlay" />
+          </LinkPreviewProvider>
+        </div>
+        <button type="button">Outside</button>
+      </div>
+    );
+
+    const trigger = screen.getByRole("button", { name: "Link actions" });
+    trigger.focus();
+
+    const actionSurfaceId = onCardActionsActiveChange.mock.calls[0]?.[0];
+
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("button", { name: "Copy link" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("link", { name: "Open link" })).toHaveFocus();
+
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Outside" })).toHaveFocus();
+      expect(
+        screen.queryByRole("button", { name: "Copy link" })
+      ).not.toBeInTheDocument();
+    });
+
+    expect(onCardActionsActiveChange).toHaveBeenLastCalledWith(
+      actionSurfaceId,
+      false
+    );
   });
 
   it("keeps the overlay trigger visible on touch devices", () => {

@@ -156,6 +156,8 @@ export default function ChatItemHrefButtons({
   const openLinkButtonRef = useRef<HTMLAnchorElement>(null);
   const lastReportedActiveRef = useRef(false);
   const shouldFocusFirstMenuItemRef = useRef(false);
+  const shouldIgnoreNextPointerFocusRef = useRef(false);
+  const shouldRestoreTriggerFocusRef = useRef(false);
   const actionSurfaceStateRef = useRef({
     isMenuOpen: false,
     isHovered: false,
@@ -165,6 +167,9 @@ export default function ChatItemHrefButtons({
   const isOverlay = layout === "overlay";
   const showPersistentOverlayTrigger =
     isOverlay && (hasTouchInput || isMobileDevice);
+  const isPreviewToggleDisabled = Boolean(
+    previewToggle?.isLoading ?? !previewToggle?.canToggle
+  );
 
   useEffect(() => {
     return () => {
@@ -174,6 +179,41 @@ export default function ChatItemHrefButtons({
       }
     };
   }, [actionSurfaceId, onCardActionsActiveChange]);
+
+  useEffect(() => {
+    if (isMenuOpen || !shouldRestoreTriggerFocusRef.current) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      shouldRestoreTriggerFocusRef.current = false;
+      buttonRef.current?.focus();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (!isOverlay || !isMenuOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      shouldRestoreTriggerFocusRef.current = true;
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [isMenuOpen, isOverlay]);
 
   const updateActionSurfaceState = (
     nextStatePatch: Partial<typeof actionSurfaceStateRef.current>
@@ -246,8 +286,13 @@ export default function ChatItemHrefButtons({
     focusFirstMenuItemIfRequested();
   };
 
-  const closeMenu = () => {
+  const closeMenu = ({
+    restoreFocusToTrigger = false,
+  }: {
+    readonly restoreFocusToTrigger?: boolean;
+  } = {}) => {
     shouldFocusFirstMenuItemRef.current = false;
+    shouldRestoreTriggerFocusRef.current = restoreFocusToTrigger;
     updateActionSurfaceState({ isMenuOpen: false });
   };
 
@@ -266,12 +311,12 @@ export default function ChatItemHrefButtons({
     }
 
     previewToggle.onToggle();
-    closeMenu();
+    closeMenu({ restoreFocusToTrigger: event.detail === 0 });
   };
 
   const copyToClipboard = (event: MouseEvent<HTMLButtonElement>) => {
     stopPropagation(event);
-    closeMenu();
+    closeMenu({ restoreFocusToTrigger: event.detail === 0 });
     void navigator.clipboard.writeText(href).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 500);
@@ -280,6 +325,7 @@ export default function ChatItemHrefButtons({
 
   const handleTriggerClick = (event: MouseEvent<HTMLButtonElement>) => {
     stopPropagation(event);
+    shouldIgnoreNextPointerFocusRef.current = false;
     updateActionSurfaceState({
       isMenuOpen: !actionSurfaceStateRef.current.isMenuOpen,
     });
@@ -300,6 +346,7 @@ export default function ChatItemHrefButtons({
 
   const handleTriggerPointerStart = (event: StopEvent) => {
     shouldFocusFirstMenuItemRef.current = false;
+    shouldIgnoreNextPointerFocusRef.current = true;
     stopPropagation(event);
   };
 
@@ -321,17 +368,24 @@ export default function ChatItemHrefButtons({
     updateActionSurfaceState({ isFocused: false });
   };
 
+  const handleOverlayFocusCapture = () => {
+    if (shouldIgnoreNextPointerFocusRef.current) {
+      shouldIgnoreNextPointerFocusRef.current = false;
+      return;
+    }
+
+    updateActionSurfaceState({ isFocused: true });
+  };
+
   const previewToggleButton = showPreviewToggle ? (
     <button
       ref={handlePreviewToggleButtonRef}
       type="button"
       className={`${isOverlay ? MENU_ITEM_CLASSES : RAIL_BUTTON_CLASSES} ${
-        previewToggle?.isLoading || !previewToggle?.canToggle
-          ? "tw-cursor-default tw-opacity-60"
-          : ""
+        isPreviewToggleDisabled ? "tw-cursor-default tw-opacity-60" : ""
       }`}
       aria-label={previewToggle?.label}
-      disabled={previewToggle?.isLoading ?? !previewToggle?.canToggle}
+      disabled={isPreviewToggleDisabled}
       onClick={toggleLinkPreviews}
       onPointerDown={stopPropagation}
       onMouseDown={stopPropagation}
@@ -384,7 +438,7 @@ export default function ChatItemHrefButtons({
       className={isOverlay ? MENU_ITEM_CLASSES : RAIL_BUTTON_CLASSES}
       onClick={(event) => {
         stopPropagation(event);
-        closeMenu();
+        closeMenu({ restoreFocusToTrigger: event.detail === 0 });
       }}
       onPointerDown={stopPropagation}
       onMouseDown={stopPropagation}
@@ -432,7 +486,7 @@ export default function ChatItemHrefButtons({
           }`}
           onMouseEnter={() => updateActionSurfaceState({ isHovered: true })}
           onMouseLeave={() => updateActionSurfaceState({ isHovered: false })}
-          onFocusCapture={() => updateActionSurfaceState({ isFocused: true })}
+          onFocusCapture={handleOverlayFocusCapture}
           onBlurCapture={handleOverlayBlur}
         >
           <button

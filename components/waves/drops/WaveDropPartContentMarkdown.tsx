@@ -116,6 +116,7 @@ const WaveDropPartContentMarkdown: React.FC<
             embedPath={drop?.id ? [drop.id] : []}
             quotePath={currentQuotePath}
             embedDepth={1}
+            onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />
         </div>
       )}
