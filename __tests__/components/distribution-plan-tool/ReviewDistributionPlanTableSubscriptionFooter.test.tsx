@@ -31,49 +31,43 @@ jest.mock(
 jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterUploadPhotos",
   () => ({
-    UploadDistributionPhotosModal: (props: any) =>
-      props.show ? <div data-testid="Upload Distribution Photos" /> : null,
+    UploadDistributionPhotosModal: () => (
+      <div data-testid="Upload Distribution Photos" />
+    ),
   })
 );
 
 jest.mock(
-  "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops",
+  "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterPhaseAirdrops",
   () => ({
-    DistributionPhaseAirdropsModal: (props: any) =>
-      props.show ? (
-        <div data-testid={`${props.phase}-airdrops-modal`}>
-          <button
-            data-testid={`upload-${props.phase}-airdrops-button`}
-            onClick={() =>
-              props.onUpload(
-                "contract",
-                "123",
-                props.phase,
-                "0x123,5\n0x456,10"
-              )
-            }
-          >
-            Upload
-          </button>
-        </div>
-      ) : null,
+    DistributionPhaseAirdropsModal: (props: any) => (
+      <div data-testid={`${props.phase}-airdrops-modal`}>
+        <button
+          data-testid={`upload-${props.phase}-airdrops-button`}
+          onClick={() =>
+            props.onUpload("contract", "123", props.phase, "0x123,5\n0x456,10")
+          }
+        >
+          Upload
+        </button>
+      </div>
+    ),
   })
 );
 
 jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId",
   () => ({
-    ConfirmTokenIdModal: (props: any) =>
-      props.show ? (
-        <div data-testid="Confirm Token ID">
-          <button
-            data-testid="confirm-token-id-button"
-            onClick={() => props.onConfirm("123")}
-          >
-            Confirm
-          </button>
-        </div>
-      ) : null,
+    ConfirmTokenIdModal: (props: any) => (
+      <div data-testid="Confirm Token ID">
+        <button
+          data-testid="confirm-token-id-button"
+          onClick={() => props.onConfirm("123")}
+        >
+          Confirm
+        </button>
+      </div>
+    ),
   })
 );
 

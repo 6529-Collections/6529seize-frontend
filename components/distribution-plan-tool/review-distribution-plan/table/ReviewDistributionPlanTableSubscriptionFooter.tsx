@@ -30,7 +30,7 @@ import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription"
 import {
   DistributionAirdropsPhase,
   DistributionPhaseAirdropsModal,
-} from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
+} from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
 import {
   GithubUploadModal,
@@ -369,24 +369,25 @@ function SubscriptionFooterMain({
       />
       {distributionPlan && (
         <>
-          <ConfirmTokenIdModal
-            plan={distributionPlan}
-            show={showConfirmTokenId}
-            onConfirm={onConfirmTokenId}
-          />
-          <UploadDistributionPhotosModal
-            plan={distributionPlan}
-            show={showUploadPhotos}
-            handleClose={onCloseUploadPhotos}
-            existingPhotosCount={overview?.photos_count ?? 0}
-            confirmedTokenId={confirmedTokenId}
-            onUpload={onUploadPhotos}
-          />
+          {showConfirmTokenId && (
+            <ConfirmTokenIdModal
+              plan={distributionPlan}
+              onConfirm={onConfirmTokenId}
+            />
+          )}
+          {showUploadPhotos && (
+            <UploadDistributionPhotosModal
+              plan={distributionPlan}
+              handleClose={onCloseUploadPhotos}
+              existingPhotosCount={overview?.photos_count ?? 0}
+              confirmedTokenId={confirmedTokenId}
+              onUpload={onUploadPhotos}
+            />
+          )}
           {showAirdropsPhase !== null && (
             <DistributionPhaseAirdropsModal
               plan={distributionPlan}
               phase={showAirdropsPhase}
-              show={showAirdropsPhase !== null}
               isUploading={uploadingAirdropsPhase === showAirdropsPhase}
               handleClose={onCloseAirdrops}
               confirmedTokenId={confirmedTokenId}
@@ -731,7 +732,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         {distributionPlan && (
           <ConfirmTokenIdModal
             plan={distributionPlan}
-            show={showConfirmTokenId}
             onConfirm={handleConfirmTokenId}
           />
         )}

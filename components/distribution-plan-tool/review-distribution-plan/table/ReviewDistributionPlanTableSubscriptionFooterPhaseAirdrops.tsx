@@ -102,7 +102,6 @@ export function DistributionPhaseAirdropsModal(
   props: Readonly<{
     plan: AllowlistDescription;
     phase: DistributionAirdropsPhase;
-    show: boolean;
     isUploading: boolean;
     handleClose(): void;
     confirmedTokenId?: string | null | undefined;
@@ -228,7 +227,7 @@ export function DistributionPhaseAirdropsModal(
   };
 
   return (
-    <Modal show={props.show} onHide={handleClose}>
+    <Modal show onHide={handleClose}>
       <Modal.Header closeButton={!props.isUploading}>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           {copy.title}
