@@ -12,7 +12,11 @@ import {
   sanitizeSentryEvent,
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
-import { shouldFilterByFilenameExceptions } from "@/utils/sentry-client-filters";
+import {
+  shouldFilterByFilenameExceptions,
+  shouldFilterInjectedWalletCollision,
+  shouldFilterTwitterConfigReferenceError,
+} from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
@@ -70,6 +74,14 @@ function shouldFilterEvent(
     if (shouldFilterReferenceErrors(message, value?.type)) {
       return true;
     }
+  }
+
+  if (shouldFilterInjectedWalletCollision(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterTwitterConfigReferenceError(event)) {
+    return true;
   }
 
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
@@ -185,7 +197,10 @@ Sentry.init({
       getFallbackMessage(hint) ||
       (typeof event.message === "string" ? event.message : "");
 
-    if ((error && isIndexedDBError(error)) || (message && isIndexedDBError(message))) {
+    if (
+      (error && isIndexedDBError(error)) ||
+      (message && isIndexedDBError(message))
+    ) {
       handleIndexedDBError(event);
     }
 
