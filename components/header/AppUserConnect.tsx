@@ -5,6 +5,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  ArrowPathRoundedSquareIcon,
   ArrowRightEndOnRectangleIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
@@ -13,6 +14,7 @@ import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import PushNotificationSettings from "./PushNotificationSettings";
 import HeaderQRScanner from "./share/HeaderQRScanner";
+import { useChainSwitcher } from "./useChainSwitcher";
 
 export default function AppUserConnect({
   onNavigate,
@@ -30,6 +32,8 @@ export default function AppUserConnect({
   } = useSeizeConnectContext();
   const { setToast } = useContext(AuthContext);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { chains, currentChainName, nextChainName, switchToNextChain } =
+    useChainSwitcher();
   const availableConnectedAccounts = connectedAccounts ?? [];
 
   const runAsyncAndNavigate = async ({
@@ -59,6 +63,12 @@ export default function AppUserConnect({
   };
 
   const qrScanner = <HeaderQRScanner onScanSuccess={onNavigate} appSidebar />;
+
+  const onSwitchChain = () => {
+    if (switchToNextChain()) {
+      onNavigate();
+    }
+  };
 
   const connectButton = (
     <button
@@ -118,6 +128,21 @@ export default function AppUserConnect({
         <span>Push Notifications</span>
       </button>
       {walletConnectionButton}
+      {isConnected && chains.length > 1 && (
+        <div>
+          <span className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-px-4 tw-py-0.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out">
+            Network: {currentChainName}
+          </span>
+          <button
+            onClick={onSwitchChain}
+            className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
+            aria-label="Switch Chain"
+          >
+            <ArrowPathRoundedSquareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+            <span>Switch to {nextChainName}</span>
+          </button>
+        </div>
+      )}
       <button
         onClick={() => {
           void runAsyncAndNavigate({

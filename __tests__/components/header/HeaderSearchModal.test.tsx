@@ -2,6 +2,7 @@ import HeaderSearchModal from "@/components/header/header-search/HeaderSearchMod
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
 let clickAwayCb: () => void;
 let escapeCb: () => void;
@@ -18,6 +19,7 @@ const useAppWalletsMock = jest.fn();
 const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
+const useDropForgePermissionsMock = jest.fn();
 
 jest.mock("react-use", () => {
   return {
@@ -86,6 +88,9 @@ jest.mock("@/hooks/useSidebarSections", () => {
     mapSidebarSectionsToPages: actual.mapSidebarSectionsToPages,
   };
 });
+jest.mock("@/hooks/useDropForgePermissions", () => ({
+  useDropForgePermissions: () => useDropForgePermissionsMock(),
+}));
 jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
   const MockHeaderSearchModalItem = (props: any) => (
     <div data-testid="item">{JSON.stringify(props)}</div>
@@ -141,6 +146,7 @@ interface SetupOptions {
   nftsRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   wavesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   sidebarSections?: typeof defaultSidebarSections | undefined;
+  dropForgePermissions?: typeof DEFAULT_DROP_FORGE_PERMISSIONS | undefined;
 }
 
 function setup(options: SetupOptions = {}) {
@@ -152,6 +158,7 @@ function setup(options: SetupOptions = {}) {
     nftsRefetch = jest.fn(() => Promise.resolve()),
     wavesRefetch = jest.fn(() => Promise.resolve()),
     sidebarSections = defaultSidebarSections,
+    dropForgePermissions,
   } = options;
   const push = jest.fn();
   const onClose = jest.fn();
@@ -168,6 +175,9 @@ function setup(options: SetupOptions = {}) {
   useCookieConsentMock.mockReturnValue({ country: "US" });
   capacitorMock.mockReturnValue({ isIos: false });
   useSidebarSectionsMock.mockReturnValue(sidebarSections);
+  useDropForgePermissionsMock.mockReturnValue(
+    dropForgePermissions ?? { ...DEFAULT_DROP_FORGE_PERMISSIONS }
+  );
   useWaves.mockReturnValue(
     wavesReturn ?? {
       waves: [],
@@ -273,6 +283,45 @@ describe("HeaderSearchModal", () => {
       .map((element) => element.textContent ?? "");
     expect(
       renderedItems.some((content) => content.includes('"type":"PAGE"'))
+    ).toBe(true);
+  });
+
+  it("includes drop forge pages in search results when accessible", () => {
+    setup({
+      selectedCategory: "PAGES",
+      dropForgePermissions: {
+        hasWallet: true,
+        permissionsLoading: false,
+        canAccessLanding: true,
+        canAccessCraft: true,
+        canAccessLaunch: true,
+        canAccessLaunchPage: true,
+        isDistributionAdmin: true,
+        isClaimsAdmin: true,
+        isDropForgeAdmin: false,
+      },
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "drop forge" } });
+
+    const renderedItems = screen
+      .getAllByTestId("item")
+      .map((element) => element.textContent ?? "");
+    expect(
+      renderedItems.some((content) => content.includes('"/drop-forge"'))
+    ).toBe(true);
+    expect(
+      renderedItems.some((content) => content.includes('"/drop-forge/craft"'))
+    ).toBe(true);
+    expect(
+      renderedItems.some((content) => content.includes('"/drop-forge/launch"'))
     ).toBe(true);
   });
 

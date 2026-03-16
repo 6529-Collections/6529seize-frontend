@@ -5,6 +5,7 @@ import {
   faPlugCirclePlus,
   faPlugCircleXmark,
   faRightFromBracket,
+  faShuffle,
   faShareNodes,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useChainSwitcher } from "@/components/header/useChainSwitcher";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
@@ -51,6 +53,9 @@ export default function HeaderUserMenuDropdown({
   } = useContext(AuthContext);
   const hasProxySection =
     !!activeProfileProxy || receivedProfileProxies.length > 0;
+
+  const { chains, currentChainName, nextChainName, switchToNextChain } =
+    useChainSwitcher();
 
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
@@ -116,6 +121,12 @@ export default function HeaderUserMenuDropdown({
     });
   };
 
+  const onSwitchChain = () => {
+    if (switchToNextChain()) {
+      onClose();
+    }
+  };
+
   return (
     <div>
       <AnimatePresence mode="wait" initial={false}>
@@ -144,7 +155,7 @@ export default function HeaderUserMenuDropdown({
                         canAddAccount={canAddConnectedAccount}
                         onAddAccount={() => {
                           void runMenuAction({
-                            action: () => seizeAddConnectedAccount(),
+                            action: seizeAddConnectedAccount,
                             pendingKey: "add-account",
                             errorMessage:
                               "Failed to add connected account. Please try again.",
@@ -280,6 +291,27 @@ export default function HeaderUserMenuDropdown({
                       </button>
                     )}
                   </li>
+                  {isConnected && chains.length > 1 && (
+                    <li className="tw-h-full tw-px-2 tw-pt-2">
+                      <span className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-px-3 tw-pt-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out">
+                        Network: {currentChainName}
+                      </span>
+                      <button
+                        onClick={onSwitchChain}
+                        type="button"
+                        aria-label="Switch Chain"
+                        title="Switch Chain"
+                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <FontAwesomeIcon
+                          icon={faShuffle}
+                          height={16}
+                          width={16}
+                        />
+                        <span>Switch to {nextChainName}</span>
+                      </button>
+                    </li>
+                  )}
                   {onOpenShare && (
                     <li className="tw-h-full tw-px-2 tw-pt-2">
                       <button

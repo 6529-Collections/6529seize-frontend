@@ -8,6 +8,8 @@ import NowMintingCountdownStatus from "./NowMintingCountdownStatus";
 
 interface NowMintingCountdownProps {
   readonly nftId: number;
+  readonly contract: string;
+  readonly chainId: number;
   readonly hideMintBtn?: boolean;
   readonly hideNextDrop?: boolean;
   readonly fullWidth?: boolean;
@@ -15,14 +17,17 @@ interface NowMintingCountdownProps {
 
 export default function NowMintingCountdown({
   nftId,
+  contract,
+  chainId,
   hideMintBtn,
   hideNextDrop,
   fullWidth,
 }: NowMintingCountdownProps) {
-  const state = useMintCountdownState(
-    nftId,
-    hideMintBtn === undefined ? undefined : { hideMintBtn }
-  );
+  const state = useMintCountdownState(nftId, {
+    contract,
+    chainId,
+    hideMintBtn,
+  });
 
   return (
     <div
