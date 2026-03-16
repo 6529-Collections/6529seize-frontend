@@ -17,9 +17,8 @@ const createTestStore = () =>
     },
   });
 
-function setup(props?: any) {
+function setup() {
   const onTopIntersection = jest.fn();
-  const onUserScroll = jest.fn();
   const store = createTestStore();
 
   const utils = render(
@@ -29,13 +28,12 @@ function setup(props?: any) {
         onTopIntersection={onTopIntersection}
         isFetchingNextPage={false}
         hasNextPage={true}
-        onUserScroll={onUserScroll}
       >
         <div>child</div>
       </WaveDropsReverseContainer>
     </Provider>
   );
-  return { ...utils, onTopIntersection, onUserScroll };
+  return { ...utils, onTopIntersection };
 }
 
 describe("WaveDropsReverseContainer", () => {
@@ -56,15 +54,14 @@ describe("WaveDropsReverseContainer", () => {
     expect(onTopIntersection).toHaveBeenCalled();
   });
 
-  it("invokes onUserScroll on scroll", () => {
-    const { container, onUserScroll } = setup();
+  it("allows scrolling without attaching container-level callbacks", () => {
+    const { container } = setup();
     const scrollDiv = container.firstChild as HTMLElement;
     Object.defineProperty(scrollDiv, "scrollTop", {
       value: -10,
       writable: true,
     });
-    fireEvent.scroll(scrollDiv);
-    expect(onUserScroll).toHaveBeenCalledWith("up", false);
+    expect(() => fireEvent.scroll(scrollDiv)).not.toThrow();
   });
 
   it("keeps callback ref stable across rerenders and only detaches on unmount", () => {
