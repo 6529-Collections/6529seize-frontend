@@ -43,6 +43,8 @@ export default function CreateSnapshotTableRowRetry({
         void onRetry();
       }}
       disabled={loading}
+      aria-label={loading ? "Retrying snapshot" : "Retry snapshot"}
+      aria-busy={loading}
       type="button"
       title="Retry"
       className="tw-group tw-rounded-full tw-border-none tw-bg-primary-400/10 tw-p-2 tw-text-xs tw-font-medium tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-400/20"
