@@ -129,6 +129,7 @@ describe("useMemesQuickVoteQueue", () => {
   let currentDrops: any[] = [];
   let currentContextProfile = DEFAULT_CONTEXT_PROFILE;
   let currentMemesWaveId = DEFAULT_MEMES_WAVE_ID;
+  let currentSessionId = 1;
   let currentRefetch: jest.Mock;
 
   beforeEach(() => {
@@ -137,6 +138,7 @@ describe("useMemesQuickVoteQueue", () => {
     currentDrops = [];
     currentContextProfile = DEFAULT_CONTEXT_PROFILE;
     currentMemesWaveId = DEFAULT_MEMES_WAVE_ID;
+    currentSessionId = 1;
     currentRefetch = jest.fn().mockResolvedValue(undefined);
     commonApiPostMock.mockResolvedValue({} as any);
 
@@ -156,9 +158,12 @@ describe("useMemesQuickVoteQueue", () => {
       JSON.stringify([500, 100, 250])
     );
 
-    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.recentAmounts).toEqual([100, 250, 500]);
     expect(result.current.latestUsedAmount).toBe(250);
@@ -171,9 +176,12 @@ describe("useMemesQuickVoteQueue", () => {
       JSON.stringify([600, 100])
     );
 
-    const { result, rerender } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper(),
-    });
+    const { result, rerender } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.recentAmounts).toEqual([50, 300]);
     expect(result.current.latestUsedAmount).toBe(50);
@@ -194,9 +202,12 @@ describe("useMemesQuickVoteQueue", () => {
     ];
     localStorage.setItem(getSkippedStorageKey(), JSON.stringify([30, 999, 20]));
 
-    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
       40, 30, 20,
@@ -215,9 +226,12 @@ describe("useMemesQuickVoteQueue", () => {
     ];
     localStorage.setItem(getSkippedStorageKey(), JSON.stringify([30, 20]));
 
-    const { result, rerender } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper(),
-    });
+    const { result, rerender } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
       40, 30, 20,
@@ -247,9 +261,12 @@ describe("useMemesQuickVoteQueue", () => {
     ];
     localStorage.setItem(getSkippedStorageKey(), JSON.stringify([50, 30]));
 
-    const { result, rerender } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper(),
-    });
+    const { result, rerender } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
       40, 50, 30,
@@ -288,9 +305,12 @@ describe("useMemesQuickVoteQueue", () => {
     ];
     localStorage.setItem(getSkippedStorageKey(), JSON.stringify([20]));
 
-    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.activeDrop?.serial_no).toBe(40);
 
@@ -312,9 +332,12 @@ describe("useMemesQuickVoteQueue", () => {
       createDrop({ id: "drop-20", serialNo: 20 }),
     ];
 
-    const firstSession = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper(),
-    });
+    const firstSession = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     act(() => {
       firstSession.result.current.skipDrop(
@@ -328,9 +351,14 @@ describe("useMemesQuickVoteQueue", () => {
 
     firstSession.unmount();
 
-    const nextSession = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper(),
-    });
+    currentSessionId = 2;
+
+    const nextSession = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(
       nextSession.result.current.queue.map((drop) => drop.serial_no)
@@ -351,9 +379,12 @@ describe("useMemesQuickVoteQueue", () => {
     } as any);
 
     const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper({ requestAuth }),
-    });
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
 
     await act(async () => {
       await result.current.submitVote(result.current.activeDrop!, 1_000);
@@ -388,9 +419,12 @@ describe("useMemesQuickVoteQueue", () => {
     } as any);
 
     const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const { result, rerender } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper({ requestAuth }),
-    });
+    const { result, rerender } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
 
     await act(async () => {
       await result.current.submitVote(result.current.activeDrop!, 1_000);
@@ -435,9 +469,12 @@ describe("useMemesQuickVoteQueue", () => {
       } as any);
 
     const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper({ requestAuth }),
-    });
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
 
     await act(async () => {
       await result.current.submitVote(result.current.activeDrop!, 1_000);
@@ -464,9 +501,12 @@ describe("useMemesQuickVoteQueue", () => {
     const authDeferred = createDeferred<{ success: boolean }>();
     const requestAuth = jest.fn().mockReturnValue(authDeferred.promise);
 
-    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper({ requestAuth }),
-    });
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
 
     let firstSubmitPromise: Promise<boolean> | undefined;
 
@@ -516,9 +556,12 @@ describe("useMemesQuickVoteQueue", () => {
     const authDeferred = createDeferred<{ success: boolean }>();
     const requestAuth = jest.fn().mockReturnValue(authDeferred.promise);
 
-    const { result } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper({ requestAuth }),
-    });
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
 
     let firstSubmitPromise: Promise<boolean> | undefined;
 
@@ -570,9 +613,12 @@ describe("useMemesQuickVoteQueue", () => {
 
     const requestAuth = jest.fn().mockResolvedValue({ success: true });
     const invalidateDrops = jest.fn();
-    const { result, rerender } = renderHook(() => useMemesQuickVoteQueue(), {
-      wrapper: createWrapper({ invalidateDrops, requestAuth }),
-    });
+    const { result, rerender } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ invalidateDrops, requestAuth }),
+      }
+    );
 
     currentMemesWaveId = "other-wave";
     currentRefetch = jest.fn().mockResolvedValue(undefined);
@@ -605,5 +651,124 @@ describe("useMemesQuickVoteQueue", () => {
     });
     expect(invalidateDrops).toHaveBeenCalledTimes(1);
     expect(currentRefetch).not.toHaveBeenCalled();
+  });
+
+  it("clears optimistic queue state when the context profile changes", async () => {
+    currentDrops = [
+      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
+      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+    ];
+    commonApiPostMock.mockResolvedValue({
+      context_profile_context: {
+        rating: 1_000,
+        max_rating: 4_000,
+      },
+    } as any);
+
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+    const { result, rerender } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 1_000);
+    });
+
+    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([30]);
+    expect(result.current.uncastPower).toBe(4_000);
+
+    currentContextProfile = "other";
+    currentDrops = [
+      createDrop({ id: "drop-90", serialNo: 90, maxRating: 5_000 }),
+      createDrop({ id: "drop-80", serialNo: 80, maxRating: 5_000 }),
+    ];
+
+    rerender();
+
+    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
+      90, 80,
+    ]);
+    expect(result.current.uncastPower).toBe(5_000);
+  });
+
+  it("clears optimistic queue state when the memes wave changes", async () => {
+    currentDrops = [
+      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
+      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+    ];
+    commonApiPostMock.mockResolvedValue({
+      context_profile_context: {
+        rating: 1_000,
+        max_rating: 4_000,
+      },
+    } as any);
+
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+    const { result, rerender } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 1_000);
+    });
+
+    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([30]);
+    expect(result.current.uncastPower).toBe(4_000);
+
+    currentMemesWaveId = "other-wave";
+    currentDrops = [
+      createDrop({ id: "drop-70", serialNo: 70, maxRating: 5_000 }),
+      createDrop({ id: "drop-60", serialNo: 60, maxRating: 5_000 }),
+    ];
+
+    rerender();
+
+    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
+      70, 60,
+    ]);
+    expect(result.current.uncastPower).toBe(5_000);
+  });
+
+  it("clears optimistic queue state when a new quick-vote session starts", async () => {
+    currentDrops = [
+      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
+      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
+    ];
+    commonApiPostMock.mockResolvedValue({
+      context_profile_context: {
+        rating: 1_000,
+        max_rating: 4_000,
+      },
+    } as any);
+
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+    const { result, rerender } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 1_000);
+    });
+
+    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([30]);
+    expect(result.current.uncastPower).toBe(4_000);
+
+    currentSessionId = 2;
+
+    rerender();
+
+    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
+      40, 30,
+    ]);
+    expect(result.current.uncastPower).toBe(5_000);
   });
 });

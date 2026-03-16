@@ -16,6 +16,22 @@ import { useMemesWaveParticipatoryDrops } from "@/hooks/useMemesWaveParticipator
 import { useMemesQuickVoteStorage } from "@/hooks/useMemesQuickVoteStorage";
 import { useCallback, useContext, useMemo, useState } from "react";
 
+type UseMemesQuickVoteQueueOptions = {
+  readonly sessionId: number;
+};
+
+type MemesQuickVoteOptimisticState = {
+  readonly resetKey: string;
+  readonly votedSerials: number[];
+  readonly optimisticRemainingPower: number | null;
+};
+
+const buildMemesQuickVoteResetKey = (
+  sessionId: number,
+  memesWaveId: string | null | undefined,
+  contextProfile: string | null | undefined
+): string => `${sessionId}:${memesWaveId ?? ""}:${contextProfile ?? ""}`;
+
 type UseMemesQuickVoteQueueResult = {
   readonly activeDrop: ExtendedDrop | null;
   readonly queue: ExtendedDrop[];
@@ -33,16 +49,24 @@ type UseMemesQuickVoteQueueResult = {
   readonly skipDrop: (drop: ExtendedDrop) => void;
 };
 
-export const useMemesQuickVoteQueue = (): UseMemesQuickVoteQueueResult => {
+export const useMemesQuickVoteQueue = ({
+  sessionId,
+}: UseMemesQuickVoteQueueOptions): UseMemesQuickVoteQueueResult => {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { drops, contextProfile, isPending, isRefetching, memesWaveId } =
     useMemesWaveParticipatoryDrops();
 
-  const [votedSerials, setVotedSerials] = useState<number[]>([]);
-  const [optimisticRemainingPower, setOptimisticRemainingPower] = useState<
-    number | null
-  >(null);
+  const currentResetKey = useMemo(
+    () => buildMemesQuickVoteResetKey(sessionId, memesWaveId, contextProfile),
+    [contextProfile, memesWaveId, sessionId]
+  );
+  const [optimisticState, setOptimisticState] =
+    useState<MemesQuickVoteOptimisticState>({
+      resetKey: currentResetKey,
+      votedSerials: [],
+      optimisticRemainingPower: null,
+    });
   const {
     liveSkippedSerials,
     recentAmountsByRecency,
@@ -62,13 +86,23 @@ export const useMemesQuickVoteQueue = (): UseMemesQuickVoteQueueResult => {
     [drops]
   );
 
-  const liveVotedSerials = useMemo(
-    () => votedSerials.filter((serialNo) => liveEligibleSerials.has(serialNo)),
-    [liveEligibleSerials, votedSerials]
-  );
+  const isCurrentOptimisticState = optimisticState.resetKey === currentResetKey;
+  const liveVotedSerials = useMemo(() => {
+    if (!isCurrentOptimisticState) {
+      return [];
+    }
+
+    return optimisticState.votedSerials.filter((serialNo) =>
+      liveEligibleSerials.has(serialNo)
+    );
+  }, [
+    isCurrentOptimisticState,
+    liveEligibleSerials,
+    optimisticState.votedSerials,
+  ]);
   const hasPendingOptimisticVote = liveVotedSerials.length > 0;
   const activeOptimisticRemainingPower = hasPendingOptimisticVote
-    ? optimisticRemainingPower
+    ? optimisticState.optimisticRemainingPower
     : null;
   const effectiveDrops = useMemo(
     () =>
@@ -98,18 +132,23 @@ export const useMemesQuickVoteQueue = (): UseMemesQuickVoteQueueResult => {
 
   const handleVoteSuccess = useCallback(
     (drop: ExtendedDrop, nextRemainingPower: number) => {
-      setVotedSerials((current) => {
-        const liveCurrent = current.filter((serialNo) =>
+      setOptimisticState((current) => {
+        const baseVotedSerials =
+          current.resetKey === currentResetKey ? current.votedSerials : [];
+        const liveCurrent = baseVotedSerials.filter((serialNo) =>
           liveEligibleSerials.has(serialNo)
         );
 
-        return liveCurrent.includes(drop.serial_no)
-          ? liveCurrent
-          : [...liveCurrent, drop.serial_no];
+        return {
+          resetKey: currentResetKey,
+          votedSerials: liveCurrent.includes(drop.serial_no)
+            ? liveCurrent
+            : [...liveCurrent, drop.serial_no],
+          optimisticRemainingPower: nextRemainingPower,
+        };
       });
-      setOptimisticRemainingPower(nextRemainingPower);
     },
-    [liveEligibleSerials]
+    [currentResetKey, liveEligibleSerials]
   );
   const { isVoting, submitVote } = useMemesQuickVoteSubmit({
     requestAuth,

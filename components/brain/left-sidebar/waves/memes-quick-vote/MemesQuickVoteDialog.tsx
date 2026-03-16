@@ -158,7 +158,7 @@ export default function MemesQuickVoteDialog({
     skipDrop,
     uncastPower,
     votingLabel,
-  } = useMemesQuickVoteQueue();
+  } = useMemesQuickVoteQueue({ sessionId });
 
   useEffect(() => {
     const dialog = dialogRef.current;
