@@ -143,7 +143,9 @@ function filterNoisyThirdPartyTransactionSpans(
     extra: {
       ...existingExtra,
       filteredThirdPartySpanCount: spans.length - keptSpans.length,
-      filteredThirdPartySpanKeys: Array.from(filteredSpanKeys).sort(),
+      filteredThirdPartySpanKeys: Array.from(filteredSpanKeys).sort(
+        (left, right) => left.localeCompare(right)
+      ),
     },
   };
 
