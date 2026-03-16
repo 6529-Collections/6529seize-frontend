@@ -168,7 +168,7 @@ export default function ChatItemHrefButtons({
   const showPersistentOverlayTrigger =
     isOverlay && (hasTouchInput || isMobileDevice);
   const isPreviewToggleDisabled = Boolean(
-    previewToggle?.isLoading ?? !previewToggle?.canToggle
+    previewToggle && (previewToggle.isLoading || !previewToggle.canToggle)
   );
 
   useEffect(() => {
@@ -306,7 +306,7 @@ export default function ChatItemHrefButtons({
 
   const toggleLinkPreviews = (event: MouseEvent<HTMLButtonElement>) => {
     stopPropagation(event);
-    if (!previewToggle || previewToggle.isLoading || !previewToggle.canToggle) {
+    if (!previewToggle || isPreviewToggleDisabled) {
       return;
     }
 

@@ -52,7 +52,7 @@ export default function CommonDropdownItemsDefaultWrapper({
     const dropdownEl = dropdownRef.current;
 
     // Get width from the list element if possible, otherwise the wrapper
-    const width = listRef.current?.offsetWidth ?? dropdownEl.offsetWidth ?? 288;
+    const width = listRef.current?.offsetWidth ?? dropdownEl.offsetWidth;
     const height = listRef.current?.offsetHeight ?? dropdownEl.offsetHeight;
 
     const scrollX = window.scrollX;
