@@ -297,6 +297,8 @@ function SubscriptionFooterMain({
             </>
           )}
         </button>
+      </div>
+      <div className="mt-2 d-flex align-items-center justify-content-end gap-2 flex-wrap">
         <button
           onClick={onFinalize}
           disabled={isFinalizing}
@@ -323,8 +325,6 @@ function SubscriptionFooterMain({
             </>
           )}
         </button>
-      </div>
-      <div className="mt-2 d-flex align-items-center justify-content-end gap-2">
         <span
           className="tw-inline-flex"
           title={githubUploadTooltip ?? undefined}
