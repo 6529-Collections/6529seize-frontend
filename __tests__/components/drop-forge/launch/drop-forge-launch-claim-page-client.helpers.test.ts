@@ -114,7 +114,7 @@ describe("getAutoSelectedLaunchPhase", () => {
     ).toBe("research");
   });
 
-  it("falls back to phase0 when schedules are missing", () => {
+  it("falls back to phase0 when phase0's schedule is null", () => {
     expect(
       getAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
