@@ -5,13 +5,18 @@ import type { CreateSnapshotSnapshot } from "../CreateSnapshots";
 
 export default function CreateSnapshotTable({
   snapshots,
+  refreshDownloads,
 }: {
   snapshots: CreateSnapshotSnapshot[];
+  refreshDownloads: () => Promise<void>;
 }) {
   return (
     <DistributionPlanTableWrapper>
       <CreateSnapshotTableHeader />
-      <CreateSnapshotTableBody snapshots={snapshots}/>
+      <CreateSnapshotTableBody
+        snapshots={snapshots}
+        refreshDownloads={refreshDownloads}
+      />
     </DistributionPlanTableWrapper>
   );
 }
