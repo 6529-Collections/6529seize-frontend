@@ -85,8 +85,7 @@ interface AllowlistPhaseComponentItem {
   readonly tokensCount: number;
 }
 
-interface AllowlistPhaseComponentWithItems
-  extends AllowlistPhaseComponent {
+interface AllowlistPhaseComponentWithItems extends AllowlistPhaseComponent {
   readonly items: AllowlistPhaseComponentItem[];
 }
 
@@ -127,6 +126,7 @@ export enum AllowlistOperationCode {
 
 export interface AllowlistOperationBase {
   readonly code: AllowlistOperationCode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly params: Record<string, any>;
 }
 
@@ -187,6 +187,19 @@ export enum DistributionPlanTokenPoolDownloadStatus {
   COMPLETED = "COMPLETED",
 }
 
+export enum DistributionPlanTokenPoolDownloadStage {
+  PREPARING = "PREPARING",
+  REQUEUED = "REQUEUED",
+  CLAIMED = "CLAIMED",
+  CHECKING_ALCHEMY = "CHECKING_ALCHEMY",
+  INDEXING_SINGLE = "INDEXING_SINGLE",
+  INDEXING_BATCH = "INDEXING_BATCH",
+  BUILDING_TOKEN_OWNERS = "BUILDING_TOKEN_OWNERS",
+  PERSISTING_RESULTS = "PERSISTING_RESULTS",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+}
+
 export interface DistributionPlanTokenPoolDownload {
   readonly contract: string;
   readonly tokenIds?: string | undefined;
@@ -194,6 +207,23 @@ export interface DistributionPlanTokenPoolDownload {
   readonly allowlistId: string;
   readonly blockNo: number;
   readonly status: DistributionPlanTokenPoolDownloadStatus;
+  readonly rawStatus: DistributionPlanTokenPoolDownloadStatus;
+  readonly stale: boolean;
+  readonly retryable: boolean;
+  readonly errorReason?: string | null;
+  readonly stage?: DistributionPlanTokenPoolDownloadStage | undefined;
+  readonly progress?: Record<string, unknown> | undefined;
+  readonly attemptCount: number;
+  readonly failureCount: number;
+  readonly createdAt?: number | undefined;
+  readonly updatedAt?: number | undefined;
+  readonly claimedAt?: number | undefined;
+  readonly lastHeartbeatAt?: number | undefined;
+  readonly completedAt?: number | undefined;
+  readonly failedAt?: number | undefined;
+  readonly lastFailureAt?: number | undefined;
+  readonly lastFailureReason?: string | null;
+  readonly consolidateBlockNo?: number | null;
 }
 
 export interface DistributionPlanSnapshotToken {
