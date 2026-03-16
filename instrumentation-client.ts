@@ -13,9 +13,12 @@ import {
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 import {
+  getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
+  shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
 
@@ -34,6 +37,11 @@ const noisyPatterns = [
 const referenceErrors = ["__firefox__"];
 
 const URL_REGEX = /\(([^)]+?)\)/;
+type SentryTransactionEvent = Sentry.Event & {
+  spans?: SentryTransactionSpan[] | undefined;
+  tags?: Record<string, unknown> | undefined;
+  extra?: Record<string, unknown> | undefined;
+};
 
 function getFallbackMessage(hint?: Sentry.EventHint): string {
   if (typeof hint?.originalException === "string") {
@@ -86,6 +94,60 @@ function shouldFilterEvent(
 
   const frames = event.exception?.values?.[0]?.stacktrace?.frames;
   return shouldFilterByFilenameExceptions(frames, hint);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function filterNoisyThirdPartyTransactionSpans(
+  event: Sentry.Event
+): Sentry.Event {
+  const transactionEvent = event as SentryTransactionEvent;
+  const spans = transactionEvent.spans;
+  if (!Array.isArray(spans) || spans.length === 0) {
+    return event;
+  }
+
+  const filteredSpanKeys = new Set<string>();
+  const keptSpans = spans.filter((span) => {
+    if (!shouldFilterThirdPartyTelemetrySpan(span)) {
+      return true;
+    }
+
+    const targetKey = getThirdPartyTelemetrySpanTargetKey(span);
+    if (targetKey) {
+      filteredSpanKeys.add(targetKey);
+    }
+    return false;
+  });
+
+  if (keptSpans.length === spans.length) {
+    return event;
+  }
+
+  const existingTags = isRecord(transactionEvent.tags)
+    ? transactionEvent.tags
+    : {};
+  const existingExtra = isRecord(transactionEvent.extra)
+    ? transactionEvent.extra
+    : {};
+
+  const nextEvent: SentryTransactionEvent = {
+    ...transactionEvent,
+    spans: keptSpans,
+    tags: {
+      ...existingTags,
+      third_party_span_noise_filtered: "true",
+    },
+    extra: {
+      ...existingExtra,
+      filteredThirdPartySpanCount: spans.length - keptSpans.length,
+      filteredThirdPartySpanKeys: Array.from(filteredSpanKeys).sort(),
+    },
+  };
+
+  return nextEvent;
 }
 
 function handleIndexedDBError(event: Sentry.Event): void {
@@ -212,7 +274,9 @@ Sentry.init({
   },
 
   beforeSendTransaction(event) {
-    return sanitizeSentryEvent(event as any);
+    return sanitizeSentryEvent(
+      filterNoisyThirdPartyTransactionSpans(event) as any
+    );
   },
 });
 

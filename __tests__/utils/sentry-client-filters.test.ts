@@ -2,10 +2,22 @@ import {
   __testing,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
+  shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
 } from "@/utils/sentry-client-filters";
 
 describe("sentry-client-filters", () => {
+  const buildSpan = (overrides: Record<string, unknown> = {}) =>
+    ({
+      op: "http.client",
+      data: {
+        "http.url": "https://region1.google-analytics.com/g/collect",
+        "http.response.status_code": 0,
+        "url.same_origin": false,
+      },
+      ...overrides,
+    }) as any;
+
   const createTwitterConfigEvent = (overrides: Record<string, unknown> = {}) =>
     ({
       exception: {
@@ -188,6 +200,83 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toContain(expected);
+  });
+
+  it("filters failed Google Analytics collect spans with exact target matching", () => {
+    const result = shouldFilterThirdPartyTelemetrySpan(buildSpan());
+
+    expect(result).toBe(true);
+  });
+
+  it("filters failed Coinbase metrics spans with exact target matching", () => {
+    const result = shouldFilterThirdPartyTelemetrySpan(
+      buildSpan({
+        data: {
+          "http.url": "https://cca-lite.coinbase.com/metrics",
+          "http.response.status_code": 0,
+          "url.same_origin": false,
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters failed Coinbase amp beacons with zero transfer size", () => {
+    const result = shouldFilterThirdPartyTelemetrySpan({
+      op: "resource.beacon",
+      description: "https://cca-lite.coinbase.com/amp",
+      data: {
+        "http.response.status_code": 0,
+        "http.response_transfer_size": 0,
+        "url.same_origin": false,
+      },
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it("does not filter first-party spans", () => {
+    const result = shouldFilterThirdPartyTelemetrySpan(
+      buildSpan({
+        data: {
+          "http.url":
+            "https://api.6529.io/api/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
+          "http.response.status_code": 0,
+          "url.same_origin": false,
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter allowlisted third-party targets when the request succeeded", () => {
+    const result = shouldFilterThirdPartyTelemetrySpan(
+      buildSpan({
+        data: {
+          "http.url": "https://region1.google-analytics.com/g/collect",
+          "http.response.status_code": 200,
+          "url.same_origin": false,
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter broader third-party domains outside the exact allowlist", () => {
+    const result = shouldFilterThirdPartyTelemetrySpan(
+      buildSpan({
+        data: {
+          "http.url": "https://api-js.mixpanel.com/track/",
+          "http.response.status_code": 0,
+          "url.same_origin": false,
+        },
+      })
+    );
+
+    expect(result).toBe(false);
   });
 
   it("filters Twitter CONFIG reference errors with app URI frames", () => {
