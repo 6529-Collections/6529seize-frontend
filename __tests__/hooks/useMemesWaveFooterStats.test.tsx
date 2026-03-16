@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 import { commonApiFetch } from "@/services/api/common-api";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 jest.mock("@/services/api/common-api", () => ({
@@ -50,12 +51,14 @@ const createDrop = ({
   ({
     id,
     serial_no: serialNo,
+    drop_type: ApiDropType.Participatory,
     context_profile_context: {
       rating,
       max_rating: maxRating,
     },
     wave: {
       voting_credit_type: ApiWaveCreditType.Tdh,
+      authenticated_user_eligible_to_vote: true,
     },
   }) as any;
 
@@ -213,9 +216,39 @@ describe("useMemesWaveFooterStats", () => {
       {
         id: "a",
         serial_no: 100,
+        drop_type: ApiDropType.Participatory,
         context_profile_context: null,
         wave: {
           voting_credit_type: ApiWaveCreditType.Tdh,
+          authenticated_user_eligible_to_vote: true,
+        },
+      },
+    ]);
+
+    const { result } = renderHook(() => useMemesWaveFooterStats(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(1));
+
+    expect(result.current.isReady).toBe(false);
+    expect(result.current.uncastPower).toBeNull();
+    expect(result.current.unratedCount).toBe(0);
+  });
+
+  it("ignores unrated drops that are no longer quick-vote eligible", async () => {
+    commonApiFetchMock.mockResolvedValue([
+      {
+        id: "a",
+        serial_no: 100,
+        drop_type: ApiDropType.Participatory,
+        context_profile_context: {
+          rating: 0,
+          max_rating: 5_000,
+        },
+        wave: {
+          voting_credit_type: ApiWaveCreditType.Tdh,
+          authenticated_user_eligible_to_vote: false,
         },
       },
     ]);
