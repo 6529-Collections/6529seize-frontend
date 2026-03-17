@@ -6,6 +6,7 @@ import {
   ArrowTopRightOnSquareIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "react-bootstrap";
@@ -47,6 +48,76 @@ export function DistributionPhotosViewerModal(
     null
   );
   const closeExpandedPhoto = () => setExpandedPhoto(null);
+  let bodyContent: ReactNode;
+
+  if (props.isLoading) {
+    bodyContent = (
+      <ReviewDistributionPlanTableSubscriptionFooterLoadingRow>
+        Loading distribution photos...
+      </ReviewDistributionPlanTableSubscriptionFooterLoadingRow>
+    );
+  } else if (props.error) {
+    bodyContent = (
+      <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="danger">
+        {props.error}
+      </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
+    );
+  } else if (props.photos.length === 0) {
+    bodyContent = (
+      <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="secondary">
+        No distribution photos found for this token.
+      </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
+    );
+  } else {
+    bodyContent = (
+      <>
+        <ReviewDistributionPlanTableSubscriptionFooterRow>
+          <div className="tw-inline-flex tw-rounded-full tw-bg-sky-200 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-sky-950">
+            {formatLabel(props.photos.length, "photo", "photos")}
+          </div>
+        </ReviewDistributionPlanTableSubscriptionFooterRow>
+        <ReviewDistributionPlanTableSubscriptionFooterRow>
+          <div className="tw-grid tw-grid-cols-2 tw-gap-2 md:tw-grid-cols-3 lg:tw-grid-cols-4">
+            {props.photos.map((photo) => {
+              const photoFileName = getPhotoFileName(photo.link);
+              return (
+                <div
+                  key={photo.id}
+                  className="tw-relative tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-1.5"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setExpandedPhoto(photo)}
+                    className="tw-block tw-w-full tw-cursor-zoom-in tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0"
+                  >
+                    <div className="tw-aspect-[4/3] tw-overflow-hidden tw-rounded-md tw-bg-iron-950">
+                      <img
+                        src={photo.link}
+                        alt={photoFileName}
+                        loading="lazy"
+                        className="tw-h-full tw-w-full tw-object-contain"
+                      />
+                    </div>
+                  </button>
+                  <a
+                    href={photo.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(event) => event.stopPropagation()}
+                    aria-label={`Open distribution photo ${photoFileName} in new tab`}
+                    title={photo.link}
+                    className="tw-absolute tw-right-3 tw-top-3 tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900/90 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-500"
+                  >
+                    <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4" />
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </ReviewDistributionPlanTableSubscriptionFooterRow>
+      </>
+    );
+  }
 
   return (
     <>
@@ -66,66 +137,7 @@ export function DistributionPhotosViewerModal(
           tokenId={props.confirmedTokenId}
           muted
         />
-        {props.isLoading ? (
-          <ReviewDistributionPlanTableSubscriptionFooterLoadingRow>
-            Loading distribution photos...
-          </ReviewDistributionPlanTableSubscriptionFooterLoadingRow>
-        ) : props.error ? (
-          <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="danger">
-            {props.error}
-          </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
-        ) : props.photos.length === 0 ? (
-          <ReviewDistributionPlanTableSubscriptionFooterAlertRow variant="secondary">
-            No distribution photos found for this token.
-          </ReviewDistributionPlanTableSubscriptionFooterAlertRow>
-        ) : (
-          <>
-            <ReviewDistributionPlanTableSubscriptionFooterRow>
-              <div className="tw-inline-flex tw-rounded-full tw-bg-sky-200 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-sky-950">
-                {formatLabel(props.photos.length, "photo", "photos")}
-              </div>
-            </ReviewDistributionPlanTableSubscriptionFooterRow>
-            <ReviewDistributionPlanTableSubscriptionFooterRow>
-              <div className="tw-grid tw-grid-cols-2 tw-gap-2 md:tw-grid-cols-3 lg:tw-grid-cols-4">
-                {props.photos.map((photo) => {
-                  const photoFileName = getPhotoFileName(photo.link);
-                  return (
-                    <div
-                      key={photo.id}
-                      className="tw-relative tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-1.5"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setExpandedPhoto(photo)}
-                        className="tw-block tw-w-full tw-cursor-zoom-in tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0"
-                      >
-                        <div className="tw-aspect-[4/3] tw-overflow-hidden tw-rounded-md tw-bg-iron-950">
-                          <img
-                            src={photo.link}
-                            alt={photoFileName}
-                            loading="lazy"
-                            className="tw-h-full tw-w-full tw-object-contain"
-                          />
-                        </div>
-                      </button>
-                      <a
-                        href={photo.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(event) => event.stopPropagation()}
-                        aria-label={`Open distribution photo ${photoFileName} in new tab`}
-                        title={photo.link}
-                        className="tw-absolute tw-right-3 tw-top-3 tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900/90 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-500"
-                      >
-                        <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4" />
-                      </a>
-                    </div>
-                  );
-                })}
-              </div>
-            </ReviewDistributionPlanTableSubscriptionFooterRow>
-          </>
-        )}
+        {bodyContent}
       </ReviewDistributionPlanTableSubscriptionFooterModal>
       <DistributionPhotoLightbox
         photo={expandedPhoto}

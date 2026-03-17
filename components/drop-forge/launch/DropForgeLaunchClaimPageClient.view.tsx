@@ -797,7 +797,7 @@ function DropForgeActionCompletionToggle({
   ariaLabel,
   onToggle,
 }: Readonly<{
-  action?: ApiMintingClaimAction | null;
+  action: ApiMintingClaimAction | null | undefined;
   disabled: boolean;
   ariaLabel: string;
   onToggle: (action: string, completed: boolean) => Promise<void>;

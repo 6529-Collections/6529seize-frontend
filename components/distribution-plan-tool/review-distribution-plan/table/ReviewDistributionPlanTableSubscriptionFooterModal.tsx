@@ -38,8 +38,10 @@ export function ReviewDistributionPlanTableSubscriptionFooterModal({
   closeButton = true,
   bodyTestId,
 }: Readonly<ReviewDistributionPlanTableSubscriptionFooterModalProps>) {
+  const modalSizeProps = size ? { size } : {};
+
   return (
-    <Modal show onHide={onClose} size={size}>
+    <Modal show onHide={onClose} {...modalSizeProps}>
       <Modal.Header closeButton={closeButton}>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           {title}
