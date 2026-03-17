@@ -46,100 +46,100 @@ export function DistributionPhotosViewerModal(
   return (
     <>
       <Modal show onHide={props.handleClose} size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title className="tw-text-lg tw-font-semibold">
-          Distribution Photos
-        </Modal.Title>
-      </Modal.Header>
-      <hr className="mb-0 mt-0" />
-      <Modal.Body data-testid="distribution-photos-viewer-modal">
-        <Container>
-          <Row className="pt-2 pb-2">
-            <Col className="tw-text-sm tw-text-iron-500">
-              Contract: The Memes - {formatAddress(MEMES_CONTRACT)} | Token ID:{" "}
-              {props.confirmedTokenId}
-            </Col>
-          </Row>
-          {props.isLoading ? (
-            <Row className="pt-4 pb-4">
-              <Col className="d-flex align-items-center justify-content-center gap-2">
-                <CircleLoader />
-                <span>Loading distribution photos...</span>
-              </Col>
-            </Row>
-          ) : props.error ? (
+        <Modal.Header closeButton>
+          <Modal.Title className="tw-text-lg tw-font-semibold">
+            Distribution Photos
+          </Modal.Title>
+        </Modal.Header>
+        <hr className="mb-0 mt-0" />
+        <Modal.Body data-testid="distribution-photos-viewer-modal">
+          <Container>
             <Row className="pt-2 pb-2">
-              <Col>
-                <div className="alert alert-danger mb-0">{props.error}</div>
+              <Col className="tw-text-sm tw-text-iron-500">
+                Contract: The Memes - {formatAddress(MEMES_CONTRACT)} | Token
+                ID: {props.confirmedTokenId}
               </Col>
             </Row>
-          ) : props.photos.length === 0 ? (
-            <Row className="pt-2 pb-2">
-              <Col>
-                <div className="alert alert-secondary mb-0 border border-dark">
-                  No distribution photos found for this token.
-                </div>
-              </Col>
-            </Row>
-          ) : (
-            <>
+            {props.isLoading ? (
+              <Row className="pt-4 pb-4">
+                <Col className="d-flex align-items-center justify-content-center gap-2">
+                  <CircleLoader />
+                  <span>Loading distribution photos...</span>
+                </Col>
+              </Row>
+            ) : props.error ? (
               <Row className="pt-2 pb-2">
                 <Col>
-                  <div className="tw-inline-flex tw-rounded-full tw-bg-sky-200 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-sky-950">
-                    {formatLabel(props.photos.length, "photo", "photos")}
+                  <div className="alert alert-danger mb-0">{props.error}</div>
+                </Col>
+              </Row>
+            ) : props.photos.length === 0 ? (
+              <Row className="pt-2 pb-2">
+                <Col>
+                  <div className="alert alert-secondary mb-0 border border-dark">
+                    No distribution photos found for this token.
                   </div>
                 </Col>
               </Row>
-              <Row className="pt-2 pb-2">
-                <Col>
-                  <div className="tw-grid tw-grid-cols-2 tw-gap-2 md:tw-grid-cols-3 lg:tw-grid-cols-4">
-                    {props.photos.map((photo) => {
-                      const photoFileName = getPhotoFileName(photo.link);
-                      return (
-                        <div
-                          key={photo.id}
-                          className="tw-relative tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-1.5"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => setExpandedPhoto(photo)}
-                            className="tw-block tw-w-full tw-cursor-zoom-in tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0"
+            ) : (
+              <>
+                <Row className="pt-2 pb-2">
+                  <Col>
+                    <div className="tw-inline-flex tw-rounded-full tw-bg-sky-200 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-sky-950">
+                      {formatLabel(props.photos.length, "photo", "photos")}
+                    </div>
+                  </Col>
+                </Row>
+                <Row className="pt-2 pb-2">
+                  <Col>
+                    <div className="tw-grid tw-grid-cols-2 tw-gap-2 md:tw-grid-cols-3 lg:tw-grid-cols-4">
+                      {props.photos.map((photo) => {
+                        const photoFileName = getPhotoFileName(photo.link);
+                        return (
+                          <div
+                            key={photo.id}
+                            className="tw-relative tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-1.5"
                           >
-                            <div className="tw-aspect-[4/3] tw-overflow-hidden tw-rounded-md tw-bg-iron-950">
-                              <img
-                                src={photo.link}
-                                alt={photoFileName}
-                                loading="lazy"
-                                className="tw-h-full tw-w-full tw-object-contain"
-                              />
-                            </div>
-                          </button>
-                          <a
-                            href={photo.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(event) => event.stopPropagation()}
-                            aria-label={`Open distribution photo ${photoFileName} in new tab`}
-                            title={photo.link}
-                            className="tw-absolute tw-right-3 tw-top-3 tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900/90 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-500"
-                          >
-                            <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4" />
-                          </a>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Col>
-              </Row>
-            </>
-          )}
-        </Container>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={props.handleClose}>
-          Close
-        </Button>
-      </Modal.Footer>
+                            <button
+                              type="button"
+                              onClick={() => setExpandedPhoto(photo)}
+                              className="tw-block tw-w-full tw-cursor-zoom-in tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0"
+                            >
+                              <div className="tw-aspect-[4/3] tw-overflow-hidden tw-rounded-md tw-bg-iron-950">
+                                <img
+                                  src={photo.link}
+                                  alt={photoFileName}
+                                  loading="lazy"
+                                  className="tw-h-full tw-w-full tw-object-contain"
+                                />
+                              </div>
+                            </button>
+                            <a
+                              href={photo.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(event) => event.stopPropagation()}
+                              aria-label={`Open distribution photo ${photoFileName} in new tab`}
+                              title={photo.link}
+                              className="tw-absolute tw-right-3 tw-top-3 tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900/90 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-500"
+                            >
+                              <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4" />
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Col>
+                </Row>
+              </>
+            )}
+          </Container>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={props.handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
       <DistributionPhotoLightbox
         photo={expandedPhoto}

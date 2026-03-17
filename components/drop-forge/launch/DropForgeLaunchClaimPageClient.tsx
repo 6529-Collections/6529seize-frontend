@@ -1100,10 +1100,7 @@ export default function DropForgeLaunchClaimPageClient({
         if (isStaleClaimActionRequest()) {
           return;
         }
-        const msg = getErrorMessage(
-          e,
-          `Failed to update ${action}`
-        );
+        const msg = getErrorMessage(e, `Failed to update ${action}`);
         showErrorToast(msg);
       } finally {
         if (!isStaleClaimActionRequest()) {

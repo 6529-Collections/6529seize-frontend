@@ -363,10 +363,7 @@ function SubscriptionFooterMain({
                 <CircleLoader />
               </span>
             ) : (
-              <FontAwesomeIcon
-                icon={faUpload}
-                className="tw-h-3.5 tw-w-3.5"
-              />
+              <FontAwesomeIcon icon={faUpload} className="tw-h-3.5 tw-w-3.5" />
             )}
           </button>
           <button
@@ -1017,9 +1014,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         handleShowViewAirdrops(contract, confirmedTokenId, phase)
       }
       onShowUploadPhotos={() => setShowUploadPhotos(true)}
-      onShowViewPhotos={() =>
-        handleShowViewPhotos(contract, confirmedTokenId)
-      }
+      onShowViewPhotos={() => handleShowViewPhotos(contract, confirmedTokenId)}
       onDownloadAirdrops={(phase) =>
         handleDownloadAirdrops(contract, confirmedTokenId, phase)
       }
