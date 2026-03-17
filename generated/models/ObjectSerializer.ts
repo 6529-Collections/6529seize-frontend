@@ -62,6 +62,8 @@ export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
 export * from '../models/ApiCreateWaveOutcome';
 export * from '../models/ApiCreateWaveOutcomeDistributionItem';
+export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
+export * from '../models/ApiDistributionAirdropsUploadResponse';
 export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropBoost';
@@ -101,6 +103,7 @@ export * from '../models/ApiGroupRepFilter';
 export * from '../models/ApiGroupTdhFilter';
 export * from '../models/ApiGroupTdhInclusionStrategy';
 export * from '../models/ApiIdentity';
+export * from '../models/ApiIdentityActivity';
 export * from '../models/ApiIdentityAndSubscriptionActions';
 export * from '../models/ApiIdentitySubscriptionActions';
 export * from '../models/ApiIdentitySubscriptionTargetAction';
@@ -118,6 +121,10 @@ export * from '../models/ApiMemesMintStatsYearly';
 export * from '../models/ApiMentionedWave';
 export * from '../models/ApiMintMetrics';
 export * from '../models/ApiMintMetricsPage';
+export * from '../models/ApiMintingClaimAction';
+export * from '../models/ApiMintingClaimActionTypesResponse';
+export * from '../models/ApiMintingClaimActionUpdateRequest';
+export * from '../models/ApiMintingClaimActionsResponse';
 export * from '../models/ApiMintingClaimsPhaseTotalItem';
 export * from '../models/ApiNft';
 export * from '../models/ApiNftLinkData';
@@ -354,6 +361,8 @@ import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
+import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
+import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
 import { ApiDrop                              } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropBoost } from '../models/ApiDropBoost';
@@ -393,6 +402,7 @@ import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter    } from '../models/ApiGroupTdhFilter';
 import { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStrategy';
 import { ApiIdentity                         } from '../models/ApiIdentity';
+import { ApiIdentityActivity } from '../models/ApiIdentityActivity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
@@ -410,6 +420,10 @@ import { ApiMemesMintStatsYearly } from '../models/ApiMemesMintStatsYearly';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiMintMetrics } from '../models/ApiMintMetrics';
 import { ApiMintMetricsPage } from '../models/ApiMintMetricsPage';
+import { ApiMintingClaimAction } from '../models/ApiMintingClaimAction';
+import { ApiMintingClaimActionTypesResponse } from '../models/ApiMintingClaimActionTypesResponse';
+import { ApiMintingClaimActionUpdateRequest } from '../models/ApiMintingClaimActionUpdateRequest';
+import { ApiMintingClaimActionsResponse } from '../models/ApiMintingClaimActionsResponse';
 import { ApiMintingClaimsPhaseTotalItem } from '../models/ApiMintingClaimsPhaseTotalItem';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
 import { ApiNftLinkData } from '../models/ApiNftLinkData';
@@ -697,6 +711,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
     "ApiCreateWaveOutcome": ApiCreateWaveOutcome,
     "ApiCreateWaveOutcomeDistributionItem": ApiCreateWaveOutcomeDistributionItem,
+    "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
+    "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
     "ApiDrop": ApiDrop,
     "ApiDropAndDropVote": ApiDropAndDropVote,
     "ApiDropBoost": ApiDropBoost,
@@ -730,6 +746,7 @@ let typeMap: {[index: string]: any} = {
     "ApiGroupRepFilter": ApiGroupRepFilter,
     "ApiGroupTdhFilter": ApiGroupTdhFilter,
     "ApiIdentity": ApiIdentity,
+    "ApiIdentityActivity": ApiIdentityActivity,
     "ApiIdentityAndSubscriptionActions": ApiIdentityAndSubscriptionActions,
     "ApiIdentitySubscriptionActions": ApiIdentitySubscriptionActions,
     "ApiIncomingIdentitySubscriptionsPage": ApiIncomingIdentitySubscriptionsPage,
@@ -745,6 +762,10 @@ let typeMap: {[index: string]: any} = {
     "ApiMentionedWave": ApiMentionedWave,
     "ApiMintMetrics": ApiMintMetrics,
     "ApiMintMetricsPage": ApiMintMetricsPage,
+    "ApiMintingClaimAction": ApiMintingClaimAction,
+    "ApiMintingClaimActionTypesResponse": ApiMintingClaimActionTypesResponse,
+    "ApiMintingClaimActionUpdateRequest": ApiMintingClaimActionUpdateRequest,
+    "ApiMintingClaimActionsResponse": ApiMintingClaimActionsResponse,
     "ApiMintingClaimsPhaseTotalItem": ApiMintingClaimsPhaseTotalItem,
     "ApiNft": ApiNft,
     "ApiNftLinkData": ApiNftLinkData,

@@ -23,13 +23,21 @@ export class DistributionOverview {
     */
     'is_normalized': boolean;
     /**
-    * Count of unique addresses with automatic airdrops
+    * Count of unique addresses in the Airdrop - Artist phase
     */
-    'automatic_airdrops_addresses': number;
+    'artist_airdrops_addresses': number;
     /**
-    * Total count of automatic airdrops
+    * Total count in the Airdrop - Artist phase
     */
-    'automatic_airdrops_count': number;
+    'artist_airdrops_count': number;
+    /**
+    * Count of unique addresses in the Airdrop - Team phase
+    */
+    'team_airdrops_addresses': number;
+    /**
+    * Total count in the Airdrop - Team phase
+    */
+    'team_airdrops_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -49,14 +57,26 @@ export class DistributionOverview {
             "format": ""
         },
         {
-            "name": "automatic_airdrops_addresses",
-            "baseName": "automatic_airdrops_addresses",
+            "name": "artist_airdrops_addresses",
+            "baseName": "artist_airdrops_addresses",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "automatic_airdrops_count",
-            "baseName": "automatic_airdrops_count",
+            "name": "artist_airdrops_count",
+            "baseName": "artist_airdrops_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "team_airdrops_addresses",
+            "baseName": "team_airdrops_addresses",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "team_airdrops_count",
+            "baseName": "team_airdrops_count",
             "type": "number",
             "format": "int64"
         }    ];
