@@ -108,6 +108,13 @@ const resolveFullWaveMessagesSnapshot = ({
   };
 };
 
+const isSameWaveMessagesSnapshot = (
+  currentSnapshot: WaveMessagesSnapshot,
+  nextSnapshot: WaveMessagesSnapshot
+): boolean =>
+  currentSnapshot.waveId === nextSnapshot.waveId &&
+  currentSnapshot.messages === nextSnapshot.messages;
+
 const getNextVirtualLimitAfterAppend = ({
   currentLimit,
   hasInitialized,
@@ -174,11 +181,13 @@ export function useVirtualizedWaveMessages(
   });
 
   if (
-    resolvedFullWaveMessagesSnapshot.waveId !==
-      fullWaveMessagesSnapshot.waveId ||
-    resolvedFullWaveMessagesSnapshot.messages !==
-      fullWaveMessagesSnapshot.messages
+    !isSameWaveMessagesSnapshot(
+      fullWaveMessagesSnapshot,
+      resolvedFullWaveMessagesSnapshot
+    )
   ) {
+    // Track the last committed same-wave snapshot during render to avoid
+    // effect-driven derived state and skip rendering stale fallback data.
     setFullWaveMessagesSnapshot(resolvedFullWaveMessagesSnapshot);
   }
 
@@ -189,6 +198,8 @@ export function useVirtualizedWaveMessages(
       : null);
   const activeDropMessages = dropId ? fullWaveMessagesForDrop : null;
   const activeMessages = activeDropMessages ?? activeFullWaveMessages;
+  const hasActiveMessages = Boolean(activeMessages);
+  const activeMessagesCount = activeMessages?.drops.length ?? 0;
   const virtualLimit = getScopedVirtualLimit({
     scopeKey,
     virtualLimitState,
@@ -196,26 +207,24 @@ export function useVirtualizedWaveMessages(
   });
   const persistedEffectiveLimit = scopedAppendTrackingState.effectiveLimit;
   const baseVirtualLimit = Math.max(virtualLimit, persistedEffectiveLimit);
-  const effectiveVirtualLimit = activeMessages
+  const effectiveVirtualLimit = hasActiveMessages
     ? getNextVirtualLimitAfterAppend({
         currentLimit: baseVirtualLimit,
         hasInitialized: scopedAppendTrackingState.hasInitialized,
         pageSize,
         previousTotal: scopedAppendTrackingState.previousTotal,
-        totalDrops: activeMessages.drops.length,
+        totalDrops: activeMessagesCount,
       })
     : baseVirtualLimit;
-  const hasMoreLocal = activeMessages
-    ? activeMessages.drops.length > effectiveVirtualLimit
+  const hasMoreLocal = hasActiveMessages
+    ? activeMessagesCount > effectiveVirtualLimit
     : false;
-
-  const nextAppendTrackingState = activeMessages
+  const nextAppendTrackingState = hasActiveMessages
     ? {
         scopeKey,
-        previousTotal: activeMessages.drops.length,
+        previousTotal: activeMessagesCount,
         hasInitialized:
-          scopedAppendTrackingState.hasInitialized ||
-          activeMessages.drops.length > 0,
+          scopedAppendTrackingState.hasInitialized || activeMessagesCount > 0,
         effectiveLimit: effectiveVirtualLimit,
       }
     : createAppendTrackingState(scopeKey, pageSize);
@@ -223,6 +232,8 @@ export function useVirtualizedWaveMessages(
   if (
     !isSameAppendTrackingState(appendTrackingState, nextAppendTrackingState)
   ) {
+    // Persist append bookkeeping during render because it only tracks previous
+    // render inputs and should not be synchronized through an effect.
     setAppendTrackingState(nextAppendTrackingState);
   }
 
