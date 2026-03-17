@@ -1,9 +1,9 @@
 "use client";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 import UserCICTypeIcon from "./UserCICTypeIcon";
 
@@ -12,12 +12,8 @@ export default function UserCICTypeIconWrapper({
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const tooltipId = `user-cic-type-tooltip-${profile.id}`;
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const tooltipId = `user-cic-type-tooltip-${profile.id ?? "unknown"}`;
+  const canRenderTooltip = typeof document !== "undefined";
 
   return (
     <>
@@ -25,20 +21,19 @@ export default function UserCICTypeIconWrapper({
         <UserCICTypeIcon cic={profile.cic} />
       </div>
 
-      {mounted &&
+      {canRenderTooltip &&
         createPortal(
           <Tooltip
             id={tooltipId}
             clickable={true}
             place="right"
+            positionStrategy="fixed"
             opacity={1}
-            border="1px solid #333"
             style={{
-              backgroundColor: "#26272B",
-              borderRadius: "8px",
+              ...TOOLTIP_STYLES,
               padding: "0",
               maxWidth: "360px",
-              zIndex: 9999,
+              pointerEvents: "auto",
             }}
           >
             <UserCICTypeIconTooltip profile={profile} />
