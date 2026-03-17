@@ -35,9 +35,19 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
+  const resizeDescriptionTextarea = useCallback(
+    (textarea: HTMLTextAreaElement | null) => {
+      if (!textarea) return;
+
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    },
+    []
+  );
+
   // Sync refs with props when they change
   React.useEffect(() => {
-    if (titleRef.current && title && titleRef.current.value !== title) {
+    if (titleRef.current && titleRef.current.value !== title) {
       titleRef.current.value = title;
     }
   }, [title]);
@@ -45,36 +55,43 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   React.useEffect(() => {
     if (
       descriptionRef.current &&
-      description &&
       descriptionRef.current.value !== description
     ) {
       descriptionRef.current.value = description;
     }
-  }, [description]);
+
+    resizeDescriptionTextarea(descriptionRef.current);
+  }, [description, resizeDescriptionTextarea]);
 
   // Handle blur events - only update parent state when user finishes typing
   const handleTitleBlur = useCallback(() => {
-    if (titleRef.current && titleRef.current.value !== title) {
-      onTitleChange(titleRef.current.value);
-    }
     // Call parent blur handler for validation
     if (onTitleBlur) {
       onTitleBlur();
     }
-  }, [onTitleChange, title, onTitleBlur]);
+  }, [onTitleBlur]);
 
   const handleDescriptionBlur = useCallback(() => {
-    if (
-      descriptionRef.current &&
-      descriptionRef.current.value !== description
-    ) {
-      onDescriptionChange(descriptionRef.current.value);
-    }
     // Call parent blur handler for validation
     if (onDescriptionBlur) {
       onDescriptionBlur();
     }
-  }, [onDescriptionChange, description, onDescriptionBlur]);
+  }, [onDescriptionBlur]);
+
+  const handleTitleInput = useCallback(
+    (event: React.FormEvent<HTMLInputElement>) => {
+      onTitleChange(event.currentTarget.value);
+    },
+    [onTitleChange]
+  );
+
+  const handleDescriptionInput = useCallback(
+    (event: React.FormEvent<HTMLTextAreaElement>) => {
+      onDescriptionChange(event.currentTarget.value);
+      resizeDescriptionTextarea(event.currentTarget);
+    },
+    [onDescriptionChange, resizeDescriptionTextarea]
+  );
 
   // Check if fields are filled
   const isTitleFilled = useMemo(() => title.trim().length > 0, [title]);
@@ -93,12 +110,11 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
           <div className="tw-relative">
             <label
               htmlFor="field-title"
-              className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all
-                ${
-                  titleError
-                    ? "tw-text-red"
-                    : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
-                }`}
+              className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-transition-all ${
+                titleError
+                  ? "tw-text-red"
+                  : "group-focus-visible-within:tw-text-primary-400 tw-text-iron-300"
+              }`}
             >
               Artwork Title
             </label>
@@ -111,25 +127,22 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 type="text"
                 maxLength={500}
                 defaultValue={title || ""}
+                onInput={handleTitleInput}
                 onBlur={handleTitleBlur}
                 aria-invalid={!!titleError}
                 aria-describedby={titleError ? "title-error" : undefined}
                 data-field="title"
-                className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out
-                  tw-bg-iron-900 tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-cursor-text tw-ring-1
-                  ${
-                    titleError
-                      ? "tw-ring-red"
-                      : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
-                  }
-                  ${isTitleFilled && !titleError ? "tw-pr-10" : ""}
-                  `}
+                className={`tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 ${
+                  titleError
+                    ? "tw-ring-red"
+                    : "tw-ring-iron-700 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"
+                } ${isTitleFilled && !titleError ? "tw-pr-10" : ""} `}
               />
 
               {/* Title checkmark */}
               {isTitleFilled && !titleError && (
-                <div className="tw-absolute tw-right-3 tw-top-1/2 tw-transform -tw-translate-y-1/2 tw-pointer-events-none">
-                  <CheckCircleIcon className="tw-text-emerald-500 tw-w-5 tw-h-5 tw-flex-shrink-0" />
+                <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-transform">
+                  <CheckCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-emerald-500" />
                 </div>
               )}
             </div>
@@ -142,12 +155,11 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
           <div className="tw-relative">
             <label
               htmlFor="field-description"
-              className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all
-                ${
-                  descriptionError
-                    ? "tw-text-red"
-                    : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
-                }`}
+              className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-transition-all ${
+                descriptionError
+                  ? "tw-text-red"
+                  : "group-focus-visible-within:tw-text-primary-400 tw-text-iron-300"
+              }`}
             >
               Description
             </label>
@@ -158,6 +170,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 id="field-description"
                 name="description"
                 defaultValue={description || ""}
+                onInput={handleDescriptionInput}
                 onBlur={handleDescriptionBlur}
                 rows={4}
                 maxLength={500}
@@ -166,21 +179,17 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                   descriptionError ? "description-error" : undefined
                 }
                 data-field="description"
-                className={`tw-form-textarea tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out
-                  tw-bg-iron-900 tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-resize-none tw-cursor-text tw-ring-1
-                  ${
-                    descriptionError
-                      ? "tw-ring-red"
-                      : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
-                  }
-                  ${isDescriptionFilled && !descriptionError ? "tw-pr-10" : ""}
-                  `}
+                className={`tw-form-textarea tw-w-full tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 ${
+                  descriptionError
+                    ? "tw-ring-red"
+                    : "tw-ring-iron-700 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"
+                } ${isDescriptionFilled && !descriptionError ? "tw-pr-10" : ""} `}
               />
 
               {/* Description checkmark */}
               {isDescriptionFilled && !descriptionError && (
-                <div className="tw-absolute tw-right-3 tw-top-3 tw-pointer-events-none">
-                  <CheckCircleIcon className="tw-text-emerald-500 tw-w-5 tw-h-5 tw-flex-shrink-0" />
+                <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-3">
+                  <CheckCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-emerald-500" />
                 </div>
               )}
             </div>

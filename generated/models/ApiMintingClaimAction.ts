@@ -11,16 +11,24 @@
  * Do not edit the class manually.
  */
 
-import { ApiWaveDecisionAward } from '../models/ApiWaveDecisionAward';
 import { HttpFile } from '../http/http';
 
-export class ApiDropWinningContext {
-    'place': number;
-    'awards': Array<ApiWaveDecisionAward>;
-    'decision_time': number;
-    'sale_time'?: number | null;
-    'sale_price'?: number | null;
-    'sale_price_currency'?: string | null;
+export class ApiMintingClaimAction {
+    /**
+    * Contract-specific minting claim action name
+    */
+    'action': string;
+    'completed': boolean;
+    /**
+    * Unix epoch milliseconds when this action record was created
+    */
+    'created_at'?: number;
+    /**
+    * Unix epoch milliseconds when this action record was last updated
+    */
+    'updated_at'?: number;
+    'created_by_wallet'?: string;
+    'updated_by_wallet'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -28,44 +36,44 @@ export class ApiDropWinningContext {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "place",
-            "baseName": "place",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "awards",
-            "baseName": "awards",
-            "type": "Array<ApiWaveDecisionAward>",
+            "name": "action",
+            "baseName": "action",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "decision_time",
-            "baseName": "decision_time",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "sale_time",
-            "baseName": "sale_time",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "sale_price",
-            "baseName": "sale_price",
-            "type": "number",
+            "name": "completed",
+            "baseName": "completed",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "sale_price_currency",
-            "baseName": "sale_price_currency",
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "updated_at",
+            "baseName": "updated_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "created_by_wallet",
+            "baseName": "created_by_wallet",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "updated_by_wallet",
+            "baseName": "updated_by_wallet",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropWinningContext.attributeTypeMap;
+        return ApiMintingClaimAction.attributeTypeMap;
     }
 
     public constructor() {

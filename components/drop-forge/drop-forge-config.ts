@@ -5,8 +5,13 @@ import { useChainId } from "wagmi";
 import { Chain, mainnet, sepolia } from "wagmi/chains";
 import { MEMES_CONTRACT } from "@/constants/constants";
 
+// 6529Deployer contract
 const DROP_FORGE_TESTNET_CONTRACT =
   "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c";
+
+// prxt contract
+// const DROP_FORGE_TESTNET_CONTRACT =
+//   "0xb491971ba9d757d1b16feba1a019b60d6b74dc20";
 
 export enum DropForgeMintingMode {
   MAINNET = "MAINNET",

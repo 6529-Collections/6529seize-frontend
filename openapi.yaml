@@ -771,12 +771,16 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
-  /distributions/{contract}/{id}/airdrops_artist:
+  /distributions/{contract}/{id}/artist-airdrops:
     get:
       tags:
         - Distributions
       summary: Get artist airdrops for a specific contract and card
-      operationId: getDistributionAirdropsArtist
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Returns
+        JSON by default, or CSV in `address,count` format when the client sends
+        `Accept: text/csv`.
+      operationId: getDistributionArtistAirdrops
       parameters:
         - name: contract
           in: path
@@ -800,14 +804,66 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PhaseAirdrop"
+            text/csv:
+              schema:
+                type: string
+                format: binary
         "400":
           description: Invalid request
-  /distributions/{contract}/{id}/airdrops_team:
+        "403":
+          description: Forbidden - not a Subscription Admin
+    post:
+      tags:
+        - Distributions
+      summary: Upload artist airdrops for a specific contract and card
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Replaces
+        any existing distribution rows for the Airdrop - Artist phase on the
+        given token. The request body must be `application/json` matching
+        `ApiDistributionAirdropsCsvUploadRequest`, with a `csv` property whose
+        value is CSV text in `address,count` format.
+      operationId: uploadDistributionArtistAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDistributionAirdropsCsvUploadRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDistributionAirdropsUploadResponse"
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
+  /distributions/{contract}/{id}/team-airdrops:
     get:
       tags:
         - Distributions
       summary: Get team airdrops for a specific contract and card
-      operationId: getDistributionAirdropsTeam
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Returns
+        JSON by default, or CSV in `address,count` format when the client sends
+        `Accept: text/csv`.
+      operationId: getDistributionTeamAirdrops
       parameters:
         - name: contract
           in: path
@@ -831,8 +887,56 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PhaseAirdrop"
+            text/csv:
+              schema:
+                type: string
+                format: binary
         "400":
           description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
+    post:
+      tags:
+        - Distributions
+      summary: Upload team airdrops for a specific contract and card
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Replaces
+        any existing distribution rows for the Airdrop - Team phase on the given
+        token. The request body must be `application/json` matching
+        `ApiDistributionAirdropsCsvUploadRequest`, with a `csv` property whose
+        value is CSV text in `address,count` format.
+      operationId: uploadDistributionTeamAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDistributionAirdropsCsvUploadRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDistributionAirdropsUploadResponse"
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
   /light-drops:
     get:
       tags:
@@ -2029,6 +2133,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
+  /identities/{id}/activity:
+    get:
+      tags:
+        - Identities
+      summary: Get daily public-wave drop activity for an identity.
+      operationId: getIdentityActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentityActivity"
+        "404":
+          description: Identity not found
   /memes-mint-stats:
     get:
       tags:
@@ -2339,6 +2464,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
       responses:
         "200":
           description: successful operation
@@ -2374,6 +2500,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
       requestBody:
         content:
           application/json:
@@ -2416,6 +2543,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
       responses:
         "202":
           description: Accepted; work queued
@@ -2433,6 +2561,123 @@ paths:
           description: Claim not found
         "409":
           description: Conflict - claim already synced or upload already in progress
+  /minting-claims/actions/{contract}/types:
+    get:
+      tags:
+        - Minting Claims
+      summary: >-
+        Get supported minting claim action types for a contract (claims admin
+        only)
+      description: >
+        Returns the supported minting claim action names for the given contract.
+        Only CLAIMS_ADMIN_WALLETS can call this. Unsupported contracts return
+        400.
+      operationId: getMintingClaimActionTypes
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionTypesResponse"
+        "400":
+          description: Unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can access
+  /minting-claims/actions/{contract}/{claim_id}:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get minting claim actions (claims admin only)
+      description: >
+        Returns the current action state for a minting claim. All supported
+        actions for the contract are always returned; missing records are
+        represented as completed=false. Only CLAIMS_ADMIN_WALLETS can call this.
+        Unsupported contracts return 400.
+      operationId: getMintingClaimActions
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionsResponse"
+        "400":
+          description: Invalid request or unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can access
+        "404":
+          description: Claim not found
+    post:
+      tags:
+        - Minting Claims
+      summary: Upsert minting claim action state (claims admin only)
+      description: >
+        Creates or updates the current state of a minting claim action for the
+        given claim. The caller wallet is recorded as the actor. Only
+        CLAIMS_ADMIN_WALLETS can call this. Unsupported contracts or unsupported
+        action names for the given contract return 400.
+      operationId: postMintingClaimAction
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMintingClaimActionUpdateRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionsResponse"
+        "400":
+          description: Invalid request or unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can update
+        "404":
+          description: Claim not found
   /nft-link:
     get:
       tags:
@@ -7912,6 +8157,27 @@ components:
         description:
           type: string
           nullable: true
+    ApiDistributionAirdropsCsvUploadRequest:
+      type: object
+      required:
+        - csv
+      properties:
+        csv:
+          type: string
+          description: CSV text with one `address,count` entry per line
+          example: |-
+            0x0000000000000000000000000000000000000001,2
+            0x0000000000000000000000000000000000000002,1
+    ApiDistributionAirdropsUploadResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
     ApiDrop:
       type: object
       required:
@@ -8339,6 +8605,16 @@ components:
         decision_time:
           type: integer
           format: int64
+        sale_time:
+          type: integer
+          format: int64
+          nullable: true
+        sale_price:
+          type: number
+          nullable: true
+        sale_price_currency:
+          type: string
+          nullable: true
     ApiDropWithoutWave:
       type: object
       required:
@@ -8811,6 +9087,23 @@ components:
             format: int64
         is_wave_creator:
           type: boolean
+    ApiIdentityActivity:
+      type: object
+      required:
+        - last_date
+        - date_samples
+      properties:
+        last_date:
+          type: string
+          example: 12.03.2026
+        date_samples:
+          type: array
+          minItems: 365
+          maxItems: 365
+          items:
+            type: integer
+            format: int64
+            minimum: 0
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -9058,6 +9351,76 @@ components:
           type: string
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
+    ApiMintingClaimAction:
+      type: object
+      required:
+        - action
+        - completed
+      properties:
+        action:
+          type: string
+          minLength: 1
+          pattern: ^[A-Z0-9_]+$
+          description: Contract-specific minting claim action name
+        completed:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: Unix epoch milliseconds when this action record was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix epoch milliseconds when this action record was last updated
+        created_by_wallet:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+          description: Wallet that first created this action record
+        updated_by_wallet:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+          description: Wallet that last updated this action record
+    ApiMintingClaimActionsResponse:
+      type: object
+      required:
+        - contract
+        - claim_id
+        - actions
+      properties:
+        contract:
+          type: string
+        claim_id:
+          type: integer
+          format: int64
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMintingClaimAction"
+    ApiMintingClaimActionTypesResponse:
+      type: object
+      required:
+        - contract
+        - action_types
+      properties:
+        contract:
+          type: string
+        action_types:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            description: Contract-specific minting claim action name
+    ApiMintingClaimActionUpdateRequest:
+      type: object
+      required:
+        - action
+        - completed
+      properties:
+        action:
+          type: string
+          minLength: 1
+          pattern: ^[A-Z0-9_]+$
+          description: Contract-specific minting claim action name
+        completed:
+          type: boolean
     ApiMintingClaimsPhaseTotalItem:
       type: object
       required:
@@ -11855,8 +12218,10 @@ components:
       required:
         - photos_count
         - is_normalized
-        - automatic_airdrops_addresses
-        - automatic_airdrops_count
+        - artist_airdrops_addresses
+        - artist_airdrops_count
+        - team_airdrops_addresses
+        - team_airdrops_count
       properties:
         photos_count:
           type: integer
@@ -11865,14 +12230,22 @@ components:
         is_normalized:
           type: boolean
           description: Whether the distribution has been normalized
-        automatic_airdrops_addresses:
+        artist_airdrops_addresses:
           type: integer
           format: int64
-          description: Count of unique addresses with automatic airdrops
-        automatic_airdrops_count:
+          description: Count of unique addresses in the Airdrop - Artist phase
+        artist_airdrops_count:
           type: integer
           format: int64
-          description: Total count of automatic airdrops
+          description: Total count in the Airdrop - Artist phase
+        team_airdrops_addresses:
+          type: integer
+          format: int64
+          description: Count of unique addresses in the Airdrop - Team phase
+        team_airdrops_count:
+          type: integer
+          format: int64
+          description: Total count in the Airdrop - Team phase
     DistributionPhasesPage:
       type: object
       required:
