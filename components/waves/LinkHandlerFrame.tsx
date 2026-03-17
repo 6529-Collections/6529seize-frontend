@@ -27,14 +27,14 @@ export default function LinkHandlerFrame({
       const relative = removeBaseEndpoint(href);
       return relative.startsWith("/") ? relative : undefined;
     })();
-  const actionButtons = !hideActions ? (
+  const actionButtons = hideActions ? null : (
     <ChatItemHrefButtons
       href={href}
       hideLink={hideLink}
       relativeHref={effectiveRelativeHref}
       layout="overlay"
     />
-  ) : null;
+  );
   const shouldAnchorOverlayToContent =
     overlayAnchor === "content" && actionButtons !== null;
 

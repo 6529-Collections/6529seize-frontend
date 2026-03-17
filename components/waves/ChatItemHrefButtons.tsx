@@ -11,7 +11,6 @@ import {
   useId,
   useRef,
   useState,
-  type FocusEvent,
   type KeyboardEvent,
   type MouseEvent,
   type PointerEvent,
@@ -185,13 +184,13 @@ export default function ChatItemHrefButtons({
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
+    const timeoutId = globalThis.window.setTimeout(() => {
       shouldRestoreTriggerFocusRef.current = false;
       buttonRef.current?.focus();
     }, 0);
 
     return () => {
-      window.clearTimeout(timeoutId);
+      globalThis.window.clearTimeout(timeoutId);
     };
   }, [isMenuOpen]);
 
@@ -208,10 +207,10 @@ export default function ChatItemHrefButtons({
       shouldRestoreTriggerFocusRef.current = true;
     };
 
-    window.addEventListener("keydown", handleKeyDown, true);
+    globalThis.window.addEventListener("keydown", handleKeyDown, true);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown, true);
+      globalThis.window.removeEventListener("keydown", handleKeyDown, true);
     };
   }, [isMenuOpen, isOverlay]);
 
@@ -358,19 +357,11 @@ export default function ChatItemHrefButtons({
     closeMenu();
   };
 
-  const handleOverlayBlur = (event: FocusEvent<HTMLDivElement>) => {
-    const nextTarget = event.relatedTarget;
-    if (
-      nextTarget instanceof Node &&
-      event.currentTarget.contains(nextTarget)
-    ) {
-      return;
-    }
-
+  const handleTriggerBlur = () => {
     updateActionSurfaceState({ isFocused: false });
   };
 
-  const handleOverlayFocusCapture = () => {
+  const handleTriggerFocus = () => {
     if (shouldIgnoreNextPointerFocusRef.current) {
       shouldIgnoreNextPointerFocusRef.current = false;
       return;
@@ -432,7 +423,7 @@ export default function ChatItemHrefButtons({
     </button>
   );
 
-  const openLinkButton = !hideLink ? (
+  const openLinkButton = hideLink ? null : (
     <Link
       ref={handleOpenLinkButtonRef}
       href={relativeHref ?? href}
@@ -453,7 +444,7 @@ export default function ChatItemHrefButtons({
       )}
       {isOverlay && <span>Open link</span>}
     </Link>
-  ) : null;
+  );
 
   if (!isOverlay) {
     return (
@@ -486,10 +477,6 @@ export default function ChatItemHrefButtons({
               ? "tw-pointer-events-auto tw-opacity-100"
               : "tw-pointer-events-none tw-opacity-0 group-focus-within/link-card:tw-pointer-events-auto group-focus-within/link-card:tw-opacity-100 desktop-hover:group-hover/link-card:tw-pointer-events-auto desktop-hover:group-hover/link-card:tw-opacity-100"
           }`}
-          onMouseEnter={() => updateActionSurfaceState({ isHovered: true })}
-          onMouseLeave={() => updateActionSurfaceState({ isHovered: false })}
-          onFocusCapture={handleOverlayFocusCapture}
-          onBlurCapture={handleOverlayBlur}
         >
           <button
             ref={buttonRef}
@@ -499,6 +486,10 @@ export default function ChatItemHrefButtons({
             aria-haspopup="true"
             aria-expanded={isMenuOpen}
             onClick={handleTriggerClick}
+            onMouseEnter={() => updateActionSurfaceState({ isHovered: true })}
+            onMouseLeave={() => updateActionSurfaceState({ isHovered: false })}
+            onFocus={handleTriggerFocus}
+            onBlur={handleTriggerBlur}
             onKeyDown={handleTriggerKeyDown}
             onPointerDown={handleTriggerPointerStart}
             onMouseDown={handleTriggerPointerStart}

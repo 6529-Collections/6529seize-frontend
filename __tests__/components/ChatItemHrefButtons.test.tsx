@@ -173,6 +173,39 @@ describe("ChatItemHrefButtons", () => {
     );
   });
 
+  it("reports overlay action activity when the trigger is hovered", () => {
+    const onCardActionsActiveChange = jest.fn();
+
+    render(
+      <div className="tw-group/link-card tw-relative">
+        <LinkPreviewProvider
+          onCardActionsActiveChange={onCardActionsActiveChange}
+        >
+          <ChatItemHrefButtons href="https://a" layout="overlay" />
+        </LinkPreviewProvider>
+      </div>
+    );
+
+    const trigger = screen.getByRole("button", { name: "Link actions" });
+
+    fireEvent.mouseEnter(trigger);
+
+    const actionSurfaceId = onCardActionsActiveChange.mock.calls[0]?.[0];
+    expect(onCardActionsActiveChange).toHaveBeenNthCalledWith(
+      1,
+      actionSurfaceId,
+      true
+    );
+
+    fireEvent.mouseLeave(trigger);
+
+    expect(onCardActionsActiveChange).toHaveBeenNthCalledWith(
+      2,
+      actionSurfaceId,
+      false
+    );
+  });
+
   it("reports overlay actions as inactive when the component unmounts while active", () => {
     const onCardActionsActiveChange = jest.fn();
 
