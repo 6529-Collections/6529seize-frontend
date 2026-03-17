@@ -1582,14 +1582,14 @@ function DropForgePhaseSelectionSection({
           aria-selected={selectedPhase === "phase0"}
           aria-controls="phase-panel-phase0"
           onClick={() => onSelectedPhaseChange("phase0")}
-          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
+          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
             selectedPhase === "phase0"
               ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
               : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
           }`}
         >
           <span>Phase 0</span>
-          <span className="tw-hidden sm:tw-inline"> - Initialize Claim</span>
+          <span className="tw-hidden sm:tw-inline">- Initialize Claim</span>
         </button>
         <button
           type="button"
