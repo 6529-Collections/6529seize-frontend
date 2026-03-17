@@ -43,7 +43,7 @@ export default function CreateDropActionsRow({
             <input
               type="file"
               className="tw-hidden"
-              accept="image/*,video/*,audio/*,.csv,text/csv"
+              accept="image/*,video/*,audio/*"
               multiple
               onChange={(e) => {
                 if (e.target.files) {

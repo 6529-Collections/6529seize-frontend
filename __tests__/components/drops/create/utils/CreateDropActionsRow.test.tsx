@@ -41,11 +41,11 @@ describe('CreateDropActionsRow', () => {
     expect(toast).not.toHaveBeenCalled();
   });
 
-  it('accepts csv files in the input picker', () => {
+  it('does not expose csv in the legacy input picker', () => {
     renderComponent({ canAddPart: false, isStormMode: false, setFiles: jest.fn(), breakIntoStorm: jest.fn() });
     const button = screen.getByRole('button', { name: /select audio file/i });
     const input = button.querySelector('input') as HTMLInputElement;
-    expect(input).toHaveAttribute('accept', 'image/*,video/*,audio/*,.csv,text/csv');
+    expect(input).toHaveAttribute('accept', 'image/*,video/*,audio/*');
   });
 
   it('renders break into storm button when allowed and handles click', () => {
