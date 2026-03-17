@@ -34,10 +34,13 @@ export interface UserPageBrainActivityCell {
 interface UserPageBrainActivityMonthLabel {
   readonly key: string;
   readonly label: string;
-  readonly startColumn: number;
+  readonly labelColumn: number;
+  readonly firstVisibleColumn: number;
+  readonly lastVisibleColumn: number;
 }
 
 export interface UserPageBrainActivityViewModel {
+  readonly resetKey: string;
   readonly periodLabel: string;
   readonly totalDrops: number;
   readonly weekCount: number;
@@ -124,6 +127,16 @@ function getIntensity(
   return 4;
 }
 
+function getSamplesSignature(samples: readonly number[]): string {
+  let hash = 0;
+
+  for (const sample of samples) {
+    hash = (hash * 31 + sample) >>> 0;
+  }
+
+  return hash.toString(36);
+}
+
 export function buildUserPageBrainActivityViewModel(
   activity: UserPageBrainActivityResponse
 ): UserPageBrainActivityViewModel | null {
@@ -170,8 +183,9 @@ export function buildUserPageBrainActivityViewModel(
     {
       readonly key: string;
       readonly label: string;
-      preferredStartColumn: number;
-      endColumn: number;
+      preferredLabelColumn: number;
+      firstVisibleColumn: number;
+      lastVisibleColumn: number;
     }
   >();
 
@@ -195,13 +209,14 @@ export function buildUserPageBrainActivityViewModel(
 
     const existingMonth = monthColumns.get(monthKey);
     if (existingMonth) {
-      existingMonth.endColumn = weekIndex;
+      existingMonth.lastVisibleColumn = weekIndex;
     } else {
       monthColumns.set(monthKey, {
         key: `month-${monthKey}`,
         label: MONTH_LABEL_FORMATTER.format(date),
-        preferredStartColumn: labelStartColumn,
-        endColumn: weekIndex,
+        preferredLabelColumn: labelStartColumn,
+        firstVisibleColumn: weekIndex,
+        lastVisibleColumn: weekIndex,
       });
     }
 
@@ -230,10 +245,13 @@ export function buildUserPageBrainActivityViewModel(
   const monthLabels = Array.from(monthColumns.values()).map((month) => ({
     key: month.key,
     label: month.label,
-    startColumn: Math.min(month.preferredStartColumn, month.endColumn),
+    labelColumn: Math.min(month.preferredLabelColumn, month.lastVisibleColumn),
+    firstVisibleColumn: month.firstVisibleColumn,
+    lastVisibleColumn: month.lastVisibleColumn,
   }));
 
   return {
+    resetKey: `${toIsoDate(lastDate)}:${getSamplesSignature(normalizedSamples)}`,
     periodLabel: "the last 12 months",
     totalDrops,
     weekCount: cells.length / WEEKDAY_COUNT,

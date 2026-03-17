@@ -96,19 +96,21 @@ describe("UserPageBrainActivity", () => {
       identity: "alice",
       enabled: true,
     });
-    expect(screen.getByText("12 drops in 2026")).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "Jan 1, 2026: 1 drop" })
+      screen.getByText("12 public posts in the last 12 months")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "Mar 16, 2026: 2 drops" })
+      screen.getByRole("img", { name: "Jan 1, 2026: 1 public post" })
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText("Activity heatmap for 2026")
+      screen.getByRole("img", { name: "Mar 16, 2026: 2 public posts" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Public activity heatmap for the last 12 months")
     ).toBeInTheDocument();
     expect(screen.getByText("Jan")).toBeInTheDocument();
     expect(screen.getByText("Feb")).toBeInTheDocument();
-    expect(screen.getByText("Mar")).toBeInTheDocument();
+    expect(screen.getAllByText("Mar")).not.toHaveLength(0);
   });
 
   it("falls back to the primary wallet when the handle is missing", () => {

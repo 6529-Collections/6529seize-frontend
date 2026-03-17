@@ -15,19 +15,20 @@ export function useIdentityActivity({
   enabled = true,
 }: Readonly<UseIdentityActivityOptions>) {
   const normalizedIdentity = identity?.trim() ?? "";
+  const canonicalIdentity = normalizedIdentity.toLowerCase();
 
   return useQuery<UserPageBrainActivityResponse, Error>({
-    queryKey: [QueryKey.IDENTITY_ACTIVITY, normalizedIdentity.toLowerCase()],
+    queryKey: [QueryKey.IDENTITY_ACTIVITY, canonicalIdentity],
     queryFn: async () => {
-      if (!normalizedIdentity) {
+      if (!canonicalIdentity) {
         throw new Error("Identity is required to fetch brain activity");
       }
 
       return await commonApiFetch<UserPageBrainActivityResponse>({
-        endpoint: `identities/${encodeURIComponent(normalizedIdentity)}/activity`,
+        endpoint: `identities/${encodeURIComponent(canonicalIdentity)}/activity`,
       });
     },
-    enabled: enabled && normalizedIdentity.length > 0,
+    enabled: enabled && canonicalIdentity.length > 0,
     staleTime: Time.minutes(15).toMillis(),
     gcTime: Time.hours(1).toMillis(),
     refetchOnWindowFocus: false,
