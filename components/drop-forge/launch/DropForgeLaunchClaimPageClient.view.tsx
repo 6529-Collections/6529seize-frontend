@@ -791,6 +791,37 @@ function DropForgeOnChainClaimSection({
   );
 }
 
+function DropForgeActionCompletionToggle({
+  action,
+  disabled,
+  ariaLabel,
+  onToggle,
+}: Readonly<{
+  action?: ApiMintingClaimAction | null;
+  disabled: boolean;
+  ariaLabel: string;
+  onToggle: (action: string, completed: boolean) => Promise<void>;
+}>) {
+  if (!action) {
+    return null;
+  }
+
+  return (
+    <div className="tw-inline-flex tw-items-center tw-gap-3">
+      <span className="tw-text-sm tw-text-iron-400">Completed</span>
+      <Toggle
+        checked={action.completed}
+        disabled={disabled}
+        icons={false}
+        aria-label={ariaLabel}
+        onChange={() => {
+          void onToggle(action.action, action.completed);
+        }}
+      />
+    </div>
+  );
+}
+
 function DropForgeAirdropSummaryActionRow({
   title,
   loading,
@@ -824,20 +855,12 @@ function DropForgeAirdropSummaryActionRow({
     <div className="tw-space-y-5">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         <div className="tw-text-base tw-font-medium tw-text-white">{title}</div>
-        {action ? (
-          <div className="tw-inline-flex tw-items-center tw-gap-3">
-            <span className="tw-text-sm tw-text-iron-400">Completed</span>
-            <Toggle
-              checked={action.completed}
-              disabled={isActionToggleDisabled}
-              icons={false}
-              aria-label={`${title} completed`}
-              onChange={() => {
-                void onActionToggle(action.action, action.completed);
-              }}
-            />
-          </div>
-        ) : null}
+        <DropForgeActionCompletionToggle
+          action={action}
+          disabled={isActionToggleDisabled}
+          ariaLabel={`${title} completed`}
+          onToggle={onActionToggle}
+        />
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox label="Address Count / Total Airdrops">
@@ -1017,7 +1040,9 @@ function DropForgeSubscriptionAirdropSections({
               ? (mintingClaimActionsByName[actionName] ?? null)
               : null;
             const isActionToggleDisabled =
-              claimWritePending || mintingClaimActionPending !== null;
+              !isInitialized ||
+              claimWritePending ||
+              mintingClaimActionPending !== null;
 
             return (
               <>
@@ -1025,25 +1050,12 @@ function DropForgeSubscriptionAirdropSections({
                   <div className="tw-text-base tw-font-medium tw-text-white">
                     {section.title}
                   </div>
-                  {action ? (
-                    <div className="tw-inline-flex tw-items-center tw-gap-3">
-                      <span className="tw-text-sm tw-text-iron-400">
-                        Completed
-                      </span>
-                      <Toggle
-                        checked={action.completed}
-                        disabled={isActionToggleDisabled}
-                        icons={false}
-                        aria-label={`${section.title} completed`}
-                        onChange={() => {
-                          void onMintingClaimActionToggle(
-                            action.action,
-                            action.completed
-                          );
-                        }}
-                      />
-                    </div>
-                  ) : null}
+                  <DropForgeActionCompletionToggle
+                    action={action}
+                    disabled={isActionToggleDisabled}
+                    ariaLabel={`${section.title} completed`}
+                    onToggle={onMintingClaimActionToggle}
+                  />
                 </div>
                 <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
                   <DropForgeFieldBox label="Address Count / Total Airdrops">
@@ -1170,7 +1182,7 @@ function DropForgeResearchAirdropSection({
 }>) {
   const isCompleted = researchAction?.completed ?? false;
   const isActionToggleDisabled =
-    claimWritePending || mintingClaimActionPending !== null;
+    !isInitialized || claimWritePending || mintingClaimActionPending !== null;
   const researchActionName = researchAction?.action ?? null;
 
   return (
@@ -1179,23 +1191,12 @@ function DropForgeResearchAirdropSection({
         <div className="tw-text-base tw-font-medium tw-text-white">
           Research Airdrop
         </div>
-        {researchAction ? (
-          <div className="tw-inline-flex tw-items-center tw-gap-3">
-            <span className="tw-text-sm tw-text-iron-400">Completed</span>
-            <Toggle
-              checked={researchAction.completed}
-              disabled={isActionToggleDisabled}
-              icons={false}
-              aria-label="Research airdrop completed"
-              onChange={() => {
-                void onMintingClaimActionToggle(
-                  researchAction.action,
-                  researchAction.completed
-                );
-              }}
-            />
-          </div>
-        ) : null}
+        <DropForgeActionCompletionToggle
+          action={researchAction}
+          disabled={isActionToggleDisabled}
+          ariaLabel="Research airdrop completed"
+          onToggle={onMintingClaimActionToggle}
+        />
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox label="Total Minted">
