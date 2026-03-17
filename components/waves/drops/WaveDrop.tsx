@@ -158,6 +158,9 @@ const WaveDrop = ({
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
+  const [activeLinkCardActionIds, setActiveLinkCardActionIds] = useState<
+    string[]
+  >([]);
   const [boostAnimation, setBoostAnimation] =
     useState<BoostAnimationState | null>(null);
   const dropRef = useRef<HTMLDivElement>(null);
@@ -183,6 +186,7 @@ const WaveDrop = ({
   const isMdUp = breakpoint === "MD";
   const allowLongPress = hasTouch && !isMdUp;
   const compact = useCompactMode();
+  const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
   const isProfileView = location === DropLocation.PROFILE;
   const showAuthorInfo = !shouldGroupWithPreviousDrop || isProfileView;
@@ -343,6 +347,22 @@ const WaveDrop = ({
     setBoostAnimation(null);
   }, []);
 
+  const handleLinkCardActionsActiveChange = useCallback(
+    (actionId: string, active: boolean) => {
+      setActiveLinkCardActionIds((current) => {
+        const hasActionId = current.includes(actionId);
+        if (active) {
+          return hasActionId ? current : [...current, actionId];
+        }
+
+        return hasActionId
+          ? current.filter((item) => item !== actionId)
+          : current;
+      });
+    },
+    []
+  );
+
   // Handler for mobile menu boost animation
   const handleMobileBoostAnimation = useCallback(() => {
     if (!dropRef.current) return;
@@ -429,6 +449,7 @@ const WaveDrop = ({
               onSave={handleEditSave}
               onCancel={handleEditCancel}
               hasTouch={allowLongPress}
+              onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
             />
           </div>
         </div>
@@ -439,6 +460,7 @@ const WaveDrop = ({
           activePartIndex={activePartIndex}
           onReply={handleOnReply}
           onEdit={handleOnEdit}
+          suppressed={hasActiveLinkCardActions}
         />
       )}
     </>
