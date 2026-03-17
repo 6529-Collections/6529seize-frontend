@@ -819,8 +819,9 @@ paths:
       description: >-
         Requires the user to be authenticated as a Subscription Admin. Replaces
         any existing distribution rows for the Airdrop - Artist phase on the
-        given token. The request body must contain CSV text in `address,count`
-        format.
+        given token. The request body must be `application/json` matching
+        `ApiDistributionAirdropsCsvUploadRequest`, with a `csv` property whose
+        value is CSV text in `address,count` format.
       operationId: uploadDistributionArtistAirdrops
       parameters:
         - name: contract
@@ -901,7 +902,9 @@ paths:
       description: >-
         Requires the user to be authenticated as a Subscription Admin. Replaces
         any existing distribution rows for the Airdrop - Team phase on the given
-        token. The request body must contain CSV text in `address,count` format.
+        token. The request body must be `application/json` matching
+        `ApiDistributionAirdropsCsvUploadRequest`, with a `csv` property whose
+        value is CSV text in `address,count` format.
       operationId: uploadDistributionTeamAirdrops
       parameters:
         - name: contract
