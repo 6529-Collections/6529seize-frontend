@@ -35,8 +35,10 @@ export default function LinkHandlerFrame({
       layout="overlay"
     />
   ) : null;
+  const shouldAnchorOverlayToContent =
+    overlayAnchor === "content" && actionButtons !== null;
 
-  if (overlayAnchor === "content") {
+  if (shouldAnchorOverlayToContent) {
     return (
       <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full">
         <div className="tw-group/link-card tw-relative tw-inline-flex tw-w-fit tw-min-w-0 tw-max-w-full tw-flex-col">

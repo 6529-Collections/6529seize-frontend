@@ -228,6 +228,35 @@ describe("ChatItemHrefButtons", () => {
     ).toHaveFocus();
   });
 
+  it("moves pointer-opened overlay menus into the tab sequence", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <div>
+        <div className="tw-group/link-card tw-relative">
+          <ChatItemHrefButtons href="https://a" layout="overlay" />
+        </div>
+        <button type="button">Outside</button>
+      </div>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Link actions" }));
+
+    expect(screen.getByRole("button", { name: "Copy link" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("link", { name: "Open link" })).toHaveFocus();
+
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Outside" })).toHaveFocus();
+      expect(
+        screen.queryByRole("button", { name: "Copy link" })
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it("skips disabled overlay actions when moving keyboard focus into the menu", async () => {
     const user = userEvent.setup();
 

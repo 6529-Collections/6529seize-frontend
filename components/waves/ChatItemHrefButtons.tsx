@@ -326,8 +326,10 @@ export default function ChatItemHrefButtons({
   const handleTriggerClick = (event: MouseEvent<HTMLButtonElement>) => {
     stopPropagation(event);
     shouldIgnoreNextPointerFocusRef.current = false;
+    const nextIsMenuOpen = !actionSurfaceStateRef.current.isMenuOpen;
+    shouldFocusFirstMenuItemRef.current = nextIsMenuOpen;
     updateActionSurfaceState({
-      isMenuOpen: !actionSurfaceStateRef.current.isMenuOpen,
+      isMenuOpen: nextIsMenuOpen,
     });
   };
 
