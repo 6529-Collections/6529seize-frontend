@@ -39,7 +39,7 @@ const renderTweetEmbed = (
   const { tweetId, href: normalizedHref } = ensureTwitterLink(href);
   const renderFallback = () => <TweetFallback href={normalizedHref} />;
   return (
-    <LinkHandlerFrame href={normalizedHref}>
+    <LinkHandlerFrame href={normalizedHref} overlayAnchor="content">
       <div className="tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[480px]">
         <ErrorBoundary fallbackRender={() => renderFallback()}>
           <ExpandableTweetPreview
