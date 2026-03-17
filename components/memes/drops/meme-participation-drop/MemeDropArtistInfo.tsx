@@ -21,7 +21,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
     <div className="tw-flex tw-items-center tw-gap-x-3">
       <WaveDropAuthorPfp drop={drop} />
       <div className="tw-flex tw-flex-col tw-gap-y-1.5">
-        <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
           {!!drop.author.level && (
             <UserCICAndLevel
               level={drop.author.level}
