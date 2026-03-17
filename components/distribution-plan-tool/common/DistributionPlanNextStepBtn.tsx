@@ -10,12 +10,14 @@ export default function DistributionPlanNextStepBtn({
   loading,
   showNextBtn,
   showSkipBtn,
+  disableNextBtn = false,
 }: {
   showRunAnalysisBtn: boolean;
   onNextStep: () => void;
   loading: boolean;
   showNextBtn: boolean;
   showSkipBtn: boolean;
+  disableNextBtn?: boolean;
 }) {
   const { runOperations } = useContext(DistributionPlanToolContext);
   return (
@@ -24,7 +26,8 @@ export default function DistributionPlanNextStepBtn({
         <button
           onClick={onNextStep}
           type="button"
-          className="tw-cursor-pointer tw-bg-transparent hover:tw-bg-iron-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+          className="tw-cursor-pointer tw-rounded-lg tw-border-2 tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800/80"
+        >
           Skip
         </button>
       )}
@@ -32,16 +35,18 @@ export default function DistributionPlanNextStepBtn({
         <button
           onClick={runOperations}
           type="button"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-transparent hover:tw-bg-iron-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800/80"
+        >
           Run analysis
         </button>
       )}
       {!showRunAnalysisBtn && showNextBtn && (
         <DistributionPlanPrimaryBtn
           loading={loading}
-          isDisabled={false}
+          isDisabled={disableNextBtn}
           type="button"
-          onClick={onNextStep}>
+          onClick={onNextStep}
+        >
           Next
         </DistributionPlanPrimaryBtn>
       )}
