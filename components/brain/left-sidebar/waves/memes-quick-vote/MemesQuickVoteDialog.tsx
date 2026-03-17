@@ -110,10 +110,13 @@ function MemesQuickVoteDialogContent({
       <div className="md:tw-sticky md:tw-top-0">
         <MemesQuickVoteControls
           customValue={customValue}
+          drop={activeDrop}
           isCustomOpen={isCustomOpen}
           isSubmitting={isVoting}
           latestUsedAmount={normalizedLatestUsedAmount}
+          remainingCount={queueLength}
           quickAmounts={visibleQuickAmounts}
+          uncastPower={uncastPower}
           votingLabel={votingLabel}
           onCustomChange={(value) => {
             if (value === "") {
@@ -246,33 +249,19 @@ export default function MemesQuickVoteDialog({
           onClose();
         }}
       >
-        <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-bg-iron-950 md:tw-h-auto md:tw-max-h-[min(92vh,56rem)] md:tw-max-w-5xl md:tw-overflow-hidden md:tw-rounded-[2rem] md:tw-border md:tw-border-solid md:tw-border-white/10 md:tw-shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-          <header className="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-border-b tw-border-solid tw-border-white/5 tw-p-5 md:tw-p-6">
-            <div>
-              <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-                Memes Wave
-              </p>
-              <h2 className="tw-mb-1 tw-text-2xl tw-font-semibold tw-text-white">
-                Quick vote
-              </h2>
-              <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-                Newest first. Skip keeps a meme for later.
-              </p>
-            </div>
+        <div className="tw-relative tw-flex tw-h-full tw-w-full tw-flex-col tw-bg-iron-950 md:tw-h-auto md:tw-max-h-[min(92vh,56rem)] md:tw-max-w-5xl md:tw-overflow-hidden md:tw-rounded-[2rem] md:tw-border md:tw-border-solid md:tw-border-white/10 md:tw-shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+          <button
+            type="button"
+            data-autofocus="true"
+            onClick={onClose}
+            disabled={isVoting}
+            className="tw-absolute tw-right-3 tw-top-3 tw-z-10 tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/90 tw-text-iron-300 tw-shadow-[0_18px_40px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white md:tw-right-4 md:tw-top-4 md:tw-size-11"
+            aria-label="Close quick vote"
+          >
+            <XMarkIcon className="tw-size-5" />
+          </button>
 
-            <button
-              type="button"
-              data-autofocus="true"
-              onClick={onClose}
-              disabled={isVoting}
-              className="tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
-              aria-label="Close quick vote"
-            >
-              <XMarkIcon className="tw-size-5" />
-            </button>
-          </header>
-
-          <div className="tw-flex-1 tw-overflow-y-auto tw-p-4 md:tw-p-6">
+          <div className="tw-flex-1 tw-overflow-y-auto tw-p-4 tw-pt-16 md:tw-p-6">
             {!activeDrop ? (
               <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
                 <div className="tw-text-center">

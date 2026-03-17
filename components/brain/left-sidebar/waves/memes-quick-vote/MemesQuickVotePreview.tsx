@@ -117,7 +117,10 @@ export default function MemesQuickVotePreview({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      <div
+        data-testid="quick-vote-preview-status"
+        className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-hidden"
+      >
         {typeof uncastPower === "number" && (
           <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em]">
             {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"} left
@@ -156,6 +159,7 @@ export default function MemesQuickVotePreview({
         )}
 
         <article
+          data-testid="quick-vote-preview-card"
           className={clsx(
             "tw-relative tw-overflow-hidden tw-rounded-[2rem] tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/95 tw-shadow-[0_24px_60px_rgba(0,0,0,0.35)] tw-transition-transform",
             isBusy && "tw-pointer-events-none tw-opacity-70"
@@ -169,7 +173,7 @@ export default function MemesQuickVotePreview({
           onTouchEnd={handleTouchEnd}
           onTouchCancel={resetSwipe}
         >
-          <div className="tw-border-b tw-border-solid tw-border-white/5 tw-p-4">
+          <div className="tw-border-b tw-border-solid tw-border-white/5 tw-p-4 md:tw-hidden">
             <div className="tw-flex tw-items-center tw-gap-3">
               <WaveDropAuthorPfp drop={drop} />
               <div className="tw-min-w-0 tw-flex-1">
@@ -189,27 +193,32 @@ export default function MemesQuickVotePreview({
             </div>
           </div>
 
-          <div className="tw-p-4 sm:tw-p-6">
-            <h2 className="tw-mb-2 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-white">
-              {title}
-            </h2>
-            {description && (
-              <p
-                className="tw-mb-4 tw-text-sm tw-leading-6 tw-text-iron-300"
-                style={{
-                  display: "-webkit-box",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 3,
-                  overflow: "hidden",
-                }}
-              >
-                {description}
-              </p>
-            )}
+          <div
+            data-testid="quick-vote-preview-mobile-context"
+            className="tw-p-4 sm:tw-p-6 md:tw-p-0"
+          >
+            <div className="md:tw-hidden">
+              <h2 className="tw-mb-2 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-white">
+                {title}
+              </h2>
+              {description && (
+                <p
+                  className="tw-mb-4 tw-text-sm tw-leading-6 tw-text-iron-300"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 3,
+                    overflow: "hidden",
+                  }}
+                >
+                  {description}
+                </p>
+              )}
+            </div>
 
             {artworkMedia ? (
-              <div className="tw-overflow-hidden tw-rounded-[1.5rem] tw-bg-iron-950">
-                <div className="tw-flex tw-h-[min(52vh,28rem)] tw-items-center tw-justify-center tw-bg-iron-950/80">
+              <div className="tw-overflow-hidden tw-rounded-[1.5rem] tw-bg-iron-950 md:tw-rounded-none">
+                <div className="tw-flex tw-h-[min(52vh,28rem)] tw-items-center tw-justify-center tw-bg-iron-950/80 md:tw-h-[min(72vh,44rem)] md:tw-bg-iron-950/85">
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
@@ -218,7 +227,7 @@ export default function MemesQuickVotePreview({
                 </div>
               </div>
             ) : (
-              <div className="tw-flex tw-h-64 tw-items-center tw-justify-center tw-rounded-[1.5rem] tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-950 tw-text-sm tw-text-iron-500">
+              <div className="tw-flex tw-h-64 tw-items-center tw-justify-center tw-rounded-[1.5rem] tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-950 tw-text-sm tw-text-iron-500 md:tw-h-[min(72vh,44rem)] md:tw-rounded-none md:tw-border-0">
                 Preview unavailable
               </div>
             )}

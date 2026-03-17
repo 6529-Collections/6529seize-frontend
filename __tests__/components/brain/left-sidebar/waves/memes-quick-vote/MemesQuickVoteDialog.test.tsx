@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 import MemesQuickVoteDialog from "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
@@ -55,6 +61,10 @@ const createDrop = (serialNo: number) =>
       {
         data_key: "title",
         data_value: `Drop ${serialNo}`,
+      },
+      {
+        data_key: "description",
+        data_value: `Description ${serialNo}`,
       },
     ],
     parts: [
@@ -150,7 +160,52 @@ describe("MemesQuickVoteDialog", () => {
     );
 
     expect(screen.queryByText("Loading your queue")).not.toBeInTheDocument();
-    expect(screen.getByText("Drop 42")).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
+        "Drop 42"
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("removes the dialog header copy while keeping an accessible close button", () => {
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    expect(screen.queryByText("Memes Wave")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Newest first. Skip keeps a meme for later.")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Close quick vote" })
+    ).toBeInTheDocument();
+  });
+
+  it("keeps single-column preview context available even when js reports desktop", () => {
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    expect(
+      within(screen.getByTestId("quick-vote-preview-status")).getByText(
+        "5,000 votes left"
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
+        "Drop 42"
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
+        "Description 42"
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(
+        screen.getByTestId("quick-vote-controls-desktop-context")
+      ).getByText("Drop 42")
+    ).toBeInTheDocument();
   });
 
   it("uses the open custom amount for swipe voting on mobile", async () => {
@@ -178,17 +233,15 @@ describe("MemesQuickVoteDialog", () => {
       screen.getByText("Swipe left to skip, right to vote 777 votes")
     ).toBeInTheDocument();
 
-    const previewCard = screen.getByText("Drop 42").closest("article");
+    const previewCard = screen.getByTestId("quick-vote-preview-card");
 
-    expect(previewCard).not.toBeNull();
-
-    fireEvent.touchStart(previewCard!, {
+    fireEvent.touchStart(previewCard, {
       touches: [{ clientX: 0, clientY: 0 }],
     });
-    fireEvent.touchMove(previewCard!, {
+    fireEvent.touchMove(previewCard, {
       touches: [{ clientX: 120, clientY: 0 }],
     });
-    fireEvent.touchEnd(previewCard!);
+    fireEvent.touchEnd(previewCard);
 
     await waitFor(() => {
       expect(submitVote).toHaveBeenCalledWith(activeDrop, 777);

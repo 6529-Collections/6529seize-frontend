@@ -1,14 +1,20 @@
 "use client";
 
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import clsx from "clsx";
 
 interface MemesQuickVoteControlsProps {
   readonly customValue: string;
+  readonly drop: ExtendedDrop;
   readonly isCustomOpen: boolean;
   readonly isSubmitting: boolean;
   readonly latestUsedAmount: number | null;
+  readonly remainingCount: number;
   readonly quickAmounts: readonly number[];
+  readonly uncastPower: number | null;
   readonly votingLabel: string | null;
   readonly onCustomChange: (value: string) => void;
   readonly onCustomSubmit: () => Promise<void>;
@@ -19,10 +25,13 @@ interface MemesQuickVoteControlsProps {
 
 export default function MemesQuickVoteControls({
   customValue,
+  drop,
   isCustomOpen,
   isSubmitting,
   latestUsedAmount,
+  remainingCount,
   quickAmounts,
+  uncastPower,
   votingLabel,
   onCustomChange,
   onCustomSubmit,
@@ -31,6 +40,13 @@ export default function MemesQuickVoteControls({
   onVoteAmount,
 }: MemesQuickVoteControlsProps) {
   const hasQuickAmounts = quickAmounts.length > 0;
+  const title =
+    drop.metadata.find((entry) => entry.data_key === "title")?.data_value ??
+    "Untitled submission";
+  const description =
+    drop.metadata.find((entry) => entry.data_key === "description")
+      ?.data_value ?? "";
+  const authorLabel = drop.author.handle ?? drop.author.primary_address;
   const customAmountLabel =
     customValue.trim().length > 0 && Number.parseInt(customValue, 10) > 0
       ? formatNumberWithCommas(Number.parseInt(customValue, 10))
@@ -38,6 +54,61 @@ export default function MemesQuickVoteControls({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
+      <div
+        data-testid="quick-vote-controls-desktop-context"
+        className="tw-hidden tw-flex-col tw-gap-4 md:tw-flex"
+      >
+        <div className="tw-flex tw-flex-wrap tw-gap-2">
+          {typeof uncastPower === "number" && (
+            <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em]">
+              {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"}{" "}
+              left
+            </span>
+          )}
+          <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-300">
+            {formatNumberWithCommas(remainingCount)} left
+          </span>
+        </div>
+
+        <div className="tw-rounded-[1.75rem] tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-p-5">
+          <div className="tw-flex tw-items-center tw-gap-3">
+            <WaveDropAuthorPfp drop={drop} />
+            <div className="tw-min-w-0 tw-flex-1">
+              <div className="tw-flex tw-items-center tw-gap-2">
+                <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+                  {authorLabel}
+                </span>
+                <span className="tw-size-1 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700" />
+                <span className="tw-text-xs tw-text-iron-500">
+                  <WaveDropTime timestamp={drop.created_at} />
+                </span>
+              </div>
+              <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+                {drop.wave.name}
+              </p>
+            </div>
+          </div>
+
+          <h2 className="tw-mb-0 tw-mt-4 tw-text-[1.65rem] tw-font-semibold tw-leading-tight tw-text-white">
+            {title}
+          </h2>
+
+          {description && (
+            <p
+              className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300"
+              style={{
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 4,
+                overflow: "hidden",
+              }}
+            >
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
+
       <div className="tw-flex tw-items-center tw-justify-between">
         <div>
           <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
