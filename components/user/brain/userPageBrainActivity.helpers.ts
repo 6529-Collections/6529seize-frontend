@@ -109,10 +109,15 @@ function getIntensity(
     first: number;
     second: number;
     third: number;
+    max: number;
   }>
 ): UserPageBrainActivityIntensity {
   if (count <= 0) {
     return 0;
+  }
+
+  if (count >= thresholds.max) {
+    return 4;
   }
 
   if (count <= thresholds.first) {
@@ -164,6 +169,7 @@ export function buildUserPageBrainActivityViewModel(
     first: getQuantileValue(activeCounts, 0.25),
     second: getQuantileValue(activeCounts, 0.5),
     third: getQuantileValue(activeCounts, 0.75),
+    max: activeCounts[activeCounts.length - 1] ?? 0,
   } as const;
   const startDate = new Date(
     lastDate.getTime() - (normalizedSamples.length - 1) * DAY_MS

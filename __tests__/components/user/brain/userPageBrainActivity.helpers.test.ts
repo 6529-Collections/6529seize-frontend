@@ -165,6 +165,29 @@ describe("buildUserPageBrainActivityViewModel", () => {
     ).toBe(4);
   });
 
+  it("keeps the brightest bucket reachable for sparse profiles", () => {
+    const activity = buildUserPageBrainActivityViewModel(
+      buildResponse({
+        lastDate: new Date(Date.UTC(2026, 2, 16)),
+        countsByIsoDate: {
+          "2026-03-14": 1,
+          "2026-03-15": 20,
+          "2026-03-16": 500,
+        },
+      })
+    );
+
+    expect(
+      activity?.cells.find((cell) => cell.isoDate === "2026-03-14")?.intensity
+    ).toBe(1);
+    expect(
+      activity?.cells.find((cell) => cell.isoDate === "2026-03-15")?.intensity
+    ).toBe(2);
+    expect(
+      activity?.cells.find((cell) => cell.isoDate === "2026-03-16")?.intensity
+    ).toBe(4);
+  });
+
   it("returns null for an invalid anchor date", () => {
     expect(
       buildUserPageBrainActivityViewModel({

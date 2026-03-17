@@ -4,7 +4,6 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
-import { COLUMN_STRIDE_PX } from "./userPageBrainActivityHeatmap.helpers";
 
 type ViewportMetrics = Readonly<{
   scrollLeft: number;
@@ -31,9 +30,8 @@ function snapViewportToLatest(viewport: HTMLDivElement | null) {
     0,
     viewport.scrollWidth - viewport.clientWidth
   );
-  // Align to whole week columns so the latest visible edge does not land mid-cell.
-  viewport.scrollLeft =
-    Math.floor(maxScrollLeft / COLUMN_STRIDE_PX) * COLUMN_STRIDE_PX;
+  // Show the latest column fully, even when the viewport width is not aligned to a column stride.
+  viewport.scrollLeft = maxScrollLeft;
 }
 
 function readViewportMetrics(
