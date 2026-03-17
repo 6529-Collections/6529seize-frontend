@@ -78,6 +78,7 @@ export const useMemesQuickVoteSubmit = ({
 
   const submitVote = useCallback(
     async (drop: ExtendedDrop, amount: number | string) => {
+      const currentRating = drop.context_profile_context?.rating ?? 0;
       const maxRating = drop.context_profile_context?.max_rating ?? 0;
       const normalizedAmount = normalizeQuickVoteAmount(amount, maxRating);
 
@@ -99,9 +100,12 @@ export const useMemesQuickVoteSubmit = ({
           dropId: drop.id,
           amount: normalizedAmount,
         });
-        const nextRemainingPower =
-          response.context_profile_context?.max_rating ??
-          Math.max(0, maxRating - normalizedAmount);
+        const nextRating = response.context_profile_context?.rating;
+        const appliedAmount =
+          typeof nextRating === "number"
+            ? Math.max(0, nextRating - currentRating)
+            : normalizedAmount;
+        const nextRemainingPower = Math.max(0, maxRating - appliedAmount);
 
         onVoteSuccess(drop, nextRemainingPower);
         setAndPersistRecentAmounts((current) =>

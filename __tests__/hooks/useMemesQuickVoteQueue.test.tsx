@@ -374,7 +374,7 @@ describe("useMemesQuickVoteQueue", () => {
     commonApiPostMock.mockResolvedValue({
       context_profile_context: {
         rating: 1_000,
-        max_rating: 4_000,
+        max_rating: 5_000,
       },
     } as any);
 
@@ -414,7 +414,7 @@ describe("useMemesQuickVoteQueue", () => {
     commonApiPostMock.mockResolvedValue({
       context_profile_context: {
         rating: 1_000,
-        max_rating: 4_000,
+        max_rating: 5_000,
       },
     } as any);
 
@@ -458,13 +458,13 @@ describe("useMemesQuickVoteQueue", () => {
       .mockResolvedValueOnce({
         context_profile_context: {
           rating: 1_000,
-          max_rating: 4_000,
+          max_rating: 5_000,
         },
       } as any)
       .mockResolvedValueOnce({
         context_profile_context: {
           rating: 4_000,
-          max_rating: 0,
+          max_rating: 5_000,
         },
       } as any);
 
@@ -491,6 +491,9 @@ describe("useMemesQuickVoteQueue", () => {
         category: "Rep",
       },
     });
+    expect(result.current.queue).toEqual([]);
+    expect(result.current.activeDrop).toBeNull();
+    expect(result.current.uncastPower).toBeNull();
   });
 
   it("blocks overlapping submits while auth is pending", async () => {
@@ -536,7 +539,7 @@ describe("useMemesQuickVoteQueue", () => {
     commonApiPostMock.mockResolvedValue({
       context_profile_context: {
         rating: 1_000,
-        max_rating: 4_000,
+        max_rating: 5_000,
       },
     } as any);
 
@@ -584,7 +587,7 @@ describe("useMemesQuickVoteQueue", () => {
     commonApiPostMock.mockResolvedValue({
       context_profile_context: {
         rating: 250,
-        max_rating: 4_750,
+        max_rating: 5_000,
       },
     } as any);
     requestAuth.mockResolvedValue({ success: true });
@@ -661,7 +664,7 @@ describe("useMemesQuickVoteQueue", () => {
     commonApiPostMock.mockResolvedValue({
       context_profile_context: {
         rating: 1_000,
-        max_rating: 4_000,
+        max_rating: 5_000,
       },
     } as any);
 
@@ -702,7 +705,7 @@ describe("useMemesQuickVoteQueue", () => {
     commonApiPostMock.mockResolvedValue({
       context_profile_context: {
         rating: 1_000,
-        max_rating: 4_000,
+        max_rating: 5_000,
       },
     } as any);
 
@@ -743,7 +746,7 @@ describe("useMemesQuickVoteQueue", () => {
     commonApiPostMock.mockResolvedValue({
       context_profile_context: {
         rating: 1_000,
-        max_rating: 4_000,
+        max_rating: 5_000,
       },
     } as any);
 
