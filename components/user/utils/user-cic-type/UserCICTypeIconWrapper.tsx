@@ -1,11 +1,16 @@
 "use client";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 import UserCICTypeIcon from "./UserCICTypeIcon";
+
+const subscribeToClientRender = () => () => undefined;
+const getClientRenderSnapshot = () => true;
+const getServerRenderSnapshot = () => false;
 
 export default function UserCICTypeIconWrapper({
   profile,
@@ -13,7 +18,11 @@ export default function UserCICTypeIconWrapper({
   readonly profile: ApiIdentity;
 }) {
   const tooltipId = `user-cic-type-tooltip-${profile.id ?? "unknown"}`;
-  const canRenderTooltip = typeof document !== "undefined";
+  const canRenderTooltip = useSyncExternalStore(
+    subscribeToClientRender,
+    getClientRenderSnapshot,
+    getServerRenderSnapshot
+  );
 
   return (
     <>
