@@ -796,6 +796,7 @@ function DropForgeAirdropSummaryActionRow({
   title,
   loading,
   summary,
+  isInitialized,
   disabled,
   buttonLabel,
   onClick,
@@ -807,6 +808,7 @@ function DropForgeAirdropSummaryActionRow({
   title: string;
   loading: boolean;
   summary: LaunchAirdropSummaryView;
+  isInitialized: boolean;
   disabled: boolean;
   buttonLabel: string;
   onClick: () => void;
@@ -816,7 +818,8 @@ function DropForgeAirdropSummaryActionRow({
   onActionToggle: (action: string, completed: boolean) => Promise<void>;
 }>) {
   const isCompleted = action?.completed ?? false;
-  const isActionToggleDisabled = claimWritePending || actionPending !== null;
+  const isActionToggleDisabled =
+    !isInitialized || claimWritePending || actionPending !== null;
 
   return (
     <div className="tw-space-y-5">
@@ -846,7 +849,7 @@ function DropForgeAirdropSummaryActionRow({
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-end">
           <button
             type="button"
-            disabled={disabled || isCompleted}
+            disabled={disabled || isCompleted || actionPending !== null}
             onClick={onClick}
             className={BTN_SUBSCRIPTIONS_AIRDROP}
           >
@@ -922,6 +925,7 @@ function DropForgePhase0AirdropsSection({
         title="Artist Airdrops"
         loading={phase0AirdropsLoading}
         summary={artistAirdropSummary}
+        isInitialized={isInitialized}
         disabled={
           !isInitialized ||
           claimWritePending ||
@@ -946,6 +950,7 @@ function DropForgePhase0AirdropsSection({
         title="Team Airdrops"
         loading={phase0AirdropsLoading}
         summary={teamAirdropSummary}
+        isInitialized={isInitialized}
         disabled={
           !isInitialized ||
           claimWritePending ||
@@ -1053,6 +1058,7 @@ function DropForgeSubscriptionAirdropSections({
                       disabled={
                         !isInitialized ||
                         claimWritePending ||
+                        mintingClaimActionPending !== null ||
                         section.loading ||
                         section.airdropCount <= 0 ||
                         (action?.completed ?? false)
@@ -1212,6 +1218,7 @@ function DropForgeResearchAirdropSection({
             type="button"
             disabled={
               claimWritePending ||
+              mintingClaimActionPending !== null ||
               !isInitialized ||
               researchAirdropCount <= 0 ||
               isCompleted
@@ -1572,7 +1579,7 @@ function DropForgePhaseSelectionSection({
           id="phase-selection"
           value={selectedPhase}
           onChange={(e) => onSelectedPhaseChange(e.target.value)}
-          className="tw-h-16 tw-w-full tw-appearance-none tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-pl-4 tw-pr-12 tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-iron-600"
+          className="tw-h-16 tw-w-full tw-appearance-none tw-rounded-xl tw-border-0 tw-bg-[#03002e] tw-pl-4 tw-pr-12 tw-text-lg tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-[#010048] focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-[#090088]"
         >
           <option value="" disabled>
             Phase Selection

@@ -181,7 +181,7 @@ export async function getDistributionAirdropsArtist(
   cardId: number
 ): Promise<PhaseAirdrop[]> {
   return commonApiFetch<PhaseAirdrop[]>({
-    endpoint: `distributions/${contract}/${cardId}/airdrops_artist`,
+    endpoint: `distributions/${contract}/${cardId}/artist-airdrops`,
   });
 }
 
@@ -190,7 +190,7 @@ export async function getDistributionAirdropsTeam(
   cardId: number
 ): Promise<PhaseAirdrop[]> {
   return commonApiFetch<PhaseAirdrop[]>({
-    endpoint: `distributions/${contract}/${cardId}/airdrops_team`,
+    endpoint: `distributions/${contract}/${cardId}/team-airdrops`,
   });
 }
 

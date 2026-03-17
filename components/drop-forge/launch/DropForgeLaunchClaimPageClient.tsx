@@ -12,6 +12,7 @@ import {
   buildSubscriptionAirdropSelection,
   formatDateTimeLocalInput,
   getAnimationMimeType,
+  getAutoSelectedLaunchPhase,
   getErrorMessage,
   getMediaTypeLabel,
   getRootForPhase,
@@ -78,27 +79,6 @@ interface ClaimTxModalState {
 
 const DEFAULT_PHASE_PRICE_ETH = "0.06529";
 type LaunchMediaTab = "image" | "animation";
-const MEMES_MINTING_CLAIM_ACTION_LABELS: Record<string, string> = {
-  ARTIST_AIRDROP: "Artist Airdrop",
-  TEAM_AIRDROP: "Team Airdrop",
-  PHASE0_AIRDROP: "Phase0 Airdrop",
-  PHASE1_AIRDROP: "Phase1 Airdrop",
-  PUBLIC_PHASE_AIRDROP: "Public Phase Airdrop",
-  RESEARCH_AIRDROP: "Research Airdrop",
-};
-
-function formatMintingClaimActionLabel(action: string): string {
-  return (
-    MEMES_MINTING_CLAIM_ACTION_LABELS[action] ??
-    action
-      .trim()
-      .toLowerCase()
-      .split("_")
-      .filter(Boolean)
-      .map((segment) => segment[0]?.toUpperCase() + segment.slice(1))
-      .join(" ")
-  );
-}
 
 function getSelectedPhaseFormValues({
   selectedPhase,
@@ -182,6 +162,10 @@ export default function DropForgeLaunchClaimPageClient({
   const [error, setError] = useState<string | null>(null);
   const [activeMediaTab, setActiveMediaTab] = useState<LaunchMediaTab>("image");
   const [selectedPhase, setSelectedPhase] = useState<"" | LaunchPhaseKey>("");
+  const [isPhaseSelectionManual, setIsPhaseSelectionManual] = useState(false);
+  const [initialPhaseSelectionNowMs, setInitialPhaseSelectionNowMs] = useState(
+    () => Date.now()
+  );
   const [researchTargetEditionSize, setResearchTargetEditionSize] =
     useState(310);
   const [phaseAllowlistWindows, setPhaseAllowlistWindows] = useState<
@@ -222,6 +206,7 @@ export default function DropForgeLaunchClaimPageClient({
   const handledClaimWriteSuccessTxHashRef = useRef<string | null>(null);
   const handledClaimWriteErrorTxHashRef = useRef<string | null>(null);
   const pendingMintingClaimActionRef = useRef<string | null>(null);
+  const activeClaimIdRef = useRef(claimId);
   const lastErrorToastRef = useRef<{ message: string; ts: number } | null>(
     null
   );
@@ -247,6 +232,10 @@ export default function DropForgeLaunchClaimPageClient({
     },
     [setToast]
   );
+
+  useEffect(() => {
+    activeClaimIdRef.current = claimId;
+  }, [claimId]);
 
   const shouldShowPermissionFallback =
     permissionsLoading || !hasWallet || !canAccessLaunchPage;
@@ -367,18 +356,9 @@ export default function DropForgeLaunchClaimPageClient({
   }, [claimId]);
 
   useEffect(() => {
-    if (!hasPublishedMetadata) {
-      setSelectedPhase("");
-      return;
-    }
-    if (!isInitialized) {
-      setSelectedPhase("phase0");
-      return;
-    }
-    setSelectedPhase((prev) => prev || "phase0");
-  }, [hasPublishedMetadata, isInitialized]);
-
-  useEffect(() => {
+    setSelectedPhase("");
+    setIsPhaseSelectionManual(false);
+    setInitialPhaseSelectionNowMs(Date.now());
     setPhaseAllowlistWindows({});
     setPhasePricesEth({});
     setArtistAirdrops(null);
@@ -744,6 +724,35 @@ export default function DropForgeLaunchClaimPageClient({
       },
     ];
   }, [mintTimeline, roots]);
+  useEffect(() => {
+    if (isPhaseSelectionManual || selectedPhase) {
+      return;
+    }
+
+    setSelectedPhase(
+      getAutoSelectedLaunchPhase({
+        hasPublishedMetadata,
+        isInitialized,
+        nowMs: initialPhaseSelectionNowMs,
+        phases: phaseData.map((phase) => ({
+          key: phase.key,
+          schedule: phase.schedule
+            ? {
+                startMs: phase.schedule.start.toMillis(),
+                endMs: phase.schedule.end.toMillis(),
+              }
+            : null,
+        })),
+      })
+    );
+  }, [
+    hasPublishedMetadata,
+    initialPhaseSelectionNowMs,
+    isInitialized,
+    isPhaseSelectionManual,
+    phaseData,
+    selectedPhase,
+  ]);
   const selectedPhaseConfig = useMemo(
     () => phaseData.find((phase) => phase.key === selectedPhase) ?? null,
     [phaseData, selectedPhase]
@@ -1042,6 +1051,10 @@ export default function DropForgeLaunchClaimPageClient({
 
   const updateMintingClaimAction = useCallback(
     async ({ action, completed }: { action: string; completed: boolean }) => {
+      const currentClaimId = claimId;
+      const isStaleClaimActionRequest = (): boolean =>
+        activeClaimIdRef.current !== currentClaimId;
+
       if (!isClaimsAdmin) {
         return;
       }
@@ -1056,18 +1069,25 @@ export default function DropForgeLaunchClaimPageClient({
 
       if (!getAuthJwt()) {
         const { success } = await requestAuth();
-        if (!success) {
+        if (!success || isStaleClaimActionRequest()) {
           return;
         }
+      }
+
+      if (isStaleClaimActionRequest()) {
+        return;
       }
 
       setMintingClaimActionPending(action);
 
       try {
-        const response = await upsertMemesMintingClaimAction(claimId, {
+        const response = await upsertMemesMintingClaimAction(currentClaimId, {
           action,
           completed,
         });
+        if (isStaleClaimActionRequest()) {
+          return;
+        }
         setMintingClaimActions(response);
         setMintingClaimActionTypes(
           (prev) =>
@@ -1077,15 +1097,20 @@ export default function DropForgeLaunchClaimPageClient({
               .filter((value, index, source) => source.indexOf(value) === index)
         );
       } catch (e) {
+        if (isStaleClaimActionRequest()) {
+          return;
+        }
         const msg = getErrorMessage(
           e,
-          `Failed to update ${formatMintingClaimActionLabel(action)}`
+          `Failed to update ${action}`
         );
         showErrorToast(msg);
       } finally {
-        setMintingClaimActionPending((current) =>
-          current === action ? null : current
-        );
+        if (!isStaleClaimActionRequest()) {
+          setMintingClaimActionPending((current) =>
+            current === action ? null : current
+          );
+        }
       }
     },
     [
@@ -1416,6 +1441,7 @@ export default function DropForgeLaunchClaimPageClient({
   );
 
   const handleSelectedPhaseChange = useCallback((value: string) => {
+    setIsPhaseSelectionManual(true);
     setSelectedPhase(value as "" | LaunchPhaseKey);
   }, []);
 

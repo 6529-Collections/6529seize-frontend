@@ -771,12 +771,16 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
-  /distributions/{contract}/{id}/airdrops_artist:
+  /distributions/{contract}/{id}/artist-airdrops:
     get:
       tags:
         - Distributions
       summary: Get artist airdrops for a specific contract and card
-      operationId: getDistributionAirdropsArtist
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Returns
+        JSON by default, or CSV in `address,count` format when the client sends
+        `Accept: text/csv`.
+      operationId: getDistributionArtistAirdrops
       parameters:
         - name: contract
           in: path
@@ -800,14 +804,66 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PhaseAirdrop"
+            text/csv:
+              schema:
+                type: string
+                format: binary
         "400":
           description: Invalid request
-  /distributions/{contract}/{id}/airdrops_team:
+        "403":
+          description: Forbidden - not a Subscription Admin
+    post:
+      tags:
+        - Distributions
+      summary: Upload artist airdrops for a specific contract and card
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Replaces
+        any existing distribution rows for the Airdrop - Artist phase on the
+        given token. The request body must be `application/json` matching
+        `ApiDistributionAirdropsCsvUploadRequest`, with a `csv` property whose
+        value is CSV text in `address,count` format.
+      operationId: uploadDistributionArtistAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDistributionAirdropsCsvUploadRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDistributionAirdropsUploadResponse"
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
+  /distributions/{contract}/{id}/team-airdrops:
     get:
       tags:
         - Distributions
       summary: Get team airdrops for a specific contract and card
-      operationId: getDistributionAirdropsTeam
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Returns
+        JSON by default, or CSV in `address,count` format when the client sends
+        `Accept: text/csv`.
+      operationId: getDistributionTeamAirdrops
       parameters:
         - name: contract
           in: path
@@ -831,8 +887,56 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PhaseAirdrop"
+            text/csv:
+              schema:
+                type: string
+                format: binary
         "400":
           description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
+    post:
+      tags:
+        - Distributions
+      summary: Upload team airdrops for a specific contract and card
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Replaces
+        any existing distribution rows for the Airdrop - Team phase on the given
+        token. The request body must be `application/json` matching
+        `ApiDistributionAirdropsCsvUploadRequest`, with a `csv` property whose
+        value is CSV text in `address,count` format.
+      operationId: uploadDistributionTeamAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDistributionAirdropsCsvUploadRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDistributionAirdropsUploadResponse"
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
   /light-drops:
     get:
       tags:
@@ -2029,6 +2133,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
+  /identities/{id}/activity:
+    get:
+      tags:
+        - Identities
+      summary: Get daily public-wave drop activity for an identity.
+      operationId: getIdentityActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentityActivity"
+        "404":
+          description: Identity not found
   /memes-mint-stats:
     get:
       tags:
@@ -2339,6 +2464,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
       responses:
         "200":
           description: successful operation
@@ -2374,6 +2500,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
       requestBody:
         content:
           application/json:
@@ -2416,6 +2543,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
       responses:
         "202":
           description: Accepted; work queued
@@ -2489,7 +2617,7 @@ paths:
           schema:
             type: integer
             format: int64
-            minimum: 0
+            minimum: 1
       responses:
         "200":
           description: successful operation
@@ -2528,7 +2656,7 @@ paths:
           schema:
             type: integer
             format: int64
-            minimum: 0
+            minimum: 1
       requestBody:
         required: true
         content:
@@ -8029,6 +8157,27 @@ components:
         description:
           type: string
           nullable: true
+    ApiDistributionAirdropsCsvUploadRequest:
+      type: object
+      required:
+        - csv
+      properties:
+        csv:
+          type: string
+          description: CSV text with one `address,count` entry per line
+          example: |-
+            0x0000000000000000000000000000000000000001,2
+            0x0000000000000000000000000000000000000002,1
+    ApiDistributionAirdropsUploadResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
     ApiDrop:
       type: object
       required:
@@ -8456,6 +8605,16 @@ components:
         decision_time:
           type: integer
           format: int64
+        sale_time:
+          type: integer
+          format: int64
+          nullable: true
+        sale_price:
+          type: number
+          nullable: true
+        sale_price_currency:
+          type: string
+          nullable: true
     ApiDropWithoutWave:
       type: object
       required:
@@ -8928,6 +9087,23 @@ components:
             format: int64
         is_wave_creator:
           type: boolean
+    ApiIdentityActivity:
+      type: object
+      required:
+        - last_date
+        - date_samples
+      properties:
+        last_date:
+          type: string
+          example: 12.03.2026
+        date_samples:
+          type: array
+          minItems: 365
+          maxItems: 365
+          items:
+            type: integer
+            format: int64
+            minimum: 0
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -9184,6 +9360,7 @@ components:
         action:
           type: string
           minLength: 1
+          pattern: ^[A-Z0-9_]+$
           description: Contract-specific minting claim action name
         completed:
           type: boolean
@@ -9240,6 +9417,7 @@ components:
         action:
           type: string
           minLength: 1
+          pattern: ^[A-Z0-9_]+$
           description: Contract-specific minting claim action name
         completed:
           type: boolean
@@ -12040,8 +12218,10 @@ components:
       required:
         - photos_count
         - is_normalized
-        - automatic_airdrops_addresses
-        - automatic_airdrops_count
+        - artist_airdrops_addresses
+        - artist_airdrops_count
+        - team_airdrops_addresses
+        - team_airdrops_count
       properties:
         photos_count:
           type: integer
@@ -12050,14 +12230,22 @@ components:
         is_normalized:
           type: boolean
           description: Whether the distribution has been normalized
-        automatic_airdrops_addresses:
+        artist_airdrops_addresses:
           type: integer
           format: int64
-          description: Count of unique addresses with automatic airdrops
-        automatic_airdrops_count:
+          description: Count of unique addresses in the Airdrop - Artist phase
+        artist_airdrops_count:
           type: integer
           format: int64
-          description: Total count of automatic airdrops
+          description: Total count in the Airdrop - Artist phase
+        team_airdrops_addresses:
+          type: integer
+          format: int64
+          description: Count of unique addresses in the Airdrop - Team phase
+        team_airdrops_count:
+          type: integer
+          format: int64
+          description: Total count in the Airdrop - Team phase
     DistributionPhasesPage:
       type: object
       required:

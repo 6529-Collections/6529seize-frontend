@@ -176,6 +176,50 @@ export function getSubscriptionPhaseName(phaseKey: LaunchPhaseKey): string {
   return "Public Phase";
 }
 
+export function getAutoSelectedLaunchPhase({
+  hasPublishedMetadata,
+  isInitialized,
+  nowMs,
+  phases,
+}: Readonly<{
+  hasPublishedMetadata: boolean;
+  isInitialized: boolean;
+  nowMs: number;
+  phases: ReadonlyArray<{
+    key: Exclude<LaunchPhaseKey, "research">;
+    schedule:
+      | {
+          startMs: number;
+          endMs: number;
+        }
+      | null
+      | undefined;
+  }>;
+}>): "" | LaunchPhaseKey {
+  if (!hasPublishedMetadata) {
+    return "";
+  }
+
+  if (!isInitialized) {
+    return "phase0";
+  }
+
+  if (phases.every((phase) => !phase.schedule)) {
+    return "phase0";
+  }
+
+  for (const phase of phases) {
+    if (!phase.schedule) {
+      continue;
+    }
+    if (nowMs <= phase.schedule.endMs) {
+      return phase.key;
+    }
+  }
+
+  return "research";
+}
+
 function normalizeAirdropAmount(value: number | undefined): number {
   const normalized = Number(value ?? 0);
   if (!Number.isFinite(normalized)) return 0;
@@ -395,7 +439,9 @@ export function getAnimationMimeType(claim: MintingClaim): string | null {
   }
 
   if (isVideoUrl(animationUrl)) {
-    return extension ? (VIDEO_EXTENSION_TO_MIME[extension] ?? "video/*") : "video/*";
+    return extension
+      ? (VIDEO_EXTENSION_TO_MIME[extension] ?? "video/*")
+      : "video/*";
   }
 
   return extension
