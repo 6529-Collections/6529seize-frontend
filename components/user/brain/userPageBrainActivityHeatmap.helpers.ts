@@ -32,7 +32,16 @@ export const DAY_LABEL_TOP_OFFSET_PX =
 export const HEATMAP_GRID_HEIGHT_PX = CELL_SIZE_PX * 7 + CELL_GAP_PX * 6;
 export const COLUMN_STRIDE_PX = CELL_SIZE_PX + CELL_GAP_PX;
 export const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""] as const;
-export const LOADING_MONTH_HEADER_WIDTHS_PX = [18, 24, 16, 22, 20, 18, 24, 16];
+export const LOADING_MONTH_HEADER_SEGMENTS = [
+  { key: "start", widthPx: 18 },
+  { key: "spring", widthPx: 24 },
+  { key: "early-summer", widthPx: 16 },
+  { key: "late-summer", widthPx: 22 },
+  { key: "autumn", widthPx: 20 },
+  { key: "winter-start", widthPx: 18 },
+  { key: "winter-mid", widthPx: 24 },
+  { key: "end", widthPx: 16 },
+] as const;
 export const MONTH_LABEL_MIN_SPACING_PX = 34;
 const MONTH_LABEL_OVERFLOW_TOLERANCE_PX = 18;
 export const TOOLTIP_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
@@ -144,16 +153,16 @@ export function getCellTooltipAnchorProps(
 export function getHeatmapTooltipData(
   activeAnchor: Element | null
 ): HeatmapTooltipData | null {
-  const countValue = Number(activeAnchor?.getAttribute("data-tooltip-count"));
-  const isoDate = activeAnchor?.getAttribute("data-tooltip-date");
+  const dataset =
+    activeAnchor instanceof HTMLElement ? activeAnchor.dataset : undefined;
+  const countValue = Number(dataset?.tooltipCount);
+  const isoDate = dataset?.tooltipDate;
 
   if (!isoDate || Number.isNaN(countValue)) {
     return null;
   }
 
-  const intensityValue = Number(
-    activeAnchor?.getAttribute("data-tooltip-intensity")
-  );
+  const intensityValue = Number(dataset?.tooltipIntensity);
 
   return {
     count: countValue,

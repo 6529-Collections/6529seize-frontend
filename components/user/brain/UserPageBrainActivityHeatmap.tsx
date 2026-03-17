@@ -18,7 +18,7 @@ import {
   HEATMAP_GRID_HEIGHT_PX,
   HEATMAP_GRID_STYLE,
   HEATMAP_VIEWPORT_CLASS_NAME,
-  LOADING_MONTH_HEADER_WIDTHS_PX,
+  LOADING_MONTH_HEADER_SEGMENTS,
   MONTH_LABEL_MIN_SPACING_PX,
   MONTH_LABEL_ROW_HEIGHT_PX,
   TOOLTIP_DATE_FORMATTER,
@@ -46,11 +46,11 @@ export function UserPageBrainActivityHeatmapLoading() {
             gap: `${MONTH_LABEL_MIN_SPACING_PX}px`,
           }}
         >
-          {LOADING_MONTH_HEADER_WIDTHS_PX.map((width, index) => (
+          {LOADING_MONTH_HEADER_SEGMENTS.map((segment) => (
             <span
-              key={index}
+              key={segment.key}
               className="tw-h-[5px] tw-animate-pulse tw-rounded-full tw-bg-white/5"
-              style={{ width: `${width}px` }}
+              style={{ width: `${segment.widthPx}px` }}
             />
           ))}
         </div>
@@ -132,7 +132,7 @@ function HeatmapDayLabels() {
           key={`${label || "empty"}-${index}`}
           className="tw-flex tw-items-center tw-justify-end"
         >
-          {label ? label : <span className="tw-opacity-0">Sun</span>}
+          {label || <span className="tw-opacity-0">Sun</span>}
         </div>
       ))}
     </div>
