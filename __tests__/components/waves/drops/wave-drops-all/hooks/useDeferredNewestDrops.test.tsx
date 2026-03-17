@@ -74,6 +74,122 @@ describe("useDeferredNewestDrops", () => {
     expect(result.current.pendingDropsCount).toBe(0);
   });
 
+  it("captures the pre-unpin latest serial when unpinning and appending in the same render", () => {
+    const { result, rerender } = renderHook(
+      ({
+        isAppleMobile,
+        shouldPinToBottom,
+        waveId,
+        waveMessages,
+      }: {
+        isAppleMobile: boolean;
+        shouldPinToBottom: boolean;
+        waveId: string;
+        waveMessages: any;
+      }) =>
+        useDeferredNewestDrops({
+          waveId,
+          isAppleMobile,
+          waveMessages,
+          shouldPinToBottom,
+        }),
+      {
+        initialProps: {
+          waveId: "wave-1",
+          isAppleMobile: true,
+          shouldPinToBottom: true,
+          waveMessages: createWaveMessages([1]),
+        },
+      }
+    );
+
+    rerender({
+      waveId: "wave-1",
+      isAppleMobile: true,
+      shouldPinToBottom: false,
+      waveMessages: createWaveMessages([2, 1]),
+    });
+
+    expect(
+      result.current.renderedWaveMessages?.drops.map((drop) => drop.serial_no)
+    ).toEqual([1]);
+    expect(result.current.pendingDropsCount).toBe(1);
+
+    act(() => {
+      result.current.revealPendingDrops();
+    });
+
+    expect(
+      result.current.renderedWaveMessages?.drops.map((drop) => drop.serial_no)
+    ).toEqual([2, 1]);
+    expect(result.current.pendingDropsCount).toBe(0);
+  });
+
+  it("captures the newest pinned serial before later arrivals after unpinning", () => {
+    const { result, rerender } = renderHook(
+      ({
+        isAppleMobile,
+        shouldPinToBottom,
+        waveId,
+        waveMessages,
+      }: {
+        isAppleMobile: boolean;
+        shouldPinToBottom: boolean;
+        waveId: string;
+        waveMessages: any;
+      }) =>
+        useDeferredNewestDrops({
+          waveId,
+          isAppleMobile,
+          waveMessages,
+          shouldPinToBottom,
+        }),
+      {
+        initialProps: {
+          waveId: "wave-1",
+          isAppleMobile: true,
+          shouldPinToBottom: true,
+          waveMessages: createWaveMessages([1]),
+        },
+      }
+    );
+
+    rerender({
+      waveId: "wave-1",
+      isAppleMobile: true,
+      shouldPinToBottom: true,
+      waveMessages: createWaveMessages([2, 1]),
+    });
+
+    rerender({
+      waveId: "wave-1",
+      isAppleMobile: true,
+      shouldPinToBottom: false,
+      waveMessages: createWaveMessages([2, 1]),
+    });
+
+    rerender({
+      waveId: "wave-1",
+      isAppleMobile: true,
+      shouldPinToBottom: false,
+      waveMessages: createWaveMessages([3, 2, 1]),
+    });
+
+    expect(
+      result.current.renderedWaveMessages?.drops.map((drop) => drop.serial_no)
+    ).toEqual([2, 1]);
+    expect(result.current.pendingDropsCount).toBe(1);
+
+    act(() => {
+      result.current.revealPendingDrops();
+    });
+
+    expect(
+      result.current.renderedWaveMessages?.drops.map((drop) => drop.serial_no)
+    ).toEqual([3, 2, 1]);
+    expect(result.current.pendingDropsCount).toBe(0);
+  });
+
   it("shows newest drops immediately when not on Apple mobile", () => {
     const { result, rerender } = renderHook(
       ({
@@ -366,6 +482,98 @@ describe("useDeferredNewestDrops", () => {
       isAppleMobile: true,
       shouldPinToBottom: true,
       waveMessages: createWaveMessages([1]),
+    });
+
+    expect(renderCount).toBe(rendersBeforeRerender + 1);
+  });
+
+  it("does not add an internal update cycle for pinned Apple mobile appends", () => {
+    let renderCount = 0;
+
+    const { rerender } = renderHook(
+      ({
+        isAppleMobile,
+        shouldPinToBottom,
+        waveId,
+        waveMessages,
+      }: {
+        isAppleMobile: boolean;
+        shouldPinToBottom: boolean;
+        waveId: string;
+        waveMessages: any;
+      }) => {
+        renderCount += 1;
+
+        return useDeferredNewestDrops({
+          waveId,
+          isAppleMobile,
+          waveMessages,
+          shouldPinToBottom,
+        });
+      },
+      {
+        initialProps: {
+          waveId: "wave-1",
+          isAppleMobile: true,
+          shouldPinToBottom: true,
+          waveMessages: createWaveMessages([1]),
+        },
+      }
+    );
+
+    const rendersBeforeRerender = renderCount;
+
+    rerender({
+      waveId: "wave-1",
+      isAppleMobile: true,
+      shouldPinToBottom: true,
+      waveMessages: createWaveMessages([2, 1]),
+    });
+
+    expect(renderCount).toBe(rendersBeforeRerender + 1);
+  });
+
+  it("does not add an internal update cycle for pinned desktop appends", () => {
+    let renderCount = 0;
+
+    const { rerender } = renderHook(
+      ({
+        isAppleMobile,
+        shouldPinToBottom,
+        waveId,
+        waveMessages,
+      }: {
+        isAppleMobile: boolean;
+        shouldPinToBottom: boolean;
+        waveId: string;
+        waveMessages: any;
+      }) => {
+        renderCount += 1;
+
+        return useDeferredNewestDrops({
+          waveId,
+          isAppleMobile,
+          waveMessages,
+          shouldPinToBottom,
+        });
+      },
+      {
+        initialProps: {
+          waveId: "wave-1",
+          isAppleMobile: false,
+          shouldPinToBottom: true,
+          waveMessages: createWaveMessages([1]),
+        },
+      }
+    );
+
+    const rendersBeforeRerender = renderCount;
+
+    rerender({
+      waveId: "wave-1",
+      isAppleMobile: false,
+      shouldPinToBottom: true,
+      waveMessages: createWaveMessages([2, 1]),
     });
 
     expect(renderCount).toBe(rendersBeforeRerender + 1);

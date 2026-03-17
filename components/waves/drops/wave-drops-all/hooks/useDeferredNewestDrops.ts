@@ -27,9 +27,10 @@ interface DeferredNewestDropsSession {
   readonly revealedLatestSerial: number | null;
 }
 
-interface DeferredNewestDropsViewState {
-  readonly nextSession: DeferredNewestDropsSession;
-  readonly visibleLatestSerial: number | null;
+interface DeferredNewestDropsInputsSnapshot {
+  readonly waveId: string;
+  readonly latestSerialNo: number | null;
+  readonly shouldPinToBottom: boolean;
 }
 
 const createDeferredNewestDropsSession = (
@@ -55,7 +56,18 @@ const updateDeferredNewestDropsSession = ({
     ? session
     : nextSession;
 
-const getDeferredNewestDropsViewState = ({
+const getPreviousPinnedLatestSerial = ({
+  previousInputs,
+  waveId,
+}: {
+  readonly previousInputs: DeferredNewestDropsInputsSnapshot | null;
+  readonly waveId: string;
+}): number | null =>
+  previousInputs?.waveId === waveId && previousInputs.shouldPinToBottom
+    ? previousInputs.latestSerialNo
+    : null;
+
+const getDeferredNewestDropsVisibleLatestSerial = ({
   session,
   waveId,
   isAppleMobile,
@@ -67,7 +79,33 @@ const getDeferredNewestDropsViewState = ({
   readonly isAppleMobile: boolean;
   readonly shouldPinToBottom: boolean;
   readonly latestSerialNo: number | null;
-}): DeferredNewestDropsViewState => {
+}): number | null => {
+  if (!isAppleMobile || shouldPinToBottom || session.waveId !== waveId) {
+    return latestSerialNo;
+  }
+
+  return (
+    session.revealedLatestSerial ??
+    session.capturedLatestSerial ??
+    latestSerialNo
+  );
+};
+
+const getDeferredNewestDropsNextSession = ({
+  session,
+  waveId,
+  isAppleMobile,
+  shouldPinToBottom,
+  latestSerialNo,
+  previousInputs,
+}: {
+  readonly session: DeferredNewestDropsSession;
+  readonly waveId: string;
+  readonly isAppleMobile: boolean;
+  readonly shouldPinToBottom: boolean;
+  readonly latestSerialNo: number | null;
+  readonly previousInputs: DeferredNewestDropsInputsSnapshot | null;
+}): DeferredNewestDropsSession => {
   let nextSession =
     session.waveId === waveId
       ? session
@@ -81,10 +119,7 @@ const getDeferredNewestDropsViewState = ({
       revealedLatestSerial: null,
     };
 
-    return {
-      nextSession: updateDeferredNewestDropsSession({ session, nextSession }),
-      visibleLatestSerial: latestSerialNo,
-    };
+    return updateDeferredNewestDropsSession({ session, nextSession });
   }
 
   if (shouldPinToBottom) {
@@ -95,16 +130,16 @@ const getDeferredNewestDropsViewState = ({
       revealedLatestSerial: null,
     };
 
-    return {
-      nextSession: updateDeferredNewestDropsSession({ session, nextSession }),
-      visibleLatestSerial: latestSerialNo,
-    };
+    return updateDeferredNewestDropsSession({ session, nextSession });
   }
 
-  const capturedLatestSerial =
-    nextSession.wasPinned && latestSerialNo !== null
-      ? latestSerialNo
-      : nextSession.capturedLatestSerial;
+  const previousPinnedLatestSerial = getPreviousPinnedLatestSerial({
+    previousInputs,
+    waveId,
+  });
+  const capturedLatestSerial = nextSession.wasPinned
+    ? (previousPinnedLatestSerial ?? latestSerialNo)
+    : nextSession.capturedLatestSerial;
 
   nextSession = {
     ...nextSession,
@@ -112,13 +147,7 @@ const getDeferredNewestDropsViewState = ({
     capturedLatestSerial,
   };
 
-  return {
-    nextSession: updateDeferredNewestDropsSession({ session, nextSession }),
-    visibleLatestSerial:
-      nextSession.revealedLatestSerial ??
-      nextSession.capturedLatestSerial ??
-      latestSerialNo,
-  };
+  return updateDeferredNewestDropsSession({ session, nextSession });
 };
 
 const filterDeferredDrops = ({
@@ -196,8 +225,11 @@ export function useDeferredNewestDrops({
     createDeferredNewestDropsSession(waveId)
   );
   const sessionRef = useRef(session);
+  const previousInputsRef = useRef<DeferredNewestDropsInputsSnapshot | null>(
+    null
+  );
 
-  const { nextSession, visibleLatestSerial } = getDeferredNewestDropsViewState({
+  const visibleLatestSerial = getDeferredNewestDropsVisibleLatestSerial({
     session,
     waveId,
     isAppleMobile,
@@ -210,11 +242,26 @@ export function useDeferredNewestDrops({
   }, [session]);
 
   useLayoutEffect(() => {
+    const nextSession = getDeferredNewestDropsNextSession({
+      session,
+      waveId,
+      isAppleMobile,
+      shouldPinToBottom,
+      latestSerialNo,
+      previousInputs: previousInputsRef.current,
+    });
+
+    previousInputsRef.current = {
+      waveId,
+      latestSerialNo,
+      shouldPinToBottom,
+    };
+
     if (session !== nextSession) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- This commits the derived session before the next paint so deferred-drop capture stays in sync with the current render inputs.
       setSession(nextSession);
     }
-  }, [nextSession, session]);
+  }, [isAppleMobile, latestSerialNo, session, shouldPinToBottom, waveId]);
 
   const renderedWaveMessages = useMemo(
     () =>

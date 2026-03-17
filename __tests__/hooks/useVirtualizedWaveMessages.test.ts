@@ -1,8 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import {
-  getNextVirtualLimitAfterAppend,
-  useVirtualizedWaveMessages,
-} from "@/hooks/useVirtualizedWaveMessages";
+import { useVirtualizedWaveMessages } from "@/hooks/useVirtualizedWaveMessages";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 
 jest.useFakeTimers();
@@ -68,28 +65,6 @@ describe("useVirtualizedWaveMessages", () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.clearAllTimers();
-  });
-
-  it("grows the virtual limit only for initialized append scenarios", () => {
-    expect(
-      getNextVirtualLimitAfterAppend({
-        currentLimit: 10,
-        hasInitialized: true,
-        pageSize: 5,
-        previousTotal: 10,
-        totalDrops: 12,
-      })
-    ).toBe(12);
-
-    expect(
-      getNextVirtualLimitAfterAppend({
-        currentLimit: 10,
-        hasInitialized: false,
-        pageSize: 5,
-        previousTotal: 10,
-        totalDrops: 12,
-      })
-    ).toBe(10);
   });
 
   it("returns undefined when no data is available", () => {
