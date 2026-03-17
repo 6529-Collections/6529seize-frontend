@@ -17,6 +17,9 @@ interface WaveDropQuoteWithSerialNoProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly onLinkCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
 }
 
 const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
@@ -27,6 +30,7 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  onLinkCardActionsActiveChange,
 }) => {
   const { data } = useQuery<ApiWaveDropsFeed>({
     queryKey: [
@@ -70,6 +74,7 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
       quotePath={quotePath}
       embedDepth={embedDepth}
       maxEmbedDepth={maxEmbedDepth}
+      onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
     />
   );
 };
