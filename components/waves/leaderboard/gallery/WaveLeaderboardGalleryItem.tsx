@@ -137,7 +137,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
     const baseImageClasses =
-      "tw-aspect-square tw-relative tw-cursor-pointer tw-touch-none tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+      "tw-aspect-square tw-relative tw-cursor-pointer tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
     const imageScaleClasses = hasTouchScreen
       ? ""
