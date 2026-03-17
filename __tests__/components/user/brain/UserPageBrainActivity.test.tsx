@@ -100,17 +100,42 @@ describe("UserPageBrainActivity", () => {
       screen.getByText("12 public posts in the last 12 months")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "Jan 1, 2026: 1 public post" })
+      screen.getByRole("img", {
+        name: "Public activity heatmap for the last 12 months",
+      })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: "Mar 16, 2026: 2 public posts" })
-    ).toBeInTheDocument();
+      screen.queryByRole("img", { name: "Jan 1, 2026: 1 public post" })
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByLabelText("Public activity heatmap for the last 12 months")
-    ).toBeInTheDocument();
+      screen.queryByRole("img", { name: "Mar 16, 2026: 2 public posts" })
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Jan")).toBeInTheDocument();
     expect(screen.getByText("Feb")).toBeInTheDocument();
     expect(screen.getAllByText("Mar")).not.toHaveLength(0);
+  });
+
+  it("renders the empty activity state", () => {
+    mockedUseIdentityActivity.mockReturnValue({
+      status: "success",
+      data: {
+        last_date: "16.03.2026",
+        date_samples: Array.from({ length: 365 }, () => 0),
+      },
+    } as any);
+
+    render(
+      <UserPageBrainActivity
+        profile={{ handle: "alice", primary_wallet: "0x1" } as any}
+      />
+    );
+
+    expect(
+      screen.getByText("No activity in last 12 months.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("0 public posts in the last 12 months")
+    ).toBeInTheDocument();
   });
 
   it("falls back to the primary wallet when the handle is missing", () => {

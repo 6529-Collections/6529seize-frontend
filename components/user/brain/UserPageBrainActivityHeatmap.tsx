@@ -88,6 +88,7 @@ export function UserPageBrainActivityHeatmap({
           <div className={HEATMAP_CONTENT_CLASS_NAME}>
             <div
               className="tw-grid tw-grid-flow-col tw-grid-rows-7"
+              role="img"
               aria-label={`Public activity heatmap for ${activity.periodLabel}`}
               style={HEATMAP_GRID_STYLE}
             >

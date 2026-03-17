@@ -30,7 +30,7 @@ export const DAY_LABEL_TOP_OFFSET_PX =
   HEADER_TO_HEATMAP_GAP_PX +
   DAY_LABEL_EXTRA_OFFSET_PX;
 export const HEATMAP_GRID_HEIGHT_PX = CELL_SIZE_PX * 7 + CELL_GAP_PX * 6;
-export const COLUMN_STRIDE_PX = CELL_SIZE_PX + CELL_GAP_PX;
+const COLUMN_STRIDE_PX = CELL_SIZE_PX + CELL_GAP_PX;
 export const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""] as const;
 export const LOADING_MONTH_HEADER_SEGMENTS = [
   { key: "start", widthPx: 18 },
@@ -126,8 +126,7 @@ export function getCellTooltipAnchorProps(
   tooltipId: string
 ):
   | Readonly<{
-      role: "img";
-      "aria-label": string;
+      "aria-hidden": true;
       "data-tooltip-id": string;
       "data-tooltip-count": string;
       "data-tooltip-date": string;
@@ -136,13 +135,12 @@ export function getCellTooltipAnchorProps(
   | Readonly<{
       "aria-hidden": true;
     }> {
-  if (!cell.ariaLabel || !cell.isoDate) {
+  if (!cell.isoDate) {
     return { "aria-hidden": true };
   }
 
   return {
-    role: "img",
-    "aria-label": cell.ariaLabel,
+    "aria-hidden": true,
     "data-tooltip-id": tooltipId,
     "data-tooltip-count": String(cell.count),
     "data-tooltip-date": cell.isoDate,
@@ -153,16 +151,19 @@ export function getCellTooltipAnchorProps(
 export function getHeatmapTooltipData(
   activeAnchor: Element | null
 ): HeatmapTooltipData | null {
-  const dataset =
-    activeAnchor instanceof HTMLElement ? activeAnchor.dataset : undefined;
-  const countValue = Number(dataset?.tooltipCount);
-  const isoDate = dataset?.tooltipDate;
+  if (!(activeAnchor instanceof HTMLElement)) {
+    return null;
+  }
+
+  const { dataset } = activeAnchor;
+  const countValue = Number(dataset["tooltipCount"]);
+  const isoDate = dataset["tooltipDate"];
 
   if (!isoDate || Number.isNaN(countValue)) {
     return null;
   }
 
-  const intensityValue = Number(dataset?.tooltipIntensity);
+  const intensityValue = Number(dataset["tooltipIntensity"]);
 
   return {
     count: countValue,

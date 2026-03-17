@@ -169,7 +169,7 @@ export function buildUserPageBrainActivityViewModel(
     first: getQuantileValue(activeCounts, 0.25),
     second: getQuantileValue(activeCounts, 0.5),
     third: getQuantileValue(activeCounts, 0.75),
-    max: activeCounts[activeCounts.length - 1] ?? 0,
+    max: activeCounts.at(-1) ?? 0,
   } as const;
   const startDate = new Date(
     lastDate.getTime() - (normalizedSamples.length - 1) * DAY_MS

@@ -34,8 +34,10 @@ function ActivityCardHeader({
   periodLabel?: string | undefined;
   totalDrops?: number | undefined;
 }>) {
+  const totalDropsLabel = totalDrops === 0 ? "0" : numberWithCommas(totalDrops);
+
   return (
-    <div className="tw-mb-4 tw-flex tw-flex-col tw-gap-3 tw-px-4 sm:tw-mb-6 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between md:tw-px-5">
+    <div className="gap-x-4 tw-mb-4 tw-flex tw-flex-col tw-gap-y-2 tw-px-4 sm:tw-mb-6 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between md:tw-px-5">
       <div className="tw-min-w-0">
         <h3
           id="brain-activity-heading"
@@ -45,8 +47,8 @@ function ActivityCardHeader({
         </h3>
       </div>
       {periodLabel && totalDrops !== undefined && (
-        <div className="tw-max-w-[14rem] tw-text-[11px] tw-font-medium tw-tracking-wide tw-text-iron-400 sm:tw-max-w-none sm:tw-text-right sm:tw-text-[12px]">
-          {numberWithCommas(totalDrops)} public post
+        <div className="tw-text-xs tw-font-medium tw-text-iron-400 sm:tw-max-w-none sm:tw-text-right">
+          {totalDropsLabel} public post
           {totalDrops === 1 ? "" : "s"} in {periodLabel}
         </div>
       )}
@@ -65,47 +67,40 @@ export default function UserPageBrainActivity({
     enabled: identity.length > 0,
   });
 
+  if (!identity) {
+    return null;
+  }
+
   const activity = activityQuery.data
     ? buildUserPageBrainActivityViewModel(activityQuery.data)
     : null;
+  const periodLabel = activity?.periodLabel;
+  const totalDrops = activity?.totalDrops;
 
-  let content: ReactNode = null;
-  let periodLabel: string | undefined;
-  let totalDrops: number | undefined;
+  let content: ReactNode;
 
-  if (identity) {
-    if (activityQuery.status === "pending") {
-      content = <UserPageBrainActivityHeatmapLoading />;
-    } else if (activityQuery.status === "error") {
-      content = (
-        <p className="tw-px-4 tw-text-sm tw-text-iron-400 md:tw-px-5">
-          Unable to load activity.
-        </p>
-      );
-    } else if (activity) {
-      periodLabel = activity.periodLabel;
-      totalDrops = activity.totalDrops;
-      content =
-        activity.totalDrops > 0 ? (
-          <UserPageBrainActivityHeatmap activity={activity} />
-        ) : (
-          <p className="tw-px-4 tw-text-sm tw-text-iron-500 md:tw-px-5">
-            No activity in last 12 months.
-          </p>
-        );
-    } else {
-      content = (
-        <p className="tw-px-4 tw-text-sm tw-text-iron-400 md:tw-px-5">
-          No activity data available.
-        </p>
-      );
-    }
+  if (activityQuery.status === "pending") {
+    content = <UserPageBrainActivityHeatmapLoading />;
+  } else if (activityQuery.status === "error") {
+    content = (
+      <p className="tw-px-4 tw-text-sm tw-text-iron-400 md:tw-px-5">
+        Unable to load activity.
+      </p>
+    );
+  } else if (activity && activity.totalDrops > 0) {
+    content = <UserPageBrainActivityHeatmap activity={activity} />;
+  } else {
+    content = (
+      <p className="tw-px-4 tw-text-sm tw-italic tw-text-iron-500 md:tw-px-5">
+        No activity in last 12 months.
+      </p>
+    );
   }
 
-  return identity ? (
+  return (
     <ActivityCardFrame>
       <ActivityCardHeader periodLabel={periodLabel} totalDrops={totalDrops} />
       {content}
     </ActivityCardFrame>
-  ) : null;
+  );
 }
