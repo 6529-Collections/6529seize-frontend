@@ -1100,10 +1100,7 @@ export default function DropForgeLaunchClaimPageClient({
         if (isStaleClaimActionRequest()) {
           return;
         }
-        const msg = getErrorMessage(
-          e,
-          `Failed to update ${action}`
-        );
+        const msg = getErrorMessage(e, `Failed to update ${action}`);
         showErrorToast(msg);
       } finally {
         if (!isStaleClaimActionRequest()) {
@@ -1440,9 +1437,9 @@ export default function DropForgeLaunchClaimPageClient({
     [isInitialized, researchAirdropCount, runAirdropWrite, setToast]
   );
 
-  const handleSelectedPhaseChange = useCallback((value: string) => {
+  const handleSelectedPhaseChange = useCallback((value: LaunchPhaseKey) => {
     setIsPhaseSelectionManual(true);
-    setSelectedPhase(value as "" | LaunchPhaseKey);
+    setSelectedPhase(value);
   }, []);
 
   const handleResearchTargetEditionSizeChange = useCallback((value: string) => {

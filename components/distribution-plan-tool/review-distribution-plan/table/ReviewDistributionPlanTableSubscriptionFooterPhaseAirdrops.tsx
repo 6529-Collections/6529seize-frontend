@@ -266,6 +266,14 @@ export function DistributionPhaseAirdropsModal(
           </Row>
           <Row className="pt-2 pb-2">
             <Col>
+              <div className="alert alert-warning mb-0 border border-dark">
+                This upload will replace the current {copy.successLabel}{" "}
+                airdrops list for this token.
+              </div>
+            </Col>
+          </Row>
+          <Row className="pt-2 pb-2">
+            <Col>
               <div className="alert alert-info mb-0 border border-dark">
                 <div className="mb-2">
                   <strong>CSV format:</strong>{" "}

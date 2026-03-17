@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import {
   ArrowLeftIcon,
   ArrowTopRightOnSquareIcon,
@@ -131,7 +130,7 @@ interface DropForgeLaunchClaimPageViewProps {
   claimWritePending: boolean;
   runMetadataLocationOnlyUpdate: () => void;
   selectedPhase: "" | LaunchPhaseKey;
-  onSelectedPhaseChange: (value: string) => void;
+  onSelectedPhaseChange: (value: LaunchPhaseKey) => void;
   totalMinted: number;
   researchTargetEditionSize: number;
   onResearchTargetEditionSizeChange: (value: string) => void;
@@ -792,6 +791,37 @@ function DropForgeOnChainClaimSection({
   );
 }
 
+function DropForgeActionCompletionToggle({
+  action,
+  disabled,
+  ariaLabel,
+  onToggle,
+}: Readonly<{
+  action: ApiMintingClaimAction | null | undefined;
+  disabled: boolean;
+  ariaLabel: string;
+  onToggle: (action: string, completed: boolean) => Promise<void>;
+}>) {
+  if (!action) {
+    return null;
+  }
+
+  return (
+    <div className="tw-inline-flex tw-items-center tw-gap-3">
+      <span className="tw-text-sm tw-text-iron-400">Completed</span>
+      <Toggle
+        checked={action.completed}
+        disabled={disabled}
+        icons={false}
+        aria-label={ariaLabel}
+        onChange={() => {
+          void onToggle(action.action, action.completed);
+        }}
+      />
+    </div>
+  );
+}
+
 function DropForgeAirdropSummaryActionRow({
   title,
   loading,
@@ -825,20 +855,12 @@ function DropForgeAirdropSummaryActionRow({
     <div className="tw-space-y-5">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         <div className="tw-text-base tw-font-medium tw-text-white">{title}</div>
-        {action ? (
-          <div className="tw-inline-flex tw-items-center tw-gap-3">
-            <span className="tw-text-sm tw-text-iron-400">Completed</span>
-            <Toggle
-              checked={action.completed}
-              disabled={isActionToggleDisabled}
-              icons={false}
-              aria-label={`${title} completed`}
-              onChange={() => {
-                void onActionToggle(action.action, action.completed);
-              }}
-            />
-          </div>
-        ) : null}
+        <DropForgeActionCompletionToggle
+          action={action}
+          disabled={isActionToggleDisabled}
+          ariaLabel={`${title} completed`}
+          onToggle={onActionToggle}
+        />
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox label="Address Count / Total Airdrops">
@@ -1018,7 +1040,9 @@ function DropForgeSubscriptionAirdropSections({
               ? (mintingClaimActionsByName[actionName] ?? null)
               : null;
             const isActionToggleDisabled =
-              claimWritePending || mintingClaimActionPending !== null;
+              !isInitialized ||
+              claimWritePending ||
+              mintingClaimActionPending !== null;
 
             return (
               <>
@@ -1026,25 +1050,12 @@ function DropForgeSubscriptionAirdropSections({
                   <div className="tw-text-base tw-font-medium tw-text-white">
                     {section.title}
                   </div>
-                  {action ? (
-                    <div className="tw-inline-flex tw-items-center tw-gap-3">
-                      <span className="tw-text-sm tw-text-iron-400">
-                        Completed
-                      </span>
-                      <Toggle
-                        checked={action.completed}
-                        disabled={isActionToggleDisabled}
-                        icons={false}
-                        aria-label={`${section.title} completed`}
-                        onChange={() => {
-                          void onMintingClaimActionToggle(
-                            action.action,
-                            action.completed
-                          );
-                        }}
-                      />
-                    </div>
-                  ) : null}
+                  <DropForgeActionCompletionToggle
+                    action={action}
+                    disabled={isActionToggleDisabled}
+                    ariaLabel={`${section.title} completed`}
+                    onToggle={onMintingClaimActionToggle}
+                  />
                 </div>
                 <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
                   <DropForgeFieldBox label="Address Count / Total Airdrops">
@@ -1171,32 +1182,21 @@ function DropForgeResearchAirdropSection({
 }>) {
   const isCompleted = researchAction?.completed ?? false;
   const isActionToggleDisabled =
-    claimWritePending || mintingClaimActionPending !== null;
+    !isInitialized || claimWritePending || mintingClaimActionPending !== null;
   const researchActionName = researchAction?.action ?? null;
 
   return (
-    <div className="tw-space-y-3 tw-pt-4">
+    <div className="tw-space-y-5 tw-pt-4">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         <div className="tw-text-base tw-font-medium tw-text-white">
           Research Airdrop
         </div>
-        {researchAction ? (
-          <div className="tw-inline-flex tw-items-center tw-gap-3">
-            <span className="tw-text-sm tw-text-iron-400">Completed</span>
-            <Toggle
-              checked={researchAction.completed}
-              disabled={isActionToggleDisabled}
-              icons={false}
-              aria-label="Research airdrop completed"
-              onChange={() => {
-                void onMintingClaimActionToggle(
-                  researchAction.action,
-                  researchAction.completed
-                );
-              }}
-            />
-          </div>
-        ) : null}
+        <DropForgeActionCompletionToggle
+          action={researchAction}
+          disabled={isActionToggleDisabled}
+          ariaLabel="Research airdrop completed"
+          onToggle={onMintingClaimActionToggle}
+        />
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox label="Total Minted">
@@ -1518,7 +1518,7 @@ function DropForgePhaseSelectionSection({
   subscriptionAirdropSections,
 }: Readonly<{
   selectedPhase: "" | LaunchPhaseKey;
-  onSelectedPhaseChange: (value: string) => void;
+  onSelectedPhaseChange: (value: LaunchPhaseKey) => void;
   isInitialized: boolean;
   totalMinted: number;
   researchTargetEditionSize: number;
@@ -1568,37 +1568,89 @@ function DropForgePhaseSelectionSection({
 
   return (
     <>
-      <label
-        htmlFor="phase-selection"
-        className="tw-text-base tw-font-semibold tw-text-iron-50"
-      >
+      <div className="tw-text-base tw-font-semibold tw-text-iron-50">
         Phase Selection
-      </label>
-      <div className="tw-relative">
-        <select
-          id="phase-selection"
-          value={selectedPhase}
-          onChange={(e) => onSelectedPhaseChange(e.target.value)}
-          className="tw-h-16 tw-w-full tw-appearance-none tw-rounded-xl tw-border-0 tw-bg-[#03002e] tw-pl-4 tw-pr-12 tw-text-lg tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-[#010048] focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-[#090088]"
+      </div>
+      <div
+        role="tablist"
+        aria-label="Phase selection"
+        className="tw-grid tw-grid-cols-2 tw-gap-2 tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950/70 tw-p-2 md:tw-grid-cols-3 xl:tw-grid-cols-5"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={selectedPhase === "phase0"}
+          aria-controls="phase-panel-phase0"
+          onClick={() => onSelectedPhaseChange("phase0")}
+          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
+            selectedPhase === "phase0"
+              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
+              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
+          }`}
         >
-          <option value="" disabled>
-            Phase Selection
-          </option>
-          <option value="phase0">Phase 0 - Initialize Claim</option>
-          <option value="phase1" disabled={!isInitialized}>
-            Phase 1
-          </option>
-          <option value="phase2" disabled={!isInitialized}>
-            Phase 2
-          </option>
-          <option value="publicphase" disabled={!isInitialized}>
-            Public Phase
-          </option>
-          <option value="research" disabled={!isInitialized}>
-            Airdrop to Research
-          </option>
-        </select>
-        <ChevronDownIcon className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-h-5 tw-w-5 -tw-translate-y-1/2 tw-text-iron-300" />
+          <span>Phase 0</span>
+          <span className="tw-hidden sm:tw-inline"> - Initialize Claim</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={selectedPhase === "phase1"}
+          aria-controls="phase-panel-phase1"
+          disabled={!isInitialized}
+          onClick={() => onSelectedPhaseChange("phase1")}
+          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
+            selectedPhase === "phase1"
+              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
+              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
+          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
+        >
+          Phase 1
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={selectedPhase === "phase2"}
+          aria-controls="phase-panel-phase2"
+          disabled={!isInitialized}
+          onClick={() => onSelectedPhaseChange("phase2")}
+          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
+            selectedPhase === "phase2"
+              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
+              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
+          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
+        >
+          Phase 2
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={selectedPhase === "publicphase"}
+          aria-controls="phase-panel-publicphase"
+          disabled={!isInitialized}
+          onClick={() => onSelectedPhaseChange("publicphase")}
+          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
+            selectedPhase === "publicphase"
+              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
+              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
+          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
+        >
+          Public Phase
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={selectedPhase === "research"}
+          aria-controls="phase-panel-research"
+          disabled={!isInitialized}
+          onClick={() => onSelectedPhaseChange("research")}
+          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
+            selectedPhase === "research"
+              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
+              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
+          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
+        >
+          Airdrop to Research
+        </button>
       </div>
       {selectedPhase === "research" ? (
         <DropForgeResearchAirdropSection
@@ -1724,7 +1776,7 @@ function DropForgeLaunchClaimActionsSection({
   isInitialized: boolean;
   runMetadataLocationOnlyUpdate: () => void;
   selectedPhase: "" | LaunchPhaseKey;
-  onSelectedPhaseChange: (value: string) => void;
+  onSelectedPhaseChange: (value: LaunchPhaseKey) => void;
   totalMinted: number;
   researchTargetEditionSize: number;
   onResearchTargetEditionSizeChange: (value: string) => void;
