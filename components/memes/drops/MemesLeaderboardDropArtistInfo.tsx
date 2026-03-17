@@ -22,7 +22,7 @@ const MemesLeaderboardDropArtistInfo = ({
     <div className="tw-flex tw-gap-x-3">
       <WaveDropAuthorPfp drop={drop} />
       <div className="tw-flex tw-h-12 tw-flex-col tw-justify-between">
-        <div className="-tw-mt-0.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+        <div className="-tw-mt-0.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
           {drop.author.handle ? (
             <UserProfileTooltipWrapper user={drop.author.handle}>
               <Link

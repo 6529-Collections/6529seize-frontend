@@ -54,7 +54,7 @@ interface DropAuthorBadgesProps {
     | undefined;
 }
 
-const DEFAULT_CONTAINER_CLASS = "tw-inline-flex tw-items-center tw-gap-x-1.5";
+const DEFAULT_CONTAINER_CLASS = "tw-inline-flex tw-items-center tw-gap-x-1";
 
 const toApiProfileMin = (profile: DropAuthorBadgesProfile): ApiProfileMin => {
   const primaryAddress =

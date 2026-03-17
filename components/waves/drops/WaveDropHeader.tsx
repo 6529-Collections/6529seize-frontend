@@ -53,8 +53,8 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
             <p
               className={`tw-mb-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
             >
