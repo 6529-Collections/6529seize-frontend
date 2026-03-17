@@ -1652,54 +1652,58 @@ function DropForgePhaseSelectionSection({
           Airdrop to Research
         </button>
       </div>
-      {selectedPhase === "research" ? (
-        <DropForgeResearchAirdropSection
-          totalMinted={totalMinted}
-          researchTargetEditionSize={researchTargetEditionSize}
-          onResearchTargetEditionSizeChange={onResearchTargetEditionSizeChange}
-          claimWritePending={claimWritePending}
-          isInitialized={isInitialized}
-          researchAirdropCount={researchAirdropCount}
-          runResearchAirdropWrite={runResearchAirdropWrite}
-          researchAction={researchAction}
-          mintingClaimActionPending={mintingClaimActionPending}
-          onMintingClaimActionToggle={onMintingClaimActionToggle}
-        />
-      ) : (
-        <DropForgePhaseConfigurationSection
-          manifoldClaim={manifoldClaim}
-          selectedPhaseDiffs={selectedPhaseDiffs}
-          changedFieldBoxClassName={changedFieldBoxClassName}
-          changedFieldBoxLabelClassName={changedFieldBoxLabelClassName}
-          selectedPhasePriceValue={selectedPhasePriceValue}
-          onSelectedPhasePriceChange={onSelectedPhasePriceChange}
-          selectedPhase={selectedPhase}
-          isPublicPhaseSelected={isPublicPhaseSelected}
-          rootsLoading={rootsLoading}
-          selectedPhaseConfig={selectedPhaseConfig}
-          selectedPhaseWindowStartValue={selectedPhaseWindowStartValue}
-          selectedPhaseWindowEndValue={selectedPhaseWindowEndValue}
-          onSelectedPhaseStartChange={onSelectedPhaseStartChange}
-          onSelectedPhaseEndChange={onSelectedPhaseEndChange}
-          selectedPhaseActionDisabled={selectedPhaseActionDisabled}
-          onSelectedPhaseAction={onSelectedPhaseAction}
-          selectedPhaseActionLabel={selectedPhaseActionLabel}
-          claimWritePending={claimWritePending}
-          showPhase0AirdropSections={showPhase0AirdropSections}
-          phase0AirdropsError={phase0AirdropsError}
-          phase0AirdropsLoading={phase0AirdropsLoading}
-          isInitialized={isInitialized}
-          artistAirdropSummary={artistAirdropSummary}
-          teamAirdropSummary={teamAirdropSummary}
-          artistAirdrops={artistAirdrops}
-          teamAirdrops={teamAirdrops}
-          runAirdropWrite={runAirdropWrite}
-          mintingClaimActionsByName={mintingClaimActionsByName}
-          mintingClaimActionPending={mintingClaimActionPending}
-          onMintingClaimActionToggle={onMintingClaimActionToggle}
-          subscriptionAirdropSections={subscriptionAirdropSections}
-        />
-      )}
+      <div className="tw-min-h-[18rem] lg:tw-min-h-[30rem]">
+        {selectedPhase === "research" ? (
+          <DropForgeResearchAirdropSection
+            totalMinted={totalMinted}
+            researchTargetEditionSize={researchTargetEditionSize}
+            onResearchTargetEditionSizeChange={
+              onResearchTargetEditionSizeChange
+            }
+            claimWritePending={claimWritePending}
+            isInitialized={isInitialized}
+            researchAirdropCount={researchAirdropCount}
+            runResearchAirdropWrite={runResearchAirdropWrite}
+            researchAction={researchAction}
+            mintingClaimActionPending={mintingClaimActionPending}
+            onMintingClaimActionToggle={onMintingClaimActionToggle}
+          />
+        ) : (
+          <DropForgePhaseConfigurationSection
+            manifoldClaim={manifoldClaim}
+            selectedPhaseDiffs={selectedPhaseDiffs}
+            changedFieldBoxClassName={changedFieldBoxClassName}
+            changedFieldBoxLabelClassName={changedFieldBoxLabelClassName}
+            selectedPhasePriceValue={selectedPhasePriceValue}
+            onSelectedPhasePriceChange={onSelectedPhasePriceChange}
+            selectedPhase={selectedPhase}
+            isPublicPhaseSelected={isPublicPhaseSelected}
+            rootsLoading={rootsLoading}
+            selectedPhaseConfig={selectedPhaseConfig}
+            selectedPhaseWindowStartValue={selectedPhaseWindowStartValue}
+            selectedPhaseWindowEndValue={selectedPhaseWindowEndValue}
+            onSelectedPhaseStartChange={onSelectedPhaseStartChange}
+            onSelectedPhaseEndChange={onSelectedPhaseEndChange}
+            selectedPhaseActionDisabled={selectedPhaseActionDisabled}
+            onSelectedPhaseAction={onSelectedPhaseAction}
+            selectedPhaseActionLabel={selectedPhaseActionLabel}
+            claimWritePending={claimWritePending}
+            showPhase0AirdropSections={showPhase0AirdropSections}
+            phase0AirdropsError={phase0AirdropsError}
+            phase0AirdropsLoading={phase0AirdropsLoading}
+            isInitialized={isInitialized}
+            artistAirdropSummary={artistAirdropSummary}
+            teamAirdropSummary={teamAirdropSummary}
+            artistAirdrops={artistAirdrops}
+            teamAirdrops={teamAirdrops}
+            runAirdropWrite={runAirdropWrite}
+            mintingClaimActionsByName={mintingClaimActionsByName}
+            mintingClaimActionPending={mintingClaimActionPending}
+            onMintingClaimActionToggle={onMintingClaimActionToggle}
+            subscriptionAirdropSections={subscriptionAirdropSections}
+          />
+        )}
+      </div>
     </>
   );
 }
