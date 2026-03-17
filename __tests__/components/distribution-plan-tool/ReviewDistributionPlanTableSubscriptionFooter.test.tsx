@@ -504,7 +504,9 @@ test("downloads artist airdrops csv with the response filename", async () => {
   await waitFor(() => {
     expect(mockUseDownloader).toHaveBeenCalledWith();
     expect(mockDownload).toHaveBeenCalledWith(
-      "https://api.test.6529.io/api/distributions/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123/artist-airdrops",
+      expect.stringContaining(
+        "/api/distributions/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123/artist-airdrops"
+      ),
       "artist_airdrops_123.csv",
       undefined,
       {

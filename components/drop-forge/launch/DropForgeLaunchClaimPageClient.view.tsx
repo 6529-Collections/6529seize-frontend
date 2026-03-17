@@ -796,6 +796,7 @@ function DropForgeAirdropSummaryActionRow({
   title,
   loading,
   summary,
+  isInitialized,
   disabled,
   buttonLabel,
   onClick,
@@ -807,6 +808,7 @@ function DropForgeAirdropSummaryActionRow({
   title: string;
   loading: boolean;
   summary: LaunchAirdropSummaryView;
+  isInitialized: boolean;
   disabled: boolean;
   buttonLabel: string;
   onClick: () => void;
@@ -816,7 +818,8 @@ function DropForgeAirdropSummaryActionRow({
   onActionToggle: (action: string, completed: boolean) => Promise<void>;
 }>) {
   const isCompleted = action?.completed ?? false;
-  const isActionToggleDisabled = claimWritePending || actionPending !== null;
+  const isActionToggleDisabled =
+    !isInitialized || claimWritePending || actionPending !== null;
 
   return (
     <div className="tw-space-y-5">
@@ -922,6 +925,7 @@ function DropForgePhase0AirdropsSection({
         title="Artist Airdrops"
         loading={phase0AirdropsLoading}
         summary={artistAirdropSummary}
+        isInitialized={isInitialized}
         disabled={
           !isInitialized ||
           claimWritePending ||
@@ -946,6 +950,7 @@ function DropForgePhase0AirdropsSection({
         title="Team Airdrops"
         loading={phase0AirdropsLoading}
         summary={teamAirdropSummary}
+        isInitialized={isInitialized}
         disabled={
           !isInitialized ||
           claimWritePending ||
