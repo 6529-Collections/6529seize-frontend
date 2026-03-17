@@ -22,6 +22,9 @@ type LinkPreviewContextValue = {
   readonly hideActions: boolean;
   readonly previewToggle?: LinkPreviewToggleControl | undefined;
   readonly inlineShowControl?: LinkPreviewInlineShowControl | undefined;
+  readonly onCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
 };
 
 const DEFAULT_CONTEXT: LinkPreviewContextValue = {
@@ -36,11 +39,15 @@ export const LinkPreviewProvider = ({
   variant = "chat",
   previewToggle,
   inlineShowControl,
+  onCardActionsActiveChange,
   children,
 }: {
   readonly variant?: LinkPreviewVariant | undefined;
   readonly previewToggle?: LinkPreviewToggleControl | undefined;
   readonly inlineShowControl?: LinkPreviewInlineShowControl | undefined;
+  readonly onCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
   readonly children: ReactNode;
 }) => {
   const value = useMemo(
@@ -49,8 +56,9 @@ export const LinkPreviewProvider = ({
       hideActions: variant === "home",
       previewToggle,
       inlineShowControl,
+      onCardActionsActiveChange,
     }),
-    [variant, previewToggle, inlineShowControl]
+    [variant, previewToggle, inlineShowControl, onCardActionsActiveChange]
   );
 
   return (

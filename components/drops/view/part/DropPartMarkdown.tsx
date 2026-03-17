@@ -259,6 +259,9 @@ export interface DropPartMarkdownProps {
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
   readonly linkPreviewToggleControl?: LinkPreviewToggleControl | undefined;
+  readonly onLinkCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
 }
 
 function DropPartMarkdown({
@@ -276,6 +279,7 @@ function DropPartMarkdown({
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
   linkPreviewToggleControl,
+  onLinkCardActionsActiveChange,
 }: DropPartMarkdownProps) {
   const queryClient = useQueryClient();
   const isMobile = useIsMobileScreen();
@@ -430,6 +434,7 @@ function DropPartMarkdown({
     <LinkPreviewProvider
       variant={linkPreviewVariant}
       previewToggle={linkPreviewToggleControl}
+      onCardActionsActiveChange={onLinkCardActionsActiveChange}
     >
       <Markdown
         rehypePlugins={rehypePlugins}
