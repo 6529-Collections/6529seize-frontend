@@ -15,8 +15,8 @@ import {
   DAY_LABEL_TOP_OFFSET_PX,
   DAY_LABELS,
   HEATMAP_CONTENT_CLASS_NAME,
-  HEATMAP_GRID_HEIGHT_PX,
   HEATMAP_GRID_STYLE,
+  LOADING_HEATMAP_WEEK_COUNT,
   HEATMAP_VIEWPORT_CLASS_NAME,
   LOADING_MONTH_HEADER_SEGMENTS,
   MONTH_LABEL_MIN_SPACING_PX,
@@ -33,32 +33,53 @@ import {
 } from "./userPageBrainActivityHeatmap.helpers";
 import { useHeatmapViewport } from "./userPageBrainActivityHeatmap.viewport";
 
+const LOADING_COLUMN_STRIDE_PX = CELL_SIZE_PX + CELL_GAP_PX;
+const LOADING_HEATMAP_CELLS = Array.from(
+  { length: LOADING_HEATMAP_WEEK_COUNT * 7 },
+  (_, index) => {
+    const column = Math.floor(index / 7);
+    const row = index % 7;
+
+    return {
+      key: `loading-${column}-${row}`,
+      isPadding:
+        (column === 0 && row < 2) ||
+        (column === LOADING_HEATMAP_WEEK_COUNT - 1 && row > 4),
+      isAccent: (column + row) % 5 === 0,
+    };
+  }
+);
+
 export function UserPageBrainActivityHeatmapLoading() {
+  const { viewportRef, viewportMetrics } = useHeatmapViewport("loading");
+
   return (
-    <div className="tw-flex tw-gap-3" aria-label="Loading activity heatmap">
+    <div
+      className="tw-flex tw-gap-3 tw-px-4"
+      aria-label="Loading activity heatmap"
+    >
       <HeatmapDayLabels />
-      <div className="tw-min-w-0 tw-flex-1">
-        <div
-          className="tw-mb-1 tw-flex tw-items-end tw-justify-between tw-overflow-hidden"
-          aria-hidden="true"
-          style={{
-            height: `${MONTH_LABEL_ROW_HEIGHT_PX}px`,
-            gap: `${MONTH_LABEL_MIN_SPACING_PX}px`,
-          }}
-        >
-          {LOADING_MONTH_HEADER_SEGMENTS.map((segment) => (
-            <span
-              key={segment.key}
-              className="tw-h-[5px] tw-animate-pulse tw-rounded-full tw-bg-white/5"
-              style={{ width: `${segment.widthPx}px` }}
-            />
-          ))}
-        </div>
-        <div className="tw-overflow-hidden tw-pb-3" aria-hidden="true">
-          <div
-            className="tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-white/[0.03]"
-            style={{ height: `${HEATMAP_GRID_HEIGHT_PX}px` }}
-          />
+      <div className="tw-relative tw-min-w-0 tw-flex-1">
+        <HeatmapLoadingMonthLabels
+          scrollLeft={viewportMetrics.scrollLeft}
+          clientWidth={viewportMetrics.clientWidth}
+        />
+        <div ref={viewportRef} className={HEATMAP_VIEWPORT_CLASS_NAME}>
+          <div className={HEATMAP_CONTENT_CLASS_NAME}>
+            <div
+              className="tw-grid tw-animate-pulse tw-grid-flow-col tw-grid-rows-7"
+              aria-hidden="true"
+              style={HEATMAP_GRID_STYLE}
+            >
+              {LOADING_HEATMAP_CELLS.map((cell) => (
+                <HeatmapLoadingCell
+                  key={cell.key}
+                  isPadding={cell.isPadding}
+                  isAccent={cell.isAccent}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -140,6 +161,32 @@ function HeatmapDayLabels() {
   );
 }
 
+function HeatmapLoadingCell({
+  isPadding,
+  isAccent,
+}: Readonly<{
+  isPadding: boolean;
+  isAccent: boolean;
+}>) {
+  return (
+    <div
+      className="tw-flex tw-items-center tw-justify-center"
+      style={CELL_FRAME_STYLE}
+    >
+      {!isPadding && (
+        <div
+          className={clsx(
+            "tw-rounded-[2px]",
+            isAccent
+              ? "tw-h-[9px] tw-w-[9px] tw-bg-white/[0.09]"
+              : "tw-h-[7px] tw-w-[7px] tw-bg-white/[0.05]"
+          )}
+        />
+      )}
+    </div>
+  );
+}
+
 function HeatmapCell({
   cell,
   tooltipId,
@@ -186,6 +233,47 @@ function HeatmapTooltipContent({
       <span className="tw-text-xs tw-font-medium tw-text-iron-400">
         {TOOLTIP_DATE_FORMATTER.format(new Date(`${isoDate}T00:00:00.000Z`))}
       </span>
+    </div>
+  );
+}
+
+function HeatmapLoadingMonthLabels({
+  scrollLeft,
+  clientWidth,
+}: Readonly<{
+  scrollLeft: number;
+  clientWidth: number;
+}>) {
+  const visibleSegments = LOADING_MONTH_HEADER_SEGMENTS.filter((segment) => {
+    const leftPx = segment.labelColumn * LOADING_COLUMN_STRIDE_PX - scrollLeft;
+    const rightPx = leftPx + segment.widthPx;
+
+    if (clientWidth <= 0) {
+      return true;
+    }
+
+    return rightPx >= 0 && leftPx <= clientWidth;
+  });
+
+  return (
+    <div
+      className="tw-relative tw-mb-1 tw-overflow-hidden"
+      aria-hidden="true"
+      style={{
+        height: `${MONTH_LABEL_ROW_HEIGHT_PX}px`,
+        minWidth: `${MONTH_LABEL_MIN_SPACING_PX}px`,
+      }}
+    >
+      {visibleSegments.map((segment) => (
+        <span
+          key={segment.key}
+          className="tw-absolute tw-bottom-0 tw-h-[5px] tw-animate-pulse tw-rounded-full tw-bg-white/[0.08]"
+          style={{
+            left: `${segment.labelColumn * LOADING_COLUMN_STRIDE_PX - scrollLeft}px`,
+            width: `${segment.widthPx}px`,
+          }}
+        />
+      ))}
     </div>
   );
 }
