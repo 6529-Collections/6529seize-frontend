@@ -20,8 +20,8 @@ export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
   const id = useId();
   const uniqueTooltipId = `${tooltipId}-${id}`;
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
-
-  const dataTooltipId = !isMobile ? uniqueTooltipId : undefined;
+  const showTooltip = isMobile === false;
+  const dataTooltipId = showTooltip ? uniqueTooltipId : undefined;
 
   return (
     <>
@@ -44,7 +44,7 @@ export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
           className="tw-h-2.5 tw-w-2.5 tw-flex-shrink-0 tw-text-current"
         />
       </button>
-      {!isMobile && (
+      {showTooltip && (
         <Tooltip
           id={uniqueTooltipId}
           place="top"
