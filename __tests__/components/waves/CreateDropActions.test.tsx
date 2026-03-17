@@ -269,6 +269,25 @@ describe("CreateDropActions", () => {
     expect(fileInput).toHaveAttribute("multiple");
   });
 
+  it("accepts csv uploads in chat mode only", () => {
+    const { rerender } = render(
+      <CreateDropActions {...defaultProps} isDropMode={false} />
+    );
+
+    let fileInputs = screen.getAllByLabelText("Upload a file");
+    let fileInput = fileInputs[0]?.querySelector('input[type="file"]');
+    expect(fileInput).toHaveAttribute(
+      "accept",
+      "image/*,video/*,audio/*,.csv,text/csv"
+    );
+
+    rerender(<CreateDropActions {...defaultProps} isDropMode={true} />);
+
+    fileInputs = screen.getAllByLabelText("Upload a file");
+    fileInput = fileInputs[0]?.querySelector('input[type="file"]');
+    expect(fileInput).toHaveAttribute("accept", "image/*,video/*,audio/*");
+  });
+
   it("passes correct props to StormButton", () => {
     render(
       <CreateDropActions
