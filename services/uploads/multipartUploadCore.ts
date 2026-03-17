@@ -27,11 +27,15 @@ interface MultipartUploadCoreParams {
 }
 
 export function getContentType(file: File): string {
+  const fileName = file.name.toLowerCase();
+  if (fileName.endsWith(".csv")) {
+    return "text/csv";
+  }
+
   if (file.type) {
     return file.type;
   }
 
-  const fileName = file.name.toLowerCase();
   if (fileName.endsWith(".glb")) {
     return "model/gltf-binary";
   }

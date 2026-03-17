@@ -139,6 +139,9 @@ const isMetadataValuePresent = (value: string | number | null): boolean => {
 const hasMetadataContent = (metadata: CreateDropMetadataType[]): boolean =>
   metadata.some((item) => isMetadataValuePresent(item.value));
 
+const isCsvFile = (file: File): boolean =>
+  file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv");
+
 const hasSubmissionContent = ({
   markdown,
   files,
@@ -966,7 +969,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [activeDrop, isApp, focusMobileInput]);
 
   const handleFileChange = (newFiles: File[]) => {
-    let updatedFiles = [...files, ...newFiles];
+    let acceptedFiles = [...newFiles];
+
+    if (isDropMode) {
+      const rejectedCsvFiles = acceptedFiles.filter(isCsvFile);
+      if (rejectedCsvFiles.length) {
+        setToast({
+          message: "CSV attachments are only supported on chat drops.",
+          type: "error",
+        });
+        acceptedFiles = acceptedFiles.filter((file) => !isCsvFile(file));
+      }
+    }
+
+    if (!acceptedFiles.length) {
+      return;
+    }
+
+    let updatedFiles = [...files, ...acceptedFiles];
     let removedCount = 0;
 
     if (updatedFiles.length > MAX_DROP_UPLOAD_FILES) {

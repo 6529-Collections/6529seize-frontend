@@ -23,7 +23,10 @@ describe('CreateDropActionsRow', () => {
     const button = screen.getByRole('button', { name: /select audio file/i });
     const input = button.querySelector('input') as HTMLInputElement;
     fireEvent.change(input, { target: { files } });
-    expect(toast).toHaveBeenCalledWith({ message: 'You can only upload up to 4 files at a time', type: 'error' });
+    expect(toast).toHaveBeenCalledWith({
+      message: `You can only upload up to ${MAX_DROP_UPLOAD_FILES} files at a time`,
+      type: 'error'
+    });
     expect(setFiles).not.toHaveBeenCalled();
   });
 
@@ -36,6 +39,13 @@ describe('CreateDropActionsRow', () => {
     fireEvent.change(input, { target: { files } });
     expect(setFiles).toHaveBeenCalledWith(files);
     expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('accepts csv files in the input picker', () => {
+    renderComponent({ canAddPart: false, isStormMode: false, setFiles: jest.fn(), breakIntoStorm: jest.fn() });
+    const button = screen.getByRole('button', { name: /select audio file/i });
+    const input = button.querySelector('input') as HTMLInputElement;
+    expect(input).toHaveAttribute('accept', 'image/*,video/*,audio/*,.csv,text/csv');
   });
 
   it('renders break into storm button when allowed and handles click', () => {

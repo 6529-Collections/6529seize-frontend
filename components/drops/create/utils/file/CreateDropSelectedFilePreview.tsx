@@ -3,6 +3,7 @@ enum FILE_TYPES {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",
   AUDIO = "AUDIO",
+  CSV = "CSV",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -20,6 +21,9 @@ export default function CreateDropSelectedFilePreview({
     }
     if (file.type.includes("audio")) {
       return FILE_TYPES.AUDIO;
+    }
+    if (file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv")) {
+      return FILE_TYPES.CSV;
     }
     return FILE_TYPES.UNKNOWN;
   };
@@ -45,6 +49,18 @@ export default function CreateDropSelectedFilePreview({
         <source src={URL.createObjectURL(file)} type={file.type} />
         Your browser does not support the audio tag.
       </audio>
+    ),
+    [FILE_TYPES.CSV]: (
+      <div className="tw-flex tw-h-full tw-min-h-32 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-6 tw-text-center">
+        <div>
+          <div className="tw-text-sm tw-font-semibold tw-text-iron-100">
+            CSV attachment
+          </div>
+          <div className="tw-mt-1 tw-break-all tw-text-xs tw-text-iron-400">
+            {file.name}
+          </div>
+        </div>
+      </div>
     ),
     [FILE_TYPES.UNKNOWN]: <></>,
   };

@@ -57,6 +57,10 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
       e.target.value = "";
     };
 
+    const fileInputAccept = isDropMode
+      ? "image/*,video/*,audio/*"
+      : "image/*,video/*,audio/*,.csv,text/csv";
+
     useEffect(() => {
       if (!showGifPicker || !gifPickerEnabled) return;
 
@@ -167,7 +171,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       <input
                         type="file"
                         className="tw-hidden"
-                        accept="image/*,video/*,audio/*"
+                        accept={fileInputAccept}
                         multiple
                         onChange={onFiles}
                       />
