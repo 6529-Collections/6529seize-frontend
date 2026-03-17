@@ -9,6 +9,7 @@ const mockDownload = jest.fn();
 const mockUseDownloader = jest.fn();
 const mockGetStagingAuth = jest.fn();
 const mockGetAuthJwt = jest.fn();
+const mockFetchAllPages = jest.fn();
 
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
@@ -18,6 +19,10 @@ jest.mock("react-use-downloader", () => ({
 jest.mock("@/services/auth/auth.utils", () => ({
   getStagingAuth: () => mockGetStagingAuth(),
   getAuthJwt: () => mockGetAuthJwt(),
+}));
+
+jest.mock("@/services/6529api", () => ({
+  fetchAllPages: (...args: any[]) => mockFetchAllPages(...args),
 }));
 
 jest.mock(
@@ -50,6 +55,32 @@ jest.mock(
         >
           Upload
         </button>
+      </div>
+    ),
+  })
+);
+
+jest.mock(
+  "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterPhaseAirdropsViewer",
+  () => ({
+    DistributionPhaseAirdropsViewerModal: (props: any) => (
+      <div data-testid={`${props.phase}-airdrops-viewer-modal`}>
+        <div>{props.isLoading ? "Loading" : "Loaded"}</div>
+        <div>{`Error: ${props.error ?? "none"}`}</div>
+        <div>{`Rows: ${props.rows.length}`}</div>
+      </div>
+    ),
+  })
+);
+
+jest.mock(
+  "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooterPhotosViewer",
+  () => ({
+    DistributionPhotosViewerModal: (props: any) => (
+      <div data-testid="distribution-photos-viewer-modal">
+        <div>{props.isLoading ? "Loading photos" : "Loaded photos"}</div>
+        <div>{`Photo error: ${props.error ?? "none"}`}</div>
+        <div>{`Photos: ${props.photos.length}`}</div>
       </div>
     ),
   })
@@ -107,9 +138,11 @@ beforeEach(() => {
   mockUseDownloader.mockReset();
   mockGetStagingAuth.mockReset();
   mockGetAuthJwt.mockReset();
+  mockFetchAllPages.mockReset();
   mockDownload.mockResolvedValue(undefined);
   mockGetStagingAuth.mockReturnValue(null);
   mockGetAuthJwt.mockReturnValue(null);
+  mockFetchAllPages.mockResolvedValue([]);
   mockUseDownloader.mockReturnValue({
     download: mockDownload,
     error: null,
@@ -171,9 +204,24 @@ test("renders split admin controls after token id is confirmed", async () => {
   await waitFor(() => {
     expect(screen.getByText("Change Token ID")).toBeInTheDocument();
     expect(screen.getByText("Reset Subscriptions")).toBeInTheDocument();
-    expect(screen.getByText("Upload Artist Airdrops")).toBeInTheDocument();
-    expect(screen.getByText("Upload Team Airdrops")).toBeInTheDocument();
-    expect(screen.getByText("Upload Distribution Photos")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /upload artist airdrops/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /upload team airdrops/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^artist airdrops$/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^team airdrops$/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /upload distribution photos/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /distribution photos \(0\)/i })
+    ).toBeInTheDocument();
     expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
     expect(screen.getByText("Publish to GitHub")).toBeInTheDocument();
     expect(
@@ -206,24 +254,97 @@ test("shows upload modals when upload buttons clicked", async () => {
   await user.click(screen.getByTestId("confirm-token-id-button"));
 
   await waitFor(() => {
-    expect(screen.getByText("Upload Distribution Photos")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /upload distribution photos/i })
+    ).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Distribution Photos"));
+  await user.click(
+    screen.getByRole("button", { name: /upload distribution photos/i })
+  );
   await waitFor(() => {
     expect(
       screen.getByTestId("Upload Distribution Photos")
     ).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Artist Airdrops"));
+  await user.click(
+    screen.getByRole("button", { name: /upload artist airdrops/i })
+  );
   await waitFor(() => {
     expect(screen.getByTestId("artist-airdrops-modal")).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Team Airdrops"));
+  await user.click(
+    screen.getByRole("button", { name: /upload team airdrops/i })
+  );
   await waitFor(() => {
     expect(screen.getByTestId("team-airdrops-modal")).toBeInTheDocument();
+  });
+});
+
+test("loads distribution photos into a viewer modal from the photos endpoint", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  mockFetchAllPages.mockResolvedValue([
+    { id: 1, link: "https://example.com/1.jpg" },
+    { id: 2, link: "https://example.com/2.jpg" },
+  ]);
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  await user.click(
+    screen.getByRole("button", { name: /distribution photos \(0\)/i })
+  );
+
+  await waitFor(() => {
+    expect(mockFetchAllPages).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/distribution_photos/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/123"
+    );
+    expect(
+      screen.getByTestId("distribution-photos-viewer-modal")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Loaded photos")).toBeInTheDocument();
+    expect(screen.getByText("Photos: 2")).toBeInTheDocument();
+  });
+});
+
+test("loads artist airdrops into a viewer modal from the get endpoint", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  const commonApiFetch = jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockImplementation(({ endpoint }: { endpoint: string }) => {
+      if (endpoint.includes("/artist-airdrops")) {
+        return Promise.resolve([
+          { wallet: "0x123", amount: 5 },
+          { wallet: "0x456", amount: 10 },
+        ]);
+      }
+
+      return Promise.resolve(
+        createOverview({
+          artist_airdrops_addresses: 2,
+          artist_airdrops_count: 15,
+        })
+      );
+    });
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  await user.click(screen.getByRole("button", { name: /^artist airdrops$/i }));
+
+  await waitFor(() => {
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: expect.stringContaining("/artist-airdrops"),
+      })
+    );
+    expect(
+      screen.getByTestId("artist-airdrops-viewer-modal")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Loaded")).toBeInTheDocument();
+    expect(screen.getByText("Rows: 2")).toBeInTheDocument();
   });
 });
 
@@ -339,10 +460,14 @@ test("upload artist airdrops posts csv data and shows success toast", async () =
   render(<TestWrapper initialTokenId="123" />);
 
   await waitFor(() => {
-    expect(screen.getByText("Upload Artist Airdrops")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /upload artist airdrops/i })
+    ).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Artist Airdrops"));
+  await user.click(
+    screen.getByRole("button", { name: /upload artist airdrops/i })
+  );
   await waitFor(() => {
     expect(screen.getByTestId("artist-airdrops-modal")).toBeInTheDocument();
   });
@@ -377,10 +502,14 @@ test("upload team airdrops posts csv data and shows success toast", async () => 
   render(<TestWrapper initialTokenId="123" />);
 
   await waitFor(() => {
-    expect(screen.getByText("Upload Team Airdrops")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /upload team airdrops/i })
+    ).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Team Airdrops"));
+  await user.click(
+    screen.getByRole("button", { name: /upload team airdrops/i })
+  );
   await waitFor(() => {
     expect(screen.getByTestId("team-airdrops-modal")).toBeInTheDocument();
   });
@@ -414,10 +543,14 @@ test("upload artist airdrops shows error toast on failure", async () => {
   render(<TestWrapper initialTokenId="123" />);
 
   await waitFor(() => {
-    expect(screen.getByText("Upload Artist Airdrops")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /upload artist airdrops/i })
+    ).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Artist Airdrops"));
+  await user.click(
+    screen.getByRole("button", { name: /upload artist airdrops/i })
+  );
   await waitFor(() => {
     expect(screen.getByTestId("artist-airdrops-modal")).toBeInTheDocument();
   });
@@ -443,10 +576,14 @@ test("upload artist airdrops handles exceptions", async () => {
   render(<TestWrapper initialTokenId="123" />);
 
   await waitFor(() => {
-    expect(screen.getByText("Upload Artist Airdrops")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /upload artist airdrops/i })
+    ).toBeInTheDocument();
   });
 
-  await user.click(screen.getByText("Upload Artist Airdrops"));
+  await user.click(
+    screen.getByRole("button", { name: /upload artist airdrops/i })
+  );
   await waitFor(() => {
     expect(screen.getByTestId("artist-airdrops-modal")).toBeInTheDocument();
   });
@@ -553,6 +690,57 @@ test("downloads team airdrops csv with the response filename", async () => {
         },
       }
     );
+  });
+});
+
+test("artist download loading state does not disable team download", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+
+  let resolveDownload: (() => void) | null = null;
+  mockDownload.mockImplementation(
+    () =>
+      new Promise<void>((resolve) => {
+        resolveDownload = resolve;
+      })
+  );
+
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue(
+      createOverview({
+        artist_airdrops_addresses: 2,
+        artist_airdrops_count: 15,
+        team_airdrops_addresses: 1,
+        team_airdrops_count: 5,
+      })
+    );
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  const artistDownloadButton = await screen.findByRole("button", {
+    name: /download artist airdrops csv/i,
+  });
+  const teamDownloadButton = await screen.findByRole("button", {
+    name: /download team airdrops csv/i,
+  });
+
+  await waitFor(() => {
+    expect(artistDownloadButton).toBeEnabled();
+    expect(teamDownloadButton).toBeEnabled();
+  });
+
+  await user.click(artistDownloadButton);
+
+  await waitFor(() => {
+    expect(artistDownloadButton).toBeDisabled();
+    expect(teamDownloadButton).toBeEnabled();
+  });
+
+  resolveDownload?.();
+
+  await waitFor(() => {
+    expect(artistDownloadButton).toBeEnabled();
   });
 });
 

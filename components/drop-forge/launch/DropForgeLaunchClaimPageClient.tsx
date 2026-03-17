@@ -1440,9 +1440,9 @@ export default function DropForgeLaunchClaimPageClient({
     [isInitialized, researchAirdropCount, runAirdropWrite, setToast]
   );
 
-  const handleSelectedPhaseChange = useCallback((value: string) => {
+  const handleSelectedPhaseChange = useCallback((value: LaunchPhaseKey) => {
     setIsPhaseSelectionManual(true);
-    setSelectedPhase(value as "" | LaunchPhaseKey);
+    setSelectedPhase(value);
   }, []);
 
   const handleResearchTargetEditionSizeChange = useCallback((value: string) => {
