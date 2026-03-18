@@ -36,7 +36,8 @@ export default function RootLayout({
         <StoreSetup>
           <Providers
             enableVersionCheck={false}
-            enableWalletAuthentication={false}>
+            enableWalletAuthentication={false}
+          >
             <DynamicHeadTitle />
             {children}
           </Providers>

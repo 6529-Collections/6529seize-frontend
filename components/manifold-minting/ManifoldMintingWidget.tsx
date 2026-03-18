@@ -408,10 +408,7 @@ export default function ManifoldMintingWidget(
         ? "TODAY"
         : startDate.toIsoDateString();
     const timeDisplay = props.local_timezone
-      ? startDate
-          .toLocaleDateTimeString()
-          .split(" ")[1]
-          ?.slice(0, 5)
+      ? startDate.toLocaleDateTimeString().split(" ")[1]?.slice(0, 5)
       : startDate.toIsoTimeStringWithoutSeconds();
     return `DROPS ${dateDisplay} ${timeDisplay ?? ""}`.trim();
   }
@@ -470,7 +467,9 @@ export default function ManifoldMintingWidget(
               ? printMintCountInput()
               : printMintCountDropdown(available)}
             {mintCount > 0 && (
-              <b className="tw-text-white">{fromGWEI(Number(getValue()))} ETH</b>
+              <b className="tw-text-white">
+                {fromGWEI(Number(getValue()))} ETH
+              </b>
             )}
           </div>
         </div>
@@ -497,9 +496,7 @@ export default function ManifoldMintingWidget(
             </span>
           </div>
         )}
-        {mintStatus && (
-          <div className="tw-pt-3">{mintStatus}</div>
-        )}
+        {mintStatus && <div className="tw-pt-3">{mintStatus}</div>}
       </div>
     );
   }

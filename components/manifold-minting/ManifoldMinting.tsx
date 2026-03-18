@@ -3,7 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AppKitButton } from "@reown/appkit/react";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  type CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";

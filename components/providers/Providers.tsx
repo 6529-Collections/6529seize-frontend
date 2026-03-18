@@ -47,9 +47,8 @@ export default function Providers({
                   <IpfsProvider>
                     <SeizeConnectProvider>
                       <Auth
-                        enableWalletAuthentication={
-                          enableWalletAuthentication
-                        }>
+                        enableWalletAuthentication={enableWalletAuthentication}
+                      >
                         <WaveEligibilityProvider>
                           <NotificationsProvider>
                             <CookieConsentProvider>
