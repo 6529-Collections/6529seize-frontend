@@ -14,6 +14,7 @@ interface ArtworkDetailsProps {
   readonly descriptionError?: string | null | undefined;
   readonly onTitleBlur?: (() => void) | undefined;
   readonly onDescriptionBlur?: (() => void) | undefined;
+  readonly size?: "default" | "sm" | undefined;
 }
 
 /**
@@ -30,6 +31,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   descriptionError,
   onTitleBlur,
   onDescriptionBlur,
+  size = "default",
 }) => {
   // Refs to track input elements directly
   const titleRef = useRef<HTMLInputElement>(null);
@@ -103,20 +105,20 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   return (
     <FormSection
       title="Artwork Details"
-      titleClassName="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4 sm:tw-mb-6"
+      titleClassName="tw-text-base tw-font-semibold tw-text-iron-100 tw-tracking-tight tw-mb-2"
     >
       <div className="tw-grid tw-grid-cols-1 tw-gap-6">
         <div className="tw-group tw-relative">
           <div className="tw-relative">
             <label
               htmlFor="field-title"
-              className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-transition-all ${
+              className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-font-medium tw-transition-all ${size === "sm" ? "tw-text-[11px]" : "tw-text-xs"} ${
                 titleError
                   ? "tw-text-red"
                   : "group-focus-visible-within:tw-text-primary-400 tw-text-iron-300"
               }`}
             >
-              Artwork Title
+              Artwork Title <span className="tw-text-red">*</span>
             </label>
 
             <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
@@ -132,7 +134,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 aria-invalid={!!titleError}
                 aria-describedby={titleError ? "title-error" : undefined}
                 data-field="title"
-                className={`tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 ${
+                className={`tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 ${
                   titleError
                     ? "tw-ring-red"
                     : "tw-ring-iron-700 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"
@@ -155,13 +157,13 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
           <div className="tw-relative">
             <label
               htmlFor="field-description"
-              className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-transition-all ${
+              className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-font-medium tw-transition-all ${size === "sm" ? "tw-text-[11px]" : "tw-text-xs"} ${
                 descriptionError
                   ? "tw-text-red"
                   : "group-focus-visible-within:tw-text-primary-400 tw-text-iron-300"
               }`}
             >
-              Description
+              Description <span className="tw-text-red">*</span>
             </label>
 
             <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
@@ -179,7 +181,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                   descriptionError ? "description-error" : undefined
                 }
                 data-field="description"
-                className={`tw-form-textarea tw-w-full tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 ${
+                className={`tw-form-textarea tw-w-full tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 ${
                   descriptionError
                     ? "tw-ring-red"
                     : "tw-ring-iron-700 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"

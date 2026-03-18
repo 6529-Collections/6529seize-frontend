@@ -15,6 +15,7 @@ type TextTraitProps = {
   readonly className?: string | undefined;
   readonly error?: string | null | undefined;
   readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
+  readonly size?: "default" | "sm" | undefined;
 };
 
 /**
@@ -32,6 +33,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
     className,
     error,
     onBlur,
+    size = "default",
   }) => {
     const currentTraitValue = ((traits[field] as string) ?? "").toString();
     // Use a ref to track the input element
@@ -114,8 +116,10 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
       // Determine padding for checkmark
       const paddingClassName = isFieldFilled && !error ? "tw-pr-10" : "";
 
-      return `tw-form-input tw-font-normal tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 ${stateClassName} ${paddingClassName}`;
-    }, [readOnly, error, isFieldFilled]);
+      const paddingBase =
+        size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5";
+      return `tw-form-input tw-font-normal tw-w-full tw-rounded-lg ${paddingBase} tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 ${stateClassName} ${paddingClassName}`;
+    }, [readOnly, error, isFieldFilled, size]);
 
     return (
       <TraitWrapper
@@ -124,6 +128,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
         className={className}
         error={error}
         isFieldFilled={isFieldFilled}
+        size={size}
       >
         <input
           ref={inputRef}
@@ -147,7 +152,8 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
       prevProps.readOnly === nextProps.readOnly &&
       prevProps.placeholder === nextProps.placeholder &&
       prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field] &&
-      prevProps.error === nextProps.error
+      prevProps.error === nextProps.error &&
+      prevProps.size === nextProps.size
     );
   }
 );

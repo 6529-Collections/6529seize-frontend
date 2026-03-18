@@ -16,6 +16,7 @@ interface TraitFieldProps {
   readonly error?: string | null | undefined;
   readonly onBlur?: (() => void) | undefined;
   readonly readOnlyOverride?: boolean;
+  readonly size?: "default" | "sm" | undefined;
 }
 
 // Create the component
@@ -28,6 +29,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
   error,
   onBlur,
   readOnlyOverride,
+  size,
 }) => {
   const effectiveReadOnly =
     readOnlyOverride === undefined ? definition.readOnly : readOnlyOverride;
@@ -42,6 +44,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         placeholder={definition.placeholder}
         error={error}
         onBlur={onBlur}
+        size={size}
       />
     );
   }
@@ -58,6 +61,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         max={definition.max}
         error={error}
         onBlur={onBlur}
+        size={size}
       />
     );
   }
@@ -74,6 +78,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         options={definition.options}
         error={error}
         onBlur={onBlur}
+        size={size}
       />
     );
   }
@@ -141,8 +146,14 @@ const arePropsEqual = (
     }
   }
 
+  const sizeMatches = prevProps.size === nextProps.size;
+
   return (
-    fieldMatches && definitionMatches && readOnlyOverrideMatches && errorMatches
+    fieldMatches &&
+    definitionMatches &&
+    readOnlyOverrideMatches &&
+    errorMatches &&
+    sizeMatches
   );
 };
 

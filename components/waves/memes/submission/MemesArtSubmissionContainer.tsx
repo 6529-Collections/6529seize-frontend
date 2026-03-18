@@ -313,7 +313,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
                   : ""
               }`}
             >
-              <motion.h3 className="tw-text-2xl tw-font-semibold tw-text-iron-100 lg:tw-text-3xl">
+              <motion.h3 className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-text-2xl">
                 Submit Work to The Memes
               </motion.h3>
               <motion.button

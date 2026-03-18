@@ -11,6 +11,7 @@ interface TraitWrapperProps {
   readonly error?: string | null | undefined;
   readonly id?: string | undefined;
   readonly isFieldFilled?: boolean | undefined;
+  readonly size?: "default" | "sm" | undefined;
 }
 
 export const TraitWrapper: React.FC<TraitWrapperProps> = ({
@@ -22,6 +23,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   error,
   id,
   isFieldFilled = false,
+  size = "default",
 }) => {
   const fieldId = id ?? `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
   const errorId = error ? `${fieldId}-error` : undefined;
@@ -39,30 +41,28 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   if (isBoolean) {
     return (
       <div className={`tw-group tw-relative ${className ?? ""}`}>
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+        <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900 tw-px-4 tw-py-2.5">
           <label
             htmlFor={fieldId}
-            className="tw-w-40 tw-flex-shrink-0 tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-300"
+            className="tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-truncate tw-text-sm tw-font-medium tw-text-iron-300"
           >
             {label}
           </label>
-          <div className="tw-max-w-xs tw-flex-1">{children}</div>
+          <div className="tw-flex-shrink-0">{children}</div>
         </div>
       </div>
     );
   }
 
-  const hasPaddingOverride = className?.includes("tw-pb-");
-  const basePadding = hasPaddingOverride ? "" : "tw-pb-8";
-
   return (
-    <div className={`tw-group tw-relative ${basePadding} ${className ?? ""}`}>
+    <div className={`tw-group tw-relative ${className ?? ""}`}>
       <div className="tw-relative">
         <label
           htmlFor={fieldId}
-          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-transition-all ${labelClassName}`}
+          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-font-medium tw-transition-all ${size === "sm" ? "tw-text-[11px]" : "tw-text-xs"} ${labelClassName}`}
         >
           {label}
+          {!readOnly && <span className="tw-text-red"> *</span>}
         </label>
 
         <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
@@ -86,13 +86,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
         </div>
       </div>
 
-      {hasPaddingOverride ? (
-        <ValidationError error={error} id={errorId} className="tw-mt-1" />
-      ) : (
-        <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0">
-          <ValidationError error={error} id={errorId} className="tw-mt-0" />
-        </div>
-      )}
+      <ValidationError error={error} id={errorId} className="tw-mt-1" />
     </div>
   );
 };

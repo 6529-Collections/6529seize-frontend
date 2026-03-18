@@ -331,6 +331,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       descriptionError={validation.errors.description}
       onTitleBlur={() => handleFieldBlur("title")}
       onDescriptionBlur={() => handleFieldBlur("description")}
+      size="sm"
     />
   );
 
@@ -340,6 +341,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       setTraits={setTraits}
       validationErrors={validation.errors}
       onFieldBlur={handleFieldBlur}
+      size="sm"
     />
   );
 
@@ -356,7 +358,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
             </div>
           </div>
 
-          <div className="tw-w-full tw-px-4 tw-pb-6 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-pl-4 lg:tw-pr-8 lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500">
+          <div className="tw-w-full tw-px-4 tw-pb-6 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-pl-8 lg:tw-pr-8 lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500">
             <div className="tw-flex tw-flex-col tw-gap-y-6">
               {renderArtworkDetailsPanel()}
               {renderArtworkTraitsPanel()}

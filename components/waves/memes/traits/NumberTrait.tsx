@@ -16,6 +16,7 @@ interface NumberTraitProps {
   readonly max: number;
   readonly traits: TraitsData;
   readonly updateNumber: (field: keyof TraitsData, value: number) => void;
+  readonly size?: "default" | "sm" | undefined;
 }
 
 /**
@@ -34,6 +35,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
     className,
     error,
     onBlur,
+    size = "default",
   }) => {
     // Use a ref for direct DOM access
     const inputRef = useRef<HTMLInputElement>(null);
@@ -167,6 +169,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
     const isFieldFilled = useMemo(() => {
       const n = Number.parseFloat(currentInputValue);
       if (!Number.isFinite(n)) return false;
+      if (n === 0) return false;
       if (min !== undefined && n < min) return false;
       if (max !== undefined && n > max) return false;
       return true;
@@ -194,6 +197,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
         className={className}
         error={error}
         isFieldFilled={isFieldFilled}
+        size={size}
       >
         <input
           ref={inputRef}
@@ -205,7 +209,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
           readOnly={readOnly}
           min={min}
           max={max}
-          className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
+          className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
           style={{
             MozAppearance: "textfield",
             WebkitAppearance: "none",
