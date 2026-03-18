@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../../../*"]
+    }
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    ".next-static-export/types/**/*.ts"
+  ],
+  "exclude": [
+    "../../../node_modules",
+    "../../../.next",
+    "../../../__tests__",
+    "../../../coverage",
+    "../../../e2e",
+    "../../../generated/http",
+    "../../../tests"
+  ]
+}

@@ -99,7 +99,13 @@ export function initializeAppKit(
   );
   const appKitConfig = buildAppKitConfig(newAdapter, config.chains);
   const appKit = createAppKit(appKitConfig);
+  appKit.setWalletFeaturesOrder(["onramp", "send"]);
   const ready = appKit.ready();
+  ready.then(() => {
+    appKit.updateRemoteFeatures({
+      swaps: false,
+    });
+  });
   // Prevent unhandled rejections if a caller chooses not to await `ready`.
   ready.catch((error) => {
     logErrorSecurely("[AppKitInitialization] AppKit ready() failed", error);
@@ -120,6 +126,7 @@ function buildAppKitConfig(adapter: WagmiAdapter, chains: Chain[]) {
       "AppKit initialization requires at least one configured chain."
     );
   }
+
   return {
     adapters: [adapter] as ChainAdapter[],
     networks: chains as [AppKitNetwork, ...AppKitNetwork[]],
@@ -142,7 +149,9 @@ function buildAppKitConfig(adapter: WagmiAdapter, chains: Chain[]) {
       analytics: true,
       email: false,
       socials: [],
+      swaps: false,
       connectMethodsOrder: ["wallet" as const],
+      walletFeaturesOrder: ["onramp", "send"] as const,
     },
     enableOnramp: false,
     enableSwaps: false,

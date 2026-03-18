@@ -27,8 +27,12 @@ import WagmiSetup from "./WagmiSetup";
 
 export default function Providers({
   children,
+  enableVersionCheck = true,
+  enableWalletAuthentication = true,
 }: {
   readonly children: React.ReactNode;
+  readonly enableVersionCheck?: boolean;
+  readonly enableWalletAuthentication?: boolean;
 }) {
   return (
     <QueryClientSetup>
@@ -42,7 +46,10 @@ export default function Providers({
                 <EmojiProvider>
                   <IpfsProvider>
                     <SeizeConnectProvider>
-                      <Auth>
+                      <Auth
+                        enableWalletAuthentication={
+                          enableWalletAuthentication
+                        }>
                         <WaveEligibilityProvider>
                           <NotificationsProvider>
                             <CookieConsentProvider>
@@ -64,7 +71,7 @@ export default function Providers({
                                       </TitleProvider>
                                     </MyStreamProvider>
                                   </LayoutProvider>
-                                  <NewVersionToast />
+                                  {enableVersionCheck && <NewVersionToast />}
                                 </AppWebSocketProvider>
                               </EULAConsentProvider>
                             </CookieConsentProvider>

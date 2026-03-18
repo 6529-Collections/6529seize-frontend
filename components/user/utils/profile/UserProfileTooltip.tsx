@@ -30,6 +30,7 @@ import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
 
 interface UserProfileTooltipProps {
   readonly user: string;
+  readonly hideActions?: boolean;
   readonly onArtistPreviewOpen?:
     | ((params: {
         readonly user: ApiProfileMin;
@@ -43,6 +44,7 @@ interface UserProfileTooltipProps {
 
 export default function UserProfileTooltip({
   user,
+  hideActions = false,
   onArtistPreviewOpen,
   onWaveCreatorPreviewOpen,
 }: UserProfileTooltipProps) {
@@ -123,6 +125,7 @@ export default function UserProfileTooltip({
     [connectedProfile?.handle]
   );
   const showFollowButton = Boolean(
+    !hideActions &&
     normalizedProfileHandle &&
     normalizedProfileHandle !== normalizedConnectedHandle
   );

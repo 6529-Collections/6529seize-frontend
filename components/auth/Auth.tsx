@@ -128,8 +128,10 @@ export const useAuth = () => {
 
 export default function Auth({
   children,
+  enableWalletAuthentication = true,
 }: {
   readonly children: React.ReactNode;
+  readonly enableWalletAuthentication?: boolean;
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const pathname = usePathname();
@@ -281,6 +283,13 @@ export default function Auth({
 
   // Immediate authentication effect with race condition prevention
   useEffect(() => {
+    if (!enableWalletAuthentication) {
+      abortCurrentAuthOperation();
+      setShowSignModal(false);
+      setAuthLoadingState("idle");
+      return;
+    }
+
     // Clear previous operations when dependencies change
     abortCurrentAuthOperation();
 
@@ -380,6 +389,7 @@ export default function Auth({
     address,
     activeProfileProxy,
     connectionState,
+    enableWalletAuthentication,
     isAddressAuthorized,
     isConnected,
     abortCurrentAuthOperation,
@@ -626,6 +636,19 @@ export default function Auth({
   // These functions have been moved above to fix initialization order
 
   const requestAuth = async (): Promise<{ success: boolean }> => {
+    if (!enableWalletAuthentication) {
+      if (!address) {
+        setToast({
+          message: "Please connect your wallet",
+          type: "error",
+        });
+        invalidateAll();
+        return { success: false };
+      }
+
+      return { success: true };
+    }
+
     if (!address) {
       setToast({
         message: "Please connect your wallet",
@@ -718,6 +741,11 @@ export default function Auth({
     removeAuthJwt();
     if (!address) {
       setActiveProfileProxy(null);
+      return;
+    }
+
+    if (!enableWalletAuthentication) {
+      setActiveProfileProxy(profileProxy);
       return;
     }
 
@@ -850,66 +878,68 @@ export default function Auth({
     >
       {children}
       <ToastContainer />
-      <Modal
-        show={shouldShowSignModal}
-        onHide={() => {
-          // Only allow modal dismissal when not actively validating
-          if (authLoadingState !== "validating") {
-            setShowSignModal(false);
-          }
-        }}
-        backdrop="static"
-        keyboard={false}
-        centered
-        dialogClassName={styles["signModalDialog"] ?? ""}
-        contentClassName={styles["signModalSurface"] ?? ""}
-      >
-        <Modal.Header className={styles["signModalHeader"]}>
-          <div className={styles["signModalTitle"]}>
-            Sign Authentication Request
-          </div>
-        </Modal.Header>
-        <Modal.Body className={styles["signModalBody"]}>
-          <p className={styles["signModalLead"]}>
-            To connect your wallet, you will need to sign a message to confirm
-            your identity.
-          </p>
+      {enableWalletAuthentication && (
+        <Modal
+          show={shouldShowSignModal}
+          onHide={() => {
+            // Only allow modal dismissal when not actively validating
+            if (authLoadingState !== "validating") {
+              setShowSignModal(false);
+            }
+          }}
+          backdrop="static"
+          keyboard={false}
+          centered
+          dialogClassName={styles["signModalDialog"] ?? ""}
+          contentClassName={styles["signModalSurface"] ?? ""}
+        >
+          <Modal.Header className={styles["signModalHeader"]}>
+            <div className={styles["signModalTitle"]}>
+              Sign Authentication Request
+            </div>
+          </Modal.Header>
+          <Modal.Body className={styles["signModalBody"]}>
+            <p className={styles["signModalLead"]}>
+              To connect your wallet, you will need to sign a message to confirm
+              your identity.
+            </p>
 
-          <ul className={styles["signModalList"]}>
-            <li>
-              This signature will be used to generate a secure token (JWT) to
-              authenticate your session.
-            </li>
-            <li>
-              Your signature will not cost any gas and is purely for
-              authentication purposes.
-            </li>
-          </ul>
-        </Modal.Body>
-        <Modal.Footer className={styles["signModalFooter"]}>
-          <Button
-            variant="link"
-            className={styles["signModalCancelButton"]}
-            onClick={onCancelSignRequest}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="link"
-            className={styles["signModalConfirmButton"]}
-            onClick={() => requestAuth()}
-            disabled={isSigningPending}
-          >
-            {isSigningPending ? (
-              <span className={styles["signModalButtonContent"]}>
-                Confirm in your wallet <DotLoader />
-              </span>
-            ) : (
-              "Sign"
-            )}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            <ul className={styles["signModalList"]}>
+              <li>
+                This signature will be used to generate a secure token (JWT) to
+                authenticate your session.
+              </li>
+              <li>
+                Your signature will not cost any gas and is purely for
+                authentication purposes.
+              </li>
+            </ul>
+          </Modal.Body>
+          <Modal.Footer className={styles["signModalFooter"]}>
+            <Button
+              variant="link"
+              className={styles["signModalCancelButton"]}
+              onClick={onCancelSignRequest}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="link"
+              className={styles["signModalConfirmButton"]}
+              onClick={() => requestAuth()}
+              disabled={isSigningPending}
+            >
+              {isSigningPending ? (
+                <span className={styles["signModalButtonContent"]}>
+                  Confirm in your wallet <DotLoader />
+                </span>
+              ) : (
+                "Sign"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </AuthContext.Provider>
   );
 }

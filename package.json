@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build:env-schema": "node scripts/build-env-schema.cjs",
+    "export-mint-page": "npm run build:env-schema && node standalone/standalone-memes-mint/scripts/export-mint-page.cjs",
     "predev": "npm run build:env-schema",
     "dev": "node scripts/dev-with-fallback.cjs",
     "dev:webpack": "USE_TURBO=false node scripts/dev-with-fallback.cjs",
