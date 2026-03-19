@@ -96,9 +96,7 @@ test("keeps memes drops active across phased allowlists", async () => {
     Time.fromString("2024-07-03T00:00:00.000Z")
   );
 
-  jest
-    .spyOn(Date, "now")
-    .mockReturnValue(phase0.end.plusMinutes(5).toMillis());
+  jest.spyOn(Date, "now").mockReturnValue(phase0.end.plusMinutes(5).toMillis());
 
   mockRead.mockReturnValue({
     data: [
@@ -141,7 +139,9 @@ test("keeps memes drops active across phased allowlists", async () => {
     })
   );
 
-  await waitFor(() => expect(result.current.claim?.nextMemePhase?.id).toBe("1"));
+  await waitFor(() =>
+    expect(result.current.claim?.nextMemePhase?.id).toBe("1")
+  );
 
   expect(result.current.claim?.phase).toBe(ManifoldPhase.ALLOWLIST);
   expect(result.current.claim?.isFinalized).toBe(true);
@@ -151,7 +151,9 @@ test("keeps memes drops active across phased allowlists", async () => {
 });
 
 test("maps memes phase from roots using the onchain merkle root", async () => {
-  const [phase0] = buildMemesPhases(Time.fromString("2024-07-03T00:00:00.000Z"));
+  const [phase0] = buildMemesPhases(
+    Time.fromString("2024-07-03T00:00:00.000Z")
+  );
 
   mockRead.mockReturnValue({
     data: [

@@ -447,8 +447,7 @@ export function useManifoldClaim({
       const isSoldOut = remaining <= 0;
       const isFinalized = isSoldOut || status === ManifoldClaimStatus.ENDED;
       const isDropComplete =
-        isSoldOut ||
-        (status === ManifoldClaimStatus.ENDED && !nextMemePhase);
+        isSoldOut || (status === ManifoldClaimStatus.ENDED && !nextMemePhase);
       const newClaim: ManifoldClaim = {
         identifier,
         instanceId: instanceId,

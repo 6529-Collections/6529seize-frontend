@@ -24,20 +24,19 @@ jest.mock("@/hooks/useManifoldClaim", () => ({
   useManifoldClaim: jest.fn(),
 }));
 
-const { useManifoldClaim, ManifoldClaimStatus, ManifoldPhase } = jest.requireMock(
-  "@/hooks/useManifoldClaim"
-) as {
-  useManifoldClaim: jest.Mock;
-  ManifoldClaimStatus: {
-    UPCOMING: "upcoming";
-    ACTIVE: "active";
-    ENDED: "ended";
+const { useManifoldClaim, ManifoldClaimStatus, ManifoldPhase } =
+  jest.requireMock("@/hooks/useManifoldClaim") as {
+    useManifoldClaim: jest.Mock;
+    ManifoldClaimStatus: {
+      UPCOMING: "upcoming";
+      ACTIVE: "active";
+      ENDED: "ended";
+    };
+    ManifoldPhase: {
+      ALLOWLIST: "Allowlist";
+      PUBLIC: "Public Phase";
+    };
   };
-  ManifoldPhase: {
-    ALLOWLIST: "Allowlist";
-    PUBLIC: "Public Phase";
-  };
-};
 
 beforeEach(() => {
   jest.spyOn(Date, "now").mockReturnValue(150 * 1000);
