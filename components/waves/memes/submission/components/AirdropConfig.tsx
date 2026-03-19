@@ -180,7 +180,6 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                 id={`airdrop-${index}-address`}
                 error={error}
                 isFieldFilled={isValid}
-                showRequiredMarker={true}
                 labelTone="muted"
                 className="tw-flex-1 tw-pb-0"
               >
@@ -202,7 +201,6 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                 label="Count"
                 id={`airdrop-${index}-count`}
                 isFieldFilled={!!entry.count}
-                showRequiredMarker={true}
                 labelTone="muted"
                 className="tw-w-[120px] tw-pb-0"
               >

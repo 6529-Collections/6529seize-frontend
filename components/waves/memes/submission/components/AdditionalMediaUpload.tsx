@@ -318,9 +318,10 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
               className="tw-pb-0"
             >
               <textarea
-                placeholder="About the artist"
+                placeholder="Tell us about yourself as an artist..."
                 value={aboutArtist}
                 onChange={(e) => onAboutArtistChange(e.target.value)}
+                aria-required="true"
                 className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm ${
                   errors?.aboutArtist ? "tw-ring-red" : "tw-ring-iron-700"
                 }`}
@@ -343,6 +344,7 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
                 placeholder="Artwork commentary"
                 value={artworkCommentary}
                 onChange={(e) => onArtworkCommentaryChange(e.target.value)}
+                aria-required="true"
                 className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm ${
                   errors?.artworkCommentary ? "tw-ring-red" : "tw-ring-iron-700"
                 }`}
