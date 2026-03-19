@@ -5,7 +5,13 @@ import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
 import MemesWaveFooter from "../left-sidebar/waves/MemesWaveFooter";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 
-const BrainMobileWaves: React.FC = () => {
+interface BrainMobileWavesProps {
+  readonly onOpenQuickVote: () => void;
+}
+
+const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
+  onOpenQuickVote,
+}) => {
   const { mobileWavesViewStyle } = useLayout();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   // We'll use the mobileWavesViewStyle for capacitor spacing
@@ -20,7 +26,7 @@ const BrainMobileWaves: React.FC = () => {
       <div className={scrollContainerClassName} ref={scrollContainerRef}>
         <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
       </div>
-      <MemesWaveFooter />
+      <MemesWaveFooter onOpenQuickVote={onOpenQuickVote} />
     </div>
   );
 };

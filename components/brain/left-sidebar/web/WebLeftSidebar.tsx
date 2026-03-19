@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import WebBrainLeftSidebarWaves from "./WebBrainLeftSidebarWaves";
 import WebDirectMessagesList from "./WebDirectMessagesList";
 import MemesWaveFooter from "../waves/MemesWaveFooter";
+import MemesQuickVoteDialog from "../waves/memes-quick-vote/MemesQuickVoteDialog";
 import { usePathname } from "next/navigation";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
@@ -21,6 +22,34 @@ import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 interface WebLeftSidebarProps {
   readonly isCollapsed?: boolean | undefined;
 }
+
+const WebLeftSidebarQuickVoteOwner: React.FC<{
+  readonly isCollapsed: boolean;
+}> = ({ isCollapsed }) => {
+  const [isQuickVoteOpen, setIsQuickVoteOpen] = useState(false);
+  const [quickVoteSessionId, setQuickVoteSessionId] = useState(0);
+
+  const handleOpenQuickVote = () => {
+    setQuickVoteSessionId((current) => current + 1);
+    setIsQuickVoteOpen(true);
+  };
+
+  return (
+    <>
+      <div className="tw-flex-shrink-0 tw-bg-black">
+        <MemesWaveFooter
+          collapsed={isCollapsed}
+          onOpenQuickVote={handleOpenQuickVote}
+        />
+      </div>
+      <MemesQuickVoteDialog
+        isOpen={isQuickVoteOpen}
+        sessionId={quickVoteSessionId}
+        onClose={() => setIsQuickVoteOpen(false)}
+      />
+    </>
+  );
+};
 
 const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
   isCollapsed = false,
@@ -82,9 +111,7 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
           )}
         </div>
         {!isMessagesView && (
-          <div className="tw-flex-shrink-0 tw-bg-black">
-            <MemesWaveFooter collapsed={isCollapsed} />
-          </div>
+          <WebLeftSidebarQuickVoteOwner isCollapsed={isCollapsed} />
         )}
       </div>
     </div>

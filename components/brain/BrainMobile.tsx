@@ -26,6 +26,8 @@ import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import BrainNotifications from "./notifications/NotificationsContainer";
+import MemesQuickVoteDialog from "./left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
+import MemesWaveQuickVoteTrigger from "./left-sidebar/waves/MemesWaveQuickVoteTrigger";
 import {
   getActiveWaveIdFromUrl,
   getHomeRoute,
@@ -37,6 +39,7 @@ import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectM
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -56,6 +59,29 @@ interface Props {
   readonly children: ReactNode;
 }
 
+interface FloatingMemesQuickVoteTriggerProps {
+  readonly onOpenQuickVote: () => void;
+}
+
+const FloatingMemesQuickVoteTrigger: React.FC<
+  FloatingMemesQuickVoteTriggerProps
+> = ({ onOpenQuickVote }) => {
+  const { isReady, uncastPower, unratedCount } = useMemesWaveFooterStats();
+
+  if (!isReady || typeof uncastPower !== "number" || unratedCount <= 0) {
+    return null;
+  }
+
+  return (
+    <div className="tw-absolute tw-right-2 tw-top-2 tw-z-20 sm:tw-right-4 sm:tw-top-3">
+      <MemesWaveQuickVoteTrigger
+        onOpenQuickVote={onOpenQuickVote}
+        unratedCount={unratedCount}
+      />
+    </div>
+  );
+};
+
 const BrainMobile: React.FC<Props> = ({ children }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,6 +89,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
   const [hydrated, setHydrated] = useState(false);
+  const [isQuickVoteOpen, setIsQuickVoteOpen] = useState(false);
+  const [quickVoteSessionId, setQuickVoteSessionId] = useState(0);
   const myStream = useMyStreamOptional();
 
   useEffect(() => {
@@ -108,7 +136,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const { isMemesWave, isCurationWave, isRankWave } = useWave(wave);
+  const { isMemesWave, isCurationWave, isRankWave, isDm } = useWave(wave);
 
   const {
     voting: { isCompleted },
@@ -132,6 +160,11 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeRoute();
     router.replace(newUrl, { scroll: false });
+  };
+
+  const handleOpenQuickVote = () => {
+    setQuickVoteSessionId((current) => current + 1);
+    setIsQuickVoteOpen(true);
   };
 
   const isDropOpen =
@@ -304,10 +337,24 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       isRankWave && isMemesWave && !!wave ? (
         <MyStreamWaveFAQ wave={wave} />
       ) : null,
-    [BrainView.WAVES]: <BrainMobileWaves />,
+    [BrainView.WAVES]: (
+      <BrainMobileWaves onOpenQuickVote={handleOpenQuickVote} />
+    ),
     [BrainView.MESSAGES]: <BrainMobileMessages />,
     [BrainView.NOTIFICATIONS]: <BrainNotifications />,
   };
+
+  const shouldMountFloatingQuickVoteEntry =
+    isApp &&
+    hasWave &&
+    !!wave &&
+    activeView === BrainView.DEFAULT &&
+    !isDropOpen &&
+    !isDm;
+  const shouldMountQuickVoteDialog =
+    isQuickVoteOpen ||
+    shouldMountFloatingQuickVoteEntry ||
+    activeView === BrainView.WAVES;
 
   const dropOverlayClass = isApp
     ? "tw-fixed tw-inset-0 tw-z-[1010] tw-bg-black tailwind-scope"
@@ -347,11 +394,23 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="tw-min-w-0 tw-flex-1"
+          className="tw-relative tw-min-w-0 tw-flex-1"
         >
+          {shouldMountFloatingQuickVoteEntry && (
+            <FloatingMemesQuickVoteTrigger
+              onOpenQuickVote={handleOpenQuickVote}
+            />
+          )}
           {viewComponents[activeView]}
         </motion.div>
       </AnimatePresence>
+      {shouldMountQuickVoteDialog && (
+        <MemesQuickVoteDialog
+          isOpen={isQuickVoteOpen}
+          sessionId={quickVoteSessionId}
+          onClose={() => setIsQuickVoteOpen(false)}
+        />
+      )}
     </div>
   );
 };

@@ -122,7 +122,7 @@ export default function MemesQuickVotePreview({
         className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-hidden"
       >
         {typeof uncastPower === "number" && (
-          <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em]">
+          <span className="tw-rounded-full tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300">
             {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"} left
           </span>
         )}
@@ -149,7 +149,7 @@ export default function MemesQuickVotePreview({
             </div>
             <div
               className={clsx(
-                "tw-text-primary-200 tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-transition-opacity",
+                "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity",
                 swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
               )}
             >

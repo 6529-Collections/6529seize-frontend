@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
@@ -19,6 +19,7 @@ import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useCapacitor from "@/hooks/useCapacitor";
 import PullToRefresh from "../providers/PullToRefresh";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -27,6 +28,27 @@ const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
 
 interface Props {
   readonly children: ReactNode;
+}
+
+function WavesQuickVoteView() {
+  const [isQuickVoteOpen, setIsQuickVoteOpen] = useState(false);
+  const [quickVoteSessionId, setQuickVoteSessionId] = useState(0);
+
+  const handleOpenQuickVote = useCallback(() => {
+    setQuickVoteSessionId((current) => current + 1);
+    setIsQuickVoteOpen(true);
+  }, []);
+
+  return (
+    <>
+      <BrainMobileWaves onOpenQuickVote={handleOpenQuickVote} />
+      <MemesQuickVoteDialog
+        isOpen={isQuickVoteOpen}
+        sessionId={quickVoteSessionId}
+        onClose={() => setIsQuickVoteOpen(false)}
+      />
+    </>
+  );
 }
 
 export default function AppLayout({ children }: Props) {
@@ -86,7 +108,7 @@ export default function AppLayout({ children }: Props) {
       {activeView === "messages" ? (
         <BrainMobileMessages />
       ) : activeView === "waves" ? (
-        <BrainMobileWaves />
+        <WavesQuickVoteView />
       ) : (
         <main>{children}</main>
       )}

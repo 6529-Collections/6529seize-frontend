@@ -186,11 +186,16 @@ describe("MemesQuickVoteDialog", () => {
       <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
     );
 
-    expect(
-      within(screen.getByTestId("quick-vote-preview-status")).getByText(
-        "5,000 votes left"
-      )
-    ).toBeInTheDocument();
+    const mobileRemainingPill = within(
+      screen.getByTestId("quick-vote-preview-status")
+    ).getByText("5,000 votes left");
+    const desktopRemainingPill = within(
+      screen.getByTestId("quick-vote-controls-desktop-context")
+    ).getByText("5,000 votes left");
+
+    expect(mobileRemainingPill).toHaveClass("tw-text-primary-300");
+    expect(desktopRemainingPill).toHaveClass("tw-text-primary-300");
+    expect(mobileRemainingPill).toBeInTheDocument();
     expect(
       within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
         "Drop 42"
@@ -206,6 +211,26 @@ describe("MemesQuickVoteDialog", () => {
         screen.getByTestId("quick-vote-controls-desktop-context")
       ).getByText("Drop 42")
     ).toBeInTheDocument();
+  });
+
+  it("bottom-aligns the custom amount action row on larger screens", () => {
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Custom amount",
+      })
+    );
+
+    const customInput = screen.getByRole("textbox");
+    const customActionRow = customInput.closest("label")?.parentElement;
+    const voteButton = screen.getByRole("button", { name: "Vote" });
+
+    expect(customActionRow).not.toBeNull();
+    expect(customActionRow).toHaveClass("sm:tw-items-end");
+    expect(voteButton).toHaveClass("tw-shrink-0", "tw-whitespace-nowrap");
   });
 
   it("uses the open custom amount for swipe voting on mobile", async () => {
