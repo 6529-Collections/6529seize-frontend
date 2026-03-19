@@ -331,6 +331,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       descriptionError={validation.errors.description}
       onTitleBlur={() => handleFieldBlur("title")}
       onDescriptionBlur={() => handleFieldBlur("description")}
+      showRequiredMarkers={true}
       size="sm"
     />
   );
@@ -341,6 +342,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       setTraits={setTraits}
       validationErrors={validation.errors}
       onFieldBlur={handleFieldBlur}
+      showRequiredMarkers={true}
       size="sm"
     />
   );
@@ -352,13 +354,11 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
         className="tw-min-h-0 tw-w-full tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-overflow-hidden"
       >
         <div className="tw-flex tw-min-h-full tw-w-full tw-flex-col lg:tw-h-full lg:tw-min-h-0 lg:tw-flex-row">
-          <div className="tw-w-full tw-px-4 tw-pb-6 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-pb-0 lg:tw-pl-8 lg:tw-pr-4 lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500">
-            <div className="lg:tw-h-full lg:tw-min-h-[520px]">
-              {renderMediaSubmissionPanel()}
-            </div>
+          <div className="tw-flex tw-w-full tw-flex-col tw-px-4 lg:tw-min-h-0 lg:tw-w-1/2 md:tw-pl-8 lg:tw-pr-4 tw-pt-4">
+            {renderMediaSubmissionPanel()}
           </div>
 
-          <div className="tw-w-full tw-px-4 tw-pb-6 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-pl-8 lg:tw-pr-8 lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500">
+          <div className="tw-w-full tw-px-4 tw-pb-6 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto md:tw-pl-6 md:tw-pr-8 lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500 tw-pt-6">
             <div className="tw-flex tw-flex-col tw-gap-y-6">
               {renderArtworkDetailsPanel()}
               {renderArtworkTraitsPanel()}
@@ -367,10 +367,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
         </div>
       </div>
 
-      {/* Action Buttons - Fixed at bottom */}
       <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-py-3">
         <div className="tw-px-4 md:tw-px-8">
-          {/* Submission Progress - Only shown when active */}
           {submissionPhase !== "idle" && (
             <div className="tw-mb-4">
               <SubmissionProgress
@@ -382,54 +380,50 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
             </div>
           )}
 
-          {/* Action buttons row */}
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
-            {/* Cancel button - always visible, but disabled during upload/processing and hidden on success */}
-            {onCancel && submissionPhase !== "success" ? (
-              <button
-                onClick={
-                  submissionPhase === "uploading" ||
-                  submissionPhase === "processing"
-                    ? undefined
-                    : onCancel
-                }
-                disabled={
-                  submissionPhase === "uploading" ||
-                  submissionPhase === "processing"
-                }
-                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 tw-px-3.5 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-ring-iron-650"
-                type="button"
-              >
-                Cancel
-              </button>
-            ) : (
-              /* Keep this invisible div when button is not shown to maintain layout */
-              <div></div>
-            )}
+              {onCancel && submissionPhase !== "success" ? (
+                <button
+                  onClick={
+                    submissionPhase === "uploading" ||
+                    submissionPhase === "processing"
+                      ? undefined
+                      : onCancel
+                  }
+                  disabled={
+                    submissionPhase === "uploading" ||
+                    submissionPhase === "processing"
+                  }
+                  className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-ring-iron-650"
+                  type="button"
+                >
+                  Cancel
+                </button>
+              ) : (
+                /* Keep this invisible div when button is not shown to maintain layout */
+                <div></div>
+              )}
 
-            {/* Submit button */}
-            <div
-              className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}
-            >
-              <PrimaryButton
-                padding="tw-py-3 tw-px-3.5"
-                onClicked={handleSubmit}
-                loading={
-                  isSubmitting &&
-                  submissionPhase !== "success" &&
-                  submissionPhase !== "error"
-                }
-                disabled={isSubmitDisabled}
-                title={getSubmitButtonTooltip(
-                  isSubmitDisabled,
-                  isFormComplete,
-                  artworkUploaded,
-                  traits
-                )}
+              <div
+                className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}
               >
-                {getButtonText()}
-              </PrimaryButton>
-            </div>
+                <PrimaryButton
+                  onClicked={handleSubmit}
+                  loading={
+                    isSubmitting &&
+                    submissionPhase !== "success" &&
+                    submissionPhase !== "error"
+                  }
+                  disabled={isSubmitDisabled}
+                  title={getSubmitButtonTooltip(
+                    isSubmitDisabled,
+                    isFormComplete,
+                    artworkUploaded,
+                    traits
+                  )}
+                >
+                  {getButtonText()}
+                </PrimaryButton>
+              </div>
           </div>
         </div>
       </div>

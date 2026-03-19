@@ -1,7 +1,8 @@
 "use client";
 
-import type { TraitsData } from "../submission/types/TraitsData";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useRef } from "react";
+import type { TraitsData } from "../submission/types/TraitsData";
 import { TraitWrapper } from "./TraitWrapper";
 
 interface DropdownTraitProps {
@@ -13,8 +14,19 @@ interface DropdownTraitProps {
   readonly options: readonly string[];
   readonly traits: TraitsData;
   readonly updateText: (field: keyof TraitsData, value: string) => void;
+  readonly showRequiredMarker?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
 }
+
+const SELECT_PLACEHOLDER_COLOR = "#848490";
+const SELECT_VALUE_COLOR = "#EFEFF1";
+const EMPTY_RING_CLASSES = ["tw-ring-iron-700", "desktop-hover:hover:tw-ring-iron-650"];
+const FILLED_RING_CLASSES = [
+  "tw-ring-emerald-600/45",
+  "desktop-hover:hover:tw-ring-emerald-600/55",
+];
+const getSelectTextColor = (value: string) =>
+  value.trim().length > 0 ? SELECT_VALUE_COLOR : SELECT_PLACEHOLDER_COLOR;
 
 /**
  * Simplified DropdownTrait component with direct state management
@@ -29,27 +41,65 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
     className,
     error,
     onBlur,
+    showRequiredMarker = false,
     size = "default",
   }) => {
-    // Create ref for select element
     const selectRef = useRef<HTMLSelectElement>(null);
+    const successIconRef = useRef<HTMLSpanElement>(null);
+    const currentValue = (traits[field] as string) || "";
+    const isFieldFilled = currentValue.trim().length > 0;
+    const showSuccessIcon = isFieldFilled && !error;
 
-    // Update select value when traits change
+    const syncSuccessIconVisibility = useCallback(
+      (value: string, hasError: boolean) => {
+        successIconRef.current?.classList.toggle(
+          "tw-hidden",
+          value.trim().length === 0 || hasError
+        );
+      },
+      []
+    );
+
+    const syncSelectVisualState = useCallback(
+      (element: HTMLSelectElement, value: string, hasError: boolean) => {
+        element.style.color = getSelectTextColor(value);
+        element.classList.remove(
+          ...EMPTY_RING_CLASSES,
+          ...FILLED_RING_CLASSES,
+          "tw-ring-red"
+        );
+
+        if (hasError) {
+          element.classList.add("tw-ring-red");
+        } else if (value.trim().length > 0) {
+          element.classList.add(...FILLED_RING_CLASSES);
+        } else {
+          element.classList.add(...EMPTY_RING_CLASSES);
+        }
+
+        syncSuccessIconVisibility(value, hasError);
+      },
+      [syncSuccessIconVisibility]
+    );
+
     React.useEffect(() => {
-      const value = (traits[field] as string) || "";
-      if (selectRef.current && value !== selectRef.current.value) {
-        selectRef.current.value = value;
+      if (selectRef.current && currentValue !== selectRef.current.value) {
+        selectRef.current.value = currentValue;
       }
-    }, [traits, field]);
+      if (selectRef.current) {
+        syncSelectVisualState(selectRef.current, currentValue, Boolean(error));
+      }
+    }, [currentValue, error, syncSelectVisualState]);
 
     // Handle change events
     const handleChange = useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newValue = e.target.value;
+        syncSelectVisualState(e.target, newValue, Boolean(error));
         // For dropdowns, we can update immediately
         updateText(field, newValue);
       },
-      [field, updateText]
+      [error, field, syncSelectVisualState, updateText]
     );
 
     // Handle blur events
@@ -60,12 +110,6 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
       }
     }, [onBlur, field]);
 
-    // Check if field is filled (option selected, not empty default)
-    const isFieldFilled = React.useMemo(() => {
-      const currentValue = (traits[field] as string) || "";
-      return currentValue.trim().length > 0;
-    }, [traits, field]);
-
     const paddingClass =
       size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5";
 
@@ -75,30 +119,37 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
         className={className}
         error={error}
         isFieldFilled={isFieldFilled}
+        showRequiredMarker={showRequiredMarker}
+        labelRightAdornment={
+          <span
+            ref={successIconRef}
+            className={showSuccessIcon ? "" : "tw-hidden"}
+          >
+            <CheckCircleIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-emerald-500" />
+          </span>
+        }
         size={size}
       >
         <select
           ref={selectRef}
-          defaultValue={(traits[field] as string) || ""}
+          defaultValue={currentValue}
           onChange={handleChange}
           onBlur={handleBlur}
-          className={`tw-form-select tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-outline-none ${paddingClass} tw-cursor-pointer tw-text-sm tw-text-iron-100 tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out ${
-            error
-              ? "tw-ring-red"
-              : "tw-ring-iron-700 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"
-          } tw-appearance-none [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100 ${isFieldFilled && !error ? "tw-pr-10" : ""}`}
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`,
-            backgroundPosition: "right 0.5rem center",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "1.5em 1.5em",
-          }}
+          className={`tw-form-select tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-outline-none ${paddingClass} tw-cursor-pointer tw-text-base sm:tw-text-sm tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-appearance-none [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100`}
+          style={{ color: getSelectTextColor(currentValue) }}
         >
-          <option value="" className="tw-bg-iron-950">
+          <option
+            value=""
+            className="tw-bg-iron-950"
+            style={{ color: SELECT_PLACEHOLDER_COLOR }}>
             Select {label}
           </option>
           {options.map((option) => (
-            <option key={option} value={option} className="tw-bg-iron-950">
+            <option
+              key={option}
+              value={option}
+              className="tw-bg-iron-950"
+              style={{ color: SELECT_VALUE_COLOR }}>
               {option}
             </option>
           ))}

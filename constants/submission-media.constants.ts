@@ -1,5 +1,10 @@
 export type SubmissionMediaCategory = "image" | "video" | "interactive";
 
+export interface SubmissionUiFormatGroup {
+  kind: SubmissionMediaCategory;
+  label: string;
+}
+
 interface SubmissionMediaType {
   mimeType: string;
   format: string;
@@ -75,12 +80,10 @@ export const SUBMISSION_INTERACTIVE_MIME_TYPES = SUBMISSION_MEDIA_TYPES.filter(
 export const SUBMISSION_FILE_INPUT_ACCEPT =
   "image/png,image/jpeg,image/jpg,image/gif,video/mp4,video/quicktime,.mov,model/gltf-binary,model/gltf+json,application/octet-stream,.glb,.gltf";
 
-export const SUBMISSION_UI_FORMAT_CATEGORIES = [
-  "PNG",
-  "JPG",
-  "GIF",
-  "VIDEO",
-  "GLB",
+export const SUBMISSION_UI_FORMAT_GROUPS: SubmissionUiFormatGroup[] = [
+  { kind: "image", label: "PNG, JPG, GIF" },
+  { kind: "video", label: "VIDEO" },
+  { kind: "interactive", label: "GLB" },
 ];
 
 const CATEGORY_STYLES: Record<

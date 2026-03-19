@@ -15,6 +15,7 @@ type TextTraitProps = {
   readonly className?: string | undefined;
   readonly error?: string | null | undefined;
   readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
+  readonly showRequiredMarker?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
 };
 
@@ -33,6 +34,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
     className,
     error,
     onBlur,
+    showRequiredMarker = false,
     size = "default",
   }) => {
     const currentTraitValue = ((traits[field] as string) ?? "").toString();
@@ -105,9 +107,14 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
       let stateClassName: string;
       if (readOnly) {
         stateClassName =
-          "tw-bg-iron-700 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-300";
+          isFieldFilled
+            ? "tw-bg-iron-700 tw-ring-emerald-700/40 tw-text-iron-300 tw-opacity-70 tw-cursor-not-allowed"
+            : "tw-bg-iron-700 tw-ring-iron-700 tw-text-iron-300 tw-opacity-70 tw-cursor-not-allowed";
       } else if (error) {
         stateClassName = "tw-bg-iron-900 tw-ring-red tw-cursor-text";
+      } else if (isFieldFilled) {
+        stateClassName =
+          "tw-bg-iron-900 tw-ring-emerald-600/45 desktop-hover:hover:tw-ring-emerald-600/55 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
       } else {
         stateClassName =
           "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
@@ -118,7 +125,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
 
       const paddingBase =
         size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5";
-      return `tw-form-input tw-font-normal tw-w-full tw-rounded-lg ${paddingBase} tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 ${stateClassName} ${paddingClassName}`;
+      return `tw-form-input tw-font-normal tw-w-full tw-rounded-lg ${paddingBase} tw-text-base sm:tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 ${stateClassName} ${paddingClassName}`;
     }, [readOnly, error, isFieldFilled, size]);
 
     return (
@@ -128,6 +135,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
         className={className}
         error={error}
         isFieldFilled={isFieldFilled}
+        showRequiredMarker={showRequiredMarker}
         size={size}
       >
         <input
@@ -153,6 +161,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
       prevProps.placeholder === nextProps.placeholder &&
       prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field] &&
       prevProps.error === nextProps.error &&
+      prevProps.showRequiredMarker === nextProps.showRequiredMarker &&
       prevProps.size === nextProps.size
     );
   }

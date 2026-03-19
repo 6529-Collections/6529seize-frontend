@@ -16,6 +16,7 @@ interface NumberTraitProps {
   readonly max: number;
   readonly traits: TraitsData;
   readonly updateNumber: (field: keyof TraitsData, value: number) => void;
+  readonly showRequiredMarker?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
 }
 
@@ -35,6 +36,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
     className,
     error,
     onBlur,
+    showRequiredMarker = false,
     size = "default",
   }) => {
     // Use a ref for direct DOM access
@@ -179,9 +181,14 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
     let stateClassName: string;
     if (readOnly) {
       stateClassName =
-        "tw-bg-iron-800 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-500";
+        isFieldFilled
+          ? "tw-bg-iron-800 tw-ring-emerald-700/40 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-500"
+          : "tw-bg-iron-800 tw-ring-iron-700 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-500";
     } else if (error) {
       stateClassName = "tw-bg-iron-900 tw-ring-red tw-cursor-text";
+    } else if (isFieldFilled) {
+      stateClassName =
+        "tw-bg-iron-900 tw-ring-emerald-600/45 desktop-hover:hover:tw-ring-emerald-600/55 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
     } else {
       stateClassName =
         "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
@@ -197,6 +204,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
         className={className}
         error={error}
         isFieldFilled={isFieldFilled}
+        showRequiredMarker={showRequiredMarker}
         size={size}
       >
         <input
@@ -209,7 +217,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
           readOnly={readOnly}
           min={min}
           max={max}
-          className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
+          className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
           style={{
             MozAppearance: "textfield",
             WebkitAppearance: "none",

@@ -309,17 +309,18 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
         <div className="tw-flex tw-flex-col tw-gap-y-6">
           <div className="tw-flex tw-flex-col tw-gap-y-1">
             <TraitWrapper
-              label="About the Artist *"
+              label="About the Artist"
               id="about-artist"
               error={errors?.aboutArtist}
               isFieldFilled={!!aboutArtist.trim()}
+              showRequiredMarker={true}
               className="tw-pb-0"
             >
               <textarea
                 placeholder="Tell us about yourself as an artist..."
                 value={aboutArtist}
                 onChange={(e) => onAboutArtistChange(e.target.value)}
-                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
+                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
                   errors?.aboutArtist ? "tw-ring-red" : "tw-ring-iron-700"
                 }`}
               />
@@ -329,17 +330,18 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
 
           <div className="tw-flex tw-flex-col tw-gap-y-1">
             <TraitWrapper
-              label="Artwork Commentary *"
+              label="Artwork Commentary"
               id="artwork-commentary"
               error={errors?.artworkCommentary}
               isFieldFilled={!!artworkCommentary.trim()}
+              showRequiredMarker={true}
               className="tw-pb-0"
             >
               <textarea
                 placeholder="Tell us more about the artwork..."
                 value={artworkCommentary}
                 onChange={(e) => onArtworkCommentaryChange(e.target.value)}
-                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
+                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
                   errors?.artworkCommentary ? "tw-ring-red" : "tw-ring-iron-700"
                 }`}
               />

@@ -174,10 +174,11 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
           return (
             <div key={entry.id} className="tw-flex tw-items-start tw-gap-x-3">
               <TraitWrapper
-                label="Wallet Address *"
+                label="Wallet Address"
                 id={`airdrop-${index}-address`}
                 error={error}
                 isFieldFilled={isValid}
+                showRequiredMarker={true}
                 className="tw-flex-1 tw-pb-0"
               >
                 <EnsAddressInput
@@ -188,16 +189,17 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                     handleLoadingChange(entry.id, loading)
                   }
                   onError={(hasError) => handleEnsError(entry.id, hasError)}
-                  className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
+                  className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
                     error ? "tw-ring-red" : "tw-ring-iron-700"
                   } focus:tw-ring-primary-400`}
                 />
               </TraitWrapper>
 
               <TraitWrapper
-                label="Count *"
+                label="Count"
                 id={`airdrop-${index}-count`}
                 isFieldFilled={!!entry.count}
+                showRequiredMarker={true}
                 className="tw-w-24 tw-pb-0"
               >
                 <input
@@ -206,7 +208,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                   max={AIRDROP_TOTAL}
                   value={entry.count || ""}
                   onChange={(e) => handleCountChange(index, e.target.value)}
-                  className="tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400"
+                  className="tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400"
                 />
               </TraitWrapper>
 

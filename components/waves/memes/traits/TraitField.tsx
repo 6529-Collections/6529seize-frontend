@@ -16,6 +16,7 @@ interface TraitFieldProps {
   readonly error?: string | null | undefined;
   readonly onBlur?: (() => void) | undefined;
   readonly readOnlyOverride?: boolean;
+  readonly showRequiredMarkers?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
 }
 
@@ -29,6 +30,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
   error,
   onBlur,
   readOnlyOverride,
+  showRequiredMarkers = false,
   size,
 }) => {
   const effectiveReadOnly =
@@ -44,6 +46,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         placeholder={definition.placeholder}
         error={error}
         onBlur={onBlur}
+        showRequiredMarker={showRequiredMarkers}
         size={size}
       />
     );
@@ -61,6 +64,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         max={definition.max}
         error={error}
         onBlur={onBlur}
+        showRequiredMarker={showRequiredMarkers}
         size={size}
       />
     );
@@ -78,6 +82,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         options={definition.options}
         error={error}
         onBlur={onBlur}
+        showRequiredMarker={showRequiredMarkers}
         size={size}
       />
     );
@@ -147,12 +152,15 @@ const arePropsEqual = (
   }
 
   const sizeMatches = prevProps.size === nextProps.size;
+  const requiredMarkerMatches =
+    prevProps.showRequiredMarkers === nextProps.showRequiredMarkers;
 
   return (
     fieldMatches &&
     definitionMatches &&
     readOnlyOverrideMatches &&
     errorMatches &&
+    requiredMarkerMatches &&
     sizeMatches
   );
 };

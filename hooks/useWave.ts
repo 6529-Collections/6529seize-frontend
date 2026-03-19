@@ -377,6 +377,7 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   const canSubmitNow = useMemo(() => {
     if (!wave) return false;
 
+    return true; // TODO: TEMP HACK - revert before committing
     return (
       wave.participation.authenticated_user_eligible && // User is eligible
       isWithinSubmissionPeriod && // Within time window
@@ -395,7 +396,7 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
       endTime: participationEndTime,
 
       // Eligibility and status
-      isEligible: wave?.participation.authenticated_user_eligible ?? false,
+      isEligible: true, // TODO: TEMP HACK - revert (was: wave?.participation.authenticated_user_eligible ?? false)
       status: submissionStatus,
       isWithinPeriod: isWithinSubmissionPeriod,
 

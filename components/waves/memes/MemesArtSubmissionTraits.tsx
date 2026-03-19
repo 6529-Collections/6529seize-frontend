@@ -15,6 +15,7 @@ interface MemesArtSubmissionTraitsProps {
     | undefined;
   readonly onFieldBlur?: ((field: keyof TraitsData) => void) | undefined;
   readonly readOnlyOverrides?: Partial<Record<keyof TraitsData, boolean>>;
+  readonly showRequiredMarkers?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
 }
 
@@ -30,6 +31,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   validationErrors = {},
   onFieldBlur,
   readOnlyOverrides,
+  showRequiredMarkers = false,
   size,
 }) => {
   const { connectedProfile } = useAuth();
@@ -72,7 +74,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
         </h2>
       )}
 
-      <div className="tw-flex tw-flex-col tw-gap-y-8">
+      <div className="tw-flex tw-flex-col tw-gap-y-10">
         {formSections.map((section, sectionIndex) => {
           const renderField = (
             field: (typeof section.fields)[number],
@@ -96,6 +98,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
                 onBlur={
                   onFieldBlur ? () => onFieldBlur(field.field) : undefined
                 }
+                showRequiredMarkers={showRequiredMarkers}
                 size={size}
               />
             );
@@ -115,8 +118,8 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
 
             return (
               <Section key={`section-${sectionIndex}`} title={section.title}>
-                <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-5">
-                  <div className="tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-5 sm:tw-grid-cols-2">
+                <div className="tw-flex tw-flex-col tw-gap-x-6 tw-gap-y-8">
+                  <div className="tw-grid tw-grid-cols-1 tw-gap-x-5 tw-gap-y-8 sm:tw-grid-cols-2">
                     {artistField && renderField(artistField, 0)}
                     {profileField && renderField(profileField, 1)}
                   </div>
@@ -132,7 +135,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
           if (section.title === "Card Points") {
             return (
               <Section key={`section-${sectionIndex}`} title={section.title}>
-                <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-4">
+                <div className="tw-grid tw-grid-cols-2 tw-gap-4 sm:tw-grid-cols-4">
                   {section.fields.map((field, fieldIndex) =>
                     renderField(field, fieldIndex)
                   )}
@@ -145,7 +148,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
           if (section.title === "Card Attributes") {
             return (
               <Section key={`section-${sectionIndex}`} title={section.title}>
-                <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
+                <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
                   {section.fields.map((field, fieldIndex) =>
                     renderField(field, fieldIndex)
                   )}
@@ -156,7 +159,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
 
           return (
             <Section key={`section-${sectionIndex}`} title={section.title}>
-              <div className="tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-5 sm:tw-grid-cols-2">
+              <div className="tw-grid tw-grid-cols-1 tw-gap-x-5 tw-gap-y-8 sm:tw-grid-cols-2">
                 {section.fields.map((field, fieldIndex) =>
                   renderField(field, fieldIndex)
                 )}

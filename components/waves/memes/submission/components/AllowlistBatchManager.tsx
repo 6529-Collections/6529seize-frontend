@@ -63,10 +63,11 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
             <div key={batch.id} className="tw-flex tw-items-start tw-gap-x-3">
               {/* Contract Address */}
               <TraitWrapper
-                label="Contract Address *"
+                label="Contract Address"
                 id={`batch-${index}-contract`}
                 error={errors?.[index]?.contract}
                 isFieldFilled={!!batch.contract && !errors?.[index]?.contract}
+                showRequiredMarker={true}
                 className="tw-flex-1 tw-pb-0"
               >
                 <input
@@ -76,7 +77,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                   onChange={(e) =>
                     handleBatchChange(index, "contract", e.target.value)
                   }
-                  className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 ${
+                  className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 ${
                     errors?.[index]?.contract
                       ? "tw-ring-red"
                       : "tw-ring-iron-700"
@@ -101,7 +102,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                   onChange={(e) =>
                     handleBatchChange(index, "token_ids_raw", e.target.value)
                   }
-                  className={`tw-truncat tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 ${
+                  className={`tw-truncat tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 ${
                     errors?.[index]?.token_ids
                       ? "tw-ring-red"
                       : "tw-ring-iron-700"

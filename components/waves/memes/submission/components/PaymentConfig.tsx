@@ -103,10 +103,11 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
 
       {hasDesignatedPayee && (
         <TraitWrapper
-          label="Designated Payee Name *"
+          label="Designated Payee Name"
           id="designated-payee-name"
           error={designatedPayeeNameError}
           isFieldFilled={!!designatedPayeeName.trim()}
+          showRequiredMarker={true}
           className="tw-pb-8"
         >
           <input
@@ -115,7 +116,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
             onChange={handleDesignatedPayeeNameChange}
             placeholder="Enter designated payee name"
             autoFocus
-            className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
+            className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
               designatedPayeeNameError ? "tw-ring-red" : "tw-ring-iron-700"
             } focus:tw-ring-primary-400`}
           />
@@ -125,12 +126,13 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
       <TraitWrapper
         label={
           hasDesignatedPayee
-            ? "Designated Payee Address *"
-            : "Payment Address *"
+            ? "Designated Payee Address"
+            : "Payment Address"
         }
         id="payment-address"
         error={addressError}
         isFieldFilled={isAddressValid}
+        showRequiredMarker={true}
         className="tw-pb-0"
       >
         <EnsAddressInput
@@ -139,7 +141,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
           onAddressChange={handleAddressChange}
           onLoadingChange={setIsLoading}
           onError={setHasEnsError}
-          className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
+          className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
             addressError ? "tw-ring-red" : "tw-ring-iron-700"
           } focus:tw-ring-primary-400`}
         />

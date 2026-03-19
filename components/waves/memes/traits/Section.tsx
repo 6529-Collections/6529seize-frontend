@@ -12,10 +12,9 @@ interface SectionProps {
  */
 const SectionComponent: React.FC<SectionProps> = ({ title, children }) => {
   return (
-    <div className="tw-space-y-5">
-      <div className="tw-flex tw-items-center tw-gap-4">
-        <div className="tw-h-px tw-w-8 tw-bg-iron-800/80"></div>
-        <h3 className="tw-whitespace-nowrap tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+    <div className="tw-space-y-6">
+      <div className="tw-flex tw-items-center tw-gap-5">
+        <h3 className="tw-whitespace-nowrap tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-0">
           {title}
         </h3>
         <div className="tw-h-px tw-flex-1 tw-bg-iron-800/80"></div>

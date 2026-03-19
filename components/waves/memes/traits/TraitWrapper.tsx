@@ -11,6 +11,8 @@ interface TraitWrapperProps {
   readonly error?: string | null | undefined;
   readonly id?: string | undefined;
   readonly isFieldFilled?: boolean | undefined;
+  readonly labelRightAdornment?: React.ReactNode;
+  readonly showRequiredMarker?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
 }
 
@@ -23,10 +25,14 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   error,
   id,
   isFieldFilled = false,
+  labelRightAdornment,
+  showRequiredMarker = false,
   size = "default",
 }) => {
   const fieldId = id ?? `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
   const errorId = error ? `${fieldId}-error` : undefined;
+  const hasLabelRightAdornment =
+    labelRightAdornment !== undefined && labelRightAdornment !== null;
 
   const hasError = !!error && !readOnly;
 
@@ -59,26 +65,33 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
       <div className="tw-relative">
         <label
           htmlFor={fieldId}
-          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-font-medium tw-transition-all ${size === "sm" ? "tw-text-[11px]" : "tw-text-xs"} ${labelClassName}`}
+          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-font-medium tw-transition-all ${hasLabelRightAdornment ? "tw-flex tw-items-center tw-gap-1" : ""} ${size === "sm" ? "tw-text-[11px]" : "tw-text-xs"} ${labelClassName}`}
         >
-          {label}
-          {!readOnly && <span className="tw-text-red"> *</span>}
+          <span className="tw-inline-flex tw-items-center tw-gap-0.5">
+            <span>{label}</span>
+            {showRequiredMarker && !readOnly && (
+              <span aria-hidden="true" className="tw-text-iron-500">
+                *
+              </span>
+            )}
+          </span>
+          {labelRightAdornment}
         </label>
 
         <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
           {React.Children.map(children, (child) => {
-            if (React.isValidElement(child)) {
+            if (React.isValidElement<Record<string, unknown>>(child)) {
               return React.cloneElement(child, {
+                ...child.props,
                 id: fieldId,
                 "aria-invalid": hasError,
                 "aria-describedby": errorId,
-                ...(child.props || {}),
-              } as any);
+              });
             }
             return child;
           })}
 
-          {isFieldFilled && !hasError && (
+          {!hasLabelRightAdornment && isFieldFilled && !hasError && (
             <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-transform">
               <CheckCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-emerald-500" />
             </div>
