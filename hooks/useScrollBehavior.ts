@@ -4,10 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type ScrollIntent = "pinned" | "reading" | "auto";
 
-interface ScrollBehaviorOptions {
-  readonly onPinStateChange?: (shouldPinToBottom: boolean) => void;
-}
-
 const BOTTOM_THRESHOLD_PX = 50;
 const SCROLL_INTENT_DELTA_PX = 20;
 
@@ -26,19 +22,15 @@ const getScrollPosition = (container: HTMLDivElement) => {
 interface BottomAnchorObserverOptions {
   readonly scrollContainerEl: HTMLDivElement | null;
   readonly bottomAnchorEl: HTMLDivElement | null;
-  readonly scrollIntentRef: React.RefObject<ScrollIntent>;
   readonly setIsAtBottom: React.Dispatch<React.SetStateAction<boolean>>;
   readonly setScrollIntentSafely: (nextIntent: ScrollIntent) => void;
-  readonly notifyPinStateChange: (nextShouldPin: boolean) => void;
 }
 
 const useBottomAnchorObserver = ({
   scrollContainerEl,
   bottomAnchorEl,
-  scrollIntentRef,
   setIsAtBottom,
   setScrollIntentSafely,
-  notifyPinStateChange,
 }: BottomAnchorObserverOptions) => {
   useEffect(() => {
     const container = scrollContainerEl;
@@ -59,12 +51,6 @@ const useBottomAnchorObserver = ({
         if (isIntersecting) {
           setScrollIntentSafely("pinned");
         }
-
-        const nextIntentValue = isIntersecting
-          ? "pinned"
-          : scrollIntentRef.current;
-        const nextShouldPin = nextIntentValue === "pinned" && isIntersecting;
-        notifyPinStateChange(nextShouldPin);
       },
       {
         root: container,
@@ -78,14 +64,7 @@ const useBottomAnchorObserver = ({
     return () => {
       observer.disconnect();
     };
-  }, [
-    scrollContainerEl,
-    bottomAnchorEl,
-    scrollIntentRef,
-    setIsAtBottom,
-    setScrollIntentSafely,
-    notifyPinStateChange,
-  ]);
+  }, [scrollContainerEl, bottomAnchorEl, setIsAtBottom, setScrollIntentSafely]);
 };
 
 interface ScrollListenerOptions {
@@ -161,40 +140,15 @@ const useScrollIntentState = () => {
     setScrollIntent(nextIntent);
   }, []);
 
-  return { scrollIntent, scrollIntentRef, setScrollIntentSafely };
+  return { scrollIntent, setScrollIntentSafely };
 };
 
-const usePinStateNotifier = (
-  onPinStateChange?: (shouldPinToBottom: boolean) => void
-) => {
-  const shouldPinToBottomRef = useRef(true);
-  const onPinStateChangeRef = useRef(onPinStateChange);
-
-  useEffect(() => {
-    onPinStateChangeRef.current = onPinStateChange;
-  }, [onPinStateChange]);
-
-  const notifyPinStateChange = useCallback((nextShouldPin: boolean) => {
-    if (shouldPinToBottomRef.current === nextShouldPin) {
-      return;
-    }
-    shouldPinToBottomRef.current = nextShouldPin;
-    onPinStateChangeRef.current?.(nextShouldPin);
-  }, []);
-
-  return { notifyPinStateChange };
-};
-
-export const useScrollBehavior = (options: ScrollBehaviorOptions = {}) => {
+export const useScrollBehavior = () => {
   const { scrollContainerRef, scrollContainerEl, syncScrollContainerRef } =
     useScrollContainer();
   const { bottomAnchorRef, bottomAnchorEl, syncBottomAnchorRef } =
     useBottomAnchor();
-  const { scrollIntent, scrollIntentRef, setScrollIntentSafely } =
-    useScrollIntentState();
-  const { notifyPinStateChange } = usePinStateNotifier(
-    options.onPinStateChange
-  );
+  const { scrollIntent, setScrollIntentSafely } = useScrollIntentState();
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isAtTop, setIsAtTop] = useState(false);
   const lastScrollTopRef = useRef(0);
@@ -217,9 +171,8 @@ export const useScrollBehavior = (options: ScrollBehaviorOptions = {}) => {
       setScrollIntentSafely("pinned");
       setIsAtBottom(true);
       lastScrollTopRef.current = 0;
-      notifyPinStateChange(true);
     },
-    [scrollContainerRef, setScrollIntentSafely, notifyPinStateChange]
+    [scrollContainerRef, setScrollIntentSafely]
   );
 
   const scrollToVisualBottom = useCallback(() => {
@@ -270,21 +223,12 @@ export const useScrollBehavior = (options: ScrollBehaviorOptions = {}) => {
       nextIntent = "pinned";
     }
 
-    const nextIntentValue = nextIntent ?? scrollIntentRef.current;
-    const nextShouldPin = nextIntentValue === "pinned" && newIsAtBottom;
-    notifyPinStateChange(nextShouldPin);
-
     if (nextIntent) {
       setScrollIntentSafely(nextIntent);
     }
 
     lastScrollTopRef.current = scrollTop;
-  }, [
-    scrollContainerRef,
-    scrollIntentRef,
-    setScrollIntentSafely,
-    notifyPinStateChange,
-  ]);
+  }, [scrollContainerRef, setScrollIntentSafely]);
 
   const recomputeScrollMetrics = useCallback(() => {
     const container = scrollContainerRef.current;
@@ -306,19 +250,14 @@ export const useScrollBehavior = (options: ScrollBehaviorOptions = {}) => {
 
     setIsAtBottom(newIsAtBottom);
     setIsAtTop(newIsAtTop);
-
-    const nextShouldPin = scrollIntentRef.current === "pinned" && newIsAtBottom;
-    notifyPinStateChange(nextShouldPin);
-  }, [scrollContainerRef, scrollIntentRef, notifyPinStateChange]);
+  }, [scrollContainerRef]);
 
   // Intersection Observer for robust bottom detection
   useBottomAnchorObserver({
     scrollContainerEl,
     bottomAnchorEl,
-    scrollIntentRef,
     setIsAtBottom,
     setScrollIntentSafely,
-    notifyPinStateChange,
   });
 
   useScrollListener({ scrollContainerEl, handleScroll });

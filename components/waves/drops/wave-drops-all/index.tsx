@@ -20,12 +20,13 @@ import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   TweetPreviewModeProvider,
   type TweetPreviewMode,
 } from "@/components/tweets/TweetPreviewModeContext";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
+import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
@@ -72,16 +73,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
     useVirtualizedWaveDrops(waveId, dropId);
 
-  const latestSerialNo = waveMessages?.drops[0]?.serial_no ?? null;
-  const latestSerialNoRef = useRef<number | null>(null);
-  const [pinnedLatestSerial, setPinnedLatestSerial] = useState<number | null>(
-    null
-  );
-
-  useEffect(() => {
-    latestSerialNoRef.current = latestSerialNo;
-  }, [latestSerialNo]);
-
   const { setUnreadDividerSerialNo } = useUnreadDivider();
 
   const typingMessage = useWaveIsTyping(
@@ -92,30 +83,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const { data: boostedDrops } = useWaveBoostedDrops({ waveId });
 
-  const handlePinStateChange = useCallback(
-    (nextShouldPinToBottom: boolean) => {
-      if (!isAppleMobile) {
-        return;
-      }
-
-      if (nextShouldPinToBottom) {
-        setPinnedLatestSerial(null);
-        return;
-      }
-
-      const latestSerial = latestSerialNoRef.current;
-      if (latestSerial === null) {
-        return;
-      }
-
-      setPinnedLatestSerial((previous) => previous ?? latestSerial);
-    },
-    [isAppleMobile]
-  );
-
-  const scrollBehavior = useScrollBehavior({
-    onPinStateChange: handlePinStateChange,
-  });
+  const scrollBehavior = useScrollBehavior();
   const {
     scrollContainerRef,
     scrollContainerCallbackRef,
@@ -152,57 +120,16 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     setUnreadDividerSerialNo(dividerSerialNo ?? null);
   }, [waveId, dividerSerialNo, setUnreadDividerSerialNo]);
 
-  let visibleLatestSerial: number | null = null;
-  if (latestSerialNo !== null) {
-    if (!isAppleMobile || shouldPinToBottom) {
-      visibleLatestSerial = latestSerialNo;
-    } else {
-      visibleLatestSerial = pinnedLatestSerial ?? latestSerialNo;
-    }
-  }
-
-  const renderedWaveMessages = useMemo(() => {
-    if (!waveMessages) {
-      return waveMessages;
-    }
-
-    if (!isAppleMobile || visibleLatestSerial === null) {
-      return waveMessages;
-    }
-
-    const filteredDrops = waveMessages.drops.filter((drop) => {
-      if (typeof drop.serial_no !== "number") {
-        return true;
-      }
-      return drop.serial_no <= visibleLatestSerial;
-    });
-
-    if (filteredDrops.length === waveMessages.drops.length) {
-      return waveMessages;
-    }
-
-    return {
-      ...waveMessages,
-      drops: filteredDrops,
-    };
-  }, [waveMessages, isAppleMobile, visibleLatestSerial]);
-
-  const pendingDropsCount = useMemo(() => {
-    if (
-      !isAppleMobile ||
-      !waveMessages?.drops?.length ||
-      visibleLatestSerial === null
-    ) {
-      return 0;
-    }
-
-    return waveMessages.drops.reduce((count, drop) => {
-      if (typeof drop.serial_no !== "number") {
-        return count;
-      }
-      return drop.serial_no > visibleLatestSerial ? count + 1 : count;
-    }, 0);
-  }, [isAppleMobile, waveMessages, visibleLatestSerial]);
+  const {
+    renderedWaveMessages,
+    pendingDropsCount,
+    revealPendingDrops: revealDeferredPendingDrops,
+  } = useDeferredNewestDrops({
+    waveId,
+    isAppleMobile,
+    waveMessages,
+    shouldPinToBottom,
+  });
 
   const {
     serialTarget,
@@ -267,8 +194,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       return;
     }
 
+    revealDeferredPendingDrops();
     forcePinToBottom();
-  }, [waveMessages, forcePinToBottom]);
+  }, [waveMessages, revealDeferredPendingDrops, forcePinToBottom]);
 
   const handleTopIntersection = useCallback(async () => {
     if (
@@ -349,7 +277,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           onQuoteClick={handleQuoteClick}
           isAtBottom={isAtBottom}
           scrollToBottom={forcePinToBottom}
-          onScroll={scrollBehavior.handleScroll}
           typingMessage={typingMessage}
           onDropContentClick={onDropContentClick}
           pendingCount={pendingDropsCount}
