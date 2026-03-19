@@ -197,6 +197,7 @@
     "istanbul-lib-coverage": "^3.2.2",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jiti": "^2.6.1",
     "knip": "^5.50.5",
     "nodemon": "^3.1.4",
     "pino-pretty": "^13.1.2",

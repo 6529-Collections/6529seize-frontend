@@ -130,15 +130,15 @@ function StandaloneMintPageTopBar() {
     useSeizeConnectContext();
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 tw-pt-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
-      <div className="tw-flex tw-items-center tw-gap-3">
+    <div className="tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-4 tw-pt-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
+      <div className="tw-flex tw-items-center tw-justify-center tw-gap-3">
         <Image src="/6529.svg" alt="6529" width={28} height={28} unoptimized />
         <span className="tw-text-xl tw-font-bold tw-text-white">
           The Memes by 6529 - Mint Page
         </span>
       </div>
       <div
-        className="tw-flex tw-justify-start md:tw-justify-end"
+        className="tw-flex tw-justify-center md:tw-justify-end"
         style={
           {
             "--apkt-tokens-core-backgroundAccentPrimary": "#406AFE",
