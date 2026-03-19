@@ -2,7 +2,7 @@
 
 ## Overview
 
-Edit-eligible users can change a wave picture from the `About` avatar.
+Edit-eligible users can change a non-DM wave picture from the `About` avatar.
 Selecting the avatar pencil opens `Update wave picture`.
 
 ## Location in the Site
@@ -16,7 +16,8 @@ Selecting the avatar pencil opens `Update wave picture`.
 
 ## Availability Rules
 
-- The control renders only when `canEditWave` is true.
+- The control renders only on non-direct-message waves when `canEditWave` is
+  true.
 - `canEditWave` requires:
   - connected profile handle
   - no active proxy session
@@ -24,7 +25,7 @@ Selecting the avatar pencil opens `Update wave picture`.
 
 ## Entry Points
 
-1. Open an active wave and switch to `About`.
+1. Open an active non-DM wave and switch to `About`.
 2. Hover the avatar.
 3. Select `Edit wave picture`.
 
@@ -50,7 +51,8 @@ Selecting the avatar pencil opens `Update wave picture`.
 
 ## Errors and Recovery
 
-- No permission or touch-only web layout: pencil is not shown.
+- No permission, direct-message wave, or touch-only web layout: pencil is not
+  shown.
 - Unsupported file: `Invalid file type`.
 - Oversized file: `File size must be less than 10MB`.
 - Auth failure: `Failed to authenticate`.
@@ -62,10 +64,13 @@ Selecting the avatar pencil opens `Update wave picture`.
 
 - There is no crop flow.
 - No request is sent until a valid file is selected and `Save` is pressed.
+- Shared avatar picture/collage fallback rules are documented in
+  [Wave Avatar Fallbacks](../../shared/feature-wave-avatar-fallbacks.md).
 
 ## Related Pages
 
 - [Wave Header Index](README.md)
 - [Wave Header Controls](feature-wave-header-controls.md)
+- [Wave Avatar Fallbacks](../../shared/feature-wave-avatar-fallbacks.md)
 - [Wave Notification Controls](../sidebars/feature-wave-notification-controls.md)
 - [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)

@@ -88,6 +88,7 @@ Timestamp source and precedence:
 
 - [Sidebars Index](README.md)
 - [Waves Index](../README.md)
+- [Wave Avatar Fallbacks](../../shared/feature-wave-avatar-fallbacks.md)
 - [Wave List Navigation Behavior](feature-wave-list-navigation.md)
 - [Wave Notification Controls and Mute Behavior](feature-wave-notification-controls.md)
 - [Pinned Wave Controls](feature-pinned-wave-controls.md)

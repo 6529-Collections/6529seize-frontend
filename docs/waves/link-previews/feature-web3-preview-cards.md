@@ -75,7 +75,8 @@ Only `https://` URLs match. Host must be apex or `www`.
 
 - Open or publish a drop with one or more supported URLs.
 - Open an existing drop that already contains supported URLs.
-- If previews are hidden for your drop, use `Show link previews`.
+- If previews are hidden on your thread drop, use desktop `More` >
+  `Restore link previews`.
 
 ## User Journey
 

@@ -75,11 +75,14 @@ Users can:
 - This surface is read-only for description content.
 - Preview text is normalized plain text, not rendered markdown.
 - Only first-part description content contributes to preview.
+- Wave admins can replace the source description drop from
+  [Wave Drop Set as Pinned Drop](../drop-actions/feature-set-pinned-drop.md).
 
 ## Related Pages
 
 - [Wave Header Index](README.md)
 - [Wave Header Controls](feature-wave-header-controls.md)
+- [Wave Drop Set as Pinned Drop](../drop-actions/feature-set-pinned-drop.md)
 - [Wave Link Share and Copy](feature-wave-link-share-copy.md)
 - [Wave Creation Description Step](../create/feature-description-step.md)
 - [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)

@@ -56,4 +56,4 @@ Use it when a metric name needs clarification before comparing stats.
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
 - [Network Levels](feature-network-levels.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
-- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
+- [Collected Tab, Stats Summary, and Transfer Mode](../profiles/tabs/feature-collected-tab.md)

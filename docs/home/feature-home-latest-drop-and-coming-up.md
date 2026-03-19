@@ -69,8 +69,7 @@ Use this page for visibility rules, state switches, and route targets.
   - The full section is hidden.
 - In `Coming up` leader cards:
   - first place can show `LEADING`
-  - other positions use `CURRENT {ordinal} PLACE` (for example
-    `CURRENT 2nd PLACE`)
+  - other positions use `{ordinal} PLACE` (for example `2nd PLACE`)
 
 ## Edge Cases
 

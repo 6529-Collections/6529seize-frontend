@@ -11,7 +11,6 @@ Profile tab routes live under `/{user}`.
 - `/{user}/brain`: Brain
 - `/{user}/collected`: Collected
 - `/{user}/xtdh`: xTDH (Beta label in the tab UI)
-- `/{user}/stats`: Stats
 - `/{user}/subscriptions`: Subscriptions
 - `/{user}/proxy`: Proxy
 
@@ -38,6 +37,7 @@ Profile tab routes live under `/{user}`.
 
 - `/{user}/identity` redirects to `/{user}` and preserves query params.
 - `/{user}/waves`, `/{user}/groups`, and `/{user}/followers` redirect to `/{user}` without query params.
+- `/{user}/stats` is no longer a supported profile route and does not redirect.
 - `/{user}/rep` is unsupported and does not redirect.
 - `/{user}` values that end with probe-like suffixes (`.html`, `.htm`, `.php`, `.asp`, `.aspx`, `.jsp`) are treated as invalid profile slugs and show not-found.
 - Unknown `/{user}/<subroute>` routes show not-found.
@@ -47,6 +47,7 @@ Profile tab routes live under `/{user}`.
 
 - Missing user or invalid profile route: [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
 - If profile loading fails with a transient error, reload the page.
+- Replace saved `/{user}/stats` links with `/{user}/collected`.
 - Replace saved `/{user}/rep` links with `/{user}` or another supported tab route.
 
 ## Related Pages
@@ -58,9 +59,8 @@ Profile tab routes live under `/{user}`.
 - [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
-- [Collected Tab and Transfer Controls](../tabs/feature-collected-tab.md)
+- [Collected Tab, Stats Summary, and Transfer Mode](../tabs/feature-collected-tab.md)
 - [Profile xTDH Tab](../tabs/feature-xtdh-tab.md)
-- [Profile Stats Tab](../tabs/feature-stats-tab.md)
 - [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
 - [Profile Proxy Tab](../tabs/feature-proxy-tab.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

@@ -49,6 +49,8 @@
 - Keep the same tab while stepping through cards with previous/next arrows.
 - Open an unresolved numeric card URL and use the fallback mint timing panel.
 - Open `Your Cards` to check personal ownership and transfer history.
+- Open `The Art` to review original media, Arweave links/downloads, and file
+  details for the currently visible slide.
 
 ## Edge Cases
 
@@ -58,6 +60,12 @@
 - `Your Cards` shows wallet-specific empty states:
   - No wallet connected: prompt to connect a wallet.
   - Wallet connected with no editions: ownership empty-state message.
+- `The Art` can still open in animated mode when top-level `animation` is
+  blank but metadata provides `animation` or `animation_url`.
+- If only one original media URL resolves, `The Art` shows just that media
+  slide and its matching download/link row.
+- `File Type` and `Dimensions` rows appear only when the active `The Art`
+  slide has usable metadata values.
 - If card fetches fail or resolve inconsistently, the route can stay in a heading-only state with no dedicated inline error panel.
 
 ## Failure and Recovery

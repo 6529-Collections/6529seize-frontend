@@ -30,7 +30,8 @@ This page covers:
     `upload.wikimedia.org`)
   - `wikidata.org` / `www.wikidata.org`
   - `w.wiki` short links
-- If previews are hidden, use `Show link previews` on the drop.
+- If previews are hidden on your thread drop, use desktop `More` >
+  `Restore link previews`.
 
 ## User Journey
 

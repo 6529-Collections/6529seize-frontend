@@ -47,7 +47,7 @@ Rules:
 - While a quote target is loading, the quote card area shows placeholder content.
 - Extra query keys do not block quote rendering unless `drop` is present.
 - If previews are hidden for a drop, quote cards stay suppressed until the author
-  re-enables previews.
+  restores previews from the desktop `More` menu.
 
 ## Edge Cases
 
@@ -60,8 +60,9 @@ Rules:
 - Nested quote rendering is capped at `4` levels; deeper levels fall back to
   normal link behavior.
 - `/waves/{waveId}` links without `serialNo` do not use quote-card rendering.
-- When previews are hidden, only the drop author sees the inline `Show link previews`
-  control; other viewers only see plain links.
+- When previews are hidden, quote-card sources stay plain links until the
+  author restores previews from the desktop `More` menu. Other viewers only
+  see the plain links.
 
 ## Failure and Recovery
 
@@ -72,7 +73,8 @@ Rules:
   state while the rest of the thread remains usable.
 - If the target drop cannot be resolved (for example inaccessible or missing), the
   quote area can remain in placeholder state without a separate empty-state message.
-- If previews were hidden, re-enable with `Show link previews` (author-only control).
+- If previews were hidden, restore them from the desktop `More` menu before
+  retrying quote-card rendering.
 
 ## Limitations / Notes
 

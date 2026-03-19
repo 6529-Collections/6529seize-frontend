@@ -19,7 +19,7 @@ boosters.
 
 - Open `/network/tdh` directly.
 - Open `Network -> TDH` in the sidebar.
-- Open `TDH Version: 1.4` in profile `Stats -> Boost Breakdown`.
+- Open `TDH Version: 1.4` in profile `Collected -> Details -> Boost Breakdown`.
 - Open `TDH` from `/network/definitions`.
 - Open `TDH` from `/network/tdh/historic-boosts`.
 
@@ -85,4 +85,4 @@ boosters.
 - [Network Definitions](feature-network-definitions.md)
 - [Network Stats](feature-network-stats.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
-- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
+- [Collected Tab, Stats Summary, and Transfer Mode](../profiles/tabs/feature-collected-tab.md)

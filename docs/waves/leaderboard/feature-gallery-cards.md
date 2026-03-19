@@ -51,6 +51,8 @@ works from the card.
 - Known MIME values show tooltip labels like `Image - PNG`, `Video - MP4`, and
   `Interactive - GLB`.
 - Unknown or missing MIME values still show a badge tooltip as `Unknown`.
+- On narrow/mobile layouts, long titles and author handles truncate inside the
+  card and vote/rater rows wrap instead of forcing horizontal overflow.
 - On non-touch devices, sort changes briefly highlight card media to signal reordering.
 
 ## Edge Cases

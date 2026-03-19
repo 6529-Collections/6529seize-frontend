@@ -13,8 +13,9 @@ threads.
 
 ### Ownership
 
-- Owns posted-drop action controls: voting, reactions, boosting, curation,
-  open/copy, media download, and mark-as-unread.
+- Owns posted-drop action controls: voting, reactions, boosting, admin-only
+  pinned-drop reassignment, curation, open/copy, media download, and
+  mark-as-unread.
 - Owns action-entry behavior across desktop `More` menus and touch action menus
   where applicable.
 - Owns in-thread drop presentation behaviors tied to actions: content display,
@@ -47,6 +48,7 @@ threads.
 ### Menus and thread-state actions
 
 - [Wave Drop Touch Menu](feature-touch-drop-menu.md)
+- [Wave Drop Set as Pinned Drop](feature-set-pinned-drop.md)
 - [Wave Drop Mark as Unread](feature-mark-as-unread.md)
 - [Wave Drop Artist Preview Modal](feature-artist-preview-modal.md)
 

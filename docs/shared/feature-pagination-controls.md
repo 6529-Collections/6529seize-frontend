@@ -19,8 +19,8 @@ Two shared variants are used across the app:
   `/open-data/network-metrics`, `/open-data/rememes`, `/open-data/royalties`,
   `/open-data/meme-subscriptions`, and `/the-memes/{id}/distribution`.
 - Table pagination appears on routes such as:
-  the Network identities leaderboard, `/network/activity`, `/{user}/stats`,
-  and `/{user}/collected`.
+  the Network identities leaderboard, `/network/activity`, and
+  `/{user}/collected`.
 
 ## Entry Points
 
@@ -67,9 +67,9 @@ Two shared variants are used across the app:
 - Numbered page jumps apply only on `Enter`; changing the input value alone
   does not navigate.
 - URL behavior is route-specific:
-  routes such as the Network identities leaderboard, `/{user}/stats`, and
-  `/{user}/collected` can keep page state in query params, while other routes
-  keep page state locally.
+  routes such as the Network identities leaderboard and `/{user}/collected`
+  can keep page state in query params, while other routes keep page state
+  locally.
 
 ## Related Pages
 
@@ -84,5 +84,4 @@ Two shared variants are used across the app:
 - [Meme Subscriptions](../open-data/feature-meme-subscriptions.md)
 - [Network Identities Leaderboard](../network/feature-network-identities-leaderboard.md)
 - [Network Activity Feed](../network/feature-network-activity-feed.md)
-- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
-- [Collected Tab and Transfer Mode](../profiles/tabs/feature-collected-tab.md)
+- [Collected Tab, Stats Summary, and Transfer Mode](../profiles/tabs/feature-collected-tab.md)

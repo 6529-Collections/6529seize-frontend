@@ -41,19 +41,32 @@ handoff does not behave as expected.
 - Sidebar rows are missing on web:
   expand `Network`, `Collections`, `Tools`, or `About`; in collapsed rail,
   open the flyout first.
-- `Discover` row/tab is missing:
-  expected behavior. `/discover` is removed, and primary wave navigation uses
-  `/waves` (plus `/messages` for DM routes).
+- `Notifications` row is missing on web:
+  it appears only when connected and sits above `Profile` near the sidebar
+  account area, not in the main navigation list.
+- `Discovery` row/tab is missing or `/discover` looks empty:
+  `Discovery` is an active route in current navigation catalogs. Web exposes a
+  `Discovery` row, and the app exposes `Discovery` in bottom navigation and the
+  drawer. If the page body is blank, refresh `/discover` or compare against `/`
+  and `/waves`.
 - `Profile` shortcut is missing:
-  connect wallet first; profile rows in web/app sidebars are hidden while
-  disconnected.
+  connect wallet first; the web sidebar profile row and the app-drawer
+  `Profile` row plus profile-avatar shortcut are hidden while disconnected.
+- `Share` row is missing on web:
+  disconnected desktop web shows a standalone `Share` row; connected desktop
+  web moves `Share` into the user menu; Capacitor/native and mobile-device web
+  hide it.
+- App drawer profile shortcut does not open your profile:
+  tap the connected `Profile` row or the connected avatar in the drawer
+  header; handle/wallet text and level badge are not navigation controls.
 - `App Wallets` row is missing:
   it appears only when app-wallet support is available.
 - Subscription rows are missing on iOS web:
   `Subscriptions Report`, `Open Data > Meme Subscriptions`, and
   `About > Subscriptions` are shown only for `US` country context.
 - Search shortcut does nothing:
-  only `⌘K` is wired where search triggers are mounted; `Ctrl+K` is not wired.
+  use `⌘K` where search triggers are mounted; `Ctrl+K` works only from the
+  desktop-web sidebar path.
 - Search returns nothing too early:
   site-wide search starts at 3+ characters; in-wave search starts at 2+.
 - `Try Again` is missing in search errors:
@@ -61,9 +74,12 @@ handoff does not behave as expected.
   by query change or reopen.
 - `In this Wave` tab is missing:
   it appears only when search opens with active wave context.
-- Share modal `Share Connection` is missing or empty:
+- Share modal `Connection` is missing or empty:
   it depends on authenticated session state; share payload requires refresh
   token plus wallet address.
+- Sidebar avatar switches accounts instead of opening the menu:
+  expected when you activate it twice quickly and at least two connected
+  accounts are available; use a single activate to open the menu.
 - App bottom navigation is hidden:
   dismiss keyboard, close single-drop view (`?drop=...`), and finish inline
   drop edit mode.
@@ -91,7 +107,8 @@ handoff does not behave as expected.
 
 - If route switching stalls, jump to a stable root and retry:
   `/`, `/waves`, `/messages`, `/notifications`, or `/network`.
-- If a stale bookmark points to `/discover`, restart from `/` or `/waves`.
+- If `/discover` is blank after refresh, retry from `/` or `/waves` to confirm
+  whether discovery data is empty or filtered out.
 - If a drop stays stuck open, use app-header `Back` once to clear `drop` state.
 - If wave/message context looks stale, go to `/waves` or `/messages` root, then
   reopen the target thread.
@@ -122,6 +139,7 @@ handoff does not behave as expected.
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
+- [Share Modal](feature-share-modal.md)
 - [Back Button Behavior](feature-back-button.md)
 - [Mobile Pull-to-Refresh Behavior](feature-mobile-pull-to-refresh.md)
 - [Mobile App Landing Page](feature-mobile-app-landing.md)

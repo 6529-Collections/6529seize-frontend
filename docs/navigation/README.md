@@ -15,7 +15,7 @@ and mobile app layouts.
 
 ## Route Coverage
 
-- Primary section switching: `/`, `/waves`, `/messages`,
+- Primary section switching: `/`, `/discover`, `/waves`, `/messages`,
   `/network`, `/the-memes`, `/notifications`, and connected profile routes
   (`/{normalized-handle}` with wallet-address fallback).
 - Secondary jumps: `/network/*`, `/nft-activity`, `/meme-calendar`,
@@ -28,12 +28,12 @@ and mobile app layouts.
 - [Web Sidebar Navigation](feature-sidebar-navigation.md): web route switching
   from the desktop rail and overlay sidebar modes on narrow web layouts.
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): app primary
-  tabs for `Profile`, `Waves`, `Messages`, `Home`, `Network`, `Collections`,
-  and `Notifications`; disconnected profile taps open wallet connect, and
-  connected profile taps route to the active profile slug.
+  tabs for `Discovery`, `Waves`, `Messages`, `Home`, `Network`,
+  `Collections`, and `Notifications`.
 - [App Sidebar Menu](feature-app-sidebar-menu.md): app drawer with direct rows
-  (connected `Profile`), grouped links (`Network`, `Tools`,
-  `About`), and footer account actions.
+  for connected `Profile` and `Discovery`, a connected profile-avatar
+  shortcut, grouped links (`Network`, `Tools`, `About`), and footer account
+  actions.
 
 ### Shared Shell Controls
 
@@ -44,7 +44,9 @@ and mobile app layouts.
 - [Back Button Behavior](feature-back-button.md): create-route, wave/drop, and
   history-aware back behavior.
 - [Wallet and Account Controls](feature-wallet-account-controls.md):
-  connect, disconnect, switch account, and proxy/account actions.
+  connect, disconnect, share, and proxy/account actions.
+- [Share Modal](feature-share-modal.md): desktop-web QR/deep-link sharing for
+  current routes, authenticated connection handoff, and 6529 app targets.
 - [Internal Link Navigation](feature-internal-link-navigation.md): internal
   route links, hash anchors, and drop-content link behavior.
 

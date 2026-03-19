@@ -6,7 +6,8 @@ Use this area when a drop contains URLs and you need to know:
 
 - when links render as cards vs plain links
 - which provider card is used for a URL
-- when `Hide link previews` and `Show link previews` are available
+- when `Hide link previews` is available and where hidden previews can be
+  restored
 
 This area covers external/provider previews and preview visibility controls.
 Internal Seize embed cards (wave/group/drop/quote) are documented in
@@ -20,13 +21,15 @@ Internal Seize embed cards (wave/group/drop/quote) are documented in
 - home-style preview variants inside wave leaderboard card content
 
 Preview toggle actions are available in wave and direct-message thread drops.
-Home-style variants suppress side-action controls; if an authored drop is already
-hidden, one inline `Show link previews` action can still appear.
+Preview cards can expose `Hide link previews`, and desktop thread `More` menus
+can expose `Restore link previews` after a drop is hidden. Home-style variants
+suppress those controls.
 
 ## Features
 
 - [Wave Drop Link Preview Toggle](feature-link-preview-toggle.md): author-only
-  hide/show controls for link previews on a drop.
+  hide controls on preview cards and desktop restore action for hidden
+  previews.
 - [Wave Drop External Link Previews](feature-external-link-previews.md):
   generic metadata cards for supported HTTP(S) links.
 - [Wave Drop YouTube Link Previews](feature-youtube-link-previews.md):

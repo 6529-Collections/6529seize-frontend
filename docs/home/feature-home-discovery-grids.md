@@ -76,6 +76,9 @@ why a section can disappear.
 
 - `Boosted Drops` has no `View all` action on the homepage.
 - `Most active waves` is capped to six cards on home.
+- The dedicated `/discover` route reuses the active-wave card surface with up
+  to 20 results, no subtitle, no footer link, and backend exclude-followed
+  filtering.
 - Boosted ranking uses a recent boost window and updates while the page stays open.
 
 ## Related Pages
@@ -83,6 +86,7 @@ why a section can disappear.
 - [Home Index](README.md)
 - [Home Latest Drop and Coming Up](feature-home-latest-drop-and-coming-up.md)
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
+- [Wave Discover Cards](../waves/discovery/feature-discover-cards.md)
 - [Waves Index](../waves/README.md)
 - [Wave Navigation and Posting](../waves/troubleshooting-wave-navigation-and-posting.md)
 - [Docs Home](../README.md)

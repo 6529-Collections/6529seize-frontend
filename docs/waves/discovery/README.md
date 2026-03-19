@@ -1,38 +1,36 @@
-# Wave Discovery (Legacy Route Removed)
+# Wave Discovery
 
 ## Overview
 
-The dedicated wave discovery route (`/discover`) has been removed.
+Use this subarea for the dedicated wave discovery route and its shared card
+surfaces.
 
-Use current wave entry points instead:
-
-- home wave cards on `/`
-- waves list and thread routes on `/waves` and `/waves/{waveId}`
-- direct-message thread routes on `/messages` and `/messages?wave={waveId}`
+- Dedicated discovery route: `/discover`
+- Related wave entry points still exist on `/`, `/waves`, and
+  `/messages?wave={waveId}`
 
 ## Route Coverage
 
-- Legacy route removed: `/discover`
+- Active discovery route: `/discover`
 - Current wave entry routes: `/`, `/waves`, `/waves/{waveId}`
 - Current direct-message entry routes: `/messages`, `/messages?wave={waveId}`
 
 ## Query Coverage
 
-- Legacy discover filter state (`identity=...`) is no longer active because the
-  `/discover` route is removed.
-- Current wave/direct-message route query behavior is documented in
+- `/discover` does not expose route-level discovery filters.
+- The route requests wave-discovery data with backend filtering; current wave
+  and direct-message query behavior stays documented in
   [Waves Index](../README.md).
 
 ## Ownership
 
-- This subarea now tracks legacy discover-route behavior and replacement
-  navigation paths.
-- Active wave discovery behavior is documented in Home and Waves area pages.
+- This subarea owns `/discover` route behavior and discovery-card specifics.
+- Home-owned discovery summaries stay documented in Home pages.
 
 ## Features
 
-- [Wave Discover Sections and Search (Legacy Route Removed)](feature-discover-sections-and-search.md)
-- [Wave Discover Cards (Legacy Route Removed)](feature-discover-cards.md)
+- [Wave Discover Route and Navigation](feature-discover-sections-and-search.md)
+- [Wave Discover Cards](feature-discover-cards.md)
 
 ## Flows
 

@@ -30,9 +30,14 @@ Use leaderboard header filters to:
 ## Control Behavior
 
 - `Sort` is always visible in the leaderboard header.
+- On wider layouts, `Sort` uses compact pill tabs instead of a dropdown.
 - `Sort` options are:
   - all waves: `Current Vote`, `Projected Vote`, `Hot`, `Newest`
   - curation waves only: `Price`
+- In tab layout, the active sort stays filled and brighter than the inactive
+  options so the current mode remains easy to scan.
+- Inactive sort tabs keep a darker filled background and brighten on hover
+  before selection.
 - `Group` is shown only when curation groups load for that wave.
 - `Group` options always include `All submissions` plus every loaded curation
   group.

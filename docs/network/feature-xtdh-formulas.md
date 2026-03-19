@@ -10,12 +10,12 @@ received from grants, granted out, and added to your total.
 ## Location in the Site
 
 - Route: `/network/xtdh`
-- Sidebar path (web and app): `Network -> xTDH`
+- This rules reference is not in the current web/app sidebar route list.
 
 ## Entry Points
 
 - Open `/network/xtdh` directly.
-- Open `Network -> xTDH` from the sidebar.
+- Follow a direct link from related xTDH docs or troubleshooting pages.
 
 ## What Users Read on This Page
 
@@ -61,7 +61,7 @@ received from grants, granted out, and added to your total.
 
 ## Failure and Recovery
 
-- If `/network/xtdh` fails, retry from `Network -> xTDH` or open the URL directly.
+- If `/network/xtdh` fails, reopen the URL directly.
 - For TDH baseline rules, open `/network/tdh`.
 - For live network-wide xTDH data, open `/xtdh`.
 

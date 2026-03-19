@@ -15,7 +15,6 @@ The profile header appears on profile routes under `/{user}` and shows:
 - `/{user}/brain`
 - `/{user}/collected`
 - `/{user}/xtdh`
-- `/{user}/stats`
 - `/{user}/subscriptions`
 - `/{user}/proxy`
 
@@ -55,8 +54,13 @@ The profile header appears on profile routes under `/{user}` and shows:
    - own profile with handle and no active proxy: edit banner, profile picture,
      name, classification, and About
    - other profile, signed-in viewer with handle, and target profile with
-     handle: follow button
-   - after follow, if target has a primary wallet: direct-message button
+     handle: follow/unfollow button
+   - if that target also has a primary wallet: direct-message button appears
+     beside follow/unfollow immediately; it is not gated on existing follow
+     state
+   - while direct-message creation is pending, the paper-plane button shows a
+     loader, stays disabled, and ignores repeated clicks until the request
+     settles
 
 ## Common Scenarios
 
@@ -81,7 +85,8 @@ The profile header appears on profile routes under `/{user}` and shows:
 - If header-side fetches fail (BIO statement, profile-enabled date, followers
   count), the profile route still loads and missing header fields are omitted.
 - Followers count falls back to `0` if the count request fails.
-- If direct-message creation fails, users get an error toast and can retry.
+- If direct-message creation fails, users get an error toast, the paper-plane
+  button returns to its idle state, and they can retry.
 - If profile header edits fail, users get a toast or inline error and can retry.
 - If the profile cannot be resolved, users see the shared not-found screen:
   - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md).
@@ -89,8 +94,8 @@ The profile header appears on profile routes under `/{user}` and shows:
 ## Limitations / Notes
 
 - Followers count in the header is a load-time snapshot.
-- Direct-message action requires existing follow state and a target primary
-  wallet.
+- Direct-message action requires a signed-in viewer with a handle, a viewed
+  profile with a handle, and a target primary wallet.
 - Artist badge and modal tabs depend on loaded
   `active_main_stage_submission_ids` and `winner_main_stage_drop_ids`.
 

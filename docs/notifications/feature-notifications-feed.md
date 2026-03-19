@@ -11,12 +11,13 @@ with cause filters, grouped reactions, and inline drop previews.
 ## Location in the Site
 
 - Route: `/notifications`.
-- Reached from sidebar `Notifications`.
+- Reached from the connected-only web sidebar `Notifications` row near the
+  account area, or from app notifications navigation.
 - Opened directly from URL, including `/notifications?reload=true`.
 
 ## Entry Points
 
-- Select `Notifications` in app navigation.
+- Select `Notifications` from the connected web sidebar row or app navigation.
 - Open `/notifications` directly.
 - Open `/notifications?reload=true` to force one refetch/read pass.
 

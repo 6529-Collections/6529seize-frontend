@@ -22,7 +22,8 @@ reduce layout shift while loading.
 
 - Open a published drop with at least one eligible external URL.
 - Publish a new drop that includes an eligible external URL.
-- Use `Show link previews` on a hidden-preview drop to restore cards.
+- If previews are hidden on your thread drop, use desktop `More` >
+  `Restore link previews` to restore cards.
 
 ## User Journey
 

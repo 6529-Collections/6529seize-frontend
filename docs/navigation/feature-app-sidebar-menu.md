@@ -3,8 +3,8 @@
 ## Overview
 
 In app layout, the top-left menu/avatar button opens a left drawer for
-secondary route jumps and account actions. Primary section switching stays in
-bottom navigation.
+direct profile/discovery jumps, grouped secondary routes, and account actions.
+Primary section switching stays in bottom navigation.
 Connected account surfaces in this drawer can show unread notification
 indicators (dot/count badges) to help account switching.
 
@@ -12,7 +12,9 @@ indicators (dot/count badges) to help account switching.
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Direct rows: connected-only `Profile`.
+- Direct rows: connected `Profile` and `Discovery`.
+- Drawer header: connected profile avatar shortcut to
+  `/{normalized-handle}` with `/{walletAddress}` fallback.
 - Collapsible groups: `Network`, `Tools`, `About`.
 - Footer actions: `Scan QR Code` (Capacitor + scanner support), then either
   `Connect` (disconnected) or connected actions (`Push Notifications`,
@@ -22,6 +24,7 @@ indicators (dot/count badges) to help account switching.
 
 - Open an app-layout route where the top-left control is menu/avatar.
 - Tap the menu/avatar button.
+- Choose a direct row, the connected avatar shortcut, or a grouped route.
 - Close with close button, backdrop tap, right-to-left swipe, or route
   selection.
 
@@ -30,20 +33,27 @@ indicators (dot/count badges) to help account switching.
 1. Open the menu/avatar button from the app header.
 2. Drawer opens from the left over the current route.
 3. Header shows:
-   - connected: profile card (avatar, handle/wallet label, level, stats, and
-     unread count badge when present)
+   - connected: profile card (profile-avatar shortcut, handle/wallet label,
+     level, stats, and unread count badge when present)
    - disconnected: `6529` logo linking to `/`
-4. Choose connected `Profile`, or expand `Network`, `Tools`, or `About` and
-   choose a nested route.
-5. Drawer closes and route navigation runs.
-6. Use footer actions for QR scan, connect/session actions, or push settings.
+4. Drawer body shows direct rows plus grouped sections:
+   - connected `Profile` row
+   - `Discovery`
+   - `Network`, `Tools`, `About`
+5. Tap the connected profile avatar or `Profile` row to open your own profile
+   route (`/{normalized-handle}` with `/{walletAddress}` fallback), tap
+   `Discovery` for `/discover`, or expand grouped sections for nested routes.
+6. Drawer closes and route navigation runs.
+7. Use footer actions for QR scan, connect/session actions, or push settings.
 
 ## Common Scenarios
 
 - Open network routes:
   `/network`, `/network/activity`, `/network/groups`, `/nft-activity`,
-  `/meme-calendar`, `/network/tdh`, `/network/health`, `/network/definitions`,
-  `/network/levels`, `/network/health/network-tdh`.
+  `/meme-calendar`, `/network/tdh`, `/xtdh`, `/network/health`,
+  `/network/definitions`, `/network/levels`, `/network/health/network-tdh`.
+- Open `Discovery`:
+  use the direct row to route into `/discover`.
 - Open tools routes:
   `/delegation/delegation-center`, `/delegation/wallet-architecture`,
   `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`,
@@ -58,7 +68,8 @@ indicators (dot/count badges) to help account switching.
   `/about/data-decentralization`, `/about/ens`, `/about/license`,
   `/about/release-notes`.
 - Open connected profile shortcut:
-  profile route resolves handle-first, then wallet-address fallback.
+  tap either the drawer-header avatar or the direct `Profile` row; both
+  resolve `/{normalized-handle}` first, then `/{walletAddress}` fallback.
 - Use `Scan QR Code` for `https://6529.io/*` links and `mobile6529://` deep
   links (`navigate/*` and `share-connection` scopes).
 - Open `Push Notifications`, review per-device toggles, then save changes.
@@ -69,7 +80,12 @@ indicators (dot/count badges) to help account switching.
 
 - Menu/avatar is replaced by `Back` on create routes, active-wave contexts, and
   profile routes with valid in-app history.
-- `Profile` row is hidden when disconnected.
+- Connected profile shortcut is avatar-only; handle/wallet text and level badge
+  do not navigate.
+- `Profile` row is unavailable when disconnected.
+- Discovery stays available even while disconnected.
+- Profile avatar shortcut is unavailable when disconnected because the header
+  shows the `6529` home link instead.
 - `Network`, `Tools`, and `About` are collapsible; section headers inside them
   are labels, not links.
 - `App Wallets` is prepended inside `Tools` only when app-wallet support is
@@ -84,6 +100,8 @@ indicators (dot/count badges) to help account switching.
 
 - If drawer state looks stuck, close with backdrop/icon/swipe and reopen.
 - If route change does not apply, reopen the drawer and select the route again.
+- If `Profile` is missing, connect wallet first or use the header avatar once a
+  connected profile is available.
 - If QR scan fails or shows `Invalid QR code`, rescan, update app build if
   needed, or navigate manually.
 - If push settings fail to load/save, close and reopen `Push Notifications`, then
@@ -96,7 +114,8 @@ indicators (dot/count badges) to help account switching.
 
 - App-sidebar behavior is app-layout only.
 - Primary section switching stays in
-  [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
+  [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md), even though
+  `Discovery` and `Profile` are also accessible here.
 - Search stays in the header search control, not in this drawer.
 - Session/proxy details are owned by
   [Wallet and Account Controls](feature-wallet-account-controls.md).

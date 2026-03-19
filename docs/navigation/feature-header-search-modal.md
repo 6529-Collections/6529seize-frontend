@@ -20,6 +20,7 @@ It supports:
 - Click `Search` in desktop sidebar navigation.
 - Click a header search button where available.
 - Press `⌘K` when a search trigger is mounted.
+- On desktop web with sidebar navigation mounted, `Ctrl+K` also opens search.
 
 ## User Journey
 
@@ -36,6 +37,9 @@ It supports:
 - Site-wide browse:
   - In `All`, each category shows a 3-result preview.
   - `View all <Category>` opens the full list for that category.
+- Pages catalog:
+  - Page results can include top-level navigation destinations such as
+    `Discovery` (`/discover`), subject to the current route catalog.
 - Category persistence:
   - Selected category is remembered between openings.
   - `Clear` resets category to `All`.
@@ -78,7 +82,9 @@ It supports:
 ## Limitations / Notes
 
 - Search is modal-only; there is no dedicated `/search` route.
-- Shortcut is `⌘K`; `Ctrl+K` is not wired.
+- `⌘K` is available from mounted search triggers.
+- `Ctrl+K` is supported from the desktop-web sidebar path only; header search
+  buttons do not guarantee that shortcut.
 - `Pages` results come from navigation entries, not full-page text content.
 - Page results change with runtime route visibility (for example wallet/device/region-gated entries).
 

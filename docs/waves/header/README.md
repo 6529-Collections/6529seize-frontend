@@ -7,7 +7,7 @@ Use this area for wave-header behavior in `About` surfaces:
 - follow and notification controls
 - wave metadata and description entry
 - header follower-list switch
-- pin, rename, picture edit, and author-only options
+- pin, non-DM rename/picture edit, and author-only options
 - chat/gallery view toggle controls in active wave headers
 
 ## Features
@@ -20,7 +20,7 @@ Use this area for wave-header behavior in `About` surfaces:
 - [Wave Link Share and Copy](feature-wave-link-share-copy.md): share/copy wave
   link action behavior across supported header surfaces.
 - [Update Wave Picture](feature-wave-picture-edit.md): avatar-based picture
-  update flow, file rules, and error handling.
+  update flow, file rules, and error handling for editable non-DM waves.
 - [Chat and Gallery View Toggle](feature-chat-gallery-toggle.md): switch chat
   content between `Chat` and `Gallery` in supported waves.
 

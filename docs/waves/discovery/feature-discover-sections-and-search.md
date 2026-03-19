@@ -1,71 +1,87 @@
-# Wave Discover Sections and Search (Legacy Route Removed)
+# Wave Discover Route and Navigation
 
 ## Overview
 
-The `/discover` route and its section/search modes were removed.
+`/discover` is a dedicated discovery route for active waves.
 
-Legacy discover-specific controls are no longer active:
+- It renders one discovery grid with the route title
+  `Active discussions you are not yet following`.
+- It reuses the same wave-card surface as home discovery cards, but expands the
+  list to 20 results.
+- It does not expose local section tabs, a route-local search mode, or a
+  `View all` footer action.
 
-- section mode (`Latest`, `Most Followed`, and related sections)
-- discover-local search mode (`Search waves` and `By Identity` on `/discover`)
-- discover-header actions (`My Waves`, `Create Wave`, `Create DM`)
+Navigation catalogs expose `Discovery` as a first-class destination on web
+sidebar, app drawer, mobile bottom navigation, and search `Pages` results.
 
 ## Location in the Site
 
-- Legacy route removed: `/discover`
-- Current replacement routes:
-  - `/` for home wave cards
-  - `/waves` and `/messages` for list and thread navigation
+- Dedicated route: `/discover`
+- Related navigation surfaces:
+  - web sidebar direct row: `Discovery`
+  - app drawer direct row: `Discovery`
+  - app bottom tab: `Discovery`
+  - search `Pages` result: `Discovery`
 
 ## Access and Availability
 
-- Discover-route access checks are no longer applicable because `/discover`
-  no longer exists.
-- Existing auth/profile rules for `/waves` and `/messages` continue to apply.
+- `/discover` has no dedicated wallet gate.
+- The route fetch requests include `exclude_followed=true` and are intended to
+  prioritize waves the current session is not already following.
+- Existing auth/profile rules for `/waves` and `/messages` still apply after
+  you open a thread from discovery.
 
 ## Entry Points
 
-- Open `/` to discover active waves from home sections.
-- Open `/waves` to browse waves list entries.
+- Open `/discover` directly.
+- Use `Discovery` in navigation surfaces.
 - Use [Header Search Modal](../../navigation/feature-header-search-modal.md)
-  for cross-area search.
+  and open the `Discovery` page result.
 
 ## User Journey
 
-1. Start from `/` or `/waves`.
-2. Select a wave entry to open `/waves/{waveId}` or `/messages?wave={waveId}`.
-3. Continue thread interaction in wave/message routes.
+1. Open `/discover` from a direct URL or a shell navigation entry.
+2. While data loads, the route renders discovery-card skeletons.
+3. When data resolves, the page shows up to 20 active-wave cards.
+4. Select a card to open `/waves/{waveId}` or `/messages?wave={waveId}` for
+   direct-message waves.
+5. Continue thread interaction in wave/message routes.
 
 ## Common Scenarios
 
-- Discover active waves from home (`Boosted Drops`, `Most active waves`).
-- Use `/waves` as the canonical non-DM list route.
-- Use `/messages` as the canonical DM list route.
-- Navigation controls no longer include a `Discover` destination; use `Waves`
-  or `Messages` entries plus home discovery cards.
+- Open a dedicated discovery view that is broader than the six-card home grid.
+- Browse active waves outside your already-followed set.
+- Use shell navigation or search to return to `/discover` without going through
+  `/` or `/waves`.
 
 ## Edge Cases
 
-- Stale bookmarks to `/discover` no longer open discover sections/search.
-- Legacy `identity` discover-query behavior is not active after route removal.
-- Search/page catalogs should not return `/discover` as an active destination.
+- If discovery fetch fails or returns no waves, the route can render as a blank
+  page body because the shared section hides on empty/error.
+- Cards still route to `/messages?wave={waveId}` for direct-message waves.
+- `/discover` does not expose legacy `identity` filters, section tabs, or local
+  search controls.
+- The route does not render a `View all` footer link because it is already the
+  expanded discovery surface.
 
 ## Failure and Recovery
 
-- If a stale link points to `/discover`, retry from `/` or `/waves`.
+- If `/discover` looks blank, refresh the route to rerun discovery fetches.
+- If discovery still looks empty, cross-check active wave availability from `/`
+  or `/waves`.
 - If thread routing fails, open `/waves` or `/messages` first and re-enter the
   target wave.
 
 ## Limitations / Notes
 
-- This page is retained as a legacy reference after discover-route removal.
-- Current discovery and search behavior is owned by Home, Waves, and Navigation
-  docs.
+- `/discover` is a single-surface route, not a multi-section discovery hub.
+- Card rendering behavior is shared with Home discovery and documented in the
+  paired card page.
 
 ## Related Pages
 
 - [Wave Discovery Index](README.md)
-- [Wave Discover Cards (Legacy Route Removed)](feature-discover-cards.md)
+- [Wave Discover Cards](feature-discover-cards.md)
 - [Wave Participation Flow](../flow-wave-participation.md)
 - [Waves Index](../README.md)
 - [Home Boosted Drops and Most Active Waves](../../home/feature-home-discovery-grids.md)

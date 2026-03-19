@@ -1,56 +1,67 @@
-# Wave Discover Cards (Legacy Route Removed)
+# Wave Discover Cards
 
 ## Overview
 
-The dedicated discover-card grids on `/discover` were removed with the
-`/discover` route.
+`/discover` renders a dedicated grid of active-wave cards.
 
-Current wave-entry cards are documented in:
+- It uses the same card component as home `Most active waves`.
+- The dedicated route expands the list to 20 cards.
+- The route requests discovery data with `exclude_followed=true`.
+- There is no `View all` footer because `/discover` is already the expanded
+  surface.
 
-- [Home Boosted Drops and Most Active Waves](../../home/feature-home-discovery-grids.md)
-- [Wave List Navigation](../sidebars/feature-wave-list-navigation.md)
+Use this page to verify card loading, routing, and route-specific differences
+from home discovery.
 
 ## Location in the Site
 
-- Legacy route removed: `/discover`
-- Current non-DM wave destination: `/waves/{waveId}`
-- Current DM wave destination: `/messages?wave={waveId}`
+- Discovery route: `/discover`
+- Non-DM card destination: `/waves/{waveId}`
+- Direct-message card destination: `/messages?wave={waveId}`
+- Home comparison surface: `/`
 
 ## Entry Points
 
-- Open `/` and use home wave cards (`Boosted Drops`, `Most active waves`).
-- Open `/waves` and select a wave from the waves list.
+- Open `/discover`.
+- Open `Discovery` from web/app shell navigation.
 
 ## User Journey
 
-1. Open a current wave-entry surface (`/` home cards or `/waves` list).
-2. Select a wave entry.
-3. The app opens `/waves/{waveId}` for non-DM waves or
+1. Open `/discover`.
+2. While loading, the route renders discovery skeleton cards.
+3. When data resolves, up to 20 cards render in a responsive grid.
+4. Select a wave entry.
+5. The app opens `/waves/{waveId}` for non-DM waves or
    `/messages?wave={waveId}` for DM waves.
 
 ## Common Scenarios
 
-- Open a home card to jump directly into wave chat context.
+- Open a discovery card to jump directly into wave chat context.
 - Open a DM-targeting card to jump into `/messages?wave={waveId}`.
-- Use wave list rows in `/waves` to enter active threads.
+- Use `/discover` as the larger browse surface when home six-card discovery is
+  not enough.
 
 ## Edge Cases
 
-- `/discover` no longer hosts card grids.
-- Auth/profile requirements still apply to `/waves` and `/messages` content.
+- Discovery cards share the same metadata, preview, and route mapping as home
+  `Most active waves` cards.
+- If preview data for a wave is unavailable, the card still opens the target
+  wave route.
+- Auth/profile requirements still apply after entering `/waves` or `/messages`
+  content from a card.
 - DM waves continue to use query-style thread routes (`/messages?wave={waveId}`).
 
 ## Failure and Recovery
 
+- If discovery cards never appear, refresh `/discover` to rerun the query.
 - If a wave entry route fails, retry from `/waves` or `/messages` root routes.
-- If a stale shared link points to `/discover`, navigate using `/` or `/waves`
-  instead.
+- If the dedicated discovery page is empty, compare against home discovery on
+  `/` to confirm whether the data source is empty or filtered.
 
 ## Limitations / Notes
 
-- This page is a legacy reference for removed `/discover` card surfaces.
-- Active card behavior should be documented in the current owning pages linked
-  above.
+- `/discover` intentionally omits the home subtitle and footer link.
+- Home still caps its `Most active waves` section to six cards.
 
 ## Related Pages
 

@@ -13,7 +13,7 @@ Users can:
 - Open and close followers from the `Joined` count
 - Pin or unpin the wave
 - Open the wave name link
-- Rename the wave and update the picture (when edit-eligible)
+- Rename the wave and update the picture (when edit-eligible on non-DM waves)
 - Open author options (`Mute` / `Unmute`, `Delete`)
 
 ## Location in the Site
@@ -34,7 +34,7 @@ Users can:
 
 - Anyone viewing the header can open description and followers.
 - `Join`, notification settings, and pin require a connected non-proxy profile.
-- Rename and picture edit require `canEditWave` eligibility:
+- Rename and picture edit require a non-DM wave plus `canEditWave` eligibility:
   author or admin-eligible, connected, and non-proxy.
 - Owner options menu (`Mute` / `Unmute`, `Delete`) is only shown when the connected
   handle matches the wave author.
@@ -51,7 +51,8 @@ Users can:
 8. Use `Back` in followers to return to `About`.
 9. Use pin to keep the wave in pinned lists (up to 20 total).
 10. Open the wave name to go to `/waves/{waveId}`.
-11. If edit-eligible, use pencil actions to rename or update picture.
+11. If edit-eligible on a non-DM wave, use pencil actions to rename or update
+    picture.
 12. If author, open `⋮` for `Mute` / `Unmute` and `Delete`.
 13. For `Delete`, confirm in modal. Success redirects to `/waves`.
 
@@ -61,6 +62,8 @@ Users can:
 - Open followers, then use `Back` or `Joined` again to return to `About`.
 - Pin active waves for faster return.
 - Rename a wave without leaving the thread (`Save` stays disabled until the name changes).
+- On direct-message waves, the name link stays available but rename/picture
+  pencils stay hidden.
 - Open the canonical wave route from the header name link.
 - Delete an author-owned wave from the same panel.
 
@@ -71,6 +74,8 @@ Users can:
 - Notification controls render only when the wave is followed.
 - `All` notifications can be disabled for high-follower waves.
 - When muted, notification mode buttons are replaced by a `Muted` control.
+- Direct-message waves never show rename or picture-edit pencils, even when the
+  connected user would otherwise pass `canEditWave`.
 - Pin attempts beyond 20 are blocked and show an error toast.
 - Controls show loading states and disable repeat clicks while requests are running.
 - Pencil edit controls are hover-revealed and may not appear on touch-only web layouts.
@@ -96,6 +101,8 @@ Users can:
   [Pinned Wave Controls](../sidebars/feature-pinned-wave-controls.md).
 - Direct-message route behavior is owned by
   [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md).
+- Shared avatar picture/collage fallback rules are owned by
+  [Wave Avatar Fallbacks](../../shared/feature-wave-avatar-fallbacks.md).
 - Wave header controls vary by role and active session state.
 
 ## Related Pages
@@ -104,6 +111,7 @@ Users can:
 - [Wave Description Preview Popover](feature-wave-description-preview-popover.md)
 - [Update Wave Picture](feature-wave-picture-edit.md)
 - [Chat and Gallery View Toggle](feature-chat-gallery-toggle.md)
+- [Wave Avatar Fallbacks](../../shared/feature-wave-avatar-fallbacks.md)
 - [Wave Notification Controls and Mute Behavior](../sidebars/feature-wave-notification-controls.md)
 - [Pinned Wave Controls](../sidebars/feature-pinned-wave-controls.md)
 - [Wave Right Sidebar Tabs](../sidebars/feature-right-sidebar-tabs.md)

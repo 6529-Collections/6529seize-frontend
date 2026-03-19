@@ -45,7 +45,8 @@ back to the generic external preview flow, then to a plain link if needed.
 
 - Open or publish a drop with one or more supported social URLs.
 - Open existing wave/message drops that already contain supported social URLs.
-- If previews are hidden, use `Show link previews` on the drop.
+- If previews are hidden on your thread drop, use desktop `More` >
+  `Restore link previews`.
 
 ## User Journey
 

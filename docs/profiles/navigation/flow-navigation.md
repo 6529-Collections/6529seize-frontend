@@ -12,7 +12,6 @@ valid across tabs and contexts.
   - `/{user}/brain`
   - `/{user}/collected`
   - `/{user}/xtdh`
-  - `/{user}/stats`
   - `/{user}/subscriptions`
   - `/{user}/proxy`
 - Legacy aliases:
@@ -44,11 +43,13 @@ valid across tabs and contexts.
   - `NIC` and `Rep` -> `/{user}`
   - `Followers` opens a modal and does not change route
 - Renaming your handle keeps you on the same tab path under the new handle URL.
-- Unknown `/{user}/<subroute>` paths (including `/{user}/rep`) do not resolve to a tab route.
+- Unknown `/{user}/<subroute>` paths (including `/{user}/rep` and
+  `/{user}/stats`) do not resolve to a tab route.
 - Missing users and unsupported subroutes show the shared not-found screen.
 
 ## Recovery
 
+- Replace saved `/{user}/stats` links with `/{user}/collected`.
 - Replace saved `/{user}/rep` links with `/{user}` or another supported tab route.
 - If profile loading or redirects fail unexpectedly, refresh and retry.
 - If a profile URL returns not-found, verify handle/wallet and subroute:

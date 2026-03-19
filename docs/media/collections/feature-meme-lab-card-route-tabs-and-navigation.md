@@ -40,8 +40,8 @@ pagination.
    shortcuts (when available).
 7. On `Your Cards`, connect wallet to review ownership summary, transfer
    actions, and wallet transaction history.
-8. On `The Art`, review original media, fullscreen controls, Arweave links, and
-   downloads.
+8. On `The Art`, review original media, fullscreen controls, Arweave
+   links/downloads, and card details for the currently visible slide.
 9. On `Collectors`, review the holder leaderboard.
 10. On `Activity`, filter transaction types, review rows, and paginate.
 11. On `Timeline`, review card history milestones.
@@ -70,6 +70,12 @@ pagination.
 - If card metadata does not resolve for `{id}`, the route can render only the
   page heading, with no inline not-found panel.
 - Previous/next arrows are disabled at the first and last available card index.
+- `The Art` can still open in animated mode when top-level `animation` is
+  blank but metadata provides `animation` or `animation_url`.
+- If only one original media URL resolves, `The Art` shows just that media
+  slide and its matching download/link row.
+- `File Type` and `Dimensions` rows appear only when the active `The Art`
+  slide has usable metadata values.
 - `Activity` can show a loading spinner first, then an empty-state panel when
   no rows are available.
 - `/meme-lab/{id}/distribution` with non-positive or invalid IDs shows the

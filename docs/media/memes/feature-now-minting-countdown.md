@@ -51,9 +51,11 @@ the card’s distribution view.
     panel.
   - `Edition`, `Status`, `Mint price`, and `Floor` row behavior is documented
     in [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md).
-  - The `Edition Details` accordion includes `Mint date`, `File type`,
-    `Dimensions`, `Collection`, `Season`, and a `Distribution Plan` row with a
-    direct link to `/the-memes/{id}/distribution`.
+  - The `Edition Details` accordion always includes `Mint date`,
+    `Collection`, `Season`, and a `Distribution Plan` row with a direct link
+    to `/the-memes/{id}/distribution`.
+  - `File type` and `Dimensions` appear only when the current drop exposes
+    usable media format and dimension metadata.
 - Allowlist phase:
   - Info icon appears beside status
   - Header uses phase-specific labels such as `Phase 0 (Allowlist) Starts In`
@@ -88,6 +90,8 @@ the card’s distribution view.
   If the drop sells out before the scheduled end time, the countdown surface
   stays in place and shows the sold-out status card until end-time status
   changes.
+- If media metadata is missing or blank, `Edition Details` omits `File type`
+  and `Dimensions` instead of showing empty values.
 - At the exact phase start timestamp, the state changes from `Upcoming` to
   `Live`; at the exact phase end timestamp, it leaves the active countdown.
 - During Europe/Athens daylight-saving transitions, UTC/local countdown values

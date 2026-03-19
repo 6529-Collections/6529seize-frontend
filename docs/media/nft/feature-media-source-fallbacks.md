@@ -50,9 +50,15 @@
 ### Standard NFT video surfaces (`NFTVideoRenderer`)
 
 - Default video mode (`showOriginal=false`):
-  `compressed_animation (if present) -> animation -> metadata.animation`.
+  `compressed_animation (if present) -> animation -> metadata.animation -> metadata.animation_url`.
 - Original video mode (`showOriginal=true`, used on `The Art`):
-  `animation -> metadata.animation`.
+  `animation -> metadata.animation -> metadata.animation_url`.
+
+### Dedicated HTML and GLB animation surfaces (`NFTHTMLRenderer`, `NFTModel`)
+
+- Source resolution order is:
+  `animation -> metadata.animation -> metadata.animation_url`.
+- Blank or whitespace-only animation values are skipped before rendering.
 
 ### ReMeme image surfaces (`RememeImage`)
 
@@ -72,6 +78,14 @@
 - If video mode comes from MP4 metadata but `image` is not `.mp4`, fallback
   order is:
   `metadata.animation (ipfs.io form, if present) -> metadata.animation (cf-ipfs gateway, if present)`.
+
+### Arweave gateway retries
+
+- When the current image/video URL is already on a supported Arweave gateway,
+  retry preserves the same asset path/query and rotates across
+  `arweave.net`, `gateway.arweave.net`, `gateway.ar.io`, and `ar-io.net`,
+  skipping duplicate/current hosts.
+- Unsupported long-tail Arweave gateways are not retried automatically.
 
 ## Loading Behavior
 
@@ -95,7 +109,7 @@
 - HTML and GLB animation formats use dedicated iframe/model renderers and do
   not run this image/video fallback chain.
 - Metadata fallback works only when the metadata field exists and has a usable
-  URL.
+  non-blank URL.
 
 ## Related Pages
 

@@ -50,6 +50,8 @@ On `success`, the modal auto-closes after a short delay.
 - `Preview` stays disabled until `Additional Information` is valid.
 - `Submit Artwork` from `Additional Information` stays disabled until the form
   is valid.
+- `Preview` and `Submit Artwork` also stay disabled if any `Additional Information`
+  metadata value exceeds `5000` characters.
 - `Back to Edit` returns to the same draft values.
 - Preview uses temporary drop values (ID/score/rater data) for layout checks.
 - Main preview-card click handlers are inert, so card-body clicks do not open a
@@ -70,8 +72,14 @@ On `success`, the modal auto-closes after a short delay.
 ## Failure and Recovery
 
 - If preview output is wrong, return to edit, update fields, and reopen preview.
+- If metadata goes over `5000` characters, trim the affected
+  `Additional Information` content and retry before reopening preview or
+  submitting.
 - If upload, auth, signing, or API submission fails, the modal keeps current
   draft state and supports retry from the current screen.
+- If submission is attempted with an over-limit metadata payload, the app stops
+  before upload/signing and can show a toast naming the offending metadata
+  sections.
 - Errors are surfaced via toast; `Additional Information` and `Preview` do not
   show detailed per-phase text labels.
 - If no valid media exists, submission is blocked before API post.

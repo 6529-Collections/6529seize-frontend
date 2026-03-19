@@ -16,7 +16,7 @@ Badge state decides which section opens first.
 
 - Profile headers on `/{user}` routes that reuse the shared profile header:
   `/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/xtdh`,
-  `/{user}/stats`, `/{user}/subscriptions`, and `/{user}/proxy`.
+  `/{user}/subscriptions`, and `/{user}/proxy`.
 - Wave and direct-message drop headers:
   `/waves/{waveId}` and `/messages?wave={waveId}`.
 - Single-drop overlays opened with `drop={dropId}` in the current route.

@@ -59,6 +59,11 @@ If the connected profile has a primary wallet, the form pre-fills:
 - `Preview` upload is required for `Video`, `HTML`, and `GLB` submissions
   (`image/*`, including GIF).
 - `Promo Video` upload is optional and appears for `HTML`/`GLB` submissions.
+- Near-limit metadata counters appear once a stored value reaches
+  `4500/5000` characters.
+- Counters can surface for `Airdrop Distribution`, `Payment`,
+  `Allowlist Configuration`, `Supporting Media`, `About the Artist`, and
+  `Artwork Commentary`.
 
 ## Validation and Gating
 
@@ -78,6 +83,10 @@ If the connected profile has a primary wallet, the form pre-fills:
 - Required text checks:
   - `About the Artist` must be non-empty
   - `Artwork Commentary` must be non-empty
+- Metadata size checks:
+  - each stored metadata value must stay at or below `5000` characters
+  - `About the Artist` and `Artwork Commentary` show inline over-limit errors
+  - any over-limit metadata value blocks `Preview` and `Submit Artwork`
 - Media checks:
   - required `Preview` upload must exist for `Video`/`HTML`/`GLB`
 
@@ -103,8 +112,13 @@ If the connected profile has a primary wallet, the form pre-fills:
 ## Failure and Recovery
 
 - Missing required fields keep `Preview` and `Submit Artwork` disabled.
+- If a metadata counter goes over limit, shorten the affected text or remove
+  extra airdrop, allowlist, or media data until the section drops back under
+  `5000`.
 - Failed supplemental uploads can be removed and retried.
 - Submission/signing/API errors keep modal state open so users can retry.
+- If an over-limit payload still reaches submission, the app shows an error
+  toast naming the offending metadata sections and does not continue.
 - If stored `additional_media` JSON is malformed, preview/promo/media sections
   do not render.
 - `About the Artist` and `Artwork Commentary` can still render because they are
@@ -116,6 +130,9 @@ If the connected profile has a primary wallet, the form pre-fills:
 - ENS input is accepted in payment/airdrop fields, but unresolved ENS names are
   treated as invalid.
 - Allowlist contract input does not perform ENS resolution.
+- For `Airdrop Distribution`, `Payment`, `Allowlist Configuration`, and
+  `Supporting Media`, the counter reflects that section's stored metadata value
+  rather than a single visible text field.
 
 ## Related Pages
 

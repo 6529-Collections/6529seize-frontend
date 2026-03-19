@@ -7,7 +7,8 @@ This subarea owns profile URL navigation under `/{user}`.
 It covers:
 
 - canonical handle/wallet redirects and query carry-over
-- supported tab routes (`/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/xtdh`, `/{user}/stats`, `/{user}/subscriptions`, `/{user}/proxy`)
+- supported tab routes (`/{user}`, `/{user}/brain`, `/{user}/collected`,
+  `/{user}/xtdh`, `/{user}/subscriptions`, `/{user}/proxy`)
 - hidden-tab fallback to the first visible tab
 - legacy aliases (`/{user}/identity`, `/{user}/waves`, `/{user}/groups`, `/{user}/followers`) redirecting to `/{user}`
 - shared header behavior and header edit entry points

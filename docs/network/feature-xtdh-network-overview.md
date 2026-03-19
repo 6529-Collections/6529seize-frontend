@@ -11,9 +11,8 @@ It shows network-wide xTDH stats, then lets users drill down:
 ## Location in the Site
 
 - Route: `/xtdh`
-- Collections dropdown entry: `xTDH` (available on collection routes such as
-  `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`)
-- Mobile navigation treats `/xtdh` as part of `Collections`
+- Sidebar path (web and app): `Network -> xTDH`
+- Mobile navigation treats `/xtdh` as part of `Network`
 
 ## URL State
 
@@ -37,7 +36,7 @@ Notes:
 ## Entry Points
 
 - Open `/xtdh` directly.
-- Open any collection route and choose `xTDH` in the collections dropdown.
+- Open `Network -> xTDH` from the sidebar.
 - Open a saved deep link with `xtdh_received_contract` and sort/group params.
 
 ## User Journey
@@ -74,6 +73,8 @@ Notes:
 ## Edge Cases
 
 - `/xtdh` is a live dashboard. `/network/xtdh` is a static rules page.
+- `/xtdh` stays a top-level route even though navigation groups it under
+  `Network`.
 - Wallet/identity is not required on `/xtdh`; it always runs in ecosystem scope.
 - Search text is local UI state and is not stored in URL.
 - Selected token and selected grant are local UI state and reset on refresh.

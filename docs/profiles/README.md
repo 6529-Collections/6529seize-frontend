@@ -14,7 +14,9 @@ Coverage includes:
 ## Features
 
 - [Navigation](navigation/README.md): route resolution, tab visibility, canonical-handle redirects, legacy alias redirects, and header behavior.
-- [Tabs](tabs/README.md): Identity (`Rep` + `NIC`), Brain, Collected, xTDH, Stats, Subscriptions, and Proxy tab behavior.
+- [Tabs](tabs/README.md): Identity (`Rep` + `NIC`), Brain, Collected
+  (including integrated stats/details), xTDH, Subscriptions, and Proxy tab
+  behavior.
 - [About](about/README.md): public `/about/primary-address` route behavior, table states, and row-link expectations.
 
 ## Flows

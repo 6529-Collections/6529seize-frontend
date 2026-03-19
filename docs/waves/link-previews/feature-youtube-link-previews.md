@@ -37,7 +37,8 @@ Links that do not match these rules stay regular links.
 - Open or publish a drop that contains a supported YouTube URL.
 - Open a shared drop route where markdown contains a supported YouTube URL.
 - Open a boosted card on `/` where the first detected preview URL is supported.
-- If previews are hidden for your drop, use `Show link previews` when available.
+- If previews are hidden on your thread drop, use desktop `More` >
+  `Restore link previews` when available.
 
 ## User Journey
 
@@ -60,8 +61,8 @@ Links that do not match these rules stay regular links.
 - YouTube subdomains are supported (for example `music.youtube.com`).
 - If previews are hidden for a drop, YouTube URLs stay plain until previews are
   shown again.
-- Hidden drops can show one inline `Show link previews` action beside the first
-  hidden link.
+- Hidden previews can be restored from the desktop `More` menu on eligible
+  thread drops.
 - Boosted cards on `/` attempt preview rendering from the first detected URL in
   drop text.
 

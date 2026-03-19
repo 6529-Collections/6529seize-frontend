@@ -85,4 +85,4 @@ All archived versions use this combination model:
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [Network Definitions](feature-network-definitions.md)
 - [Network Routes and Health Troubleshooting](troubleshooting-network-routes-and-health.md)
-- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
+- [Collected Tab, Stats Summary, and Transfer Mode](../profiles/tabs/feature-collected-tab.md)

@@ -48,7 +48,8 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 - Inside list items, `Enter` keeps list editing behavior.
 - In headings, `Shift+Enter` continues in a paragraph instead of extending the
   heading.
-- Missing required metadata or media blocks `Enter` submission.
+- In `Drop` mode, missing required metadata or media blocks `Enter`
+  submission.
 - If there is no submit-ready content, `Enter` does not submit.
 - Mobile web and Capacitor disable Enter-key submit shortcuts.
 - On narrow rows, expanded actions collapse after the next edit, on blur, and
@@ -56,8 +57,8 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 
 ## Failure and Recovery
 
-- If submit is blocked, complete required metadata/media and retry `Enter` or
-  use the submit button.
+- If submit is blocked in `Drop` mode, complete required metadata/media and
+  retry `Enter` or use the submit button.
 - If actions collapse on a narrow row, open them again with the chevron.
 - If auth/signature is canceled, the draft stays in place.
 - If upload or submit fails, the composer shows an error and keeps the draft for

@@ -11,7 +11,7 @@ Use this page when:
 Scope:
 
 - profile routes: `/{user}`, `/{user}/brain`, `/{user}/collected`,
-  `/{user}/xtdh`, `/{user}/stats`, `/{user}/subscriptions`, `/{user}/proxy`
+  `/{user}/xtdh`, `/{user}/subscriptions`, `/{user}/proxy`
 - legacy aliases: `/{user}/identity`, `/{user}/waves`, `/{user}/groups`,
   `/{user}/followers`
 - unsupported route: `/{user}/rep`
@@ -41,6 +41,10 @@ Scope:
 - Symptom: URL redirects to another handle.
   - Meaning: canonical-handle normalization.
   - Action: save the canonical URL.
+
+- Symptom: `/{user}/stats` shows `USER OR PAGE`.
+  - Meaning: the standalone `Stats` route was removed.
+  - Action: open `/{user}/collected` and use `Details` for profile stats behavior.
 
 - Symptom: legacy route redirects look inconsistent.
   - Meaning:
@@ -75,10 +79,10 @@ Scope:
   - Meaning: Waves-disabled context, empty feed, or failed drop fetch.
   - Action: refresh; if Waves is unavailable, use `/{user}`.
 
-- Symptom: Stats shows `-`, `No transactions`, `No distributions found`, or
-  `No TDH history found`.
+- Symptom: Collected `Details` shows `-`, `No transactions`,
+  `No distributions found`, or `No TDH history found`.
   - Meaning: empty data for selected scope/filter, or failed request.
-  - Action: adjust `address`/filters and refresh.
+  - Action: adjust `address`/details filters and refresh.
 
 - Symptom: subscriptions controls are disabled.
   - Meaning: read-only context (not owner mode).
@@ -103,6 +107,9 @@ Scope:
 
 - Hidden-tab fallback keeps the current query string.
 - Clicking a profile tab keeps only `address` and drops other query keys.
+- On `/{user}/collected`, `activity`, `wallet-activity`, and `page` can be used
+  inside `Details`; switching profile tabs drops those keys because tab
+  navigation keeps only `address`.
 - Canonical-handle redirects can normalize repeated query keys to one
   comma-separated value.
 - On mobile Identity, `Rep` opens first; switch to `NIC` for NIC actions and
@@ -118,7 +125,7 @@ Scope:
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
-- [Profile Stats Tab](../tabs/feature-stats-tab.md)
+- [Collected Tab, Stats Summary, and Transfer Mode](../tabs/feature-collected-tab.md)
 - [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
 - [Profile Proxy Tab](../tabs/feature-proxy-tab.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)

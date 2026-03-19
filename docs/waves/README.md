@@ -12,6 +12,7 @@ Use this area for wave and direct-message tasks:
 
 ## Route Coverage
 
+- Discovery route: `/discover`
 - Waves list: `/waves`
 - Wave thread: `/waves/{waveId}`
 - Messages list: `/messages`
@@ -37,6 +38,7 @@ Use this area for wave and direct-message tasks:
 
 ## Access and Availability
 
+- `/discover` is public and can render before wallet connect.
 - `/waves` and `/messages` require authenticated wallet access.
 - A profile handle is required before route content renders.
 - Proxy sessions cannot access wave/message content and show unavailable states.
@@ -53,8 +55,8 @@ Use this area for wave and direct-message tasks:
 
 ## Features
 
-- [Discovery](discovery/README.md): legacy discover-route notes and current
-  replacement entry points.
+- [Discovery](discovery/README.md): dedicated `/discover` route, card behavior,
+  and navigation entry points.
 - [Create](create/README.md): wave and direct-message creation entry points and
   form/step behavior.
 - [Chat](chat/README.md): in-thread tab behavior, thread scroll/pinning, serial

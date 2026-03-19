@@ -48,8 +48,9 @@ same context.
      `Outcome`, and wave-specific tabs).
 4. Read and navigate drops with unread markers, serial jumps, and search jump
    actions.
-5. Use drop actions (reply, react, vote, open drop, copy link, boost, and other
-   available actions) based on wave and drop eligibility.
+5. Use drop actions (reply, react, vote, open drop, copy link, boost,
+   admin-only pinned-drop updates, and other available actions) based on wave
+   and drop eligibility.
 6. Submit new content when participation is allowed.
 7. Share links so others can reopen the same wave or target drop.
 

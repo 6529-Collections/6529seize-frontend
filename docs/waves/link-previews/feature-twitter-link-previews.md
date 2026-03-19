@@ -40,7 +40,8 @@ Links that do not match these rules stay regular links.
   URL.
 - Open a boosted drop on `/` where the selected preview URL is a supported
   Twitter/X status URL.
-- If previews are hidden for a drop, use `Show link previews` when available.
+- If previews are hidden on your thread drop, use desktop `More` >
+  `Restore link previews` when available.
 
 ## User Journey
 
@@ -58,8 +59,8 @@ Links that do not match these rules stay regular links.
 - Multiple supported Twitter/X links in one drop each render their own tweet card.
 - If previews are hidden for a drop, Twitter/X links stay plain until previews are
   shown again.
-- Hidden drops can show one inline `Show link previews` action beside the first
-  hidden link.
+- Hidden previews can be restored from the desktop `More` menu on eligible
+  thread drops.
 - During serial-jump or history-load scroll operations, newly inserted drops can
   stay in auto-compact mode.
 

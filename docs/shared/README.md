@@ -28,11 +28,19 @@ Shared docs cover user-facing behavior reused across multiple product areas.
   indeterminate loading feedback and screen-reader status behavior.
 - [Pagination Controls](feature-pagination-controls.md): shared numbered
   page-jump controls plus table-style previous/next controls.
+- [Wave Avatar Fallbacks](feature-wave-avatar-fallbacks.md): shared explicit
+  picture, contributor-collage, and gradient fallback rules for wave avatars.
 - [Hover Cards and Tooltip Positioning](feature-hover-cards-and-tooltips.md):
   `CustomTooltip`-based profile/wave hover cards and helper tooltips with
   viewport-aware placement.
 - [Browser Zoom and Pinch Scaling](feature-browser-zoom-and-pinch-scaling.md):
   web zoom defaults plus native-wrapper zoom lock and text-entry safeguards.
+
+### Privacy and Consent
+
+- [Cookie Consent and Performance Analytics](feature-cookie-consent-and-performance-analytics.md):
+  site-wide consent banner, `/about/cookie-policy`, and performance-tracking
+  enable/disable behavior.
 
 ### App Delivery
 

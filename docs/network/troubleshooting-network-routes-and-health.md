@@ -19,12 +19,12 @@ metrics.
 ## Entry Points
 
 - Sidebar: `Network -> Identities`, `Network -> Activity`, `Network -> TDH`,
-  `Network -> xTDH`
+  `Network -> xTDH` (`/xtdh`)
 - Sidebar metrics subsection: `Network -> Metrics -> Health`,
   `Network -> Metrics -> Definitions`, `Network -> Metrics -> Levels`,
   `Network -> Metrics -> Network Stats`
+- Direct reference route: `/network/xtdh`
 - `/network` header button: `Nerd view` opens `/network/nerd/*`
-- Collections area: `Collections -> xTDH` opens `/xtdh`
 
 ## Fast Recovery Flow
 
