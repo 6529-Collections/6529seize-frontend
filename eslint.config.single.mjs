@@ -100,7 +100,6 @@ export default defineConfig([
     files: ["**/*.{ts,tsx}"],
     ignores: [
       "scripts/**",
-      "**/next.config.*",
       "config/env.ts",
       "config/serverEnv.ts",
       "config/alchemyEnv.ts",

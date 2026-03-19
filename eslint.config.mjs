@@ -150,12 +150,7 @@ const rules = {
       fixStyle: "separate-type-imports",
     },
   ],
-  "@typescript-eslint/consistent-type-exports": [
-    "error",
-    {
-      fixMixedExportsWithInlineTypeSpecifier: true,
-    },
-  ],
+  "@typescript-eslint/consistent-type-exports": "off",
   "@typescript-eslint/no-import-type-side-effects": "off",
 
   // Prevent common mistakes
@@ -454,7 +449,6 @@ export default defineConfig([
     files: ["**/*.{ts,tsx}"],
     ignores: [
       "scripts/**",
-      "**/next.config.*",
       "config/env.ts",
       "config/serverEnv.ts",
       "config/alchemyEnv.ts",
@@ -470,6 +464,12 @@ export default defineConfig([
       },
     },
     rules: {
+      "@typescript-eslint/consistent-type-exports": [
+        "error",
+        {
+          fixMixedExportsWithInlineTypeSpecifier: true,
+        },
+      ],
       "no-restricted-syntax": [
         "error",
         {
