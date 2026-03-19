@@ -1,11 +1,9 @@
-
 "use client";
 import { AuthContext } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useParams, useRouter } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useContext } from "react";
 import UserPageDrops from "./UserPageDrops";
 
 export default function UserPageBrainWrapper({
@@ -14,21 +12,9 @@ export default function UserPageBrainWrapper({
   readonly profile: ApiIdentity;
 }) {
   const params = useParams();
-  const router = useRouter();
-  const user = (params?.["user"] as string)?.toLowerCase();
+  const user = (params["user"] as string).toLowerCase();
 
-  const { address } = useSeizeConnectContext();
-  const { connectedProfile, activeProfileProxy, showWaves } =
-    useContext(AuthContext);
-
-  useEffect(() => {
-    if (showWaves) {
-      return;
-    }
-    if (connectedProfile || !address) {
-      router.push(`/${user}`);
-    }
-  }, [connectedProfile, activeProfileProxy, address, showWaves]);
+  const { showWaves } = useContext(AuthContext);
 
   const { profile } = useIdentity({
     handleOrWallet: user,
@@ -39,5 +25,5 @@ export default function UserPageBrainWrapper({
     return <div className="tw-min-h-screen" />;
   }
 
-  return <UserPageDrops profile={profile} />;
+  return <UserPageDrops profile={profile ?? initialProfile} />;
 }
