@@ -1,9 +1,10 @@
-const forms = require("@tailwindcss/forms");
-const containerQueries = require("@tailwindcss/container-queries");
-const plugin = require("tailwindcss/plugin");
-const scrollbar = require("tailwind-scrollbar");
+import forms from "@tailwindcss/forms";
+import containerQueries from "@tailwindcss/container-queries";
+import plugin from "tailwindcss/plugin";
+import scrollbar from "tailwind-scrollbar";
+import type { Config } from "tailwindcss";
 
-const tailwindSharedConfig = {
+const tailwindSharedConfig: Config = {
   darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -196,4 +197,4 @@ const tailwindSharedConfig = {
   ],
 };
 
-module.exports = tailwindSharedConfig;
+export default tailwindSharedConfig;

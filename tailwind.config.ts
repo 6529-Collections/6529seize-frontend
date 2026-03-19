@@ -1,6 +1,4 @@
 import type { Config } from "tailwindcss";
-import tailwindSharedConfig from "./config/tailwind.shared.cjs";
+import tailwindSharedConfig from "./config/tailwind.shared";
 
-const config = tailwindSharedConfig as Config;
-
-export default config;
+export default tailwindSharedConfig satisfies Config;

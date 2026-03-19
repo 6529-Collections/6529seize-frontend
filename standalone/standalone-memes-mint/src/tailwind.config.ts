@@ -1,8 +1,8 @@
-import baseConfig from "../../../config/tailwind.shared.cjs";
+import baseConfig from "../../../config/tailwind.shared";
 import type { Config } from "tailwindcss";
 
 const standaloneTailwindConfig: Config = {
-  ...(baseConfig as Config),
+  ...baseConfig,
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "../../../app/**/*.{js,ts,jsx,tsx,mdx}",

@@ -1,4 +1,5 @@
 import { createAppKit } from "@reown/appkit/react";
+import type { CreateAppKit, WalletFeature } from "@reown/appkit/react";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import type { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
 import { publicEnv } from "@/config/env";
@@ -120,12 +121,17 @@ export function initializeAppKit(
 /**
  * Builds the AppKit configuration object
  */
-function buildAppKitConfig(adapter: WagmiAdapter, chains: Chain[]) {
+function buildAppKitConfig(
+  adapter: WagmiAdapter,
+  chains: Chain[]
+): CreateAppKit {
   if (chains.length === 0) {
     throw new Error(
       "AppKit initialization requires at least one configured chain."
     );
   }
+
+  const walletFeaturesOrder: WalletFeature[] = ["onramp", "send"];
 
   return {
     adapters: [adapter] as ChainAdapter[],
@@ -151,7 +157,7 @@ function buildAppKitConfig(adapter: WagmiAdapter, chains: Chain[]) {
       socials: [],
       swaps: false,
       connectMethodsOrder: ["wallet" as const],
-      walletFeaturesOrder: ["onramp", "send"],
+      walletFeaturesOrder,
     },
     enableOnramp: false,
     enableSwaps: false,
