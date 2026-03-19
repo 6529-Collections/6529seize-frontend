@@ -9,7 +9,10 @@
   "include": [
     "app/**/*.ts",
     "app/**/*.tsx",
-    ".next-static-export/types/**/*.ts"
+    ".next-static-export/types/**/*.ts",
+    "../../../src/types/**/*.ts",
+    "../../../types/**/*.d.ts",
+    "../../../components/**/*.d.ts"
   ],
   "exclude": [
     "../../../node_modules",

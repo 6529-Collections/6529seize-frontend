@@ -27,9 +27,6 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   transpilePackages: ["react-tweet"],
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   experimental: {
     externalDir: true,
   },

@@ -408,7 +408,7 @@ export default function ManifoldMintingWidget(
         ? "TODAY"
         : startDate.toIsoDateString();
     const timeDisplay = props.local_timezone
-      ? startDate.toLocaleDateTimeString().split(" ")[1]?.slice(0, 5)
+      ? startDate.toLocaleHMString()
       : startDate.toIsoTimeStringWithoutSeconds();
     return `DROPS ${dateDisplay} ${timeDisplay ?? ""}`.trim();
   }

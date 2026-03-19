@@ -19,6 +19,14 @@ function run(command, args) {
     stdio: "inherit",
   });
 
+  if (result.error) {
+    console.error(result.error.message);
+    if (result.error.stack) {
+      console.error(result.error.stack);
+    }
+    process.exit(1);
+  }
+
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
   }
