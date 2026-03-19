@@ -151,7 +151,7 @@ function buildAppKitConfig(adapter: WagmiAdapter, chains: Chain[]) {
       socials: [],
       swaps: false,
       connectMethodsOrder: ["wallet" as const],
-      walletFeaturesOrder: ["onramp", "send"] as const,
+      walletFeaturesOrder: ["onramp", "send"],
     },
     enableOnramp: false,
     enableSwaps: false,
