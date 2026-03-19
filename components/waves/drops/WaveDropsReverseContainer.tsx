@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useCallback, useRef } from "react";
+import React, { forwardRef, useCallback, useRef, useState } from "react";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
 const TOP_SENTINEL_ROOT_MARGIN = "200px 0px 0px 0px";
@@ -29,7 +29,8 @@ export const WaveDropsReverseContainer = forwardRef<
     },
     ref
   ) => {
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [scrollRootElement, setScrollRootElement] =
+      useState<HTMLDivElement | null>(null);
     const topSentinelRef = useRef<HTMLDivElement>(null);
 
     const handleIntersection = useCallback(
@@ -41,22 +42,38 @@ export const WaveDropsReverseContainer = forwardRef<
       [onTopIntersection]
     );
 
+    const handleScrollContainerRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        setScrollRootElement((currentRoot) =>
+          currentRoot === node ? currentRoot : node
+        );
+
+        if (typeof ref === "function") {
+          ref(node);
+          return;
+        }
+
+        if (ref) {
+          ref.current = node;
+        }
+      },
+      [ref]
+    );
+
     useIntersectionObserver(
       topSentinelRef,
       {
-        root: scrollContainerRef.current,
+        root: scrollRootElement,
         rootMargin: TOP_SENTINEL_ROOT_MARGIN,
         threshold: 0,
       },
       handleIntersection,
-      !!scrollContainerRef.current
+      scrollRootElement !== null
     );
-
-    React.useImperativeHandle(ref, () => scrollContainerRef.current!, []);
 
     return (
       <div
-        ref={scrollContainerRef}
+        ref={handleScrollContainerRef}
         className={`tw-min-h-0 tw-flex-1 ${
           bottomPaddingClassName ?? "tw-pb-6"
         } no-scrollbar tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-bg-iron-950 tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
