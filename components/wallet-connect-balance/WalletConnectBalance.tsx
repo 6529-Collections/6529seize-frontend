@@ -7,7 +7,7 @@ import { faPlugCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
 function formatWeiBalance(value: bigint, decimals: number): string {
   const s = formatUnits(value, decimals);
-  const [whole, frac = ""] = s.split(".");
+  const [whole = "0", frac = ""] = s.split(".");
   const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   const shortFrac = frac.slice(0, 6).replace(/0+$/, "");
   return shortFrac ? `${grouped}.${shortFrac}` : grouped;

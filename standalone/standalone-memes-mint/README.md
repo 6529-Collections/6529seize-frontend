@@ -20,8 +20,6 @@ Defaults are aligned so **one hostname drives both** the baked-in app URL and th
 
 `next.config.ts` reads `STANDALONE_BASE_ENDPOINT` during `next build`. The export script sets it to `https://<bucket>` so WalletConnect / AppKit `metadata.url` matches the site origin.
 
-The standalone layout passes **`usePublicHttpTransports`** on `Providers` so wagmi uses public HTTP RPCs (e.g. Cloudflare Ethereum for mainnet) for **read** calls like native balance on `AppKitButton`. The main 6529 app leaves this off and keeps Reown’s default RPC routing.
-
 Override buckets only if needed:
 
 - `STANDALONE_S3_BUCKET_PROD`

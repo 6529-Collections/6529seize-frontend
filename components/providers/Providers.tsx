@@ -31,19 +31,17 @@ export default function Providers({
   enableWalletAuthentication = true,
   enableCookieConsent = true,
   enableMyStream = true,
-  usePublicHttpTransports = false,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
   readonly enableWalletAuthentication?: boolean;
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
-  readonly usePublicHttpTransports?: boolean;
 }) {
   return (
     <QueryClientSetup>
       <AppWalletsProvider>
-        <WagmiSetup usePublicHttpTransports={usePublicHttpTransports}>
+        <WagmiSetup>
           <CapacitorSetup />
           <IpfsImageSetup />
           <ReactQueryWrapper>
