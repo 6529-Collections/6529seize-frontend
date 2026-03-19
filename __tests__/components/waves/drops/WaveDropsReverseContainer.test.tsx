@@ -1,57 +1,57 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
-import { editSlice } from "@/store/editSlice";
 
 jest.mock("@/hooks/scroll/useIntersectionObserver");
 
-const mockUseIntersectionObserver = useIntersectionObserver as jest.Mock;
+const mockUseIntersectionObserver =
+  useIntersectionObserver as jest.MockedFunction<
+    typeof useIntersectionObserver
+  >;
 
-const createTestStore = () =>
-  configureStore({
-    reducer: {
-      edit: editSlice.reducer,
-    },
-  });
-
-function setup() {
+function setup({ ref = React.createRef<HTMLDivElement>() } = {}) {
   const onTopIntersection = jest.fn();
-  const store = createTestStore();
 
   const utils = render(
-    <Provider store={store}>
-      <WaveDropsReverseContainer
-        ref={React.createRef()}
-        onTopIntersection={onTopIntersection}
-        isFetchingNextPage={false}
-        hasNextPage={true}
-      >
-        <div>child</div>
-      </WaveDropsReverseContainer>
-    </Provider>
+    <WaveDropsReverseContainer
+      ref={ref}
+      onTopIntersection={onTopIntersection}
+      isFetchingNextPage={false}
+      hasNextPage={true}
+    >
+      <div>child</div>
+    </WaveDropsReverseContainer>
   );
   return { ...utils, onTopIntersection };
 }
 
 describe("WaveDropsReverseContainer", () => {
   beforeEach(() => {
-    mockUseIntersectionObserver.mockImplementation((ref, opts, cb) => {
-      cb({ isIntersecting: true } as any);
-    });
-    jest
-      .spyOn(window, "requestAnimationFrame")
-      .mockImplementation((cb: any) => {
-        cb();
-        return 1 as any;
-      });
+    mockUseIntersectionObserver.mockReset();
   });
 
-  it("calls onTopIntersection when sentinel visible", () => {
-    const { onTopIntersection } = setup();
-    expect(onTopIntersection).toHaveBeenCalled();
+  it("rebinds the observer after the scroll root mounts", () => {
+    const { container, onTopIntersection } = setup();
+
+    expect(
+      mockUseIntersectionObserver.mock.calls.length
+    ).toBeGreaterThanOrEqual(2);
+
+    const [, firstOptions, , firstEnabled] =
+      mockUseIntersectionObserver.mock.calls[0]!;
+    const [, lastOptions, lastCallback, lastEnabled] =
+      mockUseIntersectionObserver.mock.calls.at(-1)!;
+    const scrollDiv = container.firstChild as HTMLElement;
+
+    expect(firstOptions.root).toBeNull();
+    expect(firstEnabled).toBe(false);
+    expect(lastOptions.root).toBe(scrollDiv);
+    expect(lastEnabled).toBe(true);
+
+    lastCallback({ isIntersecting: true } as IntersectionObserverEntry);
+
+    expect(onTopIntersection).toHaveBeenCalledTimes(1);
   });
 
   it("allows scrolling without attaching container-level callbacks", () => {
@@ -65,21 +65,18 @@ describe("WaveDropsReverseContainer", () => {
   });
 
   it("keeps callback ref stable across rerenders and only detaches on unmount", () => {
-    const store = createTestStore();
     const onTopIntersection = jest.fn();
     const callbackRef = jest.fn();
 
     const { rerender, unmount } = render(
-      <Provider store={store}>
-        <WaveDropsReverseContainer
-          ref={callbackRef}
-          onTopIntersection={onTopIntersection}
-          isFetchingNextPage={false}
-          hasNextPage={true}
-        >
-          <div>child</div>
-        </WaveDropsReverseContainer>
-      </Provider>
+      <WaveDropsReverseContainer
+        ref={callbackRef}
+        onTopIntersection={onTopIntersection}
+        isFetchingNextPage={false}
+        hasNextPage={true}
+      >
+        <div>child</div>
+      </WaveDropsReverseContainer>
     );
 
     const attachedCalls = () =>
@@ -91,29 +88,25 @@ describe("WaveDropsReverseContainer", () => {
     expect(detachedCalls()).toHaveLength(0);
 
     rerender(
-      <Provider store={store}>
-        <WaveDropsReverseContainer
-          ref={callbackRef}
-          onTopIntersection={onTopIntersection}
-          isFetchingNextPage={true}
-          hasNextPage={true}
-        >
-          <div>child</div>
-        </WaveDropsReverseContainer>
-      </Provider>
+      <WaveDropsReverseContainer
+        ref={callbackRef}
+        onTopIntersection={onTopIntersection}
+        isFetchingNextPage={true}
+        hasNextPage={true}
+      >
+        <div>child</div>
+      </WaveDropsReverseContainer>
     );
 
     rerender(
-      <Provider store={store}>
-        <WaveDropsReverseContainer
-          ref={callbackRef}
-          onTopIntersection={onTopIntersection}
-          isFetchingNextPage={false}
-          hasNextPage={true}
-        >
-          <div>child</div>
-        </WaveDropsReverseContainer>
-      </Provider>
+      <WaveDropsReverseContainer
+        ref={callbackRef}
+        onTopIntersection={onTopIntersection}
+        isFetchingNextPage={false}
+        hasNextPage={true}
+      >
+        <div>child</div>
+      </WaveDropsReverseContainer>
     );
 
     expect(attachedCalls()).toHaveLength(1);
