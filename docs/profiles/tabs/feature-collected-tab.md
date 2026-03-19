@@ -26,12 +26,15 @@ Transfer mode is part of the Native collected view (not a separate route).
   - `seized=<seized|not_seized>`: Memes-only filter.
   - `szn=<season-id>`: Memes-only season filter.
   - `sort-by=<token_id|tdh|rank|xtdh|xtdh_day>`
-  - `sort-direction=<asc|desc>`
+  - `sort-direction=<asc|desc>`: shared links can omit the default active sort
+    (`token_id desc` in Native, `xtdh desc` in Network).
   - `activity=wallet-activity|distributions|tdh-history`: Details-panel lower
-    section. Missing or unknown values default to `wallet-activity`.
+    section. Any present value opens `Details` on first render. Missing or
+    unknown values default to `wallet-activity`.
   - `wallet-activity=all|airdrops|mints|sales|purchases|transfers|burns`:
     Wallet Activity filter. Missing or unknown values default to `all`.
   - `page=<n>`: current page for the active paginated section on this route.
+    Canonical links omit `page=1`.
 
 ## Entry Points
 
@@ -39,15 +42,27 @@ Transfer mode is part of the Native collected view (not a separate route).
 - Click `TDH` in the profile header stats row.
 - Switch to `Collected` from another profile tab.
 - Open a shared collected deep link with query parameters.
+- Open a deep link such as `/{user}/collected?activity=distributions` to land
+  with `Details` already expanded.
 
 ## User Journey
 
 1. Open `/{user}/collected`.
+   - If the URL already has `activity=...`, `Details` starts open and the lower
+     section selects that tab when the value is recognized.
 2. Review the top stats block:
    - headline metrics can include `NextGen`, `Meme Sets`, `Memes`,
      `Gradients`, and `Boost`
+   - collection-backed metrics (`NextGen`, `Meme Sets`, `Memes`, `Gradients`)
+     act as shortcuts into that collection; clicking the active metric clears
+     that collection filter
+   - `Boost` is informational only and does not change filters
+   - `Meme Sets` appears only when every valid Meme season has at least one
+     full set; it shows the lowest full-set count across those seasons
    - `Seasons` tiles show started Meme seasons, complete-set counts, and
      progress toward the next set
+   - hover/focus previews a season tile's progress text; click applies or
+     clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
 3. Click `Details` to expand the integrated stats panel.
 4. In `Details`, review:
@@ -75,16 +90,25 @@ Transfer mode is part of the Native collected view (not a separate route).
 ## Common Scenarios
 
 - Compare consolidated holdings (`All Addresses`) against one wallet (`address=...`).
+- Jump from the summary metrics directly into `NextGen`, `Gradients`, or Meme
+  holdings without using the collection dropdown.
 - Open `Details` and switch between `Wallet Activity`, `Distributions`, and
   `TDH History`.
+- Share or reopen a collected deep link that jumps straight into
+  `Distributions` or `TDH History` with `Details` already open.
 - Check how many full Meme sets exist and how far the active season is from the
   next set.
+- Preview season progress from the stats strip, then click a season tile to
+  switch into `The Memes` with that season selected.
 - Filter Memes by season and clear back to `All Seasons`.
 - Switch to `Network` to inspect per-token `xTDH` and `xTDH/day`.
 - Keep a transfer selection while changing pages or filters.
 
 ## Edge Cases
 
+- Any non-empty `activity` query opens `Details` immediately on first render.
+- If `activity` is unknown, `Details` still opens and the lower section falls
+  back to `Wallet Activity`.
 - The top stats block still renders on `Network`; if an `address` query is
   already present, it continues to scope both the stats block and Network
   results even though the address dropdown is hidden there.
@@ -92,16 +116,24 @@ Transfer mode is part of the Native collected view (not a separate route).
   produce a stats scope, the panel shows `Stats are unavailable for this profile.`.
 - The `Seasons` strip is hidden when there are no started Meme seasons.
 - On desktop, the started-season row can collapse behind `+N more`; on
-  touch/mobile, seasons stay horizontally scrollable.
+  touch/mobile, seasons stay horizontally scrollable. When a season filter is
+  active, the collapsed desktop row keeps that season visible.
 - `page` is reused by the main collected list and the paginated details tables
   on this route.
 - Clicking another profile tab keeps only `address` and drops collected-specific
   filters plus `activity`, `wallet-activity`, and `page`.
+- Clicking an active collection metric clears that collection filter back to the
+  combined Native view.
+- Clicking a season tile switches to `The Memes`, applies the selected season,
+  and resets incompatible state such as `page`, `subcollection`, and default
+  sorts. Clicking the active season tile again clears the season filter.
 - Transfer controls are hidden when:
   - screen is mobile,
   - connected wallet is not one of the profile wallets,
   - current native page has no cards.
 - If `szn` does not match an available season, the UI stays on `All Seasons`.
+- Invalid or zero-card seasons are ignored in the summary metric and season
+  strip.
 - Cards can show `Not owned by your connected wallet` in transfer mode when the
   current result set includes cards from other profile wallets.
 - Selecting the same sort field toggles sort direction.
@@ -132,6 +164,8 @@ Transfer mode is part of the Native collected view (not a separate route).
 - There is no standalone `/{user}/stats` route. Use `/{user}/collected` and
   `Details` for profile stats behavior.
 - `Seized` and `Season` controls appear only when `Collection` is `The Memes`.
+- Season-tile shortcuts use the same route filters as the main controls; they do
+  not create a separate stats-only state.
 - Network cards are informational in this tab and do not open token detail routes.
 - Transfer mode uses the connected wallet's transferable balance, not consolidated
   profile balance.

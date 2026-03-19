@@ -15,10 +15,11 @@ Primary jobs in this area:
 
 ## Features
 
+- [EMMA Create Snapshots Status and Retry](feature-create-snapshots-status-and-retry.md): add collection snapshots, monitor background job progress, retry failed rows, and wait for `Run analysis` / `Next` to unlock.
 - [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md): connect, sign in, create plans, open saved plans, and delete plans.
 - [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md): add wallets manually or by CSV and auto-split large uploads into multiple custom snapshots.
 - [Map Delegations](feature-map-delegations.md): optionally add one delegation contract, run analysis when required, then continue to `Review`.
-- [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md): confirm token ID, upload photos and automatic airdrops, finalize, and publish to GitHub.
+- [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md): confirm token ID, manage artist/team airdrops and distribution photos, finalize, and publish to GitHub.
 
 ## Flows
 

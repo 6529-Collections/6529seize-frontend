@@ -38,6 +38,8 @@ from home discovery.
 
 - Open a discovery card to jump directly into wave chat context.
 - Open a DM-targeting card to jump into `/messages?wave={waveId}`.
+- Review the compact preview row when a wave description drop has usable text
+  or media content.
 - Use `/discover` as the larger browse surface when home six-card discovery is
   not enough.
 
@@ -45,8 +47,10 @@ from home discovery.
 
 - Discovery cards share the same metadata, preview, and route mapping as home
   `Most active waves` cards.
-- If preview data for a wave is unavailable, the card still opens the target
-  wave route.
+- Preview content comes from the wave description drop rather than the latest
+  chat message.
+- If a wave description drop is empty, whitespace-only, or media-free, the card
+  still opens the target wave route without rendering the compact preview row.
 - Auth/profile requirements still apply after entering `/waves` or `/messages`
   content from a card.
 - DM waves continue to use query-style thread routes (`/messages?wave={waveId}`).

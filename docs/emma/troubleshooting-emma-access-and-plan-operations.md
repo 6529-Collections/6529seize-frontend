@@ -38,8 +38,15 @@ actions are blocked.
 
 - `Run analysis` shows instead of `Next`:
   one or more plan operations have not run; click `Run analysis`, wait for completion, then continue.
-- `Next` is missing in `Create Snapshots`:
-  add at least one snapshot and wait for active download states to leave `PENDING`/`CLAIMED`.
+- `Next` is disabled in `Create Snapshots`:
+  at least one snapshot row is still incomplete; wait for all rows to reach
+  `Completed`, or retry/delete failed rows first.
+- `Snapshot attention required` appears in `Create Snapshots`:
+  one or more snapshot jobs failed; use the row retry action or delete the
+  broken snapshot before continuing.
+- `Run analysis` is hidden in `Create Snapshots`:
+  at least one snapshot row is still unresolved; EMMA shows `Run analysis` only
+  after every snapshot is completed.
 - `Next` is missing in `Create Custom Snapshot`:
   add at least one custom snapshot, or use `Skip` if you do not need this step.
 - `Next` is missing in `Create Phases`:
@@ -58,7 +65,11 @@ actions are blocked.
 - `Confirm Token ID` keeps reopening in `Review`:
   subscriptions-admin actions stay blocked until you confirm a valid positive token ID.
 - `Publish to GitHub` is disabled in review:
-  `Finalize Distribution` first, then upload at least one photo and at least one automatic airdrop entry.
+  `Finalize Distribution` first, then upload at least one photo and at least
+  one artist or team airdrop entry.
+- `Artist Airdrops` or `Team Airdrops` upload is rejected:
+  remove any header row and use raw `address,count` lines with one valid wallet
+  and one positive integer per line.
 - `JSON`/`CSV`/`Manifold` buttons are disabled on `Public`:
   this is expected; the synthetic `Public` row keeps those exports visible but disabled.
 
@@ -73,6 +84,7 @@ actions are blocked.
 
 - [EMMA Index](README.md)
 - [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md)
+- [EMMA Create Snapshots Status and Retry](feature-create-snapshots-status-and-retry.md)
 - [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md)
 - [Map Delegations](feature-map-delegations.md)
 - [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md)

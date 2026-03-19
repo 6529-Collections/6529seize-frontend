@@ -11,6 +11,8 @@ On web layouts, route switching is sidebar-first.
 - Touch small-screen web: header menu button opens the same sidebar as overlay.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
   nested route grouping shown in the expanded rail.
+- When the connected wallet can access Drop Forge, the sidebar inserts a
+  standalone `Drop Forge` row after `About`.
 - `Messages` keeps a main-nav unread dot; connected users get a lower
   `Notifications` row with its own unread dot.
 - Connected account avatar in the sidebar account area can show an unread dot
@@ -21,6 +23,7 @@ On web layouts, route switching is sidebar-first.
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Direct rows: `Home`, `Waves`, `Messages`, `Discovery`.
 - Expandable groups: `Network`, `Collections`, `Tools`, `About`.
+- Optional permission-gated row: `Drop Forge` after `About`.
 - Utility rows: desktop `Search`, connected-only `Notifications`,
   connected-only `Profile`, and disconnected-only `Share`.
 - Bottom account area: connect action, loading placeholders, and the connected
@@ -32,6 +35,8 @@ On web layouts, route switching is sidebar-first.
 - Touch small-screen web: use header menu button.
 - Select direct rows or expand groups for nested routes.
 - Open `Discovery` from the direct row.
+- Open `Drop Forge` from the optional row when the current wallet can access
+  `/drop-forge`.
 - Open `Search` from the desktop sidebar row.
 - Open connected `Notifications` from the lower row above `Profile`.
 - Open `Share` from the lower row while disconnected, or from the connected
@@ -59,6 +64,8 @@ On web layouts, route switching is sidebar-first.
 - Open `Collections` routes:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`.
 - Open `Discovery` to route into `/discover`.
+- Open `Drop Forge` from its standalone row when the current wallet has landing
+  access; the row sits after `About` and before the lower utility rows.
 - Open `Tools` routes:
   delegation pages, `/meme-accounting`, `/meme-gas`,
   optional `/tools/subscriptions-report`, optional `/tools/app-wallets`,
@@ -92,6 +99,8 @@ On web layouts, route switching is sidebar-first.
 - Flyouts reposition on sidebar scroll and window resize.
 - `Notifications` row appears only when wallet connection is active.
 - `Profile` row appears only when wallet connection is active.
+- `Drop Forge` row appears only when the connected wallet can access the
+  `/drop-forge` landing route.
 - Connected user row opens the account menu on a single activate; a quick
   second activate cycles to the next connected account when at least two are
   available.
@@ -110,6 +119,8 @@ On web layouts, route switching is sidebar-first.
 - If profile handle is missing, `Profile` route falls back to wallet address.
 - If overlay looks stuck, close with backdrop, `Escape`, or route change.
 - If submenu state looks stale, toggle the group or rail again.
+- If `Drop Forge` is missing, verify the connected wallet can access the landing
+  route and wait for permission checks to finish.
 - If `Share` looks missing, check auth/device context: disconnected desktop web
   uses the standalone row, connected desktop web uses the user menu, and
   Capacitor/mobile-device web hides it.

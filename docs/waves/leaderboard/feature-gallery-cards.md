@@ -53,6 +53,8 @@ works from the card.
 - Unknown or missing MIME values still show a badge tooltip as `Unknown`.
 - On narrow/mobile layouts, long titles and author handles truncate inside the
   card and vote/rater rows wrap instead of forcing horizontal overflow.
+- On touch devices, dragging vertically on card media continues page scrolling;
+  a tap still opens the drop detail.
 - On non-touch devices, sort changes briefly highlight card media to signal reordering.
 
 ## Edge Cases

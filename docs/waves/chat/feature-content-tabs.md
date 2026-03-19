@@ -3,7 +3,7 @@
 ## Overview
 
 Wave pages can expose a tab strip that switches the main content panel between
-wave sections such as `Chat`, `Leaderboard`, `Winners`, and other
+wave sections such as `Chat`, `Leaderboard`, `Sales`, `Winners`, and other
 wave-dependent views.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
@@ -47,8 +47,10 @@ restores it whenever that wave is opened again and the tab is still available.
 
 - Switch between `Chat` and `Leaderboard` while a wave is active.
 - Open `Winners` once the first decision has passed.
-- In memes waves, move between `My Votes`, `FAQ`, and other available tabs.
-- In curation waves, use available tabs without an `Outcome` tab.
+- In memes waves, move between `Leaderboard`, `My Votes`, `FAQ`, and other
+  available tabs.
+- In curation waves, move between `Chat`, `Leaderboard`, `Sales`, `Winners`,
+  and `My Votes` as those tabs become available.
 - In the `My Votes` tab, users can quickly scan entries by format: image,
   video, or interactive media is indicated with a small badge at the title row.
 - In `My Votes`, non-image drops show a static preview thumbnail in the row when
@@ -63,12 +65,15 @@ restores it whenever that wave is opened again and the tab is still available.
 - If local tab memory for a wave is unavailable or invalid, the wave opens with its
   default tab.
 - `Winners` is shown only after the first decision has passed.
+- `Sales` appears in curation waves only.
 - `My Votes` appears in memes and curation waves; `FAQ` appears in memes waves
   only.
 - Tabs expose selected-state semantics and link to the active content panel for
   assistive technologies.
 - For memes waves, available tabs are evaluated to prefer `Leaderboard` first; if it
   is unavailable, `Chat` becomes the fallback tab.
+- Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated
+  results-slot instead.
 - In `My Votes`, non-image rows suppress inline media interaction even when the row
   includes video, audio, or HTML media.
 - If `preview_image` is missing or invalid, the row still shows the drop by using
@@ -80,6 +85,8 @@ restores it whenever that wave is opened again and the tab is still available.
   interface moves to the first available tab.
 - If a previously stored tab is no longer available for that wave, the UI falls
   back to the wave default.
+- If a saved or active `Sales` tab is revisited in a non-curation context, the
+  UI falls back to that wave's first available tab.
 - If an unavailable tab is requested, tab state falls back to that wave’s first
   available tab (typically `Leaderboard` for memes waves, otherwise `Chat`).
 - If a wave becomes chat-only, the tab strip is removed and the chat panel
@@ -103,6 +110,7 @@ restores it whenever that wave is opened again and the tab is still available.
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
 - [Wave Right Sidebar Tabs](../sidebars/feature-right-sidebar-tabs.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
+- [Wave Sales Tab](../leaderboard/feature-sales-tab.md)
 - [Wave Winners Tab](../leaderboard/feature-winners-tab.md)
 - [Wave Chat Scroll Behavior](feature-scroll-behavior.md)
 - [Wave My Votes Tab](../leaderboard/feature-my-votes-tab.md)

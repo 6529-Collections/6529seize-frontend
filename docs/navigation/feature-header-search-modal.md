@@ -39,7 +39,9 @@ It supports:
   - `View all <Category>` opens the full list for that category.
 - Pages catalog:
   - Page results can include top-level navigation destinations such as
-    `Discovery` (`/discover`), subject to the current route catalog.
+    `Discovery` (`/discover`) and permission-gated operational routes such as
+    `Drop Forge`, `Craft Claims`, or `Launch Claims`, subject to the current
+    route catalog.
 - Category persistence:
   - Selected category is remembered between openings.
   - `Clear` resets category to `All`.

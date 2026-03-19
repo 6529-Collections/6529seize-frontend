@@ -12,7 +12,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 
 - App routes rendered through `AppLayout` (native app shell).
 - Common route families: `/`, `/waves*`, `/messages*`,
-  `/network*`, collection routes, tool routes, and profile routes.
+  `/network*`, `/drop-forge*`, collection routes, tool routes, and profile
+  routes.
 - Excluded routes: `/access*` and `/restricted*` (no layout wrapper).
 
 ## Entry Points
@@ -44,6 +45,10 @@ In the app layout, the header adapts to route and thread state. It controls:
    - active wave -> loading spinner, then wave name
    - `/the-memes|6529-gradient|meme-lab|nextgen/{numericId}` ->
      `{Collection} #{id}`
+   - `/drop-forge/craft` -> `Drop Forge - Craft`
+   - `/drop-forge/craft/{id}` -> `Drop Forge - Craft #{id}`
+   - `/drop-forge/launch` -> `Drop Forge - Launch`
+   - `/drop-forge/launch/{id}` -> `Drop Forge - Launch #{id}`
    - `/rememes/{contract}/{tokenId}` ->
      `Rememes {shortContract} #{shortToken}`
    - fallback -> last path segment (normalized and center-truncated)
@@ -65,6 +70,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 - Return to `/waves` or `/messages`: title resets to section name and
   menu/avatar button returns.
 - Open `/the-memes/123`: title is `The Memes #123`.
+- Open `/drop-forge/craft/42`: title is `Drop Forge - Craft #42`.
+- Open `/drop-forge/launch/42`: title is `Drop Forge - Launch #42`.
 - Open `/rememes/{contract}/{tokenId}`: title uses shortened contract/token.
 - Open `/`: health heart shortcut appears in the action row.
 
@@ -77,6 +84,8 @@ In the app layout, the header adapts to route and thread state. It controls:
   unread notifications.
 - Rememes formatting applies only when both `contract` and `tokenId` are
   present.
+- Drop Forge title formatting applies only on `craft` and `launch` route
+  families; `/drop-forge` landing uses normal fallback title handling.
 - Fallback title uses the last segment only and truncates long values.
 
 ## Failure and Recovery

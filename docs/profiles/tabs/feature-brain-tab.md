@@ -2,8 +2,14 @@
 
 ## Overview
 
-The `Brain` tab shows a profile's drop feed, including replies.
+The `Brain` tab shows a profile's activity summary and drop feed, including
+replies.
+The `Activity` card above the feed is documented separately in
+[Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md).
 Clicking a drop body or quote preview opens that thread in Waves or Messages.
+The companion `Created Waves` and `Most Active In` surfaces inside this tab are
+documented separately in
+[Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md).
 
 ## Location in the Site
 
@@ -22,12 +28,14 @@ Clicking a drop body or quote preview opens that thread in Waves or Messages.
 1. Open `/{user}/brain`.
 2. Profile route resolution runs first (canonical-handle redirects and
    not-found behavior follow shared profile route rules).
-3. If `Brain` is visible and the route resolves to a profile handle, the tab
-   loads the first drop page.
-4. Select a drop or quote preview to open its thread:
+3. If `Brain` is visible and the route resolves to a profile, the tab loads the
+   `Activity` card and first drop page.
+4. If the viewed profile exposes a Brain identity, the `Activity` card renders
+   above the feed.
+5. Select a drop or quote preview to open its thread:
    - public wave drop: `/waves/{waveId}?serialNo={serialNo}`
    - direct-message drop: `/messages?wave={waveId}&serialNo={serialNo}`
-5. Scroll to load older drops.
+6. Scroll to load older drops.
 
 ## Common Scenarios
 
@@ -66,12 +74,16 @@ Clicking a drop body or quote preview opens that thread in Waves or Messages.
   scroll intersection.
 - Feed scope comes from the `/{user}` route path; unrelated query parameters do
   not switch the feed owner.
+- The activity card and wave sidebar are companion surfaces around the same
+  Brain feed; each has separate loading and empty states.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
 - [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profiles Tabs Index](README.md)
+- [Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md)
+- [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)

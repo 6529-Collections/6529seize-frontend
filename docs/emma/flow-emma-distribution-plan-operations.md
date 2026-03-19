@@ -30,12 +30,14 @@ active-run blocking, and failed-run recovery.
    plan. If loading fails, EMMA routes back to `/emma`.
 5. `Create Snapshots`:
    - Add one or more snapshots.
-   - Each snapshot starts a download job.
-   - While any snapshot download is active (`PENDING` / `CLAIMED`), progression
-     controls are hidden.
-   - After downloads settle, `Run analysis` appears when snapshot operations are
-     not run. `Next` appears when at least one snapshot exists and no run is
-     required.
+   - Each snapshot starts a background download job and adds a row to the
+     snapshots table.
+   - Snapshot rows can expose detailed status, stage, progress, retry, and
+     failure messaging while EMMA keeps polling for updates.
+   - `Next` appears after at least one snapshot exists, but stays disabled until
+     every snapshot is completed.
+   - After all snapshots complete, `Run analysis` appears when snapshot
+     operations are not run yet; otherwise `Next` is enabled.
 6. `Create Custom Snapshot`:
    - `Skip` appears when no custom snapshots exist.
    - `Next` appears after at least one custom snapshot exists.
@@ -92,6 +94,7 @@ active-run blocking, and failed-run recovery.
 
 - [EMMA Index](README.md)
 - [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md)
+- [EMMA Create Snapshots Status and Retry](feature-create-snapshots-status-and-retry.md)
 - [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md)
 - [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md)
 - [EMMA Access and Plan Operations Troubleshooting](troubleshooting-emma-access-and-plan-operations.md)

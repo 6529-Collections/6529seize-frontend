@@ -39,6 +39,8 @@ why a section can disappear.
 3. `Most active waves` loads hot waves:
    - While loading: six skeleton cards render.
    - When data is ready: up to six cards render with wave metadata.
+   - Cards reuse the wave description drop for the compact preview row when
+     that content has text or media.
    - If the request fails or returns no waves: section is hidden.
 4. Users select a wave card to open that wave, or use `View all` to open
    `/waves`.
@@ -53,16 +55,22 @@ why a section can disappear.
   - Footer shows `Anonymous` when the author has no handle.
 - Most active waves card with recent activity:
   - Shows relative last-drop time and drops count.
-  - Shows a compact latest-drop preview text/media snippet.
+  - Shows a compact description-drop preview text/media snippet when the wave
+    description has usable content.
 - Most active waves card with no activity:
   - Shows `No drops yet`.
+- Most active waves card with activity but no description content:
+  - Keeps the activity metadata row.
+  - Hides the compact preview row.
 
 ## Edge Cases
 
 - Most active waves preview snippets are read-only; links are not clickable in
   the compact preview row.
-- If latest-drop preview data for a wave is unavailable, the card still opens
-  the wave route.
+- Preview content comes from the wave description drop, not the latest chat
+  message.
+- If the description drop is empty, whitespace-only, or media-free, the card
+  still opens the wave route without a compact preview row.
 - Cards can route to `/messages` for direct-message waves.
 
 ## Failure and Recovery

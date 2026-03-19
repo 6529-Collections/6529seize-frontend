@@ -8,6 +8,7 @@ decision timing, winners, and vote management.
 This area covers:
 - Thread routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
 - `Leaderboard` before voting ends.
+- `Sales` in curation waves.
 - `Winners` after the first decision time passes.
 - `My Votes` in memes and curation waves.
 - Wave-level `Voters` plus non-chat single-drop `Top voters`.
@@ -33,6 +34,8 @@ This area covers:
 
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md): collapsed
   header, pause messaging, and expandable decision history.
+- [Wave Sales Tab](feature-sales-tab.md): curation-wave sale-link cards,
+  loading/empty states, and paging through older decision rounds.
 - [Wave Winners Tab](feature-winners-tab.md): when winners appear and how
   main-thread and right-sidebar winners render in single-decision vs
   multi-decision waves.

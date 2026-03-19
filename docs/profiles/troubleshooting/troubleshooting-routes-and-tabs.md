@@ -65,7 +65,8 @@ Scope:
 
 - Symptom: tab URL opens, then moves to another tab.
   - Meaning: current tab is hidden in current context; app falls back to first
-    visible tab.
+    visible tab. On `/{user}/proxy`, the fallback waits until the app finishes
+    checking whether the profile belongs to you.
   - Action: switch context or use a visible tab URL.
 
 - Symptom: followers stat does not open `/{user}/followers`.
@@ -78,6 +79,13 @@ Scope:
 - Symptom: `/{user}/brain` is blank or shows `No Drops to show`.
   - Meaning: Waves-disabled context, empty feed, or failed drop fetch.
   - Action: refresh; if Waves is unavailable, use `/{user}`.
+
+- Symptom: the Brain `Activity` card shows `Unable to load activity.` or
+  `No activity in last 12 months.`
+  - Meaning: the profile activity request failed, or the resolved identity has
+    no public posts in the last 12 months.
+  - Action: refresh once; if the empty state is expected, use the feed and wave
+    sidebar for broader Brain context.
 
 - Symptom: Collected `Details` shows `-`, `No transactions`,
   `No distributions found`, or `No TDH history found`.
@@ -125,6 +133,7 @@ Scope:
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
+- [Profile Brain Activity Heatmap](../tabs/feature-brain-activity-heatmap.md)
 - [Collected Tab, Stats Summary, and Transfer Mode](../tabs/feature-collected-tab.md)
 - [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
 - [Profile Proxy Tab](../tabs/feature-proxy-tab.md)

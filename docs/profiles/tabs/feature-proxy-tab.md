@@ -26,9 +26,13 @@ Use this page to:
 
 - The `Proxy` tab is visible only when the opened profile matches your connected
   handle or one of your connected wallets.
+- If you open `/{user}/proxy` while your signed-in profile session is still
+  loading, the tab stays visible until the app finishes checking whether the
+  opened profile is yours.
 - If `/{user}/proxy` is opened in a context where the tab is hidden, profile tab
   routing replaces it with the first visible profile tab and keeps the current
-  query string.
+  query string. For direct `/{user}/proxy` loads, that fallback happens only
+  after the ownership check finishes.
 - `Assign Proxy` and accept/reject/revoke/restore buttons are shown only in
   owner mode (your own profile and no active proxy session).
 - Credit and end-time edit controls are shown only when your connected profile
@@ -41,8 +45,8 @@ Use this page to:
    sections.
 3. Review each relationship row:
    - grantor and receiver profiles
-   - action rows with status chips, start time, end time, and credit (when the
-     action type supports credit)
+   - action rows with status chips, start time, end time, and, for credit-based
+     actions, both `Credit` and `Spent`
 4. In owner mode, click `Assign Proxy`:
    1. Search and select a profile owner target (`Search profile`).
    2. If that target already has a relationship, the existing relationship is
@@ -63,6 +67,10 @@ Use this page to:
   `Received` side, revoked actions are removed from the list.
 - Action rows are ordered with active/non-expired actions first, then expired
   actions. Within each group, newer rows are shown first.
+- The `Start` value is rendered from the action's effective `start_time`, so it
+  can differ from when the action record was originally created.
+- Credit-based action rows show both the granted credit amount and a read-only
+  `Spent` total.
 - Current action creation UI supports these action types:
   - `Allocate Rep`
   - `Allocate NIC`
@@ -82,6 +90,9 @@ Use this page to:
 - Grantors can edit:
   - credit amount (credit actions only)
   - end time (`No end time` toggle or specific end time)
+- `Spent` is informational only, is shown for credit-based actions in both
+  received and granted lists, and falls back to `0` when the API does not
+  return a spent value.
 - For `Allocate Rep` and `Allocate NIC`, save stays disabled until credit is
   greater than `0`.
 

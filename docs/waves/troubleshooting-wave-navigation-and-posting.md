@@ -76,9 +76,13 @@ target drop, tabs look wrong, or posting/submission is blocked.
   it appears only after the first decision has passed.
 - `Leaderboard` is missing:
   it can disappear after voting ends.
+- `Sales` is missing:
+  it appears only in curation waves.
 - Leaderboard looks empty:
   `No drops to show`, `No curated drops yet`, and
   `No artwork submissions yet` are valid empty states.
+- Sales looks empty:
+  `No sales yet.` is valid until winning drops expose usable sale links.
 - Winners/Outcome looks empty:
   `No Winners Yet`, `No winners yet`, and `No outcomes to show.` are valid
   until results are available.

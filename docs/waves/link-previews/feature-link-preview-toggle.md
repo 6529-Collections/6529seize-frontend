@@ -6,7 +6,10 @@ Parent: [Link Previews Index](README.md)
 
 Drop authors can hide or restore link previews for a single drop.
 
-- `Hide link previews` appears beside preview cards in thread/chat surfaces.
+- Visible preview and quote cards expose `Hide link previews` inside their
+  `Link actions` menu.
+- On desktop, the `Link actions` trigger appears on hover or keyboard focus.
+- On touch and mobile, the trigger stays visible on the card.
 - When previews are hidden in a thread, the desktop `More` menu can show
   `Restore link previews`.
 - The UI updates immediately, then confirms with the API.
@@ -15,8 +18,10 @@ Drop authors can hide or restore link previews for a single drop.
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Thread desktop `More` menu: `Restore link previews` when the authored drop
-  is already hidden
+- Link preview cards and quote cards inside drop markdown:
+  `Link actions` -> `Hide link previews`
+- Thread desktop `More` menu: `Restore link previews` when the authored drop is
+  already hidden
 - Home-style drop cards that reuse wave markdown previews (for example
   leaderboard/boosted-card content)
 
@@ -26,7 +31,8 @@ action once previews are hidden.
 ## Entry Points
 
 - Open your drop with at least one `http://` or `https://` URL.
-- Select `Hide link previews`.
+- Open `Link actions` from a visible preview or quote card, then select
+  `Hide link previews`.
 - If previews are already hidden on desktop, open `More` and select
   `Restore link previews`.
 
@@ -34,12 +40,13 @@ action once previews are hidden.
 
 1. Open a wave or direct-message thread.
 2. Find your drop with at least one eligible URL.
-3. Select `Hide link previews`.
-4. The drop switches to plain links without an inline restore button in the
+3. Open `Link actions` on a visible preview or quote card.
+4. Select `Hide link previews`.
+5. The drop switches to plain links without an inline restore button in the
    markdown body.
-5. Open the desktop `More` menu for that drop.
-6. Select `Restore link previews` to restore cards.
-7. While a toggle request is in flight, controls show loading and ignore
+6. Open the desktop `More` menu for that drop.
+7. Select `Restore link previews` to restore cards.
+8. While a toggle request is in flight, controls show loading and ignore
    repeat input.
 
 ## Common Scenarios
@@ -47,9 +54,11 @@ action once previews are hidden.
 - Hide previews when you want plain text links in a drop.
 - Restore previews later from the desktop `More` menu without editing the drop
   content.
-- Toggle applies to all link-preview cards in the drop (generic and
-  provider-specific).
+- Toggle applies to all preview cards in the drop (generic, provider-specific,
+  and quote-card rendering).
+- The same card menu also contains `Copy link` and `Open link`.
 - After success, you stay in the same thread context.
+- While a card menu is open, the overlapping drop action tray stays hidden.
 
 ## Edge Cases
 
@@ -73,7 +82,7 @@ action once previews are hidden.
 ## Limitations / Notes
 
 - Visibility is drop-level, not per-link.
-- `Hide link previews` lives beside preview cards when previews are visible.
+- `Hide link previews` lives inside each visible card's `Link actions` menu.
 - `Restore link previews` currently lives in the desktop `More` menu once
   previews are hidden.
 - Hidden previews fall back to plain links until the author restores previews

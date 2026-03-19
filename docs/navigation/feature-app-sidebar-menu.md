@@ -7,6 +7,8 @@ direct profile/discovery jumps, grouped secondary routes, and account actions.
 Primary section switching stays in bottom navigation.
 Connected account surfaces in this drawer can show unread notification
 indicators (dot/count badges) to help account switching.
+When the connected wallet can access Drop Forge, the drawer adds a standalone
+`Drop Forge` row after `About`.
 
 ## Location in the Site
 
@@ -16,9 +18,11 @@ indicators (dot/count badges) to help account switching.
 - Drawer header: connected profile avatar shortcut to
   `/{normalized-handle}` with `/{walletAddress}` fallback.
 - Collapsible groups: `Network`, `Tools`, `About`.
+- Optional permission-gated row: `Drop Forge` after `About`.
 - Footer actions: `Scan QR Code` (Capacitor + scanner support), then either
   `Connect` (disconnected) or connected actions (`Push Notifications`,
-  `Switch Account`, `Disconnect & Logout`).
+  `Disconnect Wallet`, optional `Switch to {nextChain}`,
+  `Disconnect & Logout`).
 
 ## Entry Points
 
@@ -40,11 +44,14 @@ indicators (dot/count badges) to help account switching.
    - connected `Profile` row
    - `Discovery`
    - `Network`, `Tools`, `About`
+   - optional `Drop Forge` row after `About`
 5. Tap the connected profile avatar or `Profile` row to open your own profile
    route (`/{normalized-handle}` with `/{walletAddress}` fallback), tap
-   `Discovery` for `/discover`, or expand grouped sections for nested routes.
+   `Discovery` for `/discover`, use `Drop Forge` when present, or expand
+   grouped sections for nested routes.
 6. Drawer closes and route navigation runs.
-7. Use footer actions for QR scan, connect/session actions, or push settings.
+7. Use footer actions for QR scan, connect/session actions, push settings, and
+   optional chain switching.
 
 ## Common Scenarios
 
@@ -54,6 +61,9 @@ indicators (dot/count badges) to help account switching.
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`.
 - Open `Discovery`:
   use the direct row to route into `/discover`.
+- Open `Drop Forge`:
+  use the standalone row after `About` when the current wallet can access the
+  landing route.
 - Open tools routes:
   `/delegation/delegation-center`, `/delegation/wallet-architecture`,
   `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`,
@@ -73,6 +83,8 @@ indicators (dot/count badges) to help account switching.
 - Use `Scan QR Code` for `https://6529.io/*` links and `mobile6529://` deep
   links (`navigate/*` and `share-connection` scopes).
 - Open `Push Notifications`, review per-device toggles, then save changes.
+- Review `Network: {currentChain}` and use `Switch to {nextChain}` when the
+  current wallet exposes more than one supported chain.
 - Use unread count badges in connected account avatars to pick the account with
   pending notification activity.
 
@@ -84,6 +96,8 @@ indicators (dot/count badges) to help account switching.
   do not navigate.
 - `Profile` row is unavailable when disconnected.
 - Discovery stays available even while disconnected.
+- `Drop Forge` row appears only when the connected wallet can access the
+  landing route.
 - Profile avatar shortcut is unavailable when disconnected because the header
   shows the `6529` home link instead.
 - `Network`, `Tools`, and `About` are collapsible; section headers inside them
@@ -92,6 +106,8 @@ indicators (dot/count badges) to help account switching.
   available.
 - `Scan QR Code` appears only when running in Capacitor with scanner support.
 - `Push Notifications` appears only when connected and opens an in-app modal.
+- Network switch controls appear only when the wallet is connected and more
+  than one supported chain is available.
 - Connected profile/account unread badges are capped at `99+`.
 - Invalid or unsupported QR content shows `Invalid QR code`.
 - Push settings save is disabled until at least one toggle changes.
@@ -102,8 +118,12 @@ indicators (dot/count badges) to help account switching.
 - If route change does not apply, reopen the drawer and select the route again.
 - If `Profile` is missing, connect wallet first or use the header avatar once a
   connected profile is available.
+- If `Drop Forge` is missing, verify the connected wallet can access the
+  landing route and wait for permission checks to finish.
 - If QR scan fails or shows `Invalid QR code`, rescan, update app build if
   needed, or navigate manually.
+- If chain switching is missing, verify the wallet is connected and that more
+  than one supported chain is configured for the current session.
 - If push settings fail to load/save, close and reopen `Push Notifications`, then
   retry save.
 - Opening the target wave/DM thread should clear that wave's unread state and

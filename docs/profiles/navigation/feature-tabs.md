@@ -26,6 +26,7 @@ Profile tab routes live under `/{user}`.
 - `Brain` is shown only when Waves is enabled.
 - `Subscriptions` is hidden on iOS unless consent country is `US`.
 - `Proxy` is shown only when you are on your own profile (matched by connected handle or connected wallet).
+- If you open `/{user}/proxy` while your signed-in profile session is still loading, the app keeps the `Proxy` tab selected until it can finish the ownership check.
 - If the current tab route is hidden in the current context, the app replaces the URL with the first visible tab and keeps the current query string.
 
 ## Query-String Behavior

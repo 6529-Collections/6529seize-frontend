@@ -6,7 +6,7 @@ Use this index to find user-facing docs for routes, actions, loading states,
 empty states, failures, and recovery steps.
 
 Route coverage in this index was verified against `app/**/page.tsx` on
-March 5, 2026.
+March 19, 2026.
 
 ## Quick Start
 
@@ -30,6 +30,7 @@ March 5, 2026.
   [Profiles](profiles/README.md),
   [Profile Troubleshooting](profiles/troubleshooting/README.md)
 - Browse memes, collections, minting, and media actions: [Media](media/README.md)
+- Run Drop Forge craft and launch claim operations: [Drop Forge](drop-forge/README.md)
 - Check app notifications and push behavior:
   [Notifications](notifications/README.md)
 - Follow live NFT activity and socket behavior: [Realtime](realtime/README.md)
@@ -57,6 +58,8 @@ March 5, 2026.
 - [Media](media/README.md): `/the-memes`, `/the-memes/{param*}`,
   `/6529-gradient`, `/6529-gradient/{param*}`, `/meme-lab`,
   `/meme-lab/{param*}`, `/rememes`, `/rememes/{param*}`, `/meme-calendar`
+- [Drop Forge](drop-forge/README.md): `/drop-forge`, `/drop-forge/craft`,
+  `/drop-forge/craft/{id}`, `/drop-forge/launch`, `/drop-forge/launch/{id}`
 - [Notifications](notifications/README.md): `/notifications`
 - [Realtime](realtime/README.md): `/nft-activity`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
@@ -95,6 +98,9 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/meme-lab`, `/meme-lab/collection/{collection}`, `/meme-lab/{id}`,
   `/meme-lab/{id}/distribution`, `/rememes`, `/rememes/add`,
   `/rememes/{contract}/{id}`, `/meme-calendar`
+- Drop Forge:
+  `/drop-forge`, `/drop-forge/craft`, `/drop-forge/craft/{id}`,
+  `/drop-forge/launch`, `/drop-forge/launch/{id}`
 - Notifications and realtime:
   `/notifications`, `/nft-activity`
 - Network and groups:
@@ -168,6 +174,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - [Delegation Routes and Actions](delegation/troubleshooting-delegation-routes-and-actions.md)
 - [EMMA Access and Plan Operations](emma/troubleshooting-emma-access-and-plan-operations.md)
 - [Media Routes and Minting](media/troubleshooting-media-routes-and-minting.md)
+- [Drop Forge Access and Claim Operations](drop-forge/troubleshooting-drop-forge-access-and-claims.md)
 - [NextGen Routes, Mint, and Admin](nextgen/troubleshooting-nextgen-routes-mint-and-admin.md)
 - [NextGen Slideshow and Token Media](nextgen/troubleshooting-nextgen-slideshow-and-token-media.md)
 - [Open Data Routes and Download States](open-data/troubleshooting-open-data-routes-and-downloads.md)

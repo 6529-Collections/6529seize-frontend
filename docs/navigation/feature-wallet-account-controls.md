@@ -3,8 +3,8 @@
 ## Overview
 
 Wallet and account controls cover connect, disconnect, share, account
-selection, logout, and proxy identity switching. Web and app surfaces reach
-the same session outcomes, but they expose different controls.
+selection, network switching, logout, and proxy identity switching. Web and app
+surfaces reach the same session outcomes, but they expose different controls.
 
 ## Location in the Site
 
@@ -48,15 +48,24 @@ the same session outcomes, but they expose different controls.
     `Disconnect & Logout`
   - wallet disconnected: `Connect Wallet`, desktop-web `Share`, `Logout`
   - multi-account web sessions also expose `Sign Out All Profiles`
+- Network controls:
+  - when the connected wallet has more than one supported chain, the dropdown
+    shows `Network: {currentChain}`
+  - `Switch to {nextChain}` cycles to the next supported chain and closes the
+    dropdown
 
 ### App Sidebar Footer
 
 - Disconnected: `Connect`
-- Connected: `Push Notifications`, `Switch Account`, `Disconnect & Logout`
+- Connected: `Push Notifications`, `Disconnect Wallet`, optional
+  `Switch to {nextChain}`, `Disconnect & Logout`
   - connected profile card avatar can show unread count badge (`1-99+`) for
     the active account
   - additional connected account avatars can show unread count badges (`1-99+`)
     and can be selected for account switch
+- Network label:
+  - when the wallet has more than one supported chain, the footer shows
+    `Network: {currentChain}` above the switch action
 - `Scan QR Code` appears only in Capacitor runtime with scanner support.
 
 ## User Journey
@@ -71,6 +80,8 @@ the same session outcomes, but they expose different controls.
 5. Use session actions:
    - `Disconnect Wallet` (web only): disconnect wallet without full logout.
    - desktop-web `Share`: open the QR/deep-link modal from the web dropdown.
+   - `Switch to {nextChain}`: move to the next supported wallet network when
+     chain switching is available.
    - `Disconnect & Logout` / `Logout`: full sign-out.
    - `Sign Out All Profiles` (web only): clear all connected profiles at once.
 6. During known-account switch handoff, active account state stays pinned to
@@ -96,6 +107,8 @@ the same session outcomes, but they expose different controls.
 - Use `Disconnect & Logout` (or `Logout`) to fully sign out.
 - Use web `Disconnect Wallet` when you need wallet disconnect without full
   logout.
+- Use `Switch to {nextChain}` from the web dropdown or app footer when you need
+  to cycle between supported wallet networks.
 - Open `Share` from the web dropdown on desktop web.
 - Use `Sign Out All Profiles` when you need to clear a multi-account web
   session.
@@ -117,6 +130,8 @@ the same session outcomes, but they expose different controls.
 - Proxy switching is not available in app footer.
 - Web `Share` appears only on desktop web after device detection resolves; it
   is hidden in Capacitor/native and mobile-device web contexts.
+- Chain switch controls appear only when the connected wallet has more than one
+  supported chain.
 - Quick double activate cycles accounts only when at least two connected
   accounts are available.
 - Unread count badges are capped at `99+`.
@@ -135,6 +150,8 @@ the same session outcomes, but they expose different controls.
   `Disconnect & Logout`, then reconnect.
 - If quick re-activating the web user row switches accounts unexpectedly, wait
   a moment and use a single activate to reopen the dropdown.
+- If chain switching is missing, verify the wallet is connected and the current
+  session exposes more than one supported chain.
 - If web `Share` is missing, verify you are on desktop web with a resolved
   device state; Capacitor/native and mobile-device web intentionally hide it.
 - If unread account dots/badges look stale, open `/notifications` for the
@@ -148,6 +165,8 @@ the same session outcomes, but they expose different controls.
 - Proxy switching is available only in the web dropdown.
 - `Disconnect Wallet` exists only in web dropdown; app footer uses full logout
   actions.
+- Chain switching cycles through the configured supported wallet networks and
+  appears only when more than one chain is available.
 - Desktop-web `Share` is available from the web dropdown, while disconnected
   desktop web exposes `Share` as a standalone sidebar row instead.
 - Unread dots/badges are notification-count indicators only; they do not show
