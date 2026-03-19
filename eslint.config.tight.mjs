@@ -434,7 +434,7 @@ export default defineConfig([
     "stubs/**",
     "standalone/standalone-memes-mint/src/next.config.ts",
     "standalone/standalone-memes-mint/src/postcss.config.js",
-    "standalone/standalone-memes-mint/src/tailwind.config.ts",
+    "standalone/standalone-memes-mint/src/tailwind.config.cjs",
     ".claude/**",
     ".codex/**",
   ]),

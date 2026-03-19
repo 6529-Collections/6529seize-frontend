@@ -130,7 +130,7 @@ function StandaloneMintPageTopBar() {
     useSeizeConnectContext();
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
+    <div className="tw-flex tw-flex-col tw-gap-4 tw-pt-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
       <div className="tw-flex tw-items-center tw-gap-3">
         <Image src="/6529.svg" alt="6529" width={28} height={28} unoptimized />
         <span className="tw-text-xl tw-font-bold tw-text-white">
@@ -415,77 +415,73 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   function printActions(instance: MintMetadata, manifoldClaim: ManifoldClaim) {
     return (
-      <div className="tw-order-2 tw-p-4 md:tw-order-1 md:tw-col-span-5">
-        <div>
-          <div className="tw-pb-2">
-            <div className="tw-flex tw-items-center tw-justify-between">
-              {props.standalone ? (
-                <div className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight tw-text-white">
-                  {instance.asset.name ?? props.title}
-                </div>
-              ) : (
-                <Link
-                  href={`/${getPathForContract(props.contract)}/${
-                    props.mintMetadata.tokenId
-                  }`}
-                  className="tw-text-white hover:tw-text-white"
-                >
-                  <div className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight">
-                    {instance.asset.name ?? props.title}
-                  </div>
-                </Link>
-              )}
+      <div
+        className={`tw-order-2 md:tw-order-1 md:tw-col-span-5 ${props.standalone ? "tw-py-8" : "tw-py-4"}`}
+      >
+        <div className="tw-flex tw-items-center tw-justify-between">
+          {props.standalone ? (
+            <div className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight tw-text-white">
+              {instance.asset.name ?? props.title}
             </div>
-            <div className="tw-pb-3 tw-pt-1 tw-text-base tw-font-light tw-text-iron-200">
-              <span>
-                {getNameForContract(props.contract)} #
-                {props.mintMetadata.tokenId}
-              </span>
-            </div>
-            {artist?.handle && (
-              <ArtistInfoStrip
-                handle={artist.handle}
-                name={artist.name ?? undefined}
-                standalone={props.standalone}
-              />
-            )}
-            <div className="tw-text-base tw-text-iron-100">
-              {printDescription(instance)}
-            </div>
-            <div className="tw-pt-3">
-              <table className="tw-w-full tw-border-separate tw-border-spacing-0">
-                <tbody>
-                  <MetadataRow
-                    label="Edition Size"
-                    value={
-                      <span className="tw-flex tw-items-center tw-justify-end tw-gap-1.5">
-                        {isManifoldClaimFetching && <Spinner dimension={12} />}
-                        <b>
-                          {numberWithCommas(manifoldClaim.total)} /{" "}
-                          {numberWithCommas(manifoldClaim.totalMax)}
-                          {manifoldClaim.remaining > 0 &&
-                            manifoldClaim.status !==
-                              ManifoldClaimStatus.ENDED && (
-                              <> ({manifoldClaim.remaining} remaining)</>
-                            )}
-                        </b>
-                      </span>
-                    }
-                  />
-                </tbody>
-              </table>
-            </div>
-            <div className="tw-pt-3">
-              <NowMintingCountdown
-                nftId={props.mintMetadata.tokenId}
-                hideMintBtn={true}
-                contract={props.contract}
-                chainId={props.chain.id}
-              />
-            </div>
-            <div className="tw-pt-3">{printMint()}</div>
-          </div>
+          ) : (
+            <Link
+              href={`/${getPathForContract(props.contract)}/${
+                props.mintMetadata.tokenId
+              }`}
+              className="tw-text-white hover:tw-text-white"
+            >
+              <div className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight">
+                {instance.asset.name ?? props.title}
+              </div>
+            </Link>
+          )}
         </div>
+        <div className="tw-pb-3 tw-pt-1 tw-text-base tw-font-light tw-text-iron-200">
+          <span>
+            {getNameForContract(props.contract)} #{props.mintMetadata.tokenId}
+          </span>
+        </div>
+        {artist?.handle && (
+          <ArtistInfoStrip
+            handle={artist.handle}
+            name={artist.name ?? undefined}
+            standalone={props.standalone}
+          />
+        )}
+        <div className="tw-text-base tw-text-iron-100">
+          {printDescription(instance)}
+        </div>
+        <div className="tw-pt-3">
+          <table className="tw-w-full tw-border-separate tw-border-spacing-0">
+            <tbody>
+              <MetadataRow
+                label="Edition Size"
+                value={
+                  <span className="tw-flex tw-items-center tw-justify-end tw-gap-1.5">
+                    {isManifoldClaimFetching && <Spinner dimension={12} />}
+                    <b>
+                      {numberWithCommas(manifoldClaim.total)} /{" "}
+                      {numberWithCommas(manifoldClaim.totalMax)}
+                      {manifoldClaim.remaining > 0 &&
+                        manifoldClaim.status !== ManifoldClaimStatus.ENDED && (
+                          <> ({manifoldClaim.remaining} remaining)</>
+                        )}
+                    </b>
+                  </span>
+                }
+              />
+            </tbody>
+          </table>
+        </div>
+        <div className="tw-pt-3">
+          <NowMintingCountdown
+            nftId={props.mintMetadata.tokenId}
+            hideMintBtn={true}
+            contract={props.contract}
+            chainId={props.chain.id}
+          />
+        </div>
+        <div className="tw-pt-3">{printMint()}</div>
       </div>
     );
   }
@@ -513,7 +509,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6">
         {printTestnetIndicator()}
         {printTitle()}
-        <div className="tw-p-4">
+        <div className={props.standalone ? "tw-py-8" : "tw-py-4"}>
           {isError ? (
             <span className="tw-text-iron-100">
               Error fetching mint information
@@ -531,7 +527,9 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!instance || !nftImage) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-p-4 tw-px-4 md:tw-px-6">
+      <div
+        className={`tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6 ${props.standalone ? "tw-py-8" : "tw-py-4"}`}
+      >
         {printTestnetIndicator()}
         {printTitle()}
         <div>
@@ -545,7 +543,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6">
       {printTestnetIndicator()}
       {props.standalone && (
-        <div className="tw-pb-8">
+        <div>
           <StandaloneMintPageTopBar />
           <div className="tw-mt-4 tw-h-px tw-w-full tw-bg-white/20" />
         </div>

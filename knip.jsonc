@@ -17,7 +17,7 @@
       "standalone/standalone-memes-mint/src/app/page.tsx",
       "standalone/standalone-memes-mint/src/next.config.ts",
       "standalone/standalone-memes-mint/src/postcss.config.js",
-      "standalone/standalone-memes-mint/src/tailwind.config.ts",
+      "standalone/standalone-memes-mint/src/tailwind.config.cjs",
       "eslint.config.tight.mjs",
       "eslint.config.diff.mjs",
       "jest.config.js",
@@ -51,7 +51,7 @@
       "standalone/standalone-memes-mint/src/app/page.tsx": ["exports"],
       "standalone/standalone-memes-mint/src/next.config.ts": ["exports"],
       "standalone/standalone-memes-mint/src/postcss.config.js": ["exports"],
-      "standalone/standalone-memes-mint/src/tailwind.config.ts": ["exports"],
+      "standalone/standalone-memes-mint/src/tailwind.config.cjs": ["exports"],
       "utils/sentry-client-filters.ts": ["exports", "types"],
       "lib/fetch/ssrFetch.ts": ["exports"],
       "config/serverEnv.ts": ["exports"]
