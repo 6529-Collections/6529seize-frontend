@@ -10,6 +10,7 @@ import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
+import DropMediaAttachmentCard from "./DropMediaAttachmentCard";
 
 enum MediaType {
   IMAGE = "IMAGE",
@@ -17,6 +18,7 @@ enum MediaType {
   AUDIO = "AUDIO",
   GLB = "GLB",
   HTML = "HTML",
+  CSV = "CSV",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -73,6 +75,9 @@ export default function DropListItemContentMedia({
     if (media_mime_type === "text/html") {
       return MediaType.HTML;
     }
+    if (media_mime_type === "text/csv") {
+      return MediaType.CSV;
+    }
     return MediaType.UNKNOWN;
   };
 
@@ -125,6 +130,13 @@ export default function DropListItemContentMedia({
           title=""
           src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")}
           className="tw-h-full tw-w-full"
+        />
+      );
+    case MediaType.CSV:
+      return (
+        <DropMediaAttachmentCard
+          src={media_url}
+          mimeType={media_mime_type}
         />
       );
     case MediaType.UNKNOWN:

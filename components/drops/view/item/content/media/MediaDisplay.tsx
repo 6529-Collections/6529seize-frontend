@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import { ImageScale } from "@/helpers/image.helpers";
 import MediaDisplayAudio from "./MediaDisplayAudio";
+import DropMediaAttachmentCard from "./DropMediaAttachmentCard";
 import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";
 
@@ -13,6 +14,7 @@ enum MediaType {
   AUDIO = "AUDIO",
   GLB = "GLB",
   HTML = "HTML",
+  CSV = "CSV",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -63,6 +65,9 @@ export default function MediaDisplay({
     if (media_mime_type === "text/html") {
       return MediaType.HTML;
     }
+    if (media_mime_type === "text/csv") {
+      return MediaType.CSV;
+    }
     return MediaType.UNKNOWN;
   };
 
@@ -103,6 +108,13 @@ export default function MediaDisplay({
           title=""
           src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")}
           className="tw-h-full tw-w-full"
+        />
+      );
+    case MediaType.CSV:
+      return (
+        <DropMediaAttachmentCard
+          src={media_url}
+          mimeType={media_mime_type}
         />
       );
     case MediaType.UNKNOWN:

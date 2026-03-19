@@ -10,6 +10,9 @@ jest.mock('@/components/drops/view/item/content/media/MediaDisplayVideo', () => 
 jest.mock('@/components/drops/view/item/content/media/MediaDisplayAudio', () => (props: any) => (
   <div data-testid="audio" data-src={props.src} data-controls={String(props.showControls)} />
 ));
+jest.mock('@/components/drops/view/item/content/media/DropMediaAttachmentCard', () => (props: any) => (
+  <div data-testid="attachment" data-src={props.src} data-mime={props.mimeType} />
+));
 
 jest.mock('next/dynamic', () => (importFn: any) => importFn().then ? () => <div data-testid="glb" /> : () => <div data-testid="glb" />);
 
@@ -39,6 +42,13 @@ describe('MediaDisplay', () => {
   it('renders glb', () => {
     render(<MediaDisplay media_mime_type="model" media_url="model.glb" />);
     expect(screen.getByTestId('glb')).toBeInTheDocument();
+  });
+
+  it('renders attachment card for csv', () => {
+    render(<MediaDisplay media_mime_type="text/csv" media_url="file.csv" />);
+    const node = screen.getByTestId('attachment');
+    expect(node).toHaveAttribute('data-src', 'file.csv');
+    expect(node).toHaveAttribute('data-mime', 'text/csv');
   });
 
   it('renders empty fragment for unknown', () => {

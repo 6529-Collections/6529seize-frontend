@@ -6,6 +6,7 @@ jest.mock('@/components/drops/view/item/content/media/DropListItemContentMediaIm
 jest.mock('@/components/drops/view/item/content/media/DropListItemContentMediaVideo', () => ({ __esModule: true, default: () => <div data-testid="video" /> }));
 jest.mock('@/components/drops/view/item/content/media/DropListItemContentMediaAudio', () => ({ __esModule: true, default: () => <div data-testid="audio" /> }));
 jest.mock('@/components/drops/view/item/content/media/DropListItemContentMediaGLB', () => ({ __esModule: true, default: () => <div data-testid="glb" /> }));
+jest.mock('@/components/drops/view/item/content/media/DropMediaAttachmentCard', () => ({ __esModule: true, default: () => <div data-testid="attachment" /> }));
 jest.mock('next/dynamic', () => (importer: any) => () => <div data-testid="glb" />);
 
 describe('DropListItemContentMedia', () => {
@@ -27,6 +28,11 @@ describe('DropListItemContentMedia', () => {
   it('renders glb component', () => {
     render(<DropListItemContentMedia media_mime_type="model/gltf-binary" media_url="file.glb" />);
     expect(screen.getByTestId('glb')).toBeInTheDocument();
+  });
+
+  it('renders attachment card for csv', () => {
+    render(<DropListItemContentMedia media_mime_type="text/csv" media_url="file.csv" />);
+    expect(screen.getByTestId('attachment')).toBeInTheDocument();
   });
 
   it('renders empty fragment for unknown type', () => {
