@@ -72,8 +72,11 @@ export default defineConfig([
     "*.tsx",
     "scripts/**",
     "stubs/**",
+    "standalone/standalone-memes-mint/src/next.config.ts",
+    "standalone/standalone-memes-mint/src/postcss.config.js",
+    "standalone/standalone-memes-mint/src/tailwind.config.ts",
     ".claude/**",
-        ".codex/**",
+    ".codex/**",
   ]),
 
   // Base config with Next.js rules
@@ -100,6 +103,7 @@ export default defineConfig([
     files: ["**/*.{ts,tsx}"],
     ignores: [
       "scripts/**",
+      "**/next.config.*",
       "config/env.ts",
       "config/serverEnv.ts",
       "config/alchemyEnv.ts",
