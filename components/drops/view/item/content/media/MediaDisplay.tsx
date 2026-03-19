@@ -2,6 +2,7 @@
 
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import InteractiveMediaLoadGate from "@/components/drops/media/InteractiveMediaLoadGate";
+import { parseIpfsUrl } from "@/helpers/Helpers";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
@@ -24,6 +25,10 @@ const MediaDisplayGLB = dynamic(() => import("./MediaDisplayGLB"), {
   ssr: false,
 });
 
+const DEFAULT_HTML_MEDIA_TITLE = "Interactive HTML media";
+
+const normalizeMediaUrl = (mediaUrl: string): string => parseIpfsUrl(mediaUrl);
+
 function InteractiveHtmlMediaDisplay({
   media_url,
   previewImageUrl,
@@ -34,6 +39,7 @@ function InteractiveHtmlMediaDisplay({
   readonly imageScale?: ImageScale | undefined;
 }) {
   const [isActivated, setIsActivated] = useState(false);
+  const normalizedMediaUrl = normalizeMediaUrl(media_url);
 
   if (!isActivated) {
     return (
@@ -47,8 +53,8 @@ function InteractiveHtmlMediaDisplay({
 
   return (
     <SandboxedExternalIframe
-      title=""
-      src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")}
+      title={DEFAULT_HTML_MEDIA_TITLE}
+      src={normalizedMediaUrl}
       className="tw-h-full tw-w-full"
     />
   );
@@ -81,6 +87,7 @@ export default function MediaDisplay({
   readonly previewImageUrl?: string | null | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
 }) {
+  const normalizedMediaUrl = normalizeMediaUrl(media_url);
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
       return MediaType.IMAGE;
@@ -150,8 +157,8 @@ export default function MediaDisplay({
     case MediaType.HTML:
       return (
         <SandboxedExternalIframe
-          title=""
-          src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")}
+          title={DEFAULT_HTML_MEDIA_TITLE}
+          src={normalizedMediaUrl}
           className="tw-h-full tw-w-full"
         />
       );
