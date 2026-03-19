@@ -17,7 +17,7 @@ const originalEnv = process.env;
 function freshImportPublicEnvSchema() {
   jest.resetModules();
   // Adjust path if needed
-   
+
   const mod = require("@/config/env.schema");
   if (!mod.publicEnvSchema) {
     throw new Error(
@@ -163,6 +163,15 @@ describe("config/env.ts publicEnv loader", () => {
     const { publicEnv } = require("@/config/env");
     expect(publicEnv.BASE_ENDPOINT).toBe("https://6529.io");
     expect(publicEnv.API_ENDPOINT).toBe("https://api.6529.io");
+  });
+
+  it("parses DROP_FORGE_TESTNET when baked runtime value is boolean", () => {
+    process.env["PUBLIC_RUNTIME"] = JSON.stringify({
+      ...defaultInput,
+      DROP_FORGE_TESTNET: true,
+    });
+    const { publicEnv } = require("@/config/env");
+    expect(publicEnv.DROP_FORGE_TESTNET).toBe(true);
   });
 
   it("throws for invalid BASE_ENDPOINT via PUBLIC_RUNTIME JSON", () => {

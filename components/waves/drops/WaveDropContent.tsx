@@ -28,6 +28,9 @@ interface WaveDropContentProps {
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly hasTouch?: boolean | undefined;
+  readonly onLinkCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
 }
 
 const WaveDropContent: React.FC<WaveDropContentProps> = ({
@@ -45,6 +48,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
   hasTouch,
+  onLinkCardActionsActiveChange,
 }) => {
   const isTouchDevice = useIsTouchDevice();
   const effectiveHasTouch = hasTouch ?? isTouchDevice;
@@ -65,6 +69,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
       isCompetitionDrop={isCompetitionDrop}
       mediaImageScale={mediaImageScale}
       hasTouch={effectiveHasTouch}
+      onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
     />
   );
 };

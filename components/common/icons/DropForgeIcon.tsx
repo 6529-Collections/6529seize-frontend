@@ -1,0 +1,21 @@
+const DropForgeIcon = ({
+  className,
+}: {
+  readonly className?: string | undefined;
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 32 32"
+    preserveAspectRatio="xMidYMid meet"
+    className={className}
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      d="M22.933 24.607h3.972v-1.818c1.232-0.436 2.465-1.219 3.697-2.291-1.236-1.094-2.448-1.703-3.697-1.995v-1.856h-14.575v1.269h-5.549c0.998 2.422 3.198 4.083 5.549 4.636v2.056h3.655c-0.869 2.19-2.502 3.935-4.36 5.44h15.985c-2.216-1.505-3.847-3.248-4.677-5.44zM14.855 15.567l3.076-1.385-1.332-4.39-3.483-3.422-1.996 0.899 1.053 3.473-11.095 4.994 0.783 1.739 11.095-4.995zM22.547 15.462l7.927-3.179-4.418-0.123 2.981-4.286-4.584 2.45 1.34-5.963-4.768 7.585-0.516-2.040-1.886 5.552 3.911-1.833z"
+    />
+  </svg>
+);
+
+export default DropForgeIcon;

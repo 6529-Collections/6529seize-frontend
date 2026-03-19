@@ -12,17 +12,22 @@ import {
 } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
+const VIEWPORT_PADDING = 16;
+const MENU_GAP = 8;
+
 export default function CommonDropdownItemsDefaultWrapper({
   isOpen,
   setOpen,
   buttonRef,
   dynamicPosition = true,
+  closeOnFocusOutside = true,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement | null>;
   readonly dynamicPosition?: boolean | undefined;
+  readonly closeOnFocusOutside?: boolean | undefined;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -49,25 +54,40 @@ export default function CommonDropdownItemsDefaultWrapper({
     const dropdownEl = dropdownRef.current;
 
     // Get width from the list element if possible, otherwise the wrapper
-    const width = listRef.current?.offsetWidth ?? dropdownEl.offsetWidth ?? 288;
+    const width = listRef.current?.offsetWidth ?? dropdownEl.offsetWidth;
+    const height = listRef.current?.offsetHeight ?? dropdownEl.offsetHeight;
 
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
+    const viewportTop = scrollY + VIEWPORT_PADDING;
+    const viewportLeft = scrollX + VIEWPORT_PADDING;
+    const viewportRight = scrollX + window.innerWidth - VIEWPORT_PADDING;
+    const viewportBottom = scrollY + window.innerHeight - VIEWPORT_PADDING;
+    const availableAbove = buttonRect.top - VIEWPORT_PADDING;
+    const availableBelow =
+      window.innerHeight - buttonRect.bottom - VIEWPORT_PADDING;
+    const shouldOpenAbove =
+      height > 0 &&
+      availableBelow < height + MENU_GAP &&
+      availableAbove > availableBelow;
 
-    // Vertical position: below the button
-    const top = buttonRect.bottom + scrollY;
+    const unclampedTop = shouldOpenAbove
+      ? buttonRect.top + scrollY - height - MENU_GAP
+      : buttonRect.bottom + scrollY + MENU_GAP;
+    const maxTop = Math.max(viewportTop, viewportBottom - height);
+    const top = Math.min(Math.max(unclampedTop, viewportTop), maxTop);
 
     // Horizontal position: default to left align
     let left = buttonRect.left + scrollX;
 
     // Check if it overflows right edge of viewport
-    if (buttonRect.left + width > window.innerWidth - 16) {
+    if (buttonRect.left + width > window.innerWidth - VIEWPORT_PADDING) {
       // Switch to right align (align right edge of dropdown with right edge of button)
       left = buttonRect.right + scrollX - width;
     }
 
-    // Ensure it doesn't overflow left edge
-    left = Math.max(16, left);
+    const maxLeft = Math.max(viewportLeft, viewportRight - width);
+    left = Math.min(Math.max(left, viewportLeft), maxLeft);
 
     dropdownEl.style.top = `${top}px`;
     dropdownEl.style.left = `${left}px`;
@@ -88,6 +108,33 @@ export default function CommonDropdownItemsDefaultWrapper({
     };
   }, [dynamicPosition, isOpen, position]);
 
+  useEffect(() => {
+    if (!isOpen || !closeOnFocusOutside) {
+      return;
+    }
+
+    const handleFocusIn = (event: FocusEvent) => {
+      if (!(event.target instanceof Node)) {
+        return;
+      }
+
+      if (
+        buttonRef.current?.contains(event.target) ||
+        listRef.current?.contains(event.target)
+      ) {
+        return;
+      }
+
+      setOpen(false);
+    };
+
+    document.addEventListener("focusin", handleFocusIn);
+
+    return () => {
+      document.removeEventListener("focusin", handleFocusIn);
+    };
+  }, [buttonRef, closeOnFocusOutside, isOpen, setOpen]);
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -107,7 +154,7 @@ export default function CommonDropdownItemsDefaultWrapper({
             ref={listRef}
             role="menu"
             tabIndex={-1}
-            className="tw-mt-2 tw-w-56 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
+            className="tw-w-56 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

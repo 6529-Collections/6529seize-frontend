@@ -87,7 +87,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               <div className="tw-flex tw-gap-x-2">
                 <WaveWinnersDropHeaderAuthorPfp winner={winner} size="sm" />
                 <div className="tw-flex tw-items-center">
-                  <div className="-tw-mt-0.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
+                  <div className="-tw-mt-0.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
                     {winner.drop.author.handle ? (
                       <UserProfileTooltipWrapper
                         user={winner.drop.author.handle}

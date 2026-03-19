@@ -28,6 +28,9 @@ interface WaveDropPartContentMarkdownProps {
     | undefined;
   readonly onCancel?: (() => void) | undefined;
   readonly drop?: ApiDrop | undefined; // Add drop to check for edited status
+  readonly onLinkCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
 }
 
 const WaveDropPartContentMarkdown: React.FC<
@@ -44,6 +47,7 @@ const WaveDropPartContentMarkdown: React.FC<
   onSave,
   onCancel,
   drop,
+  onLinkCardActionsActiveChange,
 }) => {
   const linkPreviewToggleControl = useDropLinkPreviewToggleControl(drop);
   const currentQuotePath =
@@ -89,6 +93,7 @@ const WaveDropPartContentMarkdown: React.FC<
           hideLinkPreviews={drop?.hide_link_preview}
           quotePath={currentQuotePath}
           linkPreviewToggleControl={linkPreviewToggleControl}
+          onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
         />
         {typeof drop?.updated_at === "number" &&
           drop.updated_at !== drop.created_at && (
@@ -111,6 +116,7 @@ const WaveDropPartContentMarkdown: React.FC<
             embedPath={drop?.id ? [drop.id] : []}
             quotePath={currentQuotePath}
             embedDepth={1}
+            onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />
         </div>
       )}

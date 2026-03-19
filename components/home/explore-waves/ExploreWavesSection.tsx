@@ -82,7 +82,7 @@ export function ExploreWavesSection({
           </div>
         </div>
 
-        <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-5 lg:tw-grid-cols-3">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
           {isLoading
             ? Array.from({ length: limit }).map((_, index) => (
                 <div key={`skeleton-${index}`} className="tw-w-full">

@@ -1,6 +1,7 @@
 import { CollectedStatsSeasonTile } from "@/components/user/collected/stats/subcomponents/CollectedStatsSeasonTile";
 import type { DisplaySeason } from "@/components/user/collected/stats/types";
-import { render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 let shouldReduceMotion = false;
 
@@ -16,6 +17,7 @@ const buildSeason = (
 ): DisplaySeason => ({
   id: "Season 2",
   label: "SZN2",
+  seasonNumber: 2,
   totalCards: 39,
   setsHeld: 1,
   nextSetCards: 26,
@@ -34,11 +36,11 @@ const renderTile = (
   render(
     <CollectedStatsSeasonTile
       season={season}
-      isActive={false}
+      isSelected={false}
       showDetailText={false}
       hasTouchScreen={false}
       shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
-      onActivate={jest.fn()}
+      onPreview={jest.fn()}
     />
   );
 
@@ -115,5 +117,122 @@ describe("CollectedStatsSeasonTile", () => {
       `${CIRCUMFERENCE - season.progressPct * CIRCUMFERENCE}`
     );
     expect(progressCircle?.querySelector("animate")).not.toBeInTheDocument();
+  });
+
+  it("does not trigger the selection handler on hover", async () => {
+    const user = userEvent.setup();
+    const onPreview = jest.fn();
+    const onSelect = jest.fn();
+
+    render(
+      <CollectedStatsSeasonTile
+        season={buildSeason()}
+        isSelected={false}
+        showDetailText={false}
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={onPreview}
+        onSelect={onSelect}
+      />
+    );
+
+    const button = screen.getByRole("button", { name: /szn2/i });
+
+    await user.hover(button);
+
+    expect(onPreview).toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("shows a subtle selected state on the whole tile", () => {
+    render(
+      <CollectedStatsSeasonTile
+        season={buildSeason()}
+        isSelected
+        showDetailText={false}
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: /szn2/i })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: /szn2/i })).toHaveClass(
+      "tw-border-iron-700",
+      "tw-bg-iron-950/80"
+    );
+  });
+
+  it("uses hover-only scaling for the season tile", () => {
+    render(
+      <CollectedStatsSeasonTile
+        season={buildSeason()}
+        isSelected={false}
+        showDetailText={false}
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    const button = screen.getByRole("button", { name: /szn2/i });
+
+    expect(button).toHaveClass("tw-border-transparent", "tw-bg-transparent");
+    expect(button).toHaveClass("desktop-hover:hover:tw-scale-[1.03]");
+    expect(button).not.toHaveClass(
+      "hover:tw-scale-[1.01]",
+      "focus-visible:tw-scale-[1.01]"
+    );
+  });
+
+  it("does not trigger preview when selection is activated by click", () => {
+    const onPreview = jest.fn();
+    const onSelect = jest.fn();
+
+    render(
+      <CollectedStatsSeasonTile
+        season={buildSeason()}
+        isSelected={false}
+        showDetailText={false}
+        hasTouchScreen
+        shouldAnimateProgressOnMount
+        onPreview={onPreview}
+        onSelect={onSelect}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /szn2/i }));
+
+    expect(onPreview).not.toHaveBeenCalled();
+    expect(onSelect).toHaveBeenCalled();
+  });
+
+  it("keeps detail text constrained to a single centered line", () => {
+    render(
+      <CollectedStatsSeasonTile
+        season={buildSeason({
+          detailText: "Set 1 complete",
+        })}
+        isSelected={false}
+        showDetailText
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("Set 1 complete")).toHaveClass(
+      "tw-w-full",
+      "tw-whitespace-nowrap",
+      "tw-text-center"
+    );
+    expect(screen.getByRole("button", { name: /szn2/i })).toHaveClass(
+      "tw-w-[78px]",
+      "sm:tw-w-[88px]",
+      "tw-px-2"
+    );
   });
 });

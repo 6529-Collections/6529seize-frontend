@@ -9,11 +9,13 @@ interface CollectedStatsSeasonsProps {
   readonly hiddenStartedSeasonCount: number;
   readonly notStartedSeasons: DisplaySeason[];
   readonly activeSeasonId: string | null;
+  readonly activeSeasonNumber: number | null;
   readonly hasTouchScreen: boolean;
   readonly isDesktopLayout: boolean;
   readonly isDesktopSeasonListExpanded: boolean;
   readonly desktopSeasonsRef: RefObject<HTMLDivElement | null>;
   readonly onActivateSeason: (seasonId: string) => void;
+  readonly onSeasonShortcut?: ((seasonNumber: number) => void) | undefined;
   readonly onToggleExpanded: () => void;
 }
 
@@ -24,15 +26,19 @@ export function CollectedStatsSeasons({
   hiddenStartedSeasonCount,
   notStartedSeasons,
   activeSeasonId,
+  activeSeasonNumber,
   hasTouchScreen,
   isDesktopLayout,
   isDesktopSeasonListExpanded,
   desktopSeasonsRef,
   onActivateSeason,
+  onSeasonShortcut,
   onToggleExpanded,
 }: Readonly<CollectedStatsSeasonsProps>) {
   const shouldAnimateProgressOnMount =
     !isDesktopLayout || !isDesktopSeasonListExpanded;
+  const desktopToggleClassName =
+    "tw-inline-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-text-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500";
 
   if (startedSeasons.length === 0) {
     return null;
@@ -43,11 +49,16 @@ export function CollectedStatsSeasons({
       <CollectedStatsSeasonTile
         key={season.id}
         season={season}
-        isActive={season.id === activeSeasonId}
+        isSelected={season.seasonNumber === activeSeasonNumber}
         showDetailText={hasTouchScreen || season.id === activeSeasonId}
         hasTouchScreen={hasTouchScreen}
         shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
-        onActivate={() => onActivateSeason(season.id)}
+        onPreview={() => onActivateSeason(season.id)}
+        onSelect={
+          onSeasonShortcut
+            ? () => onSeasonShortcut(season.seasonNumber)
+            : undefined
+        }
       />
     ));
 
@@ -65,35 +76,35 @@ export function CollectedStatsSeasons({
       <div ref={desktopSeasonsRef} className="tw-w-full">
         {isDesktopLayout ? (
           <>
-            <div className="tw-relative tw-w-full tw-pb-1 tw-pt-3">
-              <div className="tw-flex tw-w-full tw-flex-wrap tw-items-start tw-gap-x-3 tw-gap-y-3">
+            <div className="tw-w-full tw-pt-3">
+              <div className="tw-flex tw-w-full tw-flex-wrap tw-items-start tw-gap-x-1 tw-gap-y-2">
                 {renderTiles(visibleStartedSeasons)}
               </div>
-
-              {!isDesktopSeasonListExpanded && hiddenStartedSeasonCount > 0 && (
-                <button
-                  type="button"
-                  aria-expanded={false}
-                  aria-label={`Show ${hiddenStartedSeasonCount} more started seasons`}
-                  onClick={onToggleExpanded}
-                  className="tw-absolute tw-right-0 tw-top-[35%] tw-inline-flex -tw-translate-y-[35%] tw-items-center tw-justify-center tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-text-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500"
-                >
-                  +{hiddenStartedSeasonCount} more
-                </button>
-              )}
             </div>
 
-            {hiddenStartedSeasonCount > 0 && isDesktopSeasonListExpanded && (
-              <div className="tw-flex tw-justify-center tw-pt-1">
-                <button
-                  type="button"
-                  aria-expanded={isDesktopSeasonListExpanded}
-                  aria-label="Show less"
-                  onClick={onToggleExpanded}
-                  className="tw-inline-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-text-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500"
-                >
-                  Show less
-                </button>
+            {hiddenStartedSeasonCount > 0 && (
+              <div className="tw-flex tw-justify-center -tw-mb-2 tw-mt-1">
+                {isDesktopSeasonListExpanded ? (
+                  <button
+                    type="button"
+                    aria-expanded
+                    aria-label="Show less"
+                    onClick={onToggleExpanded}
+                    className={desktopToggleClassName}
+                  >
+                    Show less
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    aria-expanded={false}
+                    aria-label={`Show ${hiddenStartedSeasonCount} more started seasons`}
+                    onClick={onToggleExpanded}
+                    className={desktopToggleClassName}
+                  >
+                    +{hiddenStartedSeasonCount} more
+                  </button>
+                )}
               </div>
             )}
           </>

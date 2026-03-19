@@ -31,6 +31,7 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 jest.mock("@/hooks/useVirtualizedWaveDrops");
 jest.mock("@/hooks/useScrollBehavior");
 jest.mock("@/hooks/useWaveIsTyping");
+jest.mock("@/hooks/useWaveBoostedDrops");
 jest.mock("@/components/notifications/NotificationsContext");
 jest.mock("@/components/auth/Auth");
 jest.mock("@/services/api/common-api");
@@ -70,26 +71,26 @@ jest.mock("@/components/drops/view/DropsList", () => ({
   },
 }));
 
-jest.mock("@/components/waves/drops/WaveDropsScrollBottomButton", () => ({
+jest.mock("@/components/waves/drops/WaveDropsScrollControls", () => ({
   __esModule: true,
-  WaveDropsScrollBottomButton: (props: any) => {
+  WaveDropsScrollControls: (props: any) => {
     scrollButtonProps = props;
     const handleClick = () => {
       if (props.newMessagesCount > 0 && props.onRevealNewMessages) {
         props.onRevealNewMessages();
-      } else {
-        props.scrollToBottom();
+        return;
       }
-    };
-    return <button data-testid="scroll-bottom-btn" onClick={handleClick} />;
-  },
-}));
 
-jest.mock("@/components/waves/drops/WaveDropsScrollToUnreadButton", () => ({
-  __esModule: true,
-  WaveDropsScrollToUnreadButton: () => (
-    <button data-testid="scroll-unread-btn" />
-  ),
+      props.scrollToBottom();
+    };
+
+    return (
+      <>
+        <button data-testid="scroll-bottom-btn" onClick={handleClick} />
+        <button data-testid="scroll-unread-btn" />
+      </>
+    );
+  },
 }));
 
 jest.mock("@/components/waves/drops/WaveDropsEmptyPlaceholder", () => ({
@@ -121,8 +122,6 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 const mockPush = jest.fn();
 const mockScrollToVisualBottom = jest.fn();
 const mockForcePinToBottom = jest.fn();
-const mockRecomputePinState = jest.fn();
-const mockHandleScroll = jest.fn();
 const mockScrollContainerRef = { current: document.createElement("div") };
 const mockScrollContainerCallbackRef = jest.fn();
 const mockBottomAnchorRef = { current: document.createElement("div") };
@@ -259,8 +258,6 @@ function setupMocks(options: MockSetupOptions = {}) {
         scrollIntent: options.scrollBehavior?.scrollIntent ?? "pinned",
         scrollToVisualBottom: mockScrollToVisualBottom,
         forcePinToBottom: mockForcePinToBottom,
-        recomputePinState: mockRecomputePinState,
-        handleScroll: mockHandleScroll,
       };
     }
   );
@@ -286,6 +283,10 @@ function setupMocks(options: MockSetupOptions = {}) {
   require("@/hooks/useWaveIsTyping").useWaveIsTyping.mockReturnValue(
     options.typingMessage ?? null
   );
+
+  require("@/hooks/useWaveBoostedDrops").useWaveBoostedDrops.mockReturnValue({
+    data: undefined,
+  });
 
   // Setup API mock
   require("@/services/api/common-api").commonApiPostWithoutBodyAndResponse.mockImplementation(
@@ -450,7 +451,7 @@ describe("WaveDropsAll", () => {
         activeDrop: mockActiveDrop,
         dropViewDropId: "target-drop",
         onReply: props.onReply,
-        onQuote: props.onQuote,
+        onQuoteClick: expect.any(Function),
       });
     });
   });
@@ -708,7 +709,41 @@ describe("WaveDropsAll", () => {
         expect(scrollButtonProps.newMessagesCount).toBe(0);
       });
 
-      expect(mockScrollToVisualBottom).toHaveBeenCalled();
+      expect(mockForcePinToBottom).toHaveBeenCalled();
+    });
+
+    it("shows new drops immediately on non-Apple mobile while reading", () => {
+      const initialDrop = createMockDrop({ id: "drop-1", serial_no: 1 });
+      const newDrop = createMockDrop({
+        id: "drop-2",
+        serial_no: 2,
+        created_at: Date.now() + 1000,
+      });
+
+      const { getWaveMessages, setWaveMessages } = setupMocks({
+        waveMessages: { drops: [initialDrop] },
+        scrollBehavior: {
+          isAtBottom: false,
+          shouldPinToBottom: false,
+          scrollIntent: "reading",
+        },
+        deviceInfo: { isAppleMobile: false },
+      });
+
+      const renderResult = renderComponent();
+      const { props } = renderResult;
+
+      act(() => {
+        const currentWaveMessages = getWaveMessages();
+        setWaveMessages({
+          ...(currentWaveMessages ?? {}),
+          drops: [newDrop, initialDrop],
+        });
+        renderResult.rerender(<WaveDropsAll {...props} />);
+      });
+
+      expect(dropsProps.drops).toHaveLength(2);
+      expect(scrollButtonProps.newMessagesCount).toBe(0);
     });
   });
 
@@ -735,7 +770,7 @@ describe("WaveDropsAll", () => {
       expect(containerProps.hasNextPage).toBe(true);
     });
 
-    it("does not expose deprecated onUserScroll callback on reverse container", async () => {
+    it("keeps scroll handling out of the reverse container", async () => {
       setupMocks({
         waveMessages: { drops: [createMockDrop()] },
       });
@@ -747,9 +782,9 @@ describe("WaveDropsAll", () => {
         expect(screen.getByTestId("reverse-container")).toBeInTheDocument();
       });
 
-      // Legacy onUserScroll callback is no longer provided
+      // Scroll ownership stays in useScrollBehavior; the container is presentational.
       expect(containerProps.onUserScroll).toBeUndefined();
-      // onTopIntersection should still be a callable handler
+      expect(containerProps.onScroll).toBeUndefined();
       expect(typeof containerProps.onTopIntersection).toBe("function");
     });
 

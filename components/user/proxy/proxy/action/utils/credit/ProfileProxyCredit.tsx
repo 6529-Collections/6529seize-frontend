@@ -1,9 +1,8 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
@@ -18,22 +17,14 @@ export default function ProfileProxyCredit({
   readonly profileProxyAction: ApiProfileProxyAction;
   readonly onCreditEdit: () => void;
 }) {
-  const { connectedProfile } = useContext(AuthContext);
-  const getIsOwner = (): boolean => {
-    if (!connectedProfile) {
-      return false;
-    }
-    return connectedProfile?.id === profileProxy.created_by.id;
-  };
-
-  const [isOwner, setIsOwner] = useState(getIsOwner());
-  useEffect(() => setIsOwner(getIsOwner()), [connectedProfile, profileProxy]);
+  const { connectedProfile } = useAuth();
+  const isOwner = connectedProfile?.id === profileProxy.created_by.id;
 
   return (
-    <div className="tw-flex lg:tw-justify-center tw-items-center">
-      <p className="tw-flex tw-items-center tw-mb-0 tw-gap-x-1.5 tw-text-md tw-font-normal tw-text-iron-500">
+    <div className="tw-flex tw-items-center lg:tw-justify-center">
+      <p className="tw-mb-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-md tw-font-normal tw-text-iron-500">
         <span className="tw-font-normal tw-text-iron-500">Credit:</span>
-        <span className="tw-text-iron-300 tw-font-medium">
+        <span className="tw-font-medium tw-text-iron-300">
           {formatNumberWithCommas(profileProxyAction.credit_amount ?? 0)}
         </span>
       </p>
@@ -41,8 +32,9 @@ export default function ProfileProxyCredit({
         <button
           type="button"
           aria-label="Edit credit"
-          className="tw-group tw-bg-transparent tw-border-0 tw-h-7 tw-w-7 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-          onClick={onCreditEdit}>
+          className="tw-group tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400"
+          onClick={onCreditEdit}
+        >
           <PencilIcon size={PencilIconSize.SMALL} />
         </button>
       )}

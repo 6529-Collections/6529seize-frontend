@@ -8,6 +8,16 @@ interface UseWaveDecisionsProps {
   readonly enabled?: boolean | undefined;
 }
 
+const DEFAULT_PAGE_SIZE = 100;
+const DEFAULT_STALE_TIME = 60000;
+
+const sortDecisionPoint = (
+  decisionPoint: ApiWaveDecision
+): ApiWaveDecision => ({
+  ...decisionPoint,
+  winners: [...decisionPoint.winners].sort((a, b) => a.place - b.place),
+});
+
 export function useWaveDecisions({
   waveId,
   enabled = true,
@@ -21,25 +31,21 @@ export function useWaveDecisions({
           sort_direction: "DESC",
           sort: "decision_time",
           page: "1",
-          page_size: "100", // Fetch a reasonable amount, adjust as needed
+          page_size: DEFAULT_PAGE_SIZE.toString(),
         },
       });
     },
     enabled,
-    staleTime: 60000, // Adjust based on how frequently decisions update
+    staleTime: DEFAULT_STALE_TIME,
   });
 
-  // Sort decisions by round number (if available) in ascending order
-  const sortedDecisionPoints =
+  const decisionPoints =
     data?.data
-      .map((d) => ({
-        ...d,
-        winners: d.winners.sort((a, b) => a.place - b.place),
-      }))
+      .map((decisionPoint) => sortDecisionPoint(decisionPoint))
       .sort((a, b) => a.decision_time - b.decision_time) ?? [];
 
   return {
-    decisionPoints: sortedDecisionPoints,
+    decisionPoints,
     isError,
     error,
     refetch,
