@@ -5,6 +5,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useClickAway, useKey, useKeyPressEvent } from "react-use";
 import type { Handler, KeyFilter } from "react-use/lib/useKey";
+import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../../helpers/dropForgePermissions";
 
 jest.mock("focus-trap-react", () => jest.requireActual("focus-trap-react"));
 jest.mock("react-use");
@@ -27,6 +28,7 @@ const useAppWalletsMock = jest.fn();
 const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
+const useDropForgePermissionsMock = jest.fn();
 
 let escapeHandler: (() => void) | null = null;
 
@@ -90,6 +92,9 @@ jest.mock("@/hooks/useSidebarSections", () => {
     mapSidebarSectionsToPages: actual.mapSidebarSectionsToPages,
   };
 });
+jest.mock("@/hooks/useDropForgePermissions", () => ({
+  useDropForgePermissions: () => useDropForgePermissionsMock(),
+}));
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
@@ -155,6 +160,9 @@ beforeEach(() => {
   useCookieConsentMock.mockReturnValue({ country: "US" });
   capacitorMock.mockReturnValue({ isIos: false });
   useSidebarSectionsMock.mockReturnValue(defaultSidebarSections);
+  useDropForgePermissionsMock.mockReturnValue({
+    ...DEFAULT_DROP_FORGE_PERMISSIONS,
+  });
 });
 
 const PLACEHOLDER_TEXT = "Search 6529.io";

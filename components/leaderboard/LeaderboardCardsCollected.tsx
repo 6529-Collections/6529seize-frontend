@@ -7,9 +7,9 @@ import { useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import type { Collector, Content } from "./Leaderboard";
 import styles from "./Leaderboard.module.scss";
-import type {
-  LeaderboardMetrics} from "./leaderboard_helpers";
+import type { LeaderboardMetrics } from "./leaderboard_helpers";
 import {
+  formatPercentageFromCounts,
   LeaderboardCardsCollectedSort,
   useFetchLeaderboard,
 } from "./leaderboard_helpers";
@@ -200,10 +200,11 @@ export default function LeaderboardCardsCollectedComponent(
                           ? numberWithCommas(lead.unique_memes)
                           : 0}{" "}
                         / {numberWithCommas(lead.unique_memes_total)} (
-                        {Math.round(
-                          (lead.unique_memes / lead.unique_memes_total) * 100
+                        {formatPercentageFromCounts(
+                          lead.unique_memes,
+                          lead.unique_memes_total
                         )}
-                        %)
+                        )
                       </td>
                       <td className={styles["tdhSub"]}>
                         {numberWithCommas(lead.memes_cards_sets)}

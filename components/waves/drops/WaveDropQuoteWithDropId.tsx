@@ -17,6 +17,9 @@ interface WaveDropQuoteWithDropIdProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly onLinkCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
 }
 
 const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
@@ -28,6 +31,7 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  onLinkCardActionsActiveChange,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { data: drop } = useQuery<ApiDrop | undefined>({
@@ -58,6 +62,7 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
       quotePath={quotePath}
       embedDepth={embedDepth}
       maxEmbedDepth={maxEmbedDepth}
+      onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
     />
   );
 };

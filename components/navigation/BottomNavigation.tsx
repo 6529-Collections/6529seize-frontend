@@ -1,8 +1,14 @@
 "use client";
 
-import { getNotificationsRoute } from "@/helpers/navigation.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { usePathname, useSearchParams } from "next/navigation";
 import React, { useCallback, useMemo, useRef } from "react";
+import {
+  getActiveWaveIdFromUrl,
+  getNotificationsRoute,
+} from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useWave } from "@/hooks/useWave";
+import { useWaveData } from "@/hooks/useWaveData";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
@@ -77,8 +83,16 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
 }) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
+  const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const { data: waveData } = useWaveData({
+    waveId: waveIdFromQuery,
+    onWaveNotFound: () => {},
+  });
+  const { isDm: isCurrentWaveDm } = useWave(waveData);
 
   const setMobileNavRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -117,7 +131,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
               key={item.name}
               className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
             >
-              <NavItem item={item} />
+              <NavItem item={item} isCurrentWaveDm={isCurrentWaveDm} />
             </li>
           ))}
         </ul>

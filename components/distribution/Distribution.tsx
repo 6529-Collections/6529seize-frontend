@@ -1,5 +1,10 @@
 "use client";
 
+import Image from "next/image";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+import { mainnet } from "viem/chains";
 import Address from "@/components/address/Address";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
@@ -23,10 +28,6 @@ import {
   numberWithCommas,
 } from "@/helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
-import Image from "next/image";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import styles from "./Distribution.module.scss";
 
 interface Props {
@@ -307,7 +308,15 @@ export default function DistributionPage(props: Readonly<Props>) {
       isValidNftId &&
       nftId
     ) {
-      return <NowMintingCountdown nftId={Number.parseInt(nftId, 10)} hideNextDrop fullWidth />;
+      return (
+        <NowMintingCountdown
+          nftId={Number.parseInt(nftId, 10)}
+          contract={MEMES_CONTRACT}
+          chainId={mainnet.id}
+          hideNextDrop
+          fullWidth
+        />
+      );
     }
 
     return <></>;
