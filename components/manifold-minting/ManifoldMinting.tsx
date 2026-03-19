@@ -415,7 +415,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   function printActions(instance: MintMetadata, manifoldClaim: ManifoldClaim) {
     return (
-      <div className="tw-order-2 md:tw-order-1 md:tw-col-span-5">
+      <div className="tw-order-2 tw-p-4 md:tw-order-1 md:tw-col-span-5">
         <div>
           <div className="tw-pb-2">
             <div className="tw-flex tw-items-center tw-justify-between">
@@ -496,7 +496,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
 
     return (
-      <div className="tw-order-1 md:tw-order-2 md:tw-col-span-7">
+      <div className="tw-order-1 tw-flex tw-pt-4 tw-items-center tw-justify-center md:tw-order-2 md:tw-pt-0 md:tw-h-screen md:tw-col-span-7">
         <NFTImage
           nft={nftImage}
           animation={true}
@@ -510,10 +510,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!manifoldClaim) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 tw-pt-4 md:tw-px-6">
+      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6">
         {printTestnetIndicator()}
         {printTitle()}
-        <div className="tw-pt-2">
+        <div className="tw-p-4">
           {isError ? (
             <span className="tw-text-iron-100">
               Error fetching mint information
@@ -531,7 +531,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!instance || !nftImage) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 tw-pt-4 md:tw-px-6">
+      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-p-4 tw-px-4 md:tw-px-6">
         {printTestnetIndicator()}
         {printTitle()}
         <div>
@@ -542,7 +542,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 tw-pt-4 md:tw-px-6">
+    <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6">
       {printTestnetIndicator()}
       {props.standalone && (
         <div className="tw-pb-8">
