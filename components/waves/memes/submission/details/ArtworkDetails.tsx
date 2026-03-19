@@ -18,10 +18,7 @@ interface ArtworkDetailsProps {
   readonly size?: "default" | "sm" | undefined;
 }
 
-const getFieldStateClass = (
-  hasError: boolean,
-  isFilled: boolean
-): string => {
+const getFieldStateClass = (hasError: boolean, isFilled: boolean): string => {
   if (hasError) {
     return "tw-ring-red";
   }
@@ -175,15 +172,25 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 aria-invalid={!!titleError}
                 aria-describedby={titleError ? "title-error" : undefined}
                 data-field="title"
-                className={`tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 ${titleStateClass} ${
+                className={`tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${titleStateClass} ${
                   isTitleFilled && !titleError ? "tw-pr-10" : ""
                 } `}
               />
 
               {/* Title checkmark */}
               {isTitleFilled && !titleError && (
-                <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-transform">
-                  <CheckCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-emerald-500" />
+                <div
+                  className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-items-center ${
+                    size === "sm" ? "tw-right-2.5" : "tw-right-3"
+                  }`}
+                >
+                  <CheckCircleIcon
+                    className={`tw-flex-shrink-0 tw-text-emerald-500 ${
+                      size === "sm"
+                        ? "tw-h-[18px] tw-w-[18px]"
+                        : "tw-h-5 tw-w-5"
+                    }`}
+                  />
                 </div>
               )}
             </div>
@@ -224,15 +231,27 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                   descriptionError ? "description-error" : undefined
                 }
                 data-field="description"
-                className={`tw-form-textarea tw-w-full tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 ${descriptionStateClass} ${
+                className={`tw-form-textarea tw-w-full tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${descriptionStateClass} ${
                   isDescriptionFilled && !descriptionError ? "tw-pr-10" : ""
                 } `}
               />
 
               {/* Description checkmark */}
               {isDescriptionFilled && !descriptionError && (
-                <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-3">
-                  <CheckCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-emerald-500" />
+                <div
+                  className={`tw-pointer-events-none tw-absolute ${
+                    size === "sm"
+                      ? "tw-right-2.5 tw-top-2.5"
+                      : "tw-right-3 tw-top-3"
+                  }`}
+                >
+                  <CheckCircleIcon
+                    className={`tw-flex-shrink-0 tw-text-emerald-500 ${
+                      size === "sm"
+                        ? "tw-h-[18px] tw-w-[18px]"
+                        : "tw-h-5 tw-w-5"
+                    }`}
+                  />
                 </div>
               )}
             </div>

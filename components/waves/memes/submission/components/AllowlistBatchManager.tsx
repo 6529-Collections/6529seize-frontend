@@ -52,15 +52,15 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
 
   return (
     <FormSection title="Allowlist Configuration">
-      <MetadataLengthHint status={allowlistLengthStatus} className="tw-mb-3" />
+      <MetadataLengthHint status={allowlistLengthStatus} className="tw-mb-4" />
       <div className="tw-flex tw-flex-col tw-gap-y-6">
         {batches.length === 0 ? (
-          <div className="tw-py-2 tw-text-sm tw-italic tw-text-iron-500">
+          <div className="-tw-mt-1 tw-mb-1 tw-text-[13px] tw-italic tw-text-iron-500">
             No allowlist batches added.
           </div>
         ) : (
           batches.map((batch, index) => (
-            <div key={batch.id} className="tw-flex tw-items-start tw-gap-x-3">
+            <div key={batch.id} className="tw-flex tw-items-start tw-gap-x-4">
               {/* Contract Address */}
               <TraitWrapper
                 label="Contract Address"
@@ -68,6 +68,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                 error={errors?.[index]?.contract}
                 isFieldFilled={!!batch.contract && !errors?.[index]?.contract}
                 showRequiredMarker={true}
+                labelTone="muted"
                 className="tw-flex-1 tw-pb-0"
               >
                 <input
@@ -77,7 +78,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                   onChange={(e) =>
                     handleBatchChange(index, "contract", e.target.value)
                   }
-                  className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 ${
+                  className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 sm:tw-text-sm ${
                     errors?.[index]?.contract
                       ? "tw-ring-red"
                       : "tw-ring-iron-700"
@@ -93,6 +94,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                 isFieldFilled={
                   !!batch.token_ids_raw && !errors?.[index]?.token_ids
                 }
+                labelTone="muted"
                 className="tw-flex-1 tw-pb-0"
               >
                 <input
@@ -102,7 +104,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                   onChange={(e) =>
                     handleBatchChange(index, "token_ids_raw", e.target.value)
                   }
-                  className={`tw-truncat tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 ${
+                  className={`tw-truncat tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 sm:tw-text-sm ${
                     errors?.[index]?.token_ids
                       ? "tw-ring-red"
                       : "tw-ring-iron-700"
@@ -114,10 +116,10 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
               <button
                 type="button"
                 onClick={() => handleRemoveBatch(index)}
-                className="tw-mt-2 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-2 tw-text-iron-400 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-rose-400"
+                className="-tw-ml-2 tw-flex tw-cursor-pointer tw-items-center tw-self-center tw-border-0 tw-bg-transparent tw-p-2 tw-text-iron-400 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-rose-400"
                 aria-label={`Remove Batch ${index + 1}`}
               >
-                <TrashIcon className="tw-size-5 tw-flex-shrink-0" />
+                <TrashIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
               </button>
             </div>
           ))
@@ -128,7 +130,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
       <button
         type="button"
         onClick={handleAddBatch}
-        className="tw-mt-4 tw-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-border-0 tw-bg-transparent tw-text-sm tw-font-semibold tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-primary-300"
+        className="-tw-ml-2 tw-mt-3 tw-flex tw-w-max tw-cursor-pointer tw-items-center tw-gap-x-1 tw-border-0 tw-bg-transparent tw-text-[13px] tw-font-semibold tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-primary-400"
       >
         <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
         Add Batch

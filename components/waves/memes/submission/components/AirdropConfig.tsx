@@ -124,41 +124,43 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
 
   const getSummaryBarClasses = () => {
     if (isExactlyAllocated)
-      return "tw-bg-green/10 tw-border tw-border-green/30";
+      return "tw-border tw-border-[#0d402b] tw-bg-[#062417]";
     if (isOverAllocated) return "tw-bg-red/10 tw-border tw-border-red/30";
-    return "tw-bg-iron-800/50 tw-border tw-border-iron-700";
+    return "tw-border tw-border-iron-800 tw-bg-iron-900/70";
   };
 
   const getTotalTextColorClass = () => {
     if (isOverAllocated) return "tw-text-red";
-    if (isExactlyAllocated) return "tw-text-green";
+    if (isExactlyAllocated) return "tw-text-emerald-500";
     return "tw-text-iron-100";
   };
 
   return (
     <FormSection title="Airdrop Distribution">
       <div
-        className={`tw-mb-4 tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-px-4 tw-py-3 ${getSummaryBarClasses()}`}
+        className={`tw-mb-6 tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-rounded-lg tw-border-solid tw-px-4 tw-py-3 ${getSummaryBarClasses()}`}
       >
-        <span className="tw-text-sm tw-text-iron-300">
+        <span className="tw-text-[13px] tw-font-medium tw-text-iron-400">
           Total allocated:{" "}
-          <span className={`tw-font-bold ${getTotalTextColorClass()}`}>
+          <span
+            className={`tw-px-0.5 tw-font-bold ${getTotalTextColorClass()}`}
+          >
             {totalAllocated}
           </span>{" "}
           / {AIRDROP_TOTAL}
         </span>
         {isOverAllocated && (
-          <span className="tw-text-sm tw-font-medium tw-text-red">
+          <span className="tw-text-[13px] tw-font-semibold tw-text-red">
             {Math.abs(remaining)} over limit
           </span>
         )}
         {isUnderAllocated && (
-          <span className="tw-text-sm tw-text-iron-400">
+          <span className="tw-text-[13px] tw-font-medium tw-text-iron-400">
             {remaining} remaining
           </span>
         )}
         {isExactlyAllocated && (
-          <span className="tw-text-sm tw-font-medium tw-text-green">
+          <span className="tw-text-[13px] tw-font-semibold tw-text-emerald-500">
             Complete
           </span>
         )}
@@ -172,13 +174,14 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
           const isValid = !!entry.address && !error && !isLoading;
 
           return (
-            <div key={entry.id} className="tw-flex tw-items-start tw-gap-x-3">
+            <div key={entry.id} className="tw-flex tw-items-start tw-gap-x-4">
               <TraitWrapper
                 label="Wallet Address"
                 id={`airdrop-${index}-address`}
                 error={error}
                 isFieldFilled={isValid}
                 showRequiredMarker={true}
+                labelTone="muted"
                 className="tw-flex-1 tw-pb-0"
               >
                 <EnsAddressInput
@@ -189,7 +192,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                     handleLoadingChange(entry.id, loading)
                   }
                   onError={(hasError) => handleEnsError(entry.id, hasError)}
-                  className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
+                  className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 sm:tw-text-sm ${
                     error ? "tw-ring-red" : "tw-ring-iron-700"
                   } focus:tw-ring-primary-400`}
                 />
@@ -200,7 +203,8 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                 id={`airdrop-${index}-count`}
                 isFieldFilled={!!entry.count}
                 showRequiredMarker={true}
-                className="tw-w-24 tw-pb-0"
+                labelTone="muted"
+                className="tw-w-[120px] tw-pb-0"
               >
                 <input
                   type="number"
@@ -208,7 +212,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                   max={AIRDROP_TOTAL}
                   value={entry.count || ""}
                   onChange={(e) => handleCountChange(index, e.target.value)}
-                  className="tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400"
+                  className="tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400 sm:tw-text-sm"
                 />
               </TraitWrapper>
 
@@ -216,10 +220,10 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                 <button
                   type="button"
                   onClick={() => handleRemoveEntry(index)}
-                  className="tw-mt-2 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-2 tw-text-iron-400 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-rose-400"
+                  className="-tw-ml-2 tw-flex tw-cursor-pointer tw-items-center tw-self-center tw-border-0 tw-bg-transparent tw-p-2 tw-text-iron-400 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-rose-400"
                   aria-label={`Remove address ${index + 1}`}
                 >
-                  <TrashIcon className="tw-size-5 tw-flex-shrink-0" />
+                  <TrashIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                 </button>
               )}
             </div>
@@ -230,10 +234,10 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
       <button
         type="button"
         onClick={handleAddEntry}
-        className="tw-mt-4 tw-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-border-0 tw-bg-transparent tw-text-sm tw-font-semibold tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-primary-300"
+        className="-tw-ml-2 tw-mt-3 tw-flex tw-cursor-pointer tw-items-center tw-gap-x-1 tw-border-0 tw-bg-transparent tw-text-[13px] tw-font-semibold tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-primary-400"
       >
         <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
-        Add Address
+        <span>Add Address</span>
       </button>
 
       {entries.length === 1 && !firstEntry?.address && (

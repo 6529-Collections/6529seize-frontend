@@ -17,15 +17,15 @@ interface FormSectionProps {
 const FormSection: React.FC<FormSectionProps> = ({
   title,
   children,
-  titleClassName = "tw-text-lg tw-font-semibold tw-text-iron-100",
+  titleClassName = "tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-100",
   contentClassName = "",
   headerRight,
 }) => {
   return (
     <div>
-      <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
         <div className={titleClassName}>{title}</div>
-        {headerRight && <div>{headerRight}</div>}
+        {headerRight !== undefined && <div>{headerRight}</div>}
       </div>
       <div className={contentClassName}>{children}</div>
     </div>

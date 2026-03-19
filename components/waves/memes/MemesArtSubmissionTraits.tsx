@@ -75,11 +75,12 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
       )}
 
       <div className="tw-flex tw-flex-col tw-gap-y-10">
-        {formSections.map((section, sectionIndex) => {
-          const renderField = (
-            field: (typeof section.fields)[number],
-            fieldIndex: number
-          ) => {
+        {formSections.map((section) => {
+          const sectionKey =
+            section.title ||
+            section.fields.map((field) => field.field).join("|");
+
+          const renderField = (field: (typeof section.fields)[number]) => {
             const readOnlyOverride = readOnlyOverrides?.[field.field];
             const traitFieldOverrideProps =
               readOnlyOverride === undefined
@@ -87,7 +88,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
                 : { readOnlyOverride: Boolean(readOnlyOverride) };
             return (
               <TraitField
-                key={`field-${field.field}-${fieldIndex}`}
+                key={field.field}
                 definition={field}
                 {...traitFieldOverrideProps}
                 traits={traits}
@@ -117,15 +118,13 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
             );
 
             return (
-              <Section key={`section-${sectionIndex}`} title={section.title}>
+              <Section key={sectionKey} title={section.title}>
                 <div className="tw-flex tw-flex-col tw-gap-x-6 tw-gap-y-8">
                   <div className="tw-grid tw-grid-cols-1 tw-gap-x-5 tw-gap-y-8 sm:tw-grid-cols-2">
-                    {artistField && renderField(artistField, 0)}
-                    {profileField && renderField(profileField, 1)}
+                    {artistField && renderField(artistField)}
+                    {profileField && renderField(profileField)}
                   </div>
-                  {remainingFields.map((field, fieldIndex) =>
-                    renderField(field, fieldIndex + 2)
-                  )}
+                  {remainingFields.map((field) => renderField(field))}
                 </div>
               </Section>
             );
@@ -134,11 +133,9 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
           // Card Points: all 4 fields in one row
           if (section.title === "Card Points") {
             return (
-              <Section key={`section-${sectionIndex}`} title={section.title}>
+              <Section key={sectionKey} title={section.title}>
                 <div className="tw-grid tw-grid-cols-2 tw-gap-4 sm:tw-grid-cols-4">
-                  {section.fields.map((field, fieldIndex) =>
-                    renderField(field, fieldIndex)
-                  )}
+                  {section.fields.map((field) => renderField(field))}
                 </div>
               </Section>
             );
@@ -147,22 +144,18 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
           // Card Attributes: 2-column grid for boolean toggles
           if (section.title === "Card Attributes") {
             return (
-              <Section key={`section-${sectionIndex}`} title={section.title}>
+              <Section key={sectionKey} title={section.title}>
                 <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
-                  {section.fields.map((field, fieldIndex) =>
-                    renderField(field, fieldIndex)
-                  )}
+                  {section.fields.map((field) => renderField(field))}
                 </div>
               </Section>
             );
           }
 
           return (
-            <Section key={`section-${sectionIndex}`} title={section.title}>
+            <Section key={sectionKey} title={section.title}>
               <div className="tw-grid tw-grid-cols-1 tw-gap-x-5 tw-gap-y-8 sm:tw-grid-cols-2">
-                {section.fields.map((field, fieldIndex) =>
-                  renderField(field, fieldIndex)
-                )}
+                {section.fields.map((field) => renderField(field))}
               </div>
             </Section>
           );

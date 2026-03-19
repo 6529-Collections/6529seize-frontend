@@ -225,14 +225,14 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
   ) => (
     <div className="tw-flex tw-flex-col tw-gap-y-2">
       <div className="tw-flex tw-items-center tw-justify-between">
-        <span className="tw-text-sm tw-font-medium tw-text-iron-300">
+        <span className="tw-text-sm tw-font-medium tw-text-iron-200">
           {title}
         </span>
         <button
           type="button"
           disabled={upload.items.length >= maxItems || upload.isUploading}
           onClick={() => inputRef.current?.click()}
-          className="tw-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-border-0 tw-bg-transparent tw-text-sm tw-font-semibold tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-primary-300"
+          className="tw-flex tw-w-max tw-cursor-pointer tw-items-center tw-gap-x-1 tw-border-0 tw-bg-transparent tw-text-[13px] tw-font-semibold tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-primary-400"
           aria-label={`Add ${title}`}
         >
           <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
@@ -266,7 +266,7 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
 
   return (
     <FormSection title="Supplemental Media & Commentary">
-      <div className="tw-flex tw-flex-col tw-gap-y-8">
+      <div className="tw-flex tw-flex-col tw-gap-y-6">
         {requiresPreviewImage && (
           <div className="tw-flex tw-flex-col tw-gap-y-2">
             {renderMediaSection(
@@ -314,13 +314,14 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
               error={errors?.aboutArtist}
               isFieldFilled={!!aboutArtist.trim()}
               showRequiredMarker={true}
+              labelTone="muted"
               className="tw-pb-0"
             >
               <textarea
-                placeholder="Tell us about yourself as an artist..."
+                placeholder="About the artist"
                 value={aboutArtist}
                 onChange={(e) => onAboutArtistChange(e.target.value)}
-                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
+                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm ${
                   errors?.aboutArtist ? "tw-ring-red" : "tw-ring-iron-700"
                 }`}
               />
@@ -335,13 +336,14 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
               error={errors?.artworkCommentary}
               isFieldFilled={!!artworkCommentary.trim()}
               showRequiredMarker={true}
+              labelTone="muted"
               className="tw-pb-0"
             >
               <textarea
-                placeholder="Tell us more about the artwork..."
+                placeholder="Artwork commentary"
                 value={artworkCommentary}
                 onChange={(e) => onArtworkCommentaryChange(e.target.value)}
-                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 ${
+                className={`tw-form-textarea tw-min-h-[120px] tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm ${
                   errors?.artworkCommentary ? "tw-ring-red" : "tw-ring-iron-700"
                 }`}
               />

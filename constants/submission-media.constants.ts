@@ -1,6 +1,6 @@
 export type SubmissionMediaCategory = "image" | "video" | "interactive";
 
-export interface SubmissionUiFormatGroup {
+interface SubmissionUiFormatGroup {
   kind: SubmissionMediaCategory;
   label: string;
 }

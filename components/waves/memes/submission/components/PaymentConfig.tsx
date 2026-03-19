@@ -44,9 +44,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
       onPaymentInfoChange({
         ...paymentInfo,
         has_designated_payee: checked,
-        designated_payee_name: checked
-          ? (paymentInfo.designated_payee_name ?? "")
-          : "",
+        designated_payee_name: checked ? paymentInfo.designated_payee_name : "",
       });
     },
     [paymentInfo, onPaymentInfoChange]
@@ -62,9 +60,9 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
     [paymentInfo, onPaymentInfoChange]
   );
 
-  const address = paymentInfo.payment_address ?? "";
-  const hasDesignatedPayee = paymentInfo.has_designated_payee ?? false;
-  const designatedPayeeName = paymentInfo.designated_payee_name ?? "";
+  const address = paymentInfo.payment_address;
+  const hasDesignatedPayee = paymentInfo.has_designated_payee;
+  const designatedPayeeName = paymentInfo.designated_payee_name;
   const addressError = getAddressError(address);
   const isAddressValid = !!address && !addressError && !isLoading;
 
@@ -74,27 +72,29 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
       : null;
 
   return (
-    <FormSection title="Payment">
-      <p className="-tw-mt-1 tw-mb-3 tw-text-sm tw-text-iron-500">
+    <FormSection title="Payment" contentClassName="-tw-mt-3">
+      <p className="tw-mb-5 tw-text-[13px] tw-text-iron-400">
         Address to receive split of minting proceeds.
       </p>
       <MetadataLengthHint
         status={paymentInfoLengthStatus}
-        className="-tw-mt-2 tw-mb-3"
+        className="tw-mb-4"
       />
 
       <div className="tw-mb-5">
-        <label className="tw-flex tw-cursor-pointer tw-items-center tw-gap-3">
+        <label className="tw-group tw-flex tw-w-max tw-cursor-pointer tw-items-center tw-gap-3">
           <input
             type="checkbox"
             checked={hasDesignatedPayee}
             onChange={handleDesignatedPayeeToggle}
             aria-label="Designated Payee"
-            className="tw-h-4 tw-w-4 tw-cursor-pointer tw-rounded tw-border-iron-700 tw-bg-iron-900 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0"
+            className="tw-form-checkbox tw-h-4 tw-w-4 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0 desktop-hover:group-hover:tw-border-iron-400"
           />
-          <span className="tw-text-sm">
-            <span className="tw-text-iron-300">Designated Payee</span>
-            <span className="tw-ml-1 tw-text-iron-500">
+          <span className="tw-text-[13px] tw-text-iron-400">
+            <span className="tw-font-medium tw-text-iron-200 tw-transition-colors desktop-hover:group-hover:tw-text-white">
+              Designated Payee
+            </span>
+            <span className="tw-ml-1 tw-text-iron-400">
               — proceeds will be paid to a third party
             </span>
           </span>
@@ -116,7 +116,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
             onChange={handleDesignatedPayeeNameChange}
             placeholder="Enter designated payee name"
             autoFocus
-            className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
+            className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 sm:tw-text-sm ${
               designatedPayeeNameError ? "tw-ring-red" : "tw-ring-iron-700"
             } focus:tw-ring-primary-400`}
           />
@@ -125,14 +125,13 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
 
       <TraitWrapper
         label={
-          hasDesignatedPayee
-            ? "Designated Payee Address"
-            : "Payment Address"
+          hasDesignatedPayee ? "Designated Payee Address" : "Payment Address"
         }
         id="payment-address"
         error={addressError}
         isFieldFilled={isAddressValid}
         showRequiredMarker={true}
+        labelTone="muted"
         className="tw-pb-0"
       >
         <EnsAddressInput
@@ -141,7 +140,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
           onAddressChange={handleAddressChange}
           onLoadingChange={setIsLoading}
           onError={setHasEnsError}
-          className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 ${
+          className={`tw-form-input tw-w-full tw-truncate tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-4 tw-pr-11 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 focus:tw-bg-iron-900 focus:tw-text-iron-100 sm:tw-text-sm ${
             addressError ? "tw-ring-red" : "tw-ring-iron-700"
           } focus:tw-ring-primary-400`}
         />

@@ -13,6 +13,7 @@ interface TraitWrapperProps {
   readonly isFieldFilled?: boolean | undefined;
   readonly labelRightAdornment?: React.ReactNode;
   readonly showRequiredMarker?: boolean | undefined;
+  readonly labelTone?: "default" | "muted" | undefined;
   readonly size?: "default" | "sm" | undefined;
 }
 
@@ -27,6 +28,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   isFieldFilled = false,
   labelRightAdornment,
   showRequiredMarker = false,
+  labelTone = "default",
   size = "default",
 }) => {
   const fieldId = id ?? `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
@@ -37,7 +39,9 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   const hasError = !!error && !readOnly;
 
   let labelClassName =
-    "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400";
+    labelTone === "muted"
+      ? "tw-text-iron-400 group-focus-visible-within:tw-text-primary-400"
+      : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400";
   if (readOnly) {
     labelClassName = "tw-text-iron-500";
   } else if (hasError) {
@@ -92,8 +96,16 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
           })}
 
           {!hasLabelRightAdornment && isFieldFilled && !hasError && (
-            <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-transform">
-              <CheckCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-emerald-500" />
+            <div
+              className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-items-center ${
+                size === "sm" ? "tw-right-2.5" : "tw-right-3"
+              }`}
+            >
+              <CheckCircleIcon
+                className={`tw-flex-shrink-0 tw-text-emerald-500 ${
+                  size === "sm" ? "tw-h-[18px] tw-w-[18px]" : "tw-h-5 tw-w-5"
+                }`}
+              />
             </div>
           )}
         </div>
