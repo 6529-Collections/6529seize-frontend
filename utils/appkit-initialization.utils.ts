@@ -155,11 +155,10 @@ function buildAppKitConfig(
       analytics: true,
       email: false,
       socials: [],
+      onramp: false,
       swaps: false,
       connectMethodsOrder: ["wallet" as const],
       walletFeaturesOrder,
     },
-    enableOnramp: false,
-    enableSwaps: false,
   };
 }
