@@ -18,6 +18,10 @@ const useAuthMock = jest.fn();
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => useAuthMock(),
 }));
+const useSeizeConnectContextMock = jest.fn();
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => useSeizeConnectContextMock(),
+}));
 const capacitorMock = jest.fn();
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
@@ -25,7 +29,14 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 jest.mock("@/components/user/layout/UserPageTab", () => ({
   __esModule: true,
-  default: (p: any) => <div data-testid="tab">{p.tab.id}</div>,
+  default: (p: any) => (
+    <div
+      data-testid="tab"
+      data-active={p.activeTabId === p.tab.id ? "true" : "false"}
+    >
+      {p.tab.id}
+    </div>
+  ),
 }));
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: jest.fn(),
@@ -35,6 +46,15 @@ const {
   useCookieConsent,
 } = require("@/components/cookies/CookieConsentContext");
 
+const getTabIds = () =>
+  screen.getAllByTestId("tab").map((tab) => tab.textContent);
+
+const getActiveTabIds = () =>
+  screen
+    .getAllByTestId("tab")
+    .filter((tab) => tab.getAttribute("data-active") === "true")
+    .map((tab) => tab.textContent);
+
 const renderTabs = ({
   showWaves,
   isIos,
@@ -42,6 +62,8 @@ const renderTabs = ({
   connectedProfile = null,
   fetchingProfile = false,
   pathname = "/[user]",
+  address = undefined,
+  connectionState = "disconnected",
 }: {
   showWaves: boolean;
   isIos: boolean;
@@ -49,6 +71,13 @@ const renderTabs = ({
   connectedProfile?: any;
   fetchingProfile?: boolean;
   pathname?: string;
+  address?: string;
+  connectionState?:
+    | "initializing"
+    | "disconnected"
+    | "connecting"
+    | "connected"
+    | "error";
 }) => {
   const router = { push: jest.fn(), replace: jest.fn() };
   (useRouter as jest.Mock).mockReturnValue(router);
@@ -67,6 +96,10 @@ const renderTabs = ({
     connectedProfile,
     fetchingProfile,
   });
+  useSeizeConnectContextMock.mockReturnValue({
+    address,
+    connectionState,
+  });
   return {
     router,
     ...render(<UserPageTabs />),
@@ -76,7 +109,7 @@ const renderTabs = ({
 describe("UserPageTabs", () => {
   it("filters tabs based on context and platform", () => {
     renderTabs({ showWaves: false, isIos: false });
-    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    const tabs = getTabIds();
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.BRAIN);
     expect(tabs).not.toContain("stats");
     expect(tabs).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
@@ -84,7 +117,7 @@ describe("UserPageTabs", () => {
 
   it("hides subscriptions tab on iOS non-US", () => {
     renderTabs({ showWaves: true, isIos: true, country: "CA" });
-    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    const tabs = getTabIds();
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
   });
 
@@ -97,7 +130,7 @@ describe("UserPageTabs", () => {
         wallets: [],
       },
     });
-    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    const tabs = getTabIds();
     expect(tabs).toContain(USER_PAGE_TAB_IDS.PROXY);
   });
 
@@ -110,7 +143,7 @@ describe("UserPageTabs", () => {
         wallets: [{ wallet: "testuser" }],
       },
     });
-    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    const tabs = getTabIds();
     expect(tabs).toContain(USER_PAGE_TAB_IDS.PROXY);
   });
 
@@ -123,13 +156,13 @@ describe("UserPageTabs", () => {
         wallets: [{ wallet: "0xSomeOtherWallet" }],
       },
     });
-    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    const tabs = getTabIds();
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.PROXY);
   });
 
   it("hides proxy tab when not connected", () => {
     renderTabs({ showWaves: false, isIos: false });
-    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    const tabs = getTabIds();
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.PROXY);
   });
 
@@ -141,9 +174,119 @@ describe("UserPageTabs", () => {
       fetchingProfile: true,
     });
 
-    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    const tabs = getTabIds();
     expect(tabs).toContain(USER_PAGE_TAB_IDS.PROXY);
     expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("avoids redirecting away from brain while wallet state is initializing", () => {
+    const { router } = renderTabs({
+      showWaves: false,
+      isIos: false,
+      pathname: "/testuser/brain",
+      connectionState: "initializing",
+    });
+
+    const tabs = getTabIds();
+    const activeTabs = getActiveTabIds();
+    expect(tabs).toContain(USER_PAGE_TAB_IDS.BRAIN);
+    expect(activeTabs).toEqual([USER_PAGE_TAB_IDS.BRAIN]);
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("avoids redirecting away from brain while wallet state is connecting", () => {
+    const { router } = renderTabs({
+      showWaves: false,
+      isIos: false,
+      pathname: "/testuser/brain",
+      connectionState: "connecting",
+    });
+
+    const tabs = getTabIds();
+    const activeTabs = getActiveTabIds();
+    expect(tabs).toContain(USER_PAGE_TAB_IDS.BRAIN);
+    expect(activeTabs).toEqual([USER_PAGE_TAB_IDS.BRAIN]);
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("avoids redirecting away from brain while profile access is still loading", () => {
+    const { router } = renderTabs({
+      showWaves: false,
+      isIos: false,
+      pathname: "/testuser/brain",
+      address: "0x1",
+      connectionState: "connected",
+      fetchingProfile: true,
+    });
+
+    const tabs = getTabIds();
+    const activeTabs = getActiveTabIds();
+    expect(tabs).toContain(USER_PAGE_TAB_IDS.BRAIN);
+    expect(activeTabs).toEqual([USER_PAGE_TAB_IDS.BRAIN]);
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("redirects away from the brain tab after loading when waves stay unavailable", async () => {
+    const { rerender, router } = renderTabs({
+      showWaves: false,
+      isIos: false,
+      pathname: "/testuser/brain",
+      address: "0x1",
+      connectionState: "connected",
+      fetchingProfile: true,
+    });
+
+    useAuthMock.mockReturnValue({
+      showWaves: false,
+      connectedProfile: null,
+      fetchingProfile: false,
+    });
+    useSeizeConnectContextMock.mockReturnValue({
+      address: "0x1",
+      connectionState: "connected",
+    });
+
+    rerender(<UserPageTabs />);
+
+    await waitFor(() => {
+      expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS.BRAIN);
+      expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS.REP]);
+      expect(router.replace).toHaveBeenCalledWith("/testuser");
+    });
+  });
+
+  it("shows the brain tab and avoids redirect once waves become available", async () => {
+    const { rerender, router } = renderTabs({
+      showWaves: false,
+      isIos: false,
+      pathname: "/testuser/brain",
+      address: "0x1",
+      connectionState: "connected",
+      fetchingProfile: true,
+    });
+
+    useAuthMock.mockReturnValue({
+      showWaves: true,
+      connectedProfile: {
+        normalised_handle: "testuser",
+        wallets: [{ wallet: "0x1" }],
+      },
+      fetchingProfile: false,
+    });
+    useSeizeConnectContextMock.mockReturnValue({
+      address: "0x1",
+      connectionState: "connected",
+    });
+
+    rerender(<UserPageTabs />);
+
+    await waitFor(() => {
+      const tabs = getTabIds();
+      const activeTabs = getActiveTabIds();
+      expect(tabs).toContain(USER_PAGE_TAB_IDS.BRAIN);
+      expect(activeTabs).toEqual([USER_PAGE_TAB_IDS.BRAIN]);
+      expect(router.replace).not.toHaveBeenCalled();
+    });
   });
 
   it("redirects away from the proxy tab after loading when the profile is not owned", async () => {
