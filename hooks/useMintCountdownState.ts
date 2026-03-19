@@ -10,6 +10,7 @@ import {
   ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
+import { Time } from "@/helpers/time";
 import type { Abi } from "viem";
 
 export interface CountdownData {
@@ -88,7 +89,29 @@ export function useMintCountdownState(
       return { type: "sold_out" };
     }
 
-    if (manifoldClaim.isFinalized) {
+    if (
+      manifoldClaim.isFinalized &&
+      !manifoldClaim.isDropComplete &&
+      manifoldClaim.nextMemePhase
+    ) {
+      const nextPhase = manifoldClaim.nextMemePhase;
+      const isUpcoming = Time.now().lt(nextPhase.start);
+
+      return {
+        type: "countdown",
+        countdown: {
+          title: `${nextPhase.name} ${isUpcoming ? "Starts In" : "Ends In"}`,
+          targetDate: isUpcoming
+            ? nextPhase.start.toSeconds()
+            : nextPhase.end.toSeconds(),
+          showAllowlistInfo: nextPhase.type === ManifoldPhase.ALLOWLIST,
+          showMintBtn,
+          isActive: !isUpcoming,
+        },
+      };
+    }
+
+    if (manifoldClaim.isDropComplete) {
       return { type: "finalized" };
     }
 

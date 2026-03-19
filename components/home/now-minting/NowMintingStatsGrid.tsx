@@ -37,7 +37,7 @@ export default function NowMintingStatsGrid({
   const statusLabel = manifoldClaim
     ? formatClaimStatus(manifoldClaim)
     : undefined;
-  const statusTone = manifoldClaim?.isFinalized ? "ended" : status;
+  const statusTone = manifoldClaim?.isDropComplete ? "ended" : status;
 
   const editionSize = manifoldClaim
     ? formatEditionSize(manifoldClaim).replace(/\s*\/\s*/, "/")

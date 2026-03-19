@@ -46,6 +46,7 @@ import {
   ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import type {
@@ -125,11 +126,14 @@ function MetadataRow({
 }
 
 function StandaloneMintPageTopBar() {
+  const { isConnected, seizeConnect, seizeConnectOpen } =
+    useSeizeConnectContext();
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
       <div className="tw-flex tw-items-center tw-gap-3">
-        <Image src="/6529.svg" alt="6529" width={36} height={36} unoptimized />
-        <span className="tw-text-2xl tw-font-bold tw-text-white">
+        <Image src="/6529.svg" alt="6529" width={28} height={28} unoptimized />
+        <span className="tw-text-xl tw-font-bold tw-text-white">
           The Memes by 6529 - Mint Page
         </span>
       </div>
@@ -146,7 +150,18 @@ function StandaloneMintPageTopBar() {
           } as CSSProperties
         }
       >
-        <AppKitButton balance="show" />
+        {isConnected ? (
+          <AppKitButton balance="show" />
+        ) : (
+          <button
+            type="button"
+            onClick={seizeConnect}
+            disabled={seizeConnectOpen}
+            className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-bg-primary-500 tw-px-4 !tw-text-[13px] tw-font-medium tw-leading-none tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          >
+            {seizeConnectOpen ? "CONNECTING..." : "CONNECT WALLET"}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -400,9 +415,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   function printActions(instance: MintMetadata, manifoldClaim: ManifoldClaim) {
     return (
-      <div
-        className={`tw-order-2 md:tw-order-1 md:tw-col-span-5 md:tw-pr-4 ${props.standalone ? "md:tw-pt-4" : ""}`}
-      >
+      <div className="tw-order-2 md:tw-order-1 md:tw-col-span-5">
         <div>
           <div className="tw-pb-2">
             <div className="tw-flex tw-items-center tw-justify-between">
@@ -483,7 +496,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
 
     return (
-      <div className="tw-order-1 md:tw-order-2 md:tw-col-span-7 md:tw-flex md:tw-items-center md:tw-justify-center">
+      <div className="tw-order-1 md:tw-order-2 md:tw-col-span-7">
         <NFTImage
           nft={nftImage}
           animation={true}
@@ -497,7 +510,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!manifoldClaim) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 md:tw-px-6">
+      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 tw-pt-4 md:tw-px-6">
         {printTestnetIndicator()}
         {printTitle()}
         <div className="tw-pt-2">
@@ -518,7 +531,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!instance || !nftImage) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 md:tw-px-6">
+      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 tw-pt-4 md:tw-px-6">
         {printTestnetIndicator()}
         {printTitle()}
         <div>
@@ -529,10 +542,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 md:tw-px-6">
+    <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 tw-pb-4 tw-pt-4 md:tw-px-6">
       {printTestnetIndicator()}
       {props.standalone && (
-        <div className="tw-pb-8 tw-pt-4">
+        <div className="tw-pb-8">
           <StandaloneMintPageTopBar />
           <div className="tw-mt-4 tw-h-px tw-w-full tw-bg-white/20" />
         </div>
@@ -804,7 +817,7 @@ function ManifoldMemesMintingPhase(
   let eligibleMintsText =
     props.phase.id === "public" ? "Unlimited spots" : "No eligible spots";
   let eligibleMintsStyle =
-    props.phase.id === "public" ? "tw-font-semibold tw-text-success" : "";
+    props.phase.id === "public" ? "tw-font-semibold" : "";
 
   if (eligibleMints) {
     const count = eligibleMints.spots;
@@ -813,13 +826,24 @@ function ManifoldMemesMintingPhase(
   }
 
   let status: PhaseStatus = PhaseStatus.UPCOMING;
-  if (props.phase.end.lt(Time.now()) || props.claim.isFinalized) {
-    status = PhaseStatus.COMPLETED;
-  } else if (
+  const isDropComplete = props.claim.isDropComplete;
+
+  if (
     props.claim.memePhase?.id === props.phase.id &&
     props.claim.status === ManifoldClaimStatus.ACTIVE
   ) {
     status = PhaseStatus.ACTIVE;
+  } else if (props.phase.end.lt(Time.now()) || isDropComplete) {
+    status = PhaseStatus.COMPLETED;
+  }
+
+  if (props.phase.id === "public" && !eligibleMints) {
+    eligibleMintsStyle =
+      status === PhaseStatus.ACTIVE
+        ? "tw-font-semibold tw-text-success"
+        : status === PhaseStatus.UPCOMING
+          ? "tw-font-semibold tw-text-primary-300"
+          : "tw-font-semibold tw-text-red/75";
   }
 
   let startText = "Expected start";
@@ -841,8 +865,13 @@ function ManifoldMemesMintingPhase(
 
   const startDisplay = getDateTimeString(startDate, props.local_timezone);
   const endDisplay = getDateTimeString(endDate, props.local_timezone);
+  const hasActivePhase = props.claim.status === ManifoldClaimStatus.ACTIVE;
   const isHighlighted =
-    props.claim.memePhase?.id === props.phase.id && !props.claim.isFinalized;
+    status === PhaseStatus.ACTIVE ||
+    (status === PhaseStatus.UPCOMING &&
+      !hasActivePhase &&
+      props.claim.nextMemePhase?.id === props.phase.id &&
+      !isDropComplete);
   const highlightedRingClass =
     status === PhaseStatus.ACTIVE
       ? "tw-border-success tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-success"

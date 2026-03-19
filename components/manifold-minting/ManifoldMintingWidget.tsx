@@ -561,7 +561,7 @@ export default function ManifoldMintingWidget(
           <div>{printMint()}</div>
         ) : (
           <>
-            <div>
+            <div className="tw-mt-2">
               {merkleProofs.length > 0 ? (
                 printTable("Allowlist Spots", merkleProofs.length)
               ) : (

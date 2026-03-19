@@ -119,8 +119,9 @@ jest.mock("@/hooks/useManifoldClaim", () => {
 });
 
 // Mock the constants
-jest.mock("@/constants", () => ({
+jest.mock("@/constants/constants", () => ({
   ETHEREUM_ICON_TEXT: "Ξ",
+  MANIFOLD_LAZY_CLAIM_CONTRACT: "0x2",
   MEMES_CONTRACT: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
 }));
 
