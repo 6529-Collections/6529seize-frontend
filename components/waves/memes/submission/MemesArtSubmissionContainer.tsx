@@ -298,22 +298,13 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col">
-      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-backdrop-blur">
-        <div className="tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-xl">
-          <div className="tw-absolute -tw-right-1/4 -tw-top-1/4 tw-h-1/2 tw-w-1/2 tw-bg-primary-500/[0.03] tw-blur-3xl" />
-          <div className="tw-absolute -tw-left-1/4 tw-top-1/4 tw-h-1/2 tw-w-2/3 tw-bg-purple-500/[0.02] tw-blur-3xl" />
-          <div className="tw-absolute -tw-bottom-1/4 -tw-left-1/4 tw-h-1/2 tw-w-1/2 tw-bg-iron-500/[0.03] tw-blur-3xl" />
-        </div>
+      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-backdrop-blur">
         <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col">
-          <div className="tw-px-4 md:tw-px-8">
+          <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-6 md:tw-px-8">
             <div
-              className={`tw-flex tw-w-full tw-flex-shrink-0 tw-justify-between tw-border tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4 tw-pt-6 lg:tw-mb-0 lg:tw-border-b-0 lg:tw-pb-6 lg:tw-pt-8 ${
-                form.currentStep === SubmissionStep.AGREEMENT
-                  ? "tw-mx-auto tw-max-w-6xl"
-                  : ""
-              }`}
+              className="tw-flex tw-w-full tw-items-center tw-flex-shrink-0 tw-justify-between tw-pt-6 lg:tw-border-b-0"
             >
-              <motion.h3 className="tw-text-2xl tw-font-semibold tw-text-iron-100 lg:tw-text-3xl">
+              <motion.h3 className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-text-2xl tw-mb-0">
                 Submit Work to The Memes
               </motion.h3>
               <motion.button
