@@ -11,6 +11,10 @@ interface TraitWrapperProps {
   readonly error?: string | null | undefined;
   readonly id?: string | undefined;
   readonly isFieldFilled?: boolean | undefined;
+  readonly labelRightAdornment?: React.ReactNode;
+  readonly showRequiredMarker?: boolean | undefined;
+  readonly labelTone?: "default" | "muted" | undefined;
+  readonly size?: "default" | "sm" | undefined;
 }
 
 export const TraitWrapper: React.FC<TraitWrapperProps> = ({
@@ -22,14 +26,22 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   error,
   id,
   isFieldFilled = false,
+  labelRightAdornment,
+  showRequiredMarker = false,
+  labelTone = "default",
+  size = "default",
 }) => {
   const fieldId = id ?? `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
   const errorId = error ? `${fieldId}-error` : undefined;
+  const hasLabelRightAdornment =
+    labelRightAdornment !== undefined && labelRightAdornment !== null;
 
   const hasError = !!error && !readOnly;
 
   let labelClassName =
-    "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400";
+    labelTone === "muted"
+      ? "tw-text-iron-400 group-focus-visible-within:tw-text-primary-400"
+      : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400";
   if (readOnly) {
     labelClassName = "tw-text-iron-500";
   } else if (hasError) {
@@ -39,60 +51,67 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   if (isBoolean) {
     return (
       <div className={`tw-group tw-relative ${className ?? ""}`}>
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+        <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900 tw-px-4 tw-py-2.5">
           <label
             htmlFor={fieldId}
-            className="tw-w-40 tw-flex-shrink-0 tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-300"
+            className="tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-truncate tw-text-sm tw-font-medium tw-text-iron-300"
           >
             {label}
           </label>
-          <div className="tw-max-w-xs tw-flex-1">{children}</div>
+          <div className="tw-flex-shrink-0">{children}</div>
         </div>
       </div>
     );
   }
 
-  const hasPaddingOverride = className?.includes("tw-pb-");
-  const basePadding = hasPaddingOverride ? "" : "tw-pb-8";
-
   return (
-    <div className={`tw-group tw-relative ${basePadding} ${className ?? ""}`}>
+    <div className={`tw-group tw-relative ${className ?? ""}`}>
       <div className="tw-relative">
         <label
           htmlFor={fieldId}
-          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-transition-all ${labelClassName}`}
+          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-font-medium tw-transition-all ${hasLabelRightAdornment ? "tw-flex tw-items-center tw-gap-1" : ""} ${size === "sm" ? "tw-text-[11px]" : "tw-text-xs"} ${labelClassName}`}
         >
-          {label}
+          <span className="tw-inline-flex tw-items-center tw-gap-0.5">
+            <span>{label}</span>
+            {showRequiredMarker && !readOnly && (
+              <span aria-hidden="true" className="tw-text-iron-500">
+                *
+              </span>
+            )}
+          </span>
+          {labelRightAdornment}
         </label>
 
         <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
           {React.Children.map(children, (child) => {
-            if (React.isValidElement(child)) {
+            if (React.isValidElement<Record<string, unknown>>(child)) {
               return React.cloneElement(child, {
+                ...child.props,
                 id: fieldId,
                 "aria-invalid": hasError,
                 "aria-describedby": errorId,
-                ...(child.props || {}),
-              } as any);
+              });
             }
             return child;
           })}
 
-          {isFieldFilled && !hasError && (
-            <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-transform">
-              <CheckCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-emerald-500" />
+          {!hasLabelRightAdornment && isFieldFilled && !hasError && (
+            <div
+              className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-items-center ${
+                size === "sm" ? "tw-right-2.5" : "tw-right-3"
+              }`}
+            >
+              <CheckCircleIcon
+                className={`tw-flex-shrink-0 tw-text-emerald-500 ${
+                  size === "sm" ? "tw-h-[18px] tw-w-[18px]" : "tw-h-5 tw-w-5"
+                }`}
+              />
             </div>
           )}
         </div>
       </div>
 
-      {hasPaddingOverride ? (
-        <ValidationError error={error} id={errorId} className="tw-mt-1" />
-      ) : (
-        <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0">
-          <ValidationError error={error} id={errorId} className="tw-mt-0" />
-        </div>
-      )}
+      <ValidationError error={error} id={errorId} className="tw-mt-1" />
     </div>
   );
 };

@@ -12,6 +12,8 @@ import { motion } from "framer-motion";
 import { AuthContext } from "@/components/auth/Auth";
 import { TabToggle } from "@/components/common/TabToggle";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 
 import FilePreview from "./file-upload/components/FilePreview";
 import UploadArea from "./file-upload/components/UploadArea";
@@ -28,12 +30,17 @@ import {
   ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES,
   DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
   INTERACTIVE_MEDIA_PROVIDERS,
+  type InteractiveMediaProvider,
 } from "./submission/constants/media";
 
 const renderPreviewMessage = (primary: string, secondary: string) => (
-  <div className="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center tw-text-sm tw-text-iron-400">
-    <span>{primary}</span>
-    <span className="tw-text-iron-500">{secondary}</span>
+  <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-p-6 tw-text-center">
+    <span className="tw-mb-2 tw-text-sm tw-font-medium tw-tracking-wide tw-text-iron-300">
+      {primary}
+    </span>
+    <span className="tw-text-xs tw-font-medium tw-tracking-wide tw-text-iron-500">
+      {secondary}
+    </span>
   </div>
 );
 
@@ -164,25 +171,25 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     [setMediaSource, onExternalMimeTypeChange]
   );
 
-  const providerOptions = useMemo(
+  const providerOptions = useMemo<
+    readonly CommonSelectItem<InteractiveMediaProvider>[]
+  >(
     () =>
       INTERACTIVE_MEDIA_PROVIDERS.map((provider) => ({
         key: provider.key,
         label: provider.label,
-        panelId: `memes-art-submission-provider-${provider.key}`,
+        value: provider.key,
       })),
     []
   );
 
   const handleProviderSelect = useCallback(
-    (key: string) => {
-      if (key === externalProvider) {
+    (provider: InteractiveMediaProvider) => {
+      if (provider === externalProvider) {
         return;
       }
 
-      if (key === "ipfs" || key === "arweave") {
-        onExternalProviderChange(key);
-      }
+      onExternalProviderChange(provider);
     },
     [externalProvider, onExternalProviderChange]
   );
@@ -262,166 +269,179 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   }, [externalMimeType]);
 
   return (
-    <div className="tw-flex tw-min-h-0 tw-flex-col tw-gap-4 lg:tw-h-full">
-      <div className="tw-w-full tw-max-w-md tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-1">
+    <div className="tw-flex tw-min-h-0 tw-flex-col lg:tw-h-full">
+      <div className="tw-mb-4 tw-flex-shrink-0 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800/60">
         <TabToggle
           options={tabOptions}
           activeKey={mediaSource}
           onSelect={handleTabSelect}
-          fullWidth
         />
       </div>
-
-      {showUploadUi ? (
-        <motion.div
-          id="memes-art-submission-upload-panel"
-          ref={dropAreaRef}
-          {...(!artworkUploaded && !prefersReducedMotion
-            ? { whileHover: { scale: 1.002 } }
-            : {})}
-          className={`tw-group tw-relative tw-min-h-[280px] tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 sm:tw-min-h-[340px] lg:tw-h-full lg:tw-min-h-0 ${
-            visualState === "dragging"
-              ? "tw-border-2 tw-border-primary-500/60"
-              : ""
-          } ${visualState === "invalid" ? "tw-border-2 tw-border-red/60" : ""} ${
-            visualState === "idle" && !artworkUploaded
-              ? "hover:tw-border hover:tw-border-iron-700/80"
-              : ""
-          } tw-transition-all tw-duration-300 ${artworkUploaded ? "" : "tw-cursor-pointer"} `}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={!artworkUploaded ? handleAreaClick : undefined}
-          role={artworkUploaded ? undefined : "button"}
-          tabIndex={artworkUploaded ? -1 : 0}
-          aria-label="Upload artwork"
-          onKeyDown={handleKeyDown}
-          aria-describedby={error ? "file-upload-error" : undefined}
-          data-testid="artwork-upload-area"
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={SUBMISSION_FILE_INPUT_ACCEPT}
-            className="tw-hidden"
-            onChange={handleFileInputChange}
-            data-testid="artwork-file-input"
-          />
-
-          {!browserSupport.supported && browserSupport.reason && (
-            <BrowserWarning reason={browserSupport.reason} />
-          )}
-
-          {!artworkUploaded ? (
-            <UploadArea
-              visualState={visualState}
-              error={error}
-              hasRecoveryOption={state.hasRecoveryOption}
-              onRetry={handleRetry}
-            />
-          ) : (
-            <FilePreview
-              url={previewUrl}
-              file={currentFile}
-              onRemove={handleRemoveFile}
-              videoCompatibility={videoCompatibility}
-              isCheckingCompatibility={isCheckingCompatibility}
-            />
-          )}
-        </motion.div>
-      ) : (
-        <div
-          id="memes-art-submission-interactive-panel"
-          className={`tw-flex tw-min-h-[280px] tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 tw-p-4 sm:tw-min-h-[340px] lg:tw-min-h-0 lg:tw-flex-1`}
-        >
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-              Hosting Network
-            </span>
-            <div className="tw-inline-flex tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-1">
-              <TabToggle
-                options={providerOptions}
-                activeKey={externalProvider}
-                onSelect={handleProviderSelect}
-              />
-            </div>
-          </div>
-
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            <label
-              htmlFor="memes-interactive-media-hash"
-              className="tw-text-sm tw-font-medium tw-text-iron-200"
-            >
-              Content Hash or Path
-            </label>
+      <div
+        className={`tw-min-h-0 tw-flex-1 tw-overflow-hidden ${
+          showUploadUi
+            ? ""
+            : "tw-pb-4 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-overflow-y-auto lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500"
+        }`}
+      >
+        {showUploadUi ? (
+          <motion.div
+            id="memes-art-submission-upload-panel"
+            ref={dropAreaRef}
+            {...(!artworkUploaded && !prefersReducedMotion
+              ? { whileHover: { scale: 1.002 } }
+              : {})}
+            className={`tw-group tw-relative tw-min-h-[280px] tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 sm:tw-min-h-[340px] lg:tw-h-full lg:tw-min-h-0 ${
+              visualState === "dragging"
+                ? "tw-border-2 tw-border-primary-500/60"
+                : ""
+            } ${visualState === "invalid" ? "tw-border-2 tw-border-red/60" : ""} ${
+              visualState === "idle" && !artworkUploaded
+                ? "hover:tw-border hover:tw-border-iron-700/80"
+                : ""
+            } tw-transition-all tw-duration-300 ${artworkUploaded ? "" : "tw-cursor-pointer"} `}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={!artworkUploaded ? handleAreaClick : undefined}
+            role={artworkUploaded ? undefined : "button"}
+            tabIndex={artworkUploaded ? -1 : 0}
+            aria-label="Upload artwork"
+            onKeyDown={handleKeyDown}
+            aria-describedby={error ? "file-upload-error" : undefined}
+            data-testid="artwork-upload-area"
+          >
             <input
-              id="memes-interactive-media-hash"
-              type="text"
-              autoComplete="off"
-              className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-600"
-              placeholder="bafy.../index.html"
-              value={externalHash}
-              onChange={(event) => onExternalHashChange(event.target.value)}
-              aria-invalid={Boolean(externalError)}
+              ref={fileInputRef}
+              type="file"
+              accept={SUBMISSION_FILE_INPUT_ACCEPT}
+              className="tw-hidden"
+              onChange={handleFileInputChange}
+              data-testid="artwork-file-input"
             />
-            {externalError && (
-              <p className="tw-text-red-400 tw-text-xs">{externalError}</p>
+
+            {!browserSupport.supported && browserSupport.reason && (
+              <BrowserWarning reason={browserSupport.reason} />
             )}
-            {externalConstructedUrl && !externalError && (
-              <p className="tw-text-xs tw-text-iron-400">
-                Resulting URL{" "}
-                <span className="tw-text-iron-100">
-                  {externalConstructedUrl}
-                </span>
-              </p>
-            )}
-          </div>
 
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-              Media Type
-            </span>
-            <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200">
-              <span>{mediaTypeLabel}</span>
-              <span className="tw-text-xs tw-text-iron-500">
-                Fixed to interactive HTML (text/html)
-              </span>
-            </div>
-          </div>
-
-          <div className="tw-flex tw-items-center">
-            <button
-              type="button"
-              onClick={onClearExternalMedia}
-              className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
-              disabled={!externalHash}
-            >
-              Clear Hash
-            </button>
-          </div>
-
-          <div className="tw-flex tw-min-h-[260px] tw-flex-1 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 sm:tw-min-h-[320px] lg:tw-min-h-[360px]">
-            {isExternalMediaValid ? (
-              <SandboxedExternalIframe
-                key={externalPreviewUrl}
-                src={externalPreviewUrl}
-                title="Interactive artwork preview"
-                className="tw-bg-transparent"
-                containerClassName="tw-flex-1 tw-flex tw-flex-col"
-                fallback={renderPreviewMessage(
-                  "Preview unavailable for unapproved domains or file types.",
-                  "Only ipfs.io or arweave.net HTML documents can be embedded."
-                )}
+            {!artworkUploaded ? (
+              <UploadArea
+                visualState={visualState}
+                error={error}
+                hasRecoveryOption={state.hasRecoveryOption}
+                onRetry={handleRetry}
               />
             ) : (
-              <div className="tw-flex tw-flex-1 tw-flex-col">
-                {previewFallback}
-              </div>
+              <FilePreview
+                url={previewUrl}
+                file={currentFile}
+                onRemove={handleRemoveFile}
+                videoCompatibility={videoCompatibility}
+                isCheckingCompatibility={isCheckingCompatibility}
+              />
             )}
+          </motion.div>
+        ) : (
+          <div
+            id="memes-art-submission-interactive-panel"
+            className={`tw-flex tw-min-h-[280px] tw-flex-col tw-gap-6 tw-p-4 sm:tw-min-h-[340px] lg:tw-min-h-full`}
+          >
+            <div className="tw-flex tw-flex-col tw-gap-2">
+              <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+                Hosting Network
+              </span>
+              <div className="tw-w-fit tw-max-w-full">
+                <CommonTabs
+                  items={providerOptions}
+                  activeItem={externalProvider}
+                  filterLabel="Select hosting network"
+                  setSelected={handleProviderSelect}
+                  size="sm"
+                  fill={false}
+                />
+              </div>
+            </div>
+
+            <div className="tw-flex tw-flex-col tw-gap-2">
+              <label
+                htmlFor="memes-interactive-media-hash"
+                className="tw-text-sm tw-font-medium tw-text-iron-200"
+              >
+                Content Hash or Path
+              </label>
+              <input
+                id="memes-interactive-media-hash"
+                type="text"
+                autoComplete="off"
+                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base sm:tw-text-sm tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"
+                placeholder="bafy.../index.html"
+                value={externalHash}
+                onChange={(event) => onExternalHashChange(event.target.value)}
+                aria-invalid={Boolean(externalError)}
+              />
+              {externalError && (
+                <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
+                  {externalError}
+                </p>
+              )}
+              {externalConstructedUrl && !externalError && (
+                <p className="tw-text-xs tw-text-iron-400">
+                  Resulting URL{" "}
+                  <span className="tw-text-iron-100">
+                    {externalConstructedUrl}
+                  </span>
+                </p>
+              )}
+            </div>
+
+            <div className="tw-flex tw-flex-col tw-gap-y-4">
+              <div className="tw-flex tw-flex-col tw-gap-2">
+                <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+                  Media Type
+                </span>
+                <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-py-2 tw-text-sm tw-text-iron-200">
+                  <span>{mediaTypeLabel}</span>
+                  <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+                    Fixed to interactive HTML (text/html)
+                  </span>
+                </div>
+              </div>
+
+              <div className="tw-flex tw-items-center">
+                <button
+                  type="button"
+                  onClick={onClearExternalMedia}
+                  className="tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-800"
+                  disabled={!externalHash}
+                >
+                  Clear Hash
+                </button>
+              </div>
+
+              <div className="tw-flex tw-min-h-[260px] tw-flex-1 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 sm:tw-min-h-[320px] lg:tw-min-h-[360px]">
+                {isExternalMediaValid ? (
+                  <SandboxedExternalIframe
+                    key={externalPreviewUrl}
+                    src={externalPreviewUrl}
+                    title="Interactive artwork preview"
+                    className="tw-bg-transparent"
+                    containerClassName="tw-flex-1 tw-flex tw-flex-col"
+                    fallback={renderPreviewMessage(
+                      "Preview unavailable for unapproved domains or file types.",
+                      "Only ipfs.io or arweave.net HTML documents can be embedded."
+                    )}
+                  />
+                ) : (
+                  <div className="tw-flex tw-h-full tw-flex-1 tw-items-center tw-justify-center">
+                    {previewFallback}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
