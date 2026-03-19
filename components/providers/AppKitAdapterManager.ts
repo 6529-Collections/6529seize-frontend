@@ -20,7 +20,7 @@ import type { CreateConnectorFn } from "wagmi";
 
 type ConnectionState = "connecting" | "connected" | "disconnected";
 
-export type AppKitAdapterManagerOptions = {
+type AppKitAdapterManagerOptions = {
   usePublicHttpTransports?: boolean;
 };
 
@@ -58,7 +58,10 @@ export class AppKitAdapterManager {
   private readonly usePublicHttpTransports: boolean;
 
   constructor(
-    requestPassword: (address: string, addressHashed: string) => Promise<string>,
+    requestPassword: (
+      address: string,
+      addressHashed: string
+    ) => Promise<string>,
     options?: AppKitAdapterManagerOptions
   ) {
     if (!requestPassword) {

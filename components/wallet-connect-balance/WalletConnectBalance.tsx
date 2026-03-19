@@ -4,7 +4,7 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlugCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
-export default function UserBalance() {
+export default function WalletConnectBalance() {
   const account = useAccount();
   const { data: balance } = useBalance({
     address: account.address,

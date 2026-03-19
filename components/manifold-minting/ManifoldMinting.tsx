@@ -53,7 +53,7 @@ import type {
   ManifoldMintMetadata,
 } from "./manifold-mint-metadata";
 import type { Chain } from "viem";
-import UserBalance from "@/components/user-balance/UserBalance";
+import WalletConnectBalance from "@/components/wallet-connect-balance/WalletConnectBalance";
 
 interface Props {
   title: string;
@@ -146,7 +146,7 @@ function StandaloneMintPageTopBar() {
           } as CSSProperties
         }
       >
-        <UserBalance />
+        <WalletConnectBalance />
       </div>
     </div>
   );
