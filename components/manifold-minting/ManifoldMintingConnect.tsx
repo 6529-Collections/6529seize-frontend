@@ -17,9 +17,10 @@ const noopProfileSelection = (_: CommunityMemberMinimal | null) => undefined;
 export default function ManifoldMintingConnect(
   props: Readonly<{
     onMintFor: (address: string) => void;
+    showConnect?: boolean;
   }>
 ) {
-  const { onMintFor } = props;
+  const { onMintFor, showConnect } = props;
   const account = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isIos } = useCapacitor();
@@ -201,6 +202,9 @@ export default function ManifoldMintingConnect(
   }
 
   if (!account.isConnected) {
+    if (showConnect) {
+      return null;
+    }
     return (
       <div className="tw-py-2 tw-text-center">
         <HeaderUserConnect />

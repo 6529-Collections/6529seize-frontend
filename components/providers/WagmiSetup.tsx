@@ -127,8 +127,10 @@ function canAssignProperty(descriptor: PropertyDescriptor): boolean {
 
 export default function WagmiSetup({
   children,
+  usePublicHttpTransports = false,
 }: {
   readonly children: React.ReactNode;
+  readonly usePublicHttpTransports?: boolean;
 }) {
   const enableTestnet = publicEnv.DROP_FORGE_TESTNET === true;
 
@@ -150,8 +152,11 @@ export default function WagmiSetup({
   // Use the same adapter manager for both mobile and web
   // AppKit will automatically handle the appropriate connectors
   const adapterManager = useMemo(
-    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
-    [appWalletPasswordModal.requestPassword]
+    () =>
+      new AppKitAdapterManager(appWalletPasswordModal.requestPassword, {
+        usePublicHttpTransports,
+      }),
+    [appWalletPasswordModal.requestPassword, usePublicHttpTransports]
   );
 
   // Handle client-side mounting for App Router

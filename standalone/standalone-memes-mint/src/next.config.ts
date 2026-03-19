@@ -3,11 +3,16 @@ import type { NextConfig } from "next";
 
 const require = createRequire(import.meta.url);
 const { publicEnvSchema } = require("../../../config/env.schema.runtime.cjs");
+
+const standaloneBaseEndpoint = (
+  process.env["STANDALONE_BASE_ENDPOINT"]?.trim() || "https://thememes.6529.io"
+).replace(/\/+$/, "");
+
 const standalonePublicEnv = {
   NODE_ENV: "production",
   API_ENDPOINT: "https://api.6529.io",
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io",
-  BASE_ENDPOINT: "https://thememes.6529.io",
+  BASE_ENDPOINT: standaloneBaseEndpoint,
   IPFS_API_ENDPOINT: "https://api-ipfs.6529.io",
   IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io",
   NEXTGEN_CHAIN_ID: 1,

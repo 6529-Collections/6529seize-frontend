@@ -115,14 +115,24 @@ export default function NFTMarketplaceLinks({
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            unoptimized
-            className="tw-rounded-md"
-            src={marketplace.imageSrc}
-            alt={marketplace.alt}
-            width={size}
-            height={size}
-          />
+          {marketplace.imageSrc.endsWith(".svg") ? (
+            <img
+              className="tw-rounded-md"
+              src={marketplace.imageSrc}
+              alt={marketplace.alt}
+              width={size}
+              height={size}
+            />
+          ) : (
+            <Image
+              unoptimized
+              className="tw-rounded-md"
+              src={marketplace.imageSrc}
+              alt={marketplace.alt}
+              width={size}
+              height={size}
+            />
+          )}
         </Link>
       ))}
     </div>

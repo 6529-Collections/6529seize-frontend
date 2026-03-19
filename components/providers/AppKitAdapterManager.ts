@@ -1,6 +1,7 @@
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { mainnet } from "viem/chains";
+import { mainnet, sepolia } from "viem/chains";
 import { coinbaseWallet } from "wagmi/connectors";
+import { http } from "wagmi";
 import { CW_PROJECT_ID } from "@/constants/constants";
 import {
   AdapterCacheError,
@@ -19,6 +20,30 @@ import type { CreateConnectorFn } from "wagmi";
 
 type ConnectionState = "connecting" | "connected" | "disconnected";
 
+export type AppKitAdapterManagerOptions = {
+  usePublicHttpTransports?: boolean;
+};
+
+const MAINNET_PUBLIC_HTTP_RPC = "https://cloudflare-eth.com";
+const SEPOLIA_PUBLIC_HTTP_RPC = "https://rpc.sepolia.org";
+
+function wagmiTransportsForChains(chains: Chain[]) {
+  const transports: Record<number, ReturnType<typeof http>> = {};
+  for (const chain of chains) {
+    if (chain.id === mainnet.id) {
+      transports[chain.id] = http(MAINNET_PUBLIC_HTTP_RPC);
+    } else if (chain.id === sepolia.id) {
+      transports[chain.id] = http(SEPOLIA_PUBLIC_HTTP_RPC);
+    } else {
+      const url = chain.rpcUrls?.default?.http?.[0];
+      if (url) {
+        transports[chain.id] = http(url);
+      }
+    }
+  }
+  return transports;
+}
+
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null;
   private currentWallets: AppWallet[] = [];
@@ -30,9 +55,11 @@ export class AppKitAdapterManager {
   private readonly adapterCache = new Map<string, WagmiAdapter>();
   private readonly maxCacheSize = 5;
   private readonly connectionStates = new Map<string, ConnectionState>();
+  private readonly usePublicHttpTransports: boolean;
 
   constructor(
-    requestPassword: (address: string, addressHashed: string) => Promise<string>
+    requestPassword: (address: string, addressHashed: string) => Promise<string>,
+    options?: AppKitAdapterManagerOptions
   ) {
     if (!requestPassword) {
       throw new AdapterError(
@@ -43,6 +70,7 @@ export class AppKitAdapterManager {
       throw new AdapterError("ADAPTER_006: requestPassword must be a function");
     }
     this.requestPassword = requestPassword;
+    this.usePublicHttpTransports = options?.usePublicHttpTransports === true;
   }
 
   createAdapter(
@@ -99,8 +127,11 @@ export class AppKitAdapterManager {
     const wagmiAdapter = new WagmiAdapter({
       networks: chains,
       projectId: CW_PROJECT_ID,
-      ssr: false, // App Router requires this to be false to avoid hydration mismatches
+      ssr: false,
       connectors,
+      ...(this.usePublicHttpTransports
+        ? { transports: wagmiTransportsForChains(chains) }
+        : {}),
     });
 
     this.currentAdapter = wagmiAdapter;
@@ -294,7 +325,7 @@ export class AppKitAdapterManager {
         : sortedAddresses.join(",");
     return `${walletsKey}|chains:${chainIdentifiers.join(",")}|platform:${
       isCapacitor ? "capacitor" : "web"
-    }`;
+    }|pubRpc:${this.usePublicHttpTransports}`;
   }
 
   private getSortedChainIdentifiers(chains: Chain[]): string[] {

@@ -56,6 +56,7 @@ export default function ManifoldMintingWidget(
     abi: any;
     claim: ManifoldClaim;
     local_timezone: boolean;
+    showConnect?: boolean;
     setFee: (fee: number) => void;
     setMintForAddress: (address: string) => void;
   }>
@@ -631,7 +632,10 @@ export default function ManifoldMintingWidget(
       {props.claim.status !== ManifoldClaimStatus.ENDED &&
         !props.claim.isFinalized && (
           <div>
-            <ManifoldMintingConnect onMintFor={setMintForAddress} />
+            <ManifoldMintingConnect
+              onMintFor={setMintForAddress}
+              showConnect={props.showConnect ?? false}
+            />
           </div>
         )}
       <div>{printContent()}</div>

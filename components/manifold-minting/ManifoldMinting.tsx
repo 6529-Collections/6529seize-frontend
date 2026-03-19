@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
+import clsx from "clsx";
 import Link from "next/link";
-import { AppKitButton } from "@reown/appkit/react";
 import {
   type ReactNode,
   type CSSProperties,
@@ -46,7 +45,6 @@ import {
   ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import type {
@@ -55,6 +53,7 @@ import type {
   ManifoldMintMetadata,
 } from "./manifold-mint-metadata";
 import type { Chain } from "viem";
+import UserBalance from "@/components/user-balance/UserBalance";
 
 interface Props {
   title: string;
@@ -126,13 +125,10 @@ function MetadataRow({
 }
 
 function StandaloneMintPageTopBar() {
-  const { isConnected, seizeConnect, seizeConnectOpen } =
-    useSeizeConnectContext();
-
   return (
-    <div className="tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-4 tw-pt-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
+    <div className="tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
       <div className="tw-flex tw-items-center tw-justify-center tw-gap-3">
-        <Image src="/6529.svg" alt="6529" width={28} height={28} unoptimized />
+        <img src="/6529.svg" alt="6529" width={28} height={28} />
         <span className="tw-text-xl tw-font-bold tw-text-white">
           The Memes by 6529 - Mint Page
         </span>
@@ -150,18 +146,7 @@ function StandaloneMintPageTopBar() {
           } as CSSProperties
         }
       >
-        {isConnected ? (
-          <AppKitButton balance="show" />
-        ) : (
-          <button
-            type="button"
-            onClick={seizeConnect}
-            disabled={seizeConnectOpen}
-            className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-bg-primary-500 tw-px-4 !tw-text-[13px] tw-font-medium tw-leading-none tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-          >
-            {seizeConnectOpen ? "CONNECTING..." : "CONNECT WALLET"}
-          </button>
-        )}
+        <UserBalance />
       </div>
     </div>
   );
@@ -247,6 +232,13 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   const [fee, setFee] = useState<number>(0);
   const [mintForAddress, setMintForAddress] = useState<string>("");
+  const pageContainerClassName =
+    "tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6";
+  const standalonePageContainerClassName = clsx(
+    pageContainerClassName,
+    props.standalone && "tw-pt-4"
+  );
+  const sectionPaddingClassName = props.standalone ? "tw-py-8" : "tw-py-4";
 
   const instance = useMemo<MintMetadata | undefined>(() => {
     if (
@@ -335,6 +327,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         abi={props.abi}
         claim={manifoldClaim}
         local_timezone={isLocalTimezone}
+        showConnect={props.standalone ?? false}
         setFee={setFee}
         setMintForAddress={setMintForAddress}
       />
@@ -416,7 +409,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   function printActions(instance: MintMetadata, manifoldClaim: ManifoldClaim) {
     return (
       <div
-        className={`tw-order-2 md:tw-order-1 md:tw-col-span-5 ${props.standalone ? "tw-py-8" : "tw-py-4"}`}
+        className={clsx(
+          "tw-order-2 md:tw-order-1 md:tw-col-span-5",
+          sectionPaddingClassName
+        )}
       >
         <div className="tw-flex tw-items-center tw-justify-between">
           {props.standalone ? (
@@ -506,10 +502,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!manifoldClaim) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6">
+      <div className={pageContainerClassName}>
         {printTestnetIndicator()}
         {printTitle()}
-        <div className={props.standalone ? "tw-py-8" : "tw-py-4"}>
+        <div className={sectionPaddingClassName}>
           {isError ? (
             <span className="tw-text-iron-100">
               Error fetching mint information
@@ -527,9 +523,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!instance || !nftImage) {
     return (
-      <div
-        className={`tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6 ${props.standalone ? "tw-py-8" : "tw-py-4"}`}
-      >
+      <div className={clsx(pageContainerClassName, sectionPaddingClassName)}>
         {printTestnetIndicator()}
         {printTitle()}
         <div>
@@ -540,7 +534,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6">
+    <div className={standalonePageContainerClassName}>
       {printTestnetIndicator()}
       {props.standalone && (
         <div>

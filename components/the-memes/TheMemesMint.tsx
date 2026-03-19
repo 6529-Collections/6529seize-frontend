@@ -56,7 +56,7 @@ export default function TheMemesMint({
       abi={MEMES_MANIFOLD_PROXY_ABI}
       mint_date={Time.fromString(nft.mint_date?.toString() ?? "")}
       mintMetadata={mintMetadata}
-      standalone={standalone}
+      standalone={true}
     />
   );
 }

@@ -37,6 +37,9 @@ export default function RootLayout({
           <Providers
             enableVersionCheck={false}
             enableWalletAuthentication={false}
+            enableCookieConsent={false}
+            enableMyStream={false}
+            usePublicHttpTransports
           >
             <DynamicHeadTitle />
             {children}

@@ -659,7 +659,18 @@ describe("AppKitAdapterManager", () => {
     });
 
     it("should return empty-wallets key with chains for empty array", () => {
-      expect(manager["getCacheKey"]([])).toBe("empty-wallets|chains:1");
+      expect(manager["getCacheKey"]([])).toBe(
+        "empty-wallets|chains:1|platform:web|pubRpc:false"
+      );
+    });
+
+    it("should include pubRpc in cache key when usePublicHttpTransports is true", () => {
+      const pub = new AppKitAdapterManager(mockRequestPassword, {
+        usePublicHttpTransports: true,
+      });
+      expect(pub["getCacheKey"]([])).toBe(
+        "empty-wallets|chains:1|platform:web|pubRpc:true"
+      );
     });
 
     it("should generate consistent cache key for same wallets", () => {

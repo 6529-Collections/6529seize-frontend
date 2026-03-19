@@ -29,15 +29,21 @@ export default function Providers({
   children,
   enableVersionCheck = true,
   enableWalletAuthentication = true,
+  enableCookieConsent = true,
+  enableMyStream = true,
+  usePublicHttpTransports = false,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
   readonly enableWalletAuthentication?: boolean;
+  readonly enableCookieConsent?: boolean;
+  readonly enableMyStream?: boolean;
+  readonly usePublicHttpTransports?: boolean;
 }) {
   return (
     <QueryClientSetup>
       <AppWalletsProvider>
-        <WagmiSetup>
+        <WagmiSetup usePublicHttpTransports={usePublicHttpTransports}>
           <CapacitorSetup />
           <IpfsImageSetup />
           <ReactQueryWrapper>
@@ -51,12 +57,28 @@ export default function Providers({
                       >
                         <WaveEligibilityProvider>
                           <NotificationsProvider>
-                            <CookieConsentProvider>
+                            <CookieConsentProvider
+                              disabled={!enableCookieConsent}
+                            >
                               <MixpanelSetup />
                               <EULAConsentProvider>
                                 <AppWebSocketProvider>
                                   <LayoutProvider>
-                                    <MyStreamProvider>
+                                    {enableMyStream ? (
+                                      <MyStreamProvider>
+                                        <TitleProvider>
+                                          <HeaderProvider>
+                                            <ScrollPositionProvider>
+                                              <ViewProvider>
+                                                <NavigationHistoryProvider>
+                                                  {children}
+                                                </NavigationHistoryProvider>
+                                              </ViewProvider>
+                                            </ScrollPositionProvider>
+                                          </HeaderProvider>
+                                        </TitleProvider>
+                                      </MyStreamProvider>
+                                    ) : (
                                       <TitleProvider>
                                         <HeaderProvider>
                                           <ScrollPositionProvider>
@@ -68,7 +90,7 @@ export default function Providers({
                                           </ScrollPositionProvider>
                                         </HeaderProvider>
                                       </TitleProvider>
-                                    </MyStreamProvider>
+                                    )}
                                   </LayoutProvider>
                                   {enableVersionCheck && <NewVersionToast />}
                                 </AppWebSocketProvider>
