@@ -488,7 +488,7 @@ export default function ManifoldMintingWidget(
           </button>
         </div>
         {mintError && (
-          <div className="tw-pt-3 tw-text-sm tw-text-red">{mintError}</div>
+          <div className="tw-pt-3 tw-text-base tw-text-red">{mintError}</div>
         )}
         {mintWrite.isPending && (
           <div className="tw-pt-3">

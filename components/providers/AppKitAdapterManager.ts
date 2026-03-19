@@ -38,6 +38,15 @@ function wagmiTransportsForChains(chains: Chain[]) {
       const url = chain.rpcUrls?.default?.http?.[0];
       if (url) {
         transports[chain.id] = http(url);
+      } else {
+        console.warn(
+          "[AppKitAdapterManager] Chain has no default HTTP RPC URL; transport not configured.",
+          {
+            chainId: chain.id,
+            chainName: chain.name,
+            rpcUrls: chain.rpcUrls,
+          }
+        );
       }
     }
   }

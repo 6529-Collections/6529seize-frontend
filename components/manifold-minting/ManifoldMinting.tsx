@@ -238,7 +238,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     pageContainerClassName,
     props.standalone && "tw-pt-4"
   );
-  const sectionPaddingClassName = props.standalone ? "tw-py-8" : "tw-py-4";
 
   const instance = useMemo<MintMetadata | undefined>(() => {
     if (
@@ -336,7 +335,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   function printTitle() {
     return (
-      <div className="tw-flex tw-items-center tw-gap-2 tw-pb-2">
+      <div className="tw-flex tw-items-center tw-gap-2 tw-py-8">
         <h2 className="tw-mb-0 tw-text-3xl tw-font-semibold tw-text-white">
           Mint {props.title}
         </h2>
@@ -408,12 +407,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   function printActions(instance: MintMetadata, manifoldClaim: ManifoldClaim) {
     return (
-      <div
-        className={clsx(
-          "tw-order-2 md:tw-order-1 md:tw-col-span-5",
-          sectionPaddingClassName
-        )}
-      >
+      <div className="tw-order-2 tw-py-8 md:tw-order-1 md:tw-col-span-5">
         <div className="tw-flex tw-items-center tw-justify-between">
           {props.standalone ? (
             <div className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight tw-text-white">
@@ -500,49 +494,50 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     );
   }
 
-  if (!manifoldClaim) {
+  const printContent = (content: ReactNode) => {
     return (
-      <div className={pageContainerClassName}>
+      <div className={standalonePageContainerClassName}>
+        {props.standalone && (
+          <div>
+            <StandaloneMintPageTopBar />
+            <div className="tw-mt-4 tw-h-px tw-w-full tw-bg-white/20" />
+          </div>
+        )}
         {printTestnetIndicator()}
-        {printTitle()}
-        <div className={sectionPaddingClassName}>
-          {isError ? (
-            <span className="tw-text-iron-100">
-              Error fetching mint information
-            </span>
-          ) : (
-            <div className="tw-inline-flex tw-items-center tw-gap-3 tw-text-iron-100">
-              <span>Retrieving Mint information</span>
-              <Spinner />
-            </div>
-          )}
-        </div>
+        {!instance && !nftImage && printTitle()}
+        {content}
+      </div>
+    );
+  };
+
+  if (!manifoldClaim) {
+    return printContent(
+      <div>
+        {isError ? (
+          <span className="tw-text-iron-100">
+            Error fetching mint information
+          </span>
+        ) : (
+          <div className="tw-inline-flex tw-items-center tw-gap-3 tw-text-iron-100">
+            <span>Retrieving Mint information</span>
+            <Spinner />
+          </div>
+        )}
       </div>
     );
   }
 
   if (!instance || !nftImage) {
-    return (
-      <div className={clsx(pageContainerClassName, sectionPaddingClassName)}>
-        {printTestnetIndicator()}
-        {printTitle()}
-        <div>
-          <p className="tw-mb-0 tw-text-iron-100">No mint information found</p>
-        </div>
+    return printContent(
+      <div>
+        <p className="tw-mb-0 tw-text-iron-100">No mint information found</p>
       </div>
     );
   }
 
-  return (
-    <div className={standalonePageContainerClassName}>
-      {printTestnetIndicator()}
-      {props.standalone && (
-        <div>
-          <StandaloneMintPageTopBar />
-          <div className="tw-mt-4 tw-h-px tw-w-full tw-bg-white/20" />
-        </div>
-      )}
-      <div className="tw-grid tw-gap-8 tw-pb-3 md:tw-grid-cols-12">
+  return printContent(
+    <>
+      <div className="tw-grid tw-gap-8 md:tw-grid-cols-12">
         {printImage()}
         {printActions(instance, manifoldClaim)}
       </div>
@@ -729,7 +724,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       <div className="tw-py-3">
         <NFTAttributes attributes={instance.asset.attributes ?? []} />
       </div>
-    </div>
+    </>
   );
 }
 
