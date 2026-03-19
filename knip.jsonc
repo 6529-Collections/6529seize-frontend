@@ -47,6 +47,10 @@
       "jest.config.js": ["exports"],
       "eslint.config.tight.mjs": ["exports"],
       "eslint.config.diff.mjs": ["exports"],
+      "standalone/standalone-memes-mint/src/app/layout.tsx": ["exports"],
+      "standalone/standalone-memes-mint/src/app/page.tsx": ["exports"],
+      "standalone/standalone-memes-mint/src/next.config.ts": ["exports"],
+      "standalone/standalone-memes-mint/src/tailwind.config.ts": ["exports"],
       "utils/sentry-client-filters.ts": ["exports", "types"],
       "lib/fetch/ssrFetch.ts": ["exports"],
       "config/serverEnv.ts": ["exports"]
