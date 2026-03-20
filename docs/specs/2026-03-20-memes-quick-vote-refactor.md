@@ -81,6 +81,8 @@ The intended behavior is:
 - If `count` is greater than `0`, use the first returned drop to derive the remaining voting power for this mode.
 - If `count` is greater than `0`, use the first returned drop to derive the voting label for that power.
 
+For memes quick vote, `unvoted_by_me=true` is treated as a confirmed match for the candidate set this flow needs. The first returned drop is treated as a safe, authoritative source for remaining voting power and the corresponding label.
+
 ### 2. Paginated Unvoted Stream for the Dialog
 
 The dialog should stop treating the full submission history as its source of truth. Instead, it should build a working queue from paginated server results fetched from the leaderboard endpoint with `unvoted_by_me=true`, while hydrating only the item that is about to be shown.
@@ -90,6 +92,8 @@ The page endpoint is used to discover submission identifiers in server order. Th
 With `unvoted_by_me=true`, the paginated stream should already exclude submissions the viewer has rated. That means quick vote no longer needs to scan a broader stream and then strip out already-voted items during page processing.
 
 The actual item presented to the user should come from a separate single-item fetch. That single-item fetch becomes the freshness checkpoint for display. If the item is no longer present, no longer unvoted, no longer votable, or otherwise no longer usable for quick vote, it should be discarded before the user interacts with it.
+
+For this refactor, the single-item endpoint is assumed to already expose the viewer-specific state required to decide whether the item is still safe to display and vote.
 
 This keeps the network work bounded while still protecting the user from seeing stale skipped items or voting against outdated data.
 
@@ -101,10 +105,14 @@ Recommended model:
 
 - Load the first page of submission ids when quick vote opens.
 - Build a working client queue from the server-returned unvoted ids, after removing ids that are already deferred in local skip storage.
+- Treat the active queue depth as the number of usable non-skipped ids only. Deferred skipped ids do not count toward replenishment thresholds.
 - Hydrate only the current item to render, and prefetch the next item so normal progression feels instant.
 - After each vote or skip, advance to the next hydrated item immediately when available.
 - When the remaining usable unvoted id buffer reaches 5 or fewer items, prefetch the next page of ids in the background.
 - Keep at most one page-pagination request in flight at a time.
+- Merge page results idempotently. An id that is already present in the active queue, already deferred, or already removed as handled or stale during this session must not be re-added.
+- If a fetched page contributes no usable active ids because all returned ids are currently deferred as skipped, fetch the next page immediately when more pages remain.
+- If the active usable queue still has 5 or fewer items after a page is merged, continue fetching subsequent pages one page at a time until the usable queue is replenished or the server reports no more pages.
 - Do not request another page if the server has already indicated there are no more pages.
 - If the user advances faster than the next item can be hydrated, show a loader until the next item is ready.
 - Stop fetching when the server indicates there are no more pages.
@@ -143,6 +151,16 @@ To preserve this with paginated loading:
 - When the user eventually gets back to deferred items, hydrate the actual item before showing it.
 - If a deferred item is gone, already rated, or otherwise no longer valid when hydrated, remove it from both the working queue and local skip storage.
 
+Queue exhaustion should work like this:
+
+- First consume the normal paginated non-skipped queue in server order.
+- When there are no more normal pages in the current pass, switch to deferred skipped items.
+- When a skipped item is voted successfully, remove it from local skip storage immediately.
+- When the deferred skipped pool is exhausted, restart paginated discovery from page `0`.
+- If the new page-`0` pass yields valid non-skipped items, continue the normal queue again.
+- If the new page-`0` pass yields no valid non-skipped items, fall back to deferred skipped items again if any still exist.
+- Show the final "you are done" state only when a fresh page-`0` discovery pass yields no usable items and the deferred skipped pool is also empty.
+
 This makes skip behave like a real local “not now” mechanism. Items the user does not want to see immediately should not keep jumping back to the front just because the server still sorts them first.
 
 ## Validity and Freshness Rules
@@ -171,7 +189,9 @@ Implications:
 - The page endpoint should be treated as a discovery source, not as a guarantee that the next item is still displayable.
 - The paginated stream should be requested with `unvoted_by_me=true`, so page-fetch results can be treated as unvoted at fetch time.
 - The item about to be shown should be hydrated individually before display whenever needed.
-- A successful vote response should immediately update local queue state, clear local skip state for that id, and trigger a lightweight refresh of summary data.
+- A successful vote response should immediately update local queue state, clear local skip state for that id, and invalidate the same drop-related query family already refreshed by the current vote flow.
+- In practice, this should follow the existing `invalidateDrops()` pattern so leaderboard-derived summary state, drop detail, and related drop feeds are refreshed together after each successful quick vote.
+- Skip should not invalidate summary queries, because skipping does not change remaining voting power or complete any voting work.
 - If hydration shows that the next item is gone, already voted, or no longer usable, the client should drop that id from the queue, remove it from local skip storage if present, and advance again.
 - If the user advances faster than hydration completes, showing a loader is acceptable.
 - If background prefetch returns fewer useful unvoted items than expected because items disappeared or were already handled elsewhere, that should be treated as normal.
@@ -198,6 +218,7 @@ Client responsibilities:
 - persist and apply skip ordering locally
 - persist recent quick-vote amounts locally
 - handle optimistic UI movement after success
+- dedupe ids across page merges and ignore late page results that no longer fit current queue state
 - remove stale, deleted, or already-handled ids from local state when hydration exposes them
 - recover smoothly from stale-item failures
 
@@ -231,8 +252,8 @@ Expected outcome:
 After the core shift is working, tighten the edge cases:
 
 - confirm skip persistence behavior
-- confirm empty-state transitions after the last valid item
-- confirm how aggressively summary data should be refreshed after votes, skips, and dialog open
+- confirm restart-from-page-`0` behavior after deferred skipped items are exhausted
+- confirm id-deduping and usable-queue replenishment behavior during background pagination
 
 ## Success Criteria
 
@@ -245,10 +266,9 @@ After the core shift is working, tighten the edge cases:
 
 ## Risks
 
-- If the footer query and dialog query do not interpret `unvoted_by_me=true` the same way, the button count and dialog contents will drift.
-- If the single-item endpoint does not expose enough viewer-specific state, the client cannot safely decide whether an item is still quick-voteable.
-- If `unvoted_by_me=true` does not match quick-vote eligibility closely enough, the client may still need extra rejection logic after hydration.
-- If the first returned drop is not a reliable source of remaining voting power for the viewer, the footer could show the wrong remaining amount.
+- If vote-triggered invalidation misses one of the drop-related query groups already used elsewhere, footer summary and dialog state may drift until the next refetch.
+- If page filtering against skipped ids is not applied before queue-depth checks, the client may stop fetching too early and surface skipped items before the normal pass is truly exhausted.
+- If page-merge logic does not dedupe ids correctly across pagination passes and page-`0` restarts, the queue may resurface handled items or feel unstable.
 - If skip ordering is applied too aggressively across newly fetched pages, the queue may feel unstable or surprising.
 - If stale-item failures are not treated as normal, the flow will still feel brittle even with better pagination.
 - If the server order is not stable enough, background prefetch may produce duplicates or confusing jumps.
@@ -256,6 +276,4 @@ After the core shift is working, tighten the edge cases:
 ## Open Questions
 
 - Should skipped submissions persist across browser sessions exactly as they do today, or should skip reset more aggressively?
-- Is the single-item endpoint guaranteed to include the viewer-specific state needed to decide whether the item is still safe to display and vote?
-- Should the footer summary query refresh only after successful votes, or also after dialog open and other visibility events?
 - How many hydrated items should be kept ahead at once beyond the immediate current and next item?
