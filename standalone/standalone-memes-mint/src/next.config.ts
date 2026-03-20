@@ -4,15 +4,27 @@ import type { NextConfig } from "next";
 const require = createRequire(import.meta.url);
 const { publicEnvSchema } = require("../../../config/env.schema.runtime.cjs");
 
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+
+  while (end > 0 && value[end - 1] === "/") {
+    end -= 1;
+  }
+
+  return value.slice(0, end);
+}
+
 const standaloneBaseEndpoint = (
   process.env["STANDALONE_BASE_ENDPOINT"]?.trim() || "https://thememes.6529.io"
-).replace(/\/+$/, "");
+);
+const normalizedStandaloneBaseEndpoint =
+  trimTrailingSlashes(standaloneBaseEndpoint);
 
 const standalonePublicEnv = {
   NODE_ENV: "production",
   API_ENDPOINT: "https://api.6529.io",
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io",
-  BASE_ENDPOINT: standaloneBaseEndpoint,
+  BASE_ENDPOINT: normalizedStandaloneBaseEndpoint,
   STANDALONE_MAIN_SITE_BASE: "https://6529.io",
   IPFS_API_ENDPOINT: "https://api-ipfs.6529.io",
   IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io",

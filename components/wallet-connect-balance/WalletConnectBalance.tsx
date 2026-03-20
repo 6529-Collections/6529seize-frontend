@@ -6,11 +6,43 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlugCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
+function addThousandsSeparators(value: string): string {
+  let formatted = "";
+  let digitsInGroup = 0;
+
+  for (let index = value.length - 1; index >= 0; index -= 1) {
+    const character = value[index];
+    if (character === undefined) {
+      continue;
+    }
+
+    if (digitsInGroup === 3) {
+      formatted = `,${formatted}`;
+      digitsInGroup = 0;
+    }
+
+    formatted = `${character}${formatted}`;
+    digitsInGroup += 1;
+  }
+
+  return formatted;
+}
+
+function trimTrailingZeroes(value: string): string {
+  let end = value.length;
+
+  while (end > 0 && value[end - 1] === "0") {
+    end -= 1;
+  }
+
+  return value.slice(0, end);
+}
+
 function formatWeiBalance(value: bigint, decimals: number): string {
   const s = formatUnits(value, decimals);
   const [whole = "0", frac = ""] = s.split(".");
-  const grouped = whole.replaceAll(/\B(?=(\d{3})+(?!\d))/g, ",");
-  const shortFrac = frac.slice(0, 4).replace(/0+$/, "");
+  const grouped = addThousandsSeparators(whole);
+  const shortFrac = trimTrailingZeroes(frac.slice(0, 4));
   return shortFrac ? `${grouped}.${shortFrac}` : grouped;
 }
 

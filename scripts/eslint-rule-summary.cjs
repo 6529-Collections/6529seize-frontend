@@ -14,11 +14,13 @@ const eslintCliPath = path.join(
   "bin",
   "eslint.js"
 );
+const SAFE_SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin";
 
 function runGitCommand(commandArgs) {
   const result = spawnSync("git", commandArgs, {
     cwd: rootDir,
     encoding: "utf8",
+    env: { ...process.env, PATH: SAFE_SYSTEM_PATH },
   });
 
   if (result.error) {
@@ -78,6 +80,7 @@ if (changedOnly) {
   eslintArgs.push(...files);
   proc = spawn(process.execPath, eslintArgs, {
     cwd: rootDir,
+    env: { ...process.env, PATH: SAFE_SYSTEM_PATH },
     stdio: ["ignore", "pipe", "pipe"],
   });
 } else {
@@ -87,6 +90,7 @@ if (changedOnly) {
   }
   proc = spawn(process.execPath, eslintArgs, {
     cwd: rootDir,
+    env: { ...process.env, PATH: SAFE_SYSTEM_PATH },
     stdio: ["ignore", "pipe", "pipe"],
   });
 }

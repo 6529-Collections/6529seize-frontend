@@ -22,6 +22,7 @@ const finalOutputDir = distRootDir;
 
 const S3_BUCKET_PROD = "thememes.6529.io";
 const S3_BUCKET_TEST = "thememestest.6529.io";
+const SAFE_SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin";
 
 const STANDALONE_PUBLIC_FILES = [
   "6529.svg",
@@ -75,7 +76,7 @@ Env overrides:
 function run(command, args, envOverrides = {}) {
   const result = spawnSync(command, args, {
     cwd: rootDir,
-    env: { ...process.env, ...envOverrides },
+    env: { ...process.env, PATH: SAFE_SYSTEM_PATH, ...envOverrides },
     stdio: "inherit",
   });
 
@@ -106,7 +107,7 @@ function resolveCloudFrontDistributionIdByAlias(hostname) {
     ],
     {
       cwd: rootDir,
-      env: process.env,
+      env: { ...process.env, PATH: SAFE_SYSTEM_PATH },
       encoding: "utf8",
     }
   );
