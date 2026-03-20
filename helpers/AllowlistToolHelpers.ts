@@ -1,5 +1,4 @@
 class ObjectId {
-
   private readonly timestamp: number;
   private readonly machineId: number;
   private readonly processId: number;

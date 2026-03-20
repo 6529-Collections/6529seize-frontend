@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
@@ -73,8 +73,19 @@ export function useMintCountdownState(
 
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
+  const [now, setNow] = useState(() => Time.now());
 
   const showMintBtn = !hideMintBtn && !(isIos && country !== "US");
+
+  useEffect(() => {
+    const interval = globalThis.window.setInterval(() => {
+      setNow(Time.now());
+    }, 1000);
+
+    return () => {
+      globalThis.window.clearInterval(interval);
+    };
+  }, []);
 
   return useMemo((): MintCountdownState => {
     if (isError) {
@@ -95,7 +106,7 @@ export function useMintCountdownState(
       manifoldClaim.nextMemePhase
     ) {
       const nextPhase = manifoldClaim.nextMemePhase;
-      const isUpcoming = Time.now().lt(nextPhase.start);
+      const isUpcoming = now.lt(nextPhase.start);
 
       return {
         type: "countdown",
@@ -134,5 +145,5 @@ export function useMintCountdownState(
         isActive: !isUpcoming,
       },
     };
-  }, [manifoldClaim, isError, showMintBtn]);
+  }, [manifoldClaim, isError, now, showMintBtn]);
 }

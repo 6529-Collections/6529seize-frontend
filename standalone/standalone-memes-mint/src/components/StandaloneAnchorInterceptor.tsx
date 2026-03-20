@@ -4,7 +4,12 @@ import { publicEnv } from "@/config/env";
 import { useEffect } from "react";
 
 function mainSiteBaseForRewrites(): string {
-  return publicEnv.STANDALONE_MAIN_SITE_BASE!.replace(/\/+$/, "");
+  const base = publicEnv.STANDALONE_MAIN_SITE_BASE?.trim();
+  if (!base) {
+    throw new Error("STANDALONE_MAIN_SITE_BASE is not set");
+  }
+
+  return base.replace(/\/+$/, "");
 }
 
 function resolveStandaloneClickUrl(absoluteUrl: URL, pageOrigin: string): URL {
@@ -22,7 +27,8 @@ export default function StandaloneAnchorInterceptor() {
   useEffect(() => {
     const onClickCapture = (event: MouseEvent) => {
       if (event.defaultPrevented) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
       if (event.button !== 0) return;
 
       const node = event.target;
@@ -31,7 +37,8 @@ export default function StandaloneAnchorInterceptor() {
       const anchor = node.closest("a");
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.hasAttribute("download")) return;
-      if (anchor.getAttribute("data-standalone-skip-intercept") === "true") return;
+      if (anchor.getAttribute("data-standalone-skip-intercept") === "true")
+        return;
 
       const hrefAttr = anchor.getAttribute("href");
       if (hrefAttr == null || hrefAttr === "") return;

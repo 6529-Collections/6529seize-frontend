@@ -32,10 +32,7 @@ export class AppKitAdapterManager {
   private readonly connectionStates = new Map<string, ConnectionState>();
 
   constructor(
-    requestPassword: (
-      address: string,
-      addressHashed: string
-    ) => Promise<string>
+    requestPassword: (address: string, addressHashed: string) => Promise<string>
   ) {
     if (!requestPassword) {
       throw new AdapterError(

@@ -714,10 +714,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <table className="tw-w-full tw-border-separate tw-border-spacing-0">
             <tbody>
               {artist && (
-                <MetadataRow
-                  label="Artist"
-                  value={<b>{artistNameLink}</b>}
-                />
+                <MetadataRow label="Artist" value={<b>{artistNameLink}</b>} />
               )}
               <MetadataRow
                 label="Minting Approach"
@@ -852,6 +849,11 @@ function ManifoldMemesMintingPhases(
         const response = await fetch(
           `https://api.6529.io/api/distributions?card_id=${props.token_id}&contract=${props.contract}&page=1&search=${props.address}`
         );
+        if (!response.ok) {
+          throw new Error(
+            `Distribution request failed with status ${response.status}`
+          );
+        }
         const data = await response.json();
 
         if (!isCancelled) {
@@ -974,7 +976,9 @@ function ManifoldMemesMintingPhase(
           </span>
         </div>
         {props.address && (
-          <div className={`tw-pt-4 tw-text-center ${eligibleMintsDetails.className}`}>
+          <div
+            className={`tw-pt-4 tw-text-center ${eligibleMintsDetails.className}`}
+          >
             {eligibleMintsDetails.text}
           </div>
         )}

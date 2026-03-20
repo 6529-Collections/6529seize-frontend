@@ -635,6 +635,20 @@ export default function Auth({
 
   // These functions have been moved above to fix initialization order
 
+  const dispatchProfileSwitchedEvent = (
+    profileProxy: ApiProfileProxy | null
+  ) => {
+    if (globalThis.window === undefined) {
+      return;
+    }
+
+    globalThis.dispatchEvent(
+      new CustomEvent(PROFILE_SWITCHED_EVENT, {
+        detail: { profileProxy },
+      })
+    );
+  };
+
   const ensureConnectedWalletAddress = (): string | null => {
     if (address) {
       return address;
@@ -644,7 +658,6 @@ export default function Auth({
       message: "Please connect your wallet",
       type: "error",
     });
-    invalidateAll();
     return null;
   };
 
@@ -691,10 +704,21 @@ export default function Auth({
 
     if (!isValid) {
       removeAuthJwt();
-      await requestSignIn({
+      const { success } = await requestSignIn({
         signerAddress: walletAddress,
         role,
       });
+
+      if (!success) {
+        setShowSignModal(false);
+        try {
+          await seizeDisconnect();
+        } catch (error) {
+          logErrorSecurely("requestAuth_disconnect_after_failed_signin", error);
+        }
+        return false;
+      }
+
       invalidateAll();
     }
 
@@ -745,6 +769,7 @@ export default function Auth({
 
     if (!enableWalletAuthentication) {
       setActiveProfileProxy(profileProxy);
+      dispatchProfileSwitchedEvent(profileProxy);
       return;
     }
 
@@ -756,9 +781,7 @@ export default function Auth({
       });
       if (success) {
         setActiveProfileProxy(profileProxy);
-        if (globalThis.window !== undefined) {
-          globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
-        }
+        dispatchProfileSwitchedEvent(profileProxy);
       }
     } catch (error) {
       // Handle InvalidRoleStateError specifically

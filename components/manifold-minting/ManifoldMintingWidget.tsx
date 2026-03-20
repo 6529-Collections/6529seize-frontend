@@ -26,9 +26,7 @@ import type { Chain } from "viem";
 
 const MINT_PROXY_FUNCTION_NAME = "mintProxy";
 
-function normalizeMintCount(
-  value: number | string | null | undefined
-): number {
+function normalizeMintCount(value: number | string | null | undefined): number {
   const parsed =
     typeof value === "string" ? Number.parseInt(value, 10) : Number(value ?? 0);
 
