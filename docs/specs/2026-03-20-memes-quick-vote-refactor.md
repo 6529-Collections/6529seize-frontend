@@ -63,26 +63,33 @@ Important behavior already embedded in the current system:
 
 The refactor should split quick vote into two distinct concerns:
 
-### 1. Lightweight Summary for the Entry Point
+### 1. Lightweight Summary Query for the Entry Point
 
-Introduce a dedicated summary endpoint whose only job is to answer the footer trigger question:
+Reuse the leaderboard endpoint for the footer trigger query by requesting `unvoted_by_me=true` with `limit=1`.
 
 - Does the viewer currently have quick-vote work to do?
-- How many unrated quick-vote submissions remain?
+- How many unvoted quick-vote submissions remain?
 - How much voting power remains for this mode?
 - What label should be used for that power?
 
-This endpoint should be cheap, stable, and independent from full queue retrieval. The footer button should rely on this summary only. It should not need to page through submissions just to render the count and remaining power.
+The footer button should rely on this lightweight query only. It should not need to page through submissions just to render the count and remaining power.
 
-### 2. Paginated Discovery Stream for the Dialog
+The intended behavior is:
 
-The dialog should stop treating the full submission history as its source of truth. Instead, it should build a working queue from paginated server results ordered by the viewer’s current vote state, while hydrating only the item that is about to be shown.
+- Read `count` from the leaderboard response to determine how many unvoted submissions remain.
+- If `count` is `0`, hide the quick-vote button and do not depend on a returned drop.
+- If `count` is greater than `0`, use the first returned drop to derive the remaining voting power for this mode.
+- If `count` is greater than `0`, use the first returned drop to derive the voting label for that power.
+
+### 2. Paginated Unvoted Stream for the Dialog
+
+The dialog should stop treating the full submission history as its source of truth. Instead, it should build a working queue from paginated server results fetched from the leaderboard endpoint with `unvoted_by_me=true`, while hydrating only the item that is about to be shown.
 
 The page endpoint is used to discover submission identifiers in server order. The client should use those pages mainly as a source of ids and order, not as the final truth for what is safe to show on screen.
 
-The page endpoint is expected to be sorted by the viewer’s own vote from lowest to highest. That means unrated items should appear first, but already voted items may still appear later in the stream. Those already voted items should not become quick-vote queue entries.
+With `unvoted_by_me=true`, the paginated stream should already exclude submissions the viewer has rated. That means quick vote no longer needs to scan a broader stream and then strip out already-voted items during page processing.
 
-The actual item presented to the user should come from a separate single-item fetch. That single-item fetch becomes the freshness checkpoint for display. If the item is no longer present, no longer unrated, no longer votable, or otherwise no longer usable for quick vote, it should be discarded before the user interacts with it.
+The actual item presented to the user should come from a separate single-item fetch. That single-item fetch becomes the freshness checkpoint for display. If the item is no longer present, no longer unvoted, no longer votable, or otherwise no longer usable for quick vote, it should be discarded before the user interacts with it.
 
 This keeps the network work bounded while still protecting the user from seeing stale skipped items or voting against outdated data.
 
@@ -93,11 +100,10 @@ The queue should be treated as a rolling id buffer instead of a full in-memory h
 Recommended model:
 
 - Load the first page of submission ids when quick vote opens.
-- From each fetched page, immediately ignore entries that are already voted by the viewer.
-- Build a working client queue only from ids that are still unrated at page-fetch time, after removing ids that are already deferred in local skip storage.
+- Build a working client queue from the server-returned unvoted ids, after removing ids that are already deferred in local skip storage.
 - Hydrate only the current item to render, and prefetch the next item so normal progression feels instant.
 - After each vote or skip, advance to the next hydrated item immediately when available.
-- When the remaining usable unrated id buffer reaches 5 or fewer items, prefetch the next page of ids in the background.
+- When the remaining usable unvoted id buffer reaches 5 or fewer items, prefetch the next page of ids in the background.
 - Keep at most one page-pagination request in flight at a time.
 - Do not request another page if the server has already indicated there are no more pages.
 - If the user advances faster than the next item can be hydrated, show a loader until the next item is ready.
@@ -105,17 +111,18 @@ Recommended model:
 
 This gives the user a fast first interaction while still avoiding full-history loading. It also lets the client protect the user from stale or deleted skipped items by validating the actual item only when it is about to matter.
 
-## Handling Already Voted Submissions
+## Handling Newly Stale or Newly Voted Submissions
 
-The paginated endpoint is ordered by the viewer’s vote state, not limited to only unrated submissions. The spec should therefore state this behavior explicitly:
+The paginated endpoint should be called with `unvoted_by_me=true`, so the server stream is already narrowed to submissions the viewer has not rated yet.
 
-- Submissions with zero viewer vote are eligible to enter quick-vote discovery.
-- Submissions with non-zero viewer vote should be ignored immediately during page processing.
+The spec should therefore state this behavior explicitly:
+
+- Already voted submissions should be excluded by the server before they reach quick-vote pagination.
 - Already voted submissions must never enter the working queue.
 - Already voted submissions must never enter the local skipped pool.
-- If an item was unrated when the page was fetched but is already voted by the time it is hydrated, the client should drop it and continue.
+- If an item was unvoted when the page was fetched but is already voted by the time it is hydrated, the client should drop it and continue.
 
-This keeps the queue aligned with the purpose of quick vote even though the discovery endpoint itself contains a broader stream.
+This keeps the queue aligned with the purpose of quick vote while still acknowledging that items can change state after page fetch.
 
 ## Skip Semantics
 
@@ -132,7 +139,7 @@ To preserve this with paginated loading:
 
 - Keep skipped identifiers in local storage scoped to the viewer and the memes wave.
 - Preserve skip order in local storage so deferred items return in a stable local order later.
-- When unrated ids arrive from paginated fetches, remove skipped ids from the immediate working queue and keep them in the deferred pool instead.
+- When unvoted ids arrive from paginated fetches, remove skipped ids from the immediate working queue and keep them in the deferred pool instead.
 - When the user eventually gets back to deferred items, hydrate the actual item before showing it.
 - If a deferred item is gone, already rated, or otherwise no longer valid when hydrated, remove it from both the working queue and local skip storage.
 
@@ -152,21 +159,22 @@ That means the system must handle all of these cleanly:
 
 The safest rule is:
 
-- the summary endpoint owns summary truth
+- the lightweight summary query owns entry-point truth
 - paginated fetch owns server ordering
 - single-item hydration owns display freshness
 - vote response owns write-time truth
 
 Implications:
 
-- Summary values should always come from the dedicated summary response, not from locally counting buffered ids.
+- Summary values should always come from the leaderboard response fetched with `unvoted_by_me=true` and `limit=1`, not from locally counting buffered ids.
+- If that response reports `count = 0`, the button should be hidden even if the client still has stale local quick-vote state.
 - The page endpoint should be treated as a discovery source, not as a guarantee that the next item is still displayable.
-- Entries that are already voted at page-fetch time should be discarded before they enter any local quick-vote state.
+- The paginated stream should be requested with `unvoted_by_me=true`, so page-fetch results can be treated as unvoted at fetch time.
 - The item about to be shown should be hydrated individually before display whenever needed.
 - A successful vote response should immediately update local queue state, clear local skip state for that id, and trigger a lightweight refresh of summary data.
 - If hydration shows that the next item is gone, already voted, or no longer usable, the client should drop that id from the queue, remove it from local skip storage if present, and advance again.
 - If the user advances faster than hydration completes, showing a loader is acceptable.
-- If background prefetch returns fewer useful unrated items than expected because items disappeared or were already handled elsewhere, that should be treated as normal.
+- If background prefetch returns fewer useful unvoted items than expected because items disappeared or were already handled elsewhere, that should be treated as normal.
 
 ## Data Responsibility Split
 
@@ -174,9 +182,12 @@ The refactor is cleaner if responsibilities are sharply separated.
 
 Server responsibilities:
 
-- compute remaining unrated count
+- compute remaining unvoted count
 - compute remaining voting power
+- return `count` for the leaderboard query used by the footer trigger
+- return the first unvoted submission when `limit=1` and unvoted work exists
 - return paginated submissions in stable server order
+- apply `unvoted_by_me=true` so already-voted submissions are excluded from the quick-vote stream
 - return fresh single-item data for the item being shown
 
 Client responsibilities:
@@ -184,7 +195,6 @@ Client responsibilities:
 - show summary state
 - hold the current working id buffer
 - hydrate the current and next item
-- discard already voted items during page processing
 - persist and apply skip ordering locally
 - persist recent quick-vote amounts locally
 - handle optimistic UI movement after success
@@ -193,9 +203,9 @@ Client responsibilities:
 
 ## Proposed Rollout
 
-### Phase 1: Summary Endpoint
+### Phase 1: Footer Summary Query
 
-Replace footer-button derivation with a dedicated summary endpoint. This gives immediate value because it removes the need to fetch the entire participatory set just to show the entry point.
+Replace footer-button derivation with a lightweight leaderboard query using `unvoted_by_me=true` and `limit=1`. This gives immediate value because it removes the need to fetch the entire participatory set just to show the entry point.
 
 Expected outcome:
 
@@ -212,7 +222,7 @@ Expected outcome:
 - opening quick vote becomes faster
 - memory and network usage are bounded
 - the client stops rebuilding the queue from full history
-- already voted items are filtered out before they pollute quick-vote state
+- the client no longer needs to filter already voted items out of paginated results
 - skipped items no longer need to be blindly trusted when they come back later
 - stale-item handling becomes simpler and more explicit
 
@@ -235,9 +245,10 @@ After the core shift is working, tighten the edge cases:
 
 ## Risks
 
-- If summary and queue endpoints are not aligned on what “unvoted” means, the button count and dialog contents will drift.
+- If the footer query and dialog query do not interpret `unvoted_by_me=true` the same way, the button count and dialog contents will drift.
 - If the single-item endpoint does not expose enough viewer-specific state, the client cannot safely decide whether an item is still quick-voteable.
-- If page processing does not filter out already voted items early enough, the local queue and skip state will accumulate invalid ids.
+- If `unvoted_by_me=true` does not match quick-vote eligibility closely enough, the client may still need extra rejection logic after hydration.
+- If the first returned drop is not a reliable source of remaining voting power for the viewer, the footer could show the wrong remaining amount.
 - If skip ordering is applied too aggressively across newly fetched pages, the queue may feel unstable or surprising.
 - If stale-item failures are not treated as normal, the flow will still feel brittle even with better pagination.
 - If the server order is not stable enough, background prefetch may produce duplicates or confusing jumps.
@@ -246,5 +257,5 @@ After the core shift is working, tighten the edge cases:
 
 - Should skipped submissions persist across browser sessions exactly as they do today, or should skip reset more aggressively?
 - Is the single-item endpoint guaranteed to include the viewer-specific state needed to decide whether the item is still safe to display and vote?
-- Should the summary endpoint refresh only after successful votes, or also after dialog open and other visibility events?
+- Should the footer summary query refresh only after successful votes, or also after dialog open and other visibility events?
 - How many hydrated items should be kept ahead at once beyond the immediate current and next item?
