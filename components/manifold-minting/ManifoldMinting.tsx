@@ -135,37 +135,44 @@ function getEligibleMintsDetails(
   eligibleSpots: number | undefined,
   status: MemePhaseCardStatus
 ): { text: string; className: string } {
-  if (eligibleSpots !== undefined) {
+  if (phaseId === "public") {
+    if (status === MemePhaseCardStatus.ACTIVE) {
+      return {
+        text: "Unlimited spots",
+        className: "tw-font-semibold tw-text-success",
+      };
+    }
+
+    if (status === MemePhaseCardStatus.UPCOMING) {
+      return {
+        text: "Unlimited spots",
+        className: "tw-font-semibold tw-text-primary-300",
+      };
+    }
+
     return {
-      text: `${eligibleSpots} eligible spot${eligibleSpots > 1 ? "s" : ""}`,
-      className: "tw-font-semibold tw-text-success",
+      text: "Unlimited spots",
+      className: "tw-font-semibold tw-text-red/75",
     };
   }
 
-  if (phaseId !== "public") {
+  if (eligibleSpots === undefined) {
+    return {
+      text: "Loading eligibility...",
+      className: "tw-text-iron-300",
+    };
+  }
+
+  if (eligibleSpots === 0) {
     return {
       text: "No eligible spots",
-      className: "",
-    };
-  }
-
-  if (status === MemePhaseCardStatus.ACTIVE) {
-    return {
-      text: "Unlimited spots",
-      className: "tw-font-semibold tw-text-success",
-    };
-  }
-
-  if (status === MemePhaseCardStatus.UPCOMING) {
-    return {
-      text: "Unlimited spots",
-      className: "tw-font-semibold tw-text-primary-300",
+      className: "tw-text-iron-300",
     };
   }
 
   return {
-    text: "Unlimited spots",
-    className: "tw-font-semibold tw-text-red/75",
+    text: `${eligibleSpots} eligible spot${eligibleSpots > 1 ? "s" : ""}`,
+    className: "tw-font-semibold tw-text-success",
   };
 }
 
@@ -421,8 +428,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       return undefined;
     }
 
+    const artistLabel = artist.name ?? artist.handle;
+
     if (!artist.handle) {
-      return artist.name;
+      return artistLabel;
     }
 
     if (props.standalone) {
@@ -432,12 +441,12 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {artist.name}
+          {artistLabel}
         </a>
       );
     }
 
-    return <Link href={`/${artist.handle}`}>{artist.name}</Link>;
+    return <Link href={`/${artist.handle}`}>{artistLabel}</Link>;
   }, [artist, props.standalone]);
 
   useEffect(() => {

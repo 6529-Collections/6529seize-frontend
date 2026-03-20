@@ -11,14 +11,14 @@ function addThousandsSeparators(value: string): string {
     return value;
   }
 
-  const parsedValue = Number(value);
-  if (!Number.isFinite(parsedValue)) {
+  try {
+    const parsedValue = BigInt(value);
+    return new Intl.NumberFormat(undefined, {
+      maximumFractionDigits: 0,
+    }).format(parsedValue);
+  } catch {
     return value;
   }
-
-  return new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: 0,
-  }).format(parsedValue);
 }
 
 function trimTrailingZeroes(value: string): string {
