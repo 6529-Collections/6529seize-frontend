@@ -14,11 +14,11 @@ function trimTrailingSlashes(value: string): string {
   return value.slice(0, end);
 }
 
-const standaloneBaseEndpoint = (
-  process.env["STANDALONE_BASE_ENDPOINT"]?.trim() || "https://thememes.6529.io"
+const standaloneBaseEndpoint =
+  process.env["STANDALONE_BASE_ENDPOINT"]?.trim() || "https://thememes.6529.io";
+const normalizedStandaloneBaseEndpoint = trimTrailingSlashes(
+  standaloneBaseEndpoint
 );
-const normalizedStandaloneBaseEndpoint =
-  trimTrailingSlashes(standaloneBaseEndpoint);
 const standaloneMainSiteBase = trimTrailingSlashes(
   process.env["STANDALONE_MAIN_SITE_BASE"]?.trim() ||
     normalizedStandaloneBaseEndpoint

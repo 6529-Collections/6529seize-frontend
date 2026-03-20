@@ -42,7 +42,7 @@ export default function StandaloneAnchorInterceptor() {
       const anchor = node.closest("a");
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.hasAttribute("download")) return;
-      if (anchor.dataset.standaloneSkipIntercept === "true") return;
+      if (anchor.dataset["standaloneSkipIntercept"] === "true") return;
 
       const hrefAttr = anchor.getAttribute("href");
       if (hrefAttr == null || hrefAttr === "") return;
@@ -69,7 +69,10 @@ export default function StandaloneAnchorInterceptor() {
 
       if (url.protocol !== "http:" && url.protocol !== "https:") return;
 
-      const nextUrl = resolveStandaloneClickUrl(url, globalThis.location.origin);
+      const nextUrl = resolveStandaloneClickUrl(
+        url,
+        globalThis.location.origin
+      );
       anchor.href = nextUrl.toString();
 
       return { anchor, nextUrl };

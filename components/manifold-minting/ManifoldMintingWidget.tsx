@@ -293,7 +293,10 @@ export default function ManifoldMintingWidget(
     const selectedProofs = getSelectedMerkleProofs();
     const argsPreview =
       hasValidMintForAddress && safeMintCount > 0
-        ? getMintArgs()
+        ? (getMintArgs() ?? {
+            functionName: "n/a",
+            args: [],
+          })
         : {
             functionName: "n/a",
             args: [],
