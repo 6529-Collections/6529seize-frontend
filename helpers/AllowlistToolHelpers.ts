@@ -7,9 +7,9 @@ class ObjectId {
 
   constructor() {
     this.timestamp = Math.floor(Date.now() / 1000);
-    this.machineId = Math.floor(Math.random() * 16777216);
-    this.processId = Math.floor(Math.random() * 65536);
-    this.counter = Math.floor(Math.random() * 16777216);
+    this.machineId = getSecureRandomInt(16777216);
+    this.processId = getSecureRandomInt(65536);
+    this.counter = getSecureRandomInt(16777216);
   }
 
   toString(): string {
@@ -19,6 +19,12 @@ class ObjectId {
     const hexCounter = this.counter.toString(16).padStart(6, "0");
     return hexTimestamp + hexMachineId + hexProcessId + hexCounter;
   }
+}
+
+function getSecureRandomInt(maxExclusive: number): number {
+  const values = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(values);
+  return (values[0] ?? 0) % maxExclusive;
 }
 
 export const truncateTextMiddle = (

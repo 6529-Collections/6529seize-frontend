@@ -14,11 +14,13 @@ function getSrc(
 ): string {
   if (showThumbnail) {
     return nft.thumbnail;
-  } else if (nft.scaled && !showOriginal) {
-    return nft.scaled;
-  } else {
+  }
+
+  if (showOriginal || !nft.scaled) {
     return nft.image;
   }
+
+  return nft.scaled;
 }
 
 export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {

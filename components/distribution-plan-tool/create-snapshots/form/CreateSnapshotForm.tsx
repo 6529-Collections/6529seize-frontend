@@ -164,7 +164,7 @@ export default function CreateSnapshotForm() {
   };
 
   const goToEtherScan = () => {
-    window.open("https://etherscan.io/", "_blank");
+    window.open("https://etherscan.io/", "_blank", "noopener,noreferrer");
   };
 
   return (

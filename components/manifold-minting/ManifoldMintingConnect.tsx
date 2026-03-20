@@ -17,10 +17,10 @@ const noopProfileSelection = (_: CommunityMemberMinimal | null) => undefined;
 export default function ManifoldMintingConnect(
   props: Readonly<{
     onMintFor: (address: string) => void;
-    showConnect?: boolean;
+    hideConnect?: boolean;
   }>
 ) {
-  const { onMintFor, showConnect } = props;
+  const { onMintFor, hideConnect } = props;
   const account = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isIos } = useCapacitor();
@@ -184,16 +184,11 @@ export default function ManifoldMintingConnect(
       return (
         <Link
           href={mintOn6529Href}
-          className="tw-block tw-py-2"
+          className="tw-block tw-w-full tw-rounded-xl tw-border tw-border-white/15 tw-bg-white tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-950 tw-no-underline tw-transition hover:tw-bg-iron-100"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <button
-            type="button"
-            className="tw-w-full tw-rounded-xl tw-border tw-border-white/15 tw-bg-white tw-px-4 tw-py-3 tw-font-semibold tw-text-iron-950 tw-transition hover:tw-bg-iron-100"
-          >
-            Mint on 6529.io
-          </button>
+          Mint on 6529.io
         </Link>
       );
     } else {
@@ -202,7 +197,7 @@ export default function ManifoldMintingConnect(
   }
 
   if (!account.isConnected) {
-    if (showConnect) {
+    if (hideConnect) {
       return null;
     }
     return (

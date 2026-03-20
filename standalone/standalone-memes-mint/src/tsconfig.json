@@ -9,6 +9,8 @@
   "include": [
     "app/**/*.ts",
     "app/**/*.tsx",
+    "components/**/*.ts",
+    "components/**/*.tsx",
     ".next-static-export/types/**/*.ts",
     "../../../src/types/**/*.ts",
     "../../../types/**/*.d.ts",

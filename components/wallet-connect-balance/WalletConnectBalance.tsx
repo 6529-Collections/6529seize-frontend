@@ -1,4 +1,5 @@
 import { formatAddress } from "@/helpers/Helpers";
+import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { formatUnits } from "viem";
 import { useAccount, useBalance, useEnsName } from "wagmi";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -8,8 +9,8 @@ import { faPlugCircleXmark } from "@fortawesome/free-solid-svg-icons";
 function formatWeiBalance(value: bigint, decimals: number): string {
   const s = formatUnits(value, decimals);
   const [whole = "0", frac = ""] = s.split(".");
-  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  const shortFrac = frac.slice(0, 6).replace(/0+$/, "");
+  const grouped = whole.replaceAll(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const shortFrac = frac.slice(0, 4).replace(/0+$/, "");
   return shortFrac ? `${grouped}.${shortFrac}` : grouped;
 }
 
@@ -29,6 +30,13 @@ export default function WalletConnectBalance() {
 
   const { seizeConnect, seizeConnectOpen, seizeDisconnect } =
     useSeizeConnectContext();
+  const handleDisconnect = async () => {
+    try {
+      await seizeDisconnect();
+    } catch (error) {
+      logErrorSecurely("wallet_connect_balance_disconnect", error);
+    }
+  };
 
   if (!account.isConnected) {
     return (
@@ -60,7 +68,7 @@ export default function WalletConnectBalance() {
       <button
         type="button"
         aria-label="Disconnect wallet"
-        onClick={seizeDisconnect}
+        onClick={handleDisconnect}
         className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-r-full tw-border-0 tw-bg-transparent tw-px-3 tw-text-black tw-ring-0 tw-transition-colors hover:tw-bg-iron-100 focus:tw-outline-none focus-visible:tw-bg-iron-100"
       >
         <FontAwesomeIcon icon={faPlugCircleXmark} className="tw-h-4 tw-w-4" />

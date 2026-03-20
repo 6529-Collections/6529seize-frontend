@@ -79,7 +79,9 @@ export default function NFTMarketplaceLinks({
       marketplace.enabled &&
       (marketplace.shouldShow ? marketplace.shouldShow(contract) : true)
   );
-  const marketplaces = include6529CollectionLink
+  const shouldInclude6529CollectionLink =
+    include6529CollectionLink && isMemesContract(contract);
+  const marketplaces = shouldInclude6529CollectionLink
     ? [
         {
           key: "6529",

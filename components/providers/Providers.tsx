@@ -38,6 +38,18 @@ export default function Providers({
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
 }) {
+  const sharedProviders = (
+    <TitleProvider>
+      <HeaderProvider>
+        <ScrollPositionProvider>
+          <ViewProvider>
+            <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
+          </ViewProvider>
+        </ScrollPositionProvider>
+      </HeaderProvider>
+    </TitleProvider>
+  );
+
   return (
     <QueryClientSetup>
       <AppWalletsProvider>
@@ -64,30 +76,10 @@ export default function Providers({
                                   <LayoutProvider>
                                     {enableMyStream ? (
                                       <MyStreamProvider>
-                                        <TitleProvider>
-                                          <HeaderProvider>
-                                            <ScrollPositionProvider>
-                                              <ViewProvider>
-                                                <NavigationHistoryProvider>
-                                                  {children}
-                                                </NavigationHistoryProvider>
-                                              </ViewProvider>
-                                            </ScrollPositionProvider>
-                                          </HeaderProvider>
-                                        </TitleProvider>
+                                        {sharedProviders}
                                       </MyStreamProvider>
                                     ) : (
-                                      <TitleProvider>
-                                        <HeaderProvider>
-                                          <ScrollPositionProvider>
-                                            <ViewProvider>
-                                              <NavigationHistoryProvider>
-                                                {children}
-                                              </NavigationHistoryProvider>
-                                            </ViewProvider>
-                                          </ScrollPositionProvider>
-                                        </HeaderProvider>
-                                      </TitleProvider>
+                                      sharedProviders
                                     )}
                                   </LayoutProvider>
                                   {enableVersionCheck && <NewVersionToast />}

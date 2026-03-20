@@ -20,6 +20,8 @@ Defaults are aligned so **one hostname drives both** the baked-in app URL and th
 
 `next.config.ts` reads `STANDALONE_BASE_ENDPOINT` during `next build`. The export script sets it to `https://<bucket>` so WalletConnect / AppKit `metadata.url` matches the site origin.
 
+The standalone layout mounts a **document-level anchor interceptor**: any normal click on an `http(s)` link opens a **new tab** and never performs in-place navigation in the mint shell. Relative links and same-origin URLs (the mint host) are rewritten to **`https://6529.io`** (`STANDALONE_MAIN_SITE_BASE` in `standalone-memes-mint/src/next.config.ts`). **`BASE_ENDPOINT`** stays the mint origin for WalletConnect / metadata (`STANDALONE_BASE_ENDPOINT` / bucket URL). To opt out for a specific anchor, set `data-standalone-skip-intercept="true"`.
+
 Override buckets only if needed:
 
 - `STANDALONE_S3_BUCKET_PROD`

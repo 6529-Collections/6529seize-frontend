@@ -1,16 +1,63 @@
-const { spawn, execSync } = require("node:child_process");
+const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
+const path = require("node:path");
 
 const args = process.argv.slice(2);
 const outputPath = parseOutputPath(args);
 const configPath = parseConfigPath(args);
 const changedOnly = args.includes("--changed");
+const rootDir = path.resolve(__dirname, "..");
+const eslintCliPath = path.join(
+  rootDir,
+  "node_modules",
+  "eslint",
+  "bin",
+  "eslint.js"
+);
+
+function runGitCommand(commandArgs) {
+  const result = spawnSync("git", commandArgs, {
+    cwd: rootDir,
+    encoding: "utf8",
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr?.trim() || "git command failed");
+  }
+
+  return result.stdout.split("\0").filter(Boolean);
+}
+
+function isLintableFile(file) {
+  return /\.(?:[cm]?[jt]sx?)$/i.test(file) && !file.startsWith("generated/");
+}
 
 function getChangedFiles() {
-  const cmd = `{ git diff --name-only -z main...HEAD -- "*.js" "*.jsx" "*.ts" "*.tsx" ":(exclude)generated/**"; git ls-files --others --exclude-standard -z -- "*.js" "*.jsx" "*.ts" "*.tsx" ":(exclude)generated/**"; }`;
   try {
-    const output = execSync(cmd, { shell: "/bin/bash", encoding: "utf8" });
-    return output.split("\0").filter((file) => file && fs.existsSync(file));
+    const changedFiles = runGitCommand([
+      "diff",
+      "--name-only",
+      "-z",
+      "main...HEAD",
+      "--",
+      ".",
+    ]);
+    const untrackedFiles = runGitCommand([
+      "ls-files",
+      "--others",
+      "--exclude-standard",
+      "-z",
+      "--",
+      ".",
+    ]);
+
+    return Array.from(new Set([...changedFiles, ...untrackedFiles])).filter(
+      (file) => isLintableFile(file) && fs.existsSync(path.join(rootDir, file))
+    );
   } catch {
     return [];
   }
@@ -24,27 +71,31 @@ if (changedOnly) {
     console.log("No changed files to lint.");
     process.exit(0);
   }
-  const eslintArgs = ["eslint", "--no-warn-ignored", "--format", "json"];
+  const eslintArgs = [eslintCliPath, "--no-warn-ignored", "--format", "json"];
   if (configPath) {
     eslintArgs.push("--config", configPath);
   }
   eslintArgs.push(...files);
-  proc = spawn("npx", eslintArgs, { stdio: ["ignore", "pipe", "pipe"] });
+  proc = spawn(process.execPath, eslintArgs, {
+    cwd: rootDir,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 } else {
-  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-  const npmArgs = ["--silent", "run", "lint", "--"];
+  const eslintArgs = [eslintCliPath, ".", "--format", "json"];
   if (configPath) {
-    npmArgs.push("--config", configPath);
+    eslintArgs.push("--config", configPath);
   }
-  npmArgs.push("--format", "json");
-  proc = spawn(npmCommand, npmArgs, { stdio: ["ignore", "pipe", "pipe"] });
+  proc = spawn(process.execPath, eslintArgs, {
+    cwd: rootDir,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 }
 
 let stdout = "";
 let stderr = "";
 
 proc.on("error", (error) => {
-  console.error("Failed to run npm lint:", error);
+  console.error("Failed to run eslint:", error);
   process.exit(1);
 });
 

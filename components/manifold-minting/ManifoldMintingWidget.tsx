@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { type JSX, type ReactNode, useEffect, useState } from "react";
+import { type JSX, type ReactNode, useEffect, useId, useState } from "react";
 import {
   useReadContract,
   useReadContracts,
@@ -26,6 +26,19 @@ import type { Chain } from "viem";
 
 const MINT_PROXY_FUNCTION_NAME = "mintProxy";
 
+function normalizeMintCount(
+  value: number | string | null | undefined
+): number {
+  const parsed =
+    typeof value === "string" ? Number.parseInt(value, 10) : Number(value ?? 0);
+
+  if (!Number.isFinite(parsed) || Number.isNaN(parsed)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.trunc(parsed));
+}
+
 function MintSummaryRow({
   title,
   value,
@@ -35,6 +48,12 @@ function MintSummaryRow({
 }) {
   return (
     <table className="tw-w-full tw-border-separate tw-border-spacing-0">
+      <thead className="tw-sr-only">
+        <tr>
+          <th scope="col">Label</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
       <tbody>
         <tr className="tw-border-b tw-border-white/5 last:tw-border-b-0">
           <td className="tw-h-[46px] tw-w-[45%] tw-py-2 tw-pr-4 tw-align-middle">
@@ -56,7 +75,7 @@ export default function ManifoldMintingWidget(
     abi: any;
     claim: ManifoldClaim;
     local_timezone: boolean;
-    showConnect?: boolean;
+    hideConnect?: boolean;
     setFee: (fee: number) => void;
     setMintForAddress: (address: string) => void;
   }>
@@ -75,6 +94,7 @@ export default function ManifoldMintingWidget(
 
   const [mintCount, setMintCount] = useState<number>(0);
   const [feeWei, setFeeWei] = useState<bigint>(0n);
+  const mintCountControlId = useId();
 
   const [mintStatus, setMintStatus] = useState<JSX.Element>(<></>);
   const [mintError, setMintError] = useState<string>("");
@@ -178,6 +198,8 @@ export default function ManifoldMintingWidget(
     );
   }, [readContracts.data]);
 
+  const safeMintCount = normalizeMintCount(mintCount);
+
   const getSelectedMerkleProofs = () => {
     const selectedMerkleProofs: MintingClaimsProofItem[] = [];
     for (let i = 0; i < merkleProofsMints.length; i++) {
@@ -188,7 +210,7 @@ export default function ManifoldMintingWidget(
       if (!merkleProofsMints[i]) {
         selectedMerkleProofs.push(proof);
       }
-      if (selectedMerkleProofs.length === mintCount) {
+      if (selectedMerkleProofs.length === safeMintCount) {
         break;
       }
     }
@@ -219,8 +241,8 @@ export default function ManifoldMintingWidget(
     const mintArgs = [];
     const selectedMerkleProofs = getSelectedMerkleProofs();
 
-    if (mintCount > 1 || isProxy) {
-      mintArgs.push(mintCount);
+    if (safeMintCount > 1 || isProxy) {
+      mintArgs.push(safeMintCount);
 
       if (props.claim.phase === ManifoldPhase.PUBLIC) {
         mintArgs.push([], []);
@@ -241,7 +263,7 @@ export default function ManifoldMintingWidget(
   };
 
   const getDirectMintFunctionName = () => {
-    if (mintCount > 1) {
+    if (safeMintCount > 1) {
       return "mintBatch";
     }
     return "mint";
@@ -258,7 +280,7 @@ export default function ManifoldMintingWidget(
       !areEqualAddresses(connectedWallet, recipientWallet);
     const selectedProofs = getSelectedMerkleProofs();
     const argsPreview =
-      recipientWallet && mintCount > 0
+      recipientWallet && safeMintCount > 0
         ? getMintArgs()
         : {
             functionName: "n/a",
@@ -274,7 +296,7 @@ export default function ManifoldMintingWidget(
       recipientWallet,
       isProxy,
       mintFunction: argsPreview.functionName,
-      mintCount,
+      mintCount: safeMintCount,
       valueWei: getValue().toString(),
       feeWei: feeWei.toString(),
       claimCostWei: (props.claim.costWei ?? 0n).toString(),
@@ -304,9 +326,14 @@ export default function ManifoldMintingWidget(
     setMintError("");
     setMintStatus(<></>);
 
+    if (safeMintCount <= 0) {
+      setMintError("Enter a valid mint count");
+      return;
+    }
+
     if (props.claim.phase === ManifoldPhase.ALLOWLIST) {
       const selectedProofs = getSelectedMerkleProofs();
-      if (selectedProofs.length < mintCount) {
+      if (selectedProofs.length < safeMintCount) {
         setMintError("No allowlist spots in current phase for this address");
         return;
       }
@@ -399,15 +426,16 @@ export default function ManifoldMintingWidget(
 
   function getButtonText() {
     if (props.claim.status === ManifoldClaimStatus.ACTIVE) {
-      return <>SEIZE {mintCount ? `x${mintCount}` : "-"}</>;
+      return <>SEIZE {safeMintCount ? `x${safeMintCount}` : "-"}</>;
     }
 
     const startDate = Time.seconds(props.claim.startDate);
-    const dateDisplay = props.local_timezone
-      ? startDate.toLocaleDropDateString().toUpperCase()
-      : startDate.toIsoDateString() === Time.now().toIsoDateString()
-        ? "TODAY"
-        : startDate.toIsoDateString();
+    let dateDisplay = startDate.toIsoDateString();
+    if (props.local_timezone) {
+      dateDisplay = startDate.toLocaleDropDateString().toUpperCase();
+    } else if (startDate.toIsoDateString() === Time.now().toIsoDateString()) {
+      dateDisplay = "TODAY";
+    }
     const timeDisplay = props.local_timezone
       ? startDate.toLocaleHMString()
       : startDate.toIsoTimeStringWithoutSeconds();
@@ -418,9 +446,10 @@ export default function ManifoldMintingWidget(
     const optionsArray = Array.from({ length: available }, (_, i) => i);
     return (
       <select
+        id={mintCountControlId}
         className="tw-h-11 tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-white focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/30"
-        value={mintCount}
-        onChange={(e) => setMintCount(Number.parseInt(e.target.value))}
+        value={safeMintCount}
+        onChange={(e) => setMintCount(normalizeMintCount(e.target.value))}
       >
         <option value="" disabled>
           Select
@@ -440,34 +469,36 @@ export default function ManifoldMintingWidget(
   function printMintCountInput() {
     return (
       <input
+        id={mintCountControlId}
         className="tw-h-11 tw-w-[100px] tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-white focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/30"
         type="number"
-        value={mintCount}
-        onChange={(e) => setMintCount(Number.parseInt(e.target.value))}
+        min={0}
+        step={1}
+        value={safeMintCount}
+        onChange={(e) => setMintCount(normalizeMintCount(e.target.value))}
       />
     );
   }
 
   const getValue = () => {
-    const safeCount =
-      Number.isFinite(mintCount) && !Number.isNaN(mintCount)
-        ? Math.max(0, Math.trunc(mintCount))
-        : 0;
-    return ((props.claim.costWei ?? 0n) + feeWei) * BigInt(safeCount);
+    return ((props.claim.costWei ?? 0n) + feeWei) * BigInt(safeMintCount);
   };
 
   function printMint(available?: number) {
     return (
       <div className="tw-pt-3">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-          <span className="tw-text-base tw-font-medium tw-text-white">
-            Select Mint Count:
-          </span>
+          <label
+            htmlFor={mintCountControlId}
+            className="tw-text-base tw-font-medium tw-text-white"
+          >
+            Mint count
+          </label>
           <div className="tw-flex tw-items-center tw-gap-3">
             {available === undefined
               ? printMintCountInput()
               : printMintCountDropdown(available)}
-            {mintCount > 0 && (
+            {safeMintCount > 0 && (
               <b className="tw-text-white">
                 {fromGWEI(Number(getValue()))} ETH
               </b>
@@ -479,7 +510,7 @@ export default function ManifoldMintingWidget(
             disabled={
               mintWrite.isPending ||
               props.claim.status !== ManifoldClaimStatus.ACTIVE ||
-              !mintCount
+              safeMintCount <= 0
             }
             className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
             onClick={onMint}
@@ -625,7 +656,7 @@ export default function ManifoldMintingWidget(
 
   useEffect(() => {
     props.setMintForAddress(mintForAddress);
-  }, [mintForAddress]);
+  }, [mintForAddress, props.setMintForAddress]);
 
   return (
     <div>
@@ -634,7 +665,7 @@ export default function ManifoldMintingWidget(
           <div>
             <ManifoldMintingConnect
               onMintFor={setMintForAddress}
-              showConnect={props.showConnect ?? false}
+              hideConnect={props.hideConnect ?? false}
             />
           </div>
         )}

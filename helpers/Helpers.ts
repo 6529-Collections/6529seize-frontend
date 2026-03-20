@@ -361,17 +361,12 @@ export function printMintDate(date?: Date) {
 }
 
 export function getRandomColor() {
-  const r = Math.floor(Math.random() * 256)
-    .toString(16)
-    .padStart(2, "0");
-  const g = Math.floor(Math.random() * 256)
-    .toString(16)
-    .padStart(2, "0");
-  const b = Math.floor(Math.random() * 256)
-    .toString(16)
-    .padStart(2, "0");
+  const toHex = (value: number) => value.toString(16).padStart(2, "0");
+  const values = new Uint8Array(3);
+  globalThis.crypto.getRandomValues(values);
+  const [r = 0, g = 0, b = 0] = values;
 
-  return `#${r}${g}${b}`;
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
 export function capitalizeEveryWord(input: string): string {

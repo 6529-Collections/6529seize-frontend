@@ -12,6 +12,7 @@ import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import type { Viewport } from "next";
+import StandaloneAnchorInterceptor from "../components/StandaloneAnchorInterceptor";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {
@@ -40,6 +41,7 @@ export default function RootLayout({
             enableCookieConsent={false}
             enableMyStream={false}
           >
+            <StandaloneAnchorInterceptor />
             <DynamicHeadTitle />
             {children}
           </Providers>

@@ -105,6 +105,107 @@ function getFeeLabelForPhase(phase: ManifoldPhase) {
   return "Manifold Fee (Allowlist)";
 }
 
+enum MemePhaseCardStatus {
+  UPCOMING = "UPCOMING",
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+}
+
+function getMemePhaseCardStatus(
+  claim: ManifoldClaim,
+  phase: MemePhase
+): MemePhaseCardStatus {
+  if (
+    claim.memePhase?.id === phase.id &&
+    claim.status === ManifoldClaimStatus.ACTIVE
+  ) {
+    return MemePhaseCardStatus.ACTIVE;
+  }
+
+  if (phase.end.lt(Time.now()) || claim.isDropComplete) {
+    return MemePhaseCardStatus.COMPLETED;
+  }
+
+  return MemePhaseCardStatus.UPCOMING;
+}
+
+function getEligibleMintsDetails(
+  phaseId: string,
+  eligibleSpots: number | undefined,
+  status: MemePhaseCardStatus
+): { text: string; className: string } {
+  if (eligibleSpots !== undefined) {
+    return {
+      text: `${eligibleSpots} eligible spot${eligibleSpots > 1 ? "s" : ""}`,
+      className: "tw-font-semibold tw-text-success",
+    };
+  }
+
+  if (phaseId !== "public") {
+    return {
+      text: "No eligible spots",
+      className: "",
+    };
+  }
+
+  if (status === MemePhaseCardStatus.ACTIVE) {
+    return {
+      text: "Unlimited spots",
+      className: "tw-font-semibold tw-text-success",
+    };
+  }
+
+  if (status === MemePhaseCardStatus.UPCOMING) {
+    return {
+      text: "Unlimited spots",
+      className: "tw-font-semibold tw-text-primary-300",
+    };
+  }
+
+  return {
+    text: "Unlimited spots",
+    className: "tw-font-semibold tw-text-red/75",
+  };
+}
+
+function getPhaseDateLabels(status: MemePhaseCardStatus): {
+  start: string;
+  end: string;
+} {
+  if (status === MemePhaseCardStatus.ACTIVE) {
+    return { start: "Started", end: "Ends" };
+  }
+
+  if (status === MemePhaseCardStatus.COMPLETED) {
+    return { start: "Started", end: "Ended" };
+  }
+
+  return {
+    start: "Expected start",
+    end: "Expected end",
+  };
+}
+
+function getPhaseStatusClassName(status: MemePhaseCardStatus): string {
+  if (status === MemePhaseCardStatus.ACTIVE) {
+    return "tw-text-success";
+  }
+
+  if (status === MemePhaseCardStatus.UPCOMING) {
+    return "tw-text-primary-300";
+  }
+
+  return "tw-text-red/75";
+}
+
+function getHighlightedRingClassName(status: MemePhaseCardStatus): string {
+  if (status === MemePhaseCardStatus.ACTIVE) {
+    return "tw-border-success tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-success";
+  }
+
+  return "tw-border-primary-300 tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-primary-300";
+}
+
 function MetadataRow({
   label,
   value,
@@ -155,36 +256,25 @@ function StandaloneMintPageTopBar() {
 function ArtistInfoStrip({
   handle,
   name,
-  standalone,
 }: {
   readonly handle: string;
   readonly name: string | undefined;
-  readonly standalone: boolean | undefined;
 }) {
   const { profile } = useIdentity({
     handleOrWallet: handle,
     initialProfile: null,
   });
 
-  const href = standalone ? `https://6529.io/${handle}` : `/${handle}`;
+  const href = `/${handle}`;
   const displayName = profile?.handle ?? name ?? handle;
-  const linkProps = standalone
-    ? {
-        href,
-        target: "_blank" as const,
-        rel: "noopener noreferrer",
-      }
-    : {
-        href,
-      };
 
   return (
-    <UserProfileTooltipWrapper user={handle} hideActions={!!standalone}>
+    <UserProfileTooltipWrapper user={handle}>
       <div className="tw-inline-flex tw-items-center tw-gap-3 tw-pb-4 tw-pt-1">
         <DropPfp pfpUrl={profile?.pfp} />
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           <Link
-            {...linkProps}
+            href={href}
             className="tw-text-white tw-no-underline hover:tw-text-white"
           >
             <span className="tw-text-lg tw-font-medium tw-leading-none">
@@ -291,6 +381,29 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
     return { name, handle };
   }, [instance?.asset.attributes]);
+  const artistNameLink = useMemo(() => {
+    if (!artist) {
+      return undefined;
+    }
+
+    if (!artist.handle) {
+      return artist.name;
+    }
+
+    if (props.standalone) {
+      return (
+        <a
+          href={`https://6529.io/${artist.handle}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {artist.name}
+        </a>
+      );
+    }
+
+    return <Link href={`/${artist.handle}`}>{artist.name}</Link>;
+  }, [artist, props.standalone]);
 
   useEffect(() => {
     if (instance) {
@@ -326,7 +439,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         abi={props.abi}
         claim={manifoldClaim}
         local_timezone={isLocalTimezone}
-        showConnect={props.standalone ?? false}
+        hideConnect={props.standalone ?? false}
         setFee={setFee}
         setMintForAddress={setMintForAddress}
       />
@@ -435,7 +548,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <ArtistInfoStrip
             handle={artist.handle}
             name={artist.name ?? undefined}
-            standalone={props.standalone}
           />
         )}
         <div className="tw-text-base tw-text-iron-100">
@@ -604,25 +716,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               {artist && (
                 <MetadataRow
                   label="Artist"
-                  value={
-                    <b>
-                      {artist?.handle ? (
-                        props.standalone ? (
-                          <a
-                            href={`https://6529.io/${artist.handle}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {artist.name}
-                          </a>
-                        ) : (
-                          <Link href={`/${artist.handle}`}>{artist.name}</Link>
-                        )
-                      ) : (
-                        artist.name
-                      )}
-                    </b>
-                  }
+                  value={<b>{artistNameLink}</b>}
                 />
               )}
               <MetadataRow
@@ -746,18 +840,37 @@ function ManifoldMemesMintingPhases(
   const phases = buildMemesPhases(phaseAnchorDate);
 
   useEffect(() => {
-    if (props.address) {
-      fetch(
-        `https://api.6529.io/api/distributions?card_id=${props.token_id}&contract=${props.contract}&page=1&search=${props.address}`
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          setDistribution(data.data[0]);
-        });
-    } else {
+    if (!props.address) {
       setDistribution(undefined);
+      return;
     }
-  }, [props.address]);
+
+    let isCancelled = false;
+
+    const loadDistribution = async () => {
+      try {
+        const response = await fetch(
+          `https://api.6529.io/api/distributions?card_id=${props.token_id}&contract=${props.contract}&page=1&search=${props.address}`
+        );
+        const data = await response.json();
+
+        if (!isCancelled) {
+          setDistribution(data.data[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch mint distribution", error);
+        if (!isCancelled) {
+          setDistribution(undefined);
+        }
+      }
+    };
+
+    void loadDistribution();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [props.address, props.contract, props.token_id]);
 
   return (
     <div>
@@ -791,85 +904,41 @@ function ManifoldMemesMintingPhase(
     local_timezone: boolean;
   }>
 ) {
-  enum PhaseStatus {
-    UPCOMING = "UPCOMING",
-    ACTIVE = "ACTIVE",
-    COMPLETED = "COMPLETED",
-  }
-
   const eligibleMints = props.distribution?.allowlist.find((phase) =>
     phase.phase.includes(props.phase.id)
   );
-
-  let eligibleMintsText =
-    props.phase.id === "public" ? "Unlimited spots" : "No eligible spots";
-  let eligibleMintsStyle =
-    props.phase.id === "public" ? "tw-font-semibold" : "";
-
-  if (eligibleMints) {
-    const count = eligibleMints.spots;
-    eligibleMintsText = `${count} eligible spot${count > 1 ? "s" : ""}`;
-    eligibleMintsStyle = "tw-font-semibold tw-text-success";
-  }
-
-  let status: PhaseStatus = PhaseStatus.UPCOMING;
-  const isDropComplete = props.claim.isDropComplete;
-
-  if (
-    props.claim.memePhase?.id === props.phase.id &&
-    props.claim.status === ManifoldClaimStatus.ACTIVE
-  ) {
-    status = PhaseStatus.ACTIVE;
-  } else if (props.phase.end.lt(Time.now()) || isDropComplete) {
-    status = PhaseStatus.COMPLETED;
-  }
-
-  if (props.phase.id === "public" && !eligibleMints) {
-    eligibleMintsStyle =
-      status === PhaseStatus.ACTIVE
-        ? "tw-font-semibold tw-text-success"
-        : status === PhaseStatus.UPCOMING
-          ? "tw-font-semibold tw-text-primary-300"
-          : "tw-font-semibold tw-text-red/75";
-  }
-
-  let startText = "Expected start";
-  let endText = "Expected end";
-  if (status === PhaseStatus.ACTIVE) {
-    startText = "Started";
-    endText = "Ends";
-  } else if (status === PhaseStatus.COMPLETED) {
-    startText = "Started";
-    endText = "Ended";
-  }
+  const status = getMemePhaseCardStatus(props.claim, props.phase);
+  const phaseDateLabels = getPhaseDateLabels(status);
+  const eligibleMintsDetails = getEligibleMintsDetails(
+    props.phase.id,
+    eligibleMints?.spots,
+    status
+  );
 
   let startDate = props.phase.start;
   let endDate = props.phase.end;
-  if (status === PhaseStatus.ACTIVE) {
+  if (status === MemePhaseCardStatus.ACTIVE) {
     startDate = Time.seconds(props.claim.startDate);
     endDate = Time.seconds(props.claim.endDate);
   }
 
   const startDisplay = getDateTimeString(startDate, props.local_timezone);
   const endDisplay = getDateTimeString(endDate, props.local_timezone);
+  const isDropComplete = props.claim.isDropComplete;
   const hasActivePhase = props.claim.status === ManifoldClaimStatus.ACTIVE;
   const isHighlighted =
-    status === PhaseStatus.ACTIVE ||
-    (status === PhaseStatus.UPCOMING &&
+    status === MemePhaseCardStatus.ACTIVE ||
+    (status === MemePhaseCardStatus.UPCOMING &&
       !hasActivePhase &&
       props.claim.nextMemePhase?.id === props.phase.id &&
       !isDropComplete);
-  const highlightedRingClass =
-    status === PhaseStatus.ACTIVE
-      ? "tw-border-success tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-success"
-      : "tw-border-primary-300 tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-primary-300";
 
   return (
     <div className="tw-pb-1 tw-pt-1 md:tw-col-span-3">
       <div
         className={`tw-h-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-p-5 tw-text-left ${
           isHighlighted
-            ? highlightedRingClass
+            ? getHighlightedRingClassName(status)
             : "tw-border-white/5 tw-bg-iron-900/40"
         }`}
       >
@@ -881,20 +950,16 @@ function ManifoldMemesMintingPhase(
             Status
           </span>
           <span
-            className={`tw-text-right tw-font-semibold ${
-              status === PhaseStatus.ACTIVE
-                ? "tw-text-success"
-                : status === PhaseStatus.UPCOMING
-                  ? "tw-text-primary-300"
-                  : "tw-text-red/75"
-            }`}
+            className={`tw-text-right tw-font-semibold ${getPhaseStatusClassName(
+              status
+            )}`}
           >
             {status}
           </span>
         </div>
         <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <span className="tw-text-sm tw-font-light tw-text-iron-300">
-            {startText}
+            {phaseDateLabels.start}
           </span>
           <span className="tw-text-right tw-text-sm tw-text-iron-100">
             {startDisplay}
@@ -902,15 +967,15 @@ function ManifoldMemesMintingPhase(
         </div>
         <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <span className="tw-text-sm tw-font-light tw-text-iron-300">
-            {endText}
+            {phaseDateLabels.end}
           </span>
           <span className="tw-text-right tw-text-sm tw-text-iron-100">
             {endDisplay}
           </span>
         </div>
         {props.address && (
-          <div className={`tw-pt-4 tw-text-center ${eligibleMintsStyle}`}>
-            {eligibleMintsText}
+          <div className={`tw-pt-4 tw-text-center ${eligibleMintsDetails.className}`}>
+            {eligibleMintsDetails.text}
           </div>
         )}
       </div>

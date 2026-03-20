@@ -635,95 +635,95 @@ export default function Auth({
 
   // These functions have been moved above to fix initialization order
 
-  const requestAuth = async (): Promise<{ success: boolean }> => {
-    if (!enableWalletAuthentication) {
-      if (!address) {
-        setToast({
-          message: "Please connect your wallet",
-          type: "error",
-        });
-        invalidateAll();
-        return { success: false };
-      }
-
-      return { success: true };
+  const ensureConnectedWalletAddress = (): string | null => {
+    if (address) {
+      return address;
     }
 
-    if (!address) {
-      setToast({
-        message: "Please connect your wallet",
-        type: "error",
+    setToast({
+      message: "Please connect your wallet",
+      type: "error",
+    });
+    invalidateAll();
+    return null;
+  };
+
+  const authenticateUnauthorizedWallet = async (
+    walletAddress: string
+  ): Promise<boolean> => {
+    const { success } = await requestSignIn({
+      signerAddress: walletAddress,
+      role: null,
+    });
+
+    if (!success) {
+      setShowSignModal(false);
+      try {
+        await seizeDisconnect();
+      } catch (error) {
+        logErrorSecurely("requestAuth_disconnect_after_failed_signin", error);
+      }
+      return false;
+    }
+
+    invalidateAll();
+    setShowSignModal(false);
+    return true;
+  };
+
+  const authenticateAuthorizedWallet = async (
+    walletAddress: string
+  ): Promise<boolean> => {
+    const abortController = new AbortController();
+    const operationId = `manual-auth-${Date.now()}`;
+    const role = activeProfileProxy
+      ? validateRoleForAuthentication(activeProfileProxy)
+      : null;
+
+    const { isValid } = await validateJwt({
+      jwt: getAuthJwt(),
+      wallet: walletAddress,
+      role,
+      operationId,
+      abortSignal: abortController.signal,
+      activeProfileProxy,
+    });
+
+    if (!isValid) {
+      removeAuthJwt();
+      await requestSignIn({
+        signerAddress: walletAddress,
+        role,
       });
       invalidateAll();
+    }
+
+    const isSuccess = !!getAuthJwt();
+    if (isSuccess) {
+      setShowSignModal(false);
+    }
+
+    return isSuccess;
+  };
+
+  const requestAuth = async (): Promise<{ success: boolean }> => {
+    const connectedAddress = ensureConnectedWalletAddress();
+    if (!connectedAddress) {
       return { success: false };
+    }
+
+    if (!enableWalletAuthentication) {
+      return { success: true };
     }
 
     // Set loading state for signing
     setAuthLoadingState("signing");
 
     try {
-      if (!isAddressAuthorized) {
-        if (!canStoreAnotherWalletAccount(address)) {
-          setToast({
-            message: "Maximum connected profiles reached",
-            type: "error",
-          });
-          return { success: false };
-        }
-
-        const { success } = await requestSignIn({
-          signerAddress: address,
-          role: null,
-        });
-        if (!success) {
-          setShowSignModal(false);
-          try {
-            await seizeDisconnect();
-          } catch (error) {
-            logErrorSecurely(
-              "requestAuth_disconnect_after_failed_signin",
-              error
-            );
-          }
-          return { success: false };
-        }
-
-        invalidateAll();
-        setShowSignModal(false);
-        return { success: true };
-      }
-
-      // Create a new abort controller for this auth request
-      const abortController = new AbortController();
-      const operationId = `manual-auth-${Date.now()}`;
-
-      const { isValid } = await validateJwt({
-        jwt: getAuthJwt(),
-        wallet: address,
-        role: activeProfileProxy
-          ? validateRoleForAuthentication(activeProfileProxy)
-          : null,
-        operationId,
-        abortSignal: abortController.signal,
-        activeProfileProxy,
-      });
-
-      if (!isValid) {
-        removeAuthJwt();
-        await requestSignIn({
-          signerAddress: address,
-          role: activeProfileProxy
-            ? validateRoleForAuthentication(activeProfileProxy)
-            : null,
-        });
-        invalidateAll();
-      }
-
-      const isSuccess = !!getAuthJwt();
-      if (isSuccess) {
-        setShowSignModal(false);
-      }
-      return { success: isSuccess };
+      const success = isAddressAuthorized
+        ? await authenticateAuthorizedWallet(connectedAddress)
+        : await authenticateUnauthorizedWallet(connectedAddress);
+      return { success };
     } finally {
       setAuthLoadingState("idle");
     }
@@ -738,7 +738,6 @@ export default function Auth({
       return;
     }
 
-    removeAuthJwt();
     if (!address) {
       setActiveProfileProxy(null);
       return;
@@ -749,6 +748,7 @@ export default function Auth({
       return;
     }
 
+    removeAuthJwt();
     try {
       const { success } = await requestSignIn({
         signerAddress: address,

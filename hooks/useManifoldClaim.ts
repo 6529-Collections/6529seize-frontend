@@ -246,6 +246,95 @@ interface UseManifoldClaimParams {
   onError?: () => void;
 }
 
+function buildClaimFromReadData({
+  data,
+  readMethod,
+  identifier,
+  getStatus,
+  getMemePhase,
+  getNextMemePhase,
+}: {
+  readonly data: unknown;
+  readonly readMethod: ManifoldClaimReadMethod;
+  readonly identifier: number;
+  readonly getStatus: (start: number, end: number) => ManifoldClaimStatus;
+  readonly getMemePhase: (
+    phase: ManifoldPhase,
+    merkleRoot: `0x${string}` | undefined,
+    start: number,
+    end: number
+  ) => MemePhase | undefined;
+  readonly getNextMemePhase: (
+    memePhase: MemePhase | undefined,
+    start: number
+  ) => MemePhase | undefined;
+}): ManifoldClaim | undefined {
+  const readData = data as any;
+  const claimData =
+    readMethod === "getClaimForToken"
+      ? (readData.claim ?? readData[1])
+      : readData;
+
+  if (!claimData) {
+    return undefined;
+  }
+
+  const instanceId =
+    readMethod === "getClaimForToken"
+      ? Number(readData.instanceId ?? readData[0] ?? identifier)
+      : identifier;
+  const startDate = Number(claimData.startDate ?? 0);
+  const endDate = Number(claimData.endDate ?? 0);
+  const costRaw = parseUnknownBigInt(claimData.cost);
+  const costWei = costRaw !== null && costRaw >= 0n ? costRaw : 0n;
+  const merkleRoot = toValidatedMerkleRoot(claimData.merkleRoot);
+  const tokenId = toValidatedTokenId(claimData.tokenId);
+  const paymentReceiver = toValidatedAddress(claimData.paymentReceiver);
+  const erc20 = toValidatedAddress(claimData.erc20);
+  const signingAddress = toValidatedAddress(claimData.signingAddress);
+  const status = getStatus(startDate, endDate);
+  const publicMerkle = areEqualAddresses(NULL_MERKLE, merkleRoot);
+  const phase =
+    publicMerkle && claimData.total > 0
+      ? ManifoldPhase.PUBLIC
+      : ManifoldPhase.ALLOWLIST;
+  const memePhase = getMemePhase(phase, merkleRoot, startDate, endDate);
+  const nextMemePhase = getNextMemePhase(memePhase, startDate);
+  const remaining = Number(claimData.totalMax) - Number(claimData.total);
+  const isSoldOut = remaining <= 0;
+  const isFinalized = isSoldOut || status === ManifoldClaimStatus.ENDED;
+  const isDropComplete =
+    isSoldOut || (status === ManifoldClaimStatus.ENDED && !nextMemePhase);
+
+  return {
+    identifier,
+    instanceId,
+    location: String(claimData.location ?? ""),
+    total: Number(claimData.total),
+    totalMax: Number(claimData.totalMax),
+    remaining,
+    costWei,
+    walletMax: Number(claimData.walletMax ?? 0),
+    storageProtocol: Number(claimData.storageProtocol ?? 0),
+    merkleRoot,
+    tokenId,
+    paymentReceiver,
+    erc20,
+    signingAddress,
+    startDate,
+    endDate,
+    status,
+    phase,
+    memePhase,
+    nextMemePhase,
+    isFetching: false,
+    isFinalized,
+    isDropComplete,
+    isSoldOut,
+    isError: false,
+  };
+}
+
 export function useManifoldClaim({
   chainId,
   contract,
@@ -300,18 +389,18 @@ export function useManifoldClaim({
         return undefined;
       }
 
-      if (memesRootsState.status !== "success") {
-        return getScheduledMemePhase(phase, start, end);
-      }
-
-      if (memesRootsState.roots.length === 0) {
-        return undefined;
-      }
-
       const memePhases = buildMemesPhases(Time.seconds(start));
+      const scheduledPhase = getScheduledMemePhase(phase, start, end);
 
       if (phase === ManifoldPhase.PUBLIC) {
         return memePhases.find((mp) => mp.id === "public");
+      }
+
+      if (
+        memesRootsState.status !== "success" ||
+        memesRootsState.roots.length === 0
+      ) {
+        return scheduledPhase;
       }
 
       const matchedRoot = memesRootsState.roots.find(
@@ -321,10 +410,13 @@ export function useManifoldClaim({
       const phaseId = getMemePhaseIdForRootPhase(matchedRoot?.phase);
 
       if (!phaseId) {
-        return undefined;
+        return scheduledPhase;
       }
 
-      return memePhases.find((memePhase) => memePhase.id === phaseId);
+      return (
+        memePhases.find((memePhase) => memePhase.id === phaseId) ??
+        scheduledPhase
+      );
     },
     [contract, getScheduledMemePhase, memesRootsState]
   );
@@ -417,71 +509,29 @@ export function useManifoldClaim({
   }, [contract, identifier]);
 
   useEffect(() => {
-    if (readContract.data) {
-      const data = readContract.data as any;
-      const claimData =
-        readMethod === "getClaimForToken" ? (data.claim ?? data[1]) : data;
-      if (!claimData) return;
-      const instanceId =
-        readMethod === "getClaimForToken"
-          ? Number(data.instanceId ?? data[0] ?? identifier)
-          : identifier;
-      const startDate = Number(claimData.startDate ?? 0);
-      const endDate = Number(claimData.endDate ?? 0);
-      const costRaw = parseUnknownBigInt(claimData.cost);
-      const costWei = costRaw !== null && costRaw >= 0n ? costRaw : 0n;
-      const merkleRoot = toValidatedMerkleRoot(claimData.merkleRoot);
-      const tokenId = toValidatedTokenId(claimData.tokenId);
-      const paymentReceiver = toValidatedAddress(claimData.paymentReceiver);
-      const erc20 = toValidatedAddress(claimData.erc20);
-      const signingAddress = toValidatedAddress(claimData.signingAddress);
-      const status = getStatus(startDate, endDate);
-      const publicMerkle = areEqualAddresses(NULL_MERKLE, merkleRoot);
-      const phase =
-        publicMerkle && claimData.total > 0
-          ? ManifoldPhase.PUBLIC
-          : ManifoldPhase.ALLOWLIST;
-      const memePhase = getMemePhase(phase, merkleRoot, startDate, endDate);
-      const nextMemePhase = getNextMemePhase(memePhase, startDate);
-      const remaining = Number(claimData.totalMax) - Number(claimData.total);
-      const isSoldOut = remaining <= 0;
-      const isFinalized = isSoldOut || status === ManifoldClaimStatus.ENDED;
-      const isDropComplete =
-        isSoldOut || (status === ManifoldClaimStatus.ENDED && !nextMemePhase);
-      const newClaim: ManifoldClaim = {
-        identifier,
-        instanceId: instanceId,
-        location: String(claimData.location ?? ""),
-        total: Number(claimData.total),
-        totalMax: Number(claimData.totalMax),
-        remaining: remaining,
-        costWei,
-        walletMax: Number(claimData.walletMax ?? 0),
-        storageProtocol: Number(claimData.storageProtocol ?? 0),
-        merkleRoot,
-        tokenId,
-        paymentReceiver,
-        erc20,
-        signingAddress,
-        startDate,
-        endDate,
-        status: status,
-        phase: phase,
-        memePhase: memePhase,
-        nextMemePhase,
-        isFetching: false,
-        isFinalized,
-        isDropComplete,
-        isSoldOut,
-        isError: false,
-      };
-      setClaim(newClaim);
-      setRefetchInterval(
-        status === ManifoldClaimStatus.ACTIVE
-          ? ACTIVE_CLAIM_REFETCH_INTERVAL_MS
-          : INACTIVE_CLAIM_REFETCH_INTERVAL_MS
-      );
+    if (!readContract.data) {
+      return;
     }
+
+    const newClaim = buildClaimFromReadData({
+      data: readContract.data,
+      readMethod,
+      identifier,
+      getStatus,
+      getMemePhase,
+      getNextMemePhase,
+    });
+
+    if (!newClaim) {
+      return;
+    }
+
+    setClaim(newClaim);
+    setRefetchInterval(
+      newClaim.status === ManifoldClaimStatus.ACTIVE
+        ? ACTIVE_CLAIM_REFETCH_INTERVAL_MS
+        : INACTIVE_CLAIM_REFETCH_INTERVAL_MS
+    );
   }, [
     readContract.data,
     readMethod,

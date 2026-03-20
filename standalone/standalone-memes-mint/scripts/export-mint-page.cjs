@@ -93,7 +93,7 @@ function run(command, args, envOverrides = {}) {
 }
 
 function resolveCloudFrontDistributionIdByAlias(hostname) {
-  const query = `DistributionList.Items[?Aliases.Items[?contains(@, '${hostname}')]].Id`;
+  const query = `DistributionList.Items[?Aliases.Items[?@ == '${hostname}']].Id`;
   const proc = spawnSync(
     "aws",
     [
@@ -121,15 +121,16 @@ function resolveCloudFrontDistributionIdByAlias(hostname) {
   const text = proc.stdout.trim();
   if (!text) {
     console.warn(
-      `No CloudFront distribution matched alias containing "${hostname}"`
+      `No CloudFront distribution matched alias "${hostname}"`
     );
     return null;
   }
   const ids = text.split(/\s+/).filter(Boolean);
-  if (ids.length > 1) {
+  if (ids.length !== 1) {
     console.warn(
-      `Multiple CloudFront distributions matched "${hostname}"; using ${ids[0]}`
+      `Expected exactly one CloudFront distribution for alias "${hostname}", found ${ids.length}`
     );
+    return null;
   }
   return ids[0] ?? null;
 }
