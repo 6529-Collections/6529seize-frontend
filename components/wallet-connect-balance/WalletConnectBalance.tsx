@@ -7,25 +7,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlugCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
 function addThousandsSeparators(value: string): string {
-  let formatted = "";
-  let digitsInGroup = 0;
-
-  for (let index = value.length - 1; index >= 0; index -= 1) {
-    const character = value[index];
-    if (character === undefined) {
-      continue;
-    }
-
-    if (digitsInGroup === 3) {
-      formatted = `,${formatted}`;
-      digitsInGroup = 0;
-    }
-
-    formatted = `${character}${formatted}`;
-    digitsInGroup += 1;
+  if (!value) {
+    return value;
   }
 
-  return formatted;
+  const parsedValue = Number(value);
+  if (!Number.isFinite(parsedValue)) {
+    return value;
+  }
+
+  return new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 0,
+  }).format(parsedValue);
 }
 
 function trimTrailingZeroes(value: string): string {

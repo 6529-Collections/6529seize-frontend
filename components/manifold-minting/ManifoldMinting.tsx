@@ -37,6 +37,7 @@ import {
   numberWithCommas,
   parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
+import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim, MemePhase } from "@/hooks/useManifoldClaim";
 import {
@@ -269,6 +270,32 @@ function ArtistInfoStrip({
 
   const href = `/${handle}`;
   const displayName = profile?.handle ?? name ?? handle;
+  const badgesProfile = useMemo(() => {
+    if (!profile) {
+      return null;
+    }
+
+    return {
+      id: profile.id,
+      handle: profile.handle,
+      pfp: profile.pfp,
+      banner1_color: getBannerColorValue(profile.banner1),
+      banner2_color: getBannerColorValue(profile.banner2),
+      cic: profile.cic,
+      rep: profile.rep,
+      tdh: profile.tdh,
+      tdh_rate: profile.tdh_rate,
+      xtdh: profile.xtdh,
+      xtdh_rate: profile.xtdh_rate,
+      level: profile.level,
+      primary_wallet: profile.primary_wallet,
+      active_main_stage_submission_ids:
+        profile.active_main_stage_submission_ids,
+      winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids,
+      artist_of_prevote_cards: profile.artist_of_prevote_cards,
+      is_wave_creator: profile.is_wave_creator,
+    };
+  }, [profile]);
 
   return (
     <UserProfileTooltipWrapper user={handle}>
@@ -295,10 +322,10 @@ function ArtistInfoStrip({
               size={UserCICAndLevelSize.SMALL}
             />
           )}
-          {profile && (
+          {badgesProfile && (
             <DropAuthorBadges
-              profile={profile}
-              tooltipIdPrefix={`mint-artist-badges-${profile.id ?? handle}`}
+              profile={badgesProfile}
+              tooltipIdPrefix={`mint-artist-badges-${badgesProfile.id ?? handle}`}
             />
           )}
         </div>
@@ -615,7 +642,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     );
   }
 
-  const printContent = (content: ReactNode) => {
+  const printContent = (content: ReactNode, padContent?: boolean) => {
     return (
       <div className={standalonePageContainerClassName}>
         {props.standalone && (
@@ -626,7 +653,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         )}
         {printTestnetIndicator()}
         {!instance && !nftImage && printTitle()}
-        {content}
+        {padContent ? <div className="tw-pt-8">{content}</div> : content}
       </div>
     );
   };
@@ -644,7 +671,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
             <Spinner />
           </div>
         )}
-      </div>
+      </div>,
+      true
     );
   }
 
@@ -652,7 +680,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     return printContent(
       <div>
         <p className="tw-mb-0 tw-text-iron-100">No mint information found</p>
-      </div>
+      </div>,
+      true
     );
   }
 
@@ -938,11 +967,16 @@ function ManifoldMemesMintingPhase(
   const endDisplay = getDateTimeString(endDate, props.local_timezone);
   const isDropComplete = props.claim.isDropComplete;
   const hasActivePhase = props.claim.status === ManifoldClaimStatus.ACTIVE;
+  const isUpcomingClaim = props.claim.status === ManifoldClaimStatus.UPCOMING;
+  const hasFinalizedCurrentClaim =
+    props.claim.isFinalized && !props.claim.isDropComplete;
   const isHighlighted =
     status === MemePhaseCardStatus.ACTIVE ||
     (status === MemePhaseCardStatus.UPCOMING &&
       !hasActivePhase &&
-      props.claim.nextMemePhase?.id === props.phase.id &&
+      ((isUpcomingClaim && props.claim.memePhase?.id === props.phase.id) ||
+        (hasFinalizedCurrentClaim &&
+          props.claim.nextMemePhase?.id === props.phase.id)) &&
       !isDropComplete);
 
   return (

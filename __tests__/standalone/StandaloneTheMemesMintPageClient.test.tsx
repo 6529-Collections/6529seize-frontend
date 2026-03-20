@@ -7,20 +7,6 @@ jest.mock("@/hooks/useNowMinting", () => ({
   useNowMinting: jest.fn(),
 }));
 
-jest.mock("@/components/the-memes/TheMemesMint", () => ({
-  __esModule: true,
-  default: (props: { nft: { id: number }; standalone?: boolean }) => (
-    <div data-testid="the-memes-mint">
-      nft-{props.nft.id}-{String(props.standalone)}
-    </div>
-  ),
-}));
-
-jest.mock("@/components/utils/Spinner", () => ({
-  __esModule: true,
-  default: () => <div data-testid="spinner" />,
-}));
-
 jest.mock("@/styles/Home.module.scss", () => ({ main: "main-class" }));
 
 describe("StandaloneTheMemesMintPageClient", () => {
@@ -28,7 +14,7 @@ describe("StandaloneTheMemesMintPageClient", () => {
     jest.clearAllMocks();
   });
 
-  it("shows a loading state while the latest mint is being fetched", () => {
+  it("shows a placeholder when mint NFT is not yet available", () => {
     (useNowMinting as jest.Mock).mockReturnValue({
       nft: undefined,
       isFetched: false,
@@ -39,29 +25,26 @@ describe("StandaloneTheMemesMintPageClient", () => {
 
     render(<StandaloneTheMemesMintPageClient />);
 
-    expect(screen.getByText("Retrieving Mint information")).toBeInTheDocument();
-    expect(screen.getByTestId("spinner")).toBeInTheDocument();
+    expect(screen.getByText("loads")).toBeInTheDocument();
   });
 
-  it("renders the mint page once the latest nft is loaded", () => {
+  it("shows a loading spinner while the mint query is in flight", () => {
     (useNowMinting as jest.Mock).mockReturnValue({
       nft: { id: 123 },
-      isFetched: true,
-      isFetching: false,
-      isLoading: false,
+      isFetched: false,
+      isFetching: true,
+      isLoading: true,
       error: null,
     });
 
     render(<StandaloneTheMemesMintPageClient />);
 
-    expect(screen.getByTestId("the-memes-mint")).toHaveTextContent(
-      "nft-123-true"
-    );
+    expect(screen.getByRole("img", { name: /loading/i })).toBeInTheDocument();
   });
 
   it("shows an error state when the latest mint fetch fails", () => {
     (useNowMinting as jest.Mock).mockReturnValue({
-      nft: undefined,
+      nft: { id: 1 },
       isFetched: true,
       isFetching: false,
       isLoading: false,
@@ -70,8 +53,25 @@ describe("StandaloneTheMemesMintPageClient", () => {
 
     render(<StandaloneTheMemesMintPageClient />);
 
+    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(screen.getByText("boom")).toBeInTheDocument();
+  });
+
+  it("shows an empty state when no mint information is returned", () => {
+    (useNowMinting as jest.Mock).mockReturnValue({
+      nft: { id: 1 },
+      isFetched: true,
+      isFetching: false,
+      isLoading: false,
+      error: undefined,
+    });
+
+    render(<StandaloneTheMemesMintPageClient />);
+
     expect(
-      screen.getByText("Error fetching mint information")
+      screen.getByText(
+        /No mint information found\. We could not load the current mint\. Try again later\./
+      )
     ).toBeInTheDocument();
   });
 });

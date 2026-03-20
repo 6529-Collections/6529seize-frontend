@@ -3,11 +3,13 @@ const {
   cpSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readdirSync,
   rmSync,
   rmdirSync,
 } = require("node:fs");
 const path = require("node:path");
+const os = require("node:os");
 const { spawnSync } = require("node:child_process");
 
 const rootDir = path.resolve(__dirname, "../../..");
@@ -22,10 +24,6 @@ const finalOutputDir = distRootDir;
 
 const S3_BUCKET_PROD = "thememes.6529.io";
 const S3_BUCKET_TEST = "thememestest.6529.io";
-const awsExecutablePath = resolveExecutablePath(
-  ["/usr/bin/aws", "/opt/homebrew/bin/aws", "/usr/local/bin/aws"],
-  "aws"
-);
 
 const STANDALONE_PUBLIC_FILES = [
   "6529.svg",
@@ -78,14 +76,15 @@ Env overrides:
   const known = new Set(["--test", "--sync", "--help", "-h"]);
   for (const a of argv) {
     if (a.startsWith("-") && !known.has(a)) {
-      console.warn(`Unknown option: ${a} (try --help)`);
+      console.error(`Unknown option: ${a} (try --help)`);
+      process.exit(1);
     }
   }
   return { useTest, doSync };
 }
 
 function run(command, args, envOverrides = {}) {
-  const result = spawnSync(resolveCommand(command), args, {
+  const result = spawnSync(command, args, {
     cwd: rootDir,
     env: { ...process.env, ...envOverrides },
     stdio: "inherit",
@@ -104,14 +103,11 @@ function run(command, args, envOverrides = {}) {
   }
 }
 
-function resolveCommand(command) {
-  if (command === "aws") {
-    return awsExecutablePath;
-  }
-  return command;
+function createTempDir(prefix) {
+  return mkdtempSync(path.join(os.tmpdir(), prefix));
 }
 
-function resolveCloudFrontDistributionIdByAlias(hostname) {
+function resolveCloudFrontDistributionIdByAlias(hostname, awsExecutablePath) {
   const query = `DistributionList.Items[?Aliases.Items[?@ == '${hostname}']].Id`;
   const proc = spawnSync(
     awsExecutablePath,
@@ -157,17 +153,54 @@ function ensureDirClean(dir) {
   rmSync(dir, { recursive: true, force: true });
 }
 
-function copyStandalonePublicAssets() {
-  mkdirSync(appPublicDir, { recursive: true });
+function copyDirectoryContents(fromDir, toDir) {
+  mkdirSync(toDir, { recursive: true });
+  const entries = readdirSync(fromDir, { withFileTypes: true });
+  for (const entry of entries) {
+    cpSync(path.join(fromDir, entry.name), path.join(toDir, entry.name), {
+      recursive: true,
+    });
+  }
+}
+
+function snapshotDirectory(sourceDir, tempRoot, name) {
+  if (!existsSync(sourceDir)) {
+    return null;
+  }
+
+  const snapshotDir = path.join(tempRoot, name);
+  copyDirectoryContents(sourceDir, snapshotDir);
+  return snapshotDir;
+}
+
+function replaceDirectoryContents(targetDir, sourceDir) {
+  ensureDirClean(targetDir);
+  mkdirSync(targetDir, { recursive: true });
+  copyDirectoryContents(sourceDir, targetDir);
+}
+
+function restoreDirectorySnapshot(targetDir, snapshotDir) {
+  if (!snapshotDir) {
+    ensureDirClean(targetDir);
+    return;
+  }
+
+  replaceDirectoryContents(targetDir, snapshotDir);
+}
+
+function createStandalonePublicAssetsSnapshot(tempRoot) {
+  const stagedPublicDir = path.join(tempRoot, "standalone-public");
+  mkdirSync(stagedPublicDir, { recursive: true });
   for (const name of STANDALONE_PUBLIC_FILES) {
     const from = path.join(rootPublicDir, name);
     if (!existsSync(from)) {
       throw new Error(`Missing required public asset for export: ${name}`);
     }
-    const to = path.join(appPublicDir, name);
+    const to = path.join(stagedPublicDir, name);
     mkdirSync(path.dirname(to), { recursive: true });
     copyFileSync(from, to);
   }
+  return stagedPublicDir;
 }
 
 function removeEmptyDirectoriesUnder(root) {
@@ -219,6 +252,9 @@ function removeArtifacts(dir) {
 
 function main() {
   const { useTest, doSync } = parseArgs(process.argv.slice(2));
+  const tempRoot = createTempDir("standalone-mint-export-");
+  let appPublicBackupDir = null;
+  let stagedPublicDir = null;
 
   const s3Bucket = useTest
     ? process.env["STANDALONE_S3_BUCKET_TEST"]?.trim() || S3_BUCKET_TEST
@@ -227,79 +263,97 @@ function main() {
   const mainSiteBase =
     process.env["STANDALONE_MAIN_SITE_BASE"]?.trim() || "https://6529.io";
 
-  ensureDirClean(appPublicDir);
-  ensureDirClean(appBuildDir);
-  ensureDirClean(appTurboBuildDir);
-  ensureDirClean(distRootDir);
-
-  copyStandalonePublicAssets();
-
-  run(
-    process.execPath,
-    [
-      path.join(rootDir, "node_modules", "next", "dist", "bin", "next"),
-      "build",
-      appDir,
-    ],
-    {
-      STANDALONE_BASE_ENDPOINT: baseEndpoint,
-      STANDALONE_MAIN_SITE_BASE: mainSiteBase,
-    }
-  );
-
-  if (!existsSync(path.join(appBuildDir, "index.html"))) {
-    throw new Error(
-      `Expected static export at ${appBuildDir}/index.html, but it was not created.`
+  try {
+    appPublicBackupDir = snapshotDirectory(
+      appPublicDir,
+      tempRoot,
+      "app-public-backup"
     );
-  }
+    stagedPublicDir = createStandalonePublicAssetsSnapshot(tempRoot);
+    ensureDirClean(appBuildDir);
+    ensureDirClean(appTurboBuildDir);
+    replaceDirectoryContents(appPublicDir, stagedPublicDir);
 
-  mkdirSync(finalOutputDir, { recursive: true });
-  cpSync(appBuildDir, finalOutputDir, { recursive: true });
-  removeArtifacts(finalOutputDir);
-  removeSpuriousExportRoots(finalOutputDir);
-  removeEmptyDirectoriesUnder(finalOutputDir);
-
-  if (!existsSync(path.join(finalOutputDir, "index.html"))) {
-    throw new Error(
-      `Expected packaged artifact at ${finalOutputDir}/index.html, but it was not created.`
+    run(
+      process.execPath,
+      [
+        path.join(rootDir, "node_modules", "next", "dist", "bin", "next"),
+        "build",
+        appDir,
+      ],
+      {
+        STANDALONE_BASE_ENDPOINT: baseEndpoint,
+        STANDALONE_MAIN_SITE_BASE: mainSiteBase,
+      }
     );
-  }
 
-  console.log(`Mint page export ready at ${finalOutputDir}`);
-  console.log(`BASE_ENDPOINT baked in: ${baseEndpoint}`);
-  console.log(`STANDALONE_MAIN_SITE_BASE baked in: ${mainSiteBase}`);
-
-  if (doSync) {
-    const distAbs = path.resolve(finalOutputDir);
-    const localPrefix = distAbs.endsWith(path.sep) ? distAbs : distAbs + path.sep;
-    console.log(`Syncing to s3://${s3Bucket}/ ...`);
-    run("aws", [
-      "s3",
-      "sync",
-      localPrefix,
-      `s3://${s3Bucket}/`,
-      "--delete",
-    ]);
-
-    const cloudFrontDistributionId =
-      resolveCloudFrontDistributionIdByAlias(s3Bucket);
-    if (cloudFrontDistributionId) {
-      console.log(
-        `Creating CloudFront invalidation /* for distribution ${cloudFrontDistributionId} ...`
+    if (!existsSync(path.join(appBuildDir, "index.html"))) {
+      throw new Error(
+        `Expected static export at ${appBuildDir}/index.html, but it was not created.`
       );
-      run("aws", [
-        "cloudfront",
-        "create-invalidation",
-        "--distribution-id",
-        cloudFrontDistributionId,
-        "--paths",
-        "/*",
+    }
+
+    const stagedFinalOutputDir = path.join(tempRoot, "dist");
+    copyDirectoryContents(appBuildDir, stagedFinalOutputDir);
+    removeArtifacts(stagedFinalOutputDir);
+    removeSpuriousExportRoots(stagedFinalOutputDir);
+    removeEmptyDirectoriesUnder(stagedFinalOutputDir);
+
+    if (!existsSync(path.join(stagedFinalOutputDir, "index.html"))) {
+      throw new Error(
+        `Expected packaged artifact at ${stagedFinalOutputDir}/index.html, but it was not created.`
+      );
+    }
+
+    replaceDirectoryContents(finalOutputDir, stagedFinalOutputDir);
+
+    console.log(`Mint page export ready at ${finalOutputDir}`);
+    console.log(`BASE_ENDPOINT baked in: ${baseEndpoint}`);
+    console.log(`STANDALONE_MAIN_SITE_BASE baked in: ${mainSiteBase}`);
+
+    if (doSync) {
+      const awsExecutablePath = resolveExecutablePath(
+        ["/usr/bin/aws", "/opt/homebrew/bin/aws", "/usr/local/bin/aws"],
+        "aws"
+      );
+      const distAbs = path.resolve(finalOutputDir);
+      const localPrefix = distAbs.endsWith(path.sep)
+        ? distAbs
+        : distAbs + path.sep;
+      console.log(`Syncing to s3://${s3Bucket}/ ...`);
+      run(awsExecutablePath, [
+        "s3",
+        "sync",
+        localPrefix,
+        `s3://${s3Bucket}/`,
+        "--delete",
       ]);
-    } else {
-      console.warn(
-        "CloudFront invalidation skipped: list-distributions --query returned no id (CNAMEs vs bucket hostname, IAM, or pagination)"
+
+      const cloudFrontDistributionId = resolveCloudFrontDistributionIdByAlias(
+        s3Bucket,
+        awsExecutablePath
       );
+      if (cloudFrontDistributionId) {
+        console.log(
+          `Creating CloudFront invalidation /* for distribution ${cloudFrontDistributionId} ...`
+        );
+        run(awsExecutablePath, [
+          "cloudfront",
+          "create-invalidation",
+          "--distribution-id",
+          cloudFrontDistributionId,
+          "--paths",
+          "/*",
+        ]);
+      } else {
+        console.warn(
+          "CloudFront invalidation skipped: list-distributions --query returned no id (CNAMEs vs bucket hostname, IAM, or pagination)"
+        );
+      }
     }
+  } finally {
+    restoreDirectorySnapshot(appPublicDir, appPublicBackupDir);
+    ensureDirClean(tempRoot);
   }
 }
 
