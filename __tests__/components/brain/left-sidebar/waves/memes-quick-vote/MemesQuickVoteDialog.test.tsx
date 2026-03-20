@@ -233,6 +233,22 @@ describe("MemesQuickVoteDialog", () => {
     expect(voteButton).toHaveClass("tw-shrink-0", "tw-whitespace-nowrap");
   });
 
+  it("seeds the initial custom amount at one percent when no recent amounts exist", () => {
+    useMemesQuickVoteQueueMock.mockReturnValue(
+      createQueueState({
+        latestUsedAmount: null,
+        recentAmounts: [],
+      })
+    );
+
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    expect(screen.getByRole("textbox")).toHaveValue("50");
+    expect(screen.getByRole("button", { name: "Vote 50" })).toBeInTheDocument();
+  });
+
   it("uses the open custom amount for swipe voting on mobile", async () => {
     useIsMobileScreenMock.mockReturnValue(true);
     const submitVote = jest.fn().mockResolvedValue(true);

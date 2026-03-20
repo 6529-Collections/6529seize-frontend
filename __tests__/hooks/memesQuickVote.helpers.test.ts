@@ -7,6 +7,7 @@ import {
   deriveMemesQuickVoteEffectiveDrops,
   deriveMemesQuickVoteStats,
   getDisplayQuickVoteAmounts,
+  getDefaultQuickVoteAmount,
   sanitizeStoredAmounts,
   sanitizeStoredSerials,
 } from "@/hooks/memesQuickVote.helpers";
@@ -135,6 +136,12 @@ describe("memesQuickVote.helpers", () => {
     expect(getDisplayQuickVoteAmounts(capped)).toEqual([
       125, 250, 500, 1000, 2000,
     ]);
+  });
+
+  it("derives the initial custom quick-vote amount from one percent of max power", () => {
+    expect(getDefaultQuickVoteAmount(5_000)).toBe(50);
+    expect(getDefaultQuickVoteAmount(99)).toBe(1);
+    expect(getDefaultQuickVoteAmount(1)).toBe(1);
   });
 
   it("sanitizes stored arrays and moves re-skipped serials to the end", () => {

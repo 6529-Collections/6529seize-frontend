@@ -6,7 +6,7 @@ import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { Time } from "@/helpers/time";
 
 export const MEMES_WAVE_DROPS_LIMIT = 20 as const;
-const QUICK_VOTE_DEFAULT_PERCENTAGE = 0.05;
+const QUICK_VOTE_DEFAULT_PERCENTAGE = 0.01;
 const MAX_QUICK_VOTE_AMOUNTS = 5;
 
 export type MemesQuickVoteStats = {
