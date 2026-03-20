@@ -105,7 +105,5 @@ export default function StandaloneTheMemesMintPageClient() {
     );
   }
 
-  return (
-    <main className={styles["main"]}>{content}</main>
-  );
+  return <main className={styles["main"]}>{content}</main>;
 }
