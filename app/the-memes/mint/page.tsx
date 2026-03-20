@@ -1,10 +1,10 @@
-import {
-  getTheMemesMintMetadata,
-  TheMemesMintPageShell,
-} from "@/components/the-memes/TheMemesMintPageShell";
+import { getAppMetadata } from "@/components/providers/metadata";
+import TheMemesMint from "@/components/the-memes/TheMemesMint";
+import { publicEnv } from "@/config/env";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
 export default async function TheMemesMintPage() {
@@ -13,9 +13,18 @@ export default async function TheMemesMintPage() {
     endpoint: "memes_latest",
     headers,
   });
-  return <TheMemesMintPageShell nft={nft} />;
+  return (
+    <main className={styles["main"]}>
+      <TheMemesMint nft={nft} />
+    </main>
+  );
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getTheMemesMintMetadata();
+  return getAppMetadata({
+    title: "Mint | The Memes",
+    ogImage: `${publicEnv.BASE_ENDPOINT}/memes-preview.png`,
+    description: "Collections",
+    twitterCard: "summary_large_image",
+  });
 }

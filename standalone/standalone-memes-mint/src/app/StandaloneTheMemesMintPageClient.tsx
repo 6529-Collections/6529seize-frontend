@@ -67,7 +67,7 @@ export default function StandaloneTheMemesMintPageClient() {
               }}
             >
               <div
-                className="tw-animate-spin-y tw-inline-block tw-will-change-transform"
+                className="tw-inline-block tw-animate-spin-y tw-will-change-transform"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 <img
