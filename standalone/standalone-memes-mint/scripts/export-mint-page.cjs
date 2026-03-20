@@ -22,7 +22,10 @@ const finalOutputDir = distRootDir;
 
 const S3_BUCKET_PROD = "thememes.6529.io";
 const S3_BUCKET_TEST = "thememestest.6529.io";
-const SAFE_SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin";
+const awsExecutablePath = resolveExecutablePath(
+  ["/usr/bin/aws", "/opt/homebrew/bin/aws", "/usr/local/bin/aws"],
+  "aws"
+);
 
 const STANDALONE_PUBLIC_FILES = [
   "6529.svg",
@@ -32,6 +35,14 @@ const STANDALONE_PUBLIC_FILES = [
   "opensea.png",
   "rarible.svg",
 ];
+
+function resolveExecutablePath(candidates, name) {
+  const executablePath = candidates.find((candidate) => existsSync(candidate));
+  if (!executablePath) {
+    throw new Error(`Unable to locate ${name} in fixed system paths.`);
+  }
+  return executablePath;
+}
 
 function parseArgs(argv) {
   const useTest = argv.includes("--test");
@@ -74,9 +85,9 @@ Env overrides:
 }
 
 function run(command, args, envOverrides = {}) {
-  const result = spawnSync(command, args, {
+  const result = spawnSync(resolveCommand(command), args, {
     cwd: rootDir,
-    env: { ...process.env, PATH: SAFE_SYSTEM_PATH, ...envOverrides },
+    env: { ...process.env, ...envOverrides },
     stdio: "inherit",
   });
 
@@ -93,10 +104,17 @@ function run(command, args, envOverrides = {}) {
   }
 }
 
+function resolveCommand(command) {
+  if (command === "aws") {
+    return awsExecutablePath;
+  }
+  return command;
+}
+
 function resolveCloudFrontDistributionIdByAlias(hostname) {
   const query = `DistributionList.Items[?Aliases.Items[?@ == '${hostname}']].Id`;
   const proc = spawnSync(
-    "aws",
+    awsExecutablePath,
     [
       "cloudfront",
       "list-distributions",
@@ -107,7 +125,6 @@ function resolveCloudFrontDistributionIdByAlias(hostname) {
     ],
     {
       cwd: rootDir,
-      env: { ...process.env, PATH: SAFE_SYSTEM_PATH },
       encoding: "utf8",
     }
   );

@@ -14,13 +14,23 @@ const eslintCliPath = path.join(
   "bin",
   "eslint.js"
 );
-const SAFE_SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin";
+const gitExecutablePath = resolveExecutablePath(
+  ["/usr/bin/git", "/opt/homebrew/bin/git", "/usr/local/bin/git"],
+  "git"
+);
+
+function resolveExecutablePath(candidates, name) {
+  const executablePath = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!executablePath) {
+    throw new Error(`Unable to locate ${name} in fixed system paths.`);
+  }
+  return executablePath;
+}
 
 function runGitCommand(commandArgs) {
-  const result = spawnSync("git", commandArgs, {
+  const result = spawnSync(gitExecutablePath, commandArgs, {
     cwd: rootDir,
     encoding: "utf8",
-    env: { ...process.env, PATH: SAFE_SYSTEM_PATH },
   });
 
   if (result.error) {
@@ -80,7 +90,6 @@ if (changedOnly) {
   eslintArgs.push(...files);
   proc = spawn(process.execPath, eslintArgs, {
     cwd: rootDir,
-    env: { ...process.env, PATH: SAFE_SYSTEM_PATH },
     stdio: ["ignore", "pipe", "pipe"],
   });
 } else {
@@ -90,7 +99,6 @@ if (changedOnly) {
   }
   proc = spawn(process.execPath, eslintArgs, {
     cwd: rootDir,
-    env: { ...process.env, PATH: SAFE_SYSTEM_PATH },
     stdio: ["ignore", "pipe", "pipe"],
   });
 }
