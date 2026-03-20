@@ -13,14 +13,12 @@ interface UserProfileTooltipWrapperProps {
   readonly user: string;
   readonly children: React.ReactElement;
   readonly placement?: "top" | "bottom" | "left" | "right" | "auto" | undefined;
-  readonly hideActions?: boolean;
 }
 
 export default function UserProfileTooltipWrapper({
   user,
   children,
   placement = "auto",
-  hideActions = false,
 }: UserProfileTooltipWrapperProps) {
   const { hasTouchScreen } = useDeviceInfo();
   const trimmedUser = user.trim();
@@ -89,7 +87,6 @@ export default function UserProfileTooltipWrapper({
         content={
           <UserProfileTooltip
             user={user}
-            hideActions={hideActions}
             onArtistPreviewOpen={handleArtistPreviewOpen}
             onWaveCreatorPreviewOpen={handleWaveCreatorPreviewOpen}
           />

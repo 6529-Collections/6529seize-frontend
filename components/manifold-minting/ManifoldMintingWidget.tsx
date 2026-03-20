@@ -22,7 +22,7 @@ import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-cla
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
-import type { Chain } from "viem";
+import { isAddress, type Chain } from "viem";
 
 const MINT_PROXY_FUNCTION_NAME = "mintProxy";
 
@@ -75,12 +75,12 @@ export default function ManifoldMintingWidget(
     local_timezone: boolean;
     hideConnect?: boolean;
     setFee: (fee: number) => void;
-    setMintForAddress: (address: string) => void;
+    setMintForAddress: (address: string | null) => void;
   }>
 ) {
   const connectedAddress = useSeizeConnectContext();
   const searchParams = useSearchParams();
-  const [mintForAddress, setMintForAddress] = useState<string>("");
+  const [mintForAddress, setMintForAddress] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<"" | "copied" | "failed">("");
 
   const [isError, setIsError] = useState<boolean>(false);
@@ -102,45 +102,55 @@ export default function ManifoldMintingWidget(
     confirmations: 1,
     hash: mintWrite.data,
   });
+  const hasValidMintForAddress = Boolean(
+    mintForAddress && isAddress(mintForAddress)
+  );
 
   useEffect(() => {
-    if (props.claim.phase === ManifoldPhase.PUBLIC) {
+    if (
+      props.claim.phase === ManifoldPhase.PUBLIC ||
+      !props.claim.merkleRoot ||
+      !mintForAddress ||
+      !hasValidMintForAddress
+    ) {
+      setMerkleProofs([]);
+      setFetchingMerkle(false);
+      setIsError(false);
       return;
     }
 
-    if (mintForAddress && props.claim.merkleRoot) {
-      mintWrite.reset();
-      setMintStatus(<></>);
-      setMintError("");
-      setIsError(false);
-      setFetchingMerkle(true);
-      getMemesMintingProofsByAddress(
-        props.claim.instanceId,
-        props.claim.merkleRoot,
-        mintForAddress
-      )
-        .then((response) => {
-          const mappedProofs: MintingClaimsProofItem[] = (
-            response.proofs ?? []
-          ).map((proof) => ({
-            merkle_proof: proof.merkle_proof ?? [],
-            value: Number(proof.value ?? 0),
-          }));
-          setMerkleProofs(mappedProofs);
-        })
-        .catch((err) => {
-          setMerkleProofs([]);
-          const msg =
-            typeof err === "string" ? err : ((err as Error)?.message ?? "");
-          const isNotFound =
-            /404|not found|no proof/i.test(msg) || msg.includes("404");
-          setIsError(!isNotFound);
-        })
-        .finally(() => {
-          setFetchingMerkle(false);
-        });
-    }
+    mintWrite.reset();
+    setMintStatus(<></>);
+    setMintError("");
+    setIsError(false);
+    setFetchingMerkle(true);
+    getMemesMintingProofsByAddress(
+      props.claim.instanceId,
+      props.claim.merkleRoot,
+      mintForAddress
+    )
+      .then((response) => {
+        const mappedProofs: MintingClaimsProofItem[] = (
+          response.proofs ?? []
+        ).map((proof) => ({
+          merkle_proof: proof.merkle_proof ?? [],
+          value: Number(proof.value ?? 0),
+        }));
+        setMerkleProofs(mappedProofs);
+      })
+      .catch((err) => {
+        setMerkleProofs([]);
+        const msg =
+          typeof err === "string" ? err : ((err as Error)?.message ?? "");
+        const isNotFound =
+          /404|not found|no proof/i.test(msg) || msg.includes("404");
+        setIsError(!isNotFound);
+      })
+      .finally(() => {
+        setFetchingMerkle(false);
+      });
   }, [
+    hasValidMintForAddress,
     mintForAddress,
     props.claim.merkleRoot,
     props.contract,
@@ -216,6 +226,10 @@ export default function ManifoldMintingWidget(
   };
 
   const getMintArgs = () => {
+    if (!mintForAddress || !isAddress(mintForAddress)) {
+      return null;
+    }
+
     const isProxy = !areEqualAddresses(
       connectedAddress.address,
       mintForAddress
@@ -278,7 +292,7 @@ export default function ManifoldMintingWidget(
       !areEqualAddresses(connectedWallet, recipientWallet);
     const selectedProofs = getSelectedMerkleProofs();
     const argsPreview =
-      recipientWallet && safeMintCount > 0
+      hasValidMintForAddress && safeMintCount > 0
         ? getMintArgs()
         : {
             functionName: "n/a",
@@ -329,6 +343,11 @@ export default function ManifoldMintingWidget(
       return;
     }
 
+    if (!mintForAddress || !hasValidMintForAddress) {
+      setMintError("Select a valid recipient wallet");
+      return;
+    }
+
     if (props.claim.phase === ManifoldPhase.ALLOWLIST) {
       const selectedProofs = getSelectedMerkleProofs();
       if (selectedProofs.length < safeMintCount) {
@@ -339,6 +358,10 @@ export default function ManifoldMintingWidget(
 
     const value = getValue();
     const args = getMintArgs();
+    if (!args) {
+      setMintError("Select a valid recipient wallet");
+      return;
+    }
     mintWrite.writeContract({
       address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
       abi: props.abi,
@@ -508,7 +531,8 @@ export default function ManifoldMintingWidget(
             disabled={
               mintWrite.isPending ||
               props.claim.status !== ManifoldClaimStatus.ACTIVE ||
-              safeMintCount <= 0
+              safeMintCount <= 0 ||
+              !hasValidMintForAddress
             }
             className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
             onClick={onMint}
@@ -569,7 +593,7 @@ export default function ManifoldMintingWidget(
     ) {
       return <></>;
     }
-    if (!mintForAddress) {
+    if (!hasValidMintForAddress) {
       return <></>;
     }
 

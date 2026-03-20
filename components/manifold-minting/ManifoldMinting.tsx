@@ -256,9 +256,11 @@ function StandaloneMintPageTopBar() {
 function ArtistInfoStrip({
   handle,
   name,
+  standalone = false,
 }: {
   readonly handle: string;
   readonly name: string | undefined;
+  readonly standalone?: boolean;
 }) {
   const { profile } = useIdentity({
     handleOrWallet: handle,
@@ -273,14 +275,20 @@ function ArtistInfoStrip({
       <div className="tw-inline-flex tw-items-center tw-gap-3 tw-pb-4 tw-pt-1">
         <DropPfp pfpUrl={profile?.pfp} />
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <Link
-            href={href}
-            className="tw-text-white tw-no-underline hover:tw-text-white"
-          >
-            <span className="tw-text-lg tw-font-medium tw-leading-none">
+          {standalone ? (
+            <span className="tw-text-lg tw-font-medium tw-leading-none tw-text-white">
               {displayName}
             </span>
-          </Link>
+          ) : (
+            <Link
+              href={href}
+              className="tw-text-white tw-no-underline hover:tw-text-white"
+            >
+              <span className="tw-text-lg tw-font-medium tw-leading-none">
+                {displayName}
+              </span>
+            </Link>
+          )}
           {!!profile?.level && (
             <UserCICAndLevel
               level={profile.level}
@@ -321,7 +329,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     });
 
   const [fee, setFee] = useState<number>(0);
-  const [mintForAddress, setMintForAddress] = useState<string>("");
+  const [mintForAddress, setMintForAddress] = useState<string | null>(null);
   const pageContainerClassName =
     "tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6";
   const standalonePageContainerClassName = clsx(
@@ -548,6 +556,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <ArtistInfoStrip
             handle={artist.handle}
             name={artist.name ?? undefined}
+            standalone={props.standalone ?? false}
           />
         )}
         <div className="tw-text-base tw-text-iron-100">
@@ -821,7 +830,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
 function ManifoldMemesMintingPhases(
   props: Readonly<{
-    address: string;
+    address: string | null;
     contract: string;
     token_id: number;
     mint_date: Time;
@@ -843,6 +852,7 @@ function ManifoldMemesMintingPhases(
     }
 
     let isCancelled = false;
+    setDistribution(undefined);
 
     const loadDistribution = async () => {
       try {
@@ -900,7 +910,7 @@ function ManifoldMemesMintingPhases(
 function ManifoldMemesMintingPhase(
   props: Readonly<{
     claim: ManifoldClaim;
-    address: string;
+    address: string | null;
     phase: MemePhase;
     distribution: Distribution | undefined;
     local_timezone: boolean;

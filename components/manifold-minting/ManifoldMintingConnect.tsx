@@ -16,7 +16,7 @@ const noopProfileSelection = (_: CommunityMemberMinimal | null) => undefined;
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
-    onMintFor: (address: string) => void;
+    onMintFor: (address: string | null) => void;
     hideConnect?: boolean;
   }>
 ) {
@@ -77,7 +77,7 @@ export default function ManifoldMintingConnect(
   useEffect(() => {
     if (mintForFren) {
       if (!selectedFrenWallet) {
-        onMintFor("");
+        onMintFor(null);
         return;
       }
 
@@ -85,9 +85,9 @@ export default function ManifoldMintingConnect(
       return;
     }
 
-    const mintDestination = selectedMintForMeWallet ?? account.address ?? "";
+    const mintDestination = selectedMintForMeWallet ?? account.address ?? null;
     if (!mintDestination) {
-      onMintFor("");
+      onMintFor(null);
       return;
     }
 

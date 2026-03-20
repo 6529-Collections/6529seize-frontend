@@ -44,41 +44,104 @@ function runGitCommand(commandArgs) {
   return result.stdout.split("\0").filter(Boolean);
 }
 
+function runGitTextCommand(commandArgs) {
+  const result = spawnSync(gitExecutablePath, commandArgs, {
+    cwd: rootDir,
+    encoding: "utf8",
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr?.trim() || "git command failed");
+  }
+
+  return result.stdout.trim();
+}
+
+function gitRefExists(ref) {
+  const result = spawnSync(
+    gitExecutablePath,
+    ["rev-parse", "--verify", "--quiet", ref],
+    {
+      cwd: rootDir,
+      encoding: "utf8",
+    }
+  );
+
+  return result.status === 0;
+}
+
+function resolveDiffBase() {
+  const githubBaseRef = process.env["GITHUB_BASE_REF"]?.trim();
+  if (githubBaseRef) {
+    const remoteRef = `origin/${githubBaseRef}`;
+    if (gitRefExists(remoteRef)) {
+      return `${remoteRef}...HEAD`;
+    }
+    if (gitRefExists(githubBaseRef)) {
+      return `${githubBaseRef}...HEAD`;
+    }
+
+    throw new Error(`Unable to resolve GITHUB_BASE_REF "${githubBaseRef}".`);
+  }
+
+  if (gitRefExists("origin/main")) {
+    return "origin/main...HEAD";
+  }
+
+  if (gitRefExists("main")) {
+    const mergeBase = runGitTextCommand(["merge-base", "HEAD", "main"]);
+    if (mergeBase) {
+      return `${mergeBase}...HEAD`;
+    }
+  }
+
+  throw new Error("Unable to determine a git diff base for changed-file linting.");
+}
+
 function isLintableFile(file) {
   return /\.(?:[cm]?[jt]sx?)$/i.test(file) && !file.startsWith("generated/");
 }
 
 function getChangedFiles() {
-  try {
-    const changedFiles = runGitCommand([
-      "diff",
-      "--name-only",
-      "-z",
-      "main...HEAD",
-      "--",
-      ".",
-    ]);
-    const untrackedFiles = runGitCommand([
-      "ls-files",
-      "--others",
-      "--exclude-standard",
-      "-z",
-      "--",
-      ".",
-    ]);
+  const diffBase = resolveDiffBase();
+  const changedFiles = runGitCommand([
+    "diff",
+    "--name-only",
+    "-z",
+    diffBase,
+    "--",
+    ".",
+  ]);
+  const untrackedFiles = runGitCommand([
+    "ls-files",
+    "--others",
+    "--exclude-standard",
+    "-z",
+    "--",
+    ".",
+  ]);
 
-    return Array.from(new Set([...changedFiles, ...untrackedFiles])).filter(
-      (file) => isLintableFile(file) && fs.existsSync(path.join(rootDir, file))
-    );
-  } catch {
-    return [];
-  }
+  return Array.from(new Set([...changedFiles, ...untrackedFiles])).filter(
+    (file) => isLintableFile(file) && fs.existsSync(path.join(rootDir, file))
+  );
 }
 
 let proc;
 
 if (changedOnly) {
-  const files = getChangedFiles();
+  let files;
+  try {
+    files = getChangedFiles();
+  } catch (error) {
+    console.error(
+      error instanceof Error ? error.message : "Failed to determine changed files."
+    );
+    process.exit(1);
+  }
   if (files.length === 0) {
     console.log("No changed files to lint.");
     process.exit(0);

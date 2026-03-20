@@ -19,13 +19,17 @@ const standaloneBaseEndpoint = (
 );
 const normalizedStandaloneBaseEndpoint =
   trimTrailingSlashes(standaloneBaseEndpoint);
+const standaloneMainSiteBase = trimTrailingSlashes(
+  process.env["STANDALONE_MAIN_SITE_BASE"]?.trim() ||
+    normalizedStandaloneBaseEndpoint
+);
 
 const standalonePublicEnv = {
   NODE_ENV: "production",
   API_ENDPOINT: "https://api.6529.io",
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io",
   BASE_ENDPOINT: normalizedStandaloneBaseEndpoint,
-  STANDALONE_MAIN_SITE_BASE: "https://6529.io",
+  STANDALONE_MAIN_SITE_BASE: standaloneMainSiteBase,
   IPFS_API_ENDPOINT: "https://api-ipfs.6529.io",
   IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io",
   NEXTGEN_CHAIN_ID: 1,

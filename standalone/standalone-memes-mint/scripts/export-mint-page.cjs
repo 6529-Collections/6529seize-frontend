@@ -224,6 +224,8 @@ function main() {
     ? process.env["STANDALONE_S3_BUCKET_TEST"]?.trim() || S3_BUCKET_TEST
     : process.env["STANDALONE_S3_BUCKET_PROD"]?.trim() || S3_BUCKET_PROD;
   const baseEndpoint = `https://${s3Bucket}`;
+  const mainSiteBase =
+    process.env["STANDALONE_MAIN_SITE_BASE"]?.trim() || "https://6529.io";
 
   ensureDirClean(appPublicDir);
   ensureDirClean(appBuildDir);
@@ -239,7 +241,10 @@ function main() {
       "build",
       appDir,
     ],
-    { STANDALONE_BASE_ENDPOINT: baseEndpoint }
+    {
+      STANDALONE_BASE_ENDPOINT: baseEndpoint,
+      STANDALONE_MAIN_SITE_BASE: mainSiteBase,
+    }
   );
 
   if (!existsSync(path.join(appBuildDir, "index.html"))) {
@@ -262,6 +267,7 @@ function main() {
 
   console.log(`Mint page export ready at ${finalOutputDir}`);
   console.log(`BASE_ENDPOINT baked in: ${baseEndpoint}`);
+  console.log(`STANDALONE_MAIN_SITE_BASE baked in: ${mainSiteBase}`);
 
   if (doSync) {
     const distAbs = path.resolve(finalOutputDir);

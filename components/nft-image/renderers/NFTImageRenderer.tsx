@@ -16,11 +16,11 @@ function getSrc(
     return nft.thumbnail;
   }
 
-  if (showOriginal || !nft.scaled) {
-    return nft.image;
+  if (!showOriginal && nft.scaled) {
+    return nft.scaled;
   }
 
-  return nft.scaled;
+  return nft.image;
 }
 
 export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {

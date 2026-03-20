@@ -35,20 +35,14 @@ function resolveStandaloneClickUrl(absoluteUrl: URL, pageOrigin: string): URL {
 
 export default function StandaloneAnchorInterceptor() {
   useEffect(() => {
-    const onClickCapture = (event: MouseEvent) => {
-      if (event.defaultPrevented) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
-        return;
-      if (event.button !== 0) return;
-
-      const node = event.target;
+    const getRewrittenAnchorTarget = (target: EventTarget | null) => {
+      const node = target;
       if (!(node instanceof Element)) return;
 
       const anchor = node.closest("a");
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.hasAttribute("download")) return;
-      if (anchor.getAttribute("data-standalone-skip-intercept") === "true")
-        return;
+      if (anchor.dataset.standaloneSkipIntercept === "true") return;
 
       const hrefAttr = anchor.getAttribute("href");
       if (hrefAttr == null || hrefAttr === "") return;
@@ -68,24 +62,60 @@ export default function StandaloneAnchorInterceptor() {
 
       let url: URL;
       try {
-        url = new URL(hrefAttr, window.location.href);
+        url = new URL(hrefAttr, globalThis.location.href);
       } catch {
         return;
       }
 
       if (url.protocol !== "http:" && url.protocol !== "https:") return;
 
-      const nextUrl = resolveStandaloneClickUrl(url, window.location.origin);
+      const nextUrl = resolveStandaloneClickUrl(url, globalThis.location.origin);
+      anchor.href = nextUrl.toString();
+
+      return { anchor, nextUrl };
+    };
+
+    const onPointerDownCapture = (event: PointerEvent) => {
+      getRewrittenAnchorTarget(event.target);
+    };
+
+    const onClickCapture = (event: MouseEvent) => {
+      if (event.defaultPrevented) return;
+
+      const rewrittenTarget = getRewrittenAnchorTarget(event.target);
+      if (!rewrittenTarget) return;
+
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+
+      if (event.button !== 0) {
+        return;
+      }
 
       event.preventDefault();
       event.stopPropagation();
-      window.open(nextUrl.toString(), "_blank", "noopener,noreferrer");
+      globalThis.open(
+        rewrittenTarget.nextUrl.toString(),
+        "_blank",
+        "noopener,noreferrer"
+      );
     };
 
-    document.addEventListener("click", onClickCapture, true);
+    globalThis.document.addEventListener(
+      "pointerdown",
+      onPointerDownCapture,
+      true
+    );
+    globalThis.document.addEventListener("click", onClickCapture, true);
 
     return () => {
-      document.removeEventListener("click", onClickCapture, true);
+      globalThis.document.removeEventListener(
+        "pointerdown",
+        onPointerDownCapture,
+        true
+      );
+      globalThis.document.removeEventListener("click", onClickCapture, true);
     };
   }, []);
 

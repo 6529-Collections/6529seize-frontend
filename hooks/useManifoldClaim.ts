@@ -294,10 +294,9 @@ function buildClaimFromReadData({
   const signingAddress = toValidatedAddress(claimData.signingAddress);
   const status = getStatus(startDate, endDate);
   const publicMerkle = areEqualAddresses(NULL_MERKLE, merkleRoot);
-  const phase =
-    publicMerkle && claimData.total > 0
-      ? ManifoldPhase.PUBLIC
-      : ManifoldPhase.ALLOWLIST;
+  const phase = publicMerkle
+    ? ManifoldPhase.PUBLIC
+    : ManifoldPhase.ALLOWLIST;
   const memePhase = getMemePhase(phase, merkleRoot, startDate, endDate);
   const nextMemePhase = getNextMemePhase(memePhase, startDate);
   const remaining = Number(claimData.totalMax) - Number(claimData.total);
