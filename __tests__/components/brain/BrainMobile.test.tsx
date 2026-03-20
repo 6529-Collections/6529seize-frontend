@@ -5,7 +5,8 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import BrainMobile, { BrainView } from "@/components/brain/BrainMobile";
+import BrainMobile from "@/components/brain/BrainMobile";
+import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -30,6 +31,8 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 
 let dropData: any = null;
 let waveData: any = null;
+let mockIsCompleted = false;
+let mockFirstDecisionDone = true;
 
 jest.mock("@tanstack/react-query", () => ({
   keepPreviousData: {},
@@ -52,8 +55,8 @@ jest.mock("@/hooks/useMemesWaveFooterStats", () => ({
 
 jest.mock("@/hooks/useWaveTimers", () => ({
   useWaveTimers: () => ({
-    voting: { isCompleted: false },
-    decisions: { firstDecisionDone: true },
+    voting: { isCompleted: mockIsCompleted },
+    decisions: { firstDecisionDone: mockFirstDecisionDone },
   }),
 }));
 
@@ -212,6 +215,8 @@ describe("BrainMobile", () => {
     dropData = null;
     waveData = null;
     isApp = true;
+    mockIsCompleted = false;
+    mockFirstDecisionDone = true;
     latestTabsProps = null;
     mockDialogMountCount = 0;
     mockUseWave.mockImplementation((incomingWave?: any) => ({
@@ -358,6 +363,105 @@ describe("BrainMobile", () => {
     });
   });
 
+  it("drops a stale local tab selection when navigation context changes", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.ABOUT);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("about")).toBeInTheDocument();
+    });
+
+    mockSearchParams.delete("wave");
+    mockPathname = "/messages";
+    waveData = null;
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("messages")).toBeInTheDocument();
+      expect(screen.queryByTestId("about")).toBeNull();
+    });
+  });
+
+  it("does not resurrect a stale tab selection when revisiting a wave", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.ABOUT);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("about")).toBeInTheDocument();
+    });
+
+    mockSearchParams.set("wave", "2");
+    waveData = { ...createWave(false), id: "2" };
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("about")).toBeNull();
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
+
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("about")).toBeNull();
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
+  });
+
+  it("keeps the selected shell tab when web create modal query changes", async () => {
+    isApp = false;
+    mockPathname = "/waves";
+
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("waves")).toBeInTheDocument();
+      expect(screen.getByTestId("tabs")).toBeInTheDocument();
+    });
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.MESSAGES);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("messages")).toBeInTheDocument();
+      expect(screen.queryByTestId("waves")).toBeNull();
+    });
+
+    mockSearchParams.set("create", "wave");
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("messages")).toBeInTheDocument();
+      expect(screen.queryByTestId("waves")).toBeNull();
+    });
+
+    mockSearchParams.delete("create");
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("messages")).toBeInTheDocument();
+      expect(screen.queryByTestId("waves")).toBeNull();
+    });
+  });
+
   it("reuses the page-owned quick-vote dialog across floating and waves entry points", async () => {
     mockSearchParams.set("wave", "1");
     waveData = createWave(false);
@@ -429,6 +533,62 @@ describe("BrainMobile", () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId("sales")).toBeNull();
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
+  });
+
+  it("falls back to default when a rank-only view becomes unavailable", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.OUTCOME);
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("outcome")).toBeInTheDocument()
+    );
+
+    mockUseWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+      isDm: false,
+    });
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("outcome")).toBeNull();
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
+  });
+
+  it("falls back to default when winners becomes unavailable", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+    mockFirstDecisionDone = true;
+
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.WINNERS);
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("winners")).toBeInTheDocument()
+    );
+
+    mockFirstDecisionDone = false;
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("winners")).toBeNull();
       expect(screen.getByText("child")).toBeInTheDocument();
     });
   });

@@ -59,9 +59,9 @@ export default function AppLayout({ children }: Props) {
   const { activeView } = useViewContext();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isSingleDropOpen = searchParams?.get("drop") !== null;
+  const isSingleDropOpen = searchParams.get("drop") !== null;
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const viewParam = searchParams?.get("view");
+  const viewParam = searchParams.get("view");
   const hasWaveParam = Boolean(waveParam);
   const isViewingWavesOrMessages =
     viewParam === "waves" || viewParam === "messages";

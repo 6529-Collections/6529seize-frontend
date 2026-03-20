@@ -1,0 +1,15 @@
+"use client";
+
+export enum BrainView {
+  DEFAULT = "DEFAULT",
+  ABOUT = "ABOUT",
+  LEADERBOARD = "LEADERBOARD",
+  SALES = "SALES",
+  WINNERS = "WINNERS",
+  OUTCOME = "OUTCOME",
+  MY_VOTES = "MY_VOTES",
+  FAQ = "FAQ",
+  WAVES = "WAVES",
+  MESSAGES = "MESSAGES",
+  NOTIFICATIONS = "NOTIFICATIONS",
+}
