@@ -85,7 +85,7 @@ export default function WalletConnectBalance() {
 
   return (
     <div className="tw-inline-flex tw-h-8 tw-max-w-full tw-items-stretch tw-rounded-full tw-bg-white !tw-text-sm tw-shadow-sm">
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 tw-rounded-l-full tw-pl-3 tw-pr-2 tw-font-medium">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-select-none tw-items-center tw-gap-x-2 tw-rounded-l-full tw-pl-3 tw-pr-2 tw-font-medium">
         <span className="tw-truncate tw-text-black">{accountDisplay}</span>
         <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-iron-500">
           {balancePending || balance?.value == null || balance.decimals == null
