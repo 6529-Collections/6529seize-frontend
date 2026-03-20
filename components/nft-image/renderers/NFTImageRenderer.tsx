@@ -26,11 +26,12 @@ function getSrc(
 export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   const src = getSrc(props.nft, !!props.showThumbnail, !!props.showOriginal);
   const shouldLazyLoad = !!props.showThumbnail || props.height === 300;
+  const marginBottomClass = props.height === "full" ? "" : "mb-2";
 
   return (
     <Col
       xs={12}
-      className={`${props.height !== "full" ? "mb-2" : ""}text-center d-flex align-items-center justify-content-center ${styles["imageWrapper"]} ${props.heightStyle} ${props.bgStyle}`}
+      className={`${marginBottomClass} text-center d-flex align-items-center justify-content-center ${styles["imageWrapper"]} ${props.heightStyle} ${props.bgStyle}`.trim()}
     >
       <Image
         loading={shouldLazyLoad ? "lazy" : "eager"}
