@@ -5840,6 +5840,15 @@ paths:
           required: false
           schema:
             type: string
+        - name: unvoted_by_me
+          in: query
+          description: >-
+            When true, only returns drops the authenticated user has not voted
+            on or currently has a 0 vote on
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: successful operation

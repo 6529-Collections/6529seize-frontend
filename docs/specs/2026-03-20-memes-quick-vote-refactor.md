@@ -65,7 +65,9 @@ The refactor should split quick vote into two distinct concerns:
 
 ### 1. Lightweight Summary Query for the Entry Point
 
-Reuse the leaderboard endpoint for the footer trigger query by requesting `unvoted_by_me=true` with `limit=1`.
+Reuse the leaderboard endpoint for the footer trigger query by requesting `unvoted_by_me=true` with `page_size=1`.
+
+The leaderboard endpoint exposes `unvoted_by_me=true` for both the footer summary query and the dialog pagination query used by this refactor.
 
 - Does the viewer currently have quick-vote work to do?
 - How many unvoted quick-vote submissions remain?
@@ -85,7 +87,7 @@ For memes quick vote, `unvoted_by_me=true` is treated as a confirmed match for t
 
 ### 2. Paginated Unvoted Stream for the Dialog
 
-The dialog should stop treating the full submission history as its source of truth. Instead, it should build a working queue from paginated server results fetched from the leaderboard endpoint with `unvoted_by_me=true`, while hydrating only the item that is about to be shown.
+The dialog should stop treating the full submission history as its source of truth. Instead, it should build a working queue from paginated server results fetched from the leaderboard endpoint with `unvoted_by_me=true`, `sort=CREATED_AT`, and `sort_direction=DESC`, while hydrating only the item that is about to be shown.
 
 The page endpoint is used to discover submission identifiers in server order. The client should use those pages mainly as a source of ids and order, not as the final truth for what is safe to show on screen.
 
@@ -93,7 +95,13 @@ With `unvoted_by_me=true`, the paginated stream should already exclude submissio
 
 The actual item presented to the user should come from a separate single-item fetch. That single-item fetch becomes the freshness checkpoint for display. If the item is no longer present, no longer unvoted, no longer votable, or otherwise no longer usable for quick vote, it should be discarded before the user interacts with it.
 
+If a prefetched next item becomes active before its fresh single-item revalidation completes, the client may render that prefetched payload briefly while the revalidation request is in flight. Once revalidation completes, the client should either update the rendered item in place with the fresh payload or discard it and advance if it is no longer valid.
+
 For this refactor, the single-item endpoint is assumed to already expose the viewer-specific state required to decide whether the item is still safe to display and vote.
+
+For implementation purposes, `GET /drops/{id}` should be treated as returning the viewer-specific quick-vote freshness fields this flow needs. That includes enough information to determine whether the item is still unvoted, still votable, and what voting power and label should be rendered for the active viewer.
+
+Quick vote remains unavailable for proxy sessions, matching the current behavior.
 
 This keeps the network work bounded while still protecting the user from seeing stale skipped items or voting against outdated data.
 
@@ -107,6 +115,7 @@ Recommended model:
 - Build a working client queue from the server-returned unvoted ids, after removing ids that are already deferred in local skip storage.
 - Treat the active queue depth as the number of usable non-skipped ids only. Deferred skipped ids do not count toward replenishment thresholds.
 - Hydrate only the current item to render, and prefetch only the next item so normal progression feels instant. Do not keep a deeper hydrated lookahead for now.
+- Treat the prefetched next item as a fast-path candidate, not as final truth. When it becomes active, immediately revalidate it with a fresh single-item fetch.
 - After each vote or skip, advance to the next hydrated item immediately when available.
 - When the remaining usable unvoted id buffer reaches 5 or fewer items, prefetch the next page of ids in the background.
 - Keep at most one page-pagination request in flight at a time.
@@ -115,7 +124,13 @@ Recommended model:
 - If the active usable queue still has 5 or fewer items after a page is merged, continue fetching subsequent pages one page at a time until the usable queue is replenished or the server reports no more pages.
 - Do not request another page if the server has already indicated there are no more pages.
 - If the user advances faster than the next item can be hydrated, show a loader until the next item is ready.
+- A prefetched item may render briefly before revalidation completes. That is acceptable for this flow.
 - Stop fetching when the server indicates there are no more pages.
+
+The dialog state machine should distinguish between these states explicitly:
+
+- `waiting-for-item`: there is no currently renderable hydrated item, but the flow still has pending work. That includes cases where a page fetch is in flight, an item hydration or revalidation is in flight, usable ids remain in the working buffer, or deferred skipped items still remain to be checked. In this state, keep the dialog open and show a loader or transition state instead of treating the session as complete.
+- `exhausted`: there is no currently renderable hydrated item, no usable ids remain in the working buffer, no deferred skipped items remain, no more pages are available, no page fetch is in flight, no item hydration or revalidation is in flight, and the required fresh restart discovery pass has already produced no usable items. Only then should the flow move to the final done state.
 
 This gives the user a fast first interaction while still avoiding full-history loading. It also lets the client protect the user from stale or deleted skipped items by validating the actual item only when it is about to matter.
 
@@ -156,10 +171,10 @@ Queue exhaustion should work like this:
 - First consume the normal paginated non-skipped queue in server order.
 - When there are no more normal pages in the current pass, switch to deferred skipped items.
 - When a skipped item is voted successfully, remove it from local skip storage immediately.
-- When the deferred skipped pool is exhausted, restart paginated discovery from page `0`.
-- If the new page-`0` pass yields valid non-skipped items, continue the normal queue again.
-- If the new page-`0` pass yields no valid non-skipped items, fall back to deferred skipped items again if any still exist.
-- Show the final "you are done" state only when a fresh page-`0` discovery pass yields no usable items and the deferred skipped pool is also empty.
+- When the deferred skipped pool is exhausted, restart paginated discovery from page `1`.
+- If the new page-`1` pass yields valid non-skipped items, continue the normal queue again.
+- If the new page-`1` pass yields no valid non-skipped items, fall back to deferred skipped items again if any still exist.
+- Show the final "you are done" state only when a fresh page-`1` discovery pass yields no usable items and the deferred skipped pool is also empty.
 
 This makes skip behave like a real local “not now” mechanism. Items the user does not want to see immediately should not keep jumping back to the front just because the server still sorts them first.
 
@@ -184,15 +199,17 @@ The safest rule is:
 
 Implications:
 
-- Summary values should always come from the leaderboard response fetched with `unvoted_by_me=true` and `limit=1`, not from locally counting buffered ids.
+- Summary values should always come from the leaderboard response fetched with `unvoted_by_me=true` and `page_size=1`, not from locally counting buffered ids.
 - If that response reports `count = 0`, the button should be hidden even if the client still has stale local quick-vote state.
 - The page endpoint should be treated as a discovery source, not as a guarantee that the next item is still displayable.
 - The paginated stream should be requested with `unvoted_by_me=true`, so page-fetch results can be treated as unvoted at fetch time.
 - The item about to be shown should be hydrated individually before display whenever needed.
 - The dialog should not hold or optimistically recompute a separate local remaining-voting-power value. Each hydrated drop should carry the viewer-specific voting data it needs to render itself.
+- After a vote succeeds, a prefetched next item may still be shown briefly, but it must be revalidated when it becomes active and then either updated in place or discarded if the fresh payload shows it is no longer usable.
 - A successful vote response should immediately update local queue state and clear local skip state for that id.
 - Skip should not trigger remaining-power refresh behavior, because skipping does not change remaining voting power or complete any voting work.
 - If hydration shows that the next item is gone, already voted, or no longer usable, the client should drop that id from the queue, remove it from local skip storage if present, and advance again.
+- A temporary absence of a hydrated active item must not be treated as completion if pagination, hydration, revalidation, or deferred-item recovery is still in progress.
 - If the user advances faster than hydration completes, showing a loader is acceptable.
 - If background prefetch returns fewer useful unvoted items than expected because items disappeared or were already handled elsewhere, that should be treated as normal.
 
@@ -205,7 +222,7 @@ Server responsibilities:
 - compute remaining unvoted count
 - compute remaining voting power
 - return `count` for the leaderboard query used by the footer trigger
-- return the first unvoted submission when `limit=1` and unvoted work exists
+- return the first unvoted submission when `page_size=1` and unvoted work exists
 - return paginated submissions in stable server order
 - apply `unvoted_by_me=true` so already-voted submissions are excluded from the quick-vote stream
 - return fresh single-item data for the item being shown, including the viewer-specific voting data that item needs to render itself
@@ -227,7 +244,7 @@ Client responsibilities:
 
 ### Phase 1: Footer Summary Query
 
-Replace footer-button derivation with a lightweight leaderboard query using `unvoted_by_me=true` and `limit=1`. This gives immediate value because it removes the need to fetch the entire participatory set just to show the entry point.
+Replace footer-button derivation with a lightweight leaderboard query using `unvoted_by_me=true` and `page_size=1`. This gives immediate value because it removes the need to fetch the entire participatory set just to show the entry point.
 
 Expected outcome:
 
