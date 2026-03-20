@@ -42,8 +42,10 @@ test("syncs input when traits change", () => {
   );
   const input = screen.getByRole("textbox") as HTMLInputElement;
   expect(input.value).toBe("one");
+  expect(input).toHaveClass("tw-ring-emerald-500/30");
   rerender(
-    <TextTrait label="Label" field="title" traits={{ title: "two" } as any} updateText={updateText} />
+    <TextTrait label="Label" field="title" traits={{ title: "" } as any} updateText={updateText} />
   );
-  expect(input.value).toBe("two");
+  expect(input.value).toBe("");
+  expect(input).toHaveClass("tw-ring-iron-700");
 });
