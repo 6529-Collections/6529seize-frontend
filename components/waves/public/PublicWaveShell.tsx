@@ -16,60 +16,75 @@ interface PublicWaveShellProps {
 
 const LOCKED_PREVIEW_ROWS = [
   {
+    id: "preview-1",
     nameWidth: "tw-w-24",
     timeWidth: "tw-w-12",
     lines: ["tw-w-5/6", "tw-w-2/5"],
     hasAttachment: false,
     reactions: 0,
+    opacityClass: "tw-opacity-90",
   },
   {
+    id: "preview-2",
     nameWidth: "tw-w-32",
     timeWidth: "tw-w-16",
     lines: ["tw-w-11/12", "tw-w-full", "tw-w-4/5", "tw-w-3/5"],
     hasAttachment: true,
     reactions: 2,
+    opacityClass: "tw-opacity-60",
   },
   {
+    id: "preview-3",
     nameWidth: "tw-w-20",
     timeWidth: "tw-w-10",
     lines: ["tw-w-1/3"],
     hasAttachment: false,
     reactions: 1,
+    opacityClass: "tw-opacity-90",
   },
   {
+    id: "preview-4",
     nameWidth: "tw-w-28",
     timeWidth: "tw-w-14",
     lines: ["tw-w-3/4", "tw-w-5/6", "tw-w-2/5"],
     hasAttachment: false,
     reactions: 0,
+    opacityClass: "tw-opacity-60",
   },
   {
+    id: "preview-5",
     nameWidth: "tw-w-36",
     timeWidth: "tw-w-12",
     lines: ["tw-w-3/5"],
     hasAttachment: true,
     reactions: 3,
+    opacityClass: "tw-opacity-90",
   },
   {
+    id: "preview-6",
     nameWidth: "tw-w-24",
     timeWidth: "tw-w-12",
     lines: ["tw-w-full", "tw-w-4/5", "tw-w-11/12", "tw-w-1/5"],
     hasAttachment: false,
     reactions: 0,
+    opacityClass: "tw-opacity-60",
   },
   {
+    id: "preview-7",
     nameWidth: "tw-w-20",
     timeWidth: "tw-w-14",
     lines: ["tw-w-1/2"],
     hasAttachment: false,
     reactions: 0,
+    opacityClass: "tw-opacity-90",
   },
 ] as const;
+const REACTION_KEYS = ["first", "second", "third", "fourth"] as const;
 
 function compactDescriptionText(text: string): string {
   const normalized = text
-    .replace(/https?:\/\/\S+/g, "")
-    .replace(/\s+/g, " ")
+    .replaceAll(/https?:\/\/\S+/g, "")
+    .replaceAll(/\s+/g, " ")
     .trim();
 
   if (normalized.length <= 240) {
@@ -92,12 +107,10 @@ function PublicWaveLockedPreview() {
 
       <div className="tw-absolute tw-inset-0 tw-overflow-hidden tw-p-6 md:tw-p-8">
         <div className="tw-flex tw-h-full tw-select-none tw-flex-col tw-justify-end tw-gap-6 tw-opacity-50 tw-blur-md">
-          {LOCKED_PREVIEW_ROWS.map((row, index) => (
+          {LOCKED_PREVIEW_ROWS.map((row) => (
             <div
-              key={`${row.nameWidth}-${row.timeWidth}-${index}`}
-              className={`tw-mx-auto tw-flex tw-w-full tw-max-w-5xl tw-items-start tw-gap-4 ${
-                index % 2 === 0 ? "tw-opacity-90" : "tw-opacity-60"
-              }`}
+              key={row.id}
+              className={`tw-mx-auto tw-flex tw-w-full tw-max-w-5xl tw-items-start tw-gap-4 ${row.opacityClass}`}
             >
               <div className="tw-size-11 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600 tw-shadow-sm" />
 
@@ -126,10 +139,10 @@ function PublicWaveLockedPreview() {
 
                 {row.reactions > 0 && (
                   <div className="tw-flex tw-gap-2 tw-pt-2">
-                    {Array.from({ length: row.reactions }).map(
-                      (_, reactionIndex) => (
+                    {REACTION_KEYS.slice(0, row.reactions).map(
+                      (reactionKey) => (
                         <div
-                          key={reactionIndex}
+                          key={reactionKey}
                           className="tw-h-6 tw-w-10 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800"
                         />
                       )
@@ -232,8 +245,12 @@ function PublicWaveShellContent({
                 <div className="tw-relative tw-w-full tw-overflow-hidden tw-rounded-xl">
                   <HeaderUserConnect
                     className="tw-h-12 tw-w-full"
-                    icon={<LockClosedIcon strokeWidth={2.5} />}
-                    iconClassName="tw-size-5 tw-flex-shrink-0"
+                    icon={
+                      <LockClosedIcon
+                        className="tw-size-5 tw-flex-shrink-0"
+                        strokeWidth={2.5}
+                      />
+                    }
                     label="Connect Wallet"
                   />
                 </div>
