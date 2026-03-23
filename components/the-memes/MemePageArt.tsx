@@ -1,6 +1,6 @@
 "use client";
 
-import Download from "@/components/download/Download";
+import { ArweaveLinksTable } from "@/components/nft-attributes/ArweaveLinksTable";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
@@ -45,6 +45,28 @@ export function MemePageArt(props: {
     props.nft?.metadata
   );
   const imageHref = getResolvedImageSrc(props.nft);
+  const metadataHref = props.nft?.uri.trim() ?? "";
+  const metadata =
+    props.nft?.metadata !== null && typeof props.nft?.metadata === "object"
+      ? (props.nft.metadata as {
+          readonly image?: unknown;
+          readonly animation?: unknown;
+          readonly animation_url?: unknown;
+        })
+      : undefined;
+  const artImageHref =
+    (typeof metadata?.image === "string" ? metadata.image.trim() : "") ||
+    (typeof props.nft?.image === "string" ? props.nft.image.trim() : "") ||
+    "";
+  const artAnimationHref =
+    (typeof metadata?.animation_url === "string"
+      ? metadata.animation_url.trim()
+      : "") ||
+    (typeof metadata?.animation === "string" ? metadata.animation.trim() : "") ||
+    (typeof props.nft?.animation === "string"
+      ? props.nft.animation.trim()
+      : "") ||
+    "";
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
   let fullscreenElementId = "";
@@ -55,6 +77,39 @@ export function MemePageArt(props: {
   }
   const fileType = isShowingAnimation ? animationFormat : imageFormat;
   const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
+  const arweaveRows = [
+    metadataHref
+      ? {
+          label: "JSON",
+          url: metadataHref,
+          openLabel: "Open JSON in new tab",
+        }
+      : null,
+    artImageHref
+      ? {
+          label: imageFormat?.toUpperCase() || "IMAGE",
+          url: artImageHref,
+          openLabel: "Open image in new tab",
+          extension: imageFormat ?? "",
+          downloadName: props.nft?.name || `meme-${props.nft?.id ?? "asset"}`,
+        }
+      : null,
+    artAnimationHref
+      ? {
+          label: animationFormat?.toUpperCase() || "ANIMATION",
+          url: artAnimationHref,
+          openLabel: "Open animation in new tab",
+          extension: animationFormat ?? "",
+          downloadName: props.nft?.name || `meme-${props.nft?.id ?? "asset"}`,
+        }
+      : null,
+  ].filter(Boolean) as {
+    label: string;
+    url: string;
+    openLabel: string;
+    extension?: string | undefined;
+    downloadName?: string | undefined;
+  }[];
 
   const distributionPlanLink = (() => {
     const id = props.nft?.id;
@@ -178,49 +233,13 @@ export function MemePageArt(props: {
                   <Col>
                     <Row>
                       <Col>
-                        <h3>Arweave Links</h3>
+                        <h3 className="tw-pb-2">Arweave Links</h3>
                       </Col>
                     </Row>
-                    {imageHref && (
-                      <Row>
-                        <Col className="tw-flex tw-items-center tw-gap-1">
-                          {imageFormat && <span>{imageFormat}</span>}
-                          <Link
-                            className={styles["arweaveLink"]}
-                            href={imageHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {imageHref}
-                          </Link>
-                          <Download
-                            href={imageHref}
-                            name={props.nft.name}
-                            extension={imageFormat ?? ""}
-                          />
-                        </Col>
-                      </Row>
-                    )}
-                    {animationHref && (
-                      <Row className="pt-3">
-                        <Col className="tw-flex tw-items-center tw-gap-1">
-                          {animationFormat && <span>{animationFormat}</span>}
-                          <Link
-                            className={styles["arweaveLink"]}
-                            href={animationHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {animationHref}
-                          </Link>
-                          <Download
-                            href={animationHref}
-                            name={props.nft.name}
-                            extension={animationFormat ?? ""}
-                          />
-                        </Col>
-                      </Row>
-                    )}
+                    <ArweaveLinksTable
+                      rows={arweaveRows}
+                      linkClassName={styles["arweaveLink"]}
+                    />
                   </Col>
                 </Row>
               </Container>
