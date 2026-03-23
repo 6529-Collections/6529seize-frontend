@@ -251,7 +251,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     if (externalValidationStatus === "invalid" && externalError) {
       return renderPreviewMessage(
         externalError,
-        "Only ipfs.io or arweave.net HTML documents can be embedded."
+        "Only approved IPFS or Arweave gateway HTML documents can be embedded."
       );
     }
 
@@ -374,7 +374,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                 id="memes-interactive-media-hash"
                 type="text"
                 autoComplete="off"
-                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base sm:tw-text-sm tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"
+                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 sm:tw-text-sm"
                 placeholder="bafy.../index.html"
                 value={externalHash}
                 onChange={(event) => onExternalHashChange(event.target.value)}
@@ -429,7 +429,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                     containerClassName="tw-flex-1 tw-flex tw-flex-col"
                     fallback={renderPreviewMessage(
                       "Preview unavailable for unapproved domains or file types.",
-                      "Only ipfs.io or arweave.net HTML documents can be embedded."
+                      "Only approved IPFS or Arweave gateway HTML documents can be embedded."
                     )}
                   />
                 ) : (
