@@ -61,7 +61,7 @@ function PublicWaveShellContent({
 
         <div className="tw-absolute tw-inset-0 tw-z-10 tw-overflow-y-auto tw-px-4 tw-py-8 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-px-8">
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center">
-            <section className="tw-group tw-relative tw-z-10 tw-flex tw-w-full tw-max-w-lg tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl">
+            <section className="tw-group tw-relative tw-z-10 tw-flex tw-w-full tw-max-w-lg tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-2xl">
               <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/10 tw-to-transparent tw-opacity-80" />
               <div
                 className="tw-pointer-events-none tw-absolute tw-inset-0 tw-opacity-5 tw-mix-blend-overlay"
@@ -73,14 +73,14 @@ function PublicWaveShellContent({
 
               <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-items-center tw-px-6 tw-pb-10 tw-pt-10 tw-text-center md:tw-px-10">
                 <div className="tw-mb-1 tw-flex tw-max-w-md tw-flex-col tw-items-center tw-justify-center tw-gap-4">
-                  <div className="tw-size-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/10 sm:tw-size-14">
+                  <div className="tw-size-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/10 tw-ring-offset-4 tw-ring-offset-iron-950 tw-shadow-2xl sm:tw-size-14">
                     <WavePicture
                       name={wave.name}
                       picture={wave.picture}
                       contributors={[]}
                     />
                   </div>
-                  <h2 className="tw-mb-2 tw-bg-gradient-to-b tw-from-white tw-to-iron-400 tw-bg-clip-text tw-text-xl tw-font-semibold tw-leading-[1.05] tw-tracking-tighter tw-text-transparent sm:tw-text-2xl md:tw-text-3xl">
+                  <h2 className="tw-mb-2 tw-text-white tw-text-xl tw-font-semibold tw-leading-[1.05] tw-tracking-tighter tw-text-transparent sm:tw-text-2xl md:tw-text-3xl">
                     {wave.name}
                   </h2>
                 </div>
