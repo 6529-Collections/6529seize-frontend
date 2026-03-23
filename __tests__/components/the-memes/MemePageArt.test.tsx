@@ -357,7 +357,7 @@ describe("MemePageArt", () => {
     expect(getCardDetailValue("File type")).toBe("gif");
     expect(getCardDetailValue("Dimensions")).toBe("200x300");
 
-    fireEvent.click(screen.getAllByTestId("fullscreen-icon")[0]!);
+    fireEvent.click(screen.getAllByTestId("fullscreen-icon")[0]);
 
     expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
       "the-art-fullscreen-animation"
