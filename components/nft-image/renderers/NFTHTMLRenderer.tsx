@@ -74,16 +74,18 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
           height={props.height}
         />
       )}
-      <iframe
-        title={props.id}
-        src={activeUrl}
-        id={props.id ?? `iframe-${props.nft.id}`}
-        key={`${props.nft.contract}-${props.nft.id}-${activeUrl ?? ""}`}
-        onLoad={() => {
-          setDidLoadCurrentUrl(true);
-        }}
-        onError={advanceToNextUrl}
-      />
+      {activeUrl ? (
+        <iframe
+          title={props.id}
+          src={activeUrl}
+          id={props.id ?? `iframe-${props.nft.id}`}
+          key={`${props.nft.contract}-${props.nft.id}-${activeUrl}`}
+          onLoad={() => {
+            setDidLoadCurrentUrl(true);
+          }}
+          onError={advanceToNextUrl}
+        />
+      ) : null}
     </Col>
   );
 }

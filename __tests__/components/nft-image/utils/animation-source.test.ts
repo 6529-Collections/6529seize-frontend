@@ -102,6 +102,19 @@ describe("getResolvedAnimationSrc", () => {
     );
   });
 
+  it("returns undefined for HTML format when metadata animation fields are empty", () => {
+    const nft = createMockNFT({
+      animation: "https://example.com/processed-or-proxy.html",
+      metadata: {
+        animation_details: { format: "html" },
+        animation: "",
+        animation_url: undefined,
+      },
+    });
+
+    expect(getResolvedAnimationSrc(nft)).toBeUndefined();
+  });
+
   it("returns undefined when every candidate is empty or invalid", () => {
     const nft = createMockNFT({
       animation: "   ",
