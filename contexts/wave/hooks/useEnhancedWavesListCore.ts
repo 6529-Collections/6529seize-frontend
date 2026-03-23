@@ -2,6 +2,7 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
 import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
@@ -12,6 +13,9 @@ export interface MinimalWave {
   id: string;
   name: string;
   type: ApiWaveType;
+  descriptionPreview: string | null;
+  membersCount: number;
+  postsCount: number;
   newDropsCount: MinimalWaveNewDropsCount;
   picture: string | null;
   contributors: { pfp: string; identity: string }[];
@@ -48,6 +52,82 @@ interface UseEnhancedWavesListCoreOptions {
 const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
   supportsPinning: true,
 };
+
+function mapWaveToMinimalWave({
+  wave,
+  newDropsCounts,
+  clearedUnreadWaveIds,
+  forcedUnreadCounts,
+  supportsPinning,
+}: {
+  readonly wave: EnhancedApiWave;
+  readonly newDropsCounts: ReturnType<
+    typeof useNewDropCounter
+  >["newDropsCounts"];
+  readonly clearedUnreadWaveIds: ReadonlySet<string>;
+  readonly forcedUnreadCounts: Readonly<Record<string, number>>;
+  readonly supportsPinning: boolean;
+}): MinimalWave {
+  const wsData = newDropsCounts[wave.id];
+  const hasNewWsDrops = (wsData?.count ?? 0) > 0;
+  const newDrops = {
+    count: wsData?.count ?? 0,
+    latestDropTimestamp: getNewestTimestamp(
+      wsData?.latestDropTimestamp,
+      wave.metrics.latest_drop_timestamp
+    ),
+    firstUnreadSerialNo: wsData?.firstUnreadSerialNo ?? null,
+  };
+  const isCleared = clearedUnreadWaveIds.has(wave.id) && !hasNewWsDrops;
+  const forcedCount = forcedUnreadCounts[wave.id];
+  const apiFirstUnread = wave.metrics.first_unread_drop_serial_no ?? null;
+  const wsFirstUnread = wsData?.firstUnreadSerialNo ?? null;
+  const wasCleared = clearedUnreadWaveIds.has(wave.id);
+  let firstUnreadDropSerialNo: number | null = null;
+  if (!isCleared) {
+    if (wasCleared && hasNewWsDrops) {
+      firstUnreadDropSerialNo = wsFirstUnread;
+    } else if (apiFirstUnread !== null && wsFirstUnread !== null) {
+      firstUnreadDropSerialNo = Math.min(apiFirstUnread, wsFirstUnread);
+    } else {
+      firstUnreadDropSerialNo = apiFirstUnread ?? wsFirstUnread;
+    }
+  }
+
+  let unreadDropsCount: number;
+  if (isCleared) {
+    unreadDropsCount = 0;
+  } else if (forcedCount !== undefined) {
+    unreadDropsCount = forcedCount + (wsData?.count ?? 0);
+  } else if (wasCleared && hasNewWsDrops) {
+    unreadDropsCount = wsData?.count ?? 0;
+  } else if (hasNewWsDrops) {
+    unreadDropsCount =
+      wave.metrics.your_unread_drops_count + (wsData?.count ?? 0);
+  } else {
+    unreadDropsCount = wave.metrics.your_unread_drops_count;
+  }
+
+  return {
+    id: wave.id,
+    name: wave.name,
+    type: wave.wave.type,
+    descriptionPreview: getWaveDescriptionPreviewText(wave),
+    membersCount: wave.metrics.subscribers_count,
+    postsCount: wave.metrics.drops_count,
+    picture: wave.picture,
+    contributors: wave.contributors_overview.map((c) => ({
+      pfp: c.contributor_pfp,
+      identity: c.contributor_identity,
+    })),
+    newDropsCount: newDrops,
+    isPinned: supportsPinning ? (wave.isPinned ?? wave.pinned) : false,
+    isMuted: wave.metrics.muted,
+    unreadDropsCount,
+    latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
+    firstUnreadDropSerialNo,
+  };
+}
 
 function useEnhancedWavesListCore(
   activeWaveId: string | null,
@@ -117,67 +197,14 @@ function useEnhancedWavesListCore(
   }, [activeWaveId, resetWaveUnreadCount]);
 
   const mapWave = useCallback(
-    (wave: EnhancedApiWave): MinimalWave => {
-      const wsData = newDropsCounts[wave.id];
-      const hasNewWsDrops = (wsData?.count ?? 0) > 0;
-      const newDrops = {
-        count: wsData?.count ?? 0,
-        latestDropTimestamp: getNewestTimestamp(
-          wsData?.latestDropTimestamp,
-          wave.metrics.latest_drop_timestamp ?? null
-        ),
-        firstUnreadSerialNo: wsData?.firstUnreadSerialNo ?? null,
-      };
-      const isCleared = clearedUnreadWaveIds.has(wave.id) && !hasNewWsDrops;
-      const forcedCount = forcedUnreadCounts[wave.id];
-      const apiFirstUnread = wave.metrics.first_unread_drop_serial_no ?? null;
-      const wsFirstUnread = wsData?.firstUnreadSerialNo ?? null;
-      const wasCleared = clearedUnreadWaveIds.has(wave.id);
-      let firstUnreadDropSerialNo: number | null = null;
-      if (!isCleared) {
-        if (wasCleared && hasNewWsDrops) {
-          firstUnreadDropSerialNo = wsFirstUnread;
-        } else if (apiFirstUnread !== null && wsFirstUnread !== null) {
-          firstUnreadDropSerialNo = Math.min(apiFirstUnread, wsFirstUnread);
-        } else {
-          firstUnreadDropSerialNo = apiFirstUnread ?? wsFirstUnread;
-        }
-      }
-
-      let unreadDropsCount: number;
-      if (isCleared) {
-        unreadDropsCount = 0;
-      } else if (forcedCount !== undefined) {
-        unreadDropsCount = forcedCount + (wsData?.count ?? 0);
-      } else if (wasCleared && hasNewWsDrops) {
-        unreadDropsCount = wsData?.count ?? 0;
-      } else if (hasNewWsDrops) {
-        unreadDropsCount =
-          wave.metrics.your_unread_drops_count + (wsData?.count ?? 0);
-      } else {
-        unreadDropsCount = wave.metrics.your_unread_drops_count;
-      }
-
-      return {
-        id: wave.id,
-        name: wave.name,
-        type: wave.wave.type,
-        picture: wave.picture,
-        contributors: wave.contributors_overview.map((c) => ({
-          pfp: c.contributor_pfp,
-          identity: c.contributor_identity,
-        })),
-        newDropsCount: newDrops,
-        // Prefer isPinned (computed optimistic value from useWavesList) over pinned (raw server field)
-        isPinned: options.supportsPinning
-          ? (wave.isPinned ?? wave.pinned ?? false)
-          : false,
-        isMuted: wave.metrics.muted,
-        unreadDropsCount,
-        latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
-        firstUnreadDropSerialNo,
-      };
-    },
+    (wave: EnhancedApiWave): MinimalWave =>
+      mapWaveToMinimalWave({
+        wave,
+        newDropsCounts,
+        clearedUnreadWaveIds,
+        forcedUnreadCounts,
+        supportsPinning: options.supportsPinning,
+      }),
     [
       newDropsCounts,
       clearedUnreadWaveIds,

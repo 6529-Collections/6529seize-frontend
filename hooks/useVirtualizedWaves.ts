@@ -43,7 +43,6 @@ export function useVirtualizedWaves<T>(
       el.removeEventListener("scroll", onScroll);
     };
   }, [getPosition, setPosition, key, scrollContainerRef, isActive]);
-
   const viewportHeight = scrollContainerRef.current?.clientHeight ?? 0;
   const listOffset = listContainerRef.current?.offsetTop ?? 0;
   const startIndex = Math.max(
