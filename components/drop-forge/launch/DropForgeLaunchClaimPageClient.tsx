@@ -1586,6 +1586,7 @@ export default function DropForgeLaunchClaimPageClient({
     <>
       <DropForgeLaunchClaimPageView
         pageTitle={pageTitle}
+        craftHref={`/drop-forge/craft/${claimId}`}
         loading={loading}
         error={error}
         rootsError={rootsError}

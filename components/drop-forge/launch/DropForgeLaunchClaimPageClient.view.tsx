@@ -108,6 +108,7 @@ interface DropForgeLaunchClaimPermissionFallbackViewProps {
 
 interface DropForgeLaunchClaimPageViewProps {
   pageTitle: string;
+  craftHref: string;
   loading: boolean;
   error: string | null;
   rootsError: string | null;
@@ -303,16 +304,26 @@ export function DropForgeLaunchClaimPermissionFallbackView({
 
 function DropForgeLaunchClaimHeader({
   pageTitle,
-}: Readonly<{ pageTitle: string }>) {
+  craftHref,
+}: Readonly<{ pageTitle: string; craftHref: string }>) {
   return (
     <div className="tw-mb-6">
-      <Link
-        href="/drop-forge/launch"
-        className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start"
-      >
-        <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-        Back to Launch list
-      </Link>
+      <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
+        <Link
+          href="/drop-forge/launch"
+          className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start"
+        >
+          <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          Back to Launch list
+        </Link>
+        <Link
+          href={craftHref}
+          className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-ml-auto sm:tw-w-auto sm:tw-justify-start"
+        >
+          <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          Go to Craft
+        </Link>
+      </div>
       <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-2xl tw-font-semibold tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left sm:tw-text-3xl">
           <DropForgeLaunchIcon className="tw-h-7 tw-w-7 tw-flex-shrink-0 sm:tw-h-8 sm:tw-w-8" />
@@ -2025,6 +2036,7 @@ function DropForgeLaunchClaimContent({
 
 export function DropForgeLaunchClaimPageView({
   pageTitle,
+  craftHref,
   loading,
   error,
   rootsError,
@@ -2032,7 +2044,7 @@ export function DropForgeLaunchClaimPageView({
 }: Readonly<DropForgeLaunchClaimPageViewProps>) {
   return (
     <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
-      <DropForgeLaunchClaimHeader pageTitle={pageTitle} />
+      <DropForgeLaunchClaimHeader pageTitle={pageTitle} craftHref={craftHref} />
       {loading && <p className="tw-text-iron-400">Loading…</p>}
       {error && (
         <p className="tw-text-red-400 tw-mb-4" role="alert">

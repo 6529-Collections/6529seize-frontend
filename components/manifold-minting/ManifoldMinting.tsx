@@ -277,6 +277,8 @@ function ArtistInfoStrip({
 
   const href = `/${handle}`;
   const displayName = profile?.handle ?? name ?? handle;
+  const standaloneDisplayName = name ?? profile?.handle ?? handle;
+  const standaloneHref = `https://6529.io/${profile?.handle ?? handle}`;
   const badgesProfile = useMemo(() => {
     if (!profile) {
       return null;
@@ -304,25 +306,35 @@ function ArtistInfoStrip({
     };
   }, [profile]);
 
+  if (standalone) {
+    return (
+      <a
+        href={standaloneHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="tw-inline-flex tw-items-center tw-gap-3 tw-pb-4 tw-pt-1 tw-text-white tw-no-underline hover:tw-text-white"
+      >
+        <DropPfp pfpUrl={profile?.pfp} />
+        <span className="tw-text-lg tw-font-medium tw-leading-none">
+          {standaloneDisplayName}
+        </span>
+      </a>
+    );
+  }
+
   return (
     <UserProfileTooltipWrapper user={handle}>
       <div className="tw-inline-flex tw-items-center tw-gap-3 tw-pb-4 tw-pt-1">
         <DropPfp pfpUrl={profile?.pfp} />
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          {standalone ? (
-            <span className="tw-text-lg tw-font-medium tw-leading-none tw-text-white">
+          <Link
+            href={href}
+            className="tw-text-white tw-no-underline hover:tw-text-white"
+          >
+            <span className="tw-text-lg tw-font-medium tw-leading-none">
               {displayName}
             </span>
-          ) : (
-            <Link
-              href={href}
-              className="tw-text-white tw-no-underline hover:tw-text-white"
-            >
-              <span className="tw-text-lg tw-font-medium tw-leading-none">
-                {displayName}
-              </span>
-            </Link>
-          )}
+          </Link>
           {!!profile?.level && (
             <UserCICAndLevel
               level={profile.level}

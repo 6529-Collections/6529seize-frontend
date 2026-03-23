@@ -5,7 +5,7 @@ import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
-import type { MemesExtendedData, NFT } from "@/entities/INFT";
+import type { IAttribute, MemesExtendedData, NFT } from "@/entities/INFT";
 import {
   enterArtFullScreen,
   fullScreenSupported,
@@ -26,6 +26,21 @@ import { useEffect, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import styles from "./TheMemes.module.scss";
+
+const PROPERTY_EXCLUDED_TRAITS = new Set([
+  "Type - Season",
+  "Type - Meme",
+  "Type - Card",
+]);
+
+function shouldShowPropertyAttribute(attribute: IAttribute): boolean {
+  const displayType = attribute.display_type?.trim().toLowerCase();
+
+  return (
+    !PROPERTY_EXCLUDED_TRAITS.has(attribute.trait_type) &&
+    (!displayType || displayType === "text")
+  );
+}
 
 export function MemePageArt(props: {
   show: boolean;
@@ -370,11 +385,7 @@ export function MemePageArt(props: {
                   <Col>
                     <NFTAttributes
                       attributes={props.nft.metadata.attributes.filter(
-                        (a: any) =>
-                          !a.display_type &&
-                          a.trait_type != "Type - Season" &&
-                          a.trait_type != "Type - Meme" &&
-                          a.trait_type != "Type - Card"
+                        shouldShowPropertyAttribute
                       )}
                     />
                   </Col>
