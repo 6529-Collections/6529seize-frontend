@@ -64,40 +64,6 @@ export function getArweaveGatewayFallbackUrls(url: string): string[] {
   return getTryList(trimmed, trimmed);
 }
 
-export async function pickReachableArweaveUrl(
-  urls: readonly string[],
-  signal?: AbortSignal
-): Promise<string> {
-  if (urls.length === 0) {
-    return "";
-  }
-  if (urls.length === 1) {
-    return urls[0] ?? "";
-  }
-  for (const u of urls) {
-    if (signal?.aborted) {
-      return urls[0] ?? "";
-    }
-    try {
-      const init: RequestInit = {
-        method: "HEAD",
-        mode: "cors",
-        cache: "no-store",
-      };
-      if (signal) {
-        init.signal = signal;
-      }
-      const res = await fetch(u, init);
-      if (res.ok) {
-        return u;
-      }
-    } catch {
-      continue;
-    }
-  }
-  return urls[0] ?? "";
-}
-
 function getTryList(currentSrc: string, originalSrc: string): string[] {
   const current = safeParseUrl(currentSrc);
   const orig = safeParseUrl(originalSrc);

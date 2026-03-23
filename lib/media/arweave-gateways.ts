@@ -1,5 +1,5 @@
 // Ordered list: the array order defines the Arweave fallback retry order.
-export const ARWEAVE_GATEWAY_HOSTS = [
+const ARWEAVE_GATEWAY_HOSTS = [
   "arweave.net",
   "ardrive.net",
   "gateway.arweave.net",
@@ -14,24 +14,21 @@ export const canonicalizeArweaveGatewayHostname = (hostname: string): string =>
 
 export const ARWEAVE_FALLBACK_HOSTS = [...ARWEAVE_GATEWAY_HOSTS];
 
-export const ARWEAVE_GATEWAY_EXACT_HOSTS = dedupe(
-  ARWEAVE_GATEWAY_HOSTS
-);
+const ARWEAVE_GATEWAY_EXACT_HOSTS = dedupe(ARWEAVE_GATEWAY_HOSTS);
 
-export const ARWEAVE_GATEWAY_WILDCARD_BASE_HOSTS = dedupe(
+const ARWEAVE_GATEWAY_WILDCARD_BASE_HOSTS = dedupe(
   ARWEAVE_GATEWAY_HOSTS
 );
 
 export const ARWEAVE_GATEWAY_CSP_SOURCES = dedupe(
-  ARWEAVE_GATEWAY_HOSTS.flatMap((hostname) =>
-    [`https://${hostname}`, `https://*.${hostname}`]
-  )
+  ARWEAVE_GATEWAY_HOSTS.flatMap((hostname) => [
+    `https://${hostname}`,
+    `https://*.${hostname}`,
+  ])
 );
 
 export const ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES = dedupe(
-  ARWEAVE_GATEWAY_HOSTS.flatMap((hostname) =>
-    [hostname, `**.${hostname}`]
-  )
+  ARWEAVE_GATEWAY_HOSTS.flatMap((hostname) => [hostname, `**.${hostname}`])
 );
 
 export const isArweaveGatewayRuntimeHost = (hostname: string): boolean => {
