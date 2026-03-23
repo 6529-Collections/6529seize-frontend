@@ -202,7 +202,7 @@ function PublicWaveShellContent({
                   {wave.name}
                 </h2>
                 {hasDescription && (
-                  <p className="tw-mb-10 tw-max-w-md tw-text-sm tw-font-normal tw-text-iron-400 md:tw-text-base">
+                  <p className="tw-mb-10 tw-max-w-md tw-text-pretty tw-text-sm tw-font-normal tw-text-iron-400 md:tw-text-base">
                     {description}
                   </p>
                 )}
@@ -233,7 +233,7 @@ function PublicWaveShellContent({
                   <HeaderUserConnect
                     className="tw-h-12 tw-w-full"
                     icon={<LockClosedIcon strokeWidth={2.5} />}
-                    iconClassName="tw-size-5"
+                    iconClassName="tw-size-5 tw-flex-shrink-0"
                     label="Connect Wallet"
                   />
                 </div>
