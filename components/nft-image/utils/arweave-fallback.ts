@@ -1,11 +1,9 @@
 import type React from "react";
-
-const ARWEAVE_GATEWAYS: readonly string[] = [
-  "arweave.net",
-  "gateway.arweave.net",
-  "gateway.ar.io",
-  "ar-io.net",
-] as const;
+import {
+  ARWEAVE_FALLBACK_HOSTS,
+  canonicalizeArweaveGatewayHostname,
+  isArweaveGatewayRuntimeHost,
+} from "@/lib/media/arweave-gateways";
 
 function dedupe(list: readonly string[]): string[] {
   return Array.from(new Set(list));
@@ -20,15 +18,11 @@ function safeParseUrl(url: string): URL | null {
 }
 
 function normalizeHost(hostname: string): string {
-  const h = hostname.toLowerCase();
-
-  if (h === "arweave.net" || h.endsWith(".arweave.net")) return "arweave.net";
-
-  return h;
+  return canonicalizeArweaveGatewayHostname(hostname);
 }
 
 function isArweaveGatewayHost(hostname: string): boolean {
-  return ARWEAVE_GATEWAYS.includes(normalizeHost(hostname));
+  return isArweaveGatewayRuntimeHost(hostname);
 }
 
 function isArweaveUrl(url: string): boolean {
@@ -48,12 +42,27 @@ function buildUrlWithGateway(
   return u.toString();
 }
 
-type MediaErrorEvent =
-  | React.SyntheticEvent<HTMLImageElement, Event>
-  | React.SyntheticEvent<HTMLVideoElement, Event>;
+type MediaErrorEvent = React.SyntheticEvent<
+  | HTMLImageElement
+  | HTMLVideoElement
+  | HTMLIFrameElement
+  | (HTMLElement & { src: string }),
+  Event
+>;
 
 const DS_ORIGINAL = "arweaveOriginalSrc";
 const DS_LAST_HOST = "arweaveLastGatewayHost";
+
+export function getArweaveGatewayFallbackUrls(url: string): string[] {
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return [];
+  }
+  if (!isArweaveUrl(trimmed)) {
+    return [trimmed];
+  }
+  return getTryList(trimmed, trimmed);
+}
 
 function getTryList(currentSrc: string, originalSrc: string): string[] {
   const current = safeParseUrl(currentSrc);
@@ -67,7 +76,7 @@ function getTryList(currentSrc: string, originalSrc: string): string[] {
   const origHost = orig ? normalizeHost(orig.hostname) : null;
 
   // Build gateway variants from originalSrc (preserves path/query exactly).
-  const variants = ARWEAVE_GATEWAYS.filter((h) => h !== origHost) // original already first in base
+  const variants = ARWEAVE_FALLBACK_HOSTS.filter((h) => h !== origHost) // original already first in base
     .filter((h) => h !== currentHost) // skip current host too
     .map((h) => buildUrlWithGateway(originalSrc, h))
     .filter((u): u is string => !!u);

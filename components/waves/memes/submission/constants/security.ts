@@ -1,11 +1,14 @@
 import type { InteractiveMediaProvider } from "./media";
+import {
+  canonicalizeArweaveGatewayHostname,
+  isArweaveGatewayRuntimeHost,
+} from "@/lib/media/arweave-gateways";
 
 const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>([
   "ipfs.io",
   "www.ipfs.io",
 ]);
 
-const ARWEAVE_ROOT_HOSTS = new Set<string>(["arweave.net", "www.arweave.net"]);
 const ARWEAVE_SUBDOMAIN_PATTERN = /^([a-z0-9_-]{43,87})\.arweave\.net$/;
 
 const CIDV0_PATTERN = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
@@ -19,11 +22,7 @@ const ARWEAVE_PATH_PATTERN = /^\/([^/]+)$/;
 export const canonicalizeInteractiveMediaHostname = (
   hostname: string
 ): string => {
-  let normalized = hostname.toLowerCase();
-  while (normalized.endsWith(".")) {
-    normalized = normalized.slice(0, -1);
-  }
-  return normalized;
+  return canonicalizeArweaveGatewayHostname(hostname);
 };
 
 const isIpfsHost = (hostname: string): boolean =>
@@ -40,12 +39,7 @@ const getArweaveTransactionIdFromSubdomain = (
 };
 
 const isArweaveHost = (hostname: string): boolean => {
-  const normalized = canonicalizeInteractiveMediaHostname(hostname);
-  if (ARWEAVE_ROOT_HOSTS.has(normalized)) {
-    return true;
-  }
-
-  return getArweaveTransactionIdFromSubdomain(hostname) !== null;
+  return isArweaveGatewayRuntimeHost(hostname);
 };
 
 const getInteractiveMediaProviderForHost = (
