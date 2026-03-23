@@ -23,14 +23,17 @@ export function getResolvedAnimationSrc(
       ? (nft.metadata as {
           readonly animation?: unknown;
           readonly animation_url?: unknown;
+          readonly animation_details?: { readonly format?: unknown };
         })
       : undefined;
 
-  const candidates = [
-    nft.animation,
-    metadata?.animation,
-    metadata?.animation_url,
-  ];
+  const format = metadata?.animation_details?.format;
+  const isHtmlAnimation =
+    typeof format === "string" && format.toLowerCase() === "html";
+
+  const candidates = isHtmlAnimation
+    ? [metadata?.animation, metadata?.animation_url]
+    : [nft.animation, metadata?.animation, metadata?.animation_url];
 
   for (const candidate of candidates) {
     const resolved = normalizeNonEmptyString(candidate);
