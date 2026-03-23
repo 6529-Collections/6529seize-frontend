@@ -9,8 +9,15 @@ const ARWEAVE_GATEWAY_HOSTS = [
 const dedupe = (values: readonly string[]): string[] =>
   Array.from(new Set(values));
 
-export const canonicalizeArweaveGatewayHostname = (hostname: string): string =>
-  hostname.trim().toLowerCase().replace(/\.+$/, "");
+export const canonicalizeArweaveGatewayHostname = (
+  hostname: string
+): string => {
+  let normalized = hostname.trim().toLowerCase();
+  while (normalized.endsWith(".")) {
+    normalized = normalized.slice(0, -1);
+  }
+  return normalized;
+};
 
 export const ARWEAVE_FALLBACK_HOSTS = [...ARWEAVE_GATEWAY_HOSTS];
 
