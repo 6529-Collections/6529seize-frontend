@@ -44,7 +44,7 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
+    const timeoutId = globalThis.setTimeout(() => {
       setActiveIndex((current) =>
         current === activeIndex && current + 1 < urls.length
           ? current + 1
@@ -53,7 +53,7 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
     }, IFRAME_FALLBACK_TIMEOUT_MS);
 
     return () => {
-      window.clearTimeout(timeoutId);
+      globalThis.clearTimeout(timeoutId);
     };
   }, [activeIndex, activeUrl, didLoadCurrentUrl, urls.length]);
 
