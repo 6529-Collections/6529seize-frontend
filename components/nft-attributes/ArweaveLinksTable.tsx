@@ -26,12 +26,13 @@ export function ArweaveLinksTable(props: {
       {props.rows.map((row) => (
         <div
           key={`${row.label}-${row.url}`}
-          className="tw-grid tw-items-center tw-gap-x-3 tw-gap-y-1"
-          style={{ gridTemplateColumns: "max-content minmax(0, 1fr)" }}
+          className="tw-grid tw-gap-y-2 sm:tw-grid-cols-[max-content_minmax(0,1fr)] sm:tw-items-start sm:tw-gap-x-4 sm:tw-gap-y-1"
         >
-          <div className="tw-whitespace-nowrap">{row.label}</div>
+          <div className="tw-whitespace-nowrap tw-text-sm sm:tw-pt-1">
+            {row.label}
+          </div>
           <div className="tw-min-w-0">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+            <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-start">
               <Link
                 className={`${props.linkClassName ?? ""} tw-break-all`}
                 href={row.url}
@@ -40,7 +41,7 @@ export function ArweaveLinksTable(props: {
               >
                 {row.url}
               </Link>
-              <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                 <Link
                   href={row.url}
                   target="_blank"
