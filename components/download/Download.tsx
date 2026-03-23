@@ -25,6 +25,9 @@ export default function Download(props: Readonly<Props>) {
   const { percentage, download, cancel, isInProgress } = useDownloader();
   const showProgress = props.showProgress ?? true;
   const variant = props.variant ?? "default";
+  const normalizedPercentage = Number.isFinite(percentage)
+    ? Math.min(Math.max(percentage, 0), 100)
+    : null;
 
   const [isCompleted, setIsCompleted] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -37,7 +40,7 @@ export default function Download(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    if (percentage === 100 && showProgress) {
+    if (normalizedPercentage === 100 && showProgress) {
       setIsCompleted(true);
       if (completionTimeoutRef.current) {
         clearTimeout(completionTimeoutRef.current);
@@ -47,7 +50,7 @@ export default function Download(props: Readonly<Props>) {
         completionTimeoutRef.current = null;
       }, 1500);
     }
-  }, [percentage, showProgress]);
+  }, [normalizedPercentage, showProgress]);
 
   useEffect(() => {
     return () => {
@@ -113,7 +116,9 @@ export default function Download(props: Readonly<Props>) {
         className="tw-bg-iron-900 tw-rounded-full tw-h-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out tw-border-0 tw-text-white tw-gap-2 tw-px-3"
         aria-label="Downloading file">
         <span className="tw-leading-[2.25rem] tw-text-sm tw-font-medium">
-          Downloading {percentage}%
+          {normalizedPercentage === null
+            ? "Downloading..."
+            : `Downloading ${normalizedPercentage}%`}
         </span>
         <FontAwesomeIcon
           icon={faXmarkCircle}

@@ -290,7 +290,7 @@ function createMockNft(overrides: any = {}) {
     mint_price: 0,
     collection: "Test Collection",
     artist_seize_handle: "testartist",
-    uri: "",
+    uri: "https://metadata.example/lab.json",
     icon: "",
     thumbnail: "",
     scaled: "",
@@ -542,14 +542,62 @@ describe("MemeLabPageComponent", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("link", {
+          name: "https://metadata.example/lab.json",
+        })
+      ).toHaveAttribute("href", "https://metadata.example/lab.json");
+      expect(
+        screen.getByRole("link", { name: "Open JSON in new tab" })
+      ).toHaveAttribute("href", "https://metadata.example/lab.json");
+      expect(
+        screen.getByRole("link", {
           name: "https://top-level.example/image.png",
         })
+      ).toHaveAttribute("href", "https://top-level.example/image.png");
+      expect(
+        screen.getByRole("link", { name: "Open image in new tab" })
       ).toHaveAttribute("href", "https://top-level.example/image.png");
       expect(
         screen.getByRole("link", {
           name: "https://top-level.example/animation.mp4",
         })
       ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
+      expect(
+        screen.getByRole("link", { name: "Open animation in new tab" })
+      ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
+    });
+  });
+
+  it("prefers metadata animation_url over top-level animation for art links", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      animation: "https://cdn.example.com/animation.mp4",
+      metadata: {
+        attributes: [],
+        image_details: { format: "PNG" },
+        animation_details: { format: "HTML" },
+        animation_url: "https://arweave.net/animation.html",
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", {
+          name: "https://arweave.net/animation.html",
+        })
+      ).toHaveAttribute("href", "https://arweave.net/animation.html");
+      expect(
+        screen.getByRole("link", { name: "Open animation in new tab" })
+      ).toHaveAttribute("href", "https://arweave.net/animation.html");
     });
   });
 
@@ -580,7 +628,10 @@ describe("MemeLabPageComponent", () => {
           name: "https://top-level.example/image.png",
         })
       ).toHaveAttribute("href", "https://top-level.example/image.png");
-      expect(screen.getByTestId("download")).toHaveAttribute(
+      expect(
+        screen.getByRole("link", { name: "Open image in new tab" })
+      ).toHaveAttribute("href", "https://top-level.example/image.png");
+      expect(screen.getAllByTestId("download")[0]).toHaveAttribute(
         "data-href",
         "https://top-level.example/image.png"
       );
@@ -617,7 +668,13 @@ describe("MemeLabPageComponent", () => {
           name: "https://metadata.example/animation.html",
         })
       ).toHaveAttribute("href", "https://metadata.example/animation.html");
-      expect(getCardDetailValue("File type")).toBe("HTML");
+      expect(
+        screen.getByRole("link", { name: "Open image in new tab" })
+      ).toHaveAttribute("href", "https://metadata.example/image.png");
+      expect(
+        screen.getByRole("link", { name: "Open animation in new tab" })
+      ).toHaveAttribute("href", "https://metadata.example/animation.html");
+      expect(getCardDetailValue("File Type")).toBe("HTML");
       expect(getCardDetailValue("Dimensions")).toBe("1,920 x 1,080");
     });
   });
@@ -652,7 +709,7 @@ describe("MemeLabPageComponent", () => {
     fireEvent.click(screen.getByTestId("carousel-slide-1"));
 
     await waitFor(() => {
-      expect(getCardDetailValue("File type")).toBe("PNG");
+      expect(getCardDetailValue("File Type")).toBe("PNG");
       expect(getCardDetailValue("Dimensions")).toBe("1,200 x 800");
     });
   });
