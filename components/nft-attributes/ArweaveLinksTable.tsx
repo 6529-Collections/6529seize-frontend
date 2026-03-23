@@ -27,7 +27,7 @@ export function ArweaveLinksTable(props: {
         <div
           key={`${row.label}-${row.url}`}
           className="tw-grid tw-items-center tw-gap-x-3 tw-gap-y-1"
-          style={{ gridTemplateColumns: "4rem minmax(0, 1fr)" }}
+          style={{ gridTemplateColumns: "max-content minmax(0, 1fr)" }}
         >
           <div className="tw-whitespace-nowrap">{row.label}</div>
           <div className="tw-min-w-0">
