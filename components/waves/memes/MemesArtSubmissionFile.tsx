@@ -251,7 +251,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     if (externalValidationStatus === "invalid" && externalError) {
       return renderPreviewMessage(
         externalError,
-        "Only ipfs.io or arweave.net HTML documents can be embedded."
+        "Only approved IPFS or Arweave gateway HTML documents can be embedded."
       );
     }
 
@@ -429,7 +429,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                     containerClassName="tw-flex-1 tw-flex tw-flex-col"
                     fallback={renderPreviewMessage(
                       "Preview unavailable for unapproved domains or file types.",
-                      "Only ipfs.io or arweave.net HTML documents can be embedded."
+                      "Only approved IPFS or Arweave gateway HTML documents can be embedded."
                     )}
                   />
                 ) : (
