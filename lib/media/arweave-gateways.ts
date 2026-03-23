@@ -55,10 +55,16 @@ export const stripArweaveGatewayUrlPrefix = (value: string): string => {
       return value;
     }
 
-    return `${parsed.pathname}${parsed.search}${parsed.hash}`.replace(
+    const strippedValue = `${parsed.pathname}${parsed.search}${parsed.hash}`.replace(
       /^\/+/,
       ""
     );
+
+    if (!strippedValue) {
+      return value;
+    }
+
+    return strippedValue;
   } catch {
     return value;
   }
