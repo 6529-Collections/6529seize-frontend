@@ -39,6 +39,7 @@ export function sharedConfig(
     transpilePackages: ["react-tweet"],
     poweredByHeader: false,
     logging: {
+      browserToTerminal: "error",
       incomingRequests: false,
     },
     async headers() {
