@@ -54,6 +54,10 @@ function getNotAuthenticatedContent({
   readonly isApp: boolean;
   readonly publicWaveShellState: PublicWaveShellState;
 }): ReactNode {
+  if (isApp) {
+    return <ConnectWallet />;
+  }
+
   if (activeWaveId === null || publicWaveShellState.status === "unavailable") {
     return <ConnectWallet />;
   }
@@ -63,14 +67,6 @@ function getNotAuthenticatedContent({
       <PublicWaveShell waveId={activeWaveId} />
     </div>
   );
-
-  if (isApp) {
-    return (
-      <div className="tw-flex-1" id="waves-content">
-        {publicShell}
-      </div>
-    );
-  }
 
   return (
     <div className="tw-flex-1" id="waves-content">
@@ -93,7 +89,8 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const searchParams = useSearchParams();
   const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
   const publicWaveShellState = usePublicWaveShellState(activeWaveId, {
-    enabled: contentState === "not-authenticated" && activeWaveId !== null,
+    enabled:
+      !isApp && contentState === "not-authenticated" && activeWaveId !== null,
   });
 
   const containerClassName =

@@ -7,6 +7,7 @@ import { useWaveById } from "@/hooks/useWaveById";
 export interface PublicWaveShellData {
   readonly id: string;
   readonly name: string;
+  readonly picture: string | null;
   readonly descriptionPreview: string | null;
   readonly membersCount: number;
   readonly postsCount: number;
@@ -25,6 +26,7 @@ function getPublicWaveShellDataFromApiWave(wave: ApiWave): PublicWaveShellData {
   return {
     id: wave.id,
     name: wave.name,
+    picture: wave.picture ?? null,
     descriptionPreview: getWaveDescriptionPreviewText(wave),
     membersCount: wave.metrics.subscribers_count,
     postsCount: wave.metrics.drops_count,
