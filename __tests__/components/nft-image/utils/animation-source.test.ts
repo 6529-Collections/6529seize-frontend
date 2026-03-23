@@ -88,6 +88,33 @@ describe("getResolvedAnimationSrc", () => {
     );
   });
 
+  it("uses metadata animation fields for HTML, not top-level animation", () => {
+    const nft = createMockNFT({
+      animation: "https://example.com/processed-or-proxy.html",
+      metadata: {
+        animation_details: { format: "html" },
+        animation_url: "https://example.com/original.html",
+      },
+    });
+
+    expect(getResolvedAnimationSrc(nft)).toBe(
+      "https://example.com/original.html"
+    );
+  });
+
+  it("returns undefined for HTML format when metadata animation fields are empty", () => {
+    const nft = createMockNFT({
+      animation: "https://example.com/processed-or-proxy.html",
+      metadata: {
+        animation_details: { format: "html" },
+        animation: "",
+        animation_url: undefined,
+      },
+    });
+
+    expect(getResolvedAnimationSrc(nft)).toBeUndefined();
+  });
+
   it("returns undefined when every candidate is empty or invalid", () => {
     const nft = createMockNFT({
       animation: "   ",
