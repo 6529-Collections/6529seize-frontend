@@ -452,6 +452,15 @@ export default defineConfig([
     },
   },
 
+  // Standalone build/export scripts legitimately use computed paths and stdout logging.
+  {
+    files: ["standalone/standalone-memes-mint/scripts/**/*.{js,cjs,mjs}"],
+    rules: {
+      "security/detect-non-literal-fs-filename": "off",
+      "no-console": "off",
+    },
+  },
+
   // Non-TypeScript files should not run type-aware @typescript-eslint rules.
   {
     files: ["**/*.{js,cjs,mjs}"],
