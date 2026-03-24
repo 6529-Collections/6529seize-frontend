@@ -273,9 +273,10 @@
   padding: 0.5rem;
 }
 
-.leaderboardTable tbody tr + tr > *,
-.nftLeaderboardTable tbody tr + tr > * {
-  padding-top: 0.9rem;
+.leaderboardTable tbody > tr > *,
+.nftLeaderboardTable tbody > tr > * {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .borderBottom {
