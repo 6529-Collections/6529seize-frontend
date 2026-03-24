@@ -3,7 +3,6 @@
 import {
   ArrowLeftIcon,
   ArrowTopRightOnSquareIcon,
-  DocumentDuplicateIcon,
   PlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -27,6 +26,7 @@ import {
 } from "@/components/drop-forge/drop-forge-status.helpers";
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
+import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
@@ -372,85 +372,20 @@ function MediaSourceLinkCard({
   url: string | null | undefined;
   emptyText?: string;
 }>) {
-  const [copied, setCopied] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trimmedUrl = url?.trim() ?? "";
-  const hasUrl = trimmedUrl.length > 0;
   const openableUrl = getOpenableMediaUrl(trimmedUrl || undefined);
-  const contentClassName = `tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
-    hasUrl ? "tw-text-white" : "tw-text-iron-500"
-  }`;
-  const displayText = hasUrl ? trimmedUrl : emptyText;
-
-  async function handleCopy() {
-    if (!hasUrl) return;
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    try {
-      await navigator.clipboard.writeText(trimmedUrl);
-      setCopied(true);
-      timeoutRef.current = setTimeout(() => {
-        setCopied(false);
-        timeoutRef.current = null;
-      }, 1000);
-    } catch {
-      // ignore
-    }
-  }
-
-  function handleOpen() {
-    if (!openableUrl || typeof globalThis.open !== "function") {
-      return;
-    }
-
-    globalThis.open(openableUrl, "_blank", "noopener,noreferrer");
-  }
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
 
   return (
-    <div className={MEDIA_SOURCE_CARD_CLASS}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-200">
-          {label}
-        </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-          {hasUrl && (
-            <button
-              type="button"
-              onClick={() => {
-                void handleCopy();
-              }}
-              className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-              aria-label={`Copy ${label}`}
-            >
-              <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
-            </button>
-          )}
-          {openableUrl && (
-            <button
-              type="button"
-              onClick={handleOpen}
-              className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-              aria-label={`Open ${label} in new tab`}
-            >
-              <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
-            </button>
-          )}
-          {copied && (
-            <span className="tw-animate-in tw-fade-in tw-text-xs tw-text-iron-300 tw-duration-150">
-              Copied
-            </span>
-          )}
-        </div>
-      </div>
-      <div className={contentClassName} title={hasUrl ? trimmedUrl : undefined}>
-        {displayText}
-      </div>
-    </div>
+    <DropForgeLinkCard
+      label={label}
+      displayValue={trimmedUrl}
+      emptyText={emptyText}
+      copyValue={trimmedUrl}
+      openUrl={openableUrl}
+      copyLabel={`Copy ${label}`}
+      openLabel={`Open ${label} in new tab`}
+      cardClassName={MEDIA_SOURCE_CARD_CLASS}
+    />
   );
 }
 
@@ -1700,76 +1635,20 @@ function ArweaveLinkRow({
   label,
   cid,
 }: Readonly<{ label: string; cid: string | null | undefined }>) {
-  const [copied, setCopied] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trimmedCid = cid?.trim() ?? "";
-  const hasCid = trimmedCid.length > 0;
-  const url = hasCid ? `https://arweave.net/${trimmedCid}` : null;
-
-  async function handleCopy(e: React.MouseEvent) {
-    e.preventDefault();
-    if (!url) return;
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      timeoutRef.current = setTimeout(() => {
-        setCopied(false);
-        timeoutRef.current = null;
-      }, 1000);
-    } catch {
-      // ignore
-    }
-  }
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  const url = trimmedCid ? `https://arweave.net/${trimmedCid}` : null;
 
   return (
-    <div className={ARWEAVE_LINK_CARD}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-min-w-0 tw-text-base tw-text-iron-200">{label}</div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-          {url && (
-            <>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-                aria-label={`Copy ${label} link`}
-              >
-                <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
-              </button>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-                aria-label={`Open ${label} on Arweave`}
-              >
-                <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
-              </a>
-            </>
-          )}
-          {copied && (
-            <span className="tw-animate-in tw-fade-in tw-text-xs tw-text-iron-300 tw-duration-150">
-              Copied
-            </span>
-          )}
-        </div>
-      </div>
-      <div
-        className={`tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
-          hasCid ? "tw-text-white" : "tw-text-iron-500"
-        }`}
-        title={hasCid ? trimmedCid : undefined}
-      >
-        {hasCid ? trimmedCid : "—"}
-      </div>
-    </div>
+    <DropForgeLinkCard
+      label={label}
+      displayValue={trimmedCid}
+      copyValue={url}
+      openUrl={url}
+      copyLabel={`Copy ${label} link`}
+      openLabel={`Open ${label} on Arweave`}
+      cardClassName={ARWEAVE_LINK_CARD}
+      labelClassName="tw-min-w-0 tw-text-base tw-text-iron-200"
+    />
   );
 }
 
