@@ -106,18 +106,16 @@ export function useMintCountdownState(
       manifoldClaim.nextMemePhase
     ) {
       const nextPhase = manifoldClaim.nextMemePhase;
-      const isUpcoming = now.lt(nextPhase.start);
+      const hasReachedNextPhaseStart = !now.lt(nextPhase.start);
 
       return {
         type: "countdown",
         countdown: {
-          title: `${nextPhase.name} ${isUpcoming ? "Starts In" : "Ends In"}`,
-          targetDate: isUpcoming
-            ? nextPhase.start.toSeconds()
-            : nextPhase.end.toSeconds(),
+          title: `${nextPhase.name} Starts In`,
+          targetDate: nextPhase.start.toSeconds(),
           showAllowlistInfo: nextPhase.type === ManifoldPhase.ALLOWLIST,
-          showMintBtn,
-          isActive: !isUpcoming,
+          showMintBtn: showMintBtn && !hasReachedNextPhaseStart,
+          isActive: false,
         },
       };
     }

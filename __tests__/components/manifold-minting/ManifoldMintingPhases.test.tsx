@@ -1,5 +1,6 @@
 import ManifoldMinting from "@/components/manifold-minting/ManifoldMinting";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 const mockUseManifoldClaim = jest.fn();
 
@@ -33,7 +34,12 @@ jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
 
 jest.mock("@/components/manifold-minting/ManifoldMintingWidget", () => ({
   __esModule: true,
-  default: () => <div data-testid="mint-widget" />,
+  default: (props: { setMintForAddress?: (address: string | null) => void }) => (
+    <button
+      data-testid="mint-widget"
+      onClick={() => props.setMintForAddress?.("0xabc")}
+    />
+  ),
 }));
 
 jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
@@ -153,6 +159,7 @@ jest.mock("@/hooks/useManifoldClaim", () => {
 
 describe("ManifoldMinting phases", () => {
   beforeEach(() => {
+    global.fetch = jest.fn();
     mockUseManifoldClaim.mockReset();
     mockUseManifoldClaim.mockReturnValue({
       claim: {
@@ -175,6 +182,10 @@ describe("ManifoldMinting phases", () => {
       },
       isFetching: false,
     });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   test("shows only elapsed phases as completed during the downtime between memes phases", () => {
@@ -260,5 +271,45 @@ describe("ManifoldMinting phases", () => {
     );
     expect(container.querySelectorAll(".tw-ring-success")).toHaveLength(1);
     expect(container.querySelectorAll(".tw-ring-primary-300")).toHaveLength(0);
+  });
+
+  test("shows no eligible spots after distribution data resolves without an allowlist entry", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            airdrops: 0,
+            allowlist: [],
+          },
+        ],
+      }),
+    });
+
+    render(
+      <ManifoldMinting
+        title="Test Meme"
+        contract="0xmemes"
+        chain={{ id: 1 } as any}
+        abi={[]}
+        mint_date={{ toMillis: () => Date.UTC(2026, 2, 18, 17, 40) } as any}
+        mintMetadata={{
+          tokenId: 123,
+          metadata: {
+            name: "Test NFT",
+            description: "Test description",
+            attributes: [],
+            image_url: "test.jpg",
+          },
+        }}
+      />
+    );
+
+    await userEvent.click(screen.getByTestId("mint-widget"));
+
+    await waitFor(() =>
+      expect(screen.getAllByText("No eligible spots")).toHaveLength(3)
+    );
+    expect(screen.queryByText("Loading eligibility...")).not.toBeInTheDocument();
   });
 });
