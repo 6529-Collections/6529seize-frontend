@@ -7,7 +7,10 @@ const {
   readdirSync,
   rmSync,
   rmdirSync,
+  writeFileSync,
 } = require("node:fs");
+const http = require("node:http");
+const https = require("node:https");
 const path = require("node:path");
 const os = require("node:os");
 const { spawnSync } = require("node:child_process");
@@ -27,6 +30,7 @@ const S3_BUCKET_TEST = "thememestest.6529.io";
 
 const STANDALONE_PUBLIC_FILES = [
   "6529.svg",
+  "6529io.png",
   "6529bgwhite.svg",
   "favicon.ico",
   "manifold.svg",
@@ -103,6 +107,150 @@ function run(command, args, envOverrides = {}) {
   }
 }
 
+function runText(command, args) {
+  const result = spawnSync(command, args, {
+    cwd: rootDir,
+    env: process.env,
+    encoding: "utf8",
+  });
+
+  if (result.error || result.status !== 0) {
+    return null;
+  }
+
+  return result.stdout.trim() || null;
+}
+
+function resolveStandaloneCommit() {
+  const gitSha = runText("git", ["rev-parse", "HEAD"]);
+  if (gitSha) {
+    return gitSha;
+  }
+
+  return "standalone-mint";
+}
+
+function fetchJson(url, redirectCount = 0) {
+  return new Promise((resolve, reject) => {
+    if (redirectCount > 5) {
+      reject(new Error(`Too many redirects while fetching ${url}`));
+      return;
+    }
+
+    const parsedUrl = new URL(url);
+    const client = parsedUrl.protocol === "http:" ? http : https;
+    const req = client.request(
+      parsedUrl,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      },
+      (res) => {
+        const statusCode = res.statusCode ?? 0;
+        const location = res.headers.location;
+
+        if (
+          location &&
+          [301, 302, 303, 307, 308].includes(statusCode)
+        ) {
+          res.resume();
+          resolve(fetchJson(new URL(location, url).toString(), redirectCount + 1));
+          return;
+        }
+
+        if (statusCode === 404) {
+          res.resume();
+          resolve(null);
+          return;
+        }
+
+        let body = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => {
+          body += chunk;
+        });
+        res.on("end", () => {
+          if (statusCode < 200 || statusCode >= 300) {
+            reject(
+              new Error(
+                `HTTP ${statusCode} while fetching ${url}${
+                  body ? `: ${body.slice(0, 200)}` : ""
+                }`
+              )
+            );
+            return;
+          }
+
+          if (!body.trim()) {
+            resolve(null);
+            return;
+          }
+
+          try {
+            resolve(JSON.parse(body));
+          } catch (error) {
+            reject(
+              new Error(
+                `Invalid JSON returned from ${url}: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              )
+            );
+          }
+        });
+      }
+    );
+
+    req.on("error", reject);
+    req.end();
+  });
+}
+
+async function resolveRemoteBuildMetadata(baseEndpoint, commit) {
+  const versionUrl = `${baseEndpoint.replace(/\/+$/, "")}/version.json`;
+
+  try {
+    const remote = await fetchJson(versionUrl);
+    const remoteCommit =
+      typeof remote?.commit === "string"
+        ? remote.commit.trim()
+        : typeof remote?.version === "string"
+          ? remote.version.trim()
+          : "";
+    const remoteBuild =
+      typeof remote?.build === "number" &&
+      Number.isFinite(remote.build) &&
+      remote.build >= 1
+        ? Math.trunc(remote.build)
+        : 0;
+
+    if (remoteCommit === commit) {
+      return {
+        build: remoteBuild > 0 ? remoteBuild + 1 : 2,
+        remoteVersionUrl: versionUrl,
+      };
+    }
+
+    return {
+      build: 1,
+      remoteVersionUrl: versionUrl,
+    };
+  } catch (error) {
+    console.warn(
+      `Unable to read remote version manifest at ${versionUrl}; defaulting to build 1`
+    );
+    if (error instanceof Error && error.message) {
+      console.warn(error.message);
+    }
+    return {
+      build: 1,
+      remoteVersionUrl: versionUrl,
+    };
+  }
+}
+
 function createTempDir(prefix) {
   return mkdtempSync(path.join(os.tmpdir(), prefix));
 }
@@ -111,14 +259,7 @@ function resolveCloudFrontDistributionIdByAlias(hostname, awsExecutablePath) {
   const query = `DistributionList.Items[?Aliases.Items[?@ == '${hostname}']].Id`;
   const proc = spawnSync(
     awsExecutablePath,
-    [
-      "cloudfront",
-      "list-distributions",
-      "--query",
-      query,
-      "--output",
-      "text",
-    ],
+    ["cloudfront", "list-distributions", "--query", query, "--output", "text"],
     {
       cwd: rootDir,
       encoding: "utf8",
@@ -129,14 +270,14 @@ function resolveCloudFrontDistributionIdByAlias(hostname, awsExecutablePath) {
     return null;
   }
   if (proc.status !== 0) {
-    console.warn(proc.stderr?.trim() || "aws cloudfront list-distributions failed");
+    console.warn(
+      proc.stderr?.trim() || "aws cloudfront list-distributions failed"
+    );
     return null;
   }
   const text = proc.stdout.trim();
   if (!text) {
-    console.warn(
-      `No CloudFront distribution matched alias "${hostname}"`
-    );
+    console.warn(`No CloudFront distribution matched alias "${hostname}"`);
     return null;
   }
   const ids = text.split(/\s+/).filter(Boolean);
@@ -250,7 +391,7 @@ function removeArtifacts(dir) {
   }
 }
 
-function main() {
+async function main() {
   const { useTest, doSync } = parseArgs(process.argv.slice(2));
   const tempRoot = createTempDir("standalone-mint-export-");
   let appPublicBackupDir = null;
@@ -262,6 +403,12 @@ function main() {
   const baseEndpoint = `https://${s3Bucket}`;
   const mainSiteBase =
     process.env["STANDALONE_MAIN_SITE_BASE"]?.trim() || "https://6529.io";
+  const commit = resolveStandaloneCommit();
+  const { build, remoteVersionUrl } = await resolveRemoteBuildMetadata(
+    baseEndpoint,
+    commit
+  );
+  const builtAt = new Date().toISOString();
 
   try {
     appPublicBackupDir = snapshotDirectory(
@@ -295,6 +442,22 @@ function main() {
 
     const stagedFinalOutputDir = path.join(tempRoot, "dist");
     copyDirectoryContents(appBuildDir, stagedFinalOutputDir);
+    writeFileSync(
+      path.join(stagedFinalOutputDir, "version.json"),
+      JSON.stringify(
+        {
+          commit,
+          build,
+          built_at: builtAt,
+          bucket: s3Bucket,
+          base_endpoint: baseEndpoint,
+          main_site_base: mainSiteBase,
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
     removeArtifacts(stagedFinalOutputDir);
     removeSpuriousExportRoots(stagedFinalOutputDir);
     removeEmptyDirectoriesUnder(stagedFinalOutputDir);
@@ -310,6 +473,10 @@ function main() {
     console.log(`Mint page export ready at ${finalOutputDir}`);
     console.log(`BASE_ENDPOINT baked in: ${baseEndpoint}`);
     console.log(`STANDALONE_MAIN_SITE_BASE baked in: ${mainSiteBase}`);
+    console.log(`Commit: ${commit}`);
+    console.log(`Build: ${build}`);
+    console.log(`Remote manifest checked: ${remoteVersionUrl}`);
+    console.log(`Version manifest: ${path.join(finalOutputDir, "version.json")}`);
 
     if (doSync) {
       const awsExecutablePath = resolveExecutablePath(
@@ -357,4 +524,7 @@ function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});

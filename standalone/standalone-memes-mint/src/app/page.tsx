@@ -5,9 +5,8 @@ import StandaloneTheMemesMintPageClient from "./StandaloneTheMemesMintPageClient
 export const dynamic = "force-static";
 export const metadata = getAppMetadata({
   title: "Mint | The Memes by 6529",
-  ogImage: `${publicEnv.BASE_ENDPOINT}/memes-preview.png`,
-  description: "Collections",
-  twitterCard: "summary_large_image",
+  ogImage: `${publicEnv.BASE_ENDPOINT}/6529io.png`,
+  description: "The Memes by 6529 Mint Page",
 });
 
 export default function StandaloneTheMemesMintPage() {

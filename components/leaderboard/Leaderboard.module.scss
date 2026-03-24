@@ -230,6 +230,14 @@
   }
 }
 
+.collectorLevel {
+  span {
+    float: none !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
 @media only screen and (max-width: 1600px) {
   .hodler {
     white-space: break-spaces !important;

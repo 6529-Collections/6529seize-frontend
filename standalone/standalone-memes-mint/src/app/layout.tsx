@@ -11,6 +11,7 @@ import Providers from "@/components/providers/Providers";
 import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
+import { SeizeSettingsMode } from "@/types/enums";
 import type { Viewport } from "next";
 
 export const metadata = getAppMetadata();
@@ -39,6 +40,7 @@ export default function RootLayout({
             enableWalletAuthentication={false}
             enableCookieConsent={false}
             enableMyStream={false}
+            settingsMode={SeizeSettingsMode.LOCAL}
           >
             <DynamicHeadTitle />
             {children}

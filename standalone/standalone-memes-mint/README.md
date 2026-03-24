@@ -27,6 +27,20 @@ Override buckets only if needed:
 - `STANDALONE_S3_BUCKET_PROD`
 - `STANDALONE_S3_BUCKET_TEST`
 
+## Versioning
+
+Each export writes
+`standalone/standalone-memes-mint/dist/version.json`.
+
+The manifest is generated automatically from:
+
+- `commit`: current `git rev-parse HEAD`
+- `build`: if `https://<bucket>/version.json` already exists with the same commit, increment its build number; otherwise start at `1`
+
+That lets you check the deployed standalone build directly via
+`https://thememes.6529.io/version.json` or
+`https://thememestest.6529.io/version.json`.
+
 ## npm scripts
 
 | Command | Build target | S3 sync | CloudFront invalidation |

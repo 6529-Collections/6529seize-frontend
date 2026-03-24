@@ -17,6 +17,7 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
+import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
@@ -31,12 +32,14 @@ export default function Providers({
   enableWalletAuthentication = true,
   enableCookieConsent = true,
   enableMyStream = true,
+  settingsMode = SeizeSettingsMode.REMOTE,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
   readonly enableWalletAuthentication?: boolean;
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
+  readonly settingsMode?: SeizeSettingsMode;
 }) {
   const sharedProviders = (
     <TitleProvider>
@@ -58,7 +61,7 @@ export default function Providers({
           <IpfsImageSetup />
           <ReactQueryWrapper>
             <RefreshProvider>
-              <SeizeSettingsProvider>
+              <SeizeSettingsProvider mode={settingsMode}>
                 <EmojiProvider>
                   <IpfsProvider>
                     <SeizeConnectProvider>
