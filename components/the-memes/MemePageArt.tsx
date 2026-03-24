@@ -62,7 +62,9 @@ export function MemePageArt(props: {
     (typeof metadata?.animation_url === "string"
       ? metadata.animation_url.trim()
       : "") ||
-    (typeof metadata?.animation === "string" ? metadata.animation.trim() : "") ||
+    (typeof metadata?.animation === "string"
+      ? metadata.animation.trim()
+      : "") ||
     (typeof props.nft?.animation === "string"
       ? props.nft.animation.trim()
       : "") ||

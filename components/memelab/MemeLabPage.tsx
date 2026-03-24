@@ -61,10 +61,7 @@ import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { ContractType } from "@/types/enums";
-import {
-  faExpandAlt,
-  faFire,
-} from "@fortawesome/free-solid-svg-icons";
+import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -1003,7 +1000,9 @@ export default function MemeLabPageComponent({
     (typeof metadata?.animation_url === "string"
       ? metadata.animation_url.trim()
       : "") ||
-    (typeof metadata?.animation === "string" ? metadata.animation.trim() : "") ||
+    (typeof metadata?.animation === "string"
+      ? metadata.animation.trim()
+      : "") ||
     nft?.animation.trim() ||
     "";
   const hasImage = Boolean(imageHref);
