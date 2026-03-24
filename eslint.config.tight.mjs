@@ -459,6 +459,12 @@ export default defineConfig([
     },
   },
 
+  // Non-TypeScript files should not run type-aware @typescript-eslint rules.
+  {
+    files: ["**/*.{js,cjs,mjs}"],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+
   // TypeScript-specific rules with type-checking
   {
     files: ["**/*.{ts,tsx}"],
