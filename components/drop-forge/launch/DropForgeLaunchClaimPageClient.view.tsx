@@ -16,6 +16,7 @@ import {
   getClaimArweaveSectionStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
+import { getDropForgeStorageLocationInfo } from "@/components/drop-forge/drop-forge-storage-location.helpers";
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeExplorerLink from "@/components/drop-forge/DropForgeExplorerLink";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
@@ -29,7 +30,6 @@ import {
   formatScheduledLabel,
   getRootAddressesCount,
   getRootTotalSpots,
-  toArweaveUrl,
 } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
@@ -366,8 +366,9 @@ function DropForgeArweaveLinkValue({
   value,
   truncate = false,
 }: Readonly<{ value: string | null | undefined; truncate?: boolean }>) {
-  const url = toArweaveUrl(value ?? undefined);
-  const text = value || "—";
+  const locationInfo = getDropForgeStorageLocationInfo(value);
+  const url = locationInfo?.openUrl ?? null;
+  const text = (locationInfo?.displayValue ?? value) || "—";
 
   if (!url) {
     return text;
@@ -383,9 +384,13 @@ function DropForgeArweaveLinkValue({
       target="_blank"
       rel="noopener noreferrer"
       className={className}
-      title={truncate ? (value ?? undefined) : undefined}
+      title={
+        truncate
+          ? (locationInfo?.displayTitle ?? value ?? undefined)
+          : undefined
+      }
     >
-      {value}
+      {text}
     </a>
   );
 }
@@ -394,17 +399,28 @@ function DropForgeArweaveLinkCard({
   label,
   value,
 }: Readonly<{ label: string; value: string | null | undefined }>) {
-  const trimmedValue = value?.trim() ?? "";
-  const url = toArweaveUrl(trimmedValue || undefined);
+  const locationInfo = getDropForgeStorageLocationInfo(value);
 
   return (
     <DropForgeLinkCard
-      label={label}
-      displayValue={trimmedValue}
-      copyValue={url}
-      openUrl={url}
+      label={
+        <span className="tw-flex tw-items-center tw-gap-2">
+          <span>{label}</span>
+          {locationInfo?.providerBadgeLabel ? (
+            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/15 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-500/30">
+              {locationInfo.providerBadgeLabel}
+            </span>
+          ) : null}
+        </span>
+      }
+      displayValue={locationInfo?.displayValue}
+      displayTitle={locationInfo?.displayTitle}
+      copyValue={locationInfo?.copyValue}
+      openUrl={locationInfo?.openUrl}
       copyLabel={`Copy ${label} link`}
-      openLabel={`Open ${label} on Arweave`}
+      openLabel={`Open ${label} ${
+        locationInfo?.provider === "ipfs" ? "on IPFS" : "on Arweave"
+      }`}
       cardClassName={ARWEAVE_LINK_CARD_CLASS}
       labelClassName="tw-min-w-0 tw-text-base tw-text-iron-200"
     />

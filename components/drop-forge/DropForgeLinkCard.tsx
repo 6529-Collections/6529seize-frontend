@@ -4,6 +4,7 @@ import {
   ArrowTopRightOnSquareIcon,
   DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_CARD_CLASS_NAME =
@@ -16,6 +17,7 @@ const ACTION_BUTTON_CLASS_NAME =
 export default function DropForgeLinkCard({
   label,
   displayValue,
+  displayTitle,
   emptyText = "—",
   copyValue,
   openUrl,
@@ -24,8 +26,9 @@ export default function DropForgeLinkCard({
   cardClassName = DEFAULT_CARD_CLASS_NAME,
   labelClassName = DEFAULT_LABEL_CLASS_NAME,
 }: Readonly<{
-  label: string;
+  label: ReactNode;
   displayValue: string | null | undefined;
+  displayTitle?: string | null | undefined;
   emptyText?: string;
   copyValue?: string | null | undefined;
   openUrl?: string | null | undefined;
@@ -86,7 +89,7 @@ export default function DropForgeLinkCard({
 
   return (
     <div className={cardClassName}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+      <div className="tw-flex tw-min-h-10 tw-items-center tw-justify-between tw-gap-3">
         <div className={labelClassName}>{label}</div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
           {copied && (
@@ -120,7 +123,11 @@ export default function DropForgeLinkCard({
       </div>
       <div
         className={valueClassName}
-        title={hasDisplayValue ? trimmedDisplayValue : undefined}
+        title={
+          hasDisplayValue
+            ? displayTitle?.trim() || trimmedDisplayValue
+            : undefined
+        }
       >
         {hasDisplayValue ? trimmedDisplayValue : emptyText}
       </div>
