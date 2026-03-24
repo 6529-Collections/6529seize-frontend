@@ -206,7 +206,9 @@ export default function UserPageRep({
         hasNextPage &&
         !isFetchingNextPage
       ) {
-        void fetchNextPage();
+        fetchNextPage().catch(() => {
+          // Errors are surfaced via query state rendered in the UI.
+        });
       }
 
       return {
