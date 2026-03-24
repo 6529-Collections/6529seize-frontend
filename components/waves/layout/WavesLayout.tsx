@@ -67,7 +67,7 @@ function getNotAuthenticatedContent({
           {activeWaveId === null ? (
             <WaveScreenMessage
               title="Select a Wave"
-              description="Select a wave from the left to preview it. Connect your wallet to access waves and join the conversation."
+              description="Connect your wallet to access wave and join the conversation."
               action={<HeaderUserConnect label="Connect Wallet" />}
             />
           ) : (
