@@ -123,14 +123,10 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         id={`field-${field}`}
         isFieldFilled={isFieldFilled}
       >
-        <div
-          ref={uiStateRef}
-          className="tw-flex tw-w-full tw-gap-3"
-          data-field={field}
-        >
+        <div ref={uiStateRef} className="tw-flex tw-gap-1" data-field={field}>
           <button
             onClick={handleYesClick}
-            className={`yes-button tw-flex-1 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-sm tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition-all ${
+            className={`yes-button tw-rounded-md tw-border-0 tw-px-3.5 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition-all ${
               traits[field]
                 ? "tw-bg-primary-400/30 tw-text-primary-300 tw-ring-primary-400/60"
                 : "tw-bg-iron-800/50 tw-text-iron-400 tw-ring-iron-700/50"
@@ -141,7 +137,7 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
           </button>
           <button
             onClick={handleNoClick}
-            className={`no-button tw-flex-1 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-sm tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition-all ${
+            className={`no-button tw-rounded-md tw-border-0 tw-px-3.5 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition-all ${
               traits[field] === false
                 ? "tw-bg-primary-400/30 tw-text-primary-300 tw-ring-primary-400/60"
                 : "tw-bg-iron-800/50 tw-text-iron-400 tw-ring-iron-700/50"

@@ -1,6 +1,7 @@
 import { createSecurityHeaders } from "./securityHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
+import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 
 export function sharedConfig(
   publicEnv: PublicEnv,
@@ -18,8 +19,10 @@ export function sharedConfig(
       remotePatterns: [
         { protocol: "https", hostname: "6529.io" },
         { protocol: "https", hostname: "staging.6529.io" },
-        { protocol: "https", hostname: "arweave.net" },
-        { protocol: "https", hostname: "ar-io.net" },
+        ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
+          protocol: "https" as const,
+          hostname,
+        })),
         { protocol: "http", hostname: "localhost" },
         { protocol: "https", hostname: "media.generator.seize.io" },
         { protocol: "https", hostname: "d3lqz0a4bldqgf.cloudfront.net" },
@@ -39,6 +42,7 @@ export function sharedConfig(
     transpilePackages: ["react-tweet"],
     poweredByHeader: false,
     logging: {
+      browserToTerminal: "error",
       incomingRequests: false,
     },
     async headers() {

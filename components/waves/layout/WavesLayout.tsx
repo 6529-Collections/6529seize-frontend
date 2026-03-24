@@ -1,82 +1,133 @@
 "use client";
 
-import type { ReactNode} from "react";
-import { useMemo } from "react";
+import type { ReactNode } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import ConnectWallet from "../../common/ConnectWallet";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesDesktop from "../WavesDesktop";
 import WavesMobile from "../WavesMobile";
+import PublicWaveShell from "../public/PublicWaveShell";
+import {
+  type PublicWaveShellState,
+  usePublicWaveShellState,
+} from "../public/usePublicWaveShellState";
+
+function getConnectPrompt(
+  contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
+): ReactNode {
+  switch (contentState) {
+    case "needs-profile":
+      return (
+        <>
+          <h1 className="tw-text-xl tw-font-bold">
+            You need to set up a profile to continue.
+          </h1>
+          <UserSetUpProfileCta />
+        </>
+      );
+    case "not-available":
+      return (
+        <h1 className="tw-text-xl tw-font-bold">
+          This content is not available.
+        </h1>
+      );
+    case "loading":
+    case "measuring":
+    case "not-authenticated":
+    case "ready":
+    default:
+      return null;
+  }
+}
+
+function getNotAuthenticatedContent({
+  activeWaveId,
+  containerClassName,
+  isApp,
+  publicWaveShellState,
+}: {
+  readonly activeWaveId: string | null;
+  readonly containerClassName: string;
+  readonly isApp: boolean;
+  readonly publicWaveShellState: PublicWaveShellState;
+}): ReactNode {
+  if (isApp) {
+    return <ConnectWallet />;
+  }
+
+  if (activeWaveId === null || publicWaveShellState.status === "unavailable") {
+    return <ConnectWallet />;
+  }
+
+  const publicShell = (
+    <div className={containerClassName}>
+      <PublicWaveShell waveId={activeWaveId} />
+    </div>
+  );
+
+  return (
+    <div className="tw-flex-1" id="waves-content">
+      <WavesDesktop
+        allowDropOverlay={false}
+        allowRightSidebar={false}
+        showLeftSidebar={true}
+      >
+        {publicShell}
+      </WavesDesktop>
+    </div>
+  );
+}
 
 // Main layout content that uses the Layout context
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const publicWaveShellState = usePublicWaveShellState(activeWaveId, {
+    enabled:
+      !isApp && contentState === "not-authenticated" && activeWaveId !== null,
+  });
 
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
+  const connectPrompt = getConnectPrompt(contentState);
 
-  const connectPrompt = useMemo(() => {
-    switch (contentState) {
-      case "needs-profile":
-        return (
-          <>
-            <h1 className="tw-text-xl tw-font-bold">
-              You need to set up a profile to continue.
-            </h1>
-            <UserSetUpProfileCta />
-          </>
-        );
-      case "not-available":
-        return (
-          <h1 className="tw-text-xl tw-font-bold">
-            This content is not available.
-          </h1>
-        );
-      case "loading":
-      case "measuring":
-        // Don't show any text for loading states - let the waves content handle its own loading UI
-        return null;
-      default:
-        return null;
-    }
-  }, [contentState]);
+  let content: ReactNode = null;
 
-  const content = useMemo(() => {
-    if (contentState === "ready") {
-      // Include device routing here instead of separate Brain component
-      const Component = isApp ? WavesMobile : WavesDesktop;
-      return (
-        <div className="tw-flex-1" id="waves-content">
-          <Component>
-            <div className={containerClassName}>{children}</div>
-          </Component>
-        </div>
-      );
-    }
-
-    if (contentState === "not-authenticated") {
-      return <ConnectWallet />;
-    }
-
-    // For other states (needs-profile, not-available)
-    if (connectPrompt) {
-      return (
-        <div className="tw-flex tw-items-center tw-justify-center tw-min-h-screen tw-px-6">
-          <div className="tw-flex tw-flex-col tw-items-center tw-text-center tw-gap-4">
+  if (contentState === "ready") {
+    const Component = isApp ? WavesMobile : WavesDesktop;
+    content = (
+      <div className="tw-flex-1" id="waves-content">
+        <Component>
+          <div className={containerClassName}>{children}</div>
+        </Component>
+      </div>
+    );
+  } else if (contentState === "not-authenticated") {
+    content = getNotAuthenticatedContent({
+      activeWaveId,
+      containerClassName,
+      isApp,
+      publicWaveShellState,
+    });
+  } else {
+    content =
+      connectPrompt === null ? null : (
+        <div className="tw-flex tw-min-h-screen tw-items-center tw-justify-center tw-px-6">
+          <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-text-center">
             {connectPrompt}
           </div>
         </div>
       );
-    }
-
-    // Loading/measuring states
-    return null;
-  }, [contentState, connectPrompt, containerClassName, children, isApp]);
+  }
 
   return (
-    <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
+    <div className="tailwind-scope tw-flex tw-flex-col tw-overflow-hidden tw-bg-black">
       {content}
     </div>
   );

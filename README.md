@@ -2,6 +2,10 @@
 
 PORT: 3000
 
+### Documentation
+
+User-facing documentation lives in [`docs/README.md`](docs/README.md).
+
 ### Install
 
 ```

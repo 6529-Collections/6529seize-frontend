@@ -157,15 +157,13 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
     // Every entry with a valid address must have count > 0
     const hasEntryWithAddressButNoCount = airdropEntries.some(
       (e) =>
-        e.address &&
-        validateStrictAddress(e.address) &&
-        (!e.count || e.count <= 0)
+        e.address.length > 0 && validateStrictAddress(e.address) && e.count <= 0
     );
     if (hasEntryWithAddressButNoCount) return false;
 
     // All provided addresses must be valid (even if count is 0)
     const hasInvalidAddress = airdropEntries.some(
-      (e) => e.address && !validateStrictAddress(e.address)
+      (e) => e.address.length > 0 && !validateStrictAddress(e.address)
     );
     if (hasInvalidAddress) return false;
 
@@ -210,93 +208,97 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="tw-mx-auto tw-flex tw-h-full tw-max-w-4xl tw-flex-col tw-pb-8"
+      className="tw-flex tw-h-full tw-w-full tw-flex-col"
     >
-      <div className="tw-flex-1 tw-space-y-12 tw-overflow-y-auto tw-px-4 tw-py-2 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700">
-        <p className="tw-text-sm tw-text-iron-400">
+      <div className="tw-mx-auto tw-w-full tw-max-w-4xl tw-flex-1 tw-overflow-y-auto tw-px-4 tw-pb-8 tw-pt-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 md:tw-px-8">
+        <p className="tw-mb-8 tw-text-sm tw-text-iron-400">
           Complete the following details for distribution and storytelling
           purposes.
         </p>
 
-        <AirdropConfig
-          entries={airdropEntries}
-          onEntriesChange={onAirdropEntriesChange}
-          airdropLengthStatus={metadataStatuses["airdrop_config"]}
-        />
+        <div className="tw-flex tw-flex-col tw-gap-y-10">
+          <AirdropConfig
+            entries={airdropEntries}
+            onEntriesChange={onAirdropEntriesChange}
+            airdropLengthStatus={metadataStatuses["airdrop_config"]}
+          />
 
-        <PaymentConfig
-          paymentInfo={paymentInfo}
-          onPaymentInfoChange={onPaymentInfoChange}
-          paymentInfoLengthStatus={metadataStatuses["payment_info"]}
-        />
+          <PaymentConfig
+            paymentInfo={paymentInfo}
+            onPaymentInfoChange={onPaymentInfoChange}
+            paymentInfoLengthStatus={metadataStatuses["payment_info"]}
+          />
 
-        <AllowlistBatchManager
-          batches={allowlistBatches}
-          onBatchesChange={onBatchesChange}
-          allowlistLengthStatus={metadataStatuses["allowlist_batches"]}
-          errors={allowlistBatches.map((batch) => {
-            const contractError = getContractError(batch.contract);
-            const tokenIdsError = getTokenIdsError(batch.token_ids_raw);
-            return {
-              ...(contractError ? { contract: contractError } : {}),
-              ...(tokenIdsError ? { token_ids: tokenIdsError } : {}),
-            };
-          })}
-        />
+          <AllowlistBatchManager
+            batches={allowlistBatches}
+            onBatchesChange={onBatchesChange}
+            allowlistLengthStatus={metadataStatuses["allowlist_batches"]}
+            errors={allowlistBatches.map((batch) => {
+              const contractError = getContractError(batch.contract);
+              const tokenIdsError = getTokenIdsError(batch.token_ids_raw);
+              return {
+                ...(contractError ? { contract: contractError } : {}),
+                ...(tokenIdsError ? { token_ids: tokenIdsError } : {}),
+              };
+            })}
+          />
 
-        <AdditionalMediaUpload
-          supportingMedia={supportingMedia}
-          artworkCommentary={artworkCommentary}
-          aboutArtist={aboutArtist}
-          previewImage={previewImage}
-          promoVideo={promoVideo}
-          requiresPreviewImage={requiresPreviewImage}
-          requiresPromoVideoOption={requiresPromoVideoOption}
-          previewRequiredMediaType={previewRequiredMediaType}
-          onSupportingMediaChange={onSupportingMediaChange}
-          onPreviewImageChange={onPreviewImageChange}
-          onPromoVideoChange={onPromoVideoChange}
-          onArtworkCommentaryChange={onArtworkCommentaryChange}
-          onAboutArtistChange={onAboutArtistChange}
-          aboutArtistLengthStatus={
-            aboutArtistStatus?.isWarning && !aboutArtistStatus.isError
-              ? aboutArtistStatus
-              : undefined
-          }
-          artworkCommentaryLengthStatus={
-            commentaryStatus?.isWarning && !commentaryStatus.isError
-              ? commentaryStatus
-              : undefined
-          }
-          additionalMediaLengthStatus={metadataStatuses["additional_media"]}
-          errors={{
-            ...(aboutArtistError ? { aboutArtist: aboutArtistError } : {}),
-            ...(artworkCommentaryError
-              ? { artworkCommentary: artworkCommentaryError }
-              : {}),
-          }}
-        />
+          <AdditionalMediaUpload
+            supportingMedia={supportingMedia}
+            artworkCommentary={artworkCommentary}
+            aboutArtist={aboutArtist}
+            previewImage={previewImage}
+            promoVideo={promoVideo}
+            requiresPreviewImage={requiresPreviewImage}
+            requiresPromoVideoOption={requiresPromoVideoOption}
+            previewRequiredMediaType={previewRequiredMediaType}
+            onSupportingMediaChange={onSupportingMediaChange}
+            onPreviewImageChange={onPreviewImageChange}
+            onPromoVideoChange={onPromoVideoChange}
+            onArtworkCommentaryChange={onArtworkCommentaryChange}
+            onAboutArtistChange={onAboutArtistChange}
+            aboutArtistLengthStatus={
+              aboutArtistStatus?.isWarning && !aboutArtistStatus.isError
+                ? aboutArtistStatus
+                : undefined
+            }
+            artworkCommentaryLengthStatus={
+              commentaryStatus?.isWarning && !commentaryStatus.isError
+                ? commentaryStatus
+                : undefined
+            }
+            additionalMediaLengthStatus={metadataStatuses["additional_media"]}
+            errors={{
+              ...(aboutArtistError ? { aboutArtist: aboutArtistError } : {}),
+              ...(artworkCommentaryError
+                ? { artworkCommentary: artworkCommentaryError }
+                : {}),
+            }}
+          />
+        </div>
       </div>
 
-      <div className="tw-mt-auto tw-flex tw-items-center tw-justify-between tw-border-t tw-border-iron-800 tw-px-4 tw-pt-6">
-        <SecondaryButton onClicked={onBack} disabled={isSubmitting}>
-          Back
-        </SecondaryButton>
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <SecondaryButton
-            onClicked={onPreview}
-            disabled={!formValid || isSubmitting}
-          >
-            Preview
+      <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-py-3">
+        <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-4xl tw-items-center tw-justify-between tw-px-4 md:tw-px-8">
+          <SecondaryButton onClicked={onBack} disabled={isSubmitting}>
+            Back
           </SecondaryButton>
-          <PrimaryButton
-            onClicked={onSubmit}
-            disabled={!formValid}
-            loading={isSubmitting}
-            padding="tw-px-6 tw-py-3"
-          >
-            Submit Artwork
-          </PrimaryButton>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <SecondaryButton
+              onClicked={onPreview}
+              disabled={!formValid || isSubmitting}
+            >
+              Preview
+            </SecondaryButton>
+            <PrimaryButton
+              onClicked={onSubmit}
+              disabled={!formValid}
+              loading={isSubmitting}
+              padding="tw-px-6 tw-py-3"
+            >
+              Submit Artwork
+            </PrimaryButton>
+          </div>
         </div>
       </div>
     </motion.div>
