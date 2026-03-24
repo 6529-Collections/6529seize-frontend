@@ -7,6 +7,7 @@ import {
   getRefreshToken,
   getStagingAuth,
   getWalletAddress,
+  isAuthAddressAuthorized,
   removeAuthJwt,
   setActiveWalletAccount,
   setAuthJwt,
@@ -141,6 +142,57 @@ describe("auth.utils", () => {
     publicEnv.USE_DEV_AUTH = "false";
     (safeLocalStorage.getItem as jest.Mock).mockReturnValue("stored");
     expect(getWalletAddress()).toBe("stored");
+  });
+
+  it("authorizes a stored connected address", () => {
+    expect(
+      isAuthAddressAuthorized({
+        address: "0xAbC",
+        connectedAccounts: [{ address: "0xabc" }],
+      })
+    ).toBe(true);
+  });
+
+  it("authorizes a matching dev-auth address and jwt without stored accounts", () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.USE_DEV_AUTH = "true";
+    publicEnv.DEV_MODE_WALLET_ADDRESS = "0xDev";
+    publicEnv.DEV_MODE_AUTH_JWT = "dev-jwt";
+
+    expect(
+      isAuthAddressAuthorized({
+        address: "0xdev",
+        connectedAccounts: [],
+      })
+    ).toBe(true);
+  });
+
+  it("does not authorize dev auth when the active address differs", () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.USE_DEV_AUTH = "true";
+    publicEnv.DEV_MODE_WALLET_ADDRESS = "0xDev";
+    publicEnv.DEV_MODE_AUTH_JWT = "dev-jwt";
+
+    expect(
+      isAuthAddressAuthorized({
+        address: "0xother",
+        connectedAccounts: [],
+      })
+    ).toBe(false);
+  });
+
+  it("does not authorize dev auth when the jwt is missing", () => {
+    const { publicEnv } = require("@/config/env");
+    publicEnv.USE_DEV_AUTH = "true";
+    publicEnv.DEV_MODE_WALLET_ADDRESS = "0xDev";
+    publicEnv.DEV_MODE_AUTH_JWT = null;
+
+    expect(
+      isAuthAddressAuthorized({
+        address: "0xdev",
+        connectedAccounts: [],
+      })
+    ).toBe(false);
   });
 
   it("removeAuthJwt clears storage and cookie", () => {

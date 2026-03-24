@@ -363,6 +363,25 @@ describe("MemesQuickVoteDialog", () => {
     expect(submitVote).not.toHaveBeenCalledWith(activeDrop, 250);
   });
 
+  it("submits the visible quick amount from the mobile action row", async () => {
+    useIsMobileScreenMock.mockReturnValue(true);
+    const submitVote = jest.fn().mockResolvedValue(true);
+
+    useMemesQuickVoteQueueMock.mockReturnValue(
+      createQueueState({ submitVote })
+    );
+
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /250/i }));
+
+    await waitFor(() => {
+      expect(submitVote).toHaveBeenCalledWith(activeDrop, 250);
+    });
+  });
+
   it("resets dialog-local controls when the session id changes", () => {
     const { rerender } = render(
       <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />

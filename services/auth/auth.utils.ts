@@ -41,6 +41,42 @@ const getAddressRoleStorageKey = (address: string): string => {
 
 const normalizeAddress = (address: string): string => address.toLowerCase();
 
+export const isAuthAddressAuthorized = ({
+  address,
+  connectedAccounts,
+}: {
+  readonly address: string | null | undefined;
+  readonly connectedAccounts: readonly { readonly address: string }[];
+}): boolean => {
+  if (!address) {
+    return false;
+  }
+
+  const normalizedAddress = normalizeAddress(address);
+  const isStoredAddressAuthorized = connectedAccounts.some(
+    (account) => normalizeAddress(account.address) === normalizedAddress
+  );
+
+  if (isStoredAddressAuthorized) {
+    return true;
+  }
+
+  if (publicEnv.USE_DEV_AUTH !== "true") {
+    return false;
+  }
+
+  const devWalletAddress = getWalletAddress();
+  const devAuthJwt = getAuthJwt();
+
+  return (
+    typeof devWalletAddress === "string" &&
+    devWalletAddress.length > 0 &&
+    typeof devAuthJwt === "string" &&
+    devAuthJwt.length > 0 &&
+    normalizeAddress(devWalletAddress) === normalizedAddress
+  );
+};
+
 const emitWalletAccountsUpdated = (): void => {
   if (globalThis.window !== undefined) {
     globalThis.dispatchEvent(new CustomEvent(WALLET_ACCOUNTS_UPDATED_EVENT));
