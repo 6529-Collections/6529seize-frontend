@@ -33,7 +33,11 @@ jest.mock("react-bootstrap", () => {
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children }: any) => <a href={href}>{children}</a>,
+  default: ({ href, children, ...rest }: any) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
 }));
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: (props: any) => (
@@ -95,6 +99,7 @@ const nft = {
   artist: "a",
   mint_date: "2023",
   description: "desc",
+  uri: "https://metadata.example/meme.json",
   metadata: {
     image_details: { format: "png", width: 1, height: 2 },
     animation_details: { format: "gif", width: 1, height: 2 },
@@ -143,6 +148,17 @@ describe("MemePageArt", () => {
       <MemePageArt show={true} nft={nft as any} nftMeta={nftMeta as any} />
     );
     expect(screen.getByText("Arweave Links")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "https://metadata.example/meme.json",
+      })
+    ).toHaveAttribute("href", "https://metadata.example/meme.json");
+    expect(
+      screen.getByRole("link", { name: "Open JSON in new tab" })
+    ).toHaveAttribute("href", "https://metadata.example/meme.json");
+    expect(
+      screen.getByRole("link", { name: "Open image in new tab" })
+    ).toHaveAttribute("href", "img");
     expect(screen.getByText("Card Details")).toBeInTheDocument();
     expect(screen.getByText("Minting Approach")).toBeInTheDocument();
     expect(screen.getByText("Card Description")).toBeInTheDocument();
@@ -231,6 +247,40 @@ describe("MemePageArt", () => {
         name: "https://top-level.example/animation.mp4",
       })
     ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
+    expect(
+      screen.getByRole("link", { name: "Open image in new tab" })
+    ).toHaveAttribute("href", "https://top-level.example/image.png");
+    expect(
+      screen.getByRole("link", { name: "Open animation in new tab" })
+    ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
+  });
+
+  it("prefers metadata animation_url over top-level animation for art links", () => {
+    const nftWithMetadataAnimationUrl = {
+      ...nft,
+      animation: "https://cdn.example.com/animation.mp4",
+      metadata: {
+        ...nft.metadata,
+        animation_url: "https://arweave.net/animation.mp4",
+      },
+    };
+
+    render(
+      <MemePageArt
+        show={true}
+        nft={nftWithMetadataAnimationUrl as any}
+        nftMeta={nftMeta as any}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "https://arweave.net/animation.mp4",
+      })
+    ).toHaveAttribute("href", "https://arweave.net/animation.mp4");
+    expect(
+      screen.getByRole("link", { name: "Open animation in new tab" })
+    ).toHaveAttribute("href", "https://arweave.net/animation.mp4");
   });
 
   it("ignores whitespace metadata.image and falls back to the top-level image", () => {
@@ -256,7 +306,10 @@ describe("MemePageArt", () => {
         name: "https://top-level.example/image.png",
       })
     ).toHaveAttribute("href", "https://top-level.example/image.png");
-    expect(screen.getByTestId("download")).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Open image in new tab" })
+    ).toHaveAttribute("href", "https://top-level.example/image.png");
+    expect(screen.getAllByTestId("download")[0]).toHaveAttribute(
       "data-href",
       "https://top-level.example/image.png"
     );
@@ -288,6 +341,12 @@ describe("MemePageArt", () => {
       screen.getByRole("link", {
         name: "https://metadata.example/animation.gif",
       })
+    ).toHaveAttribute("href", "https://metadata.example/animation.gif");
+    expect(
+      screen.getByRole("link", { name: "Open image in new tab" })
+    ).toHaveAttribute("href", "img");
+    expect(
+      screen.getByRole("link", { name: "Open animation in new tab" })
     ).toHaveAttribute("href", "https://metadata.example/animation.gif");
     expect(getCardDetailValue("File type")).toBe("gif");
     expect(getCardDetailValue("Dimensions")).toBe("200x300");
@@ -352,7 +411,7 @@ describe("MemePageArt", () => {
     expect(getCardDetailValue("File type")).toBe("gif");
     expect(getCardDetailValue("Dimensions")).toBe("200x300");
 
-    fireEvent.click(screen.getByTestId("fullscreen-icon"));
+    fireEvent.click(screen.getAllByTestId("fullscreen-icon")[0]);
 
     expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
       "the-art-fullscreen-animation"

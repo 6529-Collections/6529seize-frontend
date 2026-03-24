@@ -25,6 +25,9 @@ export default function Download(props: Readonly<Props>) {
   const { percentage, download, cancel, isInProgress } = useDownloader();
   const showProgress = props.showProgress ?? true;
   const variant = props.variant ?? "default";
+  const normalizedPercentage = Number.isFinite(percentage)
+    ? Math.min(Math.max(percentage, 0), 100)
+    : null;
 
   const [isCompleted, setIsCompleted] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -37,7 +40,7 @@ export default function Download(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    if (percentage === 100 && showProgress) {
+    if (normalizedPercentage === 100 && showProgress) {
       setIsCompleted(true);
       if (completionTimeoutRef.current) {
         clearTimeout(completionTimeoutRef.current);
@@ -47,7 +50,7 @@ export default function Download(props: Readonly<Props>) {
         completionTimeoutRef.current = null;
       }, 1500);
     }
-  }, [percentage, showProgress]);
+  }, [normalizedPercentage, showProgress]);
 
   useEffect(() => {
     return () => {
@@ -61,14 +64,15 @@ export default function Download(props: Readonly<Props>) {
     if (isCompleted) {
       return (
         <div
-          className="tw-bg-iron-900 tw-rounded-full tw-h-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out tw-border-0 tw-text-white tw-gap-2 tw-px-3"
-          aria-label="Download complete">
-          <span className="tw-leading-[2.25rem] tw-text-sm tw-font-medium">
+          className="tw-inline-flex tw-h-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-white tw-transition tw-duration-300 tw-ease-out"
+          aria-label="Download complete"
+        >
+          <span className="tw-text-sm tw-font-medium tw-leading-[2.25rem]">
             Complete
           </span>
           <FontAwesomeIcon
             icon={faCheckCircle}
-            className="tw-text-white tw-w-5 tw-h-5 tw-flex-shrink-0 tw-cursor-pointer"
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-cursor-pointer tw-text-white"
             onClick={() => setIsCompleted(false)}
           />
         </div>
@@ -83,11 +87,16 @@ export default function Download(props: Readonly<Props>) {
               e.stopPropagation();
               startDownload();
             }}
-            className="tw-bg-transparent tw-border-0 tw-text-white/40 desktop-hover:hover:tw-text-white tw-transition-colors tw-duration-300 tw-flex tw-items-center tw-gap-1.5 tw-cursor-pointer tw-text-xs tw-font-medium"
+            className="tw-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-text-xs tw-font-medium tw-text-white/40 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-white"
             aria-label="Download file"
-            type="button">
-            <ArrowDownTrayIcon className="tw-w-4 tw-h-4 tw-flex-shrink-0" />
-            <span className={props.alwaysShowText ? "" : "tw-hidden sm:tw-inline"}>Download</span>
+            type="button"
+          >
+            <ArrowDownTrayIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+            <span
+              className={props.alwaysShowText ? "" : "tw-hidden sm:tw-inline"}
+            >
+              Download
+            </span>
           </button>
         );
       }
@@ -97,12 +106,13 @@ export default function Download(props: Readonly<Props>) {
             e.stopPropagation();
             startDownload();
           }}
-          className="tw-bg-iron-900 desktop-hover:hover:tw-bg-iron-800 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-border-0"
+          className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-800"
           aria-label="Download file"
-          type="button">
+          type="button"
+        >
           <FontAwesomeIcon
             icon={faDownload}
-            className="tw-text-white tw-w-4 tw-h-4 tw-flex-shrink-0"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-white"
           />
         </button>
       );
@@ -110,14 +120,17 @@ export default function Download(props: Readonly<Props>) {
 
     return (
       <div
-        className="tw-bg-iron-900 tw-rounded-full tw-h-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out tw-border-0 tw-text-white tw-gap-2 tw-px-3"
-        aria-label="Downloading file">
-        <span className="tw-leading-[2.25rem] tw-text-sm tw-font-medium">
-          Downloading {percentage}%
+        className="tw-inline-flex tw-h-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-white tw-transition tw-duration-300 tw-ease-out"
+        aria-label="Downloading file"
+      >
+        <span className="tw-text-sm tw-font-medium tw-leading-[2.25rem]">
+          {normalizedPercentage === null
+            ? "Downloading..."
+            : `Downloading ${normalizedPercentage}%`}
         </span>
         <FontAwesomeIcon
           icon={faXmarkCircle}
-          className="tw-text-white tw-w-5 tw-h-5 tw-flex-shrink-0 tw-cursor-pointer"
+          className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-cursor-pointer tw-text-white"
           onClick={() => cancel()}
         />
       </div>

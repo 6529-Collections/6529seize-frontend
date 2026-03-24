@@ -7,10 +7,10 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import Download from "@/components/download/Download";
 import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
+import { ArweaveLinksTable } from "@/components/nft-attributes/ArweaveLinksTable";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import NFTImage from "@/components/nft-image/NFTImage";
@@ -983,11 +983,66 @@ export default function MemeLabPageComponent({
   const imageDimensions = getImageDimensionsFromMetadata(nft?.metadata);
   const animationDimensions = getAnimationDimensionsFromMetadata(nft?.metadata);
   const imageHref = getResolvedImageSrc(nft);
+  const metadataHref = nft?.uri.trim() ?? "";
+  const metadata =
+    nft?.metadata !== null && typeof nft?.metadata === "object"
+      ? (nft.metadata as {
+          readonly image?: unknown;
+          readonly animation?: unknown;
+          readonly animation_url?: unknown;
+        })
+      : undefined;
+  const artImageHref =
+    (typeof metadata?.image === "string" ? metadata.image.trim() : "") ||
+    nft?.image.trim() ||
+    "";
+  const artAnimationHref =
+    (typeof metadata?.animation_url === "string"
+      ? metadata.animation_url.trim()
+      : "") ||
+    (typeof metadata?.animation === "string"
+      ? metadata.animation.trim()
+      : "") ||
+    nft?.animation.trim() ||
+    "";
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !hasImage);
   const fileType = isShowingAnimation ? animationFormat : imageFormat;
   const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
   const currentFormat = fileType ?? "";
+  const arweaveRows = [
+    metadataHref
+      ? {
+          label: "JSON",
+          url: metadataHref,
+          openLabel: "Open JSON in new tab",
+        }
+      : null,
+    artImageHref
+      ? {
+          label: imageFormat?.toUpperCase() || "IMAGE",
+          url: artImageHref,
+          openLabel: "Open image in new tab",
+          extension: imageFormat ?? "",
+          downloadName: nft?.name || `meme-lab-${nft?.id ?? "asset"}`,
+        }
+      : null,
+    artAnimationHref
+      ? {
+          label: animationFormat?.toUpperCase() || "ANIMATION",
+          url: artAnimationHref,
+          openLabel: "Open animation in new tab",
+          extension: animationFormat ?? "",
+          downloadName: nft?.name || `meme-lab-${nft?.id ?? "asset"}`,
+        }
+      : null,
+  ].filter(Boolean) as {
+    label: string;
+    url: string;
+    openLabel: string;
+    extension?: string | undefined;
+    downloadName?: string | undefined;
+  }[];
 
   function printTheArt() {
     if (nft && nftMeta) {
@@ -1085,49 +1140,13 @@ export default function MemeLabPageComponent({
                     <Col>
                       <Row>
                         <Col>
-                          <h3>Arweave Links</h3>
+                          <h3 className="tw-pb-2">Arweave Links</h3>
                         </Col>
                       </Row>
-                      {imageHref && (
-                        <Row>
-                          <Col className="tw-flex tw-items-center tw-gap-1">
-                            {imageFormat && <span>{imageFormat}</span>}
-                            <Link
-                              className={styles["arweaveLink"]}
-                              href={imageHref}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {imageHref}
-                            </Link>
-                            <Download
-                              href={imageHref}
-                              name={nft.name}
-                              extension={imageFormat ?? ""}
-                            />
-                          </Col>
-                        </Row>
-                      )}
-                      {animationHref && (
-                        <Row className="pt-3">
-                          <Col className="tw-flex tw-items-center tw-gap-1">
-                            {animationFormat && <span>{animationFormat}</span>}
-                            <Link
-                              className={styles["arweaveLink"]}
-                              href={animationHref}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {animationHref}
-                            </Link>
-                            <Download
-                              href={animationHref}
-                              name={nft.name}
-                              extension={animationFormat ?? ""}
-                            />
-                          </Col>
-                        </Row>
-                      )}
+                      <ArweaveLinksTable
+                        rows={arweaveRows}
+                        linkClassName={styles["arweaveLink"]}
+                      />
                     </Col>
                   </Row>
                 </Container>

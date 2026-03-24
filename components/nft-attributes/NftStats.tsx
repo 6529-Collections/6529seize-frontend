@@ -1,6 +1,7 @@
 import { numberWithCommas } from "@/helpers/Helpers";
 
 import type { LabNFT, NFT } from "@/entities/INFT";
+import { MetadataLink } from "./MetadataLink";
 
 export function NftPageStats(props: {
   readonly nft: NFT | LabNFT;
@@ -18,6 +19,7 @@ export function NftPageStats(props: {
           unit="ETH"
         />
       )}
+      <MetadataLink url={props.nft.uri} />
       {hasHodlRate && (
         <NftStatTableRow
           label="TDH Rate"

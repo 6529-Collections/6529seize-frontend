@@ -168,7 +168,6 @@ function useEnhancedWavesListCore(
           identity: c.contributor_identity,
         })),
         newDropsCount: newDrops,
-        // Prefer isPinned (computed optimistic value from useWavesList) over pinned (raw server field)
         isPinned: options.supportsPinning
           ? (wave.isPinned ?? wave.pinned ?? false)
           : false,
