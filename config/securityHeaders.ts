@@ -24,9 +24,8 @@ export function createSecurityHeaders(
   ipfsGatewayEndpoint: string | undefined = ""
 ) {
   const arweaveGatewaySources = ARWEAVE_GATEWAY_CSP_SOURCES.join(" ");
-  const configuredIpfsGatewaySource = getConfiguredIpfsGatewaySource(
-    ipfsGatewayEndpoint
-  );
+  const configuredIpfsGatewaySource =
+    getConfiguredIpfsGatewaySource(ipfsGatewayEndpoint);
 
   return [
     {

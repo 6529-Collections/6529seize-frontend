@@ -305,7 +305,7 @@ function MediaSourceLinkCard({
               href={openableUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-text-primary-300 tw-no-underline hover:tw-text-primary-200"
+              className="hover:tw-text-primary-200 tw-text-primary-300 tw-no-underline"
             >
               {trimmedUrl}
             </a>

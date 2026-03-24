@@ -173,7 +173,11 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     <div ref={containerRef} className={containerClasses}>
       {banner}
       <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
-        {isVisible ? <iframe {...iframeProps} onLoad={onLoad} onError={onError} /> : placeholder}
+        {isVisible ? (
+          <iframe {...iframeProps} onLoad={onLoad} onError={onError} />
+        ) : (
+          placeholder
+        )}
       </div>
     </div>
   );
