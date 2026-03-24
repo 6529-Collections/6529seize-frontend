@@ -34,8 +34,8 @@ export default function DropForgeLinkCard({
   openUrl?: string | null | undefined;
   copyLabel: string;
   openLabel: string;
-  cardClassName?: string;
-  labelClassName?: string;
+  cardClassName?: string | undefined;
+  labelClassName?: string | undefined;
 }>) {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
