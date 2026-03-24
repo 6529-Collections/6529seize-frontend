@@ -24,6 +24,7 @@ interface BrainMobileViewContentProps {
   readonly isRankWave: boolean;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onOpenQuickVote: () => void;
+  readonly onPrefetchQuickVote?: (() => void) | undefined;
   readonly wave: ApiWave | null | undefined;
 }
 
@@ -36,6 +37,7 @@ export default function BrainMobileViewContent({
   isRankWave,
   onDropClick,
   onOpenQuickVote,
+  onPrefetchQuickVote,
   wave,
 }: BrainMobileViewContentProps) {
   const rankWave = isRankWave ? (wave ?? null) : null;
@@ -79,7 +81,12 @@ export default function BrainMobileViewContent({
     [BrainView.OUTCOME]: outcomeContent,
     [BrainView.MY_VOTES]: myVotesContent,
     [BrainView.FAQ]: faqContent,
-    [BrainView.WAVES]: <BrainMobileWaves onOpenQuickVote={onOpenQuickVote} />,
+    [BrainView.WAVES]: (
+      <BrainMobileWaves
+        onOpenQuickVote={onOpenQuickVote}
+        onPrefetchQuickVote={onPrefetchQuickVote}
+      />
+    ),
     [BrainView.MESSAGES]: <BrainMobileMessages />,
     [BrainView.NOTIFICATIONS]: <BrainNotifications />,
   };

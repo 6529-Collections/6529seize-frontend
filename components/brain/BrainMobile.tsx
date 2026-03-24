@@ -28,6 +28,7 @@ import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectM
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
 import FloatingMemesQuickVoteTrigger from "./mobile/FloatingMemesQuickVoteTrigger";
 import { BrainView } from "./mobile/brainMobileViews";
@@ -43,9 +44,14 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
+  const {
+    closeQuickVote,
+    isQuickVoteOpen,
+    openQuickVote,
+    prefetchQuickVote,
+    quickVoteSessionId,
+  } = useMemesQuickVoteDialogController();
   const [hydrated, setHydrated] = useState(false);
-  const [isQuickVoteOpen, setIsQuickVoteOpen] = useState(false);
-  const [quickVoteSessionId, setQuickVoteSessionId] = useState(0);
   const myStream = useMyStreamOptional();
 
   useEffect(() => {
@@ -126,11 +132,6 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeRoute();
     router.replace(newUrl, { scroll: false });
-  };
-
-  const handleOpenQuickVote = () => {
-    setQuickVoteSessionId((current) => current + 1);
-    setIsQuickVoteOpen(true);
   };
 
   const isDropOpen =
@@ -231,7 +232,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         >
           {shouldMountFloatingQuickVoteEntry && (
             <FloatingMemesQuickVoteTrigger
-              onOpenQuickVote={handleOpenQuickVote}
+              onOpenQuickVote={openQuickVote}
+              onPrefetchQuickVote={prefetchQuickVote}
             />
           )}
           <BrainMobileViewContent
@@ -241,7 +243,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
             isMemesWave={isMemesWave}
             isRankWave={isRankWave}
             onDropClick={onDropClick}
-            onOpenQuickVote={handleOpenQuickVote}
+            onOpenQuickVote={openQuickVote}
+            onPrefetchQuickVote={prefetchQuickVote}
             wave={wave}
           >
             {children}
@@ -252,7 +255,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         <MemesQuickVoteDialog
           isOpen={isQuickVoteOpen}
           sessionId={quickVoteSessionId}
-          onClose={() => setIsQuickVoteOpen(false)}
+          onClose={closeQuickVote}
         />
       )}
     </div>

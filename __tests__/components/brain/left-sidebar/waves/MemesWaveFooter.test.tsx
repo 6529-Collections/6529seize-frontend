@@ -14,6 +14,7 @@ const useMemesWaveFooterStatsMock =
 
 describe("MemesWaveFooter", () => {
   const onOpenQuickVote = jest.fn();
+  const onPrefetchQuickVote = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -54,7 +55,12 @@ describe("MemesWaveFooter", () => {
       isReady: true,
     });
 
-    render(<MemesWaveFooter onOpenQuickVote={onOpenQuickVote} />);
+    render(
+      <MemesWaveFooter
+        onOpenQuickVote={onOpenQuickVote}
+        onPrefetchQuickVote={onPrefetchQuickVote}
+      />
+    );
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -65,6 +71,31 @@ describe("MemesWaveFooter", () => {
     expect(onOpenQuickVote).toHaveBeenCalledTimes(1);
   });
 
+  it("prefetches quick vote from the expanded card on hover and focus", () => {
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      uncastPower: 5000,
+      unratedCount: 3,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+
+    render(
+      <MemesWaveFooter
+        onOpenQuickVote={onOpenQuickVote}
+        onPrefetchQuickVote={onPrefetchQuickVote}
+      />
+    );
+
+    const button = screen.getByRole("button", {
+      name: "Uncast Power, 5,000 TDH, 3 left",
+    });
+
+    fireEvent.mouseEnter(button);
+    fireEvent.focus(button);
+
+    expect(onPrefetchQuickVote).toHaveBeenCalledTimes(2);
+  });
+
   it("renders the compact collapsed pill", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
       uncastPower: 5000,
@@ -73,7 +104,13 @@ describe("MemesWaveFooter", () => {
       isReady: true,
     });
 
-    render(<MemesWaveFooter collapsed onOpenQuickVote={onOpenQuickVote} />);
+    render(
+      <MemesWaveFooter
+        collapsed
+        onOpenQuickVote={onOpenQuickVote}
+        onPrefetchQuickVote={onPrefetchQuickVote}
+      />
+    );
 
     expect(screen.queryByText("Uncast Power")).not.toBeInTheDocument();
     expect(
@@ -102,6 +139,32 @@ describe("MemesWaveFooter", () => {
     expect(onOpenQuickVote).toHaveBeenCalledTimes(1);
   });
 
+  it("prefetches quick vote from the collapsed pill on hover and focus", () => {
+    useMemesWaveFooterStatsMock.mockReturnValue({
+      uncastPower: 5000,
+      unratedCount: 4,
+      votingLabel: "TDH",
+      isReady: true,
+    });
+
+    render(
+      <MemesWaveFooter
+        collapsed
+        onOpenQuickVote={onOpenQuickVote}
+        onPrefetchQuickVote={onPrefetchQuickVote}
+      />
+    );
+
+    const button = screen.getByRole("button", {
+      name: "4 submissions left unrated in memes wave",
+    });
+
+    fireEvent.mouseEnter(button);
+    fireEvent.focus(button);
+
+    expect(onPrefetchQuickVote).toHaveBeenCalledTimes(2);
+  });
+
   it("ignores expanded-card clicks when no submissions remain", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
       uncastPower: 5000,
@@ -110,14 +173,21 @@ describe("MemesWaveFooter", () => {
       isReady: true,
     });
 
-    render(<MemesWaveFooter onOpenQuickVote={onOpenQuickVote} />);
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Uncast Power, 5,000 TDH, 0 left",
-      })
+    render(
+      <MemesWaveFooter
+        onOpenQuickVote={onOpenQuickVote}
+        onPrefetchQuickVote={onPrefetchQuickVote}
+      />
     );
 
+    const button = screen.getByRole("button", {
+      name: "Uncast Power, 5,000 TDH, 0 left",
+    });
+
+    fireEvent.mouseEnter(button);
+    fireEvent.click(button);
+
     expect(onOpenQuickVote).not.toHaveBeenCalled();
+    expect(onPrefetchQuickVote).not.toHaveBeenCalled();
   });
 });

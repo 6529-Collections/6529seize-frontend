@@ -1,11 +1,7 @@
 "use client";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import {
   appendSkippedDropId,
-  buildMemesQuickVoteApiDrop,
-  MEMES_QUICK_VOTE_DISCOVERY_PAGE_SIZE,
   MEMES_QUICK_VOTE_REPLENISH_THRESHOLD,
 } from "@/hooks/memesQuickVote.helpers";
 import {
@@ -21,36 +17,22 @@ import {
   removeMemesQuickVoteDropId,
   shouldFetchMemesQuickVotePage,
 } from "@/hooks/memesQuickVote.queue.helpers";
+import {
+  fetchMemesQuickVoteDiscoveryBatch,
+  getMemesQuickVoteDiscoveryQueryKey,
+  getMemesQuickVoteDiscoveryStateKey,
+  type MemesQuickVoteDiscoveryQueryData,
+} from "@/hooks/memesQuickVote.query";
 import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
-import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
-const MEMES_QUICK_VOTE_DISCOVERY_SORT = "CREATED_AT" as const;
-const MEMES_QUICK_VOTE_DISCOVERY_SORT_DIRECTION = "DESC" as const;
 const EMPTY_DISCOVERY_PAGES: readonly MemesQuickVoteDiscoveryPage[] = [];
-
-type MemesQuickVoteDiscoveryQueryData = {
-  readonly pages: readonly MemesQuickVoteDiscoveryPage[];
-};
 
 type KeyedMemesQuickVoteDiscoveryState = MemesQuickVoteDiscoveryState & {
   readonly fetchVersion: number;
   readonly key: string;
 };
-
-const getMemesQuickVoteDiscoveryStateKey = ({
-  contextProfile,
-  enabled,
-  memesWaveId,
-  sessionId,
-}: {
-  readonly contextProfile: string | null | undefined;
-  readonly enabled: boolean;
-  readonly memesWaveId: string | null | undefined;
-  readonly sessionId: number;
-}): string =>
-  `${sessionId}:${memesWaveId ?? ""}:${contextProfile ?? ""}:${enabled ? "1" : "0"}`;
 
 const createKeyedMemesQuickVoteDiscoveryState = (
   key: string
@@ -101,87 +83,6 @@ const shouldReuseDiscoveryPlaceholderData = ({
   );
 
   return previousQueryIdentity === identity;
-};
-
-const getMemesQuickVoteDiscoveryQueryKey = ({
-  discoveryStateKey,
-  fetchVersion,
-  waveId,
-}: {
-  readonly discoveryStateKey: string;
-  readonly fetchVersion: number;
-  readonly waveId: string | null;
-}) =>
-  [
-    QueryKey.DROPS_LEADERBOARD,
-    {
-      context: "memes-quick-vote-discovery",
-      fetchVersion,
-      identity: discoveryStateKey,
-      page_size: MEMES_QUICK_VOTE_DISCOVERY_PAGE_SIZE,
-      sort: MEMES_QUICK_VOTE_DISCOVERY_SORT,
-      sort_direction: MEMES_QUICK_VOTE_DISCOVERY_SORT_DIRECTION,
-      unvoted_by_me: true,
-      waveId,
-    },
-  ] as const;
-
-const fetchMemesQuickVoteDiscoveryBatch = async ({
-  discoveryState,
-  skippedDropIds,
-  waveId,
-}: {
-  readonly discoveryState: MemesQuickVoteDiscoveryState;
-  readonly skippedDropIds: readonly string[];
-  readonly waveId: string | null;
-}): Promise<MemesQuickVoteDiscoveryQueryData> => {
-  if (waveId === null) {
-    throw new Error("Memes quick vote discovery requires a wave id");
-  }
-
-  const pages: MemesQuickVoteDiscoveryPage[] = [];
-  let nextPageToFetch: number | null = 1;
-
-  while (nextPageToFetch !== null) {
-    const page = await commonApiFetch<ApiDropsLeaderboardPage>({
-      endpoint: `waves/${waveId}/leaderboard`,
-      params: {
-        page: `${nextPageToFetch}`,
-        page_size: `${MEMES_QUICK_VOTE_DISCOVERY_PAGE_SIZE}`,
-        sort: MEMES_QUICK_VOTE_DISCOVERY_SORT,
-        sort_direction: MEMES_QUICK_VOTE_DISCOVERY_SORT_DIRECTION,
-        unvoted_by_me: "true",
-      },
-    });
-
-    pages.push({
-      drops: page.drops.map((drop) =>
-        buildMemesQuickVoteApiDrop(drop, page.wave)
-      ),
-      nextPage: page.next ? page.page + 1 : null,
-      pageCount: page.count,
-    });
-
-    const snapshot = deriveMemesQuickVoteDiscoverySnapshot({
-      enabled: true,
-      pages,
-      skippedDropIds,
-      state: discoveryState,
-    });
-
-    if (
-      !shouldFetchMemesQuickVotePage({
-        replenishThreshold: MEMES_QUICK_VOTE_REPLENISH_THRESHOLD,
-        state: snapshot,
-      })
-    ) {
-      break;
-    }
-
-    nextPageToFetch = snapshot.nextPage;
-  }
-
-  return { pages };
 };
 
 const applyMemesQuickVoteDiscoveryStateUpdate = ({

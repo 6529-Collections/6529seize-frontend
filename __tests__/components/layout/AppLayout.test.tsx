@@ -67,6 +67,34 @@ jest.mock("@/components/providers/PullToRefresh", () => ({
   __esModule: true,
   default: () => null,
 }));
+jest.mock("@/hooks/useMemesQuickVoteDialogController", () => ({
+  useMemesQuickVoteDialogController: () => {
+    const React = require("react");
+    const [isQuickVoteOpen, setIsQuickVoteOpen] = React.useState(false);
+    const [quickVoteSessionId, setQuickVoteSessionId] = React.useState(0);
+    const nextSessionIdRef = React.useRef(1);
+    const reservedSessionIdRef = React.useRef(null as number | null);
+
+    return {
+      closeQuickVote: () => setIsQuickVoteOpen(false),
+      isQuickVoteOpen,
+      openQuickVote: () => {
+        const sessionId =
+          reservedSessionIdRef.current ?? nextSessionIdRef.current;
+        reservedSessionIdRef.current = null;
+        nextSessionIdRef.current = sessionId + 1;
+        setQuickVoteSessionId(sessionId);
+        setIsQuickVoteOpen(true);
+      },
+      prefetchQuickVote: () => {
+        if (reservedSessionIdRef.current === null) {
+          reservedSessionIdRef.current = nextSessionIdRef.current;
+        }
+      },
+      quickVoteSessionId,
+    };
+  },
+}));
 jest.mock(
   "@/components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog",
   () => ({

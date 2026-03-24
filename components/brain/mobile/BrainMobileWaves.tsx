@@ -7,10 +7,12 @@ import { useLayout } from "../my-stream/layout/LayoutContext";
 
 interface BrainMobileWavesProps {
   readonly onOpenQuickVote: () => void;
+  readonly onPrefetchQuickVote?: (() => void) | undefined;
 }
 
 const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
   onOpenQuickVote,
+  onPrefetchQuickVote,
 }) => {
   const { mobileWavesViewStyle } = useLayout();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +28,10 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
       <div className={scrollContainerClassName} ref={scrollContainerRef}>
         <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
       </div>
-      <MemesWaveFooter onOpenQuickVote={onOpenQuickVote} />
+      <MemesWaveFooter
+        onOpenQuickVote={onOpenQuickVote}
+        onPrefetchQuickVote={onPrefetchQuickVote}
+      />
     </div>
   );
 };

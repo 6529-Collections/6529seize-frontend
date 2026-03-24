@@ -9,6 +9,7 @@ import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import MemesQuickVoteControls from "./MemesQuickVoteControls";
+import MemesQuickVoteDialogSkeleton from "./MemesQuickVoteDialogSkeleton";
 import MemesQuickVotePreview from "./MemesQuickVotePreview";
 
 interface MemesQuickVoteDialogProps {
@@ -88,7 +89,7 @@ function MemesQuickVoteDialogContent({
   };
 
   return (
-    <div className="tw-grid tw-gap-6 md:tw-grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.95fr)] md:tw-items-start">
+    <div className="tw-grid tw-gap-6 md:tw-grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.95fr)] md:tw-items-stretch">
       <MemesQuickVotePreview
         drop={activeDrop}
         isBusy={isVoting}
@@ -107,7 +108,7 @@ function MemesQuickVoteDialogContent({
         }}
       />
 
-      <div className="md:tw-sticky md:tw-top-0">
+      <div className="md:tw-sticky md:tw-top-0 md:tw-self-stretch">
         <MemesQuickVoteControls
           customValue={customValue}
           drop={activeDrop}
@@ -181,21 +182,6 @@ function MemesQuickVoteDialogErrorState({
   );
 }
 
-function MemesQuickVoteDialogLoadingState() {
-  return (
-    <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
-      <div className="tw-text-center">
-        <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
-          Loading your queue
-        </p>
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-          Pulling unrated memes and your recent quick-vote amounts.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export default function MemesQuickVoteDialog({
   isOpen,
   sessionId,
@@ -209,6 +195,7 @@ export default function MemesQuickVoteDialog({
     activeDrop,
     hasDiscoveryError,
     isExhausted,
+    isLoading,
     isVoting,
     latestUsedAmount,
     recentAmounts,
@@ -285,8 +272,10 @@ export default function MemesQuickVoteDialog({
     dialogBody = <MemesQuickVoteDialogDoneState />;
   } else if (!activeDrop && hasDiscoveryError) {
     dialogBody = <MemesQuickVoteDialogErrorState onRetry={retryDiscovery} />;
+  } else if (!activeDrop && isLoading) {
+    dialogBody = <MemesQuickVoteDialogSkeleton />;
   } else if (!activeDrop) {
-    dialogBody = <MemesQuickVoteDialogLoadingState />;
+    dialogBody = <MemesQuickVoteDialogSkeleton />;
   } else {
     dialogBody = (
       <MemesQuickVoteDialogContent
@@ -328,7 +317,7 @@ export default function MemesQuickVoteDialog({
             data-autofocus="true"
             onClick={onClose}
             disabled={isVoting}
-            className="tw-absolute tw-right-3 tw-top-3 tw-z-10 tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/90 tw-text-iron-300 tw-shadow-[0_18px_40px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white md:tw-right-4 md:tw-top-4 md:tw-size-11"
+            className="tw-absolute tw-right-3 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-10 tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/90 tw-text-iron-300 tw-shadow-[0_18px_40px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white md:tw-right-4 md:tw-top-4"
             aria-label="Close quick vote"
           >
             <XMarkIcon className="tw-size-5" />

@@ -10,6 +10,7 @@ import React from "react";
 interface MemesWaveFooterProps {
   readonly collapsed?: boolean | undefined;
   readonly onOpenQuickVote: () => void;
+  readonly onPrefetchQuickVote?: (() => void) | undefined;
 }
 
 const revealTransition = {
@@ -20,6 +21,7 @@ const revealTransition = {
 const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
   collapsed = false,
   onOpenQuickVote,
+  onPrefetchQuickVote,
 }) => {
   const { isReady, uncastPower, unratedCount, votingLabel } =
     useMemesWaveFooterStats();
@@ -30,6 +32,14 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
     }
 
     onOpenQuickVote();
+  };
+
+  const handlePrefetchQuickVote = () => {
+    if (unratedCount <= 0) {
+      return;
+    }
+
+    onPrefetchQuickVote?.();
   };
 
   return (
@@ -49,6 +59,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           {collapsed ? (
             <MemesWaveQuickVoteTrigger
               onOpenQuickVote={handleOpenQuickVote}
+              onPrefetchQuickVote={handlePrefetchQuickVote}
               unratedCount={unratedCount}
             />
           ) : (
@@ -58,6 +69,8 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                 uncastPower
               )} ${votingLabel ?? "Votes"}, ${unratedCount} left`}
               onClick={handleOpenQuickVote}
+              onFocus={handlePrefetchQuickVote}
+              onMouseEnter={handlePrefetchQuickVote}
               className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-4 tw-rounded-2xl tw-border tw-border-solid tw-border-primary-500/30 tw-bg-iron-900/95 tw-px-4 tw-py-3 tw-text-left tw-shadow-[0_18px_36px_rgba(0,0,0,0.28)] tw-backdrop-blur-sm tw-transition-colors tw-duration-300 desktop-hover:hover:tw-border-primary-400/40 desktop-hover:hover:tw-bg-iron-900"
             >
               <div className="tw-min-w-0 tw-flex-1">

@@ -192,7 +192,7 @@ describe("MemesQuickVoteDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows a loader while the next item is still hydrating", () => {
+  it("shows structural skeletons while the next item is still hydrating", () => {
     useMemesQuickVoteQueueMock.mockReturnValue(
       createQueueState({
         activeDrop: null,
@@ -205,7 +205,15 @@ describe("MemesQuickVoteDialog", () => {
       <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
     );
 
-    expect(screen.getByText("Loading your queue")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("quick-vote-loading-skeleton")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("quick-vote-preview-mobile-context")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("quick-vote-controls-desktop-context")
+    ).toBeInTheDocument();
   });
 
   it("shows a retry state when queue discovery fails", () => {

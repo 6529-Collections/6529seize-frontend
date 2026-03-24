@@ -5,24 +5,13 @@ import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/que
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  fetchMemesQuickVoteDrop,
+  getMemesQuickVoteDropQueryKey,
+} from "@/hooks/memesQuickVote.query";
 import { Time } from "@/helpers/time";
-import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
-
-const getMemesQuickVoteDropQueryKey = (dropId: string) =>
-  [
-    QueryKey.DROP,
-    {
-      context: "memes-quick-vote",
-      drop_id: dropId,
-    },
-  ] as const;
-
-const fetchMemesQuickVoteDrop = async (dropId: string) =>
-  await commonApiFetch<ApiDrop>({
-    endpoint: `drops/${dropId}`,
-  });
 
 const shouldInvalidateActiveDrop = (
   drop: ApiDrop,
