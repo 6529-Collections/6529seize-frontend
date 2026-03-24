@@ -72,6 +72,27 @@ describe("getDropForgeStorageLocationInfo", () => {
     });
   });
 
+  it("preserves suffix paths for ipfs protocol locations", () => {
+    expect(
+      getDropForgeStorageLocationInfo(
+        "ipfs://bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png"
+      )
+    ).toEqual({
+      rawValue:
+        "ipfs://bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+      displayValue:
+        "bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+      displayTitle:
+        "ipfs://bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+      provider: "ipfs",
+      providerBadgeLabel: "IPFS",
+      openUrl:
+        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+      copyValue:
+        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+    });
+  });
+
   it("treats bare ipfs cids as ipfs locations", () => {
     expect(
       getDropForgeStorageLocationInfo(
@@ -126,6 +147,27 @@ describe("getDropForgeStorageLocationInfo", () => {
         "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
       copyValue:
         "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+    });
+  });
+
+  it("preserves suffix paths for ipfs gateway urls", () => {
+    expect(
+      getDropForgeStorageLocationInfo(
+        "https://ipfs.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png"
+      )
+    ).toEqual({
+      rawValue:
+        "https://ipfs.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+      displayValue:
+        "bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+      displayTitle:
+        "https://ipfs.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+      provider: "ipfs",
+      providerBadgeLabel: "IPFS",
+      openUrl:
+        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+      copyValue:
+        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
     });
   });
 

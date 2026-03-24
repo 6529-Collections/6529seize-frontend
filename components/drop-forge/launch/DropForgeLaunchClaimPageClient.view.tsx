@@ -454,7 +454,7 @@ function DropForgeLaunchClaimArweaveSection({
         </div>
       ) : (
         <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-          No Arweave links published yet.
+          No published links yet.
         </p>
       )}
     </DropForgeAccordionSection>

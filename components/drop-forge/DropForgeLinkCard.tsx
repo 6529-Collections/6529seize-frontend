@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_CARD_CLASS_NAME =
-  "tw-flex tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
+  "tw-flex tw-h-full tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
 const DEFAULT_LABEL_CLASS_NAME =
   "tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-200";
 const ACTION_BUTTON_CLASS_NAME =
@@ -121,15 +121,17 @@ export default function DropForgeLinkCard({
           )}
         </div>
       </div>
-      <div
-        className={valueClassName}
-        title={
-          hasDisplayValue
-            ? displayTitle?.trim() || trimmedDisplayValue
-            : undefined
-        }
-      >
-        {hasDisplayValue ? trimmedDisplayValue : emptyText}
+      <div className="tw-flex tw-flex-1 tw-items-center">
+        <div
+          className={valueClassName}
+          title={
+            hasDisplayValue
+              ? displayTitle?.trim() || trimmedDisplayValue
+              : undefined
+          }
+        >
+          {hasDisplayValue ? trimmedDisplayValue : emptyText}
+        </div>
       </div>
     </div>
   );
