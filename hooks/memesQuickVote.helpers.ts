@@ -1,11 +1,11 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { Time } from "@/helpers/time";
 
-export const MEMES_WAVE_DROPS_LIMIT = 20 as const;
+export const MEMES_QUICK_VOTE_DISCOVERY_PAGE_SIZE = 20 as const;
+export const MEMES_QUICK_VOTE_REPLENISH_THRESHOLD = 5 as const;
+export const MEMES_QUICK_VOTE_SUMMARY_PAGE_SIZE = 1 as const;
 const QUICK_VOTE_DEFAULT_PERCENTAGE = 0.01;
 const MAX_QUICK_VOTE_AMOUNTS = 5;
 
@@ -15,30 +15,30 @@ export type MemesQuickVoteStats = {
   readonly votingLabel: string | null;
 };
 
-export const sanitizeStoredSerials = (value: unknown): number[] => {
+export const sanitizeStoredDropIds = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
     return [];
   }
 
-  const seen = new Set<number>();
-  const serials: number[] = [];
+  const seen = new Set<string>();
+  const ids: string[] = [];
 
   for (const entry of value) {
-    if (
-      typeof entry !== "number" ||
-      !Number.isFinite(entry) ||
-      !Number.isInteger(entry) ||
-      entry <= 0 ||
-      seen.has(entry)
-    ) {
+    if (typeof entry !== "string") {
       continue;
     }
 
-    seen.add(entry);
-    serials.push(entry);
+    const trimmed = entry.trim();
+
+    if (trimmed.length === 0 || seen.has(trimmed)) {
+      continue;
+    }
+
+    seen.add(trimmed);
+    ids.push(trimmed);
   }
 
-  return serials;
+  return ids;
 };
 
 export const sanitizeStoredAmounts = (value: unknown): number[] => {
@@ -67,53 +67,22 @@ export const sanitizeStoredAmounts = (value: unknown): number[] => {
   return amounts.slice(-MAX_QUICK_VOTE_AMOUNTS);
 };
 
-const isMemesQuickVoteEligibleDrop = (
-  drop: ApiDrop,
-  now = Time.currentMillis()
-): boolean => {
-  const profileContext = drop.context_profile_context;
+export const buildMemesQuickVoteApiDrop = (
+  drop: ApiDropWithoutWave,
+  wave: ApiWaveMin
+): ApiDrop => ({
+  ...drop,
+  wave,
+});
 
-  if (drop.drop_type !== ApiDropType.Participatory) {
-    return false;
-  }
-
-  if (profileContext?.rating !== 0 || profileContext.max_rating <= 0) {
-    return false;
-  }
-
-  if (
-    !drop.wave.authenticated_user_eligible_to_vote ||
-    drop.id.startsWith("temp-")
-  ) {
-    return false;
-  }
-
-  const votingPeriodStart = drop.wave.voting_period_start;
-
-  if (votingPeriodStart !== null && now < votingPeriodStart) {
-    return false;
-  }
-
-  const votingPeriodEnd = drop.wave.voting_period_end;
-
-  if (votingPeriodEnd !== null && now > votingPeriodEnd) {
-    return false;
-  }
-
-  return true;
-};
-
-export const getMemesQuickVoteEligibleDrops = (
-  drops: readonly ApiDrop[],
-  now = Time.currentMillis()
-): ApiDrop[] => drops.filter((drop) => isMemesQuickVoteEligibleDrop(drop, now));
-
-export const deriveMemesQuickVoteStats = (
-  drops: readonly ApiDrop[]
-): MemesQuickVoteStats => {
-  const eligibleDrops = getMemesQuickVoteEligibleDrops(drops);
-
-  if (eligibleDrops.length === 0) {
+export const deriveMemesQuickVoteStatsFromDrop = ({
+  count,
+  drop,
+}: {
+  readonly count: number;
+  readonly drop: ApiDrop | null;
+}): MemesQuickVoteStats => {
+  if (count <= 0 || !drop) {
     return {
       uncastPower: null,
       unratedCount: 0,
@@ -121,110 +90,20 @@ export const deriveMemesQuickVoteStats = (
     };
   }
 
-  let uncastPower = 0;
-  let votingLabel: string | null = null;
-
-  for (const drop of eligibleDrops) {
-    const profileContext = drop.context_profile_context;
-
-    if (!profileContext) {
-      continue;
-    }
-
-    votingLabel ??= WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
-    uncastPower = Math.max(uncastPower, profileContext.max_rating);
-  }
+  const uncastPower = drop.context_profile_context?.max_rating ?? null;
 
   return {
-    uncastPower: uncastPower > 0 ? uncastPower : null,
-    unratedCount: eligibleDrops.length,
-    votingLabel,
+    uncastPower:
+      typeof uncastPower === "number" && uncastPower > 0 ? uncastPower : null,
+    unratedCount: count,
+    votingLabel: WAVE_VOTING_LABELS[drop.wave.voting_credit_type],
   };
 };
 
-export const deriveMemesQuickVoteEffectiveDrops = (
-  drops: readonly ApiDrop[],
-  votedSerials: readonly number[],
-  optimisticRemainingPower: number | null
-): readonly ApiDrop[] => {
-  if (votedSerials.length === 0 && optimisticRemainingPower === null) {
-    return drops;
-  }
-
-  const votedSet = new Set(votedSerials);
-
-  return drops.flatMap((drop) => {
-    if (votedSet.has(drop.serial_no)) {
-      return [];
-    }
-
-    const profileContext = drop.context_profile_context;
-    const maxRating = profileContext?.max_rating;
-
-    if (
-      optimisticRemainingPower === null ||
-      profileContext?.rating !== 0 ||
-      typeof maxRating !== "number"
-    ) {
-      return [drop];
-    }
-
-    const nextMaxRating = Math.max(
-      0,
-      Math.min(maxRating, optimisticRemainingPower)
-    );
-
-    if (nextMaxRating === maxRating) {
-      return [drop];
-    }
-
-    return [
-      {
-        ...drop,
-        context_profile_context: {
-          ...profileContext,
-          max_rating: nextMaxRating,
-        },
-      },
-    ];
-  });
-};
-
-export const buildMemesQuickVoteQueue = (
-  drops: readonly ApiDrop[],
-  skippedSerials: readonly number[]
-): ExtendedDrop[] => {
-  const eligibleDrops = getMemesQuickVoteEligibleDrops(drops).map(
-    convertApiDropToExtendedDrop
-  );
-  const skippedSet = new Set(skippedSerials);
-  const deferredDrops = new Map<number, ExtendedDrop>();
-  const queue: ExtendedDrop[] = [];
-
-  for (const drop of eligibleDrops) {
-    if (!skippedSet.has(drop.serial_no)) {
-      queue.push(drop);
-      continue;
-    }
-
-    deferredDrops.set(drop.serial_no, drop);
-  }
-
-  for (const serialNo of skippedSerials) {
-    const deferredDrop = deferredDrops.get(serialNo);
-
-    if (deferredDrop) {
-      queue.push(deferredDrop);
-    }
-  }
-
-  return queue;
-};
-
-export const appendSkippedSerial = (
-  serials: readonly number[],
-  serialNo: number
-): number[] => [...serials.filter((value) => value !== serialNo), serialNo];
+export const appendSkippedDropId = (
+  ids: readonly string[],
+  dropId: string
+): string[] => [...ids.filter((value) => value !== dropId), dropId];
 
 export const addRecentQuickVoteAmount = (
   amounts: readonly number[],

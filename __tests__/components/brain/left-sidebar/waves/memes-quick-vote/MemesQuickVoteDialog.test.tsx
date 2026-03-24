@@ -89,12 +89,16 @@ describe("MemesQuickVoteDialog", () => {
     overrides: Partial<ReturnType<typeof useMemesQuickVoteQueue>> = {}
   ): ReturnType<typeof useMemesQuickVoteQueue> => ({
     activeDrop,
+    hasDiscoveryError: false,
+    isExhausted: false,
     isLoading: false,
     isReady: true,
     isVoting: false,
     latestUsedAmount: 250,
     queue: [activeDrop],
     recentAmounts: [250, 500],
+    remainingCount: 9,
+    retryDiscovery: jest.fn(),
     submitVote: jest.fn().mockResolvedValue(true),
     skipDrop: jest.fn(),
     uncastPower: 5_000,
@@ -167,6 +171,67 @@ describe("MemesQuickVoteDialog", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows a done state instead of closing when the queue is exhausted", () => {
+    useMemesQuickVoteQueueMock.mockReturnValue(
+      createQueueState({
+        activeDrop: null,
+        isExhausted: true,
+        isReady: false,
+        queue: [],
+        remainingCount: 0,
+      })
+    );
+
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    expect(screen.getByText("You are done")).toBeInTheDocument();
+    expect(
+      screen.getByText("No unrated memes are left in quick vote right now.")
+    ).toBeInTheDocument();
+  });
+
+  it("shows a loader while the next item is still hydrating", () => {
+    useMemesQuickVoteQueueMock.mockReturnValue(
+      createQueueState({
+        activeDrop: null,
+        isReady: false,
+        queue: [],
+      })
+    );
+
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    expect(screen.getByText("Loading your queue")).toBeInTheDocument();
+  });
+
+  it("shows a retry state when queue discovery fails", () => {
+    const retryDiscovery = jest.fn();
+
+    useMemesQuickVoteQueueMock.mockReturnValue(
+      createQueueState({
+        activeDrop: null,
+        hasDiscoveryError: true,
+        isReady: false,
+        queue: [],
+        retryDiscovery,
+      })
+    );
+
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    expect(screen.getByText("Couldn't load your queue")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(retryDiscovery).toHaveBeenCalledTimes(1);
+  });
+
   it("removes the dialog header copy while keeping an accessible close button", () => {
     render(
       <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
@@ -226,7 +291,7 @@ describe("MemesQuickVoteDialog", () => {
 
     const customInput = screen.getByRole("textbox");
     const customActionRow = customInput.closest("label")?.parentElement;
-    const voteButton = screen.getByRole("button", { name: "Vote" });
+    const voteButton = screen.getByRole("button", { name: "Vote 50" });
 
     expect(customActionRow).not.toBeNull();
     expect(customActionRow).toHaveClass("sm:tw-items-end");

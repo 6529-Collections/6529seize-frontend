@@ -1,35 +1,35 @@
 "use client";
 
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
-  getMemesQuickVoteEligibleDrops,
   sanitizeStoredAmounts,
-  sanitizeStoredSerials,
+  sanitizeStoredDropIds,
 } from "@/hooks/memesQuickVote.helpers";
 import {
   readStoredNumberArray,
+  readStoredStringArray,
   useStoredNumberArray,
+  useStoredStringArray,
   writeStoredNumberArray,
+  writeStoredStringArray,
 } from "@/hooks/memesQuickVote.storageStore";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback } from "react";
 
 const SKIPPED_STORAGE_PREFIX = "memesQuickVoteSkipped";
 const AMOUNTS_STORAGE_PREFIX = "memesQuickVoteAmounts";
 
 type UseMemesQuickVoteStorageOptions = {
-  readonly drops: readonly ApiDrop[];
   readonly contextProfile: string | null | undefined;
   readonly memesWaveId: string | null | undefined;
 };
 
 type UseMemesQuickVoteStorageResult = {
-  readonly liveSkippedSerials: number[];
+  readonly skippedDropIds: string[];
   readonly recentAmountsByRecency: number[];
   readonly setAndPersistRecentAmounts: (
     updater: (current: number[]) => number[]
   ) => void;
-  readonly setAndPersistSkippedSerials: (
-    updater: (current: number[]) => number[]
+  readonly setAndPersistSkippedDropIds: (
+    updater: (current: string[]) => string[]
   ) => void;
 };
 
@@ -52,8 +52,14 @@ const areNumberArraysEqual = (
   left.length === right.length &&
   left.every((value, index) => value === right[index]);
 
+const areStringArraysEqual = (
+  left: readonly string[],
+  right: readonly string[]
+): boolean =>
+  left.length === right.length &&
+  left.every((value, index) => value === right[index]);
+
 export const useMemesQuickVoteStorage = ({
-  drops,
   contextProfile,
   memesWaveId,
 }: UseMemesQuickVoteStorageOptions): UseMemesQuickVoteStorageResult => {
@@ -68,43 +74,14 @@ export const useMemesQuickVoteStorage = ({
     contextProfile
   );
 
-  const storedSkippedSerials = useStoredNumberArray(
+  const skippedDropIds = useStoredStringArray(
     skippedStorageKey,
-    sanitizeStoredSerials
+    sanitizeStoredDropIds
   );
   const recentAmountsByRecency = useStoredNumberArray(
     amountsStorageKey,
     sanitizeStoredAmounts
   );
-
-  const liveEligibleSerials = useMemo(
-    () =>
-      new Set(
-        getMemesQuickVoteEligibleDrops(drops).map((drop) => drop.serial_no)
-      ),
-    [drops]
-  );
-
-  const sanitizeLiveSkippedSerials = useCallback(
-    (serials: number[]) =>
-      sanitizeStoredSerials(serials).filter((serialNo) =>
-        liveEligibleSerials.has(serialNo)
-      ),
-    [liveEligibleSerials]
-  );
-
-  const liveSkippedSerials = useMemo(
-    () => sanitizeLiveSkippedSerials(storedSkippedSerials),
-    [sanitizeLiveSkippedSerials, storedSkippedSerials]
-  );
-
-  useEffect(() => {
-    if (areNumberArraysEqual(storedSkippedSerials, liveSkippedSerials)) {
-      return;
-    }
-
-    writeStoredNumberArray(skippedStorageKey, liveSkippedSerials);
-  }, [liveSkippedSerials, skippedStorageKey, storedSkippedSerials]);
 
   const setAndPersistRecentAmounts = useCallback(
     (updater: (current: number[]) => number[]) => {
@@ -123,27 +100,27 @@ export const useMemesQuickVoteStorage = ({
     [amountsStorageKey]
   );
 
-  const setAndPersistSkippedSerials = useCallback(
-    (updater: (current: number[]) => number[]) => {
-      const current = readStoredNumberArray(
+  const setAndPersistSkippedDropIds = useCallback(
+    (updater: (current: string[]) => string[]) => {
+      const current = readStoredStringArray(
         skippedStorageKey,
-        sanitizeStoredSerials
+        sanitizeStoredDropIds
       );
-      const next = sanitizeLiveSkippedSerials(updater([...current]));
+      const next = sanitizeStoredDropIds(updater([...current]));
 
-      if (areNumberArraysEqual(current, next)) {
+      if (areStringArraysEqual(current, next)) {
         return;
       }
 
-      writeStoredNumberArray(skippedStorageKey, next);
+      writeStoredStringArray(skippedStorageKey, next);
     },
-    [sanitizeLiveSkippedSerials, skippedStorageKey]
+    [skippedStorageKey]
   );
 
   return {
-    liveSkippedSerials,
+    skippedDropIds,
     recentAmountsByRecency,
     setAndPersistRecentAmounts,
-    setAndPersistSkippedSerials,
+    setAndPersistSkippedDropIds,
   };
 };

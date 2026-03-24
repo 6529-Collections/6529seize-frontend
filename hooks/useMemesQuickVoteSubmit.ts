@@ -21,13 +21,14 @@ type SetToast = (options: {
 }) => void;
 
 type PersistNumberArray = (updater: (current: number[]) => number[]) => void;
+type PersistStringArray = (updater: (current: string[]) => string[]) => void;
 
 type UseMemesQuickVoteSubmitOptions = {
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: SetToast;
   readonly invalidateDrops: () => void;
   readonly setAndPersistRecentAmounts: PersistNumberArray;
-  readonly setAndPersistSkippedSerials: PersistNumberArray;
+  readonly setAndPersistSkippedDropIds: PersistStringArray;
   readonly onVoteSuccess: (
     drop: ExtendedDrop,
     nextRemainingPower: number
@@ -47,7 +48,7 @@ export const useMemesQuickVoteSubmit = ({
   setToast,
   invalidateDrops,
   setAndPersistRecentAmounts,
-  setAndPersistSkippedSerials,
+  setAndPersistSkippedDropIds,
   onVoteSuccess,
 }: UseMemesQuickVoteSubmitOptions): UseMemesQuickVoteSubmitResult => {
   const submitInFlightRef = useRef(false);
@@ -111,8 +112,8 @@ export const useMemesQuickVoteSubmit = ({
         setAndPersistRecentAmounts((current) =>
           addRecentQuickVoteAmount(current, normalizedAmount)
         );
-        setAndPersistSkippedSerials((current) =>
-          current.filter((serialNo) => serialNo !== drop.serial_no)
+        setAndPersistSkippedDropIds((current) =>
+          current.filter((dropId) => dropId !== drop.id)
         );
         invalidateDrops();
 
@@ -129,7 +130,7 @@ export const useMemesQuickVoteSubmit = ({
       onVoteSuccess,
       requestAuth,
       setAndPersistRecentAmounts,
-      setAndPersistSkippedSerials,
+      setAndPersistSkippedDropIds,
       voteMutation,
     ]
   );

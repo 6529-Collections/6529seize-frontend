@@ -1,132 +1,102 @@
-import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
   addRecentQuickVoteAmount,
-  appendSkippedSerial,
-  buildMemesQuickVoteQueue,
-  deriveMemesQuickVoteEffectiveDrops,
-  deriveMemesQuickVoteStats,
-  getDisplayQuickVoteAmounts,
+  appendSkippedDropId,
+  deriveMemesQuickVoteStatsFromDrop,
   getDefaultQuickVoteAmount,
+  getDisplayQuickVoteAmounts,
+  normalizeQuickVoteAmount,
   sanitizeStoredAmounts,
-  sanitizeStoredSerials,
+  sanitizeStoredDropIds,
 } from "@/hooks/memesQuickVote.helpers";
 
 const createDrop = ({
-  id,
-  serialNo,
-  rating = 0,
+  id = "drop-1",
   maxRating = 5_000,
-  eligible = true,
 }: {
-  readonly id: string;
-  readonly serialNo: number;
-  readonly rating?: number;
+  readonly id?: string;
   readonly maxRating?: number;
-  readonly eligible?: boolean;
-}) =>
+} = {}) =>
   ({
     id,
-    serial_no: serialNo,
-    drop_type: ApiDropType.Participatory,
+    serial_no: 1,
+    drop_type: "PARTICIPATORY",
     context_profile_context: {
-      rating,
+      rating: 0,
       max_rating: maxRating,
     },
     wave: {
       id: "wave-1",
       name: "The Memes",
       voting_credit_type: ApiWaveCreditType.Tdh,
-      authenticated_user_eligible_to_vote: eligible,
+      authenticated_user_eligible_to_vote: true,
+      voting_period_start: null,
+      voting_period_end: null,
     },
     author: {
-      handle: `artist-${serialNo}`,
-      primary_address: `0x${serialNo}`,
+      handle: "artist",
+      primary_address: "0x123",
     },
-    parts: [],
+    parts: [
+      {
+        content: "hello",
+        media: [],
+      },
+    ],
     metadata: [],
-    created_at: new Date(serialNo * 1_000).toISOString(),
+    created_at: new Date(1_000).toISOString(),
   }) as any;
 
 describe("memesQuickVote.helpers", () => {
-  it("moves skipped serials to the tail while keeping live newest-first order", () => {
-    const queue = buildMemesQuickVoteQueue(
-      [
-        createDrop({ id: "drop-30", serialNo: 30 }),
-        createDrop({ id: "drop-20", serialNo: 20 }),
-        createDrop({ id: "drop-10", serialNo: 10 }),
-      ],
-      [10, 30, 999]
-    );
-
-    expect(queue.map((drop) => drop.serial_no)).toEqual([20, 10, 30]);
+  it("sanitizes stored drop ids by trimming, deduping, and removing invalid values", () => {
+    expect(
+      sanitizeStoredDropIds([
+        " drop-1 ",
+        "drop-2",
+        "drop-1",
+        "",
+        "   ",
+        10,
+        null,
+      ])
+    ).toEqual(["drop-1", "drop-2"]);
   });
 
-  it("derives footer stats only from quick-vote eligible drops", () => {
-    const stats = deriveMemesQuickVoteStats([
-      createDrop({ id: "eligible-a", serialNo: 20, rating: 0, maxRating: 500 }),
-      createDrop({ id: "ineligible-voted", serialNo: 19, rating: 3 }),
-      createDrop({
-        id: "ineligible-flagged",
-        serialNo: 18,
-        rating: 0,
-        eligible: false,
-      }),
-      createDrop({ id: "eligible-b", serialNo: 17, rating: 0, maxRating: 250 }),
-    ]);
+  it("sanitizes stored quick-vote amounts and keeps the last five unique values", () => {
+    expect(
+      sanitizeStoredAmounts([
+        500, 500, 250, 0, -1, 1000, 2000, 3000, 4000, 5000,
+      ])
+    ).toEqual([250, 1000, 2000, 3000, 4000, 5000].slice(-5));
+  });
 
-    expect(stats).toEqual({
-      uncastPower: 500,
-      unratedCount: 2,
+  it("derives footer stats from the first returned unvoted drop", () => {
+    expect(
+      deriveMemesQuickVoteStatsFromDrop({
+        count: 7,
+        drop: createDrop({ maxRating: 750 }),
+      })
+    ).toEqual({
+      uncastPower: 750,
+      unratedCount: 7,
       votingLabel: "TDH",
     });
   });
 
-  it("removes voted drops from the effective quick-vote list", () => {
-    const effectiveDrops = deriveMemesQuickVoteEffectiveDrops(
-      [
-        createDrop({ id: "drop-30", serialNo: 30 }),
-        createDrop({ id: "drop-20", serialNo: 20 }),
-        createDrop({ id: "drop-10", serialNo: 10 }),
-      ],
-      [20],
-      null
-    );
-
-    expect(effectiveDrops.map((drop) => drop.serial_no)).toEqual([30, 10]);
-  });
-
-  it("clamps remaining unrated drops to the optimistic remaining power", () => {
-    const effectiveDrops = deriveMemesQuickVoteEffectiveDrops(
-      [
-        createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-        createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
-        createDrop({
-          id: "drop-10",
-          serialNo: 10,
-          rating: 100,
-          maxRating: 900,
-        }),
-      ],
-      [30],
-      4_000
-    );
-
+  it("returns empty stats when there is no usable first drop", () => {
     expect(
-      effectiveDrops.map((drop) => drop.context_profile_context?.max_rating)
-    ).toEqual([4_000, 900]);
+      deriveMemesQuickVoteStatsFromDrop({
+        count: 0,
+        drop: createDrop(),
+      })
+    ).toEqual({
+      uncastPower: null,
+      unratedCount: 0,
+      votingLabel: null,
+    });
   });
 
-  it("returns the original drops when there is no live optimistic vote", () => {
-    const drops = [
-      createDrop({ id: "drop-30", serialNo: 30 }),
-      createDrop({ id: "drop-20", serialNo: 20 }),
-    ];
-
-    expect(deriveMemesQuickVoteEffectiveDrops(drops, [], null)).toBe(drops);
-  });
-
-  it("keeps the last five unique quick-vote amounts but renders them ascending", () => {
+  it("keeps the last five unique quick-vote amounts and renders them ascending", () => {
     const recent = [50, 125, 250, 500];
     const withDuplicate = addRecentQuickVoteAmount(recent, 125);
     const withNewAmount = addRecentQuickVoteAmount(withDuplicate, 1_000);
@@ -138,30 +108,17 @@ describe("memesQuickVote.helpers", () => {
     ]);
   });
 
-  it("derives the initial custom quick-vote amount from one percent of max power", () => {
-    expect(getDefaultQuickVoteAmount(5_000)).toBe(50);
-    expect(getDefaultQuickVoteAmount(99)).toBe(1);
-    expect(getDefaultQuickVoteAmount(1)).toBe(1);
+  it("moves re-skipped drop ids to the tail", () => {
+    expect(
+      appendSkippedDropId(["drop-30", "drop-10", "drop-20"], "drop-10")
+    ).toEqual(["drop-30", "drop-20", "drop-10"]);
   });
 
-  it("sanitizes stored arrays and moves re-skipped serials to the end", () => {
-    expect(sanitizeStoredSerials([20, 20, "x", 10, -1, 5.5, 30, null])).toEqual(
-      [20, 10, 30]
-    );
-    expect(
-      sanitizeStoredAmounts([
-        500,
-        500,
-        "250",
-        250,
-        0,
-        1000,
-        2000,
-        3000,
-        4000,
-        5000,
-      ])
-    ).toEqual([1000, 2000, 3000, 4000, 5000]);
-    expect(appendSkippedSerial([30, 10, 20], 10)).toEqual([30, 20, 10]);
+  it("derives and clamps quick-vote amounts safely", () => {
+    expect(getDefaultQuickVoteAmount(5_000)).toBe(50);
+    expect(getDefaultQuickVoteAmount(99)).toBe(1);
+    expect(normalizeQuickVoteAmount("777", 500)).toBe(500);
+    expect(normalizeQuickVoteAmount("0", 500)).toBe(1);
+    expect(normalizeQuickVoteAmount("nope", 500)).toBeNull();
   });
 });

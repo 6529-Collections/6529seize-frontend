@@ -21,7 +21,9 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => useSeizeSettings(),
 }));
 
-const commonApiFetchMock = commonApiFetch as jest.Mock;
+const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
+  typeof commonApiFetch
+>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -43,10 +45,10 @@ const createDrop = ({
   rating,
   maxRating = 5_000,
 }: {
-  id: string;
-  serialNo: number;
-  rating: number;
-  maxRating?: number;
+  readonly id: string;
+  readonly serialNo: number;
+  readonly rating: number;
+  readonly maxRating?: number;
 }) =>
   ({
     id,
@@ -57,27 +59,14 @@ const createDrop = ({
       max_rating: maxRating,
     },
     wave: {
+      id: "memes-wave",
+      name: "The Memes",
       voting_credit_type: ApiWaveCreditType.Tdh,
       authenticated_user_eligible_to_vote: true,
+      voting_period_start: null,
+      voting_period_end: null,
     },
   }) as any;
-
-const createPage = ({
-  count,
-  startSerialNo,
-  unratedIndexes = [],
-}: {
-  count: number;
-  startSerialNo: number;
-  unratedIndexes?: number[];
-}) =>
-  Array.from({ length: count }, (_, index) =>
-    createDrop({
-      id: `drop-${startSerialNo - index}`,
-      serialNo: startSerialNo - index,
-      rating: unratedIndexes.includes(index) ? 0 : index + 1,
-    })
-  );
 
 describe("useMemesWaveFooterStats", () => {
   beforeEach(() => {
@@ -100,7 +89,7 @@ describe("useMemesWaveFooterStats", () => {
     });
   });
 
-  it("requires a handle to request contextual drops", () => {
+  it("requires a handle to request quick-vote summary data", () => {
     useAuth.mockReturnValue({
       connectedProfile: {
         id: "profile-1",
@@ -138,7 +127,7 @@ describe("useMemesWaveFooterStats", () => {
     expect(result.current.isReady).toBe(false);
   });
 
-  it("does not fetch until memes settings and auth are ready", () => {
+  it("does not fetch until memes settings are loaded", () => {
     useSeizeSettings.mockReturnValue({
       isLoaded: false,
       seizeSettings: {
@@ -154,31 +143,28 @@ describe("useMemesWaveFooterStats", () => {
     expect(result.current.isReady).toBe(false);
   });
 
-  it("paginates through all participatory drops and derives uncast power", async () => {
-    const firstPage = createPage({
-      count: 20,
-      startSerialNo: 40,
-      unratedIndexes: [0],
-    });
-    const secondPage = createPage({
-      count: 1,
-      startSerialNo: 20,
-      unratedIndexes: [0],
-    });
-
-    commonApiFetchMock.mockImplementation(
-      async ({ params }: { params: Record<string, string> }) => {
-        if (!params.serial_no_less_than) {
-          return firstPage;
-        }
-
-        if (params.serial_no_less_than === "21") {
-          return secondPage;
-        }
-
-        return [];
-      }
-    );
+  it("fetches the first unvoted leaderboard item and derives footer stats from it", async () => {
+    commonApiFetchMock.mockResolvedValue({
+      count: 2,
+      page: 1,
+      next: true,
+      wave: {
+        id: "memes-wave",
+        name: "The Memes",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        authenticated_user_eligible_to_vote: true,
+        voting_period_start: null,
+        voting_period_end: null,
+      },
+      drops: [
+        createDrop({
+          id: "drop-40",
+          serialNo: 40,
+          rating: 0,
+          maxRating: 5_000,
+        }),
+      ],
+    } as any);
 
     const { result } = renderHook(() => useMemesWaveFooterStats(), {
       wrapper: createWrapper(),
@@ -189,41 +175,43 @@ describe("useMemesWaveFooterStats", () => {
     expect(result.current.uncastPower).toBe(5_000);
     expect(result.current.unratedCount).toBe(2);
     expect(result.current.votingLabel).toBe("TDH");
-    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
-    expect(commonApiFetchMock).toHaveBeenNthCalledWith(1, {
-      endpoint: "drops",
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "waves/memes-wave/leaderboard",
       params: {
-        context_profile: "me",
-        wave_id: "memes-wave",
-        limit: "20",
-        drop_type: "PARTICIPATORY",
-      },
-    });
-    expect(commonApiFetchMock).toHaveBeenNthCalledWith(2, {
-      endpoint: "drops",
-      params: {
-        context_profile: "me",
-        wave_id: "memes-wave",
-        limit: "20",
-        drop_type: "PARTICIPATORY",
-        serial_no_less_than: "21",
+        page: "1",
+        page_size: "1",
+        sort: "CREATED_AT",
+        sort_direction: "DESC",
+        unvoted_by_me: "true",
       },
     });
   });
 
-  it("stays hidden when the fetched drops have no usable vote context", async () => {
-    commonApiFetchMock.mockResolvedValue([
-      {
-        id: "a",
-        serial_no: 100,
-        drop_type: ApiDropType.Participatory,
-        context_profile_context: null,
-        wave: {
-          voting_credit_type: ApiWaveCreditType.Tdh,
-          authenticated_user_eligible_to_vote: true,
-        },
+  it("stays hidden when the summary response does not include usable vote context", async () => {
+    commonApiFetchMock.mockResolvedValue({
+      count: 1,
+      page: 1,
+      next: false,
+      wave: {
+        id: "memes-wave",
+        name: "The Memes",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        authenticated_user_eligible_to_vote: true,
+        voting_period_start: null,
+        voting_period_end: null,
       },
-    ]);
+      drops: [
+        {
+          ...createDrop({
+            id: "drop-40",
+            serialNo: 40,
+            rating: 0,
+          }),
+          context_profile_context: null,
+        },
+      ],
+    } as any);
 
     const { result } = renderHook(() => useMemesWaveFooterStats(), {
       wrapper: createWrapper(),
@@ -234,33 +222,6 @@ describe("useMemesWaveFooterStats", () => {
     expect(result.current.isReady).toBe(false);
     expect(result.current.uncastPower).toBeNull();
     expect(result.current.unratedCount).toBe(0);
-  });
-
-  it("ignores unrated drops that are no longer quick-vote eligible", async () => {
-    commonApiFetchMock.mockResolvedValue([
-      {
-        id: "a",
-        serial_no: 100,
-        drop_type: ApiDropType.Participatory,
-        context_profile_context: {
-          rating: 0,
-          max_rating: 5_000,
-        },
-        wave: {
-          voting_credit_type: ApiWaveCreditType.Tdh,
-          authenticated_user_eligible_to_vote: false,
-        },
-      },
-    ]);
-
-    const { result } = renderHook(() => useMemesWaveFooterStats(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(1));
-
-    expect(result.current.isReady).toBe(false);
-    expect(result.current.uncastPower).toBeNull();
-    expect(result.current.unratedCount).toBe(0);
+    expect(result.current.votingLabel).toBeNull();
   });
 });

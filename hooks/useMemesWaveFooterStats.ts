@@ -1,11 +1,7 @@
 "use client";
 
-import {
-  deriveMemesQuickVoteStats,
-  type MemesQuickVoteStats,
-} from "@/hooks/memesQuickVote.helpers";
-import { useMemesWaveParticipatoryDrops } from "@/hooks/useMemesWaveParticipatoryDrops";
-import { useMemo } from "react";
+import type { MemesQuickVoteStats } from "@/hooks/memesQuickVote.helpers";
+import { useMemesQuickVoteSummary } from "@/hooks/useMemesQuickVoteSummary";
 
 type MemesWaveFooterStats = MemesQuickVoteStats & {
   readonly isReady: boolean;
@@ -19,10 +15,9 @@ const EMPTY_STATS: MemesWaveFooterStats = {
 };
 
 export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
-  const { drops } = useMemesWaveParticipatoryDrops();
-  const stats = useMemo(() => deriveMemesQuickVoteStats(drops), [drops]);
+  const { stats } = useMemesQuickVoteSummary();
 
-  if (typeof stats.uncastPower !== "number") {
+  if (typeof stats.uncastPower !== "number" || stats.unratedCount <= 0) {
     return EMPTY_STATS;
   }
 

@@ -1,30 +1,43 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
-import { useMemesWaveParticipatoryDrops } from "@/hooks/useMemesWaveParticipatoryDrops";
-import { commonApiPost } from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
-jest.mock("@/hooks/useMemesWaveParticipatoryDrops", () => ({
-  useMemesWaveParticipatoryDrops: jest.fn(),
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettings: jest.fn(),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
 }));
 
-const useMemesWaveParticipatoryDropsMock =
-  useMemesWaveParticipatoryDrops as jest.Mock;
+const useSeizeSettingsMock = useSeizeSettings as jest.MockedFunction<
+  typeof useSeizeSettings
+>;
+const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
+  typeof commonApiFetch
+>;
 const commonApiPostMock = commonApiPost as jest.MockedFunction<
   typeof commonApiPost
 >;
 
 const DEFAULT_CONTEXT_PROFILE = "me";
 const DEFAULT_MEMES_WAVE_ID = "memes-wave";
+const DEFAULT_WAVE = {
+  id: DEFAULT_MEMES_WAVE_ID,
+  name: "The Memes",
+  voting_credit_type: ApiWaveCreditType.Tdh,
+  authenticated_user_eligible_to_vote: true,
+  voting_period_start: null,
+  voting_period_end: null,
+} as const;
 
 const getSkippedStorageKey = (
   memesWaveId = DEFAULT_MEMES_WAVE_ID,
@@ -37,10 +50,14 @@ const getAmountsStorageKey = (
 ) => `memesQuickVoteAmounts:${memesWaveId}:${contextProfile}`;
 
 const createWrapper = ({
+  activeProfileProxy = null,
+  connectedProfileHandle = DEFAULT_CONTEXT_PROFILE,
   invalidateDrops = jest.fn(),
   requestAuth = jest.fn().mockResolvedValue({ success: false }),
   setToast = jest.fn(),
 }: {
+  readonly activeProfileProxy?: { readonly id: string } | null;
+  readonly connectedProfileHandle?: string | null;
   readonly invalidateDrops?: jest.Mock;
   readonly requestAuth?: jest.Mock;
   readonly setToast?: jest.Mock;
@@ -58,7 +75,22 @@ const createWrapper = ({
 
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={{ requestAuth, setToast } as any}>
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: connectedProfileHandle
+              ? {
+                  id: "profile-1",
+                  handle: connectedProfileHandle,
+                  primary_wallet: "0x123",
+                }
+              : null,
+            activeProfileProxy,
+            requestAuth,
+            setToast,
+          } as any
+        }
+      >
         <ReactQueryWrapperContext.Provider value={{ invalidateDrops } as any}>
           {children}
         </ReactQueryWrapperContext.Provider>
@@ -89,9 +121,7 @@ const createDrop = ({
       max_rating: maxRating,
     },
     wave: {
-      id: "wave-1",
-      name: "The Memes",
-      voting_credit_type: ApiWaveCreditType.Tdh,
+      ...DEFAULT_WAVE,
       authenticated_user_eligible_to_vote: eligible,
     },
     author: {
@@ -100,19 +130,21 @@ const createDrop = ({
     },
     title: null,
     reply_to: null,
-    parts: [],
+    parts: [
+      {
+        content: `content-${serialNo}`,
+        media: [],
+      },
+    ],
     metadata: [],
     created_at: new Date(serialNo * 1_000).toISOString(),
   }) as any;
 
-const readStoredNumbers = (key: string): number[] =>
+const readStoredStrings = (key: string): string[] =>
   JSON.parse(localStorage.getItem(key) || "[]");
 
-const readSkippedStorage = (key = getSkippedStorageKey()): number[] =>
-  readStoredNumbers(key);
-
-const readAmountsStorage = (key = getAmountsStorageKey()): number[] =>
-  readStoredNumbers(key);
+const readStoredNumbers = (key: string): number[] =>
+  JSON.parse(localStorage.getItem(key) || "[]");
 
 const createDeferred = <T,>() => {
   let resolve!: (value: T) => void;
@@ -125,31 +157,77 @@ const createDeferred = <T,>() => {
   return { promise, resolve, reject };
 };
 
+const getLeaderboardFetchCalls = (pageSize: number) =>
+  commonApiFetchMock.mock.calls.filter(([request]) => {
+    const candidate = request as {
+      readonly endpoint: string;
+      readonly params?: Record<string, string>;
+    };
+
+    return (
+      candidate.endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/leaderboard` &&
+      candidate.params?.page_size === `${pageSize}`
+    );
+  });
+
 describe("useMemesQuickVoteQueue", () => {
-  let currentDrops: any[] = [];
-  let currentContextProfile = DEFAULT_CONTEXT_PROFILE;
-  let currentMemesWaveId = DEFAULT_MEMES_WAVE_ID;
-  let currentSessionId = 1;
-  let currentRefetch: jest.Mock;
+  let currentLeaderboardIds: string[];
+  let currentLeaderboardDropsById: Record<string, any>;
+  let currentHydratedDropsById: Record<string, any>;
 
   beforeEach(() => {
     localStorage.clear();
     jest.clearAllMocks();
-    currentDrops = [];
-    currentContextProfile = DEFAULT_CONTEXT_PROFILE;
-    currentMemesWaveId = DEFAULT_MEMES_WAVE_ID;
-    currentSessionId = 1;
-    currentRefetch = jest.fn().mockResolvedValue(undefined);
-    commonApiPostMock.mockResolvedValue({} as any);
 
-    useMemesWaveParticipatoryDropsMock.mockImplementation(() => ({
-      drops: currentDrops,
-      contextProfile: currentContextProfile,
-      isPending: false,
-      isRefetching: false,
-      memesWaveId: currentMemesWaveId,
-      refetch: currentRefetch,
-    }));
+    currentLeaderboardIds = [];
+    currentLeaderboardDropsById = {};
+    currentHydratedDropsById = {};
+
+    useSeizeSettingsMock.mockReturnValue({
+      isLoaded: true,
+      seizeSettings: {
+        memes_wave_id: DEFAULT_MEMES_WAVE_ID,
+      },
+    } as any);
+
+    commonApiPostMock.mockResolvedValue({} as any);
+    commonApiFetchMock.mockImplementation(async (request: any) => {
+      const { endpoint, params } = request as {
+        readonly endpoint: string;
+        readonly params?: Record<string, string>;
+      };
+
+      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/leaderboard`) {
+        const page = Number(params?.page ?? "1");
+        const pageSize = Number(params?.page_size ?? "20");
+        const startIndex = (page - 1) * pageSize;
+        const pageIds = currentLeaderboardIds.slice(
+          startIndex,
+          startIndex + pageSize
+        );
+
+        return {
+          count: currentLeaderboardIds.length,
+          page,
+          next: startIndex + pageSize < currentLeaderboardIds.length,
+          wave: DEFAULT_WAVE,
+          drops: pageIds.map((id) => currentLeaderboardDropsById[id]),
+        } as any;
+      }
+
+      if (endpoint.startsWith("drops/")) {
+        const dropId = endpoint.replace(/^drops\//, "");
+        const drop = currentHydratedDropsById[dropId];
+
+        if (!drop) {
+          throw new Error("not found");
+        }
+
+        return drop;
+      }
+
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
   });
 
   it("hydrates recent quick-vote amounts from storage on mount", () => {
@@ -159,7 +237,7 @@ describe("useMemesQuickVoteQueue", () => {
     );
 
     const { result } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      () => useMemesQuickVoteQueue({ enabled: false, sessionId: 1 }),
       {
         wrapper: createWrapper(),
       }
@@ -169,609 +247,775 @@ describe("useMemesQuickVoteQueue", () => {
     expect(result.current.latestUsedAmount).toBe(250);
   });
 
-  it("reads recent quick-vote amounts from the active storage key when the context changes", () => {
-    localStorage.setItem(getAmountsStorageKey(), JSON.stringify([300, 50]));
-    localStorage.setItem(
-      getAmountsStorageKey(DEFAULT_MEMES_WAVE_ID, "other"),
-      JSON.stringify([600, 100])
-    );
+  it("persists skipped drop ids and advances to the next discovered item", async () => {
+    const drop30 = createDrop({ id: "drop-30", serialNo: 30 });
+    const drop20 = createDrop({ id: "drop-20", serialNo: 20 });
+    const drop10 = createDrop({ id: "drop-10", serialNo: 10 });
 
-    const { result, rerender } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
-
-    expect(result.current.recentAmounts).toEqual([50, 300]);
-    expect(result.current.latestUsedAmount).toBe(50);
-
-    currentContextProfile = "other";
-
-    rerender();
-
-    expect(result.current.recentAmounts).toEqual([100, 600]);
-    expect(result.current.latestUsedAmount).toBe(100);
-  });
-
-  it("ignores dead skipped serials when building the queue and prunes storage", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40 }),
-      createDrop({ id: "drop-30", serialNo: 30 }),
-      createDrop({ id: "drop-20", serialNo: 20 }),
-    ];
-    localStorage.setItem(getSkippedStorageKey(), JSON.stringify([30, 999, 20]));
+    currentLeaderboardIds = [drop30.id, drop20.id, drop10.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+      [drop10.id]: drop10,
+    };
+    currentHydratedDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+      [drop10.id]: drop10,
+    };
 
     const { result } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
         wrapper: createWrapper(),
       }
     );
 
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      40, 30, 20,
-    ]);
-
-    await waitFor(() => {
-      expect(readSkippedStorage()).toEqual([30, 20]);
-    });
-  });
-
-  it("recomputes queue order when a skipped drop disappears and prunes storage", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40 }),
-      createDrop({ id: "drop-30", serialNo: 30 }),
-      createDrop({ id: "drop-20", serialNo: 20 }),
-    ];
-    localStorage.setItem(getSkippedStorageKey(), JSON.stringify([30, 20]));
-
-    const { result, rerender } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      40, 30, 20,
-    ]);
-
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40 }),
-      createDrop({ id: "drop-20", serialNo: 20 }),
-    ];
-
-    rerender();
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      40, 20,
-    ]);
-
-    await waitFor(() => {
-      expect(readSkippedStorage()).toEqual([20]);
-    });
-  });
-
-  it("does not keep a reappearing drop skipped after it was pruned from storage", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-50", serialNo: 50 }),
-      createDrop({ id: "drop-40", serialNo: 40 }),
-      createDrop({ id: "drop-30", serialNo: 30 }),
-    ];
-    localStorage.setItem(getSkippedStorageKey(), JSON.stringify([50, 30]));
-
-    const { result, rerender } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      40, 50, 30,
-    ]);
-
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40 }),
-      createDrop({ id: "drop-30", serialNo: 30 }),
-    ];
-
-    rerender();
-
-    await waitFor(() => {
-      expect(readSkippedStorage()).toEqual([30]);
-    });
-
-    currentDrops = [
-      createDrop({ id: "drop-50", serialNo: 50 }),
-      createDrop({ id: "drop-40", serialNo: 40 }),
-      createDrop({ id: "drop-30", serialNo: 30 }),
-    ];
-
-    rerender();
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      50, 40, 30,
-    ]);
-    expect(readSkippedStorage()).toEqual([30]);
-  });
-
-  it("persists skipped ordering and moves the skipped drop to the session tail", () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40 }),
-      createDrop({ id: "drop-30", serialNo: 30 }),
-      createDrop({ id: "drop-20", serialNo: 20 }),
-    ];
-    localStorage.setItem(getSkippedStorageKey(), JSON.stringify([20]));
-
-    const { result } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
-
-    expect(result.current.activeDrop?.serial_no).toBe(40);
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
 
     act(() => {
       result.current.skipDrop(result.current.activeDrop!);
     });
 
-    expect(readSkippedStorage()).toEqual([20, 40]);
-    expect(result.current.activeDrop?.serial_no).toBe(30);
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      30, 20, 40,
+    expect(readStoredStrings(getSkippedStorageKey())).toEqual([drop30.id]);
+
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop20.id));
+    expect(result.current.queue.map((drop) => drop.id)).toEqual([
+      drop20.id,
+      drop10.id,
+      drop30.id,
     ]);
+    expect(result.current.remainingCount).toBe(3);
   });
 
-  it("keeps skipped items reachable after the quick-vote session remounts", () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40 }),
-      createDrop({ id: "drop-30", serialNo: 30 }),
-      createDrop({ id: "drop-20", serialNo: 20 }),
-    ];
-
-    const firstSession = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
-
-    act(() => {
-      firstSession.result.current.skipDrop(
-        firstSession.result.current.activeDrop!
-      );
-    });
-
-    expect(
-      firstSession.result.current.queue.map((drop) => drop.serial_no)
-    ).toEqual([30, 20, 40]);
-
-    firstSession.unmount();
-
-    currentSessionId = 2;
-
-    const nextSession = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
-
-    expect(
-      nextSession.result.current.queue.map((drop) => drop.serial_no)
-    ).toEqual([30, 20, 40]);
-  });
-
-  it("updates remaining power immediately after a successful vote", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
-      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-      createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
-    ];
-    commonApiPostMock.mockResolvedValue({
-      context_profile_context: {
-        rating: 1_000,
-        max_rating: 5_000,
-      },
-    } as any);
-
+  it("stores the vote amount, removes the voted item, and advances after a successful vote", async () => {
+    const drop30 = createDrop({ id: "drop-30", serialNo: 30 });
+    const drop20 = createDrop({ id: "drop-20", serialNo: 20 });
+    const invalidateDrops = jest.fn();
     const requestAuth = jest.fn().mockResolvedValue({ success: true });
+
+    currentLeaderboardIds = [drop30.id, drop20.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+    currentHydratedDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+
     const { result } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
-        wrapper: createWrapper({ requestAuth }),
+        wrapper: createWrapper({
+          invalidateDrops,
+          requestAuth,
+        }),
       }
     );
 
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
+
     await act(async () => {
-      await result.current.submitVote(result.current.activeDrop!, 1_000);
+      await result.current.submitVote(result.current.activeDrop!, 250);
     });
 
-    expect(result.current.activeDrop?.serial_no).toBe(30);
-    expect(result.current.activeDrop?.context_profile_context?.max_rating).toBe(
-      4_000
-    );
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      30, 20,
-    ]);
-    expect(
-      result.current.queue.map(
-        (drop) => drop.context_profile_context?.max_rating
-      )
-    ).toEqual([4_000, 4_000]);
-    expect(result.current.uncastPower).toBe(4_000);
-  });
-
-  it("stops applying optimistic remaining power once the voted drop disappears", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
-      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-      createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
-    ];
-    commonApiPostMock.mockResolvedValue({
-      context_profile_context: {
-        rating: 1_000,
-        max_rating: 5_000,
+    expect(commonApiPostMock).toHaveBeenCalledWith({
+      endpoint: `drops/${drop30.id}/ratings`,
+      body: {
+        rating: 250,
+        category: "Rep",
       },
-    } as any);
+    });
+    expect(readStoredNumbers(getAmountsStorageKey())).toEqual([250]);
+    expect(invalidateDrops).toHaveBeenCalledTimes(1);
 
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop20.id));
+    expect(result.current.latestUsedAmount).toBe(250);
+    expect(result.current.queue.map((drop) => drop.id)).toEqual([drop20.id]);
+  });
+
+  it("treats zero optimistic remaining power as exhaustion while the next card is still refetching", async () => {
+    const drop30 = createDrop({
+      id: "drop-30",
+      serialNo: 30,
+      maxRating: 5_000,
+    });
+    const drop20 = createDrop({
+      id: "drop-20",
+      serialNo: 20,
+      maxRating: 5_000,
+    });
+    const hydratedDrop20 = createDrop({
+      id: drop20.id,
+      serialNo: drop20.serial_no,
+      maxRating: 0,
+    });
+    const deferredDrop20 = createDeferred<any>();
     const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const { result, rerender } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+
+    currentLeaderboardIds = [drop30.id, drop20.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+    currentHydratedDropsById = {
+      [drop30.id]: drop30,
+    };
+
+    commonApiFetchMock.mockImplementation(async (request: any) => {
+      const { endpoint, params } = request as {
+        readonly endpoint: string;
+        readonly params?: Record<string, string>;
+      };
+
+      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/leaderboard`) {
+        const page = Number(params?.page ?? "1");
+        const pageSize = Number(params?.page_size ?? "20");
+        const startIndex = (page - 1) * pageSize;
+        const pageIds = currentLeaderboardIds.slice(
+          startIndex,
+          startIndex + pageSize
+        );
+
+        return {
+          count: currentLeaderboardIds.length,
+          page,
+          next: startIndex + pageSize < currentLeaderboardIds.length,
+          wave: DEFAULT_WAVE,
+          drops: pageIds.map((id) => currentLeaderboardDropsById[id]),
+        } as any;
+      }
+
+      if (endpoint === `drops/${drop20.id}`) {
+        return deferredDrop20.promise;
+      }
+
+      if (endpoint === `drops/${drop30.id}`) {
+        return drop30;
+      }
+
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+    commonApiPostMock.mockResolvedValueOnce(
+      createDrop({
+        id: drop30.id,
+        serialNo: drop30.serial_no,
+        rating: 5_000,
+        maxRating: 0,
+      })
+    );
+
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
         wrapper: createWrapper({ requestAuth }),
       }
     );
 
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
+
     await act(async () => {
-      await result.current.submitVote(result.current.activeDrop!, 1_000);
+      await result.current.submitVote(result.current.activeDrop!, 5_000);
     });
 
-    currentDrops = [
-      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-      createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
-    ];
+    await waitFor(() => expect(result.current.isExhausted).toBe(true));
+    expect(result.current.activeDrop).toBeNull();
+    expect(result.current.isReady).toBe(false);
+    expect(result.current.uncastPower).toBeNull();
+    expect(result.current.queue[0]?.context_profile_context?.max_rating).toBe(
+      0
+    );
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
 
-    rerender();
+    await act(async () => {
+      deferredDrop20.resolve(hydratedDrop20);
+      await Promise.resolve();
+    });
 
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      30, 20,
-    ]);
-    expect(
-      result.current.queue.map(
-        (drop) => drop.context_profile_context?.max_rating
-      )
-    ).toEqual([5_000, 5_000]);
-    expect(result.current.uncastPower).toBe(5_000);
+    await waitFor(() => expect(result.current.isExhausted).toBe(true));
+    expect(result.current.queue.map((drop) => drop.id)).toEqual([drop20.id]);
+    expect(result.current.queue[0]?.context_profile_context?.max_rating).toBe(
+      0
+    );
   });
 
-  it("normalizes back-to-back votes against optimistic remaining power", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
-      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-      createDrop({ id: "drop-20", serialNo: 20, maxRating: 5_000 }),
-    ];
+  it("clears the optimistic cap after fresh next-card data arrives", async () => {
+    const drop30 = createDrop({
+      id: "drop-30",
+      serialNo: 30,
+      maxRating: 5_000,
+    });
+    const drop20 = createDrop({
+      id: "drop-20",
+      serialNo: 20,
+      maxRating: 5_000,
+    });
+    const hydratedDrop20 = createDrop({
+      id: drop20.id,
+      serialNo: drop20.serial_no,
+      maxRating: 1_200,
+    });
+    const deferredDrop20 = createDeferred<any>();
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+
+    currentLeaderboardIds = [drop30.id, drop20.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+    currentHydratedDropsById = {
+      [drop30.id]: drop30,
+    };
+
+    commonApiFetchMock.mockImplementation(async (request: any) => {
+      const { endpoint, params } = request as {
+        readonly endpoint: string;
+        readonly params?: Record<string, string>;
+      };
+
+      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/leaderboard`) {
+        const page = Number(params?.page ?? "1");
+        const pageSize = Number(params?.page_size ?? "20");
+        const startIndex = (page - 1) * pageSize;
+        const pageIds = currentLeaderboardIds.slice(
+          startIndex,
+          startIndex + pageSize
+        );
+
+        return {
+          count: currentLeaderboardIds.length,
+          page,
+          next: startIndex + pageSize < currentLeaderboardIds.length,
+          wave: DEFAULT_WAVE,
+          drops: pageIds.map((id) => currentLeaderboardDropsById[id]),
+        } as any;
+      }
+
+      if (endpoint === `drops/${drop20.id}`) {
+        return deferredDrop20.promise;
+      }
+
+      if (endpoint === `drops/${drop30.id}`) {
+        return drop30;
+      }
+
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
     commonApiPostMock
-      .mockResolvedValueOnce({
-        context_profile_context: {
+      .mockResolvedValueOnce(
+        createDrop({
+          id: drop30.id,
+          serialNo: drop30.serial_no,
+          rating: 4_700,
+          maxRating: 300,
+        })
+      )
+      .mockResolvedValueOnce(
+        createDrop({
+          id: drop20.id,
+          serialNo: drop20.serial_no,
           rating: 1_000,
-          max_rating: 5_000,
-        },
-      } as any)
-      .mockResolvedValueOnce({
-        context_profile_context: {
-          rating: 4_000,
-          max_rating: 5_000,
-        },
-      } as any);
+          maxRating: 200,
+        })
+      );
 
-    const requestAuth = jest.fn().mockResolvedValue({ success: true });
     const { result } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
         wrapper: createWrapper({ requestAuth }),
       }
     );
 
-    await act(async () => {
-      await result.current.submitVote(result.current.activeDrop!, 1_000);
-    });
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
 
     await act(async () => {
-      await result.current.submitVote(result.current.activeDrop!, 4_500);
+      await result.current.submitVote(result.current.activeDrop!, 4_700);
+    });
+
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop20.id));
+    expect(result.current.activeDrop?.context_profile_context?.max_rating).toBe(
+      300
+    );
+
+    await act(async () => {
+      deferredDrop20.resolve(hydratedDrop20);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(
+        result.current.activeDrop?.context_profile_context?.max_rating
+      ).toBe(1_200)
+    );
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 1_000);
     });
 
     expect(commonApiPostMock).toHaveBeenNthCalledWith(2, {
-      endpoint: "drops/drop-30/ratings",
+      endpoint: `drops/${drop20.id}/ratings`,
       body: {
-        rating: 4_000,
+        rating: 1_000,
         category: "Rep",
       },
     });
-    expect(result.current.queue).toEqual([]);
-    expect(result.current.activeDrop).toBeNull();
-    expect(result.current.uncastPower).toBeNull();
   });
 
-  it("blocks overlapping submits while auth is pending", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
-      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-    ];
-    const authDeferred = createDeferred<{ success: boolean }>();
-    const requestAuth = jest.fn().mockReturnValue(authDeferred.promise);
+  it("keeps a lower server max rating when the next card refetch completes first", async () => {
+    const drop30 = createDrop({
+      id: "drop-30",
+      serialNo: 30,
+      maxRating: 5_000,
+    });
+    const drop20 = createDrop({
+      id: "drop-20",
+      serialNo: 20,
+      maxRating: 5_000,
+    });
+    const hydratedDrop20 = createDrop({
+      id: drop20.id,
+      serialNo: drop20.serial_no,
+      maxRating: 200,
+    });
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+
+    currentLeaderboardIds = [drop30.id, drop20.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+    currentHydratedDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: hydratedDrop20,
+    };
+
+    commonApiPostMock.mockResolvedValueOnce(
+      createDrop({
+        id: drop30.id,
+        serialNo: drop30.serial_no,
+        rating: 4_700,
+        maxRating: 300,
+      })
+    );
 
     const { result } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
         wrapper: createWrapper({ requestAuth }),
       }
     );
 
-    let firstSubmitPromise: Promise<boolean> | undefined;
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
 
     await act(async () => {
-      firstSubmitPromise = result.current.submitVote(
-        result.current.activeDrop!,
-        1_000
-      );
+      await result.current.submitVote(result.current.activeDrop!, 4_700);
     });
 
-    expect(result.current.isVoting).toBe(true);
-    expect(requestAuth).toHaveBeenCalledTimes(1);
-
-    let secondSubmitResult = true;
-
-    await act(async () => {
-      secondSubmitResult = await result.current.submitVote(
-        result.current.activeDrop!,
-        500
-      );
-    });
-
-    expect(secondSubmitResult).toBe(false);
-    expect(requestAuth).toHaveBeenCalledTimes(1);
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-
-    commonApiPostMock.mockResolvedValue({
-      context_profile_context: {
-        rating: 1_000,
-        max_rating: 5_000,
-      },
-    } as any);
-
-    await act(async () => {
-      authDeferred.resolve({ success: true });
-      await firstSubmitPromise!;
-    });
-
-    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
-    expect(result.current.isVoting).toBe(false);
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop20.id));
+    expect(result.current.activeDrop?.context_profile_context?.max_rating).toBe(
+      200
+    );
   });
 
-  it("clears the submit lock after auth fails", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
-    ];
-    const authDeferred = createDeferred<{ success: boolean }>();
-    const requestAuth = jest.fn().mockReturnValue(authDeferred.promise);
+  it("resets optimistic remaining power when the session changes", async () => {
+    const drop30 = createDrop({
+      id: "drop-30",
+      serialNo: 30,
+      maxRating: 5_000,
+    });
+    const drop20 = createDrop({
+      id: "drop-20",
+      serialNo: 20,
+      maxRating: 5_000,
+    });
+    const deferredDrop20 = createDeferred<any>();
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
 
-    const { result } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+    currentLeaderboardIds = [drop30.id, drop20.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+    currentHydratedDropsById = {
+      [drop30.id]: drop30,
+    };
+
+    commonApiFetchMock.mockImplementation(async (request: any) => {
+      const { endpoint, params } = request as {
+        readonly endpoint: string;
+        readonly params?: Record<string, string>;
+      };
+
+      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/leaderboard`) {
+        const page = Number(params?.page ?? "1");
+        const pageSize = Number(params?.page_size ?? "20");
+        const startIndex = (page - 1) * pageSize;
+        const pageIds = currentLeaderboardIds.slice(
+          startIndex,
+          startIndex + pageSize
+        );
+
+        return {
+          count: currentLeaderboardIds.length,
+          page,
+          next: startIndex + pageSize < currentLeaderboardIds.length,
+          wave: DEFAULT_WAVE,
+          drops: pageIds.map((id) => currentLeaderboardDropsById[id]),
+        } as any;
+      }
+
+      if (endpoint === `drops/${drop20.id}`) {
+        return deferredDrop20.promise;
+      }
+
+      if (endpoint === `drops/${drop30.id}`) {
+        return drop30;
+      }
+
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+
+    commonApiPostMock.mockResolvedValueOnce(
+      createDrop({
+        id: drop30.id,
+        serialNo: drop30.serial_no,
+        rating: 4_700,
+        maxRating: 300,
+      })
+    );
+
+    const { result, rerender } = renderHook(
+      ({ sessionId }) => useMemesQuickVoteQueue({ sessionId }),
       {
+        initialProps: { sessionId: 1 },
         wrapper: createWrapper({ requestAuth }),
       }
     );
 
-    let firstSubmitPromise: Promise<boolean> | undefined;
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
 
     await act(async () => {
-      firstSubmitPromise = result.current.submitVote(
-        result.current.activeDrop!,
-        1_000
-      );
+      await result.current.submitVote(result.current.activeDrop!, 4_700);
     });
 
-    expect(result.current.isVoting).toBe(true);
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop20.id));
+    expect(result.current.activeDrop?.context_profile_context?.max_rating).toBe(
+      300
+    );
 
-    await act(async () => {
-      authDeferred.resolve({ success: false });
-      await firstSubmitPromise!;
-    });
+    rerender({ sessionId: 2 });
 
-    expect(result.current.isVoting).toBe(false);
-
-    commonApiPostMock.mockResolvedValue({
-      context_profile_context: {
-        rating: 250,
-        max_rating: 5_000,
-      },
-    } as any);
-    requestAuth.mockResolvedValue({ success: true });
-
-    let didSubmit = false;
-
-    await act(async () => {
-      didSubmit = await result.current.submitVote(
-        result.current.activeDrop!,
-        250
-      );
-    });
-
-    expect(didSubmit).toBe(true);
-    expect(requestAuth).toHaveBeenCalledTimes(2);
-    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
+    expect(result.current.activeDrop?.context_profile_context?.max_rating).toBe(
+      5_000
+    );
   });
 
-  it("persists recent quick-vote amounts to the active storage key after a successful vote", async () => {
-    currentDrops = [createDrop({ id: "drop-40", serialNo: 40 })];
-    localStorage.setItem(getAmountsStorageKey(), JSON.stringify([100]));
+  it("prunes invalidated skipped items before exhausting the queue", async () => {
+    const leaderboardDrop = createDrop({ id: "drop-30", serialNo: 30 });
+    const hydratedDrop = createDrop({
+      id: "drop-30",
+      serialNo: 30,
+      rating: 1,
+    });
+
+    currentLeaderboardIds = [leaderboardDrop.id];
+    currentLeaderboardDropsById = {
+      [leaderboardDrop.id]: leaderboardDrop,
+    };
+    currentHydratedDropsById = {
+      [hydratedDrop.id]: hydratedDrop,
+    };
     localStorage.setItem(
-      getAmountsStorageKey("other-wave"),
-      JSON.stringify([400])
+      getSkippedStorageKey(),
+      JSON.stringify([leaderboardDrop.id])
     );
 
-    const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const invalidateDrops = jest.fn();
-    const { result, rerender } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
-        wrapper: createWrapper({ invalidateDrops, requestAuth }),
+        wrapper: createWrapper(),
       }
     );
 
-    currentMemesWaveId = "other-wave";
-    currentRefetch = jest.fn().mockResolvedValue(undefined);
+    await waitFor(() => expect(result.current.isExhausted).toBe(true));
 
-    rerender();
+    expect(result.current.activeDrop).toBeNull();
+    expect(result.current.queue).toEqual([]);
+    expect(readStoredStrings(getSkippedStorageKey())).toEqual([]);
 
-    let didSubmit = false;
-
-    await act(async () => {
-      didSubmit = await result.current.submitVote(
-        result.current.activeDrop!,
-        123
-      );
-    });
-
-    expect(didSubmit).toBe(true);
-    expect(readAmountsStorage()).toEqual([100]);
-    expect(readAmountsStorage(getAmountsStorageKey("other-wave"))).toEqual([
-      400, 123,
-    ]);
-    expect(result.current.recentAmounts).toEqual([123, 400]);
-    expect(result.current.latestUsedAmount).toBe(123);
-    expect(requestAuth).toHaveBeenCalledTimes(1);
-    expect(commonApiPostMock).toHaveBeenCalledWith({
-      endpoint: "drops/drop-40/ratings",
-      body: {
-        rating: 123,
-        category: "Rep",
-      },
-    });
-    expect(invalidateDrops).toHaveBeenCalledTimes(1);
-    expect(currentRefetch).not.toHaveBeenCalled();
+    expect(getLeaderboardFetchCalls(20)).toHaveLength(1);
   });
 
-  it("clears optimistic queue state when the context profile changes", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
-      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-    ];
-    commonApiPostMock.mockResolvedValue({
-      context_profile_context: {
-        rating: 1_000,
-        max_rating: 5_000,
+  it("refetches the shared summary when a hydrated drop is discarded", async () => {
+    const leaderboardDrop = createDrop({ id: "drop-30", serialNo: 30 });
+    const hydratedDrop = createDrop({
+      id: leaderboardDrop.id,
+      serialNo: leaderboardDrop.serial_no,
+      rating: 1,
+    });
+
+    currentLeaderboardIds = [leaderboardDrop.id];
+    currentLeaderboardDropsById = {
+      [leaderboardDrop.id]: leaderboardDrop,
+    };
+    currentHydratedDropsById = {
+      [hydratedDrop.id]: hydratedDrop,
+    };
+    localStorage.setItem(
+      getSkippedStorageKey(),
+      JSON.stringify([leaderboardDrop.id, "drop-20"])
+    );
+
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isExhausted).toBe(true));
+    await waitFor(() => expect(getLeaderboardFetchCalls(1)).toHaveLength(2));
+
+    expect(result.current.activeDrop).toBeNull();
+    expect(result.current.queue).toEqual([]);
+    expect(readStoredStrings(getSkippedStorageKey())).toEqual(["drop-20"]);
+  });
+
+  it("does not refetch the shared summary when the hydrated drop stays eligible", async () => {
+    const leaderboardDrop = createDrop({ id: "drop-30", serialNo: 30 });
+
+    currentLeaderboardIds = [leaderboardDrop.id];
+    currentLeaderboardDropsById = {
+      [leaderboardDrop.id]: leaderboardDrop,
+    };
+    currentHydratedDropsById = {
+      [leaderboardDrop.id]: leaderboardDrop,
+    };
+
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() =>
+      expect(result.current.activeDrop?.id).toBe(leaderboardDrop.id)
+    );
+
+    expect(result.current.queue.map((drop) => drop.id)).toEqual([
+      leaderboardDrop.id,
+    ]);
+    expect(getLeaderboardFetchCalls(1)).toHaveLength(1);
+  });
+
+  it("advances past a candidate whose hydrated drop fails after retries", async () => {
+    const drop30 = createDrop({ id: "drop-30", serialNo: 30 });
+    const drop20 = createDrop({ id: "drop-20", serialNo: 20 });
+
+    currentLeaderboardIds = [drop30.id, drop20.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+    currentHydratedDropsById = {
+      [drop20.id]: drop20,
+    };
+
+    commonApiFetchMock.mockImplementation(async (request: any) => {
+      const { endpoint, params } = request as {
+        readonly endpoint: string;
+        readonly params?: Record<string, string>;
+      };
+
+      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/leaderboard`) {
+        const page = Number(params?.page ?? "1");
+        const pageSize = Number(params?.page_size ?? "20");
+        const startIndex = (page - 1) * pageSize;
+        const pageIds = currentLeaderboardIds.slice(
+          startIndex,
+          startIndex + pageSize
+        );
+
+        return {
+          count: currentLeaderboardIds.length,
+          page,
+          next: startIndex + pageSize < currentLeaderboardIds.length,
+          wave: DEFAULT_WAVE,
+          drops: pageIds.map((id) => currentLeaderboardDropsById[id]),
+        } as any;
+      }
+
+      if (endpoint === `drops/${drop30.id}`) {
+        throw new Error("network error");
+      }
+
+      if (endpoint === `drops/${drop20.id}`) {
+        return drop20;
+      }
+
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop20.id), {
+      timeout: 10_000,
+    });
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.queue.map((drop) => drop.id)).toEqual([drop20.id]);
+    expect(readStoredStrings(getSkippedStorageKey())).toEqual([]);
+  }, 15_000);
+
+  it("keeps discovery failures retryable until the leaderboard loads", async () => {
+    const leaderboardDrop = createDrop({ id: "drop-30", serialNo: 30 });
+    let discoveryAttemptCount = 0;
+
+    currentLeaderboardIds = [leaderboardDrop.id];
+    currentLeaderboardDropsById = {
+      [leaderboardDrop.id]: leaderboardDrop,
+    };
+    currentHydratedDropsById = {
+      [leaderboardDrop.id]: leaderboardDrop,
+    };
+
+    commonApiFetchMock.mockImplementation(async (request: any) => {
+      const { endpoint, params } = request as {
+        readonly endpoint: string;
+        readonly params?: Record<string, string>;
+      };
+
+      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/leaderboard`) {
+        const page = Number(params?.page ?? "1");
+        const pageSize = Number(params?.page_size ?? "20");
+
+        if (page === 1 && pageSize === 20) {
+          discoveryAttemptCount += 1;
+
+          if (discoveryAttemptCount === 1) {
+            throw new Error("network error");
+          }
+        }
+
+        const startIndex = (page - 1) * pageSize;
+        const pageIds = currentLeaderboardIds.slice(
+          startIndex,
+          startIndex + pageSize
+        );
+
+        return {
+          count: currentLeaderboardIds.length,
+          page,
+          next: startIndex + pageSize < currentLeaderboardIds.length,
+          wave: DEFAULT_WAVE,
+          drops: pageIds.map((id) => currentLeaderboardDropsById[id]),
+        } as any;
+      }
+
+      if (endpoint.startsWith("drops/")) {
+        const dropId = endpoint.replace(/^drops\//, "");
+        const drop = currentHydratedDropsById[dropId];
+
+        if (!drop) {
+          throw new Error("not found");
+        }
+
+        return drop;
+      }
+
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => expect(result.current.hasDiscoveryError).toBe(true));
+
+    expect(result.current.isExhausted).toBe(false);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.activeDrop).toBeNull();
+
+    act(() => {
+      result.current.retryDiscovery();
+    });
+
+    await waitFor(() =>
+      expect(result.current.activeDrop?.id).toBe(leaderboardDrop.id)
+    );
+    expect(result.current.hasDiscoveryError).toBe(false);
+
+    expect(getLeaderboardFetchCalls(20)).toHaveLength(2);
+  });
+
+  it("treats missing wave ids as unavailable instead of loading forever", () => {
+    useSeizeSettingsMock.mockReturnValue({
+      isLoaded: true,
+      seizeSettings: {
+        memes_wave_id: null,
       },
     } as any);
 
-    const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const { result, rerender } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
-        wrapper: createWrapper({ requestAuth }),
+        wrapper: createWrapper(),
       }
     );
 
-    await act(async () => {
-      await result.current.submitVote(result.current.activeDrop!, 1_000);
-    });
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([30]);
-    expect(result.current.uncastPower).toBe(4_000);
-
-    currentContextProfile = "other";
-    currentDrops = [
-      createDrop({ id: "drop-90", serialNo: 90, maxRating: 5_000 }),
-      createDrop({ id: "drop-80", serialNo: 80, maxRating: 5_000 }),
-    ];
-
-    rerender();
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      90, 80,
-    ]);
-    expect(result.current.uncastPower).toBe(5_000);
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
+    expect(result.current.isExhausted).toBe(true);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.activeDrop).toBeNull();
   });
 
-  it("clears optimistic queue state when the memes wave changes", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
-      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-    ];
-    commonApiPostMock.mockResolvedValue({
-      context_profile_context: {
-        rating: 1_000,
-        max_rating: 5_000,
+  it("keeps quick vote loading while seize settings are unresolved", () => {
+    useSeizeSettingsMock.mockReturnValue({
+      isLoaded: false,
+      seizeSettings: {
+        memes_wave_id: null,
       },
     } as any);
 
-    const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const { result, rerender } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
-        wrapper: createWrapper({ requestAuth }),
+        wrapper: createWrapper(),
       }
     );
 
-    await act(async () => {
-      await result.current.submitVote(result.current.activeDrop!, 1_000);
-    });
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([30]);
-    expect(result.current.uncastPower).toBe(4_000);
-
-    currentMemesWaveId = "other-wave";
-    currentDrops = [
-      createDrop({ id: "drop-70", serialNo: 70, maxRating: 5_000 }),
-      createDrop({ id: "drop-60", serialNo: 60, maxRating: 5_000 }),
-    ];
-
-    rerender();
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      70, 60,
-    ]);
-    expect(result.current.uncastPower).toBe(5_000);
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
+    expect(result.current.isExhausted).toBe(false);
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.activeDrop).toBeNull();
   });
 
-  it("clears optimistic queue state when a new quick-vote session starts", async () => {
-    currentDrops = [
-      createDrop({ id: "drop-40", serialNo: 40, maxRating: 5_000 }),
-      createDrop({ id: "drop-30", serialNo: 30, maxRating: 5_000 }),
-    ];
-    commonApiPostMock.mockResolvedValue({
-      context_profile_context: {
-        rating: 1_000,
-        max_rating: 5_000,
-      },
-    } as any);
-
-    const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const { result, rerender } = renderHook(
-      () => useMemesQuickVoteQueue({ sessionId: currentSessionId }),
+  it("treats proxy sessions as unavailable instead of loading forever", () => {
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
       {
-        wrapper: createWrapper({ requestAuth }),
+        wrapper: createWrapper({
+          activeProfileProxy: {
+            id: "proxy-1",
+          },
+        }),
       }
     );
 
-    await act(async () => {
-      await result.current.submitVote(result.current.activeDrop!, 1_000);
-    });
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([30]);
-    expect(result.current.uncastPower).toBe(4_000);
-
-    currentSessionId = 2;
-
-    rerender();
-
-    expect(result.current.queue.map((drop) => drop.serial_no)).toEqual([
-      40, 30,
-    ]);
-    expect(result.current.uncastPower).toBe(5_000);
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
+    expect(result.current.isExhausted).toBe(true);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.activeDrop).toBeNull();
   });
 });

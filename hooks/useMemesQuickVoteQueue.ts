@@ -2,182 +2,378 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
-  appendSkippedSerial,
-  buildMemesQuickVoteQueue,
-  deriveMemesQuickVoteEffectiveDrops,
-  deriveMemesQuickVoteStats,
-  getMemesQuickVoteEligibleDrops,
+  appendSkippedDropId,
   getDisplayQuickVoteAmounts,
 } from "@/hooks/memesQuickVote.helpers";
-import { useMemesQuickVoteSubmit } from "@/hooks/useMemesQuickVoteSubmit";
-import { useMemesWaveParticipatoryDrops } from "@/hooks/useMemesWaveParticipatoryDrops";
+import { useMemesQuickVoteActiveDrop } from "@/hooks/useMemesQuickVoteActiveDrop";
+import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
+import { useMemesQuickVoteDiscovery } from "@/hooks/useMemesQuickVoteDiscovery";
 import { useMemesQuickVoteStorage } from "@/hooks/useMemesQuickVoteStorage";
+import { useMemesQuickVoteSubmit } from "@/hooks/useMemesQuickVoteSubmit";
+import { useMemesQuickVoteSummary } from "@/hooks/useMemesQuickVoteSummary";
+import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useCallback, useContext, useMemo, useState } from "react";
 
 type UseMemesQuickVoteQueueOptions = {
+  readonly enabled?: boolean | undefined;
   readonly sessionId: number;
 };
 
-type MemesQuickVoteOptimisticState = {
-  readonly resetKey: string;
-  readonly votedSerials: number[];
-  readonly optimisticRemainingPower: number | null;
-};
-
-const buildMemesQuickVoteResetKey = (
-  sessionId: number,
-  memesWaveId: string | null | undefined,
-  contextProfile: string | null | undefined
-): string => `${sessionId}:${memesWaveId ?? ""}:${contextProfile ?? ""}`;
-
 type UseMemesQuickVoteQueueResult = {
   readonly activeDrop: ExtendedDrop | null;
-  readonly queue: ExtendedDrop[];
-  readonly isReady: boolean;
+  readonly hasDiscoveryError: boolean;
+  readonly isExhausted: boolean;
   readonly isLoading: boolean;
+  readonly isReady: boolean;
   readonly isVoting: boolean;
   readonly latestUsedAmount: number | null;
+  readonly queue: ExtendedDrop[];
   readonly recentAmounts: number[];
-  readonly uncastPower: number | null;
-  readonly votingLabel: string | null;
+  readonly remainingCount: number;
+  readonly retryDiscovery: () => void;
   readonly submitVote: (
     drop: ExtendedDrop,
     amount: number | string
   ) => Promise<boolean>;
   readonly skipDrop: (drop: ExtendedDrop) => void;
+  readonly uncastPower: number | null;
+  readonly votingLabel: string | null;
 };
 
-export const useMemesQuickVoteQueue = ({
+type OptimisticRemainingPowerState = {
+  readonly key: string;
+  readonly value: number | null;
+};
+
+type UseMemesQuickVoteQueueDerivedState = Pick<
+  UseMemesQuickVoteQueueResult,
+  | "activeDrop"
+  | "hasDiscoveryError"
+  | "isExhausted"
+  | "isLoading"
+  | "isReady"
+  | "latestUsedAmount"
+  | "queue"
+  | "recentAmounts"
+  | "remainingCount"
+  | "uncastPower"
+  | "votingLabel"
+>;
+
+type UseDerivedMemesQuickVoteQueueStateOptions = {
+  readonly activeDropCandidate: ExtendedDrop | null;
+  readonly activeIsLoading: boolean;
+  readonly discoveredQueue: readonly ApiDrop[];
+  readonly effectiveOptimisticRemainingPower: number | null;
+  readonly enabled: boolean;
+  readonly hasPageFetchError: boolean;
+  readonly isDiscoveryExhausted: boolean;
+  readonly isFetchingPage: boolean;
+  readonly isSettingsLoaded: boolean;
+  readonly isSummaryPending: boolean;
+  readonly isSummaryQuickVoteEnabled: boolean;
+  readonly isSummarySuccess: boolean;
+  readonly recentAmountsByRecency: readonly number[];
+  readonly serverCount: number | null;
+  readonly summaryCount: number;
+  readonly summaryVotingLabel: string | null;
+};
+
+const getOptimisticRemainingPowerKey = ({
+  contextProfile,
+  memesWaveId,
   sessionId,
-}: UseMemesQuickVoteQueueOptions): UseMemesQuickVoteQueueResult => {
-  const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { drops, contextProfile, isPending, isRefetching, memesWaveId } =
-    useMemesWaveParticipatoryDrops();
+}: {
+  readonly contextProfile: string | null | undefined;
+  readonly memesWaveId: string | null | undefined;
+  readonly sessionId: number;
+}): string => `${sessionId}:${memesWaveId ?? ""}:${contextProfile ?? ""}`;
 
-  const currentResetKey = useMemo(
-    () => buildMemesQuickVoteResetKey(sessionId, memesWaveId, contextProfile),
-    [contextProfile, memesWaveId, sessionId]
+const clampDropMaxRating = (
+  drop: ExtendedDrop,
+  optimisticRemainingPower: number | null
+): ExtendedDrop => {
+  const profileContext = drop.context_profile_context;
+  const maxRating = profileContext?.max_rating;
+
+  if (
+    optimisticRemainingPower === null ||
+    profileContext?.rating !== 0 ||
+    typeof maxRating !== "number"
+  ) {
+    return drop;
+  }
+
+  const nextMaxRating = Math.max(
+    0,
+    Math.min(maxRating, optimisticRemainingPower)
   );
-  const [optimisticState, setOptimisticState] =
-    useState<MemesQuickVoteOptimisticState>({
-      resetKey: currentResetKey,
-      votedSerials: [],
-      optimisticRemainingPower: null,
-    });
-  const {
-    liveSkippedSerials,
-    recentAmountsByRecency,
-    setAndPersistRecentAmounts,
-    setAndPersistSkippedSerials,
-  } = useMemesQuickVoteStorage({
-    drops,
-    contextProfile,
-    memesWaveId,
-  });
 
-  const liveEligibleSerials = useMemo(
+  if (nextMaxRating === maxRating) {
+    return drop;
+  }
+
+  return {
+    ...drop,
+    context_profile_context: {
+      ...profileContext,
+      max_rating: nextMaxRating,
+    },
+  };
+};
+
+const isVoteableQuickVoteDrop = (drop: ExtendedDrop | null): boolean => {
+  const profileContext = drop?.context_profile_context;
+
+  return (
+    profileContext?.rating === 0 &&
+    typeof profileContext.max_rating === "number" &&
+    profileContext.max_rating > 0
+  );
+};
+
+const useDerivedMemesQuickVoteQueueState = ({
+  activeDropCandidate,
+  activeIsLoading,
+  discoveredQueue,
+  effectiveOptimisticRemainingPower,
+  enabled,
+  hasPageFetchError,
+  isDiscoveryExhausted,
+  isFetchingPage,
+  isSettingsLoaded,
+  isSummaryPending,
+  isSummaryQuickVoteEnabled,
+  isSummarySuccess,
+  recentAmountsByRecency,
+  serverCount,
+  summaryCount,
+  summaryVotingLabel,
+}: UseDerivedMemesQuickVoteQueueStateOptions): UseMemesQuickVoteQueueDerivedState => {
+  const clampedActiveDrop = useMemo(
     () =>
-      new Set(
-        getMemesQuickVoteEligibleDrops(drops).map((drop) => drop.serial_no)
-      ),
-    [drops]
+      activeDropCandidate
+        ? clampDropMaxRating(
+            activeDropCandidate,
+            effectiveOptimisticRemainingPower
+          )
+        : null,
+    [activeDropCandidate, effectiveOptimisticRemainingPower]
   );
+  const activeDrop = isVoteableQuickVoteDrop(clampedActiveDrop)
+    ? clampedActiveDrop
+    : null;
 
-  const isCurrentOptimisticState = optimisticState.resetKey === currentResetKey;
-  const liveVotedSerials = useMemo(() => {
-    if (!isCurrentOptimisticState) {
-      return [];
+  const queue = useMemo(() => {
+    const clampedQueue = discoveredQueue
+      .map(convertApiDropToExtendedDrop)
+      .map((drop) =>
+        clampDropMaxRating(drop, effectiveOptimisticRemainingPower)
+      );
+
+    if (!clampedActiveDrop) {
+      return clampedQueue;
     }
 
-    return optimisticState.votedSerials.filter((serialNo) =>
-      liveEligibleSerials.has(serialNo)
+    return clampedQueue.map((drop) =>
+      drop.id === clampedActiveDrop.id ? clampedActiveDrop : drop
     );
-  }, [
-    isCurrentOptimisticState,
-    liveEligibleSerials,
-    optimisticState.votedSerials,
-  ]);
-  const hasPendingOptimisticVote = liveVotedSerials.length > 0;
-  const activeOptimisticRemainingPower = hasPendingOptimisticVote
-    ? optimisticState.optimisticRemainingPower
-    : null;
-  const effectiveDrops = useMemo(
-    () =>
-      deriveMemesQuickVoteEffectiveDrops(
-        drops,
-        liveVotedSerials,
-        activeOptimisticRemainingPower
-      ),
-    [activeOptimisticRemainingPower, drops, liveVotedSerials]
-  );
+  }, [clampedActiveDrop, discoveredQueue, effectiveOptimisticRemainingPower]);
 
-  const queue = useMemo(
-    () => buildMemesQuickVoteQueue(effectiveDrops, liveSkippedSerials),
-    [effectiveDrops, liveSkippedSerials]
-  );
-
-  const stats = useMemo(
-    () => deriveMemesQuickVoteStats(effectiveDrops),
-    [effectiveDrops]
-  );
-  const activeDrop = queue[0] ?? null;
   const recentAmounts = useMemo(
     () => getDisplayQuickVoteAmounts(recentAmountsByRecency),
     [recentAmountsByRecency]
   );
   const latestUsedAmount = recentAmountsByRecency.at(-1) ?? null;
+  const uncastPower = activeDrop?.context_profile_context?.max_rating ?? null;
+  const votingLabel = activeDrop
+    ? WAVE_VOTING_LABELS[activeDrop.wave.voting_credit_type]
+    : summaryVotingLabel;
+  const remainingCount = isSummarySuccess
+    ? summaryCount
+    : Math.max(serverCount ?? 0, queue.length);
+  const hasDiscoveryError = enabled && hasPageFetchError;
+  const isQuickVoteUnavailable =
+    enabled && isSettingsLoaded && !isSummaryQuickVoteEnabled;
+  const activeProfileContext = clampedActiveDrop?.context_profile_context;
+  const isPowerExhausted =
+    enabled &&
+    !hasDiscoveryError &&
+    activeProfileContext?.rating === 0 &&
+    typeof activeProfileContext.max_rating === "number" &&
+    activeProfileContext.max_rating <= 0;
+  const isExhausted =
+    enabled &&
+    (isQuickVoteUnavailable || isDiscoveryExhausted || isPowerExhausted);
+  const isLoading =
+    enabled &&
+    !hasDiscoveryError &&
+    !isExhausted &&
+    !activeDropCandidate &&
+    (!isSettingsLoaded ||
+      (isSummaryQuickVoteEnabled && isSummaryPending) ||
+      isFetchingPage ||
+      activeIsLoading);
+
+  return {
+    activeDrop,
+    hasDiscoveryError,
+    isExhausted,
+    isLoading,
+    isReady: activeDrop !== null,
+    latestUsedAmount,
+    queue,
+    recentAmounts,
+    remainingCount,
+    uncastPower,
+    votingLabel,
+  };
+};
+
+export const useMemesQuickVoteQueue = ({
+  enabled = true,
+  sessionId,
+}: UseMemesQuickVoteQueueOptions): UseMemesQuickVoteQueueResult => {
+  const { requestAuth, setToast } = useContext(AuthContext);
+  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
+  const {
+    contextProfile,
+    isLoaded: isSettingsLoaded,
+    isEnabled: isQuickVoteEnabled,
+    memesWaveId,
+  } = useMemesQuickVoteContext();
+  const optimisticRemainingPowerKey = getOptimisticRemainingPowerKey({
+    contextProfile,
+    memesWaveId,
+    sessionId,
+  });
+  const [optimisticRemainingPowerState, setOptimisticRemainingPowerState] =
+    useState<OptimisticRemainingPowerState>({
+      key: optimisticRemainingPowerKey,
+      value: null,
+    });
+  const {
+    recentAmountsByRecency,
+    setAndPersistRecentAmounts,
+    setAndPersistSkippedDropIds,
+    skippedDropIds,
+  } = useMemesQuickVoteStorage({
+    contextProfile,
+    memesWaveId,
+  });
+  const summary = useMemesQuickVoteSummary({ enabled });
+  const discovery = useMemesQuickVoteDiscovery({
+    enabled,
+    sessionId,
+    skippedDropIds,
+  });
+  const {
+    activeCandidateId,
+    deferDropId,
+    discoveredDropsById,
+    hasPageFetchError,
+    isExhausted: isDiscoveryExhausted,
+    isFetchingPage,
+    nextCandidateId,
+    queue: discoveredQueue,
+    removeDropId,
+    retryDiscovery,
+    serverCount,
+  } = discovery;
+  const {
+    count: summaryCount,
+    isPending: isSummaryPending,
+    isQuickVoteEnabled: isSummaryQuickVoteEnabled,
+    isSuccess: isSummarySuccess,
+    refetch: refetchSummary,
+    stats: summaryStats,
+  } = summary;
+  const optimisticRemainingPower =
+    optimisticRemainingPowerState.key === optimisticRemainingPowerKey
+      ? optimisticRemainingPowerState.value
+      : null;
+
+  const handleInvalidatedDrop = useCallback(
+    (dropId: string) => {
+      removeDropId(dropId);
+      setAndPersistSkippedDropIds((current) =>
+        current.filter((value) => value !== dropId)
+      );
+      // Refresh the shared footer summary without blocking queue advancement.
+      void refetchSummary();
+    },
+    [removeDropId, refetchSummary, setAndPersistSkippedDropIds]
+  );
+
+  const active = useMemesQuickVoteActiveDrop({
+    activeCandidateId,
+    discoveredDropsById,
+    enabled: enabled && isQuickVoteEnabled,
+    nextCandidateId,
+    onInvalidatedDrop: handleInvalidatedDrop,
+  });
+  // Ignore the temporary cap once fresh server data lands for the active card.
+  const effectiveOptimisticRemainingPower = active.hasFreshData
+    ? null
+    : optimisticRemainingPower;
 
   const handleVoteSuccess = useCallback(
     (drop: ExtendedDrop, nextRemainingPower: number) => {
-      setOptimisticState((current) => {
-        const baseVotedSerials =
-          current.resetKey === currentResetKey ? current.votedSerials : [];
-        const liveCurrent = baseVotedSerials.filter((serialNo) =>
-          liveEligibleSerials.has(serialNo)
-        );
-
-        return {
-          resetKey: currentResetKey,
-          votedSerials: liveCurrent.includes(drop.serial_no)
-            ? liveCurrent
-            : [...liveCurrent, drop.serial_no],
-          optimisticRemainingPower: nextRemainingPower,
-        };
+      removeDropId(drop.id);
+      setOptimisticRemainingPowerState({
+        key: optimisticRemainingPowerKey,
+        value: nextRemainingPower,
       });
     },
-    [currentResetKey, liveEligibleSerials]
+    [optimisticRemainingPowerKey, removeDropId]
   );
+
   const { isVoting, submitVote } = useMemesQuickVoteSubmit({
     requestAuth,
     setToast,
     invalidateDrops,
-    setAndPersistRecentAmounts,
-    setAndPersistSkippedSerials,
     onVoteSuccess: handleVoteSuccess,
+    setAndPersistRecentAmounts,
+    setAndPersistSkippedDropIds,
   });
 
   const skipDrop = useCallback(
     (drop: ExtendedDrop) => {
-      setAndPersistSkippedSerials((current) =>
-        appendSkippedSerial(current, drop.serial_no)
+      deferDropId(drop.id);
+      setAndPersistSkippedDropIds((current) =>
+        appendSkippedDropId(current, drop.id)
       );
     },
-    [setAndPersistSkippedSerials]
+    [deferDropId, setAndPersistSkippedDropIds]
   );
 
+  const derivedState = useDerivedMemesQuickVoteQueueState({
+    activeDropCandidate: active.activeDrop,
+    activeIsLoading: active.isLoading,
+    discoveredQueue,
+    effectiveOptimisticRemainingPower,
+    enabled,
+    hasPageFetchError,
+    isDiscoveryExhausted,
+    isFetchingPage,
+    isSettingsLoaded,
+    isSummaryPending,
+    isSummaryQuickVoteEnabled,
+    isSummarySuccess,
+    recentAmountsByRecency,
+    serverCount,
+    summaryCount,
+    summaryVotingLabel: summaryStats.votingLabel,
+  });
+
   return {
-    activeDrop,
-    queue,
-    isReady: typeof stats.uncastPower === "number" && queue.length > 0,
-    isLoading: isPending || isRefetching,
+    ...derivedState,
     isVoting,
-    latestUsedAmount,
-    recentAmounts,
-    uncastPower: stats.uncastPower,
-    votingLabel: stats.votingLabel,
+    retryDiscovery,
     submitVote,
     skipDrop,
   };

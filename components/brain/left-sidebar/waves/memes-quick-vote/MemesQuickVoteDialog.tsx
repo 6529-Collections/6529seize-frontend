@@ -7,7 +7,7 @@ import {
 } from "@/hooks/memesQuickVote.helpers";
 import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import MemesQuickVoteControls from "./MemesQuickVoteControls";
 import MemesQuickVotePreview from "./MemesQuickVotePreview";
 
@@ -24,7 +24,7 @@ interface MemesQuickVoteDialogContentProps {
   readonly isMobile: boolean;
   readonly isVoting: boolean;
   readonly latestUsedAmount: number | null;
-  readonly queueLength: number;
+  readonly remainingCount: number;
   readonly recentAmounts: number[];
   readonly submitVote: ReturnType<typeof useMemesQuickVoteQueue>["submitVote"];
   readonly skipDrop: ReturnType<typeof useMemesQuickVoteQueue>["skipDrop"];
@@ -37,7 +37,7 @@ function MemesQuickVoteDialogContent({
   isMobile,
   isVoting,
   latestUsedAmount,
-  queueLength,
+  remainingCount,
   recentAmounts,
   submitVote,
   skipDrop,
@@ -93,7 +93,7 @@ function MemesQuickVoteDialogContent({
         drop={activeDrop}
         isBusy={isVoting}
         isMobile={isMobile}
-        remainingCount={queueLength}
+        remainingCount={remainingCount}
         swipeVoteAmount={swipeVoteAmount}
         uncastPower={uncastPower}
         votingLabel={votingLabel}
@@ -114,7 +114,7 @@ function MemesQuickVoteDialogContent({
           isCustomOpen={isCustomOpen}
           isSubmitting={isVoting}
           latestUsedAmount={normalizedLatestUsedAmount}
-          remainingCount={queueLength}
+          remainingCount={remainingCount}
           quickAmounts={visibleQuickAmounts}
           uncastPower={uncastPower}
           votingLabel={votingLabel}
@@ -140,6 +140,62 @@ function MemesQuickVoteDialogContent({
   );
 }
 
+function MemesQuickVoteDialogDoneState() {
+  return (
+    <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
+      <div className="tw-max-w-md tw-text-center">
+        <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
+          You are done
+        </p>
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+          No unrated memes are left in quick vote right now.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function MemesQuickVoteDialogErrorState({
+  onRetry,
+}: {
+  readonly onRetry: () => void;
+}) {
+  return (
+    <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
+      <div className="tw-max-w-md tw-text-center">
+        <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
+          Couldn&apos;t load your queue
+        </p>
+        <p className="tw-mb-4 tw-text-sm tw-text-iron-400">
+          Quick vote couldn&apos;t reach the leaderboard. Try again.
+        </p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-transition-colors desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10"
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MemesQuickVoteDialogLoadingState() {
+  return (
+    <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
+      <div className="tw-text-center">
+        <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
+          Loading your queue
+        </p>
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+          Pulling unrated memes and your recent quick-vote amounts.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function MemesQuickVoteDialog({
   isOpen,
   sessionId,
@@ -151,17 +207,18 @@ export default function MemesQuickVoteDialog({
   const isMobile = useIsMobileScreen();
   const {
     activeDrop,
-    isLoading,
-    isReady,
+    hasDiscoveryError,
+    isExhausted,
     isVoting,
     latestUsedAmount,
-    queue,
     recentAmounts,
+    remainingCount,
+    retryDiscovery,
     submitVote,
     skipDrop,
     uncastPower,
     votingLabel,
-  } = useMemesQuickVoteQueue({ sessionId });
+  } = useMemesQuickVoteQueue({ enabled: isOpen, sessionId });
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -222,15 +279,31 @@ export default function MemesQuickVoteDialog({
     };
   }, [isVoting, onClose]);
 
-  useEffect(() => {
-    if (!isOpen || isLoading) {
-      return;
-    }
+  let dialogBody: ReactNode;
 
-    if (!isReady || !activeDrop) {
-      onClose();
-    }
-  }, [activeDrop, isLoading, isOpen, isReady, onClose]);
+  if (isExhausted) {
+    dialogBody = <MemesQuickVoteDialogDoneState />;
+  } else if (!activeDrop && hasDiscoveryError) {
+    dialogBody = <MemesQuickVoteDialogErrorState onRetry={retryDiscovery} />;
+  } else if (!activeDrop) {
+    dialogBody = <MemesQuickVoteDialogLoadingState />;
+  } else {
+    dialogBody = (
+      <MemesQuickVoteDialogContent
+        key={`${sessionId}:${activeDrop.serial_no}`}
+        activeDrop={activeDrop}
+        isMobile={isMobile}
+        isVoting={isVoting}
+        latestUsedAmount={latestUsedAmount}
+        remainingCount={remainingCount}
+        recentAmounts={recentAmounts}
+        submitVote={submitVote}
+        skipDrop={skipDrop}
+        uncastPower={uncastPower}
+        votingLabel={votingLabel}
+      />
+    );
+  }
 
   return (
     <dialog
@@ -262,32 +335,7 @@ export default function MemesQuickVoteDialog({
           </button>
 
           <div className="tw-flex-1 tw-overflow-y-auto tw-p-4 tw-pt-16 md:tw-p-6">
-            {!activeDrop ? (
-              <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
-                <div className="tw-text-center">
-                  <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
-                    Loading your queue
-                  </p>
-                  <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-                    Pulling unrated memes and your recent quick-vote amounts.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <MemesQuickVoteDialogContent
-                key={`${sessionId}:${activeDrop.serial_no}`}
-                activeDrop={activeDrop}
-                isMobile={isMobile}
-                isVoting={isVoting}
-                latestUsedAmount={latestUsedAmount}
-                queueLength={queue.length}
-                recentAmounts={recentAmounts}
-                submitVote={submitVote}
-                skipDrop={skipDrop}
-                uncastPower={uncastPower}
-                votingLabel={votingLabel}
-              />
-            )}
+            {dialogBody}
           </div>
         </div>
       </div>
