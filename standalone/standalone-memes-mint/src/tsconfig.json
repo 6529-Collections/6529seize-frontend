@@ -1,0 +1,28 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../../../*"]
+    }
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    ".next-static-export/types/**/*.ts",
+    "../../../src/types/**/*.ts",
+    "../../../types/**/*.d.ts",
+    "../../../components/**/*.d.ts"
+  ],
+  "exclude": [
+    "../../../node_modules",
+    "../../../.next",
+    "../../../__tests__",
+    "../../../coverage",
+    "../../../e2e",
+    "../../../generated/http",
+    "../../../tests"
+  ]
+}

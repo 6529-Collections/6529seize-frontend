@@ -432,6 +432,9 @@ export default defineConfig([
     "*.tsx",
     "scripts/**",
     "stubs/**",
+    "standalone/standalone-memes-mint/src/next.config.ts",
+    "standalone/standalone-memes-mint/src/postcss.config.js",
+    "standalone/standalone-memes-mint/src/tailwind.config.cjs",
     ".claude/**",
     ".codex/**",
   ]),
@@ -454,6 +457,12 @@ export default defineConfig([
         callees: ["classnames", "clsx", "cn", "cva"],
       },
     },
+  },
+
+  // Non-TypeScript files should not run type-aware @typescript-eslint rules.
+  {
+    files: ["**/*.{js,cjs,mjs}"],
+    extends: [tseslint.configs.disableTypeChecked],
   },
 
   // TypeScript-specific rules with type-checking

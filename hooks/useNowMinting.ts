@@ -9,14 +9,17 @@ const fetchNowMinting = () =>
   });
 
 export const useNowMinting = () => {
-  const { data, isFetching, error } = useQuery<NFTWithMemesExtendedData>({
-    queryKey: [QueryKey.MEMES_LATEST],
-    queryFn: fetchNowMinting,
-  });
+  const { data, isFetched, isFetching, isLoading, error } =
+    useQuery<NFTWithMemesExtendedData>({
+      queryKey: [QueryKey.MEMES_LATEST],
+      queryFn: fetchNowMinting,
+    });
 
   return {
     nft: data,
+    isFetched,
     isFetching,
+    isLoading,
     error,
   };
 };

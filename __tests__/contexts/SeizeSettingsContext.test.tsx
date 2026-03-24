@@ -2,6 +2,7 @@ import {
   SeizeSettingsProvider,
   useSeizeSettings,
 } from "@/contexts/SeizeSettingsContext";
+import { SeizeSettingsMode } from "@/types/enums";
 import { render, screen, waitFor } from "@testing-library/react";
 
 jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
@@ -89,6 +90,28 @@ test("captures initial load failures without leaking an unhandled rejection", as
     );
     consoleErrorSpy.mockRestore();
   }
+});
+
+test("can skip the initial fetch", async () => {
+  function Consumer() {
+    const { isLoaded, loadError, seizeSettings } = useSeizeSettings();
+    return (
+      <div>
+        {`${isLoaded}-${loadError === null}-${seizeSettings.memes_wave_id === null}`}
+      </div>
+    );
+  }
+
+  render(
+    <SeizeSettingsProvider mode={SeizeSettingsMode.LOCAL}>
+      <Consumer />
+    </SeizeSettingsProvider>
+  );
+
+  await waitFor(() =>
+    expect(screen.getByText("true-true-true")).toBeInTheDocument()
+  );
+  expect(fetchUrl).not.toHaveBeenCalled();
 });
 
 test("hook outside provider throws", () => {

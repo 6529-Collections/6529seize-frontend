@@ -3,7 +3,6 @@
 import {
   ArrowLeftIcon,
   ArrowTopRightOnSquareIcon,
-  DocumentDuplicateIcon,
   PlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -27,11 +26,14 @@ import {
 } from "@/components/drop-forge/drop-forge-status.helpers";
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
+import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import ClaimTraitsEditor from "@/components/waves/memes/MemesArtSubmissionTraits";
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
 import ArtworkDetails from "@/components/waves/memes/submission/details/ArtworkDetails";
@@ -41,6 +43,8 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DistributionPhoto } from "@/entities/IDistribution";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimUpdateRequest } from "@/generated/models/MintingClaimUpdateRequest";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { fetchAllPages } from "@/services/6529api";
 import {
@@ -68,6 +72,10 @@ const PAGE_CONTAINER_CLASS =
   "tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8";
 const BACK_LINK_CLASS =
   "tw-inline-flex tw-w-full tw-justify-center sm:tw-w-auto sm:tw-justify-start tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50";
+const HEADER_ACTION_LINK_CLASS =
+  "tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-ml-auto sm:tw-w-auto sm:tw-justify-start";
+const MEDIA_SOURCE_CARD_CLASS =
+  "tw-flex tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
 
 type ClaimMediaType = "image" | "video" | "glb" | "html" | "unknown";
 type DistributionSectionKey =
@@ -143,6 +151,175 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function getOpenableMediaUrl(value: string | null | undefined): string | null {
+  const trimmedValue = value?.trim() ?? "";
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  try {
+    const resolvedValue = trimmedValue.startsWith("ipfs://")
+      ? resolveIpfsUrlSync(trimmedValue)
+      : trimmedValue;
+    const parsedUrl = new URL(resolvedValue);
+
+    if (
+      parsedUrl.protocol === "http:" ||
+      parsedUrl.protocol === "https:" ||
+      parsedUrl.protocol === "blob:"
+    ) {
+      return resolvedValue;
+    }
+  } catch {
+    // Ignore invalid URLs and fall back to plain text.
+  }
+
+  return null;
+}
+
+function getImageSourceCardProps({
+  pendingImageFile,
+  claimImageUrl,
+  imageUrl,
+}: Readonly<{
+  pendingImageFile: File | null;
+  claimImageUrl: string | null | undefined;
+  imageUrl: string | null;
+}>): {
+  label: string;
+  url: string | null;
+  emptyText: string;
+} {
+  const hasPendingImageUpload = pendingImageFile instanceof File;
+
+  if (hasPendingImageUpload) {
+    return {
+      label: "Current image URL",
+      url: claimImageUrl ?? null,
+      emptyText: "Pending local upload. URL available after save.",
+    };
+  }
+
+  return {
+    label: "Image URL",
+    url: imageUrl,
+    emptyText: "No image URL",
+  };
+}
+
+function getAnimationDisplayUrl({
+  pendingAnimationFile,
+  pendingAnimationPreviewUrl,
+  pendingAnimation,
+  claimAnimationUrl,
+}: Readonly<{
+  pendingAnimationFile: File | null;
+  pendingAnimationPreviewUrl: string | null;
+  pendingAnimation: string | null | undefined;
+  claimAnimationUrl: string | null | undefined;
+}>): string | null | undefined {
+  if (pendingAnimationFile && pendingAnimationPreviewUrl) {
+    return pendingAnimationPreviewUrl;
+  }
+
+  if (pendingAnimation === undefined) {
+    return claimAnimationUrl;
+  }
+
+  return pendingAnimation;
+}
+
+function getAnimationPreviewMimeType({
+  pendingAnimationFile,
+  animationDisplayUrl,
+  mediaType,
+}: Readonly<{
+  pendingAnimationFile: File | null;
+  animationDisplayUrl: string | null | undefined;
+  mediaType: ClaimMediaType;
+}>): string | null {
+  if (pendingAnimationFile) {
+    const mime = pendingAnimationFile.type?.toLowerCase();
+    if (mime) return mime;
+    const name = pendingAnimationFile.name.toLowerCase();
+    if (name.endsWith(".glb")) return "model/gltf-binary";
+    if (name.endsWith(".gltf")) return "model/gltf+json";
+  }
+
+  if (!animationDisplayUrl) {
+    return null;
+  }
+
+  const lowered = animationDisplayUrl.toLowerCase();
+  if (lowered.endsWith(".glb")) return "model/gltf-binary";
+  if (lowered.endsWith(".gltf")) return "model/gltf+json";
+  if (mediaType === "glb") return "model/gltf-binary";
+  if (mediaType === "video" || isVideoUrl(animationDisplayUrl)) {
+    return "video/mp4";
+  }
+  if (
+    mediaType === "html" ||
+    canonicalizeInteractiveMediaUrl(animationDisplayUrl) !== null
+  ) {
+    return "text/html";
+  }
+
+  return null;
+}
+
+function getAnimationPreviewLabel(mimeType: string | null): string {
+  if (mimeType?.startsWith("video/")) {
+    return "Video";
+  }
+  if (mimeType?.startsWith("model/gltf")) {
+    return "GLB";
+  }
+  if (mimeType === "text/html") {
+    return "HTML";
+  }
+
+  return "Animation";
+}
+
+function getAnimationSourceCardProps({
+  pendingAnimationFile,
+  pendingAnimation,
+  claimAnimationUrl,
+}: Readonly<{
+  pendingAnimationFile: File | null;
+  pendingAnimation: string | null | undefined;
+  claimAnimationUrl: string | null | undefined;
+}>): {
+  label: string;
+  url: string | null | undefined;
+  emptyText: string;
+} {
+  const hasPendingAnimationUpload = pendingAnimationFile instanceof File;
+
+  if (hasPendingAnimationUpload) {
+    return {
+      label: "Current animation URL",
+      url: claimAnimationUrl,
+      emptyText: "Pending local upload. URL available after save.",
+    };
+  }
+
+  if (pendingAnimation === null) {
+    return {
+      label: "Animation URL",
+      url: null,
+      emptyText: "Animation will be removed after save.",
+    };
+  }
+
+  return {
+    label: "Animation URL",
+    url: pendingAnimation ?? claimAnimationUrl,
+    emptyText: "No animation URL",
+  };
+}
+
 function getPhotoFileName(link: string): string {
   const withoutHash = link.split("#")[0] ?? link;
   const withoutQuery = withoutHash.split("?")[0] ?? withoutHash;
@@ -186,17 +363,60 @@ function normalizeRootPhase(value: string): string {
   return value.replaceAll(/\s+/g, "").toLowerCase();
 }
 
+function MediaSourceLinkCard({
+  label,
+  url,
+  emptyText = "—",
+}: Readonly<{
+  label: string;
+  url: string | null | undefined;
+  emptyText?: string;
+}>) {
+  const trimmedUrl = url?.trim() ?? "";
+  const openableUrl = getOpenableMediaUrl(trimmedUrl || undefined);
+
+  return (
+    <DropForgeLinkCard
+      label={label}
+      displayValue={trimmedUrl}
+      emptyText={emptyText}
+      copyValue={trimmedUrl}
+      openUrl={openableUrl}
+      copyLabel={`Copy ${label}`}
+      openLabel={`Open ${label} in new tab`}
+      cardClassName={MEDIA_SOURCE_CARD_CLASS}
+    />
+  );
+}
+
 function DropForgeCraftClaimHeader({
   pageTitle,
+  dropHref,
 }: Readonly<{
   pageTitle: string;
+  dropHref?: string;
 }>) {
+  const { isApp } = useDeviceInfo();
+
   return (
     <div className="tw-mb-4 sm:tw-mb-6">
-      <Link href={CRAFT_CLAIMS_LIST_PATH} className={BACK_LINK_CLASS}>
-        <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-        Back to Craft list
-      </Link>
+      <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
+        <Link href={CRAFT_CLAIMS_LIST_PATH} className={BACK_LINK_CLASS}>
+          <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          Back to Craft list
+        </Link>
+        {dropHref ? (
+          <Link
+            href={dropHref}
+            className={HEADER_ACTION_LINK_CLASS}
+            target={isApp ? undefined : "_blank"}
+            rel={isApp ? undefined : "noopener noreferrer"}
+          >
+            Go to Drop
+            <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          </Link>
+        ) : null}
+      </div>
       <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-2xl tw-font-semibold tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left sm:tw-text-3xl">
           <DropForgeCraftIcon className="tw-h-7 tw-w-7 tw-flex-shrink-0 sm:tw-h-8 sm:tw-w-8" />
@@ -216,6 +436,7 @@ export default function DropForgeCraftClaimPageClient({
   claimId: number;
 }>) {
   const { setToast } = useAuth();
+  const { seizeSettings } = useSeizeSettings();
   const { hasWallet, permissionsLoading, canAccessCraft } =
     useDropForgePermissions();
   const pageTitle = `Craft Claim #${claimId}`;
@@ -294,6 +515,16 @@ export default function DropForgeCraftClaimPageClient({
 
   if (!claim) return null;
 
+  const craftDropHref =
+    seizeSettings.memes_wave_id && claim.drop_id
+      ? getWaveRoute({
+          waveId: seizeSettings.memes_wave_id,
+          extraParams: { drop: claim.drop_id },
+          isDirectMessage: false,
+          isApp: false,
+        })
+      : undefined;
+
   const hasPendingPageChanges =
     imageDirty || animationDirty || coreInfoDirty || metadataDirty;
   const hasAnimation = Boolean(claim.animation_url);
@@ -319,7 +550,10 @@ export default function DropForgeCraftClaimPageClient({
 
   return (
     <div className={PAGE_CONTAINER_CLASS}>
-      <DropForgeCraftClaimHeader pageTitle={pageTitle} />
+      <DropForgeCraftClaimHeader
+        pageTitle={pageTitle}
+        {...(craftDropHref ? { dropHref: craftDropHref } : {})}
+      />
 
       <div className="tw-flex tw-flex-col tw-gap-5">
         <DropForgeAccordionSection title="Image" defaultOpen>
@@ -412,6 +646,11 @@ function ImageSection({
   const [formError, setFormError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageUrl = pendingImagePreviewUrl ?? claim.image_url ?? null;
+  const imageSourceCardProps = getImageSourceCardProps({
+    pendingImageFile,
+    claimImageUrl: claim.image_url,
+    imageUrl,
+  });
   const hasImage = imageUrl !== null;
   let imagePreviewMimeType = "image/jpeg";
   if (pendingImageFile?.type?.includes("image")) {
@@ -473,7 +712,7 @@ function ImageSection({
     }
   }
 
-  const hasPendingChanges = pendingImageFile !== null;
+  const hasPendingChanges = pendingImageFile instanceof File;
 
   useEffect(() => {
     onPendingChange(hasPendingChanges);
@@ -509,6 +748,11 @@ function ImageSection({
           accept="image/*"
           className="tw-hidden"
           onChange={handleUpload}
+        />
+        <MediaSourceLinkCard
+          label={imageSourceCardProps.label}
+          url={imageSourceCardProps.url}
+          emptyText={imageSourceCardProps.emptyText}
         />
         {hasImage && (
           <button
@@ -563,6 +807,61 @@ function ImageSection({
 
 type AnimationReplaceMode = "choose" | "link" | null;
 
+function AnimationReplaceControls({
+  replaceMode,
+  animationActionLabel,
+  canRemoveAnimation,
+  onChooseUpload,
+  onSwitchToLink,
+  onCancel,
+  onRemoveAnimation,
+}: Readonly<{
+  replaceMode: AnimationReplaceMode;
+  animationActionLabel: string;
+  canRemoveAnimation: boolean;
+  onChooseUpload: () => void;
+  onSwitchToLink: () => void;
+  onCancel: () => void;
+  onRemoveAnimation: () => void;
+}>) {
+  if (replaceMode === null) {
+    return (
+      <>
+        <button type="button" onClick={onChooseUpload} className={BTN_PRIMARY}>
+          {animationActionLabel}
+        </button>
+        {canRemoveAnimation && (
+          <button
+            type="button"
+            onClick={onRemoveAnimation}
+            className={BTN_DANGER}
+          >
+            Remove animation
+          </button>
+        )}
+      </>
+    );
+  }
+
+  if (replaceMode === "choose") {
+    return (
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-800 tw-p-3">
+        <button type="button" onClick={onChooseUpload} className={BTN_PRIMARY}>
+          Upload from device
+        </button>
+        <button type="button" onClick={onSwitchToLink} className={BTN_SUCCESS}>
+          Paste link
+        </button>
+        <button type="button" onClick={onCancel} className={BTN_TERTIARY}>
+          Cancel
+        </button>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 function AnimationSection({
   claim,
   claimId,
@@ -592,48 +891,25 @@ function AnimationSection({
   const animationInputRef = useRef<HTMLInputElement>(null);
   const mediaType = getClaimMediaType(claim);
   const hasAnimation = Boolean(claim.animation_url);
-  const imageUrl = claim.image_url ?? null;
-  let animationDisplayUrl: string | null | undefined;
-  if (pendingAnimationFile && pendingAnimationPreviewUrl) {
-    animationDisplayUrl = pendingAnimationPreviewUrl;
-  } else if (pendingAnimation === undefined) {
-    animationDisplayUrl = claim.animation_url;
-  } else {
-    animationDisplayUrl = pendingAnimation;
-  }
-  const isAnimationVideoUrl = Boolean(
-    animationDisplayUrl && isVideoUrl(animationDisplayUrl)
+  const animationDisplayUrl = getAnimationDisplayUrl({
+    pendingAnimationFile,
+    pendingAnimationPreviewUrl,
+    pendingAnimation,
+    claimAnimationUrl: claim.animation_url,
+  });
+  const animationPreviewMimeType = getAnimationPreviewMimeType({
+    pendingAnimationFile,
+    animationDisplayUrl,
+    mediaType,
+  });
+  const animationPreviewLabel = getAnimationPreviewLabel(
+    animationPreviewMimeType
   );
-  const animationPreviewMimeType = (() => {
-    if (pendingAnimationFile) {
-      const mime = pendingAnimationFile.type?.toLowerCase();
-      if (mime) return mime;
-      const name = pendingAnimationFile.name.toLowerCase();
-      if (name.endsWith(".glb")) return "model/gltf-binary";
-      if (name.endsWith(".gltf")) return "model/gltf+json";
-    }
-    if (!animationDisplayUrl) return null;
-    const lowered = animationDisplayUrl.toLowerCase();
-    if (lowered.endsWith(".glb")) return "model/gltf-binary";
-    if (lowered.endsWith(".gltf")) return "model/gltf+json";
-    if (mediaType === "glb") return "model/gltf-binary";
-    if (mediaType === "video" || isAnimationVideoUrl) return "video/mp4";
-    if (
-      mediaType === "html" ||
-      canonicalizeInteractiveMediaUrl(animationDisplayUrl) !== null
-    ) {
-      return "text/html";
-    }
-    return null;
-  })();
-  let animationPreviewLabel = "Animation";
-  if (animationPreviewMimeType?.startsWith("video/")) {
-    animationPreviewLabel = "Video";
-  } else if (animationPreviewMimeType?.startsWith("model/gltf")) {
-    animationPreviewLabel = "GLB";
-  } else if (animationPreviewMimeType === "text/html") {
-    animationPreviewLabel = "HTML";
-  }
+  const animationSourceCardProps = getAnimationSourceCardProps({
+    pendingAnimationFile,
+    pendingAnimation,
+    claimAnimationUrl: claim.animation_url,
+  });
 
   function clearPendingAnimationFileSelection() {
     setPendingAnimationFile(null);
@@ -737,8 +1013,10 @@ function AnimationSection({
     }
   }
 
+  const hasPendingAnimationChange = pendingAnimation !== undefined;
+  const hasPendingAnimationUpload = pendingAnimationFile instanceof File;
   const hasPendingChanges =
-    pendingAnimation !== undefined || pendingAnimationFile !== null;
+    hasPendingAnimationChange || hasPendingAnimationUpload;
   const canRevert = hasPendingChanges;
 
   useEffect(() => {
@@ -750,109 +1028,57 @@ function AnimationSection({
   }, [onPendingChange]);
 
   const showAddFlow =
-    !hasAnimation &&
-    pendingAnimation === undefined &&
-    pendingAnimationFile === null;
-  const showChoice = showAddFlow && replaceMode === "choose";
-  const showAddLink = showAddFlow && replaceMode === "link";
+    !hasAnimation && !hasPendingAnimationChange && !hasPendingAnimationUpload;
   const showAnimationControls =
-    hasAnimation ||
-    pendingAnimation !== undefined ||
-    pendingAnimationFile !== null;
+    hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload;
+  const showAddChoice = showAddFlow && replaceMode === "choose";
+  const showAddLink = showAddFlow && replaceMode === "link";
+  const showReplaceLink =
+    showAnimationControls && !showAddFlow && replaceMode === "link";
   const animationActionLabel =
     pendingAnimation === null ? "Add animation" : "Replace";
-
-  const renderReplaceControls = () => {
-    if (replaceMode === null) {
-      return (
-        <>
-          <button
-            type="button"
-            onClick={() => setReplaceMode("choose")}
-            className={BTN_PRIMARY}
-          >
-            {animationActionLabel}
-          </button>
-          {pendingAnimation !== null && (
-            <button
-              type="button"
-              onClick={handleRemoveAnimation}
-              className={BTN_DANGER}
-            >
-              Remove animation
-            </button>
-          )}
-        </>
-      );
-    }
-
-    if (replaceMode === "choose") {
-      return (
-        <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-800 tw-p-3">
-          <button
-            type="button"
-            onClick={() => animationInputRef.current?.click()}
-            className={BTN_PRIMARY}
-          >
-            Upload from device
-          </button>
-          <button
-            type="button"
-            onClick={() => setReplaceMode("link")}
-            className={BTN_SUCCESS}
-          >
-            Paste link
-          </button>
-          <button
-            type="button"
-            onClick={() => setReplaceMode(null)}
-            className={BTN_TERTIARY}
-          >
-            Cancel
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <>
-        <input
-          type="text"
-          value={linkInput}
-          onChange={(e) => {
-            setLinkInput(e.target.value);
+  const linkEditor = (
+    <div className="tw-flex tw-flex-col tw-gap-2">
+      <label
+        htmlFor="drop-forge-animation-link"
+        className="tw-text-sm tw-text-iron-400"
+      >
+        IPFS or Arweave URL (GLB or HTML)
+      </label>
+      <input
+        id="drop-forge-animation-link"
+        type="text"
+        value={linkInput}
+        onChange={(e) => {
+          setLinkInput(e.target.value);
+          setLinkError(null);
+        }}
+        placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
+        className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
+      />
+      {linkError && (
+        <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
+          {linkError}
+        </p>
+      )}
+      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
+        <button type="button" onClick={applyLink} className={BTN_SUCCESS}>
+          Use link
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setReplaceMode(null);
+            setLinkInput("");
             setLinkError(null);
           }}
-          placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
-          className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
-        />
-        {linkError && (
-          <p
-            className="tw-mb-0 tw-w-full tw-text-sm tw-text-rose-300"
-            role="alert"
-          >
-            {linkError}
-          </p>
-        )}
-        <div className="tw-flex tw-flex-wrap tw-gap-2">
-          <button type="button" onClick={applyLink} className={BTN_SUCCESS}>
-            Use link
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setReplaceMode(null);
-              setLinkInput("");
-              setLinkError(null);
-            }}
-            className={BTN_TERTIARY}
-          >
-            Cancel
-          </button>
-        </div>
-      </>
-    );
-  };
+          className={BTN_TERTIARY}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -880,10 +1106,10 @@ function AnimationSection({
             </button>
           </>
         )}
-        {showChoice && (
+        {showAddChoice && (
           <div className="tw-w-full tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900/50 tw-p-4">
             <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-300">
-              How do you want to add the animation?
+              How do you want to add or replace the animation?
             </p>
             <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
               <button
@@ -918,11 +1144,6 @@ function AnimationSection({
                 <MediaDisplay
                   media_mime_type={animationPreviewMimeType}
                   media_url={animationDisplayUrl}
-                  previewImageUrl={
-                    animationPreviewMimeType === "text/html"
-                      ? imageUrl
-                      : undefined
-                  }
                 />
               </div>
             )}
@@ -936,57 +1157,31 @@ function AnimationSection({
                 Animation removed
               </p>
             )}
+            <MediaSourceLinkCard
+              label={animationSourceCardProps.label}
+              url={animationSourceCardProps.url}
+              emptyText={animationSourceCardProps.emptyText}
+            />
           </>
         )}
 
-        {showAddLink && (
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            <label
-              htmlFor="drop-forge-animation-link"
-              className="tw-text-sm tw-text-iron-400"
-            >
-              IPFS or Arweave URL (GLB or HTML)
-            </label>
-            <input
-              id="drop-forge-animation-link"
-              type="text"
-              value={linkInput}
-              onChange={(e) => {
-                setLinkInput(e.target.value);
-                setLinkError(null);
-              }}
-              placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
-              className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
+        {showAddLink && linkEditor}
+
+        {showAnimationControls && replaceMode !== "link" && (
+          <div className="tw-flex tw-flex-wrap tw-gap-2">
+            <AnimationReplaceControls
+              replaceMode={replaceMode}
+              animationActionLabel={animationActionLabel}
+              canRemoveAnimation={pendingAnimation !== null}
+              onChooseUpload={() => setReplaceMode("choose")}
+              onSwitchToLink={() => setReplaceMode("link")}
+              onCancel={() => setReplaceMode(null)}
+              onRemoveAnimation={handleRemoveAnimation}
             />
-            {linkError && (
-              <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
-                {linkError}
-              </p>
-            )}
-            <div className="tw-flex tw-flex-wrap tw-gap-2">
-              <button type="button" onClick={applyLink} className={BTN_SUCCESS}>
-                Use link
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setReplaceMode(null);
-                  setLinkInput("");
-                  setLinkError(null);
-                }}
-                className={BTN_TERTIARY}
-              >
-                Cancel
-              </button>
-            </div>
           </div>
         )}
 
-        {showAnimationControls && (
-          <div className="tw-flex tw-flex-wrap tw-gap-2">
-            {renderReplaceControls()}
-          </div>
-        )}
+        {showReplaceLink && linkEditor}
       </div>
 
       {hasPendingChanges && (
@@ -1445,76 +1640,20 @@ function ArweaveLinkRow({
   label,
   cid,
 }: Readonly<{ label: string; cid: string | null | undefined }>) {
-  const [copied, setCopied] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trimmedCid = cid?.trim() ?? "";
-  const hasCid = trimmedCid.length > 0;
-  const url = hasCid ? `https://arweave.net/${trimmedCid}` : null;
-
-  async function handleCopy(e: React.MouseEvent) {
-    e.preventDefault();
-    if (!url) return;
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      timeoutRef.current = setTimeout(() => {
-        setCopied(false);
-        timeoutRef.current = null;
-      }, 1000);
-    } catch {
-      // ignore
-    }
-  }
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  const url = trimmedCid ? `https://arweave.net/${trimmedCid}` : null;
 
   return (
-    <div className={ARWEAVE_LINK_CARD}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-min-w-0 tw-text-base tw-text-iron-200">{label}</div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-          {url && (
-            <>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-                aria-label={`Copy ${label} link`}
-              >
-                <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
-              </button>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-                aria-label={`Open ${label} on Arweave`}
-              >
-                <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
-              </a>
-            </>
-          )}
-          {copied && (
-            <span className="tw-animate-in tw-fade-in tw-text-xs tw-text-iron-300 tw-duration-150">
-              Copied
-            </span>
-          )}
-        </div>
-      </div>
-      <div
-        className={`tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
-          hasCid ? "tw-text-white" : "tw-text-iron-500"
-        }`}
-        title={hasCid ? trimmedCid : undefined}
-      >
-        {hasCid ? trimmedCid : "—"}
-      </div>
-    </div>
+    <DropForgeLinkCard
+      label={label}
+      displayValue={trimmedCid}
+      copyValue={url}
+      openUrl={url}
+      copyLabel={`Copy ${label} link`}
+      openLabel={`Open ${label} on Arweave`}
+      cardClassName={ARWEAVE_LINK_CARD}
+      labelClassName="tw-min-w-0 tw-text-base tw-text-iron-200"
+    />
   );
 }
 

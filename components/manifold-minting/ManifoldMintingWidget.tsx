@@ -1,8 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { type JSX, useEffect, useState } from "react";
-import { Col, Container, Form, Row, Table } from "react-bootstrap";
+import { type JSX, type ReactNode, useEffect, useId, useState } from "react";
 import {
   useReadContract,
   useReadContracts,
@@ -22,11 +21,50 @@ import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
-import styles from "./ManifoldMinting.module.scss";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
-import type { Chain } from "viem";
+import { isAddress, type Chain } from "viem";
 
 const MINT_PROXY_FUNCTION_NAME = "mintProxy";
+
+function normalizeMintCount(value: number | string | null | undefined): number {
+  const parsed =
+    typeof value === "string" ? Number.parseInt(value, 10) : Number(value ?? 0);
+
+  if (!Number.isFinite(parsed) || Number.isNaN(parsed)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.trunc(parsed));
+}
+
+function MintSummaryRow({
+  title,
+  value,
+}: {
+  readonly title: string;
+  readonly value: ReactNode;
+}) {
+  return (
+    <table className="tw-w-full tw-border-separate tw-border-spacing-0">
+      <thead className="tw-sr-only">
+        <tr>
+          <th scope="col">Label</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="tw-border-b tw-border-white/5 last:tw-border-b-0">
+          <td className="tw-h-[46px] tw-w-[45%] tw-py-2 tw-pr-4 tw-align-middle">
+            {title}
+          </td>
+          <td className="tw-h-[46px] tw-w-[55%] tw-py-2 tw-align-middle">
+            <b>{value}</b>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  );
+}
 
 export default function ManifoldMintingWidget(
   props: Readonly<{
@@ -34,13 +72,15 @@ export default function ManifoldMintingWidget(
     chain: Chain;
     abi: any;
     claim: ManifoldClaim;
+    local_timezone: boolean;
+    hideConnect?: boolean;
     setFee: (fee: number) => void;
-    setMintForAddress: (address: string) => void;
+    setMintForAddress: (address: string | null) => void;
   }>
 ) {
   const connectedAddress = useSeizeConnectContext();
   const searchParams = useSearchParams();
-  const [mintForAddress, setMintForAddress] = useState<string>("");
+  const [mintForAddress, setMintForAddress] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<"" | "copied" | "failed">("");
 
   const [isError, setIsError] = useState<boolean>(false);
@@ -52,6 +92,7 @@ export default function ManifoldMintingWidget(
 
   const [mintCount, setMintCount] = useState<number>(0);
   const [feeWei, setFeeWei] = useState<bigint>(0n);
+  const mintCountControlId = useId();
 
   const [mintStatus, setMintStatus] = useState<JSX.Element>(<></>);
   const [mintError, setMintError] = useState<string>("");
@@ -61,45 +102,55 @@ export default function ManifoldMintingWidget(
     confirmations: 1,
     hash: mintWrite.data,
   });
+  const hasValidMintForAddress = Boolean(
+    mintForAddress && isAddress(mintForAddress)
+  );
 
   useEffect(() => {
-    if (props.claim.phase === ManifoldPhase.PUBLIC) {
+    if (
+      props.claim.phase === ManifoldPhase.PUBLIC ||
+      !props.claim.merkleRoot ||
+      !mintForAddress ||
+      !hasValidMintForAddress
+    ) {
+      setMerkleProofs([]);
+      setFetchingMerkle(false);
+      setIsError(false);
       return;
     }
 
-    if (mintForAddress && props.claim.merkleRoot) {
-      mintWrite.reset();
-      setMintStatus(<></>);
-      setMintError("");
-      setIsError(false);
-      setFetchingMerkle(true);
-      getMemesMintingProofsByAddress(
-        props.claim.instanceId,
-        props.claim.merkleRoot,
-        mintForAddress
-      )
-        .then((response) => {
-          const mappedProofs: MintingClaimsProofItem[] = (
-            response.proofs ?? []
-          ).map((proof) => ({
-            merkle_proof: proof.merkle_proof ?? [],
-            value: Number(proof.value ?? 0),
-          }));
-          setMerkleProofs(mappedProofs);
-        })
-        .catch((err) => {
-          setMerkleProofs([]);
-          const msg =
-            typeof err === "string" ? err : ((err as Error)?.message ?? "");
-          const isNotFound =
-            /404|not found|no proof/i.test(msg) || msg.includes("404");
-          setIsError(!isNotFound);
-        })
-        .finally(() => {
-          setFetchingMerkle(false);
-        });
-    }
+    mintWrite.reset();
+    setMintStatus(<></>);
+    setMintError("");
+    setIsError(false);
+    setFetchingMerkle(true);
+    getMemesMintingProofsByAddress(
+      props.claim.instanceId,
+      props.claim.merkleRoot,
+      mintForAddress
+    )
+      .then((response) => {
+        const mappedProofs: MintingClaimsProofItem[] = (
+          response.proofs ?? []
+        ).map((proof) => ({
+          merkle_proof: proof.merkle_proof ?? [],
+          value: Number(proof.value ?? 0),
+        }));
+        setMerkleProofs(mappedProofs);
+      })
+      .catch((err) => {
+        setMerkleProofs([]);
+        const msg =
+          typeof err === "string" ? err : ((err as Error)?.message ?? "");
+        const isNotFound =
+          /404|not found|no proof/i.test(msg) || msg.includes("404");
+        setIsError(!isNotFound);
+      })
+      .finally(() => {
+        setFetchingMerkle(false);
+      });
   }, [
+    hasValidMintForAddress,
     mintForAddress,
     props.claim.merkleRoot,
     props.contract,
@@ -155,6 +206,8 @@ export default function ManifoldMintingWidget(
     );
   }, [readContracts.data]);
 
+  const safeMintCount = normalizeMintCount(mintCount);
+
   const getSelectedMerkleProofs = () => {
     const selectedMerkleProofs: MintingClaimsProofItem[] = [];
     for (let i = 0; i < merkleProofsMints.length; i++) {
@@ -165,7 +218,7 @@ export default function ManifoldMintingWidget(
       if (!merkleProofsMints[i]) {
         selectedMerkleProofs.push(proof);
       }
-      if (selectedMerkleProofs.length === mintCount) {
+      if (selectedMerkleProofs.length === safeMintCount) {
         break;
       }
     }
@@ -173,6 +226,10 @@ export default function ManifoldMintingWidget(
   };
 
   const getMintArgs = () => {
+    if (!mintForAddress || !isAddress(mintForAddress)) {
+      return null;
+    }
+
     const isProxy = !areEqualAddresses(
       connectedAddress.address,
       mintForAddress
@@ -196,8 +253,8 @@ export default function ManifoldMintingWidget(
     const mintArgs = [];
     const selectedMerkleProofs = getSelectedMerkleProofs();
 
-    if (mintCount > 1 || isProxy) {
-      mintArgs.push(mintCount);
+    if (safeMintCount > 1 || isProxy) {
+      mintArgs.push(safeMintCount);
 
       if (props.claim.phase === ManifoldPhase.PUBLIC) {
         mintArgs.push([], []);
@@ -218,7 +275,7 @@ export default function ManifoldMintingWidget(
   };
 
   const getDirectMintFunctionName = () => {
-    if (mintCount > 1) {
+    if (safeMintCount > 1) {
       return "mintBatch";
     }
     return "mint";
@@ -235,8 +292,11 @@ export default function ManifoldMintingWidget(
       !areEqualAddresses(connectedWallet, recipientWallet);
     const selectedProofs = getSelectedMerkleProofs();
     const argsPreview =
-      recipientWallet && mintCount > 0
-        ? getMintArgs()
+      hasValidMintForAddress && safeMintCount > 0
+        ? (getMintArgs() ?? {
+            functionName: "n/a",
+            args: [],
+          })
         : {
             functionName: "n/a",
             args: [],
@@ -251,7 +311,7 @@ export default function ManifoldMintingWidget(
       recipientWallet,
       isProxy,
       mintFunction: argsPreview.functionName,
-      mintCount,
+      mintCount: safeMintCount,
       valueWei: getValue().toString(),
       feeWei: feeWei.toString(),
       claimCostWei: (props.claim.costWei ?? 0n).toString(),
@@ -281,9 +341,19 @@ export default function ManifoldMintingWidget(
     setMintError("");
     setMintStatus(<></>);
 
+    if (safeMintCount <= 0) {
+      setMintError("Enter a valid mint count");
+      return;
+    }
+
+    if (!mintForAddress || !hasValidMintForAddress) {
+      setMintError("Select a valid recipient wallet");
+      return;
+    }
+
     if (props.claim.phase === ManifoldPhase.ALLOWLIST) {
       const selectedProofs = getSelectedMerkleProofs();
-      if (selectedProofs.length < mintCount) {
+      if (selectedProofs.length < safeMintCount) {
         setMintError("No allowlist spots in current phase for this address");
         return;
       }
@@ -291,6 +361,10 @@ export default function ManifoldMintingWidget(
 
     const value = getValue();
     const args = getMintArgs();
+    if (!args) {
+      setMintError("Select a valid recipient wallet");
+      return;
+    }
     mintWrite.writeContract({
       address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
       abi: props.abi,
@@ -335,6 +409,7 @@ export default function ManifoldMintingWidget(
         href={getTransactionLink(props.chain.id, hash)}
         target="_blank"
         rel="noopener noreferrer"
+        className="tw-text-iron-200 hover:tw-text-white"
       >
         view trx
       </a>
@@ -351,51 +426,54 @@ export default function ManifoldMintingWidget(
 
     if (waitMintWritePending) {
       setMintStatus(
-        <>
-          <span className="font-larger font-bolder">
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          <span className="tw-text-lg tw-font-semibold tw-text-white">
             Transaction Submitted - SEIZING <DotLoader />
           </span>
-          <br />
-          <span className="pt-2">{getViewLink(mintWrite.data)}</span>
-        </>
+          <span>{getViewLink(mintWrite.data)}</span>
+        </div>
       );
       return;
     }
 
     if (waitMintWriteSuccess) {
       setMintStatus(
-        <>
-          <span className="text-success font-larger font-bolder">SEIZED!</span>
-          <br />
-          <span className="pt-2">{getViewLink(mintWrite.data)}</span>
-        </>
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          <span className="tw-text-lg tw-font-semibold tw-text-success">
+            SEIZED!
+          </span>
+          <span>{getViewLink(mintWrite.data)}</span>
+        </div>
       );
     }
   }, [mintWrite.data, waitMintWritePending, waitMintWriteSuccess]);
 
   function getButtonText() {
     if (props.claim.status === ManifoldClaimStatus.ACTIVE) {
-      return <>SEIZE {mintCount ? `x${mintCount}` : "-"}</>;
+      return <>SEIZE {safeMintCount ? `x${safeMintCount}` : "-"}</>;
     }
 
     const startDate = Time.seconds(props.claim.startDate);
-    const date = startDate.toIsoDateString();
-    const time = startDate.toIsoTimeString();
-    const today = Time.now().toIsoDateString();
-    const dateDisplay = date === today ? "TODAY" : date;
-    return `DROPS ${dateDisplay} ${time} UTC`;
+    let dateDisplay = startDate.toIsoDateString();
+    if (props.local_timezone) {
+      dateDisplay = startDate.toLocaleDropDateString().toUpperCase();
+    } else if (startDate.toIsoDateString() === Time.now().toIsoDateString()) {
+      dateDisplay = "TODAY";
+    }
+    const timeDisplay = props.local_timezone
+      ? startDate.toLocaleHMString()
+      : startDate.toIsoTimeStringWithoutSeconds();
+    return `DROPS ${dateDisplay} ${timeDisplay ?? ""}`.trim();
   }
 
   function printMintCountDropdown(available: number) {
     const optionsArray = Array.from({ length: available }, (_, i) => i);
     return (
-      <Form.Select
-        style={{
-          width: "fit-content",
-          height: "100%",
-        }}
-        value={mintCount}
-        onChange={(e) => setMintCount(Number.parseInt(e.target.value))}
+      <select
+        id={mintCountControlId}
+        className="tw-h-11 tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-white focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/30"
+        value={safeMintCount}
+        onChange={(e) => setMintCount(normalizeMintCount(e.target.value))}
       >
         <option value="" disabled>
           Select
@@ -408,78 +486,75 @@ export default function ManifoldMintingWidget(
             </option>
           );
         })}
-      </Form.Select>
+      </select>
     );
   }
 
   function printMintCountInput() {
     return (
-      <Form.Control
-        style={{
-          width: "100px",
-        }}
+      <input
+        id={mintCountControlId}
+        className="tw-h-11 tw-w-[100px] tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-white focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/30"
         type="number"
-        value={mintCount}
-        onChange={(e) => setMintCount(Number.parseInt(e.target.value))}
+        min={0}
+        step={1}
+        value={safeMintCount}
+        onChange={(e) => setMintCount(normalizeMintCount(e.target.value))}
       />
     );
   }
 
   const getValue = () => {
-    const safeCount =
-      Number.isFinite(mintCount) && !Number.isNaN(mintCount)
-        ? Math.max(0, Math.trunc(mintCount))
-        : 0;
-    return ((props.claim.costWei ?? 0n) + feeWei) * BigInt(safeCount);
+    return ((props.claim.costWei ?? 0n) + feeWei) * BigInt(safeMintCount);
   };
 
   function printMint(available?: number) {
     return (
-      <Container className="no-padding pt-3">
-        <Row>
-          <Col className="d-flex gap-3 align-items-center">
-            Select Mint Count:
+      <div className="tw-pt-3">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+          <label
+            htmlFor={mintCountControlId}
+            className="tw-text-base tw-font-medium tw-text-white"
+          >
+            Mint count
+          </label>
+          <div className="tw-flex tw-items-center tw-gap-3">
             {available === undefined
               ? printMintCountInput()
               : printMintCountDropdown(available)}
-            {mintCount > 0 && <b>{fromGWEI(Number(getValue()))} ETH</b>}
-          </Col>
-        </Row>
-        <Row className="pt-3">
-          <Col>
-            <button
-              disabled={
-                mintWrite.isPending ||
-                props.claim.status !== ManifoldClaimStatus.ACTIVE ||
-                !mintCount
-              }
-              className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
-              onClick={onMint}
-            >
-              <b>{getButtonText()}</b>
-            </button>
-          </Col>
-        </Row>
+            {safeMintCount > 0 && (
+              <b className="tw-text-white">
+                {fromGWEI(Number(getValue()))} ETH
+              </b>
+            )}
+          </div>
+        </div>
+        <div className="tw-pt-3">
+          <button
+            disabled={
+              mintWrite.isPending ||
+              props.claim.status !== ManifoldClaimStatus.ACTIVE ||
+              safeMintCount <= 0 ||
+              !hasValidMintForAddress
+            }
+            className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+            onClick={onMint}
+          >
+            <b>{getButtonText()}</b>
+          </button>
+        </div>
         {mintError && (
-          <Row className="pt-3">
-            <Col className="text-danger">{mintError}</Col>
-          </Row>
+          <div className="tw-pt-3 tw-text-base tw-text-red">{mintError}</div>
         )}
         {mintWrite.isPending && (
-          <Row className="pt-3">
-            <Col>
-              <span>
-                Confirm in your wallet <DotLoader />
-              </span>
-            </Col>
-          </Row>
+          <div className="tw-pt-3">
+            <span className="tw-text-iron-100">
+              Confirm in your wallet <DotLoader />
+            </span>
+          </div>
         )}
-        {mintStatus && (
-          <Row className="pt-3">
-            <Col>{mintStatus}</Col>
-          </Row>
-        )}
-      </Container>
+        {mintStatus && <div className="tw-pt-3">{mintStatus}</div>}
+      </div>
     );
   }
 
@@ -493,40 +568,25 @@ export default function ManifoldMintingWidget(
 
     return (
       <>
-        <Row>
-          <Col>
-            {merkleProofsMints.length == 0 ? (
-              <>
-                Fetching Mints <DotLoader />
-              </>
-            ) : (
-              <>
-                {printTable("Minted", minted)}{" "}
-                {printTable("Available Mints", unminted)}
-              </>
-            )}
-          </Col>
-        </Row>
-        <Row className="pt-3">
-          <Col>{printMint(unminted)}</Col>
-        </Row>
+        <div>
+          {merkleProofsMints.length == 0 ? (
+            <>
+              Fetching Mints <DotLoader />
+            </>
+          ) : (
+            <div>
+              {printTable("Minted", minted)}
+              {printTable("Available Mints", unminted)}
+            </div>
+          )}
+        </div>
+        <div className="tw-pt-3">{printMint(unminted)}</div>
       </>
     );
   }
 
   function printTable(title: string, value: string | number) {
-    return (
-      <Table className={styles["spotsTable"]}>
-        <tbody>
-          <tr>
-            <td>{title}</td>
-            <td>
-              <b>{value}</b>
-            </td>
-          </tr>
-        </tbody>
-      </Table>
-    );
+    return <MintSummaryRow title={title} value={value} />;
   }
 
   function printContent() {
@@ -536,7 +596,7 @@ export default function ManifoldMintingWidget(
     ) {
       return <></>;
     }
-    if (!mintForAddress) {
+    if (!hasValidMintForAddress) {
       return <></>;
     }
 
@@ -553,26 +613,22 @@ export default function ManifoldMintingWidget(
     }
 
     return (
-      <Container className="no-padding">
+      <div>
         {props.claim.phase === ManifoldPhase.PUBLIC ? (
-          <Row>
-            <Col>{printMint()}</Col>
-          </Row>
+          <div>{printMint()}</div>
         ) : (
           <>
-            <Row>
-              <Col>
-                {merkleProofs.length > 0 ? (
-                  printTable("Allowlist Spots", merkleProofs.length)
-                ) : (
-                  <>No spots in current phase for this address</>
-                )}
-              </Col>
-            </Row>
+            <div className="tw-mt-2">
+              {merkleProofs.length > 0 ? (
+                printTable("Allowlist Spots", merkleProofs.length)
+              ) : (
+                <>No spots in current phase for this address</>
+              )}
+            </div>
             {printProofs()}
           </>
         )}
-      </Container>
+      </div>
     );
   }
 
@@ -602,47 +658,44 @@ export default function ManifoldMintingWidget(
     };
 
     return (
-      <Row className="pt-3">
-        <Col>
-          <div className="tw-rounded-lg tw-border tw-border-white/15 tw-bg-white/5 tw-p-3 tw-text-xs tw-text-white/80">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-              <b className="tw-text-sm tw-text-white">Mint diagnostics</b>
-              <button
-                type="button"
-                onClick={onCopyMintDiagnostics}
-                disabled={copyStatus === "copied" || copyStatus === "failed"}
-                className={`tw-w-[170px] tw-rounded-md tw-border tw-px-2 tw-py-1 !tw-text-sm tw-font-medium tw-text-white disabled:tw-cursor-default ${getCopyButtonStyle()}`}
-              >
-                {getCopyButtonText()}
-              </button>
-            </div>
-            <pre className="tw-mb-0 tw-mt-2 tw-max-h-36 tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-rounded-md tw-bg-black/40 tw-p-2 tw-text-[10px] tw-text-white/80">
-              {JSON.stringify(diagnostics, null, 2)}
-            </pre>
+      <div className="tw-pt-3">
+        <div className="tw-rounded-lg tw-border tw-border-white/15 tw-bg-white/5 tw-p-3 tw-text-xs tw-text-white/80">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+            <b className="tw-text-sm tw-text-white">Mint diagnostics</b>
+            <button
+              type="button"
+              onClick={onCopyMintDiagnostics}
+              disabled={copyStatus === "copied" || copyStatus === "failed"}
+              className={`tw-w-[170px] tw-rounded-md tw-border tw-px-2 tw-py-1 !tw-text-sm tw-font-medium tw-text-white disabled:tw-cursor-default ${getCopyButtonStyle()}`}
+            >
+              {getCopyButtonText()}
+            </button>
           </div>
-        </Col>
-      </Row>
+          <pre className="tw-mb-0 tw-mt-2 tw-max-h-36 tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-rounded-md tw-bg-black/40 tw-p-2 tw-text-[10px] tw-text-white/80">
+            {JSON.stringify(diagnostics, null, 2)}
+          </pre>
+        </div>
+      </div>
     );
   }
 
   useEffect(() => {
     props.setMintForAddress(mintForAddress);
-  }, [mintForAddress]);
+  }, [mintForAddress, props.setMintForAddress]);
 
   return (
-    <Container className="no-padding">
+    <div>
       {props.claim.status !== ManifoldClaimStatus.ENDED &&
         !props.claim.isFinalized && (
-          <Row>
-            <Col>
-              <ManifoldMintingConnect onMintFor={setMintForAddress} />
-            </Col>
-          </Row>
+          <div>
+            <ManifoldMintingConnect
+              onMintFor={setMintForAddress}
+              hideConnect={props.hideConnect ?? false}
+            />
+          </div>
         )}
-      <Row>
-        <Col>{printContent()}</Col>
-      </Row>
+      <div>{printContent()}</div>
       {printMintDebug()}
-    </Container>
+    </div>
   );
 }

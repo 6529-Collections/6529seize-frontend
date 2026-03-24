@@ -3,7 +3,6 @@
 import {
   ArrowLeftIcon,
   ArrowTopRightOnSquareIcon,
-  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Toggle from "react-toggle";
@@ -20,6 +19,7 @@ import {
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeExplorerLink from "@/components/drop-forge/DropForgeExplorerLink";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
+import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
@@ -108,6 +108,7 @@ interface DropForgeLaunchClaimPermissionFallbackViewProps {
 
 interface DropForgeLaunchClaimPageViewProps {
   pageTitle: string;
+  craftHref: string;
   loading: boolean;
   error: string | null;
   rootsError: string | null;
@@ -303,16 +304,26 @@ export function DropForgeLaunchClaimPermissionFallbackView({
 
 function DropForgeLaunchClaimHeader({
   pageTitle,
-}: Readonly<{ pageTitle: string }>) {
+  craftHref,
+}: Readonly<{ pageTitle: string; craftHref: string }>) {
   return (
     <div className="tw-mb-6">
-      <Link
-        href="/drop-forge/launch"
-        className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start"
-      >
-        <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-        Back to Launch list
-      </Link>
+      <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
+        <Link
+          href="/drop-forge/launch"
+          className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start"
+        >
+          <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          Back to Launch list
+        </Link>
+        <Link
+          href={craftHref}
+          className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-ml-auto sm:tw-w-auto sm:tw-justify-start"
+        >
+          <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          Go to Craft
+        </Link>
+      </div>
       <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-2xl tw-font-semibold tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left sm:tw-text-3xl">
           <DropForgeLaunchIcon className="tw-h-7 tw-w-7 tw-flex-shrink-0 sm:tw-h-8 sm:tw-w-8" />
@@ -385,56 +396,18 @@ function DropForgeArweaveLinkCard({
 }: Readonly<{ label: string; value: string | null | undefined }>) {
   const trimmedValue = value?.trim() ?? "";
   const url = toArweaveUrl(trimmedValue || undefined);
-  const hasCid = Boolean(trimmedValue && url);
-
-  async function handleCopy() {
-    if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // ignore clipboard failures
-    }
-  }
 
   return (
-    <div className={ARWEAVE_LINK_CARD_CLASS}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-min-w-0 tw-text-base tw-text-iron-200">{label}</div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-          {hasCid && url && (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  void handleCopy();
-                }}
-                className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-                aria-label={`Copy ${label} link`}
-              >
-                <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
-              </button>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-                aria-label={`Open ${label} on Arweave`}
-              >
-                <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
-              </a>
-            </>
-          )}
-        </div>
-      </div>
-      <div
-        className={`tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
-          hasCid ? "tw-text-white" : "tw-text-iron-500"
-        }`}
-        title={hasCid ? trimmedValue : undefined}
-      >
-        {hasCid ? trimmedValue : "—"}
-      </div>
-    </div>
+    <DropForgeLinkCard
+      label={label}
+      displayValue={trimmedValue}
+      copyValue={url}
+      openUrl={url}
+      copyLabel={`Copy ${label} link`}
+      openLabel={`Open ${label} on Arweave`}
+      cardClassName={ARWEAVE_LINK_CARD_CLASS}
+      labelClassName="tw-min-w-0 tw-text-base tw-text-iron-200"
+    />
   );
 }
 
@@ -1939,7 +1912,7 @@ function DropForgeLaunchClaimContent({
 }: Readonly<
   Omit<
     DropForgeLaunchClaimPageViewProps,
-    "pageTitle" | "loading" | "error" | "rootsError"
+    "pageTitle" | "craftHref" | "loading" | "error" | "rootsError"
   >
 >) {
   if (!claim) {
@@ -2025,6 +1998,7 @@ function DropForgeLaunchClaimContent({
 
 export function DropForgeLaunchClaimPageView({
   pageTitle,
+  craftHref,
   loading,
   error,
   rootsError,
@@ -2032,7 +2006,7 @@ export function DropForgeLaunchClaimPageView({
 }: Readonly<DropForgeLaunchClaimPageViewProps>) {
   return (
     <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
-      <DropForgeLaunchClaimHeader pageTitle={pageTitle} />
+      <DropForgeLaunchClaimHeader pageTitle={pageTitle} craftHref={craftHref} />
       {loading && <p className="tw-text-iron-400">Loading…</p>}
       {error && (
         <p className="tw-text-red-400 tw-mb-4" role="alert">

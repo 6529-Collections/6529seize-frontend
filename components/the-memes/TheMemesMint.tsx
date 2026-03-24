@@ -21,14 +21,20 @@ const ManifoldMinting = dynamic(
 
 export default function TheMemesMint({
   nft,
+  standalone = false,
 }: {
   readonly nft: NFTWithMemesExtendedData;
+  readonly standalone?: boolean;
 }) {
   const { setTitle } = useTitle();
 
   useEffect(() => {
-    setTitle(`Mint #${nft.id} | ${nft.name} | The Memes`);
-  }, [nft.id, nft.name, setTitle]);
+    setTitle(
+      standalone
+        ? `Mint #${nft.id} | ${nft.name} | The Memes by 6529`
+        : `Mint #${nft.id} | ${nft.name} | The Memes`
+    );
+  }, [nft.id, nft.name, setTitle, standalone]);
 
   const { contract, chain } = useDropForgeMintingConfig();
   const mintMetadata = useMemo<ManifoldMintMetadata>(
@@ -50,6 +56,7 @@ export default function TheMemesMint({
       abi={MEMES_MANIFOLD_PROXY_ABI}
       mint_date={Time.fromString(nft.mint_date?.toString() ?? "")}
       mintMetadata={mintMetadata}
+      standalone={standalone}
     />
   );
 }

@@ -659,7 +659,9 @@ describe("AppKitAdapterManager", () => {
     });
 
     it("should return empty-wallets key with chains for empty array", () => {
-      expect(manager["getCacheKey"]([])).toBe("empty-wallets|chains:1");
+      expect(manager["getCacheKey"]([])).toBe(
+        "empty-wallets|chains:1|platform:web"
+      );
     });
 
     it("should generate consistent cache key for same wallets", () => {

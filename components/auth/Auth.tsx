@@ -129,8 +129,10 @@ export const useAuth = () => {
 
 export default function Auth({
   children,
+  enableWalletAuthentication = true,
 }: {
   readonly children: React.ReactNode;
+  readonly enableWalletAuthentication?: boolean;
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const pathname = usePathname();
@@ -279,6 +281,13 @@ export default function Auth({
 
   // Immediate authentication effect with race condition prevention
   useEffect(() => {
+    if (!enableWalletAuthentication) {
+      abortCurrentAuthOperation();
+      setShowSignModal(false);
+      setAuthLoadingState("idle");
+      return;
+    }
+
     // Clear previous operations when dependencies change
     abortCurrentAuthOperation();
 
@@ -378,6 +387,7 @@ export default function Auth({
     address,
     activeProfileProxy,
     connectionState,
+    enableWalletAuthentication,
     isAddressAuthorized,
     isConnected,
     abortCurrentAuthOperation,
@@ -623,82 +633,119 @@ export default function Auth({
 
   // These functions have been moved above to fix initialization order
 
-  const requestAuth = async (): Promise<{ success: boolean }> => {
-    if (!address) {
-      setToast({
-        message: "Please connect your wallet",
-        type: "error",
+  const dispatchProfileSwitchedEvent = (
+    profileProxy: ApiProfileProxy | null
+  ) => {
+    if (globalThis.window === undefined) {
+      return;
+    }
+
+    globalThis.dispatchEvent(
+      new CustomEvent(PROFILE_SWITCHED_EVENT, {
+        detail: { profileProxy },
+      })
+    );
+  };
+
+  const ensureConnectedWalletAddress = (): string | null => {
+    if (address) {
+      return address;
+    }
+
+    setToast({
+      message: "Please connect your wallet",
+      type: "error",
+    });
+    return null;
+  };
+
+  const authenticateUnauthorizedWallet = async (
+    walletAddress: string
+  ): Promise<boolean> => {
+    const { success } = await requestSignIn({
+      signerAddress: walletAddress,
+      role: null,
+    });
+
+    if (!success) {
+      setShowSignModal(false);
+      try {
+        await seizeDisconnect();
+      } catch (error) {
+        logErrorSecurely("requestAuth_disconnect_after_failed_signin", error);
+      }
+      return false;
+    }
+
+    invalidateAll();
+    setShowSignModal(false);
+    return true;
+  };
+
+  const authenticateAuthorizedWallet = async (
+    walletAddress: string
+  ): Promise<boolean> => {
+    const abortController = new AbortController();
+    const operationId = `manual-auth-${Date.now()}`;
+    const role = activeProfileProxy
+      ? validateRoleForAuthentication(activeProfileProxy)
+      : null;
+
+    const { isValid } = await validateJwt({
+      jwt: getAuthJwt(),
+      wallet: walletAddress,
+      role,
+      operationId,
+      abortSignal: abortController.signal,
+      activeProfileProxy,
+    });
+
+    if (!isValid) {
+      removeAuthJwt();
+      const { success } = await requestSignIn({
+        signerAddress: walletAddress,
+        role,
       });
+
+      if (!success) {
+        setShowSignModal(false);
+        try {
+          await seizeDisconnect();
+        } catch (error) {
+          logErrorSecurely("requestAuth_disconnect_after_failed_signin", error);
+        }
+        return false;
+      }
+
       invalidateAll();
+    }
+
+    const isSuccess = !!getAuthJwt();
+    if (isSuccess) {
+      setShowSignModal(false);
+    }
+
+    return isSuccess;
+  };
+
+  const requestAuth = async (): Promise<{ success: boolean }> => {
+    const connectedAddress = ensureConnectedWalletAddress();
+    if (!connectedAddress) {
       return { success: false };
+    }
+
+    if (!enableWalletAuthentication) {
+      return { success: true };
     }
 
     // Set loading state for signing
     setAuthLoadingState("signing");
 
     try {
-      if (!isAddressAuthorized) {
-        if (!canStoreAnotherWalletAccount(address)) {
-          setToast({
-            message: "Maximum connected profiles reached",
-            type: "error",
-          });
-          return { success: false };
-        }
-
-        const { success } = await requestSignIn({
-          signerAddress: address,
-          role: null,
-        });
-        if (!success) {
-          setShowSignModal(false);
-          try {
-            await seizeDisconnect();
-          } catch (error) {
-            logErrorSecurely(
-              "requestAuth_disconnect_after_failed_signin",
-              error
-            );
-          }
-          return { success: false };
-        }
-
-        invalidateAll();
-        setShowSignModal(false);
-        return { success: true };
-      }
-
-      // Create a new abort controller for this auth request
-      const abortController = new AbortController();
-      const operationId = `manual-auth-${Date.now()}`;
-
-      const { isValid } = await validateJwt({
-        jwt: getAuthJwt(),
-        wallet: address,
-        role: activeProfileProxy
-          ? validateRoleForAuthentication(activeProfileProxy)
-          : null,
-        operationId,
-        abortSignal: abortController.signal,
-        activeProfileProxy,
-      });
-
-      if (!isValid) {
-        removeAuthJwt();
-        await requestSignIn({
-          signerAddress: address,
-          role: activeProfileProxy
-            ? validateRoleForAuthentication(activeProfileProxy)
-            : null,
-        });
-        invalidateAll();
-      }
-
-      const isSuccess = !!getAuthJwt();
-      if (isSuccess) {
-        setShowSignModal(false);
-      }
-      return { success: isSuccess };
+      const success = isAddressAuthorized
+        ? await authenticateAuthorizedWallet(connectedAddress)
+        : await authenticateUnauthorizedWallet(connectedAddress);
+      return { success };
     } finally {
       setAuthLoadingState("idle");
     }
@@ -713,12 +760,18 @@ export default function Auth({
       return;
     }
 
-    removeAuthJwt();
     if (!address) {
       setActiveProfileProxy(null);
       return;
     }
 
+    if (!enableWalletAuthentication) {
+      setActiveProfileProxy(profileProxy);
+      dispatchProfileSwitchedEvent(profileProxy);
+      return;
+    }
+
+    removeAuthJwt();
     try {
       const { success } = await requestSignIn({
         signerAddress: address,
@@ -726,9 +779,7 @@ export default function Auth({
       });
       if (success) {
         setActiveProfileProxy(profileProxy);
-        if (globalThis.window !== undefined) {
-          globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
-        }
+        dispatchProfileSwitchedEvent(profileProxy);
       }
     } catch (error) {
       // Handle InvalidRoleStateError specifically
@@ -848,66 +899,68 @@ export default function Auth({
     >
       {children}
       <ToastContainer />
-      <Modal
-        show={shouldShowSignModal}
-        onHide={() => {
-          // Only allow modal dismissal when not actively validating
-          if (authLoadingState !== "validating") {
-            setShowSignModal(false);
-          }
-        }}
-        backdrop="static"
-        keyboard={false}
-        centered
-        dialogClassName={styles["signModalDialog"] ?? ""}
-        contentClassName={styles["signModalSurface"] ?? ""}
-      >
-        <Modal.Header className={styles["signModalHeader"]}>
-          <div className={styles["signModalTitle"]}>
-            Sign Authentication Request
-          </div>
-        </Modal.Header>
-        <Modal.Body className={styles["signModalBody"]}>
-          <p className={styles["signModalLead"]}>
-            To connect your wallet, you will need to sign a message to confirm
-            your identity.
-          </p>
+      {enableWalletAuthentication && (
+        <Modal
+          show={shouldShowSignModal}
+          onHide={() => {
+            // Only allow modal dismissal when not actively validating
+            if (authLoadingState !== "validating") {
+              setShowSignModal(false);
+            }
+          }}
+          backdrop="static"
+          keyboard={false}
+          centered
+          dialogClassName={styles["signModalDialog"] ?? ""}
+          contentClassName={styles["signModalSurface"] ?? ""}
+        >
+          <Modal.Header className={styles["signModalHeader"]}>
+            <div className={styles["signModalTitle"]}>
+              Sign Authentication Request
+            </div>
+          </Modal.Header>
+          <Modal.Body className={styles["signModalBody"]}>
+            <p className={styles["signModalLead"]}>
+              To connect your wallet, you will need to sign a message to confirm
+              your identity.
+            </p>
 
-          <ul className={styles["signModalList"]}>
-            <li>
-              This signature will be used to generate a secure token (JWT) to
-              authenticate your session.
-            </li>
-            <li>
-              Your signature will not cost any gas and is purely for
-              authentication purposes.
-            </li>
-          </ul>
-        </Modal.Body>
-        <Modal.Footer className={styles["signModalFooter"]}>
-          <Button
-            variant="link"
-            className={styles["signModalCancelButton"]}
-            onClick={onCancelSignRequest}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="link"
-            className={styles["signModalConfirmButton"]}
-            onClick={() => requestAuth()}
-            disabled={isSigningPending}
-          >
-            {isSigningPending ? (
-              <span className={styles["signModalButtonContent"]}>
-                Confirm in your wallet <DotLoader />
-              </span>
-            ) : (
-              "Sign"
-            )}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            <ul className={styles["signModalList"]}>
+              <li>
+                This signature will be used to generate a secure token (JWT) to
+                authenticate your session.
+              </li>
+              <li>
+                Your signature will not cost any gas and is purely for
+                authentication purposes.
+              </li>
+            </ul>
+          </Modal.Body>
+          <Modal.Footer className={styles["signModalFooter"]}>
+            <Button
+              variant="link"
+              className={styles["signModalCancelButton"]}
+              onClick={onCancelSignRequest}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="link"
+              className={styles["signModalConfirmButton"]}
+              onClick={() => requestAuth()}
+              disabled={isSigningPending}
+            >
+              {isSigningPending ? (
+                <span className={styles["signModalButtonContent"]}>
+                  Confirm in your wallet <DotLoader />
+                </span>
+              ) : (
+                "Sign"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </AuthContext.Provider>
   );
 }
