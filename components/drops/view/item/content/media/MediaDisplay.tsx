@@ -53,12 +53,6 @@ function InteractiveHtmlMediaDisplay({
   }, [media_url, requireInteractionToLoad]);
 
   useEffect(() => {
-    if (urls.length === 0) {
-      setActiveIndex(0);
-      setDidLoadCurrentUrl(false);
-      return;
-    }
-
     setActiveIndex(0);
     setDidLoadCurrentUrl(false);
   }, [urls]);

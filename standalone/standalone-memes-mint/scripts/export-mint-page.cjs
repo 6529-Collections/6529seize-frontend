@@ -140,7 +140,7 @@ function trimTrailingSlashes(value) {
   return value.slice(0, end);
 }
 
-function fetchJson(url, redirectCount = 0) {
+function fetchJson(url, redirectCount = 0, timeout = 10000) {
   return new Promise((resolve, reject) => {
     if (redirectCount > 5) {
       reject(new Error(`Too many redirects while fetching ${url}`));
@@ -149,6 +149,14 @@ function fetchJson(url, redirectCount = 0) {
 
     const parsedUrl = new URL(url);
     const client = parsedUrl.protocol === "http:" ? http : https;
+    let settled = false;
+    const finish = (callback) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      callback();
+    };
     const req = client.request(
       parsedUrl,
       {
@@ -166,13 +174,21 @@ function fetchJson(url, redirectCount = 0) {
           [301, 302, 303, 307, 308].includes(statusCode)
         ) {
           res.resume();
-          resolve(fetchJson(new URL(location, url).toString(), redirectCount + 1));
+          finish(() =>
+            resolve(
+              fetchJson(
+                new URL(location, url).toString(),
+                redirectCount + 1,
+                timeout
+              )
+            )
+          );
           return;
         }
 
         if (statusCode === 404) {
           res.resume();
-          resolve(null);
+          finish(() => resolve(null));
           return;
         }
 
@@ -183,29 +199,33 @@ function fetchJson(url, redirectCount = 0) {
         });
         res.on("end", () => {
           if (statusCode < 200 || statusCode >= 300) {
-            reject(
-              new Error(
-                `HTTP ${statusCode} while fetching ${url}${
-                  body ? `: ${body.slice(0, 200)}` : ""
-                }`
+            finish(() =>
+              reject(
+                new Error(
+                  `HTTP ${statusCode} while fetching ${url}${
+                    body ? `: ${body.slice(0, 200)}` : ""
+                  }`
+                )
               )
             );
             return;
           }
 
           if (!body.trim()) {
-            resolve(null);
+            finish(() => resolve(null));
             return;
           }
 
           try {
-            resolve(JSON.parse(body));
+            finish(() => resolve(JSON.parse(body)));
           } catch (error) {
-            reject(
-              new Error(
-                `Invalid JSON returned from ${url}: ${
-                  error instanceof Error ? error.message : String(error)
-                }`
+            finish(() =>
+              reject(
+                new Error(
+                  `Invalid JSON returned from ${url}: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`
+                )
               )
             );
           }
@@ -213,7 +233,16 @@ function fetchJson(url, redirectCount = 0) {
       }
     );
 
-    req.on("error", reject);
+    req.on("error", (error) => {
+      finish(() => reject(error));
+    });
+    req.setTimeout(timeout, () => {
+      const timeoutError = new Error(
+        `Timeout after ${timeout}ms while fetching ${url}`
+      );
+      req.destroy(timeoutError);
+      finish(() => reject(timeoutError));
+    });
     req.end();
   });
 }

@@ -14,6 +14,7 @@ export function LeaderboardCollector(
     level: number;
   }>
 ) {
+  const hasLevel = props.level !== undefined && props.level !== null;
   const link = props.handle ?? props.consolidationKey.split("-")[0];
   let display =
     props.handle ??
@@ -40,7 +41,7 @@ export function LeaderboardCollector(
         className="no-wrap d-flex gap-2 decoration-none align-items-center"
       >
         {pfpImg}
-        {props.level ? (
+        {hasLevel ? (
           <div
             className={`d-flex gap-2 align-items-center ${styles["collectorLevel"]}`}
           >

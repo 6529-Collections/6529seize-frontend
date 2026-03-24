@@ -134,7 +134,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     baseProps.className = frameClassName;
 
     return baseProps;
-  }, [canonicalSrc, frameClassName, iframeTitle]);
+  }, [canonicalSrc, frameClassName]);
 
   if (!canonicalSrc || !iframeProps) {
     return fallback ? <>{fallback}</> : null;

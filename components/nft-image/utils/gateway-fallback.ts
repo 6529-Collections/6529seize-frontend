@@ -1,11 +1,11 @@
 import type React from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { publicEnv } from "@/config/env";
 import {
   ARWEAVE_FALLBACK_HOSTS,
   canonicalizeArweaveGatewayHostname,
   isArweaveGatewayRuntimeHost,
 } from "@/lib/media/arweave-gateways";
+import { getConfiguredIpfsGatewayHost } from "@/lib/media/ipfs-gateways";
 import { parseIpfsUrl } from "@/helpers/Helpers";
 
 const DEFAULT_IPFS_GATEWAY_HOSTS = new Set([
@@ -41,20 +41,6 @@ function isArweaveUrl(url: string): boolean {
 
 function isIpfsProtocolUrl(url: string): boolean {
   return url.trim().toLowerCase().startsWith("ipfs://");
-}
-
-function getConfiguredIpfsGatewayHost(): string | null {
-  const gatewayEndpoint = publicEnv.IPFS_GATEWAY_ENDPOINT;
-  if (!gatewayEndpoint) {
-    return null;
-  }
-
-  try {
-    const parsedUrl = new URL(gatewayEndpoint);
-    return canonicalizeArweaveGatewayHostname(parsedUrl.hostname);
-  } catch {
-    return null;
-  }
 }
 
 function isKnownIpfsGatewayHost(hostname: string): boolean {

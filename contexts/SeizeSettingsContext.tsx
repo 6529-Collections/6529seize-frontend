@@ -101,6 +101,8 @@ export const SeizeSettingsProvider = ({
   );
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     if (mode === SeizeSettingsMode.LOCAL) {
       setIsLoaded(true);
 

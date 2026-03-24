@@ -128,7 +128,6 @@ const getCardDetailValue = (label: string): string => {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockNFTAttributes.mockClear();
   mockNftHelpers.getAnimationFileTypeFromMetadata.mockReturnValue("gif");
   mockNftHelpers.getImageFileTypeFromMetadata.mockReturnValue("png");
   mockNftHelpers.getAnimationDimensionsFromMetadata.mockReturnValue("200x300");
