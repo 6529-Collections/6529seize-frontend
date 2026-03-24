@@ -23,14 +23,24 @@ type SetToast = (options: {
 type PersistNumberArray = (updater: (current: number[]) => number[]) => void;
 type PersistStringArray = (updater: (current: string[]) => string[]) => void;
 
+type QueuedVote = {
+  readonly amount: number;
+  readonly currentRating: number;
+  readonly drop: ExtendedDrop;
+  readonly maxRating: number;
+};
+
 type UseMemesQuickVoteSubmitOptions = {
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: SetToast;
   readonly invalidateDrops: () => void;
   readonly setAndPersistRecentAmounts: PersistNumberArray;
   readonly setAndPersistSkippedDropIds: PersistStringArray;
+  readonly onVoteFailure: (drop: ExtendedDrop, amount: number) => void;
+  readonly onVoteQueued: (drop: ExtendedDrop, amount: number) => void;
   readonly onVoteSuccess: (
     drop: ExtendedDrop,
+    amount: number,
     nextRemainingPower: number
   ) => void;
 };
@@ -49,10 +59,14 @@ export const useMemesQuickVoteSubmit = ({
   invalidateDrops,
   setAndPersistRecentAmounts,
   setAndPersistSkippedDropIds,
+  onVoteFailure,
+  onVoteQueued,
   onVoteSuccess,
 }: UseMemesQuickVoteSubmitOptions): UseMemesQuickVoteSubmitResult => {
-  const submitInFlightRef = useRef(false);
-  const [isSubmitInFlight, setIsSubmitInFlight] = useState(false);
+  const voteQueueRef = useRef<QueuedVote[]>([]);
+  const queuedDropIdsRef = useRef<Set<string>>(new Set());
+  const isFlushingRef = useRef(false);
+  const [pendingVoteCount, setPendingVoteCount] = useState(0);
 
   const voteMutation = useMutation({
     mutationFn: ({
@@ -69,13 +83,71 @@ export const useMemesQuickVoteSubmit = ({
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
       }),
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-    },
   });
+
+  const flushQueuedVotes = useCallback(async () => {
+    if (isFlushingRef.current) {
+      return;
+    }
+
+    isFlushingRef.current = true;
+
+    try {
+      while (voteQueueRef.current.length > 0) {
+        const queuedVote = voteQueueRef.current[0];
+        if (!queuedVote) {
+          break;
+        }
+
+        try {
+          const { success } = await requestAuth();
+
+          if (!success) {
+            throw new Error("Quick vote couldn't verify your session.");
+          }
+
+          const response = await voteMutation.mutateAsync({
+            dropId: queuedVote.drop.id,
+            amount: queuedVote.amount,
+          });
+          const nextRating = response.context_profile_context?.rating;
+          const appliedAmount =
+            typeof nextRating === "number"
+              ? Math.max(0, nextRating - queuedVote.currentRating)
+              : queuedVote.amount;
+          const nextRemainingPower = Math.max(
+            0,
+            queuedVote.maxRating - appliedAmount
+          );
+
+          onVoteSuccess(queuedVote.drop, queuedVote.amount, nextRemainingPower);
+          invalidateDrops();
+        } catch (error) {
+          setToast({
+            message:
+              error instanceof Error
+                ? error.message
+                : "Quick vote couldn't submit that vote.",
+            type: "error",
+          });
+          onVoteFailure(queuedVote.drop, queuedVote.amount);
+        } finally {
+          voteQueueRef.current.shift();
+          queuedDropIdsRef.current.delete(queuedVote.drop.id);
+          setPendingVoteCount(voteQueueRef.current.length);
+        }
+      }
+    } finally {
+      isFlushingRef.current = false;
+    }
+  }, [
+    invalidateDrops,
+    onVoteFailure,
+    onVoteSuccess,
+    requestAuth,
+    setToast,
+    voteMutation,
+  ]);
 
   const submitVote = useCallback(
     async (drop: ExtendedDrop, amount: number | string) => {
@@ -83,60 +155,41 @@ export const useMemesQuickVoteSubmit = ({
       const maxRating = drop.context_profile_context?.max_rating ?? 0;
       const normalizedAmount = normalizeQuickVoteAmount(amount, maxRating);
 
-      if (normalizedAmount === null || submitInFlightRef.current) {
+      if (normalizedAmount === null || queuedDropIdsRef.current.has(drop.id)) {
         return false;
       }
 
-      submitInFlightRef.current = true;
-      setIsSubmitInFlight(true);
+      queuedDropIdsRef.current.add(drop.id);
+      voteQueueRef.current.push({
+        amount: normalizedAmount,
+        currentRating,
+        drop,
+        maxRating,
+      });
+      setPendingVoteCount(voteQueueRef.current.length);
 
-      try {
-        const { success } = await requestAuth();
+      onVoteQueued(drop, normalizedAmount);
+      setAndPersistRecentAmounts((current) =>
+        addRecentQuickVoteAmount(current, normalizedAmount)
+      );
+      setAndPersistSkippedDropIds((current) =>
+        current.filter((dropId) => dropId !== drop.id)
+      );
 
-        if (!success) {
-          return false;
-        }
+      void flushQueuedVotes();
 
-        const response = await voteMutation.mutateAsync({
-          dropId: drop.id,
-          amount: normalizedAmount,
-        });
-        const nextRating = response.context_profile_context?.rating;
-        const appliedAmount =
-          typeof nextRating === "number"
-            ? Math.max(0, nextRating - currentRating)
-            : normalizedAmount;
-        const nextRemainingPower = Math.max(0, maxRating - appliedAmount);
-
-        onVoteSuccess(drop, nextRemainingPower);
-        setAndPersistRecentAmounts((current) =>
-          addRecentQuickVoteAmount(current, normalizedAmount)
-        );
-        setAndPersistSkippedDropIds((current) =>
-          current.filter((dropId) => dropId !== drop.id)
-        );
-        invalidateDrops();
-
-        return true;
-      } catch {
-        return false;
-      } finally {
-        submitInFlightRef.current = false;
-        setIsSubmitInFlight(false);
-      }
+      return true;
     },
     [
-      invalidateDrops,
-      onVoteSuccess,
-      requestAuth,
+      flushQueuedVotes,
+      onVoteQueued,
       setAndPersistRecentAmounts,
       setAndPersistSkippedDropIds,
-      voteMutation,
     ]
   );
 
   return {
-    isVoting: isSubmitInFlight || voteMutation.isPending,
+    isVoting: pendingVoteCount > 0 || voteMutation.isPending,
     submitVote,
   };
 };

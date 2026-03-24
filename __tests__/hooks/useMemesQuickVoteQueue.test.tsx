@@ -335,6 +335,129 @@ describe("useMemesQuickVoteQueue", () => {
     expect(result.current.queue.map((drop) => drop.id)).toEqual([drop20.id]);
   });
 
+  it("advances immediately before the vote request resolves", async () => {
+    const drop30 = createDrop({ id: "drop-30", serialNo: 30 });
+    const drop20 = createDrop({ id: "drop-20", serialNo: 20 });
+    const deferredVote = createDeferred<any>();
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+
+    currentLeaderboardIds = [drop30.id, drop20.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+    currentHydratedDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+    };
+
+    commonApiPostMock.mockImplementationOnce(() => deferredVote.promise);
+
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
+
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 250);
+    });
+
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop20.id));
+    expect(result.current.latestUsedAmount).toBe(250);
+    expect(readStoredNumbers(getAmountsStorageKey())).toEqual([250]);
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      deferredVote.resolve(
+        createDrop({
+          id: drop30.id,
+          serialNo: drop30.serial_no,
+          rating: 250,
+          maxRating: 4_750,
+        })
+      );
+      await Promise.resolve();
+    });
+  });
+
+  it("keeps advancing while an earlier vote is still in flight", async () => {
+    const drop30 = createDrop({ id: "drop-30", serialNo: 30 });
+    const drop20 = createDrop({ id: "drop-20", serialNo: 20 });
+    const drop10 = createDrop({ id: "drop-10", serialNo: 10 });
+    const firstVote = createDeferred<any>();
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+
+    currentLeaderboardIds = [drop30.id, drop20.id, drop10.id];
+    currentLeaderboardDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+      [drop10.id]: drop10,
+    };
+    currentHydratedDropsById = {
+      [drop30.id]: drop30,
+      [drop20.id]: drop20,
+      [drop10.id]: drop10,
+    };
+
+    commonApiPostMock
+      .mockImplementationOnce(() => firstVote.promise)
+      .mockResolvedValueOnce(
+        createDrop({
+          id: drop20.id,
+          serialNo: drop20.serial_no,
+          rating: 500,
+          maxRating: 4_000,
+        })
+      );
+
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      {
+        wrapper: createWrapper({ requestAuth }),
+      }
+    );
+
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop30.id));
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 250);
+    });
+
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop20.id));
+
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 500);
+    });
+
+    await waitFor(() => expect(result.current.activeDrop?.id).toBe(drop10.id));
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      firstVote.resolve(
+        createDrop({
+          id: drop30.id,
+          serialNo: drop30.serial_no,
+          rating: 250,
+          maxRating: 4_750,
+        })
+      );
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    expect(commonApiPostMock).toHaveBeenNthCalledWith(2, {
+      endpoint: `drops/${drop20.id}/ratings`,
+      body: {
+        rating: 500,
+        category: "Rep",
+      },
+    });
+  });
+
   it("treats zero optimistic remaining power as exhaustion while the next card is still refetching", async () => {
     const drop30 = createDrop({
       id: "drop-30",

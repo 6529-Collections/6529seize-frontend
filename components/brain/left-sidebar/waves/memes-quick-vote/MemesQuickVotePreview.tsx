@@ -6,10 +6,12 @@ import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import clsx from "clsx";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const SWIPE_TRIGGER_THRESHOLD = 96;
 const MAX_SWIPE_OFFSET = 132;
+const SWIPE_EXIT_DURATION_MS = 180;
+const SWIPE_EXIT_OFFSET = 420;
 
 interface MemesQuickVotePreviewProps {
   readonly drop: ExtendedDrop;
@@ -19,11 +21,12 @@ interface MemesQuickVotePreviewProps {
   readonly swipeVoteAmount: number | null;
   readonly uncastPower: number | null;
   readonly votingLabel: string | null;
+  readonly onAdvanceStart: () => void;
   readonly onSkip: () => void;
   readonly onVoteWithSwipe: () => void;
 }
 
-export default function MemesQuickVotePreview({
+function MemesQuickVotePreviewContent({
   drop,
   isBusy,
   isMobile,
@@ -31,10 +34,15 @@ export default function MemesQuickVotePreview({
   swipeVoteAmount,
   uncastPower,
   votingLabel,
+  onAdvanceStart,
   onSkip,
   onVoteWithSwipe,
 }: MemesQuickVotePreviewProps) {
   const [swipeOffset, setSwipeOffset] = useState(0);
+  const [swipeExitDirection, setSwipeExitDirection] = useState<
+    "left" | "right" | null
+  >(null);
+  const swipeCommitTimeoutRef = useRef<number | null>(null);
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
 
@@ -57,13 +65,50 @@ export default function MemesQuickVotePreview({
   }, [swipeVoteAmount, votingLabel]);
 
   const resetSwipe = () => {
+    if (swipeExitDirection) {
+      return;
+    }
+
     setSwipeOffset(0);
     touchStartXRef.current = null;
     touchStartYRef.current = null;
   };
 
+  const clearSwipeCommitTimeout = () => {
+    if (swipeCommitTimeoutRef.current !== null) {
+      window.clearTimeout(swipeCommitTimeoutRef.current);
+      swipeCommitTimeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (swipeCommitTimeoutRef.current !== null) {
+        window.clearTimeout(swipeCommitTimeoutRef.current);
+        swipeCommitTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  const beginSwipeCommit = (
+    direction: "left" | "right",
+    action: () => void
+  ) => {
+    clearSwipeCommitTimeout();
+    setSwipeExitDirection(direction);
+    setSwipeOffset(
+      direction === "left" ? -SWIPE_EXIT_OFFSET : SWIPE_EXIT_OFFSET
+    );
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+    onAdvanceStart();
+    swipeCommitTimeoutRef.current = window.setTimeout(() => {
+      action();
+    }, SWIPE_EXIT_DURATION_MS);
+  };
+
   const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
-    if (isBusy || !isMobile || !event.touches[0]) {
+    if (isBusy || !isMobile || swipeExitDirection || !event.touches[0]) {
       return;
     }
 
@@ -75,6 +120,7 @@ export default function MemesQuickVotePreview({
     if (
       isBusy ||
       !isMobile ||
+      swipeExitDirection ||
       touchStartXRef.current === null ||
       touchStartYRef.current === null ||
       !event.touches[0]
@@ -101,19 +147,28 @@ export default function MemesQuickVotePreview({
     }
 
     if (swipeOffset <= -SWIPE_TRIGGER_THRESHOLD) {
-      onSkip();
-      resetSwipe();
+      beginSwipeCommit("left", onSkip);
       return;
     }
 
     if (swipeOffset >= SWIPE_TRIGGER_THRESHOLD && swipeVoteAmount !== null) {
-      onVoteWithSwipe();
-      resetSwipe();
+      beginSwipeCommit("right", onVoteWithSwipe);
       return;
     }
 
     resetSwipe();
   };
+
+  let cardTransform: React.CSSProperties["transform"];
+  if (isMobile) {
+    if (swipeExitDirection === "left") {
+      cardTransform = `translateX(-${SWIPE_EXIT_OFFSET}px) rotate(-6deg)`;
+    } else if (swipeExitDirection === "right") {
+      cardTransform = `translateX(${SWIPE_EXIT_OFFSET}px) rotate(6deg)`;
+    } else {
+      cardTransform = `translateX(${swipeOffset}px)`;
+    }
+  }
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
@@ -161,12 +216,14 @@ export default function MemesQuickVotePreview({
         <article
           data-testid="quick-vote-preview-card"
           className={clsx(
-            "tw-relative tw-overflow-hidden tw-rounded-[2rem] tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/95 tw-shadow-[0_24px_60px_rgba(0,0,0,0.35)] tw-transition-transform",
+            "tw-relative tw-overflow-hidden tw-rounded-[2rem] tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/95 tw-shadow-[0_24px_60px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 tw-ease-out",
             isBusy && "tw-pointer-events-none tw-opacity-70"
           )}
           style={{
-            transform: isMobile ? `translateX(${swipeOffset}px)` : undefined,
+            transform: cardTransform,
+            opacity: swipeExitDirection ? 0 : undefined,
             touchAction: isMobile ? "pan-y" : undefined,
+            transitionDuration: `${SWIPE_EXIT_DURATION_MS}ms`,
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -236,4 +293,10 @@ export default function MemesQuickVotePreview({
       </div>
     </div>
   );
+}
+
+export default function MemesQuickVotePreview(
+  props: MemesQuickVotePreviewProps
+) {
+  return <MemesQuickVotePreviewContent key={props.drop.id} {...props} />;
 }

@@ -23,7 +23,6 @@ interface MemesQuickVoteDialogContentProps {
     ReturnType<typeof useMemesQuickVoteQueue>["activeDrop"]
   >;
   readonly isMobile: boolean;
-  readonly isVoting: boolean;
   readonly latestUsedAmount: number | null;
   readonly remainingCount: number;
   readonly recentAmounts: number[];
@@ -36,7 +35,6 @@ interface MemesQuickVoteDialogContentProps {
 function MemesQuickVoteDialogContent({
   activeDrop,
   isMobile,
-  isVoting,
   latestUsedAmount,
   remainingCount,
   recentAmounts,
@@ -54,6 +52,7 @@ function MemesQuickVoteDialogContent({
   const [isCustomOpen, setIsCustomOpen] = useState(
     () => recentAmounts.length === 0
   );
+  const [isAdvancing, setIsAdvancing] = useState(false);
   const normalizedLatestUsedAmount =
     latestUsedAmount === null
       ? null
@@ -80,31 +79,57 @@ function MemesQuickVoteDialogContent({
     ? normalizedCustomAmount
     : (normalizedLatestUsedAmount ?? normalizedCustomAmount);
 
+  const queueVoteAmount = async (amount: number | string) => {
+    const wasQueued = await submitVote(activeDrop, amount);
+
+    if (!wasQueued) {
+      setIsAdvancing(false);
+    }
+  };
+
   const handleVoteAmount = async (amount: number | string) => {
-    await submitVote(activeDrop, amount);
+    if (isAdvancing) {
+      return;
+    }
+
+    setIsAdvancing(true);
+    await queueVoteAmount(amount);
+  };
+
+  const queueSkip = () => {
+    skipDrop(activeDrop);
   };
 
   const handleSkip = () => {
-    skipDrop(activeDrop);
+    if (isAdvancing) {
+      return;
+    }
+
+    setIsAdvancing(true);
+    queueSkip();
   };
 
   return (
     <div className="tw-grid tw-gap-6 md:tw-grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.95fr)] md:tw-items-stretch">
       <MemesQuickVotePreview
         drop={activeDrop}
-        isBusy={isVoting}
+        isBusy={isAdvancing}
         isMobile={isMobile}
         remainingCount={remainingCount}
         swipeVoteAmount={swipeVoteAmount}
         uncastPower={uncastPower}
         votingLabel={votingLabel}
-        onSkip={handleSkip}
+        onAdvanceStart={() => {
+          setIsAdvancing(true);
+        }}
+        onSkip={queueSkip}
         onVoteWithSwipe={() => {
           if (swipeVoteAmount === null) {
+            setIsAdvancing(false);
             return;
           }
 
-          void handleVoteAmount(swipeVoteAmount);
+          void queueVoteAmount(swipeVoteAmount);
         }}
       />
 
@@ -113,7 +138,7 @@ function MemesQuickVoteDialogContent({
           customValue={customValue}
           drop={activeDrop}
           isCustomOpen={isCustomOpen}
-          isSubmitting={isVoting}
+          isSubmitting={isAdvancing}
           latestUsedAmount={normalizedLatestUsedAmount}
           remainingCount={remainingCount}
           quickAmounts={visibleQuickAmounts}
@@ -196,7 +221,6 @@ export default function MemesQuickVoteDialog({
     hasDiscoveryError,
     isExhausted,
     isLoading,
-    isVoting,
     latestUsedAmount,
     recentAmounts,
     remainingCount,
@@ -253,10 +277,6 @@ export default function MemesQuickVoteDialog({
     const handleCancel = (event: Event) => {
       event.preventDefault();
 
-      if (isVoting) {
-        return;
-      }
-
       onClose();
     };
 
@@ -264,7 +284,7 @@ export default function MemesQuickVoteDialog({
     return () => {
       dialog.removeEventListener("cancel", handleCancel);
     };
-  }, [isVoting, onClose]);
+  }, [onClose]);
 
   let dialogBody: ReactNode;
 
@@ -282,7 +302,6 @@ export default function MemesQuickVoteDialog({
         key={`${sessionId}:${activeDrop.serial_no}`}
         activeDrop={activeDrop}
         isMobile={isMobile}
-        isVoting={isVoting}
         latestUsedAmount={latestUsedAmount}
         remainingCount={remainingCount}
         recentAmounts={recentAmounts}
@@ -304,7 +323,7 @@ export default function MemesQuickVoteDialog({
       <div
         className="tw-flex tw-h-full tw-w-full tw-items-stretch tw-justify-center tw-bg-iron-950/85 md:tw-items-center md:tw-p-6"
         onClick={(event) => {
-          if (event.target !== event.currentTarget || isVoting) {
+          if (event.target !== event.currentTarget) {
             return;
           }
 
@@ -316,7 +335,6 @@ export default function MemesQuickVoteDialog({
             type="button"
             data-autofocus="true"
             onClick={onClose}
-            disabled={isVoting}
             className="tw-absolute tw-right-3 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-10 tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/90 tw-text-iron-300 tw-shadow-[0_18px_40px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white md:tw-right-4 md:tw-top-4"
             aria-label="Close quick vote"
           >

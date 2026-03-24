@@ -363,6 +363,78 @@ describe("MemesQuickVoteDialog", () => {
     expect(submitVote).not.toHaveBeenCalledWith(activeDrop, 250);
   });
 
+  it("keeps the swipe-committed card moving off-screen instead of snapping back", () => {
+    useIsMobileScreenMock.mockReturnValue(true);
+    const submitVote = jest.fn().mockResolvedValue(true);
+
+    useMemesQuickVoteQueueMock.mockReturnValue(
+      createQueueState({ submitVote })
+    );
+
+    render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    const previewCard = screen.getByTestId("quick-vote-preview-card");
+
+    fireEvent.touchStart(previewCard, {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    fireEvent.touchMove(previewCard, {
+      touches: [{ clientX: 120, clientY: 0 }],
+    });
+    fireEvent.touchEnd(previewCard);
+
+    expect(previewCard).toHaveStyle({
+      transform: "translateX(420px) rotate(6deg)",
+    });
+    expect(previewCard).not.toHaveStyle({
+      transform: "translateX(0px)",
+    });
+  });
+
+  it("resets the mobile preview swipe offset when the active drop changes", () => {
+    useIsMobileScreenMock.mockReturnValue(true);
+    const nextDrop = createDrop(43);
+    const { rerender } = render(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    const previewCard = screen.getByTestId("quick-vote-preview-card");
+
+    fireEvent.touchStart(previewCard, {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    fireEvent.touchMove(previewCard, {
+      touches: [{ clientX: 60, clientY: 0 }],
+    });
+
+    expect(previewCard).toHaveStyle({
+      transform: "translateX(60px)",
+    });
+
+    useMemesQuickVoteQueueMock.mockReturnValue(
+      createQueueState({
+        activeDrop: nextDrop,
+        queue: [nextDrop],
+        remainingCount: 8,
+      })
+    );
+
+    rerender(
+      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+    );
+
+    expect(
+      within(screen.getByTestId("quick-vote-preview-mobile-context")).getByText(
+        "Drop 43"
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("quick-vote-preview-card")).toHaveStyle({
+      transform: "translateX(0px)",
+    });
+  });
+
   it("submits the visible quick amount from the mobile action row", async () => {
     useIsMobileScreenMock.mockReturnValue(true);
     const submitVote = jest.fn().mockResolvedValue(true);

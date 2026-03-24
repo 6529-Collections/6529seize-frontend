@@ -248,6 +248,21 @@ export const useMemesQuickVoteDiscovery = ({
     void refetchDiscovery();
   }, [refetchDiscovery]);
 
+  const resyncDiscovery = useCallback(() => {
+    setStoredState((current) => {
+      const baseState = getCurrentMemesQuickVoteDiscoveryState({
+        key: discoveryStateKey,
+        state: current,
+      });
+
+      return {
+        ...createInitialMemesQuickVoteDiscoveryState(),
+        fetchVersion: baseState.fetchVersion + 1,
+        key: discoveryStateKey,
+      };
+    });
+  }, [discoveryStateKey]);
+
   return {
     activeCandidateId,
     deferDropId,
@@ -258,6 +273,7 @@ export const useMemesQuickVoteDiscovery = ({
     nextCandidateId,
     queue,
     removeDropId,
+    resyncDiscovery,
     retryDiscovery,
     serverCount: discoverySnapshot.serverCount,
   };
