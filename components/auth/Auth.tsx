@@ -27,6 +27,11 @@ import type { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
+import {
+  clearPendingWavesAuthReturnUrl,
+  getCurrentBrowserRelativeUrl,
+  getPendingWavesAuthReturnUrl,
+} from "@/helpers/waves-auth-return.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import {
@@ -806,6 +811,38 @@ export default function Auth({
   const showWaves = useMemo(() => {
     return !!connectedProfile?.handle && !activeProfileProxy && !!address;
   }, [connectedProfile?.handle, activeProfileProxy, address]);
+  const previousShowWavesRef = useRef(showWaves);
+
+  // The pending `/waves` return target can only be restored after async auth
+  // hydration has made waves available again, so this has to observe auth state.
+  /* eslint-disable react-you-might-not-need-an-effect/no-event-handler */
+  useEffect(() => {
+    const didBecomeReady = !previousShowWavesRef.current && showWaves;
+    previousShowWavesRef.current = showWaves;
+
+    if (!showWaves) {
+      return;
+    }
+
+    const pendingWavesReturnUrl = getPendingWavesAuthReturnUrl();
+    if (!pendingWavesReturnUrl) {
+      return;
+    }
+
+    const currentRelativeUrl = getCurrentBrowserRelativeUrl();
+    if (currentRelativeUrl === pendingWavesReturnUrl) {
+      clearPendingWavesAuthReturnUrl();
+      return;
+    }
+
+    if (!didBecomeReady) {
+      return;
+    }
+
+    clearPendingWavesAuthReturnUrl();
+    router.replace(pendingWavesReturnUrl);
+  }, [showWaves, router]);
+  /* eslint-enable react-you-might-not-need-an-effect/no-event-handler */
 
   const onCancelSignRequest = useCallback(() => {
     setShowSignModal(false);
