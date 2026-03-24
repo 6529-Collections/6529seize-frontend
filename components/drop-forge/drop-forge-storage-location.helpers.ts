@@ -15,8 +15,12 @@ export interface DropForgeStorageLocationInfo {
 
 const IPFS_PROTOCOL_PREFIX = "ipfs://";
 const ARWEAVE_PROTOCOL_PREFIX = "ar://";
+const IPFS_CIDV0_PATTERN = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
+const IPFS_CIDV1_PATTERN = /^b[a-z2-7]{20,}$/;
 
 const isHttpUrl = (value: string): boolean => /^https?:\/\//i.test(value);
+const isBareIpfsCid = (value: string): boolean =>
+  IPFS_CIDV0_PATTERN.test(value) || IPFS_CIDV1_PATTERN.test(value);
 
 const toRootIdentifier = (value: string): string => {
   const [identifier] = value.split("/");
@@ -133,6 +137,10 @@ export function getDropForgeStorageLocationInfo(
       openUrl: trimmedValue,
       copyValue: trimmedValue,
     };
+  }
+
+  if (isBareIpfsCid(trimmedValue)) {
+    return buildIpfsLocationInfo(trimmedValue, trimmedValue);
   }
 
   return buildArweaveLocationInfo(trimmedValue, trimmedValue);

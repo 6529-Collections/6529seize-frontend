@@ -24,12 +24,12 @@ import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
-import { getDropForgeStorageLocationInfo } from "@/components/drop-forge/drop-forge-storage-location.helpers";
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
+import DropForgeStorageLinkCard from "@/components/drop-forge/DropForgeStorageLinkCard";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
@@ -1641,28 +1641,10 @@ function ArweaveLinkRow({
   label,
   cid,
 }: Readonly<{ label: string; cid: string | null | undefined }>) {
-  const locationInfo = getDropForgeStorageLocationInfo(cid);
-
   return (
-    <DropForgeLinkCard
-      label={
-        <span className="tw-flex tw-items-center tw-gap-2">
-          <span>{label}</span>
-          {locationInfo?.providerBadgeLabel ? (
-            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/15 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-500/30">
-              {locationInfo.providerBadgeLabel}
-            </span>
-          ) : null}
-        </span>
-      }
-      displayValue={locationInfo?.displayValue}
-      displayTitle={locationInfo?.displayTitle}
-      copyValue={locationInfo?.copyValue}
-      openUrl={locationInfo?.openUrl}
-      copyLabel={`Copy ${label} link`}
-      openLabel={`Open ${label} ${
-        locationInfo?.provider === "ipfs" ? "on IPFS" : "on Arweave"
-      }`}
+    <DropForgeStorageLinkCard
+      label={label}
+      value={cid}
       cardClassName={ARWEAVE_LINK_CARD}
       labelClassName="tw-min-w-0 tw-text-base tw-text-iron-200"
     />

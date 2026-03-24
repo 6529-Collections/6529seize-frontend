@@ -8,6 +8,13 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
 import { getDropForgeStorageLocationInfo } from "@/components/drop-forge/drop-forge-storage-location.helpers";
 
 describe("getDropForgeStorageLocationInfo", () => {
+  it("returns null for empty inputs", () => {
+    expect(getDropForgeStorageLocationInfo(null)).toBeNull();
+    expect(getDropForgeStorageLocationInfo(undefined)).toBeNull();
+    expect(getDropForgeStorageLocationInfo("")).toBeNull();
+    expect(getDropForgeStorageLocationInfo("   ")).toBeNull();
+  });
+
   it("treats bare transaction ids as arweave locations", () => {
     expect(
       getDropForgeStorageLocationInfo(
@@ -23,6 +30,24 @@ describe("getDropForgeStorageLocationInfo", () => {
         "https://arweave.net/OI6-rpJ2C3Ab4HiZRWt5A1SumhjnYigmSPBPX0ICBj8",
       copyValue:
         "https://arweave.net/OI6-rpJ2C3Ab4HiZRWt5A1SumhjnYigmSPBPX0ICBj8",
+    });
+  });
+
+  it("treats ar:// locations as arweave locations", () => {
+    expect(
+      getDropForgeStorageLocationInfo(
+        "ar://OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc"
+      )
+    ).toEqual({
+      rawValue: "ar://OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
+      displayValue: "OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
+      displayTitle: "ar://OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
+      provider: "arweave",
+      providerBadgeLabel: null,
+      openUrl:
+        "https://arweave.net/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
+      copyValue:
+        "https://arweave.net/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
     });
   });
 
@@ -44,6 +69,42 @@ describe("getDropForgeStorageLocationInfo", () => {
         "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
       copyValue:
         "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+    });
+  });
+
+  it("treats bare ipfs cids as ipfs locations", () => {
+    expect(
+      getDropForgeStorageLocationInfo(
+        "bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa"
+      )
+    ).toEqual({
+      rawValue: "bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+      displayValue:
+        "bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+      displayTitle:
+        "bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+      provider: "ipfs",
+      providerBadgeLabel: "IPFS",
+      openUrl:
+        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+      copyValue:
+        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+    });
+
+    expect(
+      getDropForgeStorageLocationInfo(
+        "QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY"
+      )
+    ).toEqual({
+      rawValue: "QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
+      displayValue: "QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
+      displayTitle: "QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
+      provider: "ipfs",
+      providerBadgeLabel: "IPFS",
+      openUrl:
+        "https://gateway.example/ipfs/QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
+      copyValue:
+        "https://gateway.example/ipfs/QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
     });
   });
 
