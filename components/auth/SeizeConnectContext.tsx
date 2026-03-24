@@ -20,11 +20,6 @@ import { getAddress, isAddress } from "viem";
 import { getNodeEnv, publicEnv } from "@/config/env";
 import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import {
-  clearPendingWavesAuthReturnUrl,
-  getPendingWavesAuthReturnUrl,
-  preparePendingWavesAuthReturnUrlForCurrentLocation,
-} from "@/helpers/waves-auth-return.helpers";
-import {
   canStoreAnotherWalletAccount,
   type ConnectedWalletAccount,
   getConnectedWalletAccounts,
@@ -211,7 +206,6 @@ const isCapacitorPlatform = (): boolean => {
 const normalizeAddress = (address: string): string => address.toLowerCase();
 
 const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
-const WAVES_AUTH_RETURN_CLEAR_GRACE_MS: number = 5000;
 
 const validateStoredAddress = (
   storedAddress: string
@@ -747,34 +741,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     state.open,
   ]);
 
-  useEffect(() => {
-    const pendingWavesReturnUrl = getPendingWavesAuthReturnUrl();
-    if (!pendingWavesReturnUrl) {
-      return;
-    }
-
-    const hasLiveProviderConnection = Boolean(
-      account.address && account.isConnected && isAddress(account.address)
-    );
-    const isConnectFlowActive =
-      state.open ||
-      account.status === "connecting" ||
-      account.status === "reconnecting" ||
-      hasLiveProviderConnection;
-
-    if (isConnectFlowActive) {
-      return;
-    }
-
-    const clearTimer = setTimeout(() => {
-      clearPendingWavesAuthReturnUrl();
-    }, WAVES_AUTH_RETURN_CLEAR_GRACE_MS);
-
-    return () => {
-      clearTimeout(clearTimer);
-    };
-  }, [account.address, account.isConnected, account.status, state.open]);
-
   const activeAddress = impersonatedAddress ?? connectedAddress;
   const liveConnectedAddress =
     impersonatedAddress ||
@@ -789,8 +755,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeConnect = useCallback((): void => {
     try {
-      preparePendingWavesAuthReturnUrlForCurrentLocation();
-
       // Log connection attempt for security monitoring
       logSecurityEvent(
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,
@@ -805,8 +769,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         createConnectionEventContext("seizeConnect")
       );
     } catch (error) {
-      clearPendingWavesAuthReturnUrl();
-
       const connectionError = new WalletConnectionError(
         "Failed to open wallet connection modal",
         error
