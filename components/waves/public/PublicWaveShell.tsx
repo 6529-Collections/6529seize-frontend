@@ -1,11 +1,11 @@
 "use client";
 
-import ConnectWallet from "@/components/common/ConnectWallet";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import WavePicture from "@/components/waves/WavePicture";
 import { formatCount } from "@/helpers/format.helpers";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
+import WaveScreenMessage from "../WaveScreenMessage";
 import LoggedOutSkeleton from "./LoggedOutSkeleton";
 import {
   type PublicWaveShellData,
@@ -34,13 +34,19 @@ function compactDescriptionText(text: string): string {
 function PublicWaveLoadingState() {
   return (
     <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-py-8">
-      <SpinnerLoader text="Loading wave overview..." />
+      <SpinnerLoader text="Loading wave..." />
     </div>
   );
 }
 
 function PublicWaveUnavailableState() {
-  return <ConnectWallet />;
+  return (
+    <WaveScreenMessage
+      title="This wave isn't available publicly"
+      description="Connect your wallet to check whether you have access."
+      action={<HeaderUserConnect label="Connect Wallet" />}
+    />
+  );
 }
 
 function PublicWaveShellContent({
@@ -73,19 +79,19 @@ function PublicWaveShellContent({
 
               <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-items-center tw-px-6 tw-pb-10 tw-pt-10 tw-text-center md:tw-px-10">
                 <div className="tw-mb-1 tw-flex tw-max-w-md tw-flex-col tw-items-center tw-justify-center tw-gap-4">
-                  <div className="tw-size-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/10 tw-ring-offset-4 tw-ring-offset-iron-950 tw-shadow-2xl sm:tw-size-14">
+                  <div className="tw-size-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-shadow-2xl tw-ring-1 tw-ring-white/10 tw-ring-offset-4 tw-ring-offset-iron-950 sm:tw-size-14">
                     <WavePicture
                       name={wave.name}
                       picture={wave.picture}
                       contributors={[]}
                     />
                   </div>
-                  <h2 className="tw-mb-2 tw-text-white tw-text-xl tw-font-semibold tw-leading-[1.05] tw-tracking-tighter tw-text-transparent sm:tw-text-2xl md:tw-text-3xl">
+                  <h2 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-[1.05] tw-tracking-tighter tw-text-transparent tw-text-white sm:tw-text-2xl md:tw-text-3xl">
                     {wave.name}
                   </h2>
                 </div>
                 {hasDescription && (
-                  <p className="tw-mb-10 tw-pb-0 tw-max-w-md tw-text-pretty tw-text-sm tw-font-normal tw-text-iron-400 md:tw-text-md">
+                  <p className="tw-mb-10 tw-max-w-md tw-text-pretty tw-pb-0 tw-text-sm tw-font-normal tw-text-iron-400 md:tw-text-md">
                     {description}
                   </p>
                 )}
