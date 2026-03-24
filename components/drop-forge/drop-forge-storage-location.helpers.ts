@@ -1,9 +1,9 @@
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { stripArweaveGatewayUrlPrefix } from "@/lib/media/arweave-gateways";
 
-export type DropForgeStorageProvider = "arweave" | "ipfs";
+type DropForgeStorageProvider = "arweave" | "ipfs";
 
-export interface DropForgeStorageLocationInfo {
+interface DropForgeStorageLocationInfo {
   readonly rawValue: string;
   readonly displayValue: string;
   readonly displayTitle: string;
