@@ -1547,7 +1547,7 @@ function MetadataSection({
     <form
       onSubmit={handleTraitsSave}
       noValidate
-      className="tw-flex tw-flex-col tw-gap-2"
+      className="tw-flex tw-flex-col tw-gap-4"
     >
       <ArtworkDetails
         title={traits.title}
@@ -1598,7 +1598,7 @@ function MetadataSection({
           {traitsError}
         </p>
       )}
-      <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2 tw-pt-4">
         <button
           ref={traitsSaveButtonRef}
           type="submit"
