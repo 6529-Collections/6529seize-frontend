@@ -440,10 +440,7 @@ function MediaSourceLinkCard({
           )}
         </div>
       </div>
-      <div
-        className={contentClassName}
-        title={hasUrl ? trimmedUrl : undefined}
-      >
+      <div className={contentClassName} title={hasUrl ? trimmedUrl : undefined}>
         {displayText}
       </div>
     </div>
@@ -471,7 +468,8 @@ function DropForgeCraftClaimHeader({
             href={dropHref}
             className={HEADER_ACTION_LINK_CLASS}
             target={isApp ? undefined : "_blank"}
-            rel={isApp ? undefined : "noopener noreferrer"}>
+            rel={isApp ? undefined : "noopener noreferrer"}
+          >
             Go to Drop
             <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
           </Link>
@@ -887,11 +885,7 @@ function AnimationReplaceControls({
   if (replaceMode === null) {
     return (
       <>
-        <button
-          type="button"
-          onClick={onChooseUpload}
-          className={BTN_PRIMARY}
-        >
+        <button type="button" onClick={onChooseUpload} className={BTN_PRIMARY}>
           {animationActionLabel}
         </button>
         {canRemoveAnimation && (
@@ -910,18 +904,10 @@ function AnimationReplaceControls({
   if (replaceMode === "choose") {
     return (
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-800 tw-p-3">
-        <button
-          type="button"
-          onClick={onChooseUpload}
-          className={BTN_PRIMARY}
-        >
+        <button type="button" onClick={onChooseUpload} className={BTN_PRIMARY}>
           Upload from device
         </button>
-        <button
-          type="button"
-          onClick={onSwitchToLink}
-          className={BTN_SUCCESS}
-        >
+        <button type="button" onClick={onSwitchToLink} className={BTN_SUCCESS}>
           Paste link
         </button>
         <button type="button" onClick={onCancel} className={BTN_TERTIARY}>
@@ -974,8 +960,9 @@ function AnimationSection({
     animationDisplayUrl,
     mediaType,
   });
-  const animationPreviewLabel =
-    getAnimationPreviewLabel(animationPreviewMimeType);
+  const animationPreviewLabel = getAnimationPreviewLabel(
+    animationPreviewMimeType
+  );
   const animationSourceCardProps = getAnimationSourceCardProps({
     pendingAnimationFile,
     pendingAnimation,
@@ -1099,15 +1086,11 @@ function AnimationSection({
   }, [onPendingChange]);
 
   const showAddFlow =
-    !hasAnimation &&
-    !hasPendingAnimationChange &&
-    !hasPendingAnimationUpload;
+    !hasAnimation && !hasPendingAnimationChange && !hasPendingAnimationUpload;
   const showChoice = showAddFlow && replaceMode === "choose";
   const showAddLink = showAddFlow && replaceMode === "link";
   const showAnimationControls =
-    hasAnimation ||
-    hasPendingAnimationChange ||
-    hasPendingAnimationUpload;
+    hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload;
   const animationActionLabel =
     pendingAnimation === null ? "Add animation" : "Replace";
 
