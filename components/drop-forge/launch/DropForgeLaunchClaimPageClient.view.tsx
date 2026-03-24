@@ -3,7 +3,6 @@
 import {
   ArrowLeftIcon,
   ArrowTopRightOnSquareIcon,
-  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Toggle from "react-toggle";
@@ -20,6 +19,7 @@ import {
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeExplorerLink from "@/components/drop-forge/DropForgeExplorerLink";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
+import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
@@ -396,56 +396,18 @@ function DropForgeArweaveLinkCard({
 }: Readonly<{ label: string; value: string | null | undefined }>) {
   const trimmedValue = value?.trim() ?? "";
   const url = toArweaveUrl(trimmedValue || undefined);
-  const hasCid = Boolean(trimmedValue && url);
-
-  async function handleCopy() {
-    if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // ignore clipboard failures
-    }
-  }
 
   return (
-    <div className={ARWEAVE_LINK_CARD_CLASS}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-min-w-0 tw-text-base tw-text-iron-200">{label}</div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-          {hasCid && url && (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  void handleCopy();
-                }}
-                className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-                aria-label={`Copy ${label} link`}
-              >
-                <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
-              </button>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
-                aria-label={`Open ${label} on Arweave`}
-              >
-                <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
-              </a>
-            </>
-          )}
-        </div>
-      </div>
-      <div
-        className={`tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
-          hasCid ? "tw-text-white" : "tw-text-iron-500"
-        }`}
-        title={hasCid ? trimmedValue : undefined}
-      >
-        {hasCid ? trimmedValue : "—"}
-      </div>
-    </div>
+    <DropForgeLinkCard
+      label={label}
+      displayValue={trimmedValue}
+      copyValue={url}
+      openUrl={url}
+      copyLabel={`Copy ${label} link`}
+      openLabel={`Open ${label} on Arweave`}
+      cardClassName={ARWEAVE_LINK_CARD_CLASS}
+      labelClassName="tw-min-w-0 tw-text-base tw-text-iron-200"
+    />
   );
 }
 
