@@ -463,15 +463,3 @@ export function getSafeExternalUrl(
     return null;
   }
 }
-
-export function toArweaveUrl(
-  location: string | null | undefined
-): string | null {
-  if (!location) return null;
-  const trimmed = location.trim();
-  if (!trimmed) return null;
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    return trimmed;
-  }
-  return `https://arweave.net/${trimmed}`;
-}

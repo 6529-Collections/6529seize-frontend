@@ -4,10 +4,11 @@ import {
   ArrowTopRightOnSquareIcon,
   DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_CARD_CLASS_NAME =
-  "tw-flex tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
+  "tw-flex tw-h-full tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
 const DEFAULT_LABEL_CLASS_NAME =
   "tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-200";
 const ACTION_BUTTON_CLASS_NAME =
@@ -16,6 +17,7 @@ const ACTION_BUTTON_CLASS_NAME =
 export default function DropForgeLinkCard({
   label,
   displayValue,
+  displayTitle,
   emptyText = "—",
   copyValue,
   openUrl,
@@ -24,15 +26,16 @@ export default function DropForgeLinkCard({
   cardClassName = DEFAULT_CARD_CLASS_NAME,
   labelClassName = DEFAULT_LABEL_CLASS_NAME,
 }: Readonly<{
-  label: string;
+  label: ReactNode;
   displayValue: string | null | undefined;
+  displayTitle?: string | null | undefined;
   emptyText?: string;
   copyValue?: string | null | undefined;
   openUrl?: string | null | undefined;
   copyLabel: string;
   openLabel: string;
-  cardClassName?: string;
-  labelClassName?: string;
+  cardClassName?: string | undefined;
+  labelClassName?: string | undefined;
 }>) {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -86,7 +89,7 @@ export default function DropForgeLinkCard({
 
   return (
     <div className={cardClassName}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+      <div className="tw-flex tw-min-h-10 tw-items-center tw-justify-between tw-gap-3">
         <div className={labelClassName}>{label}</div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
           {copied && (
@@ -118,11 +121,17 @@ export default function DropForgeLinkCard({
           )}
         </div>
       </div>
-      <div
-        className={valueClassName}
-        title={hasDisplayValue ? trimmedDisplayValue : undefined}
-      >
-        {hasDisplayValue ? trimmedDisplayValue : emptyText}
+      <div className="tw-flex tw-flex-1 tw-items-center">
+        <div
+          className={valueClassName}
+          title={
+            hasDisplayValue
+              ? displayTitle?.trim() || trimmedDisplayValue
+              : undefined
+          }
+        >
+          {hasDisplayValue ? trimmedDisplayValue : emptyText}
+        </div>
       </div>
     </div>
   );
