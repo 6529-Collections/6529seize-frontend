@@ -1,11 +1,18 @@
 import type React from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { publicEnv } from "@/config/env";
 import {
   ARWEAVE_FALLBACK_HOSTS,
   canonicalizeArweaveGatewayHostname,
   isArweaveGatewayRuntimeHost,
 } from "@/lib/media/arweave-gateways";
 import { parseIpfsUrl } from "@/helpers/Helpers";
+
+const DEFAULT_IPFS_GATEWAY_HOSTS = new Set([
+  "ipfs.io",
+  "www.ipfs.io",
+  "cf-ipfs.com",
+]);
 
 function dedupe(list: readonly string[]): string[] {
   return Array.from(new Set(list));
@@ -34,6 +41,47 @@ function isArweaveUrl(url: string): boolean {
 
 function isIpfsProtocolUrl(url: string): boolean {
   return url.trim().toLowerCase().startsWith("ipfs://");
+}
+
+function getConfiguredIpfsGatewayHost(): string | null {
+  const gatewayEndpoint = publicEnv.IPFS_GATEWAY_ENDPOINT;
+  if (!gatewayEndpoint) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(gatewayEndpoint);
+    return canonicalizeArweaveGatewayHostname(parsedUrl.hostname);
+  } catch {
+    return null;
+  }
+}
+
+function isKnownIpfsGatewayHost(hostname: string): boolean {
+  const normalizedHostname = canonicalizeArweaveGatewayHostname(hostname);
+  return (
+    DEFAULT_IPFS_GATEWAY_HOSTS.has(normalizedHostname) ||
+    normalizedHostname === getConfiguredIpfsGatewayHost()
+  );
+}
+
+function getIpfsProtocolUrlFromGatewayUrl(url: string): string | null {
+  const parsedUrl = safeParseUrl(url);
+  if (!parsedUrl || !isKnownIpfsGatewayHost(parsedUrl.hostname)) {
+    return null;
+  }
+
+  const pathMatch = /^\/ipfs\/(.+)$/.exec(parsedUrl.pathname);
+  if (!pathMatch) {
+    return null;
+  }
+
+  const identifierPath = pathMatch[1];
+  if (!identifierPath) {
+    return null;
+  }
+
+  return `ipfs://${identifierPath}${parsedUrl.search}${parsedUrl.hash}`;
 }
 
 function getIpfsFallbackUrls(url: string): string[] {
@@ -73,6 +121,10 @@ export function getArweaveGatewayFallbackUrls(url: string): string[] {
   }
   if (isIpfsProtocolUrl(trimmed)) {
     return getIpfsFallbackUrls(trimmed);
+  }
+  const ipfsProtocolUrl = getIpfsProtocolUrlFromGatewayUrl(trimmed);
+  if (ipfsProtocolUrl) {
+    return getIpfsFallbackUrls(ipfsProtocolUrl);
   }
   if (!isArweaveUrl(trimmed)) {
     return [trimmed];

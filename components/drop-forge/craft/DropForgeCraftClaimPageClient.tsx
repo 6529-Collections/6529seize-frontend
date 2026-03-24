@@ -44,6 +44,7 @@ import type { DistributionPhoto } from "@/entities/IDistribution";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimUpdateRequest } from "@/generated/models/MintingClaimUpdateRequest";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { fetchAllPages } from "@/services/6529api";
 import {
@@ -177,6 +178,148 @@ function getOpenableMediaUrl(value: string | null | undefined): string | null {
   return null;
 }
 
+function getImageSourceCardProps({
+  pendingImageFile,
+  claimImageUrl,
+  imageUrl,
+}: Readonly<{
+  pendingImageFile: File | null;
+  claimImageUrl: string | null | undefined;
+  imageUrl: string | null;
+}>): {
+  label: string;
+  url: string | null;
+  emptyText: string;
+} {
+  const hasPendingImageUpload = pendingImageFile instanceof File;
+
+  if (hasPendingImageUpload) {
+    return {
+      label: "Current image URL",
+      url: claimImageUrl ?? null,
+      emptyText: "Pending local upload. URL available after save.",
+    };
+  }
+
+  return {
+    label: "Image URL",
+    url: imageUrl,
+    emptyText: "No image URL",
+  };
+}
+
+function getAnimationDisplayUrl({
+  pendingAnimationFile,
+  pendingAnimationPreviewUrl,
+  pendingAnimation,
+  claimAnimationUrl,
+}: Readonly<{
+  pendingAnimationFile: File | null;
+  pendingAnimationPreviewUrl: string | null;
+  pendingAnimation: string | null | undefined;
+  claimAnimationUrl: string | null | undefined;
+}>): string | null | undefined {
+  if (pendingAnimationFile && pendingAnimationPreviewUrl) {
+    return pendingAnimationPreviewUrl;
+  }
+
+  if (pendingAnimation === undefined) {
+    return claimAnimationUrl;
+  }
+
+  return pendingAnimation;
+}
+
+function getAnimationPreviewMimeType({
+  pendingAnimationFile,
+  animationDisplayUrl,
+  mediaType,
+}: Readonly<{
+  pendingAnimationFile: File | null;
+  animationDisplayUrl: string | null | undefined;
+  mediaType: ClaimMediaType;
+}>): string | null {
+  if (pendingAnimationFile) {
+    const mime = pendingAnimationFile.type?.toLowerCase();
+    if (mime) return mime;
+    const name = pendingAnimationFile.name.toLowerCase();
+    if (name.endsWith(".glb")) return "model/gltf-binary";
+    if (name.endsWith(".gltf")) return "model/gltf+json";
+  }
+
+  if (!animationDisplayUrl) {
+    return null;
+  }
+
+  const lowered = animationDisplayUrl.toLowerCase();
+  if (lowered.endsWith(".glb")) return "model/gltf-binary";
+  if (lowered.endsWith(".gltf")) return "model/gltf+json";
+  if (mediaType === "glb") return "model/gltf-binary";
+  if (mediaType === "video" || isVideoUrl(animationDisplayUrl)) {
+    return "video/mp4";
+  }
+  if (
+    mediaType === "html" ||
+    canonicalizeInteractiveMediaUrl(animationDisplayUrl) !== null
+  ) {
+    return "text/html";
+  }
+
+  return null;
+}
+
+function getAnimationPreviewLabel(mimeType: string | null): string {
+  if (mimeType?.startsWith("video/")) {
+    return "Video";
+  }
+  if (mimeType?.startsWith("model/gltf")) {
+    return "GLB";
+  }
+  if (mimeType === "text/html") {
+    return "HTML";
+  }
+
+  return "Animation";
+}
+
+function getAnimationSourceCardProps({
+  pendingAnimationFile,
+  pendingAnimation,
+  claimAnimationUrl,
+}: Readonly<{
+  pendingAnimationFile: File | null;
+  pendingAnimation: string | null | undefined;
+  claimAnimationUrl: string | null | undefined;
+}>): {
+  label: string;
+  url: string | null | undefined;
+  emptyText: string;
+} {
+  const hasPendingAnimationUpload = pendingAnimationFile instanceof File;
+
+  if (hasPendingAnimationUpload) {
+    return {
+      label: "Current animation URL",
+      url: claimAnimationUrl,
+      emptyText: "Pending local upload. URL available after save.",
+    };
+  }
+
+  if (pendingAnimation === null) {
+    return {
+      label: "Animation URL",
+      url: null,
+      emptyText: "Animation will be removed after save.",
+    };
+  }
+
+  return {
+    label: "Animation URL",
+    url: pendingAnimation === undefined ? claimAnimationUrl : pendingAnimation,
+    emptyText: "No animation URL",
+  };
+}
+
 function getPhotoFileName(link: string): string {
   const withoutHash = link.split("#")[0] ?? link;
   const withoutQuery = withoutHash.split("?")[0] ?? withoutHash;
@@ -234,6 +377,10 @@ function MediaSourceLinkCard({
   const trimmedUrl = url?.trim() ?? "";
   const hasUrl = trimmedUrl.length > 0;
   const openableUrl = getOpenableMediaUrl(trimmedUrl || undefined);
+  const contentClassName = `tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
+    hasUrl ? "tw-text-white" : "tw-text-iron-500"
+  }`;
+  const displayText = hasUrl ? trimmedUrl : emptyText;
 
   async function handleCopy() {
     if (!hasUrl) return;
@@ -294,27 +441,10 @@ function MediaSourceLinkCard({
         </div>
       </div>
       <div
-        className={`tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
-          hasUrl ? "tw-text-white" : "tw-text-iron-500"
-        }`}
+        className={contentClassName}
         title={hasUrl ? trimmedUrl : undefined}
       >
-        {hasUrl ? (
-          openableUrl ? (
-            <a
-              href={openableUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:tw-text-primary-200 tw-text-primary-300 tw-no-underline"
-            >
-              {trimmedUrl}
-            </a>
-          ) : (
-            trimmedUrl
-          )
-        ) : (
-          emptyText
-        )}
+        {displayText}
       </div>
     </div>
   );
@@ -327,6 +457,8 @@ function DropForgeCraftClaimHeader({
   pageTitle: string;
   dropHref?: string;
 }>) {
+  const { isApp } = useDeviceInfo();
+
   return (
     <div className="tw-mb-4 sm:tw-mb-6">
       <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
@@ -335,9 +467,13 @@ function DropForgeCraftClaimHeader({
           Back to Craft list
         </Link>
         {dropHref ? (
-          <Link href={dropHref} className={HEADER_ACTION_LINK_CLASS}>
-            <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          <Link
+            href={dropHref}
+            className={HEADER_ACTION_LINK_CLASS}
+            target={isApp ? undefined : "_blank"}
+            rel={isApp ? undefined : "noopener noreferrer"}>
             Go to Drop
+            <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
           </Link>
         ) : null}
       </div>
@@ -476,7 +612,7 @@ export default function DropForgeCraftClaimPageClient({
     <div className={PAGE_CONTAINER_CLASS}>
       <DropForgeCraftClaimHeader
         pageTitle={pageTitle}
-        dropHref={craftDropHref}
+        {...(craftDropHref ? { dropHref: craftDropHref } : {})}
       />
 
       <div className="tw-flex tw-flex-col tw-gap-5">
@@ -570,8 +706,11 @@ function ImageSection({
   const [formError, setFormError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageUrl = pendingImagePreviewUrl ?? claim.image_url ?? null;
-  const imageSourceUrl =
-    pendingImageFile !== null ? (claim.image_url ?? null) : imageUrl;
+  const imageSourceCardProps = getImageSourceCardProps({
+    pendingImageFile,
+    claimImageUrl: claim.image_url,
+    imageUrl,
+  });
   const hasImage = imageUrl !== null;
   let imagePreviewMimeType = "image/jpeg";
   if (pendingImageFile?.type?.includes("image")) {
@@ -633,7 +772,7 @@ function ImageSection({
     }
   }
 
-  const hasPendingChanges = pendingImageFile !== null;
+  const hasPendingChanges = pendingImageFile instanceof File;
 
   useEffect(() => {
     onPendingChange(hasPendingChanges);
@@ -681,13 +820,9 @@ function ImageSection({
           </button>
         )}
         <MediaSourceLinkCard
-          label={pendingImageFile !== null ? "Current image URL" : "Image URL"}
-          url={imageSourceUrl}
-          emptyText={
-            pendingImageFile !== null
-              ? "Pending local upload. URL available after save."
-              : "No image URL"
-          }
+          label={imageSourceCardProps.label}
+          url={imageSourceCardProps.url}
+          emptyText={imageSourceCardProps.emptyText}
         />
       </div>
       <form onSubmit={handleSave} className="tw-flex tw-flex-col tw-gap-2">
@@ -732,6 +867,73 @@ function ImageSection({
 
 type AnimationReplaceMode = "choose" | "link" | null;
 
+function AnimationReplaceControls({
+  replaceMode,
+  animationActionLabel,
+  canRemoveAnimation,
+  onChooseUpload,
+  onSwitchToLink,
+  onCancel,
+  onRemoveAnimation,
+}: Readonly<{
+  replaceMode: AnimationReplaceMode;
+  animationActionLabel: string;
+  canRemoveAnimation: boolean;
+  onChooseUpload: () => void;
+  onSwitchToLink: () => void;
+  onCancel: () => void;
+  onRemoveAnimation: () => void;
+}>) {
+  if (replaceMode === null) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={onChooseUpload}
+          className={BTN_PRIMARY}
+        >
+          {animationActionLabel}
+        </button>
+        {canRemoveAnimation && (
+          <button
+            type="button"
+            onClick={onRemoveAnimation}
+            className={BTN_DANGER}
+          >
+            Remove animation
+          </button>
+        )}
+      </>
+    );
+  }
+
+  if (replaceMode === "choose") {
+    return (
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-800 tw-p-3">
+        <button
+          type="button"
+          onClick={onChooseUpload}
+          className={BTN_PRIMARY}
+        >
+          Upload from device
+        </button>
+        <button
+          type="button"
+          onClick={onSwitchToLink}
+          className={BTN_SUCCESS}
+        >
+          Paste link
+        </button>
+        <button type="button" onClick={onCancel} className={BTN_TERTIARY}>
+          Cancel
+        </button>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 function AnimationSection({
   claim,
   claimId,
@@ -761,48 +963,24 @@ function AnimationSection({
   const animationInputRef = useRef<HTMLInputElement>(null);
   const mediaType = getClaimMediaType(claim);
   const hasAnimation = Boolean(claim.animation_url);
-  const imageUrl = claim.image_url ?? null;
-  let animationDisplayUrl: string | null | undefined;
-  if (pendingAnimationFile && pendingAnimationPreviewUrl) {
-    animationDisplayUrl = pendingAnimationPreviewUrl;
-  } else if (pendingAnimation === undefined) {
-    animationDisplayUrl = claim.animation_url;
-  } else {
-    animationDisplayUrl = pendingAnimation;
-  }
-  const isAnimationVideoUrl = Boolean(
-    animationDisplayUrl && isVideoUrl(animationDisplayUrl)
-  );
-  const animationPreviewMimeType = (() => {
-    if (pendingAnimationFile) {
-      const mime = pendingAnimationFile.type?.toLowerCase();
-      if (mime) return mime;
-      const name = pendingAnimationFile.name.toLowerCase();
-      if (name.endsWith(".glb")) return "model/gltf-binary";
-      if (name.endsWith(".gltf")) return "model/gltf+json";
-    }
-    if (!animationDisplayUrl) return null;
-    const lowered = animationDisplayUrl.toLowerCase();
-    if (lowered.endsWith(".glb")) return "model/gltf-binary";
-    if (lowered.endsWith(".gltf")) return "model/gltf+json";
-    if (mediaType === "glb") return "model/gltf-binary";
-    if (mediaType === "video" || isAnimationVideoUrl) return "video/mp4";
-    if (
-      mediaType === "html" ||
-      canonicalizeInteractiveMediaUrl(animationDisplayUrl) !== null
-    ) {
-      return "text/html";
-    }
-    return null;
-  })();
-  let animationPreviewLabel = "Animation";
-  if (animationPreviewMimeType?.startsWith("video/")) {
-    animationPreviewLabel = "Video";
-  } else if (animationPreviewMimeType?.startsWith("model/gltf")) {
-    animationPreviewLabel = "GLB";
-  } else if (animationPreviewMimeType === "text/html") {
-    animationPreviewLabel = "HTML";
-  }
+  const animationDisplayUrl = getAnimationDisplayUrl({
+    pendingAnimationFile,
+    pendingAnimationPreviewUrl,
+    pendingAnimation,
+    claimAnimationUrl: claim.animation_url,
+  });
+  const animationPreviewMimeType = getAnimationPreviewMimeType({
+    pendingAnimationFile,
+    animationDisplayUrl,
+    mediaType,
+  });
+  const animationPreviewLabel =
+    getAnimationPreviewLabel(animationPreviewMimeType);
+  const animationSourceCardProps = getAnimationSourceCardProps({
+    pendingAnimationFile,
+    pendingAnimation,
+    claimAnimationUrl: claim.animation_url,
+  });
 
   function clearPendingAnimationFileSelection() {
     setPendingAnimationFile(null);
@@ -906,15 +1084,11 @@ function AnimationSection({
     }
   }
 
+  const hasPendingAnimationChange = pendingAnimation !== undefined;
+  const hasPendingAnimationUpload = pendingAnimationFile instanceof File;
   const hasPendingChanges =
-    pendingAnimation !== undefined || pendingAnimationFile !== null;
+    hasPendingAnimationChange || hasPendingAnimationUpload;
   const canRevert = hasPendingChanges;
-  const animationSourceUrl =
-    pendingAnimationFile !== null
-      ? (claim.animation_url ?? null)
-      : pendingAnimation === undefined
-        ? claim.animation_url
-        : pendingAnimation;
 
   useEffect(() => {
     onPendingChange(hasPendingChanges);
@@ -926,108 +1100,16 @@ function AnimationSection({
 
   const showAddFlow =
     !hasAnimation &&
-    pendingAnimation === undefined &&
-    pendingAnimationFile === null;
+    !hasPendingAnimationChange &&
+    !hasPendingAnimationUpload;
   const showChoice = showAddFlow && replaceMode === "choose";
   const showAddLink = showAddFlow && replaceMode === "link";
   const showAnimationControls =
     hasAnimation ||
-    pendingAnimation !== undefined ||
-    pendingAnimationFile !== null;
+    hasPendingAnimationChange ||
+    hasPendingAnimationUpload;
   const animationActionLabel =
     pendingAnimation === null ? "Add animation" : "Replace";
-
-  const renderReplaceControls = () => {
-    if (replaceMode === null) {
-      return (
-        <>
-          <button
-            type="button"
-            onClick={() => setReplaceMode("choose")}
-            className={BTN_PRIMARY}
-          >
-            {animationActionLabel}
-          </button>
-          {pendingAnimation !== null && (
-            <button
-              type="button"
-              onClick={handleRemoveAnimation}
-              className={BTN_DANGER}
-            >
-              Remove animation
-            </button>
-          )}
-        </>
-      );
-    }
-
-    if (replaceMode === "choose") {
-      return (
-        <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-800 tw-p-3">
-          <button
-            type="button"
-            onClick={() => animationInputRef.current?.click()}
-            className={BTN_PRIMARY}
-          >
-            Upload from device
-          </button>
-          <button
-            type="button"
-            onClick={() => setReplaceMode("link")}
-            className={BTN_SUCCESS}
-          >
-            Paste link
-          </button>
-          <button
-            type="button"
-            onClick={() => setReplaceMode(null)}
-            className={BTN_TERTIARY}
-          >
-            Cancel
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <>
-        <input
-          type="text"
-          value={linkInput}
-          onChange={(e) => {
-            setLinkInput(e.target.value);
-            setLinkError(null);
-          }}
-          placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
-          className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
-        />
-        {linkError && (
-          <p
-            className="tw-mb-0 tw-w-full tw-text-sm tw-text-rose-300"
-            role="alert"
-          >
-            {linkError}
-          </p>
-        )}
-        <div className="tw-flex tw-flex-wrap tw-gap-2">
-          <button type="button" onClick={applyLink} className={BTN_SUCCESS}>
-            Use link
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setReplaceMode(null);
-              setLinkInput("");
-              setLinkError(null);
-            }}
-            className={BTN_TERTIARY}
-          >
-            Cancel
-          </button>
-        </div>
-      </>
-    );
-  };
 
   return (
     <div>
@@ -1107,19 +1189,9 @@ function AnimationSection({
               </p>
             )}
             <MediaSourceLinkCard
-              label={
-                pendingAnimationFile !== null
-                  ? "Current animation URL"
-                  : "Animation URL"
-              }
-              url={animationSourceUrl}
-              emptyText={
-                pendingAnimation === null
-                  ? "Animation will be removed after save."
-                  : pendingAnimationFile !== null
-                    ? "Pending local upload. URL available after save."
-                    : "No animation URL"
-              }
+              label={animationSourceCardProps.label}
+              url={animationSourceCardProps.url}
+              emptyText={animationSourceCardProps.emptyText}
             />
           </>
         )}
@@ -1169,7 +1241,15 @@ function AnimationSection({
 
         {showAnimationControls && (
           <div className="tw-flex tw-flex-wrap tw-gap-2">
-            {renderReplaceControls()}
+            <AnimationReplaceControls
+              replaceMode={replaceMode}
+              animationActionLabel={animationActionLabel}
+              canRemoveAnimation={pendingAnimation !== null}
+              onChooseUpload={() => animationInputRef.current?.click()}
+              onSwitchToLink={() => setReplaceMode("link")}
+              onCancel={() => setReplaceMode(null)}
+              onRemoveAnimation={handleRemoveAnimation}
+            />
           </div>
         )}
       </div>

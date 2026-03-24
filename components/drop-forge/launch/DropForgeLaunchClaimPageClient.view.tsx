@@ -1950,7 +1950,7 @@ function DropForgeLaunchClaimContent({
 }: Readonly<
   Omit<
     DropForgeLaunchClaimPageViewProps,
-    "pageTitle" | "loading" | "error" | "rootsError"
+    "pageTitle" | "craftHref" | "loading" | "error" | "rootsError"
   >
 >) {
   if (!claim) {

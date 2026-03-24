@@ -104,6 +104,14 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     }
   }, [canonicalSrc]);
 
+  const iframeTitle = useMemo(() => {
+    if (!canonicalSrc) {
+      return title;
+    }
+
+    return `${title}: ${canonicalSrc}`;
+  }, [canonicalSrc, title]);
+
   const iframeProps = useMemo(() => {
     if (!canonicalSrc) {
       return null;
@@ -111,7 +119,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
 
     const baseProps = {
       src: canonicalSrc,
-      title,
+      title: iframeTitle,
       sandbox: DEFAULT_SANDBOX,
       // `allow=""` intentionally denies all Permission Policy features beyond the sandbox defaults.
       allow: "",
@@ -127,7 +135,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     baseProps.className = frameClassName;
 
     return baseProps;
-  }, [canonicalSrc, frameClassName, title]);
+  }, [canonicalSrc, frameClassName, iframeTitle]);
 
   if (!canonicalSrc || !iframeProps) {
     return fallback ? <>{fallback}</> : null;
