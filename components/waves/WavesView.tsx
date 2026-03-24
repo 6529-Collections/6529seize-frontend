@@ -9,6 +9,7 @@ import useDeviceInfo from "../../hooks/useDeviceInfo";
 import PrimaryButton from "../utils/button/PrimaryButton";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import WaveScreenMessage from "./WaveScreenMessage";
 
 const WavesView: React.FC = () => {
   const myStream = useMyStreamOptional();
@@ -22,32 +23,31 @@ const WavesView: React.FC = () => {
 
   let content: React.ReactNode = null;
 
-
   if (serialisedWaveId) {
     content = (
-      <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
+      <MyStreamWave
+        key={`wave-${serialisedWaveId}`}
+        waveId={serialisedWaveId}
+      />
     );
   } else if (showPlaceholder) {
     content = (
-      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-text-center tw-p-8">
-        <h2 className="tw-text-xl tw-font-bold tw-text-iron-50 tw-mb-4">
-          Select a Wave
-        </h2>
-        <p className="tw-text-iron-400 tw-max-w-md tw-mb-6 tw-text-sm sm:tw-text-base">
-          Choose a wave to view its content and participate in the discussion.
-        </p>
-
-        {connectedProfile && (
-          <PrimaryButton
-            onClicked={openWave}
-            disabled={false}
-            loading={false}
-          >
-            <PlusIcon className="tw-w-5 tw-h-5 -tw-ml-1" />
-            Create Wave
-          </PrimaryButton>
-        )}
-      </div>
+      <WaveScreenMessage
+        title="Select a Wave"
+        description="Choose a wave to view its content and participate in the discussion."
+        action={
+          connectedProfile ? (
+            <PrimaryButton
+              onClicked={openWave}
+              disabled={false}
+              loading={false}
+            >
+              <PlusIcon className="-tw-ml-1 tw-h-5 tw-w-5" />
+              Create Wave
+            </PrimaryButton>
+          ) : null
+        }
+      />
     );
   }
 
@@ -55,12 +55,9 @@ const WavesView: React.FC = () => {
   // internally via MyStreamWaveChat. We pass null to BrainContent because
   // the wave's internal state controls the reply/quote input box.
   return (
-    <BrainContent
-      activeDrop={null}
-      onCancelReplyQuote={() => { }}>
+    <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
       {content}
     </BrainContent>
-
   );
 };
 
