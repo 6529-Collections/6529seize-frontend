@@ -3,6 +3,11 @@
 import { getDropForgeStorageLocationInfo } from "@/components/drop-forge/drop-forge-storage-location.helpers";
 import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
 
+const OPEN_PROVIDER_LABELS = {
+  ipfs: "on IPFS",
+  arweave: "on Arweave",
+} as const;
+
 export default function DropForgeStorageLinkCard({
   label,
   value,
@@ -15,6 +20,9 @@ export default function DropForgeStorageLinkCard({
   labelClassName?: string;
 }>) {
   const locationInfo = getDropForgeStorageLocationInfo(value);
+  const openProviderLabel = locationInfo?.provider
+    ? OPEN_PROVIDER_LABELS[locationInfo.provider] ?? "on storage"
+    : "on storage";
 
   return (
     <DropForgeLinkCard
@@ -33,9 +41,7 @@ export default function DropForgeStorageLinkCard({
       copyValue={locationInfo?.copyValue}
       openUrl={locationInfo?.openUrl}
       copyLabel={`Copy ${label} link`}
-      openLabel={`Open ${label} ${
-        locationInfo?.provider === "ipfs" ? "on IPFS" : "on Arweave"
-      }`}
+      openLabel={`Open ${label} ${openProviderLabel}`}
       cardClassName={cardClassName}
       labelClassName={labelClassName}
     />
