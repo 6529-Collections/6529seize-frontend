@@ -97,6 +97,10 @@ export const publicEnvSchema = z.object({
     .union([z.enum(["true", "false"]), z.boolean()])
     .transform((value) => value === "true" || value === true)
     .optional(),
+  STANDALONE_MAIN_SITE_BASE: z
+    .string()
+    .url("STANDALONE_MAIN_SITE_BASE must be a valid URL")
+    .optional(),
   FEATURE_AB_CARD: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),
   NEXT_PUBLIC_DEBUG_NAV: z.string().optional(),

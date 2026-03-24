@@ -2,11 +2,11 @@
 
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import InteractiveMediaLoadGate from "@/components/drops/media/InteractiveMediaLoadGate";
-import { parseIpfsUrl } from "@/helpers/Helpers";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import { getArweaveGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
 import { ImageScale } from "@/helpers/image.helpers";
 import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
@@ -26,22 +26,66 @@ const MediaDisplayGLB = dynamic(() => import("./MediaDisplayGLB"), {
 });
 
 const DEFAULT_HTML_MEDIA_TITLE = "Interactive HTML media";
-
-const normalizeMediaUrl = (mediaUrl: string): string => parseIpfsUrl(mediaUrl);
+const IFRAME_FALLBACK_TIMEOUT_MS = 8000;
 
 function InteractiveHtmlMediaDisplay({
   media_url,
   previewImageUrl,
   imageScale = ImageScale.AUTOx1080,
+  requireInteractionToLoad = false,
 }: {
   readonly media_url: string;
   readonly previewImageUrl?: string | null | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly requireInteractionToLoad?: boolean | undefined;
 }) {
-  const [isActivated, setIsActivated] = useState(false);
-  const normalizedMediaUrl = normalizeMediaUrl(media_url);
+  const [isActivated, setIsActivated] = useState(!requireInteractionToLoad);
+  const urls = useMemo(
+    () => getArweaveGatewayFallbackUrls(media_url),
+    [media_url]
+  );
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [didLoadCurrentUrl, setDidLoadCurrentUrl] = useState(false);
+  const activeUrl = urls[activeIndex];
 
-  if (!isActivated) {
+  useEffect(() => {
+    setIsActivated(!requireInteractionToLoad);
+  }, [media_url, requireInteractionToLoad]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setDidLoadCurrentUrl(false);
+  }, [urls]);
+
+  useEffect(() => {
+    setDidLoadCurrentUrl(false);
+  }, [activeUrl]);
+
+  useEffect(() => {
+    if (!activeUrl || didLoadCurrentUrl || activeIndex + 1 >= urls.length) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      setActiveIndex((current) =>
+        current === activeIndex && current + 1 < urls.length
+          ? current + 1
+          : current
+      );
+    }, IFRAME_FALLBACK_TIMEOUT_MS);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [activeIndex, activeUrl, didLoadCurrentUrl, urls.length]);
+
+  const advanceToNextUrl = () => {
+    setActiveIndex((current) =>
+      current + 1 < urls.length ? current + 1 : current
+    );
+  };
+
+  if (requireInteractionToLoad && !isActivated) {
     return (
       <InteractiveMediaLoadGate onLoad={() => setIsActivated(true)}>
         {previewImageUrl ? (
@@ -51,11 +95,20 @@ function InteractiveHtmlMediaDisplay({
     );
   }
 
+  if (!activeUrl) {
+    return null;
+  }
+
   return (
     <SandboxedExternalIframe
+      key={activeUrl}
       title={DEFAULT_HTML_MEDIA_TITLE}
-      src={normalizedMediaUrl}
+      src={activeUrl}
       className="tw-h-full tw-w-full"
+      onLoad={() => {
+        setDidLoadCurrentUrl(true);
+      }}
+      onError={advanceToNextUrl}
     />
   );
 }
@@ -87,7 +140,6 @@ export default function MediaDisplay({
   readonly previewImageUrl?: string | null | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
 }) {
-  const normalizedMediaUrl = normalizeMediaUrl(media_url);
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
       return MediaType.IMAGE;
@@ -114,13 +166,14 @@ export default function MediaDisplay({
 
   const mediaType = getMediaType();
 
-  if (mediaType === MediaType.HTML && requireInteractionToLoad) {
+  if (mediaType === MediaType.HTML) {
     return (
       <InteractiveHtmlMediaDisplay
         key={`${media_mime_type}:${media_url}`}
         media_url={media_url}
         previewImageUrl={previewImageUrl}
         imageScale={imageScale}
+        requireInteractionToLoad={requireInteractionToLoad}
       />
     );
   }
@@ -152,14 +205,6 @@ export default function MediaDisplay({
         <MediaDisplayGLB
           src={media_url}
           disableMediaInteractions={disableMediaInteraction}
-        />
-      );
-    case MediaType.HTML:
-      return (
-        <SandboxedExternalIframe
-          title={DEFAULT_HTML_MEDIA_TITLE}
-          src={normalizedMediaUrl}
-          className="tw-h-full tw-w-full"
         />
       );
     case MediaType.UNKNOWN:

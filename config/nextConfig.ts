@@ -42,14 +42,16 @@ export function sharedConfig(
     transpilePackages: ["react-tweet"],
     poweredByHeader: false,
     logging: {
-      browserToTerminal: "error",
       incomingRequests: false,
     },
     async headers() {
       return [
         {
           source: "/:path*",
-          headers: createSecurityHeaders(publicEnv["API_ENDPOINT"]),
+          headers: createSecurityHeaders(
+            publicEnv["API_ENDPOINT"],
+            publicEnv["IPFS_GATEWAY_ENDPOINT"]
+          ),
         },
       ];
     },

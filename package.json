@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "build:env-schema": "node scripts/build-env-schema.cjs",
+    "export-mint-page": "npm run build:env-schema && node standalone/standalone-memes-mint/scripts/export-mint-page.cjs",
+    "export-mint-page:sync": "npm run export-mint-page -- --sync",
+    "export-mint-page:test": "npm run export-mint-page -- --test",
+    "export-mint-page:test:sync": "npm run export-mint-page -- --test --sync",
     "predev": "npm run build:env-schema",
     "dev": "node scripts/dev-with-fallback.cjs",
     "dev:webpack": "USE_TURBO=false node scripts/dev-with-fallback.cjs",
@@ -196,6 +200,7 @@
     "istanbul-lib-coverage": "^3.2.2",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jiti": "^2.6.1",
     "knip": "^5.50.5",
     "nodemon": "^3.1.4",
     "pino-pretty": "^13.1.2",

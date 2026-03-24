@@ -1,13 +1,27 @@
 "use client";
 
+import clsx from "clsx";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import {
+  type ReactNode,
+  type CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
+import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
+import DropPfp from "@/components/drops/create/utils/DropPfp";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
+import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import {
   ETHEREUM_ICON_TEXT,
   MANIFOLD_LAZY_CLAIM_CONTRACT,
@@ -23,14 +37,16 @@ import {
   numberWithCommas,
   parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
+import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim, MemePhase } from "@/hooks/useManifoldClaim";
 import {
   buildMemesPhases,
   ManifoldClaimStatus,
+  ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import styles from "./ManifoldMinting.module.scss";
+import { useIdentity } from "@/hooks/useIdentity";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import type {
   ArweaveAttribute,
@@ -38,6 +54,7 @@ import type {
   ManifoldMintMetadata,
 } from "./manifold-mint-metadata";
 import type { Chain } from "viem";
+import WalletConnectBalance from "@/components/wallet-connect-balance/WalletConnectBalance";
 
 interface Props {
   title: string;
@@ -46,6 +63,7 @@ interface Props {
   abi: any;
   mint_date: Time;
   mintMetadata: ManifoldMintMetadata;
+  standalone?: boolean;
 }
 
 interface MintMetadata {
@@ -80,6 +98,276 @@ function getDateTimeString(time: Time, local_timezone: boolean) {
   return `${d} ${t?.slice(0, 5)}`;
 }
 
+function getFeeLabelForPhase(phase: ManifoldPhase) {
+  if (phase === ManifoldPhase.PUBLIC) {
+    return "Manifold Fee (Public)";
+  }
+
+  return "Manifold Fee (Allowlist)";
+}
+
+enum MemePhaseCardStatus {
+  UPCOMING = "UPCOMING",
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+}
+
+function getMemePhaseCardStatus(
+  claim: ManifoldClaim,
+  phase: MemePhase
+): MemePhaseCardStatus {
+  if (
+    claim.memePhase?.id === phase.id &&
+    claim.status === ManifoldClaimStatus.ACTIVE
+  ) {
+    return MemePhaseCardStatus.ACTIVE;
+  }
+
+  if (phase.end.lt(Time.now()) || claim.isDropComplete) {
+    return MemePhaseCardStatus.COMPLETED;
+  }
+
+  return MemePhaseCardStatus.UPCOMING;
+}
+
+function getEligibleMintsDetails(
+  phaseId: string,
+  eligibleSpots: number | undefined,
+  status: MemePhaseCardStatus,
+  eligibilityState: "loading" | "ready" | "unavailable"
+): { text: string; className: string } {
+  if (phaseId === "public") {
+    if (status === MemePhaseCardStatus.ACTIVE) {
+      return {
+        text: "Unlimited spots",
+        className: "tw-font-semibold tw-text-success",
+      };
+    }
+
+    if (status === MemePhaseCardStatus.UPCOMING) {
+      return {
+        text: "Unlimited spots",
+        className: "tw-font-semibold tw-text-primary-300",
+      };
+    }
+
+    return {
+      text: "Unlimited spots",
+      className: "tw-font-semibold tw-text-red/75",
+    };
+  }
+
+  if (eligibilityState === "loading") {
+    return {
+      text: "Loading eligibility...",
+      className: "tw-text-iron-300",
+    };
+  }
+
+  if (eligibilityState === "unavailable") {
+    return {
+      text: "Eligibility unavailable",
+      className: "tw-text-iron-300",
+    };
+  }
+
+  if (eligibleSpots === undefined) {
+    return {
+      text: "No eligible spots",
+      className: "tw-text-iron-300",
+    };
+  }
+
+  if (eligibleSpots === 0) {
+    return {
+      text: "No eligible spots",
+      className: "tw-text-iron-300",
+    };
+  }
+
+  return {
+    text: `${eligibleSpots} eligible spot${eligibleSpots > 1 ? "s" : ""}`,
+    className: "tw-font-semibold tw-text-success",
+  };
+}
+
+function getPhaseDateLabels(status: MemePhaseCardStatus): {
+  start: string;
+  end: string;
+} {
+  if (status === MemePhaseCardStatus.ACTIVE) {
+    return { start: "Started", end: "Ends" };
+  }
+
+  if (status === MemePhaseCardStatus.COMPLETED) {
+    return { start: "Started", end: "Ended" };
+  }
+
+  return {
+    start: "Expected start",
+    end: "Expected end",
+  };
+}
+
+function getPhaseStatusClassName(status: MemePhaseCardStatus): string {
+  if (status === MemePhaseCardStatus.ACTIVE) {
+    return "tw-text-success";
+  }
+
+  if (status === MemePhaseCardStatus.UPCOMING) {
+    return "tw-text-primary-300";
+  }
+
+  return "tw-text-red/75";
+}
+
+function getHighlightedRingClassName(status: MemePhaseCardStatus): string {
+  if (status === MemePhaseCardStatus.ACTIVE) {
+    return "tw-border-success tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-success";
+  }
+
+  return "tw-border-primary-300 tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-primary-300";
+}
+
+function MetadataRow({
+  label,
+  value,
+}: {
+  readonly label: ReactNode;
+  readonly value: ReactNode;
+}) {
+  return (
+    <tr className="tw-border-b tw-border-white/5 last:tw-border-b-0">
+      <td className="tw-h-[46px] tw-w-[45%] tw-py-2 tw-pr-4 tw-align-middle">
+        {label}
+      </td>
+      <td className="tw-h-[46px] tw-w-[55%] tw-py-2 tw-align-middle">
+        {value}
+      </td>
+    </tr>
+  );
+}
+
+function StandaloneMintPageTopBar() {
+  return (
+    <div className="tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
+      <div className="tw-flex tw-items-center tw-justify-center tw-gap-3">
+        <img src="/6529.svg" alt="6529" width={28} height={28} />
+        <span className="tw-text-xl tw-font-bold tw-text-white">
+          The Memes by 6529 - Mint Page
+        </span>
+      </div>
+      <div
+        className="tw-flex tw-justify-center md:tw-justify-end"
+        style={
+          {
+            "--apkt-tokens-core-backgroundAccentPrimary": "#406AFE",
+            "--apkt-tokens-core-backgroundAccentPrimary-base": "#406AFE",
+            "--apkt-tokens-theme-textInvert": "#FFFFFF",
+            "--apkt-tokens-theme-iconInverse": "#FFFFFF",
+            "--apkt-borderRadius-2": "10px",
+            "--apkt-borderRadius-3": "12px",
+          } as CSSProperties
+        }
+      >
+        <WalletConnectBalance />
+      </div>
+    </div>
+  );
+}
+
+function ArtistInfoStrip({
+  handle,
+  name,
+  standalone = false,
+}: {
+  readonly handle: string;
+  readonly name: string | undefined;
+  readonly standalone?: boolean;
+}) {
+  const { profile } = useIdentity({
+    handleOrWallet: handle,
+    initialProfile: null,
+  });
+
+  const href = `/${handle}`;
+  const displayName = profile?.handle ?? name ?? handle;
+  const standaloneDisplayName = name ?? profile?.handle ?? handle;
+  const standaloneHref = `https://6529.io/${profile?.handle ?? handle}`;
+  const badgesProfile = useMemo(() => {
+    if (!profile) {
+      return null;
+    }
+
+    return {
+      id: profile.id,
+      handle: profile.handle,
+      pfp: profile.pfp,
+      banner1_color: getBannerColorValue(profile.banner1),
+      banner2_color: getBannerColorValue(profile.banner2),
+      cic: profile.cic,
+      rep: profile.rep,
+      tdh: profile.tdh,
+      tdh_rate: profile.tdh_rate,
+      xtdh: profile.xtdh,
+      xtdh_rate: profile.xtdh_rate,
+      level: profile.level,
+      primary_wallet: profile.primary_wallet,
+      active_main_stage_submission_ids:
+        profile.active_main_stage_submission_ids,
+      winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids,
+      artist_of_prevote_cards: profile.artist_of_prevote_cards,
+      is_wave_creator: profile.is_wave_creator,
+    };
+  }, [profile]);
+
+  if (standalone) {
+    return (
+      <a
+        href={standaloneHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="tw-inline-flex tw-items-center tw-gap-3 tw-pb-4 tw-pt-1 tw-text-white tw-no-underline hover:tw-text-white"
+      >
+        <DropPfp pfpUrl={profile?.pfp} />
+        <span className="tw-text-lg tw-font-medium tw-leading-none">
+          {standaloneDisplayName}
+        </span>
+      </a>
+    );
+  }
+
+  return (
+    <UserProfileTooltipWrapper user={handle}>
+      <div className="tw-inline-flex tw-items-center tw-gap-3 tw-pb-4 tw-pt-1">
+        <DropPfp pfpUrl={profile?.pfp} />
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+          <Link
+            href={href}
+            className="tw-text-white tw-no-underline hover:tw-text-white"
+          >
+            <span className="tw-text-lg tw-font-medium tw-leading-none">
+              {displayName}
+            </span>
+          </Link>
+          {!!profile?.level && (
+            <UserCICAndLevel
+              level={profile.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
+          )}
+          {badgesProfile && (
+            <DropAuthorBadges
+              profile={badgesProfile}
+              tooltipIdPrefix={`mint-artist-badges-${badgesProfile.id ?? handle}`}
+            />
+          )}
+        </div>
+      </div>
+    </UserProfileTooltipWrapper>
+  );
+}
+
 export default function ManifoldMinting(props: Readonly<Props>) {
   const [isError, setIsError] = useState<boolean>(false);
 
@@ -87,7 +375,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   const [descriptionClamped, setDescriptionClamped] = useState<boolean>(true);
   const [needsClamping, setNeedsClamping] = useState<boolean>(false);
-  const descriptionRef = useRef<HTMLSpanElement>(null);
+  const descriptionRef = useRef<HTMLDivElement>(null);
 
   const { claim: manifoldClaim, isFetching: isManifoldClaimFetching } =
     useManifoldClaim({
@@ -102,7 +390,13 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     });
 
   const [fee, setFee] = useState<number>(0);
-  const [mintForAddress, setMintForAddress] = useState<string>("");
+  const [mintForAddress, setMintForAddress] = useState<string | null>(null);
+  const pageContainerClassName =
+    "tw-mx-auto tw-w-full tw-max-w-7xl tw-px-4 md:tw-px-6";
+  const standalonePageContainerClassName = clsx(
+    pageContainerClassName,
+    props.standalone && "tw-pt-4"
+  );
 
   const instance = useMemo<MintMetadata | undefined>(() => {
     if (
@@ -156,6 +450,31 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
     return { name, handle };
   }, [instance?.asset.attributes]);
+  const artistNameLink = useMemo(() => {
+    if (!artist) {
+      return undefined;
+    }
+
+    const artistLabel = artist.name ?? artist.handle;
+
+    if (!artist.handle) {
+      return artistLabel;
+    }
+
+    if (props.standalone) {
+      return (
+        <a
+          href={`https://6529.io/${artist.handle}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {artistLabel}
+        </a>
+      );
+    }
+
+    return <Link href={`/${artist.handle}`}>{artistLabel}</Link>;
+  }, [artist, props.standalone]);
 
   useEffect(() => {
     if (instance) {
@@ -190,6 +509,8 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         chain={props.chain}
         abi={props.abi}
         claim={manifoldClaim}
+        local_timezone={isLocalTimezone}
+        hideConnect={props.standalone ?? false}
         setFee={setFee}
         setMintForAddress={setMintForAddress}
       />
@@ -198,26 +519,32 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   function printTitle() {
     return (
-      <Row className="pb-2">
-        <Col className="d-flex align-items-center gap-2">
-          <h2 className="mb-0">Mint {props.title}</h2>
-        </Col>
-      </Row>
+      <div className="tw-flex tw-items-center tw-gap-2 tw-py-8">
+        <h2 className="tw-mb-0 tw-text-3xl tw-font-semibold tw-text-white">
+          Mint {props.title}
+        </h2>
+      </div>
     );
   }
 
   function printTestnetIndicator() {
-    return (
-      <Row className="pb-2">
-        <Col className="d-flex justify-content-end">
-          <DropForgeTestnetIndicator />
-        </Col>
-      </Row>
-    );
+    return <DropForgeTestnetIndicator alignEnd padBottom />;
   }
 
   function printDistributionLink() {
     const contractPath = getPathForContract(props.contract);
+    if (props.standalone) {
+      return (
+        <a
+          href={`https://6529.io/${contractPath}/${props.mintMetadata.tokenId}/distribution`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Distribution Plan
+        </a>
+      );
+    }
+
     return (
       <Link
         href={`/${contractPath}/${props.mintMetadata.tokenId}/distribution`}
@@ -228,244 +555,83 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   function printDescription(i: MintMetadata) {
+    const rawDescription = i.asset.description ?? "";
+
     return (
-      <Container className="no-padding">
-        <Row>
-          <Col>
-            <span
-              ref={descriptionRef}
-              className={descriptionClamped ? styles["descriptionClamped"] : ""}
-              dangerouslySetInnerHTML={{
-                __html: parseNftDescriptionToHtml(i.asset.description ?? ""),
-              }}
-            />
-          </Col>
-        </Row>
-        {needsClamping && (
-          <Row>
-            <Col>
-              <button
-                className="btn btn-link decoration-none"
-                onClick={() => setDescriptionClamped(!descriptionClamped)}
-              >
-                <span className="font-smaller font-color-silver font-color-hover">
-                  {descriptionClamped ? "+ SHOW MORE" : "- SHOW LESS"}
-                </span>
-              </button>
-            </Col>
-          </Row>
+      <div>
+        <div>
+          <div
+            ref={descriptionRef}
+            className={
+              descriptionClamped
+                ? "tw-block tw-overflow-hidden tw-text-ellipsis [-webkit-box-orient:vertical] [-webkit-line-clamp:3] [display:-webkit-box]"
+                : undefined
+            }
+            dangerouslySetInnerHTML={{
+              __html: parseNftDescriptionToHtml(rawDescription),
+            }}
+          />
+        </div>
+        {(needsClamping ||
+          rawDescription.trim().length > 140 ||
+          rawDescription.includes("\n")) && (
+          <div className="tw-pt-2">
+            <button
+              type="button"
+              className="tw-border-0 tw-bg-transparent tw-p-0 !tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-text-white"
+              onClick={() => setDescriptionClamped(!descriptionClamped)}
+            >
+              {descriptionClamped ? "+ SHOW MORE" : "- SHOW LESS"}
+            </button>
+          </div>
         )}
-      </Container>
+      </div>
     );
   }
 
   function printActions(instance: MintMetadata, manifoldClaim: ManifoldClaim) {
     return (
-      <Col sm={{ span: 12, order: 2 }} md={{ span: 5, order: 1 }}>
-        <Container className="no-padding">
-          <Row className="pb-2">
-            <Col
-              xs={12}
-              className="d-flex align-items-center justify-content-between"
-            >
-              <Link
-                href={`/${getPathForContract(props.contract)}/${
-                  props.mintMetadata.tokenId
-                }`}
-              >
-                <h3 className="mb-0">{instance.asset.name ?? props.title}</h3>
-              </Link>
-            </Col>
-            <Col xs={12} className="pt-1 pb-3 font-lighter">
-              <span>
-                {getNameForContract(props.contract)} #
-                {props.mintMetadata.tokenId}
-              </span>
-            </Col>
-            <Col xs={12}>{printDescription(instance)}</Col>
-            <Col xs={12} className="pt-3">
-              <Table className={styles["spotsTable"]}>
-                <tbody>
-                  <tr>
-                    <td className="pt-2">Edition Size</td>
-                    <td className="pt-2">
-                      <span className="d-flex align-items-center justify-content-end tw-gap-1.5">
-                        {isManifoldClaimFetching && <Spinner dimension={12} />}
-                        <b>
-                          {numberWithCommas(manifoldClaim.total)} /{" "}
-                          {numberWithCommas(manifoldClaim.totalMax)}
-                          {manifoldClaim.remaining > 0 &&
-                            manifoldClaim.status !==
-                              ManifoldClaimStatus.ENDED && (
-                              <> ({manifoldClaim.remaining} remaining)</>
-                            )}
-                        </b>
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Col>
-            <Col xs={12} className="pt-3">
-              <NowMintingCountdown
-                nftId={props.mintMetadata.tokenId}
-                hideMintBtn={true}
-                contract={props.contract}
-                chainId={props.chain.id}
-              />
-            </Col>
-            <Col xs={12} className="pt-3">
-              {printMint()}
-            </Col>
-          </Row>
-        </Container>
-      </Col>
-    );
-  }
-
-  function printImage() {
-    if (!nftImage) {
-      return <></>;
-    }
-
-    return (
-      <Col sm={{ span: 12, order: 1 }} md={{ span: 7, order: 2 }}>
-        <NFTImage
-          nft={nftImage}
-          animation={true}
-          height="full"
-          showBalance={false}
-          transparentBG={true}
-        />
-      </Col>
-    );
-  }
-
-  if (!manifoldClaim) {
-    return (
-      <Container className="pt-4 pb-4 px-4">
-        {printTestnetIndicator()}
-        {printTitle()}
-        <Row className="pt-2">
-          <Col className="d-flex align-items-center gap-3">
-            {isError ? (
-              <span>Error fetching mint information</span>
-            ) : (
-              <>
-                <span>Retrieving Mint information</span>
-                <Spinner />
-              </>
-            )}
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  if (!instance || !nftImage) {
-    return (
-      <Container className="pt-4 pb-4 px-4">
-        {printTestnetIndicator()}
-        {printTitle()}
-        <Row>
-          <Col>
-            <p>No mint information found</p>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  return (
-    <Container className="pt-4 pb-4 px-4">
-      {printTestnetIndicator()}
-      <Row className="pb-3">
-        {printImage()}
-        {printActions(instance, manifoldClaim)}
-      </Row>
-      {areEqualAddresses(props.contract, MEMES_CONTRACT) && (
-        <Row className="pt-2 pb-3">
-          <Col>
-            <ManifoldMemesMintingPhases
-              address={mintForAddress}
-              contract={props.contract}
-              token_id={props.mintMetadata.tokenId}
-              mint_date={props.mint_date}
-              claim={manifoldClaim}
-              local_timezone={isLocalTimezone}
-            />
-          </Col>
-        </Row>
-      )}
-      <Row className="pt-2">
-        <Col xs={12} className="font-color-h">
-          Note: The start/end times have some variance. Watch this page or{" "}
-          <a
-            href="https://x.com/6529collections"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-color-h font-color-hover"
-          >
-            &#64;6529collections
-          </a>{" "}
-          for updates.
-        </Col>
-        <Col className="font-color-h pt-1">
-          All times are in{" "}
-          {isLocalTimezone ? (
-            <>
-              your local timezone.{" "}
-              <button
-                className="btn btn-link"
-                onClick={() => setIsLocalTimezone(false)}
-              >
-                <span className="font-color-hover">Change to UTC</span>
-              </button>
-            </>
+      <div className="tw-order-2 tw-py-8 md:tw-order-1 md:tw-col-span-5">
+        <div className="tw-flex tw-items-center tw-justify-between">
+          {props.standalone ? (
+            <div className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight tw-text-white">
+              {instance.asset.name ?? props.title}
+            </div>
           ) : (
-            <>
-              UTC.{" "}
-              <button
-                className="btn btn-link font-color-hover"
-                onClick={() => setIsLocalTimezone(true)}
-              >
-                <span className="font-color-hover">
-                  Change to your local timezone
-                </span>
-              </button>
-            </>
+            <Link
+              href={`/${getPathForContract(props.contract)}/${
+                props.mintMetadata.tokenId
+              }`}
+              className="tw-text-white hover:tw-text-white"
+            >
+              <div className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight">
+                {instance.asset.name ?? props.title}
+              </div>
+            </Link>
           )}
-        </Col>
-      </Row>
-      <hr />
-      <Row className="pb-2">
-        <Col sm={12} md={6} className="pt-1 pb-1">
-          <Table className={styles["spotsTable"]}>
+        </div>
+        <div className="tw-pb-3 tw-pt-1 tw-text-base tw-font-light tw-text-iron-200">
+          <span>
+            {getNameForContract(props.contract)} #{props.mintMetadata.tokenId}
+          </span>
+        </div>
+        {artist?.handle && (
+          <ArtistInfoStrip
+            handle={artist.handle}
+            name={artist.name ?? undefined}
+            standalone={props.standalone ?? false}
+          />
+        )}
+        <div className="tw-text-base tw-text-iron-100">
+          {printDescription(instance)}
+        </div>
+        <div className="tw-pt-3">
+          <table className="tw-w-full tw-border-separate tw-border-spacing-0">
             <tbody>
-              {artist && (
-                <tr>
-                  <td className="pt-2">Artist</td>
-                  <td className="pt-2">
-                    <b>
-                      {artist?.handle ? (
-                        <Link href={`/${artist.handle}`}>{artist.name}</Link>
-                      ) : (
-                        artist.name
-                      )}
-                    </b>
-                  </td>
-                </tr>
-              )}
-              <tr>
-                <td className="pt-2">Minting Approach</td>
-                <td className="pt-2">
-                  <b>{printDistributionLink()}</b>
-                </td>
-              </tr>
-              <tr>
-                <td className="pt-2">Edition Size</td>
-                <td className="pt-2">
-                  <span className="d-flex align-items-center tw-gap-1.5">
+              <MetadataRow
+                label="Edition Size"
+                value={
+                  <span className="tw-flex tw-items-center tw-justify-end tw-gap-1.5">
                     {isManifoldClaimFetching && <Spinner dimension={12} />}
                     <b>
                       {numberWithCommas(manifoldClaim.total)} /{" "}
@@ -476,60 +642,170 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                         )}
                     </b>
                   </span>
-                </td>
-              </tr>
-              <tr>
-                <td className="pt-2">Mint Price</td>
-                <td className="pt-2">
+                }
+              />
+            </tbody>
+          </table>
+        </div>
+        <div className="tw-pt-3">
+          <NowMintingCountdown
+            nftId={props.mintMetadata.tokenId}
+            hideMintBtn={true}
+            contract={props.contract}
+            chainId={props.chain.id}
+          />
+        </div>
+        <div className="tw-pt-3">{printMint()}</div>
+      </div>
+    );
+  }
+
+  function printImage() {
+    if (!nftImage) {
+      return <></>;
+    }
+
+    return (
+      <div className="tw-order-1 tw-flex tw-items-center tw-justify-center tw-pt-4 md:tw-order-2 md:tw-col-span-7 md:tw-h-screen md:tw-pt-0">
+        <NFTImage
+          nft={nftImage}
+          animation={true}
+          height="full"
+          showBalance={false}
+          transparentBG={true}
+        />
+      </div>
+    );
+  }
+
+  const printContent = (content: ReactNode, padContent?: boolean) => {
+    return (
+      <div className={standalonePageContainerClassName}>
+        {props.standalone && (
+          <div>
+            <StandaloneMintPageTopBar />
+            <div className="tw-mt-4 tw-h-px tw-w-full tw-bg-white/20" />
+          </div>
+        )}
+        {printTestnetIndicator()}
+        {!instance && !nftImage && printTitle()}
+        {padContent ? <div className="tw-pt-8">{content}</div> : content}
+      </div>
+    );
+  };
+
+  if (!manifoldClaim) {
+    return printContent(
+      <div>
+        {isError ? (
+          <span className="tw-text-iron-100">
+            Error fetching mint information
+          </span>
+        ) : (
+          <div className="tw-inline-flex tw-items-center tw-gap-3 tw-text-iron-100">
+            <span>Retrieving Mint information</span>
+            <Spinner />
+          </div>
+        )}
+      </div>,
+      true
+    );
+  }
+
+  if (!instance || !nftImage) {
+    return printContent(
+      <div>
+        <p className="tw-mb-0 tw-text-iron-100">No mint information found</p>
+      </div>,
+      true
+    );
+  }
+
+  return printContent(
+    <>
+      <div className="tw-grid tw-gap-8 md:tw-grid-cols-12">
+        {printImage()}
+        {printActions(instance, manifoldClaim)}
+      </div>
+      {areEqualAddresses(props.contract, MEMES_CONTRACT) && (
+        <>
+          <div className="tw-my-6 tw-h-px tw-w-full tw-bg-white/20" />
+          <div className="tw-pb-3 tw-pt-2">
+            <ManifoldMemesMintingPhases
+              address={mintForAddress}
+              contract={props.contract}
+              token_id={props.mintMetadata.tokenId}
+              mint_date={props.mint_date}
+              claim={manifoldClaim}
+              local_timezone={isLocalTimezone}
+            />
+          </div>
+        </>
+      )}
+      <div className="tw-grid tw-gap-1 tw-pt-2">
+        <div className="tw-text-base tw-text-iron-300">
+          Note: The start/end times have some variance. Watch this page or{" "}
+          <a
+            href="https://x.com/6529collections"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tw-text-iron-300 hover:tw-text-white"
+          >
+            &#64;6529collections
+          </a>{" "}
+          for updates.
+        </div>
+        <div className="tw-pt-1 tw-text-base tw-text-iron-300">
+          All times are in{" "}
+          {isLocalTimezone ? (
+            <>
+              your local timezone.{" "}
+              <button
+                type="button"
+                className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-base tw-text-iron-300 tw-underline hover:tw-text-white"
+                onClick={() => setIsLocalTimezone(false)}
+              >
+                Change to UTC
+              </button>
+            </>
+          ) : (
+            <>
+              UTC.{" "}
+              <button
+                type="button"
+                className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-base tw-text-iron-300 tw-underline hover:tw-text-white"
+                onClick={() => setIsLocalTimezone(true)}
+              >
+                Change to your local timezone
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="tw-my-6 tw-h-px tw-w-full tw-bg-white/20" />
+      <div className="tw-grid tw-gap-x-10 tw-gap-y-2 tw-pb-2 md:tw-grid-cols-2">
+        <div className="tw-pb-1 tw-pt-1">
+          <table className="tw-w-full tw-border-separate tw-border-spacing-0">
+            <tbody>
+              {artist && (
+                <MetadataRow label="Artist" value={<b>{artistNameLink}</b>} />
+              )}
+              <MetadataRow
+                label="Minting Approach"
+                value={<b>{printDistributionLink()}</b>}
+              />
+              <MetadataRow
+                label="Mint Price"
+                value={
                   <b>
                     {fromGWEI(Number(manifoldClaim.costWei ?? 0n)).toFixed(5)}{" "}
                     {ETHEREUM_ICON_TEXT}
                   </b>
-                </td>
-              </tr>
-              <tr>
-                <td className="pt-2">Status</td>
-                <td className="pt-2">
-                  <b>{capitalizeEveryWord(manifoldClaim.status)}</b>
-                </td>
-              </tr>
-            </tbody>
-          </Table>
-        </Col>
-        <Col sm={12} md={6} className="pt-1 pb-1">
-          <Table className={styles["spotsTable"]}>
-            <tbody>
-              <tr>
-                <td className="pt-2">Phase</td>
-                <td className="pt-2">
-                  <b>{manifoldClaim.phase}</b>
-                </td>
-              </tr>
-              <tr>
-                <td className="pt-2">Phase Start</td>
-                <td className="pt-2">
-                  <b>
-                    {getDateTimeString(
-                      Time.seconds(manifoldClaim.startDate),
-                      isLocalTimezone
-                    )}
-                  </b>
-                </td>
-              </tr>
-              <tr>
-                <td className="pt-2">Phase End</td>
-                <td className="pt-2">
-                  <b>
-                    {getDateTimeString(
-                      Time.seconds(manifoldClaim.endDate),
-                      isLocalTimezone
-                    )}
-                  </b>
-                </td>
-              </tr>
-              <tr>
-                <td className="pt-2">Manifold Fee</td>
-                <td className="pt-2">
+                }
+              />
+              <MetadataRow
+                label={getFeeLabelForPhase(manifoldClaim.phase)}
+                value={
                   <b>
                     {fee ? (
                       <>
@@ -539,36 +815,87 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                       <>-</>
                     )}
                   </b>
-                </td>
-              </tr>
-              <tr>
-                <td className="pt-2">Total Price Per Token</td>
-                <td className="pt-2">
+                }
+              />
+              <MetadataRow
+                label="Total Price Per Token"
+                value={
                   <b>
                     {fromGWEI(
                       Number(manifoldClaim.costWei ?? 0n) + fee
                     ).toFixed(5)}{" "}
                     {ETHEREUM_ICON_TEXT}
                   </b>
-                </td>
-              </tr>
+                }
+              />
             </tbody>
-          </Table>
-        </Col>
-      </Row>
-      <hr />
-      <Row className="pt-3 pb-3">
-        <Col>
-          <NFTAttributes attributes={instance.asset.attributes ?? []} />
-        </Col>
-      </Row>
-    </Container>
+          </table>
+        </div>
+        <div className="tw-pb-1 tw-pt-1">
+          <table className="tw-w-full tw-border-separate tw-border-spacing-0">
+            <tbody>
+              <MetadataRow
+                label="Edition Size"
+                value={
+                  <span className="tw-flex tw-items-center tw-gap-1.5">
+                    <b>
+                      {numberWithCommas(manifoldClaim.total)} /{" "}
+                      {numberWithCommas(manifoldClaim.totalMax)}
+                      {manifoldClaim.remaining > 0 &&
+                        manifoldClaim.status !== ManifoldClaimStatus.ENDED && (
+                          <> ({manifoldClaim.remaining} remaining)</>
+                        )}
+                    </b>
+                    {isManifoldClaimFetching && <Spinner dimension={12} />}
+                  </span>
+                }
+              />
+              <MetadataRow label="Phase" value={<b>{manifoldClaim.phase}</b>} />
+              <MetadataRow
+                label="Status"
+                value={<b>{capitalizeEveryWord(manifoldClaim.status)}</b>}
+              />
+              <MetadataRow
+                label="Phase Times"
+                value={
+                  <b>
+                    {getDateTimeString(
+                      Time.seconds(manifoldClaim.startDate),
+                      isLocalTimezone
+                    )}{" "}
+                    -{" "}
+                    {getDateTimeString(
+                      Time.seconds(manifoldClaim.endDate),
+                      isLocalTimezone
+                    )}
+                  </b>
+                }
+              />
+              <MetadataRow
+                label="View On"
+                value={
+                  <NFTMarketplaceLinks
+                    contract={props.contract}
+                    id={props.mintMetadata.tokenId}
+                    include6529CollectionLink={props.standalone ?? false}
+                  />
+                }
+              />
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="tw-my-6 tw-h-px tw-w-full tw-bg-white/20" />
+      <div className="tw-py-3">
+        <NFTAttributes attributes={instance.asset.attributes ?? []} />
+      </div>
+    </>
   );
 }
 
 function ManifoldMemesMintingPhases(
   props: Readonly<{
-    address: string;
+    address: string | null;
     contract: string;
     token_id: number;
     mint_date: Time;
@@ -577,6 +904,9 @@ function ManifoldMemesMintingPhases(
   }>
 ) {
   const [distribution, setDistribution] = useState<Distribution>();
+  const [distributionState, setDistributionState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
   const phaseAnchorDate =
     props.claim.startDate > 0
       ? Time.seconds(props.claim.startDate)
@@ -584,29 +914,67 @@ function ManifoldMemesMintingPhases(
   const phases = buildMemesPhases(phaseAnchorDate);
 
   useEffect(() => {
-    if (props.address) {
-      fetch(
-        `https://api.6529.io/api/distributions?card_id=${props.token_id}&contract=${props.contract}&page=1&search=${props.address}`
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          setDistribution(data.data[0]);
-        });
-    } else {
+    if (!props.address) {
       setDistribution(undefined);
+      setDistributionState("idle");
+      return;
     }
-  }, [props.address]);
+
+    let isCancelled = false;
+    setDistribution(undefined);
+    setDistributionState("loading");
+
+    const loadDistribution = async () => {
+      try {
+        const address = props.address;
+        if (!address) {
+          return;
+        }
+
+        const query = new URLSearchParams({
+          card_id: String(props.token_id),
+          contract: props.contract,
+          page: "1",
+          search: address,
+        });
+        const response = await fetch(
+          `https://api.6529.io/api/distributions?${query.toString()}`
+        );
+        if (!response.ok) {
+          throw new Error(
+            `Distribution request failed with status ${response.status}`
+          );
+        }
+        const data = await response.json();
+
+        if (!isCancelled) {
+          setDistribution(data.data[0]);
+          setDistributionState("ready");
+        }
+      } catch (error) {
+        console.error("Failed to fetch mint distribution", error);
+        if (!isCancelled) {
+          setDistribution(undefined);
+          setDistributionState("error");
+        }
+      }
+    };
+
+    void loadDistribution();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [props.address, props.contract, props.token_id]);
 
   return (
-    <Container className="no-padding">
+    <div>
       {distribution?.airdrops !== undefined && distribution.airdrops > 0 && (
-        <Row className="tw-pb-2">
-          <Col className="tw-text-lg tw-font-bold">
-            Airdrops: x{distribution.airdrops}
-          </Col>
-        </Row>
+        <div className="tw-pb-2 tw-text-lg tw-font-bold tw-text-white">
+          Airdrops: x{distribution.airdrops}
+        </div>
       )}
-      <Row>
+      <div className="tw-grid tw-gap-4 md:tw-grid-cols-12">
         {phases.map((phase) => (
           <ManifoldMemesMintingPhase
             key={`phase-${phase.id}`}
@@ -614,124 +982,114 @@ function ManifoldMemesMintingPhases(
             address={props.address}
             phase={phase}
             distribution={distribution}
+            distributionState={distributionState}
             local_timezone={props.local_timezone}
           />
         ))}
-      </Row>
-    </Container>
+      </div>
+    </div>
   );
 }
 
 function ManifoldMemesMintingPhase(
   props: Readonly<{
     claim: ManifoldClaim;
-    address: string;
+    address: string | null;
     phase: MemePhase;
     distribution: Distribution | undefined;
+    distributionState: "idle" | "loading" | "ready" | "error";
     local_timezone: boolean;
   }>
 ) {
-  enum PhaseStatus {
-    UPCOMING = "UPCOMING",
-    ACTIVE = "ACTIVE",
-    COMPLETED = "COMPLETED",
-  }
-
   const eligibleMints = props.distribution?.allowlist.find((phase) =>
     phase.phase.includes(props.phase.id)
   );
-
-  let eligibleMintsText =
-    props.phase.id === "public" ? "Unlimited spots" : "No eligible spots";
-  let eligibleMintsStyle =
-    props.phase.id === "public" ? "font-color-green font-bolder" : "";
-
-  if (eligibleMints) {
-    const count = eligibleMints.spots;
-    eligibleMintsText = `${count} eligible spot${count > 1 ? "s" : ""}`;
-    eligibleMintsStyle = "font-color-green font-bolder";
+  const status = getMemePhaseCardStatus(props.claim, props.phase);
+  const phaseDateLabels = getPhaseDateLabels(status);
+  let eligibilityState: "loading" | "ready" | "unavailable" = "loading";
+  if (props.distributionState === "ready") {
+    eligibilityState = "ready";
+  } else if (props.distributionState === "error") {
+    eligibilityState = "unavailable";
   }
-
-  let status: PhaseStatus = PhaseStatus.UPCOMING;
-  if (props.phase.end.lt(Time.now()) || props.claim.isFinalized) {
-    status = PhaseStatus.COMPLETED;
-  } else if (
-    props.claim.memePhase?.id === props.phase.id &&
-    props.claim.status === ManifoldClaimStatus.ACTIVE
-  ) {
-    status = PhaseStatus.ACTIVE;
-  }
-
-  let startText = "Expected start";
-  let endText = "Expected end";
-  if (status === PhaseStatus.ACTIVE) {
-    startText = "Started";
-    endText = "Ends";
-  } else if (status === PhaseStatus.COMPLETED) {
-    startText = "Started";
-    endText = "Ended";
-  }
+  const eligibleMintsDetails = getEligibleMintsDetails(
+    props.phase.id,
+    eligibleMints?.spots,
+    status,
+    eligibilityState
+  );
 
   let startDate = props.phase.start;
   let endDate = props.phase.end;
-  if (status === PhaseStatus.ACTIVE) {
+  if (status === MemePhaseCardStatus.ACTIVE) {
     startDate = Time.seconds(props.claim.startDate);
     endDate = Time.seconds(props.claim.endDate);
   }
 
   const startDisplay = getDateTimeString(startDate, props.local_timezone);
   const endDisplay = getDateTimeString(endDate, props.local_timezone);
+  const isDropComplete = props.claim.isDropComplete;
+  const hasActivePhase = props.claim.status === ManifoldClaimStatus.ACTIVE;
+  const isUpcomingClaim = props.claim.status === ManifoldClaimStatus.UPCOMING;
+  const hasFinalizedCurrentClaim =
+    props.claim.isFinalized && !props.claim.isDropComplete;
+  const isHighlighted =
+    status === MemePhaseCardStatus.ACTIVE ||
+    (status === MemePhaseCardStatus.UPCOMING &&
+      !hasActivePhase &&
+      ((isUpcomingClaim && props.claim.memePhase?.id === props.phase.id) ||
+        (hasFinalizedCurrentClaim &&
+          props.claim.nextMemePhase?.id === props.phase.id)) &&
+      !isDropComplete);
 
   return (
-    <Col xs={12} sm={6} md={3} className="pt-1 pb-1">
-      <Container
-        className={
-          props.claim.memePhase?.id === props.phase.id &&
-          !props.claim.isFinalized
-            ? styles["phaseBoxActive"]
-            : styles["phaseBox"]
-        }
+    <div className="tw-pb-1 tw-pt-1 md:tw-col-span-3">
+      <div
+        className={`tw-h-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-p-5 tw-text-left ${
+          isHighlighted
+            ? getHighlightedRingClassName(status)
+            : "tw-border-white/5 tw-bg-iron-900/40"
+        }`}
       >
-        <Row>
-          <Col xs={12} className="font-bolder font-larger text-center pb-2">
-            {props.phase.name}
-          </Col>
-          <Col
-            xs={12}
-            className="d-flex align-items-center justify-content-between gap-2"
+        <div className="tw-text-center tw-text-lg tw-font-bold tw-text-white">
+          {props.phase.name}
+        </div>
+        <div className="tw-mt-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <span className="tw-text-sm tw-font-light tw-text-iron-300">
+            Status
+          </span>
+          <span
+            className={`tw-text-right tw-font-semibold ${getPhaseStatusClassName(
+              status
+            )}`}
           >
-            <span className="font-lighter font-smaller">Status</span>
-            <span
-              className={`${
-                status === PhaseStatus.ACTIVE || status === PhaseStatus.UPCOMING
-                  ? "font-color-blue font-bolder text-right"
-                  : "font-color-red font-bolder text-right opacity-75"
-              }`}
-            >
-              {status}
-            </span>
-          </Col>
-          <Col
-            xs={12}
-            className="d-flex align-items-center justify-content-between gap-2"
+            {status}
+          </span>
+        </div>
+        <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <span className="tw-text-sm tw-font-light tw-text-iron-300">
+            {phaseDateLabels.start}
+          </span>
+          <span className="tw-text-right tw-text-sm tw-text-iron-100">
+            {startDisplay}
+          </span>
+        </div>
+        <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <span className="tw-text-sm tw-font-light tw-text-iron-300">
+            {phaseDateLabels.end}
+          </span>
+          <span className="tw-text-right tw-text-sm tw-text-iron-100">
+            {endDisplay}
+          </span>
+        </div>
+        {props.address && (
+          <div
+            className={`tw-pt-4 tw-text-center ${eligibleMintsDetails.className}`}
           >
-            <span className="font-lighter font-smaller">{startText}</span>
-            <span className="text-right">{startDisplay}</span>
-          </Col>
-          <Col
-            xs={12}
-            className="d-flex align-items-center justify-content-between gap-2"
-          >
-            <span className="font-lighter font-smaller">{endText}</span>
-            <span className="text-right">{endDisplay}</span>
-          </Col>
-          {props.address && (
-            <Col xs={12} className={`pt-3 text-center ${eligibleMintsStyle}`}>
-              {eligibleMintsText}
-            </Col>
-          )}
-        </Row>
-      </Container>
-    </Col>
+            {eligibleMintsDetails.text}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

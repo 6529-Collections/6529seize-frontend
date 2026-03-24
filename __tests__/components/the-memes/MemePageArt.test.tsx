@@ -1,6 +1,8 @@
 import { MemePageArt } from "@/components/the-memes/MemePageArt";
 import { fireEvent, render, screen } from "@testing-library/react";
 
+const mockNFTAttributes = jest.fn();
+
 jest.mock("react-bootstrap", () => {
   const actual = jest.requireActual("react-bootstrap");
   const Carousel = ({ children, onSlide, ...props }: any) => (
@@ -72,7 +74,10 @@ jest.mock("@/helpers/nft.helpers", () => ({
 }));
 jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   __esModule: true,
-  default: () => <div data-testid="attrs" />,
+  default: (props: any) => {
+    mockNFTAttributes(props);
+    return <div data-testid="attrs" />;
+  },
 }));
 
 const mockHelpers = jest.requireMock("@/helpers/Helpers") as {
@@ -161,6 +166,54 @@ describe("MemePageArt", () => {
     expect(screen.getByText("Boosts")).toBeInTheDocument();
     expect(getCardDetailValue("File type")).toBe("png");
     expect(getCardDetailValue("Dimensions")).toBe("100x100");
+  });
+
+  it("passes text display_type attributes to Properties", () => {
+    const nftWithTextAttribute = {
+      ...nft,
+      metadata: {
+        ...nft.metadata,
+        attributes: [
+          ...nft.metadata.attributes,
+          {
+            trait_type: "Artist",
+            value: "RachelSTWood",
+            display_type: "text",
+          },
+        ],
+      },
+    };
+
+    render(
+      <MemePageArt
+        show={true}
+        nft={nftWithTextAttribute as any}
+        nftMeta={nftMeta as any}
+      />
+    );
+
+    const passedAttributes =
+      mockNFTAttributes.mock.calls.at(-1)?.[0]?.attributes ?? [];
+
+    expect(passedAttributes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          trait_type: "Other",
+          value: "val",
+        }),
+        expect.objectContaining({
+          trait_type: "Artist",
+          value: "RachelSTWood",
+          display_type: "text",
+        }),
+      ])
+    );
+    expect(passedAttributes).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ trait_type: "Boost" }),
+        expect.objectContaining({ trait_type: "Type - Season" }),
+      ])
+    );
   });
 
   it("falls back to top-level media URLs for art links", () => {

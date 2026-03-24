@@ -99,7 +99,7 @@ export class AppKitAdapterManager {
     const wagmiAdapter = new WagmiAdapter({
       networks: chains,
       projectId: CW_PROJECT_ID,
-      ssr: false, // App Router requires this to be false to avoid hydration mismatches
+      ssr: false,
       connectors,
     });
 

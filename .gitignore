@@ -18,9 +18,12 @@ storageState.json
 # next.js
 /.next/
 /out/
-
-# production
-/build
+# standalone/standalone-memes-mint
+/standalone/standalone-memes-mint/src/.next/
+/standalone/standalone-memes-mint/src/.next-static-export/
+/standalone/standalone-memes-mint/src/out/
+/standalone/standalone-memes-mint/src/public/
+/standalone/standalone-memes-mint/dist/
 
 # misc
 .DS_Store

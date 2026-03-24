@@ -3,11 +3,16 @@ import {
   canonicalizeArweaveGatewayHostname,
   isArweaveGatewayRuntimeHost,
 } from "@/lib/media/arweave-gateways";
+import { getConfiguredIpfsGatewayHost } from "@/lib/media/ipfs-gateways";
 
-const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>([
-  "ipfs.io",
-  "www.ipfs.io",
-]);
+const DEFAULT_INTERACTIVE_MEDIA_IPFS_HOSTS = ["ipfs.io", "www.ipfs.io"];
+
+const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>(
+  [
+    ...DEFAULT_INTERACTIVE_MEDIA_IPFS_HOSTS,
+    getConfiguredIpfsGatewayHost(),
+  ].filter((value): value is string => Boolean(value))
+);
 
 const ARWEAVE_SUBDOMAIN_PATTERN = /^([a-z0-9_-]{43,87})\.arweave\.net$/;
 
