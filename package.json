@@ -186,7 +186,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-react-compiler": "^19.1.0-rc.2",
-    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-hooks": "7.0.0",
     "eslint-plugin-react-you-might-not-need-an-effect": "^0.8.5",
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-sonarjs": "^3.0.5",
@@ -218,6 +218,7 @@
       "react": "$react",
       "react-dom": "$react-dom"
     },
+    "eslint-plugin-react-hooks": "7.0.0",
     "react-toggle": {
       "react": "$react",
       "react-dom": "$react-dom"
