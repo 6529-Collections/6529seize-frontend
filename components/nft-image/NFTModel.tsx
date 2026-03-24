@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import type { SyntheticEvent } from "react";
 import type { BaseNFT } from "@/entities/INFT";
 import { getResolvedAnimationSrc } from "./utils/animation-source";
-import { withArweaveFallback } from "./utils/arweave-fallback";
+import { withArweaveFallback } from "./utils/gateway-fallback";
 
 type ModelViewerElement = HTMLElement & {
   src: string;

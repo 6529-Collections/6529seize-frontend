@@ -1,9 +1,11 @@
 import type React from "react";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import {
   ARWEAVE_FALLBACK_HOSTS,
   canonicalizeArweaveGatewayHostname,
   isArweaveGatewayRuntimeHost,
 } from "@/lib/media/arweave-gateways";
+import { parseIpfsUrl } from "@/helpers/Helpers";
 
 function dedupe(list: readonly string[]): string[] {
   return Array.from(new Set(list));
@@ -28,6 +30,17 @@ function isArweaveGatewayHost(hostname: string): boolean {
 function isArweaveUrl(url: string): boolean {
   const u = safeParseUrl(url);
   return !!u && isArweaveGatewayHost(u.hostname);
+}
+
+function isIpfsProtocolUrl(url: string): boolean {
+  return url.trim().toLowerCase().startsWith("ipfs://");
+}
+
+function getIpfsFallbackUrls(url: string): string[] {
+  const primaryUrl = resolveIpfsUrlSync(url);
+  const fallbackUrl = parseIpfsUrl(url);
+
+  return dedupe([primaryUrl, fallbackUrl].filter(Boolean));
 }
 
 function buildUrlWithGateway(
@@ -57,6 +70,9 @@ export function getArweaveGatewayFallbackUrls(url: string): string[] {
   const trimmed = url.trim();
   if (!trimmed) {
     return [];
+  }
+  if (isIpfsProtocolUrl(trimmed)) {
+    return getIpfsFallbackUrls(trimmed);
   }
   if (!isArweaveUrl(trimmed)) {
     return [trimmed];

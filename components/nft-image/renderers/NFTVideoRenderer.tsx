@@ -5,7 +5,7 @@ import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import type { BaseRendererProps } from "../types/renderer-props";
 import { getResolvedAnimationSrc } from "../utils/animation-source";
-import { withArweaveFallback } from "../utils/arweave-fallback";
+import { withArweaveFallback } from "../utils/gateway-fallback";
 
 const globalScope = globalThis as typeof globalThis & {
   window?: Window | undefined;

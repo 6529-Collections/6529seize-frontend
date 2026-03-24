@@ -130,6 +130,16 @@ function resolveStandaloneCommit() {
   return "standalone-mint";
 }
 
+function trimTrailingSlashes(value) {
+  let end = value.length;
+
+  while (end > 0 && value[end - 1] === "/") {
+    end -= 1;
+  }
+
+  return value.slice(0, end);
+}
+
 function fetchJson(url, redirectCount = 0) {
   return new Promise((resolve, reject) => {
     if (redirectCount > 5) {
@@ -209,16 +219,16 @@ function fetchJson(url, redirectCount = 0) {
 }
 
 async function resolveRemoteBuildMetadata(baseEndpoint, commit) {
-  const versionUrl = `${baseEndpoint.replace(/\/+$/, "")}/version.json`;
+  const versionUrl = `${trimTrailingSlashes(baseEndpoint)}/version.json`;
 
   try {
     const remote = await fetchJson(versionUrl);
-    const remoteCommit =
-      typeof remote?.commit === "string"
-        ? remote.commit.trim()
-        : typeof remote?.version === "string"
-          ? remote.version.trim()
-          : "";
+    let remoteCommit = "";
+    if (typeof remote?.commit === "string") {
+      remoteCommit = remote.commit.trim();
+    } else if (typeof remote?.version === "string") {
+      remoteCommit = remote.version.trim();
+    }
     const remoteBuild =
       typeof remote?.build === "number" &&
       Number.isFinite(remote.build) &&

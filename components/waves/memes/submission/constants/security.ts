@@ -1,13 +1,36 @@
 import type { InteractiveMediaProvider } from "./media";
+import { publicEnv } from "@/config/env";
 import {
   canonicalizeArweaveGatewayHostname,
   isArweaveGatewayRuntimeHost,
 } from "@/lib/media/arweave-gateways";
 
-const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>([
-  "ipfs.io",
-  "www.ipfs.io",
-]);
+const DEFAULT_INTERACTIVE_MEDIA_IPFS_HOSTS = ["ipfs.io", "www.ipfs.io"];
+
+const getConfiguredIpfsGatewayHost = (): string | null => {
+  const gatewayEndpoint = publicEnv.IPFS_GATEWAY_ENDPOINT;
+  if (!gatewayEndpoint) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(gatewayEndpoint);
+    if (parsedUrl.protocol !== "https:") {
+      return null;
+    }
+
+    return canonicalizeArweaveGatewayHostname(parsedUrl.hostname);
+  } catch {
+    return null;
+  }
+};
+
+const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>(
+  [
+    ...DEFAULT_INTERACTIVE_MEDIA_IPFS_HOSTS,
+    getConfiguredIpfsGatewayHost(),
+  ].filter((value): value is string => Boolean(value))
+);
 
 const ARWEAVE_SUBDOMAIN_PATTERN = /^([a-z0-9_-]{43,87})\.arweave\.net$/;
 

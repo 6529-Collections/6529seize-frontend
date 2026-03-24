@@ -32,6 +32,7 @@ import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePe
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import ClaimTraitsEditor from "@/components/waves/memes/MemesArtSubmissionTraits";
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
@@ -72,6 +73,8 @@ const BACK_LINK_CLASS =
   "tw-inline-flex tw-w-full tw-justify-center sm:tw-w-auto sm:tw-justify-start tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50";
 const HEADER_ACTION_LINK_CLASS =
   "tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50 sm:tw-ml-auto sm:tw-w-auto sm:tw-justify-start";
+const MEDIA_SOURCE_CARD_CLASS =
+  "tw-flex tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
 
 type ClaimMediaType = "image" | "video" | "glb" | "html" | "unknown";
 type DistributionSectionKey =
@@ -147,6 +150,33 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function getOpenableMediaUrl(value: string | null | undefined): string | null {
+  const trimmedValue = value?.trim() ?? "";
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  try {
+    const resolvedValue = trimmedValue.startsWith("ipfs://")
+      ? resolveIpfsUrlSync(trimmedValue)
+      : trimmedValue;
+    const parsedUrl = new URL(resolvedValue);
+
+    if (
+      parsedUrl.protocol === "http:" ||
+      parsedUrl.protocol === "https:" ||
+      parsedUrl.protocol === "blob:"
+    ) {
+      return resolvedValue;
+    }
+  } catch {
+    // Ignore invalid URLs and fall back to plain text.
+  }
+
+  return null;
+}
+
 function getPhotoFileName(link: string): string {
   const withoutHash = link.split("#")[0] ?? link;
   const withoutQuery = withoutHash.split("?")[0] ?? withoutHash;
@@ -188,6 +218,106 @@ function matchesTeamArtistAirdropPhase(
 
 function normalizeRootPhase(value: string): string {
   return value.replaceAll(/\s+/g, "").toLowerCase();
+}
+
+function MediaSourceLinkCard({
+  label,
+  url,
+  emptyText = "—",
+}: Readonly<{
+  label: string;
+  url: string | null | undefined;
+  emptyText?: string;
+}>) {
+  const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const trimmedUrl = url?.trim() ?? "";
+  const hasUrl = trimmedUrl.length > 0;
+  const openableUrl = getOpenableMediaUrl(trimmedUrl || undefined);
+
+  async function handleCopy() {
+    if (!hasUrl) return;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    try {
+      await navigator.clipboard.writeText(trimmedUrl);
+      setCopied(true);
+      timeoutRef.current = setTimeout(() => {
+        setCopied(false);
+        timeoutRef.current = null;
+      }, 1000);
+    } catch {
+      // ignore
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  return (
+    <div className={MEDIA_SOURCE_CARD_CLASS}>
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <div className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-200">
+          {label}
+        </div>
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+          {hasUrl && (
+            <button
+              type="button"
+              onClick={() => {
+                void handleCopy();
+              }}
+              className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
+              aria-label={`Copy ${label}`}
+            >
+              <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
+            </button>
+          )}
+          {openableUrl && (
+            <a
+              href={openableUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
+              aria-label={`Open ${label} in new tab`}
+            >
+              <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
+            </a>
+          )}
+          {copied && (
+            <span className="tw-animate-in tw-fade-in tw-text-xs tw-text-iron-300 tw-duration-150">
+              Copied
+            </span>
+          )}
+        </div>
+      </div>
+      <div
+        className={`tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
+          hasUrl ? "tw-text-white" : "tw-text-iron-500"
+        }`}
+        title={hasUrl ? trimmedUrl : undefined}
+      >
+        {hasUrl ? (
+          openableUrl ? (
+            <a
+              href={openableUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tw-text-primary-300 tw-no-underline hover:tw-text-primary-200"
+            >
+              {trimmedUrl}
+            </a>
+          ) : (
+            trimmedUrl
+          )
+        ) : (
+          emptyText
+        )}
+      </div>
+    </div>
+  );
 }
 
 function DropForgeCraftClaimHeader({
@@ -440,6 +570,8 @@ function ImageSection({
   const [formError, setFormError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageUrl = pendingImagePreviewUrl ?? claim.image_url ?? null;
+  const imageSourceUrl =
+    pendingImageFile !== null ? (claim.image_url ?? null) : imageUrl;
   const hasImage = imageUrl !== null;
   let imagePreviewMimeType = "image/jpeg";
   if (pendingImageFile?.type?.includes("image")) {
@@ -548,6 +680,15 @@ function ImageSection({
             Replace
           </button>
         )}
+        <MediaSourceLinkCard
+          label={pendingImageFile !== null ? "Current image URL" : "Image URL"}
+          url={imageSourceUrl}
+          emptyText={
+            pendingImageFile !== null
+              ? "Pending local upload. URL available after save."
+              : "No image URL"
+          }
+        />
       </div>
       <form onSubmit={handleSave} className="tw-flex tw-flex-col tw-gap-2">
         {hasPendingChanges && (
@@ -768,6 +909,12 @@ function AnimationSection({
   const hasPendingChanges =
     pendingAnimation !== undefined || pendingAnimationFile !== null;
   const canRevert = hasPendingChanges;
+  const animationSourceUrl =
+    pendingAnimationFile !== null
+      ? (claim.animation_url ?? null)
+      : pendingAnimation === undefined
+        ? claim.animation_url
+        : pendingAnimation;
 
   useEffect(() => {
     onPendingChange(hasPendingChanges);
@@ -946,11 +1093,6 @@ function AnimationSection({
                 <MediaDisplay
                   media_mime_type={animationPreviewMimeType}
                   media_url={animationDisplayUrl}
-                  previewImageUrl={
-                    animationPreviewMimeType === "text/html"
-                      ? imageUrl
-                      : undefined
-                  }
                 />
               </div>
             )}
@@ -964,6 +1106,21 @@ function AnimationSection({
                 Animation removed
               </p>
             )}
+            <MediaSourceLinkCard
+              label={
+                pendingAnimationFile !== null
+                  ? "Current animation URL"
+                  : "Animation URL"
+              }
+              url={animationSourceUrl}
+              emptyText={
+                pendingAnimation === null
+                  ? "Animation will be removed after save."
+                  : pendingAnimationFile !== null
+                    ? "Pending local upload. URL available after save."
+                    : "No animation URL"
+              }
+            />
           </>
         )}
 

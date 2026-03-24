@@ -5,7 +5,7 @@ import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import type { BaseRendererProps } from "../types/renderer-props";
-import { withArweaveFallback } from "../utils/arweave-fallback";
+import { withArweaveFallback } from "../utils/gateway-fallback";
 
 function getSrc(
   nft: BaseRendererProps["nft"],

@@ -14,6 +14,12 @@ interface SandboxedExternalIframeProps {
   readonly className?: string | undefined;
   readonly fallback?: React.ReactNode | undefined;
   readonly containerClassName?: string | undefined;
+  readonly onLoad?:
+    | React.IframeHTMLAttributes<HTMLIFrameElement>["onLoad"]
+    | undefined;
+  readonly onError?:
+    | React.IframeHTMLAttributes<HTMLIFrameElement>["onError"]
+    | undefined;
 }
 
 /**
@@ -31,6 +37,8 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   className,
   fallback = null,
   containerClassName,
+  onLoad,
+  onError,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -165,7 +173,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     <div ref={containerRef} className={containerClasses}>
       {banner}
       <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
-        {isVisible ? <iframe {...iframeProps} /> : placeholder}
+        {isVisible ? <iframe {...iframeProps} onLoad={onLoad} onError={onError} /> : placeholder}
       </div>
     </div>
   );
