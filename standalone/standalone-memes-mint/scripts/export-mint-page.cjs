@@ -140,6 +140,95 @@ function trimTrailingSlashes(value) {
   return value.slice(0, end);
 }
 
+function sanitizeLogMessage(value) {
+  return String(value).replace(/[\r\n]+/g, " ");
+}
+
+function createFetchTimeoutError(url, timeout) {
+  return new Error(`Timeout after ${timeout}ms while fetching ${url}`);
+}
+
+function readResponseBody(res) {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    res.setEncoding("utf8");
+    res.on("data", (chunk) => {
+      body += chunk;
+    });
+    res.on("end", () => {
+      resolve(body);
+    });
+    res.on("error", reject);
+  });
+}
+
+function handleFetchResponse({
+  res,
+  url,
+  redirectCount,
+  timeout,
+  finish,
+  resolve,
+  reject,
+}) {
+  const statusCode = res.statusCode ?? 0;
+  const location = res.headers.location;
+
+  if (location && [301, 302, 303, 307, 308].includes(statusCode)) {
+    res.resume();
+    finish(() =>
+      resolve(
+        fetchJson(new URL(location, url).toString(), redirectCount + 1, timeout)
+      )
+    );
+    return;
+  }
+
+  if (statusCode === 404) {
+    res.resume();
+    finish(() => resolve(null));
+    return;
+  }
+
+  void readResponseBody(res)
+    .then((body) => {
+      if (statusCode < 200 || statusCode >= 300) {
+        finish(() =>
+          reject(
+            new Error(
+              `HTTP ${statusCode} while fetching ${url}${
+                body ? `: ${body.slice(0, 200)}` : ""
+              }`
+            )
+          )
+        );
+        return;
+      }
+
+      if (!body.trim()) {
+        finish(() => resolve(null));
+        return;
+      }
+
+      try {
+        finish(() => resolve(JSON.parse(body)));
+      } catch (error) {
+        finish(() =>
+          reject(
+            new Error(
+              `Invalid JSON returned from ${url}: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            )
+          )
+        );
+      }
+    })
+    .catch((error) => {
+      finish(() => reject(error));
+    });
+}
+
 function fetchJson(url, redirectCount = 0, timeout = 10000) {
   return new Promise((resolve, reject) => {
     if (redirectCount > 5) {
@@ -166,69 +255,14 @@ function fetchJson(url, redirectCount = 0, timeout = 10000) {
         },
       },
       (res) => {
-        const statusCode = res.statusCode ?? 0;
-        const location = res.headers.location;
-
-        if (
-          location &&
-          [301, 302, 303, 307, 308].includes(statusCode)
-        ) {
-          res.resume();
-          finish(() =>
-            resolve(
-              fetchJson(
-                new URL(location, url).toString(),
-                redirectCount + 1,
-                timeout
-              )
-            )
-          );
-          return;
-        }
-
-        if (statusCode === 404) {
-          res.resume();
-          finish(() => resolve(null));
-          return;
-        }
-
-        let body = "";
-        res.setEncoding("utf8");
-        res.on("data", (chunk) => {
-          body += chunk;
-        });
-        res.on("end", () => {
-          if (statusCode < 200 || statusCode >= 300) {
-            finish(() =>
-              reject(
-                new Error(
-                  `HTTP ${statusCode} while fetching ${url}${
-                    body ? `: ${body.slice(0, 200)}` : ""
-                  }`
-                )
-              )
-            );
-            return;
-          }
-
-          if (!body.trim()) {
-            finish(() => resolve(null));
-            return;
-          }
-
-          try {
-            finish(() => resolve(JSON.parse(body)));
-          } catch (error) {
-            finish(() =>
-              reject(
-                new Error(
-                  `Invalid JSON returned from ${url}: ${
-                    error instanceof Error ? error.message : String(error)
-                  }`
-                )
-              )
-            );
-          }
+        handleFetchResponse({
+          res,
+          url,
+          redirectCount,
+          timeout,
+          finish,
+          resolve,
+          reject,
         });
       }
     );
@@ -237,9 +271,7 @@ function fetchJson(url, redirectCount = 0, timeout = 10000) {
       finish(() => reject(error));
     });
     req.setTimeout(timeout, () => {
-      const timeoutError = new Error(
-        `Timeout after ${timeout}ms while fetching ${url}`
-      );
+      const timeoutError = createFetchTimeoutError(url, timeout);
       req.destroy(timeoutError);
       finish(() => reject(timeoutError));
     });
@@ -281,7 +313,7 @@ async function resolveRemoteBuildMetadata(baseEndpoint, commit) {
       `Unable to read remote version manifest at ${versionUrl}; defaulting to build 1`
     );
     if (error instanceof Error && error.message) {
-      console.warn(error.message);
+      console.warn(sanitizeLogMessage(error.message));
     }
     return {
       build: 1,
