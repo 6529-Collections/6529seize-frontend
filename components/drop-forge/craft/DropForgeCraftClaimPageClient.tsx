@@ -749,6 +749,11 @@ function ImageSection({
           className="tw-hidden"
           onChange={handleUpload}
         />
+        <MediaSourceLinkCard
+          label={imageSourceCardProps.label}
+          url={imageSourceCardProps.url}
+          emptyText={imageSourceCardProps.emptyText}
+        />
         {hasImage && (
           <button
             type="button"
@@ -759,11 +764,6 @@ function ImageSection({
             Replace
           </button>
         )}
-        <MediaSourceLinkCard
-          label={imageSourceCardProps.label}
-          url={imageSourceCardProps.url}
-          emptyText={imageSourceCardProps.emptyText}
-        />
       </div>
       <form onSubmit={handleSave} className="tw-flex tw-flex-col tw-gap-2">
         {hasPendingChanges && (
