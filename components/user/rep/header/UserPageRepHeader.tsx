@@ -26,6 +26,10 @@ export default function UserPageRepHeader({
   repDirection,
   onRepDirectionChange,
   loading,
+  visibleCount,
+  onShowMore,
+  hasNextPage,
+  isFetchingNextPage,
 }: {
   readonly overview: ApiRepOverview | null;
   readonly categories: ApiRepCategory[];
@@ -33,19 +37,27 @@ export default function UserPageRepHeader({
   readonly repDirection: RepDirection;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly loading: boolean;
+  readonly visibleCount: number;
+  readonly onShowMore: () => void;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const [visibleCount, setVisibleCount] = useState(5);
-
-  const [prevCategories, setPrevCategories] = useState(categories);
-  if (categories !== prevCategories) {
-    setPrevCategories(categories);
-    setVisibleCount(5);
-  }
-
   const visibleCategories = categories.slice(0, visibleCount);
-  const hasMore = categories.length > visibleCount;
+  const hiddenLoadedCategoryCount = Math.max(
+    categories.length - visibleCount,
+    0
+  );
+  const hasMore = hiddenLoadedCategoryCount > 0 || hasNextPage;
+  let loadMoreLabel = "Load more";
+  if (hiddenLoadedCategoryCount > 0) {
+    loadMoreLabel = `+${hiddenLoadedCategoryCount} more`;
+  } else if (isFetchingNextPage) {
+    loadMoreLabel = "Loading...";
+  }
+  const isLoadMoreDisabled =
+    isFetchingNextPage && hiddenLoadedCategoryCount === 0;
 
   const canEditRep = useMemo(
     () =>
@@ -103,9 +115,7 @@ export default function UserPageRepHeader({
                 Total Rep
               </div>
               <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-                {overview
-                  ? formatNumberWithCommas(overview.total_rep)
-                  : "—"}
+                {overview ? formatNumberWithCommas(overview.total_rep) : "—"}
               </div>
               {overview && (
                 <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2">
@@ -158,7 +168,7 @@ export default function UserPageRepHeader({
                   <button
                     type="button"
                     onClick={() => setIsGrantRepOpen(true)}
-                    className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-primary-400/45 tw-bg-primary-500/5 tw-px-4 tw-text-sm tw-font-medium tw-text-primary-300/85 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-primary-300/70 hover:tw-bg-primary-500/10 hover:tw-text-primary-200/90"
+                    className="hover:tw-text-primary-200/90 tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-primary-400/45 tw-bg-primary-500/5 tw-px-4 tw-text-sm tw-font-medium tw-text-primary-300/85 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-primary-300/70 hover:tw-bg-primary-500/10"
                   >
                     <PlusIcon
                       aria-hidden="true"
@@ -179,10 +189,11 @@ export default function UserPageRepHeader({
                 {hasMore && (
                   <button
                     type="button"
-                    onClick={() => setVisibleCount((prev) => prev + 10)}
-                    className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white"
+                    onClick={onShowMore}
+                    disabled={isLoadMoreDisabled}
+                    className="tw-inline-flex tw-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white disabled:tw-cursor-default disabled:tw-opacity-70"
                   >
-                    +{categories.length - visibleCount} more
+                    {loadMoreLabel}
                   </button>
                 )}
               </div>

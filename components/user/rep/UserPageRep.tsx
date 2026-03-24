@@ -11,9 +11,9 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { RateMatter } from "@/types/enums";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
@@ -24,6 +24,50 @@ import type { RepDirection } from "./UserPageRep.helpers";
 import { getCanEditNic } from "./UserPageRep.helpers";
 import UserPageRepHeader from "./header/UserPageRepHeader";
 import UserPageRepMobile from "./UserPageRepMobile";
+
+const INITIAL_VISIBLE_CATEGORY_COUNT = 5;
+const VISIBLE_CATEGORY_LOAD_STEP = 10;
+const REP_CATEGORIES_PAGE_SIZE = 25;
+const TOP_CONTRIBUTORS_LIMIT = 5;
+const FIRST_REP_CATEGORIES_PAGE = 1;
+
+const getDefaultVisibleCounts = (): Record<RepDirection, number> => ({
+  received: INITIAL_VISIBLE_CATEGORY_COUNT,
+  given: INITIAL_VISIBLE_CATEGORY_COUNT,
+});
+
+function useRepCategories({
+  user,
+  queryDirection,
+  apiDirection,
+  enabled,
+}: {
+  readonly user: string;
+  readonly queryDirection: "incoming" | "outgoing";
+  readonly apiDirection?: "outgoing";
+  readonly enabled: boolean;
+}) {
+  return useInfiniteQuery({
+    queryKey: [
+      QueryKey.REP_CATEGORIES,
+      { handleOrWallet: user, direction: queryDirection },
+    ],
+    queryFn: async ({ pageParam }: { pageParam: number }) =>
+      await commonApiFetch<ApiRepCategoriesPage>({
+        endpoint: `profiles/${user}/rep/categories`,
+        params: {
+          ...(apiDirection ? { direction: apiDirection } : {}),
+          page: pageParam.toString(),
+          page_size: REP_CATEGORIES_PAGE_SIZE.toString(),
+          top_contributors_limit: TOP_CONTRIBUTORS_LIMIT.toString(),
+        },
+      }),
+    initialPageParam: FIRST_REP_CATEGORIES_PAGE,
+    getNextPageParam: (lastPage: ApiRepCategoriesPage | undefined) =>
+      lastPage?.next ? lastPage.page + 1 : undefined,
+    enabled,
+  });
+}
 
 export default function UserPageRep({
   profile,
@@ -39,6 +83,7 @@ export default function UserPageRep({
 
   const [repDirection, setRepDirection] = useState<RepDirection>("received");
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
+  const [visibleCounts, setVisibleCounts] = useState(getDefaultVisibleCounts);
 
   const canEditNic = useMemo(
     () =>
@@ -65,23 +110,11 @@ export default function UserPageRep({
       enabled: !!user,
     });
 
-  const { data: repCategories, isFetching: isFetchingCategories } =
-    useQuery<ApiRepCategoriesPage>({
-      queryKey: [
-        QueryKey.REP_CATEGORIES,
-        { handleOrWallet: user, direction: "incoming" },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ApiRepCategoriesPage>({
-          endpoint: `profiles/${user}/rep/categories`,
-          params: {
-            page: "1",
-            page_size: "100",
-            top_contributors_limit: "5",
-          },
-        }),
-      enabled: !!user,
-    });
+  const repCategoriesQuery = useRepCategories({
+    user,
+    queryDirection: "incoming",
+    enabled: !!user,
+  });
 
   // --- Outgoing (given) rep --- only fetch when active
   const { data: repOverviewGiven, isFetching: isFetchingOverviewGiven } =
@@ -98,24 +131,12 @@ export default function UserPageRep({
       enabled: !!user && repDirection === "given",
     });
 
-  const { data: repCategoriesGiven, isFetching: isFetchingCategoriesGiven } =
-    useQuery<ApiRepCategoriesPage>({
-      queryKey: [
-        QueryKey.REP_CATEGORIES,
-        { handleOrWallet: user, direction: "outgoing" },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ApiRepCategoriesPage>({
-          endpoint: `profiles/${user}/rep/categories`,
-          params: {
-            direction: "outgoing",
-            page: "1",
-            page_size: "100",
-            top_contributors_limit: "5",
-          },
-        }),
-      enabled: !!user && repDirection === "given",
-    });
+  const repCategoriesGivenQuery = useRepCategories({
+    user,
+    queryDirection: "outgoing",
+    apiDirection: "outgoing",
+    enabled: !!user && repDirection === "given",
+  });
 
   // --- CIC overview ---
   const { data: cicOverview } = useQuery<ApiCicOverview>({
@@ -127,19 +148,83 @@ export default function UserPageRep({
     enabled: !!user,
   });
 
+  const repCategories = useMemo(
+    () => repCategoriesQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [repCategoriesQuery.data]
+  );
+  const repCategoriesGiven = useMemo(
+    () =>
+      repCategoriesGivenQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [repCategoriesGivenQuery.data]
+  );
+
   // Pick active direction's data
   const activeOverview =
     repDirection === "received"
       ? (repOverview ?? null)
       : (repOverviewGiven ?? null);
   const activeCategories =
+    repDirection === "received" ? repCategories : repCategoriesGiven;
+  const activeHasNextPage =
     repDirection === "received"
-      ? (repCategories?.data ?? [])
-      : (repCategoriesGiven?.data ?? []);
+      ? Boolean(repCategoriesQuery.hasNextPage)
+      : Boolean(repCategoriesGivenQuery.hasNextPage);
+  const activeIsFetchingNextPage =
+    repDirection === "received"
+      ? repCategoriesQuery.isFetchingNextPage
+      : repCategoriesGivenQuery.isFetchingNextPage;
+  const activeVisibleCount = visibleCounts[repDirection];
   const activeLoading =
     repDirection === "received"
-      ? isFetchingOverview || isFetchingCategories
-      : isFetchingOverviewGiven || isFetchingCategoriesGiven;
+      ? isFetchingOverview || repCategoriesQuery.isFetching
+      : isFetchingOverviewGiven || repCategoriesGivenQuery.isFetching;
+
+  const handleShowMore = useCallback(() => {
+    const loadedCount =
+      repDirection === "received"
+        ? repCategories.length
+        : repCategoriesGiven.length;
+    const hasNextPage =
+      repDirection === "received"
+        ? Boolean(repCategoriesQuery.hasNextPage)
+        : Boolean(repCategoriesGivenQuery.hasNextPage);
+    const isFetchingNextPage =
+      repDirection === "received"
+        ? repCategoriesQuery.isFetchingNextPage
+        : repCategoriesGivenQuery.isFetchingNextPage;
+    const fetchNextPage =
+      repDirection === "received"
+        ? repCategoriesQuery.fetchNextPage
+        : repCategoriesGivenQuery.fetchNextPage;
+
+    setVisibleCounts((currentCounts) => {
+      const nextVisibleCount =
+        currentCounts[repDirection] + VISIBLE_CATEGORY_LOAD_STEP;
+
+      if (
+        nextVisibleCount > loadedCount &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        void fetchNextPage();
+      }
+
+      return {
+        ...currentCounts,
+        [repDirection]: nextVisibleCount,
+      };
+    });
+  }, [
+    repDirection,
+    repCategories.length,
+    repCategoriesGiven.length,
+    repCategoriesQuery.fetchNextPage,
+    repCategoriesQuery.hasNextPage,
+    repCategoriesQuery.isFetchingNextPage,
+    repCategoriesGivenQuery.fetchNextPage,
+    repCategoriesGivenQuery.hasNextPage,
+    repCategoriesGivenQuery.isFetchingNextPage,
+  ]);
 
   return (
     <div className="tailwind-scope">
@@ -153,6 +238,10 @@ export default function UserPageRep({
           onRepDirectionChange={setRepDirection}
           initialActivityLogParams={initialActivityLogParams}
           loading={activeLoading}
+          visibleCount={activeVisibleCount}
+          onShowMore={handleShowMore}
+          hasNextPage={activeHasNextPage}
+          isFetchingNextPage={activeIsFetchingNextPage}
         />
       </div>
       <div className="tw-hidden lg:tw-block">
@@ -165,6 +254,10 @@ export default function UserPageRep({
               repDirection={repDirection}
               onRepDirectionChange={setRepDirection}
               loading={activeLoading}
+              visibleCount={activeVisibleCount}
+              onShowMore={handleShowMore}
+              hasNextPage={activeHasNextPage}
+              isFetchingNextPage={activeIsFetchingNextPage}
             />
             <div className="tw-mt-6 lg:tw-mt-8">
               <UserPageCombinedActivityLog

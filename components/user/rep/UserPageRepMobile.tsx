@@ -33,6 +33,10 @@ export default function UserPageRepMobile({
   onRepDirectionChange,
   initialActivityLogParams,
   loading,
+  visibleCount,
+  onShowMore,
+  hasNextPage,
+  isFetchingNextPage,
 }: {
   readonly profile: ApiIdentity;
   readonly overview: ApiRepOverview | null;
@@ -42,6 +46,10 @@ export default function UserPageRepMobile({
   readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly initialActivityLogParams: ActivityLogParams;
   readonly loading: boolean;
+  readonly visibleCount: number;
+  readonly onShowMore: () => void;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
@@ -49,14 +57,7 @@ export default function UserPageRepMobile({
   const [activeTab, setActiveTab] = useState<MobileTab>("rep");
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(5);
   const [editCategory, setEditCategory] = useState<string | null>(null);
-
-  const [prevCategories, setPrevCategories] = useState(categories);
-  if (categories !== prevCategories) {
-    setPrevCategories(categories);
-    setVisibleCount(5);
-  }
 
   const canEditRep = useMemo(
     () =>
@@ -125,7 +126,9 @@ export default function UserPageRepMobile({
               loading={loading}
               canEditRep={canEditRep}
               visibleCount={visibleCount}
-              onShowMore={() => setVisibleCount((prev) => prev + 10)}
+              onShowMore={onShowMore}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
               onGrantRep={() => setIsGrantRepOpen(true)}
               onEditCategory={setEditCategory}
             />
