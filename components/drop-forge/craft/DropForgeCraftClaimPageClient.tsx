@@ -29,6 +29,7 @@ import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
+import DropForgeStorageLinkCard from "@/components/drop-forge/DropForgeStorageLinkCard";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
@@ -1546,7 +1547,7 @@ function MetadataSection({
     <form
       onSubmit={handleTraitsSave}
       noValidate
-      className="tw-flex tw-flex-col tw-gap-2"
+      className="tw-flex tw-flex-col tw-gap-4"
     >
       <ArtworkDetails
         title={traits.title}
@@ -1597,7 +1598,7 @@ function MetadataSection({
           {traitsError}
         </p>
       )}
-      <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2 tw-pt-4">
         <button
           ref={traitsSaveButtonRef}
           type="submit"
@@ -1640,17 +1641,10 @@ function ArweaveLinkRow({
   label,
   cid,
 }: Readonly<{ label: string; cid: string | null | undefined }>) {
-  const trimmedCid = cid?.trim() ?? "";
-  const url = trimmedCid ? `https://arweave.net/${trimmedCid}` : null;
-
   return (
-    <DropForgeLinkCard
+    <DropForgeStorageLinkCard
       label={label}
-      displayValue={trimmedCid}
-      copyValue={url}
-      openUrl={url}
-      copyLabel={`Copy ${label} link`}
-      openLabel={`Open ${label} on Arweave`}
+      value={cid}
       cardClassName={ARWEAVE_LINK_CARD}
       labelClassName="tw-min-w-0 tw-text-base tw-text-iron-200"
     />
