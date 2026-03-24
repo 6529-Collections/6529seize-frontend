@@ -2,16 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import MyStreamWaveTabsLeaderboard from "@/components/brain/my-stream/MyStreamWaveTabsLeaderboard";
-import { BrainView } from "@/components/brain/BrainMobile";
-
-jest.mock("@/components/brain/BrainMobile", () => ({
-  BrainView: {
-    DEFAULT: "DEFAULT",
-    LEADERBOARD: "LEADERBOARD",
-    SALES: "SALES",
-    WINNERS: "WINNERS",
-  },
-}));
+import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
 jest.mock("@/hooks/useWaveTimers", () => ({
   useWaveTimers: () => ({

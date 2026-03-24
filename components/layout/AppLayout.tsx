@@ -19,6 +19,8 @@ import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useCapacitor from "@/hooks/useCapacitor";
 import PullToRefresh from "../providers/PullToRefresh";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
+import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -29,6 +31,30 @@ interface Props {
   readonly children: ReactNode;
 }
 
+function WavesQuickVoteView() {
+  const {
+    closeQuickVote,
+    isQuickVoteOpen,
+    openQuickVote,
+    prefetchQuickVote,
+    quickVoteSessionId,
+  } = useMemesQuickVoteDialogController();
+
+  return (
+    <>
+      <BrainMobileWaves
+        onOpenQuickVote={openQuickVote}
+        onPrefetchQuickVote={prefetchQuickVote}
+      />
+      <MemesQuickVoteDialog
+        isOpen={isQuickVoteOpen}
+        sessionId={quickVoteSessionId}
+        onClose={closeQuickVote}
+      />
+    </>
+  );
+}
+
 export default function AppLayout({ children }: Props) {
   useDeepLinkNavigation();
   const { registerRef } = useLayout();
@@ -37,9 +63,9 @@ export default function AppLayout({ children }: Props) {
   const { activeView } = useViewContext();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isSingleDropOpen = searchParams?.get("drop") !== null;
+  const isSingleDropOpen = searchParams.get("drop") !== null;
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const viewParam = searchParams?.get("view");
+  const viewParam = searchParams.get("view");
   const hasWaveParam = Boolean(waveParam);
   const isViewingWavesOrMessages =
     viewParam === "waves" || viewParam === "messages";
@@ -86,7 +112,7 @@ export default function AppLayout({ children }: Props) {
       {activeView === "messages" ? (
         <BrainMobileMessages />
       ) : activeView === "waves" ? (
-        <BrainMobileWaves />
+        <WavesQuickVoteView />
       ) : (
         <main>{children}</main>
       )}

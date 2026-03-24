@@ -2,7 +2,7 @@
 
 import React, { useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { BrainView } from "../BrainMobile";
+import { BrainView } from "./brainMobileViews";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboard";
 import { useLayout } from "../my-stream/layout/LayoutContext";
