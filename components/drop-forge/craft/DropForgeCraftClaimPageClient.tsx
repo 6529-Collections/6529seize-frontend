@@ -315,7 +315,7 @@ function getAnimationSourceCardProps({
 
   return {
     label: "Animation URL",
-    url: pendingAnimation === undefined ? claimAnimationUrl : pendingAnimation,
+    url: pendingAnimation ?? claimAnimationUrl,
     emptyText: "No animation URL",
   };
 }
@@ -397,6 +397,14 @@ function MediaSourceLinkCard({
     }
   }
 
+  function handleOpen() {
+    if (!openableUrl || typeof globalThis.open !== "function") {
+      return;
+    }
+
+    globalThis.open(openableUrl, "_blank", "noopener,noreferrer");
+  }
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -423,15 +431,14 @@ function MediaSourceLinkCard({
             </button>
           )}
           {openableUrl && (
-            <a
-              href={openableUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={handleOpen}
               className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
               aria-label={`Open ${label} in new tab`}
             >
               <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
-            </a>
+            </button>
           )}
           {copied && (
             <span className="tw-animate-in tw-fade-in tw-text-xs tw-text-iron-300 tw-duration-150">

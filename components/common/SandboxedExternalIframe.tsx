@@ -119,7 +119,6 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
 
     const baseProps = {
       src: canonicalSrc,
-      title: iframeTitle,
       sandbox: DEFAULT_SANDBOX,
       // `allow=""` intentionally denies all Permission Policy features beyond the sandbox defaults.
       allow: "",
@@ -182,7 +181,12 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
       {banner}
       <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
         {isVisible ? (
-          <iframe {...iframeProps} onLoad={onLoad} onError={onError} />
+          <iframe
+            {...iframeProps}
+            title={iframeTitle}
+            onLoad={onLoad}
+            onError={onError}
+          />
         ) : (
           placeholder
         )}
