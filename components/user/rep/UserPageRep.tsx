@@ -13,7 +13,7 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import { RateMatter } from "@/types/enums";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
@@ -34,6 +34,11 @@ const FIRST_REP_CATEGORIES_PAGE = 1;
 const getDefaultVisibleCounts = (): Record<RepDirection, number> => ({
   received: INITIAL_VISIBLE_CATEGORY_COUNT,
   given: INITIAL_VISIBLE_CATEGORY_COUNT,
+});
+
+const getDefaultFetchStates = (): Record<RepDirection, boolean> => ({
+  received: false,
+  given: false,
 });
 
 function useRepCategories({
@@ -84,6 +89,12 @@ export default function UserPageRep({
   const [repDirection, setRepDirection] = useState<RepDirection>("received");
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
   const [visibleCounts, setVisibleCounts] = useState(getDefaultVisibleCounts);
+  const visibleCountsRef = useRef(visibleCounts);
+  const isFetchingNextPageRef = useRef(getDefaultFetchStates());
+
+  useEffect(() => {
+    visibleCountsRef.current = visibleCounts;
+  }, [visibleCounts]);
 
   const canEditNic = useMemo(
     () =>
@@ -180,6 +191,14 @@ export default function UserPageRep({
       : isFetchingOverviewGiven || repCategoriesGivenQuery.isFetching;
 
   const handleShowMore = useCallback(() => {
+    const nextVisibleCounts = {
+      ...visibleCountsRef.current,
+      [repDirection]:
+        visibleCountsRef.current[repDirection] + VISIBLE_CATEGORY_LOAD_STEP,
+    };
+    visibleCountsRef.current = nextVisibleCounts;
+    setVisibleCounts(nextVisibleCounts);
+
     const loadedCount =
       repDirection === "received"
         ? repCategories.length
@@ -197,27 +216,22 @@ export default function UserPageRep({
         ? repCategoriesQuery.fetchNextPage
         : repCategoriesGivenQuery.fetchNextPage;
 
-    setVisibleCounts((currentCounts) => {
-      const nextVisibleCount =
-        currentCounts[repDirection] + VISIBLE_CATEGORY_LOAD_STEP;
-
-      if (
-        nextVisibleCount > loadedCount &&
-        hasNextPage &&
-        !isFetchingNextPage
-      ) {
-        fetchNextPage().catch(() => {
+    if (
+      nextVisibleCounts[repDirection] > loadedCount &&
+      hasNextPage &&
+      !isFetchingNextPage &&
+      !isFetchingNextPageRef.current[repDirection]
+    ) {
+      isFetchingNextPageRef.current[repDirection] = true;
+      fetchNextPage()
+        .catch(() => {
           // Errors are surfaced via query state rendered in the UI.
+        })
+        .finally(() => {
+          isFetchingNextPageRef.current[repDirection] = false;
         });
-      }
-
-      return {
-        ...currentCounts,
-        [repDirection]: nextVisibleCount,
-      };
-    });
+    }
   }, [
-    repDirection,
     repCategories.length,
     repCategoriesGiven.length,
     repCategoriesQuery.fetchNextPage,
@@ -226,6 +240,7 @@ export default function UserPageRep({
     repCategoriesGivenQuery.fetchNextPage,
     repCategoriesGivenQuery.hasNextPage,
     repCategoriesGivenQuery.isFetchingNextPage,
+    repDirection,
   ]);
 
   return (
