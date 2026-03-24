@@ -159,7 +159,7 @@ jest.mock("@/hooks/useManifoldClaim", () => {
 
 describe("ManifoldMinting phases", () => {
   beforeEach(() => {
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn();
     mockUseManifoldClaim.mockReset();
     mockUseManifoldClaim.mockReturnValue({
       claim: {
@@ -274,7 +274,7 @@ describe("ManifoldMinting phases", () => {
   });
 
   test("shows no eligible spots after distribution data resolves without an allowlist entry", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => ({
         data: [

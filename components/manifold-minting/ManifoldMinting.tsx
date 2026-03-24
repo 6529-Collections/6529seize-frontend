@@ -1006,15 +1006,17 @@ function ManifoldMemesMintingPhase(
   );
   const status = getMemePhaseCardStatus(props.claim, props.phase);
   const phaseDateLabels = getPhaseDateLabels(status);
+  let eligibilityState: "loading" | "ready" | "unavailable" = "loading";
+  if (props.distributionState === "ready") {
+    eligibilityState = "ready";
+  } else if (props.distributionState === "error") {
+    eligibilityState = "unavailable";
+  }
   const eligibleMintsDetails = getEligibleMintsDetails(
     props.phase.id,
     eligibleMints?.spots,
     status,
-    props.distributionState === "ready"
-      ? "ready"
-      : props.distributionState === "error"
-        ? "unavailable"
-        : "loading"
+    eligibilityState
   );
 
   let startDate = props.phase.start;
