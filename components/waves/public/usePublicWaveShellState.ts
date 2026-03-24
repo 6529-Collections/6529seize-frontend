@@ -13,7 +13,7 @@ export interface PublicWaveShellData {
   readonly postsCount: number;
 }
 
-export type PublicWaveShellState =
+type PublicWaveShellState =
   | { readonly status: "loading" }
   | { readonly status: "unavailable" }
   | { readonly status: "ready"; readonly wave: PublicWaveShellData };
