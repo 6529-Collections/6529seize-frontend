@@ -133,7 +133,8 @@ function getMemePhaseCardStatus(
 function getEligibleMintsDetails(
   phaseId: string,
   eligibleSpots: number | undefined,
-  status: MemePhaseCardStatus
+  status: MemePhaseCardStatus,
+  eligibilityState: "loading" | "ready" | "unavailable"
 ): { text: string; className: string } {
   if (phaseId === "public") {
     if (status === MemePhaseCardStatus.ACTIVE) {
@@ -156,9 +157,23 @@ function getEligibleMintsDetails(
     };
   }
 
-  if (eligibleSpots === undefined) {
+  if (eligibilityState === "loading") {
     return {
       text: "Loading eligibility...",
+      className: "tw-text-iron-300",
+    };
+  }
+
+  if (eligibilityState === "unavailable") {
+    return {
+      text: "Eligibility unavailable",
+      className: "tw-text-iron-300",
+    };
+  }
+
+  if (eligibleSpots === undefined) {
+    return {
+      text: "No eligible spots",
       className: "tw-text-iron-300",
     };
   }
@@ -889,6 +904,9 @@ function ManifoldMemesMintingPhases(
   }>
 ) {
   const [distribution, setDistribution] = useState<Distribution>();
+  const [distributionState, setDistributionState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
   const phaseAnchorDate =
     props.claim.startDate > 0
       ? Time.seconds(props.claim.startDate)
@@ -898,11 +916,13 @@ function ManifoldMemesMintingPhases(
   useEffect(() => {
     if (!props.address) {
       setDistribution(undefined);
+      setDistributionState("idle");
       return;
     }
 
     let isCancelled = false;
     setDistribution(undefined);
+    setDistributionState("loading");
 
     const loadDistribution = async () => {
       try {
@@ -929,11 +949,13 @@ function ManifoldMemesMintingPhases(
 
         if (!isCancelled) {
           setDistribution(data.data[0]);
+          setDistributionState("ready");
         }
       } catch (error) {
         console.error("Failed to fetch mint distribution", error);
         if (!isCancelled) {
           setDistribution(undefined);
+          setDistributionState("error");
         }
       }
     };
@@ -960,6 +982,7 @@ function ManifoldMemesMintingPhases(
             address={props.address}
             phase={phase}
             distribution={distribution}
+            distributionState={distributionState}
             local_timezone={props.local_timezone}
           />
         ))}
@@ -974,6 +997,7 @@ function ManifoldMemesMintingPhase(
     address: string | null;
     phase: MemePhase;
     distribution: Distribution | undefined;
+    distributionState: "idle" | "loading" | "ready" | "error";
     local_timezone: boolean;
   }>
 ) {
@@ -982,10 +1006,17 @@ function ManifoldMemesMintingPhase(
   );
   const status = getMemePhaseCardStatus(props.claim, props.phase);
   const phaseDateLabels = getPhaseDateLabels(status);
+  let eligibilityState: "loading" | "ready" | "unavailable" = "loading";
+  if (props.distributionState === "ready") {
+    eligibilityState = "ready";
+  } else if (props.distributionState === "error") {
+    eligibilityState = "unavailable";
+  }
   const eligibleMintsDetails = getEligibleMintsDetails(
     props.phase.id,
     eligibleMints?.spots,
-    status
+    status,
+    eligibilityState
   );
 
   let startDate = props.phase.start;

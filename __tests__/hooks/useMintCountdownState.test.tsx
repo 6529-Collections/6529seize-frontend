@@ -85,3 +85,44 @@ test("shows the next meme phase countdown after an allowlist phase ends", () => 
     },
   });
 });
+
+test("keeps the next meme phase countdown inactive until the claim advances", () => {
+  jest.spyOn(Date, "now").mockReturnValue(250 * 1000);
+
+  useManifoldClaim.mockReturnValue({
+    claim: {
+      status: ManifoldClaimStatus.ENDED,
+      phase: ManifoldPhase.ALLOWLIST,
+      startDate: 100,
+      endDate: 140,
+      isSoldOut: false,
+      isFinalized: true,
+      isDropComplete: false,
+      nextMemePhase: {
+        id: "1",
+        name: "Phase 1 (Allowlist)",
+        type: ManifoldPhase.ALLOWLIST,
+        start: Time.seconds(200),
+        end: Time.seconds(300),
+      },
+    },
+  });
+
+  const { result } = renderHook(() =>
+    useMintCountdownState(1, {
+      contract: "0x1",
+      chainId: 1,
+    })
+  );
+
+  expect(result.current).toEqual({
+    type: "countdown",
+    countdown: {
+      title: "Phase 1 (Allowlist) Starts In",
+      targetDate: 200,
+      showAllowlistInfo: true,
+      showMintBtn: false,
+      isActive: false,
+    },
+  });
+});
