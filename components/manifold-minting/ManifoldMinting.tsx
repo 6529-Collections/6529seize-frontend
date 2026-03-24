@@ -906,11 +906,16 @@ function ManifoldMemesMintingPhases(
 
     const loadDistribution = async () => {
       try {
+        const address = props.address;
+        if (!address) {
+          return;
+        }
+
         const query = new URLSearchParams({
           card_id: String(props.token_id),
           contract: props.contract,
           page: "1",
-          search: props.address,
+          search: address,
         });
         const response = await fetch(
           `https://api.6529.io/api/distributions?${query.toString()}`
