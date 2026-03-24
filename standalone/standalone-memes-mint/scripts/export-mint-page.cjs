@@ -141,7 +141,7 @@ function trimTrailingSlashes(value) {
 }
 
 function sanitizeLogMessage(value) {
-  return String(value).replace(/[\r\n]+/g, " ");
+  return String(value).replaceAll(/[\u0000-\u001F\u007F\u2028\u2029]+/g, " ");
 }
 
 function createFetchTimeoutError(url, timeout) {

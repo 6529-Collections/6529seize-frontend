@@ -273,6 +273,11 @@
   padding: 0.5rem;
 }
 
+.leaderboardTable tbody tr + tr > *,
+.nftLeaderboardTable tbody tr + tr > * {
+  padding-top: 0.9rem;
+}
+
 .borderBottom {
   border-bottom: 0.5px solid variables.$font-color !important;
   padding: 0rem !important;
