@@ -1029,12 +1029,56 @@ function AnimationSection({
 
   const showAddFlow =
     !hasAnimation && !hasPendingAnimationChange && !hasPendingAnimationUpload;
-  const showChoice = showAddFlow && replaceMode === "choose";
-  const showAddLink = showAddFlow && replaceMode === "link";
   const showAnimationControls =
     hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload;
+  const showAddChoice = showAddFlow && replaceMode === "choose";
+  const showAddLink = showAddFlow && replaceMode === "link";
+  const showReplaceLink =
+    showAnimationControls && !showAddFlow && replaceMode === "link";
   const animationActionLabel =
     pendingAnimation === null ? "Add animation" : "Replace";
+  const linkEditor = (
+    <div className="tw-flex tw-flex-col tw-gap-2">
+      <label
+        htmlFor="drop-forge-animation-link"
+        className="tw-text-sm tw-text-iron-400"
+      >
+        IPFS or Arweave URL (GLB or HTML)
+      </label>
+      <input
+        id="drop-forge-animation-link"
+        type="text"
+        value={linkInput}
+        onChange={(e) => {
+          setLinkInput(e.target.value);
+          setLinkError(null);
+        }}
+        placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
+        className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
+      />
+      {linkError && (
+        <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
+          {linkError}
+        </p>
+      )}
+      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
+        <button type="button" onClick={applyLink} className={BTN_SUCCESS}>
+          Use link
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setReplaceMode(null);
+            setLinkInput("");
+            setLinkError(null);
+          }}
+          className={BTN_TERTIARY}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -1062,10 +1106,10 @@ function AnimationSection({
             </button>
           </>
         )}
-        {showChoice && (
+        {showAddChoice && (
           <div className="tw-w-full tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900/50 tw-p-4">
             <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-300">
-              How do you want to add the animation?
+              How do you want to add or replace the animation?
             </p>
             <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
               <button
@@ -1121,62 +1165,23 @@ function AnimationSection({
           </>
         )}
 
-        {showAddLink && (
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            <label
-              htmlFor="drop-forge-animation-link"
-              className="tw-text-sm tw-text-iron-400"
-            >
-              IPFS or Arweave URL (GLB or HTML)
-            </label>
-            <input
-              id="drop-forge-animation-link"
-              type="text"
-              value={linkInput}
-              onChange={(e) => {
-                setLinkInput(e.target.value);
-                setLinkError(null);
-              }}
-              placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
-              className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
-            />
-            {linkError && (
-              <p className="tw-mb-0 tw-text-sm tw-text-rose-300" role="alert">
-                {linkError}
-              </p>
-            )}
-            <div className="tw-flex tw-flex-wrap tw-gap-2">
-              <button type="button" onClick={applyLink} className={BTN_SUCCESS}>
-                Use link
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setReplaceMode(null);
-                  setLinkInput("");
-                  setLinkError(null);
-                }}
-                className={BTN_TERTIARY}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+        {showAddLink && linkEditor}
 
-        {showAnimationControls && (
+        {showAnimationControls && replaceMode !== "link" && (
           <div className="tw-flex tw-flex-wrap tw-gap-2">
             <AnimationReplaceControls
               replaceMode={replaceMode}
               animationActionLabel={animationActionLabel}
               canRemoveAnimation={pendingAnimation !== null}
-              onChooseUpload={() => animationInputRef.current?.click()}
+              onChooseUpload={() => setReplaceMode("choose")}
               onSwitchToLink={() => setReplaceMode("link")}
               onCancel={() => setReplaceMode(null)}
               onRemoveAnimation={handleRemoveAnimation}
             />
           </div>
         )}
+
+        {showReplaceLink && linkEditor}
       </div>
 
       {hasPendingChanges && (
