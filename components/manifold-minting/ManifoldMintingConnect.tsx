@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -17,10 +16,11 @@ const noopProfileSelection = (_: CommunityMemberMinimal | null) => undefined;
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
-    onMintFor: (address: string) => void;
+    onMintFor: (address: string | null) => void;
+    hideConnect?: boolean;
   }>
 ) {
-  const { onMintFor } = props;
+  const { onMintFor, hideConnect } = props;
   const account = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isIos } = useCapacitor();
@@ -67,16 +67,17 @@ export default function ManifoldMintingConnect(
   }, [account.address, resetFren]);
 
   useEffect(() => {
-    if (!account.address || mintForFren) {
+    if (mintForFren) {
       return;
     }
-    setSelectedMintForMeWallet(account.address);
+
+    setSelectedMintForMeWallet(account.address ?? null);
   }, [account.address, mintForFren]);
 
   useEffect(() => {
     if (mintForFren) {
       if (!selectedFrenWallet) {
-        onMintFor("");
+        onMintFor(null);
         return;
       }
 
@@ -84,8 +85,9 @@ export default function ManifoldMintingConnect(
       return;
     }
 
-    const mintDestination = selectedMintForMeWallet ?? account.address;
+    const mintDestination = selectedMintForMeWallet ?? account.address ?? null;
     if (!mintDestination) {
+      onMintFor(null);
       return;
     }
 
@@ -128,6 +130,7 @@ export default function ManifoldMintingConnect(
           onProfileSelect={noopProfileSelection}
           onWalletSelect={setSelectedMintForMeWallet}
           showLabel={false}
+          label="Choose destination wallet"
           allowProfileChange={false}
           disableSingleWalletSelection={true}
           showSelectedProfileCard={false}
@@ -141,8 +144,10 @@ export default function ManifoldMintingConnect(
       connectedProfile?.handle ?? connectedProfile?.display ?? account.address;
     const showAddress = !areEqualAddresses(profileHandle, account.address);
     return (
-      <div className="d-flex flex-column pt-1 pb-1">
-        <span className="font-smaller font-lighter">Connected Profile</span>
+      <div className="tw-py-1">
+        <span className="tw-text-sm tw-font-light tw-text-iron-300">
+          Connected Profile
+        </span>
         <div className="tw-mt-2 tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
           <TransferModalPfp
             src={connectedProfile?.pfp ?? null}
@@ -179,13 +184,11 @@ export default function ManifoldMintingConnect(
       return (
         <Link
           href={mintOn6529Href}
-          className="text-center pt-2 pb-2"
+          className="tw-block tw-w-full tw-rounded-xl tw-border tw-border-white/15 tw-bg-white tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-950 tw-no-underline tw-transition hover:tw-bg-iron-100"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <button className="btn btn-light" style={{ width: "100%" }}>
-            Mint on 6529.io
-          </button>
+          Mint on 6529.io
         </Link>
       );
     } else {
@@ -194,23 +197,28 @@ export default function ManifoldMintingConnect(
   }
 
   if (!account.isConnected) {
+    if (hideConnect) {
+      return null;
+    }
     return (
-      <div className="text-center pt-2 pb-2">
+      <div className="tw-py-2 tw-text-center">
         <HeaderUserConnect />
       </div>
     );
   }
 
   return (
-    <Container className="no-padding">
-      <Row>
-        <Col>{printConnected()}</Col>
-      </Row>
-      <Row className="pt-3">
-        <Col>
+    <div>
+      <div>{printConnected()}</div>
+      <div className="tw-pt-3">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-0">
           <button
-            className={`btn ${mintForFren ? "btn-dark" : "btn-light"}`}
-            style={{ width: "50%" }}
+            type="button"
+            className={`tw-rounded-md tw-border tw-px-4 tw-py-0.5 tw-text-2xl tw-font-normal tw-transition ${
+              mintForFren
+                ? "tw-border-[#3a3a3a] tw-bg-[#262b31] tw-text-white"
+                : "tw-border-transparent tw-bg-white tw-text-black"
+            }`}
             onClick={() => {
               resetFren();
               setMintForFren(false);
@@ -219,17 +227,19 @@ export default function ManifoldMintingConnect(
             Mint for me
           </button>
           <button
-            className={`btn ${mintForFren ? "btn-light" : "btn-dark"}`}
-            style={{ width: "50%" }}
+            type="button"
+            className={`tw-rounded-md tw-border tw-px-4 tw-py-0.5 tw-text-2xl tw-font-normal tw-transition ${
+              mintForFren
+                ? "tw-border-transparent tw-bg-white tw-text-black"
+                : "tw-border-[#3a3a3a] tw-bg-[#262b31] tw-text-white"
+            }`}
             onClick={() => setMintForFren(true)}
           >
             Mint for fren
           </button>
-        </Col>
-      </Row>
-      <Row className="pt-2">
-        <Col>{printContent()}</Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+      <div className="tw-pt-2">{printContent()}</div>
+    </div>
   );
 }

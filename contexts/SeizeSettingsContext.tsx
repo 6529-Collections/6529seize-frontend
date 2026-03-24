@@ -14,6 +14,7 @@ import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
 import { fetchUrl } from "@/services/6529api";
+import { SeizeSettingsMode } from "@/types/enums";
 import type { ReactNode } from "react";
 
 type TempApiSeizeSettings = ApiSeizeSettings & {
@@ -40,8 +41,10 @@ const SeizeSettingsContext = createContext<
 
 export const SeizeSettingsProvider = ({
   children,
+  mode = SeizeSettingsMode.REMOTE,
 }: {
   children: ReactNode;
+  mode?: SeizeSettingsMode;
 }) => {
   const [seizeSettings, setSeizeSettings] = useState<TempApiSeizeSettings>({
     rememes_submission_tdh_threshold: 0,
@@ -98,6 +101,16 @@ export const SeizeSettingsProvider = ({
   );
 
   useEffect(() => {
+    isMountedRef.current = true;
+
+    if (mode === SeizeSettingsMode.LOCAL) {
+      setIsLoaded(true);
+
+      return () => {
+        isMountedRef.current = false;
+      };
+    }
+
     // Initial load failures are exposed through `loadError`; do not leak
     // them as unhandled promise rejections from the mount effect.
     loadSeizeSettings().catch(() => undefined);
@@ -105,7 +118,7 @@ export const SeizeSettingsProvider = ({
     return () => {
       isMountedRef.current = false;
     };
-  }, [loadSeizeSettings]);
+  }, [loadSeizeSettings, mode]);
 
   const { memes_wave_id, curation_wave_id } = seizeSettings;
 

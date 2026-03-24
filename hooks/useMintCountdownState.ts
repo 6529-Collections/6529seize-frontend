@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
@@ -10,6 +10,7 @@ import {
   ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
+import { Time } from "@/helpers/time";
 import type { Abi } from "viem";
 
 export interface CountdownData {
@@ -72,8 +73,19 @@ export function useMintCountdownState(
 
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
+  const [now, setNow] = useState(() => Time.now());
 
   const showMintBtn = !hideMintBtn && !(isIos && country !== "US");
+
+  useEffect(() => {
+    const interval = globalThis.window.setInterval(() => {
+      setNow(Time.now());
+    }, 1000);
+
+    return () => {
+      globalThis.window.clearInterval(interval);
+    };
+  }, []);
 
   return useMemo((): MintCountdownState => {
     if (isError) {
@@ -88,7 +100,29 @@ export function useMintCountdownState(
       return { type: "sold_out" };
     }
 
-    if (manifoldClaim.isFinalized) {
+    if (
+      manifoldClaim.isFinalized &&
+      !manifoldClaim.isDropComplete &&
+      manifoldClaim.nextMemePhase
+    ) {
+      const nextPhase = manifoldClaim.nextMemePhase;
+      const isUpcoming = now.lt(nextPhase.start);
+
+      return {
+        type: "countdown",
+        countdown: {
+          title: `${nextPhase.name} ${isUpcoming ? "Starts In" : "Ends In"}`,
+          targetDate: isUpcoming
+            ? nextPhase.start.toSeconds()
+            : nextPhase.end.toSeconds(),
+          showAllowlistInfo: nextPhase.type === ManifoldPhase.ALLOWLIST,
+          showMintBtn,
+          isActive: !isUpcoming,
+        },
+      };
+    }
+
+    if (manifoldClaim.isDropComplete) {
       return { type: "finalized" };
     }
 
@@ -111,5 +145,5 @@ export function useMintCountdownState(
         isActive: !isUpcoming,
       },
     };
-  }, [manifoldClaim, isError, showMintBtn]);
+  }, [manifoldClaim, isError, now, showMintBtn]);
 }

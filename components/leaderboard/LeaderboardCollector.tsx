@@ -1,6 +1,9 @@
 import { formatAddress } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import UserCICAndLevel from "../user/utils/UserCICAndLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
+import styles from "./Leaderboard.module.scss";
 
 export function LeaderboardCollector(
   props: Readonly<{
@@ -11,6 +14,7 @@ export function LeaderboardCollector(
     level: number;
   }>
 ) {
+  const hasLevel = props.level !== undefined && props.level !== null;
   const link = props.handle ?? props.consolidationKey.split("-")[0];
   let display =
     props.handle ??
@@ -24,7 +28,7 @@ export function LeaderboardCollector(
     <img
       src={getScaledImageUri(props.pfp, ImageScale.W_AUTO_H_50)}
       alt={props.consolidationKey}
-      className="tw-bg-transparent tw-h-[40px] tw-object-contain"
+      className="tw-h-[40px] tw-bg-transparent tw-object-contain"
     />
   ) : (
     <></>
@@ -34,15 +38,21 @@ export function LeaderboardCollector(
     <div className="d-flex align-items-center gap-3">
       <a
         href={`/${link}`}
-        className="no-wrap d-flex gap-3 decoration-none align-items-center">
+        className="no-wrap d-flex gap-2 decoration-none align-items-center"
+      >
         {pfpImg}
-        {props.level ? (
-          <span className="d-flex gap-2 align-items-center">
-            <UserCICAndLevel level={props.level} />
-            <span>{display}</span>
-          </span>
+        {hasLevel ? (
+          <div
+            className={`d-flex gap-2 align-items-center ${styles["collectorLevel"]}`}
+          >
+            <UserCICAndLevel
+              level={props.level}
+              size={UserCICAndLevelSize.LARGE}
+            />
+            <div>{display}</div>
+          </div>
         ) : (
-          <span>{display}</span>
+          <div>{display}</div>
         )}
       </a>
     </div>

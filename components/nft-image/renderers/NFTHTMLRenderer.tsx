@@ -6,7 +6,7 @@ import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import type { BaseRendererProps } from "../types/renderer-props";
 import { getResolvedAnimationSrc } from "../utils/animation-source";
-import { getArweaveGatewayFallbackUrls } from "../utils/arweave-fallback";
+import { getArweaveGatewayFallbackUrls } from "../utils/gateway-fallback";
 
 const IFRAME_FALLBACK_TIMEOUT_MS = 8000;
 

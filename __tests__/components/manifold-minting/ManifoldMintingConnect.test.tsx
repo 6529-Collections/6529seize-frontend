@@ -113,6 +113,16 @@ describe("ManifoldMintingConnect", () => {
     expect(screen.getByTestId("header-connect")).toBeInTheDocument();
   });
 
+  it("hides connect prompt in standalone when not connected", () => {
+    (mockedConnect as jest.Mock).mockReturnValue({ isConnected: false });
+    render(
+      <CookieConsentProvider>
+        <ManifoldMintingConnect onMintFor={jest.fn()} standalone />
+      </CookieConsentProvider>
+    );
+    expect(screen.queryByTestId("header-connect")).not.toBeInTheDocument();
+  });
+
   it("calls onMintFor with account address on mount", () => {
     const { onMintFor, seizeCtx } = renderConnected();
     expect(onMintFor).toHaveBeenCalledWith(seizeCtx.address);

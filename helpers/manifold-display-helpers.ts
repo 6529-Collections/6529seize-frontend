@@ -1,4 +1,5 @@
 import { capitalizeEveryWord, numberWithCommas } from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
 const WEI_PER_ETH = 1_000_000_000_000_000_000n;
@@ -48,7 +49,7 @@ export function formatWeiToEth(wei: bigint, decimals = 5): string {
 }
 
 export function formatEditionSize(manifoldClaim: ManifoldClaim): string {
-  if (manifoldClaim.isFinalized) {
+  if (manifoldClaim.isDropComplete) {
     return numberWithCommas(manifoldClaim.total);
   } else {
     return `${numberWithCommas(manifoldClaim.total)} / ${numberWithCommas(manifoldClaim.totalMax)}`;
@@ -56,11 +57,21 @@ export function formatEditionSize(manifoldClaim: ManifoldClaim): string {
 }
 
 export function formatClaimStatus(manifoldClaim: ManifoldClaim): string {
-  if (manifoldClaim.isFinalized) {
+  if (manifoldClaim.isDropComplete) {
     return manifoldClaim.remaining > 0 ? "Ended" : "Sold Out";
-  } else {
-    return capitalizeEveryWord(manifoldClaim.status);
   }
+
+  if (manifoldClaim.isFinalized && manifoldClaim.nextMemePhase) {
+    const now = Time.now();
+    if (now.lt(manifoldClaim.nextMemePhase.start)) {
+      return "Upcoming";
+    }
+    if (now.lt(manifoldClaim.nextMemePhase.end)) {
+      return "Active";
+    }
+  }
+
+  return capitalizeEveryWord(manifoldClaim.status);
 }
 
 export function formatClaimCost(manifoldClaim: ManifoldClaim): string {

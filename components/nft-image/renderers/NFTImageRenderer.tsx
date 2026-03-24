@@ -5,7 +5,7 @@ import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import type { BaseRendererProps } from "../types/renderer-props";
-import { withArweaveFallback } from "../utils/arweave-fallback";
+import { withArweaveFallback } from "../utils/gateway-fallback";
 
 function getSrc(
   nft: BaseRendererProps["nft"],
@@ -14,21 +14,25 @@ function getSrc(
 ): string {
   if (showThumbnail) {
     return nft.thumbnail;
-  } else if (nft.scaled && !showOriginal) {
-    return nft.scaled;
-  } else {
-    return nft.image;
   }
+
+  if (!showOriginal && nft.scaled) {
+    return nft.scaled;
+  }
+
+  return nft.image;
 }
 
 export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   const src = getSrc(props.nft, !!props.showThumbnail, !!props.showOriginal);
   const shouldLazyLoad = !!props.showThumbnail || props.height === 300;
+  const marginBottomClass = props.height === "full" ? "" : "mb-2";
 
   return (
     <Col
       xs={12}
-      className={`mb-2 text-center d-flex align-items-center justify-content-center ${styles["imageWrapper"]} ${props.heightStyle} ${props.bgStyle}`}>
+      className={`${marginBottomClass} text-center d-flex align-items-center justify-content-center ${styles["imageWrapper"]} ${props.heightStyle} ${props.bgStyle}`.trim()}
+    >
       <Image
         loading={shouldLazyLoad ? "lazy" : "eager"}
         priority={!shouldLazyLoad}

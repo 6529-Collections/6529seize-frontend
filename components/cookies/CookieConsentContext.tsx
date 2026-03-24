@@ -56,6 +56,7 @@ export const useCookieConsent = () => {
 
 type CookieConsentProviderProps = {
   children: ReactNode;
+  disabled?: boolean;
 };
 
 export const getCookieConsentByName = (name: string): CookieConsent => {
@@ -71,6 +72,7 @@ export const getCookieConsentByName = (name: string): CookieConsent => {
 
 export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   children,
+  disabled = false,
 }) => {
   const { setToast } = useAuth();
   const [showCookieConsent, setShowCookieConsent] = useState(false);
@@ -179,25 +181,49 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
     }
   }, [getCookieConsent, setToast]);
 
+  const noopConsent = useCallback(async () => {}, []);
+  const noopReject = useCallback(async () => {}, []);
+
   const value = useMemo(
-    () => ({
+    () =>
+      disabled
+        ? {
+            consent: noopConsent,
+            reject: noopReject,
+            showCookieConsent: false,
+            country: "US",
+            performanceConsent: false as CookieConsent,
+          }
+        : {
+            consent,
+            reject,
+            showCookieConsent,
+            country,
+            performanceConsent,
+          },
+    [
+      disabled,
+      noopConsent,
+      noopReject,
       consent,
       reject,
       showCookieConsent,
       country,
       performanceConsent,
-    }),
-    [consent, reject, showCookieConsent, country, performanceConsent]
+    ]
   );
 
   useEffect(() => {
+    if (disabled) {
+      return;
+    }
     getCookieConsent(true);
-  }, [getCookieConsent]);
+  }, [disabled, getCookieConsent]);
 
   return (
     <CookieConsentContext.Provider value={value}>
       {children}
-      {showCookieConsent && <CookiesBanner />}
+      {!disabled && showCookieConsent && <CookiesBanner />}
     </CookieConsentContext.Provider>
   );
 };
