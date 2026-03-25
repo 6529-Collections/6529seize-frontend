@@ -33,11 +33,13 @@ function InteractiveHtmlMediaDisplay({
   previewImageUrl,
   imageScale = ImageScale.AUTOx1080,
   requireInteractionToLoad = false,
+  iframeContainerClassName,
 }: {
   readonly media_url: string;
   readonly previewImageUrl?: string | null | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
+  readonly iframeContainerClassName?: string | undefined;
 }) {
   const [isActivated, setIsActivated] = useState(!requireInteractionToLoad);
   const urls = useMemo(
@@ -105,6 +107,7 @@ function InteractiveHtmlMediaDisplay({
       title={DEFAULT_HTML_MEDIA_TITLE}
       src={activeUrl}
       className="tw-h-full tw-w-full"
+      containerClassName={iframeContainerClassName}
       onLoad={() => {
         setDidLoadCurrentUrl(true);
       }}
@@ -132,6 +135,7 @@ export default function MediaDisplay({
   imageScale = ImageScale.AUTOx1080,
   previewImageUrl,
   requireInteractionToLoad = false,
+  iframeContainerClassName,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -139,6 +143,7 @@ export default function MediaDisplay({
   readonly imageScale?: ImageScale | undefined;
   readonly previewImageUrl?: string | null | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
+  readonly iframeContainerClassName?: string | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -180,6 +185,7 @@ export default function MediaDisplay({
         previewImageUrl={previewImageUrl}
         imageScale={imageScale}
         requireInteractionToLoad={requireInteractionToLoad}
+        iframeContainerClassName={iframeContainerClassName}
       />
     );
   }

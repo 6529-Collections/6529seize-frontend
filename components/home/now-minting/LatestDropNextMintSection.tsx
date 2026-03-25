@@ -76,6 +76,7 @@ export default function LatestDropNextMintSection({
                     imageScale={ImageScale.AUTOx600}
                     disableAutoPlay={hasTouchScreen}
                     disableModal={hasTouchScreen}
+                    htmlIframeContainerClassName="tw-w-full"
                   />
                 ) : (
                   <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">

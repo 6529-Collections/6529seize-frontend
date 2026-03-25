@@ -34,6 +34,7 @@ export default function DropListItemContentMedia({
   disableAutoPlay = false,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
+  htmlIframeContainerClassName,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -43,6 +44,7 @@ export default function DropListItemContentMedia({
   readonly disableAutoPlay?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly htmlIframeContainerClassName?: string | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -100,6 +102,7 @@ export default function DropListItemContentMedia({
           media_url={media_url}
           imageScale={imageScale}
           requireInteractionToLoad={disableAutoPlay}
+          iframeContainerClassName={htmlIframeContainerClassName}
         />
       );
     case MediaType.UNKNOWN:
