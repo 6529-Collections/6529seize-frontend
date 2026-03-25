@@ -15,7 +15,9 @@ import { HttpFile } from '../http/http';
 
 export class ApiMemesMintStatsYearly {
     'year': number;
+    'total_count': number;
     'mint_count': number;
+    'subscriptions_count': number;
     'proceeds_eth': number;
     'proceeds_usd': number;
     'artist_split_eth': number;
@@ -33,8 +35,20 @@ export class ApiMemesMintStatsYearly {
             "format": "int64"
         },
         {
+            "name": "total_count",
+            "baseName": "total_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
             "name": "mint_count",
             "baseName": "mint_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "subscriptions_count",
+            "baseName": "subscriptions_count",
             "type": "number",
             "format": "int64"
         },
