@@ -11,6 +11,7 @@ import DropListItemContentMedia from "@/components/drops/view/item/content/media
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,6 +45,11 @@ export default function LatestDropNextMintSection({
 }: LatestDropNextMintSectionProps) {
   const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
+  const isHtml = media?.mime_type === "text/html";
+  const htmlPreviewImageUrl =
+    hasTouchScreen && isHtml
+      ? (getDropPreviewImageUrl(drop.metadata) ?? undefined)
+      : undefined;
   const title =
     drop.title ??
     drop.metadata.find((m) => m.data_key === "title")?.data_value ??
@@ -76,6 +82,8 @@ export default function LatestDropNextMintSection({
                     imageScale={ImageScale.AUTOx600}
                     disableAutoPlay={hasTouchScreen}
                     disableModal={hasTouchScreen}
+                    htmlIframeContainerClassName="tw-w-full"
+                    htmlPreviewImageUrl={htmlPreviewImageUrl}
                   />
                 ) : (
                   <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">
