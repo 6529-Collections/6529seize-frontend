@@ -24,6 +24,7 @@ jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
     <div
       data-testid="html"
       data-src={props.media_url}
+      data-preview-image-url={props.previewImageUrl}
       data-iframe-container-class-name={props.iframeContainerClassName}
     />
   ),
@@ -69,10 +70,15 @@ describe("DropListItemContentMedia", () => {
       <DropListItemContentMedia
         media_mime_type="text/html"
         media_url="file.html"
+        htmlPreviewImageUrl="preview.png"
         htmlIframeContainerClassName="tw-w-full"
       />
     );
     expect(screen.getByTestId("html")).toHaveAttribute("data-src", "file.html");
+    expect(screen.getByTestId("html")).toHaveAttribute(
+      "data-preview-image-url",
+      "preview.png"
+    );
     expect(screen.getByTestId("html")).toHaveAttribute(
       "data-iframe-container-class-name",
       "tw-w-full"
