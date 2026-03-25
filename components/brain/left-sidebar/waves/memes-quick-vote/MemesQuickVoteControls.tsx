@@ -1,11 +1,10 @@
 "use client";
 
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
-import clsx from "clsx";
+import MemesQuickVoteActionBar from "./MemesQuickVoteActionBar";
 
 interface MemesQuickVoteControlsProps {
   readonly customValue: string;
@@ -40,7 +39,6 @@ export default function MemesQuickVoteControls({
   onSkip,
   onVoteAmount,
 }: MemesQuickVoteControlsProps) {
-  const hasQuickAmounts = quickAmounts.length > 0;
   const title =
     drop.metadata.find((entry) => entry.data_key === "title")?.data_value ??
     "Untitled submission";
@@ -48,190 +46,70 @@ export default function MemesQuickVoteControls({
     drop.metadata.find((entry) => entry.data_key === "description")
       ?.data_value ?? "";
   const authorLabel = drop.author.handle ?? drop.author.primary_address;
-  const customAmountLabel =
-    customValue.trim().length > 0 && Number.parseInt(customValue, 10) > 0
-      ? formatNumberWithCommas(Number.parseInt(customValue, 10))
-      : null;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 md:tw-h-full">
-      <div
-        data-testid="quick-vote-controls-desktop-context"
-        className="tw-hidden tw-flex-col tw-gap-4 md:tw-flex"
-      >
-        <div className="tw-flex tw-flex-wrap tw-gap-2">
-          {typeof uncastPower === "number" && (
-            <span className="tw-rounded-full tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300">
-              {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"}{" "}
-              left
-            </span>
-          )}
-          <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-300">
-            {formatNumberWithCommas(remainingCount)} left
-          </span>
-        </div>
-
-        <div className="tw-rounded-[1.75rem] tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-p-5">
-          <div className="tw-flex tw-items-center tw-gap-3">
-            <WaveDropAuthorPfp drop={drop} />
-            <div className="tw-min-w-0 tw-flex-1">
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-                  {authorLabel}
-                </span>
-                <span className="tw-size-1 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700" />
-                <span className="tw-text-xs tw-text-iron-500">
-                  <WaveDropTime timestamp={drop.created_at} />
-                </span>
-              </div>
-              <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
-                {drop.wave.name}
-              </p>
-            </div>
-          </div>
-
-          <h2 className="tw-mb-0 tw-mt-4 tw-text-[1.65rem] tw-font-semibold tw-leading-tight tw-text-white">
-            {title}
-          </h2>
-
-          {description && (
-            <p
-              className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300"
-              style={{
-                display: "-webkit-box",
-                WebkitBoxOrient: "vertical",
-                WebkitLineClamp: 4,
-                overflow: "hidden",
-              }}
-            >
-              {description}
-            </p>
-          )}
-        </div>
+    <div
+      data-testid="quick-vote-controls-desktop-context"
+      className="tw-flex tw-shrink-0 tw-flex-col tw-gap-0 sm:tw-h-full sm:tw-min-h-0 sm:tw-overflow-hidden sm:tw-bg-[#0a0a0a]/30"
+    >
+      <div className="tw-hidden tw-shrink-0 tw-flex-wrap tw-gap-2 tw-px-8 sm:tw-flex sm:tw-pb-6 sm:tw-pt-6">
+        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-zinc-300 tw-shadow-sm tw-backdrop-blur-md">
+          {formatNumberWithCommas(remainingCount)} unexplored
+        </span>
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-1 md:tw-justify-end">
-        <div className="tw-min-w-0">
-          <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
-            Quick Vote
-          </p>
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-            Tap once to vote. Skip keeps it for later.
-          </p>
-        </div>
-
-        {hasQuickAmounts && (
-          <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-2">
-            {quickAmounts.map((amount) => {
-              const isLatestUsed = latestUsedAmount === amount;
-
-              return (
-                <button
-                  key={amount}
-                  type="button"
-                  onClick={() => {
-                    void onVoteAmount(amount);
-                  }}
-                  disabled={isSubmitting}
-                  className={clsx(
-                    "tw-inline-flex tw-h-12 tw-shrink-0 tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-px-3.5 tw-text-sm tw-font-semibold tw-transition-all",
-                    isLatestUsed
-                      ? "tw-border-primary-400/50 tw-bg-primary-500/15 tw-text-primary-300"
-                      : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800",
-                    isSubmitting && "tw-cursor-not-allowed tw-opacity-60"
-                  )}
-                >
-                  <span>{formatNumberWithCommas(amount)}</span>
-                  {isLatestUsed && (
-                    <span className="tw-rounded-full tw-bg-primary-500/20 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300">
-                      Last used
+      <div className="tw-hidden tw-min-h-0 tw-flex-1 tw-overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:tw-flex sm:tw-px-8 sm:tw-pb-6 [&::-webkit-scrollbar]:tw-hidden">
+        <div className="tw-flex tw-min-h-full tw-w-full tw-flex-col">
+          <div className="tw-flex tw-w-full tw-flex-col tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-p-5 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)] tw-backdrop-blur-xl sm:tw-p-6">
+            <div className="tw-flex tw-items-center tw-gap-3">
+              <WaveDropAuthorPfp drop={drop} />
+              <div className="tw-min-w-0 tw-flex-1">
+                <div className="tw-mb-2.5 tw-flex tw-items-center tw-gap-1.5">
+                  <span className="tw-truncate tw-text-md tw-font-bold tw-leading-none tw-tracking-tight tw-text-white">
+                    {authorLabel}
+                  </span>
+                  <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-zinc-500 [&_p]:tw-mb-0">
+                    <span className="tw-text-[12px] tw-font-medium tw-leading-none">
+                      •
                     </span>
-                  )}
-                </button>
-              );
-            })}
-
-            <button
-              type="button"
-              aria-pressed={isCustomOpen}
-              onClick={onOpenCustom}
-              disabled={isSubmitting}
-              className={clsx(
-                "tw-inline-flex tw-h-12 tw-shrink-0 tw-items-center tw-gap-3 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-px-3.5 tw-text-left tw-text-sm tw-font-semibold tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-60",
-                isCustomOpen
-                  ? "tw-text-primary-200 tw-border-primary-400/50 tw-bg-primary-500/15"
-                  : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800"
-              )}
-            >
-              <span
-                className={clsx(
-                  "tw-inline-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors",
-                  isCustomOpen
-                    ? "tw-bg-primary-500/18 tw-text-primary-200 tw-border-primary-400/30"
-                    : "tw-border-white/10 tw-bg-black/20 tw-text-iron-400"
-                )}
-              >
-                <AdjustmentsHorizontalIcon className="tw-size-4" />
-              </span>
-              <span>Custom amount</span>
-            </button>
-          </div>
-        )}
-
-        {(!hasQuickAmounts || isCustomOpen) && (
-          <div className="tw-rounded-3xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/80 tw-p-4">
-            <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-end">
-              <label className="tw-min-w-0 tw-flex-1">
-                <span className="tw-mb-2 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
-                  Custom amount
-                </span>
-                <div className="tw-relative">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={customValue}
-                    disabled={isSubmitting}
-                    onChange={(event) => onCustomChange(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key !== "Enter") {
-                        return;
-                      }
-
-                      event.preventDefault();
-                      void onCustomSubmit();
-                    }}
-                    className="tw-h-12 tw-w-full tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-4 tw-pr-20 tw-text-base tw-font-semibold tw-text-iron-50 tw-outline-none tw-transition-colors focus:tw-border-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-500"
-                  />
-                  <span className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
-                    {votingLabel ?? "Votes"}
+                    <WaveDropTime timestamp={drop.created_at} />
                   </span>
                 </div>
-              </label>
+                <p className="tw-mb-0 tw-truncate tw-text-[9px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-widest tw-text-zinc-500">
+                  {drop.wave.name}
+                </p>
+              </div>
+            </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  void onCustomSubmit();
-                }}
-                disabled={isSubmitting}
-                className="tw-inline-flex tw-h-12 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-2xl tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-primary-600"
-              >
-                {customAmountLabel ? `Vote ${customAmountLabel}` : "Vote"}
-              </button>
+            <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+              <h2 className="tw-mb-3 tw-mt-4 tw-line-clamp-3 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-white sm:tw-text-3xl">
+                {title}
+              </h2>
+
+              {description && (
+                <p className="tw-mb-0 tw-line-clamp-4 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-zinc-400 sm:tw-text-md">
+                  {description}
+                </p>
+              )}
             </div>
           </div>
-        )}
-
-        <button
-          type="button"
-          onClick={onSkip}
-          disabled={isSubmitting}
-          className="tw-inline-flex tw-h-12 tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900"
-        >
-          Skip for now
-        </button>
+        </div>
       </div>
+
+      <MemesQuickVoteActionBar
+        customValue={customValue}
+        isCustomOpen={isCustomOpen}
+        isSubmitting={isSubmitting}
+        latestUsedAmount={latestUsedAmount}
+        quickAmounts={quickAmounts}
+        uncastPower={uncastPower}
+        votingLabel={votingLabel}
+        onCustomChange={onCustomChange}
+        onCustomSubmit={onCustomSubmit}
+        onOpenCustom={onOpenCustom}
+        onSkip={onSkip}
+        onVoteAmount={onVoteAmount}
+      />
     </div>
   );
 }

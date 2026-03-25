@@ -1,6 +1,7 @@
 "use client";
 
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   getDefaultQuickVoteAmount,
   normalizeQuickVoteAmount,
@@ -24,6 +25,7 @@ interface MemesQuickVoteDialogContentProps {
   >;
   readonly isMobile: boolean;
   readonly latestUsedAmount: number | null;
+  readonly onClose: () => void;
   readonly remainingCount: number;
   readonly recentAmounts: number[];
   readonly submitVote: ReturnType<typeof useMemesQuickVoteQueue>["submitVote"];
@@ -36,6 +38,7 @@ function MemesQuickVoteDialogContent({
   activeDrop,
   isMobile,
   latestUsedAmount,
+  onClose,
   remainingCount,
   recentAmounts,
   submitVote,
@@ -110,66 +113,149 @@ function MemesQuickVoteDialogContent({
   };
 
   return (
-    <div className="tw-grid tw-gap-6 md:tw-grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.95fr)] md:tw-items-stretch">
-      <MemesQuickVotePreview
-        drop={activeDrop}
-        isBusy={isAdvancing}
-        isMobile={isMobile}
-        remainingCount={remainingCount}
-        swipeVoteAmount={swipeVoteAmount}
-        uncastPower={uncastPower}
-        votingLabel={votingLabel}
-        onAdvanceStart={() => {
-          setIsAdvancing(true);
-        }}
-        onSkip={queueSkip}
-        onVoteWithSwipe={() => {
-          if (swipeVoteAmount === null) {
-            setIsAdvancing(false);
-            return;
-          }
+    <div className="tw-flex tw-h-full tw-flex-col sm:tw-grid sm:tw-min-h-0 sm:tw-grid-cols-[minmax(0,1.22fr)_minmax(25rem,1fr)] sm:tw-items-stretch">
+      {isMobile && (
+        <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/40 tw-px-4 tw-pb-3 tw-pt-3 tw-backdrop-blur-xl sm:tw-hidden">
+          <button
+            type="button"
+            onClick={onClose}
+            className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-zinc-400 tw-shadow-inner tw-transition-colors active:tw-bg-white/10"
+            aria-label="Close quick vote"
+          >
+            <XMarkIcon className="tw-size-5 tw-shrink-0" />
+          </button>
 
-          void queueVoteAmount(swipeVoteAmount);
-        }}
-      />
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-px-3">
+            <span className="tw-truncate tw-text-[13px] tw-font-bold tw-leading-tight tw-text-zinc-300">
+              {formatNumberWithCommas(remainingCount)} unexplored
+            </span>
+          </div>
 
-      <div className="md:tw-sticky md:tw-top-0 md:tw-self-stretch">
-        <MemesQuickVoteControls
-          customValue={customValue}
-          drop={activeDrop}
-          isCustomOpen={isCustomOpen}
-          isSubmitting={isAdvancing}
-          latestUsedAmount={normalizedLatestUsedAmount}
-          remainingCount={remainingCount}
-          quickAmounts={visibleQuickAmounts}
-          uncastPower={uncastPower}
-          votingLabel={votingLabel}
-          onCustomChange={(value) => {
-            if (value === "") {
-              setCustomValue("");
-              return;
-            }
+          <div className="tw-size-10 tw-shrink-0" aria-hidden="true" />
+        </div>
+      )}
 
-            setCustomValue(value.replace(/[^\d]/g, ""));
-          }}
-          onCustomSubmit={async () => {
-            await handleVoteAmount(customValue);
-          }}
-          onOpenCustom={() => {
-            setIsCustomOpen((current) => !current);
-          }}
-          onSkip={handleSkip}
-          onVoteAmount={handleVoteAmount}
-        />
-      </div>
+      {isMobile ? (
+        <div className="tw-relative tw-z-10 tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col tw-overflow-hidden">
+          <div className="tw-h-full">
+            <MemesQuickVotePreview
+              drop={activeDrop}
+              isBusy={isAdvancing}
+              isMobile={isMobile}
+              remainingCount={remainingCount}
+              swipeVoteAmount={swipeVoteAmount}
+              uncastPower={uncastPower}
+              votingLabel={votingLabel}
+              onAdvanceStart={() => {
+                setIsAdvancing(true);
+              }}
+              onSkip={queueSkip}
+              onVoteWithSwipe={() => {
+                if (swipeVoteAmount === null) {
+                  setIsAdvancing(false);
+                  return;
+                }
+
+                void queueVoteAmount(swipeVoteAmount);
+              }}
+            />
+          </div>
+
+          <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-20 sm:tw-hidden">
+            <MemesQuickVoteControls
+              customValue={customValue}
+              drop={activeDrop}
+              isCustomOpen={isCustomOpen}
+              isSubmitting={isAdvancing}
+              latestUsedAmount={normalizedLatestUsedAmount}
+              remainingCount={remainingCount}
+              quickAmounts={visibleQuickAmounts}
+              uncastPower={uncastPower}
+              votingLabel={votingLabel}
+              onCustomChange={(value) => {
+                if (value === "") {
+                  setCustomValue("");
+                  return;
+                }
+
+                setCustomValue(value.replace(/[^\d]/g, ""));
+              }}
+              onCustomSubmit={async () => {
+                await handleVoteAmount(customValue);
+              }}
+              onOpenCustom={() => {
+                setIsCustomOpen((current) => !current);
+              }}
+              onSkip={handleSkip}
+              onVoteAmount={handleVoteAmount}
+            />
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="tw-min-h-0 tw-flex-1 sm:tw-min-h-0 sm:tw-border-y-0 sm:tw-border-b-0 sm:tw-border-l-0 sm:tw-border-r sm:tw-border-solid sm:tw-border-white/10">
+            <MemesQuickVotePreview
+              drop={activeDrop}
+              isBusy={isAdvancing}
+              isMobile={isMobile}
+              remainingCount={remainingCount}
+              swipeVoteAmount={swipeVoteAmount}
+              uncastPower={uncastPower}
+              votingLabel={votingLabel}
+              onAdvanceStart={() => {
+                setIsAdvancing(true);
+              }}
+              onSkip={queueSkip}
+              onVoteWithSwipe={() => {
+                if (swipeVoteAmount === null) {
+                  setIsAdvancing(false);
+                  return;
+                }
+
+                void queueVoteAmount(swipeVoteAmount);
+              }}
+            />
+          </div>
+
+          <div className="tw-shrink-0 sm:tw-min-h-0 sm:tw-self-stretch">
+            <MemesQuickVoteControls
+              customValue={customValue}
+              drop={activeDrop}
+              isCustomOpen={isCustomOpen}
+              isSubmitting={isAdvancing}
+              latestUsedAmount={normalizedLatestUsedAmount}
+              remainingCount={remainingCount}
+              quickAmounts={visibleQuickAmounts}
+              uncastPower={uncastPower}
+              votingLabel={votingLabel}
+              onCustomChange={(value) => {
+                if (value === "") {
+                  setCustomValue("");
+                  return;
+                }
+
+                setCustomValue(value.replace(/[^\d]/g, ""));
+              }}
+              onCustomSubmit={async () => {
+                await handleVoteAmount(customValue);
+              }}
+              onOpenCustom={() => {
+                setIsCustomOpen((current) => !current);
+              }}
+              onSkip={handleSkip}
+              onVoteAmount={handleVoteAmount}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
 function MemesQuickVoteDialogDoneState() {
   return (
-    <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
-      <div className="tw-max-w-md tw-text-center">
+    <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-py-8">
+      <div className="tw-w-full tw-max-w-xl tw-rounded-[1.75rem] tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-6 tw-py-10 tw-text-center tw-shadow-[0_24px_60px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm">
         <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
           You are done
         </p>
@@ -187,8 +273,8 @@ function MemesQuickVoteDialogErrorState({
   readonly onRetry: () => void;
 }) {
   return (
-    <div className="tw-flex tw-h-full tw-min-h-80 tw-items-center tw-justify-center">
-      <div className="tw-max-w-md tw-text-center">
+    <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-py-8">
+      <div className="tw-w-full tw-max-w-xl tw-rounded-[1.75rem] tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-6 tw-py-10 tw-text-center tw-shadow-[0_24px_60px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm">
         <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
           Couldn&apos;t load your queue
         </p>
@@ -303,6 +389,7 @@ export default function MemesQuickVoteDialog({
         activeDrop={activeDrop}
         isMobile={isMobile}
         latestUsedAmount={latestUsedAmount}
+        onClose={onClose}
         remainingCount={remainingCount}
         recentAmounts={recentAmounts}
         submitVote={submitVote}
@@ -317,11 +404,11 @@ export default function MemesQuickVoteDialog({
     <dialog
       ref={dialogRef}
       data-session-id={sessionId}
-      className="tailwind-scope tw-m-0 tw-h-screen tw-w-screen tw-max-w-none tw-border-none tw-bg-transparent tw-p-0"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-m-0 tw-h-screen tw-max-h-none tw-w-screen tw-max-w-none tw-border-none tw-bg-transparent tw-p-0"
       aria-label="Memes quick vote"
     >
       <div
-        className="tw-flex tw-h-full tw-w-full tw-items-stretch tw-justify-center tw-bg-iron-950/85 md:tw-items-center md:tw-p-6"
+        className="tw-flex tw-h-full tw-w-full tw-items-end tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] sm:tw-items-center sm:tw-p-6"
         onClick={(event) => {
           if (event.target !== event.currentTarget) {
             return;
@@ -330,18 +417,18 @@ export default function MemesQuickVoteDialog({
           onClose();
         }}
       >
-        <div className="tw-relative tw-flex tw-h-full tw-w-full tw-flex-col tw-bg-iron-950 md:tw-h-auto md:tw-max-h-[min(92vh,56rem)] md:tw-max-w-5xl md:tw-overflow-hidden md:tw-rounded-[2rem] md:tw-border md:tw-border-solid md:tw-border-white/10 md:tw-shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+        <div className="tw-relative tw-flex tw-h-[100svh] tw-max-h-[100svh] tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] sm:tw-h-[38rem] sm:tw-max-h-[min(calc(100vh-3rem),38rem)] sm:tw-max-w-[68rem] sm:tw-rounded-2xl sm:tw-border sm:tw-border-solid sm:tw-border-white/10">
           <button
             type="button"
             data-autofocus="true"
             onClick={onClose}
-            className="tw-absolute tw-right-3 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-10 tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/90 tw-text-iron-300 tw-shadow-[0_18px_40px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white md:tw-right-4 md:tw-top-4"
+            className="tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-hidden tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-zinc-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white sm:tw-right-6 sm:tw-top-6 sm:tw-inline-flex"
             aria-label="Close quick vote"
           >
-            <XMarkIcon className="tw-size-5" />
+            <XMarkIcon className="tw-size-5 tw-shrink-0" />
           </button>
 
-          <div className="tw-flex-1 tw-overflow-y-auto tw-p-4 tw-pt-16 md:tw-p-6">
+          <div className="tw-relative tw-z-10 tw-min-h-0 tw-flex-1 tw-overflow-y-auto [scrollbar-width:none] sm:tw-p-0 [&::-webkit-scrollbar]:tw-hidden">
             {dialogBody}
           </div>
         </div>

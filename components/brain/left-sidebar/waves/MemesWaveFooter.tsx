@@ -1,10 +1,10 @@
 "use client";
 
 import MemesWaveQuickVoteTrigger from "@/components/brain/left-sidebar/waves/MemesWaveQuickVoteTrigger";
+import MemesWaveZapIcon from "@/components/brain/left-sidebar/waves/MemesWaveZapIcon";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AnimatePresence, motion } from "framer-motion";
-import { BoltIcon } from "@heroicons/react/24/solid";
 import React from "react";
 
 interface MemesWaveFooterProps {
@@ -53,7 +53,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           className={
             collapsed
               ? "tw-z-10 tw-flex tw-flex-shrink-0 tw-justify-center tw-px-2 tw-pb-2 tw-pt-1"
-              : "tw-z-10 tw-flex-shrink-0 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/95 tw-to-transparent tw-px-4 tw-pb-4 tw-pt-6"
+              : "tw-relative tw-z-20 tw-mt-auto tw-flex-shrink-0"
           }
         >
           {collapsed ? (
@@ -67,27 +67,33 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
               type="button"
               aria-label={`Uncast Power, ${formatNumberWithCommas(
                 uncastPower
-              )} ${votingLabel ?? "Votes"}, ${unratedCount} left`}
+              )} ${votingLabel ?? "Votes"} left, ${formatNumberWithCommas(
+                unratedCount
+              )} left`}
               onClick={handleOpenQuickVote}
               onFocus={handlePrefetchQuickVote}
               onMouseEnter={handlePrefetchQuickVote}
-              className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-4 tw-rounded-2xl tw-border tw-border-solid tw-border-primary-500/30 tw-bg-iron-900/95 tw-px-4 tw-py-3 tw-text-left tw-shadow-[0_18px_36px_rgba(0,0,0,0.28)] tw-backdrop-blur-sm tw-transition-colors tw-duration-300 desktop-hover:hover:tw-border-primary-400/40 desktop-hover:hover:tw-bg-iron-900"
+              className="tw-mt-auto tw-w-full tw-flex-shrink-0 tw-cursor-pointer tw-border-0 tw-border-t tw-border-solid tw-border-zinc-800/60 tw-bg-[#000000] tw-p-4 tw-text-left tw-transition-colors hover:tw-bg-zinc-900/30"
             >
-              <div className="tw-min-w-0 tw-flex-1">
-                <div className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
-                  Uncast Power
-                </div>
-                <div className="tw-mt-1 tw-flex tw-items-center tw-gap-x-2 tw-text-primary-300">
-                  <BoltIcon className="tw-size-4 tw-flex-shrink-0" />
-                  <span className="tw-truncate tw-text-lg tw-font-semibold">
-                    {formatNumberWithCommas(uncastPower)}
-                    {votingLabel ? ` ${votingLabel}` : ""}
+              <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-2xl tw-border tw-border-solid tw-border-[#2d3753] tw-bg-[#0c1018] tw-px-4 tw-py-3 tw-shadow-lg">
+                <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
+                  <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-[#6b7c93]">
+                    Uncast Power
                   </span>
+
+                  <div className="tw-flex tw-items-center tw-gap-2">
+                    <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-blue-400/20 tw-text-blue-400" />
+                    <span className="tw-truncate tw-text-sm tw-font-bold tw-tracking-tight tw-text-white">
+                      {formatNumberWithCommas(uncastPower)}
+                      {votingLabel ? ` ${votingLabel}` : " votes"}
+                    </span>
+                  </div>
                 </div>
+
+                <span className="tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
+                  {formatNumberWithCommas(unratedCount)} unexplored
+                </span>
               </div>
-              <span className="tw-flex-shrink-0 tw-rounded-xl tw-border tw-border-solid tw-border-primary-500/20 tw-bg-primary-500/10 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-300">
-                {formatNumberWithCommas(unratedCount)} left
-              </span>
             </button>
           )}
         </motion.div>
