@@ -79,13 +79,13 @@ type UseDerivedMemesQuickVoteQueueStateOptions = {
   readonly enabled: boolean;
   readonly hasPageFetchError: boolean;
   readonly isDiscoveryExhausted: boolean;
+  readonly deferredCount: number;
   readonly isFetchingPage: boolean;
   readonly isSettingsLoaded: boolean;
   readonly isSummaryPending: boolean;
   readonly isSummaryQuickVoteEnabled: boolean;
   readonly isSummarySuccess: boolean;
   readonly recentAmountsByRecency: readonly number[];
-  readonly skippedCount: number;
   readonly serverCount: number | null;
   readonly summaryCount: number;
   readonly unreflectedVoteCount: number;
@@ -260,13 +260,13 @@ const useDerivedMemesQuickVoteQueueState = ({
   enabled,
   hasPageFetchError,
   isDiscoveryExhausted,
+  deferredCount,
   isFetchingPage,
   isSettingsLoaded,
   isSummaryPending,
   isSummaryQuickVoteEnabled,
   isSummarySuccess,
   recentAmountsByRecency,
-  skippedCount,
   serverCount,
   summaryCount,
   unreflectedVoteCount,
@@ -314,11 +314,9 @@ const useDerivedMemesQuickVoteQueueState = ({
   const baseRemainingCount = isSummarySuccess
     ? Math.max(queue.length, Math.max(0, summaryCount - unreflectedVoteCount))
     : Math.max(serverCount ?? 0, queue.length);
-  // "Left" intentionally excludes locally skipped drops. The persisted skip ids
-  // are the UI source of truth even while deferred items may still exist in the queue.
   const remainingCount = getMemesQuickVoteRemainingCount({
     count: baseRemainingCount,
-    skippedCount,
+    deferredCount,
   });
   const hasDiscoveryError = enabled && hasPageFetchError;
   const isQuickVoteUnavailable =
@@ -694,6 +692,7 @@ export const useMemesQuickVoteQueue = ({
   });
   const {
     activeCandidateId,
+    deferredCount,
     deferDropId,
     discoveredDropsById,
     hasPageFetchError,
@@ -751,13 +750,13 @@ export const useMemesQuickVoteQueue = ({
     enabled,
     hasPageFetchError,
     isDiscoveryExhausted,
+    deferredCount,
     isFetchingPage,
     isSettingsLoaded,
     isSummaryPending,
     isSummaryQuickVoteEnabled,
     isSummarySuccess,
     recentAmountsByRecency,
-    skippedCount: skippedDropIds.length,
     serverCount,
     summaryCount,
     unreflectedVoteCount: summaryOptimismState.unreflectedVoteCount,

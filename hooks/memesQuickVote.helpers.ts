@@ -102,11 +102,11 @@ export const deriveMemesQuickVoteStatsFromDrop = ({
 
 export const getMemesQuickVoteRemainingCount = ({
   count,
-  skippedCount,
+  deferredCount,
 }: {
   readonly count: number;
-  readonly skippedCount: number;
-}): number => Math.max(0, count - skippedCount);
+  readonly deferredCount: number;
+}): number => Math.max(0, count - deferredCount);
 
 export const appendSkippedDropId = (
   ids: readonly string[],

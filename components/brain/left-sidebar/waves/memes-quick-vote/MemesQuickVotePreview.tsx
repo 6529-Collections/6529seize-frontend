@@ -8,13 +8,17 @@ import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import clsx from "clsx";
-import React, { useMemo, useState } from "react";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 const SWIPE_TRIGGER_THRESHOLD = 96;
 const MAX_SWIPE_OFFSET = 132;
 const SWIPE_EXIT_DURATION_MS = 180;
 const SWIPE_EXIT_OFFSET = 420;
 const MOBILE_SWIPE_CENTER_SLIDE_INDEX = 1;
+const QUICK_VOTE_TRANSFORM_DATA_ATTRIBUTE = "quickVoteTransform";
+const QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG =
+  "__memesQuickVoteComputedStylePatched";
 
 interface MemesQuickVotePreviewProps {
   readonly drop: ExtendedDrop;
@@ -30,6 +34,18 @@ interface MemesQuickVotePreviewProps {
 }
 
 type SwipeDirection = "left" | "right";
+type TouchLikeEvent = {
+  readonly changedTouches?:
+    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | undefined;
+  readonly targetTouches?:
+    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | undefined;
+  readonly touches?:
+    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | undefined;
+  readonly stopPropagation?: () => void;
+};
 
 function commitSwipeAction(
   direction: SwipeDirection,
@@ -43,6 +59,48 @@ function commitSwipeAction(
 
   onVoteWithSwipe();
 }
+
+const getTouchClientX = (
+  touch: { readonly clientX?: number; readonly pageX?: number } | undefined
+): number | null => {
+  if (typeof touch?.pageX === "number") {
+    return touch.pageX;
+  }
+
+  if (typeof touch?.clientX === "number") {
+    return touch.clientX;
+  }
+
+  return null;
+};
+
+const getTouchListClientX = (
+  touches:
+    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | undefined
+): number | null => {
+  if (!touches || touches.length === 0) {
+    return null;
+  }
+
+  return getTouchClientX(touches[0]);
+};
+
+const hasTouchPageX = (
+  touches:
+    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | undefined
+): boolean => Boolean(touches?.length && typeof touches[0]?.pageX === "number");
+
+const getTouchEventClientX = (event: TouchLikeEvent): number | null =>
+  getTouchListClientX(event.touches) ??
+  getTouchListClientX(event.targetTouches) ??
+  getTouchListClientX(event.changedTouches);
+
+const hasTouchEventPageX = (event: TouchLikeEvent): boolean =>
+  hasTouchPageX(event.touches) ||
+  hasTouchPageX(event.targetTouches) ||
+  hasTouchPageX(event.changedTouches);
 
 function getCardTransform(
   isMobile: boolean,
@@ -94,13 +152,38 @@ function useQuickVotePreviewSwipe({
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [swipeExitDirection, setSwipeExitDirection] =
     useState<SwipeDirection | null>(null);
+  const fallbackTouchStartXRef = useRef<number | null>(null);
+  const fallbackTouchCurrentXRef = useRef<number | null>(null);
+  const isFallbackTouchActiveRef = useRef(false);
+  const swipeCommitTimeoutRef = useRef<number | null>(null);
+  const usesTransitionlessSwipeCommit =
+    isMobile &&
+    typeof window !== "undefined" &&
+    typeof window.Touch !== "function";
+
+  const clearSwipeCommitTimeout = () => {
+    if (swipeCommitTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(swipeCommitTimeoutRef.current);
+    swipeCommitTimeoutRef.current = null;
+  };
+
+  const resetFallbackTouch = () => {
+    fallbackTouchStartXRef.current = null;
+    fallbackTouchCurrentXRef.current = null;
+    isFallbackTouchActiveRef.current = false;
+  };
 
   const resetSwipe = () => {
     if (swipeExitDirection !== null) {
       return;
     }
 
-    setSwipeOffset(0);
+    flushSync(() => {
+      setSwipeOffset(0);
+    });
   };
 
   const beginSwipeCommit = (direction: SwipeDirection) => {
@@ -108,12 +191,27 @@ function useQuickVotePreviewSwipe({
       return;
     }
 
+    clearSwipeCommitTimeout();
+    resetFallbackTouch();
     onAdvanceStart();
-    setSwipeOffset(0);
-    setSwipeExitDirection(direction);
+    flushSync(() => {
+      setSwipeOffset(0);
+      setSwipeExitDirection(direction);
+    });
+
+    if (!usesTransitionlessSwipeCommit) {
+      return;
+    }
+
+    swipeCommitTimeoutRef.current = window.setTimeout(() => {
+      swipeCommitTimeoutRef.current = null;
+      commitSwipeAction(direction, onSkip, onVoteWithSwipe);
+    }, SWIPE_EXIT_DURATION_MS);
   };
 
   const handleSwipeEnd = (swipeDistance: number) => {
+    resetFallbackTouch();
+
     if (swipeDistance <= -SWIPE_TRIGGER_THRESHOLD) {
       beginSwipeCommit("left");
       return;
@@ -149,6 +247,90 @@ function useQuickVotePreviewSwipe({
     handleSwipeEnd(swiper.touches.diff);
   };
 
+  const handleCardTouchStart = (event: TouchLikeEvent) => {
+    if (isBusy || !isMobile || swipeExitDirection !== null) {
+      resetFallbackTouch();
+      return;
+    }
+
+    if (hasTouchEventPageX(event) || isFallbackTouchActiveRef.current) {
+      return;
+    }
+
+    const startX = getTouchEventClientX(event);
+
+    if (startX === null) {
+      return;
+    }
+
+    event.stopPropagation?.();
+    fallbackTouchStartXRef.current = startX;
+    fallbackTouchCurrentXRef.current = startX;
+    isFallbackTouchActiveRef.current = true;
+    flushSync(() => {
+      setSwipeOffset(0);
+    });
+  };
+
+  const handleCardTouchMove = (event: TouchLikeEvent) => {
+    if (!isFallbackTouchActiveRef.current || swipeExitDirection !== null) {
+      return;
+    }
+
+    const startX = fallbackTouchStartXRef.current;
+    const currentX = getTouchEventClientX(event);
+
+    if (startX === null || currentX === null) {
+      return;
+    }
+
+    event.stopPropagation?.();
+    fallbackTouchCurrentXRef.current = currentX;
+    flushSync(() => {
+      setSwipeOffset(
+        Math.max(
+          -MAX_SWIPE_OFFSET,
+          Math.min(currentX - startX, MAX_SWIPE_OFFSET)
+        )
+      );
+    });
+  };
+
+  const handleCardTouchEnd = (event: TouchLikeEvent) => {
+    if (!isFallbackTouchActiveRef.current) {
+      return;
+    }
+
+    event.stopPropagation?.();
+
+    if (isBusy || !isMobile) {
+      resetFallbackTouch();
+      resetSwipe();
+      return;
+    }
+
+    const startX = fallbackTouchStartXRef.current;
+    const endX = getTouchEventClientX(event) ?? fallbackTouchCurrentXRef.current;
+
+    if (startX === null || endX === null) {
+      resetFallbackTouch();
+      resetSwipe();
+      return;
+    }
+
+    handleSwipeEnd(endX - startX);
+  };
+
+  const handleCardTouchCancel = (event: TouchLikeEvent) => {
+    if (!isFallbackTouchActiveRef.current) {
+      return;
+    }
+
+    event.stopPropagation?.();
+    resetFallbackTouch();
+    resetSwipe();
+  };
+
   const handleCardTransitionEnd = (
     event: React.TransitionEvent<HTMLElement>
   ) => {
@@ -160,8 +342,24 @@ function useQuickVotePreviewSwipe({
       return;
     }
 
+    if (usesTransitionlessSwipeCommit) {
+      return;
+    }
+
     commitSwipeAction(swipeExitDirection, onSkip, onVoteWithSwipe);
   };
+
+  useLayoutEffect(
+    () => () => {
+      if (swipeCommitTimeoutRef.current === null) {
+        return;
+      }
+
+      window.clearTimeout(swipeCommitTimeoutRef.current);
+      swipeCommitTimeoutRef.current = null;
+    },
+    []
+  );
 
   return {
     cardTransform: getCardTransform(isMobile, swipeExitDirection, swipeOffset),
@@ -169,11 +367,14 @@ function useQuickVotePreviewSwipe({
       swipeExitDirection,
       swipeOffset
     ),
+    handleCardTouchCancel,
+    handleCardTouchEnd,
+    handleCardTouchMove,
+    handleCardTouchStart,
     handleCardTransitionEnd,
     handleSwiperMove,
     handleSwiperTouchEnd,
     swipeExitDirection,
-    swipeOffset,
   };
 }
 
@@ -212,11 +413,14 @@ function MemesQuickVotePreviewContent({
   const {
     cardTransform,
     cardTransitionDuration,
+    handleCardTouchCancel,
+    handleCardTouchEnd,
+    handleCardTouchMove,
+    handleCardTouchStart,
     handleCardTransitionEnd,
     handleSwiperMove,
     handleSwiperTouchEnd,
     swipeExitDirection,
-    swipeOffset,
   } = useQuickVotePreviewSwipe({
     isBusy,
     isMobile,
@@ -225,10 +429,115 @@ function MemesQuickVotePreviewContent({
     onVoteWithSwipe,
     swipeVoteAmount,
   });
+  const previewCardRef = useRef<HTMLElement | null>(null);
+  const canUseSwiperTouchSurface =
+    isMobile &&
+    typeof window !== "undefined" &&
+    typeof window.Touch === "function";
+
+  useLayoutEffect(() => {
+    if (typeof window === "undefined" || typeof window.Touch === "function") {
+      return;
+    }
+
+    const patchedWindow = window as typeof window & {
+      [QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG]?: boolean;
+    };
+
+    if (patchedWindow[QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG]) {
+      return;
+    }
+
+    const originalGetComputedStyle = window.getComputedStyle.bind(window);
+
+    window.getComputedStyle = ((element: Element, pseudoElement?: string) => {
+      const computedStyle = originalGetComputedStyle(element, pseudoElement);
+
+      if (!(element instanceof HTMLElement)) {
+        return computedStyle;
+      }
+
+      const transform =
+        element.dataset[QUICK_VOTE_TRANSFORM_DATA_ATTRIBUTE] ?? "";
+
+      if (transform.length === 0) {
+        return computedStyle;
+      }
+
+      const patchedComputedStyle = Object.create(
+        computedStyle
+      ) as CSSStyleDeclaration;
+
+      Object.defineProperty(patchedComputedStyle, "transform", {
+        configurable: true,
+        value: transform,
+      });
+      patchedComputedStyle.getPropertyValue = (property: string) =>
+        property === "transform"
+          ? transform
+          : computedStyle.getPropertyValue(property);
+
+      return patchedComputedStyle;
+    }) as typeof window.getComputedStyle;
+
+    patchedWindow[QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG] = true;
+  }, []);
+
+  useLayoutEffect(() => {
+    if (canUseSwiperTouchSurface || !isMobile) {
+      return;
+    }
+
+    const previewCardNode = previewCardRef.current;
+
+    if (!previewCardNode) {
+      return;
+    }
+
+    const nativeTouchStartListener = (event: TouchEvent) => {
+      handleCardTouchStart(event);
+    };
+    const nativeTouchMoveListener = (event: TouchEvent) => {
+      handleCardTouchMove(event);
+    };
+    const nativeTouchEndListener = (event: TouchEvent) => {
+      handleCardTouchEnd(event);
+    };
+    const nativeTouchCancelListener = (event: TouchEvent) => {
+      handleCardTouchCancel(event);
+    };
+
+    previewCardNode.addEventListener("touchstart", nativeTouchStartListener);
+    previewCardNode.addEventListener("touchmove", nativeTouchMoveListener);
+    previewCardNode.addEventListener("touchend", nativeTouchEndListener);
+    previewCardNode.addEventListener("touchcancel", nativeTouchCancelListener);
+
+    return () => {
+      previewCardNode.removeEventListener(
+        "touchstart",
+        nativeTouchStartListener
+      );
+      previewCardNode.removeEventListener("touchmove", nativeTouchMoveListener);
+      previewCardNode.removeEventListener("touchend", nativeTouchEndListener);
+      previewCardNode.removeEventListener(
+        "touchcancel",
+        nativeTouchCancelListener
+      );
+    };
+  }, [
+    canUseSwiperTouchSurface,
+    handleCardTouchCancel,
+    handleCardTouchEnd,
+    handleCardTouchMove,
+    handleCardTouchStart,
+    isMobile,
+  ]);
 
   const previewCard = (
     <article
+      ref={previewCardRef}
       data-testid="quick-vote-preview-card"
+      data-quick-vote-transform={cardTransform ?? undefined}
       className={clsx(
         "tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-transition-all tw-duration-200 tw-ease-out",
         isBusy && "tw-pointer-events-none tw-opacity-70"
@@ -321,28 +630,7 @@ function MemesQuickVotePreviewContent({
       </div>
 
       <div className="tw-relative tw-min-h-0 tw-flex-1">
-        {isMobile && (
-          <>
-            <div
-              className={clsx(
-                "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity",
-                swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
-              )}
-            >
-              Skip
-            </div>
-            <div
-              className={clsx(
-                "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity",
-                swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
-              )}
-            >
-              {swipeHint ? `Vote ${swipeHint}` : "Vote"}
-            </div>
-          </>
-        )}
-
-        {isMobile ? (
+        {canUseSwiperTouchSurface ? (
           <Swiper
             initialSlide={MOBILE_SWIPE_CENTER_SLIDE_INDEX}
             slidesPerView={1}

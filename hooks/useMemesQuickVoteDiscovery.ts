@@ -265,6 +265,7 @@ export const useMemesQuickVoteDiscovery = ({
 
   return {
     activeCandidateId,
+    deferredCount: discoverySnapshot.deferredIds.length,
     deferDropId,
     discoveredDropsById: discoverySnapshot.discoveredDropsById,
     hasPageFetchError,

@@ -119,6 +119,7 @@ function MemesQuickVoteDialogContent({
           <button
             type="button"
             onClick={onClose}
+            data-autofocus="true"
             className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-zinc-400 tw-shadow-inner tw-transition-colors active:tw-bg-white/10"
             aria-label="Close quick vote"
           >
@@ -420,7 +421,7 @@ export default function MemesQuickVoteDialog({
         <div className="tw-relative tw-flex tw-h-[100svh] tw-max-h-[100svh] tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] sm:tw-h-[38rem] sm:tw-max-h-[min(calc(100vh-3rem),38rem)] sm:tw-max-w-[68rem] sm:tw-rounded-2xl sm:tw-border sm:tw-border-solid sm:tw-border-white/10">
           <button
             type="button"
-            data-autofocus="true"
+            data-autofocus={isMobile ? undefined : "true"}
             onClick={onClose}
             className="tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-hidden tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-zinc-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white sm:tw-right-6 sm:tw-top-6 sm:tw-inline-flex"
             aria-label="Close quick vote"
