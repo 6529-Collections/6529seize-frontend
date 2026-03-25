@@ -13,7 +13,7 @@
 
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
-import { ApiDropMetadata } from '../models/ApiDropMetadata';
+import { ApiDropMetadataResponse } from '../models/ApiDropMetadataResponse';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropRater } from '../models/ApiDropRater';
@@ -57,7 +57,7 @@ export class ApiDrop {
     'referenced_nfts': Array<ApiDropReferencedNFT>;
     'mentioned_users': Array<ApiDropMentionedUser>;
     'mentioned_waves': Array<ApiMentionedWave>;
-    'metadata': Array<ApiDropMetadata>;
+    'metadata': Array<ApiDropMetadataResponse>;
     'rating': number;
     'realtime_rating': number;
     'rating_prediction': number;
@@ -175,7 +175,7 @@ export class ApiDrop {
         {
             "name": "metadata",
             "baseName": "metadata",
-            "type": "Array<ApiDropMetadata>",
+            "type": "Array<ApiDropMetadataResponse>",
             "format": ""
         },
         {

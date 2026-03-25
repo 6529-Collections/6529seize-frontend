@@ -13,6 +13,7 @@
 
 import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
+import { ApiWaveParticipationSubmissionStrategy } from '../models/ApiWaveParticipationSubmissionStrategy';
 import { ApiWaveRequiredMetadata } from '../models/ApiWaveRequiredMetadata';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
@@ -35,6 +36,7 @@ export class ApiWaveParticipationConfig {
     'period'?: ApiIntRange;
     'authenticated_user_eligible': boolean;
     'terms': string | null;
+    'submission_strategy'?: ApiWaveParticipationSubmissionStrategy | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -87,6 +89,12 @@ export class ApiWaveParticipationConfig {
             "name": "terms",
             "baseName": "terms",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "submission_strategy",
+            "baseName": "submission_strategy",
+            "type": "ApiWaveParticipationSubmissionStrategy",
             "format": ""
         }    ];
 

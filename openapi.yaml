@@ -7963,6 +7963,10 @@ components:
           nullable: true
         period:
           $ref: "#/components/schemas/ApiIntRange"
+        submission_strategy:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategy"
     ApiCreateNewWaveScope:
       type: object
       required:
@@ -8277,7 +8281,7 @@ components:
         metadata:
           type: array
           items:
-            $ref: "#/components/schemas/ApiDropMetadata"
+            $ref: "#/components/schemas/ApiDropMetadataResponse"
         rating:
           type: number
           format: int64
@@ -8433,6 +8437,22 @@ components:
         data_value:
           type: string
           maxLength: 5000
+    ApiDropMetadataResponse:
+      type: object
+      required:
+        - data_key
+        - data_value
+      properties:
+        data_key:
+          type: string
+          maxLength: 500
+        data_value:
+          type: string
+          maxLength: 5000
+        resolved_profile:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiProfileMin"
     ApiDropNftLink:
       type: object
       required:
@@ -8711,7 +8731,7 @@ components:
         metadata:
           type: array
           items:
-            $ref: "#/components/schemas/ApiDropMetadata"
+            $ref: "#/components/schemas/ApiDropMetadataResponse"
         rating:
           type: number
           format: int64
@@ -9252,7 +9272,9 @@ components:
       required:
         - id
         - mint_date
+        - total_count
         - mint_count
+        - subscriptions_count
         - proceeds_eth
         - proceeds_usd
         - artist_split_eth
@@ -9265,7 +9287,13 @@ components:
           type: string
           format: date-time
           nullable: true
+        total_count:
+          type: integer
+          format: int64
         mint_count:
+          type: integer
+          format: int64
+        subscriptions_count:
           type: integer
           format: int64
         proceeds_eth:
@@ -9294,14 +9322,22 @@ components:
     ApiMemesMintStatsTotals:
       type: object
       required:
+        - total_count
         - mint_count
+        - subscriptions_count
         - proceeds_eth
         - proceeds_usd
         - artist_split_eth
         - artist_split_usd
         - artists_count
       properties:
+        total_count:
+          type: integer
+          format: int64
         mint_count:
+          type: integer
+          format: int64
+        subscriptions_count:
           type: integer
           format: int64
         proceeds_eth:
@@ -9323,7 +9359,9 @@ components:
       type: object
       required:
         - year
+        - total_count
         - mint_count
+        - subscriptions_count
         - proceeds_eth
         - proceeds_usd
         - artist_split_eth
@@ -9332,7 +9370,13 @@ components:
         year:
           type: integer
           format: int64
+        total_count:
+          type: integer
+          format: int64
         mint_count:
+          type: integer
+          format: int64
+        subscriptions_count:
           type: integer
           format: int64
         proceeds_eth:
@@ -10939,6 +10983,55 @@ components:
             Decisions before this time will not be made. Should not overlap with
             other pauses. Needs to be after start_time, after now and after
             wave.next_decision_time
+    ApiUpdateWaveParticipationConfig:
+      type: object
+      required:
+        - scope
+        - required_metadata
+        - signature_required
+        - no_of_applications_allowed_per_participant
+        - required_media
+        - terms
+      properties:
+        scope:
+          $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        no_of_applications_allowed_per_participant:
+          description: >-
+            The number of applications allowed per participant. Infinite if
+            omitted.
+          type: integer
+          format: int64
+          nullable: true
+          minimum: 1
+        required_media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveParticipationRequirement"
+        required_metadata:
+          description: |
+            The metadata that must be provided by the participant. 
+            Empty array if nothing is required.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveRequiredMetadata"
+        signature_required:
+          description: If true then the votes must be signed by voters.
+          type: boolean
+        terms:
+          description: >-
+            If this is and the "signature_required" is set then this will be
+            embedded as a signature input data component for each drop.
+          type: string
+          nullable: true
+        period:
+          $ref: "#/components/schemas/ApiIntRange"
+        submission_strategy:
+          description: >-
+            If omitted, the existing submission strategy is preserved. Set
+            explicitly to null to clear it.
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategy"
     ApiUpdateWaveRequest:
       type: object
       required:
@@ -10964,10 +11057,17 @@ components:
         visibility:
           $ref: "#/components/schemas/ApiCreateNewWaveVisibilityConfig"
         participation:
-          $ref: "#/components/schemas/ApiCreateNewWaveParticipationConfig"
+          description: >-
+            Wave participation configuration. `submission_strategy` is immutable
+            after creation and, if provided on update, must match the existing
+            value exactly.
+          $ref: "#/components/schemas/ApiUpdateWaveParticipationConfig"
         chat:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         wave:
+          description: >-
+            Wave configuration. `type` is immutable after creation and must
+            match the existing wave type on update.
           $ref: "#/components/schemas/ApiCreateWaveConfig"
     ApiUploadItem:
       type: object
@@ -11623,12 +11723,55 @@ components:
         terms:
           type: string
           nullable: true
+        submission_strategy:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategy"
+    ApiWaveParticipationIdentitySubmissionAllowDuplicates:
+      type: string
+      enum:
+        - ALWAYS_ALLOW
+        - ALLOW_AFTER_WIN
+        - NEVER_ALLOW
+    ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted:
+      type: string
+      enum:
+        - ONLY_MYSELF
+        - ONLY_OTHERS
+        - EVERYONE
     ApiWaveParticipationRequirement:
       type: string
       enum:
         - IMAGE
         - AUDIO
         - VIDEO
+    ApiWaveParticipationSubmissionStrategy:
+      type: object
+      required:
+        - type
+        - config
+      properties:
+        type:
+          $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategyType"
+        config:
+          $ref: >-
+            #/components/schemas/ApiWaveParticipationSubmissionStrategyIdentityConf
+    ApiWaveParticipationSubmissionStrategyIdentityConf:
+      type: object
+      required:
+        - duplicates
+        - who_can_be_submitted
+      properties:
+        duplicates:
+          $ref: >-
+            #/components/schemas/ApiWaveParticipationIdentitySubmissionAllowDuplicates
+        who_can_be_submitted:
+          $ref: >-
+            #/components/schemas/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted
+    ApiWaveParticipationSubmissionStrategyType:
+      type: string
+      enum:
+        - IDENTITY
     ApiWaveRequiredMetadata:
       type: object
       required:
