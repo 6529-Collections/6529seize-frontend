@@ -14,7 +14,7 @@ export default function UserPageRepWrapper({
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   const params = useParams();
-  const user = (params?.["user"] as string)?.toLowerCase();
+  const user = (params["user"] as string).toLowerCase();
 
   const { profile } = useIdentity({
     handleOrWallet: user,
@@ -24,6 +24,7 @@ export default function UserPageRepWrapper({
   return (
     <UserPageSetUpProfileWrapper profile={profile ?? initialProfile}>
       <UserPageRep
+        key={user}
         profile={profile ?? initialProfile}
         initialActivityLogParams={initialActivityLogParams}
       />
