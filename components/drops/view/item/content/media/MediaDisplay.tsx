@@ -167,6 +167,12 @@ export default function MediaDisplay({
   const mediaType = getMediaType();
 
   if (mediaType === MediaType.HTML) {
+    if (previewImageUrl && !requireInteractionToLoad) {
+      return (
+        <MediaDisplayImage src={previewImageUrl} imageScale={imageScale} />
+      );
+    }
+
     return (
       <InteractiveHtmlMediaDisplay
         key={`${media_mime_type}:${media_url}`}
