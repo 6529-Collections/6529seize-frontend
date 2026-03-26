@@ -178,20 +178,31 @@ export function getSubscriptionPhaseName(phaseKey: LaunchPhaseKey): string {
 
 const DEFAULT_RESEARCH_TARGET_EDITION_SIZE = 310;
 
-function normalizeEditionSizeLimit(
-  editionSize: number | null | undefined
+function normalizePositiveIntegerLimit(
+  value: number | null | undefined
 ): number | null {
-  const normalized = Number(editionSize);
+  const normalized = Number(value);
   if (!Number.isFinite(normalized) || normalized <= 0) {
     return null;
   }
   return Math.trunc(normalized);
 }
 
+export function getResearchTargetEditionSizeLimit(
+  editionSize: number | null | undefined,
+  onChainTotalMax?: number | null | undefined
+): number | null {
+  const dbLimit = normalizePositiveIntegerLimit(editionSize);
+  const onChainLimit = normalizePositiveIntegerLimit(onChainTotalMax);
+
+  return onChainLimit ?? dbLimit;
+}
+
 export function getDefaultResearchTargetEditionSize(
-  editionSize: number | null | undefined
+  editionSize: number | null | undefined,
+  onChainTotalMax?: number | null | undefined
 ): number {
-  const limit = normalizeEditionSizeLimit(editionSize);
+  const limit = getResearchTargetEditionSizeLimit(editionSize, onChainTotalMax);
   return limit == null
     ? DEFAULT_RESEARCH_TARGET_EDITION_SIZE
     : Math.min(limit, DEFAULT_RESEARCH_TARGET_EDITION_SIZE);
@@ -199,14 +210,15 @@ export function getDefaultResearchTargetEditionSize(
 
 export function clampResearchTargetEditionSize(
   targetEditionSize: number,
-  editionSize: number | null | undefined
+  editionSize: number | null | undefined,
+  onChainTotalMax?: number | null | undefined
 ): number {
   const normalizedTarget = Number(targetEditionSize);
   const safeTarget =
     Number.isFinite(normalizedTarget) && normalizedTarget >= 0
       ? Math.trunc(normalizedTarget)
       : 0;
-  const limit = normalizeEditionSizeLimit(editionSize);
+  const limit = getResearchTargetEditionSizeLimit(editionSize, onChainTotalMax);
   return limit == null ? safeTarget : Math.min(safeTarget, limit);
 }
 

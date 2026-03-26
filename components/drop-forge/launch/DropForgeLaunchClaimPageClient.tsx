@@ -17,6 +17,7 @@ import {
   getDefaultResearchTargetEditionSize,
   getErrorMessage,
   getMediaTypeLabel,
+  getResearchTargetEditionSizeLimit,
   getRootForPhase,
   getSafeExternalUrl,
   getSubscriptionPhaseName,
@@ -345,6 +346,10 @@ export default function DropForgeLaunchClaimPageClient({
   const missingRequiredInfo = Boolean(
     claim && isMissingRequiredLaunchInfo(claim)
   );
+  const researchTargetEditionSizeLimit = getResearchTargetEditionSizeLimit(
+    claim?.edition_size,
+    manifoldClaim?.totalMax
+  );
   const primaryStatus = claim
     ? getClaimPrimaryStatus({
         claim,
@@ -374,12 +379,19 @@ export default function DropForgeLaunchClaimPageClient({
     setResearchTargetEditionSize((current) => {
       if (syncedResearchTargetClaimIdRef.current !== claimId) {
         syncedResearchTargetClaimIdRef.current = claimId;
-        return getDefaultResearchTargetEditionSize(claim.edition_size);
+        return getDefaultResearchTargetEditionSize(
+          claim.edition_size,
+          manifoldClaim?.totalMax
+        );
       }
 
-      return clampResearchTargetEditionSize(current, claim.edition_size);
+      return clampResearchTargetEditionSize(
+        current,
+        claim.edition_size,
+        manifoldClaim?.totalMax
+      );
     });
-  }, [claim, claimId]);
+  }, [claim, claimId, manifoldClaim?.totalMax]);
 
   useEffect(() => {
     setSelectedPhase("");
@@ -973,7 +985,8 @@ export default function DropForgeLaunchClaimPageClient({
   const totalMinted = Number(manifoldClaim?.total ?? 0);
   const cappedResearchTargetEditionSize = clampResearchTargetEditionSize(
     researchTargetEditionSize,
-    claim?.edition_size
+    claim?.edition_size,
+    manifoldClaim?.totalMax
   );
   const researchAirdropCount = Math.max(
     0,
@@ -1475,10 +1488,10 @@ export default function DropForgeLaunchClaimPageClient({
   const handleResearchTargetEditionSizeChange = useCallback(
     (value: string) => {
       const parsed = Number(value);
-      const editionSizeLimit =
-        typeof claim?.edition_size === "number" && claim.edition_size > 0
-          ? Math.trunc(claim.edition_size)
-          : null;
+      const editionSizeLimit = getResearchTargetEditionSizeLimit(
+        claim?.edition_size,
+        manifoldClaim?.totalMax
+      );
       if (
         editionSizeLimit != null &&
         Number.isFinite(parsed) &&
@@ -1486,7 +1499,7 @@ export default function DropForgeLaunchClaimPageClient({
       ) {
         setResearchTargetEditionSize(editionSizeLimit);
         setToast({
-          message: `Target edition size cannot exceed edition size (${editionSizeLimit})`,
+          message: `Target edition size cannot exceed claim max (${editionSizeLimit})`,
           type: "error",
         });
         return;
@@ -1495,11 +1508,12 @@ export default function DropForgeLaunchClaimPageClient({
       setResearchTargetEditionSize(
         clampResearchTargetEditionSize(
           Number.isFinite(parsed) && parsed >= 0 ? parsed : 0,
-          claim?.edition_size
+          claim?.edition_size,
+          manifoldClaim?.totalMax
         )
       );
     },
-    [claim?.edition_size, setToast]
+    [claim?.edition_size, manifoldClaim?.totalMax, setToast]
   );
 
   const handleSelectedPhasePriceChange = useCallback(
@@ -1665,7 +1679,7 @@ export default function DropForgeLaunchClaimPageClient({
         onSelectedPhaseChange={handleSelectedPhaseChange}
         totalMinted={totalMinted}
         researchTargetEditionSize={cappedResearchTargetEditionSize}
-        researchTargetEditionSizeMax={claim?.edition_size ?? null}
+        researchTargetEditionSizeMax={researchTargetEditionSizeLimit}
         onResearchTargetEditionSizeChange={
           handleResearchTargetEditionSizeChange
         }
