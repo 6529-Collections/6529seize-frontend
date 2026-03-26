@@ -12,10 +12,10 @@
  */
 
 import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
-import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
 import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
+import { ApiUpdateWaveParticipationConfig } from '../models/ApiUpdateWaveParticipationConfig';
 import { HttpFile } from '../http/http';
 
 export class ApiUpdateWaveRequest {
@@ -29,7 +29,7 @@ export class ApiUpdateWaveRequest {
     'picture': string | null;
     'voting': ApiCreateNewWaveVotingConfig;
     'visibility': ApiCreateNewWaveVisibilityConfig;
-    'participation': ApiCreateNewWaveParticipationConfig;
+    'participation': ApiUpdateWaveParticipationConfig;
     'chat': ApiCreateNewWaveChatConfig;
     'wave': ApiCreateWaveConfig;
 
@@ -65,7 +65,7 @@ export class ApiUpdateWaveRequest {
         {
             "name": "participation",
             "baseName": "participation",
-            "type": "ApiCreateNewWaveParticipationConfig",
+            "type": "ApiUpdateWaveParticipationConfig",
             "format": ""
         },
         {

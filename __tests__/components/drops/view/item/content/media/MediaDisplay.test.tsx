@@ -32,6 +32,7 @@ jest.mock("@/components/common/SandboxedExternalIframe", () => (props: any) => (
     data-src={props.src}
     data-title={props.title}
     data-class-name={props.className}
+    data-container-class-name={props.containerClassName}
   />
 ));
 jest.mock(
@@ -97,6 +98,21 @@ describe("MediaDisplay", () => {
     expect(screen.getByTestId("iframe")).toHaveAttribute(
       "data-title",
       "Interactive HTML media"
+    );
+  });
+
+  it("forwards iframe container classes for html media", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="ipfs://hash"
+        iframeContainerClassName="tw-w-full"
+      />
+    );
+
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-container-class-name",
+      "tw-w-full"
     );
   });
 
