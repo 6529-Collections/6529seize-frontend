@@ -338,7 +338,7 @@ const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
   // If isRolling is true, we need to calculate the last decision time
   if (dates.isRolling) {
     // Need an end date for rolling waves
-    if (!dates.endDate) {
+    if (typeof dates.endDate !== "number") {
       throw new Error("End date must be explicitly set when isRolling is true");
     }
 
