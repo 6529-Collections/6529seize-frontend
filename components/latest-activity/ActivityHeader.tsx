@@ -17,12 +17,13 @@ export default function ActivityHeader({
     <Col
       sm={12}
       md={6}
-      className="tw-py-2 d-flex align-items-center justify-content-between">
+      className="d-flex align-items-center justify-content-between tw-py-2"
+    >
       <span className="d-flex flex-wrap align-items-center gap-3">
         <h1 className="tw-mb-0">NFT Activity</h1>
         {showViewAll ? (
           <Link href="/nft-activity">
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold hover:tw-text-[#bbb] max-[800px]:tw-text-xs">
               View All
             </span>
           </Link>

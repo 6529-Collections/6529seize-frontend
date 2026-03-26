@@ -28,6 +28,7 @@ export const usePrefetchMemesQuickVote = () => {
   const { skippedDropIds } = useMemesQuickVoteStorage({
     contextProfile,
     memesWaveId,
+    proxyId,
   });
 
   return useCallback(
@@ -86,7 +87,11 @@ export const usePrefetchMemesQuickVote = () => {
         .filter((dropId): dropId is string => !!dropId)
         .map((dropId) =>
           queryClient.prefetchQuery({
-            queryKey: getMemesQuickVoteDropQueryKey(dropId),
+            queryKey: getMemesQuickVoteDropQueryKey({
+              contextProfile,
+              dropId,
+              proxyId,
+            }),
             queryFn: () => fetchMemesQuickVoteDrop(dropId),
             ...getDefaultQueryRetry(),
           })

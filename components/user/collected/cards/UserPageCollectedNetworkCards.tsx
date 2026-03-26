@@ -118,7 +118,7 @@ function NetworkCard({
 
       <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-1.5 tw-self-end tw-px-4 tw-pb-4 tw-pt-1.5">
         <div className="tw-flex tw-justify-between tw-gap-x-2">
-          <span className="tw-block tw-w-full tw-truncate tw-text-[14px] tw-font-semibold tw-leading-snug tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
+          <span className="tw-block tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-leading-snug tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
             {tokenMetadata?.name ?? `Token #${card.token}`}
           </span>
         </div>

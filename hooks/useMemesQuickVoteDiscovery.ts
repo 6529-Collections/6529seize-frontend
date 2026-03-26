@@ -227,7 +227,7 @@ export const useMemesQuickVoteDiscovery = ({
     [discoveryPages, discoveryStateKey, isDiscoveryEnabled, skippedDropIds]
   );
 
-  const deferDropId = useCallback(
+  const hideDropId = useCallback(
     (dropId: string) => {
       setStoredState((current) =>
         applyMemesQuickVoteDiscoveryStateUpdate({
@@ -265,10 +265,12 @@ export const useMemesQuickVoteDiscovery = ({
 
   return {
     activeCandidateId,
-    deferDropId,
     discoveredDropsById: discoverySnapshot.discoveredDropsById,
     hasPageFetchError,
-    isExhausted: isMemesQuickVoteExhausted(discoverySnapshot),
+    hideDropId,
+    isExhausted: isDiscoveryEnabled
+      ? isMemesQuickVoteExhausted(discoverySnapshot)
+      : false,
     isFetchingPage,
     nextCandidateId,
     queue,
