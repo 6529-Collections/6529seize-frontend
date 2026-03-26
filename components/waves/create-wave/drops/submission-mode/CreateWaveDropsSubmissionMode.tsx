@@ -5,6 +5,10 @@ import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/gener
 import type { ApiWaveParticipationSubmissionStrategy } from "@/generated/models/ApiWaveParticipationSubmissionStrategy";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import {
+  WAVE_IDENTITY_DUPLICATES_COPY,
+  WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY,
+} from "@/helpers/waves/wave-submission-strategy.helpers";
 
 enum CreateWaveSubmissionMode {
   STANDARD = "STANDARD",
@@ -22,11 +26,6 @@ const createDefaultIdentitySubmissionStrategy =
     },
   });
 
-type SubmissionOptionCopy = {
-  readonly label: string;
-  readonly description: string;
-};
-
 type SubmissionOptionSection = "who-can-be-submitted" | "duplicate-submissions";
 
 type SubmissionOptionRowProps<T extends string> = {
@@ -38,45 +37,6 @@ type SubmissionOptionRowProps<T extends string> = {
   readonly descriptionId: string;
   readonly groupName: string;
   readonly onChange: (type: T) => void;
-};
-
-const WHO_CAN_BE_SUBMITTED_COPY: Record<
-  ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted,
-  SubmissionOptionCopy
-> = {
-  [ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself]: {
-    label: "Own identity only",
-    description: "A participant can submit only themselves.",
-  },
-  [ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyOthers]: {
-    label: "Other identities only",
-    description: "A participant can submit someone else, but not themselves.",
-  },
-  [ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.Everyone]: {
-    label: "Own or other identities",
-    description: "A participant can submit themselves or someone else.",
-  },
-};
-
-const DUPLICATES_COPY: Record<
-  ApiWaveParticipationIdentitySubmissionAllowDuplicates,
-  SubmissionOptionCopy
-> = {
-  [ApiWaveParticipationIdentitySubmissionAllowDuplicates.NeverAllow]: {
-    label: "Never again",
-    description:
-      "The same identity can be submitted only once, even after a win.",
-  },
-  [ApiWaveParticipationIdentitySubmissionAllowDuplicates.AllowAfterWin]: {
-    label: "After it wins",
-    description:
-      "The same identity can have only one active submission; it can be submitted again after that submission wins.",
-  },
-  [ApiWaveParticipationIdentitySubmissionAllowDuplicates.AlwaysAllow]: {
-    label: "At any time",
-    description:
-      "The same identity can be submitted repeatedly, even if another submission is already active.",
-  },
 };
 
 const getOptionDescriptionId = (
@@ -256,9 +216,12 @@ export default function CreateWaveDropsSubmissionMode({
                       key={option}
                       type={option}
                       selected={submissionStrategy.config.who_can_be_submitted}
-                      label={WHO_CAN_BE_SUBMITTED_COPY[option].label}
+                      label={
+                        WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY[option].label
+                      }
                       description={
-                        WHO_CAN_BE_SUBMITTED_COPY[option].description
+                        WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY[option]
+                          .description
                       }
                       titleId={titleId}
                       descriptionId={descriptionId}
@@ -294,8 +257,10 @@ export default function CreateWaveDropsSubmissionMode({
                       key={option}
                       type={option}
                       selected={submissionStrategy.config.duplicates}
-                      label={DUPLICATES_COPY[option].label}
-                      description={DUPLICATES_COPY[option].description}
+                      label={WAVE_IDENTITY_DUPLICATES_COPY[option].label}
+                      description={
+                        WAVE_IDENTITY_DUPLICATES_COPY[option].description
+                      }
                       titleId={titleId}
                       descriptionId={descriptionId}
                       groupName="duplicate-submissions"
