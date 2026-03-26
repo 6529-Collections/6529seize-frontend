@@ -13,6 +13,7 @@ const SWIPE_EXIT_ROTATION_DEGREES = 3;
 const QUICK_VOTE_TRANSFORM_DATA_ATTRIBUTE = "quickVoteTransform";
 const QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG =
   "__memesQuickVoteComputedStylePatched";
+type TimeoutHandle = ReturnType<typeof globalThis.setTimeout>;
 
 type SwipeDirection = "left" | "right";
 type TouchLikeEvent = {
@@ -162,11 +163,15 @@ function getCardTransitionDuration(
 }
 
 function patchComputedStyleForFallbackSwipe() {
-  if (typeof window === "undefined" || typeof window.Touch === "function") {
+  if (
+    typeof globalThis.window === "undefined" ||
+    typeof globalThis.window.Touch === "function"
+  ) {
     return;
   }
 
-  const patchedWindow = window as typeof window & {
+  const browserWindow = globalThis.window;
+  const patchedWindow = browserWindow as typeof browserWindow & {
     [QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG]?: boolean;
   };
 
@@ -174,9 +179,13 @@ function patchComputedStyleForFallbackSwipe() {
     return;
   }
 
-  const originalGetComputedStyle = window.getComputedStyle.bind(window);
+  const originalGetComputedStyle =
+    browserWindow.getComputedStyle.bind(browserWindow);
 
-  window.getComputedStyle = ((element: Element, pseudoElement?: string) => {
+  browserWindow.getComputedStyle = ((
+    element: Element,
+    pseudoElement?: string
+  ) => {
     const computedStyle = originalGetComputedStyle(element, pseudoElement);
 
     if (!(element instanceof HTMLElement)) {
@@ -204,7 +213,7 @@ function patchComputedStyleForFallbackSwipe() {
         : computedStyle.getPropertyValue(property);
 
     return patchedComputedStyle;
-  }) as typeof window.getComputedStyle;
+  }) as typeof browserWindow.getComputedStyle;
 
   patchedWindow[QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG] = true;
 }
@@ -235,13 +244,13 @@ function useQuickVotePreviewSwipeState({
   const fallbackTouchStartXRef = useRef<number | null>(null);
   const fallbackTouchCurrentXRef = useRef<number | null>(null);
   const isFallbackTouchActiveRef = useRef(false);
-  const swipeCommitTimeoutRef = useRef<number | null>(null);
+  const swipeCommitTimeoutRef = useRef<TimeoutHandle | null>(null);
   const clearSwipeCommitTimeout = useCallback(() => {
     if (swipeCommitTimeoutRef.current === null) {
       return;
     }
 
-    window.clearTimeout(swipeCommitTimeoutRef.current);
+    globalThis.clearTimeout(swipeCommitTimeoutRef.current);
     swipeCommitTimeoutRef.current = null;
   }, []);
 
@@ -278,7 +287,7 @@ function useQuickVotePreviewSwipeState({
         return;
       }
 
-      swipeCommitTimeoutRef.current = window.setTimeout(() => {
+      swipeCommitTimeoutRef.current = globalThis.setTimeout(() => {
         swipeCommitTimeoutRef.current = null;
         commitSwipeAction(direction, onSkip, onVoteWithSwipe);
       }, SWIPE_EXIT_DURATION_MS);
@@ -392,8 +401,8 @@ export default function useMemesQuickVotePreviewSwipe({
   const previewCardRef = useRef<HTMLElement | null>(null);
   const canUseSwiperTouchSurface =
     isMobile &&
-    typeof window !== "undefined" &&
-    typeof window.Touch === "function";
+    typeof globalThis.window !== "undefined" &&
+    typeof globalThis.window.Touch === "function";
   const swipeState = useQuickVotePreviewSwipeState({
     isBusy,
     isMobile,

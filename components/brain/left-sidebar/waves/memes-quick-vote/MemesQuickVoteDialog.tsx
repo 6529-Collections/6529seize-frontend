@@ -25,6 +25,7 @@ const QUICK_VOTE_MOBILE_QUERY = "(max-width: 767px)";
 const QUICK_VOTE_BAR_FEEDBACK_DURATION_MS = 650;
 
 type VoteFeedbackSource = "custom-submit" | "quick-amount";
+type TimeoutHandle = ReturnType<typeof globalThis.setTimeout>;
 
 interface MemesQuickVoteDialogProps {
   readonly isOpen: boolean;
@@ -73,7 +74,7 @@ function MemesQuickVoteDialogContent({
     readonly amount: number;
     readonly source: VoteFeedbackSource;
   } | null>(null);
-  const barVoteTimeoutRef = useRef<number | null>(null);
+  const barVoteTimeoutRef = useRef<TimeoutHandle | null>(null);
   const isVoteFeedbackActive = voteFeedback !== null;
   const isControlsSubmitting = isAdvancing || isVoteFeedbackActive;
   const normalizedLatestUsedAmount =
@@ -107,18 +108,23 @@ function MemesQuickVoteDialogContent({
       return;
     }
 
-    window.clearTimeout(barVoteTimeoutRef.current);
+    globalThis.clearTimeout(barVoteTimeoutRef.current);
     barVoteTimeoutRef.current = null;
   }, []);
 
   const queueVoteAmount = useCallback(
-    async (amount: number | string) => {
-      const wasQueued = await submitVote(activeDrop, amount);
-
-      if (!wasQueued) {
-        setIsAdvancing(false);
-        setVoteFeedback(null);
-      }
+    (amount: number | string) => {
+      submitVote(activeDrop, amount)
+        .then((wasQueued) => {
+          if (!wasQueued) {
+            setIsAdvancing(false);
+            setVoteFeedback(null);
+          }
+        })
+        .catch(() => {
+          setIsAdvancing(false);
+          setVoteFeedback(null);
+        });
     },
     [activeDrop, submitVote]
   );
@@ -148,10 +154,10 @@ function MemesQuickVoteDialogContent({
         source,
       });
       clearBarVoteTimeout();
-      barVoteTimeoutRef.current = window.setTimeout(() => {
+      barVoteTimeoutRef.current = globalThis.setTimeout(() => {
         barVoteTimeoutRef.current = null;
         setIsAdvancing(true);
-        void queueVoteAmount(normalizedAmount);
+        queueVoteAmount(normalizedAmount);
       }, QUICK_VOTE_BAR_FEEDBACK_DURATION_MS);
     },
     [
@@ -221,7 +227,7 @@ function MemesQuickVoteDialogContent({
                   return;
                 }
 
-                void queueVoteAmount(swipeVoteAmount);
+                queueVoteAmount(swipeVoteAmount);
               }}
             />
           </div>
@@ -282,7 +288,7 @@ function MemesQuickVoteDialogContent({
                   return;
                 }
 
-                void queueVoteAmount(swipeVoteAmount);
+                queueVoteAmount(swipeVoteAmount);
               }}
             />
           </div>

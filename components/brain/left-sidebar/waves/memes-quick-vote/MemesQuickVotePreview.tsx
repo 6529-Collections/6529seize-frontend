@@ -149,7 +149,7 @@ function MemesQuickVotePreviewContent({
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col">
-      <div data-testid="quick-vote-preview-status" className="tw-hidden">
+      <div data-testid="quick-vote-preview-status" className="tw-sr-only">
         {swipeInstructionText && (
           <span className="tw-sr-only">{swipeInstructionText}</span>
         )}
@@ -158,7 +158,10 @@ function MemesQuickVotePreviewContent({
             {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"} left
           </span>
         )}
-        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-backdrop-blur-md">
+        <span
+          aria-hidden="true"
+          className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-backdrop-blur-md"
+        >
           {formatNumberWithCommas(remainingCount)} unexplored
         </span>
       </div>

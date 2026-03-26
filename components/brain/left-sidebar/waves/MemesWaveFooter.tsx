@@ -69,7 +69,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                 uncastPower
               )} ${votingLabel ?? "Votes"} left, ${formatNumberWithCommas(
                 unratedCount
-              )} left`}
+              )} unexplored`}
               onClick={handleOpenQuickVote}
               onFocus={handlePrefetchQuickVote}
               onMouseEnter={handlePrefetchQuickVote}
