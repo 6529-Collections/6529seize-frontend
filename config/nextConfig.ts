@@ -14,7 +14,7 @@ export function sharedConfig(
     compress: true,
     productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
-    allowedDevOrigins: ["192.168.1.133", "192.168.1.151"],
+    allowedDevOrigins: ["192.168.1.133"],
     images: {
       loader: "default",
       remotePatterns: [
