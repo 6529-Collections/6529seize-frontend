@@ -10,11 +10,9 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type {
   CreateWaveConfig,
   CreateWaveDatesConfig,
-  TimeWeightedVotingSettings} from "@/types/waves.types";
-import {
-  CreateWaveOutcomeType,
-  CreateWaveStep
+  TimeWeightedVotingSettings,
 } from "@/types/waves.types";
+import { CreateWaveOutcomeType, CreateWaveStep } from "@/types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 import type { ApiCreateWaveOutcome } from "@/generated/models/ApiCreateWaveOutcome";
 
@@ -410,6 +408,11 @@ export const getCreateNewWaveBody = ({
         max: endDate,
       },
       terms: config.drops.terms,
+      ...(config.drops.submissionStrategy
+        ? {
+            submission_strategy: config.drops.submissionStrategy,
+          }
+        : {}),
     },
     chat: {
       scope: {

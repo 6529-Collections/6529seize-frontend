@@ -28,6 +28,7 @@ describe("create-wave.validation", () => {
       noOfApplicationsAllowedPerParticipant: null,
       requiredTypes: [],
       requiredMetadata: [],
+      submissionStrategy: null,
       terms: null,
       signatureRequired: false,
       adminCanDeleteDrops: false,
@@ -125,6 +126,30 @@ describe("create-wave.validation", () => {
     });
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE
+    );
+  });
+
+  it("chat waves cannot have submission strategy", () => {
+    const config = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Chat, name: "n", image: null },
+      drops: {
+        ...baseConfig.drops,
+        submissionStrategy: {
+          type: "IDENTITY",
+          config: {
+            duplicates: "NEVER_ALLOW",
+            who_can_be_submitted: "EVERYONE",
+          },
+        },
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DROPS,
+      config,
+    });
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.DROPS_SUBMISSION_STRATEGY_INVALID
     );
   });
 
