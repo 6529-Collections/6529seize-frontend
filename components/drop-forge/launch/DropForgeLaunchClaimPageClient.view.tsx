@@ -134,6 +134,7 @@ interface DropForgeLaunchClaimPageViewProps {
   onSelectedPhaseChange: (value: LaunchPhaseKey) => void;
   totalMinted: number;
   researchTargetEditionSize: number;
+  researchTargetEditionSizeMax: number | null;
   onResearchTargetEditionSizeChange: (value: string) => void;
   researchAirdropCount: number;
   runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
@@ -482,7 +483,10 @@ function DropForgeLaunchClaimTimelineRow({
           <DropForgeStatusPill
             className={getPrimaryStatusPillClassName(primaryStatus.tone)}
             label={primaryStatus.label}
-            showLoader={primaryStatus.key === "publishing"}
+            showLoader={
+              primaryStatus.key === "publishing" ||
+              primaryStatus.key === "checking_onchain"
+            }
             tooltipText={primaryStatus.reason ?? ""}
           />
         )}
@@ -1128,6 +1132,7 @@ function DropForgeMetadataUpdateSection({
 function DropForgeResearchAirdropSection({
   totalMinted,
   researchTargetEditionSize,
+  researchTargetEditionSizeMax,
   onResearchTargetEditionSizeChange,
   claimWritePending,
   isInitialized,
@@ -1139,6 +1144,7 @@ function DropForgeResearchAirdropSection({
 }: Readonly<{
   totalMinted: number;
   researchTargetEditionSize: number;
+  researchTargetEditionSizeMax: number | null;
   onResearchTargetEditionSizeChange: (value: string) => void;
   claimWritePending: boolean;
   isInitialized: boolean;
@@ -1178,6 +1184,7 @@ function DropForgeResearchAirdropSection({
             type="number"
             inputMode="numeric"
             min="0"
+            max={researchTargetEditionSizeMax ?? undefined}
             step="1"
             value={researchTargetEditionSize}
             onChange={(e) => onResearchTargetEditionSizeChange(e.target.value)}
@@ -1455,6 +1462,7 @@ function DropForgePhaseSelectionSection({
   isInitialized,
   totalMinted,
   researchTargetEditionSize,
+  researchTargetEditionSizeMax,
   onResearchTargetEditionSizeChange,
   claimWritePending,
   researchAirdropCount,
@@ -1493,6 +1501,7 @@ function DropForgePhaseSelectionSection({
   isInitialized: boolean;
   totalMinted: number;
   researchTargetEditionSize: number;
+  researchTargetEditionSizeMax: number | null;
   onResearchTargetEditionSizeChange: (value: string) => void;
   claimWritePending: boolean;
   researchAirdropCount: number;
@@ -1628,6 +1637,7 @@ function DropForgePhaseSelectionSection({
           <DropForgeResearchAirdropSection
             totalMinted={totalMinted}
             researchTargetEditionSize={researchTargetEditionSize}
+            researchTargetEditionSizeMax={researchTargetEditionSizeMax}
             onResearchTargetEditionSizeChange={
               onResearchTargetEditionSizeChange
             }
@@ -1710,6 +1720,7 @@ function DropForgeLaunchClaimActionsSection({
   onSelectedPhaseChange,
   totalMinted,
   researchTargetEditionSize,
+  researchTargetEditionSizeMax,
   onResearchTargetEditionSizeChange,
   researchAirdropCount,
   runResearchAirdropWrite,
@@ -1754,6 +1765,7 @@ function DropForgeLaunchClaimActionsSection({
   onSelectedPhaseChange: (value: LaunchPhaseKey) => void;
   totalMinted: number;
   researchTargetEditionSize: number;
+  researchTargetEditionSizeMax: number | null;
   onResearchTargetEditionSizeChange: (value: string) => void;
   researchAirdropCount: number;
   runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
@@ -1809,6 +1821,7 @@ function DropForgeLaunchClaimActionsSection({
           isInitialized={isInitialized}
           totalMinted={totalMinted}
           researchTargetEditionSize={researchTargetEditionSize}
+          researchTargetEditionSizeMax={researchTargetEditionSizeMax}
           onResearchTargetEditionSizeChange={onResearchTargetEditionSizeChange}
           claimWritePending={claimWritePending}
           researchAirdropCount={researchAirdropCount}
@@ -1877,6 +1890,7 @@ function DropForgeLaunchClaimContent({
   onSelectedPhaseChange,
   totalMinted,
   researchTargetEditionSize,
+  researchTargetEditionSizeMax,
   onResearchTargetEditionSizeChange,
   researchAirdropCount,
   runResearchAirdropWrite,
@@ -1957,6 +1971,7 @@ function DropForgeLaunchClaimContent({
         onSelectedPhaseChange={onSelectedPhaseChange}
         totalMinted={totalMinted}
         researchTargetEditionSize={researchTargetEditionSize}
+        researchTargetEditionSizeMax={researchTargetEditionSizeMax}
         onResearchTargetEditionSizeChange={onResearchTargetEditionSizeChange}
         researchAirdropCount={researchAirdropCount}
         runResearchAirdropWrite={runResearchAirdropWrite}

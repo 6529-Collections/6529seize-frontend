@@ -345,7 +345,7 @@ function ClaimCardContent({
 }
 
 function CraftClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
-  const primaryStatus = getClaimPrimaryStatus({ claim });
+  const primaryStatus = getClaimPrimaryStatus({ claim, isCraftContext: true });
 
   return (
     <Link
@@ -366,10 +366,13 @@ function CraftClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
 }
 
 function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
-  const { claim: manifoldClaim } = useDropForgeManifoldClaim(claim.claim_id);
+  const { claim: manifoldClaim, isFetching: isManifoldClaimFetching } =
+    useDropForgeManifoldClaim(claim.claim_id);
   const primaryStatus = getClaimPrimaryStatus({
     claim,
     manifoldClaim: manifoldClaim ?? null,
+    isCraftContext: false,
+    isManifoldClaimFetching,
   });
 
   return (
@@ -381,7 +384,10 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
         <DropForgeStatusPill
           className={getPrimaryStatusPillClassName(primaryStatus.tone)}
           label={primaryStatus.label}
-          showLoader={primaryStatus.key === "publishing"}
+          showLoader={
+            primaryStatus.key === "publishing" ||
+            primaryStatus.key === "checking_onchain"
+          }
           tooltipText={primaryStatus.reason ?? ""}
         />
       </div>
