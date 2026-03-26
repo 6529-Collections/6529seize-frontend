@@ -369,12 +369,18 @@ export default function DropForgeLaunchClaimPageClient({
   }, [claimId]);
 
   useEffect(() => {
-    syncedResearchTargetClaimIdRef.current = null;
-    setResearchTargetEditionSize(getDefaultResearchTargetEditionSize(null));
-  }, [claimId]);
+    const claimMatchesCurrentClaimId = claim?.claim_id === claimId;
 
-  useEffect(() => {
-    if (!claim) return;
+    if (
+      syncedResearchTargetClaimIdRef.current !== claimId &&
+      !claimMatchesCurrentClaimId
+    ) {
+      syncedResearchTargetClaimIdRef.current = null;
+      setResearchTargetEditionSize(getDefaultResearchTargetEditionSize(null));
+      return;
+    }
+
+    if (!claim || !claimMatchesCurrentClaimId) return;
 
     setResearchTargetEditionSize((current) => {
       if (syncedResearchTargetClaimIdRef.current !== claimId) {
