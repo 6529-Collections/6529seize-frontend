@@ -369,6 +369,7 @@ export const useMemesQuickVoteQueue = ({
     isLoaded: isSettingsLoaded,
     isEnabled: isQuickVoteEnabled,
     memesWaveId,
+    proxyId,
   } = useMemesQuickVoteContext();
   const optimisticRemainingPowerKey = getOptimisticRemainingPowerKey({
     contextProfile,
@@ -387,6 +388,7 @@ export const useMemesQuickVoteQueue = ({
   } = useMemesQuickVoteStorage({
     contextProfile,
     memesWaveId,
+    proxyId,
   });
   const summary = useMemesQuickVoteSummary({ enabled });
   const discovery = useMemesQuickVoteDiscovery({

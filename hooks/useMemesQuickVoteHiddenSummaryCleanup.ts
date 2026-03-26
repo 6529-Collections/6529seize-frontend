@@ -8,6 +8,7 @@ import {
   fetchMemesQuickVoteDrop,
   getMemesQuickVoteDropQueryKey,
 } from "@/hooks/memesQuickVote.query";
+import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -30,6 +31,7 @@ export const useMemesQuickVoteHiddenSummaryCleanup = ({
   readonly skippedDropIds: readonly string[];
   readonly summaryFirstDrop: ApiDrop | null;
 }) => {
+  const { contextProfile, proxyId } = useMemesQuickVoteContext();
   const hiddenSummaryDropId = useMemo(() => {
     if (
       !enabled ||
@@ -54,7 +56,11 @@ export const useMemesQuickVoteHiddenSummaryCleanup = ({
 
   useQuery({
     queryKey: hiddenSummaryDropId
-      ? getMemesQuickVoteDropQueryKey(hiddenSummaryDropId)
+      ? getMemesQuickVoteDropQueryKey({
+          contextProfile,
+          dropId: hiddenSummaryDropId,
+          proxyId,
+        })
       : ["memes-quick-vote-hidden-summary-drop", null],
     queryFn: async () => {
       const dropId = hiddenSummaryDropId;

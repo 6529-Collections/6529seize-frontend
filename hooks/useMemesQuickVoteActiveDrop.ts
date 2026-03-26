@@ -8,6 +8,7 @@ import {
   fetchMemesQuickVoteDrop,
   getMemesQuickVoteDropQueryKey,
 } from "@/hooks/memesQuickVote.query";
+import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
 import { isMemesQuickVoteDiscoverableDrop } from "@/hooks/memesQuickVote.helpers";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
@@ -26,13 +27,18 @@ export const useMemesQuickVoteActiveDrop = ({
   readonly onInvalidatedDrop: (dropId: string) => void;
 }) => {
   const queryClient = useQueryClient();
+  const { contextProfile, proxyId } = useMemesQuickVoteContext();
   const activeInitialDrop = activeCandidateId
     ? discoveredDropsById[activeCandidateId]
     : undefined;
 
   const activeQuery = useQuery({
     queryKey: activeCandidateId
-      ? getMemesQuickVoteDropQueryKey(activeCandidateId)
+      ? getMemesQuickVoteDropQueryKey({
+          contextProfile,
+          dropId: activeCandidateId,
+          proxyId,
+        })
       : [QueryKey.DROP, { context: "memes-quick-vote", drop_id: null }],
     queryFn: () => fetchMemesQuickVoteDrop(activeCandidateId!),
     enabled: enabled && !!activeCandidateId,
@@ -55,12 +61,16 @@ export const useMemesQuickVoteActiveDrop = ({
     }
 
     void queryClient.prefetchQuery({
-      queryKey: getMemesQuickVoteDropQueryKey(nextCandidateId),
+      queryKey: getMemesQuickVoteDropQueryKey({
+        contextProfile,
+        dropId: nextCandidateId,
+        proxyId,
+      }),
       queryFn: () => fetchMemesQuickVoteDrop(nextCandidateId),
       staleTime: 0,
       ...getDefaultQueryRetry(),
     });
-  }, [enabled, nextCandidateId, queryClient]);
+  }, [contextProfile, enabled, nextCandidateId, proxyId, queryClient]);
 
   useEffect(() => {
     if (!activeCandidateId || !activeQuery.data || !hasFreshData) {

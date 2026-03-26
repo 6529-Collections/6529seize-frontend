@@ -16,7 +16,7 @@ import {
   writeStoredNumberArray,
   writeStoredStringArray,
 } from "@/hooks/memesQuickVote.storageStore";
-import { useQueries } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
 const SKIPPED_STORAGE_PREFIX = "memesQuickVoteSkipped";
@@ -25,6 +25,7 @@ const AMOUNTS_STORAGE_PREFIX = "memesQuickVoteAmounts";
 type UseMemesQuickVoteStorageOptions = {
   readonly contextProfile: string | null | undefined;
   readonly memesWaveId: string | null | undefined;
+  readonly proxyId?: string | null | undefined;
 };
 
 type UseMemesQuickVoteStorageResult = {
@@ -72,7 +73,9 @@ const areStringArraysEqual = (
 export const useMemesQuickVoteSkippedDropIds = ({
   contextProfile,
   memesWaveId,
+  proxyId,
 }: UseMemesQuickVoteStorageOptions): UseMemesQuickVoteSkippedDropIdsResult => {
+  const queryClient = useQueryClient();
   const skippedStorageKey = getStorageKey(
     SKIPPED_STORAGE_PREFIX,
     memesWaveId,
@@ -98,19 +101,15 @@ export const useMemesQuickVoteSkippedDropIds = ({
     },
     [skippedStorageKey]
   );
-  const skippedDropQueries = useQueries({
-    queries: storedSkippedDropIds.map((dropId) => ({
-      queryKey: getMemesQuickVoteDropQueryKey(dropId),
-      enabled: false,
-    })),
-  });
   const skippedDropIds = useMemo(
-    // Apply hidden skips immediately, but ignore ids that cached drop data has
-    // already proven to be missing or ineligible.
     () =>
-      storedSkippedDropIds.filter((_, index) => {
-        const query = skippedDropQueries[index];
-        const cachedDrop = query?.data as ApiDrop | undefined;
+      storedSkippedDropIds.filter((dropId) => {
+        const queryKey = getMemesQuickVoteDropQueryKey({
+          contextProfile,
+          dropId,
+          proxyId,
+        });
+        const cachedDrop = queryClient.getQueryData<ApiDrop>(queryKey);
 
         if (cachedDrop !== undefined) {
           return isMemesQuickVoteDiscoverableDrop({
@@ -119,13 +118,21 @@ export const useMemesQuickVoteSkippedDropIds = ({
           });
         }
 
-        if (query?.status !== "error") {
+        const queryState = queryClient.getQueryState(queryKey);
+
+        if (queryState?.status !== "error") {
           return true;
         }
 
-        return !isMemesQuickVoteMissingDropError(query.error);
+        return !isMemesQuickVoteMissingDropError(queryState.error);
       }),
-    [memesWaveId, skippedDropQueries, storedSkippedDropIds]
+    [
+      contextProfile,
+      memesWaveId,
+      proxyId,
+      queryClient,
+      storedSkippedDropIds,
+    ]
   );
 
   return {
@@ -137,6 +144,7 @@ export const useMemesQuickVoteSkippedDropIds = ({
 export const useMemesQuickVoteStorage = ({
   contextProfile,
   memesWaveId,
+  proxyId,
 }: UseMemesQuickVoteStorageOptions): UseMemesQuickVoteStorageResult => {
   const amountsStorageKey = getStorageKey(
     AMOUNTS_STORAGE_PREFIX,
@@ -147,6 +155,7 @@ export const useMemesQuickVoteStorage = ({
     useMemesQuickVoteSkippedDropIds({
       contextProfile,
       memesWaveId,
+      proxyId,
     });
   const recentAmountsByRecency = useStoredNumberArray(
     amountsStorageKey,

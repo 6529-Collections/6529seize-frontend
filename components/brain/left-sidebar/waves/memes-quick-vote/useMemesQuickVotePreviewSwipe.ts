@@ -1,7 +1,13 @@
 "use client";
 
 import type React from "react";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { flushSync } from "react-dom";
 import type SwiperClass from "swiper";
 
@@ -107,29 +113,10 @@ const getTouchListClientX = (
   return getTouchClientX(touches[0]);
 };
 
-const hasTouchPageX = (
-  touches:
-    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
-    | undefined
-): boolean => {
-  if (!touches || touches.length === 0) {
-    return false;
-  }
-
-  const firstTouch = touches[0];
-
-  return typeof firstTouch?.pageX === "number";
-};
-
 const getTouchEventClientX = (event: TouchLikeEvent): number | null =>
   getTouchListClientX(event.touches) ??
   getTouchListClientX(event.targetTouches) ??
   getTouchListClientX(event.changedTouches);
-
-const hasTouchEventPageX = (event: TouchLikeEvent): boolean =>
-  hasTouchPageX(event.touches) ||
-  hasTouchPageX(event.targetTouches) ||
-  hasTouchPageX(event.changedTouches);
 
 function getCardTransform(
   isMobile: boolean,
@@ -164,7 +151,7 @@ function getCardTransitionDuration(
 
 function patchComputedStyleForFallbackSwipe() {
   if (
-    typeof globalThis.window === "undefined" ||
+    globalThis.window === undefined ||
     typeof globalThis.window.Touch === "function"
   ) {
     return;
@@ -399,10 +386,21 @@ export default function useMemesQuickVotePreviewSwipe({
   swipeVoteAmount,
 }: UseMemesQuickVotePreviewSwipeArgs): UseMemesQuickVotePreviewSwipeResult {
   const previewCardRef = useRef<HTMLElement | null>(null);
-  const canUseSwiperTouchSurface =
-    isMobile &&
-    typeof globalThis.window !== "undefined" &&
-    typeof globalThis.window.Touch === "function";
+  const [canUseSwiperTouchSurface, setCanUseSwiperTouchSurface] =
+    useState(false);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setCanUseSwiperTouchSurface(false);
+      return;
+    }
+
+    setCanUseSwiperTouchSurface(
+      globalThis.window !== undefined &&
+        typeof globalThis.window.Touch === "function"
+    );
+  }, [isMobile]);
+
   const swipeState = useQuickVotePreviewSwipeState({
     isBusy,
     isMobile,
@@ -438,7 +436,7 @@ export default function useMemesQuickVotePreviewSwipe({
         return;
       }
 
-      if (hasTouchEventPageX(event) || isFallbackTouchActive.current) {
+      if (isFallbackTouchActive.current) {
         return;
       }
 
