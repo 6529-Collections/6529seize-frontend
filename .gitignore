@@ -106,3 +106,5 @@ AGENTS.md
 .gemini
 .windsurfrules
 .agent
+
+.direnv/
