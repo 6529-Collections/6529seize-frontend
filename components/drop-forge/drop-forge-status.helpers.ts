@@ -163,6 +163,7 @@ export function getClaimPrimaryStatus({
   isCraftContext?: boolean;
   isManifoldClaimFetching?: boolean;
 }): ClaimPrimaryStatus {
+  const resolvedManifoldClaim = manifoldClaim ?? null;
   const initializedOnchain = manifoldClaim?.instanceId != null;
   const localMetadata = claim.metadata_location?.trim() ?? "";
   const hasLocalMetadata = localMetadata.length > 0;
@@ -185,7 +186,7 @@ export function getClaimPrimaryStatus({
     initializedOnchain,
     isCraftContext,
     isManifoldClaimFetching,
-    manifoldClaim,
+    manifoldClaim: resolvedManifoldClaim,
     missingLaunchInfo,
   });
   if (preInitializationStatus) {
