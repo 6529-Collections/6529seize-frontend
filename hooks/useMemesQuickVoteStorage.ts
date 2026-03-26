@@ -70,6 +70,43 @@ const areStringArraysEqual = (
   left.length === right.length &&
   left.every((value, index) => value === right[index]);
 
+const getEffectiveMemesQuickVoteSkippedDropIds = ({
+  contextProfile,
+  memesWaveId,
+  proxyId,
+  queryClient,
+  skippedDropIds,
+}: {
+  readonly contextProfile: string | null | undefined;
+  readonly memesWaveId: string | null | undefined;
+  readonly proxyId: string | null | undefined;
+  readonly queryClient: ReturnType<typeof useQueryClient>;
+  readonly skippedDropIds: readonly string[];
+}): string[] =>
+  skippedDropIds.filter((dropId) => {
+    const queryKey = getMemesQuickVoteDropQueryKey({
+      contextProfile,
+      dropId,
+      proxyId,
+    });
+    const cachedDrop = queryClient.getQueryData<ApiDrop>(queryKey);
+
+    if (cachedDrop !== undefined) {
+      return isMemesQuickVoteDiscoverableDrop({
+        drop: cachedDrop,
+        waveId: memesWaveId,
+      });
+    }
+
+    const queryState = queryClient.getQueryState(queryKey);
+
+    if (queryState?.status !== "error") {
+      return true;
+    }
+
+    return !isMemesQuickVoteMissingDropError(queryState.error);
+  });
+
 export const useMemesQuickVoteSkippedDropIds = ({
   contextProfile,
   memesWaveId,
@@ -87,54 +124,38 @@ export const useMemesQuickVoteSkippedDropIds = ({
   );
   const setAndPersistSkippedDropIds = useCallback(
     (updater: (current: string[]) => string[]) => {
-      const current = readStoredStringArray(
+      const storedCurrent = readStoredStringArray(
         skippedStorageKey,
         sanitizeStoredDropIds
       );
+      const current = getEffectiveMemesQuickVoteSkippedDropIds({
+        contextProfile,
+        memesWaveId,
+        proxyId,
+        queryClient,
+        skippedDropIds: storedCurrent,
+      });
       const next = sanitizeStoredDropIds(updater([...current]));
 
-      if (areStringArraysEqual(current, next)) {
+      if (areStringArraysEqual(storedCurrent, next)) {
         return;
       }
 
       writeStoredStringArray(skippedStorageKey, next);
     },
-    [skippedStorageKey]
+    [contextProfile, memesWaveId, proxyId, queryClient, skippedStorageKey]
   );
   const skippedDropIds = useMemo(
     () =>
-      storedSkippedDropIds.filter((dropId) => {
-        const queryKey = getMemesQuickVoteDropQueryKey({
-          contextProfile,
-          dropId,
-          proxyId,
-        });
-        const cachedDrop = queryClient.getQueryData<ApiDrop>(queryKey);
-
-        if (cachedDrop !== undefined) {
-          return isMemesQuickVoteDiscoverableDrop({
-            drop: cachedDrop,
-            waveId: memesWaveId,
-          });
-        }
-
-        const queryState = queryClient.getQueryState(queryKey);
-
-        if (queryState?.status !== "error") {
-          return true;
-        }
-
-        return !isMemesQuickVoteMissingDropError(queryState.error);
+      getEffectiveMemesQuickVoteSkippedDropIds({
+        contextProfile,
+        memesWaveId,
+        proxyId,
+        queryClient,
+        skippedDropIds: storedSkippedDropIds,
       }),
-    [
-      contextProfile,
-      memesWaveId,
-      proxyId,
-      queryClient,
-      storedSkippedDropIds,
-    ]
+    [contextProfile, memesWaveId, proxyId, queryClient, storedSkippedDropIds]
   );
-
   return {
     setAndPersistSkippedDropIds,
     skippedDropIds,
