@@ -1665,7 +1665,7 @@ function ArweaveSection({
   const { setToast } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const primaryStatus = getClaimPrimaryStatus({ claim });
+  const primaryStatus = getClaimPrimaryStatus({ claim, isCraftContext: true });
   const isPublishing = primaryStatus.key === "publishing";
   const isDraft = primaryStatus.key === "draft";
   const canPublish = isDraft && !hasPendingChanges && !loading && !isPublishing;
