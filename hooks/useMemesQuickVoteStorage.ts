@@ -1,9 +1,13 @@
 "use client";
 
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { isMemesQuickVoteMissingDropError } from "@/hooks/memesQuickVote.errors";
 import {
+  isMemesQuickVoteDiscoverableDrop,
   sanitizeStoredAmounts,
   sanitizeStoredDropIds,
 } from "@/hooks/memesQuickVote.helpers";
+import { getMemesQuickVoteDropQueryKey } from "@/hooks/memesQuickVote.query";
 import {
   readStoredNumberArray,
   readStoredStringArray,
@@ -12,7 +16,8 @@ import {
   writeStoredNumberArray,
   writeStoredStringArray,
 } from "@/hooks/memesQuickVote.storageStore";
-import { useCallback } from "react";
+import { useQueries } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
 
 const SKIPPED_STORAGE_PREFIX = "memesQuickVoteSkipped";
 const AMOUNTS_STORAGE_PREFIX = "memesQuickVoteAmounts";
@@ -32,6 +37,11 @@ type UseMemesQuickVoteStorageResult = {
     updater: (current: string[]) => string[]
   ) => void;
 };
+
+type UseMemesQuickVoteSkippedDropIdsResult = Pick<
+  UseMemesQuickVoteStorageResult,
+  "setAndPersistSkippedDropIds" | "skippedDropIds"
+>;
 
 const getStorageKey = (
   prefix: string,
@@ -59,25 +69,85 @@ const areStringArraysEqual = (
   left.length === right.length &&
   left.every((value, index) => value === right[index]);
 
-export const useMemesQuickVoteStorage = ({
+export const useMemesQuickVoteSkippedDropIds = ({
   contextProfile,
   memesWaveId,
-}: UseMemesQuickVoteStorageOptions): UseMemesQuickVoteStorageResult => {
+}: UseMemesQuickVoteStorageOptions): UseMemesQuickVoteSkippedDropIdsResult => {
   const skippedStorageKey = getStorageKey(
     SKIPPED_STORAGE_PREFIX,
     memesWaveId,
     contextProfile
   );
+  const storedSkippedDropIds = useStoredStringArray(
+    skippedStorageKey,
+    sanitizeStoredDropIds
+  );
+  const setAndPersistSkippedDropIds = useCallback(
+    (updater: (current: string[]) => string[]) => {
+      const current = readStoredStringArray(
+        skippedStorageKey,
+        sanitizeStoredDropIds
+      );
+      const next = sanitizeStoredDropIds(updater([...current]));
+
+      if (areStringArraysEqual(current, next)) {
+        return;
+      }
+
+      writeStoredStringArray(skippedStorageKey, next);
+    },
+    [skippedStorageKey]
+  );
+  const skippedDropQueries = useQueries({
+    queries: storedSkippedDropIds.map((dropId) => ({
+      queryKey: getMemesQuickVoteDropQueryKey(dropId),
+      enabled: false,
+    })),
+  });
+  const skippedDropIds = useMemo(
+    // Apply hidden skips immediately, but ignore ids that cached drop data has
+    // already proven to be missing or ineligible.
+    () =>
+      storedSkippedDropIds.filter((_, index) => {
+        const query = skippedDropQueries[index];
+        const cachedDrop = query?.data as ApiDrop | undefined;
+
+        if (cachedDrop !== undefined) {
+          return isMemesQuickVoteDiscoverableDrop({
+            drop: cachedDrop,
+            waveId: memesWaveId,
+          });
+        }
+
+        if (query?.status !== "error") {
+          return true;
+        }
+
+        return !isMemesQuickVoteMissingDropError(query.error);
+      }),
+    [memesWaveId, skippedDropQueries, storedSkippedDropIds]
+  );
+
+  return {
+    setAndPersistSkippedDropIds,
+    skippedDropIds,
+  };
+};
+
+export const useMemesQuickVoteStorage = ({
+  contextProfile,
+  memesWaveId,
+}: UseMemesQuickVoteStorageOptions): UseMemesQuickVoteStorageResult => {
   const amountsStorageKey = getStorageKey(
     AMOUNTS_STORAGE_PREFIX,
     memesWaveId,
     contextProfile
   );
-
-  const skippedDropIds = useStoredStringArray(
-    skippedStorageKey,
-    sanitizeStoredDropIds
-  );
+  const { setAndPersistSkippedDropIds, skippedDropIds } =
+    useMemesQuickVoteSkippedDropIds({
+      contextProfile,
+      memesWaveId,
+    });
   const recentAmountsByRecency = useStoredNumberArray(
     amountsStorageKey,
     sanitizeStoredAmounts
@@ -98,23 +168,6 @@ export const useMemesQuickVoteStorage = ({
       writeStoredNumberArray(amountsStorageKey, next);
     },
     [amountsStorageKey]
-  );
-
-  const setAndPersistSkippedDropIds = useCallback(
-    (updater: (current: string[]) => string[]) => {
-      const current = readStoredStringArray(
-        skippedStorageKey,
-        sanitizeStoredDropIds
-      );
-      const next = sanitizeStoredDropIds(updater([...current]));
-
-      if (areStringArraysEqual(current, next)) {
-        return;
-      }
-
-      writeStoredStringArray(skippedStorageKey, next);
-    },
-    [skippedStorageKey]
   );
 
   return {

@@ -12,8 +12,8 @@ import {
   faPlusCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { useId, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
@@ -302,7 +302,7 @@ export default function UserPageCollectedCard({
         </div>
 
         <div className="tw-flex tw-justify-between tw-gap-x-2">
-          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-[14px] tw-font-semibold tw-leading-snug tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
+          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
             {card.token_name}
           </h3>
           {showSeizedCount && (

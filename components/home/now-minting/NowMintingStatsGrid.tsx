@@ -1,6 +1,3 @@
-import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
 import { useAuth } from "@/components/auth/Auth";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -11,6 +8,9 @@ import {
 } from "@/helpers/manifold-display-helpers";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useNftBalance } from "@/hooks/useNftBalance";
+import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Tooltip } from "react-tooltip";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface NowMintingStatsGridProps {
@@ -60,7 +60,7 @@ export default function NowMintingStatsGrid({
               icon={faLayerGroup}
               className="tw-size-3 tw-text-iron-400"
             />
-            <span className="tw-text-[12px] tw-font-medium tw-text-iron-300">
+            <span className="tw-text-xs tw-font-medium tw-text-iron-300">
               {balance}
             </span>
           </span>

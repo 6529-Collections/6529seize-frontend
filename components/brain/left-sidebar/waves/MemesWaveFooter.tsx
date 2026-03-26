@@ -73,24 +73,28 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
               onClick={handleOpenQuickVote}
               onFocus={handlePrefetchQuickVote}
               onMouseEnter={handlePrefetchQuickVote}
-              className="tw-mt-auto tw-w-full tw-flex-shrink-0 tw-cursor-pointer tw-border-0 tw-border-t tw-border-solid tw-border-zinc-800/60 tw-bg-[#000000] tw-p-4 tw-text-left tw-transition-colors hover:tw-bg-zinc-900/30"
+              className="tw-group tw-mt-auto tw-w-full tw-flex-shrink-0 tw-cursor-pointer tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-iron-900/40"
             >
-              <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-2xl tw-border tw-border-solid tw-border-[#2d3753] tw-bg-[#0c1018] tw-px-4 tw-py-3 tw-shadow-lg">
-                <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
+              <div className="tw-relative tw-flex tw-items-center tw-justify-between tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#2d3753] tw-bg-[#0c1018] tw-px-4 tw-py-2.5 tw-shadow-lg tw-transition-all tw-duration-200 desktop-hover:group-hover:tw-border-[#3a4670] desktop-hover:group-hover:tw-bg-[#0f1420]">
+                <span
+                  aria-hidden="true"
+                  className="tw-pointer-events-none tw-absolute tw-inset-0 -tw-translate-x-full tw-bg-gradient-to-r tw-from-white/0 tw-via-white/[0.08] tw-to-white/0 tw-opacity-50 tw-transition-transform tw-duration-1000 tw-ease-out desktop-hover:group-hover:tw-translate-x-full"
+                />
+                <div className="tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
                   <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-[#6b7c93]">
-                    Uncast Power
+                    Uncast votes
                   </span>
 
                   <div className="tw-flex tw-items-center tw-gap-2">
-                    <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-blue-400/20 tw-text-blue-400" />
-                    <span className="tw-truncate tw-text-sm tw-font-bold tw-tracking-tight tw-text-white">
+                    <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-400/20 tw-text-primary-400" />
+                    <span className="tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white">
                       {formatNumberWithCommas(uncastPower)}
                       {votingLabel ? ` ${votingLabel}` : " votes"}
                     </span>
                   </div>
                 </div>
 
-                <span className="tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
+                <span className="tw-relative tw-z-10 tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
                   {formatNumberWithCommas(unratedCount)} unexplored
                 </span>
               </div>

@@ -1,7 +1,9 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { Time } from "@/helpers/time";
 
 export const MEMES_QUICK_VOTE_DISCOVERY_PAGE_SIZE = 20 as const;
 export const MEMES_QUICK_VOTE_REPLENISH_THRESHOLD = 5 as const;
@@ -100,13 +102,65 @@ export const deriveMemesQuickVoteStatsFromDrop = ({
   };
 };
 
+export const isMemesQuickVoteDiscoverableDrop = ({
+  drop,
+  now = Time.currentMillis(),
+  waveId,
+}: {
+  readonly drop: ApiDrop | null | undefined;
+  readonly now?: number | undefined;
+  readonly waveId?: string | null | undefined;
+}): boolean => {
+  if (drop?.drop_type !== ApiDropType.Participatory) {
+    return false;
+  }
+
+  if (waveId && drop.wave.id !== waveId) {
+    return false;
+  }
+
+  const profileContext = drop.context_profile_context;
+
+  if (
+    profileContext?.rating !== 0 ||
+    typeof profileContext.max_rating !== "number"
+  ) {
+    return false;
+  }
+
+  if (
+    !drop.wave.authenticated_user_eligible_to_vote ||
+    drop.id.startsWith("temp-")
+  ) {
+    return false;
+  }
+
+  const votingPeriodStart = drop.wave.voting_period_start;
+
+  if (votingPeriodStart !== null && now < votingPeriodStart) {
+    return false;
+  }
+
+  const votingPeriodEnd = drop.wave.voting_period_end;
+
+  return votingPeriodEnd === null || now <= votingPeriodEnd;
+};
+
 export const getMemesQuickVoteRemainingCount = ({
   count,
-  deferredCount,
+  floor = 0,
+  hiddenCount = 0,
+  optimisticVoteCount = 0,
 }: {
-  readonly count: number;
-  readonly deferredCount: number;
-}): number => Math.max(0, count - deferredCount);
+  readonly count: number | null;
+  readonly floor?: number | undefined;
+  readonly hiddenCount?: number | undefined;
+  readonly optimisticVoteCount?: number | undefined;
+}): number =>
+  Math.max(
+    floor,
+    Math.max(0, (count ?? 0) - optimisticVoteCount - hiddenCount)
+  );
 
 export const appendSkippedDropId = (
   ids: readonly string[],
