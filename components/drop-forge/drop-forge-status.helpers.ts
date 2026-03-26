@@ -52,6 +52,104 @@ export function getPrimaryStatusPillClassName(
   return "tw-bg-iron-700/30 tw-text-iron-300 tw-ring-iron-500/40";
 }
 
+function getPreInitializationClaimStatus({
+  hasLocalMetadata,
+  initializedOnchain,
+  isCraftContext,
+  isManifoldClaimFetching,
+  manifoldClaim,
+  missingLaunchInfo,
+}: {
+  hasLocalMetadata: boolean;
+  initializedOnchain: boolean;
+  isCraftContext: boolean;
+  isManifoldClaimFetching: boolean;
+  manifoldClaim?: Pick<ManifoldClaim, "instanceId" | "location"> | null;
+  missingLaunchInfo: boolean;
+}): ClaimPrimaryStatus | null {
+  if (!hasLocalMetadata && !initializedOnchain) {
+    return {
+      key: "draft",
+      label: "Draft",
+      tone: "neutral",
+      reason: "Stored in DB only. Publish to Arweave to continue",
+    };
+  }
+
+  if (
+    !isCraftContext &&
+    isManifoldClaimFetching &&
+    manifoldClaim == null &&
+    hasLocalMetadata
+  ) {
+    return {
+      key: "checking_onchain",
+      label: "Checking Onchain",
+      tone: "pending",
+      reason: "Loading current onchain claim state",
+    };
+  }
+
+  if (hasLocalMetadata && !initializedOnchain && !missingLaunchInfo) {
+    if (isCraftContext) {
+      return {
+        key: "published",
+        label: "Published",
+        tone: "success",
+        reason: "Published to Arweave and ready for onchain initialization",
+      };
+    }
+
+    return {
+      key: "pending_initialization",
+      label: "Pending Initialization",
+      tone: "pending",
+      reason: "Ready to initialize onchain",
+    };
+  }
+
+  if (!initializedOnchain && missingLaunchInfo) {
+    return {
+      key: "pending_initialization_missing_info",
+      label: "Pending Initialization — Missing Info",
+      tone: "pending",
+      reason: "Not onchain yet. Required launch fields are missing",
+    };
+  }
+
+  return null;
+}
+
+function getInitializedClaimStatus({
+  initializedOnchain,
+  hasLocalMetadata,
+  chainMatchesLocal,
+}: {
+  initializedOnchain: boolean;
+  hasLocalMetadata: boolean;
+  chainMatchesLocal: boolean;
+}): ClaimPrimaryStatus | null {
+  if (initializedOnchain && hasLocalMetadata && !chainMatchesLocal) {
+    return {
+      key: "live_needs_update",
+      label: "Live — Needs Update",
+      tone: "update",
+      reason: "Onchain metadata points to an older CID",
+    };
+  }
+
+  if (initializedOnchain && hasLocalMetadata && chainMatchesLocal) {
+    return {
+      key: "live",
+      label: "Live",
+      tone: "success",
+      reason: "DB, Arweave, and onchain metadata all match",
+    };
+  }
+
+  return null;
+}
+
 export function getClaimPrimaryStatus({
   claim,
   manifoldClaim,
@@ -79,70 +177,25 @@ export function getClaimPrimaryStatus({
     };
   }
 
-  if (!hasLocalMetadata && !initializedOnchain) {
-    return {
-      key: "draft",
-      label: "Draft",
-      tone: "neutral",
-      reason: "Stored in DB only. Publish to Arweave to continue",
-    };
+  const preInitializationStatus = getPreInitializationClaimStatus({
+    hasLocalMetadata,
+    initializedOnchain,
+    isCraftContext,
+    isManifoldClaimFetching,
+    manifoldClaim,
+    missingLaunchInfo,
+  });
+  if (preInitializationStatus) {
+    return preInitializationStatus;
   }
 
-  if (
-    !isCraftContext &&
-    isManifoldClaimFetching &&
-    manifoldClaim == null &&
-    hasLocalMetadata
-  ) {
-    return {
-      key: "checking_onchain",
-      label: "Checking Onchain",
-      tone: "pending",
-      reason: "Loading current onchain claim state",
-    };
-  }
-
-  if (hasLocalMetadata && !initializedOnchain && !missingLaunchInfo) {
-    return isCraftContext
-      ? {
-          key: "published",
-          label: "Published",
-          tone: "success",
-          reason: "Published to Arweave and ready for onchain initialization",
-        }
-      : {
-          key: "pending_initialization",
-          label: "Pending Initialization",
-          tone: "pending",
-          reason: "Ready to initialize onchain",
-        };
-  }
-
-  if (!initializedOnchain && missingLaunchInfo === true) {
-    return {
-      key: "pending_initialization_missing_info",
-      label: "Pending Initialization — Missing Info",
-      tone: "pending",
-      reason: "Not onchain yet. Required launch fields are missing",
-    };
-  }
-
-  if (initializedOnchain && hasLocalMetadata && chainMatchesLocal === false) {
-    return {
-      key: "live_needs_update",
-      label: "Live — Needs Update",
-      tone: "update",
-      reason: "Onchain metadata points to an older CID",
-    };
-  }
-
-  if (initializedOnchain && hasLocalMetadata && chainMatchesLocal === true) {
-    return {
-      key: "live",
-      label: "Live",
-      tone: "success",
-      reason: "DB, Arweave, and onchain metadata all match",
-    };
+  const initializedStatus = getInitializedClaimStatus({
+    initializedOnchain,
+    hasLocalMetadata,
+    chainMatchesLocal,
+  });
+  if (initializedStatus) {
+    return initializedStatus;
   }
 
   return {
