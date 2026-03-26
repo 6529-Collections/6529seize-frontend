@@ -34,10 +34,10 @@ export default function MemesQuickVoteAmountButton({
 
   if (isQuickVoteFeedbackTarget) {
     buttonToneClassName =
-      "tw-scale-[1.02] tw-border-emerald-500/35 tw-bg-emerald-500/15 tw-text-emerald-100 tw-shadow-[0_0_20px_rgba(16,185,129,0.15)]";
+      "tw-border-emerald-500/35 tw-bg-emerald-500/15 tw-text-emerald-100 tw-shadow-[0_0_20px_rgba(16,185,129,0.15)]";
   } else if (isLatestUsed) {
     buttonToneClassName =
-      "tw-border-blue-500/30 tw-bg-blue-500/15 tw-text-white tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-blue-500/25";
+      "tw-border-blue-500/30 tw-bg-blue-500/15 tw-text-primary-300 tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-blue-500/25 desktop-hover:hover:tw-text-primary-200";
   }
 
   return (
@@ -59,7 +59,12 @@ export default function MemesQuickVoteAmountButton({
           <span>{formatNumberWithCommas(amount)}</span>
         </span>
       ) : (
-        <span className="tw-font-bold tw-leading-none">
+        <span
+          className={clsx(
+            "tw-font-bold tw-leading-none",
+            isLatestUsed && "tw-text-primary-300"
+          )}
+        >
           {formatNumberWithCommas(amount)}
         </span>
       )}

@@ -87,9 +87,17 @@ export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
     refetchOnWindowFocus: false,
     staleTime: 60_000,
   });
-  const unratedCount = shouldRecoverVisibility
-    ? (recoveredFooterCount.data ?? 0)
-    : rawUnratedCount;
+  let unratedCount = rawUnratedCount;
+
+  if (shouldRecoverVisibility) {
+    if (typeof recoveredFooterCount.data === "number") {
+      unratedCount = recoveredFooterCount.data;
+    } else if (recoveredFooterCount.isError) {
+      unratedCount = stats.unratedCount;
+    } else {
+      unratedCount = 0;
+    }
+  }
 
   useEffect(() => {
     if (!isSuccess || stats.unratedCount > 0 || skippedDropIds.length === 0) {

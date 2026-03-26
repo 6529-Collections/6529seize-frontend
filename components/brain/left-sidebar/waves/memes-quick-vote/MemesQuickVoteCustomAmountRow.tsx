@@ -87,7 +87,7 @@ export default function MemesQuickVoteCustomAmountRow({
         className={clsx(
           "tw-inline-flex tw-h-full tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-xl tw-px-5 tw-text-sm tw-font-bold tw-tracking-wide tw-transition-all active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-px-6 md:tw-px-4 lg:tw-px-6",
           isVoteFeedbackActive && feedbackSource === "custom-submit"
-            ? "tw-scale-[1.02] tw-border tw-border-solid tw-border-emerald-500/40 tw-bg-emerald-500/15 tw-text-emerald-100 tw-shadow-[0_0_20px_rgba(16,185,129,0.18)]"
+            ? "tw-border tw-border-solid tw-border-emerald-500/40 tw-bg-emerald-500/15 tw-text-emerald-100 tw-shadow-[0_0_20px_rgba(16,185,129,0.18)]"
             : "tw-border-0 tw-bg-primary-600 tw-text-white tw-shadow-[0_12px_24px_rgba(37,99,235,0.28)] desktop-hover:hover:tw-bg-primary-500"
         )}
       >

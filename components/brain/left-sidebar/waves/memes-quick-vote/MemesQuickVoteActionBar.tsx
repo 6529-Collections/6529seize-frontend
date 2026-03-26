@@ -84,7 +84,7 @@ export default function MemesQuickVoteActionBar({
   return (
     <div className="tw-relative tw-bg-[linear-gradient(180deg,rgba(10,10,12,0.68),rgba(10,10,12,0.94))] tw-px-3 tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.375rem)] tw-pt-1.5 tw-backdrop-blur-[28px] sm:tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] sm:tw-pt-2 md:tw-relative md:tw-z-20 md:tw-shrink-0 md:tw-p-0 md:tw-px-8 md:tw-pb-6 md:tw-pt-0">
       <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-gap-2 sm:tw-gap-3">
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-3 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_28px_rgba(0,0,0,0.22)] sm:tw-gap-3 sm:tw-p-4 md:tw-p-5 md:tw-shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-3 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_28px_rgba(0,0,0,0.22)] sm:tw-gap-3 sm:tw-p-4 md:tw-shadow-[0_20px_40px_rgba(0,0,0,0.18)]">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-1.5 tw-px-0.5 sm:tw-gap-2 sm:tw-px-1 md:tw-flex-nowrap">
             <p className="tw-mb-0 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-iron-500">
               Quick Vote
