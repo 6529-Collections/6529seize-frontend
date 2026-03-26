@@ -3,53 +3,15 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropType } from "@/generated/models/ApiDropType";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   fetchMemesQuickVoteDrop,
   getMemesQuickVoteDropQueryKey,
 } from "@/hooks/memesQuickVote.query";
-import { Time } from "@/helpers/time";
+import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
+import { isMemesQuickVoteDiscoverableDrop } from "@/hooks/memesQuickVote.helpers";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
-
-const shouldInvalidateActiveDrop = (
-  drop: ApiDrop,
-  now = Time.currentMillis()
-): boolean => {
-  const profileContext = drop.context_profile_context;
-
-  if (drop.drop_type !== ApiDropType.Participatory) {
-    return true;
-  }
-
-  if (
-    profileContext?.rating !== 0 ||
-    typeof profileContext.max_rating !== "number"
-  ) {
-    return true;
-  }
-
-  // Preserve zero-power cards so the queue can show an exhausted state
-  // instead of discarding otherwise valid candidates for the session.
-
-  if (
-    !drop.wave.authenticated_user_eligible_to_vote ||
-    drop.id.startsWith("temp-")
-  ) {
-    return true;
-  }
-
-  const votingPeriodStart = drop.wave.voting_period_start;
-
-  if (votingPeriodStart !== null && now < votingPeriodStart) {
-    return true;
-  }
-
-  const votingPeriodEnd = drop.wave.voting_period_end;
-
-  return votingPeriodEnd !== null && now > votingPeriodEnd;
-};
 
 export const useMemesQuickVoteActiveDrop = ({
   activeCandidateId,
@@ -65,13 +27,18 @@ export const useMemesQuickVoteActiveDrop = ({
   readonly onInvalidatedDrop: (dropId: string) => void;
 }) => {
   const queryClient = useQueryClient();
+  const { contextProfile, proxyId } = useMemesQuickVoteContext();
   const activeInitialDrop = activeCandidateId
     ? discoveredDropsById[activeCandidateId]
     : undefined;
 
   const activeQuery = useQuery({
     queryKey: activeCandidateId
-      ? getMemesQuickVoteDropQueryKey(activeCandidateId)
+      ? getMemesQuickVoteDropQueryKey({
+          contextProfile,
+          dropId: activeCandidateId,
+          proxyId,
+        })
       : [QueryKey.DROP, { context: "memes-quick-vote", drop_id: null }],
     queryFn: () => fetchMemesQuickVoteDrop(activeCandidateId!),
     enabled: enabled && !!activeCandidateId,
@@ -94,19 +61,23 @@ export const useMemesQuickVoteActiveDrop = ({
     }
 
     void queryClient.prefetchQuery({
-      queryKey: getMemesQuickVoteDropQueryKey(nextCandidateId),
+      queryKey: getMemesQuickVoteDropQueryKey({
+        contextProfile,
+        dropId: nextCandidateId,
+        proxyId,
+      }),
       queryFn: () => fetchMemesQuickVoteDrop(nextCandidateId),
       staleTime: 0,
       ...getDefaultQueryRetry(),
     });
-  }, [enabled, nextCandidateId, queryClient]);
+  }, [contextProfile, enabled, nextCandidateId, proxyId, queryClient]);
 
   useEffect(() => {
     if (!activeCandidateId || !activeQuery.data || !hasFreshData) {
       return;
     }
 
-    if (!shouldInvalidateActiveDrop(activeQuery.data)) {
+    if (isMemesQuickVoteDiscoverableDrop({ drop: activeQuery.data })) {
       return;
     }
 

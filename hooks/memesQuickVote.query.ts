@@ -22,12 +22,22 @@ export type MemesQuickVoteDiscoveryQueryData = {
   readonly pages: readonly MemesQuickVoteDiscoveryPage[];
 };
 
-export const getMemesQuickVoteDropQueryKey = (dropId: string) =>
+export const getMemesQuickVoteDropQueryKey = ({
+  contextProfile,
+  dropId,
+  proxyId,
+}: {
+  readonly contextProfile: string | null | undefined;
+  readonly dropId: string;
+  readonly proxyId: string | null | undefined;
+}) =>
   [
     QueryKey.DROP,
     {
       context: "memes-quick-vote",
+      context_profile: contextProfile ?? null,
       drop_id: dropId,
+      proxyId: proxyId ?? null,
     },
   ] as const;
 

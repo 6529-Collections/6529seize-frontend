@@ -31,31 +31,6 @@ export const createInitialMemesQuickVoteDiscoveryState = ({
 const hasId = (ids: readonly string[], targetId: string): boolean =>
   ids.includes(targetId);
 
-const getActiveDeferredIds = ({
-  discoveredDropsById,
-  removedIds,
-  skippedDropIds,
-  state,
-}: {
-  readonly discoveredDropsById: Record<string, ApiDrop>;
-  readonly removedIds: ReadonlySet<string>;
-  readonly skippedDropIds: readonly string[];
-  readonly state: MemesQuickVoteDiscoveryState;
-}): string[] => {
-  const localDeferredIds = state.deferredIds.filter(
-    (dropId) => !removedIds.has(dropId) && !!discoveredDropsById[dropId]
-  );
-  const localDeferredIdSet = new Set(localDeferredIds);
-  const persistedDeferredIds = skippedDropIds.filter(
-    (dropId) =>
-      !removedIds.has(dropId) &&
-      !!discoveredDropsById[dropId] &&
-      !localDeferredIdSet.has(dropId)
-  );
-
-  return [...persistedDeferredIds, ...localDeferredIds];
-};
-
 export const deriveMemesQuickVoteDiscoverySnapshot = ({
   enabled,
   pages,
@@ -91,21 +66,15 @@ export const deriveMemesQuickVoteDiscoverySnapshot = ({
   }
 
   const removedIds = new Set(state.removedIds);
-  const deferredIds = getActiveDeferredIds({
-    discoveredDropsById,
-    removedIds,
-    skippedDropIds,
-    state,
-  });
-  const deferredIdSet = new Set(deferredIds);
+  const skippedDropIdSet = new Set(skippedDropIds);
   const activeIds = discoveredIds.filter(
-    (dropId) => !removedIds.has(dropId) && !deferredIdSet.has(dropId)
+    (dropId) => !removedIds.has(dropId) && !skippedDropIdSet.has(dropId)
   );
   const lastPage = pages[pages.length - 1];
 
   return {
     activeIds,
-    deferredIds,
+    deferredIds: [],
     discoveredDropsById,
     nextPage: lastPage?.nextPage ?? null,
     serverCount: lastPage?.pageCount ?? null,
@@ -119,15 +88,13 @@ export const removeMemesQuickVoteDropId = ({
   readonly dropId: string;
   readonly state: MemesQuickVoteDiscoveryState;
 }): MemesQuickVoteDiscoveryState => {
-  if (hasId(state.removedIds, dropId) && !hasId(state.deferredIds, dropId)) {
+  if (hasId(state.removedIds, dropId)) {
     return state;
   }
 
   return {
-    deferredIds: state.deferredIds.filter((value) => value !== dropId),
-    removedIds: hasId(state.removedIds, dropId)
-      ? state.removedIds
-      : [...state.removedIds, dropId],
+    deferredIds: [],
+    removedIds: [...state.removedIds, dropId],
   };
 };
 
@@ -137,63 +104,26 @@ export const deferMemesQuickVoteDropId = ({
 }: {
   readonly dropId: string;
   readonly state: MemesQuickVoteDiscoveryState;
-}): MemesQuickVoteDiscoveryState => {
-  const nextDeferredIds = [
-    ...state.deferredIds.filter((value) => value !== dropId),
+}): MemesQuickVoteDiscoveryState =>
+  removeMemesQuickVoteDropId({
     dropId,
-  ];
-
-  if (
-    nextDeferredIds.length === state.deferredIds.length &&
-    nextDeferredIds.every((value, index) => value === state.deferredIds[index])
-  ) {
-    return state;
-  }
-
-  return {
-    deferredIds: nextDeferredIds,
-    removedIds: state.removedIds.filter((value) => value !== dropId),
-  };
-};
+    state,
+  });
 
 export const getMemesQuickVoteActiveCandidateId = (
   state: MemesQuickVoteDiscoverySnapshot
 ): string | null => {
-  const activeCandidateId = state.activeIds[0];
-
-  if (activeCandidateId) {
-    return activeCandidateId;
-  }
-
-  if (state.nextPage !== null) {
-    return null;
-  }
-
-  return state.deferredIds[0] ?? null;
+  return state.activeIds[0] ?? null;
 };
 
 export const getMemesQuickVoteNextCandidateId = (
   state: MemesQuickVoteDiscoverySnapshot
-): string | null => {
-  if (state.activeIds.length > 1) {
-    return state.activeIds[1] ?? null;
-  }
-
-  if (state.activeIds.length === 1) {
-    return state.nextPage === null ? (state.deferredIds[0] ?? null) : null;
-  }
-
-  if (state.nextPage !== null) {
-    return null;
-  }
-
-  return state.deferredIds[1] ?? null;
-};
+): string | null => state.activeIds[1] ?? null;
 
 export const getMemesQuickVoteDiscoveredQueue = (
   state: MemesQuickVoteDiscoverySnapshot
 ): ApiDrop[] =>
-  [...state.activeIds, ...state.deferredIds].flatMap((dropId) => {
+  state.activeIds.flatMap((dropId) => {
     const drop = state.discoveredDropsById[dropId];
     return drop ? [drop] : [];
   });
@@ -209,7 +139,4 @@ export const shouldFetchMemesQuickVotePage = ({
 
 export const isMemesQuickVoteExhausted = (
   state: MemesQuickVoteDiscoverySnapshot
-): boolean =>
-  state.nextPage === null &&
-  state.activeIds.length === 0 &&
-  state.deferredIds.length === 0;
+): boolean => state.nextPage === null && state.activeIds.length === 0;

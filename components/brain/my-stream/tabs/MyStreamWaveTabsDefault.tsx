@@ -48,7 +48,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const breakpoint = useBreakpoint();
-  const isCompact = breakpoint === "S";
+  const showBackButton = breakpoint !== "LG";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
@@ -114,7 +114,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     <div className="tw-flex tw-w-full tw-flex-col tw-bg-iron-950">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 sm:tw-px-4">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-3">
-          {isCompact && (
+          {showBackButton && (
             <button
               onClick={handleMobileBack}
               className="-tw-ml-2.5 tw-mr-1.5 tw-flex tw-h-full tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-px-2.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50"
