@@ -168,8 +168,9 @@ export default function DropForgeLaunchClaimPageClient({
   const [initialPhaseSelectionNowMs, setInitialPhaseSelectionNowMs] = useState(
     () => Date.now()
   );
-  const [researchTargetEditionSize, setResearchTargetEditionSize] =
-    useState(() => getDefaultResearchTargetEditionSize(null));
+  const [researchTargetEditionSize, setResearchTargetEditionSize] = useState(
+    () => getDefaultResearchTargetEditionSize(null)
+  );
   const [phaseAllowlistWindows, setPhaseAllowlistWindows] = useState<
     Record<string, { start: string; end: string }>
   >({});
@@ -1471,32 +1472,35 @@ export default function DropForgeLaunchClaimPageClient({
     setSelectedPhase(value);
   }, []);
 
-  const handleResearchTargetEditionSizeChange = useCallback((value: string) => {
-    const parsed = Number(value);
-    const editionSizeLimit =
-      typeof claim?.edition_size === "number" && claim.edition_size > 0
-        ? Math.trunc(claim.edition_size)
-        : null;
-    if (
-      editionSizeLimit != null &&
-      Number.isFinite(parsed) &&
-      parsed > editionSizeLimit
-    ) {
-      setResearchTargetEditionSize(editionSizeLimit);
-      setToast({
-        message: `Target edition size cannot exceed edition size (${editionSizeLimit})`,
-        type: "error",
-      });
-      return;
-    }
+  const handleResearchTargetEditionSizeChange = useCallback(
+    (value: string) => {
+      const parsed = Number(value);
+      const editionSizeLimit =
+        typeof claim?.edition_size === "number" && claim.edition_size > 0
+          ? Math.trunc(claim.edition_size)
+          : null;
+      if (
+        editionSizeLimit != null &&
+        Number.isFinite(parsed) &&
+        parsed > editionSizeLimit
+      ) {
+        setResearchTargetEditionSize(editionSizeLimit);
+        setToast({
+          message: `Target edition size cannot exceed edition size (${editionSizeLimit})`,
+          type: "error",
+        });
+        return;
+      }
 
-    setResearchTargetEditionSize(
-      clampResearchTargetEditionSize(
-        Number.isFinite(parsed) && parsed >= 0 ? parsed : 0,
-        claim?.edition_size
-      )
-    );
-  }, [claim?.edition_size, setToast]);
+      setResearchTargetEditionSize(
+        clampResearchTargetEditionSize(
+          Number.isFinite(parsed) && parsed >= 0 ? parsed : 0,
+          claim?.edition_size
+        )
+      );
+    },
+    [claim?.edition_size, setToast]
+  );
 
   const handleSelectedPhasePriceChange = useCallback(
     (value: string) => {
