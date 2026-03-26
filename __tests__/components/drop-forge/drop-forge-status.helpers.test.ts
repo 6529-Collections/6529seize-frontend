@@ -89,6 +89,16 @@ describe("getClaimPrimaryStatus", () => {
     });
   });
 
+  it("keeps craft claims published even when launch info is missing", () => {
+    mockedIsMissingRequiredLaunchInfo.mockReturnValue(true);
+
+    expect(getClaimPrimaryStatus({ claim: baseClaim })).toMatchObject({
+      key: "published",
+      label: "Published",
+      tone: "success",
+    });
+  });
+
   it("returns live when onchain and local metadata match", () => {
     expect(
       getClaimPrimaryStatus({

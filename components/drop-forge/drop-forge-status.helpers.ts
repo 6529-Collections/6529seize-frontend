@@ -90,7 +90,7 @@ function getPreInitializationClaimStatus({
     };
   }
 
-  if (hasLocalMetadata && !initializedOnchain && !missingLaunchInfo) {
+  if (hasLocalMetadata && !initializedOnchain) {
     if (isCraftContext) {
       return {
         key: "published",
@@ -100,15 +100,17 @@ function getPreInitializationClaimStatus({
       };
     }
 
-    return {
-      key: "pending_initialization",
-      label: "Pending Initialization",
-      tone: "pending",
-      reason: "Ready to initialize onchain",
-    };
+    if (!missingLaunchInfo) {
+      return {
+        key: "pending_initialization",
+        label: "Pending Initialization",
+        tone: "pending",
+        reason: "Ready to initialize onchain",
+      };
+    }
   }
 
-  if (!initializedOnchain && missingLaunchInfo) {
+  if (!initializedOnchain && missingLaunchInfo && !isCraftContext) {
     return {
       key: "pending_initialization_missing_info",
       label: "Pending Initialization — Missing Info",
