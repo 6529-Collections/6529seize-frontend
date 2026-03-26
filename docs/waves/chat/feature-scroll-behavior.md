@@ -40,6 +40,9 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - While reading history on any client, a bottom arrow control returns to latest.
 - Pending and unread count labels cap at `99+` when shown as standalone controls.
 - When unread and bottom controls are stacked, both render as icon controls.
+- If the thread scroll container finishes mounting after the first render, the
+  top-of-history trigger rebinds to that container automatically before older
+  pages load.
 - Temporary outgoing drops can trigger short auto-scroll when users are pinned.
 - When older-page loading toggles on/off, scroll controls stay attached to the
   same thread container, so jump-to-latest/unread controls do not reset.

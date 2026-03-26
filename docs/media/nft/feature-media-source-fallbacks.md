@@ -36,6 +36,18 @@
 - On `/`, this behavior runs only when `Latest Drop` (`Now Minting`) is shown.
   If `Next Drop` is shown, a different media renderer is used.
 
+## User Journey
+
+1. Open a supported media surface.
+2. The renderer picks the surface-specific primary source order for that route
+   and media type.
+3. If the current source is blank, fails to load, or errors during playback,
+   the renderer advances to the next candidate for that surface.
+4. If the source is already on an approved Arweave gateway, the renderer can
+   retry the same asset on the remaining approved gateways before giving up.
+5. If every candidate fails, the surface stays broken until the route is
+   reloaded or the component remounts.
+
 ## Fallback Order
 
 ### Standard NFT image surfaces (`NFTImageRenderer`)
@@ -56,7 +68,9 @@
 
 ### Dedicated HTML and GLB animation surfaces (`NFTHTMLRenderer`, `NFTModel`)
 
-- Source resolution order is:
+- HTML animation format uses:
+  `metadata.animation -> metadata.animation_url`.
+- Other dedicated animation formats (including GLB) use:
   `animation -> metadata.animation -> metadata.animation_url`.
 - Blank or whitespace-only animation values are skipped before rendering.
 
@@ -83,9 +97,14 @@
 
 - When the current image/video URL is already on a supported Arweave gateway,
   retry preserves the same asset path/query and rotates across
-  `arweave.net`, `gateway.arweave.net`, `gateway.ar.io`, and `ar-io.net`,
+  `arweave.net`, `ardrive.net`, `gateway.arweave.net`, and `gateway.ar.io`,
   skipping duplicate/current hosts.
-- Unsupported long-tail Arweave gateways are not retried automatically.
+- Dedicated HTML animation iframes use the same approved-gateway rotation when
+  an Arweave HTML URL errors or does not load after roughly `8` seconds.
+- Dedicated GLB/model surfaces use the same approved-gateway rotation when the
+  current Arweave-backed model source errors.
+- Unsupported Arweave hosts outside the approved gateway list are not retried
+  automatically.
 
 ## Loading Behavior
 
@@ -94,6 +113,28 @@
 - ReMeme image renderer is eager on both `300` and `650` surfaces.
 - Standard NFT video renderer preloads media (`preload="auto"`).
 - ReMeme video renderer does not set a specific preload mode.
+
+## Common Scenarios
+
+- List and grid cards fall back from thumbnail/scaled URLs to the next
+  available image source when the first candidate fails.
+- Detail views on `The Art` prefer original image or animation sources instead
+  of thumbnail/scaled variants.
+- Home `Latest Drop` HTML and dedicated GLB surfaces can retry approved
+  Arweave-backed assets across the supported gateway rotation.
+- ReMeme cards can fall back across S3, IPFS, metadata, and collection-image
+  sources depending on the renderer mode.
+
+## Edge Cases
+
+- Blank or whitespace-only animation values are skipped before dedicated HTML
+  or model renderers try to load them.
+- Approved Arweave gateway retries run only when the current media URL is
+  already on a supported gateway host.
+- Unsupported Arweave hosts outside the approved retry set are not rotated
+  automatically.
+- Successful fallback is not guaranteed when the remaining source decodes to a
+  corrupt or unsupported asset.
 
 ## Failure and Recovery
 

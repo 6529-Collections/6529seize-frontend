@@ -32,9 +32,12 @@ the card’s distribution view.
    - Status mode for sold out, finalized, or error states.
 4. In countdown mode, users see phase text with `Starts In` or `Ends In` and a
    live-updating timer.
-5. In countdown mode, the card can show a `Mint` button (depending on surface
+5. When a current phase ends but a later phase still exists for the drop, the
+   card stays in countdown mode and switches to the next phase instead of
+   immediately finalizing the whole mint.
+6. In countdown mode, the card can show a `Mint` button (depending on surface
    settings and platform/country rules) that links to `/the-memes/mint`.
-6. In the `Edition Details` accordion, users can open the card’s distribution
+7. In the `Edition Details` accordion, users can open the card’s distribution
    page directly via `Distribution Plan` → `View`.
 
 ## Common Scenarios
@@ -65,6 +68,11 @@ the card’s distribution view.
 - Public phase:
   - Header uses `Public Phase Starts In` before activation and
     `Public Phase Ends In` after activation
+- Between scheduled phases:
+  - After a finished allowlist/public claim window, the card can switch to the
+    next phase and show that phase’s `Starts In` countdown.
+  - Home and mint surfaces keep treating the drop as the current mint until the
+    final phase is finished or the drop sells out.
 - Sold out:
   - Card shows `Mint Complete` with `All editions have been minted!`
 - Finalized (ended without full sell-out):
@@ -86,10 +94,11 @@ the card’s distribution view.
   the page already includes the mint widget/action flow.
 - On iOS outside the US, the countdown card hides the `Mint` button.
 - On home, if the current mint is ended and next-drop data exists, the latest
-  section switches to a `Next Drop` panel instead of showing this countdown.
-  If the drop sells out before the scheduled end time, the countdown surface
-  stays in place and shows the sold-out status card until end-time status
-  changes.
+  section switches to a `Next Drop` panel only after the drop is actually
+  complete. If another phase still exists, home keeps the latest-drop countdown
+  instead of swapping early.
+- If the drop sells out before the scheduled end time, the countdown surface
+  stays in place and shows the sold-out status card.
 - If media metadata is missing or blank, `Edition Details` omits `File type`
   and `Dimensions` instead of showing empty values.
 - At the exact phase start timestamp, the state changes from `Upcoming` to
@@ -111,6 +120,9 @@ the card’s distribution view.
 
 - Timing and phase labels are based on Manifold claim data and periodic polling,
   so visible updates can lag a few seconds.
+- For multi-phase drops, countdown state follows the currently matched phase and
+  can continue across phase boundaries until the drop is sold out or the final
+  phase ends.
 - The Memes phase schedule is anchored to Europe/Athens wall-clock windows
   (Phase 0 `17:40-18:20`, Phase 1 `18:30-18:50`, Phase 2 `19:00-19:20`,
   Public `19:20` to `17:00` next day), then resolved per claim window and
@@ -124,6 +136,7 @@ the card’s distribution view.
 - [Media Index](../README.md)
 - [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md)
 - [The Memes Mint Flow](feature-mint-flow.md)
+- [Standalone The Memes Mint Page](feature-standalone-mint-page.md)
 - [Memes Minting Calendar](feature-minting-calendar.md)
 - [NFT Media Source Fallbacks](../nft/feature-media-source-fallbacks.md)
 - [NFT Balance Indicators](../nft/feature-balance-indicators.md)

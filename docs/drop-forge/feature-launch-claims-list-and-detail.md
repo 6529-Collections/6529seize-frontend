@@ -9,6 +9,7 @@ The launch surface combines:
 
 - a paginated launch-claims queue at `/drop-forge/launch`
 - an operations page at `/drop-forge/launch/{id}`
+- a direct `Go to Craft` shortcut back to the paired craft claim
 - on-chain claim visibility and status
 - auto-selected phase setup and updates
 - artist/team/subscription/research airdrop actions
@@ -41,6 +42,7 @@ The launch surface combines:
    - primary status
 4. Select a row to open `/drop-forge/launch/{id}`.
 5. On the claim-detail page, review:
+   - page header shortcuts (`Back to Launch list`, `Go to Craft`)
    - timeline row and primary status
    - media preview
    - details
@@ -69,6 +71,9 @@ The launch surface combines:
 - Queue browsing:
   - Use pagination when more than five launch claims exist.
   - Open a specific claim by ID from the queue or direct URL.
+- Craft handoff:
+  - Use `Go to Craft` from launch detail whenever you need to inspect or edit
+    the paired craft claim.
 - Metadata-only on-chain update:
   - When the on-chain claim still points at older metadata, the page shows a
     metadata-update block with `On-Chain Metadata`, `Updated Metadata`, and an
@@ -101,6 +106,9 @@ The launch surface combines:
     toggle can also be flipped manually.
   - `Airdrop to Research` uses the target edition-size delta to compute the
     research quantity.
+- Arweave review:
+  - `Image`, `Animation`, and `Metadata` link cards support copy/open actions
+    for the published Arweave targets.
 
 ## Edge Cases
 
@@ -108,6 +116,8 @@ The launch surface combines:
   launch pages without being able to edit the paired craft page.
 - If metadata is not yet published, launch actions are replaced with the
   craft-first prompt instead of phase controls.
+- `Go to Craft` can still lead to a craft permission fallback if the current
+  wallet may launch claims but cannot edit craft claims.
 - `Phase 1`, `Phase 2`, `Public Phase`, and `Airdrop to Research` stay disabled
   until the claim is initialized.
 - Completion toggles appear only for claims-admin wallets, and only when the

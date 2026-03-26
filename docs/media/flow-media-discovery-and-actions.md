@@ -14,6 +14,8 @@ This flow covers cross-route media tasks:
 - Home entry surface: `/` (`Latest Drop` or `Next Drop`)
 - The Memes routes: `/the-memes`, `/the-memes/mint`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`
+- Standalone The Memes mint shell:
+  `https://thememes.6529.io/` and deployment-specific equivalents
 - Memes calendar route: `/meme-calendar`
 - Meme Lab routes: `/meme-lab`, `/meme-lab/collection/{collection}`,
   `/meme-lab/{id}`, `/meme-lab/{id}/distribution`
@@ -62,6 +64,9 @@ This flow covers cross-route media tasks:
 - Card to distribution to schedule:
   open `/the-memes/{id}`, open `Distribution Plan`, then check timing on
   `/meme-calendar`.
+- Standalone mint handoff:
+  open the standalone host, connect in the top bar, mint the latest drop, then
+  use artist/distribution links to open the full `6529.io` routes in a new tab.
 - Meme Lab to distribution:
   open `/meme-lab`, open a card, then open `Distribution Plan` when present.
 - ReMemes reference review:
@@ -73,8 +78,10 @@ This flow covers cross-route media tasks:
 
 ## Edge Cases
 
-- `/` switches from `Latest Drop` to `Next Drop` when minting is ended and a
-  next drop exists.
+- `/` switches from `Latest Drop` to `Next Drop` only after the current drop is
+  actually complete and a next drop exists.
+- The current mint can stay in countdown mode between scheduled phases even
+  after one phase window has ended.
 - On iOS outside `US`, mint controls are hidden. On iOS in `US`, minting uses
   `Mint on 6529.io`.
 - `/the-memes/{id}` ignores unsupported `focus` values and falls back to
@@ -96,6 +103,9 @@ This flow covers cross-route media tasks:
 
 - If `/the-memes/mint` shows `Error fetching mint information` or
   `No mint information found`, refresh and retry.
+- If the standalone mint host shows `Something went wrong` or
+  `No mint information found`, refresh the host and retry after latest-mint
+  APIs recover.
 - If `Mint for fren` is selected but mint actions stay unavailable, choose a
   recipient wallet first.
 - If calendar handoff is blocked, allow popups or use ICS export.
@@ -123,6 +133,7 @@ This flow covers cross-route media tasks:
 - [Latest Drop Stats Grid](memes/feature-latest-drop-stats-grid.md)
 - [The Memes List Browsing and Sorting](memes/feature-the-memes-list-browsing-and-sorting.md)
 - [The Memes Mint Flow](memes/feature-mint-flow.md)
+- [Standalone The Memes Mint Page](memes/feature-standalone-mint-page.md)
 - [The Memes Card Tabs and Focus Links](memes/feature-card-tabs-and-focus-links.md)
 - [Memes Minting Calendar](memes/feature-minting-calendar.md)
 - [Meme Lab List and Collection Browsing](collections/feature-meme-lab-list-and-collection-browsing.md)

@@ -8,46 +8,58 @@ Wave and DM rows in the left list control which thread is open.
 - Click the active row to clear selection and return to section home.
 - Browser back/forward keeps the active row and URL in sync.
 
-## Where It Works
+## Location in the Site
 
 - Web left sidebar on:
   - `/waves` and `/waves/{waveId}`
   - `/messages` and `/messages?wave={waveId}`
 - Mobile/app Waves and Messages list views that reuse the same row behavior.
 
-## Route and URL Rules
+## Entry Points
+
+- Open the `Waves` or `Messages` shell with the left list visible.
+- Select an inactive wave or DM row from the list.
+- Use browser back/forward after navigating between rows.
+
+## User Journey
+
+1. Open a waves or messages shell with the row list visible.
+2. Select an inactive row to open that thread.
+3. The app updates the active highlight and URL together.
+4. Select the active row again to clear selection and return to section home.
+5. Use browser back/forward to revisit row selections while keeping the list
+   and URL in sync.
+
+## Common Scenarios
 
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages?wave={waveId}`.
 - Active-row re-click returns to `/waves` or `/messages`.
-- Direct-message navigation does not use `/messages/{waveId}`.
-- If first unread is known, row navigation can add `divider={serialNo}`.
-
-## Interaction Rules
-
-- Non-touch devices: hovering an inactive row can prefetch that thread.
-- Touch devices: no hover prefetch.
-- Browser-default behavior is kept for modified clicks:
-  - Cmd/Ctrl-click
-  - Shift/Alt-click
-  - Middle-click
-  - Right-click/context menu
-
-## History and Shell Behavior
-
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
   place and keep row highlight aligned.
+- On signed-out desktop web `/waves`, clearing the active row returns to
+  `/waves` and leaves the shell visible with a `Select a Wave` placeholder plus
+  a connect-wallet CTA in the thread pane.
 - Outside those shells, row click performs normal route navigation into the
   selected thread.
 
-## Failure Recovery
+## Edge Cases
+
+- Direct-message navigation does not use `/messages/{waveId}`.
+- If first unread is known, row navigation can add `divider={serialNo}`.
+- Non-touch devices can prefetch an inactive row on hover.
+- Touch devices do not use hover prefetch.
+- Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
+  Shift/Alt-click, middle-click, and right-click/context menu.
+
+## Failure and Recovery
 
 - If the selected thread no longer resolves, the app returns to section home
   (`/waves` or `/messages`).
 - Recovery removes stale `wave` query values when present.
 - After recovery, users can select another row immediately.
 
-## Scope Notes
+## Limitations / Notes
 
 - This page owns row selection/navigation only.
 - Row metadata (`Last drop`, badges, tooltips) is owned by the row-metadata

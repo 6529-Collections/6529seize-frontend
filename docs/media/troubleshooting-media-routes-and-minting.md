@@ -9,6 +9,8 @@ interactive previews, or marketplace shortcuts fail.
 
 - The Memes: `/the-memes`, `/the-memes/mint`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`
+- Standalone The Memes mint host:
+  `https://thememes.6529.io/` and deployment-specific equivalents
 - Meme Lab: `/meme-lab`, `/meme-lab/collection/{collection}`, `/meme-lab/{id}`,
   `/meme-lab/{id}/distribution`
 - ReMemes: `/rememes`, `/rememes/{contract}/{id}`, `/rememes/add`
@@ -20,6 +22,8 @@ interactive previews, or marketplace shortcuts fail.
 ## Entry Points
 
 - `/the-memes/mint` stays in loading, error, or no-data state.
+- The standalone mint host shows `Something went wrong` or
+  `No mint information found`.
 - A detail route opens the wrong tab, fallback panel, or mostly blank layout.
 - Meme Lab, ReMemes, or Gradient routes show empty results.
 - ReMemes add flow cannot validate or submit.
@@ -42,8 +46,15 @@ interactive previews, or marketplace shortcuts fail.
 - `/the-memes/mint` shows `Retrieving Mint information`, `Error fetching mint information`,
   or `No mint information found`:
   refresh `/the-memes/mint` and retry.
+- Standalone mint host shows `Something went wrong` or
+  `No mint information found`:
+  refresh the standalone host and retry after latest-mint APIs recover.
 - Mint action is missing after wallet connect:
   controls are hidden when claim status is ended or finalized.
+- Home or mint countdown looks ended too early:
+  for multi-phase drops, the current phase can end while the overall drop stays
+  active. Wait for the next scheduled phase countdown instead of treating the
+  drop as complete immediately.
 - `Mint for fren` is selected but mint action is missing:
   choose a recipient wallet first.
 - Mint controls are missing on iOS:
@@ -73,7 +84,8 @@ interactive previews, or marketplace shortcuts fail.
   unsupported `sort` or `sort_dir` normalizes to `sort=id&sort_dir=asc`.
 - Interactive preview is missing in Memes submission:
   only HTTPS HTML documents from approved hosts are allowed (`ipfs.io`,
-  `www.ipfs.io`, `arweave.net`, `www.arweave.net`, valid
+  `www.ipfs.io`, approved Arweave gateways such as `arweave.net`,
+  `ardrive.net`, `gateway.arweave.net`, `gateway.ar.io`, and valid
   `*.arweave.net` tx subdomains), with root CID/tx IDs only.
 - Marketplace icons are missing:
   icons are hidden on iOS unless detected country is `US`; Blur only appears
@@ -84,6 +96,8 @@ interactive previews, or marketplace shortcuts fail.
 - Numeric but unresolved Memes card IDs can intentionally render next-mint
   fallback content instead of full card content.
 - Mint button availability can change at phase boundary timestamps.
+- A drop can stay in `Latest Drop` and countdown mode between scheduled phases
+  even after one phase window has finished.
 - Allowlist phases can show `No spots in current phase for this address` while
   the drop is still active.
 - ReMemes keeps only `meme_id` in the URL; token type and sort reset on reload.
@@ -95,8 +109,8 @@ interactive previews, or marketplace shortcuts fail.
 ## Failure and Recovery
 
 - Retry from canonical roots first:
-  `/the-memes/mint`, `/the-memes`, `/meme-lab`, `/rememes`, `/meme-calendar`,
-  `/6529-gradient`.
+  `/the-memes/mint`, the standalone mint host, `/the-memes`, `/meme-lab`,
+  `/rememes`, `/meme-calendar`, `/6529-gradient`.
 - Reopen deep links from a parent list card when detail routes look blank.
 - Reconnect wallet/profile state before retrying mint or transfer actions.
 - For ReMemes add flow, fix validation/checklist errors, run `Validate` again,
@@ -104,8 +118,8 @@ interactive previews, or marketplace shortcuts fail.
 - If calendar invite links fail, retry from `/meme-calendar` and use ICS
   download fallback.
 - If marketplace pages fail, keep app state and retry in a new tab.
-- If interactive preview fails, recheck host, root CID/tx ID, and HTML
-  content-type requirements.
+- If interactive preview fails, recheck the approved gateway, root CID/tx ID,
+  and HTML content-type requirements.
 
 ## Limitations / Notes
 
