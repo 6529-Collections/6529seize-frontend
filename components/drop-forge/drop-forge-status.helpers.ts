@@ -5,6 +5,7 @@ import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 type ClaimPrimaryStatusKey =
   | "draft"
   | "publishing"
+  | "checking_onchain"
   | "published"
   | "pending_initialization_missing_info"
   | "pending_initialization"
@@ -28,7 +29,7 @@ export interface ClaimPrimaryStatus {
 
 interface ClaimArweaveSectionStatus {
   key: "not_published" | "publishing" | "published";
-  label: "Not Published" | "Publishing…" | "Published";
+  label: "Not Published" | "Publishing" | "Published";
   tone: ClaimPrimaryStatusTone;
   reason?: string;
 }
@@ -54,9 +55,11 @@ export function getPrimaryStatusPillClassName(
 export function getClaimPrimaryStatus({
   claim,
   manifoldClaim,
+  isManifoldClaimFetching = false,
 }: {
   claim: MintingClaim;
   manifoldClaim?: Pick<ManifoldClaim, "instanceId" | "location"> | null;
+  isManifoldClaimFetching?: boolean;
 }): ClaimPrimaryStatus {
   const initializedOnchain = !!manifoldClaim?.instanceId;
   const localMetadata = claim.metadata_location?.trim() ?? "";
@@ -70,7 +73,7 @@ export function getClaimPrimaryStatus({
   if (claim.media_uploading === true) {
     return {
       key: "publishing",
-      label: "Publishing…",
+      label: "Publishing",
       tone: "pending",
       reason: "Uploading media and metadata to Arweave now",
     };
@@ -82,6 +85,20 @@ export function getClaimPrimaryStatus({
       label: "Draft",
       tone: "neutral",
       reason: "Stored in DB only. Publish to Arweave to continue",
+    };
+  }
+
+  if (
+    !isCraftContext &&
+    isManifoldClaimFetching &&
+    manifoldClaim == null &&
+    hasLocalMetadata
+  ) {
+    return {
+      key: "checking_onchain",
+      label: "Checking Onchain",
+      tone: "pending",
+      reason: "Loading current onchain claim state",
     };
   }
 
@@ -142,7 +159,7 @@ export function getClaimArweaveSectionStatus(
   if (claim.media_uploading === true) {
     return {
       key: "publishing",
-      label: "Publishing…",
+      label: "Publishing",
       tone: "pending",
       reason: "Uploading media and metadata to Arweave now",
     };
