@@ -26,6 +26,7 @@ describe("getClaimPrimaryStatus", () => {
       getClaimPrimaryStatus({
         claim: baseClaim,
         manifoldClaim: null,
+        isCraftContext: false,
         isManifoldClaimFetching: true,
       })
     ).toMatchObject({
@@ -40,6 +41,7 @@ describe("getClaimPrimaryStatus", () => {
       getClaimPrimaryStatus({
         claim: baseClaim,
         manifoldClaim: null,
+        isCraftContext: false,
         isManifoldClaimFetching: false,
       })
     ).toMatchObject({
@@ -57,6 +59,7 @@ describe("getClaimPrimaryStatus", () => {
           metadata_location: null,
         },
         manifoldClaim: null,
+        isCraftContext: false,
       })
     ).toMatchObject({
       key: "draft",
@@ -72,6 +75,7 @@ describe("getClaimPrimaryStatus", () => {
       getClaimPrimaryStatus({
         claim: baseClaim,
         manifoldClaim: null,
+        isCraftContext: false,
         isManifoldClaimFetching: false,
       })
     ).toMatchObject({
@@ -82,7 +86,9 @@ describe("getClaimPrimaryStatus", () => {
   });
 
   it("keeps craft claims in the published state", () => {
-    expect(getClaimPrimaryStatus({ claim: baseClaim })).toMatchObject({
+    expect(
+      getClaimPrimaryStatus({ claim: baseClaim, isCraftContext: true })
+    ).toMatchObject({
       key: "published",
       label: "Published",
       tone: "success",
@@ -92,9 +98,28 @@ describe("getClaimPrimaryStatus", () => {
   it("keeps craft claims published even when launch info is missing", () => {
     mockedIsMissingRequiredLaunchInfo.mockReturnValue(true);
 
-    expect(getClaimPrimaryStatus({ claim: baseClaim })).toMatchObject({
+    expect(
+      getClaimPrimaryStatus({ claim: baseClaim, isCraftContext: true })
+    ).toMatchObject({
       key: "published",
       label: "Published",
+      tone: "success",
+    });
+  });
+
+  it("treats instanceId 0 as initialized onchain", () => {
+    expect(
+      getClaimPrimaryStatus({
+        claim: baseClaim,
+        manifoldClaim: {
+          instanceId: 0,
+          location: "ar://example",
+        },
+        isCraftContext: false,
+      })
+    ).toMatchObject({
+      key: "live",
+      label: "Live",
       tone: "success",
     });
   });

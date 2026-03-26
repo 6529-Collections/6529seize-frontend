@@ -345,7 +345,7 @@ function ClaimCardContent({
 }
 
 function CraftClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
-  const primaryStatus = getClaimPrimaryStatus({ claim });
+  const primaryStatus = getClaimPrimaryStatus({ claim, isCraftContext: true });
 
   return (
     <Link
@@ -371,6 +371,7 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
   const primaryStatus = getClaimPrimaryStatus({
     claim,
     manifoldClaim: manifoldClaim ?? null,
+    isCraftContext: false,
     isManifoldClaimFetching,
   });
 

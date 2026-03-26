@@ -341,7 +341,7 @@ export default function DropForgeLaunchClaimPageClient({
     showErrorToast,
   ]);
 
-  const isInitialized = Boolean(manifoldClaim?.instanceId);
+  const isInitialized = manifoldClaim?.instanceId != null;
   const hasPublishedMetadata = Boolean(claim?.metadata_location != null);
   const missingRequiredInfo = Boolean(
     claim && isMissingRequiredLaunchInfo(claim)
@@ -354,6 +354,7 @@ export default function DropForgeLaunchClaimPageClient({
     ? getClaimPrimaryStatus({
         claim,
         manifoldClaim: manifoldClaim ?? null,
+        isCraftContext: false,
         isManifoldClaimFetching: onChainClaimFetching,
       })
     : null;

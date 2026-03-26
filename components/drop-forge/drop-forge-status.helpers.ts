@@ -155,19 +155,20 @@ function getInitializedClaimStatus({
 export function getClaimPrimaryStatus({
   claim,
   manifoldClaim,
+  isCraftContext = false,
   isManifoldClaimFetching = false,
 }: {
   claim: MintingClaim;
   manifoldClaim?: Pick<ManifoldClaim, "instanceId" | "location"> | null;
+  isCraftContext?: boolean;
   isManifoldClaimFetching?: boolean;
 }): ClaimPrimaryStatus {
-  const initializedOnchain = !!manifoldClaim?.instanceId;
+  const initializedOnchain = manifoldClaim?.instanceId != null;
   const localMetadata = claim.metadata_location?.trim() ?? "";
   const hasLocalMetadata = localMetadata.length > 0;
   const onchainLocation = manifoldClaim?.location?.trim() ?? "";
   const chainMatchesLocal =
     onchainLocation.length > 0 && onchainLocation === localMetadata;
-  const isCraftContext = manifoldClaim === undefined;
   const missingLaunchInfo = isMissingRequiredLaunchInfo(claim);
 
   if (claim.media_uploading === true) {
