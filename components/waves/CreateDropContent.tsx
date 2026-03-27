@@ -403,6 +403,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     useState<ScopedValueState<boolean> | null>(null);
   const [identityPickerOpenState, setIdentityPickerOpenState] =
     useState<ScopedValueState<boolean> | null>(null);
+  const [identityPickerAutoOpenState, setIdentityPickerAutoOpenState] =
+    useState<ScopedValueState<boolean> | null>(null);
   const [identityPickerErrorMessageState, setIdentityPickerErrorMessageState] =
     useState<ScopedValueState<string | null> | null>(null);
   const closeOnNextInputRef = useRef(false);
@@ -488,6 +490,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     identityPickerOpenState?.scopeKey === identitySubmissionSessionScopeKey
       ? identityPickerOpenState.value
       : false;
+  const isIdentityPickerAutoOpenAllowed =
+    identityPickerAutoOpenState?.scopeKey === identitySubmissionSessionScopeKey
+      ? identityPickerAutoOpenState.value
+      : true;
   const identityPickerErrorMessage =
     identityPickerErrorMessageState?.scopeKey ===
     identitySubmissionSessionScopeKey
@@ -495,7 +501,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       : null;
   const isIdentityPickerOpen =
     isIdentityPickerAllowed &&
-    (isIdentityPickerExplicitlyOpen || !selectedIdentitySelection);
+    (isIdentityPickerExplicitlyOpen ||
+      (!selectedIdentitySelection && isIdentityPickerAutoOpenAllowed));
   const isMetadataOpen =
     isDropMode &&
     (metadataOpenState?.scopeKey === dropModeSessionScopeKey
@@ -1025,6 +1032,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         });
       }
       setFiles([]);
+      if (isIdentityPickerAllowed) {
+        setIdentityPickerAutoOpenState({
+          scopeKey: identitySubmissionSessionScopeKey,
+          value: false,
+        });
+      }
       refreshState();
 
       submitDrop({
@@ -1293,6 +1306,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       scopeKey: identitySubmissionSessionScopeKey,
       value: null,
     });
+    setIdentityPickerAutoOpenState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: false,
+    });
     setIdentityPickerOpenState({
       scopeKey: identitySubmissionSessionScopeKey,
       value: true,
@@ -1300,6 +1317,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [identitySubmissionSessionScopeKey]);
 
   const closeIdentityPicker = useCallback(() => {
+    setIdentityPickerAutoOpenState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: false,
+    });
     setIdentityPickerOpenState({
       scopeKey: identitySubmissionSessionScopeKey,
       value: false,
@@ -1335,6 +1356,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setSelectedIdentityState({
         scopeKey: identitySubmissionSessionScopeKey,
         value: selection,
+      });
+      setIdentityPickerAutoOpenState({
+        scopeKey: identitySubmissionSessionScopeKey,
+        value: false,
       });
       setHasAttemptedIdentitySubmitState({
         scopeKey: identitySubmissionSessionScopeKey,

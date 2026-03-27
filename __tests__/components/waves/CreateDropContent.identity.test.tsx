@@ -86,7 +86,11 @@ jest.mock("@/components/waves/CreateDropContentFiles", () => ({
   CreateDropContentFiles: () => <div data-testid="files" />,
 }));
 jest.mock("@/components/waves/CreateDropSubmit", () => ({
-  CreateDropSubmit: () => <button type="button">submit</button>,
+  CreateDropSubmit: (props: any) => (
+    <button type="button" onClick={() => void props.onDrop()}>
+      submit
+    </button>
+  ),
 }));
 jest.mock("@/components/waves/CreateDropDropModeToggle", () => ({
   CreateDropDropModeToggle: (props: any) => (
@@ -143,7 +147,7 @@ jest.mock("@/components/waves/hooks/useDropMetadata", () => ({
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
-    requestAuth: jest.fn(),
+    requestAuth: jest.fn(async () => ({ success: true })),
     setToast: jest.fn(),
     connectedProfile: {
       id: mockViewerSelection.profileId,
@@ -228,12 +232,33 @@ describe("CreateDropContent identity picker flow", () => {
       },
     }) as any;
 
+  const createStoredDrop = () =>
+    ({
+      title: null,
+      parts: [
+        {
+          content: "queued part",
+          quoted_drop: null,
+          media: [],
+        },
+      ],
+      mentioned_users: [],
+      mentioned_waves: [],
+      referenced_nfts: [],
+      metadata: [],
+      signature: null,
+    }) as any;
+
   const renderSubject = ({
     isDropMode = true,
     wave = createWave(),
+    drop = null,
+    submitDrop = jest.fn(),
   }: {
     readonly isDropMode?: boolean;
     readonly wave?: any;
+    readonly drop?: any;
+    readonly submitDrop?: jest.Mock;
   } = {}) => {
     const onDropModeChange = jest.fn();
     const utils = render(
@@ -244,7 +269,7 @@ describe("CreateDropContent identity picker flow", () => {
           activeDrop={null}
           onCancelReplyQuote={jest.fn()}
           wave={wave}
-          drop={null}
+          drop={drop}
           isStormMode={false}
           isDropMode={isDropMode}
           dropId={null}
@@ -252,7 +277,7 @@ describe("CreateDropContent identity picker flow", () => {
           setIsStormMode={jest.fn()}
           onDropModeChange={onDropModeChange}
           onSwitchToDropModeWithUrl={jest.fn()}
-          submitDrop={jest.fn()}
+          submitDrop={submitDrop}
           privileges={{ chatRestriction: null, submissionRestriction: null }}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
@@ -262,6 +287,7 @@ describe("CreateDropContent identity picker flow", () => {
     return {
       ...utils,
       onDropModeChange,
+      submitDrop,
     };
   };
 
@@ -288,6 +314,80 @@ describe("CreateDropContent identity picker flow", () => {
     expect(screen.getByTestId("identity-field")).toHaveTextContent("other");
 
     await userEvent.click(screen.getByText("change identity"));
+
+    expect(screen.getByTestId("identity-picker-modal")).toBeInTheDocument();
+  });
+
+  it("clears the selected identity after submit without auto-reopening the picker", async () => {
+    const { submitDrop } = renderSubject({ drop: createStoredDrop() });
+
+    await userEvent.click(screen.getByText("select other"));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("identity-picker-modal")
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId("identity-field")).toHaveTextContent("other");
+
+    await userEvent.click(screen.getByText("submit"));
+
+    await waitFor(() => {
+      expect(submitDrop).toHaveBeenCalledTimes(1);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("identity-field")).toHaveTextContent("none");
+      expect(
+        screen.queryByTestId("identity-picker-modal")
+      ).not.toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByText("change identity"));
+
+    expect(screen.getByTestId("identity-picker-modal")).toBeInTheDocument();
+  });
+
+  it("does not suppress picker auto-open after a chat submit on an identity wave", async () => {
+    const chatSubmit = jest.fn();
+    const { rerender } = renderSubject({
+      isDropMode: false,
+      drop: createStoredDrop(),
+      submitDrop: chatSubmit,
+    });
+
+    expect(
+      screen.queryByTestId("identity-picker-modal")
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByText("submit"));
+
+    await waitFor(() => {
+      expect(chatSubmit).toHaveBeenCalledTimes(1);
+    });
+
+    rerender(
+      <ReactQueryWrapperContext.Provider
+        value={{ addOptimisticDrop: jest.fn() } as any}
+      >
+        <CreateDropContent
+          activeDrop={null}
+          onCancelReplyQuote={jest.fn()}
+          wave={createWave()}
+          drop={null}
+          isStormMode={false}
+          isDropMode={true}
+          dropId={null}
+          setDrop={jest.fn()}
+          setIsStormMode={jest.fn()}
+          onDropModeChange={jest.fn()}
+          onSwitchToDropModeWithUrl={jest.fn()}
+          submitDrop={jest.fn()}
+          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          submissionExperience={WaveSubmissionExperience.IDENTITY}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
 
     expect(screen.getByTestId("identity-picker-modal")).toBeInTheDocument();
   });
