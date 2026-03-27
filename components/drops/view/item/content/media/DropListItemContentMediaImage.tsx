@@ -105,7 +105,7 @@ function DropListItemContentMediaImage({
       event.stopPropagation();
       const fullscreenTarget = modalImageRef.current ?? imgRef.current;
       if (fullscreenTarget) {
-        void fullscreenTarget.requestFullscreen();
+        fullscreenTarget.requestFullscreen().catch(() => undefined);
       }
     },
     []
