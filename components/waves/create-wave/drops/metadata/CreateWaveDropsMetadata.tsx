@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { CreateWaveDropsRequiredMetadata } from "@/types/waves.types";
 import CreateWaveDropsMetadataRow from "./CreateWaveDropsMetadataRow";
 import CreateWaveDropsMetadataAddRowButton from "./CreateWaveDropsMetadataAddRowButton";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import {
+  IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR,
+  isReservedIdentitySubmissionMetadataKey,
+} from "@/helpers/waves/identity-submission-metadata";
+
+const NON_UNIQUE_METADATA_ERROR = "Metadata name must be unique";
 
 export default function CreateWaveDropsMetadata({
   requiredMetadata,
@@ -48,39 +53,56 @@ export default function CreateWaveDropsMetadata({
   const haveNonUniqueMetadata = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE
   );
+  const haveReservedIdentityMetadata = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY
+  );
 
-  const getNonUniqueMetadataIdxs = () => {
-    const keys = requiredMetadata.map((item) => item.key);
-    const keyOccurrences = keys.reduce((acc, key, index) => {
-      if (!acc[key]) {
-        acc[key] = [];
+  const keyOccurrences = requiredMetadata.reduce<Record<string, number[]>>(
+    (acc, item, index) => {
+      const indices = acc[item.key];
+
+      if (indices) {
+        indices.push(index);
+      } else {
+        acc[item.key] = [index];
       }
-      acc[key].push(index);
+
       return acc;
-    }, {} as Record<string, number[]>);
+    },
+    {}
+  );
 
-    const nonUniqueIndices: number[] = [];
-    Object.values(keyOccurrences).forEach((indices) => {
-      if (indices.length > 1) {
-        nonUniqueIndices.push(...indices);
+  const nonUniqueMetadataIdxs = Object.values(keyOccurrences).flatMap(
+    (indices) => (indices.length > 1 ? indices : [])
+  );
+  const reservedIdentityMetadataIdxs = requiredMetadata.reduce<number[]>(
+    (acc, item, index) => {
+      if (isReservedIdentitySubmissionMetadataKey(item.key)) {
+        acc.push(index);
       }
-    });
+      return acc;
+    },
+    []
+  );
 
-    return nonUniqueIndices;
+  const getRowErrorMessage = (index: number) => {
+    if (
+      reservedIdentityMetadataIdxs.includes(index) &&
+      haveReservedIdentityMetadata
+    ) {
+      return IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR;
+    }
+
+    if (nonUniqueMetadataIdxs.includes(index) && haveNonUniqueMetadata) {
+      return NON_UNIQUE_METADATA_ERROR;
+    }
+
+    return null;
   };
-
-  const [nonUniqueMetadataIdxs, setNonUniqueMetadataIdxs] = useState<number[]>(
-    getNonUniqueMetadataIdxs()
-  );
-
-  useEffect(
-    () => setNonUniqueMetadataIdxs(getNonUniqueMetadataIdxs()),
-    [requiredMetadata]
-  );
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
         Required metadata
       </p>
       <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
@@ -91,15 +113,13 @@ export default function CreateWaveDropsMetadata({
                 key={`create-wave-drops-metadata-row-${i}`}
                 item={item}
                 index={i}
-                isNotUnique={
-                  nonUniqueMetadataIdxs.includes(i) && haveNonUniqueMetadata
-                }
+                errorMessage={getRowErrorMessage(i)}
                 onItemChange={onItemChange}
                 onItemRemove={onRemoveRow}
               />
             ))}
             {requiredMetadata.length === 0 && (
-              <div className="tw-text-iron-400 tw-text-sm tw-font-medium tw-py-2 tw-italic">
+              <div className="tw-py-2 tw-text-sm tw-font-medium tw-italic tw-text-iron-400">
                 No required metadata added
               </div>
             )}

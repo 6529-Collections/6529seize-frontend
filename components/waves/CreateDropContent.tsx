@@ -56,16 +56,17 @@ import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUp
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
+import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
-import { useWave } from "@/hooks/useWave";
+import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import CreateDropIdentityField from "./CreateDropIdentityField";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import type { DropMutationBody } from "./CreateDrop";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
-import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
 import {
   hasCurrentDropPartContent,
   shouldUseInitialDropConfig,
@@ -73,7 +74,16 @@ import {
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
+import { buildDropSubmissionMetadata } from "./utils/buildDropSubmissionMetadata";
+import { getIdentitySubmissionMetadataErrors } from "./utils/identitySubmissionMetadataValidation";
+import {
+  getEffectiveIdentitySubmitAttempt,
+  getEffectiveSelectedIdentity,
+  getIdentitySubmissionScopeKey,
+} from "./utils/identitySubmissionState";
 import { normalizeCurationDropInput } from "./utils/validateCurationDropUrl";
+import { getSelectableIdentity } from "../utils/input/profile-search/getSelectableIdentity";
+import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -120,6 +130,7 @@ interface CreateDropContentProps {
   readonly onSwitchToDropModeWithUrl: (url: string) => void;
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly privileges: DropPrivileges;
+  readonly submissionExperience: WaveSubmissionExperience;
 }
 
 const CONTAINER_WIDTH_THRESHOLD = 500;
@@ -350,6 +361,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   onSwitchToDropModeWithUrl,
   submitDrop,
   privileges,
+  submissionExperience,
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
@@ -363,13 +375,21 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
-  const { isMemesWave, isCurationWave } = useWave(wave);
 
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [userShowOptions, setUserShowOptions] = useState(false);
+  const [selectedIdentityState, setSelectedIdentityState] = useState<{
+    scopeKey: string;
+    value: string | null;
+  } | null>(null);
+  const [hasAttemptedIdentitySubmitState, setHasAttemptedIdentitySubmitState] =
+    useState<{
+      scopeKey: string;
+      value: boolean;
+    } | null>(null);
   const closeOnNextInputRef = useRef(false);
   const isWaveChanged = prevWaveIdRef.current !== wave.id;
   if (isWaveChanged) {
@@ -409,11 +429,60 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, []);
 
   const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
+  const isIdentitySubmissionExperience =
+    submissionExperience === WaveSubmissionExperience.IDENTITY;
+  const isCurationSubmissionExperience =
+    submissionExperience === WaveSubmissionExperience.CURATION_LEGACY;
+  const identitySubmissionMode = isIdentitySubmissionExperience
+    ? (wave.participation.submission_strategy?.config.who_can_be_submitted ??
+      null)
+    : null;
+  const viewerSelectableIdentity = getSelectableIdentity(connectedProfile);
+  const viewerIdentityLabel =
+    connectedProfile?.handle ??
+    connectedProfile?.display ??
+    viewerSelectableIdentity ??
+    null;
+  const identitySubmissionScopeKey = getIdentitySubmissionScopeKey({
+    waveId: wave.id,
+    isIdentitySubmissionExperience,
+    identitySubmissionMode,
+  });
+  const selectedIdentity = getEffectiveSelectedIdentity({
+    isIdentitySubmissionExperience,
+    identitySubmissionMode,
+    viewerSelectableIdentity,
+    selectedIdentityState,
+    scopeKey: identitySubmissionScopeKey,
+  });
+  const hasAttemptedIdentitySubmit = getEffectiveIdentitySubmitAttempt({
+    attemptState: hasAttemptedIdentitySubmitState,
+    scopeKey: identitySubmissionScopeKey,
+  });
+  const requiredMetadata = useMemo(() => {
+    if (!isIdentitySubmissionExperience) {
+      return wave.participation.required_metadata;
+    }
+
+    return wave.participation.required_metadata.filter(
+      (item) => !isReservedIdentitySubmissionMetadataKey(item.name)
+    );
+  }, [isIdentitySubmissionExperience, wave.participation.required_metadata]);
 
   const { metadata, setMetadata, initialMetadata } = useDropMetadata({
     isDropMode,
-    requiredMetadata: wave.participation.required_metadata,
+    requiredMetadata,
   });
+  const metadataErrorById = useMemo(
+    () =>
+      getIdentitySubmissionMetadataErrors({
+        isIdentitySubmissionExperience:
+          isIdentitySubmissionExperience && isDropMode,
+        metadata,
+      }),
+    [isDropMode, isIdentitySubmissionExperience, metadata]
+  );
+  const hasMetadataValidationErrors = Object.keys(metadataErrorById).length > 0;
 
   const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
 
@@ -466,7 +535,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         files,
         parts: dropParts,
         hasMetadata,
-      }) && !!(dropParts.length ? getCanSubmitStorm() : true)
+      }) &&
+      !hasMetadataValidationErrors &&
+      !!(dropParts.length ? getCanSubmitStorm() : true)
     );
   };
 
@@ -482,13 +553,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const canSubmit = getCanSubmit();
   const canAddPart = getCanAddPart();
   const normalizedCurationDropUrl = useMemo(() => {
-    if (!isCurationWave || isDropMode) {
+    if (!isCurationSubmissionExperience || isDropMode) {
       return null;
     }
     return normalizeCurationDropInput(getMarkdown ?? "");
-  }, [getMarkdown, isCurationWave, isDropMode]);
+  }, [getMarkdown, isCurationSubmissionExperience, isDropMode]);
   const showCurationDropModeWarning =
-    !isDropMode && !!normalizedCurationDropUrl && isCurationWave;
+    !isDropMode &&
+    !!normalizedCurationDropUrl &&
+    isCurationSubmissionExperience;
 
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
 
@@ -522,6 +595,59 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
   const isInitialMountRef = useRef(true);
 
+  const identityValidationMessage = useMemo(() => {
+    if (!isIdentitySubmissionExperience || !isDropMode) {
+      return null;
+    }
+
+    if (
+      identitySubmissionMode ===
+      ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself
+    ) {
+      return viewerSelectableIdentity
+        ? null
+        : "We couldn't determine your identity for this submission.";
+    }
+
+    if (!selectedIdentity) {
+      return "Select an identity to nominate.";
+    }
+
+    if (
+      identitySubmissionMode ===
+        ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyOthers &&
+      selectedIdentity.trim().toLowerCase() ===
+        viewerSelectableIdentity?.trim().toLowerCase()
+    ) {
+      return "Select someone else to nominate.";
+    }
+
+    return null;
+  }, [
+    identitySubmissionMode,
+    isDropMode,
+    isIdentitySubmissionExperience,
+    selectedIdentity,
+    viewerSelectableIdentity,
+  ]);
+
+  const showIdentityValidationMessage =
+    !!identityValidationMessage &&
+    (hasAttemptedIdentitySubmit ||
+      (selectedIdentity !== null &&
+        identitySubmissionMode ===
+          ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyOthers) ||
+      identitySubmissionMode ===
+        ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself);
+
+  const getSubmissionMetadata = useCallback(() => {
+    return buildDropSubmissionMetadata({
+      metadata,
+      identity:
+        isIdentitySubmissionExperience && isDropMode ? selectedIdentity : null,
+    });
+  }, [isDropMode, isIdentitySubmissionExperience, metadata, selectedIdentity]);
+
   const getReplyTo = () => {
     if (activeDrop?.action === ActiveDropAction.REPLY) {
       return {
@@ -545,7 +671,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         mentioned_users: drop?.mentioned_users ?? [],
         mentioned_waves: drop?.mentioned_waves ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
-        metadata: convertMetadataToDropMetadata(metadata),
+        metadata: getSubmissionMetadata(),
         signature: null,
         drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
         is_safe_signature: isSafeWallet,
@@ -580,7 +706,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       mentioned_users: [],
       mentioned_waves: [],
       referenced_nfts: [],
-      metadata: [],
+      metadata: getSubmissionMetadata(),
       signature: null,
       is_safe_signature: isSafeWallet,
       signer_address: address ?? "",
@@ -630,7 +756,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       mentioned_users: allMentions,
       mentioned_waves: allWaves,
       referenced_nfts: allNfts,
-      metadata: convertMetadataToDropMetadata(metadata),
+      metadata: getSubmissionMetadata(),
       signature: null,
       is_safe_signature: isSafeWallet,
       signer_address: address ?? "",
@@ -714,6 +840,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setMentionedWaves([]);
     setReferencedNfts([]);
     setDrop(null);
+    setSelectedIdentityState(null);
+    setHasAttemptedIdentitySubmitState(null);
     setUserShowOptions(false);
     closeOnNextInputRef.current = false;
     setDropEditorRefreshKey((prev) => prev + 1);
@@ -893,6 +1021,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (identityValidationMessage) {
+      setHasAttemptedIdentitySubmitState({
+        scopeKey: identitySubmissionScopeKey,
+        value: true,
+      });
+      return;
+    }
+
+    if (hasMetadataValidationErrors) {
+      setIsMetadataOpen(true);
+      return;
+    }
+
     if (
       missingRequirements.metadata.length ||
       missingRequirements.media.length
@@ -916,6 +1057,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (submitting) {
       return;
     }
+    if (identityValidationMessage) {
+      setHasAttemptedIdentitySubmitState({
+        scopeKey: identitySubmissionScopeKey,
+        value: true,
+      });
+      return;
+    }
+
+    if (hasMetadataValidationErrors) {
+      setIsMetadataOpen(true);
+      return;
+    }
+
     await prepareAndSubmitDrop(createGifDrop(gif));
   };
 
@@ -1169,6 +1323,31 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
       />
+      {isIdentitySubmissionExperience &&
+        isDropMode &&
+        identitySubmissionMode !== null && (
+          <CreateDropIdentityField
+            mode={identitySubmissionMode}
+            selectedIdentity={selectedIdentity}
+            selfIdentityDisplay={viewerIdentityLabel}
+            disabled={submitting}
+            errorMessage={
+              showIdentityValidationMessage ? identityValidationMessage : null
+            }
+            onChange={(identity) => {
+              setSelectedIdentityState({
+                scopeKey: identitySubmissionScopeKey,
+                value: identity,
+              });
+              if (identity) {
+                setHasAttemptedIdentitySubmitState({
+                  scopeKey: identitySubmissionScopeKey,
+                  value: false,
+                });
+              }
+            }}
+          />
+        )}
       <div className="tw-flex tw-w-full tw-items-end">
         <div
           ref={actionsContainerRef}
@@ -1227,13 +1406,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            {isParticipatory && !dropId && !isMemesWave && (
-              <CreateDropDropModeToggle
-                isDropMode={isDropMode}
-                onDropModeChange={handleDropModeChange}
-                privileges={privileges}
-              />
-            )}
+            {isParticipatory &&
+              !dropId &&
+              submissionExperience !==
+                WaveSubmissionExperience.MEMES_LEGACY && (
+                <CreateDropDropModeToggle
+                  isDropMode={isDropMode}
+                  onDropModeChange={handleDropModeChange}
+                  privileges={privileges}
+                />
+              )}
             <CreateDropSubmit
               submitting={submitting}
               canSubmit={canSubmit}
@@ -1268,6 +1450,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               closeMetadata={closeMetadata}
               metadata={metadata}
               missingRequiredMetadataKeys={missingRequirements.metadata}
+              metadataErrorById={metadataErrorById}
               onChangeKey={onChangeKey}
               onChangeValue={onChangeValue}
               onAddMetadata={onAddMetadata}

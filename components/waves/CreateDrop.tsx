@@ -22,6 +22,10 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
+import {
+  resolveWaveSubmissionExperience,
+  WaveSubmissionExperience,
+} from "@/helpers/waves/wave-submission-experience.helpers";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -68,7 +72,12 @@ export default function CreateDrop({
     url: string;
   } | null>(null);
   const { processDropRemoved, processIncomingDrop } = useMyStream();
-  const { isCurationWave } = useWave(wave);
+  const { isMemesWave, isCurationWave } = useWave(wave);
+  const submissionExperience = resolveWaveSubmissionExperience({
+    isMemesWave,
+    isCurationWave,
+    submissionStrategy: wave.participation.submission_strategy ?? null,
+  });
   const getDefaultIsDropMode = () => {
     if (fixedDropMode === DropMode.CHAT) {
       return false;
@@ -103,7 +112,9 @@ export default function CreateDrop({
     curationPrefillSeed?.scopeKey === modeScopeToken
       ? curationPrefillSeed.url
       : null;
-  const isCurationDropMode = isCurationWave && isDropMode;
+  const isCurationDropMode =
+    submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
+    isDropMode;
 
   const canSwitchDropMode = useCallback(
     (newIsDropMode: boolean) => {
@@ -182,7 +193,10 @@ export default function CreateDrop({
       }
       processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
 
-      if (isCurationWave && curationComposerVariant === "leaderboard") {
+      if (
+        submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
+        curationComposerVariant === "leaderboard"
+      ) {
         setToast({
           message: "Drop submitted successfully",
           type: "success",
@@ -335,7 +349,11 @@ export default function CreateDrop({
           curationComposerVariant={curationComposerVariant}
         />
       ) : (
-        <CreateDropContent {...createDropContentProps} wave={wave} />
+        <CreateDropContent
+          {...createDropContentProps}
+          wave={wave}
+          submissionExperience={submissionExperience}
+        />
       )}
     </>
   );

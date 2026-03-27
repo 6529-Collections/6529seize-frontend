@@ -197,6 +197,57 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(screen.getByTestId("memes")).toBeInTheDocument();
   });
 
+  it("keeps identity submission on the normal inline create path", async () => {
+    const user = userEvent.setup();
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <MyStreamWaveLeaderboard
+          wave={{
+            ...wave,
+            participation: {
+              submission_strategy: {
+                type: "IDENTITY",
+                config: {
+                  who_can_be_submitted: "EVERYONE",
+                  duplicates: "NEVER_ALLOW",
+                },
+              },
+            },
+          }}
+          onDropClick={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+    expect(screen.queryByTestId("memes")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("curation-modal")).not.toBeInTheDocument();
+  });
+
   it("renders non-meme content-only grid mode", () => {
     useWave.mockReturnValue({
       isMemesWave: false,

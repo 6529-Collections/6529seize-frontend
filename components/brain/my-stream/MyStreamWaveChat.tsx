@@ -17,6 +17,10 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  resolveWaveSubmissionExperience,
+  WaveSubmissionExperience,
+} from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
@@ -96,7 +100,12 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
-  const { isMemesWave } = useWave(wave);
+  const { isMemesWave, isCurationWave } = useWave(wave);
+  const submissionExperience = resolveWaveSubmissionExperience({
+    isMemesWave,
+    isCurationWave,
+    submissionStrategy: wave.participation.submission_strategy ?? null,
+  });
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
 
@@ -264,7 +273,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             </CreateDropWaveWrapper>
           </div>
         )}
-        {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
+        {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (
+          <MobileMemesArtSubmissionBtn wave={wave} />
+        )}
       </div>
     </UnreadDividerProvider>
   );

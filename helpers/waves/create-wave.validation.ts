@@ -1,5 +1,7 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { isReservedIdentitySubmissionMetadataKey } from "./identity-submission-metadata";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 import type {
   CreateWaveApprovalConfig,
@@ -23,6 +25,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE = "VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE",
   END_DATE_MUST_BE_AFTER_VOTING_START_DATE = "END_DATE_MUST_BE_AFTER_VOTING_START_DATE",
   DROPS_REQUIRED_METADATA_NON_UNIQUE = "DROPS_REQUIRED_METADATA_NON_UNIQUE",
+  DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY = "DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY",
   APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
   APPROVAL_THRESHOLD_TIME_REQUIRED = "APPROVAL_THRESHOLD_TIME_REQUIRED",
   APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION = "APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION",
@@ -118,6 +121,17 @@ const isRequiredMetadataRowsNonUnique = ({
   return new Set(keys).size !== keys.length;
 };
 
+const hasReservedIdentitySubmissionMetadataKey = ({
+  drops,
+}: {
+  readonly drops: CreateWaveDropsConfig;
+}): boolean =>
+  drops.submissionStrategy?.type ===
+    ApiWaveParticipationSubmissionStrategyType.Identity &&
+  drops.requiredMetadata.some((item) =>
+    isReservedIdentitySubmissionMetadataKey(item.key)
+  );
+
 const getDropsValidationErrors = ({
   waveType,
   drops,
@@ -169,6 +183,12 @@ const getDropsValidationErrors = ({
     ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE
+      );
+    }
+
+    if (hasReservedIdentitySubmissionMetadataKey({ drops })) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY
       );
     }
   }
