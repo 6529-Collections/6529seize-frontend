@@ -2,6 +2,7 @@
 
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useCallback, useEffect, useRef, useState } from "react";
 import MemesQuickVoteActionBar from "./MemesQuickVoteActionBar";
 import MemesQuickVoteDropHeader from "./MemesQuickVoteDropHeader";
 
@@ -25,6 +26,109 @@ interface MemesQuickVoteControlsProps {
   readonly onOpenCustom: () => void;
   readonly onSkip: () => void;
   readonly onVoteAmount: (amount: number) => void;
+}
+
+function MemesQuickVoteDescription({
+  description,
+}: {
+  readonly description: string;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const visibleDescriptionRef = useRef<HTMLParagraphElement | null>(null);
+  const clampClass = isExpanded ? "tw-line-clamp-none" : "tw-line-clamp-4";
+  const descriptionClassName =
+    "tw-mb-0 tw-whitespace-pre-line tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400 md:tw-text-md";
+
+  const measureOverflow = useCallback(() => {
+    const visibleDescription = visibleDescriptionRef.current;
+
+    if (!visibleDescription) {
+      return;
+    }
+
+    const computedStyles = globalThis.getComputedStyle(visibleDescription);
+    const lineHeight = Number.parseFloat(computedStyles.lineHeight || "0");
+    const collapsedHeight = lineHeight * 4;
+
+    if (!Number.isFinite(collapsedHeight) || collapsedHeight <= 0) {
+      return;
+    }
+
+    const previousDisplay = visibleDescription.style.display;
+    const previousOverflow = visibleDescription.style.overflow;
+    const previousWebkitLineClamp = visibleDescription.style.webkitLineClamp;
+
+    visibleDescription.style.display = "block";
+    visibleDescription.style.overflow = "visible";
+    visibleDescription.style.webkitLineClamp = "unset";
+
+    const fullHeight = visibleDescription.getBoundingClientRect().height;
+
+    visibleDescription.style.display = previousDisplay;
+    visibleDescription.style.overflow = previousOverflow;
+    visibleDescription.style.webkitLineClamp = previousWebkitLineClamp;
+
+    const nextIsOverflowing = fullHeight > collapsedHeight + 1;
+
+    setIsOverflowing((current) =>
+      current === nextIsOverflowing ? current : nextIsOverflowing
+    );
+  }, []);
+
+  useEffect(() => {
+    const frameId = globalThis.requestAnimationFrame(() => {
+      measureOverflow();
+    });
+
+    if (typeof ResizeObserver === "undefined") {
+      const handleResize = () => {
+        measureOverflow();
+      };
+
+      globalThis.addEventListener("resize", handleResize);
+      return () => {
+        globalThis.removeEventListener("resize", handleResize);
+        globalThis.cancelAnimationFrame(frameId);
+      };
+    }
+
+    const observer = new ResizeObserver(() => {
+      measureOverflow();
+    });
+
+    if (visibleDescriptionRef.current) {
+      observer.observe(visibleDescriptionRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+      globalThis.cancelAnimationFrame(frameId);
+    };
+  }, [measureOverflow]);
+
+  return (
+    <div className="tw-space-y-1.5">
+      <p
+        ref={visibleDescriptionRef}
+        className={`${descriptionClassName} ${clampClass}`}
+      >
+        {description}
+      </p>
+      {isOverflowing && (
+        <button
+          type="button"
+          aria-expanded={isExpanded}
+          onClick={() => {
+            setIsExpanded((current) => !current);
+          }}
+          className="tw-inline-flex tw-w-fit tw-border-0 tw-bg-transparent tw-px-0 tw-py-1 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white/15 desktop-hover:hover:tw-text-iron-300"
+        >
+          {isExpanded ? "See less" : "See more"}
+        </button>
+      )}
+    </div>
+  );
 }
 
 export default function MemesQuickVoteControls({
@@ -65,7 +169,7 @@ export default function MemesQuickVoteControls({
       </div>
 
       <div className="tw-relative tw-hidden tw-min-h-0 tw-flex-1 md:tw-flex">
-        <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-16 [-ms-overflow-style:none] [scrollbar-width:none] md:tw-px-8 [&::-webkit-scrollbar]:tw-hidden">
+        <div className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-16 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 desktop-hover:hover:tw-scrollbar-thumb-iron-600/80 md:tw-px-8">
           <div className="tw-flex tw-w-full tw-flex-col tw-gap-5">
             <MemesQuickVoteDropHeader drop={drop} />
 
@@ -75,9 +179,10 @@ export default function MemesQuickVoteControls({
               </h2>
 
               {description && (
-                <p className="tw-mb-0 tw-line-clamp-4 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400 md:tw-text-md">
-                  {description}
-                </p>
+                <MemesQuickVoteDescription
+                  key={drop.id}
+                  description={description}
+                />
               )}
             </div>
           </div>
