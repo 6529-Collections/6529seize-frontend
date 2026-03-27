@@ -11539,6 +11539,7 @@ components:
         - picture
         - description_drop_id
         - last_drop_time
+        - submission_type
         - authenticated_user_eligible_to_vote
         - authenticated_user_eligible_to_participate
         - authenticated_user_eligible_to_chat
@@ -11568,6 +11569,10 @@ components:
           description: Unix timestamp in milliseconds of the most recent drop in this wave
           type: number
           format: int64
+        submission_type:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategyType"
         authenticated_user_eligible_to_vote:
           type: boolean
         authenticated_user_eligible_to_participate:
