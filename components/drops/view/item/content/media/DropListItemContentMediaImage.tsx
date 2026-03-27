@@ -47,7 +47,6 @@ function DropListItemContentMediaImage({
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
-  const [hasFailed, setHasFailed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
   const [retryTick, setRetryTick] = useState(0);
@@ -59,17 +58,11 @@ function DropListItemContentMediaImage({
   const { isCapacitor } = useCapacitor();
 
   const handleImageLoad = useCallback(() => {
-    setHasFailed(false);
     setLoaded(true);
   }, []);
 
   const handleError = useCallback(() => {
-    if (errorCount >= maxRetries) {
-      setHasFailed(true);
-      setLoaded(false);
-      return;
-    }
-
+    if (errorCount >= maxRetries) return;
     const delay = 500 * 2 ** errorCount; // 0.5s, 1s, 2s …
     setTimeout(() => {
       setErrorCount((n) => n + 1);
@@ -79,7 +72,6 @@ function DropListItemContentMediaImage({
 
   const manualRetry = () => {
     setErrorCount(0);
-    setHasFailed(false);
     setLoaded(false);
     setRetryTick((t) => t + 1);
   };
@@ -300,7 +292,7 @@ function DropListItemContentMediaImage({
           isCompetitionDrop ? "tw-justify-center" : ""
         }`}
       >
-        {!loaded && !hasFailed && errorCount <= maxRetries && (
+        {!loaded && errorCount <= maxRetries && (
           <div
             className={`tw-rounded-xl tw-bg-iron-800 ${
               hasTouchScreen ? "" : "tw-animate-pulse"
@@ -309,7 +301,7 @@ function DropListItemContentMediaImage({
           />
         )}
 
-        {inView && !hasFailed && errorCount <= maxRetries && (
+        {inView && errorCount <= maxRetries && (
           <FallbackImage
             key={retryTick}
             ref={imgRef}
@@ -330,7 +322,7 @@ function DropListItemContentMediaImage({
             onError={handleError}
           />
         )}
-        {hasFailed && (
+        {errorCount > maxRetries && (
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2">
             <span className="tw-text-sm tw-text-iron-400">
               Couldn’t load image.

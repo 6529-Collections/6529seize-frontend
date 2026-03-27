@@ -25,43 +25,6 @@ const DropListItemContentMediaGLB = dynamic(
   }
 );
 
-const IMAGE_URL_PATTERN =
-  /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|webp)(?:$|[?#])/i;
-const VIDEO_URL_PATTERN = /\.(m3u8|m4v|mov|mp4|mpeg|mpg|ogv|webm)(?:$|[?#])/i;
-const AUDIO_URL_PATTERN = /\.(aac|flac|m4a|mp3|oga|ogg|wav)(?:$|[?#])/i;
-const HTML_URL_PATTERN = /\.(html?)(?:$|[?#])/i;
-const GLB_URL_PATTERN = /\.(glb|gltf)(?:$|[?#])/i;
-
-const resolveMediaTypeFromUrl = (mediaUrl: string): MediaType => {
-  if (IMAGE_URL_PATTERN.test(mediaUrl)) {
-    return MediaType.IMAGE;
-  }
-
-  if (VIDEO_URL_PATTERN.test(mediaUrl)) {
-    return MediaType.VIDEO;
-  }
-
-  if (AUDIO_URL_PATTERN.test(mediaUrl)) {
-    return MediaType.AUDIO;
-  }
-
-  if (GLB_URL_PATTERN.test(mediaUrl)) {
-    return MediaType.GLB;
-  }
-
-  if (HTML_URL_PATTERN.test(mediaUrl)) {
-    return MediaType.HTML;
-  }
-
-  return MediaType.UNKNOWN;
-};
-
-const UnavailableMediaFallback = () => (
-  <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-black/20 tw-text-sm tw-text-iron-500">
-    Preview unavailable
-  </div>
-);
-
 export default function DropListItemContentMedia({
   media_mime_type,
   media_url,
@@ -86,28 +49,27 @@ export default function DropListItemContentMedia({
   readonly htmlPreviewImageUrl?: string | undefined;
 }) {
   const getMediaType = (): MediaType => {
-    const normalizedMimeType = media_mime_type.trim().toLowerCase();
-
-    if (normalizedMimeType.includes("image")) {
+    if (media_mime_type.includes("image")) {
       return MediaType.IMAGE;
     }
-    if (normalizedMimeType.includes("video")) {
+    if (media_mime_type.includes("video")) {
       return MediaType.VIDEO;
     }
-    if (normalizedMimeType.includes("audio")) {
+    if (media_mime_type.includes("audio")) {
       return MediaType.AUDIO;
     }
     if (
-      normalizedMimeType === "model/gltf-binary" ||
-      normalizedMimeType === "model/gltf+json"
+      media_mime_type === "model/gltf-binary" ||
+      media_mime_type === "model/gltf+json" ||
+      media_url.endsWith(".glb") ||
+      media_url.endsWith(".gltf")
     ) {
       return MediaType.GLB;
     }
-    if (normalizedMimeType === "text/html") {
+    if (media_mime_type === "text/html") {
       return MediaType.HTML;
     }
-
-    return resolveMediaTypeFromUrl(media_url);
+    return MediaType.UNKNOWN;
   };
 
   const mediaType = getMediaType();
@@ -147,7 +109,7 @@ export default function DropListItemContentMedia({
         />
       );
     case MediaType.UNKNOWN:
-      return <UnavailableMediaFallback />;
+      return <></>;
     default:
       return assertUnreachable(mediaType);
   }
