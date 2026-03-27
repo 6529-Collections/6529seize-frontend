@@ -1,36 +1,49 @@
 "use client";
 
 import type React from "react";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type SwiperClass from "swiper";
+import {
+  usePatchComputedStyleForFallbackSwipe,
+  useQuickVotePreviewCardTouchFallback,
+  useSwipeCommitTimeoutCleanup,
+} from "./useMemesQuickVotePreviewSwipe.helpers";
 
 const SWIPE_TRIGGER_THRESHOLD = 32;
 const MAX_SWIPE_OFFSET = 132;
 const SWIPE_EXIT_DURATION_MS = 220;
 const SWIPE_EXIT_OFFSET = 420;
 const SWIPE_EXIT_ROTATION_DEGREES = 3;
-const QUICK_VOTE_TRANSFORM_DATA_ATTRIBUTE = "quickVoteTransform";
-const QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG =
-  "__memesQuickVoteComputedStylePatched";
+const TOUCH_GESTURE_AXIS_LOCK_THRESHOLD = 8;
 type TimeoutHandle = ReturnType<typeof globalThis.setTimeout>;
 
 type SwipeDirection = "left" | "right";
+type TouchGestureAxis = "pending" | "horizontal" | "vertical";
 type TouchLikeEvent = {
   readonly changedTouches?:
-    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | ArrayLike<{
+        readonly clientX?: number;
+        readonly clientY?: number;
+        readonly pageX?: number;
+        readonly pageY?: number;
+      }>
     | undefined;
   readonly targetTouches?:
-    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | ArrayLike<{
+        readonly clientX?: number;
+        readonly clientY?: number;
+        readonly pageX?: number;
+        readonly pageY?: number;
+      }>
     | undefined;
   readonly touches?:
-    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | ArrayLike<{
+        readonly clientX?: number;
+        readonly clientY?: number;
+        readonly pageX?: number;
+        readonly pageY?: number;
+      }>
     | undefined;
   readonly stopPropagation?: () => void;
 };
@@ -49,6 +62,10 @@ interface UseMemesQuickVotePreviewSwipeResult {
   readonly canUseSwiperTouchSurface: boolean;
   readonly cardTransform: string | undefined;
   readonly cardTransitionDuration: string;
+  readonly handleTouchSurfaceCancel: (event: TouchLikeEvent) => void;
+  readonly handleTouchSurfaceEnd: (event: TouchLikeEvent) => void;
+  readonly handleTouchSurfaceMove: (event: TouchLikeEvent) => void;
+  readonly handleTouchSurfaceStart: (event: TouchLikeEvent) => void;
   readonly swipeOffset: number;
   readonly handleCardTransitionEnd: (
     event: React.TransitionEvent<HTMLElement>
@@ -58,20 +75,43 @@ interface UseMemesQuickVotePreviewSwipeResult {
 }
 
 interface SwipeState {
-  readonly fallbackTouchCurrentXRef: React.RefObject<number | null>;
-  readonly fallbackTouchStartXRef: React.RefObject<number | null>;
   readonly handleCardTransitionEnd: (
     event: React.TransitionEvent<HTMLElement>
   ) => void;
-  readonly handleSwipeEnd: (swipeDistance: number) => void;
+  readonly handleTouchSurfaceCancel: (event: TouchLikeEvent) => void;
+  readonly handleTouchSurfaceEnd: (event: TouchLikeEvent) => void;
+  readonly handleTouchSurfaceMove: (event: TouchLikeEvent) => void;
+  readonly handleTouchSurfaceStart: (event: TouchLikeEvent) => void;
   readonly handleSwiperMove: (swiper: SwiperClass) => void;
   readonly handleSwiperTouchEnd: (swiper: SwiperClass) => void;
+  readonly swipeExitDirection: SwipeDirection | null;
+  readonly swipeOffset: number;
+}
+
+interface TouchSurfaceHandlerArgs {
+  readonly fallbackTouchAxisRef: React.RefObject<TouchGestureAxis>;
+  readonly fallbackTouchCurrentXRef: React.RefObject<number | null>;
+  readonly fallbackTouchCurrentYRef: React.RefObject<number | null>;
+  readonly fallbackTouchStartXRef: React.RefObject<number | null>;
+  readonly fallbackTouchStartYRef: React.RefObject<number | null>;
+  readonly handleSwipeEnd: (swipeDistance: number) => void;
+  readonly isBusy: boolean;
   readonly isFallbackTouchActiveRef: React.RefObject<boolean>;
   readonly resetFallbackTouch: () => void;
   readonly resetSwipe: () => void;
   readonly setSwipeOffset: React.Dispatch<React.SetStateAction<number>>;
   readonly swipeExitDirection: SwipeDirection | null;
-  readonly swipeOffset: number;
+}
+
+interface TouchSurfaceCompletionHandlerArgs {
+  readonly fallbackTouchAxisRef: React.RefObject<TouchGestureAxis>;
+  readonly fallbackTouchCurrentXRef: React.RefObject<number | null>;
+  readonly fallbackTouchStartXRef: React.RefObject<number | null>;
+  readonly handleSwipeEnd: (swipeDistance: number) => void;
+  readonly isBusy: boolean;
+  readonly isFallbackTouchActiveRef: React.RefObject<boolean>;
+  readonly resetFallbackTouch: () => void;
+  readonly resetSwipe: () => void;
 }
 
 function commitSwipeAction(
@@ -88,7 +128,14 @@ function commitSwipeAction(
 }
 
 const getTouchClientX = (
-  touch: { readonly clientX?: number; readonly pageX?: number } | undefined
+  touch:
+    | {
+        readonly clientX?: number;
+        readonly clientY?: number;
+        readonly pageX?: number;
+        readonly pageY?: number;
+      }
+    | undefined
 ): number | null => {
   if (typeof touch?.pageX === "number") {
     return touch.pageX;
@@ -101,9 +148,35 @@ const getTouchClientX = (
   return null;
 };
 
+const getTouchClientY = (
+  touch:
+    | {
+        readonly clientX?: number;
+        readonly clientY?: number;
+        readonly pageX?: number;
+        readonly pageY?: number;
+      }
+    | undefined
+): number | null => {
+  if (typeof touch?.pageY === "number") {
+    return touch.pageY;
+  }
+
+  if (typeof touch?.clientY === "number") {
+    return touch.clientY;
+  }
+
+  return null;
+};
+
 const getTouchListClientX = (
   touches:
-    | ArrayLike<{ readonly clientX?: number; readonly pageX?: number }>
+    | ArrayLike<{
+        readonly clientX?: number;
+        readonly clientY?: number;
+        readonly pageX?: number;
+        readonly pageY?: number;
+      }>
     | undefined
 ): number | null => {
   if (!touches || touches.length === 0) {
@@ -113,10 +186,131 @@ const getTouchListClientX = (
   return getTouchClientX(touches[0]);
 };
 
+const getTouchListClientY = (
+  touches:
+    | ArrayLike<{
+        readonly clientX?: number;
+        readonly clientY?: number;
+        readonly pageX?: number;
+        readonly pageY?: number;
+      }>
+    | undefined
+): number | null => {
+  if (!touches || touches.length === 0) {
+    return null;
+  }
+
+  return getTouchClientY(touches[0]);
+};
+
 const getTouchEventClientX = (event: TouchLikeEvent): number | null =>
   getTouchListClientX(event.touches) ??
   getTouchListClientX(event.targetTouches) ??
   getTouchListClientX(event.changedTouches);
+
+const getTouchEventClientY = (event: TouchLikeEvent): number | null =>
+  getTouchListClientY(event.touches) ??
+  getTouchListClientY(event.targetTouches) ??
+  getTouchListClientY(event.changedTouches);
+
+const clampSwipeOffset = (swipeOffset: number) =>
+  Math.max(-MAX_SWIPE_OFFSET, Math.min(swipeOffset, MAX_SWIPE_OFFSET));
+
+function startTouchSurfaceTracking({
+  fallbackTouchAxisRef,
+  fallbackTouchCurrentXRef,
+  fallbackTouchCurrentYRef,
+  fallbackTouchStartXRef,
+  fallbackTouchStartYRef,
+  isFallbackTouchActiveRef,
+  setSwipeOffset,
+  startX,
+  startY,
+}: {
+  readonly fallbackTouchAxisRef: React.RefObject<TouchGestureAxis>;
+  readonly fallbackTouchCurrentXRef: React.RefObject<number | null>;
+  readonly fallbackTouchCurrentYRef: React.RefObject<number | null>;
+  readonly fallbackTouchStartXRef: React.RefObject<number | null>;
+  readonly fallbackTouchStartYRef: React.RefObject<number | null>;
+  readonly isFallbackTouchActiveRef: React.RefObject<boolean>;
+  readonly setSwipeOffset: React.Dispatch<React.SetStateAction<number>>;
+  readonly startX: number;
+  readonly startY: number;
+}) {
+  fallbackTouchAxisRef.current = "pending";
+  fallbackTouchStartXRef.current = startX;
+  fallbackTouchStartYRef.current = startY;
+  fallbackTouchCurrentXRef.current = startX;
+  fallbackTouchCurrentYRef.current = startY;
+  isFallbackTouchActiveRef.current = true;
+  flushSync(() => {
+    setSwipeOffset(0);
+  });
+}
+
+function resolveTouchSurfaceOffset({
+  currentX,
+  currentY,
+  fallbackTouchAxisRef,
+  fallbackTouchCurrentXRef,
+  fallbackTouchCurrentYRef,
+  startX,
+  startY,
+}: {
+  readonly currentX: number;
+  readonly currentY: number;
+  readonly fallbackTouchAxisRef: React.RefObject<TouchGestureAxis>;
+  readonly fallbackTouchCurrentXRef: React.RefObject<number | null>;
+  readonly fallbackTouchCurrentYRef: React.RefObject<number | null>;
+  readonly startX: number;
+  readonly startY: number;
+}): number | null {
+  fallbackTouchCurrentXRef.current = currentX;
+  fallbackTouchCurrentYRef.current = currentY;
+
+  const deltaX = currentX - startX;
+  const deltaY = currentY - startY;
+  const absoluteDeltaX = Math.abs(deltaX);
+  const absoluteDeltaY = Math.abs(deltaY);
+
+  if (fallbackTouchAxisRef.current === "pending") {
+    if (
+      absoluteDeltaX < TOUCH_GESTURE_AXIS_LOCK_THRESHOLD &&
+      absoluteDeltaY < TOUCH_GESTURE_AXIS_LOCK_THRESHOLD
+    ) {
+      return null;
+    }
+
+    fallbackTouchAxisRef.current =
+      absoluteDeltaX > absoluteDeltaY ? "horizontal" : "vertical";
+  }
+
+  if (fallbackTouchAxisRef.current !== "horizontal") {
+    return null;
+  }
+
+  return clampSwipeOffset(deltaX);
+}
+
+function getTouchSurfaceDistance({
+  fallbackTouchAxisRef,
+  startX,
+  endX,
+}: {
+  readonly fallbackTouchAxisRef: React.RefObject<TouchGestureAxis>;
+  readonly startX: number | null;
+  readonly endX: number | null;
+}): number | null {
+  if (
+    fallbackTouchAxisRef.current !== "horizontal" ||
+    startX === null ||
+    endX === null
+  ) {
+    return null;
+  }
+
+  return endX - startX;
+}
 
 function getCardTransform(
   isMobile: boolean,
@@ -149,69 +343,244 @@ function getCardTransitionDuration(
   return `${SWIPE_EXIT_DURATION_MS}ms`;
 }
 
-function patchComputedStyleForFallbackSwipe() {
-  if (
-    globalThis.window === undefined ||
-    typeof globalThis.window.Touch === "function"
-  ) {
-    return;
-  }
-
-  const browserWindow = globalThis.window;
-  const patchedWindow = browserWindow as typeof browserWindow & {
-    [QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG]?: boolean;
-  };
-
-  if (patchedWindow[QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG]) {
-    return;
-  }
-
-  const originalGetComputedStyle =
-    browserWindow.getComputedStyle.bind(browserWindow);
-
-  browserWindow.getComputedStyle = ((
-    element: Element,
-    pseudoElement?: string
-  ) => {
-    const computedStyle = originalGetComputedStyle(element, pseudoElement);
-
-    if (!(element instanceof HTMLElement)) {
-      return computedStyle;
-    }
-
-    const transform =
-      element.dataset[QUICK_VOTE_TRANSFORM_DATA_ATTRIBUTE] ?? "";
-
-    if (transform.length === 0) {
-      return computedStyle;
-    }
-
-    const patchedComputedStyle = Object.create(
-      computedStyle
-    ) as CSSStyleDeclaration;
-
-    Object.defineProperty(patchedComputedStyle, "transform", {
-      configurable: true,
-      value: transform,
+function useQuickVoteTouchSurfaceHandlers({
+  fallbackTouchAxisRef,
+  fallbackTouchCurrentXRef,
+  fallbackTouchCurrentYRef,
+  fallbackTouchStartXRef,
+  fallbackTouchStartYRef,
+  handleSwipeEnd,
+  isBusy,
+  isFallbackTouchActiveRef,
+  resetFallbackTouch,
+  resetSwipe,
+  setSwipeOffset,
+  swipeExitDirection,
+}: TouchSurfaceHandlerArgs) {
+  const touchAxisRef = fallbackTouchAxisRef;
+  const touchCurrentXRef = fallbackTouchCurrentXRef;
+  const touchCurrentYRef = fallbackTouchCurrentYRef;
+  const touchStartXRef = fallbackTouchStartXRef;
+  const touchStartYRef = fallbackTouchStartYRef;
+  const isTouchActiveRef = isFallbackTouchActiveRef;
+  const { handleTouchSurfaceCancel, handleTouchSurfaceEnd } =
+    useQuickVoteTouchSurfaceCompletionHandlers({
+      fallbackTouchAxisRef: touchAxisRef,
+      fallbackTouchCurrentXRef: touchCurrentXRef,
+      fallbackTouchStartXRef: touchStartXRef,
+      handleSwipeEnd,
+      isBusy,
+      isFallbackTouchActiveRef: isTouchActiveRef,
+      resetFallbackTouch,
+      resetSwipe,
     });
-    patchedComputedStyle.getPropertyValue = (property: string) =>
-      property === "transform"
-        ? transform
-        : computedStyle.getPropertyValue(property);
 
-    return patchedComputedStyle;
-  }) as typeof browserWindow.getComputedStyle;
+  const handleTouchSurfaceStart = useCallback(
+    (event: TouchLikeEvent) => {
+      if (isBusy || swipeExitDirection !== null) {
+        resetFallbackTouch();
+        return;
+      }
+      if (isTouchActiveRef.current) {
+        return;
+      }
+      const startX = getTouchEventClientX(event);
+      const startY = getTouchEventClientY(event);
+      if (startX === null || startY === null) {
+        return;
+      }
+      event.stopPropagation?.();
+      startTouchSurfaceTracking({
+        fallbackTouchAxisRef: touchAxisRef,
+        fallbackTouchCurrentXRef: touchCurrentXRef,
+        fallbackTouchCurrentYRef: touchCurrentYRef,
+        fallbackTouchStartXRef: touchStartXRef,
+        fallbackTouchStartYRef: touchStartYRef,
+        isFallbackTouchActiveRef: isTouchActiveRef,
+        setSwipeOffset,
+        startX,
+        startY,
+      });
+    },
+    [
+      isBusy,
+      isTouchActiveRef,
+      resetFallbackTouch,
+      setSwipeOffset,
+      swipeExitDirection,
+      touchAxisRef,
+      touchCurrentXRef,
+      touchCurrentYRef,
+      touchStartXRef,
+      touchStartYRef,
+    ]
+  );
 
-  patchedWindow[QUICK_VOTE_COMPUTED_STYLE_PATCH_FLAG] = true;
+  const handleTouchSurfaceMove = useCallback(
+    (event: TouchLikeEvent) => {
+      if (!isTouchActiveRef.current || swipeExitDirection !== null) {
+        return;
+      }
+      const startX = touchStartXRef.current;
+      const startY = touchStartYRef.current;
+      const currentX = getTouchEventClientX(event);
+      const currentY = getTouchEventClientY(event);
+      if (
+        startX === null ||
+        startY === null ||
+        currentX === null ||
+        currentY === null
+      ) {
+        return;
+      }
+      const nextSwipeOffset = resolveTouchSurfaceOffset({
+        currentX,
+        currentY,
+        fallbackTouchAxisRef: touchAxisRef,
+        fallbackTouchCurrentXRef: touchCurrentXRef,
+        fallbackTouchCurrentYRef: touchCurrentYRef,
+        startX,
+        startY,
+      });
+      if (nextSwipeOffset === null) {
+        return;
+      }
+      event.stopPropagation?.();
+      flushSync(() => {
+        setSwipeOffset(nextSwipeOffset);
+      });
+    },
+    [
+      isTouchActiveRef,
+      setSwipeOffset,
+      swipeExitDirection,
+      touchAxisRef,
+      touchCurrentXRef,
+      touchCurrentYRef,
+      touchStartXRef,
+      touchStartYRef,
+    ]
+  );
+
+  return {
+    handleTouchSurfaceCancel,
+    handleTouchSurfaceEnd,
+    handleTouchSurfaceMove,
+    handleTouchSurfaceStart,
+  };
 }
 
-function useSwipeCommitTimeoutCleanup(clearSwipeCommitTimeout: () => void) {
-  useLayoutEffect(
-    () => () => {
-      clearSwipeCommitTimeout();
+function useQuickVoteTouchSurfaceCompletionHandlers({
+  fallbackTouchAxisRef,
+  fallbackTouchCurrentXRef,
+  fallbackTouchStartXRef,
+  handleSwipeEnd,
+  isBusy,
+  isFallbackTouchActiveRef,
+  resetFallbackTouch,
+  resetSwipe,
+}: TouchSurfaceCompletionHandlerArgs) {
+  const handleTouchSurfaceEnd = useCallback(
+    (event: TouchLikeEvent) => {
+      if (!isFallbackTouchActiveRef.current) {
+        return;
+      }
+
+      event.stopPropagation?.();
+
+      if (isBusy) {
+        resetFallbackTouch();
+        resetSwipe();
+        return;
+      }
+
+      const swipeDistance = getTouchSurfaceDistance({
+        fallbackTouchAxisRef,
+        startX: fallbackTouchStartXRef.current,
+        endX: getTouchEventClientX(event) ?? fallbackTouchCurrentXRef.current,
+      });
+
+      if (swipeDistance === null) {
+        resetFallbackTouch();
+        resetSwipe();
+        return;
+      }
+
+      handleSwipeEnd(swipeDistance);
     },
-    [clearSwipeCommitTimeout]
+    [
+      fallbackTouchAxisRef,
+      fallbackTouchCurrentXRef,
+      fallbackTouchStartXRef,
+      handleSwipeEnd,
+      isBusy,
+      isFallbackTouchActiveRef,
+      resetFallbackTouch,
+      resetSwipe,
+    ]
   );
+
+  const handleTouchSurfaceCancel = useCallback(
+    (event: TouchLikeEvent) => {
+      if (!isFallbackTouchActiveRef.current) {
+        return;
+      }
+
+      event.stopPropagation?.();
+      resetFallbackTouch();
+      resetSwipe();
+    },
+    [isFallbackTouchActiveRef, resetFallbackTouch, resetSwipe]
+  );
+
+  return {
+    handleTouchSurfaceCancel,
+    handleTouchSurfaceEnd,
+  };
+}
+
+function useQuickVoteSwiperHandlers({
+  handleSwipeEnd,
+  isBusy,
+  isMobile,
+  resetSwipe,
+  setSwipeOffset,
+  swipeExitDirection,
+}: {
+  readonly handleSwipeEnd: (swipeDistance: number) => void;
+  readonly isBusy: boolean;
+  readonly isMobile: boolean;
+  readonly resetSwipe: () => void;
+  readonly setSwipeOffset: React.Dispatch<React.SetStateAction<number>>;
+  readonly swipeExitDirection: SwipeDirection | null;
+}) {
+  const handleSwiperMove = useCallback(
+    (swiper: SwiperClass) => {
+      if (isBusy || !isMobile || swipeExitDirection !== null) {
+        return;
+      }
+
+      setSwipeOffset(clampSwipeOffset(swiper.touches.diff));
+    },
+    [isBusy, isMobile, setSwipeOffset, swipeExitDirection]
+  );
+
+  const handleSwiperTouchEnd = useCallback(
+    (swiper: SwiperClass) => {
+      if (isBusy || !isMobile) {
+        resetSwipe();
+        return;
+      }
+
+      handleSwipeEnd(swiper.touches.diff);
+    },
+    [handleSwipeEnd, isBusy, isMobile, resetSwipe]
+  );
+
+  return {
+    handleSwiperMove,
+    handleSwiperTouchEnd,
+  };
 }
 
 function useQuickVotePreviewSwipeState({
@@ -228,8 +597,11 @@ function useQuickVotePreviewSwipeState({
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [swipeExitDirection, setSwipeExitDirection] =
     useState<SwipeDirection | null>(null);
+  const fallbackTouchAxisRef = useRef<TouchGestureAxis>("pending");
   const fallbackTouchStartXRef = useRef<number | null>(null);
+  const fallbackTouchStartYRef = useRef<number | null>(null);
   const fallbackTouchCurrentXRef = useRef<number | null>(null);
+  const fallbackTouchCurrentYRef = useRef<number | null>(null);
   const isFallbackTouchActiveRef = useRef(false);
   const swipeCommitTimeoutRef = useRef<TimeoutHandle | null>(null);
   const clearSwipeCommitTimeout = useCallback(() => {
@@ -242,8 +614,11 @@ function useQuickVotePreviewSwipeState({
   }, []);
 
   const resetFallbackTouch = useCallback(() => {
+    fallbackTouchAxisRef.current = "pending";
     fallbackTouchStartXRef.current = null;
+    fallbackTouchStartYRef.current = null;
     fallbackTouchCurrentXRef.current = null;
+    fallbackTouchCurrentYRef.current = null;
     isFallbackTouchActiveRef.current = false;
   }, []);
 
@@ -311,33 +686,34 @@ function useQuickVotePreviewSwipeState({
     },
     [beginSwipeCommit, resetFallbackTouch, resetSwipe, swipeVoteAmount]
   );
-
-  const handleSwiperMove = useCallback(
-    (swiper: SwiperClass) => {
-      if (isBusy || !isMobile || swipeExitDirection !== null) {
-        return;
-      }
-
-      setSwipeOffset(
-        Math.max(
-          -MAX_SWIPE_OFFSET,
-          Math.min(swiper.touches.diff, MAX_SWIPE_OFFSET)
-        )
-      );
-    },
-    [isBusy, isMobile, swipeExitDirection]
-  );
-
-  const handleSwiperTouchEnd = useCallback(
-    (swiper: SwiperClass) => {
-      if (isBusy || !isMobile) {
-        resetSwipe();
-        return;
-      }
-
-      handleSwipeEnd(swiper.touches.diff);
-    },
-    [handleSwipeEnd, isBusy, isMobile, resetSwipe]
+  const {
+    handleTouchSurfaceCancel,
+    handleTouchSurfaceEnd,
+    handleTouchSurfaceMove,
+    handleTouchSurfaceStart,
+  } = useQuickVoteTouchSurfaceHandlers({
+    fallbackTouchAxisRef,
+    fallbackTouchCurrentXRef,
+    fallbackTouchCurrentYRef,
+    fallbackTouchStartXRef,
+    fallbackTouchStartYRef,
+    handleSwipeEnd,
+    isBusy,
+    isFallbackTouchActiveRef,
+    resetFallbackTouch,
+    resetSwipe,
+    setSwipeOffset,
+    swipeExitDirection,
+  });
+  const { handleSwiperMove, handleSwiperTouchEnd } = useQuickVoteSwiperHandlers(
+    {
+      handleSwipeEnd,
+      isBusy,
+      isMobile,
+      resetSwipe,
+      setSwipeOffset,
+      swipeExitDirection,
+    }
   );
 
   const handleCardTransitionEnd = useCallback(
@@ -362,16 +738,13 @@ function useQuickVotePreviewSwipeState({
   useSwipeCommitTimeoutCleanup(clearSwipeCommitTimeout);
 
   return {
-    fallbackTouchCurrentXRef,
-    fallbackTouchStartXRef,
     handleCardTransitionEnd,
-    handleSwipeEnd,
+    handleTouchSurfaceCancel,
+    handleTouchSurfaceEnd,
+    handleTouchSurfaceMove,
+    handleTouchSurfaceStart,
     handleSwiperMove,
     handleSwiperTouchEnd,
-    isFallbackTouchActiveRef,
-    resetFallbackTouch,
-    resetSwipe,
-    setSwipeOffset,
     swipeExitDirection,
     swipeOffset,
   };
@@ -386,20 +759,10 @@ export default function useMemesQuickVotePreviewSwipe({
   swipeVoteAmount,
 }: UseMemesQuickVotePreviewSwipeArgs): UseMemesQuickVotePreviewSwipeResult {
   const previewCardRef = useRef<HTMLElement | null>(null);
-  const [canUseSwiperTouchSurface, setCanUseSwiperTouchSurface] =
-    useState(false);
-
-  useEffect(() => {
-    if (!isMobile) {
-      setCanUseSwiperTouchSurface(false);
-      return;
-    }
-
-    setCanUseSwiperTouchSurface(
-      globalThis.window !== undefined &&
-        typeof globalThis.window.Touch === "function"
-    );
-  }, [isMobile]);
+  const canUseSwiperTouchSurface =
+    isMobile &&
+    typeof window !== "undefined" &&
+    typeof window.Touch === "function";
 
   const swipeState = useQuickVotePreviewSwipeState({
     isBusy,
@@ -411,125 +774,16 @@ export default function useMemesQuickVotePreviewSwipe({
     usesTransitionlessSwipeCommit: isMobile && !canUseSwiperTouchSurface,
   });
 
-  useLayoutEffect(() => {
-    patchComputedStyleForFallbackSwipe();
-  }, []);
-
-  useLayoutEffect(() => {
-    if (canUseSwiperTouchSurface || !isMobile) {
-      return;
-    }
-
-    const previewCardNode = previewCardRef.current;
-
-    if (!previewCardNode) {
-      return;
-    }
-
-    const fallbackTouchStartRef = swipeState.fallbackTouchStartXRef;
-    const fallbackTouchCurrentRef = swipeState.fallbackTouchCurrentXRef;
-    const isFallbackTouchActive = swipeState.isFallbackTouchActiveRef;
-
-    const handleTouchStart = (event: TouchEvent) => {
-      if (isBusy || swipeState.swipeExitDirection !== null) {
-        swipeState.resetFallbackTouch();
-        return;
-      }
-
-      if (isFallbackTouchActive.current) {
-        return;
-      }
-
-      const startX = getTouchEventClientX(event);
-
-      if (startX === null) {
-        return;
-      }
-
-      event.stopPropagation();
-      fallbackTouchStartRef.current = startX;
-      fallbackTouchCurrentRef.current = startX;
-      isFallbackTouchActive.current = true;
-      flushSync(() => {
-        swipeState.setSwipeOffset(0);
-      });
-    };
-
-    const handleTouchMove = (event: TouchEvent) => {
-      if (
-        !isFallbackTouchActive.current ||
-        swipeState.swipeExitDirection !== null
-      ) {
-        return;
-      }
-
-      const startX = fallbackTouchStartRef.current;
-      const currentX = getTouchEventClientX(event);
-
-      if (startX === null || currentX === null) {
-        return;
-      }
-
-      event.stopPropagation();
-      fallbackTouchCurrentRef.current = currentX;
-      flushSync(() => {
-        swipeState.setSwipeOffset(
-          Math.max(
-            -MAX_SWIPE_OFFSET,
-            Math.min(currentX - startX, MAX_SWIPE_OFFSET)
-          )
-        );
-      });
-    };
-
-    const handleTouchEnd = (event: TouchEvent) => {
-      if (!isFallbackTouchActive.current) {
-        return;
-      }
-
-      event.stopPropagation();
-
-      if (isBusy) {
-        swipeState.resetFallbackTouch();
-        swipeState.resetSwipe();
-        return;
-      }
-
-      const startX = fallbackTouchStartRef.current;
-      const endX =
-        getTouchEventClientX(event) ?? fallbackTouchCurrentRef.current;
-
-      if (startX === null || endX === null) {
-        swipeState.resetFallbackTouch();
-        swipeState.resetSwipe();
-        return;
-      }
-
-      swipeState.handleSwipeEnd(endX - startX);
-    };
-
-    const handleTouchCancel = (event: TouchEvent) => {
-      if (!isFallbackTouchActive.current) {
-        return;
-      }
-
-      event.stopPropagation();
-      swipeState.resetFallbackTouch();
-      swipeState.resetSwipe();
-    };
-
-    previewCardNode.addEventListener("touchstart", handleTouchStart);
-    previewCardNode.addEventListener("touchmove", handleTouchMove);
-    previewCardNode.addEventListener("touchend", handleTouchEnd);
-    previewCardNode.addEventListener("touchcancel", handleTouchCancel);
-
-    return () => {
-      previewCardNode.removeEventListener("touchstart", handleTouchStart);
-      previewCardNode.removeEventListener("touchmove", handleTouchMove);
-      previewCardNode.removeEventListener("touchend", handleTouchEnd);
-      previewCardNode.removeEventListener("touchcancel", handleTouchCancel);
-    };
-  }, [canUseSwiperTouchSurface, isBusy, isMobile, previewCardRef, swipeState]);
+  usePatchComputedStyleForFallbackSwipe();
+  useQuickVotePreviewCardTouchFallback({
+    canUseSwiperTouchSurface,
+    handleTouchSurfaceCancel: swipeState.handleTouchSurfaceCancel,
+    handleTouchSurfaceEnd: swipeState.handleTouchSurfaceEnd,
+    handleTouchSurfaceMove: swipeState.handleTouchSurfaceMove,
+    handleTouchSurfaceStart: swipeState.handleTouchSurfaceStart,
+    isMobile,
+    previewCardRef,
+  });
 
   return {
     previewCardRef,
@@ -543,6 +797,10 @@ export default function useMemesQuickVotePreviewSwipe({
       swipeState.swipeExitDirection,
       swipeState.swipeOffset
     ),
+    handleTouchSurfaceCancel: swipeState.handleTouchSurfaceCancel,
+    handleTouchSurfaceEnd: swipeState.handleTouchSurfaceEnd,
+    handleTouchSurfaceMove: swipeState.handleTouchSurfaceMove,
+    handleTouchSurfaceStart: swipeState.handleTouchSurfaceStart,
     swipeOffset: swipeState.swipeOffset,
     handleCardTransitionEnd: swipeState.handleCardTransitionEnd,
     handleSwiperMove: swipeState.handleSwiperMove,
