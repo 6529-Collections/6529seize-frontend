@@ -6,7 +6,9 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import { useRouter } from "next/navigation";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
+import { getDropVisibleMetadata } from "@/components/waves/drops/identityDisplay.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
@@ -18,6 +20,10 @@ export const WaveLeaderboardDropContent: React.FC<
 > = ({ drop, isCompetitionDrop = false }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
+  const visibleMetadata = getDropVisibleMetadata({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
     const href = getWaveRoute({
@@ -41,12 +47,17 @@ export const WaveLeaderboardDropContent: React.FC<
         setLongPressTriggered={() => {}}
         isCompetitionDrop={isCompetitionDrop}
       />
-      {!!drop.metadata.length && (
+      <WaveLeaderboardIdentity
+        drop={drop}
+        variant="responsive"
+        className="tw-mt-2"
+      />
+      {!!visibleMetadata.length && (
         <div className="tw-mt-2">
-          <WaveDropMetadata metadata={drop.metadata} />
+          <WaveDropMetadata metadata={visibleMetadata} />
         </div>
       )}
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         <WaveDropReactions drop={drop} />
       </div>
     </div>

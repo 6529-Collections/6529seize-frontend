@@ -32,6 +32,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import WaveLeaderboardGalleryItemVotes from "../gallery/WaveLeaderboardGalleryItemVotes";
+import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import type { WaveLeaderboardGridMode } from "./WaveLeaderboardGrid";
 
 interface WaveLeaderboardGridItemProps {
@@ -288,6 +289,14 @@ export const WaveLeaderboardGridItem: React.FC<
         )}
       </div>
 
+      {isContentOnlyMode && (
+        <WaveLeaderboardIdentity
+          drop={drop}
+          variant="responsive"
+          className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-bg-iron-950/50 tw-p-3"
+        />
+      )}
+
       {isCompactMode && (
         <div
           data-testid={`wave-leaderboard-grid-item-footer-${drop.id}`}
@@ -325,6 +334,11 @@ export const WaveLeaderboardGridItem: React.FC<
               )}
             </div>
           </div>
+          <WaveLeaderboardIdentity
+            drop={drop}
+            variant="condensed"
+            className="tw-mb-3"
+          />
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-text-xs">
             <WaveLeaderboardGalleryItemVotes drop={drop} variant="subtle" />
             <div className="tw-ml-4 tw-flex tw-items-center tw-gap-1 tw-text-iron-500">
