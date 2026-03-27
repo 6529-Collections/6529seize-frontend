@@ -208,7 +208,7 @@ function MemesQuickVoteDialogContent({
 
       {isMobile ? (
         <div className="tw-relative tw-z-10 tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col tw-overflow-hidden">
-          <div className="tw-h-full">
+          <div className="tw-min-h-0 tw-flex-1">
             <MemesQuickVotePreview
               drop={activeDrop}
               isBusy={isAdvancing}
@@ -232,7 +232,7 @@ function MemesQuickVoteDialogContent({
             />
           </div>
 
-          <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-20 md:tw-hidden">
+          <div className="tw-shrink-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-[#0a0a0a] md:tw-hidden">
             <MemesQuickVoteControls
               customValue={customValue}
               drop={activeDrop}

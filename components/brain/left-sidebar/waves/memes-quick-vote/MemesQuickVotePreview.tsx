@@ -2,10 +2,16 @@
 
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  getDropPreviewImageUrl,
+  type ExtendedDrop,
+} from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import clsx from "clsx";
+import type { ReactNode, TouchEventHandler } from "react";
 import { useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import MemesQuickVoteDescription from "./MemesQuickVoteDescription";
 import MemesQuickVoteDropHeader from "./MemesQuickVoteDropHeader";
 import useMemesQuickVotePreviewSwipe from "./useMemesQuickVotePreviewSwipe";
 
@@ -22,6 +28,168 @@ interface MemesQuickVotePreviewProps {
   readonly onAdvanceStart: () => void;
   readonly onSkip: () => void;
   readonly onVoteWithSwipe: () => void;
+}
+
+interface MemesQuickVoteTouchSurfaceProps {
+  readonly onTouchCancel: TouchEventHandler<HTMLDivElement>;
+  readonly onTouchEnd: TouchEventHandler<HTMLDivElement>;
+  readonly onTouchMove: TouchEventHandler<HTMLDivElement>;
+  readonly onTouchStart: TouchEventHandler<HTMLDivElement>;
+}
+
+function getQuickVoteArtworkMediaContent({
+  artworkMedia,
+  hasTouchScreen,
+  htmlPreviewImageUrl,
+}: {
+  readonly artworkMedia:
+    | ExtendedDrop["parts"][number]["media"][number]
+    | undefined;
+  readonly hasTouchScreen: boolean;
+  readonly htmlPreviewImageUrl?: string | undefined;
+}): ReactNode {
+  if (!artworkMedia) {
+    return null;
+  }
+
+  return (
+    <DropListItemContentMedia
+      media_mime_type={artworkMedia.mime_type}
+      media_url={artworkMedia.url}
+      isCompetitionDrop={true}
+      disableAutoPlay={hasTouchScreen}
+      disableModal={hasTouchScreen}
+      htmlPreviewImageUrl={htmlPreviewImageUrl}
+    />
+  );
+}
+
+function MemesQuickVoteMobileSwipeSurface({
+  className,
+  touchSurfaceProps,
+}: {
+  readonly className: string;
+  readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className={className}
+      style={{ touchAction: "pan-y" }}
+      onTouchStart={touchSurfaceProps.onTouchStart}
+      onTouchMove={touchSurfaceProps.onTouchMove}
+      onTouchEnd={touchSurfaceProps.onTouchEnd}
+      onTouchCancel={touchSurfaceProps.onTouchCancel}
+    />
+  );
+}
+
+function MemesQuickVoteMobileDetails({
+  description,
+  drop,
+  title,
+  touchSurfaceProps,
+}: {
+  readonly description: string;
+  readonly drop: ExtendedDrop;
+  readonly title: string;
+  readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
+}) {
+  return (
+    <div
+      className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-[#0d0d0e] md:tw-hidden"
+      style={{ touchAction: "pan-y" }}
+      onTouchStart={touchSurfaceProps.onTouchStart}
+      onTouchMove={touchSurfaceProps.onTouchMove}
+      onTouchEnd={touchSurfaceProps.onTouchEnd}
+      onTouchCancel={touchSurfaceProps.onTouchCancel}
+    >
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-6 tw-pb-5 tw-pt-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden">
+        <div className="tw-flex tw-flex-col tw-gap-4">
+          <MemesQuickVoteDropHeader drop={drop} />
+
+          <div className="tw-space-y-3">
+            <h2 className="tw-mb-0 tw-text-[1.15rem] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-white">
+              {title}
+            </h2>
+
+            {description && (
+              <MemesQuickVoteDescription
+                key={drop.id}
+                description={description}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MemesQuickVoteMediaStage({
+  isMobile,
+  mediaContent,
+  swipeHint,
+  swipeOffset,
+  touchSurfaceProps,
+}: {
+  readonly isMobile: boolean;
+  readonly mediaContent: ReactNode;
+  readonly swipeHint: string | null;
+  readonly swipeOffset: number;
+  readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
+}) {
+  if (mediaContent === null) {
+    return (
+      <div className="tw-flex tw-h-[45vh] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/30 tw-text-sm tw-text-iron-500 md:tw-h-full md:tw-border-0">
+        Preview unavailable
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={clsx(
+        "tw-relative tw-shrink-0 tw-overflow-hidden tw-bg-black/40",
+        isMobile
+          ? "tw-h-[45vh] tw-border-b tw-border-solid tw-border-white/5"
+          : "md:tw-flex md:tw-h-full md:tw-w-full md:tw-items-center md:tw-justify-center md:tw-border-0"
+      )}
+    >
+      <div className="tw-flex tw-h-full tw-items-center tw-justify-center md:tw-h-full md:tw-w-full">
+        {mediaContent}
+      </div>
+
+      {isMobile &&
+        (["left", "right"] as const).map((side) => (
+          <MemesQuickVoteMobileSwipeSurface
+            key={side}
+            className={clsx(
+              "tw-absolute tw-inset-y-0 tw-z-20 tw-w-12 md:tw-hidden",
+              side === "left" ? "tw-left-0" : "tw-right-0"
+            )}
+            touchSurfaceProps={touchSurfaceProps}
+          />
+        ))}
+
+      <div
+        className={clsx(
+          "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity md:tw-hidden",
+          swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
+        )}
+      >
+        Skip
+      </div>
+      <div
+        className={clsx(
+          "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity md:tw-hidden",
+          swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
+        )}
+      >
+        {swipeHint ? `Vote ${swipeHint}` : "Vote"}
+      </div>
+    </div>
+  );
 }
 
 function MemesQuickVotePreviewContent({
@@ -43,6 +211,12 @@ function MemesQuickVotePreviewContent({
     drop.metadata.find((entry) => entry.data_key === "description")
       ?.data_value ?? "";
   const artworkMedia = drop.parts.at(0)?.media.at(0);
+  const { hasTouchScreen } = useDeviceInfo();
+  const isInteractiveHtmlMedia = artworkMedia?.mime_type === "text/html";
+  const htmlPreviewImageUrl =
+    isInteractiveHtmlMedia && hasTouchScreen
+      ? (getDropPreviewImageUrl(drop.metadata) ?? undefined)
+      : undefined;
   const swipeHint = useMemo(() => {
     if (swipeVoteAmount === null) {
       return null;
@@ -61,6 +235,10 @@ function MemesQuickVotePreviewContent({
     cardTransform,
     cardTransitionDuration,
     handleCardTransitionEnd,
+    handleTouchSurfaceCancel,
+    handleTouchSurfaceEnd,
+    handleTouchSurfaceMove,
+    handleTouchSurfaceStart,
     handleSwiperMove,
     handleSwiperTouchEnd,
     swipeOffset,
@@ -72,6 +250,26 @@ function MemesQuickVotePreviewContent({
     onVoteWithSwipe,
     swipeVoteAmount,
   });
+
+  const mediaContent = getQuickVoteArtworkMediaContent({
+    artworkMedia,
+    hasTouchScreen,
+    htmlPreviewImageUrl,
+  });
+  const mobileTouchSurfaceProps: MemesQuickVoteTouchSurfaceProps = {
+    onTouchCancel: (event) => {
+      handleTouchSurfaceCancel(event);
+    },
+    onTouchEnd: (event) => {
+      handleTouchSurfaceEnd(event);
+    },
+    onTouchMove: (event) => {
+      handleTouchSurfaceMove(event);
+    },
+    onTouchStart: (event) => {
+      handleTouchSurfaceStart(event);
+    },
+  };
 
   const previewCard = (
     <article
@@ -93,56 +291,20 @@ function MemesQuickVotePreviewContent({
         data-testid="quick-vote-preview-mobile-context"
         className="tw-flex tw-h-full tw-flex-col md:tw-flex md:tw-min-h-0 md:tw-flex-1 md:tw-p-0"
       >
-        {artworkMedia ? (
-          <div className="tw-relative tw-h-[45vh] tw-shrink-0 tw-overflow-hidden tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/40 md:tw-flex md:tw-h-full md:tw-w-full md:tw-items-center md:tw-justify-center md:tw-border-0">
-            <div className="tw-flex tw-h-full tw-items-center tw-justify-center md:tw-h-full md:tw-w-full">
-              <DropListItemContentMedia
-                media_mime_type={artworkMedia.mime_type}
-                media_url={artworkMedia.url}
-                isCompetitionDrop={true}
-              />
-            </div>
-            <div
-              className={clsx(
-                "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity md:tw-hidden",
-                swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
-              )}
-            >
-              Skip
-            </div>
-            <div
-              className={clsx(
-                "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity md:tw-hidden",
-                swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
-              )}
-            >
-              {swipeHint ? `Vote ${swipeHint}` : "Vote"}
-            </div>
-          </div>
-        ) : (
-          <div className="tw-flex tw-h-[45vh] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/30 tw-text-sm tw-text-iron-500 md:tw-h-full md:tw-border-0">
-            Preview unavailable
-          </div>
-        )}
+        <MemesQuickVoteMediaStage
+          isMobile={isMobile}
+          mediaContent={mediaContent}
+          swipeHint={swipeHint}
+          swipeOffset={swipeOffset}
+          touchSurfaceProps={mobileTouchSurfaceProps}
+        />
 
-        <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-[#0a0a0a]/30 tw-px-6 tw-pt-4 md:tw-hidden">
-          <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-[calc(env(safe-area-inset-bottom,0px)+10.5rem)] [-ms-overflow-style:none] [scrollbar-width:none] sm:tw-pb-[calc(env(safe-area-inset-bottom,0px)+13rem)] [&::-webkit-scrollbar]:tw-hidden">
-            <div className="tw-flex tw-flex-col tw-gap-5">
-              <MemesQuickVoteDropHeader drop={drop} />
-
-              <div>
-                <h2 className="tw-mb-2 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100/85 md:tw-mb-3 md:tw-mt-4 md:tw-text-2xl">
-                  {title}
-                </h2>
-                {description && (
-                  <p className="tw-mb-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-500">
-                    {description}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <MemesQuickVoteMobileDetails
+          description={description}
+          drop={drop}
+          title={title}
+          touchSurfaceProps={mobileTouchSurfaceProps}
+        />
       </div>
     </article>
   );
