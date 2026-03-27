@@ -761,8 +761,8 @@ export default function useMemesQuickVotePreviewSwipe({
   const previewCardRef = useRef<HTMLElement | null>(null);
   const canUseSwiperTouchSurface =
     isMobile &&
-    typeof window !== "undefined" &&
-    typeof window.Touch === "function";
+    typeof globalThis.window !== "undefined" &&
+    typeof globalThis.window.Touch === "function";
 
   const swipeState = useQuickVotePreviewSwipeState({
     isBusy,
