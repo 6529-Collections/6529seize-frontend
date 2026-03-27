@@ -1,19 +1,19 @@
 "use client";
 
-import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useState } from "react";
 import { Tooltip } from "react-tooltip";
 
 interface ParticipationDropMetadataProps {
-  readonly metadata: ApiDropMetadata[];
+  readonly metadata: ApiDropMetadataResponse[];
   readonly contextId?: string | number | undefined;
 }
 
 // Component to display individual metadata items in cards
 const MetadataItem: React.FC<{
-  readonly meta: ApiDropMetadata;
+  readonly meta: ApiDropMetadataResponse;
   readonly contextId?: string | number | undefined;
 }> = ({ meta, contextId }) => {
   const isMobile = useIsMobileDevice();
@@ -21,13 +21,13 @@ const MetadataItem: React.FC<{
   const tooltipId = buildTooltipId("metadata", contextId, meta.data_key);
 
   return (
-    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800/50 tw-flex tw-flex-col tw-gap-y-1">
-      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5">
+    <div className="tw-flex tw-flex-col tw-gap-y-1 tw-rounded-md tw-bg-iron-800/50 tw-px-2 tw-py-1">
+      <span className="tw-mr-1.5 tw-text-xs tw-text-iron-400">
         {meta.data_key}:
       </span>
       <>
         <span
-          className="tw-text-iron-200 tw-text-xs tw-font-medium tw-line-clamp-2"
+          className="tw-line-clamp-2 tw-text-xs tw-font-medium tw-text-iron-200"
           data-tooltip-id={tooltipId}
         >
           {meta.data_value}
@@ -69,14 +69,10 @@ export default function ParticipationDropMetadata({
   };
 
   return (
-    <div className="tw-px-4 sm:tw-ml-[3.25rem] tw-pt-4 tw-hidden lg:tw-block tw-border-t tw-border-iron-800/30">
-      <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
+    <div className="tw-hidden tw-border-t tw-border-iron-800/30 tw-px-4 tw-pt-4 sm:tw-ml-[3.25rem] lg:tw-block">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4">
         {metadata.slice(0, 2).map((meta) => (
-          <MetadataItem
-            key={meta.data_key}
-            meta={meta}
-            contextId={contextId}
-          />
+          <MetadataItem key={meta.data_key} meta={meta} contextId={contextId} />
         ))}
 
         {/* Show more button or additional items */}
@@ -92,14 +88,16 @@ export default function ParticipationDropMetadata({
               ))}
               <button
                 onClick={handleShowLess}
-                className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
+                className="tw-border-0 tw-bg-transparent tw-text-left tw-text-xs tw-font-semibold tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-primary-300"
+              >
                 Show less
               </button>
             </>
           ) : (
             <button
               onClick={handleShowMore}
-              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
+              className="tw-border-0 tw-bg-transparent tw-text-left tw-text-xs tw-font-semibold tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-primary-300"
+            >
               Show all
             </button>
           ))}

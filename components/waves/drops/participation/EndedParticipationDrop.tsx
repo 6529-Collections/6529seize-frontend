@@ -22,6 +22,11 @@ import WaveDropContent from "../WaveDropContent";
 import WaveDropMetadata from "../WaveDropMetadata";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropReactions from "../WaveDropReactions";
+import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
+import {
+  getParticipationIdentityProfile,
+  getParticipationVisibleMetadata,
+} from "./participationIdentityProfile.helpers";
 
 interface EndedParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -46,6 +51,14 @@ export default function EndedParticipationDrop({
 }: EndedParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
+  const identityProfile = getParticipationIdentityProfile({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
+  const visibleMetadata = getParticipationVisibleMetadata({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -189,9 +202,18 @@ export default function EndedParticipationDrop({
           </div>
         </div>
 
-        {drop.metadata.length > 0 && (
+        {identityProfile && (
+          <div className="tw-mt-4 sm:tw-ml-[3.25rem]">
+            <ParticipationIdentityProfileCard
+              profile={identityProfile}
+              contextId={drop.id}
+            />
+          </div>
+        )}
+
+        {visibleMetadata.length > 0 && (
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <WaveDropMetadata metadata={drop.metadata} />
+            <WaveDropMetadata metadata={visibleMetadata} />
           </div>
         )}
         <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">

@@ -15,6 +15,11 @@ import ParticipationDropContent from "./ParticipationDropContent";
 import ParticipationDropMetadata from "./ParticipationDropMetadata";
 import ParticipationDropFooter from "./ParticipationDropFooter";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
+import {
+  getParticipationIdentityProfile,
+  getParticipationVisibleMetadata,
+} from "./participationIdentityProfile.helpers";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -40,6 +45,14 @@ export default function OngoingParticipationDrop({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isMobile = useIsMobileDevice();
   const hasTouch = useIsTouchDevice() || isMobile;
+  const identityProfile = getParticipationIdentityProfile({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
+  const visibleMetadata = getParticipationVisibleMetadata({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -92,8 +105,16 @@ export default function OngoingParticipationDrop({
       </div>
 
       <div className="tw-flex tw-w-full tw-flex-col">
+        {identityProfile && (
+          <div className="tw-px-4 tw-pt-4 sm:tw-ml-[3.25rem]">
+            <ParticipationIdentityProfileCard
+              profile={identityProfile}
+              contextId={drop.id}
+            />
+          </div>
+        )}
         <ParticipationDropMetadata
-          metadata={drop.metadata}
+          metadata={visibleMetadata}
           contextId={drop.id}
         />
         <ParticipationDropFooter drop={drop} />
