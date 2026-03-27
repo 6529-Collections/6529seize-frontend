@@ -123,7 +123,6 @@ export default function DropListItemContentMedia({
     case MediaType.UNKNOWN:
       return <></>;
     default:
-      assertUnreachable(mediaType);
-      return;
+      return assertUnreachable(mediaType);
   }
 }

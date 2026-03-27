@@ -16,11 +16,7 @@ const mockLogSecurityEvent = jest.fn();
 let mockAppKitAccount: {
   address?: string;
   isConnected: boolean;
-  status:
-    | "connected"
-    | "connecting"
-    | "reconnecting"
-    | "disconnected";
+  status: "connected" | "connecting" | "reconnecting" | "disconnected";
 };
 
 let mockWagmiAccount: {
