@@ -62,7 +62,7 @@ function DropListItemContentMediaImage({
   }, []);
 
   const handleError = useCallback(() => {
-    if (errorCount >= maxRetries) return; // give up – show fallback
+    if (errorCount >= maxRetries) return;
     const delay = 500 * 2 ** errorCount; // 0.5s, 1s, 2s …
     setTimeout(() => {
       setErrorCount((n) => n + 1);
@@ -105,7 +105,7 @@ function DropListItemContentMediaImage({
       event.stopPropagation();
       const fullscreenTarget = modalImageRef.current ?? imgRef.current;
       if (fullscreenTarget) {
-        fullscreenTarget.requestFullscreen();
+        fullscreenTarget.requestFullscreen().catch(() => undefined);
       }
     },
     []
@@ -162,6 +162,7 @@ function DropListItemContentMediaImage({
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     ref={modalImageRef}
                     src={src}
