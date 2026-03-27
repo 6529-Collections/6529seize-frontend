@@ -1,11 +1,13 @@
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
+import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 
 type ScopedValueState<T> = {
   readonly scopeKey: string;
   readonly value: T;
 };
 
-type ScopedIdentitySelectionState = ScopedValueState<string | null>;
+type ScopedIdentitySelectionState =
+  ScopedValueState<SelectableIdentityOption | null>;
 type ScopedIdentityAttemptState = ScopedValueState<boolean>;
 
 export const getIdentitySubmissionScopeKey = ({
@@ -24,16 +26,16 @@ export const getIdentitySubmissionScopeKey = ({
 export const getEffectiveSelectedIdentity = ({
   isIdentitySubmissionExperience,
   identitySubmissionMode,
-  viewerSelectableIdentity,
+  viewerIdentity,
   selectedIdentityState,
   scopeKey,
 }: {
   readonly isIdentitySubmissionExperience: boolean;
   readonly identitySubmissionMode: ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted | null;
-  readonly viewerSelectableIdentity: string | null;
+  readonly viewerIdentity: SelectableIdentityOption | null;
   readonly selectedIdentityState: ScopedIdentitySelectionState | null;
   readonly scopeKey: string;
-}): string | null => {
+}): SelectableIdentityOption | null => {
   if (!isIdentitySubmissionExperience) {
     return null;
   }
@@ -42,7 +44,7 @@ export const getEffectiveSelectedIdentity = ({
     identitySubmissionMode ===
     ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself
   ) {
-    return viewerSelectableIdentity ?? null;
+    return viewerIdentity ?? null;
   }
 
   return selectedIdentityState?.scopeKey === scopeKey

@@ -13,7 +13,11 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { getSelectableIdentity } from "@/components/utils/input/profile-search/getSelectableIdentity";
+import {
+  getSelectableIdentity,
+  getSelectableIdentityOption,
+  type SelectableIdentityOption,
+} from "@/components/utils/input/profile-search/getSelectableIdentity";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export enum IdentitySearchSize {
@@ -23,6 +27,12 @@ export enum IdentitySearchSize {
 
 const MIN_SEARCH_LENGTH = 3;
 
+type IdentitySearchDraft = {
+  readonly value: string;
+  readonly baseResolvedDisplayValue: string | null;
+  readonly preservedResolvedValues: readonly (string | null)[];
+};
+
 export default function IdentitySearch({
   identity,
   size = IdentitySearchSize.MD,
@@ -30,6 +40,9 @@ export default function IdentitySearch({
   error = false,
   errorMessage,
   autoFocus = false,
+  selectedDisplayValue,
+  clearable = true,
+  onSelectionChange,
   setIdentity,
 }: {
   readonly identity: string | null;
@@ -38,6 +51,11 @@ export default function IdentitySearch({
   readonly errorMessage?: string | null | undefined;
   readonly label?: string | undefined;
   readonly autoFocus?: boolean | undefined;
+  readonly selectedDisplayValue?: string | null | undefined;
+  readonly clearable?: boolean | undefined;
+  readonly onSelectionChange?:
+    | ((selection: SelectableIdentityOption | null) => void)
+    | undefined;
 
   readonly setIdentity: (identity: string | null) => void;
 }) {
@@ -58,8 +76,18 @@ export default function IdentitySearch({
 
   const inputId = useId();
   const listboxId = `${inputId}-listbox`;
-
-  const [searchCriteria, setSearchCriteria] = useState<string | null>(identity);
+  const resolvedDisplayValue = selectedDisplayValue ?? identity ?? null;
+  const [searchCriteriaDraft, setSearchCriteriaDraft] =
+    useState<IdentitySearchDraft | null>(null);
+  const shouldUseDraft =
+    searchCriteriaDraft !== null &&
+    (searchCriteriaDraft.baseResolvedDisplayValue === resolvedDisplayValue ||
+      searchCriteriaDraft.preservedResolvedValues.some(
+        (value) => value === resolvedDisplayValue
+      ));
+  const searchCriteria = shouldUseDraft
+    ? searchCriteriaDraft.value
+    : resolvedDisplayValue;
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
   );
@@ -83,16 +111,6 @@ export default function IdentitySearch({
     enabled: !!debouncedValue && debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
 
-  const selectionUpdateRef = useRef(false);
-
-  useEffect(() => {
-    if (selectionUpdateRef.current) {
-      selectionUpdateRef.current = false;
-      return;
-    }
-    setSearchCriteria(identity);
-  }, [identity]);
-
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [highlightedOptionId, setHighlightedOptionId] = useState<
@@ -101,11 +119,19 @@ export default function IdentitySearch({
   const [shouldSubmit, setShouldSubmit] = useState(false);
   const onValueChange = (
     newValue: string | null,
-    displayValue?: string | null
+    options?: {
+      readonly displayValue?: string | null;
+      readonly selection?: SelectableIdentityOption | null;
+    }
   ) => {
-    selectionUpdateRef.current = true;
+    const draftValue = options?.displayValue ?? newValue ?? "";
     setIdentity(newValue);
-    setSearchCriteria(displayValue ?? newValue);
+    onSelectionChange?.(options?.selection ?? null);
+    setSearchCriteriaDraft({
+      value: draftValue,
+      baseResolvedDisplayValue: resolvedDisplayValue,
+      preservedResolvedValues: [newValue, options?.displayValue ?? null],
+    });
     setIsOpen(false);
     setHighlightedIndex(null);
   };
@@ -121,23 +147,30 @@ export default function IdentitySearch({
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
-    setSearchCriteria(newV);
+    setSearchCriteriaDraft({
+      value: newV ?? "",
+      baseResolvedDisplayValue: resolvedDisplayValue,
+      preservedResolvedValues: [],
+    });
     const len = newV?.length ?? 0;
     setIsOpen(len >= MIN_SEARCH_LENGTH);
-    if (!newV) {
+    if (!newV && clearable) {
       setIdentity(null);
+      onSelectionChange?.(null);
     }
     setHighlightedIndex(null);
   };
 
   const selectProfile = (profile: CommunityMemberMinimal) => {
-    const nextIdentity = getSelectableIdentity(profile);
-    if (!nextIdentity) {
+    const nextSelection = getSelectableIdentityOption(profile);
+    if (!nextSelection) {
       return false;
     }
 
-    const displayValue = profile.handle ?? profile.display ?? nextIdentity;
-    onValueChange(nextIdentity, displayValue);
+    onValueChange(nextSelection.value, {
+      displayValue: nextSelection.label,
+      selection: nextSelection,
+    });
     return true;
   };
 
@@ -236,6 +269,8 @@ export default function IdentitySearch({
     );
   }, [data, identity]);
 
+  const hasIdentity = identity !== null && identity.length > 0;
+
   return (
     <div className="tw-group tw-relative tw-w-full" ref={wrapperRef}>
       <input
@@ -275,7 +310,7 @@ export default function IdentitySearch({
         className={`${ICON_CLASSES[size]} tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300`}
         aria-hidden="true"
       />
-      {!!identity?.length && (
+      {clearable && hasIdentity && (
         <button
           type="button"
           aria-label="Clear identity"

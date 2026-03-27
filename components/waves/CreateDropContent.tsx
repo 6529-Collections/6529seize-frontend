@@ -63,6 +63,7 @@ import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import CreateDropIdentityField from "./CreateDropIdentityField";
+import CreateDropIdentityPickerModal from "./CreateDropIdentityPickerModal";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import type { DropMutationBody } from "./CreateDrop";
@@ -82,7 +83,10 @@ import {
   getIdentitySubmissionScopeKey,
 } from "./utils/identitySubmissionState";
 import { normalizeCurationDropInput } from "./utils/validateCurationDropUrl";
-import { getSelectableIdentity } from "../utils/input/profile-search/getSelectableIdentity";
+import {
+  getSelectableIdentityOption,
+  type SelectableIdentityOption,
+} from "../utils/input/profile-search/getSelectableIdentity";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 
 // Use next/dynamic for lazy loading with SSR support
@@ -114,6 +118,11 @@ export type CreateDropMetadataType =
       readonly required: boolean;
     };
 
+type ScopedValueState<T> = {
+  readonly scopeKey: string;
+  readonly value: T;
+};
+
 interface CreateDropContentProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
@@ -134,6 +143,10 @@ interface CreateDropContentProps {
 }
 
 const CONTAINER_WIDTH_THRESHOLD = 500;
+const SELECT_OTHER_IDENTITY_ERROR = "Select someone else to nominate.";
+
+const normalizeIdentityValue = (identity: string | null | undefined) =>
+  identity?.trim().toLowerCase() ?? null;
 
 const isMetadataValuePresent = (value: string | number | null): boolean => {
   if (value === null) {
@@ -380,28 +393,36 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-  const [userShowOptions, setUserShowOptions] = useState(false);
-  const [selectedIdentityState, setSelectedIdentityState] = useState<{
-    scopeKey: string;
-    value: string | null;
-  } | null>(null);
+  const [metadataOpenState, setMetadataOpenState] =
+    useState<ScopedValueState<boolean> | null>(null);
+  const [showOptionsState, setShowOptionsState] =
+    useState<ScopedValueState<boolean> | null>(null);
+  const [selectedIdentityState, setSelectedIdentityState] =
+    useState<ScopedValueState<SelectableIdentityOption | null> | null>(null);
   const [hasAttemptedIdentitySubmitState, setHasAttemptedIdentitySubmitState] =
-    useState<{
-      scopeKey: string;
-      value: boolean;
-    } | null>(null);
+    useState<ScopedValueState<boolean> | null>(null);
+  const [identityPickerOpenState, setIdentityPickerOpenState] =
+    useState<ScopedValueState<boolean> | null>(null);
+  const [identityPickerErrorMessageState, setIdentityPickerErrorMessageState] =
+    useState<ScopedValueState<string | null> | null>(null);
   const closeOnNextInputRef = useRef(false);
+  const prevIsDropModeRef = useRef(isDropMode);
+  const dropModeSessionEpochRef = useRef(0);
+  // Invalidate Drop-mode transient UI state only after the prop actually flips off.
+  if (prevIsDropModeRef.current && !isDropMode) {
+    dropModeSessionEpochRef.current += 1;
+  }
+  prevIsDropModeRef.current = isDropMode;
   const isWaveChanged = prevWaveIdRef.current !== wave.id;
   if (isWaveChanged) {
     prevWaveIdRef.current = wave.id;
     hasUserToggledOptionsRef.current = false;
-  }
-  const showOptions = isWideContainer || (userShowOptions && !isWaveChanged);
-
-  useEffect(() => {
-    setUserShowOptions(false);
     closeOnNextInputRef.current = false;
-  }, [wave.id]);
+  }
+  const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpochRef.current}`;
+  const showOptions =
+    isWideContainer ||
+    (showOptionsState?.scopeKey === wave.id ? showOptionsState.value : false);
 
   useLayoutEffect(() => {
     const container = actionsContainerRef.current;
@@ -437,28 +458,49 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ? (wave.participation.submission_strategy?.config.who_can_be_submitted ??
       null)
     : null;
-  const viewerSelectableIdentity = getSelectableIdentity(connectedProfile);
-  const viewerIdentityLabel =
-    connectedProfile?.handle ??
-    connectedProfile?.display ??
-    viewerSelectableIdentity ??
-    null;
+  const viewerIdentity = getSelectableIdentityOption(connectedProfile);
+  const viewerSelectableIdentity = viewerIdentity?.value ?? null;
   const identitySubmissionScopeKey = getIdentitySubmissionScopeKey({
     waveId: wave.id,
     isIdentitySubmissionExperience,
     identitySubmissionMode,
   });
-  const selectedIdentity = getEffectiveSelectedIdentity({
+  const identitySubmissionSessionScopeKey = `${identitySubmissionScopeKey}:${dropModeSessionEpochRef.current}`;
+  const isIdentityPickerAllowed =
+    isIdentitySubmissionExperience &&
+    isDropMode &&
+    identitySubmissionMode !== null &&
+    identitySubmissionMode !==
+      ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself;
+  const selectedIdentitySelection = getEffectiveSelectedIdentity({
     isIdentitySubmissionExperience,
     identitySubmissionMode,
-    viewerSelectableIdentity,
+    viewerIdentity,
     selectedIdentityState,
-    scopeKey: identitySubmissionScopeKey,
+    scopeKey: identitySubmissionSessionScopeKey,
   });
+  const selectedIdentity = selectedIdentitySelection?.value ?? null;
   const hasAttemptedIdentitySubmit = getEffectiveIdentitySubmitAttempt({
     attemptState: hasAttemptedIdentitySubmitState,
-    scopeKey: identitySubmissionScopeKey,
+    scopeKey: identitySubmissionSessionScopeKey,
   });
+  const isIdentityPickerExplicitlyOpen =
+    identityPickerOpenState?.scopeKey === identitySubmissionSessionScopeKey
+      ? identityPickerOpenState.value
+      : false;
+  const identityPickerErrorMessage =
+    identityPickerErrorMessageState?.scopeKey ===
+    identitySubmissionSessionScopeKey
+      ? identityPickerErrorMessageState.value
+      : null;
+  const isIdentityPickerOpen =
+    isIdentityPickerAllowed &&
+    (isIdentityPickerExplicitlyOpen || !selectedIdentitySelection);
+  const isMetadataOpen =
+    isDropMode &&
+    (metadataOpenState?.scopeKey === dropModeSessionScopeKey
+      ? metadataOpenState.value
+      : false);
   const requiredMetadata = useMemo(() => {
     if (!isIdentitySubmissionExperience) {
       return wave.participation.required_metadata;
@@ -616,10 +658,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (
       identitySubmissionMode ===
         ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyOthers &&
-      selectedIdentity.trim().toLowerCase() ===
-        viewerSelectableIdentity?.trim().toLowerCase()
+      normalizeIdentityValue(selectedIdentity) ===
+        normalizeIdentityValue(viewerSelectableIdentity)
     ) {
-      return "Select someone else to nominate.";
+      return SELECT_OTHER_IDENTITY_ERROR;
     }
 
     return null;
@@ -840,9 +882,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setMentionedWaves([]);
     setReferencedNfts([]);
     setDrop(null);
+    setMetadataOpenState(null);
     setSelectedIdentityState(null);
     setHasAttemptedIdentitySubmitState(null);
-    setUserShowOptions(false);
+    setIdentityPickerOpenState(null);
+    setIdentityPickerErrorMessageState(null);
+    setShowOptionsState(null);
     closeOnNextInputRef.current = false;
     setDropEditorRefreshKey((prev) => prev + 1);
   };
@@ -1023,14 +1068,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     if (identityValidationMessage) {
       setHasAttemptedIdentitySubmitState({
-        scopeKey: identitySubmissionScopeKey,
+        scopeKey: identitySubmissionSessionScopeKey,
         value: true,
       });
       return;
     }
 
     if (hasMetadataValidationErrors) {
-      setIsMetadataOpen(true);
+      setMetadataOpenState({
+        scopeKey: dropModeSessionScopeKey,
+        value: true,
+      });
       return;
     }
 
@@ -1059,14 +1107,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
     if (identityValidationMessage) {
       setHasAttemptedIdentitySubmitState({
-        scopeKey: identitySubmissionScopeKey,
+        scopeKey: identitySubmissionSessionScopeKey,
         value: true,
       });
       return;
     }
 
     if (hasMetadataValidationErrors) {
-      setIsMetadataOpen(true);
+      setMetadataOpenState({
+        scopeKey: dropModeSessionScopeKey,
+        value: true,
+      });
       return;
     }
 
@@ -1137,7 +1188,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     setFiles(updatedFiles);
     if (!isWideContainer) {
-      setUserShowOptions(false);
+      setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     }
   };
@@ -1145,25 +1196,25 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const handleSetShowOptions = useCallback(
     (next: boolean) => {
       hasUserToggledOptionsRef.current = true;
-      setUserShowOptions(next);
+      setShowOptionsState({ scopeKey: wave.id, value: next });
       if (isWideContainer) {
         closeOnNextInputRef.current = false;
         return;
       }
       closeOnNextInputRef.current = next;
     },
-    [isWideContainer]
+    [isWideContainer, wave.id]
   );
 
   const handleEditorStateChange = useCallback(
     (newEditorState: EditorState) => {
       setEditorState(newEditorState);
       if (!isWideContainer && closeOnNextInputRef.current) {
-        setUserShowOptions(false);
+        setShowOptionsState({ scopeKey: wave.id, value: false });
         closeOnNextInputRef.current = false;
       }
     },
-    [isWideContainer]
+    [isWideContainer, wave.id]
   );
 
   const handleEditorBlur = useCallback(
@@ -1175,10 +1226,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       if (nextTarget && actionsContainerRef.current?.contains(nextTarget)) {
         return;
       }
-      setUserShowOptions(false);
+      setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     },
-    [isWideContainer]
+    [isWideContainer, wave.id]
   );
 
   const removeFile = (file: File, partIndex?: number) => {
@@ -1213,24 +1264,96 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
   }, [drop, setIsStormMode]);
 
-  const [isMetadataOpen, setIsMetadataOpen] = useState(false);
+  const openMetadata = useCallback(() => {
+    setMetadataOpenState({
+      scopeKey: dropModeSessionScopeKey,
+      value: true,
+    });
+  }, [dropModeSessionScopeKey]);
 
-  const onAddMetadataClick = () => {
-    setIsMetadataOpen(true);
-  };
-
-  const closeMetadata = () => {
-    setIsMetadataOpen(false);
-  };
+  const closeMetadata = useCallback(() => {
+    setMetadataOpenState({
+      scopeKey: dropModeSessionScopeKey,
+      value: false,
+    });
+  }, [dropModeSessionScopeKey]);
 
   const handleDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
       if (!newIsDropMode) {
-        setIsMetadataOpen(false);
+        closeMetadata();
       }
       onDropModeChange(newIsDropMode);
     },
-    [onDropModeChange]
+    [closeMetadata, onDropModeChange]
+  );
+
+  const openIdentityPicker = useCallback(() => {
+    setIdentityPickerErrorMessageState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: null,
+    });
+    setIdentityPickerOpenState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: true,
+    });
+  }, [identitySubmissionSessionScopeKey]);
+
+  const closeIdentityPicker = useCallback(() => {
+    setIdentityPickerOpenState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: false,
+    });
+    setIdentityPickerErrorMessageState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: null,
+    });
+    if (!selectedIdentitySelection) {
+      handleDropModeChange(false);
+    }
+  }, [
+    handleDropModeChange,
+    identitySubmissionSessionScopeKey,
+    selectedIdentitySelection,
+  ]);
+
+  const handleIdentitySelection = useCallback(
+    (selection: SelectableIdentityOption) => {
+      if (
+        identitySubmissionMode ===
+          ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyOthers &&
+        normalizeIdentityValue(selection.value) ===
+          normalizeIdentityValue(viewerSelectableIdentity)
+      ) {
+        setIdentityPickerErrorMessageState({
+          scopeKey: identitySubmissionSessionScopeKey,
+          value: SELECT_OTHER_IDENTITY_ERROR,
+        });
+        return;
+      }
+
+      setSelectedIdentityState({
+        scopeKey: identitySubmissionSessionScopeKey,
+        value: selection,
+      });
+      setHasAttemptedIdentitySubmitState({
+        scopeKey: identitySubmissionSessionScopeKey,
+        value: false,
+      });
+      setIdentityPickerErrorMessageState({
+        scopeKey: identitySubmissionSessionScopeKey,
+        value: null,
+      });
+      setIdentityPickerOpenState({
+        scopeKey: identitySubmissionSessionScopeKey,
+        value: false,
+      });
+    },
+    [
+      identitySubmissionMode,
+      identitySubmissionSessionScopeKey,
+      viewerSelectableIdentity,
+    ]
   );
 
   const onChangeKey = (params: { index: number; newKey: string }) => {
@@ -1328,24 +1451,28 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         identitySubmissionMode !== null && (
           <CreateDropIdentityField
             mode={identitySubmissionMode}
-            selectedIdentity={selectedIdentity}
-            selfIdentityDisplay={viewerIdentityLabel}
+            selectedIdentity={selectedIdentitySelection}
+            selfIdentity={viewerIdentity}
             disabled={submitting}
             errorMessage={
               showIdentityValidationMessage ? identityValidationMessage : null
             }
-            onChange={(identity) => {
-              setSelectedIdentityState({
-                scopeKey: identitySubmissionScopeKey,
-                value: identity,
-              });
-              if (identity) {
-                setHasAttemptedIdentitySubmitState({
-                  scopeKey: identitySubmissionScopeKey,
-                  value: false,
-                });
-              }
-            }}
+            onOpenPicker={openIdentityPicker}
+          />
+        )}
+      {isIdentitySubmissionExperience &&
+        isDropMode &&
+        identitySubmissionMode !== null &&
+        identitySubmissionMode !==
+          ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself && (
+          <CreateDropIdentityPickerModal
+            isOpen={isIdentityPickerOpen}
+            mode={identitySubmissionMode}
+            selectedIdentity={selectedIdentitySelection}
+            disabled={submitting}
+            errorMessage={identityPickerErrorMessage}
+            onClose={closeIdentityPicker}
+            onSelect={handleIdentitySelection}
           />
         )}
       <div className="tw-flex tw-w-full tw-items-end">
@@ -1360,14 +1487,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             submitting={submitting}
             showOptions={showOptions}
             animateOptions={
-              !isWideContainer &&
-              hasUserToggledOptionsRef.current &&
-              !isWaveChanged
+              !isWideContainer && hasUserToggledOptionsRef.current
             }
             isRequiredMetadataMissing={!!missingRequirements.metadata.length}
             isRequiredMediaMissing={!!missingRequirements.media.length}
             handleFileChange={handleFileChange}
-            onAddMetadataClick={onAddMetadataClick}
+            onAddMetadataClick={openMetadata}
             breakIntoStorm={breakIntoStorm}
             setShowOptions={handleSetShowOptions}
             onGifDrop={onGifDrop}
@@ -1431,7 +1556,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           wave={wave}
           missingMedia={missingRequirements.media}
           missingMetadata={missingRequirements.metadata}
-          onOpenMetadata={() => setIsMetadataOpen(true)}
+          onOpenMetadata={openMetadata}
           setFiles={handleFileChange}
           disabled={submitting}
         />

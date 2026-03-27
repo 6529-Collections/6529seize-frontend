@@ -6,11 +6,27 @@ import {
   getEffectiveSelectedIdentity,
   getIdentitySubmissionScopeKey,
 } from "@/components/waves/utils/identitySubmissionState";
+import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import { IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR } from "@/helpers/waves/identity-submission-metadata";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 
 describe("CreateDropContent utilities", () => {
+  const viewerIdentity: SelectableIdentityOption = {
+    value: "0xabc",
+    label: "alice",
+    secondaryLabel: "0xabc",
+    avatarUrl: null,
+    profileId: "viewer-1",
+  };
+  const selectedIdentity: SelectableIdentityOption = {
+    value: "0xdef",
+    label: "bob",
+    secondaryLabel: "0xdef",
+    avatarUrl: null,
+    profileId: "viewer-2",
+  };
+
   describe("convertMetadataToDropMetadata", () => {
     it("filters out entries without key or value", () => {
       const result = convertMetadataToDropMetadata([
@@ -126,11 +142,11 @@ describe("CreateDropContent utilities", () => {
           isIdentitySubmissionExperience: true,
           identitySubmissionMode:
             ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself,
-          viewerSelectableIdentity: "0xabc",
+          viewerIdentity,
           selectedIdentityState: null,
           scopeKey,
         })
-      ).toBe("0xabc");
+      ).toEqual(viewerIdentity);
     });
 
     it("ignores stale draft identity from a different scope", () => {
@@ -152,10 +168,10 @@ describe("CreateDropContent utilities", () => {
           isIdentitySubmissionExperience: true,
           identitySubmissionMode:
             ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyOthers,
-          viewerSelectableIdentity: "0xabc",
+          viewerIdentity,
           selectedIdentityState: {
             scopeKey: staleScopeKey,
-            value: "alice",
+            value: selectedIdentity,
           },
           scopeKey: currentScopeKey,
         })
