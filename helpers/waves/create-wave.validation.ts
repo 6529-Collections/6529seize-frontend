@@ -30,6 +30,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT = "CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT",
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES",
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA",
+  DROPS_SUBMISSION_STRATEGY_INVALID = "DROPS_SUBMISSION_STRATEGY_INVALID",
   APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE = "APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE",
   VOTING_TYPE_REQUIRED = "VOTING_TYPE_REQUIRED",
   CHAT_WAVE_CANNOT_HAVE_VOTING = "CHAT_WAVE_CANNOT_HAVE_VOTING",
@@ -125,6 +126,7 @@ const getDropsValidationErrors = ({
   readonly drops: CreateWaveDropsConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  const submissionStrategy = drops.submissionStrategy;
 
   if (waveType === ApiWaveType.Chat) {
     // Chat waves cannot have any drops configuration
@@ -141,6 +143,11 @@ const getDropsValidationErrors = ({
     if (drops.requiredMetadata.length > 0) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA
+      );
+    }
+    if (submissionStrategy !== null) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.DROPS_SUBMISSION_STRATEGY_INVALID
       );
     }
   } else {

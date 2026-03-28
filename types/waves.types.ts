@@ -1,6 +1,7 @@
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import type { ApiWaveParticipationSubmissionStrategy } from "@/generated/models/ApiWaveParticipationSubmissionStrategy";
 import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -46,6 +47,7 @@ export interface CreateWaveDropsConfig {
   readonly noOfApplicationsAllowedPerParticipant: number | null;
   readonly requiredTypes: ApiWaveParticipationRequirement[];
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
+  readonly submissionStrategy: ApiWaveParticipationSubmissionStrategy | null;
   readonly terms: string | null;
   readonly signatureRequired: boolean;
   readonly adminCanDeleteDrops: boolean;

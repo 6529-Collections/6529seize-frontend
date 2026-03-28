@@ -3,6 +3,9 @@ import {
   getCreateWavePreviousStep,
   calculateLastDecisionTime,
 } from "@/helpers/waves/create-wave.helpers";
+import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
+import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
+import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { CreateWaveStep } from "@/types/waves.types";
@@ -99,6 +102,7 @@ describe("create-wave.helpers", () => {
           noOfApplicationsAllowedPerParticipant: 1,
           requiredTypes: [],
           requiredMetadata: [{ key: "m", type: ApiWaveMetadataType.String }],
+          submissionStrategy: null,
           terms: null,
           signatureRequired: false,
           adminCanDeleteDrops: true,
@@ -131,6 +135,70 @@ describe("create-wave.helpers", () => {
       ]);
       expect(res.voting.period.max).toBe(2 + 3 + 5);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
+    });
+
+    it("includes identity submission strategy when configured", () => {
+      const {
+        getCreateNewWaveBody,
+      } = require("@/helpers/waves/create-wave.helpers");
+      const config = {
+        overview: { type: ApiWaveType.Rank, name: "W", image: null },
+        groups: {
+          canView: "1",
+          canDrop: "2",
+          canVote: "3",
+          canChat: "4",
+          admin: "5",
+        },
+        dates: {
+          submissionStartDate: 1,
+          votingStartDate: 2,
+          endDate: 10,
+          firstDecisionTime: 2,
+          subsequentDecisions: [],
+          isRolling: false,
+        },
+        drops: {
+          noOfApplicationsAllowedPerParticipant: 1,
+          requiredTypes: [],
+          requiredMetadata: [],
+          submissionStrategy: {
+            type: ApiWaveParticipationSubmissionStrategyType.Identity,
+            config: {
+              duplicates:
+                ApiWaveParticipationIdentitySubmissionAllowDuplicates.AllowAfterWin,
+              who_can_be_submitted:
+                ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyOthers,
+            },
+          },
+          terms: null,
+          signatureRequired: false,
+          adminCanDeleteDrops: true,
+        },
+        chat: { enabled: true },
+        voting: {
+          type: null,
+          category: null,
+          profileId: null,
+          timeWeighted: {
+            enabled: false,
+            averagingInterval: 5,
+            averagingIntervalUnit: "minutes",
+          },
+        },
+        outcomes: [],
+        approval: { threshold: null, thresholdTimeMs: null },
+      } as any;
+      const drop = {
+        parts: [],
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      } as any;
+      const res = getCreateNewWaveBody({ drop, picture: "pic", config });
+      expect(res.participation.submission_strategy).toEqual(
+        config.drops.submissionStrategy
+      );
     });
   });
 });
