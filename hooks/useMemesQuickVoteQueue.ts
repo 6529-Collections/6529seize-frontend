@@ -107,6 +107,12 @@ type UseMemesQuickVoteWindowSyncOptions = Omit<
   readonly setCurrentSessionState: UseKeyedMemesQuickVoteSessionStoreResult["setCurrentSessionState"];
 };
 
+const runBestEffortSync = (sync: () => Promise<void>): void => {
+  sync().catch(() => {
+    // Session state already models sync failures; callers should not block on this.
+  });
+};
+
 const getCurrentSessionState = ({
   key,
   state,
@@ -320,7 +326,7 @@ const useMemesQuickVoteSessionEffects = ({
     }
 
     const timeoutId = globalThis.setTimeout(() => {
-      void syncUndiscoveredWindow();
+      runBestEffortSync(syncUndiscoveredWindow);
     }, 0);
 
     return () => {
@@ -357,7 +363,7 @@ const useMemesQuickVoteSessionEffects = ({
     }
 
     const timeoutId = globalThis.setTimeout(() => {
-      void syncUndiscoveredWindow();
+      runBestEffortSync(syncUndiscoveredWindow);
     }, 300);
 
     return () => {
@@ -425,7 +431,7 @@ const useMemesQuickVoteSessionState = ({
           pendingDropIds: pendingDropIdsRef.current,
         })
       );
-      void syncUndiscoveredWindow();
+      runBestEffortSync(syncUndiscoveredWindow);
     },
     [pendingDropIdsRef, setCurrentSessionState, syncUndiscoveredWindow]
   );
@@ -438,7 +444,7 @@ const useMemesQuickVoteSessionState = ({
           failedDrop: drop,
         })
       );
-      void syncUndiscoveredWindow();
+      runBestEffortSync(syncUndiscoveredWindow);
     },
     [setCurrentSessionState, syncUndiscoveredWindow]
   );
@@ -564,7 +570,7 @@ const useMemesQuickVoteQueueSubmission = ({
       }
 
       invalidateQuickVoteUndiscoveredDrop();
-      void session.syncUndiscoveredWindow();
+      runBestEffortSync(session.syncUndiscoveredWindow);
     },
     requestAuth,
     setAndPersistRecentAmounts,
@@ -665,7 +671,7 @@ export const useMemesQuickVoteQueue = ({
     recentAmounts,
     remainingCount: session.sessionState.totalCount,
     retryDiscovery: () => {
-      void session.syncUndiscoveredWindow();
+      runBestEffortSync(session.syncUndiscoveredWindow);
     },
     skipDrop: submitSkip,
     submitVote,
