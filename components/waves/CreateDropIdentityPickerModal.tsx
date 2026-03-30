@@ -44,11 +44,9 @@ export default function CreateDropIdentityPickerModal({
       title="Select identity"
       isOpen={isOpen}
       onClose={onClose}
-      tall
-      fixedHeight
       tabletModal
+      allowOverflow
       maxWidthClass="md:tw-max-w-xl"
-      showScrollbar
     >
       <div className="tw-px-4 sm:tw-px-6">
         <p className="tw-mb-4 tw-text-sm tw-font-medium tw-text-iron-300">
@@ -68,6 +66,7 @@ export default function CreateDropIdentityPickerModal({
           size={IdentitySearchSize.MD}
           autoFocus
           clearable={false}
+          dropdownListClassName="tw-max-h-[50vh] md:tw-max-h-96 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
           error={!!errorMessage}
           errorMessage={errorMessage}
         />

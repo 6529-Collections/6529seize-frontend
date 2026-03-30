@@ -13,6 +13,7 @@ export default function CommonProfileSearchItems({
   highlightedIndex = null,
   onHighlightedOptionIdChange,
   listboxId,
+  listClassName,
 }: {
   readonly open: boolean;
   readonly profiles: CommunityMemberMinimal[];
@@ -25,6 +26,7 @@ export default function CommonProfileSearchItems({
     | undefined
     | undefined;
   readonly listboxId?: string | undefined;
+  readonly listClassName?: string | undefined;
 }) {
   const generatedListboxId = useId();
   const resolvedListboxId = listboxId ?? generatedListboxId;
@@ -92,7 +94,11 @@ export default function CommonProfileSearchItems({
           transition={{ duration: 0.2 }}
         >
           <div className="tw-absolute tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-            <div className="tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
+            <div
+              className={`tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-1 ${
+                listClassName ?? ""
+              }`}
+            >
               <ul
                 id={resolvedListboxId}
                 role="listbox"

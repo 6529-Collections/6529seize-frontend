@@ -42,6 +42,7 @@ export default function IdentitySearch({
   autoFocus = false,
   selectedDisplayValue,
   clearable = true,
+  dropdownListClassName,
   onSelectionChange,
   setIdentity,
 }: {
@@ -53,6 +54,7 @@ export default function IdentitySearch({
   readonly autoFocus?: boolean | undefined;
   readonly selectedDisplayValue?: string | null | undefined;
   readonly clearable?: boolean | undefined;
+  readonly dropdownListClassName?: string | undefined;
   readonly onSelectionChange?:
     | ((selection: SelectableIdentityOption | null) => void)
     | undefined;
@@ -337,6 +339,7 @@ export default function IdentitySearch({
         profiles={data ?? []}
         highlightedIndex={highlightedIndex}
         listboxId={listboxId}
+        listClassName={dropdownListClassName}
         onHighlightedOptionIdChange={setHighlightedOptionId}
         onProfileSelect={(profile) => {
           if (!profile) {

@@ -55,6 +55,23 @@ describe("MobileWrapperDialog", () => {
 
       expect(screen.getByTestId("child-content")).toBeInTheDocument();
     });
+
+    it("allows content overflow when allowOverflow is true", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          allowOverflow={true}
+        />
+      );
+
+      expect(
+        document.querySelector(".tw-rounded-t-xl.tw-overflow-visible")
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector(".tw-flex-1.tw-overflow-visible")
+      ).toBeInTheDocument();
+    });
   });
 
   describe("user interactions", () => {
