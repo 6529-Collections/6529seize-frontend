@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface MemesQuickVoteDescriptionProps {
+  readonly allowToggle?: boolean | undefined;
   readonly description: string;
 }
 
 export default function MemesQuickVoteDescription({
+  allowToggle = true,
   description,
 }: MemesQuickVoteDescriptionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -97,7 +99,7 @@ export default function MemesQuickVoteDescription({
       >
         {description}
       </p>
-      {isOverflowing && (
+      {allowToggle && isOverflowing && (
         <button
           type="button"
           aria-expanded={isExpanded}

@@ -5,16 +5,23 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
 import React, { useCallback, useState } from "react";
+import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 
 interface Props {
   readonly src: string;
   readonly imageScale?: ImageScale | undefined;
+  readonly loadStrategy?: MediaLoadStrategy | undefined;
 }
 
-function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx1080 }: Props) {
+function MediaDisplayImage({
+  src,
+  imageScale = ImageScale.AUTOx1080,
+  loadStrategy = "in-view",
+}: Props) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(true);
   const { hasTouchScreen } = useDeviceInfo();
+  const shouldLoadImage = loadStrategy === "eager" || inView;
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
@@ -44,13 +51,14 @@ function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx1080 }: Props) {
           style={loadingPlaceholderStyle}
         />
       )}
-      {inView && (
+      {shouldLoadImage && (
         <FallbackImage
           primarySrc={getScaledImageUri(src, imageScale)}
           fallbackSrc={src}
           alt="Media content"
           optimize={false}
           fill
+          loading={loadStrategy === "eager" ? "eager" : undefined}
           sizes="(max-width: 768px) 100vw, 600px"
           className={`tw-max-w-full tw-object-contain ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"

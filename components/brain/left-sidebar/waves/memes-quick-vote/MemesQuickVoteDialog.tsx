@@ -33,22 +33,135 @@ interface MemesQuickVoteDialogContentProps {
   readonly activeDrop: NonNullable<MemesQuickVoteDialogProps["activeDrop"]>;
   readonly isMobile: boolean;
   readonly latestUsedAmount: number | null;
+  readonly nextDrop: MemesQuickVoteDialogProps["nextDrop"];
   readonly onClose: () => void;
   readonly remainingCount: number;
   readonly recentAmounts: number[];
+  readonly sessionId: number;
   readonly submitVote: MemesQuickVoteDialogProps["submitVote"];
   readonly skipDrop: MemesQuickVoteDialogProps["skipDrop"];
   readonly uncastPower: number | null;
   readonly votingLabel: string | null;
 }
 
+function getQuickVotePreloadedNextDrop(
+  isOpen: boolean,
+  nextDrop: MemesQuickVoteDialogProps["nextDrop"]
+): MemesQuickVoteDialogProps["nextDrop"] {
+  if (!isOpen || !nextDrop) {
+    return null;
+  }
+
+  const artworkMedia = nextDrop.parts.at(0)?.media.at(0);
+  const mediaMimeType = artworkMedia?.mime_type.toLowerCase();
+  const mediaUrl = artworkMedia?.url.toLowerCase();
+  const isGlbMedia =
+    mediaMimeType === "model/gltf-binary" ||
+    mediaMimeType === "model/gltf+json" ||
+    mediaUrl?.endsWith(".glb") ||
+    mediaUrl?.endsWith(".gltf");
+
+  return isGlbMedia ? null : nextDrop;
+}
+
+function MemesQuickVotePreviewStack({
+  activeDrop,
+  isBusy,
+  isMobile,
+  nextDrop,
+  onAdvanceStart,
+  onSkip,
+  onVoteWithSwipe,
+  remainingCount,
+  sessionId,
+  swipeVoteAmount,
+  uncastPower,
+  votingLabel,
+}: {
+  readonly activeDrop: NonNullable<MemesQuickVoteDialogProps["activeDrop"]>;
+  readonly isBusy: boolean;
+  readonly isMobile: boolean;
+  readonly nextDrop: MemesQuickVoteDialogProps["nextDrop"];
+  readonly onAdvanceStart: () => void;
+  readonly onSkip: () => void;
+  readonly onVoteWithSwipe: () => void;
+  readonly remainingCount: number;
+  readonly sessionId: number;
+  readonly swipeVoteAmount: number | null;
+  readonly uncastPower: number | null;
+  readonly votingLabel: string | null;
+}) {
+  const preloadedCardRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const preloadedCard = preloadedCardRef.current;
+
+    if (!preloadedCard) {
+      return;
+    }
+
+    preloadedCard.setAttribute("inert", "");
+
+    return () => {
+      preloadedCard.removeAttribute("inert");
+    };
+  }, [nextDrop]);
+
+  return (
+    <div className="tw-relative tw-h-full tw-w-full">
+      {nextDrop && (
+        <div
+          ref={preloadedCardRef}
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-opacity-0"
+          data-testid="quick-vote-preview-card-next"
+        >
+          <MemesQuickVotePreview
+            key={`next:${sessionId}:${nextDrop.id}`}
+            drop={nextDrop}
+            isBusy={false}
+            isMobile={isMobile}
+            remainingCount={remainingCount}
+            renderMode="preloaded"
+            swipeVoteAmount={swipeVoteAmount}
+            uncastPower={uncastPower}
+            votingLabel={votingLabel}
+            onAdvanceStart={() => undefined}
+            onSkip={() => undefined}
+            onVoteWithSwipe={() => undefined}
+          />
+        </div>
+      )}
+
+      <div className="tw-relative tw-z-10 tw-h-full">
+        <MemesQuickVotePreview
+          key={`active:${sessionId}:${activeDrop.id}`}
+          drop={activeDrop}
+          isBusy={isBusy}
+          isMobile={isMobile}
+          remainingCount={remainingCount}
+          renderMode="active"
+          swipeVoteAmount={swipeVoteAmount}
+          uncastPower={uncastPower}
+          votingLabel={votingLabel}
+          onAdvanceStart={onAdvanceStart}
+          onSkip={onSkip}
+          onVoteWithSwipe={onVoteWithSwipe}
+        />
+      </div>
+    </div>
+  );
+}
+
 function MemesQuickVoteDialogContent({
   activeDrop,
   isMobile,
   latestUsedAmount,
+  nextDrop,
   onClose,
   remainingCount,
   recentAmounts,
+  sessionId,
   submitVote,
   skipDrop,
   uncastPower,
@@ -211,11 +324,13 @@ function MemesQuickVoteDialogContent({
       {isMobile ? (
         <div className="tw-relative tw-z-10 tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col tw-overflow-hidden">
           <div className="tw-min-h-0 tw-flex-1">
-            <MemesQuickVotePreview
-              drop={activeDrop}
+            <MemesQuickVotePreviewStack
+              activeDrop={activeDrop}
               isBusy={isControlsSubmitting}
               isMobile={isMobile}
+              nextDrop={nextDrop}
               remainingCount={remainingCount}
+              sessionId={sessionId}
               swipeVoteAmount={swipeVoteAmount}
               uncastPower={uncastPower}
               votingLabel={votingLabel}
@@ -273,11 +388,13 @@ function MemesQuickVoteDialogContent({
       ) : (
         <>
           <div className="tw-min-h-0 tw-flex-1 md:tw-min-h-0 md:tw-border-y-0 md:tw-border-b-0 md:tw-border-l-0 md:tw-border-r md:tw-border-solid md:tw-border-white/10">
-            <MemesQuickVotePreview
-              drop={activeDrop}
+            <MemesQuickVotePreviewStack
+              activeDrop={activeDrop}
               isBusy={isControlsSubmitting}
               isMobile={isMobile}
+              nextDrop={nextDrop}
               remainingCount={remainingCount}
+              sessionId={sessionId}
               swipeVoteAmount={swipeVoteAmount}
               uncastPower={uncastPower}
               votingLabel={votingLabel}
@@ -410,6 +527,7 @@ export default function MemesQuickVoteDialog({
   hasDiscoveryError,
   isExhausted,
   latestUsedAmount,
+  nextDrop,
   recentAmounts,
   remainingCount,
   retryDiscovery,
@@ -487,15 +605,20 @@ export default function MemesQuickVoteDialog({
   } else if (!activeDrop) {
     dialogBody = <MemesQuickVoteDialogSkeleton />;
   } else {
+    const contentResetKey = `${sessionId}:${activeDrop.id}:${isOpen ? "open" : "closed"}`;
+    const preloadedNextDrop = getQuickVotePreloadedNextDrop(isOpen, nextDrop);
+
     dialogBody = (
       <MemesQuickVoteDialogContent
-        key={`${sessionId}:${activeDrop.id}:${isOpen ? "open" : "closed"}`}
+        key={contentResetKey}
         activeDrop={activeDrop}
         isMobile={isMobile}
         latestUsedAmount={latestUsedAmount}
+        nextDrop={preloadedNextDrop}
         onClose={onClose}
         remainingCount={remainingCount}
         recentAmounts={recentAmounts}
+        sessionId={sessionId}
         submitVote={submitVote}
         skipDrop={skipDrop}
         uncastPower={uncastPower}

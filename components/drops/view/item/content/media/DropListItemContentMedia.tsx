@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
 import { ImageScale } from "@/helpers/image.helpers";
+import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 
 import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
@@ -36,6 +37,7 @@ export default function DropListItemContentMedia({
   imageScale = ImageScale.AUTOx800,
   htmlIframeContainerClassName,
   htmlPreviewImageUrl,
+  loadStrategy = "in-view",
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -47,6 +49,7 @@ export default function DropListItemContentMedia({
   readonly imageScale?: ImageScale | undefined;
   readonly htmlIframeContainerClassName?: string | undefined;
   readonly htmlPreviewImageUrl?: string | undefined;
+  readonly loadStrategy?: MediaLoadStrategy | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -84,6 +87,7 @@ export default function DropListItemContentMedia({
           disableModal={disableModal}
           imageObjectPosition={imageObjectPosition}
           imageScale={imageScale}
+          loadStrategy={loadStrategy}
         />
       );
     case MediaType.VIDEO:
@@ -106,6 +110,7 @@ export default function DropListItemContentMedia({
           previewImageUrl={htmlPreviewImageUrl}
           requireInteractionToLoad={disableAutoPlay}
           iframeContainerClassName={htmlIframeContainerClassName}
+          loadStrategy={loadStrategy}
         />
       );
     case MediaType.UNKNOWN:
