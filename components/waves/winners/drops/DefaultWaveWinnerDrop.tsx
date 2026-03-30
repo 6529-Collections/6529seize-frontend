@@ -99,7 +99,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
           <div className="tw-flex tw-flex-col tw-gap-y-2">
             <WaveWinnerIdentity drop={winner.drop} variant="full" />
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-              <div className="tw-flex-whitespace-nowrap tw-flex tw-items-center tw-gap-x-4">
+              <div className="tw-flex tw-items-center tw-gap-x-4 tw-whitespace-nowrap">
                 <WaveWinnersDropHeaderTotalVotes winner={winner} />
                 <WaveWinnersDropHeaderVoters winner={winner} />
               </div>
