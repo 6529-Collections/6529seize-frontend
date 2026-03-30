@@ -32,25 +32,15 @@ interface Props {
 }
 
 function WavesQuickVoteView() {
-  const {
-    closeQuickVote,
-    isQuickVoteOpen,
-    openQuickVote,
-    prefetchQuickVote,
-    quickVoteSessionId,
-  } = useMemesQuickVoteDialogController();
+  const quickVote = useMemesQuickVoteDialogController();
 
   return (
     <>
       <BrainMobileWaves
-        onOpenQuickVote={openQuickVote}
-        onPrefetchQuickVote={prefetchQuickVote}
+        onOpenQuickVote={quickVote.openQuickVote}
+        onPrefetchQuickVote={quickVote.prefetchQuickVote}
       />
-      <MemesQuickVoteDialog
-        isOpen={isQuickVoteOpen}
-        sessionId={quickVoteSessionId}
-        onClose={closeQuickVote}
-      />
+      <MemesQuickVoteDialog {...quickVote.dialogState} />
     </>
   );
 }
@@ -102,6 +92,15 @@ export default function AppLayout({ children }: Props) {
     !isNavVisible && !isKeyboardVisible
       ? "tw-pb-[env(safe-area-inset-bottom,0px)]"
       : "";
+  let activeContent: ReactNode;
+
+  if (activeView === "messages") {
+    activeContent = <BrainMobileMessages />;
+  } else if (activeView === "waves") {
+    activeContent = <WavesQuickVoteView />;
+  } else {
+    activeContent = <main>{children}</main>;
+  }
 
   return (
     <div className={`${safeAreaClass} ${"tw-overflow-auto"}`}>
@@ -109,13 +108,7 @@ export default function AppLayout({ children }: Props) {
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />
       </div>
-      {activeView === "messages" ? (
-        <BrainMobileMessages />
-      ) : activeView === "waves" ? (
-        <WavesQuickVoteView />
-      ) : (
-        <main>{children}</main>
-      )}
+      {activeContent}
       {!isSingleDropOpen && !isStreamRoute && (
         <div className="tw-h-[85px] tw-w-full" />
       )}

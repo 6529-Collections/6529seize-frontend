@@ -5,6 +5,7 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import React from "react";
 
 interface MemesWaveQuickVoteTriggerProps {
+  readonly isAvailable?: boolean | undefined;
   readonly className?: string | undefined;
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
@@ -12,20 +13,27 @@ interface MemesWaveQuickVoteTriggerProps {
 }
 
 const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
+  isAvailable = true,
   className,
   onOpenQuickVote,
   onPrefetchQuickVote,
   unratedCount,
 }) => {
-  if (unratedCount <= 0) {
+  if (!isAvailable) {
     return null;
   }
+
+  const label =
+    unratedCount > 0
+      ? `${unratedCount} unrated submissions in the memes wave`
+      : "Quick vote";
+  const title = unratedCount > 0 ? `${unratedCount} unrated` : "Quick vote";
 
   return (
     <button
       type="button"
-      aria-label={`${unratedCount} submissions left unrated in memes wave`}
-      title={`${unratedCount} left`}
+      aria-label={label}
+      title={title}
       onClick={onOpenQuickVote}
       onFocus={onPrefetchQuickVote}
       onMouseEnter={onPrefetchQuickVote}
@@ -34,9 +42,11 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
       }`}
     >
       <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-300/20" />
-      <span className="tw-text-xs tw-font-semibold">
-        {formatNumberWithCommas(unratedCount)}
-      </span>
+      {unratedCount > 0 && (
+        <span className="tw-text-xs tw-font-semibold">
+          {formatNumberWithCommas(unratedCount)}
+        </span>
+      )}
     </button>
   );
 };

@@ -12,15 +12,16 @@ export default function FloatingMemesQuickVoteTrigger({
   onOpenQuickVote,
   onPrefetchQuickVote,
 }: FloatingMemesQuickVoteTriggerProps) {
-  const { isReady, uncastPower, unratedCount } = useMemesWaveFooterStats();
+  const { isAvailable, unratedCount } = useMemesWaveFooterStats();
 
-  if (!isReady || typeof uncastPower !== "number" || unratedCount <= 0) {
+  if (!isAvailable) {
     return null;
   }
 
   return (
     <div className="tw-absolute tw-right-2 tw-top-2 tw-z-20 sm:tw-right-4 sm:tw-top-3">
       <MemesWaveQuickVoteTrigger
+        isAvailable={isAvailable}
         onOpenQuickVote={onOpenQuickVote}
         onPrefetchQuickVote={onPrefetchQuickVote}
         unratedCount={unratedCount}
