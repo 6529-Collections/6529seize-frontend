@@ -3,6 +3,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 
 export const MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY =
   "MEMES_QUICK_VOTE_UNDISCOVERED_DROP" as const;
+export const MEMES_QUICK_VOTE_LOOKAHEAD_COUNT = 4 as const;
 
 export const getMemesQuickVoteUndiscoveredDropQueryKey = ({
   contextProfile,

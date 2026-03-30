@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -44,19 +44,13 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
-  const {
-    closeQuickVote,
-    isQuickVoteOpen,
-    openQuickVote,
-    prefetchQuickVote,
-    quickVoteSessionId,
-  } = useMemesQuickVoteDialogController();
-  const [hydrated, setHydrated] = useState(false);
+  const quickVote = useMemesQuickVoteDialogController();
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const myStream = useMyStreamOptional();
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
 
   const dropId = searchParams.get("drop") ?? undefined;
   const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
@@ -115,9 +109,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     waveId,
   });
 
-  const onDropClick = (drop: ExtendedDrop) => {
+  const onDropClick = (selectedDrop: ExtendedDrop) => {
     const params = new URLSearchParams(searchParams.toString() || "");
-    params.set("drop", drop.id);
+    params.set("drop", selectedDrop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -144,7 +138,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const closeCreateOverlay = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("create");
-    const base = pathname ?? "/";
+    const base = pathname;
     const next = params.toString() ? `${base}?${params.toString()}` : base;
     router.replace(next, { scroll: false });
   }, [router, pathname, searchParams]);
@@ -186,7 +180,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     !isDropOpen &&
     !isDm;
   const shouldMountQuickVoteDialog =
-    isQuickVoteOpen ||
+    quickVote.isQuickVoteOpen ||
     shouldMountFloatingQuickVoteEntry ||
     activeView === BrainView.WAVES;
 
@@ -232,8 +226,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         >
           {shouldMountFloatingQuickVoteEntry && (
             <FloatingMemesQuickVoteTrigger
-              onOpenQuickVote={openQuickVote}
-              onPrefetchQuickVote={prefetchQuickVote}
+              onOpenQuickVote={quickVote.openQuickVote}
+              onPrefetchQuickVote={quickVote.prefetchQuickVote}
             />
           )}
           <BrainMobileViewContent
@@ -243,8 +237,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
             isMemesWave={isMemesWave}
             isRankWave={isRankWave}
             onDropClick={onDropClick}
-            onOpenQuickVote={openQuickVote}
-            onPrefetchQuickVote={prefetchQuickVote}
+            onOpenQuickVote={quickVote.openQuickVote}
+            onPrefetchQuickVote={quickVote.prefetchQuickVote}
             wave={wave}
           >
             {children}
@@ -252,11 +246,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         </motion.div>
       </AnimatePresence>
       {shouldMountQuickVoteDialog && (
-        <MemesQuickVoteDialog
-          isOpen={isQuickVoteOpen}
-          sessionId={quickVoteSessionId}
-          onClose={closeQuickVote}
-        />
+        <MemesQuickVoteDialog {...quickVote.dialogState} />
       )}
     </div>
   );

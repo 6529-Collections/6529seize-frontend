@@ -27,28 +27,18 @@ interface WebLeftSidebarProps {
 const WebLeftSidebarQuickVoteOwner: React.FC<{
   readonly isCollapsed: boolean;
 }> = ({ isCollapsed }) => {
-  const {
-    closeQuickVote,
-    isQuickVoteOpen,
-    openQuickVote,
-    prefetchQuickVote,
-    quickVoteSessionId,
-  } = useMemesQuickVoteDialogController();
+  const quickVote = useMemesQuickVoteDialogController();
 
   return (
     <>
       <div className="tw-flex-shrink-0 tw-bg-black">
         <MemesWaveFooter
           collapsed={isCollapsed}
-          onOpenQuickVote={openQuickVote}
-          onPrefetchQuickVote={prefetchQuickVote}
+          onOpenQuickVote={quickVote.openQuickVote}
+          onPrefetchQuickVote={quickVote.prefetchQuickVote}
         />
       </div>
-      <MemesQuickVoteDialog
-        isOpen={isQuickVoteOpen}
-        sessionId={quickVoteSessionId}
-        onClose={closeQuickVote}
-      />
+      <MemesQuickVoteDialog {...quickVote.dialogState} />
     </>
   );
 };

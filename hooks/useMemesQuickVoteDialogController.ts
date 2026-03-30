@@ -1,10 +1,34 @@
 "use client";
 
+import {
+  useMemesQuickVoteQueue,
+  type UseMemesQuickVoteQueueResult,
+} from "@/hooks/useMemesQuickVoteQueue";
 import { usePrefetchMemesQuickVote } from "@/hooks/usePrefetchMemesQuickVote";
 import { useCallback, useRef, useState } from "react";
 
+export type MemesQuickVoteDialogState = Pick<
+  UseMemesQuickVoteQueueResult,
+  | "activeDrop"
+  | "hasDiscoveryError"
+  | "isExhausted"
+  | "latestUsedAmount"
+  | "recentAmounts"
+  | "remainingCount"
+  | "retryDiscovery"
+  | "submitVote"
+  | "skipDrop"
+  | "uncastPower"
+  | "votingLabel"
+> & {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly sessionId: number;
+};
+
 type UseMemesQuickVoteDialogControllerResult = {
   readonly closeQuickVote: () => void;
+  readonly dialogState: MemesQuickVoteDialogState;
   readonly isQuickVoteOpen: boolean;
   readonly openQuickVote: () => void;
   readonly prefetchQuickVote: () => void;
@@ -19,6 +43,11 @@ export const useMemesQuickVoteDialogController =
     const lastIssuedSessionIdRef = useRef(0);
     const reservedSessionIdRef = useRef<number | null>(null);
     const prefetchedSessionIdsRef = useRef(new Set<number>());
+    const quickVoteQueue = useMemesQuickVoteQueue({
+      enabled: quickVoteSessionId > 0,
+      sessionId: quickVoteSessionId,
+    });
+    const { retryDiscovery } = quickVoteQueue;
 
     const reserveSessionId = useCallback(() => {
       if (reservedSessionIdRef.current !== null) {
@@ -31,6 +60,11 @@ export const useMemesQuickVoteDialogController =
     }, []);
 
     const prefetchQuickVote = useCallback(() => {
+      if (quickVoteSessionId > 0) {
+        retryDiscovery();
+        return;
+      }
+
       const sessionId = reserveSessionId();
 
       if (prefetchedSessionIdsRef.current.has(sessionId)) {
@@ -39,9 +73,20 @@ export const useMemesQuickVoteDialogController =
 
       prefetchedSessionIdsRef.current.add(sessionId);
       void prefetchMemesQuickVote(sessionId);
-    }, [prefetchMemesQuickVote, reserveSessionId]);
+    }, [
+      prefetchMemesQuickVote,
+      quickVoteSessionId,
+      reserveSessionId,
+      retryDiscovery,
+    ]);
 
     const openQuickVote = useCallback(() => {
+      if (quickVoteSessionId > 0) {
+        retryDiscovery();
+        setIsQuickVoteOpen(true);
+        return;
+      }
+
       const sessionId =
         reservedSessionIdRef.current ?? lastIssuedSessionIdRef.current + 1;
 
@@ -49,7 +94,7 @@ export const useMemesQuickVoteDialogController =
       reservedSessionIdRef.current = null;
       setQuickVoteSessionId(sessionId);
       setIsQuickVoteOpen(true);
-    }, []);
+    }, [quickVoteSessionId, retryDiscovery]);
 
     const closeQuickVote = useCallback(() => {
       setIsQuickVoteOpen(false);
@@ -57,6 +102,22 @@ export const useMemesQuickVoteDialogController =
 
     return {
       closeQuickVote,
+      dialogState: {
+        activeDrop: quickVoteQueue.activeDrop,
+        hasDiscoveryError: quickVoteQueue.hasDiscoveryError,
+        isExhausted: quickVoteQueue.isExhausted,
+        isOpen: isQuickVoteOpen,
+        latestUsedAmount: quickVoteQueue.latestUsedAmount,
+        onClose: closeQuickVote,
+        recentAmounts: quickVoteQueue.recentAmounts,
+        remainingCount: quickVoteQueue.remainingCount,
+        retryDiscovery: quickVoteQueue.retryDiscovery,
+        sessionId: quickVoteSessionId,
+        skipDrop: quickVoteQueue.skipDrop,
+        submitVote: quickVoteQueue.submitVote,
+        uncastPower: quickVoteQueue.uncastPower,
+        votingLabel: quickVoteQueue.votingLabel,
+      },
       isQuickVoteOpen,
       openQuickVote,
       prefetchQuickVote,

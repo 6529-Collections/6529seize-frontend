@@ -1,7 +1,6 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -11,6 +10,7 @@ import { getDisplayQuickVoteAmounts } from "@/hooks/memesQuickVote.helpers";
 import {
   fetchMemesQuickVoteUndiscoveredDrop,
   getMemesQuickVoteUndiscoveredDropQueryKey,
+  MEMES_QUICK_VOTE_LOOKAHEAD_COUNT,
   MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY,
 } from "@/hooks/memesQuickVote.query";
 import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
@@ -18,24 +18,20 @@ import { useMemesQuickVoteStorage } from "@/hooks/useMemesQuickVoteStorage";
 import { useMemesQuickVoteSubmit } from "@/hooks/useMemesQuickVoteSubmit";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import type { ContextType, Dispatch, SetStateAction } from "react";
-import { useCallback, useContext, useMemo, useState } from "react";
-
-const MEMES_QUICK_VOTE_LOOKAHEAD_COUNT = 4;
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 type UseMemesQuickVoteQueueOptions = {
   readonly enabled?: boolean | undefined;
   readonly sessionId: number;
 };
 
-type UseMemesQuickVoteQueueResult = {
+export type UseMemesQuickVoteQueueResult = {
   readonly activeDrop: ExtendedDrop | null;
   readonly hasDiscoveryError: boolean;
   readonly isExhausted: boolean;
   readonly isLoading: boolean;
   readonly isReady: boolean;
-  readonly isVoting: boolean;
   readonly latestUsedAmount: number | null;
-  readonly queue: ExtendedDrop[];
   readonly recentAmounts: number[];
   readonly remainingCount: number;
   readonly retryDiscovery: () => void;
@@ -73,7 +69,6 @@ type UseBufferedUndiscoveredDropsOptions = {
 type UseMemesQuickVoteQueueActionsOptions = {
   readonly bufferedDrops: readonly ApiDrop[];
   readonly contextProfile: string | null | undefined;
-  readonly invalidateDrops: () => void;
   readonly proxyId: string | null | undefined;
   readonly queryClient: ReturnType<typeof useQueryClient>;
   readonly requestAuth: ContextType<typeof AuthContext>["requestAuth"];
@@ -154,19 +149,21 @@ const getCurrentOptimisticRemainingPowerState = ({
   state.key === key ? state : createInitialOptimisticRemainingPowerState(key);
 
 const getResolvedOptimisticAdvanceState = ({
+  bufferedDrops,
   isFetching,
-  primaryDrop,
   state,
 }: {
+  readonly bufferedDrops: readonly ApiDrop[];
   readonly isFetching: boolean;
-  readonly primaryDrop: ApiDrop | null;
   readonly state: KeyedOptimisticAdvanceState;
 }): KeyedOptimisticAdvanceState => {
-  if (
-    state.blockedDropIds.length === 0 ||
-    isFetching ||
-    (primaryDrop !== null && state.blockedDropIds.includes(primaryDrop.id))
-  ) {
+  if (state.blockedDropIds.length === 0 || isFetching) {
+    return state;
+  }
+
+  const blockedDropIdSet = new Set(state.blockedDropIds);
+
+  if (bufferedDrops.some((drop) => blockedDropIdSet.has(drop.id))) {
     return state;
   }
 
@@ -234,22 +231,6 @@ const isVoteableQuickVoteDrop = (drop: ExtendedDrop | null): boolean => {
     typeof profileContext.max_rating === "number" &&
     profileContext.max_rating > 0
   );
-};
-
-const getUniqueDrops = (drops: readonly ApiDrop[]): ApiDrop[] => {
-  const seen = new Set<string>();
-  const uniqueDrops: ApiDrop[] = [];
-
-  for (const drop of drops) {
-    if (seen.has(drop.id)) {
-      continue;
-    }
-
-    seen.add(drop.id);
-    uniqueDrops.push(drop);
-  }
-
-  return uniqueDrops;
 };
 
 const getMemesQuickVoteQueueViewState = ({
@@ -360,25 +341,31 @@ const useBufferedUndiscoveredDrops = ({
 const useResolvedMemesQuickVoteDrops = ({
   optimisticAdvanceState,
   optimisticRemainingPowerState,
+  pendingDropIds,
   stateKey,
   undiscoveredBuffer,
 }: {
   readonly optimisticAdvanceState: KeyedOptimisticAdvanceState;
   readonly optimisticRemainingPowerState: KeyedOptimisticRemainingPowerState;
+  readonly pendingDropIds: readonly string[];
   readonly stateKey: string;
   readonly undiscoveredBuffer: ReturnType<typeof useBufferedUndiscoveredDrops>;
 }) => {
   const optimisticAdvance = getResolvedOptimisticAdvanceState({
+    bufferedDrops: undiscoveredBuffer.bufferedDrops,
     isFetching: undiscoveredBuffer.isFetching,
-    primaryDrop: undiscoveredBuffer.primaryDrop,
     state: getCurrentOptimisticAdvanceState({
       key: stateKey,
       state: optimisticAdvanceState,
     }),
   });
-  const blockedDropIdSet = useMemo(
-    () => new Set(optimisticAdvance.blockedDropIds),
-    [optimisticAdvance.blockedDropIds]
+  const pendingDropIdSet = useMemo(
+    () => new Set(pendingDropIds),
+    [pendingDropIds]
+  );
+  const hiddenDropIdSet = useMemo(
+    () => new Set([...optimisticAdvance.blockedDropIds, ...pendingDropIds]),
+    [optimisticAdvance.blockedDropIds, pendingDropIds]
   );
   const nextBufferedDrop = useMemo(() => {
     if (optimisticAdvance.blockedDropIds.length === 0) {
@@ -397,27 +384,51 @@ const useResolvedMemesQuickVoteDrops = ({
 
     if (
       optimisticAdvance.fallbackDrop &&
-      !blockedDropIdSet.has(optimisticAdvance.fallbackDrop.id)
+      !hiddenDropIdSet.has(optimisticAdvance.fallbackDrop.id)
     ) {
       return optimisticAdvance.fallbackDrop;
     }
 
     return (
       undiscoveredBuffer.bufferedDrops.find(
-        (drop) => !blockedDropIdSet.has(drop.id)
+        (drop) => !hiddenDropIdSet.has(drop.id)
       ) ?? null
     );
   }, [
-    blockedDropIdSet,
+    hiddenDropIdSet,
     optimisticAdvance.blockedDropIds.length,
     optimisticAdvance.fallbackDrop,
     optimisticAdvance.nextDropId,
     undiscoveredBuffer.bufferedDrops,
   ]);
-  const activeApiDrop =
-    optimisticAdvance.blockedDropIds.length > 0
-      ? nextBufferedDrop
-      : undiscoveredBuffer.primaryDrop;
+  const activeApiDrop = useMemo(() => {
+    if (optimisticAdvance.blockedDropIds.length > 0) {
+      return nextBufferedDrop;
+    }
+
+    const primaryDrop = undiscoveredBuffer.primaryDrop;
+
+    if (!primaryDrop) {
+      return null;
+    }
+
+    if (!pendingDropIdSet.has(primaryDrop.id)) {
+      return primaryDrop;
+    }
+
+    return (
+      undiscoveredBuffer.bufferedDrops.find(
+        (drop) => !hiddenDropIdSet.has(drop.id)
+      ) ?? null
+    );
+  }, [
+    hiddenDropIdSet,
+    nextBufferedDrop,
+    optimisticAdvance.blockedDropIds.length,
+    pendingDropIdSet,
+    undiscoveredBuffer.bufferedDrops,
+    undiscoveredBuffer.primaryDrop,
+  ]);
   const effectiveOptimisticRemainingPower =
     getEffectiveOptimisticRemainingPower({
       activeApiDrop,
@@ -439,41 +450,15 @@ const useResolvedMemesQuickVoteDrops = ({
   const activeDrop = isVoteableQuickVoteDrop(activeDropCandidate)
     ? activeDropCandidate
     : null;
-  const queue = useMemo(() => {
-    const uniqueDrops = getUniqueDrops(undiscoveredBuffer.bufferedDrops)
-      .filter((drop) => !blockedDropIdSet.has(drop.id))
-      .map((drop) =>
-        clampDropMaxRating(
-          convertApiDropToExtendedDrop(drop),
-          effectiveOptimisticRemainingPower
-        )
-      );
-
-    if (!activeDrop) {
-      return uniqueDrops;
-    }
-
-    return [
-      activeDrop,
-      ...uniqueDrops.filter((drop) => drop.id !== activeDrop.id),
-    ];
-  }, [
-    activeDrop,
-    blockedDropIdSet,
-    effectiveOptimisticRemainingPower,
-    undiscoveredBuffer.bufferedDrops,
-  ]);
 
   return {
     activeDrop,
-    queue,
   };
 };
 
 const useMemesQuickVoteQueueActions = ({
   bufferedDrops,
   contextProfile,
-  invalidateDrops,
   proxyId,
   queryClient,
   requestAuth,
@@ -486,33 +471,38 @@ const useMemesQuickVoteQueueActions = ({
   waveId,
 }: UseMemesQuickVoteQueueActionsOptions) => {
   const invalidateUndiscoveredDrops = useCallback(() => {
-    void queryClient.invalidateQueries({
-      predicate: (query) => {
-        if (
-          !Array.isArray(query.queryKey) ||
-          query.queryKey[0] !== MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
-          typeof query.queryKey[1] !== "object" ||
-          query.queryKey[1] === null
-        ) {
-          return false;
-        }
+    queryClient
+      .invalidateQueries({
+        predicate: (query) => {
+          if (
+            !Array.isArray(query.queryKey) ||
+            query.queryKey[0] !==
+              MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
+            typeof query.queryKey[1] !== "object" ||
+            query.queryKey[1] === null
+          ) {
+            return false;
+          }
 
-        const undiscoveredQuery = query.queryKey[1] as {
-          readonly context_profile?: string | null;
-          readonly proxyId?: string | null;
-          readonly sessionId?: number;
-          readonly waveId?: string | null;
-        };
+          const undiscoveredQuery = query.queryKey[1] as {
+            readonly context_profile?: string | null;
+            readonly proxyId?: string | null;
+            readonly sessionId?: number;
+            readonly waveId?: string | null;
+          };
 
-        return (
-          undiscoveredQuery.context_profile === (contextProfile ?? null) &&
-          undiscoveredQuery.proxyId === (proxyId ?? null) &&
-          undiscoveredQuery.waveId === waveId &&
-          (undiscoveredQuery.sessionId === 0 ||
-            undiscoveredQuery.sessionId === sessionId)
-        );
-      },
-    });
+          return (
+            undiscoveredQuery.context_profile === (contextProfile ?? null) &&
+            undiscoveredQuery.proxyId === (proxyId ?? null) &&
+            undiscoveredQuery.waveId === waveId &&
+            (undiscoveredQuery.sessionId === 0 ||
+              undiscoveredQuery.sessionId === sessionId)
+          );
+        },
+      })
+      .catch(() => {
+        // Invalidation is best-effort; the next session/query refresh will recover.
+      });
   }, [contextProfile, proxyId, queryClient, sessionId, waveId]);
   const setNextOptimisticAdvance = useCallback(
     (drop: ExtendedDrop) => {
@@ -532,8 +522,7 @@ const useMemesQuickVoteQueueActions = ({
     [bufferedDrops, setOptimisticAdvanceState, stateKey]
   );
 
-  const { isVoting, submitSkip, submitVote } = useMemesQuickVoteSubmit({
-    invalidateDrops,
+  const { pendingDropIds, submitSkip, submitVote } = useMemesQuickVoteSubmit({
     onRatingFailure: (drop, _amount, type) => {
       setOptimisticAdvanceState((current) => {
         const baseState = getCurrentOptimisticAdvanceState({
@@ -588,7 +577,7 @@ const useMemesQuickVoteQueueActions = ({
 
   return {
     invalidateUndiscoveredDrops,
-    isVoting,
+    pendingDropIds,
     skipDrop: submitSkip,
     submitVote,
   };
@@ -599,7 +588,6 @@ export const useMemesQuickVoteQueue = ({
   sessionId,
 }: UseMemesQuickVoteQueueOptions): UseMemesQuickVoteQueueResult => {
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
   const {
     contextProfile,
@@ -635,16 +623,9 @@ export const useMemesQuickVoteQueue = ({
     sessionId,
     waveId,
   });
-  const { activeDrop, queue } = useResolvedMemesQuickVoteDrops({
-    optimisticAdvanceState,
-    optimisticRemainingPowerState,
-    stateKey,
-    undiscoveredBuffer,
-  });
   const queueActions = useMemesQuickVoteQueueActions({
     bufferedDrops: undiscoveredBuffer.bufferedDrops,
     contextProfile,
-    invalidateDrops,
     proxyId,
     queryClient,
     requestAuth,
@@ -655,6 +636,17 @@ export const useMemesQuickVoteQueue = ({
     setToast,
     stateKey,
     waveId,
+  });
+  const currentOptimisticAdvanceState = getCurrentOptimisticAdvanceState({
+    key: stateKey,
+    state: optimisticAdvanceState,
+  });
+  const { activeDrop } = useResolvedMemesQuickVoteDrops({
+    optimisticAdvanceState,
+    optimisticRemainingPowerState,
+    pendingDropIds: queueActions.pendingDropIds,
+    stateKey,
+    undiscoveredBuffer,
   });
   const {
     latestUsedAmount,
@@ -667,6 +659,44 @@ export const useMemesQuickVoteQueue = ({
     queueActions,
     recentAmountsByRecency,
   });
+  const pendingQuickVoteCount = queueActions.pendingDropIds.length;
+  const invalidateUndiscoveredDrops = queueActions.invalidateUndiscoveredDrops;
+
+  useEffect(() => {
+    if (
+      !enabled ||
+      undiscoveredBuffer.isFetching ||
+      undiscoveredBuffer.hasDiscoveryError ||
+      undiscoveredBuffer.isExhausted
+    ) {
+      return;
+    }
+
+    const shouldContinueSync =
+      currentOptimisticAdvanceState.blockedDropIds.length > 0 ||
+      (pendingQuickVoteCount > 0 && activeDrop === null);
+
+    if (!shouldContinueSync) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      invalidateUndiscoveredDrops();
+    }, 300);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [
+    activeDrop,
+    currentOptimisticAdvanceState.blockedDropIds.length,
+    enabled,
+    invalidateUndiscoveredDrops,
+    pendingQuickVoteCount,
+    undiscoveredBuffer.hasDiscoveryError,
+    undiscoveredBuffer.isExhausted,
+    undiscoveredBuffer.isFetching,
+  ]);
 
   return {
     activeDrop,
@@ -674,9 +704,7 @@ export const useMemesQuickVoteQueue = ({
     isExhausted: undiscoveredBuffer.isExhausted,
     isLoading: undiscoveredBuffer.isLoading && activeDrop === null,
     isReady: activeDrop !== null,
-    isVoting: queueActions.isVoting,
     latestUsedAmount,
-    queue,
     recentAmounts,
     remainingCount: undiscoveredBuffer.totalCount,
     retryDiscovery,

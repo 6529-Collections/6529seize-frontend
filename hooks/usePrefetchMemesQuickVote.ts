@@ -3,12 +3,11 @@
 import {
   fetchMemesQuickVoteUndiscoveredDrop,
   getMemesQuickVoteUndiscoveredDropQueryKey,
+  MEMES_QUICK_VOTE_LOOKAHEAD_COUNT,
 } from "@/hooks/memesQuickVote.query";
 import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-
-const MEMES_QUICK_VOTE_LOOKAHEAD_COUNT = 4;
 
 export const usePrefetchMemesQuickVote = () => {
   const queryClient = useQueryClient();

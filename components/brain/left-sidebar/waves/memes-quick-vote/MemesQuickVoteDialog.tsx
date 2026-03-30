@@ -5,8 +5,8 @@ import {
   getDefaultQuickVoteAmount,
   normalizeQuickVoteAmount,
 } from "@/hooks/memesQuickVote.helpers";
+import type { MemesQuickVoteDialogState } from "@/hooks/useMemesQuickVoteDialogController";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import {
@@ -27,23 +27,17 @@ const QUICK_VOTE_BAR_FEEDBACK_DURATION_MS = 650;
 type VoteFeedbackSource = "custom-submit" | "quick-amount";
 type TimeoutHandle = ReturnType<typeof globalThis.setTimeout>;
 
-interface MemesQuickVoteDialogProps {
-  readonly isOpen: boolean;
-  readonly sessionId: number;
-  readonly onClose: () => void;
-}
+type MemesQuickVoteDialogProps = MemesQuickVoteDialogState;
 
 interface MemesQuickVoteDialogContentProps {
-  readonly activeDrop: NonNullable<
-    ReturnType<typeof useMemesQuickVoteQueue>["activeDrop"]
-  >;
+  readonly activeDrop: NonNullable<MemesQuickVoteDialogProps["activeDrop"]>;
   readonly isMobile: boolean;
   readonly latestUsedAmount: number | null;
   readonly onClose: () => void;
   readonly remainingCount: number;
   readonly recentAmounts: number[];
-  readonly submitVote: ReturnType<typeof useMemesQuickVoteQueue>["submitVote"];
-  readonly skipDrop: ReturnType<typeof useMemesQuickVoteQueue>["skipDrop"];
+  readonly submitVote: MemesQuickVoteDialogProps["submitVote"];
+  readonly skipDrop: MemesQuickVoteDialogProps["skipDrop"];
   readonly uncastPower: number | null;
   readonly votingLabel: string | null;
 }
@@ -412,25 +406,22 @@ export default function MemesQuickVoteDialog({
   isOpen,
   sessionId,
   onClose,
+  activeDrop,
+  hasDiscoveryError,
+  isExhausted,
+  latestUsedAmount,
+  recentAmounts,
+  remainingCount,
+  retryDiscovery,
+  submitVote,
+  skipDrop,
+  uncastPower,
+  votingLabel,
 }: MemesQuickVoteDialogProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const previousBodyOverflowRef = useRef("");
   const isMobile = useMediaQuery(QUICK_VOTE_MOBILE_QUERY);
-  const {
-    activeDrop,
-    hasDiscoveryError,
-    isExhausted,
-    isLoading,
-    latestUsedAmount,
-    recentAmounts,
-    remainingCount,
-    retryDiscovery,
-    submitVote,
-    skipDrop,
-    uncastPower,
-    votingLabel,
-  } = useMemesQuickVoteQueue({ enabled: isOpen, sessionId });
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -493,14 +484,12 @@ export default function MemesQuickVoteDialog({
     dialogBody = <MemesQuickVoteDialogDoneState onClose={onClose} />;
   } else if (!activeDrop && hasDiscoveryError) {
     dialogBody = <MemesQuickVoteDialogErrorState onRetry={retryDiscovery} />;
-  } else if (!activeDrop && isLoading) {
-    dialogBody = <MemesQuickVoteDialogSkeleton />;
   } else if (!activeDrop) {
     dialogBody = <MemesQuickVoteDialogSkeleton />;
   } else {
     dialogBody = (
       <MemesQuickVoteDialogContent
-        key={`${sessionId}:${activeDrop.serial_no}:${isOpen ? "open" : "closed"}`}
+        key={`${sessionId}:${activeDrop.id}:${isOpen ? "open" : "closed"}`}
         activeDrop={activeDrop}
         isMobile={isMobile}
         latestUsedAmount={latestUsedAmount}
