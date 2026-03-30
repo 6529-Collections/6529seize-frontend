@@ -1,128 +1,72 @@
 "use client";
 
+import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import type { MemesQuickVoteStats } from "@/hooks/memesQuickVote.helpers";
 import {
-  getMemesQuickVoteRemainingCount,
-  type MemesQuickVoteStats,
-} from "@/hooks/memesQuickVote.helpers";
-import {
-  createInitialMemesQuickVoteDiscoveryState,
-  deriveMemesQuickVoteDiscoverySnapshot,
-  getMemesQuickVoteDiscoveredQueue,
-} from "@/hooks/memesQuickVote.queue.helpers";
+  fetchMemesQuickVoteUndiscoveredDrop,
+  getMemesQuickVoteUndiscoveredDropQueryKey,
+} from "@/hooks/memesQuickVote.query";
 import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
-import { fetchMemesQuickVoteDiscoveryBatch } from "@/hooks/memesQuickVote.query";
-import { useMemesQuickVoteSkippedDropIds } from "@/hooks/useMemesQuickVoteStorage";
-import { useMemesQuickVoteSummary } from "@/hooks/useMemesQuickVoteSummary";
-import { useEffect } from "react";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useQuery } from "@tanstack/react-query";
 
 type MemesWaveFooterStats = MemesQuickVoteStats & {
+  readonly isAvailable: boolean;
   readonly isReady: boolean;
 };
 
 const EMPTY_STATS: MemesWaveFooterStats = {
+  isAvailable: false,
+  isReady: false,
   uncastPower: null,
   unratedCount: 0,
   votingLabel: null,
-  isReady: false,
 };
 
 export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
   const { contextProfile, isEnabled, memesWaveId, proxyId } =
     useMemesQuickVoteContext();
-  const { setAndPersistSkippedDropIds, skippedDropIds } =
-    useMemesQuickVoteSkippedDropIds({
+  const waveId =
+    typeof memesWaveId === "string" && memesWaveId.length > 0
+      ? memesWaveId
+      : null;
+  const query = useQuery({
+    queryKey: getMemesQuickVoteUndiscoveredDropQueryKey({
       contextProfile,
-      memesWaveId,
       proxyId,
-    });
-  const { isSuccess, stats } = useMemesQuickVoteSummary();
-  const rawUnratedCount = getMemesQuickVoteRemainingCount({
-    count: stats.unratedCount,
-    hiddenCount: skippedDropIds.length,
-  });
-  const shouldRecoverVisibility =
-    isEnabled &&
-    isSuccess &&
-    stats.unratedCount > 0 &&
-    skippedDropIds.length > 0 &&
-    rawUnratedCount <= 0 &&
-    typeof memesWaveId === "string" &&
-    memesWaveId.length > 0;
-  const recoveredFooterCount = useQuery({
-    queryKey: [
-      "memes-quick-vote-footer-recovery",
-      {
-        contextProfile,
-        proxyId,
-        skippedSignature: skippedDropIds.join(","),
-        waveId: memesWaveId,
-      },
-    ],
-    enabled: shouldRecoverVisibility,
-    queryFn: async () => {
-      const waveId = memesWaveId;
-
-      if (typeof waveId !== "string" || waveId.length === 0) {
-        return 0;
-      }
-
-      const discoveryState = createInitialMemesQuickVoteDiscoveryState();
-      const discoveryData = await fetchMemesQuickVoteDiscoveryBatch({
-        discoveryState,
-        skippedDropIds,
+      sessionId: 0,
+      skip: 0,
+      waveId,
+    }),
+    enabled: isEnabled && waveId !== null,
+    queryFn: ({ signal }) =>
+      fetchMemesQuickVoteUndiscoveredDrop({
+        skip: 0,
+        signal,
         waveId,
-      });
-      const snapshot = deriveMemesQuickVoteDiscoverySnapshot({
-        enabled: true,
-        pages: discoveryData.pages,
-        skippedDropIds,
-        state: discoveryState,
-      });
-
-      return getMemesQuickVoteDiscoveredQueue(snapshot).length;
-    },
-    retry: false,
+      }),
+    staleTime: 60_000,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    staleTime: 60_000,
+    ...getDefaultQueryRetry(),
   });
-  let unratedCount = rawUnratedCount;
+  const activeDrop = query.data?.drop ?? null;
+  const uncastPower = activeDrop?.context_profile_context?.max_rating ?? null;
+  const isAvailable =
+    isEnabled && waveId !== null && (!query.isSuccess || activeDrop !== null);
 
-  if (shouldRecoverVisibility) {
-    if (typeof recoveredFooterCount.data === "number") {
-      unratedCount = recoveredFooterCount.data;
-    } else if (recoveredFooterCount.isError) {
-      unratedCount = stats.unratedCount;
-    } else {
-      unratedCount = 0;
-    }
-  }
-
-  useEffect(() => {
-    if (!isSuccess || stats.unratedCount > 0 || skippedDropIds.length === 0) {
-      return;
-    }
-
-    setAndPersistSkippedDropIds(() => []);
-  }, [
-    isSuccess,
-    setAndPersistSkippedDropIds,
-    skippedDropIds.length,
-    stats.unratedCount,
-  ]);
-
-  if (shouldRecoverVisibility && recoveredFooterCount.isPending) {
-    return EMPTY_STATS;
-  }
-
-  if (typeof stats.uncastPower !== "number" || unratedCount <= 0) {
-    return EMPTY_STATS;
+  if (!query.isSuccess || typeof uncastPower !== "number" || !activeDrop) {
+    return {
+      ...EMPTY_STATS,
+      isAvailable,
+    };
   }
 
   return {
-    ...stats,
-    unratedCount,
+    isAvailable,
+    uncastPower,
+    unratedCount: query.data.total_count,
+    votingLabel: WAVE_VOTING_LABELS[activeDrop.wave.voting_credit_type],
     isReady: true,
   };
 };

@@ -11,13 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiDrop } from '../models/ApiDrop';
 import { HttpFile } from '../http/http';
 
-export class ApiDropMetadataResponse {
-    'data_key': string;
-    'data_value': string;
-    'resolved_profile'?: ApiProfileMin | null;
+export class ApiUndiscoveredDrop {
+    'drop': ApiDrop | null;
+    'total_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,26 +24,20 @@ export class ApiDropMetadataResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data_key",
-            "baseName": "data_key",
-            "type": "string",
+            "name": "drop",
+            "baseName": "drop",
+            "type": "ApiDrop",
             "format": ""
         },
         {
-            "name": "data_value",
-            "baseName": "data_value",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "resolved_profile",
-            "baseName": "resolved_profile",
-            "type": "ApiProfileMin",
-            "format": ""
+            "name": "total_count",
+            "baseName": "total_count",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropMetadataResponse.attributeTypeMap;
+        return ApiUndiscoveredDrop.attributeTypeMap;
     }
 
     public constructor() {

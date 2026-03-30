@@ -169,9 +169,17 @@ function MemesQuickVoteDialogContent({
     ]
   );
 
-  const queueSkip = () => {
-    skipDrop(activeDrop);
-  };
+  const queueSkip = useCallback(() => {
+    skipDrop(activeDrop)
+      .then((wasQueued) => {
+        if (!wasQueued) {
+          setIsAdvancing(false);
+        }
+      })
+      .catch(() => {
+        setIsAdvancing(false);
+      });
+  }, [activeDrop, skipDrop]);
 
   const handleSkip = () => {
     if (isControlsSubmitting) {
@@ -198,7 +206,7 @@ function MemesQuickVoteDialogContent({
 
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-px-3">
             <span className="tw-truncate tw-text-[13px] tw-font-bold tw-leading-tight tw-text-iron-300">
-              {formatNumberWithCommas(remainingCount)} unexplored
+              {formatNumberWithCommas(remainingCount)} unrated
             </span>
           </div>
 
@@ -211,7 +219,7 @@ function MemesQuickVoteDialogContent({
           <div className="tw-min-h-0 tw-flex-1">
             <MemesQuickVotePreview
               drop={activeDrop}
-              isBusy={isAdvancing}
+              isBusy={isControlsSubmitting}
               isMobile={isMobile}
               remainingCount={remainingCount}
               swipeVoteAmount={swipeVoteAmount}
@@ -227,6 +235,7 @@ function MemesQuickVoteDialogContent({
                   return;
                 }
 
+                setIsAdvancing(true);
                 queueVoteAmount(swipeVoteAmount);
               }}
             />
@@ -272,7 +281,7 @@ function MemesQuickVoteDialogContent({
           <div className="tw-min-h-0 tw-flex-1 md:tw-min-h-0 md:tw-border-y-0 md:tw-border-b-0 md:tw-border-l-0 md:tw-border-r md:tw-border-solid md:tw-border-white/10">
             <MemesQuickVotePreview
               drop={activeDrop}
-              isBusy={isAdvancing}
+              isBusy={isControlsSubmitting}
               isMobile={isMobile}
               remainingCount={remainingCount}
               swipeVoteAmount={swipeVoteAmount}
@@ -288,6 +297,7 @@ function MemesQuickVoteDialogContent({
                   return;
                 }
 
+                setIsAdvancing(true);
                 queueVoteAmount(swipeVoteAmount);
               }}
             />
@@ -381,10 +391,10 @@ function MemesQuickVoteDialogErrorState({
     <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-py-8">
       <div className="tw-w-full tw-max-w-xl tw-rounded-[1.75rem] tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-6 tw-py-10 tw-text-center tw-shadow-[0_24px_60px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm">
         <p className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-white">
-          Couldn&apos;t load your queue
+          Couldn&apos;t load quick vote
         </p>
         <p className="tw-mb-4 tw-text-sm tw-text-iron-400">
-          Quick vote couldn&apos;t reach the leaderboard. Try again.
+          Quick vote couldn&apos;t load the next meme. Try again.
         </p>
         <button
           type="button"

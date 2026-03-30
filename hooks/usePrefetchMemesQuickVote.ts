@@ -1,35 +1,19 @@
 "use client";
 
-import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import {
-  createInitialMemesQuickVoteDiscoveryState,
-  deriveMemesQuickVoteDiscoverySnapshot,
-  getMemesQuickVoteActiveCandidateId,
-  getMemesQuickVoteNextCandidateId,
-} from "@/hooks/memesQuickVote.queue.helpers";
-import {
-  fetchMemesQuickVoteDiscoveryBatch,
-  fetchMemesQuickVoteDrop,
-  fetchMemesQuickVoteSummary,
-  getMemesQuickVoteDiscoveryQueryKey,
-  getMemesQuickVoteDiscoveryStateKey,
-  getMemesQuickVoteDropQueryKey,
-  getMemesQuickVoteSummaryQueryKey,
+  fetchMemesQuickVoteUndiscoveredDrop,
+  getMemesQuickVoteUndiscoveredDropQueryKey,
 } from "@/hooks/memesQuickVote.query";
 import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
-import { useMemesQuickVoteStorage } from "@/hooks/useMemesQuickVoteStorage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
+
+const MEMES_QUICK_VOTE_LOOKAHEAD_COUNT = 4;
 
 export const usePrefetchMemesQuickVote = () => {
   const queryClient = useQueryClient();
   const { contextProfile, isEnabled, memesWaveId, proxyId } =
     useMemesQuickVoteContext();
-  const { skippedDropIds } = useMemesQuickVoteStorage({
-    contextProfile,
-    memesWaveId,
-    proxyId,
-  });
 
   return useCallback(
     async (sessionId: number) => {
@@ -42,70 +26,30 @@ export const usePrefetchMemesQuickVote = () => {
         return;
       }
 
-      const discoveryState = createInitialMemesQuickVoteDiscoveryState();
-      const discoveryStateKey = getMemesQuickVoteDiscoveryStateKey({
-        contextProfile,
-        enabled: true,
-        memesWaveId: waveId,
-        sessionId,
-      });
-      const summaryPromise = queryClient.prefetchQuery({
-        queryKey: getMemesQuickVoteSummaryQueryKey({
-          contextProfile,
-          proxyId,
-          waveId,
-        }),
-        queryFn: () => fetchMemesQuickVoteSummary(waveId),
-        staleTime: 60_000,
-        ...getDefaultQueryRetry(),
-      });
-      const discoveryData = await queryClient.fetchQuery({
-        queryKey: getMemesQuickVoteDiscoveryQueryKey({
-          discoveryStateKey,
-          fetchVersion: 0,
-          waveId,
-        }),
-        queryFn: () =>
-          fetchMemesQuickVoteDiscoveryBatch({
-            discoveryState,
-            skippedDropIds,
-            waveId,
-          }),
-        retry: false,
-      });
-      const discoverySnapshot = deriveMemesQuickVoteDiscoverySnapshot({
-        enabled: true,
-        pages: discoveryData.pages,
-        skippedDropIds,
-        state: discoveryState,
-      });
-      const activeCandidateId =
-        getMemesQuickVoteActiveCandidateId(discoverySnapshot);
-      const nextCandidateId =
-        getMemesQuickVoteNextCandidateId(discoverySnapshot);
-      const dropPrefetches = [activeCandidateId, nextCandidateId]
-        .filter((dropId): dropId is string => !!dropId)
-        .map((dropId) =>
+      const undiscoveredPromises = Array.from(
+        { length: MEMES_QUICK_VOTE_LOOKAHEAD_COUNT },
+        (_, skip) =>
           queryClient.prefetchQuery({
-            queryKey: getMemesQuickVoteDropQueryKey({
+            queryKey: getMemesQuickVoteUndiscoveredDropQueryKey({
               contextProfile,
-              dropId,
               proxyId,
+              sessionId,
+              skip,
+              waveId,
             }),
-            queryFn: () => fetchMemesQuickVoteDrop(dropId),
-            ...getDefaultQueryRetry(),
+            queryFn: ({ signal }) =>
+              fetchMemesQuickVoteUndiscoveredDrop({
+                skip,
+                signal,
+                waveId,
+              }),
+            retry: false,
+            staleTime: 0,
           })
-        );
+      );
 
-      await Promise.all([summaryPromise, ...dropPrefetches]);
+      await Promise.all(undiscoveredPromises);
     },
-    [
-      contextProfile,
-      isEnabled,
-      memesWaveId,
-      proxyId,
-      queryClient,
-      skippedDropIds,
-    ]
+    [contextProfile, isEnabled, memesWaveId, proxyId, queryClient]
   );
 };

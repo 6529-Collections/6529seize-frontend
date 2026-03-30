@@ -9,7 +9,8 @@ import {
 } from "@/hooks/memesQuickVote.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import type { UseMutationResult } from "@tanstack/react-query";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useRef, useState } from "react";
 import type { TypeOptions } from "react-toastify";
 
@@ -21,13 +22,13 @@ type SetToast = (options: {
 }) => void;
 
 type PersistNumberArray = (updater: (current: number[]) => number[]) => void;
-type PersistStringArray = (updater: (current: string[]) => string[]) => void;
 
-type QueuedVote = {
+type QueuedRating = {
   readonly amount: number;
   readonly currentRating: number;
   readonly drop: ExtendedDrop;
   readonly maxRating: number;
+  readonly type: "skip" | "vote";
 };
 
 type UseMemesQuickVoteSubmitOptions = {
@@ -35,22 +36,212 @@ type UseMemesQuickVoteSubmitOptions = {
   readonly setToast: SetToast;
   readonly invalidateDrops: () => void;
   readonly setAndPersistRecentAmounts: PersistNumberArray;
-  readonly setAndPersistSkippedDropIds: PersistStringArray;
-  readonly onVoteFailure: (drop: ExtendedDrop, amount: number) => void;
-  readonly onVoteQueued: (drop: ExtendedDrop, amount: number) => void;
-  readonly onVoteSuccess: (
+  readonly onRatingFailure: (
     drop: ExtendedDrop,
     amount: number,
-    nextRemainingPower: number
+    type: QueuedRating["type"]
+  ) => void;
+  readonly onRatingQueued: (
+    drop: ExtendedDrop,
+    amount: number,
+    type: QueuedRating["type"]
+  ) => void;
+  readonly onRatingSuccess: (
+    drop: ExtendedDrop,
+    amount: number,
+    nextRemainingPower: number,
+    type: QueuedRating["type"]
   ) => void;
 };
 
 type UseMemesQuickVoteSubmitResult = {
   readonly isVoting: boolean;
+  readonly submitSkip: (drop: ExtendedDrop) => Promise<boolean>;
   readonly submitVote: (
     drop: ExtendedDrop,
     amount: number | string
   ) => Promise<boolean>;
+};
+
+type RefValue<T> = {
+  current: T;
+};
+
+const getQueuedRatingAppliedAmount = ({
+  nextRating,
+  queuedRating,
+}: {
+  readonly nextRating: number | undefined;
+  readonly queuedRating: QueuedRating;
+}): number => {
+  if (queuedRating.type === "skip") {
+    return 0;
+  }
+
+  if (typeof nextRating === "number") {
+    return Math.max(0, nextRating - queuedRating.currentRating);
+  }
+
+  return queuedRating.amount;
+};
+
+const getQueuedRatingErrorMessage = ({
+  error,
+  type,
+}: {
+  readonly error: unknown;
+  readonly type: QueuedRating["type"];
+}): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return type === "skip"
+    ? "Quick vote couldn't skip that meme."
+    : "Quick vote couldn't submit that vote.";
+};
+
+const flushMemesQuickVoteRatings = async ({
+  invalidateDrops,
+  isFlushingRef,
+  onRatingFailure,
+  onRatingSuccess,
+  queuedDropIdsRef,
+  ratingMutation,
+  ratingQueueRef,
+  requestAuth,
+  setPendingRatingCount,
+  setToast,
+}: {
+  readonly invalidateDrops: () => void;
+  readonly isFlushingRef: RefValue<boolean>;
+  readonly onRatingFailure: UseMemesQuickVoteSubmitOptions["onRatingFailure"];
+  readonly onRatingSuccess: UseMemesQuickVoteSubmitOptions["onRatingSuccess"];
+  readonly queuedDropIdsRef: RefValue<Set<string>>;
+  readonly ratingMutation: UseMutationResult<
+    ApiDrop,
+    Error,
+    {
+      readonly amount: number;
+      readonly dropId: string;
+    }
+  >;
+  readonly ratingQueueRef: RefValue<QueuedRating[]>;
+  readonly requestAuth: UseMemesQuickVoteSubmitOptions["requestAuth"];
+  readonly setPendingRatingCount: Dispatch<SetStateAction<number>>;
+  readonly setToast: SetToast;
+}) => {
+  if (isFlushingRef.current) {
+    return;
+  }
+
+  isFlushingRef.current = true;
+
+  try {
+    while (ratingQueueRef.current.length > 0) {
+      const queuedRating = ratingQueueRef.current[0];
+
+      if (!queuedRating) {
+        break;
+      }
+
+      try {
+        const { success } = await requestAuth();
+
+        if (!success) {
+          throw new Error("Quick vote couldn't verify your session.");
+        }
+
+        const response = await ratingMutation.mutateAsync({
+          amount: queuedRating.amount,
+          dropId: queuedRating.drop.id,
+        });
+        const appliedAmount = getQueuedRatingAppliedAmount({
+          nextRating: response.context_profile_context?.rating,
+          queuedRating,
+        });
+        const nextRemainingPower = Math.max(
+          0,
+          queuedRating.maxRating - appliedAmount
+        );
+
+        onRatingSuccess(
+          queuedRating.drop,
+          queuedRating.amount,
+          nextRemainingPower,
+          queuedRating.type
+        );
+        invalidateDrops();
+      } catch (error) {
+        setToast({
+          message: getQueuedRatingErrorMessage({
+            error,
+            type: queuedRating.type,
+          }),
+          type: "error",
+        });
+        onRatingFailure(
+          queuedRating.drop,
+          queuedRating.amount,
+          queuedRating.type
+        );
+      } finally {
+        ratingQueueRef.current.shift();
+        queuedDropIdsRef.current.delete(queuedRating.drop.id);
+        setPendingRatingCount(ratingQueueRef.current.length);
+      }
+    }
+  } finally {
+    isFlushingRef.current = false;
+  }
+};
+
+const queueMemesQuickVoteRating = ({
+  amount,
+  drop,
+  flushQueuedRatings,
+  onRatingQueued,
+  queuedDropIdsRef,
+  ratingQueueRef,
+  setAndPersistRecentAmounts,
+  setPendingRatingCount,
+  type,
+}: {
+  readonly amount: number;
+  readonly drop: ExtendedDrop;
+  readonly flushQueuedRatings: () => void;
+  readonly onRatingQueued: UseMemesQuickVoteSubmitOptions["onRatingQueued"];
+  readonly queuedDropIdsRef: RefValue<Set<string>>;
+  readonly ratingQueueRef: RefValue<QueuedRating[]>;
+  readonly setAndPersistRecentAmounts: PersistNumberArray;
+  readonly setPendingRatingCount: Dispatch<SetStateAction<number>>;
+  readonly type: QueuedRating["type"];
+}): boolean => {
+  if (queuedDropIdsRef.current.has(drop.id)) {
+    return false;
+  }
+
+  ratingQueueRef.current.push({
+    amount,
+    currentRating: drop.context_profile_context?.rating ?? 0,
+    drop,
+    maxRating: drop.context_profile_context?.max_rating ?? 0,
+    type,
+  });
+  queuedDropIdsRef.current.add(drop.id);
+  setPendingRatingCount(ratingQueueRef.current.length);
+
+  onRatingQueued(drop, amount, type);
+
+  if (type === "vote") {
+    setAndPersistRecentAmounts((current) =>
+      addRecentQuickVoteAmount(current, amount)
+    );
+  }
+
+  flushQueuedRatings();
+
+  return true;
 };
 
 export const useMemesQuickVoteSubmit = ({
@@ -58,17 +249,16 @@ export const useMemesQuickVoteSubmit = ({
   setToast,
   invalidateDrops,
   setAndPersistRecentAmounts,
-  setAndPersistSkippedDropIds,
-  onVoteFailure,
-  onVoteQueued,
-  onVoteSuccess,
+  onRatingFailure,
+  onRatingQueued,
+  onRatingSuccess,
 }: UseMemesQuickVoteSubmitOptions): UseMemesQuickVoteSubmitResult => {
-  const voteQueueRef = useRef<QueuedVote[]>([]);
+  const ratingQueueRef = useRef<QueuedRating[]>([]);
   const queuedDropIdsRef = useRef<Set<string>>(new Set());
   const isFlushingRef = useRef(false);
-  const [pendingVoteCount, setPendingVoteCount] = useState(0);
+  const [pendingRatingCount, setPendingRatingCount] = useState(0);
 
-  const voteMutation = useMutation({
+  const ratingMutation = useMutation({
     mutationFn: ({
       dropId,
       amount,
@@ -85,111 +275,92 @@ export const useMemesQuickVoteSubmit = ({
       }),
   });
 
-  const flushQueuedVotes = useCallback(async () => {
-    if (isFlushingRef.current) {
-      return;
-    }
-
-    isFlushingRef.current = true;
-
-    try {
-      while (voteQueueRef.current.length > 0) {
-        const queuedVote = voteQueueRef.current[0];
-        if (!queuedVote) {
-          break;
-        }
-
-        try {
-          const { success } = await requestAuth();
-
-          if (!success) {
-            throw new Error("Quick vote couldn't verify your session.");
-          }
-
-          const response = await voteMutation.mutateAsync({
-            dropId: queuedVote.drop.id,
-            amount: queuedVote.amount,
-          });
-          const nextRating = response.context_profile_context?.rating;
-          const appliedAmount =
-            typeof nextRating === "number"
-              ? Math.max(0, nextRating - queuedVote.currentRating)
-              : queuedVote.amount;
-          const nextRemainingPower = Math.max(
-            0,
-            queuedVote.maxRating - appliedAmount
-          );
-
-          onVoteSuccess(queuedVote.drop, queuedVote.amount, nextRemainingPower);
-          invalidateDrops();
-        } catch (error) {
-          setToast({
-            message:
-              error instanceof Error
-                ? error.message
-                : "Quick vote couldn't submit that vote.",
-            type: "error",
-          });
-          onVoteFailure(queuedVote.drop, queuedVote.amount);
-        } finally {
-          voteQueueRef.current.shift();
-          queuedDropIdsRef.current.delete(queuedVote.drop.id);
-          setPendingVoteCount(voteQueueRef.current.length);
-        }
-      }
-    } finally {
-      isFlushingRef.current = false;
-    }
+  const flushQueuedRatings = useCallback(() => {
+    void flushMemesQuickVoteRatings({
+      invalidateDrops,
+      isFlushingRef,
+      onRatingFailure,
+      onRatingSuccess,
+      queuedDropIdsRef,
+      ratingMutation,
+      ratingQueueRef,
+      requestAuth,
+      setPendingRatingCount,
+      setToast,
+    });
   }, [
     invalidateDrops,
-    onVoteFailure,
-    onVoteSuccess,
+    isFlushingRef,
+    onRatingFailure,
+    onRatingSuccess,
+    queuedDropIdsRef,
+    ratingMutation,
+    ratingQueueRef,
     requestAuth,
+    setPendingRatingCount,
     setToast,
-    voteMutation,
   ]);
 
+  const queueRating = useCallback(
+    ({
+      amount,
+      drop,
+      type,
+    }: {
+      readonly amount: number;
+      readonly drop: ExtendedDrop;
+      readonly type: QueuedRating["type"];
+    }): boolean => {
+      return queueMemesQuickVoteRating({
+        amount,
+        drop,
+        flushQueuedRatings,
+        onRatingQueued,
+        queuedDropIdsRef,
+        ratingQueueRef,
+        setAndPersistRecentAmounts,
+        setPendingRatingCount,
+        type,
+      });
+    },
+    [flushQueuedRatings, onRatingQueued, setAndPersistRecentAmounts]
+  );
+
   const submitVote = useCallback(
-    async (drop: ExtendedDrop, amount: number | string) => {
-      const currentRating = drop.context_profile_context?.rating ?? 0;
+    (drop: ExtendedDrop, amount: number | string) => {
       const maxRating = drop.context_profile_context?.max_rating ?? 0;
       const normalizedAmount = normalizeQuickVoteAmount(amount, maxRating);
 
-      if (normalizedAmount === null || queuedDropIdsRef.current.has(drop.id)) {
-        return false;
+      if (normalizedAmount === null) {
+        return Promise.resolve(false);
       }
 
-      queuedDropIdsRef.current.add(drop.id);
-      voteQueueRef.current.push({
-        amount: normalizedAmount,
-        currentRating,
-        drop,
-        maxRating,
-      });
-      setPendingVoteCount(voteQueueRef.current.length);
-
-      onVoteQueued(drop, normalizedAmount);
-      setAndPersistRecentAmounts((current) =>
-        addRecentQuickVoteAmount(current, normalizedAmount)
+      return Promise.resolve(
+        queueRating({
+          amount: normalizedAmount,
+          drop,
+          type: "vote",
+        })
       );
-      setAndPersistSkippedDropIds((current) =>
-        current.filter((dropId) => dropId !== drop.id)
-      );
-
-      void flushQueuedVotes();
-
-      return true;
     },
-    [
-      flushQueuedVotes,
-      onVoteQueued,
-      setAndPersistRecentAmounts,
-      setAndPersistSkippedDropIds,
-    ]
+    [queueRating]
+  );
+
+  const submitSkip = useCallback(
+    (drop: ExtendedDrop) =>
+      Promise.resolve(
+        queueRating({
+          amount: 0,
+          drop,
+          type: "skip",
+        })
+      ),
+    [queueRating]
   );
 
   return {
-    isVoting: pendingVoteCount > 0 || voteMutation.isPending,
+    isVoting: pendingRatingCount > 0 || ratingMutation.isPending,
+    submitSkip,
     submitVote,
   };
 };
