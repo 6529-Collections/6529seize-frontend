@@ -20,6 +20,8 @@ import WaveDropRatings from "../WaveDropRatings";
 import WaveDropReactions from "../WaveDropReactions";
 import WaveDropReply from "../WaveDropReply";
 import WinnerDropBadge from "./WinnerDropBadge";
+import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
+import { getWinnerVisibleMetadata } from "@/components/waves/winners/identity/winnerIdentity.helpers";
 
 const getRankColorsByRank = (
   rank: number | null
@@ -111,6 +113,10 @@ const DefaultWinnerDrop = ({
   const decisionTime = drop.winning_context?.decision_time;
 
   const colors = getRankColorsByRank(effectiveRank);
+  const visibleMetadata = getWinnerVisibleMetadata({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
   const getBackgroundColorClass = (loc: DropLocation): string =>
     loc === DropLocation.WAVE ? "tw-bg-iron-900/60" : "tw-bg-iron-950";
 
@@ -236,8 +242,9 @@ const DefaultWinnerDrop = ({
           </div>
         )}
         <div className="tw-ml-[3.25rem] tw-mt-1.5 tw-flex tw-flex-col tw-gap-2">
-          {drop.metadata.length > 0 && (
-            <WaveDropMetadata metadata={drop.metadata} />
+          <WaveWinnerIdentity drop={drop} variant="full" />
+          {visibleMetadata.length > 0 && (
+            <WaveDropMetadata metadata={visibleMetadata} />
           )}
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             {!!drop.raters_count && <WaveDropRatings drop={drop} />}

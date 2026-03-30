@@ -13,6 +13,7 @@ import MemeDropTraits from "./MemeDropTraits";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropContext } from "@/components/waves/drops/DropContext";
+import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -30,14 +31,14 @@ export default function MemeWinnerDrop({
 
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
+    drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.data_key === "description")?.data_value ??
+    drop.metadata.find((m) => m.data_key === "description")?.data_value ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
-  const artworkMedia = drop.parts.at(0)?.media?.at(0);
+  const artworkMedia = drop.parts.at(0)?.media.at(0);
 
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[0]?.part_id! });
@@ -77,6 +78,12 @@ export default function MemeWinnerDrop({
                   <MemeWinnerDescription description={description} />
                 </div>
               </div>
+
+              <WaveWinnerIdentity
+                drop={drop}
+                variant="full"
+                className="tw-px-4 tw-pb-4"
+              />
 
               {artworkMedia && (
                 <div className="tw-mx-0.5 tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">

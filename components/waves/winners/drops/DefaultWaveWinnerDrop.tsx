@@ -1,15 +1,14 @@
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type {
-    ExtendedDrop} from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
-    convertApiDropToExtendedDrop,
-} from "@/helpers/waves/drop.helpers";
-import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+  WAVE_VOTE_STATS_LABELS,
+  WAVE_VOTING_LABELS,
+} from "@/helpers/waves/waves.constants";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import React from "react";
@@ -20,6 +19,7 @@ import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotal
 import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
 import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
+import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -65,36 +65,41 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
     winner.drop.context_profile_context?.rating !== 0;
   const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
-  const creditType = WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type as ApiWaveCreditType] || "votes";
+  const creditType =
+    WAVE_VOTING_LABELS[winner.drop.wave.voting_credit_type] || "votes";
 
   return (
     <div
       onClick={() => onDropClick(extendedDrop)}
-      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-transparent tw-border-l ${shadowClass}`}
+      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-l tw-border-solid tw-border-transparent tw-bg-iron-950 ${shadowClass}`}
     >
       <div className="tw-rounded-xl tw-p-4" {...touchHandlers}>
-        <div className="tw-flex tw-justify-between tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
-          <div className="tw-flex tw-gap-x-3 tw-flex-1">
+        <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-justify-between tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
+          <div className="tw-flex tw-flex-1 tw-gap-x-3">
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
-            <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
+            <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
               <WaveWinnersDropHeader winner={winner} showVotingInfo={false} />
-              <WaveWinnersDropContent winner={winner} isCompetitionDrop={true} />
+              <WaveWinnersDropContent
+                winner={winner}
+                isCompetitionDrop={true}
+              />
             </div>
           </div>
 
           {/* Show open icon when not a touch device */}
           {!hasTouchScreen && (
-            <div className="tw-flex tw-items-start tw-flex-shrink-0">
+            <div className="tw-flex tw-flex-shrink-0 tw-items-start">
               <div className="tw-h-8">
                 <WaveDropActionsOpen drop={extendedDrop} />
               </div>
             </div>
           )}
         </div>
-        <div className="tw-mt-3 tw-ml-[3.25rem]">
+        <div className="tw-ml-[3.25rem] tw-mt-3">
           <div className="tw-flex tw-flex-col tw-gap-y-2">
-            <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
-              <div className="tw-flex tw-flex-whitespace-nowrap tw-gap-x-4 tw-items-center">
+            <WaveWinnerIdentity drop={winner.drop} variant="full" />
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+              <div className="tw-flex-whitespace-nowrap tw-flex tw-items-center tw-gap-x-4">
                 <WaveWinnersDropHeaderTotalVotes winner={winner} />
                 <WaveWinnersDropHeaderVoters winner={winner} />
               </div>
@@ -111,14 +116,15 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
                     {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
                   </span>
                   <span
-                    className={`tw-text-sm tw-font-semibold ${isUserVoteNegative
-                      ? "tw-text-rose-500"
-                      : "tw-text-emerald-500"
-                      }`}
+                    className={`tw-text-sm tw-font-semibold ${
+                      isUserVoteNegative
+                        ? "tw-text-rose-500"
+                        : "tw-text-emerald-500"
+                    }`}
                   >
                     {isUserVoteNegative && "-"}
                     {formatNumberWithCommas(Math.abs(userVote))}{" "}
-                    <span className="tw-text-iron-400 tw-font-normal">
+                    <span className="tw-font-normal tw-text-iron-400">
                       {creditType}
                     </span>
                   </span>

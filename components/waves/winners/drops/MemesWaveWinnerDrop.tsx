@@ -30,6 +30,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
+import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -159,6 +160,12 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               </p>
             </div>
           </div>
+
+          <WaveWinnerIdentity
+            drop={winner.drop}
+            variant="full"
+            className="tw-px-4 tw-pb-4"
+          />
 
           {artworkMedia && (
             <div className="tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">
