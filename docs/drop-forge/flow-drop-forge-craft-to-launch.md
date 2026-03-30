@@ -30,11 +30,14 @@ on-chain launch setup in launch routes.
 6. Open `/drop-forge/launch/{id}`.
 7. If the launch page still says `Finish crafting this claim before launching`,
    return to the craft route and finish publishing first.
-8. Use the page-header shortcut (`Go to Craft` from launch or `Go to Drop` from
+8. After published metadata is available, launch can briefly show `Checking
+   Onchain` while it loads the live claim before settling on the next status
+   and phase.
+9. Use the page-header shortcut (`Go to Craft` from launch or `Go to Drop` from
    craft when available) to move between the paired operational surfaces.
-9. After published metadata is available, initialize `Phase 0`.
-10. Continue with later phase updates and any required airdrops.
-11. Revisit the launch route as needed for metadata-only updates, phase-window
+10. After published metadata is available, initialize `Phase 0`.
+11. Continue with later phase updates and any required airdrops.
+12. Revisit the launch route as needed for metadata-only updates, phase-window
     edits, or additional airdrop actions.
 
 ## Common Scenarios
@@ -58,7 +61,8 @@ on-chain launch setup in launch routes.
 - Published Arweave links can exist before the launch route has fetched its
   on-chain state.
 - Research airdrop flow depends on the initialized claim plus the current
-  minted-total versus target edition-size delta.
+  minted-total versus target edition-size delta, and that target is capped by
+  the active claim max.
 
 ## Failure and Recovery
 

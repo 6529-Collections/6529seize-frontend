@@ -15,6 +15,8 @@ The craft surface combines:
 - source URL cards with copy/open actions for image and animation assets
 - traits and core-info editing
 - Arweave publishing
+- craft-focused status pills that stay on publish state until you move into the
+  launch workflow
 - distribution-photo review
 
 ## Location in the Site
@@ -54,8 +56,8 @@ The craft surface combines:
 6. Save claim changes section by section.
 7. When the claim is in a publishable state and no draft edits are pending, use
    `Publish to Arweave`.
-8. After publish starts, watch the status pill until published Arweave links are
-   available.
+8. After publish starts, watch the status pill until it returns to `Published`
+   and published Arweave links are available.
 
 ## Common Scenarios
 
@@ -102,6 +104,9 @@ The craft surface combines:
   action only appears when the URL can be resolved safely.
 - `Publish to Arweave` stays disabled while any pending draft change has not
   been saved yet.
+- After metadata is published, craft continues to show the claim as
+  `Published`; launch-only statuses such as missing initialization info appear
+  only on launch routes.
 - A claim can show `Claim not found`, `Loading…`, or another inline error state
   before the editor renders.
 - Distribution can be empty and show `No Distribution photos found`.

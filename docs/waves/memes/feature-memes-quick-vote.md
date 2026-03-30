@@ -29,29 +29,34 @@ participatory submissions in the configured memes wave.
 ## User Journey
 
 1. Open quick vote from any available trigger.
-2. Quick vote loads the unrated memes queue from newest to oldest.
+2. Quick vote opens a full dialog skeleton while it loads the unrated memes
+   queue plus recent amount memory from newest to oldest.
 3. Review the current meme preview, including artwork, title, description,
    author, timestamp, remaining voting power, and remaining queue count.
 4. Vote by either:
    - tapping a remembered amount button
    - entering a custom amount
    - swiping right on mobile using the currently selected amount
-5. Skip the current meme by clicking `Skip for now` or swiping left on mobile.
+5. Skip the current meme by clicking `Skip` or swiping left on mobile.
 6. After each vote or skip, quick vote advances to the next eligible meme.
 7. When no unrated memes remain, or remaining power reaches zero, the dialog
-   ends with `You are done`.
+   ends with `You're all caught up`.
 
 ## Common Scenarios
 
 - Expanded surfaces show an `Uncast Power` card with remaining power plus
-  `{count} left`; compact surfaces show the remaining count only.
+  `{count} unexplored`; compact surfaces show the remaining count only.
 - Quick amount buttons remember up to five recent vote amounts per profile and
   memes wave. The most recent remembered amount is marked `Last used`.
+- When remembered amounts exist, quick vote opens on that amount row first and
+  exposes `Change vote amount` to switch into custom entry.
 - If no recent amounts are stored yet, quick vote opens with the custom-amount
   panel expanded.
+- On desktop, descriptions longer than four lines start collapsed with a
+  `See more` action; `See less` returns the panel to the compact view.
 - Custom amounts are normalized to a whole number and capped at the current
   remaining voting power.
-- `Skip for now` defers the current meme instead of discarding it permanently.
+- `Skip` defers the current meme instead of discarding it permanently.
 
 ## Edge Cases
 
@@ -66,7 +71,8 @@ participatory submissions in the configured memes wave.
 ## Failure and Recovery
 
 - If quick vote cannot load the queue, the dialog shows
-  `Couldn't load your queue` and a `Try again` action.
+  `Couldn't load your queue`, explains that quick vote could not reach the
+  leaderboard, and offers `Try again`.
 - If a vote submission fails, quick vote shows an error toast, refreshes the
   queue state, and lets the user continue from the refreshed result.
 - If the trigger is missing, first confirm the current surface and state:

@@ -103,7 +103,7 @@ is blocked.
 - Quick-vote trigger is missing in app/mobile thread view:
   it appears only in the main non-DM wave view and is hidden on other tabs or
   while a single-drop overlay is open.
-- Quick-vote dialog shows `You are done`:
+- Quick-vote dialog shows `You're all caught up`:
   there are no unrated memes left for the current viewer, or remaining voting
   power is exhausted.
 - Quick-vote dialog shows `Couldn't load your queue`:
