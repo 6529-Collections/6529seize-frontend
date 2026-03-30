@@ -1,4 +1,9 @@
-import { getAutoSelectedLaunchPhase } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
+import {
+  clampResearchTargetEditionSize,
+  getAutoSelectedLaunchPhase,
+  getDefaultResearchTargetEditionSize,
+  getResearchTargetEditionSizeLimit,
+} from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 
 describe("getAutoSelectedLaunchPhase", () => {
   const phases = [
@@ -138,5 +143,41 @@ describe("getAutoSelectedLaunchPhase", () => {
         ),
       })
     ).toBe("phase1");
+  });
+});
+
+describe("research target edition size helpers", () => {
+  it("uses the live onchain total max when it is available", () => {
+    expect(getResearchTargetEditionSizeLimit(400, 250)).toBe(250);
+    expect(getResearchTargetEditionSizeLimit(250, 400)).toBe(400);
+  });
+
+  it("defaults to the lower of the claim edition size and 310", () => {
+    expect(getDefaultResearchTargetEditionSize(305)).toBe(305);
+    expect(getDefaultResearchTargetEditionSize(500)).toBe(310);
+  });
+
+  it("defaults to the onchain cap whenever it is available", () => {
+    expect(getDefaultResearchTargetEditionSize(500, 275)).toBe(275);
+    expect(getDefaultResearchTargetEditionSize(250, 400)).toBe(310);
+  });
+
+  it("falls back to 310 when the claim edition size is missing", () => {
+    expect(getDefaultResearchTargetEditionSize(null)).toBe(310);
+    expect(getDefaultResearchTargetEditionSize(0)).toBe(310);
+  });
+
+  it("caps the research target at the claim edition size", () => {
+    expect(clampResearchTargetEditionSize(310, 305)).toBe(305);
+    expect(clampResearchTargetEditionSize(304.8, 305)).toBe(304);
+  });
+
+  it("caps the research target at the live onchain total max", () => {
+    expect(clampResearchTargetEditionSize(310, 500, 275)).toBe(275);
+    expect(clampResearchTargetEditionSize(450, 250, 400)).toBe(400);
+  });
+
+  it("keeps the research target uncapped when there is no edition size limit", () => {
+    expect(clampResearchTargetEditionSize(310, null)).toBe(310);
   });
 });

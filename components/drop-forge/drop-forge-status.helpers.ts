@@ -5,6 +5,7 @@ import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 type ClaimPrimaryStatusKey =
   | "draft"
   | "publishing"
+  | "checking_onchain"
   | "published"
   | "pending_initialization_missing_info"
   | "pending_initialization"
@@ -28,7 +29,7 @@ export interface ClaimPrimaryStatus {
 
 interface ClaimArweaveSectionStatus {
   key: "not_published" | "publishing" | "published";
-  label: "Not Published" | "Publishing…" | "Published";
+  label: "Not Published" | "Publishing" | "Published";
   tone: ClaimPrimaryStatusTone;
   reason?: string;
 }
@@ -51,31 +52,21 @@ export function getPrimaryStatusPillClassName(
   return "tw-bg-iron-700/30 tw-text-iron-300 tw-ring-iron-500/40";
 }
 
-export function getClaimPrimaryStatus({
-  claim,
+function getPreInitializationClaimStatus({
+  hasLocalMetadata,
+  initializedOnchain,
+  isCraftContext,
+  isManifoldClaimFetching,
   manifoldClaim,
+  missingLaunchInfo,
 }: {
-  claim: MintingClaim;
+  hasLocalMetadata: boolean;
+  initializedOnchain: boolean;
+  isCraftContext: boolean;
+  isManifoldClaimFetching: boolean;
   manifoldClaim?: Pick<ManifoldClaim, "instanceId" | "location"> | null;
-}): ClaimPrimaryStatus {
-  const initializedOnchain = !!manifoldClaim?.instanceId;
-  const localMetadata = claim.metadata_location?.trim() ?? "";
-  const hasLocalMetadata = localMetadata.length > 0;
-  const onchainLocation = manifoldClaim?.location?.trim() ?? "";
-  const chainMatchesLocal =
-    onchainLocation.length > 0 && onchainLocation === localMetadata;
-  const isCraftContext = manifoldClaim === undefined;
-  const missingLaunchInfo = isMissingRequiredLaunchInfo(claim);
-
-  if (claim.media_uploading === true) {
-    return {
-      key: "publishing",
-      label: "Publishing…",
-      tone: "pending",
-      reason: "Uploading media and metadata to Arweave now",
-    };
-  }
-
+  missingLaunchInfo: boolean;
+}): ClaimPrimaryStatus | null {
   if (!hasLocalMetadata && !initializedOnchain) {
     return {
       key: "draft",
@@ -85,23 +76,41 @@ export function getClaimPrimaryStatus({
     };
   }
 
-  if (hasLocalMetadata && !initializedOnchain && !missingLaunchInfo) {
-    return isCraftContext
-      ? {
-          key: "published",
-          label: "Published",
-          tone: "success",
-          reason: "Published to Arweave and ready for onchain initialization",
-        }
-      : {
-          key: "pending_initialization",
-          label: "Pending Initialization",
-          tone: "pending",
-          reason: "Ready to initialize onchain",
-        };
+  if (
+    !isCraftContext &&
+    isManifoldClaimFetching &&
+    manifoldClaim == null &&
+    hasLocalMetadata
+  ) {
+    return {
+      key: "checking_onchain",
+      label: "Checking Onchain",
+      tone: "pending",
+      reason: "Loading current onchain claim state",
+    };
   }
 
-  if (!initializedOnchain && missingLaunchInfo === true) {
+  if (hasLocalMetadata && !initializedOnchain) {
+    if (isCraftContext) {
+      return {
+        key: "published",
+        label: "Published",
+        tone: "success",
+        reason: "Published to Arweave and ready for onchain initialization",
+      };
+    }
+
+    if (!missingLaunchInfo) {
+      return {
+        key: "pending_initialization",
+        label: "Pending Initialization",
+        tone: "pending",
+        reason: "Ready to initialize onchain",
+      };
+    }
+  }
+
+  if (!initializedOnchain && missingLaunchInfo && !isCraftContext) {
     return {
       key: "pending_initialization_missing_info",
       label: "Pending Initialization — Missing Info",
@@ -110,7 +119,19 @@ export function getClaimPrimaryStatus({
     };
   }
 
-  if (initializedOnchain && hasLocalMetadata && chainMatchesLocal === false) {
+  return null;
+}
+
+function getInitializedClaimStatus({
+  initializedOnchain,
+  hasLocalMetadata,
+  chainMatchesLocal,
+}: {
+  initializedOnchain: boolean;
+  hasLocalMetadata: boolean;
+  chainMatchesLocal: boolean;
+}): ClaimPrimaryStatus | null {
+  if (initializedOnchain && hasLocalMetadata && !chainMatchesLocal) {
     return {
       key: "live_needs_update",
       label: "Live — Needs Update",
@@ -119,13 +140,66 @@ export function getClaimPrimaryStatus({
     };
   }
 
-  if (initializedOnchain && hasLocalMetadata && chainMatchesLocal === true) {
+  if (initializedOnchain && hasLocalMetadata && chainMatchesLocal) {
     return {
       key: "live",
       label: "Live",
       tone: "success",
       reason: "DB, Arweave, and onchain metadata all match",
     };
+  }
+
+  return null;
+}
+
+export function getClaimPrimaryStatus({
+  claim,
+  manifoldClaim,
+  isCraftContext = false,
+  isManifoldClaimFetching = false,
+}: {
+  claim: MintingClaim;
+  manifoldClaim?: Pick<ManifoldClaim, "instanceId" | "location"> | null;
+  isCraftContext?: boolean;
+  isManifoldClaimFetching?: boolean;
+}): ClaimPrimaryStatus {
+  const resolvedManifoldClaim = manifoldClaim ?? null;
+  const initializedOnchain = manifoldClaim?.instanceId != null;
+  const localMetadata = claim.metadata_location?.trim() ?? "";
+  const hasLocalMetadata = localMetadata.length > 0;
+  const onchainLocation = manifoldClaim?.location?.trim() ?? "";
+  const chainMatchesLocal =
+    onchainLocation.length > 0 && onchainLocation === localMetadata;
+  const missingLaunchInfo = isMissingRequiredLaunchInfo(claim);
+
+  if (claim.media_uploading === true) {
+    return {
+      key: "publishing",
+      label: "Publishing",
+      tone: "pending",
+      reason: "Uploading media and metadata to Arweave now",
+    };
+  }
+
+  const preInitializationStatus = getPreInitializationClaimStatus({
+    hasLocalMetadata,
+    initializedOnchain,
+    isCraftContext,
+    isManifoldClaimFetching,
+    manifoldClaim: resolvedManifoldClaim,
+    missingLaunchInfo,
+  });
+  if (preInitializationStatus) {
+    return preInitializationStatus;
+  }
+
+  const initializedStatus = getInitializedClaimStatus({
+    initializedOnchain,
+    hasLocalMetadata,
+    chainMatchesLocal,
+  });
+  if (initializedStatus) {
+    return initializedStatus;
   }
 
   return {
@@ -142,7 +216,7 @@ export function getClaimArweaveSectionStatus(
   if (claim.media_uploading === true) {
     return {
       key: "publishing",
-      label: "Publishing…",
+      label: "Publishing",
       tone: "pending",
       reason: "Uploading media and metadata to Arweave now",
     };

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+REPO="6529-Collections/6529seize-frontend"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DASHBOARD_SCRIPT="${SCRIPT_DIR}/ghruns-dashboard.mjs"
+
+supports_live_dashboard() {
+  [[ -t 0 && -t 1 && -t 2 ]] || return 1
+  command -v node >/dev/null 2>&1 || return 1
+  [[ -f "${DASHBOARD_SCRIPT}" ]]
+}
+
+requires_plain_output() {
+  for arg in "$@"; do
+    case "${arg}" in
+      -h | --help | -q | --jq | -t | --template | --json | -R | --repo)
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+if ! supports_live_dashboard || requires_plain_output "$@"; then
+  exec gh run list -R "${REPO}" "$@"
+fi
+
+exec node "${DASHBOARD_SCRIPT}" "${REPO}" "$@"

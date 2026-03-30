@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly WORKFLOW_FILE=".github/workflows/build-upload-deploy-prod.yml"
+readonly WORKFLOW_NAME="build-upload-deploy-prod.yml"
+readonly WORKFLOW_REPO="6529-Collections/6529seize-frontend"
+
+cleanup_ui() {
+  return 0
+}
+
+die() {
+  cleanup_ui
+  printf 'ghdeploy: %s\n' "$*" >&2
+  exit 1
+}
+
+handle_interrupt() {
+  cleanup_ui
+  exit 130
+}
+
+ensure_command() {
+  command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
+}
+
+resolve_repo_root() {
+  git rev-parse --show-toplevel 2>/dev/null ||
+    die 'Run this command from inside the repository'
+}
+
+ensure_root_mode() {
+  local repo_root="$1"
+  local current_dir="$2"
+
+  [[ "$current_dir" == "$repo_root" ]] || die 'Run ghdeploy from the repo root'
+}
+
+ensure_clean_worktree() {
+  local repo_root="$1"
+  local dirty_status
+
+  dirty_status="$(git -C "$repo_root" status --porcelain --untracked-files=normal)"
+
+  if [[ -n "$dirty_status" ]]; then
+    printf 'ghdeploy: Refusing to deploy because the working tree is not clean:\n%s\n' \
+      "$dirty_status" >&2
+    exit 1
+  fi
+}
+
+resolve_branch() {
+  local repo_root="$1"
+  local branch
+
+  branch="$(git -C "$repo_root" rev-parse --abbrev-ref HEAD 2>/dev/null)" ||
+    die 'Unable to determine the current branch'
+
+  [[ "$branch" != 'HEAD' ]] || die 'Detached HEAD is not supported'
+
+  printf '%s\n' "$branch"
+}
+
+ensure_branch_in_sync() {
+  local repo_root="$1"
+  local branch="$2"
+  local upstream_ref
+  local upstream_remote
+  local upstream_merge
+  local upstream_branch
+  local local_sha
+  local upstream_sha
+  local merge_base
+
+  upstream_ref="$(git -C "$repo_root" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null)" ||
+    die "Branch '$branch' has no upstream branch"
+
+  upstream_remote="$(git -C "$repo_root" config --get "branch.$branch.remote")" ||
+    die "Could not determine the remote for branch '$branch'"
+
+  upstream_merge="$(git -C "$repo_root" config --get "branch.$branch.merge")" ||
+    die "Could not determine the upstream ref for branch '$branch'"
+
+  upstream_branch="${upstream_merge#refs/heads/}"
+
+  printf 'Checking upstream sync with %s...\n' "$upstream_ref" >&2
+
+  git -C "$repo_root" fetch --quiet "$upstream_remote" "$upstream_branch" ||
+    die "Failed to fetch '$upstream_ref'"
+
+  local_sha="$(git -C "$repo_root" rev-parse HEAD)"
+  upstream_sha="$(git -C "$repo_root" rev-parse '@{upstream}')"
+  merge_base="$(git -C "$repo_root" merge-base HEAD '@{upstream}')"
+
+  if [[ "$local_sha" == "$upstream_sha" ]]; then
+    printf '%s\n' "$upstream_ref"
+    return 0
+  fi
+
+  if [[ "$local_sha" == "$merge_base" ]]; then
+    die "Branch '$branch' is behind '$upstream_ref'"
+  fi
+
+  if [[ "$upstream_sha" == "$merge_base" ]]; then
+    die "Branch '$branch' is ahead of '$upstream_ref'"
+  fi
+
+  die "Branch '$branch' has diverged from '$upstream_ref'"
+}
+
+confirm_deploy() {
+  local branch="$1"
+  local answer
+
+  printf 'Are you sure you want to deploy %s to production? [y/N] ' "$branch" >&2
+  IFS= read -r answer || die 'Cancelled'
+
+  case "$answer" in
+    y | Y | yes | YES)
+      ;;
+    *)
+      die 'Cancelled'
+      ;;
+  esac
+}
+
+run_deploy() {
+  local branch="$1"
+
+  printf 'Triggering production deploy for branch %s...\n' "$branch" >&2
+
+  gh workflow run "$WORKFLOW_NAME" \
+    --ref "$branch" \
+    -R "$WORKFLOW_REPO"
+}
+
+main() {
+  local repo_root
+  local current_dir
+  local branch
+  local upstream_ref
+
+  ensure_command git
+  ensure_command gh
+
+  repo_root="$(resolve_repo_root)"
+  current_dir="$(pwd -P)"
+
+  ensure_root_mode "$repo_root" "$current_dir"
+  [[ -f "$repo_root/$WORKFLOW_FILE" ]] || die "Workflow file not found: $WORKFLOW_FILE"
+
+  branch="$(resolve_branch "$repo_root")"
+  ensure_clean_worktree "$repo_root"
+  upstream_ref="$(ensure_branch_in_sync "$repo_root" "$branch")"
+
+  printf 'Deploying branch %s (synced with %s)\n' "$branch" "$upstream_ref" >&2
+  confirm_deploy "$branch"
+  run_deploy "$branch"
+}
+
+trap handle_interrupt INT TERM
+
+main "$@"
