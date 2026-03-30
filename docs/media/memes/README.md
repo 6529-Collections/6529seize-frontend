@@ -6,6 +6,8 @@
   schedule routes.
 - Core routes: `/the-memes`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`, `/the-memes/mint`, and `/meme-calendar`.
+- This subarea also covers the standalone latest-mint shell deployed outside
+  the main app host, such as `https://thememes.6529.io/`.
 - Home route `/` owns the latest-drop countdown and stats surfaces that link
   into The Memes mint and distribution routes.
 - When card data is not published yet, unresolved integer `/the-memes/{id}`
@@ -23,6 +25,8 @@
 - [The Memes Mint Flow](feature-mint-flow.md):
   `/the-memes/mint` recipient selection, phase-aware actions, and transaction
   states.
+- [Standalone The Memes Mint Page](feature-standalone-mint-page.md):
+  external latest-mint shell behavior on the standalone deployment hosts.
 - [Now Minting Countdown](feature-now-minting-countdown.md):
   countdown/status card behavior on `/`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`, and `/the-memes/mint`.

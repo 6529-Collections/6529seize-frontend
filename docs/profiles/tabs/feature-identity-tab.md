@@ -39,10 +39,12 @@ Mobile (`< lg`):
 1. Open a profile at `/{user}`.
 2. Read rep and NIC summaries.
 3. In `Rep`, switch between `Received` and `Given` as needed.
-4. If actions are available, open `Grant Rep` (received only) or `Rate NIC`.
-5. `Rate NIC` opens a modal; submit to save or select `Cancel` to close.
-6. Review activity logs and apply filters.
-7. On mobile, switch between `Rep` and `NIC` cards as needed.
+4. Use `+N more` or `Load more` to reveal additional rep categories when
+   available.
+5. If actions are available, open `Grant Rep` (received only) or `Rate NIC`.
+6. `Rate NIC` opens a modal; submit to save or select `Cancel` to close.
+7. Review activity logs and apply filters.
+8. On mobile, switch between `Rep` and `NIC` cards as needed.
 
 ## Rep Behavior
 
@@ -58,7 +60,18 @@ Mobile (`< lg`):
 - Contribution badge copy is direction-aware:
   - `Received`: `My Rate`
   - `Given`: `To Me`
-- Category list starts at 5 items and expands in `+N more` batches of 10.
+- Category list starts at 5 items.
+- `+N more` reveals 10 additional already-loaded categories at a time.
+- When the visible list reaches the end of the categories already loaded in the
+  current direction but more server pages exist, the same control changes to
+  `Load more`, requests the next categories page, shows `Loading...` while that
+  request is in flight, and stays disabled until the next page finishes
+  loading.
+- `Received` and `Given` keep separate expanded category counts while you stay
+  on the same profile route, so switching directions does not collapse the
+  other direction's list back to 5 immediately.
+- Opening a different profile route resets both directions to that profile's
+  own category list, beginning again at 5 visible items.
 - If editing is allowed in `Received`:
   - category pill opens edit for that category
   - `Add new` (desktop) or `Grant Rep` (mobile) opens grant dialog
@@ -115,14 +128,46 @@ Statement ownership in this tab:
   - proxy grantor profile cannot be the target
 - Mobile `Rep`/`Identity` switching does not change URL state.
 
+## Common Scenarios
+
+- Desktop viewers compare `Rep` and `NIC` side by side on the same route.
+- Mobile viewers switch between `Rep` and `Identity` cards without leaving
+  `/{user}`.
+- Profiles with many rep categories use `+N more`, then `Load more`, to reveal
+  additional categories incrementally.
+- Eligible viewers open `Grant Rep` from the received-rep surface or `Rate NIC`
+  from the NIC surface.
+
+## Edge Cases
+
+- `Received` and `Given` keep separate expanded-category counts while you stay
+  on the same profile route.
+- Opening a different profile resets the visible category counts back to that
+  profile's initial list state.
+- Outside proxy mode, self-rating is blocked even when the rest of the profile
+  remains visible.
+- Legacy `/{user}/identity` redirects into `/{user}`; unsupported
+  `/{user}/rep` stays not-found instead of opening the default tab.
+
 ## Failure and Recovery
 
 - Rep submit failures show an error toast and keep dialog values.
 - NIC submit failures show an error toast and keep entered value.
+- If loading a later categories page fails, already visible categories stay on
+  screen; use `Load more` again or refresh the route to retry.
 - Selecting `Cancel` closes NIC rating without applying changes.
 - Statement or rating fetch failures can leave empty/partial sections; refresh
   to retry.
 - Replace old `/{user}/rep` bookmarks with `/{user}`.
+
+## Limitations / Notes
+
+- This page documents the combined default profile tab only; other profile tabs
+  have separate route and behavior rules.
+- Action availability still depends on wallet, profile-handle, and proxy
+  permission context at runtime.
+- Mobile subview switching is local UI state and does not create a distinct URL
+  for `Rep` versus `Identity`.
 
 ## Related Pages
 

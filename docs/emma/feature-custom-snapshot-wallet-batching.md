@@ -4,7 +4,7 @@
 
 Use `Create Custom Snapshot` to build a wallet list and create custom snapshot
 operations in `/emma/plans/{planId}`. EMMA splits large lists into multiple
-snapshots of up to 500 wallets each.
+snapshots of up to 5,000 wallets each.
 
 ## Location in the Site
 
@@ -41,8 +41,8 @@ snapshots of up to 500 wallets each.
 
 ## Common Scenarios
 
-- Add up to 500 wallets and create one snapshot named `<name>-1`.
-- Upload a larger list (for example 1,100 wallets) and create
+- Add up to 5,000 wallets and create one snapshot named `<name>-1`.
+- Upload a larger list (for example 11,100 wallets) and create
   `<name>-1`, `<name>-2`, `<name>-3` automatically.
 - Combine manual wallet entry and CSV-uploaded rows before submitting.
 - Use CSV files with an optional `Owner` header and comma or semicolon
@@ -50,7 +50,7 @@ snapshots of up to 500 wallets each.
 
 ## Edge Cases
 
-- One custom snapshot contains at most 500 wallets.
+- One custom snapshot contains at most 5,000 wallets.
 - One batch can include at most 100,000 wallets total (manual + CSV combined).
 - Manual entry accepts Ethereum addresses and lowercase `.eth` names,
   lowercases input before adding, and requires clicking `Add` (pressing Enter

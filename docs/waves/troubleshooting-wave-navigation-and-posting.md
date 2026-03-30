@@ -3,7 +3,8 @@
 ## Overview
 
 Use this page when wave links open the wrong thread, serial jump links miss the
-target drop, tabs look wrong, or posting/submission is blocked.
+target drop, tabs look wrong, quick vote is unavailable, or posting/submission
+is blocked.
 
 ## Location in the Site
 
@@ -12,7 +13,15 @@ target drop, tabs look wrong, or posting/submission is blocked.
 - Legacy wave link: `/waves?wave={waveId}` (redirects to `/waves/{waveId}`)
 - Thread query values: `drop`, `serialNo`, `divider`
 
-## Fast Recovery Flow
+## Entry Points
+
+- Open a saved or shared `/waves/{waveId}` link.
+- Open a saved or shared `/messages?wave={waveId}` link.
+- Open deep links that include `drop`, `serialNo`, or `divider`.
+- Recover from hidden quick-vote, blocked posting/submission, or missing-tab
+  states inside a thread.
+
+## User Journey
 
 1. Confirm route family first: `/waves/{waveId}` or `/messages?wave={waveId}`.
 2. Reopen the thread from the sidebar/list and copy a fresh link.
@@ -22,11 +31,29 @@ target drop, tabs look wrong, or posting/submission is blocked.
 5. If posting is blocked, match the exact footer message in
    [Posting and Submission Checks](#posting-and-submission-checks).
 
+## Common Scenarios
+
+- A saved/shared link opens the wrong thread or bounces back to `/waves` or
+  `/messages`.
+- A signed-out direct `/waves/{waveId}` link shows the locked preview instead
+  of the full thread.
+- A `serialNo` or `drop` deep link does not reopen the expected in-thread
+  context.
+- A memes quick-vote trigger is missing or the quick-vote dialog cannot load.
+- Posting, submissions, or tab visibility do not match what the user expects.
+
 ## Route and Link Checks
 
 - Link opens the wrong thread:
   verify whether the target is a wave thread (`/waves/{waveId}`) or a direct
   message thread (`/messages?wave={waveId}`), then update saved/shared links.
+- Signed-out direct `/waves/{waveId}` link shows a locked preview instead of the
+  full thread:
+  expected for resolvable member-only waves. Connect a wallet to continue into
+  chat, tabs, and posting surfaces.
+- Signed-out direct `/waves/{waveId}` link shows `This wave isn't available publicly`:
+  the wave could not be resolved for public preview. Connect a wallet to check
+  whether your account can access it, or reopen a different wave from the list.
 - Legacy link uses `/waves?wave={waveId}`:
   expected behavior is redirect to `/waves/{waveId}` while preserving other
   query values. Save the normalized URL after load.
@@ -67,6 +94,22 @@ target drop, tabs look wrong, or posting/submission is blocked.
   upload artwork, complete required fields, fix inline validation errors, then
   submit again.
 
+## Quick Vote Checks
+
+- Quick-vote trigger is missing on desktop web:
+  quick vote appears only on non-`/messages` waves shells and only when you
+  still have remaining voting power plus at least one unrated memes
+  submission.
+- Quick-vote trigger is missing in app/mobile thread view:
+  it appears only in the main non-DM wave view and is hidden on other tabs or
+  while a single-drop overlay is open.
+- Quick-vote dialog shows `You're all caught up`:
+  there are no unrated memes left for the current viewer, or remaining voting
+  power is exhausted.
+- Quick-vote dialog shows `Couldn't load your queue`:
+  retry from `Try again`. If the error persists, reopen the wave and try quick
+  vote again from a fresh thread state.
+
 ## Tabs and Empty-State Checks
 
 - Expected tab is missing:
@@ -86,6 +129,8 @@ target drop, tabs look wrong, or posting/submission is blocked.
 - Winners/Outcome looks empty:
   `No Winners Yet`, `No winners yet`, and `No outcomes to show.` are valid
   until results are available.
+- `/waves` shows no thread content on signed-out desktop web:
+  `Select a Wave` is the expected placeholder when no wave is selected yet.
 - `/messages` shows no thread content:
   `Select a Conversation` is expected when no `wave` query is active.
 
@@ -93,8 +138,23 @@ target drop, tabs look wrong, or posting/submission is blocked.
 
 - Temporary drops (`temp-*`) disable `Copy link`.
 - Closing single-drop view removes `drop` from the URL.
+- Signed-out preview mode on `/waves/{waveId}` does not open right sidebar
+  surfaces or single-drop overlays.
 - Unread-jump and pending-message controls can merge into one stacked control
   when both states are active.
+
+## Failure and Recovery
+
+- Reopen the thread from the sidebar/list and save a fresh normalized link.
+- Remove stale `drop`, `serialNo`, and `divider` values before retrying the
+  thread root.
+- If a signed-out direct wave link shows only the locked preview, connect a
+  wallet to continue into thread interactions.
+- If posting or submissions stay blocked, use the exact footer copy to identify
+  the current restriction and retry after resolving that state.
+- If quick vote stays hidden, confirm that you are inside a supported waves
+  surface and that the current viewer still has unrated memes plus remaining
+  voting power.
 
 ## Limitations / Notes
 
@@ -107,11 +167,13 @@ target drop, tabs look wrong, or posting/submission is blocked.
 
 - [Waves Index](README.md)
 - [Wave Participation Flow](flow-wave-participation.md)
+- [Public Wave Preview](feature-public-wave-preview.md)
 - [Wave Chat Serial Jump Navigation](chat/feature-serial-jump-navigation.md)
 - [Wave Chat Scroll Behavior](chat/feature-scroll-behavior.md)
 - [Wave Chat Composer Availability](chat/feature-chat-composer-availability.md)
 - [Wave Content Tabs](chat/feature-content-tabs.md)
 - [Wave Drop Open and Copy Links](drop-actions/feature-open-and-copy-links.md)
 - [Wave Leaderboard Drop States](leaderboard/feature-drop-states.md)
+- [Memes Quick Vote](memes/feature-memes-quick-vote.md)
 - [Memes Submission Workflows](memes/feature-memes-submission.md)
 - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)

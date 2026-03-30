@@ -5,6 +5,19 @@
 Profile tab routes live under `/{user}`.
 `/{user}` is the default `Identity` tab (`Rep` + `NIC`).
 
+## Location in the Site
+
+- Profile shell routes under `/{user}` and its supported tab subroutes.
+- Profile header, tab bar, and shared profile links that resolve into those tab
+  routes.
+
+## Entry Points
+
+- Open a direct profile URL such as `/{user}` or `/{user}/brain`.
+- Click profile tabs in the profile shell after a profile route loads.
+- Follow shared profile links or saved bookmarks that target supported tab
+  routes.
+
 ## Supported Tab Routes
 
 - `/{user}`: Identity
@@ -21,9 +34,23 @@ Profile tab routes live under `/{user}`.
 3. If the route uses a non-canonical handle, the app redirects to the canonical handle and keeps the tab route.
 4. The header and tab bar render for that profile.
 
+## User Journey
+
+1. Open a supported profile route.
+2. The app resolves the profile and canonicalizes the handle when needed.
+3. The profile shell loads the header and tab bar.
+4. Tab visibility rules run for the current viewer, device, and Waves context.
+5. If the tab stays visible, the route remains selected; otherwise the app
+   falls back to the first visible tab and keeps the current query string.
+
 ## Tab Visibility Rules
 
 - `Brain` is shown only when Waves is enabled.
+- Direct `/{user}/brain` links delay hidden-tab fallback while client
+  hydration, wallet reconnection, or connected-profile restoration is still
+  resolving whether `Brain` should be available.
+- Once that `Brain` access check settles, `/{user}/brain` stays selected if
+  Waves became available; otherwise the app replaces the URL with `/{user}`.
 - `Subscriptions` is hidden on iOS unless consent country is `US`.
 - `Proxy` is shown only when you are on your own profile (matched by connected handle or connected wallet).
 - If you open `/{user}/proxy` while your signed-in profile session is still loading, the app keeps the `Proxy` tab selected until it can finish the ownership check.
@@ -33,6 +60,15 @@ Profile tab routes live under `/{user}`.
 
 - Clicking a profile tab keeps only `?address=...` and drops other query keys.
 - Canonical-handle redirects keep query params, remove `user`, and normalize repeated query keys into comma-separated values (for example `?x=a&x=b` becomes `?x=a,b`).
+
+## Common Scenarios
+
+- Direct `/{user}/brain` links stay on the requested tab until the app finishes
+  deciding whether Waves is available.
+- Opening your own profile can expose the `Proxy` tab after the app finishes
+  the ownership check.
+- Opening `/{user}/subscriptions` on supported devices keeps that tab visible
+  while the rest of the profile shell stays unchanged.
 
 ## Legacy and Unsupported Routes
 
@@ -44,12 +80,28 @@ Profile tab routes live under `/{user}`.
 - Unknown `/{user}/<subroute>` routes show not-found.
 - Full legacy details: [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md).
 
+## Edge Cases
+
+- Hidden-tab fallback can be delayed while the app is still resolving Brain or
+  Proxy visibility for the current context.
+- Unsupported profile subroutes do not downgrade into a supported tab route;
+  they show not-found instead.
+- Canonical-handle redirects preserve supported tab paths while normalizing the
+  handle segment.
+
 ## Failure and Recovery
 
 - Missing user or invalid profile route: [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
 - If profile loading fails with a transient error, reload the page.
 - Replace saved `/{user}/stats` links with `/{user}/collected`.
 - Replace saved `/{user}/rep` links with `/{user}` or another supported tab route.
+
+## Limitations / Notes
+
+- Tab visibility depends on current Waves availability, device/country gating,
+  and ownership context.
+- Tab clicks intentionally keep only the `address` query key.
+- Legacy route coverage is limited to the documented aliases above.
 
 ## Related Pages
 

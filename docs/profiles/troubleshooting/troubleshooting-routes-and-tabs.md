@@ -16,12 +16,43 @@ Scope:
   `/{user}/followers`
 - unsupported route: `/{user}/rep`
 
+## Location in the Site
+
+- Troubleshooting for profile shell routes under `/{user}` and their supported
+  tab subroutes.
+- Related profile header, tab-bar, and shared-link navigation states.
+
+## Entry Points
+
+- Open this page after a profile URL, tab redirect, or tab content state looks
+  wrong.
+- Start from the failing profile route if possible so the symptom can be
+  matched against the sections below.
+
+## User Journey
+
+1. Reopen the failing profile route.
+2. Confirm the target profile resolves and the route is supported.
+3. Check whether the tab should be visible for the current viewer, device, and
+   Waves context.
+4. Match the observed symptom to the route, tab-visibility, or content section
+   below.
+5. Apply the listed recovery step, then retry the route once.
+
 ## Quick Checks
 
 1. Open `/{user}` first, then retry the tab route.
 2. Confirm `{user}` resolves to a real profile (handle or wallet).
 3. Confirm tab visibility rules for your current context.
 4. Refresh once for transient request failures.
+
+## Common Scenarios
+
+- A hidden tab opens briefly, then falls back to another visible profile tab.
+- A direct `/{user}/brain` link shows a blank shell while Brain availability is
+  still resolving.
+- Legacy or removed routes such as `/{user}/identity` or `/{user}/stats`
+  behave differently from supported tab routes.
 
 ## Route Issues
 
@@ -66,7 +97,9 @@ Scope:
 - Symptom: tab URL opens, then moves to another tab.
   - Meaning: current tab is hidden in current context; app falls back to first
     visible tab. On `/{user}/proxy`, the fallback waits until the app finishes
-    checking whether the profile belongs to you.
+    checking whether the profile belongs to you. On direct `/{user}/brain`
+    links, the fallback also waits for client hydration, wallet reconnection,
+    or connected-profile restoration to decide whether Waves is available.
   - Action: switch context or use a visible tab URL.
 
 - Symptom: followers stat does not open `/{user}/followers`.
@@ -76,9 +109,18 @@ Scope:
 
 ## Content and Data Issues
 
-- Symptom: `/{user}/brain` is blank or shows `No Drops to show`.
-  - Meaning: Waves-disabled context, empty feed, or failed drop fetch.
-  - Action: refresh; if Waves is unavailable, use `/{user}`.
+- Symptom: direct `/{user}/brain` deep link shows a blank content shell before
+  content appears or the route changes.
+  - Meaning: Brain access is still resolving during client hydration, wallet
+    reconnection, or connected-profile restoration.
+  - Action: wait for loading to settle. If the route redirects to `/{user}`,
+    Brain is unavailable in the current context. If it stays on
+    `/{user}/brain`, the feed or its empty state should load next.
+
+- Symptom: `/{user}/brain` shows `No Drops to show`.
+  - Meaning: empty feed or failed drop fetch.
+  - Action: refresh; if the profile has no public drops, the empty state can be
+    expected.
 
 - Symptom: the Brain `Activity` card shows `Unable to load activity.` or
   `No activity in last 12 months.`
@@ -111,7 +153,7 @@ Scope:
     - about text can be missing when BIO statement is unavailable
   - Action: refresh and retry.
 
-## Query and Mobile Edge Cases
+## Edge Cases
 
 - Hidden-tab fallback keeps the current query string.
 - Clicking a profile tab keeps only `address` and drops other query keys.
@@ -123,6 +165,25 @@ Scope:
 - On mobile Identity, `Rep` opens first; switch to `NIC` for NIC actions and
   statements.
 - In Subscriptions, first upcoming-drop controls can lock on minting day.
+
+## Failure and Recovery
+
+- Refresh once after transient fetch or redirect failures.
+- Retry from `/{user}` if a deeper tab route looks suspect, then navigate back
+  to the target tab.
+- Replace removed or unsupported saved links with the documented supported
+  routes.
+- Re-test tab visibility under the expected account, device, and country
+  context when behavior differs across sessions.
+
+## Limitations / Notes
+
+- Some blank or empty states are expected when the selected profile has no
+  public data for that section.
+- Hidden-tab fallback is context-dependent and can wait for client-side access
+  checks before redirecting.
+- This page covers profile routing and tab issues only; deeper feature-specific
+  problems are documented on the related pages below.
 
 ## Related Pages
 

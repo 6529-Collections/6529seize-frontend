@@ -6,6 +6,14 @@ This flow covers the normal wave journey: find a wave, open its thread, read
 and interact with drops, post when eligible, and share links that reopen the
 same context.
 
+## Location in the Site
+
+- Discovery and list surfaces: `/`, `/waves`, and `/messages`
+- Standard wave thread: `/waves/{waveId}`
+- Direct-message thread: `/messages?wave={waveId}` (no `/messages/{waveId}`
+  route)
+- App create routes: `/waves/create` and `/messages/create`
+
 ## Routes and URL State
 
 - Discovery and list surfaces: `/`, `/waves`, and `/messages`
@@ -37,35 +45,43 @@ same context.
 - Start create-DM from desktop create controls (`create=dm`) or
   `/messages/create` in app mode.
 
-## Main Journey
+## User Journey
 
 1. Open a wave from a list surface.
 2. The app opens `/waves/{waveId}` (standard wave) or
    `/messages?wave={waveId}` (direct message).
-3. The thread renders:
+3. If the user is signed out on a direct `/waves/{waveId}` link, the app can
+   show a locked public preview instead of the full thread.
+4. The thread renders:
    - Chat-only for chat-type waves.
    - Tabbed views for eligible waves (`Chat`, `Leaderboard`, `Winners`,
      `Outcome`, and wave-specific tabs).
-4. Read and navigate drops with unread markers, serial jumps, and search jump
+5. Read and navigate drops with unread markers, serial jumps, and search jump
    actions.
-5. Use drop actions (reply, react, vote, open drop, copy link, boost,
+6. Use drop actions (reply, react, vote, open drop, copy link, boost,
    admin-only pinned-drop updates, and other available actions) based on wave
-   and drop eligibility.
-6. Submit new content when participation is allowed.
-7. Share links so others can reopen the same wave or target drop.
+   and drop eligibility. In memes-wave contexts, quick vote can also appear
+   from dedicated footer or floating triggers when unrated memes remain.
+7. Submit new content when participation is allowed.
+8. Share links so others can reopen the same wave or target drop.
 
-## Key User-Visible States
+## Common Scenarios
 
+- Signed-out direct `/waves/{waveId}` links can show a locked preview with wave
+  name, description preview, joined count, post count, and a connect-wallet
+  CTA.
 - If no wave is selected on desktop list routes, the UI shows selection
   placeholders (`Select a Wave` or `Select a Conversation`).
-- Access requires an authenticated wallet plus a profile handle.
-- Proxy sessions cannot access wave/message participation surfaces.
-- Tab choice is stored per wave and restored when still valid for that wave.
-- If a saved tab is no longer available, the UI falls back to the wave's
-  default available tab.
 - When posting is blocked, thread content stays readable and the composer area
   shows blocked states (for example `Wave is closed` or
   `You cannot participate in this wave at the moment`).
+
+## Edge Cases
+
+- Tab choice is stored per wave and restored when still valid for that wave.
+- If a saved tab is no longer available, the UI falls back to the wave's
+  default available tab.
+- Proxy sessions cannot access wave/message participation surfaces.
 - If `drop` and `serialNo` are both present, the single-drop overlay remains
   active while serial/divider bootstrap params are consumed and cleaned up.
 
@@ -73,12 +89,21 @@ same context.
 
 - If a wave is not found, the app removes stale wave routing state and returns
   to the relevant base list route.
+- If a signed-out direct wave link resolves, the locked preview loads instead of
+  the full thread; connect a wallet to continue past that preview.
 - If a serial-target jump is delayed or times out, users remain in the thread
   and can continue browsing.
 - While drops are loading, the thread shows a loader; if no drops exist, it
   shows `Start the conversation`.
 - Temporary drops (`temp-*`) keep some actions limited; link copy is disabled
   until the drop is persisted.
+
+## Limitations / Notes
+
+- Full participation requires an authenticated wallet plus a profile handle.
+- Direct-message threads do not use the signed-out public preview flow.
+- Shared links can preserve overlay/jump query state, but those bootstrap rules
+  still depend on the current route context.
 
 ## Related Pages
 
@@ -87,7 +112,9 @@ same context.
 - [Wave Chat Index](chat/README.md)
 - [Wave Drop Actions Index](drop-actions/README.md)
 - [Wave Creation Index](create/README.md)
+- [Public Wave Preview](feature-public-wave-preview.md)
 - [Wave Winners Tab](leaderboard/feature-winners-tab.md)
 - [Wave Outcome Lists](feature-outcome-lists.md)
+- [Memes Quick Vote](memes/feature-memes-quick-vote.md)
 - [Memes Submission Workflows](memes/feature-memes-submission.md)
 - [Wave Troubleshooting](troubleshooting-wave-navigation-and-posting.md)

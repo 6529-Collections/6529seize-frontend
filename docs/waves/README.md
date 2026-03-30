@@ -39,7 +39,14 @@ Use this area for wave and direct-message tasks:
 ## Access and Availability
 
 - `/discover` is public and can render before wallet connect.
-- `/waves` and `/messages` require authenticated wallet access.
+- Signed-out desktop web can still open `/waves`; with no selected wave, the
+  thread pane shows `Select a Wave` plus a connect-wallet CTA.
+- Direct `/waves/{waveId}` links on web can render a signed-out locked preview
+  when the wave resolves, but the full thread still requires a connected
+  wallet.
+- Small-screen web `/waves` with no selected wave and native-app waves routes
+  still use the regular connect-wallet gate.
+- `/messages` requires authenticated wallet access.
 - A profile handle is required before route content renders.
 - Proxy sessions cannot access wave/message content and show unavailable states.
 - Wave and direct-message creation requires a connected non-proxy profile.
@@ -59,6 +66,8 @@ Use this area for wave and direct-message tasks:
   and navigation entry points.
 - [Create](create/README.md): wave and direct-message creation entry points and
   form/step behavior.
+- [Public Wave Preview](feature-public-wave-preview.md): signed-out locked
+  preview state for direct `/waves/{waveId}` links.
 - [Chat](chat/README.md): in-thread tab behavior, thread scroll/pinning, serial
   jumps, unread controls, typing state, and composer availability.
 - [Composer](composer/README.md): compose and edit drops with markdown,
@@ -75,8 +84,8 @@ Use this area for wave and direct-message tasks:
 - [Leaderboard](leaderboard/README.md): leaderboard states, filters, timeline,
   `Sales` tab behavior, winners-tab behavior, `My Votes` tab behavior,
   top-voter views, and curation `Drop Art` / price-filter controls.
-- [Memes](memes/README.md): memes submission flow, preview/submit states, and
-  single-drop additional-info rendering.
+- [Memes](memes/README.md): memes quick vote, submission flow,
+  preview/submit states, and single-drop additional-info rendering.
 - [Outcome Lists](feature-outcome-lists.md): `Outcome` tab cards plus ranked-drop
   reward summaries in leaderboard and winners surfaces.
 
