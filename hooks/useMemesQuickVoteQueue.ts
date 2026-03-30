@@ -69,6 +69,7 @@ type UseBufferedUndiscoveredDropsOptions = {
 type UseMemesQuickVoteQueueActionsOptions = {
   readonly bufferedDrops: readonly ApiDrop[];
   readonly contextProfile: string | null | undefined;
+  readonly isFetching: boolean;
   readonly proxyId: string | null | undefined;
   readonly queryClient: ReturnType<typeof useQueryClient>;
   readonly requestAuth: ContextType<typeof AuthContext>["requestAuth"];
@@ -351,14 +352,7 @@ const useResolvedMemesQuickVoteDrops = ({
   readonly stateKey: string;
   readonly undiscoveredBuffer: ReturnType<typeof useBufferedUndiscoveredDrops>;
 }) => {
-  const optimisticAdvance = getResolvedOptimisticAdvanceState({
-    bufferedDrops: undiscoveredBuffer.bufferedDrops,
-    isFetching: undiscoveredBuffer.isFetching,
-    state: getCurrentOptimisticAdvanceState({
-      key: stateKey,
-      state: optimisticAdvanceState,
-    }),
-  });
+  const optimisticAdvance = optimisticAdvanceState;
   const pendingDropIdSet = useMemo(
     () => new Set(pendingDropIds),
     [pendingDropIds]
@@ -453,12 +447,14 @@ const useResolvedMemesQuickVoteDrops = ({
 
   return {
     activeDrop,
+    optimisticAdvance,
   };
 };
 
 const useMemesQuickVoteQueueActions = ({
   bufferedDrops,
   contextProfile,
+  isFetching,
   proxyId,
   queryClient,
   requestAuth,
@@ -507,9 +503,13 @@ const useMemesQuickVoteQueueActions = ({
   const setNextOptimisticAdvance = useCallback(
     (drop: ExtendedDrop) => {
       setOptimisticAdvanceState((current) => {
-        const baseState = getCurrentOptimisticAdvanceState({
-          key: stateKey,
-          state: current,
+        const baseState = getResolvedOptimisticAdvanceState({
+          bufferedDrops,
+          isFetching,
+          state: getCurrentOptimisticAdvanceState({
+            key: stateKey,
+            state: current,
+          }),
         });
 
         return buildOptimisticAdvanceState({
@@ -519,15 +519,19 @@ const useMemesQuickVoteQueueActions = ({
         });
       });
     },
-    [bufferedDrops, setOptimisticAdvanceState, stateKey]
+    [bufferedDrops, isFetching, setOptimisticAdvanceState, stateKey]
   );
 
   const { pendingDropIds, submitSkip, submitVote } = useMemesQuickVoteSubmit({
     onRatingFailure: (drop, _amount, type) => {
       setOptimisticAdvanceState((current) => {
-        const baseState = getCurrentOptimisticAdvanceState({
-          key: stateKey,
-          state: current,
+        const baseState = getResolvedOptimisticAdvanceState({
+          bufferedDrops,
+          isFetching,
+          state: getCurrentOptimisticAdvanceState({
+            key: stateKey,
+            state: current,
+          }),
         });
 
         if (!baseState.blockedDropIds.includes(drop.id)) {
@@ -623,9 +627,19 @@ export const useMemesQuickVoteQueue = ({
     sessionId,
     waveId,
   });
+  const currentOptimisticAdvanceState = getCurrentOptimisticAdvanceState({
+    key: stateKey,
+    state: optimisticAdvanceState,
+  });
+  const resolvedOptimisticAdvanceState = getResolvedOptimisticAdvanceState({
+    bufferedDrops: undiscoveredBuffer.bufferedDrops,
+    isFetching: undiscoveredBuffer.isFetching,
+    state: currentOptimisticAdvanceState,
+  });
   const queueActions = useMemesQuickVoteQueueActions({
     bufferedDrops: undiscoveredBuffer.bufferedDrops,
     contextProfile,
+    isFetching: undiscoveredBuffer.isFetching,
     proxyId,
     queryClient,
     requestAuth,
@@ -637,12 +651,8 @@ export const useMemesQuickVoteQueue = ({
     stateKey,
     waveId,
   });
-  const currentOptimisticAdvanceState = getCurrentOptimisticAdvanceState({
-    key: stateKey,
-    state: optimisticAdvanceState,
-  });
-  const { activeDrop } = useResolvedMemesQuickVoteDrops({
-    optimisticAdvanceState,
+  const { activeDrop, optimisticAdvance } = useResolvedMemesQuickVoteDrops({
+    optimisticAdvanceState: resolvedOptimisticAdvanceState,
     optimisticRemainingPowerState,
     pendingDropIds: queueActions.pendingDropIds,
     stateKey,
@@ -673,7 +683,7 @@ export const useMemesQuickVoteQueue = ({
     }
 
     const shouldContinueSync =
-      currentOptimisticAdvanceState.blockedDropIds.length > 0 ||
+      optimisticAdvance.blockedDropIds.length > 0 ||
       (pendingQuickVoteCount > 0 && activeDrop === null);
 
     if (!shouldContinueSync) {
@@ -689,9 +699,9 @@ export const useMemesQuickVoteQueue = ({
     };
   }, [
     activeDrop,
-    currentOptimisticAdvanceState.blockedDropIds.length,
     enabled,
     invalidateUndiscoveredDrops,
+    optimisticAdvance.blockedDropIds.length,
     pendingQuickVoteCount,
     undiscoveredBuffer.hasDiscoveryError,
     undiscoveredBuffer.isExhausted,
