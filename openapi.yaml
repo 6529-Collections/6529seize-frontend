@@ -5650,6 +5650,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
+  /waves/{id}/undiscovered-drop:
+    get:
+      tags:
+        - Waves
+      summary: Get the next undiscovered participatory drop for quick vote
+      operationId: getWaveUndiscoveredDrop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip
+          in: query
+          required: false
+          description: >-
+            Zero-based offset into the newest unvoted and unskipped drops for
+            this wave. If no unskipped drops remain, the offset applies to the
+            earliest skipped unvoted drops instead.
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUndiscoveredDrop"
+        "403":
+          description: User is not eligible to quick vote in this wave
+        "404":
+          description: Wave not found
   /waves/{id}/pinned-drop:
     post:
       tags:
@@ -7963,10 +7997,6 @@ components:
           nullable: true
         period:
           $ref: "#/components/schemas/ApiIntRange"
-        submission_strategy:
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategy"
     ApiCreateNewWaveScope:
       type: object
       required:
@@ -8281,7 +8311,7 @@ components:
         metadata:
           type: array
           items:
-            $ref: "#/components/schemas/ApiDropMetadataResponse"
+            $ref: "#/components/schemas/ApiDropMetadata"
         rating:
           type: number
           format: int64
@@ -8437,22 +8467,6 @@ components:
         data_value:
           type: string
           maxLength: 5000
-    ApiDropMetadataResponse:
-      type: object
-      required:
-        - data_key
-        - data_value
-      properties:
-        data_key:
-          type: string
-          maxLength: 500
-        data_value:
-          type: string
-          maxLength: 5000
-        resolved_profile:
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiProfileMin"
     ApiDropNftLink:
       type: object
       required:
@@ -8505,7 +8519,6 @@ components:
       type: object
       required:
         - rating
-        - category
       properties:
         rating:
           type: number
@@ -8513,6 +8526,7 @@ components:
         category:
           type: string
           maxLength: 100
+          nullable: true
     ApiDropReaction:
       type: object
       required:
@@ -8731,7 +8745,7 @@ components:
         metadata:
           type: array
           items:
-            $ref: "#/components/schemas/ApiDropMetadataResponse"
+            $ref: "#/components/schemas/ApiDropMetadata"
         rating:
           type: number
           format: int64
@@ -10918,6 +10932,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTransaction"
+    ApiUndiscoveredDrop:
+      type: object
+      required:
+        - drop
+        - total_count
+      properties:
+        drop:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiDrop"
+        total_count:
+          type: integer
+          format: int64
     ApiUpcomingMemeSubscriptionStatus:
       type: object
       required:
@@ -10983,55 +11010,6 @@ components:
             Decisions before this time will not be made. Should not overlap with
             other pauses. Needs to be after start_time, after now and after
             wave.next_decision_time
-    ApiUpdateWaveParticipationConfig:
-      type: object
-      required:
-        - scope
-        - required_metadata
-        - signature_required
-        - no_of_applications_allowed_per_participant
-        - required_media
-        - terms
-      properties:
-        scope:
-          $ref: "#/components/schemas/ApiCreateNewWaveScope"
-        no_of_applications_allowed_per_participant:
-          description: >-
-            The number of applications allowed per participant. Infinite if
-            omitted.
-          type: integer
-          format: int64
-          nullable: true
-          minimum: 1
-        required_media:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveParticipationRequirement"
-        required_metadata:
-          description: |
-            The metadata that must be provided by the participant. 
-            Empty array if nothing is required.
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveRequiredMetadata"
-        signature_required:
-          description: If true then the votes must be signed by voters.
-          type: boolean
-        terms:
-          description: >-
-            If this is and the "signature_required" is set then this will be
-            embedded as a signature input data component for each drop.
-          type: string
-          nullable: true
-        period:
-          $ref: "#/components/schemas/ApiIntRange"
-        submission_strategy:
-          description: >-
-            If omitted, the existing submission strategy is preserved. Set
-            explicitly to null to clear it.
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategy"
     ApiUpdateWaveRequest:
       type: object
       required:
@@ -11057,17 +11035,10 @@ components:
         visibility:
           $ref: "#/components/schemas/ApiCreateNewWaveVisibilityConfig"
         participation:
-          description: >-
-            Wave participation configuration. `submission_strategy` is immutable
-            after creation and, if provided on update, must match the existing
-            value exactly.
-          $ref: "#/components/schemas/ApiUpdateWaveParticipationConfig"
+          $ref: "#/components/schemas/ApiCreateNewWaveParticipationConfig"
         chat:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         wave:
-          description: >-
-            Wave configuration. `type` is immutable after creation and must
-            match the existing wave type on update.
           $ref: "#/components/schemas/ApiCreateWaveConfig"
     ApiUploadItem:
       type: object
@@ -11728,55 +11699,12 @@ components:
         terms:
           type: string
           nullable: true
-        submission_strategy:
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategy"
-    ApiWaveParticipationIdentitySubmissionAllowDuplicates:
-      type: string
-      enum:
-        - ALWAYS_ALLOW
-        - ALLOW_AFTER_WIN
-        - NEVER_ALLOW
-    ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted:
-      type: string
-      enum:
-        - ONLY_MYSELF
-        - ONLY_OTHERS
-        - EVERYONE
     ApiWaveParticipationRequirement:
       type: string
       enum:
         - IMAGE
         - AUDIO
         - VIDEO
-    ApiWaveParticipationSubmissionStrategy:
-      type: object
-      required:
-        - type
-        - config
-      properties:
-        type:
-          $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategyType"
-        config:
-          $ref: >-
-            #/components/schemas/ApiWaveParticipationSubmissionStrategyIdentityConf
-    ApiWaveParticipationSubmissionStrategyIdentityConf:
-      type: object
-      required:
-        - duplicates
-        - who_can_be_submitted
-      properties:
-        duplicates:
-          $ref: >-
-            #/components/schemas/ApiWaveParticipationIdentitySubmissionAllowDuplicates
-        who_can_be_submitted:
-          $ref: >-
-            #/components/schemas/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted
-    ApiWaveParticipationSubmissionStrategyType:
-      type: string
-      enum:
-        - IDENTITY
     ApiWaveRequiredMetadata:
       type: object
       required:

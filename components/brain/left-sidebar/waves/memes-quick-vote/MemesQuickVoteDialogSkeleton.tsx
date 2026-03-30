@@ -74,8 +74,7 @@ export default function MemesQuickVoteDialogSkeleton() {
       className="tw-flex tw-h-full tw-flex-col md:tw-grid md:tw-min-h-0 md:tw-grid-cols-[minmax(0,1.22fr)_minmax(25rem,1fr)] md:tw-items-stretch"
     >
       <p className="tw-sr-only">
-        Loading your queue. Pulling unrated memes and your recent quick-vote
-        amounts.
+        Loading your next meme and your recent quick-vote amounts.
       </p>
 
       <div data-testid="quick-vote-preview-status" className="tw-hidden">

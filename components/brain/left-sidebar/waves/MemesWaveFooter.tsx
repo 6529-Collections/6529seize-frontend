@@ -23,11 +23,23 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
   onOpenQuickVote,
   onPrefetchQuickVote,
 }) => {
-  const { isReady, uncastPower, unratedCount, votingLabel } =
+  const { isAvailable, isReady, uncastPower, unratedCount, votingLabel } =
     useMemesWaveFooterStats();
+  const buttonAriaLabel =
+    isReady && typeof uncastPower === "number"
+      ? `Uncast Power, ${formatNumberWithCommas(uncastPower)} ${
+          votingLabel ?? "Votes"
+        } left, ${formatNumberWithCommas(unratedCount)} unrated`
+      : "Quick vote";
+  const buttonTitle = isReady ? "Uncast votes" : "Quick vote";
+  const votingPowerLabel = votingLabel ? ` ${votingLabel}` : " votes";
+  const buttonValue =
+    isReady && typeof uncastPower === "number"
+      ? `${formatNumberWithCommas(uncastPower)}${votingPowerLabel}`
+      : "Open quick vote";
 
   const handleOpenQuickVote = () => {
-    if (unratedCount <= 0) {
+    if (!isAvailable) {
       return;
     }
 
@@ -35,7 +47,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
   };
 
   const handlePrefetchQuickVote = () => {
-    if (unratedCount <= 0) {
+    if (!isAvailable) {
       return;
     }
 
@@ -44,7 +56,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
 
   return (
     <AnimatePresence>
-      {isReady && typeof uncastPower === "number" && (
+      {isAvailable && (
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -58,6 +70,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
         >
           {collapsed ? (
             <MemesWaveQuickVoteTrigger
+              isAvailable={isAvailable}
               onOpenQuickVote={handleOpenQuickVote}
               onPrefetchQuickVote={handlePrefetchQuickVote}
               unratedCount={unratedCount}
@@ -65,11 +78,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           ) : (
             <button
               type="button"
-              aria-label={`Uncast Power, ${formatNumberWithCommas(
-                uncastPower
-              )} ${votingLabel ?? "Votes"} left, ${formatNumberWithCommas(
-                unratedCount
-              )} unexplored`}
+              aria-label={buttonAriaLabel}
               onClick={handleOpenQuickVote}
               onFocus={handlePrefetchQuickVote}
               onMouseEnter={handlePrefetchQuickVote}
@@ -82,21 +91,22 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                 />
                 <div className="tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
                   <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-[#6b7c93]">
-                    Uncast votes
+                    {buttonTitle}
                   </span>
 
                   <div className="tw-flex tw-items-center tw-gap-2">
                     <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-400/20 tw-text-primary-400" />
                     <span className="tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white">
-                      {formatNumberWithCommas(uncastPower)}
-                      {votingLabel ? ` ${votingLabel}` : " votes"}
+                      {buttonValue}
                     </span>
                   </div>
                 </div>
 
-                <span className="tw-relative tw-z-10 tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
-                  {formatNumberWithCommas(unratedCount)} unexplored
-                </span>
+                {isReady && (
+                  <span className="tw-relative tw-z-10 tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
+                    {formatNumberWithCommas(unratedCount)} unrated
+                  </span>
+                )}
               </div>
             </button>
           )}

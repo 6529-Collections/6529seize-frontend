@@ -190,20 +190,3 @@ export const useStoredNumberArray = (
   key: string | null,
   sanitize: ArraySanitizer<number>
 ): number[] => useStoredArray(key, sanitize);
-
-export const readStoredStringArray = (
-  key: string | null,
-  sanitize: ArraySanitizer<string>
-): string[] => readStoredArray(key, sanitize);
-
-export const writeStoredStringArray = (
-  key: string | null,
-  values: readonly string[]
-): void => {
-  writeStoredArray(key, values);
-};
-
-export const useStoredStringArray = (
-  key: string | null,
-  sanitize: ArraySanitizer<string>
-): string[] => useStoredArray(key, sanitize);
