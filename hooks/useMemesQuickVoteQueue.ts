@@ -57,6 +57,7 @@ export type UseMemesQuickVoteQueueResult = {
   readonly isLoading: boolean;
   readonly isReady: boolean;
   readonly latestUsedAmount: number | null;
+  readonly nextDrop: ExtendedDrop | null;
   readonly recentAmounts: number[];
   readonly remainingCount: number;
   readonly retryDiscovery: () => void;
@@ -637,6 +638,7 @@ export const useMemesQuickVoteQueue = ({
   }, [pendingDropIds]);
 
   const activeApiDrop = session.sessionState.currentDrop;
+  const nextApiDrop = session.sessionState.lookaheadDrops[0] ?? null;
   const effectiveOptimisticRemainingPower =
     getEffectiveOptimisticRemainingPower({
       activeApiDrop,
@@ -658,6 +660,19 @@ export const useMemesQuickVoteQueue = ({
   const activeDrop = isMemesQuickVoteVoteableDrop(activeDropCandidate)
     ? activeDropCandidate
     : null;
+  const nextDropCandidate = useMemo(() => {
+    if (!nextApiDrop) {
+      return null;
+    }
+
+    return clampDropMaxRating(
+      convertApiDropToExtendedDrop(nextApiDrop),
+      effectiveOptimisticRemainingPower
+    );
+  }, [effectiveOptimisticRemainingPower, nextApiDrop]);
+  const nextDrop = isMemesQuickVoteVoteableDrop(nextDropCandidate)
+    ? nextDropCandidate
+    : null;
   const latestUsedAmount = recentAmountsByRecency.at(-1) ?? null;
   const recentAmounts = getDisplayQuickVoteAmounts(recentAmountsByRecency);
 
@@ -668,6 +683,7 @@ export const useMemesQuickVoteQueue = ({
     isLoading: session.sessionState.isLoading && activeDrop === null,
     isReady: activeDrop !== null,
     latestUsedAmount,
+    nextDrop,
     recentAmounts,
     remainingCount: session.sessionState.totalCount,
     retryDiscovery: () => {
