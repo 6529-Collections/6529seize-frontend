@@ -2,9 +2,10 @@
 
 ## Overview
 
-Wallet and account controls cover connect, disconnect, share, account
-selection, network switching, logout, and proxy identity switching. Web and app
-surfaces reach the same session outcomes, but they expose different controls.
+Wallet and account controls cover connect, disconnect, add-account flows,
+share, account selection, network switching, logout, and proxy identity
+switching. Web and app surfaces reach the same session outcomes, but they
+expose different controls.
 
 ## Location in the Site
 
@@ -20,6 +21,8 @@ surfaces reach the same session outcomes, but they expose different controls.
 - Web connected with multiple accounts: activate the user row twice quickly to
   switch to the next connected account.
 - App layout: open the menu/avatar button, then use footer account actions.
+- Connected multi-profile surfaces: use `Add` on web or `+` in app footer when
+  another connected profile slot is available.
 - Web proxy switching: select an identity row in the web dropdown.
 
 ## Control Surfaces
@@ -43,6 +46,8 @@ surfaces reach the same session outcomes, but they expose different controls.
   - received proxy rows appear when available
   - connected-account rows can show unread count badges (`1-99+`) and can be
     used for direct account selection
+  - when fewer than three connected profiles are stored, an `Add` row appears
+    under the connected-profile list
 - Session actions:
   - wallet connected: `Disconnect Wallet`, desktop-web `Share`,
     `Disconnect & Logout`
@@ -63,6 +68,8 @@ surfaces reach the same session outcomes, but they expose different controls.
     the active account
   - additional connected account avatars can show unread count badges (`1-99+`)
     and can be selected for account switch
+  - when fewer than three connected profiles are stored, a `+` button appears
+    beside the additional-account avatars
 - Network label:
   - when the wallet has more than one supported chain, the footer shows
     `Network: {currentChain}` above the switch action
@@ -74,32 +81,36 @@ surfaces reach the same session outcomes, but they expose different controls.
 2. Connect wallet if needed.
 3. On web, single-activate the user row to open the dropdown, or quickly
    activate it twice to cycle to the next connected account.
-4. Use connected-account controls:
+4. If another profile slot is available, use `Add` on web or `+` in app footer
+   to reopen wallet connect and authorize another account.
+5. Use connected-account controls:
    - select another connected account from the web dropdown, or
    - use app account switch controls in the app sidebar footer.
-5. Use session actions:
+6. Use session actions:
    - `Disconnect Wallet` (web only): disconnect wallet without full logout.
    - desktop-web `Share`: open the QR/deep-link modal from the web dropdown.
    - `Switch to {nextChain}`: move to the next supported wallet network when
      chain switching is available.
    - `Disconnect & Logout` / `Logout`: full sign-out.
    - `Sign Out All Profiles` (web only): clear all connected profiles at once.
-6. During known-account switch handoff, active account state stays pinned to
+7. During known-account switch handoff, active account state stays pinned to
    the stored active wallet until the new selection settles.
-7. Review unread indicators in account selectors:
+8. Review unread indicators in account selectors:
    - web/account avatars can show a dot for unread activity on other connected
      accounts,
    - account rows can show unread count badges (`1-99+`).
-8. Optional web proxy switch:
+9. Optional web proxy switch:
    - select base identity to act as yourself,
    - select proxy identity to act as that profile,
    - select the active row again to return to base identity.
-9. Continue navigation with updated account/proxy state.
+10. Continue navigation with updated account/proxy state.
 
 ## Common Scenarios
 
 - Connect from web sidebar, then open dropdown actions.
 - Connect from app footer and continue on the same route.
+- Use `Add` or `+` to connect a second or third profile without leaving the
+  current route.
 - Use connected-account rows in the web dropdown to switch profiles without
   leaving the menu.
 - Use a quick second activate on the web user row to cycle to the next
@@ -126,6 +137,8 @@ surfaces reach the same session outcomes, but they expose different controls.
 - Web dropdown always includes the base identity row.
 - Connected-account controls appear only when at least one connected account is
   available.
+- Add-account controls appear only while fewer than three connected profiles are
+  stored.
 - Proxy rows appear only when active received proxies exist.
 - Proxy switching is not available in app footer.
 - Web `Share` appears only on desktop web after device detection resolves; it
@@ -140,12 +153,16 @@ surfaces reach the same session outcomes, but they expose different controls.
 - While provider/account signals settle during switch-account transitions, the
   active account remains anchored to the stored active wallet to avoid brief
   flips to another already-known account.
+- If add-account is canceled and the wallet flow returns to the original active
+  wallet, the current session should stay on that original profile.
 - After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`,
   `Share`, and `Logout`.
 
 ## Failure and Recovery
 
 - If wallet connect is canceled, stay on the same surface and retry `Connect`.
+- If `Add` or `+` closes without storing a new profile, reopen the same control
+  and complete the wallet handoff again.
 - If account state looks stale after proxy/account changes, run
   `Disconnect & Logout`, then reconnect.
 - If quick re-activating the web user row switches accounts unexpectedly, wait
@@ -162,6 +179,7 @@ surfaces reach the same session outcomes, but they expose different controls.
 ## Limitations / Notes
 
 - Account action sets intentionally differ between web dropdown and app footer.
+- At most three connected profiles can be stored at once.
 - Proxy switching is available only in the web dropdown.
 - `Disconnect Wallet` exists only in web dropdown; app footer uses full logout
   actions.

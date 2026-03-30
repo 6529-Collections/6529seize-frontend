@@ -9,9 +9,14 @@ The craft surface combines:
 
 - a paginated claim queue at `/drop-forge/craft`
 - a claim-detail editor at `/drop-forge/craft/{id}`
+- a direct `Go to Drop` shortcut when the claim is already attached to a wave
+  drop
 - media upload and replacement controls
+- source URL cards with copy/open actions for image and animation assets
 - traits and core-info editing
 - Arweave publishing
+- craft-focused status pills that stay on publish state until you move into the
+  launch workflow
 - distribution-photo review
 
 ## Location in the Site
@@ -41,6 +46,7 @@ The craft surface combines:
    - `*image missing` warning when only animation media exists
 4. Select a row to open `/drop-forge/craft/{id}`.
 5. On the claim-detail page, review and edit these sections:
+   - page header shortcuts (`Back to Craft list`, optional `Go to Drop`)
    - `Image`
    - `Animation`
    - `Core Information`
@@ -50,21 +56,30 @@ The craft surface combines:
 6. Save claim changes section by section.
 7. When the claim is in a publishable state and no draft edits are pending, use
    `Publish to Arweave`.
-8. After publish starts, watch the status pill until published Arweave links are
-   available.
+8. After publish starts, watch the status pill until it returns to `Published`
+   and published Arweave links are available.
 
 ## Common Scenarios
 
 - Queue browsing:
   - Use pagination when more than five claims exist.
   - Open the newest or relevant claim directly from its row.
+- Drop navigation:
+  - When the claim already maps to a wave drop, use `Go to Drop` from the page
+    header to open that drop directly.
 - Image editing:
   - Replace the claim image with a file upload.
   - Preview the pending image before saving.
+  - Use the `Image URL` or `Current image URL` card to copy the current source
+    or open it in a new tab when the URL is valid.
 - Animation editing:
   - Upload a video file.
   - Replace animation with an IPFS or Arweave URL.
   - Remove an existing animation and save that change.
+  - Use `Upload from device`, `Paste link`, and `Cancel` while choosing a new
+    animation source.
+  - Use the `Animation URL` or `Current animation URL` card to copy/open the
+    current source when available.
 - Metadata editing:
   - Update artwork title, description, external URL, and traits.
   - Save or revert pending metadata edits.
@@ -81,10 +96,17 @@ The craft surface combines:
   every 10 seconds until uploads settle.
 - Image and animation preview sections can show pending local files before the
   claim has been saved.
+- While a local upload is pending, the source card keeps showing the current
+  saved URL and notes that the new URL is only available after save.
 - Animation links are restricted to supported IPFS or Arweave URLs for GLB/HTML
   style media.
+- Source cards still show plain text for empty or invalid URLs, but the open
+  action only appears when the URL can be resolved safely.
 - `Publish to Arweave` stays disabled while any pending draft change has not
   been saved yet.
+- After metadata is published, craft continues to show the claim as
+  `Published`; launch-only statuses such as missing initialization info appear
+  only on launch routes.
 - A claim can show `Claim not found`, `Loading…`, or another inline error state
   before the editor renders.
 - Distribution can be empty and show `No Distribution photos found`.

@@ -22,6 +22,19 @@
 - Open `/tools/api` directly.
 - Open `API` from the site footer.
 
+## User Journey
+
+1. Open `/tools/api`.
+2. Review the introduction and terminology to confirm the page covers the
+   intended auth or media-upload task.
+3. Read the wallet-signature authentication example and copy the snippet when
+   needed.
+4. Read the multipart media-upload and drop-creation example and copy the
+   snippet when needed.
+5. Use the current contract highlights to spot recent payload/schema additions.
+6. Follow the external API docs for endpoint-level details beyond the examples
+   shown on this page.
+
 ## Page Structure and Behavior
 
 - The page is static content. It does not execute API calls.
@@ -96,6 +109,40 @@
 - REP: reputation signal.
 - NIC: trust signal.
 
+## Current Contract Highlights
+
+- The public API schema now exposes wave participation
+  `submission_strategy` data in wave create/read/update payloads, alongside the
+  existing scope, media, metadata, signature, terms, and period rules.
+- Wave update payloads now document stricter immutability around wave type and
+  existing participation strategy values, so API clients should preserve those
+  fields unless they are intentionally resubmitting the current server values
+  unchanged.
+- Drop responses can now enrich `metadata[]` entries with `resolved_profile`
+  when a metadata row maps to a profile, so clients no longer need to assume
+  metadata is always just raw key/value text.
+- Memes mint stats responses now expose explicit `mint_count`,
+  `subscriptions_count`, and `total_count` counters in per-mint rows, totals,
+  and yearly rollups.
+- Use the external API docs for endpoint-level request/response details beyond
+  the examples shown on `/tools/api`.
+
+## Common Scenarios
+
+- Review the auth snippet before building a wallet-signature login flow.
+- Copy the multipart example while wiring media upload and drop creation in a
+  Node.js script.
+- Check the current contract highlights when generated clients or API payloads
+  gain new wave-participation, metadata, or mint-stats fields.
+
+## Edge Cases
+
+- `/tools/api` is a static guide, so it does not confirm runtime API health or
+  credentials.
+- The snippets use simplified examples for readability and omit some production
+  hardening, such as full response-status handling in the auth example.
+- Copy-button feedback depends on browser clipboard support.
+
 ## Failure and Recovery
 
 - Route-level loading, empty, and API-error states do not apply; the route is
@@ -110,7 +157,7 @@
 - If completion succeeds but `/api/drops` fails, retry `/api/drops` with the
   same `media_url`.
 
-## Limits / Notes
+## Limitations / Notes
 
 - Examples are Node.js-oriented and include placeholders (`0x...`, private key,
   `TARGET_WAVE_ID_GOES_HERE`).
