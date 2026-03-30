@@ -1,17 +1,21 @@
 "use client";
 
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
-import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
-import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  getDropPreviewImageUrl,
+  type ExtendedDrop,
+} from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import clsx from "clsx";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode, TouchEventHandler } from "react";
+import { useMemo } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import MemesQuickVoteDescription from "./MemesQuickVoteDescription";
+import MemesQuickVoteDropHeader from "./MemesQuickVoteDropHeader";
+import useMemesQuickVotePreviewSwipe from "./useMemesQuickVotePreviewSwipe";
 
-const SWIPE_TRIGGER_THRESHOLD = 96;
-const MAX_SWIPE_OFFSET = 132;
-const SWIPE_EXIT_DURATION_MS = 180;
-const SWIPE_EXIT_OFFSET = 420;
+const MOBILE_SWIPE_CENTER_SLIDE_INDEX = 1;
 
 interface MemesQuickVotePreviewProps {
   readonly drop: ExtendedDrop;
@@ -26,6 +30,168 @@ interface MemesQuickVotePreviewProps {
   readonly onVoteWithSwipe: () => void;
 }
 
+interface MemesQuickVoteTouchSurfaceProps {
+  readonly onTouchCancel: TouchEventHandler<HTMLDivElement>;
+  readonly onTouchEnd: TouchEventHandler<HTMLDivElement>;
+  readonly onTouchMove: TouchEventHandler<HTMLDivElement>;
+  readonly onTouchStart: TouchEventHandler<HTMLDivElement>;
+}
+
+function getQuickVoteArtworkMediaContent({
+  artworkMedia,
+  hasTouchScreen,
+  htmlPreviewImageUrl,
+}: {
+  readonly artworkMedia:
+    | ExtendedDrop["parts"][number]["media"][number]
+    | undefined;
+  readonly hasTouchScreen: boolean;
+  readonly htmlPreviewImageUrl?: string | undefined;
+}): ReactNode {
+  if (!artworkMedia) {
+    return null;
+  }
+
+  return (
+    <DropListItemContentMedia
+      media_mime_type={artworkMedia.mime_type}
+      media_url={artworkMedia.url}
+      isCompetitionDrop={true}
+      disableAutoPlay={hasTouchScreen}
+      disableModal={hasTouchScreen}
+      htmlPreviewImageUrl={htmlPreviewImageUrl}
+    />
+  );
+}
+
+function MemesQuickVoteMobileSwipeSurface({
+  className,
+  touchSurfaceProps,
+}: {
+  readonly className: string;
+  readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className={className}
+      style={{ touchAction: "pan-y" }}
+      onTouchStart={touchSurfaceProps.onTouchStart}
+      onTouchMove={touchSurfaceProps.onTouchMove}
+      onTouchEnd={touchSurfaceProps.onTouchEnd}
+      onTouchCancel={touchSurfaceProps.onTouchCancel}
+    />
+  );
+}
+
+function MemesQuickVoteMobileDetails({
+  description,
+  drop,
+  title,
+  touchSurfaceProps,
+}: {
+  readonly description: string;
+  readonly drop: ExtendedDrop;
+  readonly title: string;
+  readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
+}) {
+  return (
+    <div
+      className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-[#0d0d0e] md:tw-hidden"
+      style={{ touchAction: "pan-y" }}
+      onTouchStart={touchSurfaceProps.onTouchStart}
+      onTouchMove={touchSurfaceProps.onTouchMove}
+      onTouchEnd={touchSurfaceProps.onTouchEnd}
+      onTouchCancel={touchSurfaceProps.onTouchCancel}
+    >
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-6 tw-pb-5 tw-pt-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden">
+        <div className="tw-flex tw-flex-col tw-gap-4">
+          <MemesQuickVoteDropHeader drop={drop} />
+
+          <div className="tw-space-y-3">
+            <h2 className="tw-mb-0 tw-text-[1.15rem] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-white">
+              {title}
+            </h2>
+
+            {description && (
+              <MemesQuickVoteDescription
+                key={drop.id}
+                description={description}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MemesQuickVoteMediaStage({
+  isMobile,
+  mediaContent,
+  swipeHint,
+  swipeOffset,
+  touchSurfaceProps,
+}: {
+  readonly isMobile: boolean;
+  readonly mediaContent: ReactNode;
+  readonly swipeHint: string | null;
+  readonly swipeOffset: number;
+  readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
+}) {
+  if (mediaContent === null) {
+    return (
+      <div className="tw-flex tw-h-[45vh] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/30 tw-text-sm tw-text-iron-500 md:tw-h-full md:tw-border-0">
+        Preview unavailable
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={clsx(
+        "tw-relative tw-shrink-0 tw-overflow-hidden tw-bg-black/40",
+        isMobile
+          ? "tw-h-[45vh] tw-border-b tw-border-solid tw-border-white/5"
+          : "md:tw-flex md:tw-h-full md:tw-w-full md:tw-items-center md:tw-justify-center md:tw-border-0"
+      )}
+    >
+      <div className="tw-flex tw-h-full tw-items-center tw-justify-center md:tw-h-full md:tw-w-full">
+        {mediaContent}
+      </div>
+
+      {isMobile &&
+        (["left", "right"] as const).map((side) => (
+          <MemesQuickVoteMobileSwipeSurface
+            key={side}
+            className={clsx(
+              "tw-absolute tw-inset-y-0 tw-z-20 tw-w-12 md:tw-hidden",
+              side === "left" ? "tw-left-0" : "tw-right-0"
+            )}
+            touchSurfaceProps={touchSurfaceProps}
+          />
+        ))}
+
+      <div
+        className={clsx(
+          "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity md:tw-hidden",
+          swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
+        )}
+      >
+        Skip
+      </div>
+      <div
+        className={clsx(
+          "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity md:tw-hidden",
+          swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
+        )}
+      >
+        {swipeHint ? `Vote ${swipeHint}` : "Vote"}
+      </div>
+    </div>
+  );
+}
+
 function MemesQuickVotePreviewContent({
   drop,
   isBusy,
@@ -38,14 +204,6 @@ function MemesQuickVotePreviewContent({
   onSkip,
   onVoteWithSwipe,
 }: MemesQuickVotePreviewProps) {
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [swipeExitDirection, setSwipeExitDirection] = useState<
-    "left" | "right" | null
-  >(null);
-  const swipeCommitTimeoutRef = useRef<number | null>(null);
-  const touchStartXRef = useRef<number | null>(null);
-  const touchStartYRef = useRef<number | null>(null);
-
   const title =
     drop.metadata.find((entry) => entry.data_key === "title")?.data_value ??
     "Untitled submission";
@@ -53,7 +211,12 @@ function MemesQuickVotePreviewContent({
     drop.metadata.find((entry) => entry.data_key === "description")
       ?.data_value ?? "";
   const artworkMedia = drop.parts.at(0)?.media.at(0);
-  const authorLabel = drop.author.handle ?? drop.author.primary_address;
+  const { hasTouchScreen } = useDeviceInfo();
+  const isInteractiveHtmlMedia = artworkMedia?.mime_type === "text/html";
+  const htmlPreviewImageUrl =
+    isInteractiveHtmlMedia && hasTouchScreen
+      ? (getDropPreviewImageUrl(drop.metadata) ?? undefined)
+      : undefined;
   const swipeHint = useMemo(() => {
     if (swipeVoteAmount === null) {
       return null;
@@ -63,233 +226,136 @@ function MemesQuickVotePreviewContent({
       votingLabel ?? "votes"
     }`;
   }, [swipeVoteAmount, votingLabel]);
+  const swipeInstructionText = swipeHint
+    ? `Swipe left to skip, right to vote ${swipeHint}`
+    : null;
+  const {
+    previewCardRef,
+    canUseSwiperTouchSurface,
+    cardTransform,
+    cardTransitionDuration,
+    handleCardTransitionEnd,
+    handleTouchSurfaceCancel,
+    handleTouchSurfaceEnd,
+    handleTouchSurfaceMove,
+    handleTouchSurfaceStart,
+    handleSwiperMove,
+    handleSwiperTouchEnd,
+    swipeOffset,
+  } = useMemesQuickVotePreviewSwipe({
+    isBusy,
+    isMobile,
+    onAdvanceStart,
+    onSkip,
+    onVoteWithSwipe,
+    swipeVoteAmount,
+  });
 
-  const resetSwipe = () => {
-    if (swipeExitDirection) {
-      return;
-    }
-
-    setSwipeOffset(0);
-    touchStartXRef.current = null;
-    touchStartYRef.current = null;
+  const mediaContent = getQuickVoteArtworkMediaContent({
+    artworkMedia,
+    hasTouchScreen,
+    htmlPreviewImageUrl,
+  });
+  const mobileTouchSurfaceProps: MemesQuickVoteTouchSurfaceProps = {
+    onTouchCancel: (event) => {
+      handleTouchSurfaceCancel(event);
+    },
+    onTouchEnd: (event) => {
+      handleTouchSurfaceEnd(event);
+    },
+    onTouchMove: (event) => {
+      handleTouchSurfaceMove(event);
+    },
+    onTouchStart: (event) => {
+      handleTouchSurfaceStart(event);
+    },
   };
 
-  const clearSwipeCommitTimeout = () => {
-    if (swipeCommitTimeoutRef.current !== null) {
-      window.clearTimeout(swipeCommitTimeoutRef.current);
-      swipeCommitTimeoutRef.current = null;
-    }
-  };
+  const previewCard = (
+    <article
+      ref={previewCardRef}
+      data-testid="quick-vote-preview-card"
+      data-quick-vote-transform={cardTransform ?? undefined}
+      className={clsx(
+        "tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-transition-all tw-duration-200 tw-ease-out",
+        isBusy && "tw-pointer-events-none tw-opacity-70"
+      )}
+      style={{
+        transform: cardTransform,
+        touchAction: isMobile ? "pan-y" : undefined,
+        transitionDuration: cardTransitionDuration,
+      }}
+      onTransitionEnd={handleCardTransitionEnd}
+    >
+      <div
+        data-testid="quick-vote-preview-mobile-context"
+        className="tw-flex tw-h-full tw-flex-col md:tw-flex md:tw-min-h-0 md:tw-flex-1 md:tw-p-0"
+      >
+        <MemesQuickVoteMediaStage
+          isMobile={isMobile}
+          mediaContent={mediaContent}
+          swipeHint={swipeHint}
+          swipeOffset={swipeOffset}
+          touchSurfaceProps={mobileTouchSurfaceProps}
+        />
 
-  useEffect(() => {
-    return () => {
-      if (swipeCommitTimeoutRef.current !== null) {
-        window.clearTimeout(swipeCommitTimeoutRef.current);
-        swipeCommitTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
-  const beginSwipeCommit = (
-    direction: "left" | "right",
-    action: () => void
-  ) => {
-    clearSwipeCommitTimeout();
-    setSwipeExitDirection(direction);
-    setSwipeOffset(
-      direction === "left" ? -SWIPE_EXIT_OFFSET : SWIPE_EXIT_OFFSET
-    );
-    touchStartXRef.current = null;
-    touchStartYRef.current = null;
-    onAdvanceStart();
-    swipeCommitTimeoutRef.current = window.setTimeout(() => {
-      action();
-    }, SWIPE_EXIT_DURATION_MS);
-  };
-
-  const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
-    if (isBusy || !isMobile || swipeExitDirection || !event.touches[0]) {
-      return;
-    }
-
-    touchStartXRef.current = event.touches[0].clientX;
-    touchStartYRef.current = event.touches[0].clientY;
-  };
-
-  const handleTouchMove = (event: React.TouchEvent<HTMLElement>) => {
-    if (
-      isBusy ||
-      !isMobile ||
-      swipeExitDirection ||
-      touchStartXRef.current === null ||
-      touchStartYRef.current === null ||
-      !event.touches[0]
-    ) {
-      return;
-    }
-
-    const deltaX = event.touches[0].clientX - touchStartXRef.current;
-    const deltaY = event.touches[0].clientY - touchStartYRef.current;
-
-    if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      return;
-    }
-
-    setSwipeOffset(
-      Math.max(-MAX_SWIPE_OFFSET, Math.min(deltaX, MAX_SWIPE_OFFSET))
-    );
-  };
-
-  const handleTouchEnd = () => {
-    if (isBusy || !isMobile) {
-      resetSwipe();
-      return;
-    }
-
-    if (swipeOffset <= -SWIPE_TRIGGER_THRESHOLD) {
-      beginSwipeCommit("left", onSkip);
-      return;
-    }
-
-    if (swipeOffset >= SWIPE_TRIGGER_THRESHOLD && swipeVoteAmount !== null) {
-      beginSwipeCommit("right", onVoteWithSwipe);
-      return;
-    }
-
-    resetSwipe();
-  };
-
-  let cardTransform: React.CSSProperties["transform"];
-  if (isMobile) {
-    if (swipeExitDirection === "left") {
-      cardTransform = `translateX(-${SWIPE_EXIT_OFFSET}px) rotate(-6deg)`;
-    } else if (swipeExitDirection === "right") {
-      cardTransform = `translateX(${SWIPE_EXIT_OFFSET}px) rotate(6deg)`;
-    } else {
-      cardTransform = `translateX(${swipeOffset}px)`;
-    }
-  }
+        <MemesQuickVoteMobileDetails
+          description={description}
+          drop={drop}
+          title={title}
+          touchSurfaceProps={mobileTouchSurfaceProps}
+        />
+      </div>
+    </article>
+  );
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4">
-      <div
-        data-testid="quick-vote-preview-status"
-        className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-hidden"
-      >
+    <div className="tw-flex tw-h-full tw-flex-col">
+      <div data-testid="quick-vote-preview-status" className="tw-sr-only">
+        {swipeInstructionText && (
+          <span className="tw-sr-only">{swipeInstructionText}</span>
+        )}
         {typeof uncastPower === "number" && (
-          <span className="tw-rounded-full tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300">
+          <span className="tw-sr-only tw-text-primary-300">
             {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"} left
           </span>
         )}
-        <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-300">
-          {remainingCount} left
+        <span
+          aria-hidden="true"
+          className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-backdrop-blur-md"
+        >
+          {formatNumberWithCommas(remainingCount)} unexplored
         </span>
-        {isMobile && (
-          <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-400">
-            Swipe left to skip{swipeHint ? `, right to vote ${swipeHint}` : ""}
-          </span>
-        )}
       </div>
 
-      <div className="tw-relative">
-        {isMobile && (
-          <>
-            <div
-              className={clsx(
-                "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity",
-                swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
-              )}
-            >
-              Skip
-            </div>
-            <div
-              className={clsx(
-                "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity",
-                swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
-              )}
-            >
-              {swipeHint ? `Vote ${swipeHint}` : "Vote"}
-            </div>
-          </>
-        )}
-
-        <article
-          data-testid="quick-vote-preview-card"
-          className={clsx(
-            "tw-relative tw-overflow-hidden tw-rounded-[2rem] tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/95 tw-shadow-[0_24px_60px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 tw-ease-out",
-            isBusy && "tw-pointer-events-none tw-opacity-70"
-          )}
-          style={{
-            transform: cardTransform,
-            opacity: swipeExitDirection ? 0 : undefined,
-            touchAction: isMobile ? "pan-y" : undefined,
-            transitionDuration: `${SWIPE_EXIT_DURATION_MS}ms`,
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={resetSwipe}
-        >
-          <div className="tw-border-b tw-border-solid tw-border-white/5 tw-p-4 md:tw-hidden">
-            <div className="tw-flex tw-items-center tw-gap-3">
-              <WaveDropAuthorPfp drop={drop} />
-              <div className="tw-min-w-0 tw-flex-1">
-                <div className="tw-flex tw-items-center tw-gap-2">
-                  <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-                    {authorLabel}
-                  </span>
-                  <span className="tw-size-1 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700" />
-                  <span className="tw-text-xs tw-text-iron-500">
-                    <WaveDropTime timestamp={drop.created_at} />
-                  </span>
-                </div>
-                <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
-                  {drop.wave.name}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            data-testid="quick-vote-preview-mobile-context"
-            className="tw-p-4 sm:tw-p-6 md:tw-p-0"
+      <div className="tw-relative tw-min-h-0 tw-flex-1">
+        {canUseSwiperTouchSurface ? (
+          <Swiper
+            initialSlide={MOBILE_SWIPE_CENTER_SLIDE_INDEX}
+            slidesPerView={1}
+            watchOverflow={false}
+            followFinger={false}
+            longSwipes={false}
+            shortSwipes={false}
+            threshold={0}
+            allowTouchMove={!isBusy}
+            resistanceRatio={0}
+            touchStartPreventDefault={false}
+            className="tw-h-full tw-overflow-visible"
+            onTouchMove={handleSwiperMove}
+            onTouchEnd={handleSwiperTouchEnd}
           >
-            <div className="md:tw-hidden">
-              <h2 className="tw-mb-2 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-white">
-                {title}
-              </h2>
-              {description && (
-                <p
-                  className="tw-mb-4 tw-text-sm tw-leading-6 tw-text-iron-300"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitBoxOrient: "vertical",
-                    WebkitLineClamp: 3,
-                    overflow: "hidden",
-                  }}
-                >
-                  {description}
-                </p>
-              )}
-            </div>
-
-            {artworkMedia ? (
-              <div className="tw-overflow-hidden tw-rounded-[1.5rem] tw-bg-iron-950 md:tw-rounded-none">
-                <div className="tw-flex tw-h-[min(52vh,28rem)] tw-items-center tw-justify-center tw-bg-iron-950/80 md:tw-h-[min(72vh,44rem)] md:tw-bg-iron-950/85">
-                  <DropListItemContentMedia
-                    media_mime_type={artworkMedia.mime_type}
-                    media_url={artworkMedia.url}
-                    isCompetitionDrop={true}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="tw-flex tw-h-64 tw-items-center tw-justify-center tw-rounded-[1.5rem] tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-950 tw-text-sm tw-text-iron-500 md:tw-h-[min(72vh,44rem)] md:tw-rounded-none md:tw-border-0">
-                Preview unavailable
-              </div>
-            )}
-          </div>
-        </article>
+            <SwiperSlide aria-hidden="true" className="tw-h-full">
+              <div className="tw-h-px" />
+            </SwiperSlide>
+            <SwiperSlide className="tw-h-full">{previewCard}</SwiperSlide>
+            <SwiperSlide aria-hidden="true" className="tw-h-full">
+              <div className="tw-h-px" />
+            </SwiperSlide>
+          </Swiper>
+        ) : (
+          previewCard
+        )}
       </div>
     </div>
   );

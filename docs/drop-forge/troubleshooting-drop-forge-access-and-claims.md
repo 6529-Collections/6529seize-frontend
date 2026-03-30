@@ -54,6 +54,11 @@ craft/launch claim cannot move forward.
 - Symptom: launch page says `Finish crafting this claim before launching`.
   - Meaning: metadata has not been published to Arweave yet.
   - Action: open the linked craft claim, publish it, then return to launch.
+- Symptom: launch list or detail shows `Checking Onchain`.
+  - Meaning: published metadata exists, but the route is still loading the live
+    on-chain claim record before deciding whether the claim is pending
+    initialization, live, or needs an update.
+  - Action: wait for the fetch to finish, then review the resolved status.
 - Symptom: phase actions are disabled in launch.
   - Meaning: the claim is not initialized yet, required metadata is missing, or
     the selected action currently has no runnable payload.
@@ -63,6 +68,11 @@ craft/launch claim cannot move forward.
     write is already pending.
   - Action: wait for the pending write to finish, or if you are a claims-admin
     wallet, turn off the matching `Completed` toggle before retrying.
+- Symptom: research target size snaps back and shows a claim-max error toast.
+  - Meaning: the entered target edition size is above the active claim cap from
+    the saved edition size or live on-chain `totalMax`.
+  - Action: use the capped value and re-check whether any research airdrop is
+    still needed after the current minted total is subtracted.
 
 ## Edge Cases
 

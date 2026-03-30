@@ -58,6 +58,8 @@ Attachment images use larger scaling in single-drop views than in thread cards.
 - If a scaled attachment URL fails, the viewer falls back to the original media URL.
 - If image loading still fails, users see `Couldn’t load image.` and can press
   `Retry`.
+- If a fullscreen request is denied or interrupted, the modal stays open and
+  the other image actions continue to work.
 - If fullscreen is unavailable, users can still open the source in a new tab.
 - If media is slow to load, card layout stays stable behind placeholder UI.
 

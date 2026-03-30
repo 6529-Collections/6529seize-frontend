@@ -5,8 +5,9 @@
 On `/`, the `Latest Drop` panel includes a four-row stats grid for the current
 Memes mint. The grid shows `Edition`, `Status`, `Mint price`, and `Floor`.
 
-If the current mint is ended and next-drop data is available, home switches to
-`Next Drop`; this grid is not shown in that state.
+If the current mint still has another scheduled phase, home keeps `Latest Drop`
+instead of switching early. Home only switches to `Next Drop` after the drop is
+actually complete and next-drop data is available.
 
 ## Location in the Site
 
@@ -49,6 +50,10 @@ If the current mint is ended and next-drop data is available, home switches to
 - Claim finalizes with unminted editions:
   - `Edition` still switches to final minted total `x`.
   - `Status` shows `Ended`.
+- Between scheduled phases:
+  - `Edition` stays `x/y` while the next phase countdown takes over elsewhere in
+    the same panel.
+  - Home keeps showing `Latest Drop` instead of `Next Drop`.
 - Signed-in collector:
   - `Edition` includes the balance chip with current count.
   - `0` balance still renders and resolves to `UNSEIZED` in the tooltip.
@@ -63,8 +68,10 @@ If the current mint is ended and next-drop data is available, home switches to
 - If no profile is connected, the balance chip does not render.
 - If the balance request fails, the chip falls back to `0` with `UNSEIZED`
   tooltip text.
-- If current mint is ended and a next drop is available, home switches to the
-  `Next Drop` panel and this grid does not render.
+- If the current phase window has ended but a later phase still exists, home
+  does not switch to `Next Drop` yet.
+- If the full drop is complete and a next drop is available, home switches to
+  the `Next Drop` panel and this grid does not render.
 
 ## Failure and Recovery
 

@@ -1,7 +1,7 @@
 "use client";
 
+import MemesWaveZapIcon from "@/components/brain/left-sidebar/waves/MemesWaveZapIcon";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { BoltIcon } from "@heroicons/react/24/solid";
 import React from "react";
 
 interface MemesWaveQuickVoteTriggerProps {
@@ -33,7 +33,7 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
         className ?? ""
       }`}
     >
-      <BoltIcon className="tw-size-4 tw-flex-shrink-0" />
+      <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-300/20" />
       <span className="tw-text-xs tw-font-semibold">
         {formatNumberWithCommas(unratedCount)}
       </span>

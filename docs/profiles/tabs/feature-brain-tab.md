@@ -28,19 +28,27 @@ documented separately in
 1. Open `/{user}/brain`.
 2. Profile route resolution runs first (canonical-handle redirects and
    not-found behavior follow shared profile route rules).
-3. If `Brain` is visible and the route resolves to a profile, the tab loads the
-   `Activity` card and first drop page.
-4. If the viewed profile exposes a Brain identity, the `Activity` card renders
+3. If the route was opened directly while client hydration, wallet
+   reconnection, or connected-profile restoration is still in progress, the
+   profile shell keeps the `/{user}/brain` URL and shows a blank content
+   placeholder until Brain access resolves.
+4. If `Brain` is visible once access resolves and the route maps to a profile,
+   the tab loads the `Activity` card and first drop page.
+5. If the viewed profile exposes a Brain identity, the `Activity` card renders
    above the feed.
-5. Select a drop or quote preview to open its thread:
+6. Select a drop or quote preview to open its thread:
    - public wave drop: `/waves/{waveId}?serialNo={serialNo}`
    - direct-message drop: `/messages?wave={waveId}&serialNo={serialNo}`
-6. Scroll to load older drops.
+7. Scroll to load older drops.
 
 ## Common Scenarios
 
 - Visit someone else's profile Brain tab to read latest drops.
 - Visit your own profile Brain tab to review recent drops.
+- Open a shared `/{user}/brain` link directly and stay on that route while the
+  app decides whether Waves is available for the current viewer.
+- If Waves becomes available during that access check, the same
+  `/{user}/brain` URL stays selected and loads the feed without a route change.
 - Initial load shows `Loading drops...`.
 - Empty feeds show `No Drops to show`.
 - Loading older pages shows `Loading more drops...`.
@@ -48,13 +56,11 @@ documented separately in
 ## Edge Cases
 
 - `Brain` is hidden when Waves is unavailable in the current context.
-- If the active tab route becomes hidden, profile tab navigation replaces the
-  URL with the first visible tab and keeps the current query string.
-- Opening `/{user}/brain` while `Brain` is hidden redirects to `/{user}` when
-  no wallet is connected, or when a connected profile exists but Waves is still
-  unavailable.
-- If a wallet is connected but no connected profile handle exists, the hidden
-  `/{user}/brain` route can remain on a blank shell until context changes.
+- If `/{user}/brain` is opened directly while Brain access is still unresolved,
+  the route delays fallback instead of redirecting immediately.
+- Once that access check settles and `Brain` is still hidden, profile tab
+  navigation replaces the URL with `/{user}` and keeps the current query
+  string.
 - Feed content renders only after profile resolution returns a handle.
 
 ## Failure and Recovery

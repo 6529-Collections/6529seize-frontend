@@ -42,6 +42,9 @@ If the connected profile has a primary wallet, the form pre-fills:
 
 ## Common Scenarios
 
+- Required fields show visible `*` markers where applicable, including
+  `Payment Address`, `Designated Payee Name`, `Contract Address`, `Preview`,
+  `About the Artist`, and `Artwork Commentary`.
 - Airdrop totals must equal `20` before `Preview`/`Submit Artwork` is enabled.
 - Adding an airdrop row pre-fills its count with remaining allocation.
 - The last airdrop row cannot be removed.

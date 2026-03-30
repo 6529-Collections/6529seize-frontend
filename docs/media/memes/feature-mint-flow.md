@@ -5,6 +5,9 @@
 - `/the-memes/mint` is the mint route for the current latest The Memes drop.
 - The page combines artwork, drop details, countdown status, recipient
   selection, phase-aware mint controls, and transaction status.
+- The same mint data and widget are also reused by the standalone latest-mint
+  shell documented in
+  [Standalone The Memes Mint Page](feature-standalone-mint-page.md).
 - Submit is enabled only when the claim is active, a destination wallet is
   selected, and mint count is set.
 
@@ -65,7 +68,12 @@
   - Collapsing again reuses `- SHOW LESS`/`+ SHOW MORE` to return to the preview.
 - Reviewing phase windows:
   - Phase cards show `UPCOMING`, `ACTIVE`, or `COMPLETED` for each phase.
+  - When one phase ends but a later phase still exists, the next phase becomes
+    the highlighted upcoming card instead of finalizing the whole drop.
   - Time display can be switched between local timezone and UTC.
+  - After a destination wallet is selected, each phase card can show
+    `No eligible spots`, `x eligible spot(s)`, `Unlimited spots`,
+    `Loading eligibility...`, or `Eligibility unavailable`.
 - Airdrops summary:
   - If selected destination has airdrops, the phase area shows `Airdrops: xN`.
 - Minting for another wallet:
@@ -81,6 +89,10 @@
     and resets destination to the currently connected wallet.
 - Not-yet-active phase:
   - Action button is disabled and shows `DROPS ... UTC`.
+- Between mint phases:
+  - When the active claim window ends but a later phase still exists, the page
+    countdown switches to the next phase start instead of `Mint Complete`.
+  - Mint actions stay unavailable until the next phase becomes active.
 - Mint diagnostics:
   - Add `?mintdebug=1` to show `Mint diagnostics`.
   - `Copy` copies the diagnostics JSON payload.
@@ -101,9 +113,12 @@
 - If the minted asset description is short enough to fit in the preview, the
   expand/collapse button is not shown.
 - Once claim status is ended/finalized, mint-connect and mint-action controls
-  no longer render.
+  no longer render for the finished phase window.
 - Mint action buttons become active at the exact phase start timestamp and stop
   being active at the exact phase end timestamp.
+- When the current phase has ended but the drop still has a later phase, the
+  countdown can still stay on the page while the action area waits for the next
+  phase to start.
 - Across Europe/Athens daylight-saving transitions, the UTC timestamps shown in
   the phase cards can move by one hour while phase wall-clock windows remain
   fixed.
@@ -143,6 +158,7 @@
 
 - [Media Index](../README.md)
 - [Now Minting Countdown](feature-now-minting-countdown.md)
+- [Standalone The Memes Mint Page](feature-standalone-mint-page.md)
 - [Memes Minting Calendar](feature-minting-calendar.md)
 - [The Memes Card Tabs and Focus Links](feature-card-tabs-and-focus-links.md)
 - [Docs Home](../../README.md)
