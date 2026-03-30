@@ -1,11 +1,29 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { getDisplayQuickVoteAmounts } from "@/hooks/memesQuickVote.helpers";
+import {
+  getDisplayQuickVoteAmounts,
+  isMemesQuickVoteVoteableDrop,
+} from "@/hooks/memesQuickVote.helpers";
+import {
+  applyFailedDropRestoreState,
+  applyFetchedWindowState,
+  applyOptimisticAdvanceState,
+  clampDropMaxRating,
+  createInitialOptimisticRemainingPowerState,
+  createInitialSessionState,
+  getCurrentOptimisticRemainingPowerState,
+  getEffectiveOptimisticRemainingPower,
+  getUniqueDrops,
+  reconcileOptimisticRemainingPower,
+  reduceOptimisticRemainingPower,
+  restoreOptimisticRemainingPower,
+  type KeyedOptimisticRemainingPowerState,
+  type MemesQuickVoteSessionState,
+} from "@/hooks/memesQuickVote.queue.state";
 import {
   fetchMemesQuickVoteUndiscoveredDrop,
   MEMES_QUICK_VOTE_LOOKAHEAD_COUNT,
@@ -16,6 +34,9 @@ import { useMemesQuickVoteStorage } from "@/hooks/useMemesQuickVoteStorage";
 import { useMemesQuickVoteSubmit } from "@/hooks/useMemesQuickVoteSubmit";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  type ContextType,
+  type Dispatch,
+  type SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -46,21 +67,6 @@ export type UseMemesQuickVoteQueueResult = {
   readonly skipDrop: (drop: ExtendedDrop) => Promise<boolean>;
   readonly uncastPower: number | null;
   readonly votingLabel: string | null;
-};
-
-type KeyedOptimisticRemainingPowerState = {
-  readonly key: string;
-  readonly value: number | null;
-};
-
-type MemesQuickVoteSessionState = {
-  readonly currentDrop: ApiDrop | null;
-  readonly hasDiscoveryError: boolean;
-  readonly isExhausted: boolean;
-  readonly isLoading: boolean;
-  readonly lookaheadDrops: readonly ApiDrop[];
-  readonly recentlyHandledDropIds: readonly string[];
-  readonly totalCount: number;
 };
 
 type KeyedSessionState = {
@@ -101,32 +107,6 @@ type UseMemesQuickVoteWindowSyncOptions = Omit<
   readonly setCurrentSessionState: UseKeyedMemesQuickVoteSessionStoreResult["setCurrentSessionState"];
 };
 
-const createInitialOptimisticRemainingPowerState = (
-  key: string
-): KeyedOptimisticRemainingPowerState => ({
-  key,
-  value: null,
-});
-
-const getCurrentOptimisticRemainingPowerState = ({
-  key,
-  state,
-}: {
-  readonly key: string;
-  readonly state: KeyedOptimisticRemainingPowerState;
-}): KeyedOptimisticRemainingPowerState =>
-  state.key === key ? state : createInitialOptimisticRemainingPowerState(key);
-
-const createInitialSessionState = (): MemesQuickVoteSessionState => ({
-  currentDrop: null,
-  hasDiscoveryError: false,
-  isExhausted: false,
-  isLoading: false,
-  lookaheadDrops: [],
-  recentlyHandledDropIds: [],
-  totalCount: 0,
-});
-
 const getCurrentSessionState = ({
   key,
   state,
@@ -135,213 +115,6 @@ const getCurrentSessionState = ({
   readonly state: KeyedSessionState;
 }): MemesQuickVoteSessionState =>
   state.key === key ? state.value : createInitialSessionState();
-
-const getUniqueDrops = (drops: readonly ApiDrop[]): ApiDrop[] => {
-  const seen = new Set<string>();
-  const uniqueDrops: ApiDrop[] = [];
-
-  for (const drop of drops) {
-    if (seen.has(drop.id)) {
-      continue;
-    }
-
-    seen.add(drop.id);
-    uniqueDrops.push(drop);
-  }
-
-  return uniqueDrops;
-};
-
-const getDisplayRemainingCount = ({
-  hiddenDropIds,
-  rawTotalCount,
-}: {
-  readonly hiddenDropIds: ReadonlySet<string>;
-  readonly rawTotalCount: number;
-}): number => Math.max(0, rawTotalCount - hiddenDropIds.size);
-
-const applyFetchedWindowState = ({
-  current,
-  fetchedDrops,
-  pendingDropIds,
-  primaryDrop,
-  rawTotalCount,
-}: {
-  readonly current: MemesQuickVoteSessionState;
-  readonly fetchedDrops: readonly ApiDrop[];
-  readonly pendingDropIds: readonly string[];
-  readonly primaryDrop: ApiDrop | null;
-  readonly rawTotalCount: number;
-}): MemesQuickVoteSessionState => {
-  const returnedDropIds = new Set(fetchedDrops.map((drop) => drop.id));
-  const recentlyHandledDropIds = current.recentlyHandledDropIds.filter(
-    (dropId) => returnedDropIds.has(dropId)
-  );
-  const hiddenDropIds = new Set([...recentlyHandledDropIds, ...pendingDropIds]);
-  let currentDrop = current.currentDrop;
-
-  if (currentDrop) {
-    const refreshedCurrentDrop = fetchedDrops.find(
-      (drop) => drop.id === currentDrop?.id
-    );
-
-    if (refreshedCurrentDrop) {
-      currentDrop = refreshedCurrentDrop;
-    }
-  }
-
-  if (currentDrop && hiddenDropIds.has(currentDrop.id)) {
-    currentDrop = null;
-  }
-
-  const safeFetchedDrops = fetchedDrops.filter(
-    (drop) => !hiddenDropIds.has(drop.id)
-  );
-  currentDrop ??= safeFetchedDrops[0] ?? null;
-
-  const lookaheadDrops = safeFetchedDrops.filter(
-    (drop) => drop.id !== currentDrop?.id
-  );
-  const totalCount = getDisplayRemainingCount({
-    hiddenDropIds,
-    rawTotalCount,
-  });
-  const isExhausted =
-    currentDrop === null &&
-    lookaheadDrops.length === 0 &&
-    hiddenDropIds.size === 0 &&
-    primaryDrop === null &&
-    rawTotalCount === 0;
-
-  return {
-    currentDrop,
-    hasDiscoveryError: false,
-    isExhausted,
-    isLoading: currentDrop === null && !isExhausted,
-    lookaheadDrops,
-    recentlyHandledDropIds,
-    totalCount,
-  };
-};
-
-const applyOptimisticAdvanceState = ({
-  current,
-  dropId,
-  pendingDropIds,
-}: {
-  readonly current: MemesQuickVoteSessionState;
-  readonly dropId: string;
-  readonly pendingDropIds: readonly string[];
-}): MemesQuickVoteSessionState => {
-  const recentlyHandledDropIds = current.recentlyHandledDropIds.includes(dropId)
-    ? current.recentlyHandledDropIds
-    : [...current.recentlyHandledDropIds, dropId];
-  const hiddenDropIds = new Set([
-    ...recentlyHandledDropIds,
-    ...pendingDropIds,
-    dropId,
-  ]);
-  const nextLookaheadDrops = current.lookaheadDrops.filter(
-    (candidate) => !hiddenDropIds.has(candidate.id)
-  );
-  const currentDrop = nextLookaheadDrops[0] ?? null;
-
-  return {
-    currentDrop,
-    hasDiscoveryError: false,
-    isExhausted: false,
-    isLoading: currentDrop === null,
-    lookaheadDrops: nextLookaheadDrops.slice(1),
-    recentlyHandledDropIds,
-    totalCount: Math.max(0, current.totalCount - 1),
-  };
-};
-
-const applyFailedDropRestoreState = ({
-  current,
-  failedDrop,
-}: {
-  readonly current: MemesQuickVoteSessionState;
-  readonly failedDrop: ApiDrop;
-}): MemesQuickVoteSessionState => {
-  const wasHandled = current.recentlyHandledDropIds.includes(failedDrop.id);
-  const recentlyHandledDropIds = current.recentlyHandledDropIds.filter(
-    (dropId) => dropId !== failedDrop.id
-  );
-
-  return {
-    ...current,
-    currentDrop: current.currentDrop ?? failedDrop,
-    hasDiscoveryError: false,
-    isExhausted: false,
-    isLoading: false,
-    recentlyHandledDropIds,
-    totalCount: wasHandled ? current.totalCount + 1 : current.totalCount,
-  };
-};
-
-const getEffectiveOptimisticRemainingPower = ({
-  activeApiDrop,
-  state,
-}: {
-  readonly activeApiDrop: ApiDrop | null;
-  readonly state: KeyedOptimisticRemainingPowerState;
-}): number | null => {
-  if (state.value === null) {
-    return null;
-  }
-
-  const activeMaxRating = activeApiDrop?.context_profile_context?.max_rating;
-
-  if (typeof activeMaxRating === "number" && activeMaxRating <= state.value) {
-    return null;
-  }
-
-  return state.value;
-};
-
-const clampDropMaxRating = (
-  drop: ExtendedDrop,
-  optimisticRemainingPower: number | null
-): ExtendedDrop => {
-  const profileContext = drop.context_profile_context;
-  const maxRating = profileContext?.max_rating;
-
-  if (
-    optimisticRemainingPower === null ||
-    profileContext?.rating !== 0 ||
-    typeof maxRating !== "number"
-  ) {
-    return drop;
-  }
-
-  const nextMaxRating = Math.max(
-    0,
-    Math.min(maxRating, optimisticRemainingPower)
-  );
-
-  if (nextMaxRating === maxRating) {
-    return drop;
-  }
-
-  return {
-    ...drop,
-    context_profile_context: {
-      ...profileContext,
-      max_rating: nextMaxRating,
-    },
-  };
-};
-
-const isVoteableQuickVoteDrop = (drop: ExtendedDrop | null): boolean => {
-  const profileContext = drop?.context_profile_context;
-
-  return (
-    profileContext?.rating === 0 &&
-    typeof profileContext.max_rating === "number" &&
-    profileContext.max_rating > 0
-  );
-};
 
 const useKeyedMemesQuickVoteSessionStore = (
   stateKey: string
@@ -678,6 +451,126 @@ const useMemesQuickVoteSessionState = ({
   };
 };
 
+const useInvalidateQuickVoteUndiscoveredDrop = ({
+  contextProfile,
+  proxyId,
+  queryClient,
+  waveId,
+}: {
+  readonly contextProfile: string | null | undefined;
+  readonly proxyId: string | null | undefined;
+  readonly queryClient: ReturnType<typeof useQueryClient>;
+  readonly waveId: string | null;
+}) =>
+  useCallback(() => {
+    queryClient
+      .invalidateQueries({
+        predicate: (query) => {
+          if (
+            !Array.isArray(query.queryKey) ||
+            query.queryKey[0] !==
+              MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
+            typeof query.queryKey[1] !== "object" ||
+            query.queryKey[1] === null
+          ) {
+            return false;
+          }
+
+          const undiscoveredQuery = query.queryKey[1] as {
+            readonly context_profile?: string | null;
+            readonly proxyId?: string | null;
+            readonly waveId?: string | null;
+          };
+
+          return (
+            undiscoveredQuery.context_profile === (contextProfile ?? null) &&
+            undiscoveredQuery.proxyId === (proxyId ?? null) &&
+            undiscoveredQuery.waveId === waveId
+          );
+        },
+      })
+      .catch(() => {
+        // Query invalidation is best-effort. The next footer read will recover.
+      });
+  }, [contextProfile, proxyId, queryClient, waveId]);
+
+const useMemesQuickVoteQueueSubmission = ({
+  invalidateQuickVoteUndiscoveredDrop,
+  requestAuth,
+  session,
+  setAndPersistRecentAmounts,
+  setOptimisticRemainingPowerState,
+  setToast,
+  stateKey,
+}: {
+  readonly invalidateQuickVoteUndiscoveredDrop: () => void;
+  readonly requestAuth: ContextType<typeof AuthContext>["requestAuth"];
+  readonly session: UseMemesQuickVoteSessionStateResult;
+  readonly setAndPersistRecentAmounts: (
+    updater: (current: number[]) => number[]
+  ) => void;
+  readonly setOptimisticRemainingPowerState: Dispatch<
+    SetStateAction<KeyedOptimisticRemainingPowerState>
+  >;
+  readonly setToast: ContextType<typeof AuthContext>["setToast"];
+  readonly stateKey: string;
+}) =>
+  useMemesQuickVoteSubmit({
+    onRatingFailure: (drop, amount, type) => {
+      session.restoreFailedDrop(drop);
+
+      if (type === "vote") {
+        setOptimisticRemainingPowerState((current) =>
+          restoreOptimisticRemainingPower({
+            amount,
+            current: getCurrentOptimisticRemainingPowerState({
+              key: stateKey,
+              state: current,
+            }),
+            maxRating: drop.context_profile_context?.max_rating ?? 0,
+          })
+        );
+      }
+
+      invalidateQuickVoteUndiscoveredDrop();
+    },
+    onRatingQueued: (drop, amount, type) => {
+      session.advanceVisibleDrop(drop);
+
+      if (type === "vote") {
+        setOptimisticRemainingPowerState((current) =>
+          reduceOptimisticRemainingPower({
+            amount,
+            current: getCurrentOptimisticRemainingPowerState({
+              key: stateKey,
+              state: current,
+            }),
+            maxRating: drop.context_profile_context?.max_rating ?? 0,
+          })
+        );
+      }
+    },
+    onRatingSuccess: (_drop, _amount, nextRemainingPower, type) => {
+      if (type === "vote") {
+        setOptimisticRemainingPowerState((current) =>
+          reconcileOptimisticRemainingPower({
+            current: getCurrentOptimisticRemainingPowerState({
+              key: stateKey,
+              state: current,
+            }),
+            nextRemainingPower,
+          })
+        );
+      }
+
+      invalidateQuickVoteUndiscoveredDrop();
+      void session.syncUndiscoveredWindow();
+    },
+    requestAuth,
+    setAndPersistRecentAmounts,
+    setToast,
+  });
+
 export const useMemesQuickVoteQueue = ({
   enabled = true,
   sessionId,
@@ -715,69 +608,23 @@ export const useMemesQuickVoteQueue = ({
     stateKey,
     waveId,
   });
-
-  const invalidateQuickVoteUndiscoveredDrop = useCallback(() => {
-    queryClient
-      .invalidateQueries({
-        predicate: (query) => {
-          if (
-            !Array.isArray(query.queryKey) ||
-            query.queryKey[0] !==
-              MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
-            typeof query.queryKey[1] !== "object" ||
-            query.queryKey[1] === null
-          ) {
-            return false;
-          }
-
-          const undiscoveredQuery = query.queryKey[1] as {
-            readonly context_profile?: string | null;
-            readonly proxyId?: string | null;
-            readonly waveId?: string | null;
-          };
-
-          return (
-            undiscoveredQuery.context_profile === (contextProfile ?? null) &&
-            undiscoveredQuery.proxyId === (proxyId ?? null) &&
-            undiscoveredQuery.waveId === waveId
-          );
-        },
-      })
-      .catch(() => {
-        // Query invalidation is best-effort. The next footer read will recover.
-      });
-  }, [contextProfile, proxyId, queryClient, waveId]);
-
-  const { pendingDropIds, submitSkip, submitVote } = useMemesQuickVoteSubmit({
-    onRatingFailure: (drop, _amount, type) => {
-      session.restoreFailedDrop(drop);
-
-      if (type === "vote") {
-        setOptimisticRemainingPowerState(
-          createInitialOptimisticRemainingPowerState(stateKey)
-        );
-      }
-
-      invalidateQuickVoteUndiscoveredDrop();
-    },
-    onRatingQueued: (drop) => {
-      session.advanceVisibleDrop(drop);
-    },
-    onRatingSuccess: (_drop, _amount, nextRemainingPower, type) => {
-      if (type === "vote") {
-        setOptimisticRemainingPowerState({
-          key: stateKey,
-          value: nextRemainingPower,
-        });
-      }
-
-      invalidateQuickVoteUndiscoveredDrop();
-      void session.syncUndiscoveredWindow();
-    },
-    requestAuth,
-    setAndPersistRecentAmounts,
-    setToast,
-  });
+  const invalidateQuickVoteUndiscoveredDrop =
+    useInvalidateQuickVoteUndiscoveredDrop({
+      contextProfile,
+      proxyId,
+      queryClient,
+      waveId,
+    });
+  const { pendingDropIds, submitSkip, submitVote } =
+    useMemesQuickVoteQueueSubmission({
+      invalidateQuickVoteUndiscoveredDrop,
+      requestAuth,
+      session,
+      setAndPersistRecentAmounts,
+      setOptimisticRemainingPowerState,
+      setToast,
+      stateKey,
+    });
 
   useEffect(() => {
     pendingDropIdsRef.current = pendingDropIds;
@@ -802,7 +649,7 @@ export const useMemesQuickVoteQueue = ({
       effectiveOptimisticRemainingPower
     );
   }, [activeApiDrop, effectiveOptimisticRemainingPower]);
-  const activeDrop = isVoteableQuickVoteDrop(activeDropCandidate)
+  const activeDrop = isMemesQuickVoteVoteableDrop(activeDropCandidate)
     ? activeDropCandidate
     : null;
   const latestUsedAmount = recentAmountsByRecency.at(-1) ?? null;

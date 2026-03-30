@@ -7,6 +7,16 @@ export type MemesQuickVoteStats = {
   readonly votingLabel: string | null;
 };
 
+type QuickVoteableDropLike =
+  | {
+      readonly context_profile_context?: {
+        readonly max_rating?: number | null;
+        readonly rating?: number | null;
+      } | null;
+    }
+  | null
+  | undefined;
+
 export const sanitizeStoredAmounts = (value: unknown): number[] => {
   if (!Array.isArray(value)) {
     return [];
@@ -67,4 +77,16 @@ export const normalizeQuickVoteAmount = (
   }
 
   return Math.max(1, Math.min(Math.round(parsedValue), Math.floor(maxRating)));
+};
+
+export const isMemesQuickVoteVoteableDrop = (
+  drop: QuickVoteableDropLike
+): boolean => {
+  const profileContext = drop?.context_profile_context;
+
+  return (
+    profileContext?.rating === 0 &&
+    typeof profileContext.max_rating === "number" &&
+    profileContext.max_rating > 0
+  );
 };

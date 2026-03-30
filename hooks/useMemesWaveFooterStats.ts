@@ -1,7 +1,10 @@
 "use client";
 
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
-import type { MemesQuickVoteStats } from "@/hooks/memesQuickVote.helpers";
+import {
+  isMemesQuickVoteVoteableDrop,
+  type MemesQuickVoteStats,
+} from "@/hooks/memesQuickVote.helpers";
 import {
   fetchMemesQuickVoteUndiscoveredDrop,
   getMemesQuickVoteUndiscoveredDropQueryKey,
@@ -53,9 +56,16 @@ export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
   const activeDrop = query.data?.drop ?? null;
   const uncastPower = activeDrop?.context_profile_context?.max_rating ?? null;
   const isAvailable =
-    isEnabled && waveId !== null && (!query.isSuccess || activeDrop !== null);
+    isEnabled &&
+    waveId !== null &&
+    (!query.isSuccess || isMemesQuickVoteVoteableDrop(activeDrop));
 
-  if (!query.isSuccess || typeof uncastPower !== "number" || !activeDrop) {
+  if (
+    !query.isSuccess ||
+    !activeDrop ||
+    !isMemesQuickVoteVoteableDrop(activeDrop) ||
+    typeof uncastPower !== "number"
+  ) {
     return {
       ...EMPTY_STATS,
       isAvailable,
