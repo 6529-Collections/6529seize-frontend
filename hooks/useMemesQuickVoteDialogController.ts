@@ -4,7 +4,6 @@ import {
   useMemesQuickVoteQueue,
   type UseMemesQuickVoteQueueResult,
 } from "@/hooks/useMemesQuickVoteQueue";
-import { usePrefetchMemesQuickVote } from "@/hooks/usePrefetchMemesQuickVote";
 import { useCallback, useRef, useState } from "react";
 
 export type MemesQuickVoteDialogState = Pick<
@@ -37,12 +36,10 @@ type UseMemesQuickVoteDialogControllerResult = {
 
 export const useMemesQuickVoteDialogController =
   (): UseMemesQuickVoteDialogControllerResult => {
-    const prefetchMemesQuickVote = usePrefetchMemesQuickVote();
     const [isQuickVoteOpen, setIsQuickVoteOpen] = useState(false);
     const [quickVoteSessionId, setQuickVoteSessionId] = useState(0);
     const lastIssuedSessionIdRef = useRef(0);
     const reservedSessionIdRef = useRef<number | null>(null);
-    const prefetchedSessionIdsRef = useRef(new Set<number>());
     const quickVoteQueue = useMemesQuickVoteQueue({
       enabled: quickVoteSessionId > 0,
       sessionId: quickVoteSessionId,
@@ -66,19 +63,10 @@ export const useMemesQuickVoteDialogController =
       }
 
       const sessionId = reserveSessionId();
-
-      if (prefetchedSessionIdsRef.current.has(sessionId)) {
-        return;
-      }
-
-      prefetchedSessionIdsRef.current.add(sessionId);
-      void prefetchMemesQuickVote(sessionId);
-    }, [
-      prefetchMemesQuickVote,
-      quickVoteSessionId,
-      reserveSessionId,
-      retryDiscovery,
-    ]);
+      lastIssuedSessionIdRef.current = sessionId;
+      reservedSessionIdRef.current = null;
+      setQuickVoteSessionId(sessionId);
+    }, [quickVoteSessionId, reserveSessionId, retryDiscovery]);
 
     const openQuickVote = useCallback(() => {
       if (quickVoteSessionId > 0) {
