@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import NotificationDropReactedGroup from "@/components/brain/notifications/drop-reacted/NotificationDropReactedGroup";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type {
+  GroupedReactionsItem,
+  INotificationDropReacted,
+} from "@/types/feed.types";
 
 const OverlappingAvatars = jest.fn(({ items }: { items: unknown[] }) => (
   <div data-testid="avatars">{JSON.stringify(items)}</div>
@@ -86,6 +92,40 @@ jest.mock(
   })
 );
 
+function createMockProfile(
+  overrides: Partial<ApiProfileMin> & { handle: string }
+): ApiProfileMin {
+  return {
+    id: overrides.id ?? `${overrides.handle}-id`,
+    handle: overrides.handle,
+    pfp: overrides.pfp ?? null,
+    banner1_color: overrides.banner1_color ?? null,
+    banner2_color: overrides.banner2_color ?? null,
+    cic: overrides.cic ?? 0,
+    rep: overrides.rep ?? 0,
+    tdh: overrides.tdh ?? 0,
+    tdh_rate: overrides.tdh_rate ?? 0,
+    xtdh: overrides.xtdh ?? 0,
+    xtdh_rate: overrides.xtdh_rate ?? 0,
+    level: overrides.level ?? 0,
+    primary_address: overrides.primary_address ?? `0x${overrides.handle}`,
+    subscribed_actions: overrides.subscribed_actions ?? [],
+    archived: overrides.archived ?? false,
+    active_main_stage_submission_ids:
+      overrides.active_main_stage_submission_ids ?? [],
+    winner_main_stage_drop_ids: overrides.winner_main_stage_drop_ids ?? [],
+    artist_of_prevote_cards: overrides.artist_of_prevote_cards ?? [],
+    is_wave_creator: overrides.is_wave_creator ?? false,
+  };
+}
+
+function createMockDrop(): GroupedReactionsItem["drop"] {
+  return {
+    id: "drop-1",
+    wave: { id: "wave-1" },
+  } as GroupedReactionsItem["drop"];
+}
+
 function createNotification({
   id,
   createdAt,
@@ -98,29 +138,24 @@ function createNotification({
   reaction: string;
   handle: string;
   pfp: string | null;
-}) {
+}): INotificationDropReacted {
   return {
     id,
-    cause: "DROP_REACTED",
+    cause: ApiNotificationCause.DropReacted,
     created_at: createdAt,
     read_at: null,
-    related_identity: {
-      id: `${handle}-id`,
+    related_identity: createMockProfile({
       handle,
       pfp,
       primary_address: `0x${handle}`,
-      subscribed_actions: [],
-    },
+    }),
     related_drops: [
-      {
-        id: "drop-1",
-        wave: { id: "wave-1" },
-      },
+      createMockDrop() as INotificationDropReacted["related_drops"][number],
     ],
     additional_context: {
       reaction,
     },
-  } as never;
+  };
 }
 
 describe("NotificationDropReactedGroup", () => {
@@ -136,10 +171,7 @@ describe("NotificationDropReactedGroup", () => {
           type: "grouped_reactions",
           id: 3,
           createdAt: 200,
-          drop: {
-            id: "drop-1",
-            wave: { id: "wave-1" },
-          } as never,
+          drop: createMockDrop(),
           notifications: [
             createNotification({
               id: 1,
@@ -189,10 +221,7 @@ describe("NotificationDropReactedGroup", () => {
           type: "grouped_reactions",
           id: 2,
           createdAt: 200,
-          drop: {
-            id: "drop-1",
-            wave: { id: "wave-1" },
-          } as never,
+          drop: createMockDrop(),
           notifications: [
             createNotification({
               id: 1,

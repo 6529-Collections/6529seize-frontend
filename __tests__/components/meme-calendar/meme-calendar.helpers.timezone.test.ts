@@ -32,6 +32,11 @@ describe("meme calendar timezone handling", () => {
   const originalTz = process.env.TZ;
 
   afterEach(() => {
+    if (originalTz === undefined) {
+      delete process.env.TZ;
+      return;
+    }
+
     process.env.TZ = originalTz;
   });
 

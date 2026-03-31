@@ -40,6 +40,8 @@ function mergeProfiles(
     ...fallback,
     ...preferred,
     handle: preferred.handle ?? fallback.handle,
+    // Keep an explicit empty handle, but treat blank avatar/address strings as
+    // missing so older identity data survives grouped merges.
     pfp: preferred.pfp || fallback.pfp,
     primary_address: preferred.primary_address || fallback.primary_address,
   };

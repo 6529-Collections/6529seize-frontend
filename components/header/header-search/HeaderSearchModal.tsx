@@ -163,7 +163,7 @@ const singularizePageSearchToken = (token: string): string => {
     token.endsWith("shes") ||
     token.endsWith("xes") ||
     token.endsWith("zes") ||
-    token.endsWith("ses")
+    token.endsWith("sses")
   ) {
     return token.slice(0, -2);
   }

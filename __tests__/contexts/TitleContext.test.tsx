@@ -81,4 +81,40 @@ describe("TitleContext", () => {
       expect(document.title).toBe("Memes Minting Calendar");
     });
   });
+
+  it("resets the client title when the active wave id changes on the same route", async () => {
+    mockPathname = "/messages";
+    mockSearchParams = new URLSearchParams("wave=wave-1");
+
+    const view = render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={{ name: "Wave One", newItemsCount: 0 }} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Wave One | Brain")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(document.title).toBe("Wave One | Brain");
+    });
+
+    mockSearchParams = new URLSearchParams("wave=wave-2");
+    mockActiveWaveId = "wave-2";
+
+    view.rerender(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Messages | Brain")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(document.title).toBe("Messages | Brain");
+    });
+  });
 });
