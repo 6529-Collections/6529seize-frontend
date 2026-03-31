@@ -1,4 +1,6 @@
 import {
+  formatUtcMonth,
+  formatUtcMonthYear,
   mintStartInstantUtcForMintDay,
   nextMintDateOnOrAfter,
   wallTimeToUtcInstantInZone,
@@ -27,6 +29,12 @@ const mintEndInstantUtcForMintDay = (mintDay: Date): Date => {
 };
 
 describe("meme calendar timezone handling", () => {
+  const originalTz = process.env.TZ;
+
+  afterEach(() => {
+    process.env.TZ = originalTz;
+  });
+
   it("keeps mint start anchored to 17:40 Athens time across 2024", () => {
     const months = Array.from({ length: 12 }, (_, idx) => idx);
 
@@ -120,5 +128,14 @@ describe("meme calendar timezone handling", () => {
 
     expect(summerPhaseTimes[0]?.toISOString()).toBe("2024-07-01T14:40:00.000Z");
     expect(winterPhaseTimes[0]?.toISOString()).toBe("2024-01-03T15:40:00.000Z");
+  });
+
+  it("formats UTC month labels consistently for US timezones", () => {
+    process.env.TZ = "America/Los_Angeles";
+
+    const seasonStart = isoDate(2026, 0, 1);
+
+    expect(formatUtcMonth(seasonStart, "long")).toBe("January");
+    expect(formatUtcMonthYear(seasonStart)).toBe("Jan 2026");
   });
 });

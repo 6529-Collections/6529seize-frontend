@@ -286,6 +286,105 @@ describe("HeaderSearchModal", () => {
     ).toBe(true);
   });
 
+  it("matches close pluralized page titles for page searches", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [{ name: "Memes Calendar", href: "/meme-calendar" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "meme calendar" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(
+      items.some(
+        (item) =>
+          (item.textContent ?? "").includes('"title":"Memes Calendar"') &&
+          (item.textContent ?? "").includes('"/meme-calendar"')
+      )
+    ).toBe(true);
+  });
+
+  it("matches close singularized page titles for page searches", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [{ name: "Meme Calendar", href: "/meme-calendar" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "memes calendar" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(
+      items.some(
+        (item) =>
+          (item.textContent ?? "").includes('"title":"Meme Calendar"') &&
+          (item.textContent ?? "").includes('"/meme-calendar"')
+      )
+    ).toBe(true);
+  });
+
+  it("matches partial token page searches with close pluralization", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [{ name: "Memes Calendar", href: "/meme-calendar" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "meme cal" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(
+      items.some(
+        (item) =>
+          (item.textContent ?? "").includes('"title":"Memes Calendar"') &&
+          (item.textContent ?? "").includes('"/meme-calendar"')
+      )
+    ).toBe(true);
+  });
+
   it("includes drop forge pages in search results when accessible", () => {
     setup({
       selectedCategory: "PAGES",
