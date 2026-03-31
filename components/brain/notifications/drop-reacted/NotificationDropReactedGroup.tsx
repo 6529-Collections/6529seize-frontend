@@ -68,69 +68,100 @@ function mergeProfiles(
   };
 }
 
+type LatestPerUserEntry = {
+  latest: INotificationDropReacted;
+  identity: ApiProfileMin;
+};
+
+function getFallbackIdentityKey(notification: INotificationDropReacted): string {
+  const identityKey = getIdentityKey(notification.related_identity);
+  if (identityKey !== "unknown-profile") {
+    return identityKey;
+  }
+
+  console.warn(
+    "NotificationDropReactedGroup received a reaction without a usable identity key",
+    {
+      notificationId: notification.id,
+      relatedIdentity: notification.related_identity,
+    }
+  );
+
+  return `unknown-identity-${notification.id}`;
+}
+
+function resolveGroupedIdentityKey(
+  notification: INotificationDropReacted,
+  aliasToKey: Map<string, string>
+): string {
+  const matchingKey = getIdentityAliases(notification.related_identity).find(
+    (alias) => aliasToKey.has(alias)
+  );
+
+  if (matchingKey !== undefined) {
+    return aliasToKey.get(matchingKey) ?? getFallbackIdentityKey(notification);
+  }
+
+  return getFallbackIdentityKey(notification);
+}
+
+function cacheIdentityAliases(
+  aliasToKey: Map<string, string>,
+  identity: ApiProfileMin,
+  key: string
+): void {
+  for (const alias of getIdentityAliases(identity)) {
+    aliasToKey.set(alias, key);
+  }
+}
+
+function getMergedEntry(
+  existing: LatestPerUserEntry,
+  notification: INotificationDropReacted
+): LatestPerUserEntry {
+  const isNewer =
+    notification.created_at > existing.latest.created_at ||
+    (notification.created_at === existing.latest.created_at &&
+      notification.id > existing.latest.id);
+
+  if (isNewer) {
+    return {
+      latest: notification,
+      identity: mergeProfiles(notification.related_identity, existing.identity),
+    };
+  }
+
+  return {
+    latest: existing.latest,
+    identity: mergeProfiles(existing.identity, notification.related_identity),
+  };
+}
+
 function notificationsLatestPerUser(
   notifications: GroupedReactionsItem["notifications"]
 ): INotificationDropReacted[] {
-  const byUser = new Map<
-    string,
-    {
-      latest: INotificationDropReacted;
-      identity: ApiProfileMin;
-    }
-  >();
+  const byUser = new Map<string, LatestPerUserEntry>();
   const aliasToKey = new Map<string, string>();
+
   for (const n of notifications) {
-    const identityKey = getIdentityKey(n.related_identity);
-    const fallbackKey =
-      identityKey === "unknown-profile"
-        ? `unknown-identity-${n.id}`
-        : identityKey;
-    const matchingKey = getIdentityAliases(n.related_identity).find((alias) =>
-      aliasToKey.has(alias)
-    );
-    const key =
-      matchingKey === undefined
-        ? fallbackKey
-        : (aliasToKey.get(matchingKey) ?? fallbackKey);
-    if (identityKey === "unknown-profile") {
-      console.warn(
-        "NotificationDropReactedGroup received a reaction without a usable identity key",
-        {
-          notificationId: n.id,
-          relatedIdentity: n.related_identity,
-        }
-      );
-    }
+    const key = resolveGroupedIdentityKey(n, aliasToKey);
     const existing = byUser.get(key);
+
     if (!existing) {
       const entry = {
         latest: n,
         identity: n.related_identity,
       };
       byUser.set(key, entry);
-      for (const alias of getIdentityAliases(entry.identity)) {
-        aliasToKey.set(alias, key);
-      }
+      cacheIdentityAliases(aliasToKey, entry.identity, key);
       continue;
     }
-    const isNewer =
-      n.created_at > existing.latest.created_at ||
-      (n.created_at === existing.latest.created_at && n.id > existing.latest.id);
-    const entry = isNewer
-      ? {
-          latest: n,
-          identity: mergeProfiles(n.related_identity, existing.identity),
-        }
-      : {
-          latest: existing.latest,
-          identity: mergeProfiles(existing.identity, n.related_identity),
-        };
-    byUser.set(key, entry);
 
-    for (const alias of getIdentityAliases(entry.identity)) {
-      aliasToKey.set(alias, key);
-    }
+    const entry = getMergedEntry(existing, n);
+    byUser.set(key, entry);
+    cacheIdentityAliases(aliasToKey, entry.identity, key);
   }
+
   const list = Array.from(byUser.values())
     .map(({ latest, identity }) => ({
       ...latest,
