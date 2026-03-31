@@ -43,6 +43,14 @@ function getIdentityKey(profile: ApiProfileMin): string {
   );
 }
 
+function getIdentityAliases(profile: ApiProfileMin): string[] {
+  return [
+    getNonEmptyIdentityValue(profile.id),
+    getNonEmptyIdentityValue(profile.handle),
+    getNonEmptyIdentityValue(profile.primary_address),
+  ].filter((alias): alias is string => alias !== null);
+}
+
 function mergeProfiles(
   preferred: ApiProfileMin,
   fallback: ApiProfileMin
@@ -70,12 +78,20 @@ function notificationsLatestPerUser(
       identity: ApiProfileMin;
     }
   >();
+  const aliasToKey = new Map<string, string>();
   for (const n of notifications) {
     const identityKey = getIdentityKey(n.related_identity);
-    const key =
+    const fallbackKey =
       identityKey === "unknown-profile"
         ? `unknown-identity-${n.id}`
         : identityKey;
+    const matchingKey = getIdentityAliases(n.related_identity).find((alias) =>
+      aliasToKey.has(alias)
+    );
+    const key =
+      matchingKey === undefined
+        ? fallbackKey
+        : (aliasToKey.get(matchingKey) ?? fallbackKey);
     if (identityKey === "unknown-profile") {
       console.warn(
         "NotificationDropReactedGroup received a reaction without a usable identity key",
@@ -87,23 +103,33 @@ function notificationsLatestPerUser(
     }
     const existing = byUser.get(key);
     if (!existing) {
-      byUser.set(key, {
+      const entry = {
         latest: n,
         identity: n.related_identity,
-      });
+      };
+      byUser.set(key, entry);
+      for (const alias of getIdentityAliases(entry.identity)) {
+        aliasToKey.set(alias, key);
+      }
       continue;
     }
     const isNewer =
       n.created_at > existing.latest.created_at ||
       (n.created_at === existing.latest.created_at && n.id > existing.latest.id);
-    const latest = isNewer ? n : existing.latest;
-    const fallbackIdentity = isNewer
-      ? existing.identity
-      : n.related_identity;
-    byUser.set(key, {
-      latest,
-      identity: mergeProfiles(latest.related_identity, fallbackIdentity),
-    });
+    const entry = isNewer
+      ? {
+          latest: n,
+          identity: mergeProfiles(n.related_identity, existing.identity),
+        }
+      : {
+          latest: existing.latest,
+          identity: mergeProfiles(existing.identity, n.related_identity),
+        };
+    byUser.set(key, entry);
+
+    for (const alias of getIdentityAliases(entry.identity)) {
+      aliasToKey.set(alias, key);
+    }
   }
   const list = Array.from(byUser.values())
     .map(({ latest, identity }) => ({

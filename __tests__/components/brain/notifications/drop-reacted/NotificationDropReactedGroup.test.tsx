@@ -303,6 +303,103 @@ describe("NotificationDropReactedGroup", () => {
     expect(screen.getByTestId("follow-one")).toBeInTheDocument();
   });
 
+  it("dedupes the same reactor when later notifications identify them by a different alias", () => {
+    render(
+      <NotificationDropReactedGroup
+        group={{
+          type: "grouped_reactions",
+          id: 2,
+          createdAt: 200,
+          drop: createMockDrop(),
+          notifications: [
+            createNotification({
+              id: 1,
+              createdAt: 100,
+              reaction: ":heart:",
+              handle: "gpebbles",
+              pfp: "gpebbles.png",
+              profileOverrides: {
+                id: "profile-1",
+                primary_address: "0xabc",
+              },
+            }),
+            createNotification({
+              id: 2,
+              createdAt: 200,
+              reaction: ":heart:",
+              handle: "",
+              pfp: null,
+              profileOverrides: {
+                id: "",
+                primary_address: "0xabc",
+              },
+            }),
+          ],
+        }}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByText("New reactions")).not.toBeInTheDocument();
+    expect(screen.getByTestId("header")).toHaveTextContent("gpebbles");
+    expect(screen.getByTestId("header")).toHaveTextContent("gpebbles.png");
+  });
+
+  it("keeps accumulated identity data when folding an older notification into an existing reactor", () => {
+    render(
+      <NotificationDropReactedGroup
+        group={{
+          type: "grouped_reactions",
+          id: 3,
+          createdAt: 300,
+          drop: createMockDrop(),
+          notifications: [
+            createNotification({
+              id: 3,
+              createdAt: 300,
+              reaction: ":heart:",
+              handle: "",
+              pfp: null,
+              profileOverrides: {
+                id: "reactor-1",
+                primary_address: "0xreactor1",
+              },
+            }),
+            createNotification({
+              id: 2,
+              createdAt: 200,
+              reaction: ":heart:",
+              handle: "gpebbles",
+              pfp: null,
+              profileOverrides: {
+                id: "reactor-1",
+                primary_address: "0xreactor1",
+              },
+            }),
+            createNotification({
+              id: 1,
+              createdAt: 100,
+              reaction: ":heart:",
+              handle: "",
+              pfp: "alice.png",
+              profileOverrides: {
+                id: "reactor-1",
+                primary_address: "0xreactor1",
+              },
+            }),
+          ],
+        }}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByText("New reactions")).not.toBeInTheDocument();
+    expect(screen.getByTestId("header")).toHaveTextContent("gpebbles");
+    expect(screen.getByTestId("header")).toHaveTextContent("alice.png");
+  });
+
   it("falls back to the multi-reactor layout when the only reactor has no usable handle", () => {
     render(
       <NotificationDropReactedGroup
