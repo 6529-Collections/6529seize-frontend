@@ -1,4 +1,4 @@
-const requiredPackageManager = "pnpm@10.15.1";
+const requiredPackageManager = "pnpm@10.33.0";
 const userAgent = process.env.npm_config_user_agent ?? "";
 
 if (userAgent.startsWith("pnpm/")) {
@@ -8,6 +8,6 @@ if (userAgent.startsWith("pnpm/")) {
 console.error("This repository is managed with pnpm only.");
 console.error(`Install ${requiredPackageManager} and run "pnpm install".`);
 console.error(
-  'Recommended bootstrap: "corepack enable pnpm" then "corepack use pnpm@10.15.1".'
+  'Recommended bootstrap: "corepack enable pnpm" then "corepack use pnpm@10.33.0".'
 );
 process.exit(1);

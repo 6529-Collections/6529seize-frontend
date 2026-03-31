@@ -108,7 +108,7 @@ User-facing documentation lives in [`docs/README.md`](docs/README.md).
 
 ```bash
 corepack enable pnpm
-corepack use pnpm@10.15.1
+corepack use pnpm@10.33.0
 pnpm install
 ```
 

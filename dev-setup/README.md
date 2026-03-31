@@ -7,7 +7,7 @@ This repo includes `dev-setup/run-setup.sh` to bootstrap a fresh EC2 host for a 
 ## What the script does
 
 - Ensures **Node ≥ 20** (keeps 21/22 if present)
-- Installs **pnpm 10.15.1**
+- Installs **pnpm 10.33.0**
 - Prompts you and writes **.env** **before** any build (no `.env.sample` used)
 - Installs deps, **builds**, and **starts** the app with repo-managed PM2 (default port **3001**)
 - **Optionally** installs **NGINX + Certbot** and configures HTTPS for `https://<slug>staging.6529.io`

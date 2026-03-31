@@ -6,7 +6,7 @@
 # Description:
 #   Bootstraps a host to build & run 6529seize-frontend for staging/dev.
 #   - Accepts Node >= 20; installs Node 20 only if Node missing or < 20.
-#   - Installs pnpm 10.15.1 when missing.
+#   - Installs pnpm 10.33.0 when missing.
 #   - Prompts ONCE at the beginning for all inputs (.env + nginx),
 #     builds, starts via repo-managed PM2, optionally configures NGINX + Let's Encrypt.
 #   - Configures PM2 to start on boot + enables pm2-logrotate.
@@ -20,7 +20,7 @@ trap 'echo -e "\033[31m[ERROR]\033[0m line $LINENO: \"$BASH_COMMAND\" failed. Ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PNPM_VERSION="10.15.1"
+PNPM_VERSION="10.33.0"
 
 pnpm_home_dir() {
   if [[ "$(uname -s)" == "Darwin" ]]; then
