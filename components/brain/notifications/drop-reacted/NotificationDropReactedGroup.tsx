@@ -93,16 +93,20 @@ function getFallbackIdentityKey(notification: INotificationDropReacted): string 
 function resolveGroupedIdentityKey(
   notification: INotificationDropReacted,
   aliasToKey: Map<string, string>
-): string {
-  const matchingKey = getIdentityAliases(notification.related_identity).find(
-    (alias) => aliasToKey.has(alias)
-  );
+): { canonicalKey: string; matchingKeys: string[] } {
+  const fallbackKey = getFallbackIdentityKey(notification);
+  const matchingKeys = [
+    ...new Set(
+      getIdentityAliases(notification.related_identity)
+        .map((alias) => aliasToKey.get(alias))
+        .filter((key): key is string => key !== undefined)
+    ),
+  ];
 
-  if (matchingKey !== undefined) {
-    return aliasToKey.get(matchingKey) ?? getFallbackIdentityKey(notification);
-  }
-
-  return getFallbackIdentityKey(notification);
+  return {
+    canonicalKey: matchingKeys[0] ?? fallbackKey,
+    matchingKeys,
+  };
 }
 
 function cacheIdentityAliases(
@@ -137,6 +141,28 @@ function getMergedEntry(
   };
 }
 
+function mergeLatestPerUserEntries(
+  primary: LatestPerUserEntry,
+  secondary: LatestPerUserEntry
+): LatestPerUserEntry {
+  const shouldUseSecondary =
+    secondary.latest.created_at > primary.latest.created_at ||
+    (secondary.latest.created_at === primary.latest.created_at &&
+      secondary.latest.id > primary.latest.id);
+
+  if (shouldUseSecondary) {
+    return {
+      latest: secondary.latest,
+      identity: mergeProfiles(secondary.identity, primary.identity),
+    };
+  }
+
+  return {
+    latest: primary.latest,
+    identity: mergeProfiles(primary.identity, secondary.identity),
+  };
+}
+
 function notificationsLatestPerUser(
   notifications: GroupedReactionsItem["notifications"]
 ): INotificationDropReacted[] {
@@ -144,22 +170,48 @@ function notificationsLatestPerUser(
   const aliasToKey = new Map<string, string>();
 
   for (const n of notifications) {
-    const key = resolveGroupedIdentityKey(n, aliasToKey);
-    const existing = byUser.get(key);
+    const { canonicalKey, matchingKeys } = resolveGroupedIdentityKey(
+      n,
+      aliasToKey
+    );
+    const matchedEntries = matchingKeys
+      .map((key) => ({
+        key,
+        entry: byUser.get(key),
+      }))
+      .filter(
+        (value): value is { key: string; entry: LatestPerUserEntry } =>
+          value.entry !== undefined
+      );
+    const mergedExisting = matchedEntries.reduce<LatestPerUserEntry | null>(
+      (accumulator, { entry }) =>
+        accumulator === null
+          ? entry
+          : mergeLatestPerUserEntries(accumulator, entry),
+      null
+    );
 
-    if (!existing) {
+    if (!mergedExisting) {
       const entry = {
         latest: n,
         identity: n.related_identity,
       };
-      byUser.set(key, entry);
-      cacheIdentityAliases(aliasToKey, entry.identity, key);
+      byUser.set(canonicalKey, entry);
+      cacheIdentityAliases(aliasToKey, entry.identity, canonicalKey);
       continue;
     }
 
-    const entry = getMergedEntry(existing, n);
-    byUser.set(key, entry);
-    cacheIdentityAliases(aliasToKey, entry.identity, key);
+    const entry = getMergedEntry(mergedExisting, n);
+    byUser.set(canonicalKey, entry);
+    cacheIdentityAliases(aliasToKey, entry.identity, canonicalKey);
+    cacheIdentityAliases(aliasToKey, n.related_identity, canonicalKey);
+
+    for (const { key, entry: matchedEntry } of matchedEntries) {
+      cacheIdentityAliases(aliasToKey, matchedEntry.identity, canonicalKey);
+      if (key !== canonicalKey) {
+        byUser.delete(key);
+      }
+    }
   }
 
   const list = Array.from(byUser.values())
@@ -282,23 +334,25 @@ export default function NotificationDropReactedGroup({
                 const avatarItems = rg.notifications.map((n) => {
                   const profile = n.related_identity;
                   const identityKey = getIdentityKey(profile);
+                  const normalizedHandle = getNonEmptyIdentityValue(
+                    profile.handle
+                  );
                   const key =
                     identityKey === "unknown-profile"
                       ? `unknown-identity-${n.id}`
                       : identityKey;
-                  const href = profile.handle ? `/${profile.handle}` : undefined;
-                  const displayName = profile.handle ?? profile.id;
-                  const title =
-                    displayName !== undefined && displayName !== ""
-                      ? displayName
-                      : undefined;
+                  const href = normalizedHandle
+                    ? `/${normalizedHandle}`
+                    : undefined;
+                  const displayName = normalizedHandle ?? profile.id;
+                  const title = displayName || undefined;
                   return {
                     key,
                     pfpUrl: profile.pfp ? parseIpfsUrl(profile.pfp) : null,
-                    ariaLabel: profile.handle
-                      ? `View @${profile.handle}`
+                    ariaLabel: normalizedHandle
+                      ? `View @${normalizedHandle}`
                       : "View profile",
-                    fallback: profile.handle?.slice(0, 2).toUpperCase() ?? "?",
+                    fallback: normalizedHandle?.slice(0, 2).toUpperCase() ?? "?",
                     ...(href !== undefined && { href }),
                     ...(title !== undefined && { title }),
                   };

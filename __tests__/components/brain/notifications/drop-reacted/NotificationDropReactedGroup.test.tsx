@@ -400,6 +400,60 @@ describe("NotificationDropReactedGroup", () => {
     expect(screen.getByTestId("header")).toHaveTextContent("alice.png");
   });
 
+  it("merges pre-existing buckets when a later notification links their aliases", () => {
+    render(
+      <NotificationDropReactedGroup
+        group={{
+          type: "grouped_reactions",
+          id: 3,
+          createdAt: 300,
+          drop: createMockDrop(),
+          notifications: [
+            createNotification({
+              id: 1,
+              createdAt: 100,
+              reaction: ":heart:",
+              handle: "",
+              pfp: "alice.png",
+              profileOverrides: {
+                id: "profile-1",
+                primary_address: "0xabc",
+              },
+            }),
+            createNotification({
+              id: 2,
+              createdAt: 150,
+              reaction: ":heart:",
+              handle: "gpebbles",
+              pfp: null,
+              profileOverrides: {
+                id: "",
+                primary_address: "0xdef",
+              },
+            }),
+            createNotification({
+              id: 3,
+              createdAt: 300,
+              reaction: ":heart:",
+              handle: "gpebbles",
+              pfp: null,
+              profileOverrides: {
+                id: "profile-1",
+                primary_address: "0xabc",
+              },
+            }),
+          ],
+        }}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByText("New reactions")).not.toBeInTheDocument();
+    expect(screen.getByTestId("header")).toHaveTextContent("gpebbles");
+    expect(screen.getByTestId("header")).toHaveTextContent("alice.png");
+  });
+
   it("falls back to the multi-reactor layout when the only reactor has no usable handle", () => {
     render(
       <NotificationDropReactedGroup
