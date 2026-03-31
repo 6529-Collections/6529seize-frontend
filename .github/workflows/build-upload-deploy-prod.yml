@@ -31,15 +31,22 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "22"
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      - name: Verify registry signatures
-        run: npm audit signatures
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
 
       - name: Lint package.json versions
-        run: npm run lint:package-json
+        run: pnpm run lint:package-json
 
       - name: Build App
         env:
@@ -58,7 +65,7 @@ jobs:
           ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: npm run build
+        run: pnpm run build
 
       - name: Build Target
         run: |
