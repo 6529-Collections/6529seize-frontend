@@ -269,80 +269,44 @@ const getPageMatchPriority = (
   normalizedQuery: string,
   canonicalQueryTokens: readonly string[]
 ): number => {
-  if (normalizedTitle === normalizedQuery) return 0;
-  if (
-    hasExactCanonicalPageTokenMatch([normalizedTitle], canonicalQueryTokens)
-  ) {
-    return 1;
-  }
-  if (hrefSegments.includes(normalizedQuery)) return 2;
-  if (normalizedSearchTerms.includes(normalizedQuery)) return 3;
-  if (
-    hasExactCanonicalPageTokenMatch(normalizedSearchTerms, canonicalQueryTokens)
-  ) {
-    return 4;
-  }
-  if (normalizedTitle.startsWith(normalizedQuery)) return 5;
-  if (hasCanonicalPageTokenMatch([normalizedTitle], canonicalQueryTokens)) {
-    return 6;
-  }
-  if (
-    hasCanonicalPageTokenPrefixMatch([normalizedTitle], canonicalQueryTokens)
-  ) {
-    return 7;
-  }
-  if (normalizedBreadcrumbs.includes(normalizedQuery)) return 8;
-  if (
-    hasExactCanonicalPageTokenMatch(normalizedBreadcrumbs, canonicalQueryTokens)
-  ) {
-    return 9;
-  }
-  if (
+  const titleValues = [normalizedTitle];
+  const hrefValues = [normalizedHref, ...hrefSegments];
+  const checks = [
+    normalizedTitle === normalizedQuery,
+    hasExactCanonicalPageTokenMatch(titleValues, canonicalQueryTokens),
+    hrefSegments.includes(normalizedQuery),
+    normalizedSearchTerms.includes(normalizedQuery),
+    hasExactCanonicalPageTokenMatch(
+      normalizedSearchTerms,
+      canonicalQueryTokens
+    ),
+    normalizedTitle.startsWith(normalizedQuery),
+    hasCanonicalPageTokenMatch(titleValues, canonicalQueryTokens),
+    hasCanonicalPageTokenPrefixMatch(titleValues, canonicalQueryTokens),
+    normalizedBreadcrumbs.includes(normalizedQuery),
+    hasExactCanonicalPageTokenMatch(
+      normalizedBreadcrumbs,
+      canonicalQueryTokens
+    ),
     hasCanonicalPageTokenPrefixMatch(
       normalizedBreadcrumbs,
       canonicalQueryTokens
-    )
-  ) {
-    return 10;
-  }
-  if (normalizedSearchTerms.some((term) => term.includes(normalizedQuery))) {
-    return 11;
-  }
-  if (hasCanonicalPageTokenMatch(normalizedSearchTerms, canonicalQueryTokens)) {
-    return 12;
-  }
-  if (
+    ),
+    normalizedSearchTerms.some((term) => term.includes(normalizedQuery)),
+    hasCanonicalPageTokenMatch(normalizedSearchTerms, canonicalQueryTokens),
     hasCanonicalPageTokenPrefixMatch(
       normalizedSearchTerms,
       canonicalQueryTokens
-    )
-  ) {
-    return 13;
-  }
-  if (normalizedTitle.includes(normalizedQuery)) return 14;
-  if (hrefSegments.some((segment) => segment.includes(normalizedQuery))) {
-    return 15;
-  }
-  if (
-    hasCanonicalPageTokenMatch(
-      [normalizedHref, ...hrefSegments],
-      canonicalQueryTokens
-    )
-  ) {
-    return 16;
-  }
-  if (
-    hasCanonicalPageTokenPrefixMatch(
-      [normalizedHref, ...hrefSegments],
-      canonicalQueryTokens
-    )
-  ) {
-    return 17;
-  }
-  if (hasCanonicalPageTokenMatch(normalizedBreadcrumbs, canonicalQueryTokens)) {
-    return 18;
-  }
-  return 19;
+    ),
+    normalizedTitle.includes(normalizedQuery),
+    hrefSegments.some((segment) => segment.includes(normalizedQuery)),
+    hasCanonicalPageTokenMatch(hrefValues, canonicalQueryTokens),
+    hasCanonicalPageTokenPrefixMatch(hrefValues, canonicalQueryTokens),
+    hasCanonicalPageTokenMatch(normalizedBreadcrumbs, canonicalQueryTokens),
+  ];
+
+  const matchIndex = checks.findIndex(Boolean);
+  return matchIndex === -1 ? checks.length : matchIndex;
 };
 
 const pageMatchesQuery = (
