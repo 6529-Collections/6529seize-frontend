@@ -19,6 +19,8 @@ import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useCapacitor from "@/hooks/useCapacitor";
 import PullToRefresh from "../providers/PullToRefresh";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
+import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -29,6 +31,20 @@ interface Props {
   readonly children: ReactNode;
 }
 
+function WavesQuickVoteView() {
+  const quickVote = useMemesQuickVoteDialogController();
+
+  return (
+    <>
+      <BrainMobileWaves
+        onOpenQuickVote={quickVote.openQuickVote}
+        onPrefetchQuickVote={quickVote.prefetchQuickVote}
+      />
+      <MemesQuickVoteDialog {...quickVote.dialogState} />
+    </>
+  );
+}
+
 export default function AppLayout({ children }: Props) {
   useDeepLinkNavigation();
   const { registerRef } = useLayout();
@@ -37,9 +53,9 @@ export default function AppLayout({ children }: Props) {
   const { activeView } = useViewContext();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isSingleDropOpen = searchParams?.get("drop") !== null;
+  const isSingleDropOpen = searchParams.get("drop") !== null;
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const viewParam = searchParams?.get("view");
+  const viewParam = searchParams.get("view");
   const hasWaveParam = Boolean(waveParam);
   const isViewingWavesOrMessages =
     viewParam === "waves" || viewParam === "messages";
@@ -76,6 +92,15 @@ export default function AppLayout({ children }: Props) {
     !isNavVisible && !isKeyboardVisible
       ? "tw-pb-[env(safe-area-inset-bottom,0px)]"
       : "";
+  let activeContent: ReactNode;
+
+  if (activeView === "messages") {
+    activeContent = <BrainMobileMessages />;
+  } else if (activeView === "waves") {
+    activeContent = <WavesQuickVoteView />;
+  } else {
+    activeContent = <main>{children}</main>;
+  }
 
   return (
     <div className={`${safeAreaClass} ${"tw-overflow-auto"}`}>
@@ -83,13 +108,7 @@ export default function AppLayout({ children }: Props) {
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />
       </div>
-      {activeView === "messages" ? (
-        <BrainMobileMessages />
-      ) : activeView === "waves" ? (
-        <BrainMobileWaves />
-      ) : (
-        <main>{children}</main>
-      )}
+      {activeContent}
       {!isSingleDropOpen && !isStreamRoute && (
         <div className="tw-h-[85px] tw-w-full" />
       )}

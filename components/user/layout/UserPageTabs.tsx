@@ -1,7 +1,9 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
   faChevronLeft,
@@ -16,23 +18,27 @@ import {
 } from "next/navigation";
 import {
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import UserPageTab from "./UserPageTab";
 import {
   DEFAULT_USER_PAGE_TAB,
   USER_PAGE_TABS,
-  type UserPageTabConfig,
+  USER_PAGE_TAB_IDS,
   type UserPageTabKey,
   type UserPageVisibilityContext,
   getUserPageTabByRoute,
 } from "./userTabs.config";
+import { shouldDelayUserPageBrainRedirect } from "./userPageBrainAccess";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
+const subscribeToClientRender = () => () => undefined;
+const getClientRenderSnapshot = () => true;
+const getServerRenderSnapshot = () => false;
 
 // Normalize consent country to uppercase code; empty or non-strings become null.
 const normalizeCountry = (
@@ -72,30 +78,23 @@ const resolveTabFromPath = (pathname: string): UserPageTabKey => {
   return match?.id ?? DEFAULT_TAB;
 };
 
-const filterVisibleTabs = (
-  tabs: readonly UserPageTabConfig[],
-  context: UserPageVisibilityContext
-) => tabs.filter((tab) => (tab.isVisible ? tab.isVisible(context) : true));
-
 export default function UserPageTabs() {
-  const pathname = usePathname() ?? "";
+  const pathname = usePathname();
   const router = useRouter();
   const params = useParams();
-  const handleOrWallet = params?.["user"]?.toString() ?? "";
+  const handleOrWallet = params["user"]?.toString() ?? "";
   const searchParams = useSearchParams();
-  const searchString = searchParams?.toString() ?? "";
+  const searchString = searchParams.toString();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const { showWaves, connectedProfile } = useContext(AuthContext);
+  const { showWaves, connectedProfile, fetchingProfile } = useAuth();
+  const { address, connectionState } = useSeizeConnectContext();
 
   const isOwnProfile = useMemo(() => {
-    if (!connectedProfile || !handleOrWallet) return false;
-    const lower = handleOrWallet.toLowerCase();
-    if (connectedProfile.normalised_handle === lower) return true;
-    return (
-      connectedProfile.wallets?.some((w) => w.wallet.toLowerCase() === lower) ??
-      false
-    );
+    return isOwnProfileRoute({
+      connectedProfile,
+      handleOrWallet,
+    });
   }, [connectedProfile, handleOrWallet]);
 
   const visibilityContext = useMemo(
@@ -113,15 +112,57 @@ export default function UserPageTabs() {
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const isClientHydrated = useSyncExternalStore(
+    subscribeToClientRender,
+    getClientRenderSnapshot,
+    getServerRenderSnapshot
+  );
 
   const resolvedTabFromPath = useMemo<UserPageTabKey>(
     () => resolveTabFromPath(pathname),
     [pathname]
   );
 
+  const preserveProxyTabWhileOwnershipLoads =
+    fetchingProfile &&
+    !connectedProfile &&
+    resolvedTabFromPath === USER_PAGE_TAB_IDS.PROXY;
+
+  const shouldSuppressBrainRedirect =
+    resolvedTabFromPath === USER_PAGE_TAB_IDS.BRAIN &&
+    shouldDelayUserPageBrainRedirect({
+      address,
+      connectedProfile,
+      connectionState,
+      fetchingProfile,
+      isClientHydrated,
+    });
+  const preserveBrainTabWhileAccessLoads = shouldSuppressBrainRedirect;
+
   const visibleTabs = useMemo(
-    () => filterVisibleTabs(USER_PAGE_TABS, visibilityContext),
-    [visibilityContext]
+    () =>
+      USER_PAGE_TABS.filter((tab) => {
+        if (
+          preserveProxyTabWhileOwnershipLoads &&
+          tab.id === USER_PAGE_TAB_IDS.PROXY
+        ) {
+          return true;
+        }
+
+        if (
+          preserveBrainTabWhileAccessLoads &&
+          tab.id === USER_PAGE_TAB_IDS.BRAIN
+        ) {
+          return true;
+        }
+
+        return tab.isVisible ? tab.isVisible(visibilityContext) : true;
+      }),
+    [
+      preserveBrainTabWhileAccessLoads,
+      preserveProxyTabWhileOwnershipLoads,
+      visibilityContext,
+    ]
   );
 
   const resolvedTabIsVisible = useMemo(
@@ -142,11 +183,15 @@ export default function UserPageTabs() {
 
   // Redirect to the first visible tab whenever the resolved tab becomes
   // hidden because the visibility context changed (country, feature flags,
-  // etc.). The early returns combined with `resolvedTabIsVisible` and the
-  // pathname comparison ensure we only navigate when needed, preventing
-  // redirect loops even if the context flaps quickly.
+  // etc.). When loading `/brain` directly, delay the redirect until the client
+  // has mounted and wallet/profile restoration has settled.
   useEffect(() => {
-    if (!visibleTabs.length || resolvedTabIsVisible || !handleOrWallet) {
+    if (
+      !visibleTabs.length ||
+      resolvedTabIsVisible ||
+      !handleOrWallet ||
+      shouldSuppressBrainRedirect
+    ) {
       return;
     }
 
@@ -173,6 +218,7 @@ export default function UserPageTabs() {
     resolvedTabIsVisible,
     router,
     searchString,
+    shouldSuppressBrainRedirect,
     visibleTabs,
   ]);
 

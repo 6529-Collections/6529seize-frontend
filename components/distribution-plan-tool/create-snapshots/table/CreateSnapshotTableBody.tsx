@@ -6,13 +6,19 @@ import type { CreateSnapshotSnapshot } from "../CreateSnapshots";
 
 export default function CreateSnapshotTableBody({
   snapshots,
+  refreshDownloads,
 }: {
   snapshots: CreateSnapshotSnapshot[];
+  refreshDownloads: () => Promise<void>;
 }) {
   return (
     <DistributionPlanTableBodyWrapper>
       {snapshots.map((snapshot) => (
-        <CreateSnapshotTableRow key={snapshot.id} snapshot={snapshot} />
+        <CreateSnapshotTableRow
+          key={snapshot.id}
+          snapshot={snapshot}
+          refreshDownloads={refreshDownloads}
+        />
       ))}
     </DistributionPlanTableBodyWrapper>
   );

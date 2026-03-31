@@ -1,18 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import type { ApiDrop } from "@/generated/models/ObjectSerializer";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import Link from "next/link";
+import Image from "next/image";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
-import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
-import {
-  getSubmissionCount,
-  getTrophyArtworkCount,
-} from "@/helpers/artist-activity.helpers";
+import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;
@@ -21,79 +18,53 @@ interface SingleWaveDropAuthorProps {
 export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
   drop,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalInitialTab, setModalInitialTab] = useState<"active" | "winners">(
-    "active"
-  );
-
-  const submissionCount = getSubmissionCount(drop.author);
-  const hasSubmissions = submissionCount > 0;
-
-  const trophyCount = getTrophyArtworkCount(drop.author);
-  const hasTrophyArtworks = trophyCount > 0;
-  const hasActivityBadge = hasSubmissions || hasTrophyArtworks;
-
-  const handleBadgeClick = (tab: "active" | "winners") => {
-    setModalInitialTab(tab);
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
+  const authorIdentity = drop.author.handle ?? drop.author.primary_address;
+  const resolvedPfp = drop.author.pfp
+    ? resolveIpfsUrlSync(drop.author.pfp)
+    : null;
+  const avatarAlt = drop.author.handle
+    ? `${drop.author.handle}'s profile picture`
+    : "Profile picture";
 
   return (
-    <>
-      <div className="tw-flex tw-items-start tw-gap-x-2.5">
-        <Link
-          href={`/${drop.author.handle}`}
-          className="tw-flex tw-items-center tw-gap-x-2.5 tw-no-underline"
-        >
-          {drop.author.pfp ? (
-            <div className="tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
-              <img
-                className="tw-size-full tw-object-contain tw-opacity-90"
-                src={drop.author.pfp}
-                alt="User avatar"
-              />
-            </div>
-          ) : (
-            <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
-          )}
-          <div className="tw-inline-flex tw-items-center tw-gap-x-2">
-            <div className="tw-inline-flex tw-items-center tw-gap-x-1">
-              <UserProfileTooltipWrapper
-                user={drop.author.handle ?? drop.author.id}
-              >
-                <span className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80">
-                  {drop.author.handle}
-                </span>
-              </UserProfileTooltipWrapper>
-              <UserCICAndLevel
-                level={drop.author.level}
-                size={UserCICAndLevelSize.SMALL}
-              />
-            </div>
-            <div className="tw-inline-flex tw-items-center tw-gap-x-1">
-              {hasActivityBadge && (
-                <ArtistActivityBadge
-                  submissionCount={submissionCount}
-                  trophyCount={trophyCount}
-                  onBadgeClick={handleBadgeClick}
-                  tooltipId={`single-drop-activity-badge-${drop.id}`}
-                />
-              )}
-            </div>
+    <div className="tw-flex tw-items-start tw-gap-x-2.5">
+      <Link
+        href={`/${drop.author.handle ?? drop.author.primary_address}`}
+        className="tw-flex tw-items-center tw-gap-x-2.5 tw-no-underline"
+      >
+        {resolvedPfp ? (
+          <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
+            <Image
+              src={resolvedPfp}
+              alt={avatarAlt}
+              fill
+              sizes="40px"
+              className="tw-size-full tw-object-contain tw-opacity-90"
+            />
           </div>
-        </Link>
-      </div>
-
-      <ArtistPreviewModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        user={drop.author}
-        initialTab={modalInitialTab}
-      />
-    </>
+        ) : (
+          <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
+        )}
+        <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+          <div className="tw-inline-flex tw-items-center tw-gap-x-1">
+            <UserProfileTooltipWrapper user={authorIdentity}>
+              <span className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80">
+                {authorIdentity}
+              </span>
+            </UserProfileTooltipWrapper>
+            <UserCICAndLevel
+              level={drop.author.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
+          </div>
+          <div className="tw-inline-flex tw-items-center tw-gap-x-1">
+            <DropAuthorBadges
+              profile={drop.author}
+              tooltipIdPrefix={`single-drop-author-badges-${drop.id}`}
+            />
+          </div>
+        </div>
+      </Link>
+    </div>
   );
 };

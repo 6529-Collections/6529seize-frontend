@@ -11,8 +11,8 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -21,8 +21,10 @@ import {
   WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { createPortal } from "react-dom";
@@ -49,27 +51,24 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   });
 
   const title =
-    winner.drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
+    winner.drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Artwork Title";
   const description =
-    winner.drop.metadata?.find((m) => m.data_key === "description")
-      ?.data_value || "This is an artwork submission for The Memes collection.";
+    winner.drop.metadata.find((m) => m.data_key === "description")
+      ?.data_value ?? "This is an artwork submission for The Memes collection.";
 
   const artworkMedia = winner.drop.parts.at(0)?.media.at(0);
 
   const rating = winner.drop.rating || 0;
   const isPositive = rating >= 0;
-  const ratersCount = winner.drop.raters_count || 0;
-  const topVoters = winner.drop.top_raters?.slice(0, 3) || [];
-  const creditType =
-    WAVE_VOTING_LABELS[wave.voting?.credit_type as ApiWaveCreditType] ||
-    wave.voting?.credit_type ||
-    "votes";
+  const ratersCount = winner.drop.raters_count;
+  const topVoters = winner.drop.top_raters.slice(0, 3);
+  const creditType = WAVE_VOTING_LABELS[wave.voting.credit_type];
 
   // Check if user has voted
   const hasUserVoted =
     winner.drop.context_profile_context?.rating !== undefined &&
-    winner.drop.context_profile_context?.rating !== 0;
+    winner.drop.context_profile_context.rating !== 0;
   const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
 
@@ -88,42 +87,42 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               <div className="tw-flex tw-gap-x-2">
                 <WaveWinnersDropHeaderAuthorPfp winner={winner} size="sm" />
                 <div className="tw-flex tw-items-center">
-                  <div className="-tw-mt-0.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
-                    {winner.drop.author?.handle ? (
+                  <div className="-tw-mt-0.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+                    {winner.drop.author.handle ? (
                       <UserProfileTooltipWrapper
-                        user={
-                          winner.drop.author.handle ?? winner.drop.author.id
-                        }
+                        user={winner.drop.author.handle}
                       >
                         <Link
-                          href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
+                          href={`/${winner.drop.author.handle}`}
                           onClick={(e) => e.stopPropagation()}
                           scroll={false}
                           className="tw-no-underline desktop-hover:hover:tw-underline"
                         >
                           <span className="tw-text-sm tw-font-bold tw-text-white">
-                            {winner.drop.author?.handle}
+                            {winner.drop.author.handle}
                           </span>
                         </Link>
                       </UserProfileTooltipWrapper>
                     ) : (
                       <Link
-                        href={`/${winner.drop.author?.handle ?? winner.drop.author?.id}`}
+                        href={`/${winner.drop.author.handle ?? winner.drop.author.primary_address}`}
                         onClick={(e) => e.stopPropagation()}
                         scroll={false}
                         className="tw-no-underline desktop-hover:hover:tw-underline"
                       >
                         <span className="tw-text-sm tw-font-bold tw-text-white">
-                          {winner.drop.author?.handle ?? winner.drop.author?.id}
+                          {winner.drop.author.handle ?? winner.drop.author.id}
                         </span>
                       </Link>
                     )}
-                    {winner.drop.author?.level && (
-                      <UserCICAndLevel
-                        level={winner.drop.author.level}
-                        size={UserCICAndLevelSize.SMALL}
-                      />
-                    )}
+                    <UserCICAndLevel
+                      level={winner.drop.author.level}
+                      size={UserCICAndLevelSize.SMALL}
+                    />
+                    <DropAuthorBadges
+                      profile={winner.drop.author}
+                      tooltipIdPrefix={`memes-winner-author-badges-${winner.drop.id}`}
+                    />
 
                     <span className="tw-text-sm tw-text-iron-500">•</span>
 
@@ -198,20 +197,27 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         onClick={(e) => e.stopPropagation()}
                         scroll={false}
                         className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
-                        data-tooltip-id={`voter-${voter.profile.handle}-${voter.rating}`}
+                        data-tooltip-id={`voter-${voter.profile.handle ?? voter.profile.primary_address}-${voter.rating}`}
                       >
                         {voter.profile.pfp ? (
-                          <img
+                          <Image
                             className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                            src={voter.profile.pfp}
-                            alt="Recent voter"
+                            src={getScaledImageUri(
+                              voter.profile.pfp,
+                              ImageScale.W_AUTO_H_50
+                            )}
+                            alt={`${
+                              voter.profile.handle ?? voter.profile.id
+                            }'s profile picture`}
+                            width={24}
+                            height={24}
                           />
                         ) : (
                           <div className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
                         )}
                       </Link>
                       <Tooltip
-                        id={`voter-${voter.profile.handle}-${voter.rating}`}
+                        id={`voter-${voter.profile.handle ?? voter.profile.primary_address}-${voter.rating}`}
                         style={{
                           backgroundColor: "#1F2937",
                           color: "white",

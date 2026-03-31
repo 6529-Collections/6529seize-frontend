@@ -5,8 +5,8 @@ import Link from "next/link";
 interface NowMintingDetailsAccordionProps {
   readonly nftId: number;
   readonly mintDate: Date | undefined;
-  readonly fileType: string;
-  readonly dimensions: string;
+  readonly fileType?: string | null | undefined;
+  readonly dimensions?: string | null | undefined;
   readonly collection: string;
   readonly season: number;
 }
@@ -21,8 +21,8 @@ export default function NowMintingDetailsAccordion({
 }: NowMintingDetailsAccordionProps) {
   const details = [
     { label: "Mint date", value: printMintDate(mintDate) },
-    { label: "File type", value: fileType },
-    { label: "Dimensions", value: dimensions },
+    ...(fileType ? [{ label: "File type", value: fileType }] : []),
+    ...(dimensions ? [{ label: "Dimensions", value: dimensions }] : []),
     { label: "Collection", value: collection },
     { label: "Season", value: `SZN${season}` },
   ];

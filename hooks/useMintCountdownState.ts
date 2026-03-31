@@ -1,13 +1,17 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
   ManifoldClaimStatus,
   ManifoldPhase,
-  useMemesManifoldClaim,
+  useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import { useMemo, useState } from "react";
+import { Time } from "@/helpers/time";
+import type { Abi } from "viem";
 
 export interface CountdownData {
   readonly title: string;
@@ -25,14 +29,23 @@ export type MintCountdownState =
   | { type: "countdown"; countdown: CountdownData };
 
 interface UseMintCountdownStateOptions {
-  hideMintBtn?: boolean;
+  hideMintBtn?: boolean | undefined;
+  contract: string;
+  chainId: number;
+  abi?: Abi | undefined;
 }
 
 export function useMintCountdownState(
   nftId: number,
-  opts?: UseMintCountdownStateOptions
+  opts: UseMintCountdownStateOptions
 ): MintCountdownState {
   const [errorFromCallback, setErrorFromCallback] = useState(false);
+  const {
+    contract,
+    chainId,
+    abi = MEMES_MANIFOLD_PROXY_ABI,
+    hideMintBtn,
+  } = opts;
 
   // Reset error state when nftId changes (during render, not in effect)
   const [prevNftId, setPrevNftId] = useState(nftId);
@@ -41,8 +54,17 @@ export function useMintCountdownState(
     setErrorFromCallback(false);
   }
 
-  const manifoldClaim = useMemesManifoldClaim(nftId, () => {
+  const handleManifoldClaimError = useCallback(() => {
     setErrorFromCallback(true);
+  }, []);
+
+  const { claim: manifoldClaim } = useManifoldClaim({
+    chainId,
+    contract,
+    proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
+    abi,
+    identifier: nftId,
+    onError: handleManifoldClaimError,
   });
 
   // Derive error state: callback fired AND (no data OR data has error)
@@ -51,8 +73,19 @@ export function useMintCountdownState(
 
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
+  const [now, setNow] = useState(() => Time.now());
 
-  const showMintBtn = !opts?.hideMintBtn && !(isIos && country !== "US");
+  const showMintBtn = !hideMintBtn && !(isIos && country !== "US");
+
+  useEffect(() => {
+    const interval = globalThis.window.setInterval(() => {
+      setNow(Time.now());
+    }, 1000);
+
+    return () => {
+      globalThis.window.clearInterval(interval);
+    };
+  }, []);
 
   return useMemo((): MintCountdownState => {
     if (isError) {
@@ -67,7 +100,27 @@ export function useMintCountdownState(
       return { type: "sold_out" };
     }
 
-    if (manifoldClaim.isFinalized) {
+    if (
+      manifoldClaim.isFinalized &&
+      !manifoldClaim.isDropComplete &&
+      manifoldClaim.nextMemePhase
+    ) {
+      const nextPhase = manifoldClaim.nextMemePhase;
+      const hasReachedNextPhaseStart = !now.lt(nextPhase.start);
+
+      return {
+        type: "countdown",
+        countdown: {
+          title: `${nextPhase.name} Starts In`,
+          targetDate: nextPhase.start.toSeconds(),
+          showAllowlistInfo: nextPhase.type === ManifoldPhase.ALLOWLIST,
+          showMintBtn: showMintBtn && !hasReachedNextPhaseStart,
+          isActive: false,
+        },
+      };
+    }
+
+    if (manifoldClaim.isDropComplete) {
       return { type: "finalized" };
     }
 
@@ -90,5 +143,5 @@ export function useMintCountdownState(
         isActive: !isUpcoming,
       },
     };
-  }, [manifoldClaim, isError, showMintBtn]);
+  }, [manifoldClaim, isError, now, showMintBtn]);
 }

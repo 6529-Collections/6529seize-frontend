@@ -15,7 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiDropRatingRequest {
     'rating': number;
-    'category': string;
+    'category'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 

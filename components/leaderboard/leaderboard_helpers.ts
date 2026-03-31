@@ -77,6 +77,23 @@ export interface LeaderboardInteractions {
   cic_type?: CICType | undefined;
 }
 
+export function formatPercentageFromCounts(count: number, total: number) {
+  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0;
+  const safeTotal = Number.isFinite(total) ? Math.max(0, total) : 0;
+
+  if (safeTotal === 0 || safeCount === 0) {
+    return "0%";
+  }
+
+  if (safeCount >= safeTotal) {
+    return "100%";
+  }
+
+  const percent = (safeCount / safeTotal) * 100;
+  const rounded = Number(percent.toFixed(1));
+  return rounded < 100 ? `${rounded}%` : "99.9%";
+}
+
 export function getLeaderboardDownloadFileName(
   title: string,
   block: number,

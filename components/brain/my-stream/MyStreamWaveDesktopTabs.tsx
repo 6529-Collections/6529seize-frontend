@@ -31,6 +31,7 @@ const AUTO_EXPAND_LIMIT = 5;
 const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.CHAT]: "Chat",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
+  [MyStreamWaveTab.SALES]: "Sales",
   [MyStreamWaveTab.WINNERS]: "Winners",
   [MyStreamWaveTab.OUTCOME]: "Outcome",
   [MyStreamWaveTab.MY_VOTES]: "My Votes",
@@ -172,6 +173,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           if (tab === MyStreamWaveTab.MY_VOTES) {
             return isMemesWave || isCurationWave;
           }
+          if (tab === MyStreamWaveTab.SALES) {
+            return isCurationWave;
+          }
           if (tab === MyStreamWaveTab.FAQ) {
             return isMemesWave;
           }
@@ -188,9 +192,14 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   useEffect(() => {
     const isMyVotesHidden =
       activeTab === MyStreamWaveTab.MY_VOTES && !isMemesWave && !isCurationWave;
+    const isSalesHidden =
+      activeTab === MyStreamWaveTab.SALES && !isCurationWave;
     const isFaqHidden = activeTab === MyStreamWaveTab.FAQ && !isMemesWave;
 
-    if ((isMyVotesHidden || isFaqHidden) && options.length > 0) {
+    if (
+      (isMyVotesHidden || isSalesHidden || isFaqHidden) &&
+      options.length > 0
+    ) {
       setActiveTab(options[0]?.key!);
     }
   }, [isMemesWave, isCurationWave, activeTab, options, setActiveTab]);

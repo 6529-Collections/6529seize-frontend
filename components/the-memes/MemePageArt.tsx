@@ -1,9 +1,11 @@
 "use client";
 
-import Download from "@/components/download/Download";
+import { ArweaveLinksTable } from "@/components/nft-attributes/ArweaveLinksTable";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
-import type { MemesExtendedData, NFT } from "@/entities/INFT";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
+import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
+import type { IAttribute, MemesExtendedData, NFT } from "@/entities/INFT";
 import {
   enterArtFullScreen,
   fullScreenSupported,
@@ -12,8 +14,10 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import {
-  getDimensionsFromMetadata,
-  getFileTypeFromMetadata,
+  getAnimationDimensionsFromMetadata,
+  getAnimationFileTypeFromMetadata,
+  getImageDimensionsFromMetadata,
+  getImageFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -22,6 +26,21 @@ import { useEffect, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import styles from "./TheMemes.module.scss";
+
+const PROPERTY_EXCLUDED_TRAITS = new Set([
+  "Type - Season",
+  "Type - Meme",
+  "Type - Card",
+]);
+
+function shouldShowPropertyAttribute(attribute: IAttribute): boolean {
+  const displayType = attribute.display_type?.trim().toLowerCase();
+
+  return (
+    !PROPERTY_EXCLUDED_TRAITS.has(attribute.trait_type) &&
+    (!displayType || displayType === "text")
+  );
+}
 
 export function MemePageArt(props: {
   show: boolean;
@@ -32,11 +51,82 @@ export function MemePageArt(props: {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const hasAnimation = props.nft?.animation || props.nft?.metadata?.animation;
-  const fullscreenElementId =
-    hasAnimation && currentSlide === 0
-      ? "the-art-fullscreen-animation"
-      : "the-art-fullscreen-img";
+  const animationHref = getResolvedAnimationSrc(props.nft);
+  const hasAnimation = Boolean(animationHref);
+  const imageFormat = getImageFileTypeFromMetadata(props.nft?.metadata);
+  const animationFormat = getAnimationFileTypeFromMetadata(props.nft?.metadata);
+  const imageDimensions = getImageDimensionsFromMetadata(props.nft?.metadata);
+  const animationDimensions = getAnimationDimensionsFromMetadata(
+    props.nft?.metadata
+  );
+  const imageHref = getResolvedImageSrc(props.nft);
+  const metadataHref = props.nft?.uri.trim() ?? "";
+  const metadata =
+    props.nft?.metadata !== null && typeof props.nft?.metadata === "object"
+      ? (props.nft.metadata as {
+          readonly image?: unknown;
+          readonly animation?: unknown;
+          readonly animation_url?: unknown;
+        })
+      : undefined;
+  const artImageHref =
+    (typeof metadata?.image === "string" ? metadata.image.trim() : "") ||
+    (typeof props.nft?.image === "string" ? props.nft.image.trim() : "") ||
+    "";
+  const artAnimationHref =
+    (typeof metadata?.animation_url === "string"
+      ? metadata.animation_url.trim()
+      : "") ||
+    (typeof metadata?.animation === "string"
+      ? metadata.animation.trim()
+      : "") ||
+    (typeof props.nft?.animation === "string"
+      ? props.nft.animation.trim()
+      : "") ||
+    "";
+  const hasImage = Boolean(imageHref);
+  const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
+  let fullscreenElementId = "";
+  if (isShowingAnimation) {
+    fullscreenElementId = "the-art-fullscreen-animation";
+  } else if (hasImage) {
+    fullscreenElementId = "the-art-fullscreen-img";
+  }
+  const fileType = isShowingAnimation ? animationFormat : imageFormat;
+  const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
+  const arweaveRows = [
+    metadataHref
+      ? {
+          label: "JSON",
+          url: metadataHref,
+          openLabel: "Open JSON in new tab",
+        }
+      : null,
+    artImageHref
+      ? {
+          label: imageFormat?.toUpperCase() || "IMAGE",
+          url: artImageHref,
+          openLabel: "Open image in new tab",
+          extension: imageFormat ?? "",
+          downloadName: props.nft?.name || `meme-${props.nft?.id ?? "asset"}`,
+        }
+      : null,
+    artAnimationHref
+      ? {
+          label: animationFormat?.toUpperCase() || "ANIMATION",
+          url: artAnimationHref,
+          openLabel: "Open animation in new tab",
+          extension: animationFormat ?? "",
+          downloadName: props.nft?.name || `meme-${props.nft?.id ?? "asset"}`,
+        }
+      : null,
+  ].filter(Boolean) as {
+    label: string;
+    url: string;
+    openLabel: string;
+    extension?: string | undefined;
+    downloadName?: string | undefined;
+  }[];
 
   const distributionPlanLink = (() => {
     const id = props.nft?.id;
@@ -59,27 +149,20 @@ export function MemePageArt(props: {
     setCurrentSlide(event);
   }
 
-  let currentFormat: string | undefined;
-  if (props.nft?.animation || props.nft?.metadata.animation) {
-    if (currentSlide === 0) {
-      currentFormat = props.nft.metadata.animation_details.format;
-    } else {
-      currentFormat = props.nft.metadata.image_details.format;
-    }
-  } else {
-    currentFormat = props.nft?.metadata.image_details.format;
-  }
+  const currentFormat = fileType ?? "";
 
   if (props.show && props.nft && props.nftMeta) {
     return (
       <>
         <Container className="p-0">
           <Row className="position-relative">
-            {props.nft.animation || props.nft.metadata.animation ? (
+            {hasAnimation ? (
               <>
                 <Col xs={12} className={styles["artHeader"]}>
                   <div className={styles["artHeaderContent"]}>
-                    <div className={styles["artFormatLabel"]}>{currentFormat}</div>
+                    <div className={styles["artFormatLabel"]}>
+                      {currentFormat}
+                    </div>
                     {isFullScreenSupported && (
                       <FontAwesomeIcon
                         icon={faExpandAlt}
@@ -97,7 +180,8 @@ export function MemePageArt(props: {
                   interval={null}
                   indicators={false}
                   wrap={false}
-                  onSlide={carouselHandlerSlide}>
+                  onSlide={carouselHandlerSlide}
+                >
                   <Carousel.Item className="text-center">
                     <NFTImage
                       nft={props.nft}
@@ -109,24 +193,28 @@ export function MemePageArt(props: {
                       id="the-art-fullscreen-animation"
                     />
                   </Carousel.Item>
-                  <Carousel.Item className="text-center">
-                    <NFTImage
-                      nft={props.nft}
-                      animation={false}
-                      height={650}
-                      showBalance={false}
-                      transparentBG={true}
-                      showOriginal={true}
-                      id="the-art-fullscreen-img"
-                    />
-                  </Carousel.Item>
+                  {hasImage && (
+                    <Carousel.Item className="text-center">
+                      <NFTImage
+                        nft={props.nft}
+                        animation={false}
+                        height={650}
+                        showBalance={false}
+                        transparentBG={true}
+                        showOriginal={true}
+                        id="the-art-fullscreen-img"
+                      />
+                    </Carousel.Item>
+                  )}
                 </Carousel>
               </>
             ) : (
               <>
                 <Col xs={12} className={styles["artHeader"]}>
                   <div className={styles["artHeaderContent"]}>
-                    <div className={styles["artFormatLabel"]}>{currentFormat}</div>
+                    <div className={styles["artFormatLabel"]}>
+                      {currentFormat}
+                    </div>
                     {isFullScreenSupported && (
                       <FontAwesomeIcon
                         icon={faExpandAlt}
@@ -139,15 +227,17 @@ export function MemePageArt(props: {
                     )}
                   </div>
                 </Col>
-                <NFTImage
-                  nft={props.nft}
-                  animation={false}
-                  height={650}
-                  transparentBG={true}
-                  showOriginal={true}
-                  showBalance={false}
-                  id="the-art-fullscreen-img"
-                />
+                {hasImage && (
+                  <NFTImage
+                    nft={props.nft}
+                    animation={false}
+                    height={650}
+                    transparentBG={true}
+                    showOriginal={true}
+                    showBalance={false}
+                    id="the-art-fullscreen-img"
+                  />
+                )}
               </>
             )}
           </Row>
@@ -160,60 +250,13 @@ export function MemePageArt(props: {
                   <Col>
                     <Row>
                       <Col>
-                        <h3>Arweave Links</h3>
+                        <h3 className="tw-pb-2">Arweave Links</h3>
                       </Col>
                     </Row>
-                    <Row>
-                      <Col className="tw-flex tw-items-center tw-gap-1">
-                        <span>{props.nft.metadata.image_details.format}</span>
-                        <Link
-                          className={styles["arweaveLink"]}
-                          href={props.nft.metadata.image}
-                          target="_blank"
-                          rel="noopener noreferrer">
-                          {props.nft.metadata.image}
-                        </Link>
-                        <Download
-                          href={props.nft.metadata.image}
-                          name={props.nft.name}
-                          extension={props.nft.metadata.image_details.format}
-                        />
-                      </Col>
-                    </Row>
-                    {(props.nft.metadata.animation ||
-                      props.nft.metadata.animation_url) && (
-                      <Row className="pt-3">
-                        <Col className="tw-flex tw-items-center tw-gap-1">
-                          <span>
-                            {props.nft.metadata.animation_details.format}
-                          </span>
-                          <Link
-                            className={styles["arweaveLink"]}
-                            href={
-                              props.nft.metadata.animation
-                                ? props.nft.metadata.animation
-                                : props.nft.metadata.animation_url
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer">
-                            {props.nft.metadata.animation
-                              ? props.nft.metadata.animation
-                              : props.nft.metadata.animation_url}
-                          </Link>
-                          <Download
-                            href={
-                              props.nft.metadata.animation
-                                ? props.nft.metadata.animation
-                                : props.nft.metadata.animation_url
-                            }
-                            name={props.nft.name}
-                            extension={
-                              props.nft.metadata.animation_details.format
-                            }
-                          />
-                        </Col>
-                      </Row>
-                    )}
+                    <ArweaveLinksTable
+                      rows={arweaveRows}
+                      linkClassName={styles["arweaveLink"]}
+                    />
                   </Col>
                 </Row>
               </Container>
@@ -226,7 +269,8 @@ export function MemePageArt(props: {
               xs={{ span: 12 }}
               sm={{ span: 6 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}>
+              lg={{ span: 6 }}
+            >
               <Container>
                 <Row>
                   <Col>
@@ -267,16 +311,18 @@ export function MemePageArt(props: {
                           <td>Mint Date</td>
                           <td>{printMintDate(props.nft.mint_date)}</td>
                         </tr>
-                        <tr>
-                          <td>File Type</td>
-                          <td>{getFileTypeFromMetadata(props.nft.metadata)}</td>
-                        </tr>
-                        <tr>
-                          <td>Dimensions</td>
-                          <td>
-                            {getDimensionsFromMetadata(props.nft.metadata)}
-                          </td>
-                        </tr>
+                        {fileType && (
+                          <tr>
+                            <td>File Type</td>
+                            <td>{fileType}</td>
+                          </tr>
+                        )}
+                        {dimensions && (
+                          <tr>
+                            <td>Dimensions</td>
+                            <td>{dimensions}</td>
+                          </tr>
+                        )}
                       </tbody>
                     </Table>
                   </Col>
@@ -287,7 +333,8 @@ export function MemePageArt(props: {
               xs={{ span: 12 }}
               sm={{ span: 6 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}>
+              lg={{ span: 6 }}
+            >
               <Container>
                 <Row>
                   <Col>
@@ -305,7 +352,8 @@ export function MemePageArt(props: {
                             ? undefined
                             : "noopener noreferrer"
                         }
-                        className={styles["distributionPlanLink"]}>
+                        className={styles["distributionPlanLink"]}
+                      >
                         Distribution Plan
                       </Link>
                     </Col>
@@ -338,7 +386,8 @@ export function MemePageArt(props: {
                   <Col
                     dangerouslySetInnerHTML={{
                       __html: parseNftDescriptionToHtml(props.nft.description),
-                    }}></Col>
+                    }}
+                  ></Col>
                 </Row>
               </Container>
             </Col>
@@ -357,11 +406,7 @@ export function MemePageArt(props: {
                   <Col>
                     <NFTAttributes
                       attributes={props.nft.metadata.attributes.filter(
-                        (a: any) =>
-                          !a.display_type &&
-                          a.trait_type != "Type - Season" &&
-                          a.trait_type != "Type - Meme" &&
-                          a.trait_type != "Type - Card"
+                        shouldShowPropertyAttribute
                       )}
                     />
                   </Col>
@@ -376,7 +421,8 @@ export function MemePageArt(props: {
               xs={{ span: 12 }}
               sm={{ span: 6 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}>
+              lg={{ span: 6 }}
+            >
               <Container>
                 <Row>
                   <Col>
@@ -388,7 +434,8 @@ export function MemePageArt(props: {
                     xs={{ span: 12 }}
                     sm={{ span: 10 }}
                     md={{ span: 8 }}
-                    lg={{ span: 6 }}>
+                    lg={{ span: 6 }}
+                  >
                     <Table>
                       <tbody>
                         <tr>
@@ -431,7 +478,8 @@ export function MemePageArt(props: {
               xs={{ span: 12 }}
               sm={{ span: 6 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}>
+              lg={{ span: 6 }}
+            >
               <Container>
                 <Row>
                   <Col>
@@ -443,7 +491,8 @@ export function MemePageArt(props: {
                     xs={{ span: 12 }}
                     sm={{ span: 10 }}
                     md={{ span: 8 }}
-                    lg={{ span: 6 }}>
+                    lg={{ span: 6 }}
+                  >
                     <Table>
                       <tbody>
                         {props.nft.metadata.attributes

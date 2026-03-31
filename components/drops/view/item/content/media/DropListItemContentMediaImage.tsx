@@ -18,6 +18,7 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 
 const tooltipProps = {
   delayShow: 250,
@@ -36,6 +37,7 @@ function DropListItemContentMediaImage({
   disableModal = false,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx450,
+  loadStrategy = "in-view",
 }: {
   readonly src: string;
   readonly maxRetries?: number | undefined;
@@ -44,6 +46,7 @@ function DropListItemContentMediaImage({
   readonly disableModal?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly loadStrategy?: MediaLoadStrategy | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -62,7 +65,7 @@ function DropListItemContentMediaImage({
   }, []);
 
   const handleError = useCallback(() => {
-    if (errorCount >= maxRetries) return; // give up – show fallback
+    if (errorCount >= maxRetries) return;
     const delay = 500 * 2 ** errorCount; // 0.5s, 1s, 2s …
     setTimeout(() => {
       setErrorCount((n) => n + 1);
@@ -105,7 +108,7 @@ function DropListItemContentMediaImage({
       event.stopPropagation();
       const fullscreenTarget = modalImageRef.current ?? imgRef.current;
       if (fullscreenTarget) {
-        fullscreenTarget.requestFullscreen();
+        fullscreenTarget.requestFullscreen().catch(() => undefined);
       }
     },
     []
@@ -121,6 +124,7 @@ function DropListItemContentMediaImage({
     left: "50%",
     transform: "translate(-50%, -50%)",
   };
+  const shouldLoadImage = loadStrategy === "eager" || inView;
 
   useKeyPressEvent("Escape", () => {
     if (!disableModal) {
@@ -162,6 +166,7 @@ function DropListItemContentMediaImage({
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     ref={modalImageRef}
                     src={src}
@@ -300,7 +305,7 @@ function DropListItemContentMediaImage({
           />
         )}
 
-        {inView && errorCount <= maxRetries && (
+        {shouldLoadImage && errorCount <= maxRetries && (
           <FallbackImage
             key={retryTick}
             ref={imgRef}
@@ -308,6 +313,7 @@ function DropListItemContentMediaImage({
             fallbackSrc={src}
             alt="Drop media"
             fill
+            loading={loadStrategy === "eager" ? "eager" : undefined}
             sizes="(max-width: 768px) 100vw, 768px"
             className={`tw-max-h-full tw-max-w-full ${
               !loaded ? "tw-opacity-0" : "tw-opacity-100"

@@ -10,6 +10,15 @@ export const TOOLTIP_STYLES = {
   pointerEvents: "none" as const,
 } as const;
 
+export const CUSTOM_TOOLTIP_CLOSE_ALL_EVENT = "custom-tooltip:close-all";
+
+export function closeAllCustomTooltips(): void {
+  if (typeof document === "undefined") {
+    return;
+  }
+  document.dispatchEvent(new Event(CUSTOM_TOOLTIP_CLOSE_ALL_EVENT));
+}
+
 const INVALID_ATTR_CHARS = /[^a-zA-Z0-9_-]/g;
 const HASH_RADIX = 36;
 const UINT32_RANGE = 0x100000000;

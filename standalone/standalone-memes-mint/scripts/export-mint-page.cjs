@@ -1,0 +1,601 @@
+const {
+  copyFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  rmdirSync,
+  writeFileSync,
+} = require("node:fs");
+const http = require("node:http");
+const https = require("node:https");
+const path = require("node:path");
+const os = require("node:os");
+const { spawnSync } = require("node:child_process");
+
+const rootDir = path.resolve(__dirname, "../../..");
+const standaloneDir = path.resolve(__dirname, "..");
+const appDir = path.join(standaloneDir, "src");
+const appPublicDir = path.join(appDir, "public");
+const appBuildDir = path.join(appDir, ".next-static-export");
+const appTurboBuildDir = path.join(appDir, ".next");
+const rootPublicDir = path.join(rootDir, "public");
+const distRootDir = path.join(standaloneDir, "dist");
+const finalOutputDir = distRootDir;
+
+const S3_BUCKET_PROD = "thememes.6529.io";
+const S3_BUCKET_TEST = "thememestest.6529.io";
+
+const STANDALONE_PUBLIC_FILES = [
+  "6529.svg",
+  "6529io.png",
+  "6529bgwhite.svg",
+  "favicon.ico",
+  "manifold.svg",
+  "opensea.png",
+  "rarible.svg",
+];
+
+function resolveExecutablePath(candidates, name) {
+  const executablePath = candidates.find((candidate) => existsSync(candidate));
+  if (!executablePath) {
+    throw new Error(`Unable to locate ${name} in fixed system paths.`);
+  }
+  return executablePath;
+}
+
+function parseArgs(argv) {
+  const useTest = argv.includes("--test");
+  const doSync = argv.includes("--sync");
+  if (argv.includes("--help") || argv.includes("-h")) {
+    console.log(`Mint standalone export
+
+Usage:
+  node standalone/standalone-memes-mint/scripts/export-mint-page.cjs [options]
+
+Options:
+  --test   Use bucket ${S3_BUCKET_TEST} (BASE_ENDPOINT https://${S3_BUCKET_TEST}) unless STANDALONE_S3_BUCKET_TEST is set
+  --sync   After export: aws s3 sync dist/ -> s3://<bucket>/ --delete, then CloudFront invalidation /* (distribution id from list-distributions --query ... contains(bucket hostname))
+  --help   Show this message
+
+Default (no --test): bucket ${S3_BUCKET_PROD}, BASE_ENDPOINT https://${S3_BUCKET_PROD}
+
+npm (pass flags after --):
+  npm run export-mint-page -- --test --sync
+
+Shorthand npm scripts (no extra --):
+  npm run export-mint-page          prod, no sync
+  npm run export-mint-page:sync     prod + sync
+  npm run export-mint-page:test     test, no sync
+  npm run export-mint-page:test:sync  test + sync
+
+Env overrides:
+  STANDALONE_S3_BUCKET_PROD   (default ${S3_BUCKET_PROD})
+  STANDALONE_S3_BUCKET_TEST   (default ${S3_BUCKET_TEST})
+`);
+    process.exit(0);
+  }
+  const known = new Set(["--test", "--sync", "--help", "-h"]);
+  for (const a of argv) {
+    if (a.startsWith("-") && !known.has(a)) {
+      console.error(`Unknown option: ${a} (try --help)`);
+      process.exit(1);
+    }
+  }
+  return { useTest, doSync };
+}
+
+function run(command, args, envOverrides = {}) {
+  const result = spawnSync(command, args, {
+    cwd: rootDir,
+    env: { ...process.env, ...envOverrides },
+    stdio: "inherit",
+  });
+
+  if (result.error) {
+    console.error(result.error.message);
+    if (result.error.stack) {
+      console.error(result.error.stack);
+    }
+    process.exit(1);
+  }
+
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
+}
+
+function runText(command, args) {
+  const result = spawnSync(command, args, {
+    cwd: rootDir,
+    env: process.env,
+    encoding: "utf8",
+  });
+
+  if (result.error || result.status !== 0) {
+    return null;
+  }
+
+  return result.stdout.trim() || null;
+}
+
+function resolveStandaloneCommit() {
+  const gitSha = runText("git", ["rev-parse", "HEAD"]);
+  if (gitSha) {
+    return gitSha;
+  }
+
+  return "standalone-mint";
+}
+
+function trimTrailingSlashes(value) {
+  let end = value.length;
+
+  while (end > 0 && value[end - 1] === "/") {
+    end -= 1;
+  }
+
+  return value.slice(0, end);
+}
+
+function sanitizeLogMessage(value) {
+  return String(value).replaceAll(/[\u0000-\u001F\u007F\u2028\u2029]+/g, " ");
+}
+
+function createFetchTimeoutError(url, timeout) {
+  return new Error(`Timeout after ${timeout}ms while fetching ${url}`);
+}
+
+function readResponseBody(res) {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    res.setEncoding("utf8");
+    res.on("data", (chunk) => {
+      body += chunk;
+    });
+    res.on("end", () => {
+      resolve(body);
+    });
+    res.on("error", reject);
+  });
+}
+
+function handleFetchResponse({
+  res,
+  url,
+  redirectCount,
+  timeout,
+  finish,
+  resolve,
+  reject,
+}) {
+  const statusCode = res.statusCode ?? 0;
+  const location = res.headers.location;
+
+  if (location && [301, 302, 303, 307, 308].includes(statusCode)) {
+    res.resume();
+    finish(() =>
+      resolve(
+        fetchJson(new URL(location, url).toString(), redirectCount + 1, timeout)
+      )
+    );
+    return;
+  }
+
+  if (statusCode === 404) {
+    res.resume();
+    finish(() => resolve(null));
+    return;
+  }
+
+  void readResponseBody(res)
+    .then((body) => {
+      if (statusCode < 200 || statusCode >= 300) {
+        finish(() =>
+          reject(
+            new Error(
+              `HTTP ${statusCode} while fetching ${url}${
+                body ? `: ${body.slice(0, 200)}` : ""
+              }`
+            )
+          )
+        );
+        return;
+      }
+
+      if (!body.trim()) {
+        finish(() => resolve(null));
+        return;
+      }
+
+      try {
+        finish(() => resolve(JSON.parse(body)));
+      } catch (error) {
+        finish(() =>
+          reject(
+            new Error(
+              `Invalid JSON returned from ${url}: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            )
+          )
+        );
+      }
+    })
+    .catch((error) => {
+      finish(() => reject(error));
+    });
+}
+
+function fetchJson(url, redirectCount = 0, timeout = 10000) {
+  return new Promise((resolve, reject) => {
+    if (redirectCount > 5) {
+      reject(new Error(`Too many redirects while fetching ${url}`));
+      return;
+    }
+
+    const parsedUrl = new URL(url);
+    const client = parsedUrl.protocol === "http:" ? http : https;
+    let settled = false;
+    const finish = (callback) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      callback();
+    };
+    const req = client.request(
+      parsedUrl,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      },
+      (res) => {
+        handleFetchResponse({
+          res,
+          url,
+          redirectCount,
+          timeout,
+          finish,
+          resolve,
+          reject,
+        });
+      }
+    );
+
+    req.on("error", (error) => {
+      finish(() => reject(error));
+    });
+    req.setTimeout(timeout, () => {
+      const timeoutError = createFetchTimeoutError(url, timeout);
+      req.destroy(timeoutError);
+      finish(() => reject(timeoutError));
+    });
+    req.end();
+  });
+}
+
+async function resolveRemoteBuildMetadata(baseEndpoint, commit) {
+  const versionUrl = `${trimTrailingSlashes(baseEndpoint)}/version.json`;
+
+  try {
+    const remote = await fetchJson(versionUrl);
+    let remoteCommit = "";
+    if (typeof remote?.commit === "string") {
+      remoteCommit = remote.commit.trim();
+    } else if (typeof remote?.version === "string") {
+      remoteCommit = remote.version.trim();
+    }
+    const remoteBuild =
+      typeof remote?.build === "number" &&
+      Number.isFinite(remote.build) &&
+      remote.build >= 1
+        ? Math.trunc(remote.build)
+        : 0;
+
+    if (remoteCommit === commit) {
+      return {
+        build: remoteBuild > 0 ? remoteBuild + 1 : 2,
+        remoteVersionUrl: versionUrl,
+      };
+    }
+
+    return {
+      build: 1,
+      remoteVersionUrl: versionUrl,
+    };
+  } catch (error) {
+    console.warn(
+      `Unable to read remote version manifest at ${versionUrl}; defaulting to build 1`
+    );
+    if (error instanceof Error && error.message) {
+      console.warn(sanitizeLogMessage(error.message));
+    }
+    return {
+      build: 1,
+      remoteVersionUrl: versionUrl,
+    };
+  }
+}
+
+function createTempDir(prefix) {
+  return mkdtempSync(path.join(os.tmpdir(), prefix));
+}
+
+function resolveCloudFrontDistributionIdByAlias(hostname, awsExecutablePath) {
+  const query = `DistributionList.Items[?Aliases.Items[?@ == '${hostname}']].Id`;
+  const proc = spawnSync(
+    awsExecutablePath,
+    ["cloudfront", "list-distributions", "--query", query, "--output", "text"],
+    {
+      cwd: rootDir,
+      encoding: "utf8",
+    }
+  );
+  if (proc.error) {
+    console.warn(proc.error.message);
+    return null;
+  }
+  if (proc.status !== 0) {
+    console.warn(
+      proc.stderr?.trim() || "aws cloudfront list-distributions failed"
+    );
+    return null;
+  }
+  const text = proc.stdout.trim();
+  if (!text) {
+    console.warn(`No CloudFront distribution matched alias "${hostname}"`);
+    return null;
+  }
+  const ids = text.split(/\s+/).filter(Boolean);
+  if (ids.length !== 1) {
+    console.warn(
+      `Expected exactly one CloudFront distribution for alias "${hostname}", found ${ids.length}`
+    );
+    return null;
+  }
+  return ids[0] ?? null;
+}
+
+function ensureDirClean(dir) {
+  rmSync(dir, { recursive: true, force: true });
+}
+
+function copyDirectoryContents(fromDir, toDir) {
+  mkdirSync(toDir, { recursive: true });
+  const entries = readdirSync(fromDir, { withFileTypes: true });
+  for (const entry of entries) {
+    cpSync(path.join(fromDir, entry.name), path.join(toDir, entry.name), {
+      recursive: true,
+    });
+  }
+}
+
+function snapshotDirectory(sourceDir, tempRoot, name) {
+  if (!existsSync(sourceDir)) {
+    return null;
+  }
+
+  const snapshotDir = path.join(tempRoot, name);
+  copyDirectoryContents(sourceDir, snapshotDir);
+  return snapshotDir;
+}
+
+function replaceDirectoryContents(targetDir, sourceDir) {
+  ensureDirClean(targetDir);
+  mkdirSync(targetDir, { recursive: true });
+  copyDirectoryContents(sourceDir, targetDir);
+}
+
+function restoreDirectorySnapshot(targetDir, snapshotDir) {
+  if (!snapshotDir) {
+    ensureDirClean(targetDir);
+    return;
+  }
+
+  replaceDirectoryContents(targetDir, snapshotDir);
+}
+
+function createStandalonePublicAssetsSnapshot(tempRoot) {
+  const stagedPublicDir = path.join(tempRoot, "standalone-public");
+  mkdirSync(stagedPublicDir, { recursive: true });
+  for (const name of STANDALONE_PUBLIC_FILES) {
+    const from = path.join(rootPublicDir, name);
+    if (!existsSync(from)) {
+      throw new Error(`Missing required public asset for export: ${name}`);
+    }
+    const to = path.join(stagedPublicDir, name);
+    mkdirSync(path.dirname(to), { recursive: true });
+    copyFileSync(from, to);
+  }
+  return stagedPublicDir;
+}
+
+function removeEmptyDirectoriesUnder(root) {
+  const entries = readdirSync(root, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const fullPath = path.join(root, entry.name);
+    removeEmptyDirectoriesUnder(fullPath);
+  }
+  if (root === finalOutputDir) {
+    return;
+  }
+  if (readdirSync(root).length === 0) {
+    rmdirSync(root);
+  }
+}
+
+function removeSpuriousExportRoots(dir) {
+  for (const name of ["wp-content", "wp-includes"]) {
+    const fullPath = path.join(dir, name);
+    if (existsSync(fullPath)) {
+      rmSync(fullPath, { recursive: true, force: true });
+    }
+  }
+}
+
+function removeArtifacts(dir) {
+  const entries = readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      removeArtifacts(fullPath);
+      continue;
+    }
+
+    if (
+      entry.name === ".DS_Store" ||
+      entry.name === "index.txt" ||
+      entry.name.startsWith("__next.")
+    ) {
+      rmSync(fullPath, { force: true });
+    }
+  }
+}
+
+async function main() {
+  const { useTest, doSync } = parseArgs(process.argv.slice(2));
+  const tempRoot = createTempDir("standalone-mint-export-");
+  let appPublicBackupDir = null;
+  let stagedPublicDir = null;
+
+  const s3Bucket = useTest
+    ? process.env["STANDALONE_S3_BUCKET_TEST"]?.trim() || S3_BUCKET_TEST
+    : process.env["STANDALONE_S3_BUCKET_PROD"]?.trim() || S3_BUCKET_PROD;
+  const baseEndpoint = `https://${s3Bucket}`;
+  const mainSiteBase =
+    process.env["STANDALONE_MAIN_SITE_BASE"]?.trim() || "https://6529.io";
+  const commit = resolveStandaloneCommit();
+  const { build, remoteVersionUrl } = await resolveRemoteBuildMetadata(
+    baseEndpoint,
+    commit
+  );
+  const builtAt = new Date().toISOString();
+
+  try {
+    appPublicBackupDir = snapshotDirectory(
+      appPublicDir,
+      tempRoot,
+      "app-public-backup"
+    );
+    stagedPublicDir = createStandalonePublicAssetsSnapshot(tempRoot);
+    ensureDirClean(appBuildDir);
+    ensureDirClean(appTurboBuildDir);
+    replaceDirectoryContents(appPublicDir, stagedPublicDir);
+
+    run(
+      process.execPath,
+      [
+        path.join(rootDir, "node_modules", "next", "dist", "bin", "next"),
+        "build",
+        appDir,
+      ],
+      {
+        STANDALONE_BASE_ENDPOINT: baseEndpoint,
+        STANDALONE_MAIN_SITE_BASE: mainSiteBase,
+      }
+    );
+
+    if (!existsSync(path.join(appBuildDir, "index.html"))) {
+      throw new Error(
+        `Expected static export at ${appBuildDir}/index.html, but it was not created.`
+      );
+    }
+
+    const stagedFinalOutputDir = path.join(tempRoot, "dist");
+    copyDirectoryContents(appBuildDir, stagedFinalOutputDir);
+    writeFileSync(
+      path.join(stagedFinalOutputDir, "version.json"),
+      JSON.stringify(
+        {
+          commit,
+          build,
+          built_at: builtAt,
+          bucket: s3Bucket,
+          base_endpoint: baseEndpoint,
+          main_site_base: mainSiteBase,
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+    removeArtifacts(stagedFinalOutputDir);
+    removeSpuriousExportRoots(stagedFinalOutputDir);
+    removeEmptyDirectoriesUnder(stagedFinalOutputDir);
+
+    if (!existsSync(path.join(stagedFinalOutputDir, "index.html"))) {
+      throw new Error(
+        `Expected packaged artifact at ${stagedFinalOutputDir}/index.html, but it was not created.`
+      );
+    }
+
+    replaceDirectoryContents(finalOutputDir, stagedFinalOutputDir);
+
+    console.log(`Mint page export ready at ${finalOutputDir}`);
+    console.log(`BASE_ENDPOINT baked in: ${baseEndpoint}`);
+    console.log(`STANDALONE_MAIN_SITE_BASE baked in: ${mainSiteBase}`);
+    console.log(`Commit: ${commit}`);
+    console.log(`Build: ${build}`);
+    console.log(`Remote manifest checked: ${remoteVersionUrl}`);
+    console.log(`Version manifest: ${path.join(finalOutputDir, "version.json")}`);
+
+    if (doSync) {
+      const awsExecutablePath = resolveExecutablePath(
+        ["/usr/bin/aws", "/opt/homebrew/bin/aws", "/usr/local/bin/aws"],
+        "aws"
+      );
+      const distAbs = path.resolve(finalOutputDir);
+      const localPrefix = distAbs.endsWith(path.sep)
+        ? distAbs
+        : distAbs + path.sep;
+      console.log(`Syncing to s3://${s3Bucket}/ ...`);
+      run(awsExecutablePath, [
+        "s3",
+        "sync",
+        localPrefix,
+        `s3://${s3Bucket}/`,
+        "--delete",
+      ]);
+
+      const cloudFrontDistributionId = resolveCloudFrontDistributionIdByAlias(
+        s3Bucket,
+        awsExecutablePath
+      );
+      if (cloudFrontDistributionId) {
+        console.log(
+          `Creating CloudFront invalidation /* for distribution ${cloudFrontDistributionId} ...`
+        );
+        run(awsExecutablePath, [
+          "cloudfront",
+          "create-invalidation",
+          "--distribution-id",
+          cloudFrontDistributionId,
+          "--paths",
+          "/*",
+        ]);
+      } else {
+        console.warn(
+          "CloudFront invalidation skipped: list-distributions --query returned no id (CNAMEs vs bucket hostname, IAM, or pagination)"
+        );
+      }
+    }
+  } finally {
+    restoreDirectorySnapshot(appPublicDir, appPublicBackupDir);
+    ensureDirClean(tempRoot);
+  }
+}
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});

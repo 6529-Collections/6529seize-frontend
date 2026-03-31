@@ -1,6 +1,6 @@
 "use client";
 
-import type { RefObject} from "react";
+import type { RefObject } from "react";
 import { useEffect } from "react";
 
 interface UseIntersectionObserverOptions extends IntersectionObserverInit {
@@ -41,6 +41,7 @@ export function useIntersectionObserver(
     };
   }, [
     targetRef,
+    options.root,
     options.rootMargin,
     options.threshold,
     enabled,

@@ -24,12 +24,12 @@
 }
 
 .heightFull {
-  max-height: calc(90vh - variables.$header-height) !important;
+  max-height: 90vh !important;
 
   iframe,
   video,
   model-viewer {
-    height: calc(90vh - variables.$header-height) !important;
+    height: 90vh !important;
     max-width: 90vw;
   }
 }

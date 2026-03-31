@@ -1,4 +1,4 @@
-name: Build - Upload to S3 - Deploy to Elastic Beanstalk
+name: Web Deploy - PROD
 
 on: workflow_dispatch
 
@@ -8,7 +8,6 @@ env:
   AWS_REGION: "us-east-1"
   BEANSTALK_APP_NAME: "seize app"
   BEANSTALK_ENV_NAME: "seizeapp-env-node22"
-  NODE_ENV: "production"
   API_ENDPOINT: "https://api.6529.io"
   WS_ENDPOINT: "wss://ws.6529.io"
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
@@ -34,7 +33,13 @@ jobs:
           node-version: "22"
 
       - name: Install dependencies
-        run: npm install --also=dev
+        run: npm ci
+
+      - name: Verify registry signatures
+        run: npm audit signatures
+
+      - name: Lint package.json versions
+        run: npm run lint:package-json
 
       - name: Build App
         env:
@@ -49,6 +54,7 @@ jobs:
           AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
           AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
           AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
           ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}

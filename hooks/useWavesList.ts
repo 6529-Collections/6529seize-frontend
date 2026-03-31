@@ -43,7 +43,7 @@ const useWavesList = () => {
     }
 
     const normalizedAddress = address.toLowerCase();
-    if (activeProfileProxy?.id) {
+    if (activeProfileProxy?.id != null) {
       return `${normalizedAddress}:proxy:${activeProfileProxy.id}`;
     }
 

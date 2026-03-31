@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback } from "react";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useWaves } from "@/hooks/useWaves";
 import CircleLoader, {
   CircleLoaderSize,
@@ -12,9 +11,10 @@ import { WaveCreatorPreviewItem } from "./WaveCreatorPreviewItem";
 import { shortenAddress } from "@/helpers/address.helpers";
 import { useRouter } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { WaveCreatorPreviewUser } from "./waveCreatorPreview.types";
 
 interface WaveCreatorPreviewModalContentProps {
-  readonly user: ApiProfileMin;
+  readonly user: WaveCreatorPreviewUser;
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly isApp?: boolean | undefined;
@@ -73,11 +73,11 @@ export const WaveCreatorPreviewModalContent: React.FC<
   return (
     <div className="tailwind-scope tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-white/5 tw-bg-[#0E1012] tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
       <div
-        className={`tw-relative tw-z-[100] tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between ${
+        className={`tw-relative tw-z-[100] tw-flex tw-items-start tw-justify-between tw-gap-4 sm:tw-items-center ${
           isApp ? "tw-px-6 tw-py-4" : "tw-p-6"
         } tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/60`}
       >
-        <div>
+        <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl">
             Waves by {displayName}
           </div>

@@ -19,7 +19,6 @@ interface WaveDropsMessageListSectionProps {
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
   readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly onTopIntersection: () => void;
-  readonly onScroll?: (() => void) | undefined;
   readonly onReply: ({
     drop,
     partId,
@@ -59,7 +58,6 @@ export const WaveDropsMessageListSection: React.FC<
   bottomAnchorRef,
   bottomAnchorCallbackRef,
   onTopIntersection,
-  onScroll,
   onReply,
   queueSerialTarget,
   activeDrop,
@@ -95,7 +93,6 @@ export const WaveDropsMessageListSection: React.FC<
         hasNextPage={hasNextPage}
         onTopIntersection={onTopIntersection}
         bottomPaddingClassName={bottomPaddingClassName}
-        onScroll={onScroll}
       >
         <DropsList
           scrollContainerRef={scrollContainerRef}

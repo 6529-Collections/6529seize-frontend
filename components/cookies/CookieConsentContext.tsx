@@ -17,16 +17,20 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
-import { AuthContext } from "../auth/Auth";
+import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
 
 const GTM_ID = "G-71NLVV3KY3";
 
+type CookieConsent = boolean | undefined;
+
 type CookieConsentContextType = {
   showCookieConsent: boolean;
   country: string;
+  performanceConsent: CookieConsent;
   consent: () => void;
   reject: () => void;
 };
@@ -52,9 +56,8 @@ export const useCookieConsent = () => {
 
 type CookieConsentProviderProps = {
   children: ReactNode;
+  disabled?: boolean;
 };
-
-type CookieConsent = boolean | undefined;
 
 export const getCookieConsentByName = (name: string): CookieConsent => {
   const cookie = Cookies.get(name);
@@ -69,12 +72,21 @@ export const getCookieConsentByName = (name: string): CookieConsent => {
 
 export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   children,
+  disabled = false,
 }) => {
-  const { setToast } = useContext(AuthContext);
+  const { setToast } = useAuth();
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [country, setCountry] = useState("");
+  const [performanceConsent, setPerformanceConsent] =
+    useState<CookieConsent>(undefined);
+  const performanceScriptsLoadedRef = useRef(false);
 
   const loadPerformanceCookies = useCallback(() => {
+    if (performanceScriptsLoadedRef.current) {
+      return;
+    }
+    performanceScriptsLoadedRef.current = true;
+
     const script1 = document.createElement("script");
     script1.src = `https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`;
     script1.async = true;
@@ -101,6 +113,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         const performanceCookies = getCookieConsentByName(
           CONSENT_PERFORMANCE_COOKIE
         );
+        setPerformanceConsent(performanceCookies);
 
         if (performanceCookies) {
           loadPerformanceCookies();
@@ -168,19 +181,49 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
     }
   }, [getCookieConsent, setToast]);
 
+  const noopConsent = useCallback(async () => {}, []);
+  const noopReject = useCallback(async () => {}, []);
+
   const value = useMemo(
-    () => ({ consent, reject, showCookieConsent, country }),
-    [consent, reject, showCookieConsent, country]
+    () =>
+      disabled
+        ? {
+            consent: noopConsent,
+            reject: noopReject,
+            showCookieConsent: false,
+            country: "US",
+            performanceConsent: false as CookieConsent,
+          }
+        : {
+            consent,
+            reject,
+            showCookieConsent,
+            country,
+            performanceConsent,
+          },
+    [
+      disabled,
+      noopConsent,
+      noopReject,
+      consent,
+      reject,
+      showCookieConsent,
+      country,
+      performanceConsent,
+    ]
   );
 
   useEffect(() => {
+    if (disabled) {
+      return;
+    }
     getCookieConsent(true);
-  }, [getCookieConsent]);
+  }, [disabled, getCookieConsent]);
 
   return (
     <CookieConsentContext.Provider value={value}>
       {children}
-      {showCookieConsent && <CookiesBanner />}
+      {!disabled && showCookieConsent && <CookiesBanner />}
     </CookieConsentContext.Provider>
   );
 };

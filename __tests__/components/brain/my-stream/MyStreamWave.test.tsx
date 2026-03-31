@@ -34,6 +34,12 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveOutcome", () => ({
   default: () => <div data-testid="outcome" />,
 }));
 
+const mockMyStreamWaveSales = jest.fn(() => <div data-testid="sales" />);
+jest.mock("@/components/brain/my-stream/MyStreamWaveSales", () => ({
+  __esModule: true,
+  default: (props: any) => mockMyStreamWaveSales(props),
+}));
+
 jest.mock("@/components/waves/winners/WaveWinners", () => ({
   __esModule: true,
   WaveWinners: ({ onDropClick }: any) => (
@@ -152,5 +158,13 @@ describe("MyStreamWave", () => {
     useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.CHAT });
     render(<MyStreamWave waveId="1" />);
     expect(screen.getByTestId("tabs")).toHaveTextContent("1");
+  });
+
+  it("renders sales placeholder when SALES tab is active", () => {
+    useWaveData.mockReturnValue({ data: wave });
+    useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.SALES });
+    render(<MyStreamWave waveId="1" />);
+    expect(screen.getByTestId("sales")).toBeInTheDocument();
+    expect(mockMyStreamWaveSales).toHaveBeenCalledWith({ waveId: "1" });
   });
 });

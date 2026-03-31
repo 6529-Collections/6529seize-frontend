@@ -1,15 +1,16 @@
-import type { Config } from "tailwindcss";
-import plugin from "tailwindcss/plugin";
 import forms from "@tailwindcss/forms";
-import scrollbar from "tailwind-scrollbar";
 import containerQueries from "@tailwindcss/container-queries";
+import plugin from "tailwindcss/plugin";
+import scrollbar from "tailwind-scrollbar";
+import type { Config } from "tailwindcss";
 
-export default {
+const tailwindConfig: Config = {
   darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
+    "./standalone/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   prefix: "tw-",
   corePlugins: {
@@ -163,6 +164,14 @@ export default {
             opacity: "0.98",
           },
         },
+        "spin-y": {
+          "0%": {
+            transform: "translateZ(0) rotateY(0deg)",
+          },
+          "100%": {
+            transform: "translateZ(0) rotateY(360deg)",
+          },
+        },
       },
       animation: {
         "loading-bar": "loading-bar 1.5s infinite",
@@ -178,6 +187,7 @@ export default {
           "gallery-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards",
         "fade-in-out": "fade-in-out 2s ease-in-out infinite alternate",
         "heart-beat-soft": "heart-beat-soft 2.8s ease-in-out infinite",
+        "spin-y": "spin-y 4s linear infinite",
       },
       backgroundSize: {
         "gradient-pos": "200% 200%",
@@ -192,9 +202,9 @@ export default {
     scrollbar({ nocompatible: true }),
     containerQueries,
     plugin(({ addVariant }) => {
-      // Use any-* queries so hybrid devices (touchscreen + trackpad/mouse) still
-      // get hover styles even if the primary pointer is coarse.
       addVariant("desktop-hover", "@media (any-hover: hover)");
     }),
   ],
-} satisfies Config;
+};
+
+export default tailwindConfig;

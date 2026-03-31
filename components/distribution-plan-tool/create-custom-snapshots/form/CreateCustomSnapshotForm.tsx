@@ -25,7 +25,7 @@ import CreateCustomSnapshotFormAddWalletsModal from "./CreateCustomSnapshotFormA
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 
 const MAX_CUSTOM_SNAPSHOT_ROWS = 100000;
-const CUSTOM_SNAPSHOT_CHUNK_SIZE = 500;
+const CUSTOM_SNAPSHOT_CHUNK_SIZE = 5000;
 
 export default function CreateCustomSnapshotForm() {
   const { distributionPlan, setToasts, fetchOperations } = useContext(

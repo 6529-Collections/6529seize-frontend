@@ -14,7 +14,7 @@ export interface MinimalWave {
   type: ApiWaveType;
   newDropsCount: MinimalWaveNewDropsCount;
   picture: string | null;
-  contributors: { pfp: string }[];
+  contributors: { pfp: string; identity: string }[];
   isPinned: boolean;
   isMuted: boolean;
   unreadDropsCount: number;
@@ -165,9 +165,9 @@ function useEnhancedWavesListCore(
         picture: wave.picture,
         contributors: wave.contributors_overview.map((c) => ({
           pfp: c.contributor_pfp,
+          identity: c.contributor_identity,
         })),
         newDropsCount: newDrops,
-        // Prefer isPinned (computed optimistic value from useWavesList) over pinned (raw server field)
         isPinned: options.supportsPinning
           ? (wave.isPinned ?? wave.pinned ?? false)
           : false,

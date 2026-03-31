@@ -1,166 +1,417 @@
 "use client";
 
-import { DistributionPlanTokenPoolDownloadStatus } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { DistributionPlanTokenPoolDownload } from "@/components/allowlist-tool/allowlist-tool.types";
+import {
+  DistributionPlanTokenPoolDownloadStage,
+  DistributionPlanTokenPoolDownloadStatus,
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import AllowlistToolLoader, {
+  AllowlistToolLoaderSize,
+} from "@/components/allowlist-tool/common/AllowlistToolLoader";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 import DistributionPlanDeleteOperationButton from "@/components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton";
 import { truncateTextMiddle } from "@/helpers/AllowlistToolHelpers";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
 import type { CreateSnapshotSnapshot } from "../CreateSnapshots";
 import CreateSnapshotTableRowDownload from "./CreateSnapshotTableRowDownload";
+import CreateSnapshotTableRowRetry from "./CreateSnapshotTableRowRetry";
+
+type CopyableField = "contract" | "blockNo" | "consolidatedBlockNo" | null;
+type ExecutionPath = "FAST" | "SLOW";
+
+const truncateMessage = (message: string, max = 110): string =>
+  message.length > max ? `${message.slice(0, max - 3)}...` : message;
+
+const getStatusLabel = (
+  download: DistributionPlanTokenPoolDownload | null
+): string => {
+  if (!download) {
+    return "Starting";
+  }
+  if (download.status === DistributionPlanTokenPoolDownloadStatus.COMPLETED) {
+    return "Completed";
+  }
+  if (download.stale) {
+    return "Stalled";
+  }
+  if (download.rawStatus === DistributionPlanTokenPoolDownloadStatus.FAILED) {
+    return "Failed";
+  }
+  if (
+    download.failureCount > 0 &&
+    [
+      DistributionPlanTokenPoolDownloadStatus.PENDING,
+      DistributionPlanTokenPoolDownloadStatus.CLAIMED,
+    ].includes(download.rawStatus)
+  ) {
+    return "Retrying";
+  }
+  if (download.rawStatus === DistributionPlanTokenPoolDownloadStatus.CLAIMED) {
+    return "Processing";
+  }
+  return "Queued";
+};
+
+const getStatusClasses = (
+  download: DistributionPlanTokenPoolDownload | null
+): string => {
+  if (!download) {
+    return "tw-bg-primary-400/10 tw-text-primary-300";
+  }
+  if (download.status === DistributionPlanTokenPoolDownloadStatus.COMPLETED) {
+    return "tw-bg-[#EAFAE4]/10 tw-text-success";
+  }
+  if (
+    download.stale ||
+    download.rawStatus === DistributionPlanTokenPoolDownloadStatus.FAILED
+  ) {
+    return "tw-bg-[#312524] tw-text-[#FF6A55]";
+  }
+  if (download.failureCount > 0) {
+    return "tw-bg-[#4C3A19] tw-text-[#F5C66D]";
+  }
+  return "tw-bg-primary-400/10 tw-text-primary-300";
+};
+
+const getStageLabel = (
+  download: DistributionPlanTokenPoolDownload | null
+): string => {
+  if (!download) {
+    return "Waiting for first status update";
+  }
+  switch (download.stage) {
+    case undefined:
+      if (
+        download.rawStatus === DistributionPlanTokenPoolDownloadStatus.CLAIMED
+      ) {
+        return "Worker is processing the snapshot";
+      }
+      if (
+        download.rawStatus === DistributionPlanTokenPoolDownloadStatus.PENDING
+      ) {
+        return "Queued for processing";
+      }
+      return "No stage available yet";
+    case DistributionPlanTokenPoolDownloadStage.PREPARING:
+      return "Preparing snapshot job";
+    case DistributionPlanTokenPoolDownloadStage.REQUEUED:
+      return "Re-queued for another pass";
+    case DistributionPlanTokenPoolDownloadStage.CLAIMED:
+      return "Worker claimed snapshot job";
+    case DistributionPlanTokenPoolDownloadStage.CHECKING_ALCHEMY:
+      return "Checking archive-node availability";
+    case DistributionPlanTokenPoolDownloadStage.INDEXING_SINGLE:
+      return "Indexing single transfers";
+    case DistributionPlanTokenPoolDownloadStage.INDEXING_BATCH:
+      return "Indexing batch transfers";
+    case DistributionPlanTokenPoolDownloadStage.BUILDING_TOKEN_OWNERS:
+      return "Building holder state";
+    case DistributionPlanTokenPoolDownloadStage.PERSISTING_RESULTS:
+      return "Saving snapshot results";
+    case DistributionPlanTokenPoolDownloadStage.COMPLETED:
+      return "Snapshot ready";
+    case DistributionPlanTokenPoolDownloadStage.FAILED:
+      return "Snapshot failed";
+  }
+};
+
+const getProgressNumber = (
+  download: DistributionPlanTokenPoolDownload | null,
+  key: string
+): number | null => {
+  if (!download?.progress) {
+    return null;
+  }
+  const value = download.progress[key];
+  return typeof value === "number" ? value : null;
+};
+
+const getExecutionPath = (
+  download: DistributionPlanTokenPoolDownload | null
+): ExecutionPath | null => {
+  if (!download?.progress) {
+    return null;
+  }
+  const value = download.progress["executionPath"];
+  if (value === "FAST" || value === "SLOW") {
+    return value;
+  }
+  return null;
+};
+
+const getExecutionPathLabel = (
+  executionPath: ExecutionPath | null
+): string | null => {
+  if (executionPath === "FAST") {
+    return "Fast path";
+  }
+  if (executionPath === "SLOW") {
+    return "Slow path";
+  }
+  return null;
+};
+
+const getExecutionPathClasses = (
+  executionPath: ExecutionPath | null
+): string => {
+  if (executionPath === "FAST") {
+    return "tw-bg-[#203425] tw-text-[#8CE8A4]";
+  }
+  if (executionPath === "SLOW") {
+    return "tw-bg-[#332819] tw-text-[#F5C66D]";
+  }
+  return "";
+};
+
+const getProgressSummary = (
+  download: DistributionPlanTokenPoolDownload | null
+): string => {
+  if (!download) {
+    return "Waiting for the snapshot job to be created";
+  }
+  const currentBlockNo = getProgressNumber(download, "currentBlockNo");
+  const targetBlockNo = getProgressNumber(download, "targetBlockNo");
+  if (currentBlockNo !== null && targetBlockNo !== null) {
+    return `Current block ${currentBlockNo.toLocaleString()} / ${targetBlockNo.toLocaleString()}`;
+  }
+  if (currentBlockNo !== null) {
+    return `Current block ${currentBlockNo.toLocaleString()}`;
+  }
+  const latestFetchedBlockNo = getProgressNumber(
+    download,
+    "latestFetchedBlockNo"
+  );
+  if (latestFetchedBlockNo !== null && targetBlockNo !== null) {
+    return `Indexed block ${latestFetchedBlockNo.toLocaleString()} / ${targetBlockNo.toLocaleString()}`;
+  }
+  const tokenOwnershipsCount = getProgressNumber(
+    download,
+    "tokenOwnershipsCount"
+  );
+  if (tokenOwnershipsCount !== null) {
+    return `Prepared ${tokenOwnershipsCount.toLocaleString()} token ownerships`;
+  }
+  const transfersPersisted = getProgressNumber(download, "transfersPersisted");
+  if (transfersPersisted !== null) {
+    return `Saved ${transfersPersisted.toLocaleString()} transfers in the latest batch`;
+  }
+  const blockNo = getProgressNumber(download, "blockNo");
+  if (blockNo !== null) {
+    return `Target block ${blockNo.toLocaleString()}`;
+  }
+  if (download.status === DistributionPlanTokenPoolDownloadStatus.COMPLETED) {
+    return "Snapshot holders are ready to use";
+  }
+  if (download.retryable) {
+    return "Needs retry or removal before the plan can continue";
+  }
+  return "Progress data will appear here as the job advances";
+};
+
+const getReferenceTime = (
+  download: DistributionPlanTokenPoolDownload | null
+): number | null =>
+  download?.lastHeartbeatAt ??
+  download?.updatedAt ??
+  download?.claimedAt ??
+  download?.createdAt ??
+  null;
+
+const getActivitySummary = (
+  download: DistributionPlanTokenPoolDownload | null
+): string | null => {
+  if (!download) {
+    return null;
+  }
+  const pieces: string[] = [];
+  const referenceTime = getReferenceTime(download);
+  if (referenceTime !== null) {
+    pieces.push(`Updated ${formatActivityTime(referenceTime)}`);
+  }
+  if (download.attemptCount > 0) {
+    pieces.push(`Attempt ${download.attemptCount}`);
+  }
+  if (download.failureCount > 0) {
+    pieces.push(`Failed ${download.failureCount}x`);
+  }
+  return pieces.length ? pieces.join(" • ") : null;
+};
+
+const getCurrentIssue = (
+  download: DistributionPlanTokenPoolDownload | null
+): string | null => {
+  if (!download?.errorReason) {
+    return null;
+  }
+  if (
+    download.retryable ||
+    download.rawStatus === DistributionPlanTokenPoolDownloadStatus.FAILED
+  ) {
+    return truncateMessage(download.errorReason);
+  }
+  return null;
+};
+
+const getPreviousFailure = (
+  download: DistributionPlanTokenPoolDownload | null
+): string | null => {
+  if (
+    !download ||
+    download.failureCount < 1 ||
+    typeof download.lastFailureReason !== "string" ||
+    download.lastFailureReason.length === 0
+  ) {
+    return null;
+  }
+  const failureTime =
+    download.lastFailureAt === undefined
+      ? ""
+      : ` at ${formatActivityTime(download.lastFailureAt)}`;
+  return `Previous failure${failureTime}: ${truncateMessage(
+    download.lastFailureReason
+  )}`;
+};
+
+const formatActivityTime = (timestamp: number): string =>
+  new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(timestamp));
 
 export default function CreateSnapshotTableRow({
   snapshot,
+  refreshDownloads,
 }: {
   snapshot: CreateSnapshotSnapshot;
+  refreshDownloads: () => Promise<void>;
 }) {
   const [_, copyToClipboard] = useCopyToClipboard();
-  const getContractTruncated = () => {
-    if (!snapshot.contract) {
-      return "";
-    }
-    return truncateTextMiddle(snapshot.contract, 11);
+  const download = snapshot.download;
+  const [copiedField, setCopiedField] = useState<CopyableField>(null);
+
+  let contractText = "";
+  if (copiedField === "contract") {
+    contractText = "Copied";
+  } else if (snapshot.contract !== null) {
+    contractText = truncateTextMiddle(snapshot.contract, 11);
+  }
+  const blockNo = snapshot.blockNo?.toString() ?? "";
+  const blockNoText = copiedField === "blockNo" ? "Copied" : blockNo;
+  const consolidatedBlockNo = snapshot.consolidateBlockNo?.toString() ?? "";
+  const haveConsolidatedBlockNo = consolidatedBlockNo.length > 0;
+  const consolidatedBlockNoText =
+    copiedField === "consolidatedBlockNo" ? "Copied" : consolidatedBlockNo;
+  const tokenIdsTooltip = snapshot.tokenIds ?? "All";
+  let tokenIdsTruncated = "All";
+  if (snapshot.tokenIds !== null) {
+    tokenIdsTruncated =
+      snapshot.tokenIds.length > 20
+        ? truncateTextMiddle(snapshot.tokenIds, 20)
+        : snapshot.tokenIds;
+  }
+
+  const setCopied = (field: Exclude<CopyableField, null>) => {
+    setCopiedField(field);
+    globalThis.setTimeout(() => {
+      setCopiedField((currentField) =>
+        currentField === field ? null : currentField
+      );
+    }, 3000);
   };
-  const [contractText, setContractText] = useState<string>(
-    getContractTruncated()
-  );
 
   const copyContract = () => {
-    if (!snapshot.contract) {
+    if (snapshot.contract === null) {
       return;
     }
     copyToClipboard(snapshot.contract);
-    setContractText("Copied");
-    setTimeout(() => setContractText(getContractTruncated()), 3000);
+    setCopied("contract");
   };
 
-  const [blockNo, setBlockNo] = useState<string>(
-    snapshot.blockNo?.toString() ?? ""
-  );
-
-  useEffect(() => {
-    setBlockNo(snapshot.blockNo?.toString() ?? "");
-  }, [snapshot.blockNo]);
-
-  const [blockNoText, setBlockNoText] = useState<string>(blockNo);
   const copyBlockNumber = () => {
+    if (blockNo.length === 0) {
+      return;
+    }
     copyToClipboard(blockNo);
-    setBlockNoText("Copied");
-    setTimeout(() => setBlockNoText(blockNo), 3000);
+    setCopied("blockNo");
   };
-
-  const [consolidatedBlockNo, setConsolidatedBlockNo] = useState<string>(
-    snapshot.consolidateBlockNo?.toString() ?? ""
-  );
-
-  const [haveConsolidatedBlockNo, setHaveConsolidatedBlockNo] =
-    useState<boolean>(false);
-
-  useEffect(
-    () => setHaveConsolidatedBlockNo(!!consolidatedBlockNo.length),
-    [consolidatedBlockNo]
-  );
-
-  useEffect(() => {
-    setConsolidatedBlockNo(snapshot.consolidateBlockNo?.toString() ?? "");
-  }, [snapshot.consolidateBlockNo]);
-
-  const [consolidatedBlockNoText, setConsolidatedBlockNoText] =
-    useState<string>(consolidatedBlockNo);
 
   const copyConsolidatedBlockNumber = () => {
     if (!haveConsolidatedBlockNo) {
       return;
     }
     copyToClipboard(consolidatedBlockNo);
-    setConsolidatedBlockNoText("Copied");
-    setTimeout(() => setConsolidatedBlockNoText(consolidatedBlockNo), 3000);
+    setCopied("consolidatedBlockNo");
   };
 
-  const [tokenIdsTruncated, setTokenIdsTruncated] = useState<string>("");
-  const [tokenIdsTooltip, setTokenIdsTooltip] = useState<string>("");
-  useEffect(() => {
-    if (!snapshot.tokenIds) {
-      setTokenIdsTruncated("All");
-      setTokenIdsTooltip("All");
-      return;
-    }
-    setTokenIdsTooltip(snapshot.tokenIds);
-    if (snapshot.tokenIds.length > 20) {
-      setTokenIdsTruncated(truncateTextMiddle(snapshot.tokenIds, 20));
-      return;
-    }
-    setTokenIdsTruncated(snapshot.tokenIds);
-  }, [snapshot.tokenIds]);
-
-  const [isGeneratingSnapshot, setIsGeneratingSnapshot] =
-    useState<boolean>(false);
-
-  useEffect(() => {
-    if (
-      !snapshot.downloaderStatus ||
-      ![
-        DistributionPlanTokenPoolDownloadStatus.COMPLETED,
-        DistributionPlanTokenPoolDownloadStatus.FAILED,
-      ].includes(snapshot.downloaderStatus)
-    ) {
-      setIsGeneratingSnapshot(true);
-      return;
-    }
-    setIsGeneratingSnapshot(false);
-  }, [snapshot.downloaderStatus]);
-
-  const [isCompleted, setIsCompleted] = useState<boolean>(false);
-  useEffect(() => {
-    if (
-      !snapshot.downloaderStatus ||
-      snapshot.downloaderStatus !==
-        DistributionPlanTokenPoolDownloadStatus.COMPLETED
-    ) {
-      setIsCompleted(false);
-      return;
-    }
-    setIsCompleted(true);
-  }, [snapshot.downloaderStatus]);
+  const isCompleted =
+    download?.status === DistributionPlanTokenPoolDownloadStatus.COMPLETED;
+  const showSpinner =
+    !download ||
+    (!download.stale &&
+      [
+        DistributionPlanTokenPoolDownloadStatus.PENDING,
+        DistributionPlanTokenPoolDownloadStatus.CLAIMED,
+      ].includes(download.rawStatus));
+  const currentIssue = getCurrentIssue(download);
+  const previousFailure = getPreviousFailure(download);
+  const activitySummary = getActivitySummary(download);
+  const executionPath = getExecutionPath(download);
+  const executionPathLabel = getExecutionPathLabel(executionPath);
 
   return (
     <DistributionPlanTableRowWrapper>
       <td className="tw-whitespace-nowrap tw-py-4 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-white sm:tw-pl-6">
         {snapshot.name}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300">
-        {isGeneratingSnapshot ? (
-          <svg
-            aria-hidden="true"
-            role="status"
-            className="tw-h-5 tw-w-5 tw-animate-spin tw-text-primary-400"
-            viewBox="0 0 100 101"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              className="tw-text-iron-600"
-              d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-              fill="currentColor"
-            ></path>
-            <path
-              d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-              fill="currentColor"
-            ></path>
-          </svg>
-        ) : (
-          <span
-            className={`tw-mr-2 tw-rounded-md tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-medium ${
-              snapshot.downloaderStatus ===
-              DistributionPlanTokenPoolDownloadStatus.COMPLETED
-                ? "tw-bg-[#EAFAE4]/10 tw-text-success"
-                : "tw-bg-[#312524] tw-text-[#FF6A55]"
-            }`}
-          >
-            {snapshot.downloaderStatus}
-          </span>
-        )}
+      <td className="tw-px-3 tw-py-4 tw-text-sm tw-font-normal tw-text-iron-300">
+        <div className="tw-flex tw-min-w-[15rem] tw-flex-col tw-gap-y-1.5">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            {showSpinner && (
+              <AllowlistToolLoader size={AllowlistToolLoaderSize.SMALL} />
+            )}
+            <span
+              className={`tw-inline-flex tw-rounded-md tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-medium ${getStatusClasses(
+                download
+              )}`}
+            >
+              {getStatusLabel(download)}
+            </span>
+            {executionPathLabel && (
+              <span
+                className={`tw-inline-flex tw-rounded-md tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-medium ${getExecutionPathClasses(
+                  executionPath
+                )}`}
+              >
+                {executionPathLabel}
+              </span>
+            )}
+          </div>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-200">
+            {getStageLabel(download)}
+          </p>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {getProgressSummary(download)}
+          </p>
+          {activitySummary && (
+            <p className="tw-m-0 tw-text-xs tw-text-iron-500">
+              {activitySummary}
+            </p>
+          )}
+          {previousFailure && (
+            <p className="tw-m-0 tw-text-xs tw-text-[#F5C66D]">
+              {previousFailure}
+            </p>
+          )}
+          {currentIssue && (
+            <p className="tw-m-0 tw-text-xs tw-text-[#fcc5c1]">
+              {currentIssue}
+            </p>
+          )}
+        </div>
       </td>
       <td
         onClick={copyContract}
@@ -247,7 +498,7 @@ export default function CreateSnapshotTableRow({
       >
         {haveConsolidatedBlockNo && (
           <div className="tw-flex tw-h-full tw-items-center">
-            <span> {consolidatedBlockNoText}</span>
+            <span>{consolidatedBlockNoText}</span>
             <svg
               className="tw-ml-2.5 tw-h-5 tw-w-5 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-white"
               viewBox="0 0 24 24"
@@ -275,6 +526,13 @@ export default function CreateSnapshotTableRow({
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
           {isCompleted && (
             <CreateSnapshotTableRowDownload tokenPoolId={snapshot.id} />
+          )}
+          {download?.retryable && (
+            <CreateSnapshotTableRowRetry
+              allowlistId={snapshot.allowlistId}
+              tokenPoolId={snapshot.id}
+              refreshDownloads={refreshDownloads}
+            />
           )}
           <DistributionPlanDeleteOperationButton
             allowlistId={snapshot.allowlistId}

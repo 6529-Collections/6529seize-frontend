@@ -1,11 +1,20 @@
 import { AuthContext } from "@/components/auth/Auth";
 import WaveDropMobileMenu from "@/components/waves/drops/WaveDropMobileMenu";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
+  useDropInteractionRules: jest.fn(),
+}));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuDelete", () => () => (
   <div data-testid="delete" />
 ));
+jest.mock(
+  "@/components/waves/drops/WaveDropMobileMenuSetPinnedDrop",
+  () => () => <div data-testid="set-pinned-drop" />
+);
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => () => (
   <div data-testid="open" />
 ));
@@ -56,6 +65,21 @@ jest.doMock("@/config/env", () => ({
 beforeAll(() => {
   Object.assign(navigator, {
     clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
+  });
+});
+
+const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
+
+beforeEach(() => {
+  mockedUseDropInteractionRules.mockReturnValue({
+    canShowVote: true,
+    canVote: true,
+    voteState: "CAN_VOTE" as any,
+    canDelete: true,
+    canSetPinnedDrop: false,
+    isAuthor: true,
+    isWinner: false,
+    isVotingEnded: false,
   });
 });
 
@@ -125,4 +149,95 @@ test("hides follow and clap when author and memes wave", () => {
   expect(screen.queryByTestId("clap")).toBeNull();
   expect(screen.queryByTestId("toggle-link-preview")).toBeNull();
   expect(screen.getByTestId("delete")).toBeInTheDocument();
+});
+
+test("shows pinned-drop action in the mobile menu for admins", () => {
+  mockedUseDropInteractionRules.mockReturnValue({
+    canShowVote: true,
+    canVote: true,
+    voteState: "CAN_VOTE" as any,
+    canDelete: false,
+    canSetPinnedDrop: true,
+    isAuthor: false,
+    isWinner: false,
+    isVotingEnded: false,
+  });
+
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w", authenticated_user_admin: true },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "admin" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByTestId("set-pinned-drop")).toBeInTheDocument();
+  expect(screen.queryByTestId("delete")).toBeNull();
+});
+
+test("does not show pinned-drop action in the mobile menu for non-admins", () => {
+  mockedUseDropInteractionRules.mockReturnValue({
+    canShowVote: true,
+    canVote: true,
+    voteState: "CAN_VOTE" as any,
+    canDelete: true,
+    canSetPinnedDrop: false,
+    isAuthor: true,
+    isWinner: false,
+    isVotingEnded: false,
+  });
+
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w", authenticated_user_admin: false },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "alice" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
 });

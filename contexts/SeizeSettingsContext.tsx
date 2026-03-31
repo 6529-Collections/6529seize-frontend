@@ -1,11 +1,5 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
-import { fetchUrl } from "@/services/6529api";
-import type { ReactNode } from "react";
 import {
   createContext,
   useCallback,
@@ -15,6 +9,13 @@ import {
   useRef,
   useState,
 } from "react";
+import { publicEnv } from "@/config/env";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
+import { fetchUrl } from "@/services/6529api";
+import { SeizeSettingsMode } from "@/types/enums";
+import type { ReactNode } from "react";
 
 type TempApiSeizeSettings = ApiSeizeSettings & {
   curation_wave_id: string | null;
@@ -40,14 +41,18 @@ const SeizeSettingsContext = createContext<
 
 export const SeizeSettingsProvider = ({
   children,
+  mode = SeizeSettingsMode.REMOTE,
 }: {
   children: ReactNode;
+  mode?: SeizeSettingsMode;
 }) => {
   const [seizeSettings, setSeizeSettings] = useState<TempApiSeizeSettings>({
     rememes_submission_tdh_threshold: 0,
     all_drops_notifications_subscribers_limit: 0,
     memes_wave_id: null,
     curation_wave_id: null,
+    distribution_admin_wallets: [],
+    claims_admin_wallets: [],
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
@@ -67,13 +72,16 @@ export const SeizeSettingsProvider = ({
 
         if (!isMountedRef.current) return;
 
-        setSeizeSettings({
+        setSeizeSettings((previous) => ({
+          ...previous,
           ...settings,
+          distribution_admin_wallets: settings.distribution_admin_wallets ?? [],
+          claims_admin_wallets: settings.claims_admin_wallets ?? [],
           memes_wave_id:
             publicEnv.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
           curation_wave_id:
             publicEnv.DEV_MODE_CURATION_WAVE_ID ?? settings.curation_wave_id,
-        });
+        }));
         setLoadError(null);
         setIsLoaded(true);
       } catch (error) {
@@ -93,12 +101,24 @@ export const SeizeSettingsProvider = ({
   );
 
   useEffect(() => {
-    loadSeizeSettings();
+    isMountedRef.current = true;
+
+    if (mode === SeizeSettingsMode.LOCAL) {
+      setIsLoaded(true);
+
+      return () => {
+        isMountedRef.current = false;
+      };
+    }
+
+    // Initial load failures are exposed through `loadError`; do not leak
+    // them as unhandled promise rejections from the mount effect.
+    loadSeizeSettings().catch(() => undefined);
 
     return () => {
       isMountedRef.current = false;
     };
-  }, [loadSeizeSettings]);
+  }, [loadSeizeSettings, mode]);
 
   const { memes_wave_id, curation_wave_id } = seizeSettings;
 

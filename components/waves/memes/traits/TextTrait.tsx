@@ -1,9 +1,9 @@
 "use client";
 
-import type { TraitsData } from "../submission/types/TraitsData";
-import React, { useRef, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useDebounce } from "react-use";
 import { TraitWrapper } from "./TraitWrapper";
+import type { TraitsData } from "../submission/types/TraitsData";
 
 type TextTraitProps = {
   readonly label: string;
@@ -15,6 +15,8 @@ type TextTraitProps = {
   readonly className?: string | undefined;
   readonly error?: string | null | undefined;
   readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
+  readonly showRequiredMarker?: boolean | undefined;
+  readonly size?: "default" | "sm" | undefined;
 };
 
 /**
@@ -32,27 +34,29 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
     className,
     error,
     onBlur,
+    showRequiredMarker = false,
+    size = "default",
   }) => {
+    const currentTraitValue = ((traits[field] as string) ?? "").toString();
     // Use a ref to track the input element
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Track current input value for real-time checkmark updates
-    const [currentInputValue, setCurrentInputValue] = React.useState<string>(
-      (traits[field] as string) ?? ""
-    );
+    const [currentInputValue, setCurrentInputValue] =
+      React.useState<string>(currentTraitValue);
 
     // Debounced update function - stores the current input value for use in the debounced function
-    const [debouncedValue, setDebouncedValue] = React.useState<string>("");
+    const [debouncedValue, setDebouncedValue] =
+      React.useState<string>(currentTraitValue);
 
-    // Update traits when debounced value changes
     useDebounce(
       () => {
-        if (debouncedValue !== "" && debouncedValue !== traits[field]) {
+        if (debouncedValue !== currentTraitValue) {
           updateText(field, debouncedValue);
         }
       },
-      400, // 400ms is a good balance for typing pauses
-      [debouncedValue]
+      400,
+      [debouncedValue, currentTraitValue]
     );
 
     // Handle input changes with debounce
@@ -67,7 +71,8 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
 
     // Handle blur (when user finishes typing)
     const handleBlur = useCallback(() => {
-      if (inputRef.current && inputRef.current.value !== traits[field]) {
+      const currentTraitValue = ((traits[field] as string) ?? "").toString();
+      if (inputRef.current && inputRef.current.value !== currentTraitValue) {
         updateText(field, inputRef.current.value);
       }
       // Call parent onBlur if provided
@@ -78,7 +83,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
 
     // Synchronize the input value with props when traits change from outside
     React.useEffect(() => {
-      const value = (traits[field] as string) ?? "";
+      const value = ((traits[field] as string) ?? "").toString();
       if (inputRef.current && inputRef.current.value !== value) {
         inputRef.current.value = value;
       }
@@ -86,18 +91,15 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
 
     // Update currentInputValue when traits change from outside
     React.useEffect(() => {
-      const traitValue = (traits[field] as string) ?? "";
+      const traitValue = ((traits[field] as string) ?? "").toString();
       setCurrentInputValue(traitValue);
+      setDebouncedValue(traitValue);
     }, [traits, field]);
 
-    // Check if field is filled (non-empty trimmed value)
     const isFieldFilled = useMemo(() => {
-      const traitValue = (traits[field] as string) ?? "";
       const inputValue = currentInputValue ?? "";
-
-      // Return true if either the trait value or current input value has content
-      return traitValue.trim().length > 0 || inputValue.trim().length > 0;
-    }, [traits, field, currentInputValue]);
+      return inputValue.trim().length > 0;
+    }, [currentInputValue]);
 
     // Prepare input className - add padding for checkmark when field is filled
     const inputClassName = useMemo(() => {
@@ -105,9 +107,14 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
       let stateClassName: string;
       if (readOnly) {
         stateClassName =
-          "tw-bg-iron-700 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-300";
+          isFieldFilled
+            ? "tw-bg-iron-700 tw-ring-emerald-700/40 tw-text-iron-300 tw-opacity-70 tw-cursor-not-allowed"
+            : "tw-bg-iron-700 tw-ring-iron-700 tw-text-iron-300 tw-opacity-70 tw-cursor-not-allowed";
       } else if (error) {
         stateClassName = "tw-bg-iron-900 tw-ring-red tw-cursor-text";
+      } else if (isFieldFilled) {
+        stateClassName =
+          "tw-bg-iron-900 tw-ring-emerald-600/45 desktop-hover:hover:tw-ring-emerald-600/55 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
       } else {
         stateClassName =
           "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
@@ -116,8 +123,10 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
       // Determine padding for checkmark
       const paddingClassName = isFieldFilled && !error ? "tw-pr-10" : "";
 
-      return `tw-form-input tw-font-normal tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 ${stateClassName} ${paddingClassName}`;
-    }, [readOnly, error, isFieldFilled]);
+      const paddingBase =
+        size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5";
+      return `tw-form-input tw-font-normal tw-w-full tw-rounded-lg ${paddingBase} tw-text-base sm:tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 ${stateClassName} ${paddingClassName}`;
+    }, [readOnly, error, isFieldFilled, size]);
 
     return (
       <TraitWrapper
@@ -126,6 +135,8 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
         className={className}
         error={error}
         isFieldFilled={isFieldFilled}
+        showRequiredMarker={showRequiredMarker}
+        size={size}
       >
         <input
           ref={inputRef}
@@ -149,7 +160,9 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
       prevProps.readOnly === nextProps.readOnly &&
       prevProps.placeholder === nextProps.placeholder &&
       prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field] &&
-      prevProps.error === nextProps.error
+      prevProps.error === nextProps.error &&
+      prevProps.showRequiredMarker === nextProps.showRequiredMarker &&
+      prevProps.size === nextProps.size
     );
   }
 );

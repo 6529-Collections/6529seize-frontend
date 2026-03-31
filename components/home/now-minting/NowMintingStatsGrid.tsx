@@ -1,11 +1,12 @@
 import { useAuth } from "@/components/auth/Auth";
+import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   formatClaimCost,
   formatClaimStatus,
   formatEditionSize,
-} from "@/helpers/manifoldDisplayHelpers";
-import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
+} from "@/helpers/manifold-display-helpers";
+import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useNftBalance } from "@/hooks/useNftBalance";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,21 +22,22 @@ export default function NowMintingStatsGrid({
   nftId,
   floorPrice,
 }: NowMintingStatsGridProps) {
-  const manifoldClaim = useMemesManifoldClaim(nftId);
+  const { claim: manifoldClaim } = useDropForgeManifoldClaim(nftId);
+  const { contract } = useDropForgeMintingConfig();
   const status = manifoldClaim?.status;
   const isStatusLoading = !manifoldClaim;
 
   const { connectedProfile } = useAuth();
   const { balance, isLoading: isBalanceLoading } = useNftBalance({
     consolidationKey: connectedProfile?.consolidation_key ?? null,
-    contract: MEMES_CONTRACT,
+    contract: contract ?? MEMES_CONTRACT,
     tokenId: nftId,
   });
 
   const statusLabel = manifoldClaim
     ? formatClaimStatus(manifoldClaim)
     : undefined;
-  const statusTone = manifoldClaim?.isFinalized ? "ended" : status;
+  const statusTone = manifoldClaim?.isDropComplete ? "ended" : status;
 
   const editionSize = manifoldClaim
     ? formatEditionSize(manifoldClaim).replace(/\s*\/\s*/, "/")
@@ -58,7 +60,7 @@ export default function NowMintingStatsGrid({
               icon={faLayerGroup}
               className="tw-size-3 tw-text-iron-400"
             />
-            <span className="tw-text-[12px] tw-font-medium tw-text-iron-300">
+            <span className="tw-text-xs tw-font-medium tw-text-iron-300">
               {balance}
             </span>
           </span>

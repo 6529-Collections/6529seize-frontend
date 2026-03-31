@@ -233,7 +233,7 @@ describe("HeaderShare", () => {
   });
 
   describe("Authentication State Handling", () => {
-    it("shows Share Connection tab when authenticated", async () => {
+    it("shows Connection tab when authenticated", async () => {
       mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
       mockIsMobile.mockReturnValue(false);
 
@@ -260,8 +260,8 @@ describe("HeaderShare", () => {
 
       await screen.findByTestId("header-share-modal");
 
-      // Should show Share Connection button when authenticated
-      expect(screen.getByText("Share Connection")).toBeInTheDocument();
+      // Should show Connection button when authenticated
+      expect(screen.getByText("Connection")).toBeInTheDocument();
       expect(screen.getByText("Current URL")).toBeInTheDocument();
       expect(screen.getByText("6529 Apps")).toBeInTheDocument();
     });
@@ -291,8 +291,8 @@ describe("HeaderShare", () => {
 
       await screen.findByTestId("header-share-modal");
 
-      // Should NOT show Share Connection button when not authenticated
-      expect(screen.queryByText("Share Connection")).not.toBeInTheDocument();
+      // Should NOT show Connection button when not authenticated
+      expect(screen.queryByText("Connection")).not.toBeInTheDocument();
       expect(screen.getByText("Current URL")).toBeInTheDocument();
       expect(screen.getByText("6529 Apps")).toBeInTheDocument();
     });

@@ -2,6 +2,72 @@ import { ProfileConnectedStatus } from "@/entities/IProfile";
 import type { ProfileMinWithoutSubs } from "./ProfileTypes";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
+
+type ProfileIdentityForOwnership =
+  | Pick<ApiIdentity, "normalised_handle" | "wallets">
+  | null
+  | undefined;
+
+type ProfileViewerContext = "self" | "other" | "anonymous";
+
+const normalizeProfileTarget = (
+  handleOrWallet: string | null | undefined
+): string | null => {
+  if (typeof handleOrWallet !== "string") {
+    return null;
+  }
+
+  const normalizedTarget = handleOrWallet.trim().toLowerCase();
+  return normalizedTarget.length > 0 ? normalizedTarget : null;
+};
+
+export const isOwnProfileRoute = ({
+  connectedProfile,
+  handleOrWallet,
+}: {
+  readonly connectedProfile: ProfileIdentityForOwnership;
+  readonly handleOrWallet: string | null | undefined;
+}): boolean => {
+  const normalizedTarget = normalizeProfileTarget(handleOrWallet);
+  if (!connectedProfile || !normalizedTarget) {
+    return false;
+  }
+
+  if (connectedProfile.normalised_handle?.toLowerCase() === normalizedTarget) {
+    return true;
+  }
+
+  return (
+    connectedProfile.wallets?.some(
+      (wallet) => wallet.wallet.toLowerCase() === normalizedTarget
+    ) ?? false
+  );
+};
+
+export const getProfileViewerContext = ({
+  connectedProfile,
+  handleOrWallet,
+}: {
+  readonly connectedProfile: ProfileIdentityForOwnership;
+  readonly handleOrWallet: string | null | undefined;
+}): ProfileViewerContext | null => {
+  const normalizedTarget = normalizeProfileTarget(handleOrWallet);
+  if (!normalizedTarget) {
+    return null;
+  }
+
+  if (!connectedProfile) {
+    return "anonymous";
+  }
+
+  return isOwnProfileRoute({
+    connectedProfile,
+    handleOrWallet: normalizedTarget,
+  })
+    ? "self"
+    : "other";
+};
+
 export const getProfileConnectedStatus = ({
   profile,
   isProxy,

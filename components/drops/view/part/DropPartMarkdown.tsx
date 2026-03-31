@@ -259,6 +259,9 @@ export interface DropPartMarkdownProps {
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
   readonly linkPreviewToggleControl?: LinkPreviewToggleControl | undefined;
+  readonly onLinkCardActionsActiveChange?:
+    | ((href: string, active: boolean) => void)
+    | undefined;
 }
 
 function DropPartMarkdown({
@@ -276,6 +279,7 @@ function DropPartMarkdown({
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
   linkPreviewToggleControl,
+  onLinkCardActionsActiveChange,
 }: DropPartMarkdownProps) {
   const queryClient = useQueryClient();
   const isMobile = useIsMobileScreen();
@@ -315,19 +319,6 @@ function DropPartMarkdown({
     [quotePath]
   );
 
-  const inlineShowControl = useMemo(() => {
-    if (!linkPreviewToggleControl) {
-      return undefined;
-    }
-
-    return {
-      enabled: linkPreviewToggleControl.isHidden,
-      isLoading: linkPreviewToggleControl.isLoading,
-      onToggle: linkPreviewToggleControl.onToggle,
-      label: linkPreviewToggleControl.label,
-    };
-  }, [linkPreviewToggleControl]);
-
   const { renderAnchor, isSmartLink, renderImage } = useMemo(
     () =>
       createLinkRenderer({
@@ -340,7 +331,6 @@ function DropPartMarkdown({
         quotePath: normalizedQuotePath,
         embedDepth,
         maxEmbedDepth,
-        inlineShowControl,
       }),
     [
       onQuoteClick,
@@ -352,7 +342,6 @@ function DropPartMarkdown({
       normalizedQuotePath,
       embedDepth,
       maxEmbedDepth,
-      inlineShowControl,
     ]
   );
 
@@ -445,7 +434,7 @@ function DropPartMarkdown({
     <LinkPreviewProvider
       variant={linkPreviewVariant}
       previewToggle={linkPreviewToggleControl}
-      inlineShowControl={inlineShowControl}
+      onCardActionsActiveChange={onLinkCardActionsActiveChange}
     >
       <Markdown
         rehypePlugins={rehypePlugins}

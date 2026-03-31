@@ -3,10 +3,7 @@
 import Link from "next/link";
 import type { Transaction } from "@/entities/ITransaction";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import {
-  formatAddress,
-  getProfileTargetRoute,
-} from "@/helpers/Helpers";
+import { formatAddress, getProfileTargetRoute } from "@/helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
 import { usePathname } from "next/navigation";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
@@ -75,7 +72,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   const path = getProfileTargetRoute({
     handleOrWallet: address,
     pathname: pathname ?? "",
-    defaultPath: USER_PAGE_TAB_IDS.STATS,
+    defaultPath: USER_PAGE_TAB_IDS.COLLECTED,
   });
 
   return (
@@ -83,7 +80,8 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
       <span className="tw-text-iron-400">{TYPE_TO_ACTION[type]}</span>
       <Link
         href={path}
-        className="tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+        className="tw-text-iron-100 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400"
+      >
         {display}
       </Link>
     </span>

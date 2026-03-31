@@ -65,36 +65,15 @@ export const increaseWavesOverviewDropsCount = async (
           },
         };
 
-        let updatedPages = pages.flat();
-        updatedPages = updatedPages.filter((wave) => wave.id !== waveId);
-
-        switch (type) {
-          case ApiWavesOverviewType.MostDropped:
-            updatedPages.push(updatedMatchingWave);
-            updatedPages.sort(
-              (a, b) => b.metrics.drops_count - a.metrics.drops_count
-            );
-            break;
-          case ApiWavesOverviewType.MostDroppedByYou:
-            updatedPages.push(updatedMatchingWave);
-            updatedPages.sort(
-              (a, b) =>
-                (b.metrics.your_drops_count ?? 0) -
-                (a.metrics.your_drops_count ?? 0)
-            );
-            break;
-          case ApiWavesOverviewType.RecentlyDroppedTo:
-          case ApiWavesOverviewType.RecentlyDroppedToByYou:
-            updatedPages.unshift(updatedMatchingWave);
-            break;
-          default:
-            updatedPages.splice(
-              matchingWaveIndex +
-                matchingWavePage * WAVE_FOLLOWING_WAVES_PARAMS.limit,
-              0,
-              updatedMatchingWave
-            );
-        }
+        const updatedPages = pages
+          .flat()
+          .filter((wave) => wave.id !== waveId)
+          .splice(
+            matchingWaveIndex +
+              matchingWavePage * WAVE_FOLLOWING_WAVES_PARAMS.limit,
+            0,
+            updatedMatchingWave
+          );
 
         const newPages: ApiWave[][] = [];
         for (

@@ -38,9 +38,6 @@ jest.mock("@capacitor/core", () => ({
     isNativePlatform: jest.fn(() => false),
   },
 }));
-jest.mock("@/constants", () => ({
-  CW_PROJECT_ID: "test-project-id",
-}));
 jest.mock("@/utils/appkit-initialization.utils", () => ({
   initializeAppKit: jest.fn().mockReturnValue({
     adapter: {
@@ -105,15 +102,60 @@ jest.mock("ethers", () => ({
 
 describe("WagmiSetup Security Tests", () => {
   let mockInitializeAppKit: jest.Mock;
+  let mockLogErrorSecurely: jest.Mock;
   let mockSetToast: jest.Mock;
   let mockAdapterCreateMethod: jest.Mock;
   let mockUseAppWallets: jest.Mock;
   const MockAppKitAdapterManager =
     require("@/components/providers/AppKitAdapterManager").AppKitAdapterManager;
+  const originalEthereumDescriptor = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "ethereum"
+  );
+  const originalGlobalPrototype = Object.getPrototypeOf(globalThis);
+  const originalObjectGetOwnPropertyDescriptor =
+    Object.getOwnPropertyDescriptor;
+  const originalSafeEthereumProxyInstalled = (
+    globalThis as {
+      __6529_safeEthereumProxyInstalled?: boolean | undefined;
+    }
+  ).__6529_safeEthereumProxyInstalled;
+
+  const restoreGlobalPrototype = () => {
+    if (Object.getPrototypeOf(globalThis) !== originalGlobalPrototype) {
+      Object.setPrototypeOf(globalThis, originalGlobalPrototype);
+    }
+  };
+
+  const restoreEthereumState = () => {
+    restoreGlobalPrototype();
+
+    if (originalEthereumDescriptor) {
+      Object.defineProperty(globalThis, "ethereum", originalEthereumDescriptor);
+    } else {
+      delete (globalThis as { ethereum?: unknown }).ethereum;
+    }
+
+    if (originalSafeEthereumProxyInstalled === undefined) {
+      delete (
+        globalThis as {
+          __6529_safeEthereumProxyInstalled?: boolean | undefined;
+        }
+      ).__6529_safeEthereumProxyInstalled;
+      return;
+    }
+
+    (
+      globalThis as {
+        __6529_safeEthereumProxyInstalled?: boolean | undefined;
+      }
+    ).__6529_safeEthereumProxyInstalled = originalSafeEthereumProxyInstalled;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
+    restoreEthereumState();
 
     // Add unhandled rejection handler for expected errors
     globalThis.addEventListener("unhandledrejection", (event) => {
@@ -126,6 +168,7 @@ describe("WagmiSetup Security Tests", () => {
 
     mockInitializeAppKit =
       require("@/utils/appkit-initialization.utils").initializeAppKit;
+    mockLogErrorSecurely = require("@/utils/error-sanitizer").logErrorSecurely;
     mockSetToast = jest.fn();
     mockAdapterCreateMethod = jest.fn();
     mockUseAppWallets = useAppWallets as jest.Mock;
@@ -190,6 +233,7 @@ describe("WagmiSetup Security Tests", () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    restoreEthereumState();
     // Restore console.error
     (console.error as jest.Mock).mockRestore?.();
   });
@@ -220,6 +264,297 @@ describe("WagmiSetup Security Tests", () => {
         adapterManager: expect.any(Object),
         isCapacitor: false,
       });
+    });
+  });
+
+  describe("Ethereum Proxy Installation", () => {
+    const readOnlyEthereumLogContext =
+      "[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum";
+
+    it("installs the proxy when window.ethereum is configurable getter-only", async () => {
+      const provider = {
+        request() {
+          return this;
+        },
+      };
+
+      Object.defineProperty(globalThis, "ethereum", {
+        configurable: true,
+        get: () => provider,
+      });
+
+      await renderAndWaitForMount();
+
+      const proxiedEthereum = (globalThis as { ethereum?: any }).ethereum;
+      const proxiedEthereumDescriptor = Object.getOwnPropertyDescriptor(
+        globalThis,
+        "ethereum"
+      );
+
+      expect(mockInitializeAppKit).toHaveBeenCalled();
+      expect(proxiedEthereum).toBeDefined();
+      expect(proxiedEthereum).not.toBe(provider);
+      expect(proxiedEthereum.request()).toBe(provider);
+      expect(proxiedEthereumDescriptor?.configurable).toBe(true);
+      expect(proxiedEthereumDescriptor?.writable).toBe(true);
+      expect(proxiedEthereumDescriptor?.value).toBe(proxiedEthereum);
+      expect(mockLogErrorSecurely).not.toHaveBeenCalledWith(
+        readOnlyEthereumLogContext,
+        expect.any(Error)
+      );
+      const safeEthereumProxyInstalled = (
+        globalThis as {
+          __6529_safeEthereumProxyInstalled?: boolean | undefined;
+        }
+      ).__6529_safeEthereumProxyInstalled;
+      expect(safeEthereumProxyInstalled).toBe(true);
+    });
+
+    it("skips proxy installation when own window.ethereum is non-configurable getter-only", async () => {
+      const provider = {
+        request() {
+          return this;
+        },
+      };
+
+      Object.defineProperty(globalThis, "ethereum", {
+        configurable: true,
+        get: () => provider,
+      });
+      const getOwnPropertyDescriptorSpy = jest
+        .spyOn(Object, "getOwnPropertyDescriptor")
+        .mockImplementation((target, property) => {
+          if (target === globalThis && property === "ethereum") {
+            return {
+              configurable: false,
+              enumerable: true,
+              get: () => provider,
+            };
+          }
+
+          return originalObjectGetOwnPropertyDescriptor(target, property);
+        });
+
+      try {
+        await renderAndWaitForMount();
+
+        expect(mockInitializeAppKit).toHaveBeenCalled();
+        expect((globalThis as { ethereum?: unknown }).ethereum).toBe(provider);
+        expect(mockLogErrorSecurely).toHaveBeenCalledWith(
+          readOnlyEthereumLogContext,
+          expect.any(Error)
+        );
+        expect(
+          (
+            globalThis as {
+              __6529_safeEthereumProxyInstalled?: boolean | undefined;
+            }
+          ).__6529_safeEthereumProxyInstalled
+        ).toBe(true);
+      } finally {
+        getOwnPropertyDescriptorSpy.mockRestore();
+      }
+    });
+
+    it("installs the proxy when window.ethereum is inherited non-configurable getter-only", async () => {
+      const provider = {
+        request() {
+          return this;
+        },
+      };
+      const prototypeWithEthereum = Object.create(
+        Object.getPrototypeOf(globalThis)
+      );
+
+      Object.defineProperty(prototypeWithEthereum, "ethereum", {
+        configurable: false,
+        get: () => provider,
+      });
+      Object.setPrototypeOf(globalThis, prototypeWithEthereum);
+
+      await renderAndWaitForMount();
+
+      const proxiedEthereum = (globalThis as { ethereum?: any }).ethereum;
+      const proxiedEthereumDescriptor = originalObjectGetOwnPropertyDescriptor(
+        globalThis,
+        "ethereum"
+      );
+
+      expect(mockInitializeAppKit).toHaveBeenCalled();
+      expect(proxiedEthereum).toBeDefined();
+      expect(proxiedEthereum).not.toBe(provider);
+      expect(proxiedEthereum.request()).toBe(provider);
+      expect(proxiedEthereumDescriptor?.configurable).toBe(true);
+      expect(proxiedEthereumDescriptor?.writable).toBe(true);
+      expect(proxiedEthereumDescriptor?.value).toBe(proxiedEthereum);
+      expect(mockLogErrorSecurely).not.toHaveBeenCalledWith(
+        readOnlyEthereumLogContext,
+        expect.any(Error)
+      );
+    });
+
+    it("installs the proxy when own window.ethereum is non-configurable writable", async () => {
+      const provider = {
+        request() {
+          return this;
+        },
+      };
+
+      Object.defineProperty(globalThis, "ethereum", {
+        configurable: true,
+        writable: true,
+        value: provider,
+      });
+
+      const getOwnPropertyDescriptorSpy = jest
+        .spyOn(Object, "getOwnPropertyDescriptor")
+        .mockImplementation((target, property) => {
+          if (target === globalThis && property === "ethereum") {
+            return {
+              configurable: false,
+              enumerable: true,
+              writable: true,
+              value: provider,
+            };
+          }
+
+          return originalObjectGetOwnPropertyDescriptor(target, property);
+        });
+
+      try {
+        await renderAndWaitForMount();
+
+        const proxiedEthereum = (globalThis as { ethereum?: any }).ethereum;
+        expect(mockInitializeAppKit).toHaveBeenCalled();
+        expect(proxiedEthereum).toBeDefined();
+        expect(proxiedEthereum).not.toBe(provider);
+        expect(proxiedEthereum.request()).toBe(provider);
+        expect(mockLogErrorSecurely).not.toHaveBeenCalledWith(
+          readOnlyEthereumLogContext,
+          expect.any(Error)
+        );
+      } finally {
+        getOwnPropertyDescriptorSpy.mockRestore();
+      }
+    });
+
+    it("installs the proxy when own window.ethereum is non-configurable accessor with setter", async () => {
+      const provider = {
+        request() {
+          return this;
+        },
+      };
+      let currentEthereum: unknown = provider;
+      const setEthereum = jest.fn((value: unknown) => {
+        currentEthereum = value;
+      });
+
+      Object.defineProperty(globalThis, "ethereum", {
+        configurable: true,
+        enumerable: true,
+        get: () => currentEthereum,
+        set: setEthereum,
+      });
+
+      const getOwnPropertyDescriptorSpy = jest
+        .spyOn(Object, "getOwnPropertyDescriptor")
+        .mockImplementation((target, property) => {
+          if (target === globalThis && property === "ethereum") {
+            return {
+              configurable: false,
+              enumerable: true,
+              get: () => currentEthereum,
+              set: setEthereum,
+            };
+          }
+
+          return originalObjectGetOwnPropertyDescriptor(target, property);
+        });
+
+      try {
+        await renderAndWaitForMount();
+
+        const proxiedEthereum = (globalThis as { ethereum?: any }).ethereum;
+        expect(mockInitializeAppKit).toHaveBeenCalled();
+        expect(setEthereum).toHaveBeenCalledTimes(1);
+        expect(currentEthereum).toBe(proxiedEthereum);
+        expect(proxiedEthereum).toBeDefined();
+        expect(proxiedEthereum).not.toBe(provider);
+        expect(proxiedEthereum.request()).toBe(provider);
+        expect(mockLogErrorSecurely).not.toHaveBeenCalledWith(
+          readOnlyEthereumLogContext,
+          expect.any(Error)
+        );
+      } finally {
+        getOwnPropertyDescriptorSpy.mockRestore();
+      }
+    });
+
+    it("installs the proxy when window.ethereum is writable", async () => {
+      const provider = {
+        request() {
+          return this;
+        },
+      };
+
+      Object.defineProperty(globalThis, "ethereum", {
+        configurable: true,
+        writable: true,
+        value: provider,
+      });
+
+      await renderAndWaitForMount();
+
+      const proxiedEthereum = (globalThis as { ethereum?: any }).ethereum;
+      expect(mockInitializeAppKit).toHaveBeenCalled();
+      expect(proxiedEthereum).toBeDefined();
+      expect(proxiedEthereum).not.toBe(provider);
+      expect(proxiedEthereum.request()).toBe(provider);
+      expect(mockLogErrorSecurely).not.toHaveBeenCalledWith(
+        readOnlyEthereumLogContext,
+        expect.any(Error)
+      );
+    });
+
+    it("logs the read-only ethereum skip once across mounts for own non-configurable getter-only descriptors", async () => {
+      const provider = {
+        request() {
+          return this;
+        },
+      };
+
+      Object.defineProperty(globalThis, "ethereum", {
+        configurable: true,
+        get: () => provider,
+      });
+
+      const getOwnPropertyDescriptorSpy = jest
+        .spyOn(Object, "getOwnPropertyDescriptor")
+        .mockImplementation((target, property) => {
+          if (target === globalThis && property === "ethereum") {
+            return {
+              configurable: false,
+              enumerable: true,
+              get: () => provider,
+            };
+          }
+
+          return originalObjectGetOwnPropertyDescriptor(target, property);
+        });
+
+      try {
+        const firstRender = await renderAndWaitForMount();
+        firstRender.unmount();
+
+        await renderAndWaitForMount();
+
+        const readOnlyLogs = mockLogErrorSecurely.mock.calls.filter(
+          ([context]) => context === readOnlyEthereumLogContext
+        );
+        expect(readOnlyLogs).toHaveLength(1);
+      } finally {
+        getOwnPropertyDescriptorSpy.mockRestore();
+      }
     });
   });
 

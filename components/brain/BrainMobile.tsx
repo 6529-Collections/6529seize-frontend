@@ -1,31 +1,22 @@
 "use client";
 
 import type { ReactNode } from "react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
-import BrainMobileAbout from "./mobile/BrainMobileAbout";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWaveData } from "@/hooks/useWaveData";
-import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
-import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
-import { WaveWinners } from "../waves/winners/WaveWinners";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import MyStreamWaveMyVotes from "./my-stream/votes/MyStreamWaveMyVotes";
-import MyStreamWaveFAQ from "./my-stream/MyStreamWaveFAQ";
 import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import BrainMobileWaves from "./mobile/BrainMobileWaves";
-import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import BrainNotifications from "./notifications/NotificationsContainer";
+import MemesQuickVoteDialog from "./left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 import {
   getActiveWaveIdFromUrl,
   getHomeRoute,
@@ -37,19 +28,11 @@ import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectM
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
-
-export enum BrainView {
-  DEFAULT = "DEFAULT",
-  ABOUT = "ABOUT",
-  LEADERBOARD = "LEADERBOARD",
-  WINNERS = "WINNERS",
-  OUTCOME = "OUTCOME",
-  MY_VOTES = "MY_VOTES",
-  FAQ = "FAQ",
-  WAVES = "WAVES",
-  MESSAGES = "MESSAGES",
-  NOTIFICATIONS = "NOTIFICATIONS",
-}
+import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
+import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
+import FloatingMemesQuickVoteTrigger from "./mobile/FloatingMemesQuickVoteTrigger";
+import { BrainView } from "./mobile/brainMobileViews";
+import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
 
 interface Props {
   readonly children: ReactNode;
@@ -61,14 +44,14 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
-  const [hydrated, setHydrated] = useState(false);
+  const quickVote = useMemesQuickVoteDialogController();
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const myStream = useMyStreamOptional();
 
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const dropId = searchParams.get("drop") ?? undefined;
   const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
   const { data: drop } = useQuery<ApiDrop>({
@@ -107,16 +90,28 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const { isMemesWave, isCurationWave } = useWave(wave);
+  const { isMemesWave, isCurationWave, isRankWave, isDm } = useWave(wave);
 
   const {
     voting: { isCompleted },
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
+  const { activeView, onViewChange } = useBrainMobileActiveView({
+    firstDecisionDone,
+    isApp,
+    isCompleted,
+    isCurationWave,
+    isMemesWave,
+    isRankWave,
+    pathname,
+    searchParams,
+    wave,
+    waveId,
+  });
 
-  const onDropClick = (drop: ExtendedDrop) => {
+  const onDropClick = (selectedDrop: ExtendedDrop) => {
     const params = new URLSearchParams(searchParams.toString() || "");
-    params.set("drop", drop.id);
+    params.set("drop", selectedDrop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -138,109 +133,12 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     !!drop &&
     drop.id.toLowerCase() === effectiveDropId.toLowerCase();
 
-  const isRankWave = wave?.wave.type === ApiWaveType.Rank;
-
   const hasWave = Boolean(waveId);
-
-  useEffect(() => {
-    const viewParam = searchParams.get("view");
-    const createParam = searchParams.get("create");
-
-    if (createParam && isApp) {
-      setActiveView(BrainView.DEFAULT);
-      return;
-    }
-
-    if (
-      (!waveId && pathname === "/notifications") ||
-      (!waveId && viewParam === "notifications")
-    ) {
-      setActiveView(BrainView.NOTIFICATIONS);
-      return;
-    }
-
-    if (
-      (!waveId && pathname === "/messages") ||
-      (!waveId && viewParam === "messages")
-    ) {
-      setActiveView(BrainView.MESSAGES);
-      return;
-    }
-
-    if (
-      (!waveId && pathname === "/waves") ||
-      (!waveId && viewParam === "waves")
-    ) {
-      setActiveView(BrainView.WAVES);
-      return;
-    }
-
-    if (pathname === "/" && !waveId && !viewParam) {
-      setActiveView(BrainView.DEFAULT);
-    }
-  }, [pathname, searchParams, waveId, isApp]);
-
-  // Handle tab visibility and reset on wave changes
-  useEffect(() => {
-    const globalViews = new Set([
-      BrainView.DEFAULT,
-      BrainView.WAVES,
-      BrainView.MESSAGES,
-      BrainView.NOTIFICATIONS,
-    ]);
-
-    const routeToView: Record<string, BrainView> = {
-      "/waves": BrainView.WAVES,
-      "/messages": BrainView.MESSAGES,
-      "/notifications": BrainView.NOTIFICATIONS,
-    };
-
-    if (!hasWave) {
-      const isWaveSpecificView = !globalViews.has(activeView);
-      if (isWaveSpecificView) {
-        setActiveView(routeToView[pathname ?? ""] ?? BrainView.DEFAULT);
-      }
-      return;
-    }
-
-    if (!wave) return;
-
-    const shouldResetToDefault =
-      (activeView === BrainView.LEADERBOARD && isCompleted) ||
-      (activeView === BrainView.WINNERS && !firstDecisionDone) ||
-      (activeView === BrainView.MY_VOTES && !isMemesWave && !isCurationWave) ||
-      (activeView === BrainView.FAQ && !isMemesWave);
-
-    if (shouldResetToDefault) {
-      setActiveView(BrainView.DEFAULT);
-      return;
-    }
-
-    const nonWaveViews = new Set([
-      BrainView.NOTIFICATIONS,
-      BrainView.MESSAGES,
-      BrainView.WAVES,
-    ]);
-
-    if (waveId && nonWaveViews.has(activeView)) {
-      setActiveView(BrainView.DEFAULT);
-    }
-  }, [
-    hasWave,
-    wave,
-    isCompleted,
-    firstDecisionDone,
-    activeView,
-    isMemesWave,
-    isCurationWave,
-    waveId,
-    pathname,
-  ]);
 
   const closeCreateOverlay = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("create");
-    const base = pathname ?? "/";
+    const base = pathname;
     const next = params.toString() ? `${base}?${params.toString()}` : base;
     router.replace(next, { scroll: false });
   }, [router, pathname, searchParams]);
@@ -274,37 +172,17 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     return null;
   }, [isApp, searchParams, connectedProfile, closeCreateOverlay]);
 
-  const viewComponents: Record<BrainView, ReactNode> = {
-    [BrainView.ABOUT]: <BrainMobileAbout activeWaveId={waveId} />,
-    [BrainView.DEFAULT]: children,
-    [BrainView.LEADERBOARD]:
-      isRankWave && !!wave ? (
-        <MyStreamWaveLeaderboard
-          key={wave.id}
-          wave={wave}
-          onDropClick={onDropClick}
-        />
-      ) : null,
-    [BrainView.WINNERS]:
-      isRankWave && !!wave ? (
-        <div className="tw-px-2 sm:tw-px-4">
-          <WaveWinners wave={wave} onDropClick={onDropClick} />
-        </div>
-      ) : null,
-    [BrainView.OUTCOME]:
-      isRankWave && !!wave ? <MyStreamWaveOutcome wave={wave} /> : null,
-    [BrainView.MY_VOTES]:
-      isRankWave && !!wave ? (
-        <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
-      ) : null,
-    [BrainView.FAQ]:
-      isRankWave && isMemesWave && !!wave ? (
-        <MyStreamWaveFAQ wave={wave} />
-      ) : null,
-    [BrainView.WAVES]: <BrainMobileWaves />,
-    [BrainView.MESSAGES]: <BrainMobileMessages />,
-    [BrainView.NOTIFICATIONS]: <BrainNotifications />,
-  };
+  const shouldMountFloatingQuickVoteEntry =
+    isApp &&
+    hasWave &&
+    !!wave &&
+    activeView === BrainView.DEFAULT &&
+    !isDropOpen &&
+    !isDm;
+  const shouldMountQuickVoteDialog =
+    quickVote.isQuickVoteOpen ||
+    shouldMountFloatingQuickVoteEntry ||
+    activeView === BrainView.WAVES;
 
   const dropOverlayClass = isApp
     ? "tw-fixed tw-inset-0 tw-z-[1010] tw-bg-black tailwind-scope"
@@ -329,7 +207,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       {(hasWave || !isApp) && (
         <BrainMobileTabs
           activeView={activeView}
-          onViewChange={setActiveView}
+          onViewChange={onViewChange}
           wave={wave}
           waveActive={hasWave}
           showWavesTab={hydrated}
@@ -344,11 +222,32 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="tw-flex-1"
+          className="tw-relative tw-min-w-0 tw-flex-1"
         >
-          {viewComponents[activeView]}
+          {shouldMountFloatingQuickVoteEntry && (
+            <FloatingMemesQuickVoteTrigger
+              onOpenQuickVote={quickVote.openQuickVote}
+              onPrefetchQuickVote={quickVote.prefetchQuickVote}
+            />
+          )}
+          <BrainMobileViewContent
+            activeView={activeView}
+            activeWaveId={waveId}
+            isCurationWave={isCurationWave}
+            isMemesWave={isMemesWave}
+            isRankWave={isRankWave}
+            onDropClick={onDropClick}
+            onOpenQuickVote={quickVote.openQuickVote}
+            onPrefetchQuickVote={quickVote.prefetchQuickVote}
+            wave={wave}
+          >
+            {children}
+          </BrainMobileViewContent>
         </motion.div>
       </AnimatePresence>
+      {shouldMountQuickVoteDialog && (
+        <MemesQuickVoteDialog {...quickVote.dialogState} />
+      )}
     </div>
   );
 };

@@ -13,7 +13,6 @@ import { Button, Col, Container, Modal, Row } from "react-bootstrap";
 export function ConfirmTokenIdModal(
   props: Readonly<{
     plan: AllowlistDescription;
-    show: boolean;
     onConfirm(tokenId: string): void;
   }>
 ) {
@@ -33,12 +32,7 @@ export function ConfirmTokenIdModal(
   };
 
   return (
-    <Modal
-      show={props.show}
-      onHide={() => {}}
-      backdrop="static"
-      keyboard={false}
-    >
+    <Modal show onHide={() => {}} backdrop="static" keyboard={false}>
       <Modal.Header>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           Confirm Token ID

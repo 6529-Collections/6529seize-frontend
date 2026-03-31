@@ -31,6 +31,7 @@ export default function WaveProfileTooltip({
       wave?.contributors_overview
         .map((contributor) => ({
           pfp: contributor.contributor_pfp,
+          identity: contributor.contributor_identity,
         }))
         .filter((contributor) => !!contributor.pfp) ?? [],
     [wave?.contributors_overview]

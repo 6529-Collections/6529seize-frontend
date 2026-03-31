@@ -2,20 +2,20 @@
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
-import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
+import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
-import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
   useCallback,
@@ -24,7 +24,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useKey } from "react-use";
 import WebSidebarExpandable from "./nav/WebSidebarExpandable";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
@@ -42,15 +41,12 @@ const WebSidebarNav = React.forwardRef<
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
-  const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.handle ?? null
-  );
+  const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
   });
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
   const [submenuAnchor, setSubmenuAnchor] = useState<{
@@ -60,12 +56,6 @@ const WebSidebarNav = React.forwardRef<
   } | null>(null);
   const [submenuTrigger, setSubmenuTrigger] = useState<HTMLElement | null>(
     null
-  );
-
-  useKey(
-    (event) => event.metaKey && event.key === "k",
-    () => setIsSearchOpen(true),
-    { event: "keydown" }
   );
 
   const sections = useSidebarSections(
@@ -222,115 +212,88 @@ const WebSidebarNav = React.forwardRef<
   );
 
   return (
-    <>
-      <nav
-        className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-        aria-label="Desktop navigation"
-      >
-        <ul className="tw-m-0 tw-list-none tw-p-0">
-          <li>
-            <WebSidebarNavItem
-              href="/"
-              icon={HomeIcon}
-              active={pathname === "/"}
+    <nav
+      className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+      aria-label="Desktop navigation"
+    >
+      <ul className="tw-m-0 tw-list-none tw-p-0">
+        <li>
+          <WebSidebarNavItem
+            href="/"
+            icon={HomeIcon}
+            active={pathname === "/"}
+            collapsed={isCollapsed}
+            label="Home"
+          />
+        </li>
+
+        <li>
+          <WebSidebarNavItem
+            href="/waves"
+            icon={WavesIcon}
+            active={pathname?.startsWith("/waves") || false}
+            collapsed={isCollapsed}
+            label="Waves"
+          />
+        </li>
+
+        <li>
+          <WebSidebarNavItem
+            href="/messages"
+            icon={ChatBubbleIcon}
+            active={pathname?.startsWith("/messages") || false}
+            collapsed={isCollapsed}
+            label="Messages"
+            hasIndicator={hasUnreadMessages}
+          />
+        </li>
+
+        <li>
+          <WebSidebarNavItem
+            href="/discover"
+            icon={DiscoverIcon}
+            active={pathname.startsWith("/discover")}
+            collapsed={isCollapsed}
+            label="Discovery"
+          />
+        </li>
+
+        {networkSection && (
+          <li className={isCollapsed ? "tw-relative" : undefined}>
+            <WebSidebarExpandable
+              section={networkSection}
+              expanded={expandedKeys.includes("network")}
+              onToggle={(event) => handleSectionToggle("network", event)}
               collapsed={isCollapsed}
-              label="Home"
+              pathname={pathname}
+              data-section="network"
             />
+            {renderCollapsedSubmenu("network")}
           </li>
+        )}
 
-          <li>
-            <WebSidebarNavItem
-              href="/waves"
-              icon={WavesIcon}
-              active={pathname?.startsWith("/waves") || false}
+        {collectionsSection && (
+          <li className={isCollapsed ? "tw-relative" : undefined}>
+            <WebSidebarExpandable
+              section={collectionsSection}
+              expanded={expandedKeys.includes("collections")}
+              onToggle={(event) => handleSectionToggle("collections", event)}
               collapsed={isCollapsed}
-              label="Waves"
+              pathname={pathname}
+              data-section="collections"
             />
+            {renderCollapsedSubmenu("collections")}
           </li>
+        )}
 
-          <li>
-            <WebSidebarNavItem
-              href="/messages"
-              icon={ChatBubbleIcon}
-              active={pathname?.startsWith("/messages") || false}
-              collapsed={isCollapsed}
-              label="Messages"
-              hasIndicator={hasUnreadMessages}
-            />
-          </li>
-
-          <li>
-            <WebSidebarNavItem
-              href="/discover"
-              icon={DiscoverIcon}
-              active={pathname?.startsWith("/discover") || false}
-              collapsed={isCollapsed}
-              label="Discover"
-            />
-          </li>
-
-          {networkSection && (
-            <li className={isCollapsed ? "tw-relative" : undefined}>
-              <WebSidebarExpandable
-                section={networkSection}
-                expanded={expandedKeys.includes("network")}
-                onToggle={(event) => handleSectionToggle("network", event)}
-                collapsed={isCollapsed}
-                pathname={pathname}
-                data-section="network"
-              />
-              {renderCollapsedSubmenu("network")}
-            </li>
-          )}
-
-          {collectionsSection && (
-            <li className={isCollapsed ? "tw-relative" : undefined}>
-              <WebSidebarExpandable
-                section={collectionsSection}
-                expanded={expandedKeys.includes("collections")}
-                onToggle={(event) => handleSectionToggle("collections", event)}
-                collapsed={isCollapsed}
-                pathname={pathname}
-                data-section="collections"
-              />
-              {renderCollapsedSubmenu("collections")}
-            </li>
-          )}
-
-          <li>
-            <WebSidebarNavItem
-              href="/notifications"
-              icon={BellIcon}
-              active={pathname?.startsWith("/notifications") || false}
-              collapsed={isCollapsed}
-              label="Notifications"
-              hasIndicator={haveUnreadNotifications}
-            />
-          </li>
-
-          <li>
-            <WebSidebarNavItem
-              onClick={(event?: React.MouseEvent) => {
-                event?.stopPropagation();
-                setIsSearchOpen(true);
-              }}
-              icon={MagnifyingGlassIcon}
-              active={false}
-              collapsed={isCollapsed}
-              label="Search"
-            />
-          </li>
-
-          {sections
-            .filter(
-              (section) =>
-                section.key !== "network" && section.key !== "collections"
-            )
-            .map((section) => (
-              <li
-                key={section.key}
-                className={isCollapsed ? "tw-relative" : undefined}
-              >
+        {sections
+          .filter(
+            (section) =>
+              section.key !== "network" && section.key !== "collections"
+          )
+          .map((section) => (
+            <React.Fragment key={section.key}>
+              <li className={isCollapsed ? "tw-relative" : undefined}>
                 <WebSidebarExpandable
                   section={section}
                   expanded={expandedKeys.includes(section.key)}
@@ -341,26 +304,24 @@ const WebSidebarNav = React.forwardRef<
                 />
                 {renderCollapsedSubmenu(section.key)}
               </li>
-            ))}
-        </ul>
-      </nav>
-
-      <CommonAnimationWrapper mode="sync" initial>
-        {isSearchOpen && (
-          <CommonAnimationOpacity
-            key="search-modal"
-            elementClasses="tw-fixed tw-inset-0 tw-z-50"
-            elementRole="dialog"
-            onClicked={(event) => event.stopPropagation()}
-          >
-            <HeaderSearchModal
-              onClose={() => setIsSearchOpen(false)}
-              wave={null}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
-    </>
+              {section.key === "about" && showDropForge && (
+                <li>
+                  <WebSidebarNavItem
+                    href={DROP_FORGE_PATH}
+                    icon={DropForgeIcon}
+                    active={
+                      pathname === DROP_FORGE_PATH ||
+                      pathname?.startsWith(`${DROP_FORGE_PATH}/`)
+                    }
+                    collapsed={isCollapsed}
+                    label={DROP_FORGE_TITLE}
+                  />
+                </li>
+              )}
+            </React.Fragment>
+          ))}
+      </ul>
+    </nav>
   );
 });
 

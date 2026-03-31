@@ -472,14 +472,14 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
   };
 
   return (
-    <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
+    <div className="tw-group/link-card tw-relative tw-w-full">
       <div
         className={YOUTUBE_STABLE_FRAME_CLASSES}
         data-testid="youtube-preview-stable-frame"
       >
         {card()}
       </div>
-      {!hideActions && <ChatItemHrefButtons href={href} />}
+      {!hideActions && <ChatItemHrefButtons href={href} layout="overlay" />}
     </div>
   );
 };

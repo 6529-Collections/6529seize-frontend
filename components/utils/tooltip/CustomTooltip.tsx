@@ -1,16 +1,25 @@
-"use client"
+"use client";
 
-import type {
-  MutableRefObject} from "react";
+import type { RefObject } from "react";
 import React, {
-  useState,
-  useEffect,
-  useRef,
   useCallback,
-  useLayoutEffect
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { CUSTOM_TOOLTIP_CLOSE_ALL_EVENT } from "@/helpers/tooltip.helpers";
 import styles from "./CustomTooltip.module.scss";
+import {
+  calculateTooltipLayout,
+  getTooltipWindow,
+  joinTooltipClassNames,
+  resolveTooltipTriggerElement,
+  type ResolvedTooltipPlacement,
+  type TooltipCoordinates,
+} from "./tooltipPositioning";
 
 interface CustomTooltipProps {
   readonly children: React.ReactElement;
@@ -23,16 +32,45 @@ interface CustomTooltipProps {
   readonly hoverTransitionDelay?: number | undefined;
 }
 
-type TooltipChildHandlers = {
-  onMouseEnter?: React.MouseEventHandler<HTMLElement> | undefined;
-  onMouseLeave?: React.MouseEventHandler<HTMLElement> | undefined;
-  onFocus?: React.FocusEventHandler<HTMLElement> | undefined;
-  onBlur?: React.FocusEventHandler<HTMLElement> | undefined;
-};
+const ARIA_DESCRIBED_BY_ATTRIBUTE = "aria-describedby";
 
-const globalScope = globalThis as typeof globalThis & { window?: Window | undefined };
-const win = globalScope.window ?? null;
-const isBrowser = win !== null;
+function getAriaDescribedByIds(element: HTMLElement): string[] {
+  return (element.getAttribute(ARIA_DESCRIBED_BY_ATTRIBUTE) ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function addAriaDescribedById(
+  element: HTMLElement,
+  descriptionId: string
+): void {
+  const describedByIds = getAriaDescribedByIds(element);
+
+  if (describedByIds.includes(descriptionId)) {
+    return;
+  }
+
+  element.setAttribute(
+    ARIA_DESCRIBED_BY_ATTRIBUTE,
+    [...describedByIds, descriptionId].join(" ")
+  );
+}
+
+function removeAriaDescribedById(
+  element: HTMLElement,
+  descriptionId: string
+): void {
+  const describedByIds = getAriaDescribedByIds(element).filter(
+    (describedById) => describedById !== descriptionId
+  );
+
+  if (describedByIds.length === 0) {
+    element.removeAttribute(ARIA_DESCRIBED_BY_ATTRIBUTE);
+    return;
+  }
+
+  element.setAttribute(ARIA_DESCRIBED_BY_ATTRIBUTE, describedByIds.join(" "));
+}
 
 export default function CustomTooltip({
   children,
@@ -45,190 +83,127 @@ export default function CustomTooltip({
   hoverTransitionDelay = 150,
 }: CustomTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [arrowPosition, setArrowPosition] = useState({ x: 0, y: 0 });
-  const [actualPlacement, setActualPlacement] = useState<"top" | "bottom" | "left" | "right">(
-    placement === "auto" ? "bottom" : placement
-  );
+  const [position, setPosition] = useState<TooltipCoordinates>({ x: 0, y: 0 });
+  const [arrowPosition, setArrowPosition] = useState<TooltipCoordinates>({
+    x: 0,
+    y: 0,
+  });
+  const [actualPlacement, setActualPlacement] =
+    useState<ResolvedTooltipPlacement>(
+      placement === "auto" ? "bottom" : placement
+    );
+  const tooltipId = `${useId()}-tooltip`;
 
-  const childRef = useRef<HTMLElement>(null);
+  const triggerBoundaryRef = useRef<HTMLSpanElement>(null);
+  const childNodeRef = useRef<HTMLElement | null>(null);
+  const observedChildNodeRef = useRef<HTMLElement | null>(null);
+  const describedTriggerRef = useRef<HTMLElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const showTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const childObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
-  const tooltipObserverRef: MutableRefObject<ResizeObserver | null> = useRef(null);
-  const isPointerOverTooltipRef = useRef(false);
-  const childElement = React.Children.only(children) as React.ReactElement<TooltipChildHandlers>;
-  const originalRef = (childElement as React.ReactElement & {
-    ref?: React.Ref<HTMLElement> | undefined;
-  }).ref;
+  const showTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+  const childObserverRef: RefObject<ResizeObserver | null> = useRef(null);
+  const tooltipObserverRef: RefObject<ResizeObserver | null> = useRef(null);
 
-  const setRefValue = useCallback((ref: React.Ref<HTMLElement> | undefined, node: HTMLElement | null) => {
-    if (!ref) return;
-    if (typeof ref === "function") {
-      ref(node);
-      return;
-    }
-    try {
-      (ref as React.MutableRefObject<HTMLElement | null>).current = node;
-    } catch {
-      if (typeof console !== "undefined") {
-        console.warn("[CustomTooltip] Failed to assign ref (may be read-only)");
-      }
-    }
+  const resolveTriggerNode = useCallback(() => {
+    const nextTriggerNode = resolveTooltipTriggerElement(
+      triggerBoundaryRef.current
+    );
+    childNodeRef.current = nextTriggerNode;
+    return nextTriggerNode;
   }, []);
 
-  const assignChildNode = useCallback(
-    (node: HTMLElement | null) => {
-      childRef.current = node;
+  const getCurrentTriggerNode = useCallback(() => {
+    const currentTriggerNode = childNodeRef.current;
 
-      if (node && typeof node.getBoundingClientRect !== "function") {
-        console.warn(
-          "[CustomTooltip] Child ref is not an HTMLElement; tooltip positioning may fail."
-        );
+    if (
+      currentTriggerNode &&
+      triggerBoundaryRef.current?.contains(currentTriggerNode)
+    ) {
+      return currentTriggerNode;
+    }
+
+    return resolveTriggerNode();
+  }, [resolveTriggerNode]);
+
+  const clearTooltipDescription = useCallback(
+    (target?: HTMLElement | null) => {
+      const describedTrigger = target ?? describedTriggerRef.current;
+      if (!describedTrigger) {
+        return;
       }
 
-      setRefValue(originalRef, node);
+      removeAriaDescribedById(describedTrigger, tooltipId);
 
-      if (isVisible && childObserverRef.current) {
-        try {
-          childObserverRef.current.disconnect();
-          if (node) {
-            childObserverRef.current.observe(node);
-          }
-        } catch {
-          // Ignore observer errors
-        }
+      if (describedTriggerRef.current === describedTrigger) {
+        describedTriggerRef.current = null;
       }
     },
-    [originalRef, setRefValue, isVisible]
+    [tooltipId]
   );
 
-  const mergeHandlers = useCallback(
-    <E extends React.SyntheticEvent>(ourHandler: (event: E) => void, theirHandler?: (event: E) => void) =>
-      (event: E) => {
-        ourHandler(event);
-        theirHandler?.(event);
-      },
-    []
+  const syncTooltipDescription = useCallback(() => {
+    const nextTriggerNode = getCurrentTriggerNode();
+    const previousTriggerNode = describedTriggerRef.current;
+
+    if (previousTriggerNode && previousTriggerNode !== nextTriggerNode) {
+      clearTooltipDescription(previousTriggerNode);
+    }
+
+    if (!isVisible || !tooltipRef.current || !nextTriggerNode) {
+      clearTooltipDescription();
+      return;
+    }
+
+    addAriaDescribedById(nextTriggerNode, tooltipId);
+    describedTriggerRef.current = nextTriggerNode;
+  }, [clearTooltipDescription, getCurrentTriggerNode, isVisible, tooltipId]);
+
+  const syncChildObserverNode = useCallback(
+    (observer?: ResizeObserver | null) => {
+      const nextChildNode = getCurrentTriggerNode() ?? resolveTriggerNode();
+      const observedChildNode = observedChildNodeRef.current;
+
+      if (observedChildNode && observedChildNode !== nextChildNode) {
+        observer?.unobserve(observedChildNode);
+        observedChildNodeRef.current = null;
+      }
+
+      if (!observer || !nextChildNode) {
+        return nextChildNode;
+      }
+
+      if (observedChildNode !== nextChildNode) {
+        observer.observe(nextChildNode);
+        observedChildNodeRef.current = nextChildNode;
+      }
+
+      return nextChildNode;
+    },
+    [getCurrentTriggerNode, resolveTriggerNode]
   );
-
-  const getOptimalPlacement = useCallback((childRect: DOMRect, tooltipRect: DOMRect) => {
-    if (placement !== "auto") return placement;
-
-    const padding = 8;
-    const arrowSize = 8;
-    const viewportHeight = win ? win.innerHeight : 0;
-    const viewportWidth = win ? win.innerWidth : 0;
-    const spaces = {
-      top: childRect.top - padding,
-      bottom: viewportHeight - childRect.bottom - padding,
-      left: childRect.left - padding,
-      right: viewportWidth - childRect.right - padding
-    };
-    
-    const requiredVerticalSpace = tooltipRect.height + offset + arrowSize;
-    const requiredHorizontalSpace = tooltipRect.width + offset + arrowSize;
-    
-    const placements = [
-      { name: "top", space: spaces.top, required: requiredVerticalSpace },
-      { name: "bottom", space: spaces.bottom, required: requiredVerticalSpace },
-      { name: "right", space: spaces.right, required: requiredHorizontalSpace },
-      { name: "left", space: spaces.left, required: requiredHorizontalSpace }
-    ] as const;
-    
-    const validPlacement = placements.find(p => p.space >= p.required);
-    return validPlacement ? validPlacement.name : "bottom";
-  }, [placement, offset]);
-
-  const calculateInitialPosition = useCallback((childRect: DOMRect, tooltipRect: DOMRect, targetPlacement: string) => {
-    let x = 0;
-    let y = 0;
-    
-    switch (targetPlacement) {
-      case "top":
-        x = childRect.left;
-        y = childRect.top - tooltipRect.height - offset;
-        break;
-      case "bottom":
-        x = childRect.left;
-        y = childRect.bottom + offset;
-        break;
-      case "left":
-        x = childRect.left - tooltipRect.width - offset;
-        y = childRect.top + (childRect.height - tooltipRect.height) / 2;
-        break;
-      case "right":
-        x = childRect.right + offset;
-        y = childRect.top + (childRect.height - tooltipRect.height) / 2;
-        break;
-    }
-    
-    return { x, y };
-  }, [offset]);
-
-  const adjustPositionForViewport = useCallback((position: { x: number, y: number }, childRect: DOMRect, tooltipRect: DOMRect, targetPlacement: string) => {
-    const padding = 8;
-    const viewportHeight = win ? win.innerHeight : 0;
-    const viewportWidth = win ? win.innerWidth : 0;
-    let { x, y } = position;
-    let finalPlacement = targetPlacement;
-
-    // Keep tooltip within viewport bounds horizontally
-    const maxX = viewportWidth - tooltipRect.width - padding;
-    x = Math.max(padding, Math.min(x, maxX));
-    
-    // Adjust vertical position to prevent overlap
-    if (targetPlacement === "top" && y < padding) {
-      finalPlacement = "bottom";
-      y = childRect.bottom + offset;
-    } else if (targetPlacement === "bottom" && y + tooltipRect.height > viewportHeight - padding) {
-      finalPlacement = "top";
-      y = childRect.top - tooltipRect.height - offset;
-    } else if (targetPlacement === "left" && x < padding) {
-      finalPlacement = "right";
-      x = childRect.right + offset;
-    } else if (targetPlacement === "right" && x + tooltipRect.width > viewportWidth - padding) {
-      finalPlacement = "left";
-      x = childRect.left - tooltipRect.width - offset;
-    }
-    
-    return { x, y, finalPlacement };
-  }, [offset]);
-
-  const calculateArrowPosition = useCallback((position: { x: number, y: number }, childRect: DOMRect, tooltipRect: DOMRect, finalPlacement: string) => {
-    let arrowX = 0;
-    let arrowY = 0;
-    
-    if (finalPlacement === "top" || finalPlacement === "bottom") {
-      const childCenterX = childRect.left + childRect.width / 2;
-      arrowX = childCenterX - position.x;
-      arrowX = Math.max(16, Math.min(arrowX, tooltipRect.width - 16));
-    } else if (finalPlacement === "left" || finalPlacement === "right") {
-      const childCenterY = childRect.top + childRect.height / 2;
-      arrowY = childCenterY - position.y;
-      arrowY = Math.max(16, Math.min(arrowY, tooltipRect.height - 16));
-    }
-    
-    return { x: arrowX, y: arrowY };
-  }, []);
 
   const calculatePosition = useCallback(() => {
-    if (!childRef.current || !tooltipRef.current) return;
-    if (!isBrowser) return;
+    const childNode = getCurrentTriggerNode() ?? resolveTriggerNode();
+    if (!childNode || !tooltipRef.current) return;
+    if (getTooltipWindow() === null) return;
 
-    const childRect = childRef.current.getBoundingClientRect();
+    const childRect = childNode.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    
-    const targetPlacement = getOptimalPlacement(childRect, tooltipRect);
-    const initialPosition = calculateInitialPosition(childRect, tooltipRect, targetPlacement);
-    const adjustedPosition = adjustPositionForViewport(initialPosition, childRect, tooltipRect, targetPlacement);
-    const arrowPos = calculateArrowPosition(adjustedPosition, childRect, tooltipRect, adjustedPosition.finalPlacement);
+    const layout = calculateTooltipLayout({
+      childRect,
+      tooltipRect,
+      placement,
+      offset,
+    });
 
-    setPosition({ x: adjustedPosition.x, y: adjustedPosition.y });
-    setArrowPosition(arrowPos);
-    setActualPlacement(adjustedPosition.finalPlacement as "top" | "bottom" | "left" | "right");
-  }, [getOptimalPlacement, calculateInitialPosition, adjustPositionForViewport, calculateArrowPosition]);
+    setPosition(layout.position);
+    setArrowPosition(layout.arrowPosition);
+    setActualPlacement(layout.placement);
+  }, [getCurrentTriggerNode, offset, placement, resolveTriggerNode]);
 
   const cancelShowTimer = useCallback(() => {
     if (showTimer.current !== undefined) {
@@ -246,29 +221,69 @@ export default function CustomTooltip({
 
   const show = useCallback(() => {
     if (disabled) return;
+    cancelShowTimer();
     cancelHideTimer();
     showTimer.current = setTimeout(() => {
       setIsVisible(true);
     }, delayShow);
-  }, [disabled, delayShow, cancelHideTimer]);
+  }, [cancelHideTimer, cancelShowTimer, delayShow, disabled]);
 
   const hide = useCallback(() => {
     cancelShowTimer();
-    if (isPointerOverTooltipRef.current) {
-      return;
-    }
-    hideTimer.current = setTimeout(() => setIsVisible(false), delayHide + hoverTransitionDelay);
-  }, [delayHide, hoverTransitionDelay, cancelShowTimer]);
-
-  const handleTooltipMouseEnter = useCallback(() => {
-    isPointerOverTooltipRef.current = true;
     cancelHideTimer();
-  }, [cancelHideTimer]);
+    hideTimer.current = setTimeout(
+      () => setIsVisible(false),
+      delayHide + hoverTransitionDelay
+    );
+  }, [cancelHideTimer, cancelShowTimer, delayHide, hoverTransitionDelay]);
 
-  const handleTooltipMouseLeave = useCallback(() => {
-    isPointerOverTooltipRef.current = false;
+  const handleTriggerMouseEnter = useCallback(() => {
+    resolveTriggerNode();
+    show();
+  }, [resolveTriggerNode, show]);
+
+  const handleTriggerMouseLeave = useCallback(() => {
     hide();
   }, [hide]);
+
+  const handleTriggerFocus = useCallback(() => {
+    resolveTriggerNode();
+    show();
+  }, [resolveTriggerNode, show]);
+
+  const handleTriggerBlur = useCallback(
+    (event: React.FocusEvent<HTMLSpanElement>) => {
+      const nextTarget = event.relatedTarget as Node | null;
+      if (triggerBoundaryRef.current?.contains(nextTarget)) {
+        return;
+      }
+      hide();
+    },
+    [hide]
+  );
+
+  const closeTooltipImmediately = useCallback(() => {
+    cancelShowTimer();
+    cancelHideTimer();
+    setIsVisible(false);
+  }, [cancelShowTimer, cancelHideTimer]);
+
+  useLayoutEffect(() => {
+    syncTooltipDescription();
+  });
+
+  useLayoutEffect(() => {
+    if (!isVisible) return;
+
+    const observer = childObserverRef.current;
+    if (!observer) return;
+
+    const previousObservedChildNode = observedChildNodeRef.current;
+    const childNode = syncChildObserverNode(observer);
+    if (!childNode || previousObservedChildNode === childNode) return;
+
+    calculatePosition();
+  });
 
   useLayoutEffect(() => {
     if (!isVisible) return;
@@ -283,7 +298,7 @@ export default function CustomTooltip({
   useEffect(() => {
     if (!isVisible) return;
     if (!tooltipRef.current) return;
-    if (!isBrowser) return;
+    if (getTooltipWindow() === null) return;
 
     if (typeof ResizeObserver === "undefined") {
       calculatePosition();
@@ -305,8 +320,10 @@ export default function CustomTooltip({
 
   useEffect(() => {
     if (!isVisible) return;
-    if (!childRef.current) return;
-    if (!isBrowser) return;
+    if (getTooltipWindow() === null) return;
+
+    const childNode = getCurrentTriggerNode() ?? resolveTriggerNode();
+    if (!childNode) return;
 
     if (typeof ResizeObserver === "undefined") {
       calculatePosition();
@@ -314,39 +331,54 @@ export default function CustomTooltip({
     }
 
     const observer = new ResizeObserver(() => {
+      const nextChildNode = syncChildObserverNode(observer);
+      if (!nextChildNode) return;
+
       calculatePosition();
     });
 
     childObserverRef.current = observer;
-    observer.observe(childRef.current);
+    observedChildNodeRef.current = childNode;
+    observer.observe(childNode);
 
     return () => {
+      if (observedChildNodeRef.current) {
+        observer.unobserve(observedChildNodeRef.current);
+        observedChildNodeRef.current = null;
+      }
       observer.disconnect();
       childObserverRef.current = null;
     };
-  }, [isVisible, calculatePosition]);
+  }, [
+    isVisible,
+    calculatePosition,
+    getCurrentTriggerNode,
+    resolveTriggerNode,
+    syncChildObserverNode,
+  ]);
 
   useEffect(() => {
     if (!isVisible) return;
-    if (!isBrowser) return;
+    const browserWindow = getTooltipWindow();
+    if (browserWindow === null) return;
 
     let rafId: number | null = null;
     const handleReposition = () => {
       if (rafId !== null) return;
-      rafId = win.requestAnimationFrame(() => {
+      rafId = browserWindow.requestAnimationFrame(() => {
         rafId = null;
         calculatePosition();
       });
     };
 
-    win.addEventListener("resize", handleReposition);
-    win.addEventListener("scroll", handleReposition, true);
+    browserWindow.addEventListener("resize", handleReposition);
+    browserWindow.addEventListener("scroll", handleReposition, true);
 
     return () => {
-      win.removeEventListener("resize", handleReposition);
-      win.removeEventListener("scroll", handleReposition, true);
+      browserWindow.removeEventListener("resize", handleReposition);
+      browserWindow.removeEventListener("scroll", handleReposition, true);
       if (rafId !== null) {
-        win.cancelAnimationFrame(rafId);
+        browserWindow.cancelAnimationFrame(rafId);
       }
     };
   }, [isVisible, calculatePosition]);
@@ -356,78 +388,82 @@ export default function CustomTooltip({
       cancelShowTimer();
       cancelHideTimer();
       childObserverRef.current?.disconnect();
+      observedChildNodeRef.current = null;
       tooltipObserverRef.current?.disconnect();
+      clearTooltipDescription();
     };
-  }, [cancelShowTimer, cancelHideTimer]);
+  }, [cancelShowTimer, cancelHideTimer, clearTooltipDescription]);
 
-  const clonedChild = React.cloneElement(
-    childElement,
-    {
-      ref: assignChildNode,
-      onMouseEnter: mergeHandlers<React.MouseEvent<HTMLElement>>(
-        () => {
-          show();
-        },
-        childElement.props.onMouseEnter
-      ),
-      onMouseLeave: mergeHandlers<React.MouseEvent<HTMLElement>>(
-        () => {
-          hide();
-        },
-        childElement.props.onMouseLeave
-      ),
-      onFocus: mergeHandlers<React.FocusEvent<HTMLElement>>(
-        () => {
-          show();
-        },
-        childElement.props.onFocus
-      ),
-      onBlur: mergeHandlers<React.FocusEvent<HTMLElement>>(
-        () => {
-          hide();
-        },
-        childElement.props.onBlur
-      ),
-    } as React.Attributes & TooltipChildHandlers
-  );
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const handleCloseAll = () => {
+      closeTooltipImmediately();
+    };
+
+    document.addEventListener(CUSTOM_TOOLTIP_CLOSE_ALL_EVENT, handleCloseAll);
+    return () => {
+      document.removeEventListener(
+        CUSTOM_TOOLTIP_CLOSE_ALL_EVENT,
+        handleCloseAll
+      );
+    };
+  }, [closeTooltipImmediately]);
 
   return (
     <>
-      {clonedChild}
-      {isVisible && typeof document !== "undefined" && createPortal(
-        <div
-          ref={tooltipRef}
-          role="tooltip"
-          className={`${styles["tooltip"]} ${styles["tooltip--" + actualPlacement]}`}
-          style={{
-            position: 'fixed',
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            zIndex: 999999,
-            pointerEvents: 'auto',
-          }}
-          onMouseEnter={handleTooltipMouseEnter}
-          onMouseLeave={handleTooltipMouseLeave}
-        >
-          <div className={styles["tooltipContent"]}>
-            {content}
-          </div>
-          <div 
-            className={`${styles["tooltipArrow"]} ${styles["tooltipArrow--" + actualPlacement]}`}
+      <span
+        ref={triggerBoundaryRef}
+        role="presentation"
+        style={{ display: "contents" }}
+        onMouseEnter={handleTriggerMouseEnter}
+        onMouseLeave={handleTriggerMouseLeave}
+        onFocus={handleTriggerFocus}
+        onBlur={handleTriggerBlur}
+      >
+        {children}
+      </span>
+      {isVisible &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            id={tooltipId}
+            role="tooltip"
+            className={joinTooltipClassNames(
+              styles["tooltip"],
+              styles["tooltip--" + actualPlacement]
+            )}
             style={{
-              ...(actualPlacement === "top" || actualPlacement === "bottom") && {
-                left: `${arrowPosition.x}px`,
-                transform: 'translateX(-50%)'
-              },
-              ...(actualPlacement === "left" || actualPlacement === "right") && {
-                top: `${arrowPosition.y}px`,
-                transform: 'translateY(-50%)'
-              }
+              position: "fixed",
+              left: `${position.x}px`,
+              top: `${position.y}px`,
+              zIndex: 999999,
+              pointerEvents: "none",
             }}
-          />
-        </div>,
-        document.body
-      )}
+          >
+            <div className={styles["tooltipContent"]}>{content}</div>
+            <div
+              className={joinTooltipClassNames(
+                styles["tooltipArrow"],
+                styles["tooltipArrow--" + actualPlacement]
+              )}
+              style={{
+                ...((actualPlacement === "top" ||
+                  actualPlacement === "bottom") && {
+                  left: `${arrowPosition.x}px`,
+                  transform: "translateX(-50%)",
+                }),
+                ...((actualPlacement === "left" ||
+                  actualPlacement === "right") && {
+                  top: `${arrowPosition.y}px`,
+                  transform: "translateY(-50%)",
+                }),
+              }}
+            />
+          </div>,
+          document.body
+        )}
     </>
   );
 }

@@ -1,4 +1,4 @@
-import type { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
+import type { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
 
 export default function UserPageStatsActivityWalletFilterItem({
   filter,
@@ -14,7 +14,7 @@ export default function UserPageStatsActivityWalletFilterItem({
   return (
     <li>
       <button
-        className="tw-bg-transparent tw-border-none tw-text-left tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-bg-transparent tw-p-2 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700"
         onClick={() => onFilter(filter)}
       >
         <div className="tw-w-44 tw-truncate">
@@ -23,7 +23,7 @@ export default function UserPageStatsActivityWalletFilterItem({
           </span>
           {filter === activeFilter && (
             <svg
-              className="tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-ml-2 tw-h-5 tw-w-5 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

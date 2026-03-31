@@ -183,7 +183,9 @@ function RecipientSelectedDisplay({
       <div
         className={`tw-flex tw-min-h-0 tw-flex-col tw-space-y-2 ${showSelectedProfileCard ? "tw-pt-4" : "tw-pt-0"}`}
       >
-        {(showSelectedProfileCard ? wallets.length > 1 : wallets.length > 0) && (
+        {(showSelectedProfileCard
+          ? wallets.length > 1
+          : wallets.length > 0) && (
           <div className="tw-text-sm">Choose destination wallet</div>
         )}
         <div
@@ -237,7 +239,7 @@ function RecipientSearchDisplay({
         className="tw-h-14 tw-w-full tw-rounded-lg tw-border-none tw-bg-white/10 tw-px-3 tw-py-2 focus:tw-bg-white/20 focus:tw-outline-none"
         ref={searchInputRef}
       />
-      <div className="tw-text-[12px] tw-opacity-60">{searchStatusText}</div>
+      <div className="tw-text-xs tw-opacity-60">{searchStatusText}</div>
       <div
         ref={resultsListRef}
         className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/30 hover:tw-scrollbar-thumb-white/50"

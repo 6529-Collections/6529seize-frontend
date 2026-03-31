@@ -1,27 +1,31 @@
 import type { BaseNFT, NFTLite } from "@/entities/INFT";
+import { getResolvedAnimationSrc } from "./animation-source";
 
-type MediaType = 'html' | 'glb' | 'video' | 'image';
+type MediaType = "html" | "glb" | "video" | "image";
 
-export function getMediaType(nft: BaseNFT | NFTLite, animation: boolean): MediaType {
-  if (!animation || !nft.animation) {
-    return 'image';
+export function getMediaType(
+  nft: BaseNFT | NFTLite,
+  animation: boolean
+): MediaType {
+  if (!animation || !getResolvedAnimationSrc(nft)) {
+    return "image";
   }
 
   if (!("metadata" in nft) || !nft.metadata?.animation_details?.format) {
-    return 'image';
+    return "image";
   }
 
   const format = nft.metadata.animation_details.format.toLowerCase();
-  
+
   switch (format) {
-    case 'html':
-      return 'html';
-    case 'glb':
-      return 'glb';
-    case 'mp4':
-    case 'mov':
-      return 'video';
+    case "html":
+      return "html";
+    case "glb":
+      return "glb";
+    case "mp4":
+    case "mov":
+      return "video";
     default:
-      return 'image';
+      return "image";
   }
 }

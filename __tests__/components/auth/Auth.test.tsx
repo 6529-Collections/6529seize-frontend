@@ -28,6 +28,21 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
   getWalletAddress: jest.fn(() => null),
+  isAuthAddressAuthorized: jest.fn(
+    ({
+      address,
+      connectedAccounts,
+    }: {
+      readonly address: string | null | undefined;
+      readonly connectedAccounts: readonly { readonly address: string }[];
+    }) =>
+      Boolean(
+        address &&
+        connectedAccounts.some(
+          (account) => account.address.toLowerCase() === address.toLowerCase()
+        )
+      )
+  ),
   removeAuthJwt: jest.fn(),
   setActiveWalletAccount: jest.fn(() => true),
   setAuthJwt: jest.fn(),
@@ -119,6 +134,14 @@ mockTitleContextModule();
 
 let walletAddress: string | null = "0x1";
 let connectionState: string = "connected";
+let connectedAccountsOverride:
+  | readonly {
+      readonly address: string;
+      readonly role: string | null;
+      readonly isActive: boolean;
+      readonly isConnected: boolean;
+    }[]
+  | null = null;
 
 const mockSeizeDisconnectAndLogout = jest.fn(() => Promise.resolve());
 const mockSeizeDisconnect = jest.fn(() => Promise.resolve());
@@ -126,16 +149,18 @@ const mockSeizeDisconnect = jest.fn(() => Promise.resolve());
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({
     address: walletAddress,
-    connectedAccounts: walletAddress
-      ? [
-          {
-            address: walletAddress,
-            role: null,
-            isActive: true,
-            isConnected: !!walletAddress,
-          },
-        ]
-      : [],
+    connectedAccounts:
+      connectedAccountsOverride ??
+      (walletAddress
+        ? [
+            {
+              address: walletAddress,
+              role: null,
+              isActive: true,
+              isConnected: !!walletAddress,
+            },
+          ]
+        : []),
     isConnected: !!walletAddress,
     seizeDisconnect: mockSeizeDisconnect,
     seizeDisconnectAndLogout: mockSeizeDisconnectAndLogout,
@@ -172,7 +197,26 @@ describe("Auth component", () => {
   beforeEach(() => {
     walletAddress = "0x1";
     connectionState = "connected";
+    connectedAccountsOverride = null;
     jest.clearAllMocks();
+
+    const mockIsAuthAddressAuthorized = require("@/services/auth/auth.utils")
+      .isAuthAddressAuthorized as jest.MockedFunction<any>;
+    mockIsAuthAddressAuthorized.mockImplementation(
+      ({
+        address,
+        connectedAccounts,
+      }: {
+        readonly address: string | null | undefined;
+        readonly connectedAccounts: readonly { readonly address: string }[];
+      }) =>
+        Boolean(
+          address &&
+          connectedAccounts.some(
+            (account) => account.address.toLowerCase() === address.toLowerCase()
+          )
+        )
+    );
 
     // Reset mock implementations
     mockSignMessage.mockResolvedValue({
@@ -845,6 +889,66 @@ describe("Auth component", () => {
         "Please connect your wallet",
         expect.objectContaining({ type: "error" })
       );
+    });
+
+    it("treats dev-auth sessions as authorized even without stored connected accounts", async () => {
+      connectedAccountsOverride = [];
+
+      const mockGetAuthJwt = require("@/services/auth/auth.utils")
+        .getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress = require("@/services/auth/auth.utils")
+        .getWalletAddress as jest.MockedFunction<any>;
+      const mockIsAuthAddressAuthorized = require("@/services/auth/auth.utils")
+        .isAuthAddressAuthorized as jest.MockedFunction<any>;
+
+      mockGetAuthJwt.mockReturnValue("dev-jwt");
+      mockGetWalletAddress.mockReturnValue(walletAddress);
+      mockIsAuthAddressAuthorized.mockReturnValue(true);
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+
+        return (
+          <>
+            <button
+              onClick={async () => {
+                const response = await requestAuth();
+                setResult(String(response.success));
+              }}
+              data-testid="test-dev-auth"
+            >
+              Test Dev Auth
+            </button>
+            <span data-testid="test-dev-auth-result">{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("test-dev-auth"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("test-dev-auth-result")).toHaveTextContent(
+          "true"
+        );
+      });
+
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(
+        screen.queryByText("Sign Authentication Request")
+      ).not.toBeInTheDocument();
     });
   });
 

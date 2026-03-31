@@ -32,7 +32,7 @@ export default function CommonTableSortIcon({
     if (active) {
       c += ` ${activeClassName}`;
     } else {
-      c += " tw-text-iron-400 group-hover:tw-text-iron-200";
+      c += " tw-text-iron-600 group-hover:tw-text-iron-400";
     }
     const targetDirection = rotate ? rotatedDirections[dir] : dir;
     if (targetDirection === SortDirection.ASC) {
@@ -63,11 +63,12 @@ export default function CommonTableSortIcon({
 
   return (
     <svg
-      className={`${classes} tw-transition tw-duration-300 tw-ease-out tw-h-4 tw-w-4 tw-flex-shrink-0`}
+      className={`${classes} tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg">
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         d="M12 20V4M12 4L6 10M12 4L18 10"
         stroke="currentColor"

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useDebounce } from "react-use";
-import type { TraitsData } from "../submission/types/TraitsData";
 import { TraitWrapper } from "./TraitWrapper";
+import type { TraitsData } from "../submission/types/TraitsData";
 
 interface NumberTraitProps {
   readonly label: string;
@@ -16,6 +16,8 @@ interface NumberTraitProps {
   readonly max: number;
   readonly traits: TraitsData;
   readonly updateNumber: (field: keyof TraitsData, value: number) => void;
+  readonly showRequiredMarker?: boolean | undefined;
+  readonly size?: "default" | "sm" | undefined;
 }
 
 /**
@@ -34,6 +36,8 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
     className,
     error,
     onBlur,
+    showRequiredMarker = false,
+    size = "default",
   }) => {
     // Use a ref for direct DOM access
     const inputRef = useRef<HTMLInputElement>(null);
@@ -164,22 +168,27 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
       setCurrentInputValue(String(traitValue));
     }, [traits, field]);
 
-    // Check if field is filled (non-zero value)
     const isFieldFilled = useMemo(() => {
-      const traitValue = (traits[field] as number) ?? 0;
-      const inputValue = parseFloat(currentInputValue) || 0;
-
-      // Return true if either the trait value or current input value is > 0
-      return traitValue > 0 || inputValue > 0;
-    }, [traits, field, currentInputValue]);
+      const n = Number.parseFloat(currentInputValue);
+      if (!Number.isFinite(n)) return false;
+      if (n === 0) return false;
+      if (min !== undefined && n < min) return false;
+      if (max !== undefined && n > max) return false;
+      return true;
+    }, [currentInputValue, min, max]);
 
     // Determine input state styling
     let stateClassName: string;
     if (readOnly) {
       stateClassName =
-        "tw-bg-iron-800 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-500";
+        isFieldFilled
+          ? "tw-bg-iron-800 tw-ring-emerald-700/40 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-500"
+          : "tw-bg-iron-800 tw-ring-iron-700 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-500";
     } else if (error) {
       stateClassName = "tw-bg-iron-900 tw-ring-red tw-cursor-text";
+    } else if (isFieldFilled) {
+      stateClassName =
+        "tw-bg-iron-900 tw-ring-emerald-600/45 desktop-hover:hover:tw-ring-emerald-600/55 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
     } else {
       stateClassName =
         "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
@@ -195,6 +204,8 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
         className={className}
         error={error}
         isFieldFilled={isFieldFilled}
+        showRequiredMarker={showRequiredMarker}
+        size={size}
       >
         <input
           ref={inputRef}
@@ -206,7 +217,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
           readOnly={readOnly}
           min={min}
           max={max}
-          className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
+          className={`tw-form-input tw-w-full tw-rounded-lg tw-border-0 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base sm:tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
           style={{
             MozAppearance: "textfield",
             WebkitAppearance: "none",

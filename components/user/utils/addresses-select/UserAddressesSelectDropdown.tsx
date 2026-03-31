@@ -5,7 +5,7 @@ import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { formatAddress } from "@/helpers/Helpers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { RefObject} from "react";
+import type { RefObject } from "react";
 import { useEffect, useMemo, useState } from "react";
 import UserAddressesSelectDropdownItem from "./UserAddressesSelectDropdownItem";
 
@@ -90,6 +90,7 @@ export default function UserAddressesSelectDropdown({
       activeItem={activeItem}
       containerRef={containerRef}
       setSelected={onAddressChange}
+      size="sm"
       renderItemChildren={(item) =>
         item.childrenProps ? (
           <UserAddressesSelectDropdownItem wallet={item.childrenProps} />

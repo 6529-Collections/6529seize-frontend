@@ -6,7 +6,7 @@ import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
-import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
+import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
@@ -52,15 +52,15 @@ export default function UserPageStatsActivityWalletTableWrapper({
 
   if (isFirstLoading) {
     return (
-      <div className="tw-mt-2 sm:tw-mt-4 tw-w-full tw-h-96">
+      <div className="tw-mt-2 tw-h-96 tw-w-full sm:tw-mt-4">
         <CommonCardSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
-      <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-4 tw-items-center tw-px-4 sm:tw-px-6 tw-mt-6">
+    <div className="tw-mt-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 lg:tw-mt-4">
+      <div className="tw-mt-6 tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-space-x-4 tw-px-4 sm:tw-px-6">
         <UserPageStatsActivityWalletFilter
           activeFilter={filter}
           setActiveFilter={onActiveFilter}
@@ -89,7 +89,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
             )}
           </div>
         ) : (
-          <div className="tw-py-4 tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-base tw-italic tw-text-iron-500">
+          <div className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
             {FILTER_TO_NO_DATA[filter]}
           </div>
         )}

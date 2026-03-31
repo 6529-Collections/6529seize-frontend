@@ -42,6 +42,8 @@ export default function MobileRepTabContent({
   canEditRep,
   visibleCount,
   onShowMore,
+  hasNextPage,
+  isFetchingNextPage,
   onGrantRep,
   onEditCategory,
 }: {
@@ -55,9 +57,25 @@ export default function MobileRepTabContent({
   readonly canEditRep: boolean;
   readonly visibleCount: number;
   readonly onShowMore: () => void;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
   readonly onGrantRep: () => void;
   readonly onEditCategory: (category: string) => void;
 }) {
+  const hiddenLoadedCategoryCount = Math.max(
+    categories.length - visibleCount,
+    0
+  );
+  const hasMore = hiddenLoadedCategoryCount > 0 || hasNextPage;
+  let loadMoreLabel = "Load more";
+  if (hiddenLoadedCategoryCount > 0) {
+    loadMoreLabel = `+${hiddenLoadedCategoryCount} more`;
+  } else if (isFetchingNextPage) {
+    loadMoreLabel = "Loading...";
+  }
+  const isLoadMoreDisabled =
+    isFetchingNextPage && hiddenLoadedCategoryCount === 0;
+
   return (
     <>
       {canEditRep && repDirection === "received" && (
@@ -119,9 +137,7 @@ export default function MobileRepTabContent({
             </span>
             <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
               {overview.authenticated_user_contribution > 0 && "+"}
-              {formatNumberWithCommas(
-                overview.authenticated_user_contribution
-              )}
+              {formatNumberWithCommas(overview.authenticated_user_contribution)}
             </span>
           </div>
         )}
@@ -154,13 +170,14 @@ export default function MobileRepTabContent({
                 compact
               />
             ))}
-            {categories.length > visibleCount && (
+            {hasMore && (
               <button
                 type="button"
                 onClick={onShowMore}
-                className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
+                disabled={isLoadMoreDisabled}
+                className="tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300 disabled:tw-cursor-default disabled:tw-opacity-70"
               >
-                +{categories.length - visibleCount} more
+                {loadMoreLabel}
               </button>
             )}
           </div>

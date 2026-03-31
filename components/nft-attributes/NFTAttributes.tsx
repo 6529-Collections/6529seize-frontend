@@ -1,6 +1,7 @@
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./NFTAttributes.module.scss";
 import type { IAttribute } from "@/entities/INFT";
+import clsx from "clsx";
 
 export default function NFTAttributes(
   props: Readonly<{
@@ -17,10 +18,11 @@ export default function NFTAttributes(
             sm={{ span: 3 }}
             md={{ span: 2 }}
             lg={{ span: 2 }}
-            className="pt-2 pb-2">
+            className="pt-2 pb-2"
+          >
             <Container>
               <Row>
-                <Col className={styles["nftAttribute"]}>
+                <Col className={clsx(styles["nftAttribute"], "tw-rounded-md")}>
                   <span>{a.trait_type}</span>
                   <br />
                   <span title={a.value}>{a.value}</span>

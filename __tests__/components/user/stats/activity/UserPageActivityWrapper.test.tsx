@@ -1,6 +1,5 @@
-import UserPageActivityWrapper, {
-  USER_PAGE_ACTIVITY_TAB,
-} from "@/components/user/stats/activity/UserPageActivityWrapper";
+import UserPageActivityWrapper from "@/components/user/stats/activity/UserPageActivityWrapper";
+import { USER_PAGE_ACTIVITY_TAB } from "@/components/user/stats/activity/activity.types";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -11,26 +10,22 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
   usePathname: () => "/profile",
   useSearchParams: () => ({
-    get: (k: string) => search.get(k),
+    get: (key: string) => search.get(key) ?? null,
     toString: () =>
-      Array.from(search)
-        .map(([k, v]) => `${k}=${v}`)
-        .join("&"),
+      new URLSearchParams(Array.from(search.entries())).toString(),
   }),
 }));
 
 jest.mock(
   "@/components/user/stats/activity/tabs/UserPageActivityTabs",
-  () => (props: any) =>
-    (
-      <button
-        data-testid="tab"
-        onClick={() =>
-          props.setActiveTab(USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS)
-        }>
-        tab
-      </button>
-    )
+  () => (props: { setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void }) => (
+    <button
+      data-testid="tab"
+      onClick={() => props.setActiveTab(USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS)}
+    >
+      tab
+    </button>
+  )
 );
 
 jest.mock(
@@ -48,15 +43,24 @@ jest.mock(
 
 const profile = { wallets: [] } as any;
 
-test("sets initial tab from query and navigates on change", async () => {
-  search.set("activity", "tdh-history");
-  search.set("wallet-activity", "x");
-  search.set("page", "2");
+beforeEach(() => {
+  replace.mockClear();
+  search.clear();
+});
+
+test("hydrates the active tab from query params and updates the url on change", async () => {
   const user = userEvent.setup();
+
+  search.set("activity", "tdh-history");
+  search.set("wallet-activity", "airdrops");
+  search.set("page", "2");
+
   render(<UserPageActivityWrapper profile={profile} activeAddress={null} />);
-  // initial
+
   expect(screen.getByTestId("tdh")).toBeInTheDocument();
+
   await user.click(screen.getByTestId("tab"));
+
   expect(replace).toHaveBeenCalledWith("/profile?activity=distributions", {
     scroll: false,
   });

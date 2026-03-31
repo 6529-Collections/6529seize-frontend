@@ -2,6 +2,8 @@ import CommonTablePagination from "@/components/utils/table/paginator/CommonTabl
 import type { ApiXTdhToken } from "@/generated/models/ApiXTdhToken";
 import { formatStatFloor } from "@/helpers/Helpers";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
+import type { TokenMetadata } from "@/types/nft";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 export default function UserPageCollectedNetworkCards({
@@ -15,14 +17,6 @@ export default function UserPageCollectedNetworkCards({
   readonly setPage: (page: number) => void;
   readonly next: boolean;
 }) {
-  if (!cards.length) {
-    return (
-      <div className="tw-w-full tw-text-center tw-py-10 tw-text-iron-400">
-        No tokens found
-      </div>
-    );
-  }
-
   const tokens = useMemo(
     () =>
       cards.map((card) => ({
@@ -37,8 +31,16 @@ export default function UserPageCollectedNetworkCards({
     enabled: cards.length > 0,
   });
 
+  if (cards.length === 0) {
+    return (
+      <div className="tw-w-full tw-py-10 tw-text-center tw-text-iron-400">
+        No tokens found
+      </div>
+    );
+  }
+
   return (
-    <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 tw-gap-4 lg:tw-gap-6 tw-pb-2">
+    <div className="tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6">
       {cards.map((card) => (
         <NetworkCard
           key={`${card.contract}-${card.token}`}
@@ -65,7 +67,7 @@ function NetworkCard({
   metadata,
 }: {
   readonly card: ApiXTdhToken;
-  readonly metadata: any[] | undefined;
+  readonly metadata: TokenMetadata[] | undefined;
 }) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -76,59 +78,64 @@ function NetworkCard({
   );
 
   const imageUrl = tokenMetadata?.imageUrl;
+  const hasImageUrl = typeof imageUrl === "string" && imageUrl.length > 0;
 
   return (
-    <div className="tw-group tw-relative tw-flex tw-flex-col tw-bg-gradient-to-br tw-from-iron-900 tw-to-white/5 tw-rounded-lg tw-overflow-hidden tw-px-0.5 tw-pt-0.5 tw-transition tw-duration-300 tw-ease-out tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600/60 hover:tw-to-white/10">
+    <div className="tw-group tw-relative tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-shadow-xl tw-transition-all tw-duration-300 hover:tw-border-white/30">
       <div className="tw-flex tw-flex-wrap">
         <div className="tw-w-full tw-max-w-full">
-          <div className="tw-h-[200px] min-[800px]:tw-h-[250px] min-[1200px]:tw-h-[18.75rem] tw-text-center tw-flex tw-items-center tw-justify-center tw-relative tw-w-full">
+          <div className="tw-relative tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-white/[0.02]">
             {!isImageLoaded && (
-              <div className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-lg" />
+              <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-bg-iron-800" />
             )}
-            {imageUrl && (
-              <img
+            {hasImageUrl && (
+              <Image
                 src={imageUrl}
                 alt={tokenMetadata?.collectionName ?? "Network Token"}
+                fill
                 onLoad={() => setIsImageLoaded(true)}
-                className={`tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain ${!isImageLoaded ? "tw-opacity-0" : "tw-opacity-100"
-                  } tw-transition-opacity tw-duration-300`}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                unoptimized
+                className={[
+                  "tw-bg-transparent tw-object-contain",
+                  isImageLoaded ? "tw-opacity-100" : "tw-opacity-0",
+                  "tw-transition-opacity tw-duration-300",
+                ].join(" ")}
               />
             )}
           </div>
         </div>
 
-        <div className="tw-pt-3 tw-px-2 tw-flex tw-justify-between tw-items-center tw-w-full">
-          <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-400">
+        <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-pt-4">
+          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-white/40">
             {tokenMetadata?.collectionName ?? "Network"}
           </span>
-          <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-500">
+          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-white/50">
             #{card.token}
           </span>
         </div>
       </div>
 
-      <div className="tw-pt-2 tw-pb-4 tw-px-2 tw-self-end tw-w-full tw-h-full">
-        <div className="tw-flex tw-flex-col tw-h-full tw-justify-between tw-gap-y-2.5 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
-          <div className="tw-flex tw-justify-between tw-gap-x-2">
-            <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium tw-text-iron-50 tw-truncate tw-block tw-w-full">
-              {tokenMetadata?.name ?? `Token #${card.token}`}
-            </span>
-          </div>
+      <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-1.5 tw-self-end tw-px-4 tw-pb-4 tw-pt-1.5">
+        <div className="tw-flex tw-justify-between tw-gap-x-2">
+          <span className="tw-block tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-leading-snug tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
+            {tokenMetadata?.name ?? `Token #${card.token}`}
+          </span>
+        </div>
 
-          <div className="tw-pt-2 tw-flex tw-items-center tw-justify-between">
-            <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
-              <span className="tw-text-iron-400">xTDH</span>
-              <span className="tw-ml-1 tw-text-iron-50">
-                {formatStatFloor(card.xtdh, 1)}
-              </span>
+        <div className="tw-mt-2 tw-grid tw-grid-cols-2 tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
+          <span className="tw-flex tw-items-baseline tw-gap-1.5 tw-text-[13px] tw-font-semibold">
+            <span className="tw-order-2 tw-text-white/30">xTDH</span>
+            <span className="tw-order-1 tw-text-white/80">
+              {formatStatFloor(card.xtdh, 1)}
             </span>
-            <span className="tw-text-sm min-[1200px]:tw-text-md tw-font-medium">
-              <span className="tw-text-iron-400">xTDH/day</span>
-              <span className="tw-ml-1 tw-text-iron-50">
-                {formatStatFloor(card.xtdh_rate, 1)}
-              </span>
+          </span>
+          <span className="tw-flex tw-items-baseline tw-justify-end tw-gap-1.5 tw-text-[13px] tw-font-semibold">
+            <span className="tw-order-2 tw-text-white/30">xTDH/day</span>
+            <span className="tw-order-1 tw-text-white/80">
+              {formatStatFloor(card.xtdh_rate, 1)}
             </span>
-          </div>
+          </span>
         </div>
       </div>
     </div>

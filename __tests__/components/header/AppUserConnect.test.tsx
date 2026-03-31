@@ -13,10 +13,14 @@ jest.mock("@/components/header/PushNotificationSettings", () => () => (
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
+jest.mock("@/components/header/useChainSwitcher", () => ({
+  useChainSwitcher: jest.fn(),
+}));
 
 const {
   useSeizeConnectContext,
 } = require("@/components/auth/SeizeConnectContext");
+const { useChainSwitcher } = require("@/components/header/useChainSwitcher");
 
 function setup(address: string | undefined, isConnected: boolean) {
   const seizeConnect = jest.fn();
@@ -33,6 +37,12 @@ function setup(address: string | undefined, isConnected: boolean) {
     seizeDisconnect,
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
+  });
+  (useChainSwitcher as jest.Mock).mockReturnValue({
+    chains: [],
+    currentChainName: "Ethereum",
+    nextChainName: "Polygon",
+    switchToNextChain: jest.fn(),
   });
   const onNavigate = jest.fn();
   render(<AppUserConnect onNavigate={onNavigate} />);
@@ -67,6 +77,12 @@ function setupWithAccounts(options: {
     seizeDisconnect,
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
+  });
+  (useChainSwitcher as jest.Mock).mockReturnValue({
+    chains: [],
+    currentChainName: "Ethereum",
+    nextChainName: "Polygon",
+    switchToNextChain: jest.fn(),
   });
   const onNavigate = jest.fn();
   render(<AppUserConnect onNavigate={onNavigate} />);
@@ -135,6 +151,39 @@ describe("AppUserConnect", () => {
       expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
       expect(onNavigate).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it("shows chain switch controls when multiple chains are available", () => {
+    const switchToNextChain = jest.fn(() => true);
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      address: "0xabc",
+      isConnected: true,
+      connectedAccounts: [
+        { address: "0xabc", role: null, isActive: true, isConnected: true },
+      ],
+      seizeConnect: jest.fn(),
+      seizeDisconnect: jest.fn().mockResolvedValue(undefined),
+      seizeDisconnectAndLogout: jest.fn(),
+      seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),
+    });
+    (useChainSwitcher as jest.Mock).mockReturnValue({
+      chains: [
+        { id: 1, name: "Ethereum" },
+        { id: 137, name: "Polygon" },
+      ],
+      currentChainName: "Ethereum",
+      nextChainName: "Polygon",
+      switchToNextChain,
+    });
+
+    const onNavigate = jest.fn();
+    render(<AppUserConnect onNavigate={onNavigate} />);
+
+    expect(screen.getByText("Network: Ethereum")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Switch Chain" }));
+
+    expect(switchToNextChain).toHaveBeenCalled();
+    expect(onNavigate).toHaveBeenCalled();
   });
 
   it("shows sign out all profiles only when multiple profiles exist", () => {

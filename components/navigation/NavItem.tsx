@@ -1,46 +1,44 @@
 "use client";
 
-import { useEffect } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useViewContext } from "./ViewContext";
-import type { NavItem as NavItemData } from "./navTypes";
-import { motion } from "framer-motion";
-import { useAuth } from "../auth/Auth";
+import { useEffect } from "react";
 import { useTitle } from "@/contexts/TitleContext";
-import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { isNavItemActive } from "./isNavItemActive";
-import { useWaveData } from "@/hooks/useWaveData";
-import { useWave } from "@/hooks/useWave";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { useViewContext } from "./ViewContext";
+import type { NavItem as NavItemData } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
+  readonly isCurrentWaveDm?: boolean;
 }
 
-const NavItem = ({ item }: Props) => {
+const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { activeView, handleNavClick } = useViewContext();
 
   const { name } = item;
   const { icon } = item;
+  const { address, seizeConnect } = useSeizeConnectContext();
 
-  const isLogoItem = name === "Home";
-
-  // Determine if the current wave (if any) is a DM
-  const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const { data: waveData } = useWaveData({
-    waveId: waveIdFromQuery,
-    // Minimal onWaveNotFound, actual handling of not found is likely elsewhere
-    onWaveNotFound: () => {},
-  });
-  const { isDm: isCurrentWaveDmValue } = useWave(waveData);
+  const iconSlotClass =
+    "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
+  const normalizedConnectedHandle = (
+    connectedProfile?.normalised_handle ?? connectedProfile?.handle
+  )?.toLowerCase();
+  const normalizedConnectedAddress = address?.toLowerCase();
+  const profileSlug = normalizedConnectedHandle ?? normalizedConnectedAddress;
+  const profileHref = profileSlug ? `/${profileSlug}` : null;
   const { setTitle } = useTitle();
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
     item.name === "Notifications" ? (connectedProfile?.handle ?? null) : null
@@ -57,15 +55,20 @@ const NavItem = ({ item }: Props) => {
 
   useEffect(() => {
     if (item.name !== "Notifications") return;
-    setTitle(
-      haveUnreadNotifications
-        ? `(${notifications?.unread_count}) Notifications | 6529.io`
-        : "6529.io"
-    );
+    if (haveUnreadNotifications) {
+      setTitle(`(${notifications?.unread_count}) Notifications | 6529.io`);
+    }
     if (!haveUnreadNotifications) {
       removeAllDeliveredNotifications();
+      setTitle("Notifications | 6529.io");
     }
-  }, [haveUnreadNotifications, notifications?.unread_count]);
+  }, [
+    haveUnreadNotifications,
+    item.name,
+    notifications?.unread_count,
+    removeAllDeliveredNotifications,
+    setTitle,
+  ]);
 
   if (item.disabled) {
     return (
@@ -74,9 +77,9 @@ const NavItem = ({ item }: Props) => {
         aria-label={name}
         aria-disabled="true"
         disabled
-        className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
+        className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
       >
-        <div className="tw-flex tw-items-center tw-justify-center">
+        <div className={iconSlotClass}>
           {item.iconComponent ? (
             <item.iconComponent
               className={`${
@@ -100,31 +103,57 @@ const NavItem = ({ item }: Props) => {
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
-  const isActive = isNavItemActive(
-    item,
-    pathname ?? "",
-    searchParams ?? new URLSearchParams(),
-    activeView,
-    isCurrentWaveDmValue
-  );
+  const isProfileItem = item.kind === "route" && item.name === "Profile";
+  const normalizedPathname = (pathname ?? "").toLowerCase();
+  const isProfileActive =
+    isProfileItem &&
+    activeView === null &&
+    profileHref !== null &&
+    (normalizedPathname === profileHref ||
+      normalizedPathname.startsWith(`${profileHref}/`));
+
+  const isActive = isProfileItem
+    ? isProfileActive
+    : isNavItemActive(
+        item,
+        pathname ?? "",
+        searchParams ?? new URLSearchParams(),
+        activeView,
+        isCurrentWaveDm
+      );
+
+  const handleClick = () => {
+    if (item.kind === "route" && item.name === "Profile") {
+      if (!address) {
+        seizeConnect();
+        return;
+      }
+
+      handleNavClick({
+        ...item,
+        href: profileHref ?? item.href,
+      });
+      return;
+    }
+
+    handleNavClick(item);
+  };
 
   return (
     <button
       type="button"
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
-      onClick={() => handleNavClick(item)}
-      className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
+      onClick={handleClick}
+      className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
     >
       {isActive && (
         <motion.div
           layoutId="nav-indicator"
-          className={`tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white ${
-            isLogoItem ? "tw-top-1" : ""
-          }`}
+          className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
         />
       )}
-      <div className="tw-relative tw-flex tw-items-center tw-justify-center">
+      <div className={`tw-relative ${iconSlotClass}`}>
         {item.iconComponent ? (
           <item.iconComponent
             className={`${iconSizeClass} ${

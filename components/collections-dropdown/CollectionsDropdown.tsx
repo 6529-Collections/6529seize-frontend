@@ -4,13 +4,7 @@ import styles from "./CollectionsDropdown.module.scss";
 import { Dropdown } from "react-bootstrap";
 import { useRouter } from "next/navigation";
 
-type CollectionType =
-  | "memes"
-  | "gradient"
-  | "nextgen"
-  | "memelab"
-  | "rememes"
-  | "xtdh";
+type CollectionType = "memes" | "gradient" | "nextgen" | "memelab" | "rememes";
 
 interface CollectionItem {
   id: CollectionType;
@@ -24,7 +18,6 @@ const COLLECTIONS: CollectionItem[] = [
   { id: "nextgen", name: "NextGen", path: "/nextgen" },
   { id: "memelab", name: "Meme Lab", path: "/meme-lab" },
   { id: "rememes", name: "ReMemes", path: "/rememes" },
-  { id: "xtdh", name: "xTDH", path: "/xtdh" },
 ];
 
 interface Props {
@@ -34,7 +27,7 @@ interface Props {
 export default function CollectionsDropdown(props: Readonly<Props>) {
   const router = useRouter();
   const activeCollection =
-    COLLECTIONS.find((c) => c.id === props.activePage) || COLLECTIONS[0];
+    COLLECTIONS.find((c) => c.id === props.activePage) ?? COLLECTIONS[0];
 
   const handleSelect = (collectionPath: string) => {
     router.push(collectionPath);
@@ -50,7 +43,8 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
           <Dropdown.Item
             key={`collection-${collection.id}`}
             active={collection.id === props.activePage}
-            onClick={() => handleSelect(collection.path)}>
+            onClick={() => handleSelect(collection.path)}
+          >
             {collection.name}
           </Dropdown.Item>
         ))}

@@ -1,3 +1,5 @@
+import { mainnet } from "viem/chains";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import {
   getDimensionsFromMetadata,
@@ -37,7 +39,11 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           collection={nft.collection}
           season={nft.season}
         />
-        <NowMintingCountdown nftId={nft.id} />
+        <NowMintingCountdown
+          nftId={nft.id}
+          contract={MEMES_CONTRACT}
+          chainId={mainnet.id}
+        />
       </div>
     </div>
   );

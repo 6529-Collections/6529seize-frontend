@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
+import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 
 let markdownProps: any;
 
@@ -106,4 +107,55 @@ test("clears quoted part content when drop becomes null", () => {
 
   rerender(<WaveDropQuote drop={null} partId={5} onQuoteClick={jest.fn()} />);
   expect(screen.getByTestId("markdown")).toHaveTextContent("");
+});
+
+test("passes explicit link-card suppression callback into nested markdown", () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: null },
+    parts: [{ part_id: 5, content: "text" }],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+  } as any;
+  const onLinkCardActionsActiveChange = jest.fn();
+
+  render(
+    <WaveDropQuote
+      drop={drop}
+      partId={5}
+      onQuoteClick={jest.fn()}
+      onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+    />
+  );
+
+  expect(markdownProps.onLinkCardActionsActiveChange).toBe(
+    onLinkCardActionsActiveChange
+  );
+});
+
+test("falls back to link preview context for nested markdown suppression", () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: null },
+    parts: [{ part_id: 5, content: "text" }],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+  } as any;
+  const onCardActionsActiveChange = jest.fn();
+
+  render(
+    <LinkPreviewProvider onCardActionsActiveChange={onCardActionsActiveChange}>
+      <WaveDropQuote drop={drop} partId={5} onQuoteClick={jest.fn()} />
+    </LinkPreviewProvider>
+  );
+
+  expect(markdownProps.onLinkCardActionsActiveChange).toBe(
+    onCardActionsActiveChange
+  );
 });

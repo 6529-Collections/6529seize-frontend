@@ -8,6 +8,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import type { FC } from "react";
 import { useContext, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -17,6 +18,7 @@ import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropMobileMenuBoost from "./WaveDropMobileMenuBoost";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
+import WaveDropMobileMenuSetPinnedDrop from "./WaveDropMobileMenuSetPinnedDrop";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 
@@ -49,6 +51,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const isTemporaryDrop = drop.id.startsWith("temp-");
+  const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
 
   const extendedDrop = useMemo<ExtendedDrop>(
     () => ({
@@ -254,7 +257,13 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
               onEditTriggered={closeMenu}
             />
           )}
-        {showOptions && (
+        {canSetPinnedDrop && (
+          <WaveDropMobileMenuSetPinnedDrop
+            drop={drop}
+            onPinnedDropSet={closeMenu}
+          />
+        )}
+        {canDelete && (
           <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
         )}
       </div>

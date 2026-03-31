@@ -129,13 +129,35 @@ describe("MyStreamWaveDesktopTabs", () => {
     };
     mockAvailableTabs = [
       MyStreamWaveTab.CHAT,
-      MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.SALES,
+      MyStreamWaveTab.MY_VOTES,
     ];
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+      "Chat",
+      "Leaderboard",
+      "Sales",
+      "My Votes",
+    ]);
+    expect(screen.getByText("Sales")).toBeInTheDocument();
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(setActiveTab).not.toHaveBeenCalled();
+  });
+
+  it("keeps Sales hidden outside curation waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.SALES];
+    renderComponent(MyStreamWaveTab.SALES);
+
+    expect(screen.queryByText("Sales")).toBeNull();
+    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.CHAT);
   });
 
   it("keeps FAQ hidden outside memes waves", () => {

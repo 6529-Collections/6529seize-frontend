@@ -71,8 +71,8 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   }
 
   return (
-    <div className="tw-@container">
-      <div className="tw-grid tw-gap-x-4 tw-gap-y-8 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3">
+    <div className="tw-w-full tw-min-w-0 tw-@container">
+      <div className="tw-grid tw-w-full tw-min-w-0 tw-gap-x-4 tw-gap-y-8 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3">
         {dropsWithMedia.map((drop) => (
           <WaveLeaderboardGalleryItem
             key={drop.id}

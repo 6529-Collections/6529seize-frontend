@@ -1,50 +1,176 @@
-const { spawn, execSync } = require("node:child_process");
+const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
+const path = require("node:path");
 
 const args = process.argv.slice(2);
 const outputPath = parseOutputPath(args);
 const configPath = parseConfigPath(args);
 const changedOnly = args.includes("--changed");
+const rootDir = path.resolve(__dirname, "..");
+const eslintCliPath = path.join(
+  rootDir,
+  "node_modules",
+  "eslint",
+  "bin",
+  "eslint.js"
+);
+const gitExecutablePath = resolveExecutablePath(
+  ["/usr/bin/git", "/opt/homebrew/bin/git", "/usr/local/bin/git"],
+  "git"
+);
+
+function resolveExecutablePath(candidates, name) {
+  const executablePath = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!executablePath) {
+    throw new Error(`Unable to locate ${name} in fixed system paths.`);
+  }
+  return executablePath;
+}
+
+function runGitCommand(commandArgs) {
+  const result = spawnSync(gitExecutablePath, commandArgs, {
+    cwd: rootDir,
+    encoding: "utf8",
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr?.trim() || "git command failed");
+  }
+
+  return result.stdout.split("\0").filter(Boolean);
+}
+
+function runGitTextCommand(commandArgs) {
+  const result = spawnSync(gitExecutablePath, commandArgs, {
+    cwd: rootDir,
+    encoding: "utf8",
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr?.trim() || "git command failed");
+  }
+
+  return result.stdout.trim();
+}
+
+function gitRefExists(ref) {
+  const result = spawnSync(
+    gitExecutablePath,
+    ["rev-parse", "--verify", "--quiet", ref],
+    {
+      cwd: rootDir,
+      encoding: "utf8",
+    }
+  );
+
+  return result.status === 0;
+}
+
+function resolveDiffBase() {
+  const githubBaseRef = process.env["GITHUB_BASE_REF"]?.trim();
+  if (githubBaseRef) {
+    const remoteRef = `origin/${githubBaseRef}`;
+    if (gitRefExists(remoteRef)) {
+      return `${remoteRef}...HEAD`;
+    }
+    if (gitRefExists(githubBaseRef)) {
+      return `${githubBaseRef}...HEAD`;
+    }
+
+    throw new Error(`Unable to resolve GITHUB_BASE_REF "${githubBaseRef}".`);
+  }
+
+  if (gitRefExists("origin/main")) {
+    return "origin/main...HEAD";
+  }
+
+  if (gitRefExists("main")) {
+    const mergeBase = runGitTextCommand(["merge-base", "HEAD", "main"]);
+    if (mergeBase) {
+      return `${mergeBase}...HEAD`;
+    }
+  }
+
+  throw new Error("Unable to determine a git diff base for changed-file linting.");
+}
+
+function isLintableFile(file) {
+  return /\.(?:[cm]?[jt]sx?)$/i.test(file) && !file.startsWith("generated/");
+}
 
 function getChangedFiles() {
-  const cmd = `{ git diff --name-only -z main...HEAD -- "*.js" "*.jsx" "*.ts" "*.tsx" ":(exclude)generated/**"; git ls-files --others --exclude-standard -z -- "*.js" "*.jsx" "*.ts" "*.tsx" ":(exclude)generated/**"; }`;
-  try {
-    const output = execSync(cmd, { shell: "/bin/bash", encoding: "utf8" });
-    return output.split("\0").filter((file) => file && fs.existsSync(file));
-  } catch {
-    return [];
-  }
+  const diffBase = resolveDiffBase();
+  const changedFiles = runGitCommand([
+    "diff",
+    "--name-only",
+    "-z",
+    diffBase,
+    "--",
+    ".",
+  ]);
+  const untrackedFiles = runGitCommand([
+    "ls-files",
+    "--others",
+    "--exclude-standard",
+    "-z",
+    "--",
+    ".",
+  ]);
+
+  return Array.from(new Set([...changedFiles, ...untrackedFiles])).filter(
+    (file) => isLintableFile(file) && fs.existsSync(path.join(rootDir, file))
+  );
 }
 
 let proc;
 
 if (changedOnly) {
-  const files = getChangedFiles();
+  let files;
+  try {
+    files = getChangedFiles();
+  } catch (error) {
+    console.error(
+      error instanceof Error ? error.message : "Failed to determine changed files."
+    );
+    process.exit(1);
+  }
   if (files.length === 0) {
     console.log("No changed files to lint.");
     process.exit(0);
   }
-  const eslintArgs = ["eslint", "--no-warn-ignored", "--format", "json"];
+  const eslintArgs = [eslintCliPath, "--no-warn-ignored", "--format", "json"];
   if (configPath) {
     eslintArgs.push("--config", configPath);
   }
   eslintArgs.push(...files);
-  proc = spawn("npx", eslintArgs, { stdio: ["ignore", "pipe", "pipe"] });
+  proc = spawn(process.execPath, eslintArgs, {
+    cwd: rootDir,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 } else {
-  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-  const npmArgs = ["--silent", "run", "lint", "--"];
+  const eslintArgs = [eslintCliPath, ".", "--format", "json"];
   if (configPath) {
-    npmArgs.push("--config", configPath);
+    eslintArgs.push("--config", configPath);
   }
-  npmArgs.push("--format", "json");
-  proc = spawn(npmCommand, npmArgs, { stdio: ["ignore", "pipe", "pipe"] });
+  proc = spawn(process.execPath, eslintArgs, {
+    cwd: rootDir,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 }
 
 let stdout = "";
 let stderr = "";
 
 proc.on("error", (error) => {
-  console.error("Failed to run npm lint:", error);
+  console.error("Failed to run eslint:", error);
   process.exit(1);
 });
 

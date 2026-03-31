@@ -52,6 +52,7 @@ function areEqual(
     "quotePath",
     "embedDepth",
     "maxEmbedDepth",
+    "onLinkCardActionsActiveChange",
   ];
 
   for (const key of propsToCheck) {

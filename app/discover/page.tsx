@@ -1,17 +1,25 @@
+import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
 import { getAppMetadata } from "@/components/providers/metadata";
-import Waves from "@/components/waves/Waves";
 import type { Metadata } from "next";
 
 export default function DiscoverPage() {
   return (
-    <div className="tailwind-scope lg:tw-min-h-screen tw-bg-black tw-overflow-x-hidden">
-      <div className="tw-overflow-hidden tw-h-full tw-w-full">
-        <Waves heading="Discover" documentTitle="Discover | Brain" />
-      </div>
-    </div>
+    <main className="tailwind-scope tw-min-h-screen tw-bg-black">
+      <ExploreWavesSection
+        title="Active discussions you are not yet following"
+        subtitle={null}
+        limit={20}
+        endpoint="waves-overview/hot"
+        viewAllHref={null}
+        excludeFollowed={true}
+      />
+    </main>
   );
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "Discover", description: "Brain" });
+export function generateMetadata(): Metadata {
+  return getAppMetadata({
+    title: "Discovery",
+    description: "Active discussions you are not yet following",
+  });
 }

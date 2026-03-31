@@ -42,6 +42,7 @@ export default function UserPageCollectedFiltersNetworkCollection({
       activeItem={selected}
       filterLabel="Collection"
       setSelected={setSelected}
+      size="sm"
     />
   );
 }

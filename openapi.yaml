@@ -227,6 +227,28 @@ paths:
                 $ref: "#/components/schemas/ApiRedeemRefreshTokenResponse"
         "400":
           description: Invalid request
+  /collected-stats/{identityKey}:
+    get:
+      tags:
+        - Collected Stats
+      summary: Get consolidated collection stats for an identity
+      operationId: getCollectedStats
+      parameters:
+        - name: identityKey
+          in: path
+          description: Profile handle, wallet address, or ENS name
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectedStats"
+        "404":
+          description: Identity not found
   /community-members:
     get:
       tags:
@@ -745,6 +767,172 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DistributionOverview"
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
+  /distributions/{contract}/{id}/artist-airdrops:
+    get:
+      tags:
+        - Distributions
+      summary: Get artist airdrops for a specific contract and card
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Returns
+        JSON by default, or CSV in `address,count` format when the client sends
+        `Accept: text/csv`.
+      operationId: getDistributionArtistAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
+    post:
+      tags:
+        - Distributions
+      summary: Upload artist airdrops for a specific contract and card
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Replaces
+        any existing distribution rows for the Airdrop - Artist phase on the
+        given token. The request body must be `application/json` matching
+        `ApiDistributionAirdropsCsvUploadRequest`, with a `csv` property whose
+        value is CSV text in `address,count` format.
+      operationId: uploadDistributionArtistAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDistributionAirdropsCsvUploadRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDistributionAirdropsUploadResponse"
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
+  /distributions/{contract}/{id}/team-airdrops:
+    get:
+      tags:
+        - Distributions
+      summary: Get team airdrops for a specific contract and card
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Returns
+        JSON by default, or CSV in `address,count` format when the client sends
+        `Accept: text/csv`.
+      operationId: getDistributionTeamAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
+    post:
+      tags:
+        - Distributions
+      summary: Upload team airdrops for a specific contract and card
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Replaces
+        any existing distribution rows for the Airdrop - Team phase on the given
+        token. The request body must be `application/json` matching
+        `ApiDistributionAirdropsCsvUploadRequest`, with a `csv` property whose
+        value is CSV text in `address,count` format.
+      operationId: uploadDistributionTeamAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDistributionAirdropsCsvUploadRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDistributionAirdropsUploadResponse"
         "400":
           description: Invalid request
         "403":
@@ -1945,6 +2133,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
+  /identities/{id}/activity:
+    get:
+      tags:
+        - Identities
+      summary: Get daily public-wave drop activity for an identity.
+      operationId: getIdentityActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentityActivity"
+        "404":
+          description: Identity not found
   /memes-mint-stats:
     get:
       tags:
@@ -2035,6 +2244,440 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
+  /minting-claims/{contract}/{card_id}/{merkle_root}/proofs/{address}:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get merkle proofs for an address in a card root
+      description: >
+        Returns allowlist merkle proofs for one address for the given contract,
+        card and merkle root.
+      operationId: getMintingClaimsProofs
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: merkle_root
+          in: path
+          required: true
+          description: 0x-prefixed 66-character hex merkle root
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{64}$
+        - name: address
+          in: path
+          required: true
+          description: Wallet address
+          schema:
+            $ref: "#/components/schemas/ApiEthereumAddress"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaimsProofsResponse"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+        "404":
+          description: No merkle root found for the given contract/card/merkle_root
+  /minting-claims/{contract}/{card_id}/roots:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get merkle roots for a token
+      description: Returns merkle roots (one per phase) for the given contract and card.
+      operationId: getMintingClaimsRoots
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MintingClaimsRootItem"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+  /minting-claims/{contract}/{card_id}/airdrops:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get per-phase airdrop totals for a token
+      description: |
+        Returns per-phase airdrop totals for the given contract and card.
+      operationId: getMintingClaimsAirdrops
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiMintingClaimsPhaseTotalItem"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+  /minting-claims/{contract}/{card_id}/allowlists:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get per-phase allowlist totals for a token
+      description: |
+        Returns per-phase allowlist totals for the given contract and card.
+      operationId: getMintingClaimsAllowlists
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiMintingClaimsPhaseTotalItem"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+  /minting-claims/{contract}/claims:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get minting claims (paginated, admin only)
+      description: >
+        Returns a page of minting claims for the given contract, ordered by
+        claim_id descending. Default page_size 10, max 20. Only
+        DISTRIBUTION_ADMIN_WALLETS can call this.
+      operationId: getMintingClaims
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaimsPageResponse"
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only distribution admins can access
+  /minting-claims/{contract}/claims/{claim_id}:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get minting claim by claim_id (admin only)
+      description: >
+        Returns the minting claim for the given contract and claim_id. Only
+        DISTRIBUTION_ADMIN_WALLETS can call this.
+      operationId: getMintingClaimById
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaim"
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only distribution admins can access
+        "404":
+          description: Claim not found
+    patch:
+      tags:
+        - Minting Claims
+      summary: Update minting claim (admin only)
+      description: >
+        Partial update by contract and claim_id. Any field can be provided; only
+        provided fields are updated. Only DISTRIBUTION_ADMIN_WALLETS can call
+        this.
+      operationId: patchMintingClaim
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MintingClaimUpdateRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaim"
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only distribution admins can access
+        "404":
+          description: Claim not found
+  /minting-claims/{contract}/claims/{claim_id}/arweave-upload:
+    post:
+      tags:
+        - Minting Claims
+      summary: Upload minting claim metadata and media to Arweave (admin only)
+      description: >
+        Uploads claim metadata and media (image, and animation if not HTML) to
+        Arweave asynchronously via background queue. Requires claim to have an
+        image URL and valid metadata fields. If already synced or already
+        uploading returns 409. Only DISTRIBUTION_ADMIN_WALLETS can call this.
+      operationId: postMintingClaimArweaveUpload
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "202":
+          description: Accepted; work queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaim"
+        "400":
+          description: Bad Request - claim data or media URL/content-type is invalid
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only distribution admins can access
+        "404":
+          description: Claim not found
+        "409":
+          description: Conflict - claim already synced or upload already in progress
+  /minting-claims/actions/{contract}/types:
+    get:
+      tags:
+        - Minting Claims
+      summary: >-
+        Get supported minting claim action types for a contract (claims admin
+        only)
+      description: >
+        Returns the supported minting claim action names for the given contract.
+        Only CLAIMS_ADMIN_WALLETS can call this. Unsupported contracts return
+        400.
+      operationId: getMintingClaimActionTypes
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionTypesResponse"
+        "400":
+          description: Unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can access
+  /minting-claims/actions/{contract}/{claim_id}:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get minting claim actions (claims admin only)
+      description: >
+        Returns the current action state for a minting claim. All supported
+        actions for the contract are always returned; missing records are
+        represented as completed=false. Only CLAIMS_ADMIN_WALLETS can call this.
+        Unsupported contracts return 400.
+      operationId: getMintingClaimActions
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionsResponse"
+        "400":
+          description: Invalid request or unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can access
+        "404":
+          description: Claim not found
+    post:
+      tags:
+        - Minting Claims
+      summary: Upsert minting claim action state (claims admin only)
+      description: >
+        Creates or updates the current state of a minting claim action for the
+        given claim. The caller wallet is recorded as the actor. Only
+        CLAIMS_ADMIN_WALLETS can call this. Unsupported contracts or unsupported
+        action names for the given contract return 400.
+      operationId: postMintingClaimAction
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMintingClaimActionUpdateRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMintingClaimActionsResponse"
+        "400":
+          description: Invalid request or unsupported contract
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only claims admins can update
+        "404":
+          description: Claim not found
   /nft-link:
     get:
       tags:
@@ -3727,6 +4370,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AirdropAddressResponse"
+  /subscriptions/final/{contract}/{token_id}/phases/{phase_name}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get final subscription airdrops for a token phase
+      operationId: getFinalSubscriptionsByPhase
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: token_id
+          in: path
+          description: Token ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: phase_name
+          in: path
+          description: Phase name (URL encoded)
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+        "400":
+          description: Invalid token ID
   /subscriptions/consolidation/final/{consolidation_key}/{contract}/{token_id}:
     get:
       tags:
@@ -4668,6 +5348,50 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiWave"
+  /waves-overview/favourites-of-identity/{identityKey}:
+    get:
+      tags:
+        - Waves
+      summary: Get waves where a profile has written the most messages.
+      description: >-
+        Returns non-DM waves ranked by how many chat messages the resolved
+        profile has written in them. Results only include waves the requester
+        can access.
+      operationId: getFavouriteWavesOfIdentity
+      parameters:
+        - name: identityKey
+          in: path
+          description: Profile id, wallet, ENS, or handle to resolve
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: How many waves to return (50 by default)
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Used to find next waves
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWave"
   /waves-overview/hot:
     get:
       tags:
@@ -4675,6 +5399,15 @@ paths:
       summary: Get hot waves overview.
       description: Returns up to 25 public waves ranked by activity in the last 24 hours.
       operationId: getHotWavesOverview
+      parameters:
+        - name: exclude_followed
+          in: query
+          description: >-
+            If true then result excludes waves the authenticated user already
+            follows
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -4917,6 +5650,71 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
+  /waves/{id}/undiscovered-drop:
+    get:
+      tags:
+        - Waves
+      summary: Get the next undiscovered participatory drop for quick vote
+      operationId: getWaveUndiscoveredDrop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip
+          in: query
+          required: false
+          description: >-
+            Zero-based offset into the newest unvoted and unskipped drops for
+            this wave. If no unskipped drops remain, the offset applies to the
+            earliest skipped unvoted drops instead.
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUndiscoveredDrop"
+        "403":
+          description: User is not eligible to quick vote in this wave
+        "404":
+          description: Wave not found
+  /waves/{id}/pinned-drop:
+    post:
+      tags:
+        - Waves
+      summary: Change pinned drop in a wave
+      operationId: setWavePinnedDrop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSetPinnedDropRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWave"
+        "400":
+          description: Invalid request
+        "403":
+          description: Only wave creators or admins can change pinned drop
+        "404":
+          description: Wave or drop not found
   /waves/{id}/pins:
     post:
       tags:
@@ -5049,13 +5847,15 @@ paths:
               - TREND
         - name: price_currency
           in: query
-          description: Optional currency filter used when sorting by PRICE
+          description: >-
+            Optional currency used for min_price/max_price filtering and PRICE
+            sorting
           required: false
           schema:
             type: string
         - name: min_price
           in: query
-          description: Optional minimum price filter used when sorting by PRICE
+          description: Optional minimum price filter applied to leaderboard results
           required: false
           schema:
             type: number
@@ -5063,7 +5863,7 @@ paths:
             minimum: 0
         - name: max_price
           in: query
-          description: Optional maximum price filter used when sorting by PRICE
+          description: Optional maximum price filter applied to leaderboard results
           required: false
           schema:
             type: number
@@ -5074,6 +5874,15 @@ paths:
           required: false
           schema:
             type: string
+        - name: unvoted_by_me
+          in: query
+          description: >-
+            When true, only returns drops the authenticated user has not voted
+            on or currently has a 0 vote on
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: successful operation
@@ -6398,6 +7207,58 @@ components:
           format: int64
         contributors:
           $ref: "#/components/schemas/ApiCicContributorsPage"
+    ApiCollectedStats:
+      type: object
+      required:
+        - boost
+        - nextgen_balance
+        - gradients_balance
+        - memes_balance
+        - unique_memes
+        - seasons
+      properties:
+        boost:
+          type: number
+          format: double
+        nextgen_balance:
+          type: integer
+          format: int64
+        gradients_balance:
+          type: integer
+          format: int64
+        memes_balance:
+          type: integer
+          format: int64
+        unique_memes:
+          type: integer
+          format: int64
+        seasons:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectedStatsSeason"
+    ApiCollectedStatsSeason:
+      type: object
+      required:
+        - season
+        - total_cards_in_season
+        - sets_held
+        - partial_set_unique_cards_held
+        - total_cards_held
+      properties:
+        season:
+          type: string
+        total_cards_in_season:
+          type: integer
+          format: int64
+        sets_held:
+          type: integer
+          format: int64
+        partial_set_unique_cards_held:
+          type: integer
+          format: int64
+        total_cards_held:
+          type: integer
+          format: int64
     ApiCommunityMemberMinimal:
       type: object
       required:
@@ -7339,6 +8200,27 @@ components:
         description:
           type: string
           nullable: true
+    ApiDistributionAirdropsCsvUploadRequest:
+      type: object
+      required:
+        - csv
+      properties:
+        csv:
+          type: string
+          description: CSV text with one `address,count` entry per line
+          example: |-
+            0x0000000000000000000000000000000000000001,2
+            0x0000000000000000000000000000000000000002,1
+    ApiDistributionAirdropsUploadResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
     ApiDrop:
       type: object
       required:
@@ -7637,7 +8519,6 @@ components:
       type: object
       required:
         - rating
-        - category
       properties:
         rating:
           type: number
@@ -7645,6 +8526,7 @@ components:
         category:
           type: string
           maxLength: 100
+          nullable: true
     ApiDropReaction:
       type: object
       required:
@@ -7766,6 +8648,16 @@ components:
         decision_time:
           type: integer
           format: int64
+        sale_time:
+          type: integer
+          format: int64
+          nullable: true
+        sale_price:
+          type: number
+          nullable: true
+        sale_price_currency:
+          type: string
+          nullable: true
     ApiDropWithoutWave:
       type: object
       required:
@@ -7904,6 +8796,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropWithoutWave"
+    ApiEthereumAddress:
+      type: string
+      pattern: ^0x[a-fA-F0-9]{40}$
     ApiFeedItem:
       type: object
       required:
@@ -8235,6 +9130,23 @@ components:
             format: int64
         is_wave_creator:
           type: boolean
+    ApiIdentityActivity:
+      type: object
+      required:
+        - last_date
+        - date_samples
+      properties:
+        last_date:
+          type: string
+          example: 12.03.2026
+        date_samples:
+          type: array
+          minItems: 365
+          maxItems: 365
+          items:
+            type: integer
+            format: int64
+            minimum: 0
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -8374,7 +9286,9 @@ components:
       required:
         - id
         - mint_date
+        - total_count
         - mint_count
+        - subscriptions_count
         - proceeds_eth
         - proceeds_usd
         - artist_split_eth
@@ -8387,7 +9301,13 @@ components:
           type: string
           format: date-time
           nullable: true
+        total_count:
+          type: integer
+          format: int64
         mint_count:
+          type: integer
+          format: int64
+        subscriptions_count:
           type: integer
           format: int64
         proceeds_eth:
@@ -8416,14 +9336,22 @@ components:
     ApiMemesMintStatsTotals:
       type: object
       required:
+        - total_count
         - mint_count
+        - subscriptions_count
         - proceeds_eth
         - proceeds_usd
         - artist_split_eth
         - artist_split_usd
         - artists_count
       properties:
+        total_count:
+          type: integer
+          format: int64
         mint_count:
+          type: integer
+          format: int64
+        subscriptions_count:
           type: integer
           format: int64
         proceeds_eth:
@@ -8445,7 +9373,9 @@ components:
       type: object
       required:
         - year
+        - total_count
         - mint_count
+        - subscriptions_count
         - proceeds_eth
         - proceeds_usd
         - artist_split_eth
@@ -8454,7 +9384,13 @@ components:
         year:
           type: integer
           format: int64
+        total_count:
+          type: integer
+          format: int64
         mint_count:
+          type: integer
+          format: int64
+        subscriptions_count:
           type: integer
           format: int64
         proceeds_eth:
@@ -8482,6 +9418,96 @@ components:
           type: string
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
+    ApiMintingClaimAction:
+      type: object
+      required:
+        - action
+        - completed
+      properties:
+        action:
+          type: string
+          minLength: 1
+          pattern: ^[A-Z0-9_]+$
+          description: Contract-specific minting claim action name
+        completed:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: Unix epoch milliseconds when this action record was created
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix epoch milliseconds when this action record was last updated
+        created_by_wallet:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+          description: Wallet that first created this action record
+        updated_by_wallet:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+          description: Wallet that last updated this action record
+    ApiMintingClaimActionsResponse:
+      type: object
+      required:
+        - contract
+        - claim_id
+        - actions
+      properties:
+        contract:
+          type: string
+        claim_id:
+          type: integer
+          format: int64
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMintingClaimAction"
+    ApiMintingClaimActionTypesResponse:
+      type: object
+      required:
+        - contract
+        - action_types
+      properties:
+        contract:
+          type: string
+        action_types:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            description: Contract-specific minting claim action name
+    ApiMintingClaimActionUpdateRequest:
+      type: object
+      required:
+        - action
+        - completed
+      properties:
+        action:
+          type: string
+          minLength: 1
+          pattern: ^[A-Z0-9_]+$
+          description: Contract-specific minting claim action name
+        completed:
+          type: boolean
+    ApiMintingClaimsPhaseTotalItem:
+      type: object
+      required:
+        - phase
+        - addresses
+        - total
+      properties:
+        phase:
+          type: string
+          description: Phase name
+        addresses:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Number of unique addresses in this phase
+        total:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Sum of spots for this phase
     ApiMintMetrics:
       type: object
       required:
@@ -9681,6 +10707,8 @@ components:
         - all_drops_notifications_subscribers_limit
         - memes_wave_id
         - curation_wave_id
+        - distribution_admin_wallets
+        - claims_admin_wallets
       properties:
         rememes_submission_tdh_threshold:
           type: integer
@@ -9694,6 +10722,21 @@ components:
         curation_wave_id:
           type: string
           nullable: true
+        distribution_admin_wallets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiEthereumAddress"
+        claims_admin_wallets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiEthereumAddress"
+    ApiSetPinnedDropRequest:
+      type: object
+      required:
+        - drop_id
+      properties:
+        drop_id:
+          type: string
     ApiStartMultipartMediaUploadResponse:
       required:
         - upload_id
@@ -9889,6 +10932,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTransaction"
+    ApiUndiscoveredDrop:
+      type: object
+      required:
+        - drop
+        - total_count
+      properties:
+        drop:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiDrop"
+        total_count:
+          type: integer
+          format: int64
     ApiUpcomingMemeSubscriptionStatus:
       type: object
       required:
@@ -10058,6 +11114,7 @@ components:
         - chat
         - wave
         - created_at
+        - last_drop_time
         - contributors_overview
         - subscribed_actions
         - metrics
@@ -10082,6 +11139,10 @@ components:
           example: https://example.com/picture.jpg
           nullable: true
         created_at:
+          type: number
+          format: int64
+        last_drop_time:
+          description: Unix timestamp in milliseconds of the most recent drop in this wave
           type: number
           format: int64
         description_drop:
@@ -10448,6 +11509,7 @@ components:
         - name
         - picture
         - description_drop_id
+        - last_drop_time
         - authenticated_user_eligible_to_vote
         - authenticated_user_eligible_to_participate
         - authenticated_user_eligible_to_chat
@@ -10473,6 +11535,10 @@ components:
           nullable: true
         description_drop_id:
           type: string
+        last_drop_time:
+          description: Unix timestamp in milliseconds of the most recent drop in this wave
+          type: number
+          format: int64
         authenticated_user_eligible_to_vote:
           type: boolean
         authenticated_user_eligible_to_participate:
@@ -10659,14 +11725,8 @@ components:
     ApiWavesOverviewType:
       type: string
       enum:
-        - LATEST
         - MOST_SUBSCRIBED
-        - HIGH_LEVEL_AUTHOR
-        - AUTHOR_YOU_HAVE_REPPED
-        - MOST_DROPPED
-        - MOST_DROPPED_BY_YOU
         - RECENTLY_DROPPED_TO
-        - RECENTLY_DROPPED_TO_BY_YOU
     ApiWavesPinFilter:
       type: string
       enum:
@@ -11238,8 +12298,10 @@ components:
       required:
         - photos_count
         - is_normalized
-        - automatic_airdrops_addresses
-        - automatic_airdrops_count
+        - artist_airdrops_addresses
+        - artist_airdrops_count
+        - team_airdrops_addresses
+        - team_airdrops_count
       properties:
         photos_count:
           type: integer
@@ -11248,14 +12310,22 @@ components:
         is_normalized:
           type: boolean
           description: Whether the distribution has been normalized
-        automatic_airdrops_addresses:
+        artist_airdrops_addresses:
           type: integer
           format: int64
-          description: Count of unique addresses with automatic airdrops
-        automatic_airdrops_count:
+          description: Count of unique addresses in the Airdrop - Artist phase
+        artist_airdrops_count:
           type: integer
           format: int64
-          description: Total count of automatic airdrops
+          description: Total count in the Airdrop - Artist phase
+        team_airdrops_addresses:
+          type: integer
+          format: int64
+          description: Count of unique addresses in the Airdrop - Team phase
+        team_airdrops_count:
+          type: integer
+          format: int64
+          description: Total count in the Airdrop - Team phase
     DistributionPhasesPage:
       type: object
       required:
@@ -11333,6 +12403,274 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DistributionPhoto"
+    MintingClaim:
+      type: object
+      required:
+        - drop_id
+        - contract
+        - claim_id
+        - description
+        - name
+        - attributes
+      properties:
+        drop_id:
+          type: string
+        contract:
+          type: string
+        claim_id:
+          type: integer
+          format: int64
+        image_location:
+          type: string
+          nullable: true
+        animation_location:
+          type: string
+          nullable: true
+        metadata_location:
+          type: string
+          nullable: true
+        media_uploading:
+          type: boolean
+        edition_size:
+          type: integer
+          format: int32
+          description: Maximum signed 32-bit integer.
+          maximum: 2147483647
+          nullable: true
+        description:
+          type: string
+        name:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        external_url:
+          type: string
+          nullable: true
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimAttribute"
+        image_details:
+          $ref: "#/components/schemas/MintingClaimImageDetails"
+          nullable: true
+        animation_url:
+          type: string
+          nullable: true
+        animation_details:
+          oneOf:
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsVideo"
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsHtml"
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsGlb"
+          nullable: true
+    MintingClaimAnimationDetailsGlb:
+      type: object
+      required:
+        - bytes
+        - format
+        - sha256
+      properties:
+        bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        format:
+          type: string
+          enum:
+            - GLB
+        sha256:
+          type: string
+    MintingClaimAnimationDetailsHtml:
+      type: object
+      required:
+        - format
+      properties:
+        format:
+          type: string
+          enum:
+            - HTML
+    MintingClaimAnimationDetailsVideo:
+      type: object
+      required:
+        - bytes
+        - format
+        - duration
+        - sha256
+        - width
+        - height
+        - codecs
+      properties:
+        bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        format:
+          type: string
+        duration:
+          type: number
+          minimum: 0
+        sha256:
+          type: string
+        width:
+          type: integer
+          format: int32
+          minimum: 0
+        height:
+          type: integer
+          format: int32
+          minimum: 0
+        codecs:
+          type: array
+          items:
+            type: string
+    MintingClaimAttribute:
+      type: object
+      required:
+        - trait_type
+        - value
+      properties:
+        trait_type:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - type: number
+        display_type:
+          type: string
+        max_value:
+          type: number
+    MintingClaimImageDetails:
+      type: object
+      required:
+        - bytes
+        - format
+        - sha256
+        - width
+        - height
+      properties:
+        bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        format:
+          type: string
+        sha256:
+          type: string
+        width:
+          type: integer
+          format: int32
+          minimum: 0
+        height:
+          type: integer
+          format: int32
+          minimum: 0
+    MintingClaimsPageResponse:
+      type: object
+      required:
+        - claims
+        - count
+        - page
+        - page_size
+        - next
+      properties:
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaim"
+        count:
+          type: integer
+          format: int64
+          description: Total number of claims
+        page:
+          type: integer
+          format: int64
+        page_size:
+          type: integer
+          format: int64
+        next:
+          type: boolean
+          description: True if there is a next page
+    MintingClaimsProofItem:
+      type: object
+      required:
+        - merkle_proof
+        - value
+      properties:
+        merkle_proof:
+          type: array
+          items:
+            type: string
+          description: Hex merkle proof hashes
+        value:
+          type: integer
+          format: int64
+          description: Spot index (value) for this proof
+    MintingClaimsProofsResponse:
+      type: object
+      required:
+        - proofs
+      properties:
+        proofs:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimsProofItem"
+    MintingClaimsResponse:
+      type: object
+      required:
+        - claims
+      properties:
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaim"
+    MintingClaimsRootItem:
+      type: object
+      required:
+        - phase
+        - merkle_root
+        - addresses_count
+        - total_spots
+      properties:
+        phase:
+          type: string
+          description: Phase name
+        merkle_root:
+          type: string
+          description: 0x-prefixed hex merkle root
+        addresses_count:
+          type: integer
+          format: int64
+          description: Number of unique addresses in this phase
+        total_spots:
+          type: integer
+          format: int64
+          description: Sum of mint spots for this phase
+    MintingClaimUpdateRequest:
+      type: object
+      properties:
+        edition_size:
+          type: integer
+          format: int32
+          description: Maximum signed 32-bit integer.
+          maximum: 2147483647
+          nullable: true
+        description:
+          type: string
+        name:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        external_url:
+          type: string
+          nullable: true
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimAttribute"
+        animation_url:
+          type: string
+          nullable: true
     NFTFinalSubscription:
       type: object
       required:
@@ -11434,6 +12772,18 @@ components:
         subscribed_count:
           type: integer
           format: int64
+    PhaseAirdrop:
+      type: object
+      required:
+        - wallet
+        - amount
+      properties:
+        wallet:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+        amount:
+          type: integer
+          format: int64
+          minimum: 0
     RedeemedSubscription:
       type: object
       required:

@@ -13,7 +13,6 @@ import { Button, Col, Container, Modal, Row } from "react-bootstrap";
 export function UploadDistributionPhotosModal(
   props: Readonly<{
     plan: AllowlistDescription;
-    show: boolean;
     handleClose(): void;
     existingPhotosCount?: number | undefined;
     confirmedTokenId?: string | null | undefined;
@@ -118,7 +117,7 @@ export function UploadDistributionPhotosModal(
   };
 
   return (
-    <Modal show={props.show} onHide={handleClose}>
+    <Modal show onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title className="tw-text-lg tw-font-semibold">
           Upload Distribution Photos

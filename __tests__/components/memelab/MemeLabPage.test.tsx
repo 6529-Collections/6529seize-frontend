@@ -2,10 +2,44 @@ import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
+
+jest.mock("react-bootstrap", () => {
+  const actual = jest.requireActual("react-bootstrap");
+  const Carousel = ({ children, onSlide, ...props }: any) => (
+    <div data-testid="carousel" {...props}>
+      <button
+        type="button"
+        data-testid="carousel-slide-0"
+        onClick={() => onSlide?.(0)}
+      />
+      <button
+        type="button"
+        data-testid="carousel-slide-1"
+        onClick={() => onSlide?.(1)}
+      />
+      {children}
+    </div>
+  );
+
+  Carousel.Item = ({ children, ...props }: any) => (
+    <div {...props}>{children}</div>
+  );
+
+  return {
+    ...actual,
+    Carousel,
+  };
+});
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -24,6 +58,13 @@ jest.mock("@/components/nothingHereYet/NothingHereYetSummer", () => ({
 jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
   default: () => <div data-testid="marketplace-links" />,
+}));
+
+jest.mock("@/components/download/Download", () => ({
+  __esModule: true,
+  default: ({ href }: { href: string }) => (
+    <div data-testid="download" data-href={href} />
+  ),
 }));
 // Mock Next.js components
 jest.mock("next/link", () => ({
@@ -249,7 +290,7 @@ function createMockNft(overrides: any = {}) {
     mint_price: 0,
     collection: "Test Collection",
     artist_seize_handle: "testartist",
-    uri: "",
+    uri: "https://metadata.example/lab.json",
     icon: "",
     thumbnail: "",
     scaled: "",
@@ -299,9 +340,9 @@ function createMockTransactions(balance: number) {
   };
 }
 
-function setupMockApiCalls(balance = 1) {
+function setupMockApiCalls(balance = 1, nftOverrides: any = {}) {
   const meta = createMockMeta();
-  const nft = createMockNft();
+  const nft = createMockNft(nftOverrides);
   const transactions = createMockTransactions(balance);
   const activity = { data: [], count: 0 };
 
@@ -315,6 +356,15 @@ function setupMockApiCalls(balance = 1) {
     if (url.includes("nft_history")) return Promise.resolve({ data: [] });
     return Promise.resolve({ data: [] });
   });
+}
+
+function getCardDetailValue(label: string): string {
+  const labelCell = screen.getByText(label);
+  const row = labelCell.closest("tr");
+  const value = row?.querySelectorAll("td")[1]?.textContent;
+
+  expect(value).toBeTruthy();
+  return value ?? "";
 }
 
 describe("MemeLabPageComponent", () => {
@@ -465,6 +515,203 @@ describe("MemeLabPageComponent", () => {
     expect(mockUseRouter().replace).toHaveBeenCalledWith(
       expect.stringContaining(`focus=${MEME_FOCUS.ACTIVITY}`)
     );
+  });
+
+  it("falls back to top-level media URLs for art links", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      image: "https://top-level.example/image.png",
+      animation: "https://top-level.example/animation.mp4",
+      metadata: {
+        attributes: [],
+        image_details: { format: "PNG" },
+        animation_details: { format: "MP4" },
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", {
+          name: "https://metadata.example/lab.json",
+        })
+      ).toHaveAttribute("href", "https://metadata.example/lab.json");
+      expect(
+        screen.getByRole("link", { name: "Open JSON in new tab" })
+      ).toHaveAttribute("href", "https://metadata.example/lab.json");
+      expect(
+        screen.getByRole("link", {
+          name: "https://top-level.example/image.png",
+        })
+      ).toHaveAttribute("href", "https://top-level.example/image.png");
+      expect(
+        screen.getByRole("link", { name: "Open image in new tab" })
+      ).toHaveAttribute("href", "https://top-level.example/image.png");
+      expect(
+        screen.getByRole("link", {
+          name: "https://top-level.example/animation.mp4",
+        })
+      ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
+      expect(
+        screen.getByRole("link", { name: "Open animation in new tab" })
+      ).toHaveAttribute("href", "https://top-level.example/animation.mp4");
+    });
+  });
+
+  it("prefers metadata animation_url over top-level animation for art links", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      animation: "https://cdn.example.com/animation.mp4",
+      metadata: {
+        attributes: [],
+        image_details: { format: "PNG" },
+        animation_details: { format: "HTML" },
+        animation_url: "https://arweave.net/animation.html",
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", {
+          name: "https://arweave.net/animation.html",
+        })
+      ).toHaveAttribute("href", "https://arweave.net/animation.html");
+      expect(
+        screen.getByRole("link", { name: "Open animation in new tab" })
+      ).toHaveAttribute("href", "https://arweave.net/animation.html");
+    });
+  });
+
+  it("ignores whitespace metadata.image and falls back to the top-level image", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      image: "  https://top-level.example/image.png  ",
+      metadata: {
+        attributes: [],
+        image: "   ",
+        image_details: { format: "PNG" },
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", {
+          name: "https://top-level.example/image.png",
+        })
+      ).toHaveAttribute("href", "https://top-level.example/image.png");
+      expect(
+        screen.getByRole("link", { name: "Open image in new tab" })
+      ).toHaveAttribute("href", "https://top-level.example/image.png");
+      expect(screen.getAllByTestId("download")[0]).toHaveAttribute(
+        "data-href",
+        "https://top-level.example/image.png"
+      );
+    });
+  });
+
+  it("treats metadata.animation_url-only NFTs as animated", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      animation: "",
+      metadata: {
+        attributes: [],
+        image_details: { format: "PNG", width: 1200, height: 800 },
+        animation_details: { format: "HTML", width: 1920, height: 1080 },
+        animation_url: "https://metadata.example/animation.html",
+        image: "https://metadata.example/image.png",
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
+      expect(
+        screen.getByRole("link", {
+          name: "https://metadata.example/animation.html",
+        })
+      ).toHaveAttribute("href", "https://metadata.example/animation.html");
+      expect(
+        screen.getByRole("link", { name: "Open image in new tab" })
+      ).toHaveAttribute("href", "https://metadata.example/image.png");
+      expect(
+        screen.getByRole("link", { name: "Open animation in new tab" })
+      ).toHaveAttribute("href", "https://metadata.example/animation.html");
+      expect(getCardDetailValue("File Type")).toBe("HTML");
+      expect(getCardDetailValue("Dimensions")).toBe("1,920 x 1,080");
+    });
+  });
+
+  it("switches card details to image metadata on the image slide", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.THE_ART;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      animation: "",
+      metadata: {
+        attributes: [],
+        image_details: { format: "PNG", width: 1200, height: 800 },
+        animation_details: { format: "HTML", width: 1920, height: 1080 },
+        animation_url: "https://metadata.example/animation.html",
+        image: "https://metadata.example/image.png",
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
+    });
+
+    fireEvent.click(screen.getByTestId("carousel-slide-1"));
+
+    await waitFor(() => {
+      expect(getCardDetailValue("File Type")).toBe("PNG");
+      expect(getCardDetailValue("Dimensions")).toBe("1,200 x 800");
+    });
   });
 
   it("handles empty metadata response", async () => {

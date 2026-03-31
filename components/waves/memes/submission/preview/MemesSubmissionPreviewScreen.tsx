@@ -30,7 +30,7 @@ export function MemesSubmissionPreviewScreen({
       exit={{ opacity: 0, y: -20 }}
       className="tw-mx-auto tw-flex tw-h-full tw-max-w-6xl tw-flex-col tw-pb-8"
     >
-      <div className="tw-flex-1 tw-space-y-10 tw-overflow-y-auto tw-px-4 tw-py-2 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700">
+      <div className="tw-flex-1 tw-space-y-10 tw-overflow-y-auto tw-px-4 tw-py-2 tw-pt-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700">
         <div className="tw-space-y-1">
           <h4 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
             Submission Preview

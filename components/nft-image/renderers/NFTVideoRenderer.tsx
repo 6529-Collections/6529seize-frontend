@@ -4,12 +4,35 @@ import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import type { BaseRendererProps } from "../types/renderer-props";
-import { withArweaveFallback } from "../utils/arweave-fallback";
+import { getResolvedAnimationSrc } from "../utils/animation-source";
+import { withArweaveFallback } from "../utils/gateway-fallback";
+
+const globalScope = globalThis as typeof globalThis & {
+  window?: Window | undefined;
+};
 
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
+  const animationSrc = getResolvedAnimationSrc(props.nft);
+  const animationClassName = styles["nftAnimation"] ?? "";
+  const compressedAnimationSrc =
+    "metadata" in props.nft ? props.nft.compressed_animation : undefined;
+  const normalizedCompressedAnimationSrc = (() => {
+    if (compressedAnimationSrc == null || compressedAnimationSrc === "") {
+      return undefined;
+    }
+
+    try {
+      const baseUrl = globalScope.window.location.href;
+      return new URL(compressedAnimationSrc, baseUrl).href;
+    } catch {
+      return undefined;
+    }
+  })();
+
   return (
     <Col
-      className={`${styles["nftAnimation"]} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
+      className={`${animationClassName} ${props.heightStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}
+    >
       {props.showBalance && (
         <NFTImageBalance
           contract={props.nft.contract}
@@ -30,19 +53,19 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
           "metadata" in props.nft &&
           props.nft.compressed_animation
             ? props.nft.compressed_animation
-            : props.nft.animation
+            : animationSrc
         }
         className={props.imageStyle}
         onError={withArweaveFallback(({ currentTarget }) => {
           if (
             "metadata" in props.nft &&
-            currentTarget.src === props.nft.compressed_animation
+            currentTarget.src === normalizedCompressedAnimationSrc &&
+            animationSrc
           ) {
-            currentTarget.src = props.nft.animation;
-          } else if ("metadata" in props.nft) {
-            currentTarget.src = props.nft.metadata.animation;
+            currentTarget.src = animationSrc;
           }
-        })}></video>
+        })}
+      ></video>
     </Col>
   );
 }

@@ -1,4 +1,3 @@
-import { CREATE_WAVE_SEARCH_PATH } from "@/components/waves/Waves";
 import Link from "next/link";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
@@ -6,17 +5,18 @@ import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
 export default function MyStreamNoItems() {
   const { isApp } = useDeviceInfo();
   const exploreHref = getWavesBaseRoute(isApp);
-  const createHref = isApp ? "/waves/create" : CREATE_WAVE_SEARCH_PATH;
+  const createHref = isApp ? "/waves/create" : "/waves?create=wave";
 
   return (
-    <div className="tw-mt-8 md:tw-mt-16 tw-pb-8 md:tw-max-w-xl tw-mx-auto tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+    <div className="tw-mx-auto tw-mt-8 tw-px-2 tw-pb-8 sm:tw-px-4 md:tw-mt-16 md:tw-max-w-xl md:tw-px-6 lg:tw-px-0">
       <div className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-p-4">
         <svg
           className="tw-h-8 tw-w-8 tw-text-primary-500"
           viewBox="0 0 48 48"
           fill="none"
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M7.34119 10.875H11.409V14.625H7.34119V10.875Z"
             fill="currentColor"
@@ -50,23 +50,24 @@ export default function MyStreamNoItems() {
             fill="currentColor"
           />
         </svg>
-        <div className="tw-absolute tw-inset-0 tw-rounded-full tw-bg-primary-400 tw-opacity-10 tw-animate-pulse"></div>
+        <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-rounded-full tw-bg-primary-400 tw-opacity-10"></div>
       </div>
 
       <h1 className="tw-mt-8 tw-text-2xl tw-font-bold tw-text-iron-50">
         No notifications found
       </h1>
 
-      <p className="tw-mt-2 tw-max-w-xl tw-text-base sm:tw-text-lg tw-text-iron-400 tw-font-normal">
+      <p className="tw-mt-2 tw-max-w-xl tw-text-base tw-font-normal tw-text-iron-400 sm:tw-text-lg">
         Engage with the community and get started by{" "}
-        <span className="tw-font-semibold tw-text-transparent tw-bg-clip-text tw-bg-gradient-to-r tw-from-indigo-400 tw-to-indigo-500">
+        <span className="tw-bg-gradient-to-r tw-from-indigo-400 tw-to-indigo-500 tw-bg-clip-text tw-font-semibold tw-text-transparent">
           following or creating a{" "}
           <svg
-            className="tw-inline tw-h-6 tw-w-6 tw-text-indigo-300 tw-mr-1 tw-ml-1"
+            className="tw-ml-1 tw-mr-1 tw-inline tw-h-6 tw-w-6 tw-text-indigo-300"
             viewBox="0 0 48 48"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M46.5 40.5C46.5 41.328 45.828 42 45 42C43.083 42 41.835 42.624 40.392 43.347C38.844 44.1225 37.0905 45 34.5 45C31.896 45 30.135 44.1195 28.581 43.3425C27.141 42.6225 25.8975 42 24 42C22.1025 42 20.859 42.6225 19.419 43.3425C17.865 44.1195 16.104 45 13.5 45C10.9095 45 9.156 44.1225 7.608 43.347C6.165 42.624 4.917 42 3 42C2.172 42 1.5 41.328 1.5 40.5C1.5 39.672 2.172 39 3 39C5.6265 39 7.3935 39.885 8.952 40.665C10.383 41.3805 11.619 42 13.5 42C15.396 42 16.638 41.3775 18.078 40.659C19.632 39.8805 21.3945 39 24 39C26.6055 39 28.368 39.8805 29.922 40.659C31.362 41.3775 32.604 42 34.5 42C36.381 42 37.617 41.3805 39.048 40.665C40.6065 39.885 42.3735 39 45 39C45.828 39 46.5 39.672 46.5 40.5Z"
               fill="currentColor"
@@ -84,10 +85,11 @@ export default function MyStreamNoItems() {
         </span>
       </p>
 
-      <div className="tw-mt-8 tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-gap-4">
+      <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center">
         <Link
           href={exploreHref}
-          className="tw-no-underline tw-group tw-text-sm tw-flex tw-items-center tw-font-medium tw-justify-center tw-px-4 tw-py-2.5 tw-rounded-lg tw-bg-iron-900 tw-text-primary-400 tw-border tw-border-primary-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-950  hover:tw-border-primary-400 tw-border-solid hover:tw-text-primary-400">
+          className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400 tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-400 hover:tw-bg-iron-950 hover:tw-text-primary-400"
+        >
           <span>Explore Waves</span>
           <svg
             className="tw-ml-2 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transform tw-transition-transform group-hover:tw-translate-x-1"
@@ -95,7 +97,8 @@ export default function MyStreamNoItems() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="currentColor">
+            stroke="currentColor"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -104,18 +107,20 @@ export default function MyStreamNoItems() {
           </svg>
         </Link>
 
-        <span className="tw-text-iron-500 tw-text-sm tw-font-normal tw-hidden sm:tw-block">
+        <span className="tw-hidden tw-text-sm tw-font-normal tw-text-iron-500 sm:tw-block">
           or
         </span>
 
         <Link
           href={createHref}
-          className="tw-no-underline tw-text-sm tw-group tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-font-medium tw-px-4 tw-py-2.5 tw-rounded-lg tw-bg-primary-500 tw-text-white hover:tw-text-white hover:tw-bg-primary-600 tw-border tw-border-primary-500 hover:tw-border-primary-600 tw-border-solid tw-transition tw-duration-300 tw-ease-out">
+          className="tw-group tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 hover:tw-text-white"
+        >
           <svg
             className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M12 5V19M5 12H19"
               stroke="currentColor"

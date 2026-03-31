@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useReducer } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMyStreamWaveMessages } from "@/contexts/wave/MyStreamContext";
 
 import type { Drop } from "@/helpers/waves/drop.helpers";
@@ -12,7 +12,7 @@ interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   readonly allDropsCount: number;
   readonly loadMoreLocally: () => void;
   readonly hasMoreLocal: boolean;
-  readonly fetchNextPageForDrop: () => void;
+  readonly fetchNextPageForDrop: DropMessagesResult["fetchNextPage"];
   readonly waitAndRevealDrop: (
     serialNo: number,
     maxWaitTimeMs?: number,
@@ -20,21 +20,124 @@ interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   ) => Promise<boolean>;
 }
 
-const getShouldRefresh = (old: Drop[], newDrops: Drop[]) => {
-  for (const newDrop of newDrops) {
-    const oldDrop = old.find(
-      (oldDrop) => oldDrop.serial_no === newDrop.serial_no
-    );
-    if (oldDrop && "reactions" in oldDrop && "reactions" in newDrop) {
-      if (oldDrop.reactions !== newDrop.reactions) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
+interface VirtualLimitState {
+  readonly scopeKey: string;
+  readonly limit: number;
+}
+
+interface AppendTrackingState {
+  readonly scopeKey: string;
+  readonly hasInitialized: boolean;
+  readonly previousTotal: number;
+  readonly effectiveLimit: number;
+}
+
+interface WaveMessagesSnapshot {
+  readonly waveId: string;
+  readonly messages: WaveMessages | null;
+}
+
+type DropMessagesResult = ReturnType<typeof useDropMessages>;
+type ActiveMessages = WaveMessages | DropMessagesResult;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getScopeKey = ({
+  waveId,
+  dropId,
+  pageSize,
+}: {
+  readonly waveId: string;
+  readonly dropId: string | null;
+  readonly pageSize: number;
+}) => `${waveId}:${dropId ?? ""}:${pageSize}`;
+
+const createAppendTrackingState = (
+  scopeKey: string,
+  effectiveLimit: number
+): AppendTrackingState => ({
+  scopeKey,
+  hasInitialized: false,
+  previousTotal: 0,
+  effectiveLimit,
+});
+
+const isSameAppendTrackingState = (
+  currentState: AppendTrackingState,
+  nextState: AppendTrackingState
+): boolean =>
+  currentState.scopeKey === nextState.scopeKey &&
+  currentState.hasInitialized === nextState.hasInitialized &&
+  currentState.previousTotal === nextState.previousTotal &&
+  currentState.effectiveLimit === nextState.effectiveLimit;
+
+const getScopedVirtualLimit = ({
+  scopeKey,
+  virtualLimitState,
+  pageSize,
+}: {
+  readonly scopeKey: string;
+  readonly virtualLimitState: VirtualLimitState;
+  readonly pageSize: number;
+}): number =>
+  virtualLimitState.scopeKey === scopeKey ? virtualLimitState.limit : pageSize;
+
+const resolveFullWaveMessagesSnapshot = ({
+  waveId,
+  fullWaveMessages,
+  fullWaveMessagesSnapshot,
+}: {
+  readonly waveId: string;
+  readonly fullWaveMessages: WaveMessages | undefined;
+  readonly fullWaveMessagesSnapshot: WaveMessagesSnapshot;
+}): WaveMessagesSnapshot => {
+  if (fullWaveMessages) {
+    return {
+      waveId,
+      messages: fullWaveMessages,
+    };
+  }
+
+  if (fullWaveMessagesSnapshot.waveId === waveId) {
+    return fullWaveMessagesSnapshot;
+  }
+
+  return {
+    waveId,
+    messages: null,
+  };
+};
+
+const isSameWaveMessagesSnapshot = (
+  currentSnapshot: WaveMessagesSnapshot,
+  nextSnapshot: WaveMessagesSnapshot
+): boolean =>
+  currentSnapshot.waveId === nextSnapshot.waveId &&
+  currentSnapshot.messages === nextSnapshot.messages;
+
+const getNextVirtualLimitAfterAppend = ({
+  currentLimit,
+  hasInitialized,
+  pageSize,
+  previousTotal,
+  totalDrops,
+}: {
+  readonly currentLimit: number;
+  readonly hasInitialized: boolean;
+  readonly pageSize: number;
+  readonly previousTotal: number;
+  readonly totalDrops: number;
+}): number => {
+  if (!hasInitialized || previousTotal <= 0 || totalDrops <= previousTotal) {
+    return currentLimit;
+  }
+
+  if (currentLimit >= totalDrops) {
+    return currentLimit;
+  }
+
+  return Math.min(totalDrops, currentLimit + pageSize);
+};
 
 export function useVirtualizedWaveMessages(
   waveId: string,
@@ -42,185 +145,218 @@ export function useVirtualizedWaveMessages(
   pageSize: number = 50
 ): VirtualizedWaveMessages | undefined {
   const fullWaveMessages = useMyStreamWaveMessages(waveId);
-
-  const fullWaveMessagesRef = useRef<WaveMessages | null>(null);
-
-  const [, forceRefresh] = useReducer((prev: number) => prev + 1, 0);
-
-  useEffect(() => {
-    const shouldRefresh = getShouldRefresh(
-      fullWaveMessagesRef.current?.drops ?? [],
-      fullWaveMessages?.drops ?? []
-    );
-
-    fullWaveMessagesRef.current = fullWaveMessages ?? null;
-    if (shouldRefresh) {
-      forceRefresh();
-    }
-  }, [fullWaveMessages]);
-
   const fullWaveMessagesForDrop = useDropMessages(waveId, dropId);
+  const fetchNextPageForDrop = fullWaveMessagesForDrop.fetchNextPage;
 
-  const [virtualLimit, setVirtualLimit] = useState<number>(pageSize);
+  const scopeKey = getScopeKey({ waveId, dropId, pageSize });
 
-  const [hasMoreLocal, setHasMoreLocal] = useState<boolean>(false);
+  const [fullWaveMessagesSnapshot, setFullWaveMessagesSnapshot] =
+    useState<WaveMessagesSnapshot>(() => ({
+      waveId,
+      messages: fullWaveMessages ?? null,
+    }));
+  const [appendTrackingState, setAppendTrackingState] =
+    useState<AppendTrackingState>(() =>
+      createAppendTrackingState(scopeKey, pageSize)
+    );
+  const scopedAppendTrackingState =
+    appendTrackingState.scopeKey === scopeKey
+      ? appendTrackingState
+      : createAppendTrackingState(scopeKey, pageSize);
+  const latestScopeKeyRef = useRef(scopeKey);
+  const latestActiveMessagesRef = useRef<ActiveMessages | null>(null);
+  const latestEffectiveLimitRef = useRef(pageSize);
 
-  const hasInitialized = useRef<boolean>(false);
-  const previousDropsCountRef = useRef<number>(0);
+  const [virtualLimitState, setVirtualLimitState] = useState<VirtualLimitState>(
+    () => ({
+      scopeKey,
+      limit: pageSize,
+    })
+  );
 
-  useEffect(() => {
-    const activeMessages = dropId
-      ? fullWaveMessagesForDrop
-      : fullWaveMessages ?? fullWaveMessagesRef.current;
-
-    if (activeMessages) {
-      const totalDrops = activeMessages.drops.length;
-      setHasMoreLocal(totalDrops > virtualLimit);
-
-      if (!hasInitialized.current && totalDrops > 0) {
-        hasInitialized.current = true;
-      }
-    } else {
-      setHasMoreLocal(false);
-      hasInitialized.current = false;
-    }
-  }, [
-    dropId,
+  const resolvedFullWaveMessagesSnapshot = resolveFullWaveMessagesSnapshot({
+    waveId,
     fullWaveMessages,
-    virtualLimit,
-    fullWaveMessagesForDrop,
-  ]);
+    fullWaveMessagesSnapshot,
+  });
+
+  if (
+    !isSameWaveMessagesSnapshot(
+      fullWaveMessagesSnapshot,
+      resolvedFullWaveMessagesSnapshot
+    )
+  ) {
+    // Track the last committed same-wave snapshot during render to avoid
+    // effect-driven derived state and skip rendering stale fallback data.
+    setFullWaveMessagesSnapshot(resolvedFullWaveMessagesSnapshot);
+  }
+
+  const activeFullWaveMessages =
+    fullWaveMessages ??
+    (resolvedFullWaveMessagesSnapshot.waveId === waveId
+      ? resolvedFullWaveMessagesSnapshot.messages
+      : null);
+  const activeDropMessages = dropId ? fullWaveMessagesForDrop : null;
+  const activeMessages = activeDropMessages ?? activeFullWaveMessages;
+  const hasActiveMessages = Boolean(activeMessages);
+  const activeMessagesCount = activeMessages?.drops.length ?? 0;
+  const virtualLimit = getScopedVirtualLimit({
+    scopeKey,
+    virtualLimitState,
+    pageSize,
+  });
+  const persistedEffectiveLimit = scopedAppendTrackingState.effectiveLimit;
+  const baseVirtualLimit = Math.max(virtualLimit, persistedEffectiveLimit);
+  const effectiveVirtualLimit = hasActiveMessages
+    ? getNextVirtualLimitAfterAppend({
+        currentLimit: baseVirtualLimit,
+        hasInitialized: scopedAppendTrackingState.hasInitialized,
+        pageSize,
+        previousTotal: scopedAppendTrackingState.previousTotal,
+        totalDrops: activeMessagesCount,
+      })
+    : baseVirtualLimit;
+  const hasMoreLocal = hasActiveMessages
+    ? activeMessagesCount > effectiveVirtualLimit
+    : false;
+  const nextAppendTrackingState = hasActiveMessages
+    ? {
+        scopeKey,
+        previousTotal: activeMessagesCount,
+        hasInitialized:
+          scopedAppendTrackingState.hasInitialized || activeMessagesCount > 0,
+        effectiveLimit: effectiveVirtualLimit,
+      }
+    : createAppendTrackingState(scopeKey, pageSize);
+
+  if (
+    !isSameAppendTrackingState(appendTrackingState, nextAppendTrackingState)
+  ) {
+    // Persist append bookkeeping during render because it only tracks previous
+    // render inputs and should not be synchronized through an effect.
+    setAppendTrackingState(nextAppendTrackingState);
+  }
 
   useEffect(() => {
-    setVirtualLimit(pageSize);
-    hasInitialized.current = false;
-    previousDropsCountRef.current = 0;
-  }, [waveId, pageSize, dropId]);
+    latestScopeKeyRef.current = scopeKey;
+    latestActiveMessagesRef.current = activeMessages ?? null;
+    latestEffectiveLimitRef.current = effectiveVirtualLimit;
+  }, [activeMessages, effectiveVirtualLimit, scopeKey]);
 
-  useEffect(() => {
-    const activeWaveMessages = dropId
-      ? fullWaveMessagesForDrop
-      : fullWaveMessages;
-
-    if (!activeWaveMessages) {
-      previousDropsCountRef.current = 0;
+  const loadMoreLocally = () => {
+    if (latestScopeKeyRef.current !== scopeKey) {
       return;
     }
 
-    const totalDrops = activeWaveMessages.drops.length;
-    const previousTotal = previousDropsCountRef.current;
+    setVirtualLimitState((currentState) => {
+      const totalDrops = latestActiveMessagesRef.current?.drops.length ?? 0;
+      const currentLimit =
+        currentState.scopeKey === scopeKey
+          ? Math.max(currentState.limit, latestEffectiveLimitRef.current)
+          : latestEffectiveLimitRef.current;
 
-    if (hasInitialized.current && previousTotal > 0 && totalDrops > previousTotal) {
-      setVirtualLimit((currentLimit) => {
-        if (currentLimit >= totalDrops) {
-          return currentLimit;
-        }
+      return {
+        scopeKey,
+        limit:
+          totalDrops > currentLimit ? currentLimit + pageSize : currentLimit,
+      };
+    });
+  };
 
-        const nextLimit = Math.min(totalDrops, currentLimit + pageSize);
-        return nextLimit;
-      });
+  const revealDrop = (serialNo: number) => {
+    if (latestScopeKeyRef.current !== scopeKey) {
+      return;
     }
 
-    previousDropsCountRef.current = totalDrops;
-  }, [dropId, fullWaveMessages, fullWaveMessagesForDrop, pageSize]);
+    const activeDrops = latestActiveMessagesRef.current?.drops;
+    if (!activeDrops) {
+      return;
+    }
 
-  const loadMoreLocally = useCallback(() => {
-    setVirtualLimit((prevLimit) => {
-      const messages = dropId
-        ? fullWaveMessagesForDrop
-        : fullWaveMessagesRef.current;
-      const totalDrops = messages?.drops.length ?? 0;
+    const index = activeDrops.findIndex((drop) => drop.serial_no === serialNo);
+    if (index === -1) {
+      return;
+    }
 
-      return totalDrops > prevLimit ? prevLimit + pageSize : prevLimit;
+    const maxIndex = activeDrops.length - 1;
+    const targetIndex = Math.min(index + 30, maxIndex);
+
+    setVirtualLimitState((currentState) => {
+      const currentLimit =
+        currentState.scopeKey === scopeKey
+          ? Math.max(currentState.limit, latestEffectiveLimitRef.current)
+          : latestEffectiveLimitRef.current;
+
+      return {
+        scopeKey,
+        limit: Math.max(currentLimit, targetIndex + 1),
+      };
     });
-  }, [pageSize, fullWaveMessagesForDrop, dropId]);
+  };
 
-  const revealDrop = useCallback(
-    (serialNo: number) => {
-      if (fullWaveMessagesRef.current) {
-        const index = fullWaveMessagesRef.current.drops.findIndex(
+  const waitAndRevealDrop = async (
+    serialNo: number,
+    maxWaitTimeMs: number = 3000,
+    pollIntervalMs: number = 100
+  ) => {
+    const startTime = Date.now();
+    while (Date.now() - startTime < maxWaitTimeMs) {
+      if (latestScopeKeyRef.current !== scopeKey) {
+        return false;
+      }
+
+      if (
+        latestActiveMessagesRef.current?.drops.some(
           (drop) => drop.serial_no === serialNo
-        );
-
-        if (index !== -1) {
-          const maxIndex = fullWaveMessagesRef.current.drops.length - 1;
-          const targetIndex = Math.min(index + 30, maxIndex);
-          setVirtualLimit(targetIndex + 1);
-        }
+        )
+      ) {
+        revealDrop(serialNo);
+        return true;
       }
-    },
-    []
-  );
+      await delay(pollIntervalMs);
+    }
+    console.warn(
+      `useVirtualizedWaveMessages: Timed out after ${maxWaitTimeMs}ms waiting for serialNo ${serialNo} in wave ${waveId}`
+    );
+    return false;
+  };
 
-  const waitAndRevealDrop = useCallback(
-    async (
-      serialNo: number,
-      maxWaitTimeMs: number = 3000,
-      pollIntervalMs: number = 100
-    ) => {
-      const startTime = Date.now();
-      while (Date.now() - startTime < maxWaitTimeMs) {
-        if (
-          fullWaveMessagesRef?.current?.drops?.some(
-            (drop) => drop.serial_no === serialNo
-          )
-        ) {
-          revealDrop(serialNo);
-          return true;
-        }
-        await delay(pollIntervalMs);
-      }
-      console.warn(
-        `useVirtualizedWaveMessages: Timed out after ${maxWaitTimeMs}ms waiting for serialNo ${serialNo} in wave ${waveId}`
-      );
-      return false;
-    },
-    [revealDrop, waveId]
-  );
-
-  if (dropId && !fullWaveMessagesForDrop) {
+  if (!activeMessages) {
     return undefined;
   }
 
-  if (!fullWaveMessagesRef.current) {
-    return undefined;
+  const virtualizedDrops = activeMessages.drops.slice(0, effectiveVirtualLimit);
+  const allDropsCount = activeMessages.drops.length;
+
+  if (activeDropMessages) {
+    return {
+      hasNextPage: activeDropMessages.hasNextPage,
+      id: waveId,
+      isLoading: activeDropMessages.isFetching,
+      isLoadingNextPage: activeDropMessages.isFetchingNextPage,
+      latestFetchedSerialNo: activeDropMessages.drops.at(-1)?.serial_no ?? null,
+      drops: virtualizedDrops,
+      allDropsCount,
+      loadMoreLocally,
+      hasMoreLocal,
+      fetchNextPageForDrop,
+      waitAndRevealDrop,
+    };
   }
 
-  const virtualizedDrops = dropId
-    ? fullWaveMessagesForDrop.drops.slice(0, virtualLimit)
-    : fullWaveMessagesRef.current.drops.slice(0, virtualLimit);
-
-  const hasNextPage = dropId
-    ? fullWaveMessagesForDrop.hasNextPage
-    : fullWaveMessagesRef.current.hasNextPage;
-
-  const isLoading = dropId
-    ? fullWaveMessagesForDrop.isFetching
-    : fullWaveMessagesRef.current.isLoading;
-
-  const isLoadingNextPage = dropId
-    ? fullWaveMessagesForDrop.isFetchingNextPage
-    : fullWaveMessagesRef.current.isLoadingNextPage;
-
-  const latestFetchedSerialNo = dropId
-    ? fullWaveMessagesForDrop.drops.at(-1)?.serial_no ?? null
-    : fullWaveMessagesRef.current.latestFetchedSerialNo;
-
-  const allDropsCount = dropId
-    ? fullWaveMessagesForDrop.drops.length
-    : fullWaveMessagesRef.current.drops.length;
+  const visibleFullWaveMessages = activeMessages as WaveMessages;
 
   return {
-    hasNextPage,
+    hasNextPage: visibleFullWaveMessages.hasNextPage,
     id: waveId,
-    isLoading,
-    isLoadingNextPage,
-    latestFetchedSerialNo,
+    isLoading: visibleFullWaveMessages.isLoading,
+    isLoadingNextPage: visibleFullWaveMessages.isLoadingNextPage,
+    latestFetchedSerialNo: visibleFullWaveMessages.latestFetchedSerialNo,
     drops: virtualizedDrops,
     allDropsCount,
     loadMoreLocally,
     hasMoreLocal,
-    fetchNextPageForDrop: fullWaveMessagesForDrop.fetchNextPage,
+    fetchNextPageForDrop,
     waitAndRevealDrop,
   };
 }

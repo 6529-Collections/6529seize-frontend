@@ -260,12 +260,16 @@ export function LinkPreviewCardLayout({
   }
 
   return (
-    <div className="tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-h-full tw-min-h-0 tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
+    <div className="tw-group/link-card tw-relative tw-h-full tw-w-full tw-min-w-0 tw-max-w-full">
+      <div className="tw-h-full tw-min-h-0 tw-min-w-0 tw-max-w-full tw-overflow-hidden focus-within:tw-overflow-visible">
         {children}
       </div>
       {!hideActions && (
-        <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
+        <ChatItemHrefButtons
+          href={href}
+          relativeHref={relativeHref}
+          layout="overlay"
+        />
       )}
     </div>
   );

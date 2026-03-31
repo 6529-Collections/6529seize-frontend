@@ -23,7 +23,6 @@ interface WaveDropsContentProps {
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
   readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly onTopIntersection: () => void;
-  readonly onScroll?: (() => void) | undefined;
   readonly onReply: ({
     drop,
     partId,
@@ -58,7 +57,6 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   bottomAnchorRef,
   bottomAnchorCallbackRef,
   onTopIntersection,
-  onScroll,
   onReply,
   queueSerialTarget,
   activeDrop,
@@ -114,7 +112,6 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         bottomAnchorRef={bottomAnchorRef}
         bottomAnchorCallbackRef={bottomAnchorCallbackRef}
         onTopIntersection={onTopIntersection}
-        onScroll={onScroll}
         onReply={onReply}
         queueSerialTarget={queueSerialTarget}
         activeDrop={activeDrop}

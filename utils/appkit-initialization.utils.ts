@@ -1,3 +1,9 @@
+import {
+  createAppKit,
+  type ChainAdapter,
+  type CreateAppKit,
+  type WalletFeature,
+} from "@reown/appkit/react";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import type { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
 import { publicEnv } from "@/config/env";
@@ -6,15 +12,14 @@ import { AdapterCacheError, AdapterError } from "@/src/errors/adapter";
 import { isIndexedDBError, logErrorSecurely } from "@/utils/error-sanitizer";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { AppKitNetwork } from "@reown/appkit-common";
-import type { ChainAdapter } from "@reown/appkit/react";
-import { createAppKit } from "@reown/appkit/react";
-import { mainnet } from "viem/chains";
+import type { Chain } from "viem";
 
 // Configuration interface for AppKit initialization
 export interface AppKitInitializationConfig {
   wallets: AppWallet[];
   adapterManager: AppKitAdapterManager;
   isCapacitor: boolean;
+  chains: Chain[];
 }
 
 // Result interface
@@ -42,7 +47,8 @@ function debugLog(message: string, ...args: any[]): void {
 function createAdapter(
   wallets: AppWallet[],
   adapterManager: AppKitAdapterManager,
-  isCapacitor: boolean
+  isCapacitor: boolean,
+  chains: Chain[]
 ): WagmiAdapter {
   debugLog(
     `Initializing AppKit adapter (${isCapacitor ? "mobile" : "web"}) with`,
@@ -51,7 +57,7 @@ function createAdapter(
   );
 
   try {
-    return adapterManager.createAdapterWithCache(wallets, isCapacitor);
+    return adapterManager.createAdapterWithCache(wallets, isCapacitor, chains);
   } catch (error) {
     if (isIndexedDBError(error)) {
       logErrorSecurely(
@@ -89,8 +95,13 @@ export function initializeAppKit(
 ): AppKitInitializationResult {
   const { wallets, adapterManager, isCapacitor } = config;
 
-  const newAdapter = createAdapter(wallets, adapterManager, isCapacitor);
-  const appKitConfig = buildAppKitConfig(newAdapter);
+  const newAdapter = createAdapter(
+    wallets,
+    adapterManager,
+    isCapacitor,
+    config.chains
+  );
+  const appKitConfig = buildAppKitConfig(newAdapter, config.chains);
   const appKit = createAppKit(appKitConfig);
   const ready = appKit.ready();
   // Prevent unhandled rejections if a caller chooses not to await `ready`.
@@ -107,10 +118,21 @@ export function initializeAppKit(
 /**
  * Builds the AppKit configuration object
  */
-function buildAppKitConfig(adapter: WagmiAdapter) {
+function buildAppKitConfig(
+  adapter: WagmiAdapter,
+  chains: Chain[]
+): CreateAppKit {
+  if (chains.length === 0) {
+    throw new Error(
+      "AppKit initialization requires at least one configured chain."
+    );
+  }
+
+  const walletFeaturesOrder: WalletFeature[] = ["send"];
+
   return {
     adapters: [adapter] as ChainAdapter[],
-    networks: [mainnet] as [AppKitNetwork, ...AppKitNetwork[]],
+    networks: chains as [AppKitNetwork, ...AppKitNetwork[]],
     projectId: CW_PROJECT_ID,
     metadata: {
       name: "6529.io",
@@ -130,9 +152,10 @@ function buildAppKitConfig(adapter: WagmiAdapter) {
       analytics: true,
       email: false,
       socials: [],
+      onramp: false,
+      swaps: false,
       connectMethodsOrder: ["wallet" as const],
+      walletFeaturesOrder,
     },
-    enableOnramp: false,
-    enableSwaps: false,
   };
 }

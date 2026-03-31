@@ -4,11 +4,15 @@ export type ArtistPreviewTab = "active" | "winners";
 
 export function useArtistPreviewModal() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalInitialTab, setModalInitialTab] = useState<ArtistPreviewTab>("active");
+  const [activeTab, setActiveTab] = useState<ArtistPreviewTab>("active");
 
   const handleBadgeClick = useCallback((tab: ArtistPreviewTab) => {
-    setModalInitialTab(tab);
+    setActiveTab(tab);
     setIsModalOpen(true);
+  }, []);
+
+  const handleTabChange = useCallback((tab: ArtistPreviewTab) => {
+    setActiveTab(tab);
   }, []);
 
   const handleModalClose = useCallback(() => {
@@ -17,8 +21,9 @@ export function useArtistPreviewModal() {
 
   return {
     isModalOpen,
-    modalInitialTab,
+    activeTab,
     handleBadgeClick,
+    handleTabChange,
     handleModalClose,
   };
 }

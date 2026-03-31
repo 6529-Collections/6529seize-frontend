@@ -42,7 +42,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
               data-testid="memes-art-submission-modal-panel"
-              className="tw-flex tw-h-[100dvh] tw-max-h-[100dvh] tw-w-full tw-flex-col md:tw-h-full md:tw-max-h-none"
+              className="tw-flex tw-h-[100dvh] tw-max-h-[100dvh] tw-w-full tw-max-w-screen-xl tw-flex-col md:tw-h-full md:tw-max-h-none"
               ref={modalRef}
               onClick={(e) => {
                 e.stopPropagation();

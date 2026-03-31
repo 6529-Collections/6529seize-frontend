@@ -19,8 +19,8 @@ describe('ArtworkDetails', () => {
         onDescriptionBlur={onDescriptionBlur}
       />
     );
-    const title = screen.getByLabelText('Artwork Title');
-    const desc = screen.getByLabelText('Description');
+    const title = screen.getByLabelText(/Artwork Title/);
+    const desc = screen.getByLabelText(/Description/);
     await user.clear(title);
     await user.type(title, 'new');
     await user.tab();
@@ -37,11 +37,34 @@ describe('ArtworkDetails', () => {
     const { rerender } = render(
       <ArtworkDetails title="one" description="two" onTitleChange={() => {}} onDescriptionChange={() => {}} />
     );
-    const title = screen.getByLabelText('Artwork Title') as HTMLInputElement;
+    const title = screen.getByLabelText(/Artwork Title/) as HTMLInputElement;
     expect(title.value).toBe('one');
     rerender(
       <ArtworkDetails title="three" description="two" onTitleChange={() => {}} onDescriptionChange={() => {}} />
     );
     expect(title.value).toBe('three');
+  });
+
+  it('uses neutral required markers and subtle success rings for filled fields', () => {
+    render(
+      <ArtworkDetails
+        title="Filled title"
+        description="Filled description"
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    const requiredMarkers = screen.getAllByText('*');
+    requiredMarkers.forEach((marker) => {
+      expect(marker).toHaveClass('tw-text-iron-500');
+    });
+
+    expect(screen.getByLabelText(/Artwork Title/)).toHaveClass(
+      'tw-ring-emerald-500/30'
+    );
+    expect(screen.getByLabelText(/Description/)).toHaveClass(
+      'tw-ring-emerald-500/30'
+    );
   });
 });

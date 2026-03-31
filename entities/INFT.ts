@@ -168,7 +168,7 @@ export interface Rememe {
 
 export interface IAttribute {
   trait_type: string;
-  value: string;
+  value: string | number;
   display_type?: string | undefined;
   max_value?: number | undefined;
   trait_count?: number | undefined;

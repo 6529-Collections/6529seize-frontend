@@ -1,14 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import MyStreamWaveTabsLeaderboard from '@/components/brain/my-stream/MyStreamWaveTabsLeaderboard';
-import { BrainView } from '@/components/brain/BrainMobile';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React from "react";
+import MyStreamWaveTabsLeaderboard from "@/components/brain/my-stream/MyStreamWaveTabsLeaderboard";
+import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
-jest.mock('@/components/brain/BrainMobile', () => ({
-  BrainView: { DEFAULT: 'DEFAULT', LEADERBOARD: 'LEADERBOARD', WINNERS: 'WINNERS' }
-}));
-
-jest.mock('@/hooks/useWaveTimers', () => ({
+jest.mock("@/hooks/useWaveTimers", () => ({
   useWaveTimers: () => ({
     voting: { isCompleted: mockCompleted },
     decisions: { firstDecisionDone: mockFirstDecision },
@@ -33,31 +29,45 @@ function renderComponent(view: BrainView = BrainView.DEFAULT, props: any = {}) {
   return { onViewChange, registerTabRef };
 }
 
-describe('MyStreamWaveTabsLeaderboard', () => {
+describe("MyStreamWaveTabsLeaderboard", () => {
   beforeEach(() => {
     mockCompleted = false;
     mockFirstDecision = false;
   });
 
-  it('shows leaderboard tab when voting ongoing', () => {
+  it("shows leaderboard tab when voting ongoing", () => {
     const { registerTabRef } = renderComponent();
-    expect(screen.getByText('Leaderboard')).toBeInTheDocument();
-    expect(registerTabRef).toHaveBeenCalledWith(BrainView.LEADERBOARD, expect.any(HTMLButtonElement));
-    expect(screen.queryByText('Winners')).toBeNull();
+    expect(screen.getByText("Leaderboard")).toBeInTheDocument();
+    expect(registerTabRef).toHaveBeenCalledWith(
+      BrainView.LEADERBOARD,
+      expect.any(HTMLButtonElement)
+    );
+    expect(screen.queryByText("Winners")).toBeNull();
   });
 
-  it('shows winners tab after first decision', async () => {
+  it("shows winners tab after first decision", async () => {
     mockFirstDecision = true;
     const { onViewChange } = renderComponent();
-    const button = screen.getByText('Winners');
+    const button = screen.getByText("Winners");
     expect(button).toBeInTheDocument();
     await userEvent.click(button);
     expect(onViewChange).toHaveBeenCalledWith(BrainView.WINNERS);
   });
 
-  it('hides leaderboard when voting completed', () => {
+  it("hides leaderboard when voting completed", () => {
     mockCompleted = true;
     renderComponent();
-    expect(screen.queryByText('Leaderboard')).toBeNull();
+    expect(screen.queryByText("Leaderboard")).toBeNull();
+  });
+
+  it("renders injected content between leaderboard and winners", () => {
+    mockFirstDecision = true;
+    renderComponent(BrainView.DEFAULT, {
+      renderAfterLeaderboard: <button type="button">Sales</button>,
+    });
+
+    expect(
+      screen.getAllByRole("button").map((button) => button.textContent)
+    ).toEqual(["Leaderboard", "Sales", "Winners"]);
   });
 });

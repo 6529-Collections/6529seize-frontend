@@ -1,5 +1,14 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { mainnet, sepolia } from "viem/chains";
+import { WagmiProvider } from "wagmi";
+import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
+import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { useAuth } from "@/components/auth/Auth";
+import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
+import { publicEnv } from "@/config/env";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { AppKitValidationError } from "@/src/errors/appkit-initialization";
 import type { AppKitInitializationConfig } from "@/utils/appkit-initialization.utils";
@@ -12,14 +21,8 @@ import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
-import { Capacitor } from "@capacitor/core";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { WagmiProvider } from "wagmi";
-import type { AppWallet } from "../app-wallets/AppWalletsContext";
-import { useAppWallets } from "../app-wallets/AppWalletsContext";
-import { useAuth } from "../auth/Auth";
-import { AppKitAdapterManager } from "./AppKitAdapterManager";
+import type { Chain } from "viem";
 
 /**
  * Installs a defensive wrapper around `window.ethereum` (EIP-1193 provider).
@@ -56,6 +59,19 @@ function installSafeEthereumProxy(): void {
     return;
   }
 
+  const ownEthereumDescriptor = Object.getOwnPropertyDescriptor(w, "ethereum");
+  if (
+    ownEthereumDescriptor?.configurable === false &&
+    !canAssignProperty(ownEthereumDescriptor)
+  ) {
+    logErrorSecurely(
+      "[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum",
+      new Error("window.ethereum cannot be reassigned")
+    );
+    w.__6529_safeEthereumProxyInstalled = true;
+    return;
+  }
+
   try {
     let hasLoggedProxyGetError = false;
     const proxy = new Proxy(ethereum, {
@@ -81,7 +97,16 @@ function installSafeEthereumProxy(): void {
       },
     });
 
-    w.ethereum = proxy;
+    if (ownEthereumDescriptor?.configurable === false) {
+      w.ethereum = proxy;
+    } else {
+      Object.defineProperty(w, "ethereum", {
+        configurable: true,
+        enumerable: ownEthereumDescriptor?.enumerable ?? true,
+        writable: true,
+        value: proxy,
+      });
+    }
     w.__6529_safeEthereumProxyInstalled = true;
   } catch (error) {
     logErrorSecurely(
@@ -92,11 +117,21 @@ function installSafeEthereumProxy(): void {
   }
 }
 
+function canAssignProperty(descriptor: PropertyDescriptor): boolean {
+  if ("get" in descriptor || "set" in descriptor) {
+    return typeof descriptor.set === "function";
+  }
+
+  return descriptor.writable !== false;
+}
+
 export default function WagmiSetup({
   children,
 }: {
   readonly children: React.ReactNode;
 }) {
+  const enableTestnet = publicEnv.DROP_FORGE_TESTNET === true;
+
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
   const { appWallets } = useAppWallets();
@@ -135,15 +170,21 @@ export default function WagmiSetup({
         throw new AppKitValidationError("Internal API failed");
       }
 
+      const chains: Chain[] = [mainnet];
+      if (enableTestnet) {
+        chains.push(sepolia);
+      }
+
       const config: AppKitInitializationConfig = {
         wallets,
         adapterManager: adapterManager as AppKitAdapterManager,
         isCapacitor,
+        chains,
       };
 
       return initializeAppKit(config);
     },
-    [adapterManager, isCapacitor]
+    [adapterManager, isCapacitor, enableTestnet]
   );
 
   // Initialize AppKit with fail-fast approach

@@ -16,6 +16,7 @@ import {
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
   isInteractiveMediaContentIdentifier,
 } from "../constants/security";
+import { stripArweaveGatewayUrlPrefix } from "@/lib/media/arweave-gateways";
 import type {
   AdditionalMedia,
   AirdropEntry,
@@ -99,7 +100,7 @@ const sanitizeInteractiveHash = (
     value = value.replace(/^https?:\/\/[^/]+\/ipfs\//i, "");
     value = value.replace(/^ipfs\//i, "");
   } else {
-    value = value.replace(/^https?:\/\/(?:www\.)?arweave\.net\//i, "");
+    value = stripArweaveGatewayUrlPrefix(value);
   }
 
   value = value.replace(/^\/+/, "");

@@ -93,6 +93,14 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   ENABLE_SECURITY_LOGGING: z.string().optional(),
+  DROP_FORGE_TESTNET: z
+    .union([z.enum(["true", "false"]), z.boolean()])
+    .transform((value) => value === "true" || value === true)
+    .optional(),
+  STANDALONE_MAIN_SITE_BASE: z
+    .string()
+    .url("STANDALONE_MAIN_SITE_BASE must be a valid URL")
+    .optional(),
   FEATURE_AB_CARD: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),
   NEXT_PUBLIC_DEBUG_NAV: z.string().optional(),
@@ -116,6 +124,7 @@ export const publicEnvSchema = z.object({
   AWS_RUM_APP_ID: z.string().optional(),
   AWS_RUM_REGION: z.string().optional(),
   AWS_RUM_SAMPLE_RATE: z.string().optional(),
+  NEXT_PUBLIC_MIXPANEL_TOKEN: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   SENTRY_REPLAY_ENABLED: z.enum(["true", "false"]).optional(),
 

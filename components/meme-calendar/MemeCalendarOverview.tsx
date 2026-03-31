@@ -44,17 +44,17 @@ export default function MemeCalendarOverview({
 }: MemeCalendarOverviewProps) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
-      <div className="tw-h-full tw-flex tw-items-center tw-gap-3">
+      <div className="tw-flex tw-h-full tw-items-center tw-gap-3">
         <h1 className="tw-mb-0">The Memes Minting Calendar</h1>
         {showViewAll && (
           <Link href="/meme-calendar">
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium hover:tw-text-[#bbb] max-[800px]:tw-text-[12px]">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium hover:tw-text-[#bbb] max-[800px]:tw-text-xs">
               View Full Calendar
             </span>
           </Link>
         )}
       </div>
-      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
         <div className="tw-h-full">
           <MemeCalendarOverviewNextMint displayTz={displayTz} />
         </div>
@@ -99,18 +99,20 @@ const TopControls = memo(function TopControls(props: {
 
   return (
     <div
-      className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-mb-3"
-      data-ignore-screenshot>
+      className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2"
+      data-ignore-screenshot
+    >
       <button
         disabled={canonicalNextMintNumber === selectedMintNumber}
         type="button"
-        className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-rounded-md tw-bg-white tw-text-black tw-px-3 tw-text-sm tw-font-semibold tw-border tw-border-[#d1d1d1] hover:tw-bg-[#e9e9e9] disabled:tw-opacity-75 disabled:hover:tw-bg-white disabled:hover:tw-text-black disabled:hover:tw-border-[#d1d1d1]"
-        onClick={() => onSelect(canonicalNextMintNumber)}>
+        className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-white tw-px-3 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-[#e9e9e9] disabled:tw-opacity-75 disabled:hover:tw-border-[#d1d1d1] disabled:hover:tw-bg-white disabled:hover:tw-text-black"
+        onClick={() => onSelect(canonicalNextMintNumber)}
+      >
         Next Mint
       </button>
 
       <form onSubmit={onMintInputSubmit}>
-        <div className="tw-bg-[#e5e5e5] tw-h-8 tw-flex tw-items-center tw-rounded-md tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1]">
+        <div className="tw-flex tw-h-8 tw-items-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-[#e5e5e5] tw-pl-3 tw-font-semibold tw-text-black">
           <div className="tw-shrink-0 tw-select-none tw-pr-2">Meme #</div>
           <input
             id="meme-overview-mint-input"
@@ -123,7 +125,7 @@ const TopControls = memo(function TopControls(props: {
               const v = event.target.value.replace(/\D/g, "");
               onMintInputChange(v);
             }}
-            className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-8 tw-w-[8ch] tw-px-2 tw-rounded-r-md"
+            className="tw-h-8 tw-w-[8ch] tw-rounded-r-md tw-border-none tw-px-2 tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none"
           />
         </div>
       </form>
@@ -349,7 +351,8 @@ export function MemeCalendarOverviewNextMint({
     <div className="tw-relative">
       <div
         ref={cardRef}
-        className="tw-p-4 tw-flex tw-flex-col tw-justify-between tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
+        className="tw-flex tw-flex-col tw-justify-between tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-[#0c0c0d] tw-p-4"
+      >
         <div className="tw-space-y-1">
           {id == null && (
             <TopControls
@@ -363,7 +366,7 @@ export function MemeCalendarOverviewNextMint({
               isCapturing={isCapturing}
             />
           )}
-          <div className="tw-flex tw-items-center tw-gap-2 tw-justify-between">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
             <div className="tw-text-sm tw-text-gray-400">{heading}</div>
             {id != null && (
               <ScreenshotCard
@@ -373,7 +376,7 @@ export function MemeCalendarOverviewNextMint({
             )}
           </div>
           <div className="tw-flex tw-items-center tw-gap-2">
-            <div className="!tw-text-3xl md:!tw-text-4xl tw-font-bold">
+            <div className="!tw-text-3xl tw-font-bold md:!tw-text-4xl">
               #{mintDetails.mintNumber.toLocaleString()}
             </div>
           </div>
@@ -463,8 +466,8 @@ function MemeCalendarOverviewUpcomingMints({
   const emptyStateCopy = "No upcoming mints in this season.";
 
   return (
-    <div className="tw-h-full tw-p-4 tw-flex tw-flex-col tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
-      <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
+    <div className="tw-flex tw-h-full tw-flex-col tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-[#0c0c0d] tw-p-4">
+      <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between">
         <div className="tw-font-semibold">
           {isNextSeason ? "Upcoming SZN" : "Upcoming Mints for SZN"}{" "}
           {displayedSeasonNumberFromIndex(seasonIndex)}
@@ -475,7 +478,7 @@ function MemeCalendarOverviewUpcomingMints({
         </div>
       </div>
 
-      <div className="tw-overflow-x-auto tw-flex-1 tw-max-h-[390px] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 tw-transition-colors tw-duration-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+      <div className="tw-max-h-[390px] tw-flex-1 tw-overflow-x-auto tw-overflow-y-auto tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
         <table className="tw-w-full tw-text-sm">
           <thead></thead>
           <tbody>
@@ -495,7 +498,7 @@ function MemeCalendarOverviewUpcomingMints({
                     {formatFullDateTime(instantUtc, displayTz)}
                   </td>
                   <td
-                    className="tw-py-2 tw-flex tw-items-center tw-justify-end tw-pr-6"
+                    className="tw-flex tw-items-center tw-justify-end tw-py-2 tw-pr-6"
                     dangerouslySetInnerHTML={{
                       __html: printCalendarInvites(
                         instantUtc,
@@ -503,7 +506,8 @@ function MemeCalendarOverviewUpcomingMints({
                         "#fff",
                         18
                       ),
-                    }}></td>
+                    }}
+                  ></td>
                 </tr>
               ))
             )}
@@ -559,9 +563,10 @@ function ScreenshotCard({
       type="button"
       onClick={onScreenshot}
       disabled={isCapturing}
-      className="tw-inline-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-md tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50 tw-border tw-border-[#d1d1d1]"
+      className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-white tw-text-black tw-transition hover:tw-bg-[#e9e9e9] focus:tw-outline-none disabled:tw-opacity-50"
       aria-label="Screenshot"
-      title="Screenshot">
+      title="Screenshot"
+    >
       <FontAwesomeIcon icon={faCamera} className="tw-h-4 tw-w-4" />
     </button>
   );

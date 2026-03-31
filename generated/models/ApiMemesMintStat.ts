@@ -16,7 +16,9 @@ import { HttpFile } from '../http/http';
 export class ApiMemesMintStat {
     'id': number;
     'mint_date': Date | null;
+    'total_count': number;
     'mint_count': number;
+    'subscriptions_count': number;
     'proceeds_eth': number;
     'proceeds_usd': number;
     'artist_split_eth': number;
@@ -40,8 +42,20 @@ export class ApiMemesMintStat {
             "format": "date-time"
         },
         {
+            "name": "total_count",
+            "baseName": "total_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
             "name": "mint_count",
             "baseName": "mint_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "subscriptions_count",
+            "baseName": "subscriptions_count",
             "type": "number",
             "format": "int64"
         },
