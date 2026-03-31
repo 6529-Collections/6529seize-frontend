@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify registry signatures
+        run: npm audit signatures
+
       - name: Lint package.json versions
         run: npm run lint:package-json
 
