@@ -298,11 +298,15 @@ const getPageMatchPriority = (
   normalizedQuery: string,
   canonicalQueryTokens: readonly string[]
 ): number => {
+  const isPathLikeQuery =
+    normalizedQuery.startsWith("/") || normalizedQuery.includes("/");
   const titleValues = [normalizedTitle];
   const hrefValues = [normalizedHref, ...hrefSegments];
   const checks = [
     normalizedTitle === normalizedQuery,
     normalizedHref === normalizedQuery,
+    isPathLikeQuery && normalizedHref.startsWith(normalizedQuery),
+    isPathLikeQuery && normalizedHref.includes(normalizedQuery),
     hasExactCanonicalPageTokenMatch(titleValues, canonicalQueryTokens),
     hrefSegments.includes(normalizedQuery),
     normalizedSearchTerms.includes(normalizedQuery),
@@ -352,8 +356,15 @@ const pageMatchesQuery = (
   normalizedQuery: string,
   canonicalQueryTokens: readonly string[]
 ) => {
+  const isPathLikeQuery =
+    normalizedQuery.startsWith("/") || normalizedQuery.includes("/");
   if (normalizedTitle.includes(normalizedQuery)) return true;
-  if (normalizedHref.includes(normalizedQuery)) return true;
+  if (isPathLikeQuery && normalizedHref.startsWith(normalizedQuery)) {
+    return true;
+  }
+  if (isPathLikeQuery && normalizedHref.includes(normalizedQuery)) {
+    return true;
+  }
   if (normalizedSearchTerms.some((term) => term.includes(normalizedQuery))) {
     return true;
   }

@@ -260,6 +260,81 @@ describe("NotificationDropReactedGroup", () => {
     expect(screen.queryByTestId("follow-all")).not.toBeInTheDocument();
   });
 
+  it("keeps an older handle when the latest grouped notification has a blank handle", () => {
+    render(
+      <NotificationDropReactedGroup
+        group={{
+          type: "grouped_reactions",
+          id: 2,
+          createdAt: 200,
+          drop: createMockDrop(),
+          notifications: [
+            createNotification({
+              id: 1,
+              createdAt: 100,
+              reaction: ":heart:",
+              handle: "gpebbles",
+              pfp: "gpebbles.png",
+              profileOverrides: {
+                id: "reactor-1",
+                primary_address: "0xreactor1",
+              },
+            }),
+            createNotification({
+              id: 2,
+              createdAt: 200,
+              reaction: ":heart:",
+              handle: "",
+              pfp: null,
+              profileOverrides: {
+                id: "reactor-1",
+                primary_address: "0xreactor1",
+              },
+            }),
+          ],
+        }}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByText("New reactions")).not.toBeInTheDocument();
+    expect(screen.getByTestId("header")).toHaveTextContent("gpebbles");
+    expect(screen.getByTestId("follow-one")).toBeInTheDocument();
+  });
+
+  it("falls back to the multi-reactor layout when the only reactor has no usable handle", () => {
+    render(
+      <NotificationDropReactedGroup
+        group={{
+          type: "grouped_reactions",
+          id: 1,
+          createdAt: 200,
+          drop: createMockDrop(),
+          notifications: [
+            createNotification({
+              id: 1,
+              createdAt: 200,
+              reaction: ":heart:",
+              handle: "",
+              pfp: null,
+              profileOverrides: {
+                id: "reactor-1",
+                primary_address: "",
+              },
+            }),
+          ],
+        }}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("New reactions")).toBeInTheDocument();
+    expect(screen.queryByTestId("header")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("follow-one")).not.toBeInTheDocument();
+  });
+
   it("keeps reactions with blank identity fields instead of dropping them", () => {
     render(
       <NotificationDropReactedGroup
@@ -296,7 +371,7 @@ describe("NotificationDropReactedGroup", () => {
 
     expect(OverlappingAvatars).toHaveBeenCalled();
     const avatarItems = OverlappingAvatars.mock.calls.flatMap(
-      (call) => call[0]?.items ?? []
+      (call) => (call[0]?.items as unknown[]) ?? []
     );
     expect(avatarItems).toEqual(
       expect.arrayContaining([

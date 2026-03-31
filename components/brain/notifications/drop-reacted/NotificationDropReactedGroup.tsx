@@ -50,9 +50,11 @@ function mergeProfiles(
   return {
     ...fallback,
     ...preferred,
-    handle: preferred.handle ?? fallback.handle,
-    // Keep an explicit empty handle, but treat blank avatar/address strings as
-    // missing so older identity data survives grouped merges.
+    // Treat blank identity fields as missing so grouped notifications keep the
+    // most recent usable handle/avatar/address data.
+    handle:
+      getNonEmptyIdentityValue(preferred.handle) ??
+      getNonEmptyIdentityValue(fallback.handle),
     pfp: preferred.pfp || fallback.pfp,
     primary_address: preferred.primary_address || fallback.primary_address,
   };
@@ -168,8 +170,19 @@ export default function NotificationDropReactedGroup({
   const fullReactors = latestPerUser.map((n) => n.related_identity);
   const reactionGroups = groupLatestByReaction(latestPerUser);
   const singleReactor = fullReactors[0];
+  const singleReactorHandle =
+    singleReactor && getNonEmptyIdentityValue(singleReactor.handle);
+  const singleReactorWithHandle =
+    singleReactor && singleReactorHandle
+      ? {
+          ...singleReactor,
+          handle: singleReactorHandle,
+        }
+      : null;
   const isSingleVisibleReactor =
-    fullReactors.length === 1 && reactionGroups.length === 1 && !!singleReactor;
+    fullReactors.length === 1 &&
+    reactionGroups.length === 1 &&
+    !!singleReactorWithHandle;
 
   useEffect(() => {
     hasMarkedRef.current = false;
@@ -187,10 +200,10 @@ export default function NotificationDropReactedGroup({
     <div ref={rootRef} className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
       {isSingleVisibleReactor ? (
         <NotificationHeader
-          author={singleReactor}
+          author={singleReactorWithHandle}
           actions={
             <NotificationsFollowBtn
-              profile={singleReactor}
+              profile={singleReactorWithHandle}
               size={UserFollowBtnSize.SMALL}
             />
           }

@@ -463,6 +463,45 @@ describe("HeaderSearchModal", () => {
     expect(items[0]?.textContent).toContain('"/network/health"');
   });
 
+  it("prioritizes path-like partial href queries ahead of token-based title matches", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [],
+          subsections: [
+            {
+              name: "Metrics",
+              items: [{ name: "Health", href: "/network/health" }],
+            },
+          ],
+        },
+        {
+          key: "about",
+          name: "About",
+          icon: () => null,
+          items: [{ name: "Network Health", href: "/about/network-health" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "/network/he" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(items[0]?.textContent).toContain('"/network/health"');
+  });
+
   it("includes drop forge pages in search results when accessible", () => {
     setup({
       selectedCategory: "PAGES",
