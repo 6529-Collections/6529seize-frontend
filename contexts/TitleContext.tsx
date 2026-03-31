@@ -34,6 +34,7 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
   if (pathname.startsWith("/waves")) return "Waves | Brain";
   if (pathname.startsWith("/notifications")) return "Notifications | Brain";
   if (pathname.startsWith("/messages")) return "Messages | Brain";
+  if (pathname.startsWith("/meme-calendar")) return "Memes Minting Calendar";
   if (pathname.startsWith("/the-memes")) return "The Memes | Collections";
   if (pathname.startsWith("/meme-lab")) return "Meme Lab | Collections";
   if (pathname.startsWith("/network")) return "Network";
@@ -75,7 +76,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const myStream = useMyStreamOptional();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [title, setTitle] = useState<string>(DEFAULT_TITLE);
+  const [title, setTitle] = useState<string>(() =>
+    getDefaultTitleForRoute(pathname)
+  );
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [waveData, setWaveData] = useState<{
     name: string;
@@ -83,48 +86,46 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   } | null>(null);
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
-  const waveParam =
-    myStream?.activeWave.id ??
-    getActiveWaveIdFromUrl({ pathname, searchParams }) ??
-    null;
   const isWaveRoute =
     pathname?.startsWith("/waves") ||
     pathname?.startsWith("/messages") ||
     (pathname === "/" && searchParams?.get("view") === "waves");
+  const waveParam = isWaveRoute
+    ? myStream?.activeWave.id ??
+      getActiveWaveIdFromUrl({ pathname, searchParams }) ??
+      null
+    : null;
 
   useEffect(() => {
-    if (routeRef.current === pathname) {
-      return;
-    }
-    routeRef.current = pathname;
-    const defaultTitle = getDefaultTitleForRoute(pathname);
-    setTitle(defaultTitle);
-  }, [pathname]);
-
-  useEffect(() => {
-    const pathnameChanged = routeRef.current !== pathname;
-    const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
-    const hadWaveInUrl = getActiveWaveIdFromUrl({
-      pathname: routeRef.current,
-      searchParams: queryRef.current,
+    const previousPathname = routeRef.current;
+    const previousSearchParams = queryRef.current;
+    const pathnameChanged = previousPathname !== pathname;
+    const currentWaveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
+    const previousWaveInUrl = getActiveWaveIdFromUrl({
+      pathname: previousPathname,
+      searchParams: previousSearchParams,
     });
 
+    routeRef.current = pathname;
+    queryRef.current = searchParams;
+
     if (pathnameChanged) {
-      routeRef.current = pathname;
-      queryRef.current = searchParams;
-      const defaultTitle = getDefaultTitleForRoute(pathname);
-      setTitle(defaultTitle);
+      setTitle(getDefaultTitleForRoute(pathname));
       setWaveData(null);
       return;
     }
 
-    const isWavesRoute = pathname?.startsWith("/waves");
-    if (isWavesRoute && hadWaveInUrl && !waveInUrl) {
-      queryRef.current = searchParams;
+    if (!isWaveRoute) {
+      setWaveData(null);
+      return;
+    }
+
+    if (
+      previousWaveInUrl &&
+      (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
+    ) {
       setTitle(getDefaultTitleForRoute(pathname));
       setWaveData(null);
-    } else {
-      queryRef.current = searchParams;
     }
   }, [pathname, searchParams]);
 

@@ -166,9 +166,10 @@ export function useNotificationsQuery({
 
   const items = useMemo<NotificationDisplayItem[]>(() => {
     if (!query.data) return [];
-    const grouped = (query.data.pages as TypedNotificationsResponse[]).flatMap(
-      (page) => groupReactionNotifications(page.notifications)
-    );
+    const notifications = (
+      query.data.pages as TypedNotificationsResponse[]
+    ).flatMap((page) => page.notifications);
+    const grouped = groupReactionNotifications(notifications);
     return reverse ? [...grouped].reverse() : grouped;
   }, [query.data, reverse]);
 

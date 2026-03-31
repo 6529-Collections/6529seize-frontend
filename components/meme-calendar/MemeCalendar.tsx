@@ -24,6 +24,8 @@ import {
   formatFullDate,
   formatFullDateTime,
   formatMint,
+  formatUtcMonth,
+  formatUtcMonthYear,
   getMintNumberForMintDate,
   getMonthWeeks,
   getRangeDatesByZoom,
@@ -56,12 +58,6 @@ import { getHistoricalMintsOnUtcDay } from "./meme-calendar.szn1";
  * navigate forwards/backwards. Tailwind classes are prefixed with
  * `tw-` - configure your Tailwind setup accordingly.
  */
-
-function formatMonthYearShort(d: Date): string {
-  return `${d.toLocaleString("default", {
-    month: "short",
-  })} ${d.getUTCFullYear()}`;
-}
 
 function escapeHtml(value: string): string {
   return value
@@ -145,10 +141,7 @@ interface EonViewProps {
 function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth();
-  const monthName = new Date(Date.UTC(year, month, 1)).toLocaleString(
-    "default",
-    { month: "long" }
-  );
+  const monthName = formatUtcMonth(new Date(Date.UTC(year, month, 1)), "long");
   const weeks = getMonthWeeks(year, month);
   useEffect(() => {
     if (!autoOpenYmd) return;
@@ -431,10 +424,7 @@ function YearView({
         >
           <div className="tw-font-semibold">SZN #1</div>
           <div className="tw-text-xs tw-text-gray-500">
-            {start.toLocaleString("default", { month: "short" })}{" "}
-            {start.getUTCFullYear()} -{" "}
-            {end.toLocaleString("default", { month: "short" })}{" "}
-            {end.getUTCFullYear()}
+            {formatUtcMonthYear(start)} - {formatUtcMonthYear(end)}
           </div>
           <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
         </button>
@@ -471,10 +461,7 @@ function YearView({
               SZN #{displayedSeasonNumberFromIndex(s.sIdx)}
             </div>
             <div className="tw-text-xs tw-text-gray-500">
-              {s.start.toLocaleString("default", { month: "short" })}{" "}
-              {s.start.getUTCFullYear()} -{" "}
-              {s.end.toLocaleString("default", { month: "short" })}{" "}
-              {s.end.getUTCFullYear()}
+              {formatUtcMonthYear(s.start)} - {formatUtcMonthYear(s.end)}
             </div>
             <div className="tw-mt-1 tw-text-sm">{s.label}</div>
           </button>
@@ -566,10 +553,7 @@ function EpochView({
                 Year #{y.yearNumber} ({y.start.getUTCFullYear()})
               </div>
               <div className="tw-text-xs tw-text-gray-500">
-                {y.start.toLocaleString("default", { month: "short" })}{" "}
-                {y.start.getUTCFullYear()} -{" "}
-                {y.end.toLocaleString("default", { month: "short" })}{" "}
-                {y.end.getUTCFullYear()}
+                {formatUtcMonthYear(y.start)} - {formatUtcMonthYear(y.end)}
               </div>
               <div className="tw-mt-1 tw-text-sm">{y.label}</div>
             </button>
@@ -658,10 +642,7 @@ function PeriodView({
                 Epoch #{ep.epochNumber} ({ep.start.getUTCFullYear()})
               </div>
               <div className="tw-text-xs tw-text-gray-500">
-                {ep.start.toLocaleString("default", { month: "short" })}{" "}
-                {ep.start.getUTCFullYear()} -{" "}
-                {ep.end.toLocaleString("default", { month: "short" })}{" "}
-                {ep.end.getUTCFullYear()}
+                {formatUtcMonthYear(ep.start)} - {formatUtcMonthYear(ep.end)}
               </div>
               <div className="tw-mt-1 tw-text-sm">{ep.label}</div>
             </button>
@@ -751,10 +732,7 @@ function EraView({
               Period #{p.periodNumber} ({p.start.getUTCFullYear()})
             </div>
             <div className="tw-text-xs tw-text-gray-500">
-              {p.start.toLocaleString("default", { month: "short" })}{" "}
-              {p.start.getUTCFullYear()} -{" "}
-              {p.end.toLocaleString("default", { month: "short" })}{" "}
-              {p.end.getUTCFullYear()}
+              {formatUtcMonthYear(p.start)} - {formatUtcMonthYear(p.end)}
             </div>
             <div className="tw-mt-1 tw-text-sm">{p.label}</div>
           </button>
@@ -839,10 +817,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
               Era #{er.eraNumber} ({er.start.getUTCFullYear()})
             </div>
             <div className="tw-text-xs tw-text-gray-500">
-              {er.start.toLocaleString("default", { month: "short" })}{" "}
-              {er.start.getUTCFullYear()} -{" "}
-              {er.end.toLocaleString("default", { month: "short" })}{" "}
-              {er.end.getUTCFullYear()}
+              {formatUtcMonthYear(er.start)} - {formatUtcMonthYear(er.end)}
             </div>
             <div className="tw-mt-1 tw-text-sm">{er.label}</div>
           </button>
@@ -1166,9 +1141,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                 zoomLevel,
                 seasonIndex
               );
-              const range = `${formatMonthYearShort(
-                start
-              )} - ${formatMonthYearShort(end)}`;
+              const range = `${formatUtcMonthYear(start)} - ${formatUtcMonthYear(end)}`;
               const mintRange = isSznOneIndex(seasonIndex)
                 ? "Memes #1 - #47"
                 : getRangeLabel(start, end);
