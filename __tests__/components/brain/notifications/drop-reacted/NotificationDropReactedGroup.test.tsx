@@ -150,7 +150,7 @@ function createNotification({
       primary_address: `0x${handle}`,
     }),
     related_drops: [
-      createMockDrop() as INotificationDropReacted["related_drops"][number],
+      createMockDrop(),
     ],
     additional_context: {
       reaction,
