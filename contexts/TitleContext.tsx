@@ -105,8 +105,6 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       pathname: previousPathname,
       searchParams: previousSearchParams,
     });
-    const currentWaveId = currentWaveInUrl;
-    const previousWaveId = previousWaveInUrl;
 
     routeRef.current = pathname;
     queryRef.current = searchParams;
@@ -124,7 +122,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (
       previousWaveInUrl &&
-      (!currentWaveInUrl || previousWaveId !== currentWaveId)
+      (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
     ) {
       setTitle(getDefaultTitleForRoute(pathname));
       setWaveData(null);

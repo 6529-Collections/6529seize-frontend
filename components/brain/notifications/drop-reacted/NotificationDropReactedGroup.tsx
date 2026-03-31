@@ -23,12 +23,23 @@ import {
 } from "../utils/navigationUtils";
 import ReactionEmojiPreview from "./ReactionEmojiPreview";
 
+function getNonEmptyIdentityValue(
+  value: string | null | undefined
+): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmedValue = value.trim();
+  return trimmedValue === "" ? null : trimmedValue;
+}
+
 function getIdentityKey(profile: ApiProfileMin): string {
   return (
-    profile.id ??
-    profile.handle ??
-    profile.primary_address ??
-    `unknown-profile`
+    getNonEmptyIdentityValue(profile.id) ||
+    getNonEmptyIdentityValue(profile.handle) ||
+    getNonEmptyIdentityValue(profile.primary_address) ||
+    "unknown-profile"
   );
 }
 
@@ -58,8 +69,20 @@ function notificationsLatestPerUser(
     }
   >();
   for (const n of notifications) {
-    const key = getIdentityKey(n.related_identity);
-    if (!key) continue;
+    const identityKey = getIdentityKey(n.related_identity);
+    const key =
+      identityKey === "unknown-profile"
+        ? `unknown-identity-${n.id}`
+        : identityKey;
+    if (identityKey === "unknown-profile") {
+      console.warn(
+        "NotificationDropReactedGroup received a reaction without a usable identity key",
+        {
+          notificationId: n.id,
+          relatedIdentity: n.related_identity,
+        }
+      );
+    }
     const existing = byUser.get(key);
     if (!existing) {
       byUser.set(key, {
@@ -186,15 +209,15 @@ export default function NotificationDropReactedGroup({
                 New reactions
               </span>
               {reactionGroups.map((rg, index) => {
-                const profiles = rg.notifications.map((n) => n.related_identity);
-                const avatarItems = profiles.map((profile) => {
-                  const key = getIdentityKey(profile);
+                const avatarItems = rg.notifications.map((n) => {
+                  const profile = n.related_identity;
+                  const identityKey = getIdentityKey(profile);
+                  const key =
+                    identityKey === "unknown-profile"
+                      ? `unknown-identity-${n.id}`
+                      : identityKey;
                   const href = profile.handle ? `/${profile.handle}` : undefined;
-                  const displayName =
-                    profile.handle ??
-                    (profile.id === null || profile.id === undefined
-                      ? undefined
-                      : String(profile.id));
+                  const displayName = profile.handle ?? profile.id;
                   const title =
                     displayName !== undefined && displayName !== ""
                       ? displayName

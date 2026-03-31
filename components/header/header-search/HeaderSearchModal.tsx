@@ -260,12 +260,30 @@ const hasCanonicalPageTokenPrefixMatch = (
   });
 };
 
+const getCompositePageSearchValues = (
+  normalizedTitle: string,
+  normalizedBreadcrumbs: readonly string[],
+  normalizedSearchTerms: readonly string[]
+): string[] => {
+  const values = normalizedBreadcrumbs.flatMap((_, index) => {
+    const breadcrumbSuffix = normalizedBreadcrumbs.slice(index);
+    const suffixPrefix = breadcrumbSuffix.join(" ");
+
+    return [normalizedTitle, ...normalizedSearchTerms]
+      .map((value) => [suffixPrefix, value].filter(Boolean).join(" "))
+      .filter(Boolean);
+  });
+
+  return [...new Set(values)];
+};
+
 const getPageMatchPriority = (
   normalizedTitle: string,
   normalizedHref: string,
   hrefSegments: string[],
   normalizedBreadcrumbs: string[],
   normalizedSearchTerms: string[],
+  compositeValues: string[],
   normalizedQuery: string,
   canonicalQueryTokens: readonly string[]
 ): number => {
@@ -273,6 +291,7 @@ const getPageMatchPriority = (
   const hrefValues = [normalizedHref, ...hrefSegments];
   const checks = [
     normalizedTitle === normalizedQuery,
+    normalizedHref === normalizedQuery,
     hasExactCanonicalPageTokenMatch(titleValues, canonicalQueryTokens),
     hrefSegments.includes(normalizedQuery),
     normalizedSearchTerms.includes(normalizedQuery),
@@ -280,6 +299,8 @@ const getPageMatchPriority = (
       normalizedSearchTerms,
       canonicalQueryTokens
     ),
+    compositeValues.includes(normalizedQuery),
+    hasExactCanonicalPageTokenMatch(compositeValues, canonicalQueryTokens),
     normalizedTitle.startsWith(normalizedQuery),
     hasCanonicalPageTokenMatch(titleValues, canonicalQueryTokens),
     hasCanonicalPageTokenPrefixMatch(titleValues, canonicalQueryTokens),
@@ -298,6 +319,8 @@ const getPageMatchPriority = (
       normalizedSearchTerms,
       canonicalQueryTokens
     ),
+    hasCanonicalPageTokenMatch(compositeValues, canonicalQueryTokens),
+    hasCanonicalPageTokenPrefixMatch(compositeValues, canonicalQueryTokens),
     normalizedTitle.includes(normalizedQuery),
     hrefSegments.some((segment) => segment.includes(normalizedQuery)),
     hasCanonicalPageTokenMatch(hrefValues, canonicalQueryTokens),
@@ -314,6 +337,7 @@ const pageMatchesQuery = (
   normalizedHref: string,
   normalizedBreadcrumbs: string[],
   normalizedSearchTerms: string[],
+  compositeValues: string[],
   normalizedQuery: string,
   canonicalQueryTokens: readonly string[]
 ) => {
@@ -329,6 +353,9 @@ const pageMatchesQuery = (
   ) {
     return true;
   }
+  if (compositeValues.some((value) => value.includes(normalizedQuery))) {
+    return true;
+  }
 
   return (
     hasCanonicalPageTokenMatch(
@@ -337,6 +364,7 @@ const pageMatchesQuery = (
         normalizedHref,
         ...normalizedBreadcrumbs,
         ...normalizedSearchTerms,
+        ...compositeValues,
       ],
       canonicalQueryTokens
     ) ||
@@ -346,6 +374,7 @@ const pageMatchesQuery = (
         normalizedHref,
         ...normalizedBreadcrumbs,
         ...normalizedSearchTerms,
+        ...compositeValues,
       ],
       canonicalQueryTokens
     )
@@ -629,6 +658,11 @@ export default function HeaderSearchModal({
         const normalizedSearchTerms = (page.searchTerms ?? []).map((value) =>
           value.toLowerCase()
         );
+        const compositeValues = getCompositePageSearchValues(
+          normalizedTitle,
+          normalizedBreadcrumbs,
+          normalizedSearchTerms
+        );
 
         if (
           !pageMatchesQuery(
@@ -636,6 +670,7 @@ export default function HeaderSearchModal({
             normalizedHref,
             normalizedBreadcrumbs,
             normalizedSearchTerms,
+            compositeValues,
             normalizedQuery,
             canonicalQueryTokens
           )
@@ -654,6 +689,7 @@ export default function HeaderSearchModal({
             hrefSegments,
             normalizedBreadcrumbs,
             normalizedSearchTerms,
+            compositeValues,
             normalizedQuery,
             canonicalQueryTokens
           ),

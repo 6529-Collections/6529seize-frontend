@@ -11,6 +11,8 @@ import type {
 const OverlappingAvatars = jest.fn(({ items }: { items: unknown[] }) => (
   <div data-testid="avatars">{JSON.stringify(items)}</div>
 ));
+let consoleWarnSpy: jest.SpyInstance;
+
 const NotificationHeader = jest.fn(
   ({
     author,
@@ -132,12 +134,14 @@ function createNotification({
   reaction,
   handle,
   pfp,
+  profileOverrides,
 }: {
   id: number;
   createdAt: number;
   reaction: string;
   handle: string;
   pfp: string | null;
+  profileOverrides?: Partial<ApiProfileMin>;
 }): INotificationDropReacted {
   return {
     id,
@@ -148,10 +152,9 @@ function createNotification({
       handle,
       pfp,
       primary_address: `0x${handle}`,
+      ...profileOverrides,
     }),
-    related_drops: [
-      createMockDrop(),
-    ],
+    related_drops: [createMockDrop()],
     additional_context: {
       reaction,
     },
@@ -162,6 +165,11 @@ describe("NotificationDropReactedGroup", () => {
   beforeEach(() => {
     OverlappingAvatars.mockClear();
     NotificationHeader.mockClear();
+    consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
+  });
+
+  afterEach(() => {
+    consoleWarnSpy.mockRestore();
   });
 
   it("keeps an older pfp when the latest grouped notification for that user has none", () => {
@@ -250,5 +258,61 @@ describe("NotificationDropReactedGroup", () => {
     expect(screen.getByText("reacted")).toBeInTheDocument();
     expect(screen.getByTestId("follow-one")).toBeInTheDocument();
     expect(screen.queryByTestId("follow-all")).not.toBeInTheDocument();
+  });
+
+  it("keeps reactions with blank identity fields instead of dropping them", () => {
+    render(
+      <NotificationDropReactedGroup
+        group={{
+          type: "grouped_reactions",
+          id: 3,
+          createdAt: 200,
+          drop: createMockDrop(),
+          notifications: [
+            createNotification({
+              id: 1,
+              createdAt: 100,
+              reaction: ":heart:",
+              handle: "",
+              pfp: null,
+              profileOverrides: {
+                id: "",
+                primary_address: "",
+              },
+            }),
+            createNotification({
+              id: 2,
+              createdAt: 150,
+              reaction: ":fire:",
+              handle: "prxt0",
+              pfp: "bob.png",
+            }),
+          ],
+        }}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(OverlappingAvatars).toHaveBeenCalled();
+    const avatarItems = OverlappingAvatars.mock.calls.flatMap(
+      (call) => call[0]?.items ?? []
+    );
+    expect(avatarItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "unknown-identity-1",
+        }),
+        expect.objectContaining({
+          key: "prxt0-id",
+        }),
+      ])
+    );
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      "NotificationDropReactedGroup received a reaction without a usable identity key",
+      expect.objectContaining({
+        notificationId: 1,
+      })
+    );
   });
 });
