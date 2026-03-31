@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint package.json versions
+        run: npm run lint:package-json
+
       - name: Build App
         env:
           NODE_ENV: "production"
