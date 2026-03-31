@@ -277,13 +277,24 @@ const getCompositePageSearchValues = (
   return [...new Set(values)];
 };
 
+type PageSearchMatchInputs = {
+  readonly normalizedTitle: string;
+  readonly normalizedHref: string;
+  readonly hrefSegments: string[];
+  readonly normalizedBreadcrumbs: string[];
+  readonly normalizedSearchTerms: string[];
+  readonly compositeValues: string[];
+};
+
 const getPageMatchPriority = (
-  normalizedTitle: string,
-  normalizedHref: string,
-  hrefSegments: string[],
-  normalizedBreadcrumbs: string[],
-  normalizedSearchTerms: string[],
-  compositeValues: string[],
+  {
+    normalizedTitle,
+    normalizedHref,
+    hrefSegments,
+    normalizedBreadcrumbs,
+    normalizedSearchTerms,
+    compositeValues,
+  }: PageSearchMatchInputs,
   normalizedQuery: string,
   canonicalQueryTokens: readonly string[]
 ): number => {
@@ -679,17 +690,20 @@ export default function HeaderSearchModal({
         }
 
         const hrefSegments = normalizedHref.split("/").filter(Boolean);
+        const matchInputs = {
+          normalizedTitle,
+          normalizedHref,
+          hrefSegments,
+          normalizedBreadcrumbs,
+          normalizedSearchTerms,
+          compositeValues,
+        };
 
         accumulator.push({
           page,
           normalizedTitle,
           priority: getPageMatchPriority(
-            normalizedTitle,
-            normalizedHref,
-            hrefSegments,
-            normalizedBreadcrumbs,
-            normalizedSearchTerms,
-            compositeValues,
+            matchInputs,
             normalizedQuery,
             canonicalQueryTokens
           ),
