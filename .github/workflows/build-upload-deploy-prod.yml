@@ -80,10 +80,26 @@ jobs:
 
       - name: Build Target
         run: |
-          mkdir -p target/_next
+          rm -rf target .deploy-bundle
+          mkdir -p target/_next .deploy-bundle/.next
+
+          cp -r .next/standalone/. .deploy-bundle/
           cp -r .next/static target/_next/
-          zip -r package.zip . -x '*.git*' 'node_modules/*' 'target/*'
-          mv package.zip target/
+          cp -r .next/static .deploy-bundle/.next/
+          cp -r public .deploy-bundle/
+          cp Procfile .deploy-bundle/
+          cp -r .ebextensions .deploy-bundle/
+
+          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
+            if [ -f ".next/$file" ]; then
+              cp ".next/$file" ".deploy-bundle/.next/$file"
+            fi
+          done
+
+          (
+            cd .deploy-bundle
+            zip -r ../target/package.zip .
+          )
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
