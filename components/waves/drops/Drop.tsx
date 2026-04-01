@@ -10,20 +10,12 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useMemo } from "react";
 import DropContext from "./DropContext";
+import type { DropInteractionParams, DropLocation } from "./drop.types";
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
 import WinnerDrop from "./winner/WinnerDrop";
-
-export interface DropInteractionParams {
-  drop: ExtendedDrop;
-  partId: number;
-}
-
-export enum DropLocation {
-  MY_STREAM = "MY_STREAM",
-  WAVE = "WAVE",
-  PROFILE = "PROFILE",
-}
+export type { DropInteractionParams } from "./drop.types";
+export { DropLocation } from "./drop.types";
 
 interface DropProps {
   readonly drop: ExtendedDrop;

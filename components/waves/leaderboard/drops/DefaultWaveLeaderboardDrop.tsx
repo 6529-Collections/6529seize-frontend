@@ -18,6 +18,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
 import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
+import { WaveLeaderboardDropAuthorAvatar } from "./header/WaveLeaderboardDropAuthor";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 
@@ -58,10 +59,13 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       className="tw-group tw-relative tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-@container"
     >
       <div className={getBorderClasses()} {...touchHandlers}>
-        <div className="tw-flex tw-flex-col tw-gap-3">
-          <div className="tw-flex tw-flex-col tw-gap-3">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-              <WaveLeaderboardDropHeader drop={drop} />
+        <div className="tw-flex tw-gap-x-3">
+          <div className="tw-flex-shrink-0 tw-self-start">
+            <WaveLeaderboardDropAuthorAvatar drop={drop} />
+          </div>
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
+            <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
+              <WaveLeaderboardDropHeader drop={drop} showAvatar={false} />
               <div className="tw-flex tw-items-center">
                 <div className="tw-hidden tw-h-8 lg:tw-block">
                   <WaveDropActionsOpen drop={drop} />
@@ -71,38 +75,30 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="tw-space-y-2">
-            <div className="tw-ml-14">
-              <WaveLeaderboardDropContent
-                drop={drop}
-                isCompetitionDrop={true}
-              />
-            </div>
-          </div>
-          <div className="tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 sm:tw-ml-14">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-              <WaveLeaderboardDropRaters drop={drop} />
-              <WaveLeaderboardDropFooter drop={drop} />
-            </div>
-            <div
-              className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <DropCurationButton
-                dropId={drop.id}
-                waveId={drop.wave.id}
-                isCuratable={drop.context_profile_context?.curatable ?? false}
-                isCurated={drop.context_profile_context?.curated ?? false}
-              />
-              {canShowVote && (
-                <VotingModalButton
-                  drop={drop}
-                  onClick={() => setIsVotingModalOpen(true)}
-                  variant="subtle"
+            <WaveLeaderboardDropContent drop={drop} isCompetitionDrop={true} />
+            <div className="tw-mt-3 tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+                <WaveLeaderboardDropRaters drop={drop} />
+                <WaveLeaderboardDropFooter drop={drop} />
+              </div>
+              <div
+                className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <DropCurationButton
+                  waveId={drop.wave.id}
+                  dropId={drop.id}
+                  isCuratable={drop.context_profile_context?.curatable ?? false}
+                  isCurated={drop.context_profile_context?.curated ?? false}
                 />
-              )}
+                {canShowVote && (
+                  <VotingModalButton
+                    drop={drop}
+                    onClick={() => setIsVotingModalOpen(true)}
+                    className="tw-font-semibold"
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>

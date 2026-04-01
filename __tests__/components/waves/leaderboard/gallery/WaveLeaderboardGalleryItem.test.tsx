@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveLeaderboardGalleryItem } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem";
+import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplay",
@@ -10,6 +11,15 @@ jest.mock(
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes",
   () => (props: any) => <div data-testid="votes" data-variant={props.variant} />
+);
+jest.mock(
+  "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity",
+  () => ({
+    WaveLeaderboardIdentity: ({ drop, variant }: any) =>
+      drop.wave?.submission_type === "IDENTITY" ? (
+        <div data-testid="identity" data-variant={variant} />
+      ) : null,
+  })
 );
 jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => () => (
   <div data-testid="badge" />
@@ -36,10 +46,12 @@ jest.mock("@/helpers/image.helpers", () => ({
 
 describe("WaveLeaderboardGalleryItem", () => {
   const drop: any = {
+    id: "d1",
+    metadata: [],
     parts: [{ media: [{ url: "img", mime_type: "image/png" }] }],
     raters_count: 3,
     rank: 1,
-    wave: { voting_credit_type: "NIC" },
+    wave: { id: "w1", voting_credit_type: "NIC", submission_type: null },
     context_profile_context: { rating: 1 },
     author: { handle: "alice" },
   };
@@ -74,5 +86,26 @@ describe("WaveLeaderboardGalleryItem", () => {
       />
     );
     expect(container.firstChild).not.toHaveClass("active:tw-bg-iron-900");
+  });
+
+  it("renders a condensed identity summary for identity waves", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={{
+          ...drop,
+          wave: {
+            ...drop.wave,
+            submission_type:
+              ApiWaveParticipationSubmissionStrategyType.Identity,
+          },
+        }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("identity")).toHaveAttribute(
+      "data-variant",
+      "condensed"
+    );
   });
 });

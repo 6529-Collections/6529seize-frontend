@@ -29,7 +29,7 @@ import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
 import CreateCurationDropUrlInput from "./CreateCurationDropUrlInput";
 import PrimaryButton from "../utils/button/PrimaryButton";
-import type { CurationComposerVariant } from "./PrivilegedDropCreator";
+import type { CurationComposerVariant } from "./dropComposer.types";
 import {
   normalizeCurationDropInput,
   SUPPORTED_CURATION_URL_EXAMPLES,

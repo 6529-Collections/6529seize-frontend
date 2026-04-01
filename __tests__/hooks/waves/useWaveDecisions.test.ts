@@ -11,6 +11,10 @@ jest.mock("@/services/api/common-api");
 
 const useQueryMock = useQuery as jest.Mock;
 const fetchMock = commonApiFetch as jest.Mock;
+const makeWinner = (place: number, id = `drop-${place}`) => ({
+  place,
+  drop: { id },
+});
 
 describe("useWaveDecisions", () => {
   beforeEach(() => {
@@ -27,15 +31,15 @@ describe("useWaveDecisions", () => {
   it("configures a single-page query and sorts loaded decisions", () => {
     const unsortedDecision = {
       decision_time: 2,
-      winners: [{ place: 2 }, { place: 1 }],
+      winners: [makeWinner(2), makeWinner(1)],
     };
 
     useQueryMock.mockReturnValue({
       data: {
         data: [
-          { decision_time: 3, winners: [{ place: 3 }, { place: 1 }] },
+          { decision_time: 3, winners: [makeWinner(3), makeWinner(1)] },
           unsortedDecision,
-          { decision_time: 1, winners: [{ place: 1 }] },
+          { decision_time: 1, winners: [makeWinner(1)] },
         ],
       },
       isError: false,
@@ -58,6 +62,36 @@ describe("useWaveDecisions", () => {
     expect(
       result.current.decisionPoints[1]?.winners.map((winner) => winner.place)
     ).toEqual([1, 2]);
+  });
+
+  it("warns when winners are missing drop data and keeps sorted winners", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    useQueryMock.mockReturnValue({
+      data: {
+        data: [
+          {
+            decision_time: 2,
+            winners: [makeWinner(2), { place: 1 }],
+          },
+        ],
+      },
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    });
+
+    const { result } = renderHook(() => useWaveDecisions({ waveId: "w1" }));
+
+    expect(
+      result.current.decisionPoints[0]?.winners.map((winner) => winner.place)
+    ).toEqual([1, 2]);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Found 1 winner(s) without drop data")
+    );
+
+    warnSpy.mockRestore();
   });
 
   it("requests the first page of decisions", async () => {

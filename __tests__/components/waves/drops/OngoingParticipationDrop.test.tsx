@@ -1,52 +1,99 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import OngoingParticipationDrop from '@/components/waves/drops/participation/OngoingParticipationDrop';
-import type { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React from "react";
+import OngoingParticipationDrop from "@/components/waves/drops/participation/OngoingParticipationDrop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 
 // Mock hooks and child components
 const useIsMobileDevice = jest.fn();
-jest.mock('@/hooks/isMobileDevice', () => ({ __esModule: true, default: (...args: any[]) => useIsMobileDevice(...args) }));
+jest.mock("@/hooks/isMobileDevice", () => ({
+  __esModule: true,
+  default: (...args: any[]) => useIsMobileDevice(...args),
+}));
 
-jest.mock('@/components/waves/drops/WaveDropActions', () => (props: any) => (
+jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
   <div data-testid="actions" onClick={props.onReply}></div>
 ));
 
 let longPressCb: () => void;
 
-jest.mock('@/components/waves/drops/participation/ParticipationDropContent', () => (props: any) => {
-  longPressCb = props.onLongPress;
-  return (
-    <button data-testid="content" onClick={() => longPressCb()}></button>
-  );
-});
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationDropContent",
+  () => (props: any) => {
+    longPressCb = props.onLongPress;
+    return (
+      <button data-testid="content" onClick={() => longPressCb()}></button>
+    );
+  }
+);
 
 let mobileMenuProps: any;
-jest.mock('@/components/waves/drops/WaveDropMobileMenu', () => (props: any) => {
+jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
   mobileMenuProps = props;
   return <div data-testid="mobile-menu" data-open={props.isOpen}></div>;
 });
 
-jest.mock('@/components/waves/drops/participation/ParticipationDropHeader', () => () => <div />);
-jest.mock('@/components/waves/drops/participation/ParticipationDropMetadata', () => () => <div />);
-jest.mock('@/components/waves/drops/participation/ParticipationDropFooter', () => () => <div />);
-jest.mock('@/components/waves/drops/participation/ParticipationDropContainer', () => (props: any) => <div>{props.children}</div>);
-jest.mock('@/components/waves/drops/WaveDropAuthorPfp', () => () => <div />);
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationDropHeader",
+  () => () => <div />
+);
+const ParticipationDropMetadataMock = jest.fn(() => (
+  <div data-testid="metadata" />
+));
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationDropMetadata",
+  () => (props: any) => {
+    ParticipationDropMetadataMock(props);
+    return <div data-testid="metadata" />;
+  }
+);
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationDropFooter",
+  () => () => <div />
+);
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationDropContainer",
+  () => (props: any) => <div>{props.children}</div>
+);
+jest.mock("@/components/waves/drops/WaveDropAuthorPfp", () => () => <div />);
+const ParticipationIdentityProfileCardMock = jest.fn(({ profile }: any) => (
+  <div data-testid="identity-card">
+    {profile.handle ?? profile.primary_address}
+  </div>
+));
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationIdentityProfileCard",
+  () => (props: any) => {
+    ParticipationIdentityProfileCardMock(props);
+    return (
+      <div data-testid="identity-card">
+        {props.profile.handle ?? props.profile.primary_address}
+      </div>
+    );
+  }
+);
 
 const drop: ExtendedDrop = {
-  id: 'd1',
-  parts: [{ part_id: 'p1' }],
+  id: "d1",
+  parts: [{ part_id: "p1" }],
   metadata: [],
-  wave: { id: 'w1' } as any,
+  wave: { id: "w1", submission_type: null } as any,
 } as any;
 
-const renderComp = (mobile = false) => {
+const renderComp = ({
+  mobile = false,
+  dropOverride = drop,
+}: {
+  readonly mobile?: boolean;
+  readonly dropOverride?: ExtendedDrop;
+} = {}) => {
   const onReply = jest.fn();
   const onQuote = jest.fn();
   useIsMobileDevice.mockReturnValue(mobile);
   render(
     <OngoingParticipationDrop
-      drop={drop}
+      drop={dropOverride}
       showWaveInfo={false}
       activeDrop={null}
       showReplyAndQuote={true}
@@ -59,21 +106,71 @@ const renderComp = (mobile = false) => {
   return { onReply, onQuote };
 };
 
-describe('OngoingParticipationDrop', () => {
-  it('shows actions on desktop', () => {
-    renderComp(false);
-    expect(screen.getByTestId('actions')).toBeInTheDocument();
+describe("OngoingParticipationDrop", () => {
+  beforeEach(() => {
+    ParticipationDropMetadataMock.mockClear();
+    ParticipationIdentityProfileCardMock.mockClear();
   });
 
-  it('opens mobile menu on long press and handles reply', async () => {
+  it("shows actions on desktop", () => {
+    renderComp();
+    expect(screen.getByTestId("actions")).toBeInTheDocument();
+  });
+
+  it("opens mobile menu on long press and handles reply", async () => {
     const user = userEvent.setup();
-    const { onReply } = renderComp(true);
-    await user.click(screen.getByTestId('content')); // triggers long press
+    const { onReply } = renderComp({ mobile: true });
+    await user.click(screen.getByTestId("content")); // triggers long press
     expect(mobileMenuProps.isOpen).toBe(true);
-    await user.click(screen.getByTestId('mobile-menu'));
+    await user.click(screen.getByTestId("mobile-menu"));
     mobileMenuProps.onReply();
-    expect(onReply).toHaveBeenCalledWith({ drop, partId: 'p1' });
+    expect(onReply).toHaveBeenCalledWith({ drop, partId: "p1" });
     expect(mobileMenuProps.setOpen).toBeDefined();
   });
-});
 
+  it("renders the identity profile card and filters identity metadata", () => {
+    const identityDrop = {
+      ...drop,
+      metadata: [
+        {
+          data_key: "identity",
+          data_value: "0xabc",
+          resolved_profile: {
+            id: "p1",
+            handle: "bob",
+            primary_address: "0xabc",
+            pfp: null,
+            banner1_color: null,
+            banner2_color: null,
+            cic: 12,
+            rep: 34,
+            tdh: 56,
+            tdh_rate: 1,
+            xtdh: 78,
+            xtdh_rate: 2,
+            level: 3,
+            subscribed_actions: [],
+            archived: false,
+            active_main_stage_submission_ids: [],
+            winner_main_stage_drop_ids: [],
+            artist_of_prevote_cards: [],
+            is_wave_creator: false,
+          },
+        },
+        { data_key: "title", data_value: "drop title" },
+      ],
+      wave: {
+        ...drop.wave,
+        submission_type: ApiWaveParticipationSubmissionStrategyType.Identity,
+      },
+    } as ExtendedDrop;
+
+    renderComp({ dropOverride: identityDrop });
+
+    expect(screen.getByTestId("identity-card")).toHaveTextContent("bob");
+    expect(ParticipationIdentityProfileCardMock).toHaveBeenCalledTimes(1);
+    expect(
+      ParticipationDropMetadataMock.mock.calls.at(-1)?.[0]?.metadata
+    ).toEqual([{ data_key: "title", data_value: "drop title" }]);
+  });
+});

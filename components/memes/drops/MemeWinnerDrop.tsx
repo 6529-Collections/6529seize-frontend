@@ -2,8 +2,12 @@
 
 import { useCallback } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { DropInteractionParams } from "@/components/waves/drops/Drop";
-import { DropLocation } from "@/components/waves/drops/Drop";
+import {
+  getRankHoverBorderClass,
+  getRankStaticBorderClass,
+} from "@/components/waves/drops/dropRankStyles";
+import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
@@ -13,12 +17,17 @@ import MemeDropTraits from "./MemeDropTraits";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropContext } from "@/components/waves/drops/DropContext";
+import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
   readonly showReplyAndQuote: boolean;
   readonly onReply: (param: DropInteractionParams) => void;
 }
+
+const getRankHoverClass = (rank: number | null): string => {
+  return getRankHoverBorderClass(rank);
+};
 
 export default function MemeWinnerDrop({
   drop,
@@ -30,22 +39,19 @@ export default function MemeWinnerDrop({
 
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
+    drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.data_key === "description")?.data_value ??
+    drop.metadata.find((m) => m.data_key === "description")?.data_value ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
-  const artworkMedia = drop.parts.at(0)?.media?.at(0);
+  const artworkMedia = drop.parts.at(0)?.media.at(0);
 
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
-
-  // First place shadow class from DefaultWaveWinnerDrop
-  const firstPlaceShadow =
-    "tw-shadow-[inset_1px_0_0_rgba(251,191,36,0.5),inset_0_1px_0_rgba(251,191,36,0.2),inset_-1px_0_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(251,191,36,0.2)]";
+  const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
   return (
     <div className="tw-mb-3 tw-w-full">
@@ -55,11 +61,13 @@ export default function MemeWinnerDrop({
         } tw-group tw-relative`}
       >
         <div
-          className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-l tw-border-solid tw-border-transparent tw-transition-all tw-duration-200 tw-ease-out ${
+          className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid ${getRankStaticBorderClass(
+            effectiveRank
+          )} tw-transition-all tw-duration-200 tw-ease-out ${
             location === DropLocation.WAVE
               ? "tw-bg-iron-900/80"
               : "tw-bg-iron-950"
-          } ${firstPlaceShadow}`}
+          } ${getRankHoverClass(effectiveRank)}`}
         >
           <DropMobileMenuHandler
             drop={drop}
@@ -77,6 +85,12 @@ export default function MemeWinnerDrop({
                   <MemeWinnerDescription description={description} />
                 </div>
               </div>
+
+              <WaveWinnerIdentity
+                drop={drop}
+                variant="full"
+                className="tw-px-4 tw-pb-4"
+              />
 
               {artworkMedia && (
                 <div className="tw-mx-0.5 tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">

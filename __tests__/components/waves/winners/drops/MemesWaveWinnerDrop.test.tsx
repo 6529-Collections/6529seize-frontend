@@ -71,6 +71,9 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => () => (
 jest.mock("@/components/waves/drops/time/WaveDropTime", () => () => (
   <span data-testid="time" />
 ));
+jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
+  WaveWinnerIdentity: () => <div data-testid="identity" />,
+}));
 
 const winner: ApiWaveDecisionWinner = {
   drop: {
@@ -109,6 +112,7 @@ describe("MemesWaveWinnersDrop", () => {
     expect(onClick).toHaveBeenCalledWith({ id: "ext" });
     expect(screen.getByText("5")).toBeInTheDocument();
     expect(screen.getByTestId("author-badges")).toBeInTheDocument();
+    expect(screen.getByTestId("identity")).toBeInTheDocument();
     expect(screen.getByAltText("alice's profile picture")).toBeInTheDocument();
   });
 });

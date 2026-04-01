@@ -20,13 +20,13 @@ const MetadataItem: React.FC<{ label: string; value: string }> = ({
   const tooltipId = buildTooltipId("metadata", label, value);
 
   return (
-    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1.5">
-      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-uppercase tw-font-normal">
+    <div className="tw-flex tw-flex-col tw-gap-y-1.5 tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1">
+      <span className="tw-mr-1.5 tw-text-xs tw-font-normal tw-uppercase tw-text-iron-400">
         {label}:
       </span>
       <>
         <span
-          className="tw-text-iron-50 tw-text-xs tw-font-medium tw-truncate"
+          className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-50"
           data-tooltip-id={tooltipId}
         >
           {value}
@@ -52,8 +52,7 @@ const MetadataItem: React.FC<{ label: string; value: string }> = ({
 export default function WaveDropMetadata({ metadata }: WaveDropMetadataProps) {
   const [showAllMetadata, setShowAllMetadata] = useState(false);
 
-  // Ensure metadata exists and is not empty
-  if (!metadata || metadata.length === 0) {
+  if (metadata.length === 0) {
     return null;
   }
 
@@ -68,8 +67,8 @@ export default function WaveDropMetadata({ metadata }: WaveDropMetadataProps) {
   };
 
   return (
-    <div className="tw-flex-col tw-gap-2 tw-hidden lg:tw-flex">
-      <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
+    <div className="tw-mt-4 tw-hidden tw-flex-col tw-gap-2 lg:tw-flex">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4">
         {/* Always show first 2 items */}
         {metadata.slice(0, 2).map((item) => (
           <MetadataItem
@@ -92,14 +91,16 @@ export default function WaveDropMetadata({ metadata }: WaveDropMetadataProps) {
               ))}
               <button
                 onClick={handleShowLess}
-                className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1 tw-bg-transparent tw-border-0 tw-cursor-pointer">
+                className="tw-cursor-pointer tw-self-end tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-pb-1 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-300"
+              >
                 Show less
               </button>
             </>
           ) : (
             <button
               onClick={handleShowMore}
-              className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1 tw-bg-transparent tw-border-0 tw-cursor-pointer">
+              className="tw-cursor-pointer tw-self-end tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-pb-1 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-300"
+            >
               Show all
             </button>
           ))}

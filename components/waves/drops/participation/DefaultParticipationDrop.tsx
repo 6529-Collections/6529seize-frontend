@@ -1,11 +1,11 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { DropInteractionParams, DropLocation } from "../Drop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import React from "react";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import OngoingParticipationDrop from "./OngoingParticipationDrop";
 import EndedParticipationDrop from "./EndedParticipationDrop";
+import type { DropInteractionParams, DropLocation } from "../drop.types";
 
 interface DefaultParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -28,7 +28,7 @@ export default function ParticipationDrop(
   // Render either the ongoing or ended drop component based on the voting state
   if (isVotingEnded) {
     return <EndedParticipationDrop {...props} />;
-  } else {
-    return <OngoingParticipationDrop {...props} />;
   }
+
+  return <OngoingParticipationDrop {...props} />;
 }

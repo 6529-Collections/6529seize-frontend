@@ -16,9 +16,14 @@ jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
   <button data-testid="reply" onClick={props.onReply} />
 ));
 jest.mock("@/components/waves/drops/WaveDropRatings", () => () => <div />);
-jest.mock("@/components/waves/drops/WaveDropMetadata", () => () => (
-  <div data-testid="metadata" />
-));
+const WaveDropMetadataMock = jest.fn(() => <div data-testid="metadata" />);
+jest.mock("@/components/waves/drops/WaveDropMetadata", () => (props: any) => {
+  WaveDropMetadataMock(props);
+  return <div data-testid="metadata" />;
+});
+jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
+  WaveWinnerIdentity: () => <div data-testid="identity" />,
+}));
 jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => () => <div />);
 jest.mock("@/hooks/isMobileDevice", () => () => false);
 
@@ -31,6 +36,10 @@ describe("DefaultWinnerDrop", () => {
     metadata: [],
     author: { cic: "g" },
   };
+
+  beforeEach(() => {
+    WaveDropMetadataMock.mockClear();
+  });
 
   it("calls reply handler", async () => {
     const user = userEvent.setup();
@@ -55,13 +64,20 @@ describe("DefaultWinnerDrop", () => {
     expect(onReply).toHaveBeenCalled();
   });
 
-  it("renders metadata when provided", () => {
+  it("renders identity and filtered metadata when provided", () => {
     const { container } = render(
       <DefaultWinnerDrop
         drop={{
           ...drop,
           rank: 1,
-          metadata: [{ data_key: "k", data_value: "v" }],
+          wave: {
+            ...drop.wave,
+            submission_type: "IDENTITY",
+          },
+          metadata: [
+            { data_key: "identity", data_value: "0xabc" },
+            { data_key: "k", data_value: "v" },
+          ],
         }}
         previousDrop={null}
         nextDrop={null}
@@ -76,7 +92,11 @@ describe("DefaultWinnerDrop", () => {
         onQuoteClick={jest.fn()}
       />
     );
+    expect(screen.getByTestId("identity")).toBeInTheDocument();
     const meta = container.querySelector('[data-testid="metadata"]');
     expect(meta).toBeInTheDocument();
+    expect(WaveDropMetadataMock.mock.calls.at(-1)?.[0]?.metadata).toEqual([
+      { data_key: "k", data_value: "v" },
+    ]);
   });
 });

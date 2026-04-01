@@ -7,6 +7,7 @@ import { Tooltip } from "react-tooltip";
 interface CreateDropMetadataProps {
   readonly metadata: CreateDropMetadataType[];
   readonly missingRequiredMetadataKeys: string[];
+  readonly metadataErrorById: Readonly<Record<string, string>>;
   readonly disabled: boolean;
   readonly closeMetadata: () => void;
   readonly onChangeKey: (params: { index: number; newKey: string }) => void;
@@ -21,6 +22,7 @@ interface CreateDropMetadataProps {
 const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
   metadata,
   missingRequiredMetadataKeys,
+  metadataErrorById,
   closeMetadata,
   disabled,
   onChangeKey,
@@ -30,7 +32,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
 }) => {
   return (
     <div className="tw-mt-2 tw-space-y-2">
-      <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
+      <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
         <span>
           <span className="tw-text-xs tw-text-iron-300">Add Metadata</span>
         </span>
@@ -38,7 +40,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
           <button
             type="button"
             onClick={closeMetadata}
-            className="tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2  tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+            className="-tw-mr-2 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
             data-tooltip-id="close-metadata"
           >
             <svg
@@ -73,7 +75,11 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
         {metadata.map((item, index) => (
           <CreateDropMetadataRow
             key={item.id}
-            isError={missingRequiredMetadataKeys.includes(item.key)}
+            isError={
+              missingRequiredMetadataKeys.includes(item.key) ||
+              !!metadataErrorById[item.id]
+            }
+            errorMessage={metadataErrorById[item.id] ?? null}
             onRemove={onRemoveMetadata}
             metadata={item}
             index={index}
@@ -88,8 +94,8 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
         type="button"
         onClick={onAddMetadata}
         disabled={disabled}
-        className={`tw-border-none tw-bg-transparent tw-p-0 tw-items-center tw-text-sm tw-font-medium tw-gap-x-1 tw-flex tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out ${
-          disabled ? "tw-opacity-50 tw-cursor-default" : ""
+        className={`tw-flex tw-items-center tw-gap-x-1 tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-primary-300 ${
+          disabled ? "tw-cursor-default tw-opacity-50" : ""
         }`}
       >
         <svg

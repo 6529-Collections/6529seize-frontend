@@ -1,6 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { WaveLeaderboardGridItem } from "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem";
+import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 
 const startDropOpen = jest.fn();
 let markdownProps: any;
@@ -32,6 +33,15 @@ jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => () => (
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes",
   () => () => <div data-testid="votes" />
+);
+jest.mock(
+  "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity",
+  () => ({
+    WaveLeaderboardIdentity: ({ drop, variant }: any) =>
+      drop.wave?.submission_type === "IDENTITY" ? (
+        <div data-testid="identity" data-variant={variant} />
+      ) : null,
+  })
 );
 
 jest.mock("@/components/waves/drops/DropCurationButton", () => ({
@@ -118,7 +128,12 @@ describe("WaveLeaderboardGridItem", () => {
         content: "hello",
       },
     ],
-    wave: { id: "w1" },
+    wave: {
+      id: "w1",
+      voting_credit_type: "NIC",
+      submission_type: null,
+    },
+    author: { handle: "alice" },
     context_profile_context: { curatable: true, curated: false },
     mentioned_users: [],
     mentioned_waves: [],
@@ -264,6 +279,50 @@ describe("WaveLeaderboardGridItem", () => {
         waveId: "w1",
         source: "leaderboard_grid",
       })
+    );
+  });
+
+  it("renders a condensed identity summary in compact mode for identity waves", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          wave: {
+            ...baseDrop.wave,
+            submission_type:
+              ApiWaveParticipationSubmissionStrategyType.Identity,
+          },
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("identity")).toHaveAttribute(
+      "data-variant",
+      "condensed"
+    );
+  });
+
+  it("renders a responsive identity block in content-only mode for identity waves", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          wave: {
+            ...baseDrop.wave,
+            submission_type:
+              ApiWaveParticipationSubmissionStrategyType.Identity,
+          },
+        }}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("identity")).toHaveAttribute(
+      "data-variant",
+      "responsive"
     );
   });
 

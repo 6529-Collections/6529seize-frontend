@@ -25,8 +25,12 @@ jest.mock("next/navigation", () => ({
 }));
 
 let mockIsMemesWave = false;
+let mockIsCurationWave = false;
 jest.mock("@/hooks/useWave", () => ({
-  useWave: () => ({ isMemesWave: mockIsMemesWave }),
+  useWave: () => ({
+    isMemesWave: mockIsMemesWave,
+    isCurationWave: mockIsCurationWave,
+  }),
 }));
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
@@ -91,7 +95,7 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
 }));
 
-const wave = { id: "10", metrics: { muted: false } } as any;
+const wave = { id: "10", participation: {}, metrics: { muted: false } } as any;
 const mockOnDropClick = jest.fn();
 
 describe("MyStreamWaveChat", () => {
@@ -104,6 +108,7 @@ describe("MyStreamWaveChat", () => {
     searchParamsMock.toString.mockReset();
     searchParamsMock.toString.mockReturnValue("");
     mockIsMemesWave = false;
+    mockIsCurationWave = false;
     mockOnDropClick.mockClear();
     mockSetUnreadDividerSerialNo.mockClear();
     mockRemoveWaveDeliveredNotifications.mockClear();
