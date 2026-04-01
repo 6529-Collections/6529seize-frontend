@@ -430,7 +430,7 @@ const WaveDrop = ({
             />
           )}
           <div
-            className={`tw-w-full ${
+            className={`tw-w-full ${showAuthorInfo ? "tw-mt-2" : ""}${
               shouldGroupWithPreviousDrop && !isProfileView
                 ? "tw-pl-[3.25rem]"
                 : ""

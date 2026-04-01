@@ -187,7 +187,7 @@ const DefaultWinnerDrop = ({
                   );
                 })()}
             </div>
-            <div>
+            <div className="tw-mt-2">
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}

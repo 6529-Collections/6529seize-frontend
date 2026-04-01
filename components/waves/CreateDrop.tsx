@@ -44,6 +44,7 @@ export interface DropMutationBody {
   readonly drop: ApiCreateDropRequest;
   readonly dropId: string | null;
   readonly onSuccess?: (() => void) | undefined;
+  readonly onError?: ((error: unknown) => void) | undefined;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -221,6 +222,7 @@ export default function CreateDrop({
         message: error instanceof Error ? error.message : String(error),
         type: "error",
       });
+      body.onError?.(error);
     },
     retry: (failureCount) => failureCount < 3,
     retryDelay: (failureCount) => failureCount * 1000,

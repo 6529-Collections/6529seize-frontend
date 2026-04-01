@@ -17,7 +17,14 @@ interface WaveDropRatingsProps {
   readonly drop: ApiDrop;
 }
 
+const getFallbackAvatarLabel = (label: string) => {
+  const withoutHexPrefix = label.replace(/^0x/i, "");
+  const source = withoutHexPrefix || label;
+  return source.slice(0, 2).toUpperCase();
+};
+
 const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
+  const [activeRaterId, setActiveRaterId] = React.useState<string | null>(null);
   const totalVote = drop.rating;
   const userVote = drop.context_profile_context?.rating ?? 0;
   const hasUserVoted = userVote !== 0;
@@ -51,19 +58,28 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
                 rater.profile.handle ?? rater.profile.primary_address;
               const raterHref = `/${raterLabel}`;
               const tooltipId = `wave-drop-rater-${drop.id}-${rater.profile.id}`;
-              const fallbackAvatarLabel = raterLabel.slice(0, 2).toUpperCase();
+              const fallbackAvatarLabel = getFallbackAvatarLabel(raterLabel);
               const raterTooltipLabel = `${raterLabel} • ${formatNumberWithCommas(rater.rating)} ${votingLabel}`;
+              const baseZIndex = drop.top_raters.length - index;
+              const zIndex =
+                activeRaterId === rater.profile.id
+                  ? drop.top_raters.length + 1
+                  : baseZIndex;
 
               return (
                 <React.Fragment key={rater.profile.id}>
                   <Link
                     href={raterHref}
                     onClick={(event) => event.stopPropagation()}
+                    onMouseEnter={() => setActiveRaterId(rater.profile.id)}
+                    onMouseLeave={() => setActiveRaterId(null)}
+                    onFocus={() => setActiveRaterId(rater.profile.id)}
+                    onBlur={() => setActiveRaterId(null)}
                     aria-label={raterTooltipLabel}
                     title={raterTooltipLabel}
                     data-tooltip-id={tooltipId}
-                    className="tw-relative tw-block tw-transition-transform hover:tw-z-10 hover:tw-scale-110 focus-visible:tw-rounded-md focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
-                    style={{ zIndex: drop.top_raters.length - index }}
+                    className="tw-relative tw-block tw-transition-transform hover:tw-scale-110 focus-visible:tw-rounded-md focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                    style={{ zIndex }}
                   >
                     {rater.profile.pfp ? (
                       <Image

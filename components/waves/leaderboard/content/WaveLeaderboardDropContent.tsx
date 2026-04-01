@@ -54,9 +54,7 @@ export const WaveLeaderboardDropContent: React.FC<
         className="tw-mt-2 lg:tw-mt-0"
       />
       {!!visibleMetadata.length && (
-        <div className="tw-mt-2">
-          <WaveDropMetadata metadata={visibleMetadata} />
-        </div>
+        <WaveDropMetadata metadata={visibleMetadata} />
       )}
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         <WaveDropReactions drop={drop} />

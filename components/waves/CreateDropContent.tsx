@@ -1058,6 +1058,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           isDropMode && canExitDropMode
             ? () => handleDropModeChange(false)
             : undefined,
+        onError:
+          isDropMode && canExitDropMode
+            ? handleDuplicateIdentitySubmissionError
+            : undefined,
       });
     } catch (error) {
       setToast({
@@ -1374,6 +1378,30 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     handleDropModeChange(false);
   }, [handleDropModeChange, identitySubmissionSessionScopeKey]);
 
+  const handleDuplicateIdentitySubmissionError = useCallback(
+    (error: unknown) => {
+      if (!canExitDropMode) {
+        return;
+      }
+
+      const message =
+        error instanceof Error
+          ? error.message.toLowerCase()
+          : String(error).toLowerCase();
+      const isDuplicateIdentityError =
+        message.includes("identity") &&
+        (message.includes("already been voted") ||
+          message.includes("already voted") ||
+          message.includes("already been nominated") ||
+          message.includes("already nominated"));
+
+      if (isDuplicateIdentityError) {
+        handleDropModeChange(false);
+      }
+    },
+    [canExitDropMode, handleDropModeChange]
+  );
+
   const handleIdentitySelection = useCallback(
     (selection: SelectableIdentityOption) => {
       if (
@@ -1520,7 +1548,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             }
             onOpenPicker={openIdentityPicker}
             onClosePanel={
-              canExitDropMode ? closeIdentitySelectionPanel : undefined
+              canExitDropMode && dropModeToggleExitLabel === null
+                ? closeIdentitySelectionPanel
+                : undefined
             }
           />
         )}

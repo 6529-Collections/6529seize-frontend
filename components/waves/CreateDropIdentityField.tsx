@@ -169,12 +169,17 @@ export default function CreateDropIdentityField({
           </h3>
 
           {identity ? (
-            <IdentitySelectionCard
-              identity={identity}
-              disabled={disabled}
-              clickable={!isOnlyMyself}
-              onOpenPicker={onOpenPicker}
-            />
+            <>
+              <IdentitySelectionCard
+                identity={identity}
+                disabled={disabled}
+                clickable={!isOnlyMyself}
+                onOpenPicker={onOpenPicker}
+              />
+              <p className="tw-mb-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+                Add content below to submit this drop.
+              </p>
+            </>
           ) : (
             <IdentityUnavailable
               errorMessage={errorMessage}

@@ -26,6 +26,15 @@ const hasRenderableWaveDecisionWinner = (
   return typeof id === "string" && id.length > 0;
 };
 
+const getWinnerPlace = (winner: unknown): number => {
+  if (!isRecord(winner)) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const place = winner["place"];
+  return typeof place === "number" ? place : Number.POSITIVE_INFINITY;
+};
+
 export const getRenderableWaveDecisionWinners = (
   winners: readonly ApiWaveDecisionWinner[]
 ): RenderableWaveDecisionWinner[] =>
@@ -47,7 +56,9 @@ export const prepareWaveDecisionPoint = (
     );
   }
 
-  const sortedWinners = winners.sort((a, b) => a.place - b.place);
+  const sortedWinners = winners.sort(
+    (a, b) => getWinnerPlace(a) - getWinnerPlace(b)
+  );
 
   return {
     ...decisionPoint,
