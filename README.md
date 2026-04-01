@@ -106,16 +106,14 @@ User-facing documentation lives in [`docs/README.md`](docs/README.md).
 
 ### Install
 
-```bash
-corepack enable pnpm
-corepack use pnpm@10.33.0
-pnpm install
+```
+npm i
 ```
 
 ### Build
 
-```bash
-pnpm run build
+```
+npm run build
 ```
 
 ### Environment
@@ -136,7 +134,7 @@ gateway usage:
 
 To test end-to-end:
 
-1. Run `pnpm dev`.
+1. Run `npm run dev`.
 2. Paste any pepe.wtf link in chat, for example `https://pepe.wtf/asset/GOXPEPE`
    or `https://pepe.wtf/artists/Easy-B`, and confirm the preview renders with
    imagery and stats.
@@ -147,20 +145,20 @@ To test end-to-end:
 
 - Locally
 
-```bash
-pnpm dev
+```
+npm run dev
 ```
 
 - Production
 
-```bash
-pnpm start
+```
+npm run start
 ```
 
 ### RUN USING PM2
 
-```bash
-pnpm exec pm2 start pnpm --name=6529seize -- start
+```
+pm2 start npm --name=6529seize -- run start
 ```
 
 ## Directory Structure

@@ -4,8 +4,6 @@ const { spawn } = require("node:child_process");
 let openModulePromise;
 let browserOpened = false;
 const SKIP_BROWSER_OPEN = process.env.SKIP_BROWSER_OPEN === "true";
-const packageManagerCommand =
-  process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
 function getOpenModule() {
   if (!openModulePromise) {
@@ -15,9 +13,7 @@ function getOpenModule() {
   return openModulePromise;
 }
 
-const proc = spawn(packageManagerCommand, ["dev"], {
-  stdio: ["inherit", "pipe", "inherit"],
-});
+const proc = spawn("npm", ["run", "dev"], { stdio: ["inherit", "pipe", "inherit"] });
 
 proc.on("error", (error) => {
   console.error("Failed to start dev server:", error);
