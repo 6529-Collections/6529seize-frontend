@@ -153,6 +153,12 @@ jobs:
           echo "Current deployed version is $DEPLOYED_BEANSTALK_VERSION"
           if [ "$DEPLOYED_BEANSTALK_VERSION" != "${{ env.COMMIT_SHA }}" ]; then
             echo "Deployed version does not match the commit SHA."
+            echo "Recent Elastic Beanstalk events:"
+            aws elasticbeanstalk describe-events \
+              --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
+              --max-items 20 \
+              --query 'Events[].{Time:EventDate,Severity:Severity,Message:Message}' \
+              --output table || true
             exit 1
           else
             echo "Deployed version valid!"
