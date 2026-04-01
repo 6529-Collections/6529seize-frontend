@@ -139,6 +139,9 @@ interface CreateDropContentProps {
   readonly onSwitchToDropModeWithUrl: (url: string) => void;
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly privileges: DropPrivileges;
+  readonly showDropModeToggle: boolean;
+  readonly dropModeToggleExitLabel: string | null;
+  readonly canExitDropMode: boolean;
   readonly submissionExperience: WaveSubmissionExperience;
 }
 
@@ -374,6 +377,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   onSwitchToDropModeWithUrl,
   submitDrop,
   privileges,
+  showDropModeToggle,
+  dropModeToggleExitLabel,
+  canExitDropMode,
   submissionExperience,
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
@@ -503,6 +509,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isIdentityPickerAllowed &&
     (isIdentityPickerExplicitlyOpen ||
       (!selectedIdentitySelection && isIdentityPickerAutoOpenAllowed));
+  const canDismissIdentityPicker =
+    selectedIdentitySelection !== null || canExitDropMode;
   const isMetadataOpen =
     isDropMode &&
     (metadataOpenState?.scopeKey === dropModeSessionScopeKey
@@ -1317,6 +1325,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [identitySubmissionSessionScopeKey]);
 
   const closeIdentityPicker = useCallback(() => {
+    if (!selectedIdentitySelection && !canExitDropMode) {
+      return;
+    }
+
     setIdentityPickerAutoOpenState({
       scopeKey: identitySubmissionSessionScopeKey,
       value: false,
@@ -1333,10 +1345,27 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       handleDropModeChange(false);
     }
   }, [
+    canExitDropMode,
     handleDropModeChange,
     identitySubmissionSessionScopeKey,
     selectedIdentitySelection,
   ]);
+
+  const closeIdentitySelectionPanel = useCallback(() => {
+    setIdentityPickerAutoOpenState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: false,
+    });
+    setIdentityPickerOpenState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: false,
+    });
+    setIdentityPickerErrorMessageState({
+      scopeKey: identitySubmissionSessionScopeKey,
+      value: null,
+    });
+    handleDropModeChange(false);
+  }, [handleDropModeChange, identitySubmissionSessionScopeKey]);
 
   const handleIdentitySelection = useCallback(
     (selection: SelectableIdentityOption) => {
@@ -1483,6 +1512,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               showIdentityValidationMessage ? identityValidationMessage : null
             }
             onOpenPicker={openIdentityPicker}
+            onClosePanel={
+              canExitDropMode ? closeIdentitySelectionPanel : undefined
+            }
           />
         )}
       {isIdentitySubmissionExperience &&
@@ -1496,6 +1528,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             selectedIdentity={selectedIdentitySelection}
             disabled={submitting}
             errorMessage={identityPickerErrorMessage}
+            canClose={canDismissIdentityPicker}
             onClose={closeIdentityPicker}
             onSelect={handleIdentitySelection}
           />
@@ -1556,7 +1589,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            {isParticipatory &&
+            {showDropModeToggle &&
+              isParticipatory &&
               !dropId &&
               submissionExperience !==
                 WaveSubmissionExperience.MEMES_LEGACY && (
@@ -1564,6 +1598,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   isDropMode={isDropMode}
                   onDropModeChange={handleDropModeChange}
                   privileges={privileges}
+                  exitLabel={dropModeToggleExitLabel}
                 />
               )}
             <CreateDropSubmit

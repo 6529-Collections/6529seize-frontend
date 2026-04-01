@@ -13,6 +13,7 @@ interface CreateDropIdentityPickerModalProps {
   readonly selectedIdentity: SelectableIdentityOption | null;
   readonly disabled: boolean;
   readonly errorMessage: string | null;
+  readonly canClose: boolean;
   readonly onClose: () => void;
   readonly onSelect: (selection: SelectableIdentityOption) => void;
 }
@@ -36,6 +37,7 @@ export default function CreateDropIdentityPickerModal({
   selectedIdentity,
   disabled,
   errorMessage,
+  canClose,
   onClose,
   onSelect,
 }: CreateDropIdentityPickerModalProps) {
@@ -44,12 +46,13 @@ export default function CreateDropIdentityPickerModal({
       title="Select identity"
       isOpen={isOpen}
       onClose={onClose}
+      dismissible={canClose}
       tabletModal
       allowOverflow
       maxWidthClass="md:tw-max-w-xl"
     >
       <div className="tw-px-4 sm:tw-px-6">
-        <p className="tw-mb-4 tw-text-sm tw-font-medium tw-text-iron-300">
+        <p className="tw-mb-6 tw-text-sm tw-font-normal tw-text-iron-400">
           {getHelperText(mode)}
         </p>
 
@@ -70,10 +73,6 @@ export default function CreateDropIdentityPickerModal({
           error={!!errorMessage}
           errorMessage={errorMessage}
         />
-
-        <p className="tw-mb-0 tw-mt-4 tw-text-xs tw-font-medium tw-text-iron-500">
-          If no identity is selected, closing this picker will leave Drop mode.
-        </p>
 
         {disabled && (
           <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-font-medium tw-text-iron-500">

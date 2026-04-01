@@ -2,8 +2,12 @@
 
 import { useCallback } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { DropInteractionParams } from "@/components/waves/drops/Drop";
-import { DropLocation } from "@/components/waves/drops/Drop";
+import {
+  getRankHoverBorderClass,
+  getRankStaticBorderClass,
+} from "@/components/waves/drops/dropRankStyles";
+import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
@@ -20,6 +24,10 @@ interface MemeWinnerDropProps {
   readonly showReplyAndQuote: boolean;
   readonly onReply: (param: DropInteractionParams) => void;
 }
+
+const getRankHoverClass = (rank: number | null): string => {
+  return getRankHoverBorderClass(rank);
+};
 
 export default function MemeWinnerDrop({
   drop,
@@ -43,10 +51,7 @@ export default function MemeWinnerDrop({
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
-
-  // First place shadow class from DefaultWaveWinnerDrop
-  const firstPlaceShadow =
-    "tw-shadow-[inset_1px_0_0_rgba(251,191,36,0.5),inset_0_1px_0_rgba(251,191,36,0.2),inset_-1px_0_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(251,191,36,0.2)]";
+  const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
   return (
     <div className="tw-mb-3 tw-w-full">
@@ -56,11 +61,13 @@ export default function MemeWinnerDrop({
         } tw-group tw-relative`}
       >
         <div
-          className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-l tw-border-solid tw-border-transparent tw-transition-all tw-duration-200 tw-ease-out ${
+          className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid ${getRankStaticBorderClass(
+            effectiveRank
+          )} tw-transition-all tw-duration-200 tw-ease-out ${
             location === DropLocation.WAVE
               ? "tw-bg-iron-900/80"
               : "tw-bg-iron-950"
-          } ${firstPlaceShadow}`}
+          } ${getRankHoverClass(effectiveRank)}`}
         >
           <DropMobileMenuHandler
             drop={drop}

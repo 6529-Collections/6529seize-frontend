@@ -14,10 +14,11 @@ interface ParticipationDropRatingsUserSectionProps extends RatingsSectionProps {
 
 export default function ParticipationDropRatingsUserSection({
   drop,
-  userTheme,
   ratingsData,
 }: ParticipationDropRatingsUserSectionProps) {
   const { userRating } = ratingsData;
+  const userValueClass =
+    userRating < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
 
   // Don't show anything if the user hasn't voted
   if (userRating === 0) {
@@ -25,19 +26,16 @@ export default function ParticipationDropRatingsUserSection({
   }
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-1">
-      <span className="tw-text-sm tw-font-normal tw-text-iron-500">
-        {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}
-      </span>
-
-      <div className={`tw-relative ${userTheme.indicator}`}>
-        <span className={`tw-text-sm tw-font-semibold ${userTheme.text}`}>
-          {userRating < 0 && "-"}
-          {formatNumberWithCommas(Math.abs(userRating))}
+    <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-leading-5">
+      <span className="tw-whitespace-nowrap">
+        <span className="tw-font-normal tw-text-iron-400">
+          {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
         </span>
-      </div>
-      <span className="tw-text-sm tw-font-normal tw-text-iron-500">
-        {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
+        <span className={`tw-font-medium ${userValueClass}`}>
+          {userRating < 0 && "-"}
+          {formatNumberWithCommas(Math.abs(userRating))}{" "}
+          {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
+        </span>
       </span>
     </div>
   );

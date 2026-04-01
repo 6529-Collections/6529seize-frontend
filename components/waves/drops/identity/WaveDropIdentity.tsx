@@ -1,4 +1,6 @@
-import ParticipationIdentityProfileCard from "@/components/waves/drops/participation/ParticipationIdentityProfileCard";
+import ParticipationIdentityProfileCard, {
+  type ParticipationIdentityProfileCardVariant,
+} from "@/components/waves/drops/participation/ParticipationIdentityProfileCard";
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import Link from "next/link";
@@ -16,6 +18,7 @@ interface WaveDropIdentityProps {
     readonly metadata: readonly ApiDropMetadataResponse[] | null | undefined;
   };
   readonly variant: WaveDropIdentityVariant;
+  readonly cardVariant?: ParticipationIdentityProfileCardVariant | undefined;
   readonly className?: string | undefined;
   readonly testIdPrefix?: string | undefined;
 }
@@ -48,6 +51,7 @@ function IdentityFallbackCard({
 export function WaveDropIdentity({
   drop,
   variant,
+  cardVariant,
   className,
   testIdPrefix = "wave-drop-identity",
 }: WaveDropIdentityProps) {
@@ -74,6 +78,7 @@ export function WaveDropIdentity({
             <ParticipationIdentityProfileCard
               profile={identityProfile}
               contextId={drop.id}
+              variant={cardVariant}
             />
           </div>
         ) : (

@@ -36,7 +36,7 @@ export const WaveLeaderboardDropContent: React.FC<
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-1">
+    <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-1">
       <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}
@@ -50,7 +50,8 @@ export const WaveLeaderboardDropContent: React.FC<
       <WaveLeaderboardIdentity
         drop={drop}
         variant="responsive"
-        className="tw-mt-2"
+        cardVariant="chat"
+        className="tw-mt-2 lg:tw-mt-0"
       />
       {!!visibleMetadata.length && (
         <div className="tw-mt-2">

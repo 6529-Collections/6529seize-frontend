@@ -10,7 +10,9 @@ import {
   getDropIdentityProfile,
 } from "@/components/waves/drops/identityDisplay.helpers";
 import ParticipationIdentityProfileCard from "@/components/waves/drops/participation/ParticipationIdentityProfileCard";
+import type { ParticipationIdentityProfileCardVariant } from "@/components/waves/drops/participation/ParticipationIdentityProfileCard";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { shortenAddress } from "@/helpers/address.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
 
@@ -19,6 +21,7 @@ type WaveLeaderboardIdentityVariant = "responsive" | "condensed";
 interface WaveLeaderboardIdentityProps {
   readonly drop: ExtendedDrop;
   readonly variant: WaveLeaderboardIdentityVariant;
+  readonly cardVariant?: ParticipationIdentityProfileCardVariant | undefined;
   readonly className?: string | undefined;
 }
 
@@ -43,9 +46,14 @@ function WaveLeaderboardIdentitySummary({
   const rootHref = profile
     ? `/${encodeURIComponent(displayLabel.toLowerCase())}`
     : null;
+  const primaryAddress = profile?.primary_address;
   const shouldShowAddress =
     !!profile?.handle &&
-    profile.primary_address.toLowerCase() !== profile.handle.toLowerCase();
+    !!primaryAddress &&
+    primaryAddress.toLowerCase() !== profile.handle.toLowerCase();
+  const displayAddress = shouldShowAddress
+    ? shortenAddress(primaryAddress)
+    : null;
   const avatarFallback = (
     <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-100">
       {displayLabel.slice(0, 1)}
@@ -57,10 +65,6 @@ function WaveLeaderboardIdentitySummary({
       data-testid="wave-leaderboard-identity-summary"
       className="tw-rounded-lg tw-border tw-border-iron-800/60 tw-bg-iron-900/40 tw-p-3"
     >
-      <p className="tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
-        Identity
-      </p>
-
       <div className="tw-flex tw-items-start tw-gap-3">
         {rootHref ? (
           <Link
@@ -117,9 +121,12 @@ function WaveLeaderboardIdentitySummary({
             )}
           </div>
 
-          {shouldShowAddress && (
-            <p className="tw-mb-0 tw-mt-1 tw-break-all tw-text-xs tw-text-iron-400">
-              {profile.primary_address}
+          {displayAddress && (
+            <p
+              title={primaryAddress}
+              className="tw-mb-0 tw-mt-1 tw-font-mono tw-text-xs tw-tracking-[0.01em] tw-text-iron-400"
+            >
+              {displayAddress}
             </p>
           )}
         </div>
@@ -131,6 +138,7 @@ function WaveLeaderboardIdentitySummary({
 export function WaveLeaderboardIdentity({
   drop,
   variant,
+  cardVariant,
   className,
 }: WaveLeaderboardIdentityProps) {
   const identityProfile = getDropIdentityProfile({
@@ -158,6 +166,7 @@ export function WaveLeaderboardIdentity({
           <ParticipationIdentityProfileCard
             profile={identityProfile}
             contextId={drop.id}
+            variant={cardVariant}
           />
         </div>
         <div className="lg:tw-hidden">

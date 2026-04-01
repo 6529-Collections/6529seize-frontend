@@ -19,12 +19,12 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams()!;
+  const searchParams = useSearchParams();
   const canBeOpened = drop.drop_type !== ApiDropType.Chat;
 
-  const onDropClick = (drop: ExtendedDrop) => {
+  const onDropClick = (targetDrop: ExtendedDrop) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("drop", drop.id);
+    params.set("drop", targetDrop.id);
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -75,7 +75,7 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          className="tw-h-5 tw-w-5"
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -89,18 +89,19 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
       </button>
       <Tooltip
         id={`open-${drop.id}`}
-        place="top"
+        place="top-end"
         offset={8}
         opacity={1}
+        positionStrategy="fixed"
         style={{
           padding: "4px 8px",
-          background: "#37373E",
+          background: "#1F2937",
           color: "white",
           fontSize: "13px",
           fontWeight: 500,
           borderRadius: "6px",
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          zIndex: 20,
+          zIndex: 10000,
           pointerEvents: "none",
         }}
       >

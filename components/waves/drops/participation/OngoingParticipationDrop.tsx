@@ -1,11 +1,14 @@
 "use client";
 
+import { MobileVotingModal, VotingModal } from "@/components/voting";
+import VotingModalButton from "@/components/voting/VotingModalButton";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { DropInteractionParams, DropLocation } from "../Drop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useCallback, useState } from "react";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
@@ -20,6 +23,7 @@ import {
   getParticipationIdentityProfile,
   getParticipationVisibleMetadata,
 } from "./participationIdentityProfile.helpers";
+import type { DropInteractionParams, DropLocation } from "../drop.types";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -43,7 +47,9 @@ export default function OngoingParticipationDrop({
   onDropContentClick,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
+  const { canShowVote } = useDropInteractionRules(drop);
   const isMobile = useIsMobileDevice();
+  const isMobileScreen = useIsMobileScreen();
   const hasTouch = useIsTouchDevice() || isMobile;
   const identityProfile = getParticipationIdentityProfile({
     wave: drop.wave,
@@ -57,6 +63,7 @@ export default function OngoingParticipationDrop({
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
 
   const handleLongPress = useCallback(() => {
     if (!hasTouch) return;
@@ -72,6 +79,10 @@ export default function OngoingParticipationDrop({
   const handleOnAddReaction = useCallback(() => {
     setIsSlideUp(false);
   }, []);
+
+  const voteAction = canShowVote ? (
+    <VotingModalButton drop={drop} onClick={() => setIsVotingModalOpen(true)} />
+  ) : null;
 
   return (
     <ParticipationDropContainer
@@ -89,7 +100,7 @@ export default function OngoingParticipationDrop({
       )}
       <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-px-4 tw-pt-4 tw-text-left">
         <WaveDropAuthorPfp drop={drop} />
-        <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-1.5">
+        <div className="tw-flex tw-w-full tw-flex-col">
           <ParticipationDropHeader drop={drop} showWaveInfo={showWaveInfo} />
           <ParticipationDropContent
             drop={drop}
@@ -106,10 +117,11 @@ export default function OngoingParticipationDrop({
 
       <div className="tw-flex tw-w-full tw-flex-col">
         {identityProfile && (
-          <div className="tw-px-4 tw-pt-4 sm:tw-ml-[3.25rem]">
+          <div className="tw-px-4 sm:tw-ml-[3.25rem]">
             <ParticipationIdentityProfileCard
               profile={identityProfile}
               contextId={drop.id}
+              variant="chat"
             />
           </div>
         )}
@@ -117,8 +129,22 @@ export default function OngoingParticipationDrop({
           metadata={visibleMetadata}
           contextId={drop.id}
         />
-        <ParticipationDropFooter drop={drop} />
+        <ParticipationDropFooter drop={drop} voteAction={voteAction} />
       </div>
+
+      {isMobileScreen ? (
+        <MobileVotingModal
+          drop={drop}
+          isOpen={isVotingModalOpen}
+          onClose={() => setIsVotingModalOpen(false)}
+        />
+      ) : (
+        <VotingModal
+          drop={drop}
+          isOpen={isVotingModalOpen}
+          onClose={() => setIsVotingModalOpen(false)}
+        />
+      )}
 
       {/* Mobile menu */}
       <WaveDropMobileMenu

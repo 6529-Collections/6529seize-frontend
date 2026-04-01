@@ -3,10 +3,11 @@
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
-import type { DropInteractionParams } from "@/components/waves/drops/Drop";
-import { DropLocation } from "@/components/waves/drops/Drop";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
+import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
+import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -30,22 +31,29 @@ interface MemeParticipationDropProps {
 
 // Border styling based on rank
 const getBorderClasses = (drop: ExtendedDrop, isActiveDrop: boolean) => {
-  const rank = drop.rank && drop.rank <= 3 ? drop.rank : null;
+  const rank =
+    typeof drop.rank === "number" && drop.rank <= 3 ? drop.rank : null;
 
   const baseClasses =
     "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden";
 
   if (isActiveDrop) {
     return `${baseClasses} desktop-hover:hover:tw-border-[#3CCB7F]/40 tw-bg-[#3CCB7F]/5`;
-  } else if (rank === 1) {
-    return `${baseClasses} desktop-hover:hover:tw-border-[#fbbf24]/40`;
-  } else if (rank === 2) {
-    return `${baseClasses} desktop-hover:hover:tw-border-[#94a3b8]/40`;
-  } else if (rank === 3) {
-    return `${baseClasses} desktop-hover:hover:tw-border-[#CD7F32]/40`;
-  } else {
-    return `${baseClasses} tw-border-iron-800`;
   }
+
+  if (rank === 1) {
+    return `${baseClasses} ${getRankHoverBorderClass(1)}`;
+  }
+
+  if (rank === 2) {
+    return `${baseClasses} ${getRankHoverBorderClass(2)}`;
+  }
+
+  if (rank === 3) {
+    return `${baseClasses} ${getRankHoverBorderClass(3)}`;
+  }
+
+  return `${baseClasses} tw-border-iron-800`;
 };
 
 export default function MemeParticipationDrop({
@@ -63,10 +71,10 @@ export default function MemeParticipationDrop({
 
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
+    drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.data_key === "description")?.data_value ??
+    drop.metadata.find((m) => m.data_key === "description")?.data_value ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
@@ -133,7 +141,7 @@ export default function MemeParticipationDrop({
                 projected={drop.rating_prediction}
                 votingCreditType={drop.wave.voting_credit_type}
                 ratersCount={drop.raters_count}
-                topVoters={drop.top_raters ?? []}
+                topVoters={drop.top_raters}
                 userContext={drop.context_profile_context}
               />
             </div>

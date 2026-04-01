@@ -1,4 +1,5 @@
 export enum UserCICAndLevelSize {
+  COMPACT = "COMPACT",
   SMALL = "SMALL",
   MEDIUM = "MEDIUM",
   LARGE = "LARGE",
@@ -45,6 +46,7 @@ export default function UserCICAndLevel({
   readonly size?: UserCICAndLevelSize | undefined;
 }) {
   const LEVEL_SIZE_CLASSES: Record<UserCICAndLevelSize, string> = {
+    [UserCICAndLevelSize.COMPACT]: "tw-h-[18px] tw-w-[18px] tw-text-[7.5px]",
     [UserCICAndLevelSize.SMALL]: "tw-h-5 tw-w-5 tw-text-[8.5px]",
     [UserCICAndLevelSize.MEDIUM]: "tw-h-6 tw-w-6 tw-text-[0.65rem]",
     [UserCICAndLevelSize.LARGE]: "tw-h-8 tw-w-8 tw-text-[0.8rem]",

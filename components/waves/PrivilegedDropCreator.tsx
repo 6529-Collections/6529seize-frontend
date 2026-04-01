@@ -4,20 +4,16 @@ import { useDropPrivileges } from "@/hooks/useDropPriviledges";
 import { useAuth } from "../auth/Auth";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
+import { DropMode, type CurationComposerVariant } from "./dropComposer.types";
 
-export enum DropMode {
-  CHAT = "CHAT",
-  PARTICIPATION = "PARTICIPATION",
-  BOTH = "BOTH",
-}
-
-export type CurationComposerVariant = "default" | "leaderboard";
+export { DropMode } from "./dropComposer.types";
 
 interface PrivilegedDropCreatorProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
+  readonly onExitFixedDropMode?: (() => void) | undefined;
   readonly wave: ApiWave;
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
@@ -31,6 +27,7 @@ export default function PrivilegedDropCreator({
   dropId,
   fixedDropMode,
   onAllDropsAdded,
+  onExitFixedDropMode,
   onDropAddedToQueue,
   curationComposerVariant = "default",
 }: PrivilegedDropCreatorProps) {
@@ -45,10 +42,10 @@ export default function PrivilegedDropCreator({
     submissionEnds: wave.participation.period?.max ?? null,
     maxDropsCount:
       wave.participation.no_of_applications_allowed_per_participant ?? null,
-    identityDropsCount: wave.metrics.your_participation_drops_count ?? null,
+    identityDropsCount: wave.metrics.your_participation_drops_count,
   });
 
-  if (!!submissionRestriction && !!chatRestriction) {
+  if (submissionRestriction !== null && chatRestriction !== null) {
     return (
       <DropPlaceholder
         type="both"
@@ -58,11 +55,14 @@ export default function PrivilegedDropCreator({
     );
   }
 
-  if (fixedDropMode === DropMode.CHAT && !!chatRestriction) {
+  if (fixedDropMode === DropMode.CHAT && chatRestriction !== null) {
     return <DropPlaceholder type="chat" chatRestriction={chatRestriction} />;
   }
 
-  if (fixedDropMode === DropMode.PARTICIPATION && !!submissionRestriction) {
+  if (
+    fixedDropMode === DropMode.PARTICIPATION &&
+    submissionRestriction !== null
+  ) {
     return (
       <DropPlaceholder
         type="submission"
@@ -76,6 +76,7 @@ export default function PrivilegedDropCreator({
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
       onAllDropsAdded={onAllDropsAdded}
+      onExitFixedDropMode={onExitFixedDropMode}
       wave={wave}
       dropId={dropId}
       fixedDropMode={fixedDropMode}

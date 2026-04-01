@@ -1,7 +1,7 @@
 "use client";
 
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
-import { buildTooltipId } from "@/helpers/tooltip.helpers";
+import { TOOLTIP_STYLES, buildTooltipId } from "@/helpers/tooltip.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -36,11 +36,10 @@ const MetadataItem: React.FC<{
           <Tooltip
             id={tooltipId}
             place="top"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
+            offset={8}
+            opacity={1}
+            positionStrategy="fixed"
+            style={TOOLTIP_STYLES}
           >
             {meta.data_value}
           </Tooltip>
@@ -56,7 +55,7 @@ export default function ParticipationDropMetadata({
 }: ParticipationDropMetadataProps) {
   const [showAllMetadata, setShowAllMetadata] = useState(false);
 
-  if (!metadata || metadata.length === 0) return null;
+  if (metadata.length === 0) return null;
 
   const handleShowMore = (e: React.MouseEvent) => {
     e.stopPropagation();

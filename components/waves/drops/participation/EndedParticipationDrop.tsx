@@ -13,8 +13,6 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import type { DropInteractionParams } from "../Drop";
-import { DropLocation } from "../Drop";
 import DropCurationButton from "../DropCurationButton";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
@@ -27,6 +25,8 @@ import {
   getParticipationIdentityProfile,
   getParticipationVisibleMetadata,
 } from "./participationIdentityProfile.helpers";
+import type { DropInteractionParams } from "../drop.types";
+import { DropLocation } from "../drop.types";
 
 interface EndedParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -88,9 +88,6 @@ export default function EndedParticipationDrop({
   }, []);
 
   const getDropLocationBackground = () => {
-    if (location === DropLocation.WAVE) {
-      return "tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-iron-800";
-    }
     return "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800";
   };
 
@@ -105,7 +102,7 @@ export default function EndedParticipationDrop({
       } tw-w-full`}
     >
       <div
-        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${dropBackgroundClass}`}
+        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${dropBackgroundClass}`}
       >
         {!isMobile && showReplyAndQuote && (
           <WaveDropActions
@@ -203,10 +200,11 @@ export default function EndedParticipationDrop({
         </div>
 
         {identityProfile && (
-          <div className="tw-mt-4 sm:tw-ml-[3.25rem]">
+          <div className="sm:tw-ml-[3.25rem]">
             <ParticipationIdentityProfileCard
               profile={identityProfile}
               contextId={drop.id}
+              variant="chat"
             />
           </div>
         )}
