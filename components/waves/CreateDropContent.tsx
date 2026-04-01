@@ -1636,6 +1636,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   onDropModeChange={handleDropModeChange}
                   privileges={privileges}
                   exitLabel={dropModeToggleExitLabel}
+                  inactiveActionLabel={
+                    submissionExperience === WaveSubmissionExperience.IDENTITY
+                      ? "nominate"
+                      : "drop"
+                  }
                 />
               )}
             <CreateDropSubmit

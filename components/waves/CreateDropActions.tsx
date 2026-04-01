@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import React, { memo, useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -138,12 +139,10 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       <Tooltip
                         id="add-metadata-tooltip"
                         place="top"
+                        offset={8}
+                        opacity={1}
                         positionStrategy="fixed"
-                        style={{
-                          backgroundColor: "#1F2937",
-                          color: "white",
-                          padding: "4px 8px",
-                        }}
+                        style={TOOLTIP_STYLES}
                       >
                         <span className="tw-text-xs">Add metadata</span>
                       </Tooltip>
@@ -191,13 +190,10 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       <Tooltip
                         id="upload-file-tooltip"
                         place="top"
+                        offset={8}
+                        opacity={1}
                         positionStrategy="fixed"
-                        style={{
-                          backgroundColor: "#1F2937",
-                          color: "white",
-                          padding: "4px 8px",
-                          zIndex: 9999,
-                        }}
+                        style={TOOLTIP_STYLES}
                       >
                         <span className="tw-text-xs">Upload a file</span>
                       </Tooltip>
@@ -246,13 +242,10 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         <Tooltip
                           id="add-gif-tooltip"
                           place="top"
+                          offset={8}
+                          opacity={1}
                           positionStrategy="fixed"
-                          style={{
-                            backgroundColor: "#1F2937",
-                            color: "white",
-                            padding: "4px 8px",
-                            zIndex: 9999,
-                          }}
+                          style={TOOLTIP_STYLES}
                         >
                           <span className="tw-text-xs">Add GIF</span>
                         </Tooltip>
