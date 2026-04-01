@@ -9,6 +9,7 @@ export function sharedConfig(
 ): NextConfig {
   return {
     assetPrefix,
+    output: "standalone",
     reactCompiler: true,
     reactStrictMode: false,
     compress: true,
