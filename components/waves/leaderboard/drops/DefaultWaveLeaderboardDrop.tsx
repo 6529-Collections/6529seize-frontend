@@ -76,13 +76,13 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               </div>
             </div>
             <WaveLeaderboardDropContent drop={drop} isCompetitionDrop={true} />
-            <div className="tw-mt-3 tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0">
+            <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
                 <WaveLeaderboardDropRaters drop={drop} />
                 <WaveLeaderboardDropFooter drop={drop} />
               </div>
               <div
-                className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
+                className="tw-flex tw-w-full tw-items-center tw-justify-end tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
                 onClick={(e) => e.stopPropagation()}
               >
                 <DropCurationButton
