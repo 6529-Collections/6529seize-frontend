@@ -11,14 +11,15 @@ export type MemesQuickVoteDialogState = Pick<
   | "activeDrop"
   | "hasDiscoveryError"
   | "isExhausted"
+  | "leftThisRoundCount"
   | "latestUsedAmount"
   | "nextDrop"
   | "recentAmounts"
-  | "remainingCount"
   | "retryDiscovery"
   | "submitVote"
   | "skipDrop"
   | "uncastPower"
+  | "unratedCount"
   | "votingLabel"
 > & {
   readonly isOpen: boolean;
@@ -96,16 +97,17 @@ export const useMemesQuickVoteDialogController =
         hasDiscoveryError: quickVoteQueue.hasDiscoveryError,
         isExhausted: quickVoteQueue.isExhausted,
         isOpen: isQuickVoteOpen,
+        leftThisRoundCount: quickVoteQueue.leftThisRoundCount,
         latestUsedAmount: quickVoteQueue.latestUsedAmount,
         nextDrop: quickVoteQueue.nextDrop,
         onClose: closeQuickVote,
         recentAmounts: quickVoteQueue.recentAmounts,
-        remainingCount: quickVoteQueue.remainingCount,
         retryDiscovery: quickVoteQueue.retryDiscovery,
         sessionId: quickVoteSessionId,
         skipDrop: quickVoteQueue.skipDrop,
         submitVote: quickVoteQueue.submitVote,
         uncastPower: quickVoteQueue.uncastPower,
+        unratedCount: quickVoteQueue.unratedCount,
         votingLabel: quickVoteQueue.votingLabel,
       },
       isQuickVoteOpen,

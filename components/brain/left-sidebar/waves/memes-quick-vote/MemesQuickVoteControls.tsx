@@ -1,7 +1,10 @@
 "use client";
 
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  formatMemesQuickVoteLeftThisRoundText,
+  formatMemesQuickVoteUnratedText,
+} from "@/hooks/memesQuickVote.helpers";
 import MemesQuickVoteActionBar from "./MemesQuickVoteActionBar";
 import MemesQuickVoteDescription from "./MemesQuickVoteDescription";
 import MemesQuickVoteDropHeader from "./MemesQuickVoteDropHeader";
@@ -16,10 +19,11 @@ interface MemesQuickVoteControlsProps {
   readonly isCustomOpen: boolean;
   readonly isSubmitting: boolean;
   readonly isVoteFeedbackActive: boolean;
+  readonly leftThisRoundCount: number;
   readonly latestUsedAmount: number | null;
-  readonly remainingCount: number;
   readonly quickAmounts: readonly number[];
   readonly uncastPower: number | null;
+  readonly unratedCount: number;
   readonly votingLabel: string | null;
   readonly onCustomChange: (value: string) => void;
   readonly onCustomSubmit: () => void;
@@ -36,10 +40,11 @@ export default function MemesQuickVoteControls({
   isCustomOpen,
   isSubmitting,
   isVoteFeedbackActive,
+  leftThisRoundCount,
   latestUsedAmount,
-  remainingCount,
   quickAmounts,
   uncastPower,
+  unratedCount,
   votingLabel,
   onCustomChange,
   onCustomSubmit,
@@ -61,7 +66,10 @@ export default function MemesQuickVoteControls({
     >
       <div className="tw-hidden tw-shrink-0 tw-flex-wrap tw-gap-2 tw-px-8 md:tw-flex md:tw-pb-6 md:tw-pt-6">
         <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-backdrop-blur-md">
-          {formatNumberWithCommas(remainingCount)} unrated
+          {formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount)}
+        </span>
+        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-400 tw-shadow-sm tw-backdrop-blur-md">
+          {formatMemesQuickVoteUnratedText(unratedCount)}
         </span>
       </div>
 

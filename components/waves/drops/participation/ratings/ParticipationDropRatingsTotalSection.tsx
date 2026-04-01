@@ -1,5 +1,6 @@
 import { Tooltip } from "react-tooltip";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { RatingsSectionProps, RatingsData } from "./types";
 import VoteBreakdownTooltip from "./tooltips/VoteBreakdownTooltip";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
@@ -8,53 +9,48 @@ import {
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
 
-interface ParticipationDropRatingsTotalSectionProps
-  extends RatingsSectionProps {
+interface ParticipationDropRatingsTotalSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;
 }
 
 export default function ParticipationDropRatingsTotalSection({
   drop,
-  theme,
   ratingsData,
 }: ParticipationDropRatingsTotalSectionProps) {
   const { currentRating } = ratingsData;
+  const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
+  const totalValueClass =
+    currentRating < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-1">
-      <div
-        className={`tw-relative tw-inline-flex tw-items-baseline tw-gap-x-1 ${theme.indicator}`}
-      >
-        <span>
-          <span
-            className={`tw-text-sm tw-font-semibold tw-text-iron-50 ${theme.text}`}
-          >
-            {currentRating < 0 && "-"}
-            {formatNumberWithCommas(Math.abs(currentRating))}
-          </span>{" "}
-          <span
-            className="tw-text-sm tw-font-normal tw-text-iron-400 tw-cursor-help"
-            data-tooltip-id={`total-rating-${drop.id}`}
-          >
-            {WAVE_VOTE_STATS_LABELS.TOTAL}{" "}
-            {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
-          </span>
-          <Tooltip
-            id={`total-rating-${drop.id}`}
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
-          >
-            <VoteBreakdownTooltip drop={drop} ratingsData={ratingsData} />
-          </Tooltip>
+    <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5">
+      <div className="tw-relative tw-inline-flex tw-items-center tw-gap-x-1.5">
+        <span className={`tw-font-medium ${totalValueClass}`}>
+          {currentRating < 0 && "-"}
+          {formatNumberWithCommas(Math.abs(currentRating))}
         </span>
         <DropVoteProgressing
           current={currentRating}
           projected={drop.rating_prediction}
+          compact
         />
       </div>
+      <span
+        className="tw-cursor-help tw-whitespace-nowrap tw-font-normal tw-text-iron-400"
+        data-tooltip-id={`total-rating-${drop.id}`}
+      >
+        {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}
+      </span>
+      <Tooltip
+        id={`total-rating-${drop.id}`}
+        place="top"
+        offset={8}
+        opacity={1}
+        positionStrategy="fixed"
+        style={TOOLTIP_STYLES}
+      >
+        <VoteBreakdownTooltip drop={drop} ratingsData={ratingsData} />
+      </Tooltip>
     </div>
   );
 }

@@ -10,11 +10,13 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 interface WaveCreatorBadgeProps {
   readonly tooltipId?: string | undefined;
   readonly onBadgeClick?: (() => void) | undefined;
+  readonly size?: "default" | "compact" | undefined;
 }
 
 export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
   tooltipId = "wave-creator-badge",
   onBadgeClick,
+  size = "default",
 }) => {
   const isMobile = useIsMobileDevice();
   const id = useId();
@@ -22,6 +24,10 @@ export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const showTooltip = isMobile === false;
   const dataTooltipId = showTooltip ? uniqueTooltipId : undefined;
+  const buttonSizeClassName =
+    size === "compact" ? "tw-h-[18px] tw-w-[18px]" : "tw-h-5 tw-w-5";
+  const iconSizeClassName =
+    size === "compact" ? "tw-h-[9px] tw-w-[9px]" : "tw-h-2.5 tw-w-2.5";
 
   return (
     <>
@@ -35,13 +41,13 @@ export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
         }}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
-        className="tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-white/60 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white/70"
+        className={`tw-inline-flex ${buttonSizeClassName} tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-white/60 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white/70`}
         aria-label="View created waves"
         {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
       >
         <FontAwesomeIcon
           icon={faWater}
-          className="tw-h-2.5 tw-w-2.5 tw-flex-shrink-0 tw-text-current"
+          className={`${iconSizeClassName} tw-flex-shrink-0 tw-text-current`}
         />
       </button>
       {showTooltip && (

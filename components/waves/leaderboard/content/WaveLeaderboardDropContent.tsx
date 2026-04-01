@@ -6,7 +6,9 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import { useRouter } from "next/navigation";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
+import { getDropVisibleMetadata } from "@/components/waves/drops/identityDisplay.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
@@ -18,6 +20,10 @@ export const WaveLeaderboardDropContent: React.FC<
 > = ({ drop, isCompetitionDrop = false }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
+  const visibleMetadata = getDropVisibleMetadata({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
     const href = getWaveRoute({
@@ -30,7 +36,7 @@ export const WaveLeaderboardDropContent: React.FC<
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-1">
+    <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-1">
       <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}
@@ -41,12 +47,16 @@ export const WaveLeaderboardDropContent: React.FC<
         setLongPressTriggered={() => {}}
         isCompetitionDrop={isCompetitionDrop}
       />
-      {!!drop.metadata.length && (
-        <div className="tw-mt-2">
-          <WaveDropMetadata metadata={drop.metadata} />
-        </div>
+      <WaveLeaderboardIdentity
+        drop={drop}
+        variant="responsive"
+        cardVariant="chat"
+        className="tw-mt-2 lg:tw-mt-0"
+      />
+      {!!visibleMetadata.length && (
+        <WaveDropMetadata metadata={visibleMetadata} />
       )}
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         <WaveDropReactions drop={drop} />
       </div>
     </div>

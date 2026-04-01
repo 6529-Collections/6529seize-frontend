@@ -14,20 +14,17 @@ export default function ParticipationDropRatingsContainer({
   drop,
   rank = null,
 }: ParticipationDropRatingsContainerProps) {
-  // Calculate all ratings data upfront
   const ratingsData: RatingsData = {
-    hasRaters: drop.top_raters && drop.top_raters.length > 0,
+    hasRaters: drop.top_raters.length > 0,
     userRating: drop.context_profile_context?.rating ?? 0,
-    currentRating: drop.rating ?? 0,
+    currentRating: drop.rating,
   };
 
-  // Generate themes
   const theme = getThemeColors(rank, ratingsData.currentRating < 0);
-  const userTheme = getThemeColors(rank, ratingsData.userRating < 0);
 
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-6">
-      <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-6 tw-gap-y-2">
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
         <ParticipationDropRatingsTotalSection
           drop={drop}
           rank={rank}
@@ -46,7 +43,6 @@ export default function ParticipationDropRatingsContainer({
         drop={drop}
         rank={rank}
         theme={theme}
-        userTheme={userTheme}
         ratingsData={ratingsData}
       />
     </div>

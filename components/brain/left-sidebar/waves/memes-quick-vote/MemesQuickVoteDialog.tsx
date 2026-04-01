@@ -1,7 +1,8 @@
 "use client";
 
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
+  formatMemesQuickVoteLeftThisRoundText,
+  formatMemesQuickVoteUnratedText,
   getDefaultQuickVoteAmount,
   normalizeQuickVoteAmount,
 } from "@/hooks/memesQuickVote.helpers";
@@ -32,15 +33,16 @@ type MemesQuickVoteDialogProps = MemesQuickVoteDialogState;
 interface MemesQuickVoteDialogContentProps {
   readonly activeDrop: NonNullable<MemesQuickVoteDialogProps["activeDrop"]>;
   readonly isMobile: boolean;
+  readonly leftThisRoundCount: number;
   readonly latestUsedAmount: number | null;
   readonly nextDrop: MemesQuickVoteDialogProps["nextDrop"];
   readonly onClose: () => void;
-  readonly remainingCount: number;
   readonly recentAmounts: number[];
   readonly sessionId: number;
   readonly submitVote: MemesQuickVoteDialogProps["submitVote"];
   readonly skipDrop: MemesQuickVoteDialogProps["skipDrop"];
   readonly uncastPower: number | null;
+  readonly unratedCount: number;
   readonly votingLabel: string | null;
 }
 
@@ -68,27 +70,29 @@ function MemesQuickVotePreviewStack({
   activeDrop,
   isBusy,
   isMobile,
+  leftThisRoundCount,
   nextDrop,
   onAdvanceStart,
   onSkip,
   onVoteWithSwipe,
-  remainingCount,
   sessionId,
   swipeVoteAmount,
   uncastPower,
+  unratedCount,
   votingLabel,
 }: {
   readonly activeDrop: NonNullable<MemesQuickVoteDialogProps["activeDrop"]>;
   readonly isBusy: boolean;
   readonly isMobile: boolean;
+  readonly leftThisRoundCount: number;
   readonly nextDrop: MemesQuickVoteDialogProps["nextDrop"];
   readonly onAdvanceStart: () => void;
   readonly onSkip: () => void;
   readonly onVoteWithSwipe: () => void;
-  readonly remainingCount: number;
   readonly sessionId: number;
   readonly swipeVoteAmount: number | null;
   readonly uncastPower: number | null;
+  readonly unratedCount: number;
   readonly votingLabel: string | null;
 }) {
   const preloadedCardRef = useRef<HTMLDivElement | null>(null);
@@ -121,10 +125,11 @@ function MemesQuickVotePreviewStack({
             drop={nextDrop}
             isBusy={false}
             isMobile={isMobile}
-            remainingCount={remainingCount}
+            leftThisRoundCount={leftThisRoundCount}
             renderMode="preloaded"
             swipeVoteAmount={swipeVoteAmount}
             uncastPower={uncastPower}
+            unratedCount={unratedCount}
             votingLabel={votingLabel}
             onAdvanceStart={() => undefined}
             onSkip={() => undefined}
@@ -139,10 +144,11 @@ function MemesQuickVotePreviewStack({
           drop={activeDrop}
           isBusy={isBusy}
           isMobile={isMobile}
-          remainingCount={remainingCount}
+          leftThisRoundCount={leftThisRoundCount}
           renderMode="active"
           swipeVoteAmount={swipeVoteAmount}
           uncastPower={uncastPower}
+          unratedCount={unratedCount}
           votingLabel={votingLabel}
           onAdvanceStart={onAdvanceStart}
           onSkip={onSkip}
@@ -156,15 +162,16 @@ function MemesQuickVotePreviewStack({
 function MemesQuickVoteDialogContent({
   activeDrop,
   isMobile,
+  leftThisRoundCount,
   latestUsedAmount,
   nextDrop,
   onClose,
-  remainingCount,
   recentAmounts,
   sessionId,
   submitVote,
   skipDrop,
   uncastPower,
+  unratedCount,
   votingLabel,
 }: MemesQuickVoteDialogContentProps) {
   const maxRating = activeDrop.context_profile_context?.max_rating ?? 0;
@@ -313,7 +320,10 @@ function MemesQuickVoteDialogContent({
 
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-px-3">
             <span className="tw-truncate tw-text-[13px] tw-font-bold tw-leading-tight tw-text-iron-300">
-              {formatNumberWithCommas(remainingCount)} unrated
+              {formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount)}
+            </span>
+            <span className="tw-truncate tw-text-[12px] tw-font-medium tw-leading-tight tw-text-iron-500">
+              {formatMemesQuickVoteUnratedText(unratedCount)}
             </span>
           </div>
 
@@ -328,11 +338,12 @@ function MemesQuickVoteDialogContent({
               activeDrop={activeDrop}
               isBusy={isControlsSubmitting}
               isMobile={isMobile}
+              leftThisRoundCount={leftThisRoundCount}
               nextDrop={nextDrop}
-              remainingCount={remainingCount}
               sessionId={sessionId}
               swipeVoteAmount={swipeVoteAmount}
               uncastPower={uncastPower}
+              unratedCount={unratedCount}
               votingLabel={votingLabel}
               onAdvanceStart={() => {
                 setIsAdvancing(true);
@@ -359,10 +370,11 @@ function MemesQuickVoteDialogContent({
               feedbackAmount={voteFeedback?.amount ?? null}
               feedbackSource={voteFeedback?.source ?? null}
               isVoteFeedbackActive={isVoteFeedbackActive}
+              leftThisRoundCount={leftThisRoundCount}
               latestUsedAmount={normalizedLatestUsedAmount}
-              remainingCount={remainingCount}
               quickAmounts={visibleQuickAmounts}
               uncastPower={uncastPower}
+              unratedCount={unratedCount}
               votingLabel={votingLabel}
               onCustomChange={(value) => {
                 if (value === "") {
@@ -392,11 +404,12 @@ function MemesQuickVoteDialogContent({
               activeDrop={activeDrop}
               isBusy={isControlsSubmitting}
               isMobile={isMobile}
+              leftThisRoundCount={leftThisRoundCount}
               nextDrop={nextDrop}
-              remainingCount={remainingCount}
               sessionId={sessionId}
               swipeVoteAmount={swipeVoteAmount}
               uncastPower={uncastPower}
+              unratedCount={unratedCount}
               votingLabel={votingLabel}
               onAdvanceStart={() => {
                 setIsAdvancing(true);
@@ -423,10 +436,11 @@ function MemesQuickVoteDialogContent({
               feedbackAmount={voteFeedback?.amount ?? null}
               feedbackSource={voteFeedback?.source ?? null}
               isVoteFeedbackActive={isVoteFeedbackActive}
+              leftThisRoundCount={leftThisRoundCount}
               latestUsedAmount={normalizedLatestUsedAmount}
-              remainingCount={remainingCount}
               quickAmounts={visibleQuickAmounts}
               uncastPower={uncastPower}
+              unratedCount={unratedCount}
               votingLabel={votingLabel}
               onCustomChange={(value) => {
                 if (value === "") {
@@ -526,14 +540,15 @@ export default function MemesQuickVoteDialog({
   activeDrop,
   hasDiscoveryError,
   isExhausted,
+  leftThisRoundCount,
   latestUsedAmount,
   nextDrop,
   recentAmounts,
-  remainingCount,
   retryDiscovery,
   submitVote,
   skipDrop,
   uncastPower,
+  unratedCount,
   votingLabel,
 }: MemesQuickVoteDialogProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
@@ -613,15 +628,16 @@ export default function MemesQuickVoteDialog({
         key={contentResetKey}
         activeDrop={activeDrop}
         isMobile={isMobile}
+        leftThisRoundCount={leftThisRoundCount}
         latestUsedAmount={latestUsedAmount}
         nextDrop={preloadedNextDrop}
         onClose={onClose}
-        remainingCount={remainingCount}
         recentAmounts={recentAmounts}
         sessionId={sessionId}
         submitVote={submitVote}
         skipDrop={skipDrop}
         uncastPower={uncastPower}
+        unratedCount={unratedCount}
         votingLabel={votingLabel}
       />
     );

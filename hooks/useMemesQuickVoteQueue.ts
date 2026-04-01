@@ -56,10 +56,10 @@ export type UseMemesQuickVoteQueueResult = {
   readonly isExhausted: boolean;
   readonly isLoading: boolean;
   readonly isReady: boolean;
+  readonly leftThisRoundCount: number;
   readonly latestUsedAmount: number | null;
   readonly nextDrop: ExtendedDrop | null;
   readonly recentAmounts: number[];
-  readonly remainingCount: number;
   readonly retryDiscovery: () => void;
   readonly submitVote: (
     drop: ExtendedDrop,
@@ -67,6 +67,7 @@ export type UseMemesQuickVoteQueueResult = {
   ) => Promise<boolean>;
   readonly skipDrop: (drop: ExtendedDrop) => Promise<boolean>;
   readonly uncastPower: number | null;
+  readonly unratedCount: number;
   readonly votingLabel: string | null;
 };
 
@@ -242,10 +243,11 @@ const useMemesQuickVoteWindowSync = ({
         return;
       }
 
-      const primaryDrop = responses[0]?.drop ?? null;
-      const rawTotalCount =
-        responses.find((response) => typeof response.total_count === "number")
-          ?.total_count ?? 0;
+      const primaryResponse = responses[0] ?? null;
+      const primaryDrop = primaryResponse?.drop ?? null;
+      const rawLeftThisRoundCount =
+        primaryResponse?.left_to_vote_in_current_round ?? 0;
+      const rawUnratedCount = primaryResponse?.total_count ?? 0;
       const fetchedDrops = getUniqueDrops(
         responses.flatMap((response) => (response.drop ? [response.drop] : []))
       );
@@ -256,7 +258,8 @@ const useMemesQuickVoteWindowSync = ({
           fetchedDrops,
           pendingDropIds: pendingDropIdsRef.current,
           primaryDrop,
-          rawTotalCount,
+          rawLeftThisRoundCount,
+          rawUnratedCount,
         })
       );
     } catch {
@@ -682,16 +685,17 @@ export const useMemesQuickVoteQueue = ({
     isExhausted: session.sessionState.isExhausted,
     isLoading: session.sessionState.isLoading && activeDrop === null,
     isReady: activeDrop !== null,
+    leftThisRoundCount: session.sessionState.leftThisRoundCount,
     latestUsedAmount,
     nextDrop,
     recentAmounts,
-    remainingCount: session.sessionState.totalCount,
     retryDiscovery: () => {
       runBestEffortSync(session.syncUndiscoveredWindow);
     },
     skipDrop: submitSkip,
     submitVote,
     uncastPower: activeDrop?.context_profile_context?.max_rating ?? null,
+    unratedCount: session.sessionState.unratedCount,
     votingLabel: activeDrop
       ? WAVE_VOTING_LABELS[activeDrop.wave.voting_credit_type]
       : null,

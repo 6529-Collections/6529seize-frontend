@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { DropLocation } from "./Drop";
+import type { DropLocation } from "./drop.types";
 
 interface DropContextType {
   drop: ExtendedDrop | null;
