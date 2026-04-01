@@ -27,7 +27,7 @@ export default function ParticipationDropContent({
   const hasTouch = useIsTouchDevice();
 
   return (
-    <div className="tw-mt-1">
+    <div>
       <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}

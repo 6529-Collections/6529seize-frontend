@@ -185,6 +185,7 @@ describe("CreateWave", () => {
         noOfApplicationsAllowedPerParticipant: null,
         requiredTypes: [],
         requiredMetadata: [],
+        submissionStrategy: null,
         terms: null,
         signatureRequired: false,
         adminCanDeleteDrops: false,

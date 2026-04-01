@@ -21,7 +21,9 @@ export default function MobileWrapperDialog({
   fixedHeight,
   tabletModal,
   showScrollbar,
+  allowOverflow,
   maxWidthClass,
+  dismissible = true,
 }: {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
@@ -34,9 +36,16 @@ export default function MobileWrapperDialog({
   readonly fixedHeight?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
+  readonly allowOverflow?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
+  readonly dismissible?: boolean | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
+  const handleClose = () => {
+    if (dismissible) {
+      onClose();
+    }
+  };
 
   const bottomPadding = noPadding
     ? "env(safe-area-inset-bottom,0px)"
@@ -59,7 +68,7 @@ export default function MobileWrapperDialog({
 
   const containerClassNames = clsx(
     "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10",
-    tabletModal && "md:tw-inset-0 md:tw-items-center md:tw-pt-0 md:tw-p-6"
+    tabletModal && "md:tw-inset-0 md:tw-items-center md:tw-p-6 md:tw-pt-0"
   );
 
   const slideTransition = {
@@ -84,7 +93,7 @@ export default function MobileWrapperDialog({
       <Dialog
         as="div"
         className="tailwind-scope tw-absolute tw-z-[1010]"
-        onClose={onClose}
+        onClose={handleClose}
       >
         <TransitionChild
           as={Fragment}
@@ -104,7 +113,7 @@ export default function MobileWrapperDialog({
           className="tw-fixed tw-inset-0"
           onClick={(e) => {
             e.stopPropagation();
-            onClose();
+            handleClose();
           }}
         >
           <div
@@ -118,44 +127,49 @@ export default function MobileWrapperDialog({
                   style={{ touchAction: "manipulation" }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <TransitionChild
-                    as={Fragment}
-                    enter="tw-duration-250 tw-ease-in-out"
-                    enterFrom="tw-opacity-0"
-                    enterTo="tw-opacity-100"
-                    leave="tw-duration-250 tw-ease-in-out"
-                    leaveFrom="tw-opacity-100"
-                    leaveTo="tw-opacity-0"
-                  >
-                    <div className="tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pt-4 tw-pr-2 md:tw-pr-0">
-                      <button
-                        type="button"
-                        title="Close panel"
-                        aria-label="Close panel"
-                        className="tw-relative tw-rounded-md tw-border-none tw-bg-transparent tw-p-2.5 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white"
-                        onClick={onClose}
-                      >
-                        <svg
-                          className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-white"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
+                  {dismissible && (
+                    <TransitionChild
+                      as={Fragment}
+                      enter="tw-duration-250 tw-ease-in-out"
+                      enterFrom="tw-opacity-0"
+                      enterTo="tw-opacity-100"
+                      leave="tw-duration-250 tw-ease-in-out"
+                      leaveFrom="tw-opacity-100"
+                      leaveTo="tw-opacity-0"
+                    >
+                      <div className="tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pr-2 tw-pt-4 md:tw-pr-0">
+                        <button
+                          type="button"
+                          title="Close panel"
+                          aria-label="Close panel"
+                          className="tw-relative tw-rounded-md tw-border-none tw-bg-transparent tw-p-2.5 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white"
+                          onClick={handleClose}
                         >
-                          <path
-                            d="M18 6L6 18M6 6L18 18"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </TransitionChild>
+                          <svg
+                            className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-white"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M18 6L6 18M6 6L18 18"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </TransitionChild>
+                  )}
                   <div
                     className={clsx(
-                      "tw-flex tw-flex-col tw-overflow-hidden tw-rounded-t-xl tw-bg-iron-950",
+                      "tw-flex tw-flex-col tw-rounded-t-xl tw-bg-iron-950",
+                      allowOverflow
+                        ? "tw-overflow-visible"
+                        : "tw-overflow-hidden",
                       tabletModal && "md:tw-rounded-xl"
                     )}
                     style={{
@@ -166,9 +180,13 @@ export default function MobileWrapperDialog({
                   >
                     <div
                       className={clsx(
-                        "tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-flex-1 tw-min-h-0",
+                        "tw-flex tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-flex-col",
+                        allowOverflow
+                          ? "tw-overflow-visible"
+                          : "tw-overflow-y-auto",
                         noPadding ? "tw-py-0" : "tw-py-6",
                         showScrollbar &&
+                          !allowOverflow &&
                           "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
                       )}
                       style={{ paddingBottom: bottomPadding }}

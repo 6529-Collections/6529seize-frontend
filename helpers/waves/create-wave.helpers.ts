@@ -10,11 +10,9 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type {
   CreateWaveConfig,
   CreateWaveDatesConfig,
-  TimeWeightedVotingSettings} from "@/types/waves.types";
-import {
-  CreateWaveOutcomeType,
-  CreateWaveStep
+  TimeWeightedVotingSettings,
 } from "@/types/waves.types";
+import { CreateWaveOutcomeType, CreateWaveStep } from "@/types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 import type { ApiCreateWaveOutcome } from "@/generated/models/ApiCreateWaveOutcome";
 
@@ -340,7 +338,7 @@ const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
   // If isRolling is true, we need to calculate the last decision time
   if (dates.isRolling) {
     // Need an end date for rolling waves
-    if (!dates.endDate) {
+    if (typeof dates.endDate !== "number") {
       throw new Error("End date must be explicitly set when isRolling is true");
     }
 
@@ -410,6 +408,11 @@ export const getCreateNewWaveBody = ({
         max: endDate,
       },
       terms: config.drops.terms,
+      ...(config.drops.submissionStrategy
+        ? {
+            submission_strategy: config.drops.submissionStrategy,
+          }
+        : {}),
     },
     chat: {
       scope: {

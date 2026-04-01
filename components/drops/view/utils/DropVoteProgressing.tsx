@@ -8,12 +8,14 @@ interface DropVoteProgressingProps {
   readonly current: number | null | undefined;
   readonly projected: number | null | undefined;
   readonly subtle?: boolean | undefined;
+  readonly compact?: boolean | undefined;
 }
 
 export default function DropVoteProgressing({
   current,
   projected,
   subtle = false,
+  compact = false,
 }: DropVoteProgressingProps): ReactElement | null {
   if (typeof current !== "number" || typeof projected !== "number") {
     return null;
@@ -29,20 +31,36 @@ export default function DropVoteProgressing({
 
   let color: string;
   let arrowColor: string;
+  let wrapperClasses: string;
+  let valueClasses: string;
+
   if (subtle) {
-    color = isPositiveProgressing ? "tw-text-iron-400 tw-font-mono" : "tw-text-iron-600 tw-font-mono";
+    color = isPositiveProgressing
+      ? "tw-text-iron-400 tw-font-mono"
+      : "tw-text-iron-600 tw-font-mono";
     arrowColor = "tw-text-iron-600";
+    wrapperClasses = "tw-flex tw-items-center tw-gap-2";
+    valueClasses = "tw-text-sm tw-font-medium tw-tracking-tight";
+  } else if (compact) {
+    color = isPositiveProgressing
+      ? "tw-text-emerald-400 tw-bg-emerald-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-emerald-500/15"
+      : "tw-text-rose-400 tw-bg-rose-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-rose-500/15";
+    arrowColor = "tw-text-iron-500";
+    wrapperClasses = "tw-ml-0.5 tw-flex tw-items-center tw-gap-1.5";
+    valueClasses = "tw-text-sm tw-font-medium tw-leading-5 tw-tabular-nums";
   } else {
     color = isPositiveProgressing
       ? "tw-text-emerald-500 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20 tw-font-mono"
       : "tw-text-rose-500 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20 tw-font-mono";
     arrowColor = "tw-text-iron-600";
+    wrapperClasses = "tw-ml-0.5 tw-flex tw-items-center tw-gap-2";
+    valueClasses = "tw-text-sm tw-font-medium tw-tracking-tight";
   }
 
   return (
     <>
       <span
-        className={`tw-flex tw-items-center tw-gap-2 ${subtle ? '' : 'tw-ml-0.5'}`}
+        className={wrapperClasses}
         style={{
           animationDuration: "2s",
         }}
@@ -50,9 +68,11 @@ export default function DropVoteProgressing({
       >
         <FontAwesomeIcon
           icon={faArrowRight}
-          className={`tw-flex-shrink-0 tw-size-2.5 ${arrowColor}`}
+          className={`tw-flex-shrink-0 ${compact ? "tw-size-2" : "tw-size-2.5"} ${arrowColor}`}
         />
-        <span className={`tw-text-sm tw-font-medium tw-tracking-tight ${color}`}>{formatNumberWithCommas(projected)}</span>
+        <span className={`${valueClasses} ${color}`}>
+          {formatNumberWithCommas(projected)}
+        </span>
       </span>
       <Tooltip
         id={`drop-vote-progress-${current}-${projected}`}

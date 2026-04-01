@@ -6,6 +6,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
+import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 
 // Import extracted components
 import { WaveWinnerItemSmall } from "./WaveWinnerItemSmall";
@@ -77,7 +78,9 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
 
     // For single decision waves, just render the first decision point's drops
     if (!multiDecision) {
-      const winners = decisionPoints[0]?.winners ?? [];
+      const winners = getRenderableWaveDecisionWinners(
+        decisionPoints[0]?.winners ?? []
+      );
 
       return (
         <div className="tw-p-3">
@@ -104,6 +107,11 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
       );
     }
 
+    const activeDecisionPointWinners = getRenderableWaveDecisionWinners(
+      decisionPoints.find((point) => point.id === activeDecisionPoint)
+        ?.winners ?? []
+    );
+
     // For multi-decision waves, add a decision point selector
     return (
       <div className="tw-p-3">
@@ -127,19 +135,17 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
         {/* Show winners for selected decision point */}
         <div className="tw-space-y-3">
           {activeDecisionPoint &&
-            decisionPoints
-              .find((point) => point.id === activeDecisionPoint)
-              ?.winners.map((winner) => (
-                <WaveWinnerItemSmall
-                  key={winner.drop.id}
-                  drop={convertApiDropToExtendedDrop(winner.drop)}
-                  wave={wave}
-                  rank={winner.place}
-                  onDropClick={() =>
-                    onDropClick(convertApiDropToExtendedDrop(winner.drop))
-                  }
-                />
-              ))}
+            activeDecisionPointWinners.map((winner) => (
+              <WaveWinnerItemSmall
+                key={winner.drop.id}
+                drop={convertApiDropToExtendedDrop(winner.drop)}
+                wave={wave}
+                rank={winner.place}
+                onDropClick={() =>
+                  onDropClick(convertApiDropToExtendedDrop(winner.drop))
+                }
+              />
+            ))}
         </div>
       </div>
     );

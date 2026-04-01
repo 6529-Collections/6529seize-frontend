@@ -21,6 +21,7 @@ interface ProfileBadgeProps {
 }
 
 const LEVEL_SIZE_MAP: Record<ProfileBadgeSize, ProfileLevelSize> = {
+  [ProfileBadgeSize.COMPACT]: ProfileLevelSize.SMALL,
   [ProfileBadgeSize.SMALL]: ProfileLevelSize.SMALL,
   [ProfileBadgeSize.MEDIUM]: ProfileLevelSize.MEDIUM,
   [ProfileBadgeSize.LARGE]: ProfileLevelSize.LARGE,

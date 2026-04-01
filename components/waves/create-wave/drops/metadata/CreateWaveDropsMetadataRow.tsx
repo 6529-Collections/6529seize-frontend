@@ -5,13 +5,13 @@ import CreateWaveDropsMetadataRowType from "./CreateWaveDropsMetadataRowType";
 export default function CreateWaveDropsMetadataRow({
   item,
   index,
-  isNotUnique,
+  errorMessage,
   onItemChange,
   onItemRemove,
 }: {
   readonly item: CreateWaveDropsRequiredMetadata;
   readonly index: number;
-  readonly isNotUnique: boolean;
+  readonly errorMessage: string | null;
   readonly onItemChange: (args: {
     readonly index: number;
     readonly key: string;
@@ -35,6 +35,8 @@ export default function CreateWaveDropsMetadataRow({
     });
   };
 
+  const hasError = !!errorMessage;
+
   return (
     <div>
       <div className="tw-flex">
@@ -50,24 +52,24 @@ export default function CreateWaveDropsMetadataRow({
             id={`required_metadata_key_${index}`}
             autoComplete="off"
             className={`${
-              isNotUnique
+              hasError
                 ? "tw-border-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
-                : "tw-border-iron-650 tw-ring-iron-650  focus:tw-border-blue-500  focus:tw-ring-primary-400"
-            } tw-form-input tw-block tw-px-4 tw-pb-3 tw-pt-4 tw-w-full tw-text-base tw-rounded-r-lg tw-border-0 tw-appearance-none ${
+                : "tw-border-iron-650 tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
+            } tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-r-lg tw-border-0 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base ${
               item.key
-                ? "focus:tw-text-white tw-text-primary-400"
+                ? "tw-text-primary-400 focus:tw-text-white"
                 : "tw-text-white"
-            } tw-peer tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+            } tw-peer tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset`}
             placeholder=" "
           />
-          <div
-            role="button"
+          <button
+            type="button"
             aria-label="Remove item"
-            className="tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-absolute tw-right-3 tw-top-4 tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400"
             onClick={() => onItemRemove(index)}
           >
             <svg
-              className="tw-top-4 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5"
+              className="tw-h-5 tw-w-5"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -81,22 +83,22 @@ export default function CreateWaveDropsMetadataRow({
                 strokeLinejoin="round"
               />
             </svg>
-          </div>
+          </button>
           <label
             htmlFor={`required_metadata_key_${index}`}
             className={`${
-              isNotUnique
-                ? "peer-focus:tw-text-error tw-text-error"
-                : "peer-focus:tw-text-primary-400 tw-text-iron-500"
-            } tw-absolute tw-cursor-text tw-text-base tw-font-normal tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2 peer-placeholder-shown:tw-scale-100 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
+              hasError
+                ? "tw-text-error peer-focus:tw-text-error"
+                : "tw-text-iron-500 peer-focus:tw-text-primary-400"
+            } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-base tw-font-normal tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
           >
             Name
           </label>
         </div>
       </div>
-      {isNotUnique && (
+      {errorMessage && (
         <div className="tw-ml-24">
-          <div className="tw-pt-1.5 tw-text-error tw-text-xs tw-font-medium">
+          <div className="tw-pt-1.5 tw-text-xs tw-font-medium tw-text-error">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <svg
                 className="tw-size-5 tw-flex-shrink-0 tw-text-error"
@@ -112,7 +114,7 @@ export default function CreateWaveDropsMetadataRow({
                   strokeLinejoin="round"
                 />
               </svg>
-              <span>Metadata name must be unique</span>
+              <span>{errorMessage}</span>
             </div>
           </div>
         </div>

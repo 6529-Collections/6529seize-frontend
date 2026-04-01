@@ -12,6 +12,7 @@
  */
 
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
+import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveMin {
@@ -23,6 +24,7 @@ export class ApiWaveMin {
     * Unix timestamp in milliseconds of the most recent drop in this wave
     */
     'last_drop_time': number;
+    'submission_type': ApiWaveParticipationSubmissionStrategyType | null;
     'authenticated_user_eligible_to_vote': boolean;
     'authenticated_user_eligible_to_participate': boolean;
     'authenticated_user_eligible_to_chat': boolean;
@@ -73,6 +75,12 @@ export class ApiWaveMin {
             "baseName": "last_drop_time",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "submission_type",
+            "baseName": "submission_type",
+            "type": "ApiWaveParticipationSubmissionStrategyType",
+            "format": ""
         },
         {
             "name": "authenticated_user_eligible_to_vote",

@@ -24,6 +24,7 @@ import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import Link from "next/link";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 
 interface WaveLeaderboardGalleryItemProps {
@@ -202,6 +203,11 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               />
             )}
           </div>
+          <WaveLeaderboardIdentity
+            drop={drop}
+            variant="condensed"
+            className="tw-mb-3"
+          />
           <div className="tw-mb-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-y-2 tw-text-xs">
             <div className="tw-min-w-0 tw-flex-1">
               <WaveLeaderboardGalleryItemVotes

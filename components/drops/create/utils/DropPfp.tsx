@@ -1,4 +1,6 @@
-import ProfileAvatar, { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
 import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 
 const AVATAR_SIZE_MAP: Record<DropPartSize, ProfileBadgeSize> = {
@@ -10,15 +12,18 @@ const AVATAR_SIZE_MAP: Record<DropPartSize, ProfileBadgeSize> = {
 export default function DropPfp({
   pfpUrl,
   size,
+  profileSize,
 }: {
   readonly pfpUrl: string | null | undefined;
   readonly size?: DropPartSize | undefined;
+  readonly profileSize?: ProfileBadgeSize | undefined;
 }) {
-  const effectiveSize = size ?? DropPartSize.MEDIUM;
+  const effectiveSize =
+    profileSize ?? AVATAR_SIZE_MAP[size ?? DropPartSize.MEDIUM];
   return (
     <ProfileAvatar
       pfpUrl={pfpUrl}
-      size={AVATAR_SIZE_MAP[effectiveSize]}
+      size={effectiveSize}
       alt="Create Drop Profile"
     />
   );

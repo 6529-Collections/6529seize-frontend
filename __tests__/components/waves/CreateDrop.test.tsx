@@ -38,6 +38,7 @@ const PREFILL_URL =
 
 jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
   <div>
+    <div data-testid="submission-experience">{props.submissionExperience}</div>
     <button
       onClick={() =>
         props.submitDrop({
@@ -90,7 +91,10 @@ const wave = {
 describe("CreateDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useWaveMock.mockReturnValue({ isCurationWave: false } as any);
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+    } as any);
     commonApiPostMock.mockResolvedValue({ id: "server-drop", wave_id: "1" });
   });
 
@@ -123,7 +127,10 @@ describe("CreateDrop", () => {
   it("shows success toast for leaderboard curation submissions", async () => {
     const setToast = jest.fn();
     const onAllDropsAdded = jest.fn();
-    useWaveMock.mockReturnValue({ isCurationWave: true } as any);
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
 
     render(
       <AuthContext.Provider value={{ setToast } as any}>
@@ -159,7 +166,10 @@ describe("CreateDrop", () => {
 
   it("does not show success toast for non-leaderboard curation submissions", async () => {
     const setToast = jest.fn();
-    useWaveMock.mockReturnValue({ isCurationWave: true } as any);
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
 
     render(
       <AuthContext.Provider value={{ setToast } as any}>
@@ -190,7 +200,10 @@ describe("CreateDrop", () => {
   });
 
   it("switches to curation mode with a prefilled url seed", async () => {
-    useWaveMock.mockReturnValue({ isCurationWave: true } as any);
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
 
     render(
       <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
@@ -218,7 +231,10 @@ describe("CreateDrop", () => {
   });
 
   it("resets to default mode when wave scope changes", async () => {
-    useWaveMock.mockReturnValue({ isCurationWave: true } as any);
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
     const nextWave = { ...wave, id: "2" };
 
     const { rerender } = render(
@@ -264,6 +280,42 @@ describe("CreateDrop", () => {
 
     await waitFor(() =>
       expect(screen.getByText("switch to drop")).toBeInTheDocument()
+    );
+  });
+
+  it("passes identity experience through the generic composer path", () => {
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={{
+              ...wave,
+              participation: {
+                ...wave.participation,
+                submission_strategy: {
+                  type: "IDENTITY",
+                  config: {
+                    who_can_be_submitted: "EVERYONE",
+                    duplicates: "NEVER_ALLOW",
+                  },
+                },
+              },
+            }}
+            dropId={null}
+            fixedDropMode={"PARTICIPATION" as any}
+            privileges={{} as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByTestId("submission-experience")).toHaveTextContent(
+      "IDENTITY"
     );
   });
 });

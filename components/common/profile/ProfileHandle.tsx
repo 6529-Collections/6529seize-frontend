@@ -14,6 +14,7 @@ interface ProfileHandleProps {
 }
 
 const TEXT_SIZE_CLASSES: Record<ProfileBadgeSize, string> = {
+  [ProfileBadgeSize.COMPACT]: "tw-text-sm",
   [ProfileBadgeSize.SMALL]: "tw-text-sm",
   [ProfileBadgeSize.MEDIUM]: "tw-text-md",
   [ProfileBadgeSize.LARGE]: "tw-text-md",
@@ -27,7 +28,9 @@ export default function ProfileHandle({
   highlightSearchParam = "user",
 }: ProfileHandleProps) {
   const searchParams = useSearchParams();
-  const paramValue = (searchParams?.get(highlightSearchParam) ?? "").toLowerCase();
+  const paramValue = (
+    searchParams.get(highlightSearchParam) ?? ""
+  ).toLowerCase();
   const amISubject = (handle ?? "").toLowerCase() === paramValue;
   const textClasses = TEXT_SIZE_CLASSES[size];
   const isLinkEnabled = !!(asLink && href && !amISubject);
@@ -36,7 +39,8 @@ export default function ProfileHandle({
     <Link
       onClick={(e) => e.stopPropagation()}
       href={href}
-      className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
+      className="tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 hover:tw-underline"
+    >
       {handle}
     </Link>
   ) : (
@@ -44,7 +48,9 @@ export default function ProfileHandle({
   );
 
   return (
-    <p className={`${textClasses} tw-font-semibold tw-mb-0 tw-leading-none tw-text-iron-50`}>
+    <p
+      className={`${textClasses} tw-mb-0 tw-font-semibold tw-leading-none tw-text-iron-50`}
+    >
       {content}
     </p>
   );

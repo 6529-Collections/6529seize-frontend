@@ -32,6 +32,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import WaveLeaderboardGalleryItemVotes from "../gallery/WaveLeaderboardGalleryItemVotes";
+import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import type { WaveLeaderboardGridMode } from "./WaveLeaderboardGrid";
 
 interface WaveLeaderboardGridItemProps {
@@ -86,7 +87,9 @@ export const WaveLeaderboardGridItem: React.FC<
 
   const mediaUrl = primaryMedia?.url ?? previewImageUrl ?? null;
   const mediaMimeType = primaryMedia?.mime_type ?? "image/jpeg";
-  const shouldPadContentOnlyText = isContentOnlyMode && Boolean(mediaUrl);
+  const contentTextWrapperClass = mediaUrl
+    ? "tw-px-3 tw-pb-3 tw-pt-2"
+    : "tw-p-3";
 
   const getOverflowSnapshot = useCallback(() => {
     if (!viewportEl || !innerEl) {
@@ -224,22 +227,8 @@ export const WaveLeaderboardGridItem: React.FC<
               />
             </div>
           )}
-          {activePart &&
-            (shouldPadContentOnlyText ? (
-              <div className="tw-p-2">
-                <LinkPreviewProvider variant="home">
-                  <WaveDropPartContentMarkdown
-                    mentionedUsers={drop.mentioned_users}
-                    mentionedWaves={drop.mentioned_waves}
-                    referencedNfts={drop.referenced_nfts}
-                    part={activePart}
-                    wave={drop.wave}
-                    drop={drop}
-                    onQuoteClick={() => {}}
-                  />
-                </LinkPreviewProvider>
-              </div>
-            ) : (
+          {activePart && (
+            <div className={contentTextWrapperClass}>
               <LinkPreviewProvider variant="home">
                 <WaveDropPartContentMarkdown
                   mentionedUsers={drop.mentioned_users}
@@ -251,7 +240,8 @@ export const WaveLeaderboardGridItem: React.FC<
                   onQuoteClick={() => {}}
                 />
               </LinkPreviewProvider>
-            ))}
+            </div>
+          )}
         </div>
         {showGradient && (
           <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-14 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/90 tw-to-transparent" />
@@ -287,6 +277,14 @@ export const WaveLeaderboardGridItem: React.FC<
           </div>
         )}
       </div>
+
+      {isContentOnlyMode && (
+        <WaveLeaderboardIdentity
+          drop={drop}
+          variant="responsive"
+          className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-bg-iron-950/50 tw-p-3"
+        />
+      )}
 
       {isCompactMode && (
         <div
@@ -325,6 +323,11 @@ export const WaveLeaderboardGridItem: React.FC<
               )}
             </div>
           </div>
+          <WaveLeaderboardIdentity
+            drop={drop}
+            variant="condensed"
+            className="tw-mb-3"
+          />
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-text-xs">
             <WaveLeaderboardGalleryItemVotes drop={drop} variant="subtle" />
             <div className="tw-ml-4 tw-flex tw-items-center tw-gap-1 tw-text-iron-500">

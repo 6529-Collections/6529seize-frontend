@@ -23,6 +23,17 @@ const BOTH_STATE_DOT_CLASS =
   "tw-pointer-events-none tw-absolute -tw-right-1 -tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-border tw-border-solid tw-border-black tw-bg-[#4285f4] tw-shadow-[0_0_4px_rgba(66,133,244,0.6)]";
 
 type BadgeState = "none" | "active" | "winners" | "both";
+type ArtistActivityBadgeSize = "default" | "compact";
+
+const BUTTON_CLASS_BY_SIZE: Record<ArtistActivityBadgeSize, string> = {
+  default: "tw-h-5 tw-w-5",
+  compact: "tw-h-[18px] tw-w-[18px]",
+};
+
+const ICON_CLASS_BY_SIZE: Record<ArtistActivityBadgeSize, string> = {
+  default: "tw-h-2.5 tw-w-2.5",
+  compact: "tw-h-[9px] tw-w-[9px]",
+};
 
 function getBadgeState(
   submissionCount: number,
@@ -94,6 +105,7 @@ interface ArtistActivityBadgeProps {
   readonly trophyCount: number;
   readonly onBadgeClick: (tab: ArtistPreviewTab) => void;
   readonly tooltipId?: string | undefined;
+  readonly size?: ArtistActivityBadgeSize | undefined;
 }
 
 export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
@@ -101,6 +113,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
   trophyCount,
   onBadgeClick,
   tooltipId = "artist-activity-badge",
+  size = "default",
 }) => {
   const isMobile = useIsMobileDevice();
   const { hasTouchScreen } = useDeviceInfo();
@@ -119,7 +132,12 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
   const tooltipContent = getTooltipContent(state, submissionCount, trophyCount);
   const ariaLabel = tooltipContent;
   const isPaletteIcon = config.icon === faPalette;
-  const iconClassName = isPaletteIcon ? PALETTE_ICON_CLASS : TROPHY_ICON_CLASS;
+  const sizeButtonClassName = BUTTON_CLASS_BY_SIZE[size];
+  const sizeIconClassName = ICON_CLASS_BY_SIZE[size];
+  const iconBaseClassName = isPaletteIcon
+    ? PALETTE_ICON_CLASS
+    : TROPHY_ICON_CLASS;
+  const iconClassName = `${iconBaseClassName} ${sizeIconClassName}`;
   const describedById =
     showTooltip && isTooltipOpen ? uniqueTooltipId : undefined;
 
@@ -135,7 +153,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
         }}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
-        className={config.buttonClassName}
+        className={`${config.buttonClassName} ${sizeButtonClassName}`}
         aria-label={ariaLabel}
         aria-describedby={describedById}
         {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
