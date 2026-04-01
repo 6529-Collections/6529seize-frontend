@@ -11,10 +11,16 @@
     "overrides": {
       "@emoji-mart/react>react": "19.2.4",
       "@emoji-mart/react>react-dom": "19.2.4",
+      "@nestjs/core>path-to-regexp": "8.4.0",
+      "brace-expansion@1.1.12": "1.1.13",
+      "brace-expansion@2.0.2": "2.0.3",
+      "brace-expansion@5.0.4": "5.0.5",
       "eslint-plugin-react-hooks": "7.0.0",
+      "eslint-plugin-sonarjs>minimatch": "10.2.4",
       "react-toggle>react": "19.2.4",
       "react-toggle>react-dom": "19.2.4",
-      "serialize-javascript": "7.0.4"
+      "serialize-javascript": "7.0.4",
+      "ts-jest>handlebars": "4.7.9"
     }
   },
   "scripts": {
