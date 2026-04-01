@@ -21,7 +21,8 @@ export default function CommonProfileSearchItem({
   const avatarAltText = `${avatarLabel} avatar`;
   const secondaryText =
     [profile.handle, profile.wallet, profile.display].find(
-      (value): value is string => value !== null && value.length > 0 && value !== title
+      (value): value is string =>
+        value !== null && value.length > 0 && value !== title
     ) ?? null;
 
   const onProfileClick = () => onProfileSelect(profile);
