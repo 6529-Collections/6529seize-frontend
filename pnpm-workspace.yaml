@@ -1,0 +1,32 @@
+packages:
+  - "."
+
+savePrefix: ""
+minimumReleaseAge: 1440
+
+overrides:
+  "@emoji-mart/react>react": "$react"
+  "@emoji-mart/react>react-dom": "$react-dom"
+  "@nestjs/core>path-to-regexp": "8.4.0"
+  "brace-expansion@1.1.12": "1.1.13"
+  "brace-expansion@2.0.2": "2.0.3"
+  "brace-expansion@5.0.4": "5.0.5"
+  eslint-plugin-react-hooks: "7.0.0"
+  "eslint-plugin-sonarjs>minimatch": "10.2.4"
+  "react-toggle>react": "$react"
+  "react-toggle>react-dom": "$react-dom"
+  serialize-javascript: "7.0.4"
+  "ts-jest>handlebars": "4.7.9"
+
+onlyBuiltDependencies:
+  - "@nestjs/core"
+  - "@openapitools/openapi-generator-cli"
+  - "@parcel/watcher"
+  - "@reown/appkit"
+  - "@sentry/cli"
+  - bufferutil
+  - esbuild
+  - keccak
+  - sharp
+  - unrs-resolver
+  - utf-8-validate
