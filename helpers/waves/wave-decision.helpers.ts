@@ -47,8 +47,10 @@ export const prepareWaveDecisionPoint = (
     );
   }
 
+  const sortedWinners = winners.sort((a, b) => a.place - b.place);
+
   return {
     ...decisionPoint,
-    winners: winners.sort((a, b) => a.place - b.place),
+    winners: sortedWinners,
   };
 };

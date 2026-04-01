@@ -79,8 +79,12 @@ export default function ParticipationIdentityProfileCard({
   const containerClassName = isChat
     ? "tw-mt-4 tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/80 tw-bg-iron-900/60 tw-px-3 tw-py-2.5"
     : "tw-mt-3 tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/80 tw-bg-iron-900/60 tw-p-4";
-  const headerGapClassName = isChat ? "tw-gap-2.5" : "tw-gap-3";
-  const metaGapClassName = isChat ? "tw-gap-y-0.5" : "tw-gap-y-1";
+  const headerRowClassName = isChat
+    ? "tw-flex tw-min-w-0 tw-items-center tw-gap-2.5"
+    : "tw-flex tw-min-w-0 tw-items-start tw-gap-3";
+  const metaColumnClassName = isChat
+    ? "tw-flex tw-min-w-0 tw-flex-col tw-justify-center tw-gap-y-0.5"
+    : "tw-flex tw-min-w-0 tw-flex-col tw-gap-y-1";
   const nameClassName = "tw-text-sm tw-font-semibold tw-leading-none";
   const levelSize = isChat
     ? UserCICAndLevelSize.COMPACT
@@ -94,17 +98,8 @@ export default function ParticipationIdentityProfileCard({
 
   return (
     <div className={containerClassName}>
-      <div
-        aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-[6px] tw-bg-primary-400/10 tw-blur-[4px]"
-      />
-      <div
-        aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-[2px] tw-bg-primary-400/75"
-      />
-
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-        <div className={`tw-flex tw-min-w-0 ${headerGapClassName}`}>
+        <div className={headerRowClassName}>
           <Link
             href={rootHref}
             prefetch={false}
@@ -120,7 +115,7 @@ export default function ParticipationIdentityProfileCard({
             />
           </Link>
 
-          <div className={`tw-flex tw-min-w-0 tw-flex-col ${metaGapClassName}`}>
+          <div className={metaColumnClassName}>
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               <Link
                 href={rootHref}

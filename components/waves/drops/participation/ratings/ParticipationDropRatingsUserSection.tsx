@@ -4,12 +4,11 @@ import {
   WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
-import type { RatingsSectionProps, RatingsData, ThemeColors } from "./types";
+import type { RatingsSectionProps, RatingsData } from "./types";
 
 interface ParticipationDropRatingsUserSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;
   readonly drop: ApiDrop;
-  readonly userTheme: ThemeColors;
 }
 
 export default function ParticipationDropRatingsUserSection({

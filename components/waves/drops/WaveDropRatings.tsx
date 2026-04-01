@@ -51,36 +51,42 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
                 rater.profile.handle ?? rater.profile.primary_address;
               const raterHref = `/${raterLabel}`;
               const tooltipId = `wave-drop-rater-${drop.id}-${rater.profile.id}`;
+              const fallbackAvatarLabel = raterLabel.slice(0, 2).toUpperCase();
+              const raterTooltipLabel = `${raterLabel} • ${formatNumberWithCommas(rater.rating)} ${votingLabel}`;
 
               return (
                 <React.Fragment key={rater.profile.id}>
-                  <div
-                    className="tw-relative tw-transition-transform hover:tw-z-10 hover:tw-scale-110"
-                    style={{ zIndex: drop.top_raters.length - index }}
+                  <Link
+                    href={raterHref}
+                    onClick={(event) => event.stopPropagation()}
+                    aria-label={raterTooltipLabel}
+                    title={raterTooltipLabel}
                     data-tooltip-id={tooltipId}
+                    className="tw-relative tw-block tw-transition-transform hover:tw-z-10 hover:tw-scale-110 focus-visible:tw-rounded-md focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                    style={{ zIndex: drop.top_raters.length - index }}
                   >
-                    <Link
-                      href={raterHref}
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      {rater.profile.pfp ? (
-                        <Image
-                          src={resolveIpfsUrlSync(
-                            getScaledImageUri(
-                              rater.profile.pfp,
-                              ImageScale.W_AUTO_H_50
-                            )
-                          )}
-                          alt={`${raterLabel}'s avatar`}
-                          width={20}
-                          height={20}
-                          className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-black"
-                        />
-                      ) : (
-                        <div className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-black" />
-                      )}
-                    </Link>
-                  </div>
+                    {rater.profile.pfp ? (
+                      <Image
+                        src={resolveIpfsUrlSync(
+                          getScaledImageUri(
+                            rater.profile.pfp,
+                            ImageScale.W_AUTO_H_50
+                          )
+                        )}
+                        alt={`${raterLabel}'s avatar`}
+                        width={20}
+                        height={20}
+                        className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-black"
+                      />
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800 tw-text-[9px] tw-font-semibold tw-uppercase tw-text-iron-300 tw-ring-1 tw-ring-black"
+                      >
+                        {fallbackAvatarLabel}
+                      </span>
+                    )}
+                  </Link>
                   <Tooltip
                     id={tooltipId}
                     place="top"

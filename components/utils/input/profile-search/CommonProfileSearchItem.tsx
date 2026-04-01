@@ -16,21 +16,22 @@ export default function CommonProfileSearchItem({
   readonly isHighlighted?: boolean | undefined;
   readonly id: string;
 }) {
-  const title =
-    profile.display ?? profile.handle ?? profile.wallet ?? "Profile";
-  const avatarLabel =
-    profile.display ?? profile.handle ?? profile.wallet ?? "Profile";
+  const title = profile.display ?? profile.handle ?? profile.wallet;
+  const avatarLabel = title;
   const avatarAltText = `${avatarLabel} avatar`;
-  const secondaryText = [profile.handle, profile.wallet, profile.display].find(
-    (value) => value && value !== title
-  );
+  const secondaryText =
+    [profile.handle, profile.wallet, profile.display].find(
+      (value): value is string => value !== null && value.length > 0 && value !== title
+    ) ?? null;
 
   const onProfileClick = () => onProfileSelect(profile);
 
   return (
     <li
       id={id}
-      role="option"
+      role={
+        "option" /* NOSONAR: custom combobox popup uses valid ARIA listbox/option semantics */
+      }
       aria-selected={isSelected}
       className="tw-list-none"
     >
@@ -49,6 +50,7 @@ export default function CommonProfileSearchItem({
                 <div className="tw-h-full tw-w-full tw-max-w-full">
                   <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-center">
                     {/* Keep img here because this lightweight search dropdown behaves like a typeahead. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={getScaledImageUri(
                         profile.pfp,

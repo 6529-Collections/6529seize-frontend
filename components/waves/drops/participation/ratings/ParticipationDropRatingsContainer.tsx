@@ -21,7 +21,6 @@ export default function ParticipationDropRatingsContainer({
   };
 
   const theme = getThemeColors(rank, ratingsData.currentRating < 0);
-  const userTheme = getThemeColors(rank, ratingsData.userRating < 0);
 
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
@@ -44,7 +43,6 @@ export default function ParticipationDropRatingsContainer({
         drop={drop}
         rank={rank}
         theme={theme}
-        userTheme={userTheme}
         ratingsData={ratingsData}
       />
     </div>

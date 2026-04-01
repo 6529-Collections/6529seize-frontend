@@ -43,6 +43,7 @@ interface CreateDropProps {
 export interface DropMutationBody {
   readonly drop: ApiCreateDropRequest;
   readonly dropId: string | null;
+  readonly onSuccess?: (() => void) | undefined;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -198,6 +199,7 @@ export default function CreateDrop({
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
       processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
+      body.onSuccess?.();
 
       if (
         submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
@@ -228,6 +230,7 @@ export default function CreateDrop({
   const queueRef = useRef<DropMutationBody[]>([]);
   const isProcessingRef = useRef(false);
   const hasBatchErrorsRef = useRef(false);
+  const inFlightProcessNextDropRef = useRef<Promise<void> | null>(null);
 
   const processNextDrop = useCallback(async () => {
     if (isProcessingRef.current || queueRef.current.length === 0) {
@@ -264,7 +267,7 @@ export default function CreateDrop({
       queueRef.current.push(dropRequest);
 
       // Process immediately - avoids state update timing issues
-      void processNextDrop();
+      inFlightProcessNextDropRef.current = processNextDrop();
 
       // Clear unread divider when user sends a message
       if (unreadDividerContext) {

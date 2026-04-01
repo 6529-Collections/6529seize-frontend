@@ -2,7 +2,7 @@
 
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import type { ReactNode } from "react";
+import { Children, type ReactNode } from "react";
 import DropCurationButton from "../DropCurationButton";
 import WaveDropReactions from "../WaveDropReactions";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
@@ -20,7 +20,8 @@ export default function ParticipationDropFooter({
   const canShowCuration = drop.context_profile_context?.curatable ?? false;
   const hasRatings = drop.raters_count > 0;
   const hasReactions = drop.reactions.length > 0;
-  const hasVoteAction = voteAction !== undefined && voteAction !== null;
+  const normalizedVoteAction = Children.toArray(voteAction);
+  const hasVoteAction = normalizedVoteAction.length > 0;
   const hasPrimaryActions = canShowCuration || hasVoteAction;
   const shouldShowVoteFooter = canShowVote && (hasRatings || hasPrimaryActions);
   const shouldShowRatingsOnlyFooter = !canShowVote && hasRatings;
@@ -49,7 +50,7 @@ export default function ParticipationDropFooter({
                   isCuratable={canShowCuration}
                   isCurated={drop.context_profile_context?.curated ?? false}
                 />
-                {voteAction}
+                {normalizedVoteAction}
               </div>
             )}
           </div>

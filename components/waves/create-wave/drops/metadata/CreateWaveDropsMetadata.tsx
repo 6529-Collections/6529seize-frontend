@@ -72,8 +72,10 @@ export default function CreateWaveDropsMetadata({
     {}
   );
 
-  const nonUniqueMetadataIdxs = Object.values(keyOccurrences).flatMap(
-    (indices) => (indices.length > 1 ? indices : [])
+  const nonUniqueMetadataIdxs = new Set(
+    Object.values(keyOccurrences).flatMap((indices) =>
+      indices.length > 1 ? indices : []
+    )
   );
   const reservedIdentityMetadataIdxs = requiredMetadata.reduce<number[]>(
     (acc, item, index) => {
@@ -93,7 +95,7 @@ export default function CreateWaveDropsMetadata({
       return IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR;
     }
 
-    if (nonUniqueMetadataIdxs.includes(index) && haveNonUniqueMetadata) {
+    if (nonUniqueMetadataIdxs.has(index) && haveNonUniqueMetadata) {
       return NON_UNIQUE_METADATA_ERROR;
     }
 

@@ -21,6 +21,10 @@ export default function ParticipationDropRatingsVoterSection({
       {hasRaters && (
         <div className="tw-flex tw-items-center -tw-space-x-1.5">
           {drop.top_raters.slice(0, 5).map((rater, index) => {
+            if (!rater.profile.pfp) {
+              return null;
+            }
+
             const raterLabel =
               rater.profile.handle ?? rater.profile.primary_address;
 
@@ -31,20 +35,18 @@ export default function ParticipationDropRatingsVoterSection({
                   style={{ zIndex: drop.top_raters.length - index }}
                   data-tooltip-id={`participation-rater-${rater.profile.id}`}
                 >
-                  {rater.profile.pfp && (
-                    <Link href={`/${raterLabel}`}>
-                      {/* Voter avatars can come from arbitrary remote hosts, so this stays unoptimized. */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={getScaledImageUri(
-                          rater.profile.pfp,
-                          ImageScale.W_AUTO_H_50
-                        )}
-                        alt={`${raterLabel}'s avatar`}
-                        className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-black"
-                      />
-                    </Link>
-                  )}
+                  <Link href={`/${raterLabel}`}>
+                    {/* Voter avatars can come from arbitrary remote hosts, so this stays unoptimized. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={getScaledImageUri(
+                        rater.profile.pfp,
+                        ImageScale.W_AUTO_H_50
+                      )}
+                      alt={`${raterLabel}'s avatar`}
+                      className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-black"
+                    />
+                  </Link>
                 </div>
                 <Tooltip
                   id={`participation-rater-${rater.profile.id}`}

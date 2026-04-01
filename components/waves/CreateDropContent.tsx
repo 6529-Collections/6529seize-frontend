@@ -415,19 +415,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     useState<ScopedValueState<string | null> | null>(null);
   const closeOnNextInputRef = useRef(false);
   const prevIsDropModeRef = useRef(isDropMode);
-  const dropModeSessionEpochRef = useRef(0);
-  // Invalidate Drop-mode transient UI state only after the prop actually flips off.
-  if (prevIsDropModeRef.current && !isDropMode) {
-    dropModeSessionEpochRef.current += 1;
-  }
-  prevIsDropModeRef.current = isDropMode;
+  const [dropModeSessionEpoch, setDropModeSessionEpoch] = useState(0);
   const isWaveChanged = prevWaveIdRef.current !== wave.id;
   if (isWaveChanged) {
     prevWaveIdRef.current = wave.id;
     hasUserToggledOptionsRef.current = false;
     closeOnNextInputRef.current = false;
   }
-  const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpochRef.current}`;
+  const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
   const showOptions =
     isWideContainer ||
     (showOptionsState?.scopeKey === wave.id ? showOptionsState.value : false);
@@ -457,6 +452,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return () => observer.disconnect();
   }, []);
 
+  useLayoutEffect(() => {
+    if (prevIsDropModeRef.current && !isDropMode) {
+      setDropModeSessionEpoch((prev) => prev + 1);
+    }
+
+    prevIsDropModeRef.current = isDropMode;
+  }, [isDropMode]);
+
   const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
   const isIdentitySubmissionExperience =
     submissionExperience === WaveSubmissionExperience.IDENTITY;
@@ -473,7 +476,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isIdentitySubmissionExperience,
     identitySubmissionMode,
   });
-  const identitySubmissionSessionScopeKey = `${identitySubmissionScopeKey}:${dropModeSessionEpochRef.current}`;
+  const identitySubmissionSessionScopeKey = `${identitySubmissionScopeKey}:${dropModeSessionEpoch}`;
   const isIdentityPickerAllowed =
     isIdentitySubmissionExperience &&
     isDropMode &&
@@ -1051,6 +1054,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
+        onSuccess:
+          isDropMode && canExitDropMode
+            ? () => handleDropModeChange(false)
+            : undefined,
       });
     } catch (error) {
       setToast({
