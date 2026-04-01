@@ -1,6 +1,7 @@
 "use client";
 
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import type { MediaLoadStrategy } from "@/components/drops/view/item/content/media/mediaLoadStrategy";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   getDropPreviewImageUrl,
@@ -22,6 +23,7 @@ interface MemesQuickVotePreviewProps {
   readonly isBusy: boolean;
   readonly isMobile: boolean;
   readonly remainingCount: number;
+  readonly renderMode: "active" | "preloaded";
   readonly swipeVoteAmount: number | null;
   readonly uncastPower: number | null;
   readonly votingLabel: string | null;
@@ -41,12 +43,14 @@ function getQuickVoteArtworkMediaContent({
   artworkMedia,
   hasTouchScreen,
   htmlPreviewImageUrl,
+  loadStrategy,
 }: {
   readonly artworkMedia:
     | ExtendedDrop["parts"][number]["media"][number]
     | undefined;
   readonly hasTouchScreen: boolean;
   readonly htmlPreviewImageUrl?: string | undefined;
+  readonly loadStrategy: MediaLoadStrategy;
 }): ReactNode {
   if (!artworkMedia) {
     return null;
@@ -57,9 +61,10 @@ function getQuickVoteArtworkMediaContent({
       media_mime_type={artworkMedia.mime_type}
       media_url={artworkMedia.url}
       isCompetitionDrop={true}
-      disableAutoPlay={hasTouchScreen}
+      disableAutoPlay={hasTouchScreen || loadStrategy === "eager"}
       disableModal={hasTouchScreen}
       htmlPreviewImageUrl={htmlPreviewImageUrl}
+      loadStrategy={loadStrategy}
     />
   );
 }
@@ -85,11 +90,13 @@ function MemesQuickVoteMobileSwipeSurface({
 }
 
 function MemesQuickVoteMobileDetails({
+  allowDescriptionToggle,
   description,
   drop,
   title,
   touchSurfaceProps,
 }: {
+  readonly allowDescriptionToggle: boolean;
   readonly description: string;
   readonly drop: ExtendedDrop;
   readonly title: string;
@@ -115,6 +122,7 @@ function MemesQuickVoteMobileDetails({
 
             {description && (
               <MemesQuickVoteDescription
+                allowToggle={allowDescriptionToggle}
                 key={drop.id}
                 description={description}
               />
@@ -127,12 +135,14 @@ function MemesQuickVoteMobileDetails({
 }
 
 function MemesQuickVoteMediaStage({
+  isInteractive,
   isMobile,
   mediaContent,
   swipeHint,
   swipeOffset,
   touchSurfaceProps,
 }: {
+  readonly isInteractive: boolean;
   readonly isMobile: boolean;
   readonly mediaContent: ReactNode;
   readonly swipeHint: string | null;
@@ -160,7 +170,8 @@ function MemesQuickVoteMediaStage({
         {mediaContent}
       </div>
 
-      {isMobile &&
+      {isInteractive &&
+        isMobile &&
         (["left", "right"] as const).map((side) => (
           <MemesQuickVoteMobileSwipeSurface
             key={side}
@@ -172,22 +183,26 @@ function MemesQuickVoteMediaStage({
           />
         ))}
 
-      <div
-        className={clsx(
-          "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity md:tw-hidden",
-          swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
-        )}
-      >
-        Skip
-      </div>
-      <div
-        className={clsx(
-          "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity md:tw-hidden",
-          swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
-        )}
-      >
-        {swipeHint ? `Vote ${swipeHint}` : "Vote"}
-      </div>
+      {isInteractive && (
+        <>
+          <div
+            className={clsx(
+              "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-z-10 tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-rose-300 tw-transition-opacity md:tw-hidden",
+              swipeOffset < 0 ? "tw-opacity-100" : "tw-opacity-0"
+            )}
+          >
+            Skip
+          </div>
+          <div
+            className={clsx(
+              "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-4 tw-z-10 tw-flex tw-items-center tw-text-right tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-opacity md:tw-hidden",
+              swipeOffset > 0 ? "tw-opacity-100" : "tw-opacity-0"
+            )}
+          >
+            {swipeHint ? `Vote ${swipeHint}` : "Vote"}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -197,6 +212,7 @@ function MemesQuickVotePreviewContent({
   isBusy,
   isMobile,
   remainingCount,
+  renderMode,
   swipeVoteAmount,
   uncastPower,
   votingLabel,
@@ -204,6 +220,9 @@ function MemesQuickVotePreviewContent({
   onSkip,
   onVoteWithSwipe,
 }: MemesQuickVotePreviewProps) {
+  const isInteractive = renderMode === "active";
+  const loadStrategy: MediaLoadStrategy =
+    renderMode === "preloaded" ? "eager" : "in-view";
   const title =
     drop.metadata.find((entry) => entry.data_key === "title")?.data_value ??
     "Untitled submission";
@@ -213,9 +232,10 @@ function MemesQuickVotePreviewContent({
   const artworkMedia = drop.parts.at(0)?.media.at(0);
   const { hasTouchScreen } = useDeviceInfo();
   const isInteractiveHtmlMedia = artworkMedia?.mime_type === "text/html";
+  const previewImageUrl = getDropPreviewImageUrl(drop.metadata) ?? undefined;
   const htmlPreviewImageUrl =
-    isInteractiveHtmlMedia && hasTouchScreen
-      ? (getDropPreviewImageUrl(drop.metadata) ?? undefined)
+    isInteractiveHtmlMedia && (hasTouchScreen || renderMode === "preloaded")
+      ? previewImageUrl
       : undefined;
   const swipeHint = useMemo(() => {
     if (swipeVoteAmount === null) {
@@ -255,6 +275,7 @@ function MemesQuickVotePreviewContent({
     artworkMedia,
     hasTouchScreen,
     htmlPreviewImageUrl,
+    loadStrategy,
   });
   const mobileTouchSurfaceProps: MemesQuickVoteTouchSurfaceProps = {
     onTouchCancel: (event) => {
@@ -274,7 +295,11 @@ function MemesQuickVotePreviewContent({
   const previewCard = (
     <article
       ref={previewCardRef}
-      data-testid="quick-vote-preview-card"
+      data-testid={
+        renderMode === "active"
+          ? "quick-vote-preview-card"
+          : "quick-vote-preview-card-preloaded"
+      }
       data-quick-vote-transform={cardTransform ?? undefined}
       className={clsx(
         "tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-transition-all tw-duration-200 tw-ease-out",
@@ -288,10 +313,15 @@ function MemesQuickVotePreviewContent({
       onTransitionEnd={handleCardTransitionEnd}
     >
       <div
-        data-testid="quick-vote-preview-mobile-context"
+        data-testid={
+          renderMode === "active"
+            ? "quick-vote-preview-mobile-context"
+            : "quick-vote-preview-mobile-context-preloaded"
+        }
         className="tw-flex tw-h-full tw-flex-col md:tw-flex md:tw-min-h-0 md:tw-flex-1 md:tw-p-0"
       >
         <MemesQuickVoteMediaStage
+          isInteractive={isInteractive}
           isMobile={isMobile}
           mediaContent={mediaContent}
           swipeHint={swipeHint}
@@ -300,6 +330,7 @@ function MemesQuickVotePreviewContent({
         />
 
         <MemesQuickVoteMobileDetails
+          allowDescriptionToggle={isInteractive}
           description={description}
           drop={drop}
           title={title}
@@ -311,25 +342,34 @@ function MemesQuickVotePreviewContent({
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col">
-      <div data-testid="quick-vote-preview-status" className="tw-sr-only">
-        {swipeInstructionText && (
+      <div
+        data-testid={
+          renderMode === "active"
+            ? "quick-vote-preview-status"
+            : "quick-vote-preview-status-preloaded"
+        }
+        className="tw-sr-only"
+      >
+        {isInteractive && swipeInstructionText && (
           <span className="tw-sr-only">{swipeInstructionText}</span>
         )}
-        {typeof uncastPower === "number" && (
+        {isInteractive && typeof uncastPower === "number" && (
           <span className="tw-sr-only tw-text-primary-300">
             {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"} left
           </span>
         )}
-        <span
-          aria-hidden="true"
-          className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-backdrop-blur-md"
-        >
-          {formatNumberWithCommas(remainingCount)} unrated
-        </span>
+        {isInteractive && (
+          <span
+            aria-hidden="true"
+            className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-backdrop-blur-md"
+          >
+            {formatNumberWithCommas(remainingCount)} unrated
+          </span>
+        )}
       </div>
 
       <div className="tw-relative tw-min-h-0 tw-flex-1">
-        {canUseSwiperTouchSurface ? (
+        {isInteractive && canUseSwiperTouchSurface ? (
           <Swiper
             initialSlide={MOBILE_SWIPE_CENTER_SLIDE_INDEX}
             slidesPerView={1}
@@ -364,5 +404,5 @@ function MemesQuickVotePreviewContent({
 export default function MemesQuickVotePreview(
   props: MemesQuickVotePreviewProps
 ) {
-  return <MemesQuickVotePreviewContent key={props.drop.id} {...props} />;
+  return <MemesQuickVotePreviewContent {...props} />;
 }

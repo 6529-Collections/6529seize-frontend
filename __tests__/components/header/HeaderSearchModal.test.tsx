@@ -23,6 +23,7 @@ const useDropForgePermissionsMock = jest.fn();
 
 jest.mock("react-use", () => {
   return {
+    createBreakpoint: () => () => "MD",
     useClickAway: (_ref: any, cb: () => void) => {
       clickAwayCb = cb;
     },
@@ -284,6 +285,221 @@ describe("HeaderSearchModal", () => {
     expect(
       renderedItems.some((content) => content.includes('"type":"PAGE"'))
     ).toBe(true);
+  });
+
+  it("matches close pluralized page titles for page searches", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [{ name: "Memes Calendar", href: "/meme-calendar" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "meme calendar" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(
+      items.some(
+        (item) =>
+          (item.textContent ?? "").includes('"title":"Memes Calendar"') &&
+          (item.textContent ?? "").includes('"/meme-calendar"')
+      )
+    ).toBe(true);
+  });
+
+  it("matches close singularized page titles for page searches", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [{ name: "Meme Calendar", href: "/meme-calendar" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "memes calendar" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(
+      items.some(
+        (item) =>
+          (item.textContent ?? "").includes('"title":"Meme Calendar"') &&
+          (item.textContent ?? "").includes('"/meme-calendar"')
+      )
+    ).toBe(true);
+  });
+
+  it("matches partial token page searches with close pluralization", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [{ name: "Memes Calendar", href: "/meme-calendar" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "meme cal" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(
+      items.some(
+        (item) =>
+          (item.textContent ?? "").includes('"title":"Memes Calendar"') &&
+          (item.textContent ?? "").includes('"/meme-calendar"')
+      )
+    ).toBe(true);
+  });
+
+  it("matches page queries that span breadcrumbs and titles", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [],
+          subsections: [
+            {
+              name: "Metrics",
+              items: [{ name: "Health", href: "/network/health" }],
+            },
+          ],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "metrics health" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(
+      items.some(
+        (item) =>
+          (item.textContent ?? "").includes('"title":"Health"') &&
+          (item.textContent ?? "").includes('"/network/health"')
+      )
+    ).toBe(true);
+  });
+
+  it("prioritizes exact href matches ahead of title and breadcrumb fallbacks", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [],
+          subsections: [
+            {
+              name: "Metrics",
+              items: [{ name: "Health", href: "/network/health" }],
+            },
+          ],
+        },
+        {
+          key: "about",
+          name: "About",
+          icon: () => null,
+          items: [{ name: "Network Health", href: "/about/network-health" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "/network/health" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(items[0]?.textContent).toContain('"/network/health"');
+  });
+
+  it("prioritizes path-like partial href queries ahead of token-based title matches", async () => {
+    setup({
+      selectedCategory: "PAGES",
+      sidebarSections: [
+        {
+          key: "network",
+          name: "Network",
+          icon: () => null,
+          items: [],
+          subsections: [
+            {
+              name: "Metrics",
+              items: [{ name: "Health", href: "/network/health" }],
+            },
+          ],
+        },
+        {
+          key: "about",
+          name: "About",
+          icon: () => null,
+          items: [{ name: "Network Health", href: "/about/network-health" }],
+          subsections: [],
+        },
+      ],
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "/network/he" } });
+
+    const items = await screen.findAllByTestId("item");
+    expect(items[0]?.textContent).toContain('"/network/health"');
   });
 
   it("includes drop forge pages in search results when accessible", () => {

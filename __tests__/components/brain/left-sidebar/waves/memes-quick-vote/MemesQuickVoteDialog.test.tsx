@@ -40,7 +40,13 @@ const useIsMobileScreenMock = useIsMobileScreen as jest.MockedFunction<
   typeof useIsMobileScreen
 >;
 
-const createDrop = (serialNo: number) =>
+const createDrop = (
+  serialNo: number,
+  mediaOverrides?: Partial<{
+    mime_type: string;
+    url: string;
+  }>
+) =>
   ({
     id: `drop-${serialNo}`,
     serial_no: serialNo,
@@ -73,6 +79,7 @@ const createDrop = (serialNo: number) =>
           {
             mime_type: "image/png",
             url: "https://example.com/drop.png",
+            ...mediaOverrides,
           },
         ],
       },
@@ -101,6 +108,27 @@ describe("MemesQuickVoteDialog", () => {
     retryDiscovery: jest.fn(),
     submitVote: jest.fn().mockResolvedValue(true),
     skipDrop: jest.fn(),
+    uncastPower: 5_000,
+    votingLabel: "votes",
+    ...overrides,
+  });
+
+  const createDialogProps = (
+    overrides: Partial<React.ComponentProps<typeof MemesQuickVoteDialog>> = {}
+  ): React.ComponentProps<typeof MemesQuickVoteDialog> => ({
+    activeDrop,
+    hasDiscoveryError: false,
+    isExhausted: false,
+    isOpen: true,
+    latestUsedAmount: 250,
+    nextDrop: null,
+    onClose: jest.fn(),
+    recentAmounts: [250, 500],
+    remainingCount: 9,
+    retryDiscovery: jest.fn(),
+    sessionId: 1,
+    skipDrop: jest.fn(),
+    submitVote: jest.fn().mockResolvedValue(true),
     uncastPower: 5_000,
     votingLabel: "votes",
     ...overrides,
@@ -435,6 +463,67 @@ describe("MemesQuickVoteDialog", () => {
     });
   });
 
+  it("renders a hidden preloaded next card for preload-safe media", () => {
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          nextDrop: createDrop(43),
+        })}
+      />
+    );
+
+    expect(
+      screen.getByTestId("quick-vote-preview-card-next")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("quick-vote-preview-card-preloaded")
+    ).toBeInTheDocument();
+  });
+
+  it("removes the hidden preloaded next card when the dialog closes", () => {
+    const nextDrop = createDrop(43);
+    const { rerender } = render(
+      <MemesQuickVoteDialog {...createDialogProps({ nextDrop })} />
+    );
+
+    expect(
+      screen.getByTestId("quick-vote-preview-card-next")
+    ).toBeInTheDocument();
+
+    rerender(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          isOpen: false,
+          nextDrop,
+        })}
+      />
+    );
+
+    expect(
+      screen.queryByTestId("quick-vote-preview-card-next")
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not preload hidden GLB next drops", () => {
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          nextDrop: createDrop(43, {
+            mime_type: "model/gltf-binary",
+            url: "https://example.com/drop.glb",
+          }),
+        })}
+      />
+    );
+
+    expect(
+      screen.queryByTestId("quick-vote-preview-card-next")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("quick-vote-preview-card-preloaded")
+    ).not.toBeInTheDocument();
+  });
+
   it("submits the visible quick amount from the mobile action row", async () => {
     useIsMobileScreenMock.mockReturnValue(true);
     const submitVote = jest.fn().mockResolvedValue(true);
@@ -456,7 +545,29 @@ describe("MemesQuickVoteDialog", () => {
 
   it("resets dialog-local controls when the session id changes", () => {
     const { rerender } = render(
-      <MemesQuickVoteDialog isOpen={true} sessionId={1} onClose={jest.fn()} />
+      <MemesQuickVoteDialog {...createDialogProps()} />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Custom amount",
+      })
+    );
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "777" },
+    });
+
+    expect(screen.getByRole("textbox")).toHaveValue("777");
+
+    rerender(<MemesQuickVoteDialog {...createDialogProps({ sessionId: 2 })} />);
+
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("resets dialog-local controls when the dialog closes and reopens", () => {
+    const onClose = jest.fn();
+    const { rerender } = render(
+      <MemesQuickVoteDialog {...createDialogProps({ onClose })} />
     );
 
     fireEvent.click(
@@ -471,7 +582,39 @@ describe("MemesQuickVoteDialog", () => {
     expect(screen.getByRole("textbox")).toHaveValue("777");
 
     rerender(
-      <MemesQuickVoteDialog isOpen={true} sessionId={2} onClose={jest.fn()} />
+      <MemesQuickVoteDialog
+        {...createDialogProps({ isOpen: false, onClose })}
+      />
+    );
+    rerender(<MemesQuickVoteDialog {...createDialogProps({ onClose })} />);
+
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("resets dialog-local controls when the active drop changes", () => {
+    const nextActiveDrop = createDrop(43);
+    const { rerender } = render(
+      <MemesQuickVoteDialog {...createDialogProps()} />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Custom amount",
+      })
+    );
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "777" },
+    });
+
+    expect(screen.getByRole("textbox")).toHaveValue("777");
+
+    rerender(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          activeDrop: nextActiveDrop,
+          remainingCount: 8,
+        })}
+      />
     );
 
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();

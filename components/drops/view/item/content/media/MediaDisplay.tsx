@@ -11,6 +11,7 @@ import { ImageScale } from "@/helpers/image.helpers";
 import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";
+import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 
 enum MediaType {
   IMAGE = "IMAGE",
@@ -136,6 +137,7 @@ export default function MediaDisplay({
   previewImageUrl,
   requireInteractionToLoad = false,
   iframeContainerClassName,
+  loadStrategy = "in-view",
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -144,6 +146,7 @@ export default function MediaDisplay({
   readonly previewImageUrl?: string | null | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
   readonly iframeContainerClassName?: string | undefined;
+  readonly loadStrategy?: MediaLoadStrategy | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -172,9 +175,23 @@ export default function MediaDisplay({
   const mediaType = getMediaType();
 
   if (mediaType === MediaType.HTML) {
+    if (loadStrategy === "eager") {
+      return previewImageUrl ? (
+        <MediaDisplayImage
+          src={previewImageUrl}
+          imageScale={imageScale}
+          loadStrategy={loadStrategy}
+        />
+      ) : null;
+    }
+
     if (previewImageUrl && !requireInteractionToLoad) {
       return (
-        <MediaDisplayImage src={previewImageUrl} imageScale={imageScale} />
+        <MediaDisplayImage
+          src={previewImageUrl}
+          imageScale={imageScale}
+          loadStrategy={loadStrategy}
+        />
       );
     }
 
@@ -191,12 +208,24 @@ export default function MediaDisplay({
   }
 
   if (previewImageUrl && mediaType !== MediaType.IMAGE) {
-    return <MediaDisplayImage src={previewImageUrl} imageScale={imageScale} />;
+    return (
+      <MediaDisplayImage
+        src={previewImageUrl}
+        imageScale={imageScale}
+        loadStrategy={loadStrategy}
+      />
+    );
   }
 
   switch (mediaType) {
     case MediaType.IMAGE:
-      return <MediaDisplayImage src={media_url} imageScale={imageScale} />;
+      return (
+        <MediaDisplayImage
+          src={media_url}
+          imageScale={imageScale}
+          loadStrategy={loadStrategy}
+        />
+      );
     case MediaType.VIDEO:
       return (
         <MediaDisplayVideo

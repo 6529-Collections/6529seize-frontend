@@ -612,6 +612,26 @@ export type DisplayTz = "local" | "utc";
 export function formatMint(n: number): string {
   return `#${n.toLocaleString()}`;
 }
+
+export function formatUtcMonth(
+  d: Date,
+  style: "short" | "long" = "short",
+  locale = "en-US"
+): string {
+  return d.toLocaleString(locale, {
+    month: style,
+    timeZone: "UTC",
+  });
+}
+
+export function formatUtcMonthYear(
+  d: Date,
+  style: "short" | "long" = "short",
+  locale = "en-US"
+): string {
+  return `${formatUtcMonth(d, style, locale)} ${d.getUTCFullYear()}`;
+}
+
 export function formatFullDate(d: Date, mode: DisplayTz = "local"): string {
   return d.toLocaleDateString(undefined, {
     weekday: "short",
