@@ -28,18 +28,36 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Verify registry signatures
-        run: npm audit signatures
+      - name: Install pnpm
+        run: corepack install
+
+      - name: Resolve pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-node-22-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-22-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
 
       - name: Lint package.json versions
-        run: npm run lint:package-json
+        run: pnpm run lint:package-json
 
       - name: Build App
         env:
@@ -58,7 +76,7 @@ jobs:
           ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: npm run build
+        run: pnpm run build
 
       - name: Build Target
         run: |

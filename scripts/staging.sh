@@ -20,14 +20,14 @@ git pull
 
 # Step 2: Reinstall dependencies
 print_message "Reinstalling dependencies..."
-npm ci
+pnpm install --frozen-lockfile
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
-npm run build
+pnpm run build
 
 # Step 5: Restart PM2 services
 print_message "Restarting PM2 services..."
-pm2 restart 6529seize --update-env
+pnpm exec pm2 restart 6529seize --update-env
 
 print_message "Update completed successfully!"
