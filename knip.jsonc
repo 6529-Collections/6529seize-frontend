@@ -70,6 +70,7 @@
       "eslint-plugin-diff",
       "@openapitools/openapi-generator-cli",
       "bootstrap",
+      "pm2",
       "pino-pretty",
       "@jest/globals",
       "@testing-library/react",

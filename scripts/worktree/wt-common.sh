@@ -116,13 +116,12 @@ if [ "$SKIP_LINT" = "1" ]; then
   echo "Skipping lint (SKIP_LINT=1)"
   exit 0
 fi
-npm run format:uncommitted
+pnpm run format:uncommitted
 git add -u
-npm run lint:uncommitted:tight
+pnpm run lint:uncommitted:tight
 HOOK
   chmod +x "$hooks_path/pre-commit"
 
   git -C "$worktree_path" config extensions.worktreeConfig true
   git -C "$worktree_path" config --worktree core.hooksPath .hooks
 }
-

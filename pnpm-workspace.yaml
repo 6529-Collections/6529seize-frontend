@@ -1,0 +1,26 @@
+packages:
+  - "."
+
+savePrefix: ""
+minimumReleaseAge: 1440
+
+overrides:
+  "@emoji-mart/react>react": "$react"
+  "@emoji-mart/react>react-dom": "$react-dom"
+  eslint-plugin-react-hooks: "7.0.0"
+  "react-toggle>react": "$react"
+  "react-toggle>react-dom": "$react-dom"
+  serialize-javascript: "7.0.4"
+
+onlyBuiltDependencies:
+  - "@nestjs/core"
+  - "@openapitools/openapi-generator-cli"
+  - "@parcel/watcher"
+  - "@reown/appkit"
+  - "@sentry/cli"
+  - bufferutil
+  - esbuild
+  - keccak
+  - sharp
+  - unrs-resolver
+  - utf-8-validate
