@@ -1,5 +1,4 @@
 import { withSentryConfig } from "@sentry/nextjs";
-import dotenv from "dotenv";
 import {
   PHASE_DEVELOPMENT_SERVER,
   PHASE_PRODUCTION_BUILD,
@@ -43,6 +42,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
   // Build & Dev phases
   if (phase === PHASE_DEVELOPMENT_SERVER || phase === PHASE_PRODUCTION_BUILD) {
+    const dotenv = require("dotenv");
     if (mode) dotenv.config({ path: `.env.${mode}` });
     dotenv.config({ path: `.env` });
 
