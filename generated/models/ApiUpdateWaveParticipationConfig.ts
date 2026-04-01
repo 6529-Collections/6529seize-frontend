@@ -18,7 +18,7 @@ import { ApiWaveParticipationSubmissionStrategy } from '../models/ApiWavePartici
 import { ApiWaveRequiredMetadata } from '../models/ApiWaveRequiredMetadata';
 import { HttpFile } from '../http/http';
 
-export class ApiCreateNewWaveParticipationConfig {
+export class ApiUpdateWaveParticipationConfig {
     'scope': ApiCreateNewWaveScope;
     /**
     * The number of applications allowed per participant. Infinite if omitted.
@@ -95,7 +95,7 @@ export class ApiCreateNewWaveParticipationConfig {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiCreateNewWaveParticipationConfig.attributeTypeMap;
+        return ApiUpdateWaveParticipationConfig.attributeTypeMap;
     }
 
     public constructor() {

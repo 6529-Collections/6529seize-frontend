@@ -11,13 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ApiDrop } from '../models/ApiDrop';
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
-export class ApiUndiscoveredDrop {
-    'drop': ApiDrop | null;
-    'left_to_vote_in_current_round': number;
-    'total_count': number;
+export class ApiDropMetadataResponse {
+    'data_key': string;
+    'data_value': string;
+    'resolved_profile'?: ApiProfileMin | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,26 +25,26 @@ export class ApiUndiscoveredDrop {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "drop",
-            "baseName": "drop",
-            "type": "ApiDrop",
+            "name": "data_key",
+            "baseName": "data_key",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "left_to_vote_in_current_round",
-            "baseName": "left_to_vote_in_current_round",
-            "type": "number",
-            "format": "int64"
+            "name": "data_value",
+            "baseName": "data_value",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "total_count",
-            "baseName": "total_count",
-            "type": "number",
-            "format": "int64"
+            "name": "resolved_profile",
+            "baseName": "resolved_profile",
+            "type": "ApiProfileMin",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiUndiscoveredDrop.attributeTypeMap;
+        return ApiDropMetadataResponse.attributeTypeMap;
     }
 
     public constructor() {

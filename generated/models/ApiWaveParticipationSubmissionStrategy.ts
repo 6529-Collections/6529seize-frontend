@@ -11,13 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ApiDrop } from '../models/ApiDrop';
+import { ApiWaveParticipationSubmissionStrategyIdentityConf } from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
+import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
 import { HttpFile } from '../http/http';
 
-export class ApiUndiscoveredDrop {
-    'drop': ApiDrop | null;
-    'left_to_vote_in_current_round': number;
-    'total_count': number;
+export class ApiWaveParticipationSubmissionStrategy {
+    'type': ApiWaveParticipationSubmissionStrategyType;
+    'config': ApiWaveParticipationSubmissionStrategyIdentityConf;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,28 +25,24 @@ export class ApiUndiscoveredDrop {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "drop",
-            "baseName": "drop",
-            "type": "ApiDrop",
+            "name": "type",
+            "baseName": "type",
+            "type": "ApiWaveParticipationSubmissionStrategyType",
             "format": ""
         },
         {
-            "name": "left_to_vote_in_current_round",
-            "baseName": "left_to_vote_in_current_round",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "total_count",
-            "baseName": "total_count",
-            "type": "number",
-            "format": "int64"
+            "name": "config",
+            "baseName": "config",
+            "type": "ApiWaveParticipationSubmissionStrategyIdentityConf",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiUndiscoveredDrop.attributeTypeMap;
+        return ApiWaveParticipationSubmissionStrategy.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+
