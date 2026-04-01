@@ -293,7 +293,7 @@ obtain_cert_and_enable_https() {
 install_dependencies() {
   color yellow "Installing project dependencies…"
   if [[ -d "$REPO_ROOT/node_modules" ]]; then
-    color yellow "Removing existing node_modules and lockfile for a clean install…"
+    color yellow "Removing existing node_modules for a clean install…"
     rm -rf "$REPO_ROOT/node_modules"
   fi
   ( cd "$REPO_ROOT" && pnpm install --frozen-lockfile )

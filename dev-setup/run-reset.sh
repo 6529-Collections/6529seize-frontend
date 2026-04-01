@@ -19,8 +19,12 @@ color yellow "Stopping PM2 process (if exists)…"
 if [[ -d "$REPO_ROOT" ]] && command -v pnpm >/dev/null 2>&1; then
   (cd "$REPO_ROOT" && pnpm exec pm2 delete 6529seize >/dev/null 2>&1) || true
   (cd "$REPO_ROOT" && pnpm exec pm2 save >/dev/null 2>&1) || true
+elif command -v pm2 >/dev/null 2>&1; then
+  color yellow "Repo-managed PM2 cleanup unavailable; using global pm2."
+  pm2 delete 6529seize >/dev/null 2>&1 || true
+  pm2 save >/dev/null 2>&1 || true
 else
-  color yellow "pnpm or repo checkout not available; skipping PM2 cleanup."
+  color yellow "pnpm/repo checkout unavailable and no global pm2 found; skipping PM2 cleanup."
 fi
 
 color yellow "Freeing default app port 3001 (best-effort)…"
