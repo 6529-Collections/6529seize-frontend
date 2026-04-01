@@ -27,17 +27,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-        with:
-          version: 10.33.0
-          run_install: false
-
       - name: Install Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "22"
-          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install pnpm
+        run: corepack install
+
+      - name: Resolve pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-node-22-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-22-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
