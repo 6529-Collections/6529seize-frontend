@@ -5,6 +5,7 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import type {
   SeasonMintRow} from "@/components/meme-calendar/meme-calendar.helpers";
 import {
@@ -33,6 +34,10 @@ export default function SubscriptionsReportComponent() {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
+  const hideSubscriptions = shouldHideSubscriptions({
+    capacitorIsIos: capacitor.isIos,
+    country,
+  });
   const pastDropsTarget = useRef<HTMLDivElement>(null);
   const upcomingToggleRef = useRef<HTMLDivElement>(null);
 
@@ -147,7 +152,7 @@ export default function SubscriptionsReportComponent() {
         <Col className="d-flex flex-wrap align-items-center justify-content-between">
           <h1>Subscriptions Report</h1>
           <div className="tw-flex tw-items-center tw-gap-3">
-            {connectedProfile && (!capacitor.isIos || country === "US") && (
+            {connectedProfile && !hideSubscriptions && (
               <Link
                 href={`/${connectedProfile.normalised_handle}/subscriptions`}
                 className="decoration-none"
