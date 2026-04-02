@@ -1,7 +1,6 @@
 "use client";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
-import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
 import {
   getCanonicalNextMintNumber,
   formatFullDateTime,
@@ -15,52 +14,12 @@ import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Image from "next/image";
 import Link from "next/link";
+import ArtistPill from "./ArtistPill";
+import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface LatestDropNextMintSectionProps {
   readonly drop: ApiDrop;
-}
-
-function NextMintArtistPill({
-  pfp,
-  label,
-  href,
-}: {
-  readonly pfp: string | null | undefined;
-  readonly label: string;
-  readonly href?: string | undefined;
-}) {
-  const content = (
-    <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-backdrop-blur-sm">
-      {pfp ? (
-        <Image
-          src={resolveIpfsUrl(pfp)}
-          alt={label}
-          width={16}
-          height={16}
-          className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900 tw-object-contain"
-        />
-      ) : (
-        <span
-          aria-hidden="true"
-          className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900"
-        />
-      )}
-      <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-iron-100">
-        {label}
-      </span>
-    </span>
-  );
-
-  if (!href) {
-    return content;
-  }
-
-  return (
-    <Link href={href} className="tw-no-underline">
-      {content}
-    </Link>
-  );
 }
 
 const formatDropTimestamp = (timestamp: number): string | null => {
@@ -175,14 +134,18 @@ export default function LatestDropNextMintSection({
                       mimeType={media.mime_type}
                       dropId={drop.id}
                       size="sm"
+                      iconClassName="tw-size-[26px]"
                     />
                   )}
-                  <NextMintArtistPill
+                  <ArtistPill
                     pfp={author.pfp}
                     label={authorName}
                     href={authorHandle ? `/${authorHandle}` : undefined}
+                    profileHandle={author.handle ?? undefined}
                   />
                 </div>
+
+                <LatestDropNextMintSubscribe />
               </div>
 
               <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
