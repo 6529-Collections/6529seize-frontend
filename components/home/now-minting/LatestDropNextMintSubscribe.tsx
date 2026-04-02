@@ -82,7 +82,7 @@ export default function LatestDropNextMintSubscribe() {
           title="The Memes"
           subscription={subscription}
           eligibilityCount={
-            details?.subscription_eligibility_count ?? status.eligibility ?? 1
+            details?.subscription_eligibility_count ?? status?.eligibility ?? 1
           }
           readonly={false}
           refresh={() => {
