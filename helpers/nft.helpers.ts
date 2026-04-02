@@ -135,7 +135,7 @@ function getUrlExtension(url: string | null | undefined): string | null {
   }
 
   const ext = parts.at(-1)?.trim().toUpperCase();
-  return ext ? ext : null;
+  return ext || null;
 }
 
 export function getAnimationMimeTypeFromMetadata(
@@ -184,14 +184,14 @@ export function getNftMimeType(
     return animationMimeType;
   }
 
+  if (animationSrc) {
+    return "video/mp4";
+  }
+
   const imageSrc = getResolvedImageSrc(nft);
   const imageMimeType = getMimeTypeFromFormat(getUrlExtension(imageSrc));
   if (imageMimeType) {
     return imageMimeType;
-  }
-
-  if (animationSrc) {
-    return "video/mp4";
   }
 
   if (imageSrc) {

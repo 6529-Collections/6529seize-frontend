@@ -41,7 +41,10 @@ function NextMintArtistPill({
           className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900 tw-object-contain"
         />
       ) : (
-        <div className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900 tw-object-contain" />
+        <span
+          aria-hidden="true"
+          className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900 tw-object-contain"
+        />
       )}
       <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-iron-100">
         {label}

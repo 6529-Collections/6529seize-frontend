@@ -54,6 +54,14 @@ describe("gateway fallback helpers", () => {
     ).toBe(true);
   });
 
+  it("does not use timeout fallback for empty urls", () => {
+    expect(shouldUseIframeFallbackTimeout("")).toBe(false);
+  });
+
+  it("does not use timeout fallback for ipfs protocol urls", () => {
+    expect(shouldUseIframeFallbackTimeout("ipfs://bafy-test")).toBe(false);
+  });
+
   it("does not use timeout fallback for ipfs gateways", () => {
     expect(
       shouldUseIframeFallbackTimeout("https://ipfs.6529.io/ipfs/bafy-test")

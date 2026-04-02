@@ -421,9 +421,9 @@ export function MemePageArt(props: {
                       </tbody>
                     </Table>
                   </Col>
-                  {detailColumns.map((columnRows, index) => (
+                  {detailColumns.map((columnRows) => (
                     <Col
-                      key={index}
+                      key={columnRows.map((row) => row.key).join("-")}
                       xs={{ span: 12 }}
                       lg={{ span: 6 }}
                       className="d-none d-lg-block"

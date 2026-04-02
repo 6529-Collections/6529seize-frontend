@@ -100,35 +100,51 @@ type MediaErrorEvent = React.SyntheticEvent<
 const DS_ORIGINAL = "arweaveOriginalSrc";
 const DS_LAST_HOST = "arweaveLastGatewayHost";
 
-export function getArweaveGatewayFallbackUrls(url: string): string[] {
+function classifyGatewayAssetUrl(url: string):
+  | { kind: "empty" }
+  | { kind: "ipfs"; sourceUrl: string }
+  | { kind: "arweave"; sourceUrl: string }
+  | { kind: "other"; sourceUrl: string } {
   const trimmed = url.trim();
   if (!trimmed) {
-    return [];
+    return { kind: "empty" };
   }
+
   if (isIpfsProtocolUrl(trimmed)) {
-    return getIpfsFallbackUrls(trimmed);
+    return { kind: "ipfs", sourceUrl: trimmed };
   }
+
   const ipfsProtocolUrl = getIpfsProtocolUrlFromGatewayUrl(trimmed);
   if (ipfsProtocolUrl) {
-    return getIpfsFallbackUrls(ipfsProtocolUrl);
+    return { kind: "ipfs", sourceUrl: ipfsProtocolUrl };
   }
-  if (!isArweaveUrl(trimmed)) {
-    return [trimmed];
+
+  if (isArweaveUrl(trimmed)) {
+    return { kind: "arweave", sourceUrl: trimmed };
   }
-  return getTryList(trimmed, trimmed);
+
+  return { kind: "other", sourceUrl: trimmed };
+}
+
+export function getArweaveGatewayFallbackUrls(url: string): string[] {
+  const assetUrl = classifyGatewayAssetUrl(url);
+  if (assetUrl.kind === "empty") {
+    return [];
+  }
+
+  if (assetUrl.kind === "ipfs") {
+    return getIpfsFallbackUrls(assetUrl.sourceUrl);
+  }
+
+  if (assetUrl.kind === "other") {
+    return [assetUrl.sourceUrl];
+  }
+
+  return getTryList(assetUrl.sourceUrl, assetUrl.sourceUrl);
 }
 
 export function shouldUseIframeFallbackTimeout(url: string): boolean {
-  const trimmed = url.trim();
-  if (!trimmed) {
-    return false;
-  }
-
-  if (isIpfsProtocolUrl(trimmed) || getIpfsProtocolUrlFromGatewayUrl(trimmed)) {
-    return false;
-  }
-
-  return isArweaveUrl(trimmed);
+  return classifyGatewayAssetUrl(url).kind === "arweave";
 }
 
 function getTryList(currentSrc: string, originalSrc: string): string[] {

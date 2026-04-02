@@ -229,7 +229,7 @@ export function MemePageLiveRightMenu(props: {
                           <td>File Type</td>
                           <td>
                             <MediaTypeBadge
-                              mimeType={fileMimeType ?? undefined}
+                              mimeType={fileMimeType}
                               size="sm"
                               showTooltip={false}
                               showLabel={true}

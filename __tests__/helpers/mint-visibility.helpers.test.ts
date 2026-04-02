@@ -8,6 +8,20 @@ describe("mint visibility helpers", () => {
     expect(
       shouldShowNextMintInLatestDrop({
         isMintEnded: false,
+        nextMintExists: false,
+      })
+    ).toBe(false);
+
+    expect(
+      shouldShowNextMintInLatestDrop({
+        isMintEnded: true,
+        nextMintExists: false,
+      })
+    ).toBe(false);
+
+    expect(
+      shouldShowNextMintInLatestDrop({
+        isMintEnded: false,
         nextMintExists: true,
       })
     ).toBe(false);
@@ -21,6 +35,20 @@ describe("mint visibility helpers", () => {
   });
 
   it("keeps coming-up next mint visible while the overall mint is not complete", () => {
+    expect(
+      shouldShowNextWinnerInComingUp({
+        isMintEnded: false,
+        nextMintExists: false,
+      })
+    ).toBe(false);
+
+    expect(
+      shouldShowNextWinnerInComingUp({
+        isMintEnded: true,
+        nextMintExists: false,
+      })
+    ).toBe(false);
+
     expect(
       shouldShowNextWinnerInComingUp({
         isMintEnded: false,

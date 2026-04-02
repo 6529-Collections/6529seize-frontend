@@ -82,6 +82,16 @@ describe("nft.helpers", () => {
     ).toBe("image/jpeg");
   });
 
+  it("keeps animation precedence when the animation url has no recognized extension", () => {
+    expect(
+      getNftMimeType({
+        image: "https://example.com/image.png",
+        animation: "https://example.com/animation",
+        metadata: {},
+      } as any)
+    ).toBe("video/mp4");
+  });
+
   it("returns null for empty, whitespace-only, and non-string formats", () => {
     expect(
       getAnimationFileTypeFromMetadata({

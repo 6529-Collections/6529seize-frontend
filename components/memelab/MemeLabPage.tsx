@@ -1201,19 +1201,23 @@ export default function MemeLabPageComponent({
                               <ArtistProfileHandle nft={nft} />
                             </td>
                           </tr>
-                          {fileType && fileMimeType && (
+                          {fileType && (
                             <tr>
                               <td>File Type</td>
                               <td className="tw-font-medium">
-                                <MediaTypeBadge
-                                  mimeType={fileMimeType}
-                                  dropId={`${nft.contract}-${nft.id}-art`}
-                                  showTooltip={false}
-                                  showLabel={true}
-                                  tone="color"
-                                  className="tw-inline-flex tw-items-center"
-                                  labelClassName="tw-text-inherit tw-font-medium"
-                                />
+                                {fileMimeType ? (
+                                  <MediaTypeBadge
+                                    mimeType={fileMimeType}
+                                    dropId={`${nft.contract}-${nft.id}-art`}
+                                    showTooltip={false}
+                                    showLabel={true}
+                                    tone="color"
+                                    className="tw-inline-flex tw-items-center"
+                                    labelClassName="tw-text-inherit tw-font-medium"
+                                  />
+                                ) : (
+                                  fileType
+                                )}
                               </td>
                             </tr>
                           )}
