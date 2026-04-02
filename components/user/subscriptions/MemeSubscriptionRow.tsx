@@ -82,11 +82,24 @@ export default function MemeSubscriptionRow(
   }, [props.subscription.subscribed]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const hasFinalMetadata =
-    props.first &&
-    !!final?.phase &&
-    final.phase_position !== undefined &&
-    final.phase_position > 0;
+  const finalWithMetadata = useMemo(() => {
+    if (
+      !props.first ||
+      !final?.phase ||
+      final.phase_position === undefined ||
+      final.phase_position <= 0
+    ) {
+      return null;
+    }
+
+    return {
+      phase: final.phase,
+      phasePosition: final.phase_position,
+      phaseSubscriptions: final.phase_subscriptions ?? 0,
+      airdropAddress: final.airdrop_address,
+      subscribedCount: final.subscribed_count,
+    };
+  }, [final, props.first]);
 
   const submit = async (): Promise<void> => {
     if (isSubmitting || props.minting_today) {
@@ -196,10 +209,10 @@ export default function MemeSubscriptionRow(
     }
   };
 
-  const handleCountChange = (value: string) => {
+  const handleCountChange = async (value: string): Promise<void> => {
     const nextValue = Number.parseInt(value, 10);
     setSelectedCount(nextValue);
-    handleUpdateSubscriptionCount(nextValue);
+    await handleUpdateSubscriptionCount(nextValue);
   };
 
   const renderCountSelector = ({
@@ -224,7 +237,9 @@ export default function MemeSubscriptionRow(
             isSubmitting ||
             props.minting_today
           }
-          onChange={(e) => handleCountChange(e.target.value)}
+          onChange={(e) => {
+            handleCountChange(e.target.value).catch(() => undefined);
+          }}
           style={{ minWidth: "3ch" }}
           aria-label={`Select subscription quantity for ${props.title}`}
         >
@@ -263,13 +278,13 @@ export default function MemeSubscriptionRow(
             </span>
           </div>
         </div>
-        {hasFinalMetadata && (
+        {finalWithMetadata && (
           <div className="tw-mt-2 tw-pr-2 font-smaller font-color-silver">
-            Phase: {final.phase} - Subscription Position:{" "}
-            {final.phase_position.toLocaleString()} /{" "}
-            {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
-            Address: {formatAddress(final.airdrop_address)} - Subscription
-            Count: x{final.subscribed_count}
+            Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
+            {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
+            {finalWithMetadata.phaseSubscriptions.toLocaleString()} - Airdrop
+            Address: {formatAddress(finalWithMetadata.airdropAddress)} -
+            Subscription Count: x{finalWithMetadata.subscribedCount}
           </div>
         )}
         {props.minting_today && (
@@ -339,13 +354,14 @@ export default function MemeSubscriptionRow(
                 </>
               )}
             </span>
-            {hasFinalMetadata && (
+            {finalWithMetadata && (
               <span className="font-smaller font-color-silver">
-                Phase: {final.phase} - Subscription Position:{" "}
-                {final.phase_position.toLocaleString()} /{" "}
-                {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
-                Address: {formatAddress(final.airdrop_address)} - Subscription
-                Count: x{final.subscribed_count}
+                Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
+                {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
+                {finalWithMetadata.phaseSubscriptions.toLocaleString()} -
+                Airdrop Address:{" "}
+                {formatAddress(finalWithMetadata.airdropAddress)} -
+                Subscription Count: x{finalWithMetadata.subscribedCount}
               </span>
             )}
           </div>
