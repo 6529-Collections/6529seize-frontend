@@ -43,7 +43,7 @@ function NextMintArtistPill({
       ) : (
         <span
           aria-hidden="true"
-          className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900 tw-object-contain"
+          className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900"
         />
       )}
       <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-iron-100">
@@ -175,7 +175,6 @@ export default function LatestDropNextMintSection({
                       mimeType={media.mime_type}
                       dropId={drop.id}
                       size="sm"
-                      iconClassName="tw-size-[26px] tw-rounded-full"
                     />
                   )}
                   <NextMintArtistPill

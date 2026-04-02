@@ -79,10 +79,10 @@ export function MemePageLiveRightMenu(props: {
                 <tbody>
                   <tr>
                     <td>Edition Size</td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {numberWithCommas(props.nftMeta.edition_size)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.edition_size_rank}/
                       {props.nftMeta.collection_size}
                     </td>
@@ -99,18 +99,18 @@ export function MemePageLiveRightMenu(props: {
                             />
                           </span>
                         </td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {numberWithCommas(props.nftMeta.burnt)}
                         </td>
                       </tr>
                       <tr>
                         <td>Edition Size ex. Burnt</td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {numberWithCommas(
                             props.nftMeta.edition_size_not_burnt
                           )}
                         </td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {props.nftMeta.edition_size_not_burnt_rank}/
                           {props.nftMeta.collection_size}
                         </td>
@@ -119,10 +119,10 @@ export function MemePageLiveRightMenu(props: {
                   )}
                   <tr>
                     <td>6529 Museum</td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {numberWithCommas(props.nftMeta.museum_holdings)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.museum_holdings_rank}/
                       {props.nftMeta.collection_size}
                     </td>
@@ -132,31 +132,31 @@ export function MemePageLiveRightMenu(props: {
                       Edition Size ex.{props.nftMeta.burnt > 0 && " Burnt and"}{" "}
                       6529 Museum
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {numberWithCommas(props.nftMeta.edition_size_cleaned)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.edition_size_cleaned_rank}/
                       {props.nftMeta.collection_size}
                     </td>
                   </tr>
                   <tr>
                     <td>Collectors</td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {numberWithCommas(props.nftMeta.hodlers)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.hodlers_rank}/
                       {props.nftMeta.collection_size}
                     </td>
                   </tr>
                   <tr>
                     <td>% Unique</td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {Math.round(props.nftMeta.percent_unique * 100 * 10) / 10}
                       %
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.percent_unique_rank}/
                       {props.nftMeta.collection_size}
                     </td>
@@ -164,13 +164,13 @@ export function MemePageLiveRightMenu(props: {
                   {props.nftMeta.burnt > 0 && (
                     <tr>
                       <td>% Unique ex. Burnt</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {Math.round(
                           props.nftMeta.percent_unique_not_burnt * 100 * 10
                         ) / 10}
                         %
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {props.nftMeta.percent_unique_not_burnt_rank}/
                         {props.nftMeta.collection_size}
                       </td>
@@ -181,13 +181,13 @@ export function MemePageLiveRightMenu(props: {
                       % Unique ex.{props.nftMeta.burnt > 0 && " Burnt and"} 6529
                       Museum
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {Math.round(
                         props.nftMeta.percent_unique_cleaned * 100 * 10
                       ) / 10}
                       %
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.percent_unique_cleaned_rank}/
                       {props.nftMeta.collection_size}
                     </td>

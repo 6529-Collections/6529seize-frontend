@@ -623,10 +623,10 @@ export default function MemeLabPageComponent({
                   <tbody>
                     <tr>
                       <td>Edition Size</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {numberWithCommas(nftMeta.edition_size)}
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.edition_size_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
@@ -642,16 +642,16 @@ export default function MemeLabPageComponent({
                               />
                             </span>
                           </td>
-                          <td className="text-right">
+                          <td className="text-right tw-font-medium">
                             {numberWithCommas(nftMeta.burnt)}
                           </td>
                         </tr>
                         <tr>
                           <td>Edition Size ex. Burnt</td>
-                          <td className="text-right">
+                          <td className="text-right tw-font-medium">
                             {numberWithCommas(nftMeta.edition_size_not_burnt)}
                           </td>
-                          <td className="text-right">
+                          <td className="text-right tw-font-medium">
                             {nftMeta.edition_size_not_burnt_rank}/
                             {nftMeta.collection_size}
                           </td>
@@ -660,10 +660,10 @@ export default function MemeLabPageComponent({
                     )}
                     <tr>
                       <td>6529 Museum</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {numberWithCommas(nftMeta.museum_holdings)}
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.museum_holdings_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
@@ -672,42 +672,42 @@ export default function MemeLabPageComponent({
                         Edition Size ex.
                         {nftMeta.burnt > 0 && " Burnt and"} 6529 Museum
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {numberWithCommas(nftMeta.edition_size_cleaned)}
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.edition_size_cleaned_rank}/
                         {nftMeta.collection_size}
                       </td>
                     </tr>
                     <tr>
                       <td>Collectors</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {numberWithCommas(nftMeta.hodlers)}
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.hodlers_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
                     <tr>
                       <td>% Unique</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {Math.round(nftMeta.percent_unique * 100 * 10) / 10}%
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.percent_unique_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
                     {nftMeta.burnt > 0 && (
                       <tr>
                         <td>% Unique ex. Burnt</td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {Math.round(
                             nftMeta.percent_unique_not_burnt * 100 * 10
                           ) / 10}
                           %
                         </td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {nftMeta.percent_unique_not_burnt_rank}/
                           {nftMeta.collection_size}
                         </td>
@@ -718,12 +718,12 @@ export default function MemeLabPageComponent({
                         % Unique ex.{nftMeta.burnt > 0 && " Burnt and"} 6529
                         Museum
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {Math.round(nftMeta.percent_unique_cleaned * 100 * 10) /
                           10}
                         %
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.percent_unique_cleaned_rank}/
                         {nftMeta.collection_size}
                       </td>
