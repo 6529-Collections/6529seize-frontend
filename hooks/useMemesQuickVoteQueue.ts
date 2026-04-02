@@ -174,7 +174,9 @@ const useMemesQuickVoteWindowSync = ({
   waveId,
 }: UseMemesQuickVoteWindowSyncOptions) => {
   const syncAbortControllerRef = useRef<AbortController | null>(null);
+  const syncInFlightRef = useRef(false);
   const syncRequestIdRef = useRef(0);
+  const syncRerunRequestedRef = useRef(false);
   const syncRetryTimeoutRef = useRef<ReturnType<
     typeof globalThis.setTimeout
   > | null>(null);
@@ -190,12 +192,19 @@ const useMemesQuickVoteWindowSync = ({
 
   const stopActiveSync = useCallback(() => {
     syncRequestIdRef.current += 1;
+    syncInFlightRef.current = false;
+    syncRerunRequestedRef.current = false;
     syncAbortControllerRef.current?.abort();
     syncAbortControllerRef.current = null;
     clearSyncRetryTimeout();
   }, [clearSyncRetryTimeout]);
 
-  const syncUndiscoveredWindow = useCallback(async () => {
+  const syncUndiscoveredWindow = useCallback(async function syncWindow() {
+    if (syncInFlightRef.current) {
+      syncRerunRequestedRef.current = true;
+      return;
+    }
+
     if (!enabled) {
       return;
     }
@@ -212,9 +221,10 @@ const useMemesQuickVoteWindowSync = ({
       return;
     }
 
+    syncInFlightRef.current = true;
+    syncRerunRequestedRef.current = false;
     const requestId = syncRequestIdRef.current + 1;
     syncRequestIdRef.current = requestId;
-    syncAbortControllerRef.current?.abort();
     const abortController = new AbortController();
     syncAbortControllerRef.current = abortController;
 
@@ -283,6 +293,19 @@ const useMemesQuickVoteWindowSync = ({
               isLoading: false,
             }
       );
+    } finally {
+      if (syncAbortControllerRef.current === abortController) {
+        syncAbortControllerRef.current = null;
+      }
+
+      syncInFlightRef.current = false;
+
+      if (abortController.signal.aborted || !syncRerunRequestedRef.current) {
+        return;
+      }
+
+      syncRerunRequestedRef.current = false;
+      runBestEffortSync(syncWindow);
     }
   }, [
     contextProfile,
