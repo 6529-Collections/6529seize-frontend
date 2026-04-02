@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import styles from "@/components/nft-image/NFTImage.module.scss";
 import { useNftBalance } from "@/hooks/useNftBalance";
-import styles from "./NFTImage.module.scss";
 
 interface Props {
   readonly contract: string;

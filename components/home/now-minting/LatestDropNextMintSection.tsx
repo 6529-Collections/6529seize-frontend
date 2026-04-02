@@ -1,9 +1,9 @@
 "use client";
 
-import ProfileAvatar, {
-  ProfileBadgeSize,
-} from "@/components/common/profile/ProfileAvatar";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
 import {
+  getCanonicalNextMintNumber,
   formatFullDateTime,
   getNextMintStart,
 } from "@/components/meme-calendar/meme-calendar.helpers";
@@ -19,6 +19,45 @@ import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface LatestDropNextMintSectionProps {
   readonly drop: ApiDrop;
+}
+
+function NextMintArtistPill({
+  pfp,
+  label,
+  href,
+}: {
+  readonly pfp: string | null | undefined;
+  readonly label: string;
+  readonly href?: string;
+}) {
+  const content = (
+    <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-backdrop-blur-sm">
+      {pfp ? (
+        <Image
+          src={resolveIpfsUrl(pfp)}
+          alt={label}
+          width={16}
+          height={16}
+          className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900 tw-object-contain"
+        />
+      ) : (
+        <div className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900 tw-object-contain" />
+      )}
+      <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200 desktop-hover:hover:tw-text-iron-100">
+        {label}
+      </span>
+    </span>
+  );
+
+  if (!href) {
+    return content;
+  }
+
+  return (
+    <Link href={href} className="tw-no-underline">
+      {content}
+    </Link>
+  );
 }
 
 const formatDropTimestamp = (timestamp: number): string | null => {
@@ -60,8 +99,11 @@ export default function LatestDropNextMintSection({
   const submittedAt = formatDropTimestamp(drop.created_at);
   const description =
     drop.metadata.find((m) => m.data_key === "description")?.data_value ?? null;
-  const nextMintStart = getNextMintStart();
-  const nextMintLabel = formatFullDateTime(nextMintStart, "local");
+  const now = new Date();
+  const nextMintStart = getNextMintStart(now);
+  const nextMintCardNumber = getCanonicalNextMintNumber(now);
+  const nextMintDateTime = formatFullDateTime(nextMintStart, "local");
+  const nextMintLabel = `Card #${nextMintCardNumber} - ${nextMintDateTime}`;
 
   return (
     <section className="tw-relative tw-z-50 tw-px-4 tw-pb-4 tw-pt-6 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8">
@@ -100,10 +142,12 @@ export default function LatestDropNextMintSection({
             <div className="tw-flex tw-flex-col tw-gap-5">
               <div className="tw-flex tw-flex-col">
                 <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-                  <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
-                  <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-emerald-400">
-                    NEXT MINT
-                  </span>
+                  <div className="tw-flex tw-items-center tw-gap-2">
+                    <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
+                    <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-emerald-400">
+                      NEXT MINT
+                    </span>
+                  </div>
                 </div>
                 <span className="tw-mt-1 tw-font-mono tw-text-xs tw-text-white/50">
                   {nextMintLabel}
@@ -122,32 +166,21 @@ export default function LatestDropNextMintSection({
                   </p>
                 )}
 
-                {authorHandle ? (
-                  <Link
-                    href={`/${authorHandle}`}
-                    className="tw-mt-3 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline"
-                  >
-                    <ProfileAvatar
-                      pfpUrl={author.pfp}
-                      alt={authorHandle || authorName}
-                      size={ProfileBadgeSize.SMALL}
+                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                  {media?.mime_type && (
+                    <MediaTypeBadge
+                      mimeType={media.mime_type}
+                      dropId={drop.id}
+                      size="sm"
+                      iconClassName="tw-size-[26px] tw-rounded-full"
                     />
-                    <span className="tw-min-w-0 tw-truncate tw-text-sm tw-text-iron-200 desktop-hover:hover:tw-text-iron-100">
-                      {authorName}
-                    </span>
-                  </Link>
-                ) : (
-                  <div className="tw-mt-3 tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-                    <ProfileAvatar
-                      pfpUrl={author.pfp}
-                      alt={authorName}
-                      size={ProfileBadgeSize.SMALL}
-                    />
-                    <span className="tw-min-w-0 tw-truncate tw-text-sm tw-text-iron-200">
-                      {authorName}
-                    </span>
-                  </div>
-                )}
+                  )}
+                  <NextMintArtistPill
+                    pfp={author.pfp}
+                    label={authorName}
+                    href={authorHandle ? `/${authorHandle}` : undefined}
+                  />
+                </div>
               </div>
 
               <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">

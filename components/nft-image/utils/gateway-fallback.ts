@@ -118,6 +118,19 @@ export function getArweaveGatewayFallbackUrls(url: string): string[] {
   return getTryList(trimmed, trimmed);
 }
 
+export function shouldUseIframeFallbackTimeout(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  if (isIpfsProtocolUrl(trimmed) || getIpfsProtocolUrlFromGatewayUrl(trimmed)) {
+    return false;
+  }
+
+  return isArweaveUrl(trimmed);
+}
+
 function getTryList(currentSrc: string, originalSrc: string): string[] {
   const current = safeParseUrl(currentSrc);
   const orig = safeParseUrl(originalSrc);

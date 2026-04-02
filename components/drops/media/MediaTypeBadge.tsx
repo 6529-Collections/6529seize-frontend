@@ -21,8 +21,14 @@ const FORMAT_ICONS: Record<MediaCategory, { viewBox: string; path: string }> = {
 
 interface MediaTypeBadgeProps {
   readonly mimeType: string | undefined;
-  readonly dropId: string;
+  readonly dropId?: string;
   readonly size?: "sm" | "md" | "lg";
+  readonly showTooltip?: boolean;
+  readonly showLabel?: boolean;
+  readonly tone?: "muted" | "color";
+  readonly className?: string;
+  readonly iconClassName?: string;
+  readonly labelClassName?: string;
 }
 
 const SIZE_CLASSES = {
@@ -41,49 +47,90 @@ export default function MediaTypeBadge({
   mimeType,
   dropId,
   size = "sm",
+  showTooltip = true,
+  showLabel = false,
+  tone = "muted",
+  className = "",
+  iconClassName = "",
+  labelClassName = "",
 }: MediaTypeBadgeProps) {
   const mediaInfo = getMediaTypeInfo(mimeType);
-  const tooltipId = `format-badge-${dropId}`;
+  const tooltipId = dropId ? `format-badge-${dropId}` : undefined;
+  const shouldRenderTooltip = showTooltip && Boolean(tooltipId);
   const { isOpen, setIsOpen, triggerProps } = useControlledTooltip();
+  const iconClasses = [
+    "tw-flex",
+    "tw-items-center",
+    "tw-justify-center",
+    "tw-rounded",
+    "tw-border",
+    "tw-border-solid",
+    "tw-transition-all",
+    "tw-duration-300",
+    SIZE_CLASSES[size],
+  ];
+
+  if (showTooltip) {
+    iconClasses.push("tw-cursor-pointer");
+  }
+
+  if (tone === "muted") {
+    iconClasses.push("tw-grayscale", "desktop-hover:hover:tw-grayscale-0");
+  }
+
+  const icon = (
+    <div
+      {...(shouldRenderTooltip
+        ? {
+            "data-tooltip-id": tooltipId,
+            "data-tooltip-content": mediaInfo.label,
+            "aria-label": mediaInfo.label,
+            ...triggerProps,
+          }
+        : { "aria-label": mediaInfo.label })}
+      className={`${iconClasses.join(" ")} ${iconClassName}`.trim()}
+      style={{
+        color: mediaInfo.styles.text,
+        backgroundColor: mediaInfo.styles.bg,
+        borderColor: mediaInfo.styles.border,
+      }}
+    >
+      <svg
+        className={ICON_SIZE_CLASSES[size]}
+        fill="currentColor"
+        viewBox={FORMAT_ICONS[mediaInfo.category].viewBox}
+      >
+        <path d={FORMAT_ICONS[mediaInfo.category].path} />
+      </svg>
+    </div>
+  );
 
   return (
-    <div className="tw-flex tw-flex-shrink-0">
-      <div
-        data-tooltip-id={tooltipId}
-        data-tooltip-content={mediaInfo.label}
-        aria-label={mediaInfo.label}
-        {...triggerProps}
-        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid tw-grayscale tw-transition-all tw-duration-300 desktop-hover:hover:tw-grayscale-0 ${SIZE_CLASSES[size]}`}
-        style={{
-          color: mediaInfo.styles.text,
-          backgroundColor: mediaInfo.styles.bg,
-          borderColor: mediaInfo.styles.border,
-        }}
-      >
-        <svg
-          className={ICON_SIZE_CLASSES[size]}
-          fill="currentColor"
-          viewBox={FORMAT_ICONS[mediaInfo.category].viewBox}
-        >
-          <path d={FORMAT_ICONS[mediaInfo.category].path} />
-        </svg>
-      </div>
-      <Tooltip
-        id={tooltipId}
-        place="top"
-        opacity={1}
-        delayShow={300}
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        style={{
-          padding: "4px 8px",
-          background: "#37373E",
-          color: "white",
-          fontSize: "12px",
-          borderRadius: "6px",
-          zIndex: 9999,
-        }}
-      />
+    <div
+      className={`tw-flex tw-flex-shrink-0 tw-items-center ${showLabel ? "tw-gap-2" : ""} ${className}`.trim()}
+    >
+      {icon}
+      {showLabel && (
+        <span className={labelClassName.trim()}>{mediaInfo.label}</span>
+      )}
+      {shouldRenderTooltip && tooltipId && (
+        <Tooltip
+          id={tooltipId}
+          place="top"
+          opacity={1}
+          delayShow={300}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          style={{
+            padding: "4px 8px",
+            background: "#37373E",
+            color: "white",
+            fontSize: "12px",
+            borderRadius: "6px",
+            zIndex: 9999,
+          }}
+        />
+      )}
     </div>
   );
 }

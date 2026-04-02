@@ -1,11 +1,11 @@
 "use client";
 
+import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
+import styles from "@/components/nft-image/NFTImage.module.scss";
+import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
+import { withArweaveFallback } from "@/components/nft-image/utils/gateway-fallback";
 import { Col } from "react-bootstrap";
-import styles from "../NFTImage.module.scss";
-import NFTImageBalance from "../NFTImageBalance";
-import type { BaseRendererProps } from "../types/renderer-props";
-import { getResolvedAnimationSrc } from "../utils/animation-source";
-import { withArweaveFallback } from "../utils/gateway-fallback";
 
 const globalScope = globalThis as typeof globalThis & {
   window?: Window | undefined;

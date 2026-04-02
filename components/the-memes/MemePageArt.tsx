@@ -1,5 +1,6 @@
 "use client";
 
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { ArweaveLinksTable } from "@/components/nft-attributes/ArweaveLinksTable";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
@@ -16,8 +17,10 @@ import {
 import {
   getAnimationDimensionsFromMetadata,
   getAnimationFileTypeFromMetadata,
+  getAnimationMimeTypeFromMetadata,
   getImageDimensionsFromMetadata,
   getImageFileTypeFromMetadata,
+  getImageMimeTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,6 +35,14 @@ const PROPERTY_EXCLUDED_TRAITS = new Set([
   "Type - Meme",
   "Type - Card",
 ]);
+
+function formatTdhRate(value: number | undefined): string {
+  if (!value || value <= 0) {
+    return "N/A";
+  }
+
+  return numberWithCommas(Math.round(value * 100) / 100);
+}
 
 function shouldShowPropertyAttribute(attribute: IAttribute): boolean {
   const displayType = attribute.display_type?.trim().toLowerCase();
@@ -93,6 +104,9 @@ export function MemePageArt(props: {
     fullscreenElementId = "the-art-fullscreen-img";
   }
   const fileType = isShowingAnimation ? animationFormat : imageFormat;
+  const fileTypeMimeType = isShowingAnimation
+    ? getAnimationMimeTypeFromMetadata(props.nft?.metadata)
+    : getImageMimeTypeFromMetadata(props.nft?.metadata);
   const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
   const arweaveRows = [
     metadataHref
@@ -136,6 +150,128 @@ export function MemePageArt(props: {
       return `https://github.com/6529-Collections/thememecards/tree/main/card${id}`;
     return `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
   })();
+
+  const detailRows = [
+    {
+      key: "edition-size",
+      label: "Edition Size",
+      value: <span className="tw-font-medium">{props.nft?.supply}</span>,
+    },
+    {
+      key: "collection",
+      label: "Collection",
+      value: <span className="tw-font-medium">{props.nft?.collection}</span>,
+    },
+    {
+      key: "season",
+      label: "Season",
+      value: <span className="tw-font-medium">{props.nftMeta?.season}</span>,
+    },
+    {
+      key: "meme",
+      label: "Meme",
+      value: <span className="tw-font-medium">{props.nftMeta?.meme_name}</span>,
+    },
+    {
+      key: "mint-date",
+      label: "Mint Date",
+      value: (
+        <span className="tw-font-medium">
+          {printMintDate(props.nft?.mint_date)}
+        </span>
+      ),
+    },
+    {
+      key: "artist-name",
+      label: "Artist Name",
+      value: <span className="tw-font-medium">{props.nft?.artist}</span>,
+    },
+    {
+      key: "artist-profile",
+      label: "Artist Profile",
+      value: (
+        <span className="tw-font-medium">
+          <ArtistProfileHandle nft={props.nft} />
+        </span>
+      ),
+    },
+    ...(fileType
+      ? [
+          {
+            key: "file-type",
+            label: "File Type",
+            value: (
+              <span className="tw-font-medium">
+                <MediaTypeBadge
+                  mimeType={fileTypeMimeType ?? undefined}
+                  size="sm"
+                  showTooltip={false}
+                  showLabel={true}
+                  tone="color"
+                  labelClassName="tw-text-inherit tw-font-medium"
+                />
+              </span>
+            ),
+          },
+        ]
+      : []),
+    ...(distributionPlanLink
+      ? [
+          {
+            key: "minting-approach",
+            label: "Minting Approach",
+            value: (
+              <span className="tw-font-medium">
+                <Link
+                  href={distributionPlanLink}
+                  target={props.nft?.has_distribution ? "_self" : "_blank"}
+                  rel={
+                    props.nft?.has_distribution
+                      ? undefined
+                      : "noopener noreferrer"
+                  }
+                  className={styles["distributionPlanLink"]}
+                >
+                  Distribution Plan
+                </Link>
+              </span>
+            ),
+          },
+        ]
+      : []),
+    {
+      key: "mint-price",
+      label: "Mint Price",
+      value: (
+        <span className="tw-font-medium">
+          {props.nft && props.nft.mint_price > 0
+            ? `${numberWithCommas(
+                Math.round(props.nft.mint_price * 100000) / 100000
+              )} ETH`
+            : `N/A`}
+        </span>
+      ),
+    },
+    {
+      key: "tdh-rate",
+      label: "TDH Rate",
+      value: (
+        <span className="tw-font-medium">
+          {formatTdhRate(props.nft?.hodl_rate)}
+        </span>
+      ),
+    },
+    {
+      key: "dimensions",
+      label: "Dimensions",
+      value: <span className="tw-font-medium">{dimensions || "N/A"}</span>,
+    },
+  ];
+  const detailSplitIndex = Math.ceil(detailRows.length / 2);
+  const detailColumns = [
+    detailRows.slice(0, detailSplitIndex),
+    detailRows.slice(detailSplitIndex),
+  ];
 
   useEffect(() => {
     setIsFullScreenSupported(fullScreenSupported());
@@ -265,12 +401,7 @@ export function MemePageArt(props: {
         </Container>
         <Container className="pt-3 pb-3">
           <Row>
-            <Col
-              xs={{ span: 12 }}
-              sm={{ span: 6 }}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}
-            >
+            <Col xs={{ span: 12 }}>
               <Container>
                 <Row>
                   <Col>
@@ -278,96 +409,37 @@ export function MemePageArt(props: {
                   </Col>
                 </Row>
                 <Row>
-                  <Col>
+                  <Col xs={{ span: 12 }} className="d-lg-none">
                     <Table bordered={false}>
                       <tbody>
-                        <tr>
-                          <td>Edition Size</td>
-                          <td>{props.nft.supply}</td>
-                        </tr>
-                        <tr>
-                          <td>Collection</td>
-                          <td>{props.nft.collection}</td>
-                        </tr>
-                        <tr>
-                          <td>Season</td>
-                          <td>{props.nftMeta.season}</td>
-                        </tr>
-                        <tr>
-                          <td>Meme</td>
-                          <td>{props.nftMeta.meme_name}</td>
-                        </tr>
-                        <tr>
-                          <td>Artist Name</td>
-                          <td>{props.nft.artist}</td>
-                        </tr>
-                        <tr>
-                          <td>Artist Profile</td>
-                          <td>
-                            <ArtistProfileHandle nft={props.nft} />
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Mint Date</td>
-                          <td>{printMintDate(props.nft.mint_date)}</td>
-                        </tr>
-                        {fileType && (
-                          <tr>
-                            <td>File Type</td>
-                            <td>{fileType}</td>
+                        {detailRows.map((row) => (
+                          <tr key={row.key}>
+                            <td>{row.label}</td>
+                            <td>{row.value}</td>
                           </tr>
-                        )}
-                        {dimensions && (
-                          <tr>
-                            <td>Dimensions</td>
-                            <td>{dimensions}</td>
-                          </tr>
-                        )}
+                        ))}
                       </tbody>
                     </Table>
                   </Col>
-                </Row>
-              </Container>
-            </Col>
-            <Col
-              xs={{ span: 12 }}
-              sm={{ span: 6 }}
-              md={{ span: 6 }}
-              lg={{ span: 6 }}
-            >
-              <Container>
-                <Row>
-                  <Col>
-                    <h3>Minting Approach</h3>
-                  </Col>
-                </Row>
-                {distributionPlanLink && (
-                  <Row>
-                    <Col>
-                      <Link
-                        href={distributionPlanLink}
-                        target={props.nft.has_distribution ? "_self" : "_blank"}
-                        rel={
-                          props.nft.has_distribution
-                            ? undefined
-                            : "noopener noreferrer"
-                        }
-                        className={styles["distributionPlanLink"]}
-                      >
-                        Distribution Plan
-                      </Link>
+                  {detailColumns.map((columnRows, index) => (
+                    <Col
+                      key={index}
+                      xs={{ span: 12 }}
+                      lg={{ span: 6 }}
+                      className="d-none d-lg-block"
+                    >
+                      <Table bordered={false}>
+                        <tbody>
+                          {columnRows.map((row) => (
+                            <tr key={row.key}>
+                              <td>{row.label}</td>
+                              <td>{row.value}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
                     </Col>
-                  </Row>
-                )}
-                <Row>
-                  <Col>
-                    Mint price:{" "}
-                    {props.nft.mint_price > 0
-                      ? `${numberWithCommas(
-                          Math.round(props.nft.mint_price * 100000) / 100000
-                        )} ETH`
-                      : `N/A`}
-                  </Col>
+                  ))}
                 </Row>
               </Container>
             </Col>

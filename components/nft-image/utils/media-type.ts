@@ -1,5 +1,5 @@
 import type { BaseNFT, NFTLite } from "@/entities/INFT";
-import { getResolvedAnimationSrc } from "./animation-source";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 
 type MediaType = "html" | "glb" | "video" | "image";
 

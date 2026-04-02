@@ -16,7 +16,7 @@ export function MetadataLink(props: { readonly url: string }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="d-inline-flex align-items-center gap-1"
+          className="d-inline-flex align-items-center gap-1 tw-font-medium"
         >
           <span>View</span>
           <FontAwesomeIcon

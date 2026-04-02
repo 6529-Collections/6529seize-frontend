@@ -1,6 +1,7 @@
 "use client";
 
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import RememeImage from "@/components/nft-image/RememeImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
@@ -17,6 +18,7 @@ import {
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
+import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
 import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
@@ -49,6 +51,7 @@ export function MemePageLiveRightMenu(props: {
       return `https://github.com/6529-Collections/thememecards/tree/main/card${id}`;
     return `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
   })();
+  const fileMimeType = getFileMimeTypeFromMetadata(props.nft?.metadata);
 
   if (props.show && props.nft && props.nftMeta) {
     return (
@@ -204,19 +207,40 @@ export function MemePageLiveRightMenu(props: {
                 <tbody>
                   <tr>
                     <td>Artist Name</td>
-                    <td>{props.nft.artist}</td>
+                    <td className="tw-font-medium">{props.nft.artist}</td>
                   </tr>
                   <tr>
                     <td>Artist Profile</td>
-                    <td>
+                    <td className="tw-font-medium">
                       <ArtistProfileHandle nft={props.nft} />
                     </td>
                   </tr>
                   <tr>
                     <td>Mint Date</td>
-                    <td>{printMintDate(props.nft.mint_date)}</td>
+                    <td className="tw-font-medium">
+                      {printMintDate(props.nft.mint_date)}
+                    </td>
                   </tr>
-                  <NftPageStats nft={props.nft} />
+                  <NftPageStats
+                    nft={props.nft}
+                    afterMetadata={
+                      fileMimeType ? (
+                        <tr>
+                          <td>File Type</td>
+                          <td>
+                            <MediaTypeBadge
+                              mimeType={fileMimeType ?? undefined}
+                              size="sm"
+                              showTooltip={false}
+                              showLabel={true}
+                              tone="color"
+                              labelClassName="tw-text-inherit tw-font-medium"
+                            />
+                          </td>
+                        </tr>
+                      ) : null
+                    }
+                  />
                 </tbody>
               </Table>
             </Col>
