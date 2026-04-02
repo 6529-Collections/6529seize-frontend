@@ -11,6 +11,7 @@ export type MemesQuickVoteSessionState = {
   readonly hasDiscoveryError: boolean;
   readonly isExhausted: boolean;
   readonly isLoading: boolean;
+  readonly isRestartingRound: boolean;
   readonly leftThisRoundCount: number;
   readonly lookaheadDrops: readonly ApiDrop[];
   readonly recentlyHandledDropIds: readonly string[];
@@ -38,6 +39,7 @@ export const createInitialSessionState = (): MemesQuickVoteSessionState => ({
   hasDiscoveryError: false,
   isExhausted: false,
   isLoading: false,
+  isRestartingRound: false,
   leftThisRoundCount: 0,
   lookaheadDrops: [],
   recentlyHandledDropIds: [],
@@ -122,27 +124,28 @@ export const applyFetchedWindowState = ({
     hiddenDropIds,
     rawLeftThisRoundCount,
   });
-  const isRoundDepletedWithDuplicateWindow =
+  const isRestartingRound =
     currentDrop === null &&
     lookaheadDrops.length === 0 &&
     rawLeftThisRoundCount === 0 &&
+    rawUnratedCount > 0 &&
     safeFetchedDropsWithoutHandled.length === 0;
   const isExhausted =
-    isRoundDepletedWithDuplicateWindow ||
-    (currentDrop === null &&
+    currentDrop === null &&
       lookaheadDrops.length === 0 &&
       hiddenDropIds.size === 0 &&
       primaryDrop === null &&
-      rawUnratedCount === 0);
+      rawUnratedCount === 0;
 
   return {
     currentDrop,
     hasDiscoveryError: false,
     isExhausted,
-    isLoading: currentDrop === null && !isExhausted,
+    isLoading: currentDrop === null && !isExhausted && !isRestartingRound,
+    isRestartingRound,
     leftThisRoundCount,
     lookaheadDrops,
-    recentlyHandledDropIds,
+    recentlyHandledDropIds: isRestartingRound ? [] : recentlyHandledDropIds,
     unratedCount: rawUnratedCount,
   };
 };
@@ -216,6 +219,7 @@ export const applyOptimisticAdvanceState = ({
     currentDrop,
     hasDiscoveryError: false,
     isExhausted: false,
+    isRestartingRound: false,
     isLoading: currentDrop === null,
     leftThisRoundCount: Math.max(0, current.leftThisRoundCount - 1),
     lookaheadDrops: nextLookaheadDrops.slice(1),
@@ -241,6 +245,7 @@ export const applyFailedDropRestoreState = ({
     currentDrop: current.currentDrop ?? failedDrop,
     hasDiscoveryError: false,
     isExhausted: false,
+    isRestartingRound: false,
     isLoading: false,
     leftThisRoundCount: wasHandled
       ? current.leftThisRoundCount + 1

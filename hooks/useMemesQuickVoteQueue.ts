@@ -55,6 +55,7 @@ export type UseMemesQuickVoteQueueResult = {
   readonly hasDiscoveryError: boolean;
   readonly isExhausted: boolean;
   readonly isLoading: boolean;
+  readonly isRestartingRound: boolean;
   readonly isReady: boolean;
   readonly leftThisRoundCount: number;
   readonly latestUsedAmount: number | null;
@@ -114,6 +115,8 @@ const runBestEffortSync = (sync: () => Promise<void>): void => {
     // Session state already models sync failures; callers should not block on this.
   });
 };
+
+const QUICK_VOTE_RESTART_TIMEOUT_MS = 3000;
 
 const getCurrentSessionState = ({
   key,
@@ -232,6 +235,7 @@ const useMemesQuickVoteWindowSync = ({
       ...current,
       hasDiscoveryError: false,
       isExhausted: false,
+      isRestartingRound: current.isRestartingRound,
       isLoading: current.currentDrop === null,
     }));
 
@@ -284,12 +288,14 @@ const useMemesQuickVoteWindowSync = ({
         current.currentDrop
           ? {
               ...current,
+              isRestartingRound: false,
               isLoading: false,
             }
           : {
               ...current,
               hasDiscoveryError: true,
               isExhausted: false,
+              isRestartingRound: false,
               isLoading: false,
             }
       );
@@ -330,6 +336,7 @@ const useMemesQuickVoteSessionEffects = ({
   enabled,
   isQuickVoteEnabled,
   pendingDropIdsRef,
+  setCurrentSessionState,
   stateKey,
   stopActiveSync,
   syncUndiscoveredWindow,
@@ -340,6 +347,7 @@ const useMemesQuickVoteSessionEffects = ({
   readonly enabled: boolean;
   readonly isQuickVoteEnabled: boolean;
   readonly pendingDropIdsRef: { current: readonly string[] };
+  readonly setCurrentSessionState: UseKeyedMemesQuickVoteSessionStoreResult["setCurrentSessionState"];
   readonly stateKey: string;
   readonly stopActiveSync: () => void;
   readonly syncUndiscoveredWindow: () => Promise<void>;
@@ -373,7 +381,6 @@ const useMemesQuickVoteSessionEffects = ({
   useEffect(() => {
     if (
       !enabled ||
-      currentSessionState.isLoading ||
       currentSessionState.hasDiscoveryError ||
       currentSessionState.isExhausted
     ) {
@@ -381,6 +388,7 @@ const useMemesQuickVoteSessionEffects = ({
     }
 
     const shouldContinueSync =
+      currentSessionState.isRestartingRound ||
       currentSessionState.recentlyHandledDropIds.length > 0 ||
       (pendingDropIdsRef.current.length > 0 &&
         currentSessionState.currentDrop === null);
@@ -401,10 +409,42 @@ const useMemesQuickVoteSessionEffects = ({
     currentSessionState.hasDiscoveryError,
     currentSessionState.isExhausted,
     currentSessionState.isLoading,
+    currentSessionState.isRestartingRound,
     currentSessionState.recentlyHandledDropIds.length,
     enabled,
     pendingDropIdsRef,
     syncUndiscoveredWindow,
+  ]);
+
+  useEffect(() => {
+    if (!enabled || !currentSessionState.isRestartingRound) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      stopActiveSync();
+      setCurrentSessionState((current) => {
+        if (!current.isRestartingRound) {
+          return current;
+        }
+
+        return {
+          ...current,
+          hasDiscoveryError: true,
+          isLoading: false,
+          isRestartingRound: false,
+        };
+      });
+    }, QUICK_VOTE_RESTART_TIMEOUT_MS);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [
+    currentSessionState.isRestartingRound,
+    enabled,
+    setCurrentSessionState,
+    stopActiveSync,
   ]);
 
   useEffect(
@@ -443,6 +483,7 @@ const useMemesQuickVoteSessionState = ({
     enabled,
     isQuickVoteEnabled,
     pendingDropIdsRef,
+    setCurrentSessionState,
     stateKey,
     stopActiveSync,
     syncUndiscoveredWindow,
@@ -707,6 +748,7 @@ export const useMemesQuickVoteQueue = ({
     hasDiscoveryError: session.sessionState.hasDiscoveryError,
     isExhausted: session.sessionState.isExhausted,
     isLoading: session.sessionState.isLoading && activeDrop === null,
+    isRestartingRound: session.sessionState.isRestartingRound,
     isReady: activeDrop !== null,
     leftThisRoundCount: session.sessionState.leftThisRoundCount,
     latestUsedAmount,

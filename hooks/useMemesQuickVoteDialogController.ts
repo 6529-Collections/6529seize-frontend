@@ -11,6 +11,7 @@ export type MemesQuickVoteDialogState = Pick<
   | "activeDrop"
   | "hasDiscoveryError"
   | "isExhausted"
+  | "isRestartingRound"
   | "leftThisRoundCount"
   | "latestUsedAmount"
   | "nextDrop"
@@ -96,6 +97,7 @@ export const useMemesQuickVoteDialogController =
         activeDrop: quickVoteQueue.activeDrop,
         hasDiscoveryError: quickVoteQueue.hasDiscoveryError,
         isExhausted: quickVoteQueue.isExhausted,
+        isRestartingRound: quickVoteQueue.isRestartingRound,
         isOpen: isQuickVoteOpen,
         leftThisRoundCount: quickVoteQueue.leftThisRoundCount,
         latestUsedAmount: quickVoteQueue.latestUsedAmount,

@@ -579,12 +579,16 @@ function MemesQuickVoteDialogContent({
   );
 }
 
-function MemesQuickVoteDialogDoneState({
-  hasMoreUnratedOutsideRound,
-  onClose,
+function MemesQuickVoteDialogStatusState({
+  action,
+  description,
+  title,
+  visual,
 }: {
-  readonly hasMoreUnratedOutsideRound: boolean;
-  readonly onClose: () => void;
+  readonly action?: ReactNode;
+  readonly description: string;
+  readonly title: string;
+  readonly visual: ReactNode;
 }) {
   return (
     <div className="tw-relative tw-flex tw-min-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-[#0c0c0d]/95 tw-px-6 tw-py-10 md:tw-px-8 md:tw-py-12">
@@ -593,22 +597,31 @@ function MemesQuickVoteDialogDoneState({
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_46%)]" />
 
       <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-max-w-md tw-flex-col tw-items-center tw-text-center">
-        <div className="tw-relative tw-mx-auto tw-mb-8 tw-flex tw-size-24 tw-items-center tw-justify-center md:tw-size-28">
-          <div className="tw-absolute tw-inset-0 tw-rounded-full tw-bg-primary-500/10 tw-blur-2xl" />
-          <div className="tw-absolute tw-inset-3 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-backdrop-blur-md" />
-          <div className="tw-relative tw-flex tw-size-20 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] md:tw-size-24">
-            <CheckCircleIcon className="tw-size-10 tw-text-iron-100 md:tw-size-12" />
-          </div>
-        </div>
+        {visual}
         <p className="tw-mb-3 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-[1.75rem]">
-          You&apos;re all caught up
+          {title}
         </p>
         <p className="tw-mx-auto tw-mb-8 tw-max-w-sm tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-text-[15px]">
-          {hasMoreUnratedOutsideRound
-            ? "No more memes are available in this quick vote round right now."
-            : "No unrated memes are left in quick vote right now."}
+          {description}
         </p>
+        {action}
+      </div>
+    </div>
+  );
+}
 
+function MemesQuickVoteDialogDoneState({
+  description,
+  onClose,
+  title,
+}: {
+  readonly description: string;
+  readonly onClose: () => void;
+  readonly title: string;
+}) {
+  return (
+    <MemesQuickVoteDialogStatusState
+      action={
         <button
           type="button"
           data-autofocus="true"
@@ -617,8 +630,43 @@ function MemesQuickVoteDialogDoneState({
         >
           Close
         </button>
-      </div>
-    </div>
+      }
+      description={description}
+      title={title}
+      visual={
+        <div className="tw-relative tw-mx-auto tw-mb-8 tw-flex tw-size-24 tw-items-center tw-justify-center md:tw-size-28">
+          <div className="tw-absolute tw-inset-0 tw-rounded-full tw-bg-primary-500/10 tw-blur-2xl" />
+          <div className="tw-absolute tw-inset-3 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-backdrop-blur-md" />
+          <div className="tw-relative tw-flex tw-size-20 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] md:tw-size-24">
+            <CheckCircleIcon className="tw-size-10 tw-text-iron-100 md:tw-size-12" />
+          </div>
+        </div>
+      }
+    />
+  );
+}
+
+function MemesQuickVoteDialogRestartState() {
+  return (
+    <MemesQuickVoteDialogStatusState
+      description="You’ve reached the end of this round."
+      title="Starting over"
+      visual={
+        <div className="tw-relative tw-mx-auto tw-mb-8 tw-flex tw-size-24 tw-items-center tw-justify-center md:tw-size-28">
+          <div className="tw-absolute tw-inset-0 tw-rounded-full tw-bg-primary-500/10 tw-blur-2xl" />
+          <div className="tw-absolute tw-inset-3 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-backdrop-blur-md" />
+          <div className="tw-relative tw-flex tw-size-20 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] md:tw-size-24">
+            <div className="tw-size-9 tw-animate-spin tw-rounded-full tw-border-[3px] tw-border-solid tw-border-white/10 tw-border-t-primary-400 tw-border-r-primary-400 md:tw-size-10" />
+          </div>
+        </div>
+      }
+      action={
+        <div className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300">
+          <span className="tw-size-2 tw-rounded-full tw-bg-primary-400" />
+          Loading next memes...
+        </div>
+      }
+    />
   );
 }
 
@@ -655,6 +703,7 @@ export default function MemesQuickVoteDialog({
   activeDrop,
   hasDiscoveryError,
   isExhausted,
+  isRestartingRound,
   leftThisRoundCount,
   latestUsedAmount,
   nextDrop,
@@ -670,6 +719,8 @@ export default function MemesQuickVoteDialog({
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const previousBodyOverflowRef = useRef("");
   const isMobile = useMediaQuery(QUICK_VOTE_MOBILE_QUERY);
+  const showStandaloneStateShellClose =
+    activeDrop === null && !isExhausted && (hasDiscoveryError || isRestartingRound);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -728,13 +779,14 @@ export default function MemesQuickVoteDialog({
 
   let dialogBody: ReactNode;
 
-  if (isExhausted) {
+  if (isRestartingRound) {
+    dialogBody = <MemesQuickVoteDialogRestartState />;
+  } else if (isExhausted) {
     dialogBody = (
       <MemesQuickVoteDialogDoneState
-        hasMoreUnratedOutsideRound={
-          leftThisRoundCount === 0 && unratedCount > 0
-        }
+        description="No unrated memes are left in quick vote right now."
         onClose={onClose}
+        title="You're all caught up"
       />
     );
   } else if (!activeDrop && hasDiscoveryError) {
@@ -785,9 +837,15 @@ export default function MemesQuickVoteDialog({
         <div className="tw-relative tw-flex tw-h-full tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
           <button
             type="button"
-            data-autofocus={isMobile ? undefined : "true"}
+            data-autofocus={
+              !isMobile || showStandaloneStateShellClose ? "true" : undefined
+            }
             onClick={onClose}
-            className="tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-hidden tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-iron-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white md:tw-right-6 md:tw-top-6 md:tw-inline-flex"
+            className={`tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-iron-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white md:tw-right-6 md:tw-top-6 ${
+              showStandaloneStateShellClose
+                ? "tw-inline-flex md:tw-inline-flex"
+                : "tw-hidden md:tw-inline-flex"
+            }`}
             aria-label="Close quick vote"
           >
             <XMarkIcon className="tw-size-5 tw-shrink-0" />
