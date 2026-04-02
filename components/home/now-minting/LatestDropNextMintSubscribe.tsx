@@ -1,15 +1,18 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   getCanonicalNextMintNumber,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiUpcomingMemeSubscriptionStatus } from "@/generated/models/ApiUpcomingMemeSubscriptionStatus";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useMemo } from "react";
@@ -26,9 +29,15 @@ function getProfileKey(
 
 export default function LatestDropNextMintSubscribe() {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { country } = useCookieConsent();
+  const { isIos } = useCapacitor();
 
   const tokenId = useMemo(() => getCanonicalNextMintNumber(), []);
   const hasTokenId = Number.isInteger(tokenId) && tokenId > 0;
+  const hideSubscriptions = shouldHideSubscriptions({
+    capacitorIsIos: isIos,
+    country,
+  });
 
   const profileKey = useMemo(
     () => (activeProfileProxy ? undefined : getProfileKey(connectedProfile)),
@@ -70,7 +79,7 @@ export default function LatestDropNextMintSubscribe() {
     } as NFTSubscription;
   }, [hasTokenId, profileKey, status, tokenId]);
 
-  if (!profileKey || !subscription) {
+  if (hideSubscriptions || !profileKey || !subscription) {
     return null;
   }
 
