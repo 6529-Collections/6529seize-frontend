@@ -19,11 +19,12 @@ import {
   LOADING_HEATMAP_WEEK_COUNT,
   HEATMAP_VIEWPORT_CLASS_NAME,
   LOADING_MONTH_HEADER_SEGMENTS,
-  MONTH_LABEL_MIN_SPACING_PX,
   MONTH_LABEL_ROW_HEIGHT_PX,
   TOOLTIP_DATE_FORMATTER,
   TOOLTIP_STYLE,
   type HeatmapTooltipData,
+  getHeatmapColumnLeftPx,
+  getHeatmapGridWidthPx,
   getCellFrameClassName,
   getCellNodeClassName,
   getCellTooltipAnchorProps,
@@ -33,7 +34,7 @@ import {
 } from "./userPageBrainActivityHeatmap.helpers";
 import { useHeatmapViewport } from "./userPageBrainActivityHeatmap.viewport";
 
-const LOADING_COLUMN_STRIDE_PX = CELL_SIZE_PX + CELL_GAP_PX;
+const LOADING_GRID_WIDTH_PX = getHeatmapGridWidthPx(LOADING_HEATMAP_WEEK_COUNT);
 const LOADING_HEATMAP_CELLS = Array.from(
   { length: LOADING_HEATMAP_WEEK_COUNT * 7 },
   (_, index) => {
@@ -51,7 +52,7 @@ const LOADING_HEATMAP_CELLS = Array.from(
 );
 
 export function UserPageBrainActivityHeatmapLoading() {
-  const { viewportRef, viewportMetrics } = useHeatmapViewport("loading");
+  const { viewportRef } = useHeatmapViewport("loading");
 
   return (
     <div
@@ -59,26 +60,21 @@ export function UserPageBrainActivityHeatmapLoading() {
       aria-label="Loading activity heatmap"
     >
       <HeatmapDayLabels />
-      <div className="tw-relative tw-min-w-0 tw-flex-1">
-        <HeatmapLoadingMonthLabels
-          scrollLeft={viewportMetrics.scrollLeft}
-          clientWidth={viewportMetrics.clientWidth}
-        />
-        <div ref={viewportRef} className={HEATMAP_VIEWPORT_CLASS_NAME}>
-          <div className={HEATMAP_CONTENT_CLASS_NAME}>
-            <div
-              className="tw-grid tw-animate-pulse tw-grid-flow-col tw-grid-rows-7"
-              aria-hidden="true"
-              style={HEATMAP_GRID_STYLE}
-            >
-              {LOADING_HEATMAP_CELLS.map((cell) => (
-                <HeatmapLoadingCell
-                  key={cell.key}
-                  isPadding={cell.isPadding}
-                  isAccent={cell.isAccent}
-                />
-              ))}
-            </div>
+      <div ref={viewportRef} className={HEATMAP_VIEWPORT_CLASS_NAME}>
+        <div className={HEATMAP_CONTENT_CLASS_NAME}>
+          <HeatmapLoadingMonthLabels />
+          <div
+            className="tw-grid tw-animate-pulse tw-grid-flow-col tw-grid-rows-7"
+            aria-hidden="true"
+            style={HEATMAP_GRID_STYLE}
+          >
+            {LOADING_HEATMAP_CELLS.map((cell) => (
+              <HeatmapLoadingCell
+                key={cell.key}
+                isPadding={cell.isPadding}
+                isAccent={cell.isAccent}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -92,45 +88,37 @@ export function UserPageBrainActivityHeatmap({
   activity: UserPageBrainActivityViewModel;
 }>) {
   const tooltipId = useId();
-  const { viewportRef, viewportMetrics } = useHeatmapViewport(
-    activity.resetKey
-  );
+  const { viewportRef } = useHeatmapViewport(activity.resetKey);
 
   return (
     <div className="tw-flex tw-gap-3 tw-px-4">
       <HeatmapDayLabels />
-      <div className="tw-relative tw-min-w-0 tw-flex-1">
-        <HeatmapMonthLabels
-          activity={activity}
-          scrollLeft={viewportMetrics.scrollLeft}
-          clientWidth={viewportMetrics.clientWidth}
-        />
-        <div ref={viewportRef} className={HEATMAP_VIEWPORT_CLASS_NAME}>
-          <div className={HEATMAP_CONTENT_CLASS_NAME}>
-            <div
-              className="tw-grid tw-grid-flow-col tw-grid-rows-7"
-              role="img"
-              aria-label={`Public activity heatmap for ${activity.periodLabel}`}
-              style={HEATMAP_GRID_STYLE}
-            >
-              {activity.cells.map((cell) => (
-                <HeatmapCell key={cell.key} cell={cell} tooltipId={tooltipId} />
-              ))}
-            </div>
-            <Tooltip
-              id={tooltipId}
-              place="top"
-              offset={8}
-              opacity={1}
-              style={TOOLTIP_STYLE}
-              render={({ activeAnchor }) => {
-                const tooltipData = getHeatmapTooltipData(activeAnchor);
-                return tooltipData ? (
-                  <HeatmapTooltipContent {...tooltipData} />
-                ) : null;
-              }}
-            />
+      <div ref={viewportRef} className={HEATMAP_VIEWPORT_CLASS_NAME}>
+        <div className={HEATMAP_CONTENT_CLASS_NAME}>
+          <HeatmapMonthLabels activity={activity} />
+          <div
+            className="tw-grid tw-grid-flow-col tw-grid-rows-7"
+            role="img"
+            aria-label={`Public activity heatmap for ${activity.periodLabel}`}
+            style={HEATMAP_GRID_STYLE}
+          >
+            {activity.cells.map((cell) => (
+              <HeatmapCell key={cell.key} cell={cell} tooltipId={tooltipId} />
+            ))}
           </div>
+          <Tooltip
+            id={tooltipId}
+            place="top"
+            offset={8}
+            opacity={1}
+            style={TOOLTIP_STYLE}
+            render={({ activeAnchor }) => {
+              const tooltipData = getHeatmapTooltipData(activeAnchor);
+              return tooltipData ? (
+                <HeatmapTooltipContent {...tooltipData} />
+              ) : null;
+            }}
+          />
         </div>
       </div>
     </div>
@@ -237,39 +225,22 @@ function HeatmapTooltipContent({
   );
 }
 
-function HeatmapLoadingMonthLabels({
-  scrollLeft,
-  clientWidth,
-}: Readonly<{
-  scrollLeft: number;
-  clientWidth: number;
-}>) {
-  const visibleSegments = LOADING_MONTH_HEADER_SEGMENTS.filter((segment) => {
-    const leftPx = segment.labelColumn * LOADING_COLUMN_STRIDE_PX - scrollLeft;
-    const rightPx = leftPx + segment.widthPx;
-
-    if (clientWidth <= 0) {
-      return true;
-    }
-
-    return rightPx >= 0 && leftPx <= clientWidth;
-  });
-
+function HeatmapLoadingMonthLabels() {
   return (
     <div
       className="tw-relative tw-mb-1 tw-overflow-hidden"
       aria-hidden="true"
       style={{
         height: `${MONTH_LABEL_ROW_HEIGHT_PX}px`,
-        minWidth: `${MONTH_LABEL_MIN_SPACING_PX}px`,
+        width: `${LOADING_GRID_WIDTH_PX}px`,
       }}
     >
-      {visibleSegments.map((segment) => (
+      {LOADING_MONTH_HEADER_SEGMENTS.map((segment) => (
         <span
           key={segment.key}
           className="tw-absolute tw-bottom-0 tw-h-[5px] tw-animate-pulse tw-rounded-full tw-bg-white/[0.08]"
           style={{
-            left: `${segment.labelColumn * LOADING_COLUMN_STRIDE_PX - scrollLeft}px`,
+            left: `${getHeatmapColumnLeftPx(segment.labelColumn)}px`,
             width: `${segment.widthPx}px`,
           }}
         />
@@ -280,24 +251,20 @@ function HeatmapLoadingMonthLabels({
 
 function HeatmapMonthLabels({
   activity,
-  scrollLeft,
-  clientWidth,
 }: Readonly<{
   activity: UserPageBrainActivityViewModel;
-  scrollLeft: number;
-  clientWidth: number;
 }>) {
-  const placedMonthLabels = getPlacedMonthLabels(
-    activity.monthLabels,
-    scrollLeft,
-    clientWidth
-  );
+  const placedMonthLabels = getPlacedMonthLabels(activity.monthLabels);
+  const gridWidthPx = getHeatmapGridWidthPx(activity.weekCount);
 
   return (
     <div
       className="tw-relative tw-mb-1 tw-overflow-hidden tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-600"
       aria-hidden="true"
-      style={{ height: `${MONTH_LABEL_ROW_HEIGHT_PX}px` }}
+      style={{
+        height: `${MONTH_LABEL_ROW_HEIGHT_PX}px`,
+        width: `${gridWidthPx}px`,
+      }}
     >
       {placedMonthLabels.map((label) => (
         <span
