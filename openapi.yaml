@@ -8486,7 +8486,7 @@ components:
         resolved_profile:
           anyOf:
             - type: "null"
-            - $ref: "#/components/schemas/ApiProfileMin"
+            - $ref: "#/components/schemas/ApiDropResolvedIdentityProfile"
     ApiDropNftLink:
       type: object
       required:
@@ -8575,6 +8575,21 @@ components:
         name:
           type: string
           maxLength: 500
+    ApiDropResolvedIdentityProfile:
+      allOf:
+        - $ref: "#/components/schemas/ApiProfileMin"
+        - type: object
+          required:
+            - bio
+            - top_rep_categories
+          properties:
+            bio:
+              type: string
+              nullable: true
+            top_rep_categories:
+              type: array
+              items:
+                $ref: "#/components/schemas/ApiProfileRepCategorySummary"
     ApiDropSearchStrategy:
       type: string
       enum:
@@ -10404,6 +10419,17 @@ components:
         - READ_WAVE
         - CREATE_DROP_TO_WAVE
         - RATE_WAVE_DROP
+    ApiProfileRepCategorySummary:
+      type: object
+      required:
+        - category
+        - rep
+      properties:
+        category:
+          type: string
+        rep:
+          type: number
+          format: int64
     ApiPushNotificationDevice:
       type: object
       required:
