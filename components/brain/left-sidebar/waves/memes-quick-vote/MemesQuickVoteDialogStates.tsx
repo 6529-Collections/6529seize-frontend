@@ -102,7 +102,7 @@ export function MemesQuickVoteDialogRestartState() {
       action={
         <div className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300">
           <span className="tw-size-2 tw-rounded-full tw-bg-primary-400" />
-          Loading next memes...
+          <span>Loading next memes...</span>
         </div>
       }
     />
