@@ -10956,12 +10956,16 @@ components:
       type: object
       required:
         - drop
+        - left_to_vote_in_current_round
         - total_count
       properties:
         drop:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiDrop"
+        left_to_vote_in_current_round:
+          type: integer
+          format: int64
         total_count:
           type: integer
           format: int64
@@ -11104,10 +11108,6 @@ components:
         visibility:
           $ref: "#/components/schemas/ApiCreateNewWaveVisibilityConfig"
         participation:
-          description: >-
-            Wave participation configuration. `submission_strategy` is immutable
-            after creation and, if provided on update, must match the existing
-            value exactly.
           $ref: "#/components/schemas/ApiUpdateWaveParticipationConfig"
         chat:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"

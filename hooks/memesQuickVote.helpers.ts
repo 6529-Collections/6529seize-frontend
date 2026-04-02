@@ -1,7 +1,10 @@
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+
 const QUICK_VOTE_DEFAULT_PERCENTAGE = 0.01;
 const MAX_QUICK_VOTE_AMOUNTS = 5;
 
 export type MemesQuickVoteStats = {
+  readonly leftThisRoundCount: number;
   readonly uncastPower: number | null;
   readonly unratedCount: number;
   readonly votingLabel: string | null;
@@ -53,6 +56,12 @@ export const addRecentQuickVoteAmount = (
 export const getDisplayQuickVoteAmounts = (
   amounts: readonly number[]
 ): number[] => [...amounts].sort((left, right) => left - right);
+
+export const formatMemesQuickVoteLeftThisRoundText = (count: number): string =>
+  `${formatNumberWithCommas(count)} left this round`;
+
+export const formatMemesQuickVoteUnratedText = (count: number): string =>
+  `${formatNumberWithCommas(count)} unrated`;
 
 export const getDefaultQuickVoteAmount = (maxRating: number): number => {
   const normalizedMaxRating = Math.max(1, Math.floor(maxRating));

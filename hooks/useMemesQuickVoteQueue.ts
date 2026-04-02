@@ -55,11 +55,12 @@ export type UseMemesQuickVoteQueueResult = {
   readonly hasDiscoveryError: boolean;
   readonly isExhausted: boolean;
   readonly isLoading: boolean;
+  readonly isRestartingRound: boolean;
   readonly isReady: boolean;
+  readonly leftThisRoundCount: number;
   readonly latestUsedAmount: number | null;
   readonly nextDrop: ExtendedDrop | null;
   readonly recentAmounts: number[];
-  readonly remainingCount: number;
   readonly retryDiscovery: () => void;
   readonly submitVote: (
     drop: ExtendedDrop,
@@ -67,6 +68,7 @@ export type UseMemesQuickVoteQueueResult = {
   ) => Promise<boolean>;
   readonly skipDrop: (drop: ExtendedDrop) => Promise<boolean>;
   readonly uncastPower: number | null;
+  readonly unratedCount: number;
   readonly votingLabel: string | null;
 };
 
@@ -113,6 +115,43 @@ const runBestEffortSync = (sync: () => Promise<void>): void => {
     // Session state already models sync failures; callers should not block on this.
   });
 };
+
+const QUICK_VOTE_RESTART_TIMEOUT_MS = 3000;
+
+const shouldRerunQuickVoteSync = ({
+  abortController,
+  rerunRequestedRef,
+}: {
+  readonly abortController: AbortController;
+  readonly rerunRequestedRef: { current: boolean };
+}): boolean => !abortController.signal.aborted && rerunRequestedRef.current;
+
+const getQuickVoteSyncPendingState = (
+  current: MemesQuickVoteSessionState
+): MemesQuickVoteSessionState => ({
+  ...current,
+  hasDiscoveryError: false,
+  isExhausted: false,
+  isRestartingRound: current.isRestartingRound,
+  isLoading: current.currentDrop === null,
+});
+
+const getQuickVoteSyncFailureState = (
+  current: MemesQuickVoteSessionState
+): MemesQuickVoteSessionState =>
+  current.currentDrop
+    ? {
+        ...current,
+        isRestartingRound: false,
+        isLoading: false,
+      }
+    : {
+        ...current,
+        hasDiscoveryError: true,
+        isExhausted: false,
+        isRestartingRound: false,
+        isLoading: false,
+      };
 
 const getCurrentSessionState = ({
   key,
@@ -173,7 +212,9 @@ const useMemesQuickVoteWindowSync = ({
   waveId,
 }: UseMemesQuickVoteWindowSyncOptions) => {
   const syncAbortControllerRef = useRef<AbortController | null>(null);
+  const syncInFlightRef = useRef<boolean>(false);
   const syncRequestIdRef = useRef(0);
+  const syncRerunRequestedRef = useRef<boolean>(false);
   const syncRetryTimeoutRef = useRef<ReturnType<
     typeof globalThis.setTimeout
   > | null>(null);
@@ -189,107 +230,121 @@ const useMemesQuickVoteWindowSync = ({
 
   const stopActiveSync = useCallback(() => {
     syncRequestIdRef.current += 1;
+    syncInFlightRef.current = false;
+    syncRerunRequestedRef.current = false;
     syncAbortControllerRef.current?.abort();
     syncAbortControllerRef.current = null;
     clearSyncRetryTimeout();
   }, [clearSyncRetryTimeout]);
 
-  const syncUndiscoveredWindow = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
+  const syncUndiscoveredWindow = useCallback(
+    async function syncWindow() {
+      if (syncInFlightRef.current) {
+        syncRerunRequestedRef.current = true;
+        return;
+      }
 
-    if (isSettingsLoaded && !isQuickVoteEnabled) {
-      setCurrentSessionState({
-        ...createInitialSessionState(),
-        isExhausted: true,
-      });
-      return;
-    }
+      if (!enabled) {
+        return;
+      }
 
-    if (!isQuickVoteEnabled || !contextProfile || waveId === null) {
-      return;
-    }
+      if (isSettingsLoaded && !isQuickVoteEnabled) {
+        setCurrentSessionState({
+          ...createInitialSessionState(),
+          isExhausted: true,
+        });
+        return;
+      }
 
-    const requestId = syncRequestIdRef.current + 1;
-    syncRequestIdRef.current = requestId;
-    syncAbortControllerRef.current?.abort();
-    const abortController = new AbortController();
-    syncAbortControllerRef.current = abortController;
+      if (!isQuickVoteEnabled || !contextProfile || waveId === null) {
+        return;
+      }
 
-    setCurrentSessionState((current) => ({
-      ...current,
-      hasDiscoveryError: false,
-      isExhausted: false,
-      isLoading: current.currentDrop === null,
-    }));
+      syncInFlightRef.current = true;
+      syncRerunRequestedRef.current = false;
+      const requestId = syncRequestIdRef.current + 1;
+      syncRequestIdRef.current = requestId;
+      const abortController = new AbortController();
+      syncAbortControllerRef.current = abortController;
 
-    try {
-      const responses = await Promise.all(
-        Array.from({ length: MEMES_QUICK_VOTE_LOOKAHEAD_COUNT }, (_, skip) =>
-          fetchMemesQuickVoteUndiscoveredDrop({
-            signal: abortController.signal,
-            skip,
-            waveId,
+      setCurrentSessionState(getQuickVoteSyncPendingState);
+
+      try {
+        const responses = await Promise.all(
+          Array.from({ length: MEMES_QUICK_VOTE_LOOKAHEAD_COUNT }, (_, skip) =>
+            fetchMemesQuickVoteUndiscoveredDrop({
+              signal: abortController.signal,
+              skip,
+              waveId,
+            })
+          )
+        );
+
+        if (
+          abortController.signal.aborted ||
+          syncRequestIdRef.current !== requestId
+        ) {
+          return;
+        }
+
+        const primaryResponse = responses[0] ?? null;
+        const primaryDrop = primaryResponse?.drop ?? null;
+        const rawLeftThisRoundCount =
+          primaryResponse?.left_to_vote_in_current_round ?? 0;
+        const rawUnratedCount = primaryResponse?.total_count ?? 0;
+        const fetchedDrops = getUniqueDrops(
+          responses.flatMap((response) =>
+            response.drop ? [response.drop] : []
+          )
+        );
+
+        setCurrentSessionState((current) =>
+          applyFetchedWindowState({
+            current,
+            fetchedDrops,
+            pendingDropIds: pendingDropIdsRef.current,
+            primaryDrop,
+            rawLeftThisRoundCount,
+            rawUnratedCount,
           })
-        )
-      );
+        );
+      } catch {
+        if (
+          abortController.signal.aborted ||
+          syncRequestIdRef.current !== requestId
+        ) {
+          return;
+        }
 
-      if (
-        abortController.signal.aborted ||
-        syncRequestIdRef.current !== requestId
-      ) {
-        return;
+        setCurrentSessionState(getQuickVoteSyncFailureState);
+      } finally {
+        if (syncAbortControllerRef.current === abortController) {
+          syncAbortControllerRef.current = null;
+        }
+
+        syncInFlightRef.current = false;
+
+        if (
+          shouldRerunQuickVoteSync({
+            abortController,
+            rerunRequestedRef: syncRerunRequestedRef,
+          })
+        ) {
+          syncRerunRequestedRef.current = false;
+          runBestEffortSync(syncWindow);
+        }
       }
-
-      const primaryDrop = responses[0]?.drop ?? null;
-      const rawTotalCount =
-        responses.find((response) => typeof response.total_count === "number")
-          ?.total_count ?? 0;
-      const fetchedDrops = getUniqueDrops(
-        responses.flatMap((response) => (response.drop ? [response.drop] : []))
-      );
-
-      setCurrentSessionState((current) =>
-        applyFetchedWindowState({
-          current,
-          fetchedDrops,
-          pendingDropIds: pendingDropIdsRef.current,
-          primaryDrop,
-          rawTotalCount,
-        })
-      );
-    } catch {
-      if (
-        abortController.signal.aborted ||
-        syncRequestIdRef.current !== requestId
-      ) {
-        return;
-      }
-
-      setCurrentSessionState((current) =>
-        current.currentDrop
-          ? {
-              ...current,
-              isLoading: false,
-            }
-          : {
-              ...current,
-              hasDiscoveryError: true,
-              isExhausted: false,
-              isLoading: false,
-            }
-      );
-    }
-  }, [
-    contextProfile,
-    enabled,
-    isQuickVoteEnabled,
-    isSettingsLoaded,
-    pendingDropIdsRef,
-    setCurrentSessionState,
-    waveId,
-  ]);
+    },
+    [
+      contextProfile,
+      enabled,
+      isQuickVoteEnabled,
+      isSettingsLoaded,
+      pendingDropIdsRef,
+      setCurrentSessionState,
+      waveId,
+    ]
+  );
 
   return {
     clearSyncRetryTimeout,
@@ -304,6 +359,7 @@ const useMemesQuickVoteSessionEffects = ({
   enabled,
   isQuickVoteEnabled,
   pendingDropIdsRef,
+  setCurrentSessionState,
   stateKey,
   stopActiveSync,
   syncUndiscoveredWindow,
@@ -314,6 +370,7 @@ const useMemesQuickVoteSessionEffects = ({
   readonly enabled: boolean;
   readonly isQuickVoteEnabled: boolean;
   readonly pendingDropIdsRef: { current: readonly string[] };
+  readonly setCurrentSessionState: UseKeyedMemesQuickVoteSessionStoreResult["setCurrentSessionState"];
   readonly stateKey: string;
   readonly stopActiveSync: () => void;
   readonly syncUndiscoveredWindow: () => Promise<void>;
@@ -347,7 +404,6 @@ const useMemesQuickVoteSessionEffects = ({
   useEffect(() => {
     if (
       !enabled ||
-      currentSessionState.isLoading ||
       currentSessionState.hasDiscoveryError ||
       currentSessionState.isExhausted
     ) {
@@ -355,6 +411,7 @@ const useMemesQuickVoteSessionEffects = ({
     }
 
     const shouldContinueSync =
+      currentSessionState.isRestartingRound ||
       currentSessionState.recentlyHandledDropIds.length > 0 ||
       (pendingDropIdsRef.current.length > 0 &&
         currentSessionState.currentDrop === null);
@@ -375,10 +432,42 @@ const useMemesQuickVoteSessionEffects = ({
     currentSessionState.hasDiscoveryError,
     currentSessionState.isExhausted,
     currentSessionState.isLoading,
+    currentSessionState.isRestartingRound,
     currentSessionState.recentlyHandledDropIds.length,
     enabled,
     pendingDropIdsRef,
     syncUndiscoveredWindow,
+  ]);
+
+  useEffect(() => {
+    if (!enabled || !currentSessionState.isRestartingRound) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      stopActiveSync();
+      setCurrentSessionState((current) => {
+        if (!current.isRestartingRound) {
+          return current;
+        }
+
+        return {
+          ...current,
+          hasDiscoveryError: true,
+          isLoading: false,
+          isRestartingRound: false,
+        };
+      });
+    }, QUICK_VOTE_RESTART_TIMEOUT_MS);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [
+    currentSessionState.isRestartingRound,
+    enabled,
+    setCurrentSessionState,
+    stopActiveSync,
   ]);
 
   useEffect(
@@ -417,6 +506,7 @@ const useMemesQuickVoteSessionState = ({
     enabled,
     isQuickVoteEnabled,
     pendingDropIdsRef,
+    setCurrentSessionState,
     stateKey,
     stopActiveSync,
     syncUndiscoveredWindow,
@@ -681,17 +771,19 @@ export const useMemesQuickVoteQueue = ({
     hasDiscoveryError: session.sessionState.hasDiscoveryError,
     isExhausted: session.sessionState.isExhausted,
     isLoading: session.sessionState.isLoading && activeDrop === null,
+    isRestartingRound: session.sessionState.isRestartingRound,
     isReady: activeDrop !== null,
+    leftThisRoundCount: session.sessionState.leftThisRoundCount,
     latestUsedAmount,
     nextDrop,
     recentAmounts,
-    remainingCount: session.sessionState.totalCount,
     retryDiscovery: () => {
       runBestEffortSync(session.syncUndiscoveredWindow);
     },
     skipDrop: submitSkip,
     submitVote,
     uncastPower: activeDrop?.context_profile_context?.max_rating ?? null,
+    unratedCount: session.sessionState.unratedCount,
     votingLabel: activeDrop
       ? WAVE_VOTING_LABELS[activeDrop.wave.voting_credit_type]
       : null,
