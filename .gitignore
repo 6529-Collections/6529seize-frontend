@@ -9,7 +9,6 @@
 /coverage
 /test-results/
 /playwright-report/
-/.playwright-mcp/
 /playwright/.cache/
 /storageState.json
 /playwright/.auth/

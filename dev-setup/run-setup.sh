@@ -6,9 +6,9 @@
 # Description:
 #   Bootstraps a host to build & run 6529seize-frontend for staging/dev.
 #   - Accepts Node >= 20; installs Node 20 only if Node missing or < 20.
-#   - Installs pnpm 10.33.0 when missing.
-#   - Prompts ONCE at the beginning for all inputs (.env + nginx),
-#     builds, starts via repo-managed PM2, optionally configures NGINX + Let's Encrypt.
+#   - Ensures npm >= 10 (upgrades if < 10; leaves 10+ unchanged).
+#   - Installs PM2, prompts ONCE at the beginning for all inputs (.env + nginx),
+#     builds, starts via PM2, optionally configures NGINX + Let's Encrypt.
 #   - Configures PM2 to start on boot + enables pm2-logrotate.
 #
 # Usage:
@@ -20,23 +20,6 @@ trap 'echo -e "\033[31m[ERROR]\033[0m line $LINENO: \"$BASH_COMMAND\" failed. Ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PNPM_VERSION="10.33.0"
-
-pnpm_home_dir() {
-  if [[ "$(uname -s)" == "Darwin" ]]; then
-    printf "%s" "$HOME/Library/pnpm"
-  else
-    printf "%s" "$HOME/.local/share/pnpm"
-  fi
-}
-
-setup_pnpm_env() {
-  export PNPM_HOME="${PNPM_HOME:-$(pnpm_home_dir)}"
-  case ":$PATH:" in
-    *":$PNPM_HOME:"*) ;;
-    *) export PATH="$PNPM_HOME:$PATH" ;;
-  esac
-}
 
 color() {
   local code="$1"; shift
@@ -117,7 +100,7 @@ prompt_input_required() {
 
 # ---------- Tech prerequisites ----------
 
-ensure_node_ge20() {
+ensure_node_ge20_and_npm_ge10() {
   # Accept Node >= 20; install Node 20 only if missing or < 20.
   local os="$(uname -s)"; local need_major=20; local have_major=0
   if command -v node >/dev/null 2>&1; then
@@ -153,50 +136,20 @@ ensure_node_ge20() {
     color red "Node $(node -v) < 20 after installation. Please install Node >= 20 and re-run."; exit 1
   fi
 
-  color green "Using Node $(node -v)"
+  local npm_major; npm_major="$(npm -v | cut -d. -f1 || echo 0)"
+  if [[ "$npm_major" -lt 10 ]]; then
+    color yellow "Upgrading npm to >=10…"
+    if [[ "$(uname -s)" == "Darwin" ]]; then npm i -g npm@^10; else sudo npm i -g npm@^10; fi
+  fi
+  color green "Using Node $(node -v), npm $(npm -v)"
 }
 
-ensure_pnpm() {
-  setup_pnpm_env
-
-  if command -v pnpm >/dev/null 2>&1; then
-    local current_pnpm
-    current_pnpm="$(pnpm --version)"
-    if [[ "$current_pnpm" == "$PNPM_VERSION" ]]; then
-      color green "Using pnpm $current_pnpm"
-      return 0
-    fi
-    color yellow "pnpm $current_pnpm detected; upgrading to $PNPM_VERSION…"
-  else
-    color yellow "Installing pnpm $PNPM_VERSION…"
+install_pm2() {
+  if ! command -v pm2 >/dev/null 2>&1; then
+    color yellow "Installing PM2 globally…"
+    if [[ "$(uname -s)" == "Darwin" ]]; then npm i -g pm2; else sudo npm i -g pm2; fi
   fi
-
-  if ! command -v curl >/dev/null 2>&1; then
-    color red "curl is required to install pnpm. Please install curl and re-run."
-    exit 1
-  fi
-
-  curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION="$PNPM_VERSION" SHELL=/bin/bash bash -
-  setup_pnpm_env
-  hash -r
-
-  if ! command -v pnpm >/dev/null 2>&1; then
-    color red "pnpm installation failed."
-    exit 1
-  fi
-
-  color green "Using pnpm $(pnpm --version)"
-}
-
-run_pm2() {
-  (cd "$REPO_ROOT" && pnpm exec pm2 "$@")
-}
-
-run_pm2_with_sudo_env() {
-  (
-    cd "$REPO_ROOT" &&
-      sudo env "PATH=$PATH:/usr/bin" pnpm exec pm2 "$@"
-  )
+  color green "PM2: $(pm2 -v)"
 }
 
 ensure_java_for_openapi() {
@@ -293,39 +246,39 @@ obtain_cert_and_enable_https() {
 install_dependencies() {
   color yellow "Installing project dependencies…"
   if [[ -d "$REPO_ROOT/node_modules" ]]; then
-    color yellow "Removing existing node_modules for a clean install…"
-    rm -rf "$REPO_ROOT/node_modules"
+    color yellow "Removing existing node_modules and lockfile for a clean install…"
+    rm -rf "$REPO_ROOT/node_modules" "$REPO_ROOT/package-lock.json"
   fi
-  ( cd "$REPO_ROOT" && pnpm install --frozen-lockfile )
+  ( cd "$REPO_ROOT" && npm install )
   color green "Dependencies installed."
 }
 
 build_project() {
   color yellow "Building the Next.js project…"
-  ( cd "$REPO_ROOT" && pnpm run build )
+  ( cd "$REPO_ROOT" && npm run build )
   color green "Build completed."
 }
 
 start_pm2() {
   local pm2_name="6529seize"
   color yellow "Starting the application with PM2…"
-  run_pm2 start pnpm --name="$pm2_name" -- start
-  run_pm2 save
+  ( cd "$REPO_ROOT" && pm2 start npm --name="$pm2_name" -- run start )
+  pm2 save
   color green "App started under PM2 as '$pm2_name'."
-  color blue  "Logs: pnpm exec pm2 logs $pm2_name"
+  color blue  "Logs: pm2 logs $pm2_name"
   color blue  "Port: $DEV_PORT (proxy target). Ensure your app listens on this port."
 }
 
 enable_pm2_logrotate() {
   color yellow "Enabling pm2-logrotate…"
   # Install module if not installed yet
-  run_pm2 install pm2-logrotate >/dev/null 2>&1 || true
+  pm2 install pm2-logrotate >/dev/null 2>&1 || true
   # Configure sane defaults
-  run_pm2 set pm2-logrotate:max_size 10M >/dev/null
-  run_pm2 set pm2-logrotate:retain 7 >/dev/null
-  run_pm2 set pm2-logrotate:compress true >/dev/null
-  run_pm2 set pm2-logrotate:dateFormat "YYYY-MM-DD_HH-mm-ss" >/dev/null
-  run_pm2 set pm2-logrotate:rotateInterval "0 0 * * *" >/dev/null  # daily at 00:00
+  pm2 set pm2-logrotate:max_size 10M >/dev/null
+  pm2 set pm2-logrotate:retain 7 >/dev/null
+  pm2 set pm2-logrotate:compress true >/dev/null
+  pm2 set pm2-logrotate:dateFormat "YYYY-MM-DD_HH-mm-ss" >/dev/null
+  pm2 set pm2-logrotate:rotateInterval "0 0 * * *" >/dev/null  # daily at 00:00
   color green "pm2-logrotate configured (10M, keep 7, daily, compress)."
 }
 
@@ -339,8 +292,8 @@ enable_pm2_startup() {
   local home_dir; home_dir="$(getent passwd "$u" | cut -d: -f6)"
   home_dir="${home_dir:-$(eval echo "~$u")}"
   if command -v systemctl >/dev/null 2>&1; then
-    run_pm2_with_sudo_env startup systemd -u "$u" --hp "$home_dir" >/dev/null
-    run_pm2 save
+    sudo env PATH="$PATH:/usr/bin" pm2 startup systemd -u "$u" --hp "$home_dir" >/dev/null
+    pm2 save
     color green "PM2 will restart your app on reboot for user '$u'."
   else
     color yellow "systemd not detected; skipping pm2 startup registration."
@@ -463,8 +416,8 @@ main() {
 
   # 1) Prerequisites
   require_sudo_if_linux
-  ensure_node_ge20
-  ensure_pnpm
+  ensure_node_ge20_and_npm_ge10
+  install_pm2
   ensure_java_for_openapi
 
   # 2) Build & run app
@@ -497,7 +450,7 @@ main() {
   fi
 
   color green "Done. App should be reachable via NGINX at ${DEV_DOMAIN_URL} (if configured), or directly on port ${DEV_PORT}."
-  color blue  "PM2 logs → pnpm exec pm2 logs 6529seize"
+  color blue  "PM2 logs → pm2 logs 6529seize"
 }
 
 main "$@"

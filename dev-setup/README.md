@@ -6,10 +6,10 @@ This repo includes `dev-setup/run-setup.sh` to bootstrap a fresh EC2 host for a 
 
 ## What the script does
 
-- Ensures **Node ≥ 20** (keeps 21/22 if present)
-- Installs **pnpm 10.33.0**
+- Ensures **Node ≥ 20** (keeps 21/22 if present) and **npm ≥ 10**
+- Installs **PM2**
 - Prompts you and writes **.env** **before** any build (no `.env.sample` used)
-- Installs deps, **builds**, and **starts** the app with repo-managed PM2 (default port **3001**)
+- Installs deps, **builds**, and **starts** the app with PM2 (default port **3001**)
 - **Optionally** installs **NGINX + Certbot** and configures HTTPS for `https://<slug>staging.6529.io`
 - Enables PM2 start on boot (Linux)
 
@@ -107,7 +107,7 @@ https://<slug>staging.6529.io
 PM2 logs:
 
 ```bash
-pnpm exec pm2 logs 6529seize
+pm2 logs 6529seize
 ```
 
 ---
@@ -116,15 +116,15 @@ pnpm exec pm2 logs 6529seize
 
 ```bash
 # Process status / logs
-pnpm exec pm2 ls
-pnpm exec pm2 logs 6529seize
+pm2 ls
+pm2 logs 6529seize
 
 # Restart / stop
-pnpm exec pm2 restart 6529seize
-pnpm exec pm2 stop 6529seize
+pm2 restart 6529seize
+pm2 stop 6529seize
 
 # Persist across reboots
-pnpm exec pm2 save
+pm2 save
 
 # NGINX
 sudo nginx -t && sudo systemctl reload nginx
