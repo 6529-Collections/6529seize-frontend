@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import styles from "@/components/nft-image/NFTImage.module.scss";
 import { useNftBalance } from "@/hooks/useNftBalance";
-import styles from "./NFTImage.module.scss";
 
 interface Props {
   readonly contract: string;
@@ -34,9 +34,10 @@ export default function NFTImageBalance({ contract, tokenId, height }: Props) {
   const printBalanceSpan = (b: string) => {
     return (
       <span
-        className={`${styles["balance"]}  ${
+        className={`${styles["balance"]} ${
           height === 650 ? styles["balanceBigger"] : ""
-        } `}>
+        } `}
+      >
         {b}
       </span>
     );

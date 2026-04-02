@@ -2,6 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import NFTImage from "@/components/nft-image/NFTImage";
@@ -17,6 +18,7 @@ import { VolumeType } from "@/entities/INFT";
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
+import { getNftMimeType } from "@/helpers/nft.helpers";
 import { fetchUrl } from "@/services/6529api";
 import type { MemeLabSort } from "@/types/enums";
 import { MEMES_EXTENDED_SORT, MemesSort } from "@/types/enums";
@@ -321,6 +323,8 @@ export default function TheMemesComponent() {
   }
 
   function printNft(nft: NFTWithMemesExtendedData) {
+    const mediaMimeType = getNftMimeType(nft);
+
     return (
       <Col
         key={`${nft.contract}-${nft.id}`}
@@ -346,7 +350,18 @@ export default function TheMemesComponent() {
             </Row>
             <Row>
               <Col className="text-center pt-2">
-                #{nft.id} - {nft.name}
+                <span>
+                  {mediaMimeType && (
+                    <MediaTypeBadge
+                      mimeType={mediaMimeType}
+                      dropId={`${nft.contract}-${nft.id}`}
+                      size="sm"
+                      iconClassName="tw-size-5"
+                      className="tw-mr-1.5 tw-inline-flex tw-align-[0.02em]"
+                    />
+                  )}
+                  #{nft.id} - {nft.name}
+                </span>
               </Col>
             </Row>
             <Row>

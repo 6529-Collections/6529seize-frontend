@@ -1,12 +1,14 @@
 import { numberWithCommas } from "@/helpers/Helpers";
 
 import type { LabNFT, NFT } from "@/entities/INFT";
+import type { ReactNode } from "react";
 import { MetadataLink } from "./MetadataLink";
 
 export function NftPageStats(props: {
   readonly nft: NFT | LabNFT;
   readonly hide_mint_price?: boolean | undefined;
   readonly hide_hodl_rate?: boolean | undefined;
+  readonly afterMetadata?: ReactNode;
 }) {
   const hasHodlRate = !props.hide_hodl_rate && "hodl_rate" in props.nft;
   return (
@@ -20,6 +22,7 @@ export function NftPageStats(props: {
         />
       )}
       <MetadataLink url={props.nft.uri} />
+      {props.afterMetadata}
       {hasHodlRate && (
         <NftStatTableRow
           label="TDH Rate"
@@ -59,9 +62,9 @@ function NftStatTableRow(props: {
     <tr>
       <td>{props.label}</td>
       <td>
-        <b>
+        <span className="tw-font-medium">
           {value > 0 ? `${numberWithCommas(value)} ${props.unit ?? ""}` : `N/A`}
-        </b>
+        </span>
       </td>
     </tr>
   );

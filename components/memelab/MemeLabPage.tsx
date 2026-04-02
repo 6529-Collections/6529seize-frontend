@@ -7,6 +7,7 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
@@ -52,10 +53,13 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import {
+  getAnimationMimeTypeFromMetadata,
   getAnimationDimensionsFromMetadata,
   getAnimationFileTypeFromMetadata,
+  getImageMimeTypeFromMetadata,
   getImageDimensionsFromMetadata,
   getImageFileTypeFromMetadata,
+  getMimeTypeFromFormat,
 } from "@/helpers/nft.helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -76,6 +80,9 @@ const isAbortError = (error: unknown): boolean => {
   }
   return error instanceof Error && error.name === "AbortError";
 };
+
+const trimToEmpty = (value: unknown): string =>
+  typeof value === "string" ? value.trim() : "";
 
 export default function MemeLabPageComponent({
   nftId,
@@ -616,10 +623,10 @@ export default function MemeLabPageComponent({
                   <tbody>
                     <tr>
                       <td>Edition Size</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {numberWithCommas(nftMeta.edition_size)}
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.edition_size_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
@@ -635,16 +642,16 @@ export default function MemeLabPageComponent({
                               />
                             </span>
                           </td>
-                          <td className="text-right">
+                          <td className="text-right tw-font-medium">
                             {numberWithCommas(nftMeta.burnt)}
                           </td>
                         </tr>
                         <tr>
                           <td>Edition Size ex. Burnt</td>
-                          <td className="text-right">
+                          <td className="text-right tw-font-medium">
                             {numberWithCommas(nftMeta.edition_size_not_burnt)}
                           </td>
-                          <td className="text-right">
+                          <td className="text-right tw-font-medium">
                             {nftMeta.edition_size_not_burnt_rank}/
                             {nftMeta.collection_size}
                           </td>
@@ -653,10 +660,10 @@ export default function MemeLabPageComponent({
                     )}
                     <tr>
                       <td>6529 Museum</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {numberWithCommas(nftMeta.museum_holdings)}
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.museum_holdings_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
@@ -665,42 +672,42 @@ export default function MemeLabPageComponent({
                         Edition Size ex.
                         {nftMeta.burnt > 0 && " Burnt and"} 6529 Museum
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {numberWithCommas(nftMeta.edition_size_cleaned)}
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.edition_size_cleaned_rank}/
                         {nftMeta.collection_size}
                       </td>
                     </tr>
                     <tr>
                       <td>Collectors</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {numberWithCommas(nftMeta.hodlers)}
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.hodlers_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
                     <tr>
                       <td>% Unique</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {Math.round(nftMeta.percent_unique * 100 * 10) / 10}%
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.percent_unique_rank}/{nftMeta.collection_size}
                       </td>
                     </tr>
                     {nftMeta.burnt > 0 && (
                       <tr>
                         <td>% Unique ex. Burnt</td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {Math.round(
                             nftMeta.percent_unique_not_burnt * 100 * 10
                           ) / 10}
                           %
                         </td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {nftMeta.percent_unique_not_burnt_rank}/
                           {nftMeta.collection_size}
                         </td>
@@ -711,12 +718,12 @@ export default function MemeLabPageComponent({
                         % Unique ex.{nftMeta.burnt > 0 && " Burnt and"} 6529
                         Museum
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {Math.round(nftMeta.percent_unique_cleaned * 100 * 10) /
                           10}
                         %
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {nftMeta.percent_unique_cleaned_rank}/
                         {nftMeta.collection_size}
                       </td>
@@ -983,7 +990,7 @@ export default function MemeLabPageComponent({
   const imageDimensions = getImageDimensionsFromMetadata(nft?.metadata);
   const animationDimensions = getAnimationDimensionsFromMetadata(nft?.metadata);
   const imageHref = getResolvedImageSrc(nft);
-  const metadataHref = nft?.uri.trim() ?? "";
+  const metadataHref = trimToEmpty(nft?.uri);
   const metadata =
     nft?.metadata !== null && typeof nft?.metadata === "object"
       ? (nft.metadata as {
@@ -993,22 +1000,21 @@ export default function MemeLabPageComponent({
         })
       : undefined;
   const artImageHref =
-    (typeof metadata?.image === "string" ? metadata.image.trim() : "") ||
-    nft?.image.trim() ||
-    "";
+    trimToEmpty(metadata?.image) || trimToEmpty(nft?.image) || "";
   const artAnimationHref =
-    (typeof metadata?.animation_url === "string"
-      ? metadata.animation_url.trim()
-      : "") ||
-    (typeof metadata?.animation === "string"
-      ? metadata.animation.trim()
-      : "") ||
-    nft?.animation.trim() ||
+    trimToEmpty(metadata?.animation_url) ||
+    trimToEmpty(metadata?.animation) ||
+    trimToEmpty(nft?.animation) ||
     "";
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !hasImage);
   const fileType = isShowingAnimation ? animationFormat : imageFormat;
   const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
+  const fileMimeType = isShowingAnimation
+    ? (getAnimationMimeTypeFromMetadata(nft?.metadata) ??
+      getMimeTypeFromFormat(animationFormat))
+    : (getImageMimeTypeFromMetadata(nft?.metadata) ??
+      getMimeTypeFromFormat(imageFormat));
   const currentFormat = fileType ?? "";
   const arweaveRows = [
     metadataHref
@@ -1173,36 +1179,52 @@ export default function MemeLabPageComponent({
                         <tbody>
                           <tr>
                             <td>Edition Size</td>
-                            <td>{nft.supply}</td>
+                            <td className="tw-font-medium">{nft.supply}</td>
                           </tr>
                           <tr>
                             <td>Collection</td>
-                            <td>{nft.collection}</td>
-                          </tr>
-                          <tr>
-                            <td>Artist Name</td>
-                            <td>{nft.artist}</td>
-                          </tr>
-                          <tr>
-                            <td>Artist Profile</td>
-                            <td>
-                              <ArtistProfileHandle nft={nft} />
-                            </td>
+                            <td className="tw-font-medium">{nft.collection}</td>
                           </tr>
                           <tr>
                             <td>Mint Date</td>
-                            <td>{printMintDate(nft.mint_date)}</td>
+                            <td className="tw-font-medium">
+                              {printMintDate(nft.mint_date)}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Artist Name</td>
+                            <td className="tw-font-medium">{nft.artist}</td>
+                          </tr>
+                          <tr>
+                            <td>Artist Profile</td>
+                            <td className="tw-font-medium">
+                              <ArtistProfileHandle nft={nft} />
+                            </td>
                           </tr>
                           {fileType && (
                             <tr>
                               <td>File Type</td>
-                              <td>{fileType}</td>
+                              <td className="tw-font-medium">
+                                {fileMimeType ? (
+                                  <MediaTypeBadge
+                                    mimeType={fileMimeType}
+                                    dropId={`${nft.contract}-${nft.id}-art`}
+                                    showTooltip={false}
+                                    showLabel={true}
+                                    tone="color"
+                                    className="tw-inline-flex tw-items-center"
+                                    labelClassName="tw-text-inherit tw-font-medium"
+                                  />
+                                ) : (
+                                  fileType
+                                )}
+                              </td>
                             </tr>
                           )}
                           {dimensions && (
                             <tr>
                               <td>Dimensions</td>
-                              <td>{dimensions}</td>
+                              <td className="tw-font-medium">{dimensions}</td>
                             </tr>
                           )}
                         </tbody>
@@ -1245,7 +1267,7 @@ export default function MemeLabPageComponent({
                               .map((a: any) => (
                                 <tr key={`${a.trait_type}-${a.value}`}>
                                   <td>{a.trait_type}</td>
-                                  <td>{a.value}</td>
+                                  <td className="tw-font-medium">{a.value}</td>
                                 </tr>
                               ))}
                           </tbody>

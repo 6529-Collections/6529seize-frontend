@@ -1,12 +1,15 @@
 "use client";
 
+import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
+import styles from "@/components/nft-image/NFTImage.module.scss";
+import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { useEffect, useMemo, useState } from "react";
 import { Col } from "react-bootstrap";
-import styles from "../NFTImage.module.scss";
-import NFTImageBalance from "../NFTImageBalance";
-import type { BaseRendererProps } from "../types/renderer-props";
-import { getResolvedAnimationSrc } from "../utils/animation-source";
-import { getArweaveGatewayFallbackUrls } from "../utils/gateway-fallback";
+import {
+  getArweaveGatewayFallbackUrls,
+  shouldUseIframeFallbackTimeout,
+} from "@/components/nft-image/utils/gateway-fallback";
 
 const IFRAME_FALLBACK_TIMEOUT_MS = 8000;
 
@@ -40,7 +43,12 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
   }, [activeUrl]);
 
   useEffect(() => {
-    if (!activeUrl || didLoadCurrentUrl || activeIndex + 1 >= urls.length) {
+    if (
+      !activeUrl ||
+      didLoadCurrentUrl ||
+      activeIndex + 1 >= urls.length ||
+      !shouldUseIframeFallbackTimeout(activeUrl)
+    ) {
       return;
     }
 

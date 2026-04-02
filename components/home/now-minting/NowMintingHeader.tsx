@@ -1,5 +1,6 @@
 "use client";
 
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import type { BaseNFT } from "@/entities/INFT";
@@ -12,6 +13,7 @@ interface NowMintingHeaderProps {
   readonly title: string;
   readonly artistHandle: string;
   readonly artistName: string;
+  readonly mediaMimeType?: string | null | undefined;
 }
 
 function NowMintingArtistHandlePill({
@@ -66,6 +68,7 @@ export default function NowMintingHeader({
   title,
   artistHandle,
   artistName,
+  mediaMimeType,
 }: NowMintingHeaderProps) {
   const artistHandles = artistHandle
     .split(",")
@@ -82,6 +85,14 @@ export default function NowMintingHeader({
       </Link>
 
       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+        {mediaMimeType && (
+          <MediaTypeBadge
+            mimeType={mediaMimeType}
+            dropId={`home-now-minting-${cardNumber}`}
+            size="sm"
+            iconClassName="tw-size-[26px] tw-rounded-full"
+          />
+        )}
         <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-iron-400 tw-backdrop-blur-sm">
           Card #{cardNumber}
         </span>
