@@ -16,6 +16,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiUndiscoveredDrop {
     'drop': ApiDrop | null;
+    'left_to_vote_in_current_round': number;
     'total_count': number;
 
     static readonly discriminator: string | undefined = undefined;
@@ -28,6 +29,12 @@ export class ApiUndiscoveredDrop {
             "baseName": "drop",
             "type": "ApiDrop",
             "format": ""
+        },
+        {
+            "name": "left_to_vote_in_current_round",
+            "baseName": "left_to_vote_in_current_round",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "total_count",
