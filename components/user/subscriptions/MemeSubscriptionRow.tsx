@@ -60,7 +60,7 @@ export default function MemeSubscriptionRow(
     }
   }, [props.eligibilityCount, selectedCount]);
 
-  const { data: final } = useQuery<NFTFinalSubscription>({
+  const { data: fetchedFinal } = useQuery<NFTFinalSubscription>({
     queryKey: [
       "consolidation-final-subscription",
       `${props.profileKey}-${props.subscription.contract}-${props.subscription.token_id}`,
@@ -71,6 +71,7 @@ export default function MemeSubscriptionRow(
       }),
     enabled: props.first,
   });
+  const final = fetchedFinal;
 
   useEffect(() => {
     setSubscribed(!!props.subscription.subscribed);
@@ -186,62 +187,69 @@ export default function MemeSubscriptionRow(
     }
   };
 
-  const content = (
-    <div className="d-flex gap-2 align-items-center justify-content-between">
-      <div className="d-flex flex-column gap-2 tw-min-w-0 tw-flex-1">
-        <span className="d-flex align-items-center gap-2">
-          <span className="tw-font-medium">
-            {isCompact
-              ? "Subscribe"
-              : `${props.title} #${props.subscription.token_id}`}
-          </span>
-          {!isCompact && props.date && (
-            <>
-              <span>
-                - SZN
-                {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
-              </span>
-              {" / "}
-              {props.minting_today ? (
+  if (isCompact) {
+    return (
+      <div className="tw-py-1">
+        <div className="d-flex align-items-center justify-content-between gap-2">
+          <span className="tw-font-medium">Subscribe</span>
+          <div className="d-flex align-items-center gap-2">
+            {isSubmitting && <Spinner />}
+            <Toggle
+              disabled={props.readonly || isSubmitting || props.minting_today}
+              id={id}
+              checked={subscribed}
+              icons={false}
+              onChange={submit}
+              aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+            />
+            <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
+              {subscribed ? (
                 <>
-                  <span
-                    data-tooltip-id={`minting-today-${props.subscription.token_id}`}
-                  >
-                    - Minting Today{" "}
-                    <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
-                  </span>
-                  <Tooltip
-                    id={`minting-today-${props.subscription.token_id}`}
-                    place="right"
-                    style={{
-                      backgroundColor: "#f8f9fa",
-                      color: "#212529",
-                      padding: "4px 8px",
+                  <select
+                    className="tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400"
+                    value={selectedCount}
+                    disabled={
+                      props.readonly || isSubmitting || props.minting_today
+                    }
+                    onChange={(e) => {
+                      const value = Number.parseInt(e.target.value, 10);
+                      setSelectedCount(value);
+                      handleUpdateSubscriptionCount(value);
                     }}
+                    style={{ minWidth: "3ch" }}
+                    aria-label={`Select subscription quantity for ${props.title}`}
                   >
-                    No changes allowed on minting day
-                  </Tooltip>
+                    {Array.from(
+                      { length: props.eligibilityCount },
+                      (_, i) => i + 1
+                    ).map((num) => (
+                      <option key={num} value={num}>
+                        {num}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="tw-text-iron-400">
+                    / {props.eligibilityCount}
+                  </span>
                 </>
-              ) : (
-                <span>{formatFullDate(props.date.utcDay)}</span>
-              )}
-            </>
-          )}
-        </span>
+              ) : null}
+            </span>
+          </div>
+        </div>
         {props.first &&
           final?.phase &&
           final.phase_position !== undefined &&
           final.phase_position > 0 && (
-            <span className="font-smaller font-color-silver">
+            <div className="tw-mt-2 tw-pr-2 font-smaller font-color-silver">
               Phase: {final.phase} - Subscription Position:{" "}
               {final.phase_position.toLocaleString()} /{" "}
               {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
               Address: {formatAddress(final.airdrop_address)} - Subscription
               Count: x{final.subscribed_count}
-            </span>
+            </div>
           )}
-        {isCompact && props.minting_today && (
-          <span className="font-smaller font-color-silver d-flex align-items-center gap-2">
+        {props.minting_today && (
+          <div className="font-smaller font-color-silver d-flex align-items-center gap-2 tw-mt-2">
             <span
               data-tooltip-id={`minting-today-${props.subscription.token_id}`}
             >
@@ -259,67 +267,113 @@ export default function MemeSubscriptionRow(
             >
               No changes allowed on minting day
             </Tooltip>
-          </span>
+          </div>
         )}
       </div>
-      <div className="d-flex align-items-center gap-2">
-        {isSubmitting && <Spinner />}
-        <Toggle
-          disabled={props.readonly || isSubmitting || props.minting_today}
-          id={id}
-          checked={subscribed}
-          icons={false}
-          onChange={submit}
-          aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
-        />
-        <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-          {subscribed ? (
-            <>
-              <select
-                className="tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400"
-                value={selectedCount}
-                disabled={
-                  (!isCompact && props.eligibilityCount <= 1) ||
-                  props.readonly ||
-                  isSubmitting ||
-                  props.minting_today
-                }
-                onChange={(e) => {
-                  const value = Number.parseInt(e.target.value, 10);
-                  setSelectedCount(value);
-                  handleUpdateSubscriptionCount(value);
-                }}
-                style={{ minWidth: "3ch" }}
-                aria-label={`Select subscription quantity for ${props.title}`}
-              >
-                {Array.from(
-                  { length: props.eligibilityCount },
-                  (_, i) => i + 1
-                ).map((num) => (
-                  <option key={num} value={num}>
-                    {num}
-                  </option>
-                ))}
-              </select>
-              <span className="tw-text-iron-400">
-                / {props.eligibilityCount}
-              </span>
-            </>
-          ) : null}
-        </span>
-      </div>
-    </div>
-  );
-
-  if (isCompact) {
-    return <div className="tw-py-1">{content}</div>;
+    );
   }
 
   return (
     <Container className="no-padding pt-2 pb-2">
       <Row>
         <Col className="d-flex gap-2 align-items-center justify-content-between">
-          {content}
+          <div className="d-flex flex-column gap-2 tw-flex-1 tw-min-w-0">
+            <span className="d-flex align-items-center gap-2">
+              <span className="tw-font-medium">
+                {props.title} #{props.subscription.token_id}{" "}
+              </span>
+              {props.date && (
+                <>
+                  <span>
+                    - SZN
+                    {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+                  </span>
+                  {" / "}
+                  {props.minting_today ? (
+                    <>
+                      <span
+                        data-tooltip-id={`minting-today-${props.subscription.token_id}`}
+                      >
+                        - Minting Today{" "}
+                        <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
+                      </span>
+                      <Tooltip
+                        id={`minting-today-${props.subscription.token_id}`}
+                        place="right"
+                        style={{
+                          backgroundColor: "#f8f9fa",
+                          color: "#212529",
+                          padding: "4px 8px",
+                        }}
+                      >
+                        No changes allowed on minting day
+                      </Tooltip>
+                    </>
+                  ) : (
+                    <span>{formatFullDate(props.date.utcDay)}</span>
+                  )}
+                </>
+              )}
+            </span>
+            {props.first &&
+              final?.phase &&
+              final.phase_position !== undefined &&
+              final.phase_position > 0 && (
+                <span className="font-smaller font-color-silver">
+                  Phase: {final.phase} - Subscription Position:{" "}
+                  {final.phase_position.toLocaleString()} /{" "}
+                  {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
+                  Address: {formatAddress(final.airdrop_address)} - Subscription
+                  Count: x{final.subscribed_count}
+                </span>
+              )}
+          </div>
+          <div className="d-flex align-items-center gap-2">
+            {isSubmitting && <Spinner />}
+            <Toggle
+              disabled={props.readonly || isSubmitting || props.minting_today}
+              id={id}
+              checked={subscribed}
+              icons={false}
+              onChange={submit}
+              aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+            />
+            <span className="tw-flex tw-items-center tw-gap-1 tw-min-w-16">
+              {subscribed ? (
+                <>
+                  <select
+                    className="tw-text-iron-400 tw-bg-transparent tw-border tw-border-iron-400 tw-rounded tw-px-1"
+                    value={selectedCount}
+                    disabled={
+                      props.eligibilityCount <= 1 ||
+                      props.readonly ||
+                      isSubmitting ||
+                      props.minting_today
+                    }
+                    onChange={(e) => {
+                      const value = Number.parseInt(e.target.value, 10);
+                      setSelectedCount(value);
+                      handleUpdateSubscriptionCount(value);
+                    }}
+                    style={{ minWidth: "3ch" }}
+                    aria-label={`Select subscription quantity for ${props.title}`}
+                  >
+                    {Array.from(
+                      { length: props.eligibilityCount },
+                      (_, i) => i + 1
+                    ).map((num) => (
+                      <option key={num} value={num}>
+                        {num}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="tw-text-iron-400">
+                    / {props.eligibilityCount}
+                  </span>
+                </>
+              ) : null}
+            </span>
+          </div>
         </Col>
       </Row>
     </Container>

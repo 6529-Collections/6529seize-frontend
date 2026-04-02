@@ -75,7 +75,7 @@ export default function LatestDropNextMintSubscribe() {
   }
 
   return (
-    <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
+    <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
       <div className="tw-rounded-xl tw-bg-transparent">
         <MemeSubscriptionRow
           profileKey={profileKey}

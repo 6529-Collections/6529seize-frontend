@@ -134,6 +134,7 @@ export default function LatestDropNextMintSection({
                       mimeType={media.mime_type}
                       dropId={drop.id}
                       size="sm"
+                      iconClassName="tw-size-[26px]"
                     />
                   )}
                   <ArtistPill
@@ -144,9 +145,7 @@ export default function LatestDropNextMintSection({
                   />
                 </div>
 
-                <div className="tw-mt-4">
-                  <LatestDropNextMintSubscribe />
-                </div>
+                <LatestDropNextMintSubscribe />
               </div>
 
               <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
