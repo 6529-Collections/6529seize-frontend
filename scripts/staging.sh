@@ -20,11 +20,11 @@ git pull
 
 # Step 2: Reinstall dependencies
 print_message "Reinstalling dependencies..."
-npm ci
+./bin/6529 install:frozen
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
-npm run build
+./bin/6529 build
 
 # Step 5: Restart PM2 services
 print_message "Restarting PM2 services..."

@@ -6,7 +6,8 @@
 # Description:
 #   Bootstraps a host to build & run 6529seize-frontend for staging/dev.
 #   - Accepts Node >= 20; installs Node 20 only if Node missing or < 20.
-#   - Ensures npm >= 10 (upgrades if < 10; leaves 10+ unchanged).
+#   - Activates the repo-pinned pnpm version via Corepack.
+#   - Installs Socket Firewall for secure dependency installation.
 #   - Installs PM2, prompts ONCE at the beginning for all inputs (.env + nginx),
 #     builds, starts via PM2, optionally configures NGINX + Let's Encrypt.
 #   - Configures PM2 to start on boot + enables pm2-logrotate.
@@ -100,7 +101,7 @@ prompt_input_required() {
 
 # ---------- Tech prerequisites ----------
 
-ensure_node_ge20_and_npm_ge10() {
+ensure_node_ge20() {
   # Accept Node >= 20; install Node 20 only if missing or < 20.
   local os="$(uname -s)"; local need_major=20; local have_major=0
   if command -v node >/dev/null 2>&1; then
@@ -136,12 +137,33 @@ ensure_node_ge20_and_npm_ge10() {
     color red "Node $(node -v) < 20 after installation. Please install Node >= 20 and re-run."; exit 1
   fi
 
-  local npm_major; npm_major="$(npm -v | cut -d. -f1 || echo 0)"
-  if [[ "$npm_major" -lt 10 ]]; then
-    color yellow "Upgrading npm to >=10…"
-    if [[ "$(uname -s)" == "Darwin" ]]; then npm i -g npm@^10; else sudo npm i -g npm@^10; fi
-  fi
   color green "Using Node $(node -v), npm $(npm -v)"
+}
+
+activate_pnpm_with_corepack() {
+  color yellow "Activating the repo-pinned pnpm version with Corepack…"
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    ( cd "$REPO_ROOT" && bash scripts/setup-corepack-pnpm.sh )
+  else
+    ( cd "$REPO_ROOT" && sudo bash scripts/setup-corepack-pnpm.sh )
+  fi
+  color green "pnpm: $(pnpm -v)"
+}
+
+install_socket_firewall() {
+  if command -v sfw >/dev/null 2>&1; then
+    color green "Socket Firewall: $(sfw --help >/dev/null 2>&1 && echo installed)"
+    return 0
+  fi
+
+  color yellow "Installing Socket Firewall globally…"
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    npm install --global sfw
+  else
+    sudo npm install --global sfw
+  fi
+  command -v sfw >/dev/null 2>&1 || { color red "Socket Firewall installation failed."; exit 1; }
+  color green "Socket Firewall installed."
 }
 
 install_pm2() {
@@ -244,25 +266,25 @@ obtain_cert_and_enable_https() {
 # ---------- Build & Run ----------
 
 install_dependencies() {
-  color yellow "Installing project dependencies…"
+  color yellow "Installing project dependencies through Socket Firewall + pnpm…"
   if [[ -d "$REPO_ROOT/node_modules" ]]; then
-    color yellow "Removing existing node_modules and lockfile for a clean install…"
-    rm -rf "$REPO_ROOT/node_modules" "$REPO_ROOT/package-lock.json"
+    color yellow "Removing existing node_modules for a clean install…"
+    rm -rf "$REPO_ROOT/node_modules"
   fi
-  ( cd "$REPO_ROOT" && npm install )
+  ( cd "$REPO_ROOT" && ./bin/6529 install:frozen )
   color green "Dependencies installed."
 }
 
 build_project() {
   color yellow "Building the Next.js project…"
-  ( cd "$REPO_ROOT" && npm run build )
+  ( cd "$REPO_ROOT" && ./bin/6529 build )
   color green "Build completed."
 }
 
 start_pm2() {
   local pm2_name="6529seize"
   color yellow "Starting the application with PM2…"
-  ( cd "$REPO_ROOT" && pm2 start npm --name="$pm2_name" -- run start )
+  ( cd "$REPO_ROOT" && pm2 start ./bin/6529 --name="$pm2_name" -- start )
   pm2 save
   color green "App started under PM2 as '$pm2_name'."
   color blue  "Logs: pm2 logs $pm2_name"
@@ -416,7 +438,9 @@ main() {
 
   # 1) Prerequisites
   require_sudo_if_linux
-  ensure_node_ge20_and_npm_ge10
+  ensure_node_ge20
+  activate_pnpm_with_corepack
+  install_socket_firewall
   install_pm2
   ensure_java_for_openapi
 

@@ -13,7 +13,9 @@ function getOpenModule() {
   return openModulePromise;
 }
 
-const proc = spawn("npm", ["run", "dev"], { stdio: ["inherit", "pipe", "inherit"] });
+const proc = spawn("./bin/6529", ["dev"], {
+  stdio: ["inherit", "pipe", "inherit"],
+});
 
 proc.on("error", (error) => {
   console.error("Failed to start dev server:", error);

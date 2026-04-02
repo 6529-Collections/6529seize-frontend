@@ -4,8 +4,7 @@ import { spawnSync } from "node:child_process";
 const REMOTE = "origin";
 const BRANCH = "main";
 const TARGET = `${REMOTE}/${BRANCH}`;
-const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
-const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
+const pnpmCmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const coderabbitCmd =
   process.platform === "win32" ? "coderabbit.cmd" : "coderabbit";
 
@@ -231,7 +230,7 @@ if (!Number.isFinite(behind) || !Number.isFinite(ahead)) {
 
 try {
   const result = runCommand({
-    command: npmCmd,
+    command: pnpmCmd,
     args: ["run", changedMode ? "format:changed" : "format:uncommitted"],
     inheritOutput: true,
   });
@@ -246,7 +245,7 @@ try {
 
 try {
   const result = runCommand({
-    command: npmCmd,
+    command: pnpmCmd,
     args: ["run", changedMode ? "lint:changed" : "lint:diff"],
     inheritOutput: true,
   });
@@ -265,14 +264,8 @@ try {
         inheritOutput: true,
       })
     : runCommand({
-        command: npxCmd,
-        args: [
-          "--no-install",
-          "tsc",
-          "--noEmit",
-          "-p",
-          "tsconfig.typecheck.json",
-        ],
+        command: pnpmCmd,
+        args: ["exec", "tsc", "--noEmit", "-p", "tsconfig.typecheck.json"],
         inheritOutput: true,
       });
   ensureSuccess(result, changedMode ? "typecheck:changed" : "typecheck");
@@ -290,8 +283,8 @@ let knipStderr = "";
 let knipStatus = 0;
 try {
   const result = runCommand({
-    command: npxCmd,
-    args: ["--no-install", "knip", "--reporter", "json"],
+    command: pnpmCmd,
+    args: ["exec", "knip", "--reporter", "json"],
   });
   knipStdout = result.stdout ?? "";
   knipStderr = result.stderr ?? "";

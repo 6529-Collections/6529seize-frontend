@@ -25,21 +25,30 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install Socket Firewall
+        uses: socketdev/action@v1
+        with:
+          mode: firewall
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "pnpm"
+
+      - name: Activate pinned pnpm via Corepack
+        run: bash scripts/setup-corepack-pnpm.sh
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Verify registry signatures
-        run: npm audit signatures
+        run: ./bin/6529 install:frozen
 
       - name: Lint package.json versions
-        run: npm run lint:package-json
+        run: ./bin/6529 lint:package-json
 
       - name: Build App
         env:
@@ -58,13 +67,16 @@ jobs:
           ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: npm run build
+        run: ./bin/6529 build
+
+      - name: Prune to production dependencies
+        run: pnpm prune --prod
 
       - name: Build Target
         run: |
           mkdir -p target/_next
           cp -r .next/static target/_next/
-          zip -r package.zip . -x '*.git*' 'node_modules/*' 'target/*'
+          zip -yr package.zip . -x '*.git*' 'target/*'
           mv package.zip target/
 
       - name: Configure AWS Credentials

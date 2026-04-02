@@ -52,7 +52,9 @@ again to approve the updated file.
 From the repo root, you should be able to run:
 
 ```bash
+which 6529
 which ghruns
+6529 dev --help
 ghruns
 ```
 
@@ -103,17 +105,38 @@ PORT: 3000
 ### Documentation
 
 User-facing documentation lives in [`docs/README.md`](docs/README.md).
+Developer package-management guidance lives in [`docs/developer/pnpm-and-socket-firewall.md`](docs/developer/pnpm-and-socket-firewall.md).
 
 ### Install
 
+Bootstrap Corepack and Socket Firewall once on your machine:
+
+```bash
+npm install --global corepack@latest sfw
+corepack enable pnpm
+corepack prepare pnpm@10.27.0 --activate
 ```
-npm i
+
+Then install project dependencies through the secure path:
+
+```
+6529 install
+```
+
+Plain `pnpm install`, `pnpm dev`, and `npm run ...` repo script execution are intentionally blocked. Use the `6529` wrapper only.
+
+If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
+
+```bash
+6529 install
+6529 dev
+6529 build
 ```
 
 ### Build
 
 ```
-npm run build
+pnpm run build
 ```
 
 ### Environment
@@ -134,7 +157,7 @@ gateway usage:
 
 To test end-to-end:
 
-1. Run `npm run dev`.
+1. Run `6529 dev`.
 2. Paste any pepe.wtf link in chat, for example `https://pepe.wtf/asset/GOXPEPE`
    or `https://pepe.wtf/artists/Easy-B`, and confirm the preview renders with
    imagery and stats.
@@ -146,19 +169,19 @@ To test end-to-end:
 - Locally
 
 ```
-npm run dev
+6529 dev
 ```
 
 - Production
 
 ```
-npm run start
+6529 start
 ```
 
 ### RUN USING PM2
 
 ```
-pm2 start npm --name=6529seize -- run start
+pm2 start ./bin/6529 --name=6529seize -- start
 ```
 
 ## Directory Structure

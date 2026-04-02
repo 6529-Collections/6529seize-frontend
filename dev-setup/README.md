@@ -6,7 +6,9 @@ This repo includes `dev-setup/run-setup.sh` to bootstrap a fresh EC2 host for a 
 
 ## What the script does
 
-- Ensures **Node ≥ 20** (keeps 21/22 if present) and **npm ≥ 10**
+- Ensures **Node ≥ 20** (keeps 21/22 if present)
+- Activates the repo-pinned **pnpm** version with **Corepack**
+- Installs **Socket Firewall** and uses `6529 install:frozen`
 - Installs **PM2**
 - Prompts you and writes **.env** **before** any build (no `.env.sample` used)
 - Installs deps, **builds**, and **starts** the app with PM2 (default port **3001**)
@@ -79,7 +81,7 @@ bash dev-setup/run-setup.sh
   - `IPFS_GATEWAY_ENDPOINT=https://ipfs.6529.io`
   - `BASE_ENDPOINT=https://<slug>staging.6529.io`
 
-The script then installs deps, builds, starts the app with PM2, and **offers** to set up NGINX + HTTPS.
+The script then installs deps through Socket Firewall + pnpm, builds, starts the app with PM2, and **offers** to set up NGINX + HTTPS.
 
 ---
 

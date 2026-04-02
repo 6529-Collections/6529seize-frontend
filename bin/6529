@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+export COREPACK_HOME="${COREPACK_HOME:-${TMPDIR:-/tmp}/6529-corepack}"
+export SEIZE_6529_COMMAND="1"
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "pnpm is not available. Activate the repo-pinned pnpm with Corepack first." >&2
+  exit 1
+fi
+
+command_name="${1:-}"
+
+if [[ -z "$command_name" ]]; then
+  cat <<'EOF'
+Usage:
+  6529 <command> [args...]
+
+Common commands:
+  6529 install         -> pnpm run install:secure
+  6529 install:frozen  -> pnpm run install:secure:frozen
+  6529 install:prod    -> pnpm run install:secure:prod
+  6529 dev             -> pnpm dev
+  6529 build           -> pnpm build
+  6529 start           -> pnpm start
+  6529 test            -> pnpm test
+  6529 lint            -> pnpm lint
+
+Anything else is forwarded to pnpm unchanged.
+EOF
+  exit 1
+fi
+
+shift
+
+case "$command_name" in
+  install)
+    exec pnpm run install:secure "$@"
+    ;;
+  install:frozen)
+    exec pnpm run install:secure:frozen "$@"
+    ;;
+  install:prod)
+    exec pnpm run install:secure:prod "$@"
+    ;;
+  run)
+    exec pnpm run "$@"
+    ;;
+  exec)
+    exec pnpm exec "$@"
+    ;;
+  *)
+    exec pnpm "$command_name" "$@"
+    ;;
+esac
