@@ -46,7 +46,7 @@ export const LOADING_MONTH_HEADER_SEGMENTS = [
   { key: "feb", labelColumn: 44, widthPx: 18 },
   { key: "mar", labelColumn: 48, widthPx: 20 },
 ] as const;
-export const MONTH_LABEL_MIN_SPACING_PX = 34;
+const MONTH_LABEL_MIN_SPACING_PX = 34;
 export const TOOLTIP_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
