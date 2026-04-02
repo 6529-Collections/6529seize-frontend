@@ -46,6 +46,45 @@ interface MemesQuickVoteDialogContentProps {
   readonly votingLabel: string | null;
 }
 
+interface MemesQuickVotePreviewPaneProps {
+  readonly activeDrop: NonNullable<MemesQuickVoteDialogProps["activeDrop"]>;
+  readonly className: string;
+  readonly isBusy: boolean;
+  readonly isMobile: boolean;
+  readonly leftThisRoundCount: number;
+  readonly nextDrop: MemesQuickVoteDialogProps["nextDrop"];
+  readonly onAdvanceStart: () => void;
+  readonly onSkip: () => void;
+  readonly onVoteWithSwipe: () => void;
+  readonly sessionId: number;
+  readonly swipeVoteAmount: number | null;
+  readonly uncastPower: number | null;
+  readonly unratedCount: number;
+  readonly votingLabel: string | null;
+}
+
+interface MemesQuickVoteControlsPaneProps {
+  readonly className: string;
+  readonly customValue: string;
+  readonly drop: NonNullable<MemesQuickVoteDialogProps["activeDrop"]>;
+  readonly feedbackAmount: number | null;
+  readonly feedbackSource: VoteFeedbackSource | null;
+  readonly isCustomOpen: boolean;
+  readonly isSubmitting: boolean;
+  readonly isVoteFeedbackActive: boolean;
+  readonly leftThisRoundCount: number;
+  readonly latestUsedAmount: number | null;
+  readonly quickAmounts: readonly number[];
+  readonly uncastPower: number | null;
+  readonly unratedCount: number;
+  readonly votingLabel: string | null;
+  readonly onCustomChange: (value: string) => void;
+  readonly onCustomSubmit: () => void;
+  readonly onOpenCustom: () => void;
+  readonly onSkip: () => void;
+  readonly onVoteAmount: (amount: number) => void;
+}
+
 function getQuickVotePreloadedNextDrop(
   isOpen: boolean,
   nextDrop: MemesQuickVoteDialogProps["nextDrop"]
@@ -155,6 +194,90 @@ function MemesQuickVotePreviewStack({
           onVoteWithSwipe={onVoteWithSwipe}
         />
       </div>
+    </div>
+  );
+}
+
+function MemesQuickVotePreviewPane({
+  activeDrop,
+  className,
+  isBusy,
+  isMobile,
+  leftThisRoundCount,
+  nextDrop,
+  onAdvanceStart,
+  onSkip,
+  onVoteWithSwipe,
+  sessionId,
+  swipeVoteAmount,
+  uncastPower,
+  unratedCount,
+  votingLabel,
+}: MemesQuickVotePreviewPaneProps) {
+  return (
+    <div className={className}>
+      <MemesQuickVotePreviewStack
+        activeDrop={activeDrop}
+        isBusy={isBusy}
+        isMobile={isMobile}
+        leftThisRoundCount={leftThisRoundCount}
+        nextDrop={nextDrop}
+        sessionId={sessionId}
+        swipeVoteAmount={swipeVoteAmount}
+        uncastPower={uncastPower}
+        unratedCount={unratedCount}
+        votingLabel={votingLabel}
+        onAdvanceStart={onAdvanceStart}
+        onSkip={onSkip}
+        onVoteWithSwipe={onVoteWithSwipe}
+      />
+    </div>
+  );
+}
+
+function MemesQuickVoteControlsPane({
+  className,
+  customValue,
+  drop,
+  feedbackAmount,
+  feedbackSource,
+  isCustomOpen,
+  isSubmitting,
+  isVoteFeedbackActive,
+  leftThisRoundCount,
+  latestUsedAmount,
+  quickAmounts,
+  uncastPower,
+  unratedCount,
+  votingLabel,
+  onCustomChange,
+  onCustomSubmit,
+  onOpenCustom,
+  onSkip,
+  onVoteAmount,
+}: MemesQuickVoteControlsPaneProps) {
+  return (
+    <div className={className}>
+      <MemesQuickVoteControls
+        customValue={customValue}
+        drop={drop}
+        isCustomOpen={isCustomOpen}
+        isSubmitting={isSubmitting}
+        feedbackAmount={feedbackAmount}
+        feedbackSource={feedbackSource}
+        isVoteFeedbackActive={isVoteFeedbackActive}
+        leftThisRoundCount={leftThisRoundCount}
+        latestUsedAmount={latestUsedAmount}
+        quickAmounts={quickAmounts}
+        uncastPower={uncastPower}
+        unratedCount={unratedCount}
+        votingLabel={votingLabel}
+        onCustomChange={onCustomChange}
+        onCustomSubmit={onCustomSubmit}
+        onOpenCustom={onOpenCustom}
+        onSkip={onSkip}
+        onVoteAmount={onVoteAmount}
+      />
     </div>
   );
 }
@@ -295,6 +418,10 @@ function MemesQuickVoteDialogContent({
       });
   }, [activeDrop, skipDrop]);
 
+  const handleAdvanceStart = useCallback(() => {
+    setIsAdvancing(true);
+  }, []);
+
   const handleSkip = () => {
     if (isControlsSubmitting) {
       return;
@@ -303,6 +430,40 @@ function MemesQuickVoteDialogContent({
     setIsAdvancing(true);
     queueSkip();
   };
+
+  const handleVoteWithSwipe = useCallback(() => {
+    if (swipeVoteAmount === null) {
+      setIsAdvancing(false);
+      return;
+    }
+
+    setIsAdvancing(true);
+    queueVoteAmount(swipeVoteAmount);
+  }, [queueVoteAmount, swipeVoteAmount]);
+
+  const handleCustomChange = useCallback((value: string) => {
+    if (value === "") {
+      setCustomValue("");
+      return;
+    }
+
+    setCustomValue(value.replace(/[^\d]/g, ""));
+  }, []);
+
+  const handleCustomSubmit = useCallback(() => {
+    handleBarVoteAmount(customValue, "custom-submit");
+  }, [customValue, handleBarVoteAmount]);
+
+  const handleToggleCustom = useCallback(() => {
+    setIsCustomOpen((current) => !current);
+  }, []);
+
+  const handleQuickAmountVote = useCallback(
+    (amount: number) => {
+      handleBarVoteAmount(amount, "quick-amount");
+    },
+    [handleBarVoteAmount]
+  );
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col md:tw-grid md:tw-min-h-0 md:tw-grid-cols-[minmax(0,1.22fr)_minmax(25rem,1fr)] md:tw-items-stretch">
@@ -333,135 +494,85 @@ function MemesQuickVoteDialogContent({
 
       {isMobile ? (
         <div className="tw-relative tw-z-10 tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col tw-overflow-hidden">
-          <div className="tw-min-h-0 tw-flex-1">
-            <MemesQuickVotePreviewStack
-              activeDrop={activeDrop}
-              isBusy={isControlsSubmitting}
-              isMobile={isMobile}
-              leftThisRoundCount={leftThisRoundCount}
-              nextDrop={nextDrop}
-              sessionId={sessionId}
-              swipeVoteAmount={swipeVoteAmount}
-              uncastPower={uncastPower}
-              unratedCount={unratedCount}
-              votingLabel={votingLabel}
-              onAdvanceStart={() => {
-                setIsAdvancing(true);
-              }}
-              onSkip={queueSkip}
-              onVoteWithSwipe={() => {
-                if (swipeVoteAmount === null) {
-                  setIsAdvancing(false);
-                  return;
-                }
+          <MemesQuickVotePreviewPane
+            activeDrop={activeDrop}
+            className="tw-min-h-0 tw-flex-1"
+            isBusy={isControlsSubmitting}
+            isMobile={isMobile}
+            leftThisRoundCount={leftThisRoundCount}
+            nextDrop={nextDrop}
+            onAdvanceStart={handleAdvanceStart}
+            onSkip={queueSkip}
+            onVoteWithSwipe={handleVoteWithSwipe}
+            sessionId={sessionId}
+            swipeVoteAmount={swipeVoteAmount}
+            uncastPower={uncastPower}
+            unratedCount={unratedCount}
+            votingLabel={votingLabel}
+          />
 
-                setIsAdvancing(true);
-                queueVoteAmount(swipeVoteAmount);
-              }}
-            />
-          </div>
-
-          <div className="tw-shrink-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-[#0a0a0a] md:tw-hidden">
-            <MemesQuickVoteControls
-              customValue={customValue}
-              drop={activeDrop}
-              isCustomOpen={isCustomOpen}
-              isSubmitting={isControlsSubmitting}
-              feedbackAmount={voteFeedback?.amount ?? null}
-              feedbackSource={voteFeedback?.source ?? null}
-              isVoteFeedbackActive={isVoteFeedbackActive}
-              leftThisRoundCount={leftThisRoundCount}
-              latestUsedAmount={normalizedLatestUsedAmount}
-              quickAmounts={visibleQuickAmounts}
-              uncastPower={uncastPower}
-              unratedCount={unratedCount}
-              votingLabel={votingLabel}
-              onCustomChange={(value) => {
-                if (value === "") {
-                  setCustomValue("");
-                  return;
-                }
-
-                setCustomValue(value.replace(/[^\d]/g, ""));
-              }}
-              onCustomSubmit={() => {
-                handleBarVoteAmount(customValue, "custom-submit");
-              }}
-              onOpenCustom={() => {
-                setIsCustomOpen((current) => !current);
-              }}
-              onSkip={handleSkip}
-              onVoteAmount={(amount) => {
-                handleBarVoteAmount(amount, "quick-amount");
-              }}
-            />
-          </div>
+          <MemesQuickVoteControlsPane
+            className="tw-shrink-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-[#0a0a0a] md:tw-hidden"
+            customValue={customValue}
+            drop={activeDrop}
+            feedbackAmount={voteFeedback?.amount ?? null}
+            feedbackSource={voteFeedback?.source ?? null}
+            isCustomOpen={isCustomOpen}
+            isSubmitting={isControlsSubmitting}
+            isVoteFeedbackActive={isVoteFeedbackActive}
+            leftThisRoundCount={leftThisRoundCount}
+            latestUsedAmount={normalizedLatestUsedAmount}
+            quickAmounts={visibleQuickAmounts}
+            uncastPower={uncastPower}
+            unratedCount={unratedCount}
+            votingLabel={votingLabel}
+            onCustomChange={handleCustomChange}
+            onCustomSubmit={handleCustomSubmit}
+            onOpenCustom={handleToggleCustom}
+            onSkip={handleSkip}
+            onVoteAmount={handleQuickAmountVote}
+          />
         </div>
       ) : (
         <>
-          <div className="tw-min-h-0 tw-flex-1 md:tw-min-h-0 md:tw-border-y-0 md:tw-border-b-0 md:tw-border-l-0 md:tw-border-r md:tw-border-solid md:tw-border-white/10">
-            <MemesQuickVotePreviewStack
-              activeDrop={activeDrop}
-              isBusy={isControlsSubmitting}
-              isMobile={isMobile}
-              leftThisRoundCount={leftThisRoundCount}
-              nextDrop={nextDrop}
-              sessionId={sessionId}
-              swipeVoteAmount={swipeVoteAmount}
-              uncastPower={uncastPower}
-              unratedCount={unratedCount}
-              votingLabel={votingLabel}
-              onAdvanceStart={() => {
-                setIsAdvancing(true);
-              }}
-              onSkip={queueSkip}
-              onVoteWithSwipe={() => {
-                if (swipeVoteAmount === null) {
-                  setIsAdvancing(false);
-                  return;
-                }
+          <MemesQuickVotePreviewPane
+            activeDrop={activeDrop}
+            className="tw-min-h-0 tw-flex-1 md:tw-min-h-0 md:tw-border-y-0 md:tw-border-b-0 md:tw-border-l-0 md:tw-border-r md:tw-border-solid md:tw-border-white/10"
+            isBusy={isControlsSubmitting}
+            isMobile={isMobile}
+            leftThisRoundCount={leftThisRoundCount}
+            nextDrop={nextDrop}
+            onAdvanceStart={handleAdvanceStart}
+            onSkip={queueSkip}
+            onVoteWithSwipe={handleVoteWithSwipe}
+            sessionId={sessionId}
+            swipeVoteAmount={swipeVoteAmount}
+            uncastPower={uncastPower}
+            unratedCount={unratedCount}
+            votingLabel={votingLabel}
+          />
 
-                setIsAdvancing(true);
-                queueVoteAmount(swipeVoteAmount);
-              }}
-            />
-          </div>
-
-          <div className="tw-shrink-0 md:tw-min-h-0 md:tw-self-stretch">
-            <MemesQuickVoteControls
-              customValue={customValue}
-              drop={activeDrop}
-              isCustomOpen={isCustomOpen}
-              isSubmitting={isControlsSubmitting}
-              feedbackAmount={voteFeedback?.amount ?? null}
-              feedbackSource={voteFeedback?.source ?? null}
-              isVoteFeedbackActive={isVoteFeedbackActive}
-              leftThisRoundCount={leftThisRoundCount}
-              latestUsedAmount={normalizedLatestUsedAmount}
-              quickAmounts={visibleQuickAmounts}
-              uncastPower={uncastPower}
-              unratedCount={unratedCount}
-              votingLabel={votingLabel}
-              onCustomChange={(value) => {
-                if (value === "") {
-                  setCustomValue("");
-                  return;
-                }
-
-                setCustomValue(value.replace(/[^\d]/g, ""));
-              }}
-              onCustomSubmit={() => {
-                handleBarVoteAmount(customValue, "custom-submit");
-              }}
-              onOpenCustom={() => {
-                setIsCustomOpen((current) => !current);
-              }}
-              onSkip={handleSkip}
-              onVoteAmount={(amount) => {
-                handleBarVoteAmount(amount, "quick-amount");
-              }}
-            />
-          </div>
+          <MemesQuickVoteControlsPane
+            className="tw-shrink-0 md:tw-min-h-0 md:tw-self-stretch"
+            customValue={customValue}
+            drop={activeDrop}
+            feedbackAmount={voteFeedback?.amount ?? null}
+            feedbackSource={voteFeedback?.source ?? null}
+            isCustomOpen={isCustomOpen}
+            isSubmitting={isControlsSubmitting}
+            isVoteFeedbackActive={isVoteFeedbackActive}
+            leftThisRoundCount={leftThisRoundCount}
+            latestUsedAmount={normalizedLatestUsedAmount}
+            quickAmounts={visibleQuickAmounts}
+            uncastPower={uncastPower}
+            unratedCount={unratedCount}
+            votingLabel={votingLabel}
+            onCustomChange={handleCustomChange}
+            onCustomSubmit={handleCustomSubmit}
+            onOpenCustom={handleToggleCustom}
+            onSkip={handleSkip}
+            onVoteAmount={handleQuickAmountVote}
+          />
         </>
       )}
     </div>
