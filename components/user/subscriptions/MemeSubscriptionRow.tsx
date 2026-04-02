@@ -228,8 +228,7 @@ export default function MemeSubscriptionRow(
             </>
           )}
         </span>
-        {!isCompact &&
-          props.first &&
+        {props.first &&
           final?.phase &&
           final.phase_position !== undefined &&
           final.phase_position > 0 && (
