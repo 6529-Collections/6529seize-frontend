@@ -5,7 +5,6 @@ import {
   getCanonicalNextMintNumber,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import styles from "@/components/user/subscriptions/UserPageSubscriptions.module.scss";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiUpcomingMemeSubscriptionStatus } from "@/generated/models/ApiUpcomingMemeSubscriptionStatus";
@@ -77,8 +76,7 @@ export default function LatestDropNextMintSubscribe() {
 
   return (
     <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
-      <div
-        className={`${styles["nftSubscriptionsListItem"]} ${styles["odd"]} ${styles["last"]} tw-rounded-xl`}>
+      <div className="tw-rounded-xl tw-bg-transparent">
         <MemeSubscriptionRow
           profileKey={profileKey}
           title="The Memes"
