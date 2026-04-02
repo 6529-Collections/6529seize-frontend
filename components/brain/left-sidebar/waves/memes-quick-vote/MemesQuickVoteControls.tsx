@@ -32,6 +32,26 @@ interface MemesQuickVoteControlsProps {
   readonly onVoteAmount: (amount: number) => void;
 }
 
+function MemesQuickVoteStatPill({
+  children,
+  tone = "secondary",
+}: {
+  readonly children: string;
+  readonly tone?: "primary" | "secondary";
+}) {
+  return (
+    <span
+      className={`tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-shadow-sm tw-backdrop-blur-md ${
+        tone === "primary"
+          ? "tw-text-[13px] tw-font-bold tw-text-iron-300"
+          : "tw-text-[13px] tw-font-medium tw-text-iron-400"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
 export default function MemesQuickVoteControls({
   customValue,
   drop,
@@ -65,12 +85,12 @@ export default function MemesQuickVoteControls({
       className="tw-flex tw-shrink-0 tw-flex-col tw-gap-0 md:tw-h-full md:tw-min-h-0 md:tw-overflow-hidden md:tw-bg-[#0a0a0a]/30"
     >
       <div className="tw-hidden tw-shrink-0 tw-flex-wrap tw-gap-2 tw-px-8 md:tw-flex md:tw-pb-6 md:tw-pt-6">
-        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-backdrop-blur-md">
+        <MemesQuickVoteStatPill tone="primary">
           {formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount)}
-        </span>
-        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-400 tw-shadow-sm tw-backdrop-blur-md">
+        </MemesQuickVoteStatPill>
+        <MemesQuickVoteStatPill>
           {formatMemesQuickVoteUnratedText(unratedCount)}
-        </span>
+        </MemesQuickVoteStatPill>
       </div>
 
       <div className="tw-relative tw-hidden tw-min-h-0 tw-flex-1 md:tw-flex">

@@ -468,6 +468,41 @@ function MemesQuickVoteDialogContent({
     },
     [handleBarVoteAmount]
   );
+  const previewPaneProps = {
+    activeDrop,
+    isBusy: isControlsSubmitting,
+    isMobile,
+    leftThisRoundCount,
+    nextDrop,
+    onAdvanceStart: handleAdvanceStart,
+    onSkip: queueSkip,
+    onVoteWithSwipe: handleVoteWithSwipe,
+    sessionId,
+    swipeVoteAmount,
+    uncastPower,
+    unratedCount,
+    votingLabel,
+  } satisfies Omit<MemesQuickVotePreviewPaneProps, "className">;
+  const controlsPaneProps = {
+    customValue,
+    drop: activeDrop,
+    feedbackAmount: voteFeedback?.amount ?? null,
+    feedbackSource: voteFeedback?.source ?? null,
+    isCustomOpen,
+    isSubmitting: isControlsSubmitting,
+    isVoteFeedbackActive,
+    leftThisRoundCount,
+    latestUsedAmount: normalizedLatestUsedAmount,
+    quickAmounts: visibleQuickAmounts,
+    uncastPower,
+    unratedCount,
+    votingLabel,
+    onCustomChange: handleCustomChange,
+    onCustomSubmit: handleCustomSubmit,
+    onOpenCustom: handleToggleCustom,
+    onSkip: handleSkip,
+    onVoteAmount: handleQuickAmountVote,
+  } satisfies Omit<MemesQuickVoteControlsPaneProps, "className">;
 
   return (
     <div className="tw-flex tw-h-full tw-flex-col md:tw-grid md:tw-min-h-0 md:tw-grid-cols-[minmax(0,1.22fr)_minmax(25rem,1fr)] md:tw-items-stretch">
@@ -499,83 +534,25 @@ function MemesQuickVoteDialogContent({
       {isMobile ? (
         <div className="tw-relative tw-z-10 tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col tw-overflow-hidden">
           <MemesQuickVotePreviewPane
-            activeDrop={activeDrop}
             className="tw-min-h-0 tw-flex-1"
-            isBusy={isControlsSubmitting}
-            isMobile={isMobile}
-            leftThisRoundCount={leftThisRoundCount}
-            nextDrop={nextDrop}
-            onAdvanceStart={handleAdvanceStart}
-            onSkip={queueSkip}
-            onVoteWithSwipe={handleVoteWithSwipe}
-            sessionId={sessionId}
-            swipeVoteAmount={swipeVoteAmount}
-            uncastPower={uncastPower}
-            unratedCount={unratedCount}
-            votingLabel={votingLabel}
+            {...previewPaneProps}
           />
 
           <MemesQuickVoteControlsPane
             className="tw-shrink-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-[#0a0a0a] md:tw-hidden"
-            customValue={customValue}
-            drop={activeDrop}
-            feedbackAmount={voteFeedback?.amount ?? null}
-            feedbackSource={voteFeedback?.source ?? null}
-            isCustomOpen={isCustomOpen}
-            isSubmitting={isControlsSubmitting}
-            isVoteFeedbackActive={isVoteFeedbackActive}
-            leftThisRoundCount={leftThisRoundCount}
-            latestUsedAmount={normalizedLatestUsedAmount}
-            quickAmounts={visibleQuickAmounts}
-            uncastPower={uncastPower}
-            unratedCount={unratedCount}
-            votingLabel={votingLabel}
-            onCustomChange={handleCustomChange}
-            onCustomSubmit={handleCustomSubmit}
-            onOpenCustom={handleToggleCustom}
-            onSkip={handleSkip}
-            onVoteAmount={handleQuickAmountVote}
+            {...controlsPaneProps}
           />
         </div>
       ) : (
         <>
           <MemesQuickVotePreviewPane
-            activeDrop={activeDrop}
             className="tw-min-h-0 tw-flex-1 md:tw-min-h-0 md:tw-border-y-0 md:tw-border-b-0 md:tw-border-l-0 md:tw-border-r md:tw-border-solid md:tw-border-white/10"
-            isBusy={isControlsSubmitting}
-            isMobile={isMobile}
-            leftThisRoundCount={leftThisRoundCount}
-            nextDrop={nextDrop}
-            onAdvanceStart={handleAdvanceStart}
-            onSkip={queueSkip}
-            onVoteWithSwipe={handleVoteWithSwipe}
-            sessionId={sessionId}
-            swipeVoteAmount={swipeVoteAmount}
-            uncastPower={uncastPower}
-            unratedCount={unratedCount}
-            votingLabel={votingLabel}
+            {...previewPaneProps}
           />
 
           <MemesQuickVoteControlsPane
             className="tw-shrink-0 md:tw-min-h-0 md:tw-self-stretch"
-            customValue={customValue}
-            drop={activeDrop}
-            feedbackAmount={voteFeedback?.amount ?? null}
-            feedbackSource={voteFeedback?.source ?? null}
-            isCustomOpen={isCustomOpen}
-            isSubmitting={isControlsSubmitting}
-            isVoteFeedbackActive={isVoteFeedbackActive}
-            leftThisRoundCount={leftThisRoundCount}
-            latestUsedAmount={normalizedLatestUsedAmount}
-            quickAmounts={visibleQuickAmounts}
-            uncastPower={uncastPower}
-            unratedCount={unratedCount}
-            votingLabel={votingLabel}
-            onCustomChange={handleCustomChange}
-            onCustomSubmit={handleCustomSubmit}
-            onOpenCustom={handleToggleCustom}
-            onSkip={handleSkip}
-            onVoteAmount={handleQuickAmountVote}
+            {...controlsPaneProps}
           />
         </>
       )}
