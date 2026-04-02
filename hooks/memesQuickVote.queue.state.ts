@@ -92,10 +92,7 @@ export const applyFetchedWindowState = ({
       !pendingDropIds.includes(drop.id) &&
       !resurfacedHandledDropIds.includes(drop.id)
   );
-  const recentlyHandledDropIds =
-    rawUnratedCount > 0 && safeFetchedDropsWithoutHandled.length === 0
-      ? []
-      : resurfacedHandledDropIds;
+  const recentlyHandledDropIds = resurfacedHandledDropIds;
   const hiddenDropIds = new Set([...recentlyHandledDropIds, ...pendingDropIds]);
   let currentDrop = current.currentDrop;
 
@@ -125,12 +122,18 @@ export const applyFetchedWindowState = ({
     hiddenDropIds,
     rawLeftThisRoundCount,
   });
-  const isExhausted =
+  const isRoundDepletedWithDuplicateWindow =
     currentDrop === null &&
     lookaheadDrops.length === 0 &&
-    hiddenDropIds.size === 0 &&
-    primaryDrop === null &&
-    rawUnratedCount === 0;
+    rawLeftThisRoundCount === 0 &&
+    safeFetchedDropsWithoutHandled.length === 0;
+  const isExhausted =
+    isRoundDepletedWithDuplicateWindow ||
+    (currentDrop === null &&
+      lookaheadDrops.length === 0 &&
+      hiddenDropIds.size === 0 &&
+      primaryDrop === null &&
+      rawUnratedCount === 0);
 
   return {
     currentDrop,

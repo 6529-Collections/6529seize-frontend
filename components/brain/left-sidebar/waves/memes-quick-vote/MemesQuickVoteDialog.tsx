@@ -469,8 +469,10 @@ function MemesQuickVoteDialogContent({
 }
 
 function MemesQuickVoteDialogDoneState({
+  hasMoreUnratedOutsideRound,
   onClose,
 }: {
+  readonly hasMoreUnratedOutsideRound: boolean;
   readonly onClose: () => void;
 }) {
   return (
@@ -491,7 +493,9 @@ function MemesQuickVoteDialogDoneState({
           You&apos;re all caught up
         </p>
         <p className="tw-mx-auto tw-mb-8 tw-max-w-sm tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-text-[15px]">
-          No unrated memes are left in quick vote right now.
+          {hasMoreUnratedOutsideRound
+            ? "No more memes are available in this quick vote round right now."
+            : "No unrated memes are left in quick vote right now."}
         </p>
 
         <button
@@ -614,7 +618,14 @@ export default function MemesQuickVoteDialog({
   let dialogBody: ReactNode;
 
   if (isExhausted) {
-    dialogBody = <MemesQuickVoteDialogDoneState onClose={onClose} />;
+    dialogBody = (
+      <MemesQuickVoteDialogDoneState
+        hasMoreUnratedOutsideRound={
+          leftThisRoundCount === 0 && unratedCount > 0
+        }
+        onClose={onClose}
+      />
+    );
   } else if (!activeDrop && hasDiscoveryError) {
     dialogBody = <MemesQuickVoteDialogErrorState onRetry={retryDiscovery} />;
   } else if (!activeDrop) {
