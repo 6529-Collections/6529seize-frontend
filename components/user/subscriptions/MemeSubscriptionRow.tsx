@@ -60,7 +60,7 @@ export default function MemeSubscriptionRow(
 
   useEffect(() => {
     if (selectedCount > props.eligibilityCount) {
-      setSelectedCount(Math.max(1, props.eligibilityCount));
+      setSelectedCount(Math.max(0, props.eligibilityCount));
     }
   }, [props.eligibilityCount, selectedCount]);
 
@@ -82,6 +82,11 @@ export default function MemeSubscriptionRow(
   }, [props.subscription.subscribed]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isToggleDisabled =
+    props.readonly ||
+    isSubmitting ||
+    props.minting_today ||
+    (!subscribed && props.eligibilityCount < 1);
   const finalWithMetadata = useMemo(() => {
     if (
       !props.first ||
@@ -105,19 +110,20 @@ export default function MemeSubscriptionRow(
     if (isSubmitting || props.minting_today) {
       return;
     }
-    setIsSubmitting(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setIsSubmitting(false);
-      return;
-    }
-    const subscribe = !subscribed;
     interface SubscribeBody {
       contract: string;
       token_id: number;
       subscribed: boolean;
     }
+
+    setIsSubmitting(true);
     try {
+      const { success } = await requestAuth();
+      if (!success) {
+        return;
+      }
+
+      const subscribe = !subscribed;
       const response = await commonApiPost<SubscribeBody, SubscribeBody>({
         endpoint: `subscriptions/${props.profileKey}/subscription`,
         body: {
@@ -160,18 +166,20 @@ export default function MemeSubscriptionRow(
     if (isSubmitting || props.minting_today) {
       return;
     }
-    setIsSubmitting(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setIsSubmitting(false);
-      return;
-    }
     interface UpdateSubscriptionCountBody {
       contract: string;
       token_id: number;
       count: number;
     }
+
+    setIsSubmitting(true);
     try {
+      const { success } = await requestAuth();
+      if (!success) {
+        setSelectedCount(subscribedCount);
+        return;
+      }
+
       const response = await commonApiPost<
         UpdateSubscriptionCountBody,
         UpdateSubscriptionCountBody
@@ -262,7 +270,7 @@ export default function MemeSubscriptionRow(
           <div className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}
             <Toggle
-              disabled={props.readonly || isSubmitting || props.minting_today}
+              disabled={isToggleDisabled}
               id={id}
               checked={subscribed}
               icons={false}
@@ -368,7 +376,7 @@ export default function MemeSubscriptionRow(
           <div className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}
             <Toggle
-              disabled={props.readonly || isSubmitting || props.minting_today}
+              disabled={isToggleDisabled}
               id={id}
               checked={subscribed}
               icons={false}
