@@ -87,14 +87,14 @@ export function useSidebarSections(
           {
             name: "The Memes Tools",
             items: [
-              ...(!hideSubscriptions
-                ? [
+              ...(hideSubscriptions
+                ? []
+                : [
                     {
                       name: "Subscriptions Report",
                       href: "/tools/subscriptions-report",
                     },
-                  ]
-                : []),
+                  ]),
               { name: "Memes Accounting", href: "/meme-accounting" },
               { name: "Memes Gas", href: "/meme-gas" },
             ],
@@ -115,14 +115,14 @@ export function useSidebarSections(
             items: [
               { name: "Open Data", href: "/open-data" },
               { name: "Network Metrics", href: "/open-data/network-metrics" },
-              ...(!hideSubscriptions
-                ? [
+              ...(hideSubscriptions
+                ? []
+                : [
                     {
                       name: "Meme Subscriptions",
                       href: "/open-data/meme-subscriptions",
                     },
-                  ]
-                : []),
+                  ]),
               { name: "Rememes", href: "/open-data/rememes" },
               { name: "Team", href: "/open-data/team" },
               { name: "Royalties", href: "/open-data/royalties" },
@@ -140,14 +140,14 @@ export function useSidebarSections(
             name: "NFTs",
             items: [
               { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
-              ...(!hideSubscriptions
-                ? [
+              ...(hideSubscriptions
+                ? []
+                : [
                     {
                       name: "Subscriptions",
                       href: `/about/${AboutSection.SUBSCRIPTIONS}`,
                     },
-                  ]
-                : []),
+                  ]),
               { name: "Minting", href: `/about/${AboutSection.MINTING}` },
               {
                 name: "Nakamoto Threshold",

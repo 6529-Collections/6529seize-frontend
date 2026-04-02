@@ -50,7 +50,7 @@ export default function LatestDropNextMintSubscribe() {
       await commonApiFetch<SubscriptionDetails>({
         endpoint: `subscriptions/consolidation/details/${profileKey}`,
       }),
-    enabled: !!profileKey,
+    enabled: !hideSubscriptions && !!profileKey,
   });
 
   const {
@@ -62,7 +62,7 @@ export default function LatestDropNextMintSubscribe() {
       await commonApiFetch<ApiUpcomingMemeSubscriptionStatus>({
         endpoint: `subscriptions/consolidation/upcoming-memes/${tokenId}/${profileKey}`,
       }),
-    enabled: !!profileKey && hasTokenId,
+    enabled: !hideSubscriptions && !!profileKey && hasTokenId,
   });
 
   const subscription = useMemo<NFTSubscription | null>(() => {

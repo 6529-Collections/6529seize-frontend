@@ -34,7 +34,6 @@ import {
   getUserPageTabByRoute,
 } from "./userTabs.config";
 import {
-  normalizeCountry,
   shouldHideSubscriptions,
 } from "./userPageVisibility";
 import { shouldDelayUserPageBrainRedirect } from "./userPageBrainAccess";
@@ -55,13 +54,11 @@ const getVisibilityContext = ({
   readonly country: string | null | undefined;
   readonly isOwnProfile: boolean;
 }): UserPageVisibilityContext => {
-  const normalizedCountry = normalizeCountry(country);
-
   return {
     showWaves,
     hideSubscriptions: shouldHideSubscriptions({
       capacitorIsIos,
-      country: normalizedCountry,
+      country,
     }),
     isOwnProfile,
   };
