@@ -231,5 +231,6 @@
       "react-dom": "$react-dom"
     },
     "serialize-javascript": "7.0.4"
-  }
+  },
+  "packageManager": "npm@10.9.4"
 }

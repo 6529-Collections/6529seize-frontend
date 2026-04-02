@@ -1,6 +1,7 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 
 type NextMintDropState = {
   readonly nextMint: ApiDrop | null;
@@ -21,7 +22,9 @@ export const useNextMintDrop = (): NextMintDropState => {
   });
 
   const latestDecision = decisionPoints[decisionPoints.length - 1];
-  const nextMint = latestDecision?.winners[0]?.drop ?? null;
+  const nextMint =
+    getRenderableWaveDecisionWinners(latestDecision?.winners ?? [])[0]?.drop ??
+    null;
 
   const nextMintTitle =
     nextMint?.title ??

@@ -13,47 +13,64 @@ import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
+  readonly showAvatar?: boolean | undefined;
 }
+
+interface WaveLeaderboardDropAuthorAvatarProps {
+  readonly drop: ExtendedDrop;
+}
+
+export const WaveLeaderboardDropAuthorAvatar: React.FC<
+  WaveLeaderboardDropAuthorAvatarProps
+> = ({ drop }) => {
+  const authorLabel = drop.author.handle ?? drop.author.primary_address;
+
+  return (
+    <Link
+      href={`/${authorLabel}`}
+      onClick={(e) => e.stopPropagation()}
+      className="group tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
+    >
+      <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-900">
+        {drop.author.pfp ? (
+          <div className="tw-h-full tw-w-full tw-rounded-lg">
+            <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+              <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
+                <Image
+                  src={resolveIpfsUrlSync(drop.author.pfp)}
+                  alt="Profile picture"
+                  width={40}
+                  height={40}
+                  className="tw-rounded-lg tw-object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10"></div>
+        )}
+      </div>
+    </Link>
+  );
+};
 
 export const WaveLeaderboardDropAuthor: React.FC<
   WaveLeaderboardDropAuthorProps
-> = ({ drop }) => {
+> = ({ drop, showAvatar = true }) => {
+  const authorLabel = drop.author.handle ?? drop.author.primary_address;
+
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-3">
-      <Link
-        href={`/${drop.author.handle}`}
-        onClick={(e) => e.stopPropagation()}
-        className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
-      >
-        <div className="tw-h-11 tw-w-11 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
-          {drop.author.pfp ? (
-            <div className="tw-rounded-lg tw-h-full tw-w-full">
-              <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
-                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
-                  <Image
-                    src={resolveIpfsUrlSync(drop.author.pfp)}
-                    alt="Profile picture"
-                    width={44}
-                    height={44}
-                    className="tw-rounded-lg tw-object-contain"
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="tw-h-full tw-w-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-lg"></div>
-          )}
-        </div>
-      </Link>
-      <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap">
-        <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
+      {showAvatar && <WaveLeaderboardDropAuthorAvatar drop={drop} />}
+      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+        <UserProfileTooltipWrapper user={authorLabel}>
           <Link
-            href={`/${drop.author.handle}`}
+            href={`/${authorLabel}`}
             onClick={(e) => e.stopPropagation()}
             className="tw-no-underline"
           >
-            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-              {drop.author.handle}
+            <span className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
+              {authorLabel}
             </span>
           </Link>
         </UserProfileTooltipWrapper>
@@ -63,9 +80,9 @@ export const WaveLeaderboardDropAuthor: React.FC<
         />
         <WinnerDropBadge
           rank={drop.rank}
-          decisionTime={drop.winning_context?.decision_time || null}
+          decisionTime={drop.winning_context?.decision_time ?? null}
         />
-        <div className="tw-size-[3px] tw-bg-iron-900 tw-rounded-full tw-flex-shrink-0"></div>
+        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-900"></div>
         <WaveDropTime timestamp={drop.created_at} />
       </div>
     </div>

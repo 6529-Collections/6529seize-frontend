@@ -2,7 +2,9 @@ import React from "react";
 import { WaveWinnersDrop } from "./WaveWinnersDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { ApiWaveDecisionWinner } from "@/generated/models/ObjectSerializer";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { publicEnv } from "@/config/env";
+import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 
 interface WaveWinnersDropsProps {
   readonly wave: ApiWave;
@@ -17,22 +19,44 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
   winners,
   isLoading = false,
 }) => {
+  const renderableWinners = getRenderableWaveDecisionWinners(winners);
+  const invalidWinnerCount = winners.length - renderableWinners.length;
+  const shouldShowInvalidWinnerWarning =
+    invalidWinnerCount > 0 && publicEnv.NODE_ENV !== "production";
+  const invalidWinnersMessage =
+    invalidWinnerCount === 1
+      ? "Hidden 1 winner with missing drop data."
+      : `Hidden ${invalidWinnerCount} winners with missing drop data.`;
+
   if (isLoading) {
     return (
-      <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
-        <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
+      <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
+        <div className="tw-h-full tw-w-full tw-animate-loading-bar tw-bg-indigo-400"></div>
       </div>
     );
   }
 
   // Empty state handling
-  if (!winners.length) {
-    return <></>
+  if (!renderableWinners.length) {
+    if (shouldShowInvalidWinnerWarning) {
+      return (
+        <p className="tw-rounded-md tw-border tw-border-amber-500/40 tw-bg-amber-500/10 tw-px-3 tw-py-2 tw-text-xs tw-text-amber-200">
+          {invalidWinnersMessage}
+        </p>
+      );
+    }
+
+    return <></>;
   }
 
   return (
     <div className="tw-space-y-3">
-      {winners.map((winner) => (
+      {shouldShowInvalidWinnerWarning ? (
+        <p className="tw-rounded-md tw-border tw-border-amber-500/40 tw-bg-amber-500/10 tw-px-3 tw-py-2 tw-text-xs tw-text-amber-200">
+          {invalidWinnersMessage}
+        </p>
+      ) : null}
+      {renderableWinners.map((winner) => (
         <WaveWinnersDrop
           key={winner.drop.id}
           winner={winner}

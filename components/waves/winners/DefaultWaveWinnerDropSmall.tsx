@@ -11,6 +11,7 @@ import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import { Time } from "@/helpers/time";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { WaveWinnerIdentity } from "./identity/WaveWinnerIdentity";
 
 interface DefaultWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
@@ -150,6 +151,12 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
               </span>
             </div>
           </div>
+
+          <WaveWinnerIdentity
+            drop={drop}
+            variant="compact"
+            className="tw-ml-10 tw-mt-3"
+          />
 
           <div className="tw-ml-10">
             <DropContentSmall drop={drop} onDropClick={onDropClick} />

@@ -15,19 +15,24 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { CurationComposerVariant } from "./PrivilegedDropCreator";
-import { DropMode } from "./PrivilegedDropCreator";
+import type { CurationComposerVariant } from "./dropComposer.types";
+import { DropMode } from "./dropComposer.types";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
+import {
+  resolveWaveSubmissionExperience,
+  WaveSubmissionExperience,
+} from "@/helpers/waves/wave-submission-experience.helpers";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
+  readonly onExitFixedDropMode?: (() => void) | undefined;
   readonly wave: ApiWave;
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
@@ -38,6 +43,8 @@ interface CreateDropProps {
 export interface DropMutationBody {
   readonly drop: ApiCreateDropRequest;
   readonly dropId: string | null;
+  readonly onSuccess?: (() => void) | undefined;
+  readonly onError?: ((error: unknown) => void) | undefined;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -47,6 +54,7 @@ export default function CreateDrop({
   onCancelReplyQuote,
   onDropAddedToQueue,
   onAllDropsAdded,
+  onExitFixedDropMode,
   wave,
   dropId,
   fixedDropMode,
@@ -68,7 +76,12 @@ export default function CreateDrop({
     url: string;
   } | null>(null);
   const { processDropRemoved, processIncomingDrop } = useMyStream();
-  const { isCurationWave } = useWave(wave);
+  const { isMemesWave, isCurationWave } = useWave(wave);
+  const submissionExperience = resolveWaveSubmissionExperience({
+    isMemesWave,
+    isCurationWave,
+    submissionStrategy: wave.participation.submission_strategy ?? null,
+  });
   const getDefaultIsDropMode = () => {
     if (fixedDropMode === DropMode.CHAT) {
       return false;
@@ -87,13 +100,7 @@ export default function CreateDrop({
       ? "none"
       : `${activeDrop.action}:${activeDrop.drop.id}:${activeDrop.partId}`;
   const modeScopeKey = `${wave.id}:${fixedDropMode}:${wave.chat.authenticated_user_eligible}:${wave.participation.authenticated_user_eligible}:${activeDropScope}`;
-  const modeScopeEpochRef = useRef(0);
-  const lastModeScopeKeyRef = useRef(modeScopeKey);
-  if (lastModeScopeKeyRef.current !== modeScopeKey) {
-    lastModeScopeKeyRef.current = modeScopeKey;
-    modeScopeEpochRef.current += 1;
-  }
-  const modeScopeToken = `${modeScopeKey}:${modeScopeEpochRef.current}`;
+  const modeScopeToken = modeScopeKey;
   const defaultIsDropMode = getDefaultIsDropMode();
   const isDropMode =
     dropModeOverride?.scopeKey === modeScopeToken
@@ -103,7 +110,9 @@ export default function CreateDrop({
     curationPrefillSeed?.scopeKey === modeScopeToken
       ? curationPrefillSeed.url
       : null;
-  const isCurationDropMode = isCurationWave && isDropMode;
+  const isCurationDropMode =
+    submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
+    isDropMode;
 
   const canSwitchDropMode = useCallback(
     (newIsDropMode: boolean) => {
@@ -134,13 +143,23 @@ export default function CreateDrop({
 
   const onDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
+      if (
+        !newIsDropMode &&
+        fixedDropMode === DropMode.PARTICIPATION &&
+        onExitFixedDropMode
+      ) {
+        setCurationPrefillSeed(null);
+        onExitFixedDropMode();
+        return;
+      }
+
       if (!canSwitchDropMode(newIsDropMode)) {
         return;
       }
       setCurationPrefillSeed(null);
       setDropModeOverride({ scopeKey: modeScopeToken, value: newIsDropMode });
     },
-    [canSwitchDropMode, modeScopeToken]
+    [canSwitchDropMode, fixedDropMode, modeScopeToken, onExitFixedDropMode]
   );
 
   const onSwitchToDropModeWithUrl = useCallback(
@@ -181,8 +200,12 @@ export default function CreateDrop({
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
       processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
+      body.onSuccess?.();
 
-      if (isCurationWave && curationComposerVariant === "leaderboard") {
+      if (
+        submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
+        curationComposerVariant === "leaderboard"
+      ) {
         setToast({
           message: "Drop submitted successfully",
           type: "success",
@@ -199,22 +222,17 @@ export default function CreateDrop({
         message: error instanceof Error ? error.message : String(error),
         type: "error",
       });
+      body.onError?.(error);
     },
-    retry: (failureCount) => {
-      if (failureCount >= 3) {
-        return false;
-      }
-      return true;
-    },
-    retryDelay: (failureCount) => {
-      return failureCount * 1000;
-    },
+    retry: (failureCount) => failureCount < 3,
+    retryDelay: (failureCount) => failureCount * 1000,
   });
 
   // Use refs to avoid stale closures - fixes the stream unmounting issue
   const queueRef = useRef<DropMutationBody[]>([]);
   const isProcessingRef = useRef(false);
   const hasBatchErrorsRef = useRef(false);
+  const inFlightProcessNextDropRef = useRef<Promise<void> | null>(null);
 
   const processNextDrop = useCallback(async () => {
     if (isProcessingRef.current || queueRef.current.length === 0) {
@@ -222,9 +240,11 @@ export default function CreateDrop({
     }
 
     isProcessingRef.current = true;
-    const dropRequest = queueRef.current.shift();
-
-    if (dropRequest) {
+    while (queueRef.current.length > 0) {
+      const dropRequest = queueRef.current.shift();
+      if (dropRequest === undefined) {
+        break;
+      }
       try {
         await addDropMutation.mutateAsync(dropRequest);
       } catch (error) {
@@ -234,12 +254,6 @@ export default function CreateDrop({
     }
 
     isProcessingRef.current = false;
-
-    // Process next item if queue has more
-    if (queueRef.current.length > 0) {
-      processNextDrop();
-      return;
-    }
 
     const shouldNotifyAllDropsAdded = !hasBatchErrorsRef.current;
     hasBatchErrorsRef.current = false;
@@ -255,7 +269,7 @@ export default function CreateDrop({
       queueRef.current.push(dropRequest);
 
       // Process immediately - avoids state update timing issues
-      processNextDrop();
+      inFlightProcessNextDropRef.current = processNextDrop();
 
       // Clear unread divider when user sends a message
       if (unreadDividerContext) {
@@ -266,13 +280,16 @@ export default function CreateDrop({
       onDropAddedToQueue();
 
       // Explicitly blur any focused input to close keyboard
-      (document.activeElement as HTMLElement)?.blur();
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
     },
     [onDropAddedToQueue, processNextDrop, unreadDividerContext]
   );
 
-  const createDropContentProps = useMemo(
-    () => ({
+  const createDropContentProps = useMemo(() => {
+    const hasExitFixedDropMode = onExitFixedDropMode !== undefined;
+    return {
       activeDrop,
       onCancelReplyQuote,
       drop,
@@ -285,22 +302,34 @@ export default function CreateDrop({
       onSwitchToDropModeWithUrl,
       submitDrop,
       privileges,
-    }),
-    [
-      activeDrop,
-      onCancelReplyQuote,
-      drop,
-      isStormMode,
-      isDropMode,
-      dropId,
-      setDrop,
-      setIsStormMode,
-      onDropModeChange,
-      onSwitchToDropModeWithUrl,
-      submitDrop,
-      privileges,
-    ]
-  );
+      showDropModeToggle:
+        fixedDropMode === DropMode.BOTH ||
+        (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
+      dropModeToggleExitLabel:
+        fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode
+          ? "Close create drop"
+          : null,
+      canExitDropMode:
+        (fixedDropMode === DropMode.BOTH &&
+          privileges.chatRestriction === null) ||
+        (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
+    };
+  }, [
+    activeDrop,
+    onCancelReplyQuote,
+    drop,
+    isStormMode,
+    isDropMode,
+    dropId,
+    setDrop,
+    setIsStormMode,
+    onDropModeChange,
+    onSwitchToDropModeWithUrl,
+    submitDrop,
+    privileges,
+    fixedDropMode,
+    onExitFixedDropMode,
+  ]);
 
   return (
     <>
@@ -335,7 +364,11 @@ export default function CreateDrop({
           curationComposerVariant={curationComposerVariant}
         />
       ) : (
-        <CreateDropContent {...createDropContentProps} wave={wave} />
+        <CreateDropContent
+          {...createDropContentProps}
+          wave={wave}
+          submissionExperience={submissionExperience}
+        />
       )}
     </>
   );

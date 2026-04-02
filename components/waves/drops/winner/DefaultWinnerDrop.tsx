@@ -8,8 +8,12 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { memo, useCallback, useState } from "react";
-import type { DropInteractionParams } from "../Drop";
-import { DropLocation } from "../Drop";
+import type { DropInteractionParams } from "../drop.types";
+import { DropLocation } from "../drop.types";
+import {
+  getRankHoverBorderClass,
+  getRankStaticBorderClass,
+} from "../dropRankStyles";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
@@ -20,56 +24,23 @@ import WaveDropRatings from "../WaveDropRatings";
 import WaveDropReactions from "../WaveDropReactions";
 import WaveDropReply from "../WaveDropReply";
 import WinnerDropBadge from "./WinnerDropBadge";
+import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
+import { getWinnerVisibleMetadata } from "@/components/waves/winners/identity/winnerIdentity.helpers";
 
-const getRankColorsByRank = (
-  rank: number | null
-): {
-  borderColor: string;
-  textColor: string;
-} => {
-  const rankNumber =
-    typeof rank === "string" ? parseInt(rank as string, 10) : rank;
-
-  if (rankNumber === 1) {
-    return {
-      borderColor: "#fbbf24",
-      textColor: "#E8D48A",
-    };
-  }
-  if (rankNumber === 2) {
-    return {
-      borderColor: "#C0C0C0",
-      textColor: "#E8E8E8",
-    };
-  }
-  if (rankNumber === 3) {
-    return {
-      borderColor: "#CD7F32",
-      textColor: "#CD7F32",
-    };
-  }
-  return {
-    borderColor: "#60606C",
-    textColor: "#7F8A93",
-  };
+const getRankHoverClass = (rank: number | null): string => {
+  return getRankHoverBorderClass(rank);
 };
 
-const getDropStyles = (
-  isActiveDrop: boolean,
-  colors: { borderColor: string; textColor: string }
-) => {
+const getDropStyles = (isActiveDrop: boolean) => {
   if (isActiveDrop) {
     return {
-      boxShadow: "inset 1.5px 0 0 rgba(60,203,127,0.7)",
+      borderColor: "rgba(60,203,127,0.45)",
+      boxShadow:
+        "inset 0 0 0 1px rgba(60,203,127,0.2), inset 0 0 24px rgba(60,203,127,0.08)",
     };
   }
 
-  return {
-    boxShadow: `inset 1.5px 0 0 ${colors.borderColor}80,
-                inset 0 1px 0 ${colors.borderColor}20,
-                inset -1.5px 0 0 ${colors.borderColor}20,
-                inset 0 -1.5px 0 ${colors.borderColor}20`,
-  };
+  return undefined;
 };
 
 interface DefautWinnerDropProps {
@@ -110,9 +81,12 @@ const DefaultWinnerDrop = ({
 
   const decisionTime = drop.winning_context?.decision_time;
 
-  const colors = getRankColorsByRank(effectiveRank);
-  const getBackgroundColorClass = (loc: DropLocation): string =>
-    loc === DropLocation.WAVE ? "tw-bg-iron-900/60" : "tw-bg-iron-950";
+  const visibleMetadata = getWinnerVisibleMetadata({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
+  const getBackgroundColorClass = (_loc: DropLocation): string =>
+    "tw-bg-iron-950";
 
   const bgColorClass = isActiveDrop
     ? "tw-bg-[#3CCB7F]/10"
@@ -140,11 +114,11 @@ const DefaultWinnerDrop = ({
       }`}
     >
       <div
-        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-px-4 tw-py-3 ${bgColorClass}`}
+        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid ${getRankStaticBorderClass(
+          effectiveRank
+        )} tw-px-4 tw-py-3 ${bgColorClass} ${getRankHoverClass(effectiveRank)}`}
         style={{
-          border: "1px solid transparent",
-          borderLeft: "1.5px solid transparent",
-          ...getDropStyles(isActiveDrop, colors),
+          ...getDropStyles(isActiveDrop),
           transition: "box-shadow 0.2s ease, background-color 0.2s ease",
         }}
       >
@@ -163,18 +137,20 @@ const DefaultWinnerDrop = ({
 
         <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
           <WaveDropAuthorPfp drop={drop} />
-          <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
-            <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-1">
+          <div className="tw-flex tw-w-full tw-flex-col">
+            <div className="tw-flex tw-flex-col tw-items-start">
               <WaveDropHeader
                 drop={drop}
                 showWaveInfo={false}
                 isStorm={isStorm}
                 currentPartIndex={activePartIndex}
                 partsCount={drop.parts.length}
-              />
-              <WinnerDropBadge
-                rank={effectiveRank}
-                decisionTime={decisionTime ?? null}
+                badge={
+                  <WinnerDropBadge
+                    rank={effectiveRank}
+                    decisionTime={decisionTime ?? null}
+                  />
+                }
               />
               {showWaveInfo &&
                 (() => {
@@ -211,7 +187,7 @@ const DefaultWinnerDrop = ({
                   );
                 })()}
             </div>
-            <div>
+            <div className="tw-mt-2">
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}
@@ -235,9 +211,10 @@ const DefaultWinnerDrop = ({
             />
           </div>
         )}
-        <div className="tw-ml-[3.25rem] tw-mt-1.5 tw-flex tw-flex-col tw-gap-2">
-          {drop.metadata.length > 0 && (
-            <WaveDropMetadata metadata={drop.metadata} />
+        <div className="tw-ml-[3.25rem] tw-flex tw-flex-col tw-gap-2">
+          <WaveWinnerIdentity drop={drop} variant="full" cardVariant="chat" />
+          {visibleMetadata.length > 0 && (
+            <WaveDropMetadata metadata={visibleMetadata} />
           )}
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             {!!drop.raters_count && <WaveDropRatings drop={drop} />}

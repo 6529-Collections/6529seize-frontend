@@ -37,6 +37,7 @@ const toWaveMin = (wave: ApiWave): ApiWaveMin => {
     admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
     forbid_negative_votes: wave.voting.forbid_negative_votes,
     pinned: wave.pinned,
+    submission_type: wave.participation.submission_strategy?.type ?? null,
   };
 };
 

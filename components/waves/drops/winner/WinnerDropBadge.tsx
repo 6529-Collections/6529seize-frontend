@@ -48,8 +48,8 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   switch (rankNumber) {
     case 1:
       colorClasses =
-        "tw-bg-yellow-500/10 tw-text-yellow-400 tw-border-yellow-500/20";
-      textColorClass = "tw-text-amber-400";
+        "tw-bg-yellow-500/10 tw-text-[#ffc107] tw-border-yellow-500/20";
+      textColorClass = "tw-text-[#ffc107]";
       break;
     case 2:
       colorClasses = "tw-bg-iron-400/10 tw-text-iron-300 tw-border-iron-400/20";
@@ -89,7 +89,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
 
   return (
     <div
-      className={`tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-rounded tw-border tw-border-solid tw-px-1.5 tw-py-0.5 tw-text-[11px] tw-font-semibold ${colorClasses}`}
+      className={`tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-rounded tw-border tw-border-solid tw-px-1.5 tw-py-0.5 tw-text-[11px] tw-font-medium ${colorClasses}`}
     >
       <FontAwesomeIcon icon={faTrophy} className="tw-size-2" />
       {rankText}

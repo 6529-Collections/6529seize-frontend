@@ -21,21 +21,18 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
       onClick={(e) => e.stopPropagation()}
       className="tw-flex tw-w-full tw-flex-wrap tw-justify-between tw-gap-y-2 xl:tw-flex-nowrap"
     >
-      <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-y-2.5 xl:tw-w-auto">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
-          <WaveWinnersDropHeaderAuthorHandle winner={winner} />
-          <DropAuthorBadges
-            profile={winner.drop.author}
-            tooltipIdPrefix={`winner-author-badges-${winner.drop.id}`}
-          />
-          <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
-          <WaveDropTime timestamp={winner.drop.created_at} />
-        </div>
-
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 xl:tw-w-auto">
+        <WaveWinnersDropHeaderAuthorHandle winner={winner} />
+        <DropAuthorBadges
+          profile={winner.drop.author}
+          tooltipIdPrefix={`winner-author-badges-${winner.drop.id}`}
+        />
         <WinnerDropBadge
           rank={winner.place}
           decisionTime={winner.drop.winning_context?.decision_time ?? null}
         />
+        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+        <WaveDropTime timestamp={winner.drop.created_at} />
       </div>
 
       {showVotingInfo && (

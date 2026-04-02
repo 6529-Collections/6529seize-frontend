@@ -12,6 +12,7 @@ import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -22,6 +23,7 @@ import {
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import Image from "next/image";
@@ -30,12 +32,17 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
+import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
+
+const getRankHoverClass = (place: number | null): string => {
+  return getRankHoverBorderClass(place);
+};
 
 export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   winner,
@@ -60,7 +67,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   const artworkMedia = winner.drop.parts.at(0)?.media.at(0);
 
   const rating = winner.drop.rating || 0;
-  const isPositive = rating >= 0;
   const ratersCount = winner.drop.raters_count;
   const topVoters = winner.drop.top_raters.slice(0, 3);
   const creditType = WAVE_VOTING_LABELS[wave.voting.credit_type];
@@ -71,6 +77,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     winner.drop.context_profile_context.rating !== 0;
   const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
+  const totalVoteClass = rating < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
+  const userVoteClass = isUserVoteNegative
+    ? "tw-text-rose-400"
+    : "tw-text-iron-50";
 
   // Convert the drop to ExtendedDrop using the helper function
   const extendedDrop = convertApiDropToExtendedDrop(winner.drop);
@@ -80,7 +90,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
       onClick={() => onDropClick(extendedDrop)}
       className="touch-select-none tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out"
     >
-      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-[0_0_15px_rgba(251,191,36,0.08)] tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-[#fbbf24]/20">
+      <div
+        className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-transition-all tw-duration-200 tw-ease-out ${getRankHoverClass(winner.place)}`}
+      >
         <div className="tw-flex tw-flex-col" {...touchHandlers}>
           <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 tw-pb-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
@@ -160,6 +172,13 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             </div>
           </div>
 
+          <WaveWinnerIdentity
+            drop={winner.drop}
+            variant="full"
+            cardVariant="chat"
+            className="tw-px-4 tw-pb-4"
+          />
+
           {artworkMedia && (
             <div className="tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">
               <DropListItemContentMedia
@@ -174,21 +193,17 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           <div className="tw-mt-4 tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4">
             <MemeDropTraits drop={winner.drop} />
 
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-              <div className="tw-flex tw-items-center tw-gap-x-1.5">
-                <span
-                  className={`tw-text-sm tw-font-bold ${
-                    isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-                  }`}
-                >
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-pt-1">
+              <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5">
+                <span className={`tw-font-medium ${totalVoteClass}`}>
                   {formatNumberWithCommas(rating)}
                 </span>
-                <span className="tw-text-sm tw-text-iron-500">
+                <span className="tw-font-normal tw-text-iron-400">
                   {creditType} {WAVE_VOTE_STATS_LABELS.TOTAL}
                 </span>
               </div>
 
-              <div className="tw-flex tw-items-center tw-gap-2">
+              <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-leading-5">
                 <div className="tw-flex tw-items-center -tw-space-x-2">
                   {topVoters.map((voter) => (
                     <React.Fragment key={voter.profile.handle}>
@@ -218,11 +233,11 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                       </Link>
                       <Tooltip
                         id={`voter-${voter.profile.handle ?? voter.profile.primary_address}-${voter.rating}`}
-                        style={{
-                          backgroundColor: "#1F2937",
-                          color: "white",
-                          padding: "4px 8px",
-                        }}
+                        place="top"
+                        offset={8}
+                        opacity={1}
+                        positionStrategy="fixed"
+                        style={TOOLTIP_STYLES}
                       >
                         {voter.profile.handle} -{" "}
                         {formatNumberWithCommas(voter.rating)}
@@ -230,9 +245,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     </React.Fragment>
                   ))}
                 </div>
-                <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                <span className="tw-font-medium tw-text-iron-50">
                   {formatNumberWithCommas(ratersCount)}{" "}
-                  <span className="tw-font-normal tw-text-iron-500">
+                  <span className="tw-font-normal tw-text-iron-400">
                     {ratersCount === 1 ? "voter" : "voters"}
                   </span>
                 </span>
@@ -240,18 +255,12 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
 
               {/* User's vote */}
               {hasUserVoted && (
-                <div className="tw-flex tw-items-center tw-gap-x-1.5">
+                <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-leading-5">
                   <div className="tw-flex tw-items-baseline tw-gap-x-1">
-                    <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+                    <span className="tw-font-normal tw-text-iron-400">
                       {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
                     </span>
-                    <span
-                      className={`tw-text-sm tw-font-semibold ${
-                        isUserVoteNegative
-                          ? "tw-text-rose-500"
-                          : "tw-text-emerald-500"
-                      }`}
-                    >
+                    <span className={`tw-font-medium ${userVoteClass}`}>
                       {isUserVoteNegative && "-"}
                       {formatNumberWithCommas(Math.abs(userVote))}{" "}
                       <span className="tw-font-normal tw-text-iron-400">

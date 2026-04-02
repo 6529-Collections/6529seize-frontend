@@ -32,6 +32,10 @@ import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmission
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
+import {
+  resolveWaveSubmissionExperience,
+  WaveSubmissionExperience,
+} from "@/helpers/waves/wave-submission-experience.helpers";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -48,6 +52,11 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { isMemesWave, isCurationWave, participation } = useWave(wave);
   const { leaderboardViewStyle } = useLayout(); // Get pre-calculated style from context
+  const submissionExperience = resolveWaveSubmissionExperience({
+    isMemesWave,
+    isCurationWave,
+    submissionStrategy: wave.participation.submission_strategy ?? null,
+  });
 
   // Track mount status
   const mountedRef = useRef(true);
@@ -79,19 +88,21 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     [activeProfileProxy, isCurationWave, isLoggedIn, participation]
   );
   const showToggleableDropInput =
-    !isMemesWave && !isCurationWave && isCreateDropOpen;
+    submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
+    submissionExperience !== WaveSubmissionExperience.CURATION_LEGACY &&
+    isCreateDropOpen;
 
   const onCreateDrop = useCallback(() => {
     if (!mountedRef.current) {
       return;
     }
 
-    if (isMemesWave) {
+    if (submissionExperience === WaveSubmissionExperience.MEMES_LEGACY) {
       setIsMemesCreateOpen(true);
       return;
     }
 
-    if (isCurationWave) {
+    if (submissionExperience === WaveSubmissionExperience.CURATION_LEGACY) {
       if (!canCreateDrop) {
         return;
       }
@@ -99,10 +110,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       return;
     }
 
-    if (!isCurationWave) {
-      setIsCreateDropOpen(true);
-    }
-  }, [canCreateDrop, isCurationWave, isMemesWave]);
+    setIsCreateDropOpen(true);
+  }, [canCreateDrop, submissionExperience]);
 
   // Generate a unique preference key for this wave
   const viewPreferenceKey = `waveViewMode_${wave.id}`;
@@ -313,20 +322,22 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           )}
         </AnimatePresence>
 
-        {isMemesWave && isMemesCreateOpen && (
-          <MemesArtSubmissionModal
-            isOpen={isMemesCreateOpen}
-            wave={wave}
-            onClose={() => setIsMemesCreateOpen(false)}
-          />
-        )}
-        {isCurationWave && isCurationDropModalOpen && (
-          <WaveLeaderboardCurationDropModal
-            isOpen={isCurationDropModalOpen}
-            wave={wave}
-            onClose={() => setIsCurationDropModalOpen(false)}
-          />
-        )}
+        {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY &&
+          isMemesCreateOpen && (
+            <MemesArtSubmissionModal
+              isOpen={isMemesCreateOpen}
+              wave={wave}
+              onClose={() => setIsMemesCreateOpen(false)}
+            />
+          )}
+        {submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
+          isCurationDropModalOpen && (
+            <WaveLeaderboardCurationDropModal
+              isOpen={isCurationDropModalOpen}
+              wave={wave}
+              onClose={() => setIsCurationDropModalOpen(false)}
+            />
+          )}
 
         {leaderboardContent}
       </div>

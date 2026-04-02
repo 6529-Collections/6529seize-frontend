@@ -4,6 +4,10 @@ import MemesWaveQuickVoteTrigger from "@/components/brain/left-sidebar/waves/Mem
 import MemesWaveZapIcon from "@/components/brain/left-sidebar/waves/MemesWaveZapIcon";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import {
+  formatMemesQuickVoteLeftThisRoundText,
+  formatMemesQuickVoteUnratedText,
+} from "@/hooks/memesQuickVote.helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -23,13 +27,21 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
   onOpenQuickVote,
   onPrefetchQuickVote,
 }) => {
-  const { isAvailable, isReady, uncastPower, unratedCount, votingLabel } =
-    useMemesWaveFooterStats();
+  const {
+    isAvailable,
+    isReady,
+    leftThisRoundCount,
+    uncastPower,
+    unratedCount,
+    votingLabel,
+  } = useMemesWaveFooterStats();
   const buttonAriaLabel =
     isReady && typeof uncastPower === "number"
       ? `Uncast Power, ${formatNumberWithCommas(uncastPower)} ${
           votingLabel ?? "Votes"
-        } left, ${formatNumberWithCommas(unratedCount)} unrated`
+        } left, ${formatMemesQuickVoteLeftThisRoundText(
+          leftThisRoundCount
+        )}, ${formatMemesQuickVoteUnratedText(unratedCount)}`
       : "Quick vote";
   const buttonTitle = isReady ? "Uncast votes" : "Quick vote";
   const votingPowerLabel = votingLabel ? ` ${votingLabel}` : " votes";
@@ -71,6 +83,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           {collapsed ? (
             <MemesWaveQuickVoteTrigger
               isAvailable={isAvailable}
+              leftThisRoundCount={leftThisRoundCount}
               onOpenQuickVote={handleOpenQuickVote}
               onPrefetchQuickVote={handlePrefetchQuickVote}
               unratedCount={unratedCount}
@@ -103,9 +116,16 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                 </div>
 
                 {isReady && (
-                  <span className="tw-relative tw-z-10 tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
-                    {formatNumberWithCommas(unratedCount)} unrated
-                  </span>
+                  <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-items-end tw-gap-0.5 tw-text-right">
+                    <span className="tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
+                      {formatMemesQuickVoteLeftThisRoundText(
+                        leftThisRoundCount
+                      )}
+                    </span>
+                    <span className="tw-text-[11px] tw-font-medium tw-text-[#6b7c93]">
+                      {formatMemesQuickVoteUnratedText(unratedCount)}
+                    </span>
+                  </div>
                 )}
               </div>
             </button>

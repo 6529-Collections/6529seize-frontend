@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { useNotificationsQuery, usePrefetchNotifications } from '@/hooks/useNotificationsQuery';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { ApiNotificationCause } from '@/generated/models/ApiNotificationCause';
 
 jest.mock('@tanstack/react-query');
 
@@ -73,6 +74,54 @@ describe('useNotificationsQuery', () => {
     const { result } = renderHook(() => usePrefetchNotifications());
     result.current({ identity: 'id' });
     expect(queryClientMock.prefetchInfiniteQuery).toHaveBeenCalled();
+  });
+
+  it('groups matching drop reactions across page boundaries only once', () => {
+    useInfiniteQueryMock.mockReturnValue({
+      data: {
+        pages: [
+          {
+            notifications: [
+              {
+                id: 1,
+                cause: ApiNotificationCause.DropReacted,
+                created_at: 100,
+                read_at: null,
+                related_identity: { id: 'a' },
+                related_drops: [{ id: 'drop-1' }],
+                additional_context: { reaction: ':heart:' },
+              },
+            ],
+          },
+          {
+            notifications: [
+              {
+                id: 2,
+                cause: ApiNotificationCause.DropReacted,
+                created_at: 200,
+                read_at: null,
+                related_identity: { id: 'b' },
+                related_drops: [{ id: 'drop-1' }],
+                additional_context: { reaction: ':fire:' },
+              },
+            ],
+          },
+        ],
+      },
+      isSuccess: true,
+      isError: false,
+    });
+
+    const { result } = renderHook(() => useNotificationsQuery({ identity: 'id' }));
+
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.items[0]).toEqual(
+      expect.objectContaining({
+        type: 'grouped_reactions',
+        id: 2,
+        createdAt: 200,
+      })
+    );
   });
 
   it('does nothing when prefetch called without identity', () => {
