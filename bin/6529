@@ -36,7 +36,9 @@ Usage:
 
 Common commands:
   6529 install         -> pnpm run install:secure
+  6529 i               -> pnpm run install:secure
   6529 install:frozen  -> pnpm run install:secure:frozen
+  6529 ci              -> pnpm run install:secure:frozen
   6529 install:prod    -> pnpm run install:secure:prod
   6529 dev             -> pnpm dev
   6529 build           -> pnpm build
@@ -52,8 +54,14 @@ fi
 shift
 
 case "$command_name" in
+  i)
+    exec "$REAL_PNPM" run install:secure "$@"
+    ;;
   install)
     exec "$REAL_PNPM" run install:secure "$@"
+    ;;
+  ci)
+    exec "$REAL_PNPM" run install:secure:frozen "$@"
     ;;
   install:frozen)
     exec "$REAL_PNPM" run install:secure:frozen "$@"

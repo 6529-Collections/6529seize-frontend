@@ -10,15 +10,15 @@ if (!userAgent.includes("pnpm/")) {
   console.error("  1. npm install --global corepack@latest");
   console.error("  2. corepack enable pnpm");
   console.error(`  3. corepack prepare ${packageManager} --activate`);
-  console.error("  4. pnpm run install:secure");
+  console.error("  4. 6529 install");
   process.exit(1);
 }
 
 if (!secureInstall) {
   console.error("Plain pnpm installs are blocked in this repository.");
   console.error("Use the secure install path so Socket Firewall wraps dependency downloads:");
-  console.error("  pnpm run install:secure");
-  console.error("  pnpm run install:secure:frozen");
-  console.error("  pnpm run install:secure:prod");
+  console.error("  6529 install");
+  console.error("  6529 install:frozen");
+  console.error("  6529 install:prod");
   process.exit(1);
 }
