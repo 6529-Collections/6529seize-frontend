@@ -5,13 +5,14 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import IdentityProfileSupplement from "@/components/waves/drops/identity/IdentityProfileSupplement";
 import {
   getDropIdentityFallbackValue,
   getDropIdentityProfile,
 } from "@/components/waves/drops/identityDisplay.helpers";
 import ParticipationIdentityProfileCard from "@/components/waves/drops/participation/ParticipationIdentityProfileCard";
 import type { ParticipationIdentityProfileCardVariant } from "@/components/waves/drops/participation/ParticipationIdentityProfileCard";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiDropResolvedIdentityProfile } from "@/generated/models/ApiDropResolvedIdentityProfile";
 import { shortenAddress } from "@/helpers/address.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
@@ -26,7 +27,7 @@ interface WaveLeaderboardIdentityProps {
 }
 
 interface WaveLeaderboardIdentitySummaryProps {
-  readonly profile: ApiProfileMin | null;
+  readonly profile: ApiDropResolvedIdentityProfile | null;
   readonly fallbackValue: string | null;
   readonly contextId?: string | number | undefined;
 }
@@ -128,6 +129,16 @@ function WaveLeaderboardIdentitySummary({
             >
               {displayAddress}
             </p>
+          )}
+
+          {profile && (
+            <div className="tw-mt-2">
+              <IdentityProfileSupplement
+                profile={profile}
+                variant="compact"
+                maxRepCategories={3}
+              />
+            </div>
           )}
         </div>
       </div>
