@@ -663,9 +663,7 @@ describe("MemeLabPageComponent", () => {
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("heading", { name: "NFT" })
-      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "NFT" })).toBeInTheDocument();
     });
   });
 

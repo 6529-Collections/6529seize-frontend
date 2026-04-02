@@ -70,7 +70,7 @@ export default function MediaTypeBadge({
     SIZE_CLASSES[size],
   ];
 
-  if (showTooltip) {
+  if (shouldRenderTooltip) {
     iconClasses.push("tw-cursor-pointer");
   }
 
@@ -82,7 +82,7 @@ export default function MediaTypeBadge({
     <div
       {...(shouldRenderTooltip
         ? {
-            "data-tooltip-id": tooltipId,
+            "data-tooltip-id": tooltipId!,
             "data-tooltip-content": mediaInfo.label,
             "aria-label": mediaInfo.label,
             ...triggerProps,

@@ -17,11 +17,7 @@ jest.mock("@/lib/media/ipfs-gateways", () => ({
 }));
 
 jest.mock("@/lib/media/arweave-gateways", () => ({
-  ARWEAVE_FALLBACK_HOSTS: [
-    "arweave.net",
-    "ardrive.net",
-    "gateway.arweave.net",
-  ],
+  ARWEAVE_FALLBACK_HOSTS: ["arweave.net", "ardrive.net", "gateway.arweave.net"],
   canonicalizeArweaveGatewayHostname: (hostname: string) =>
     hostname.toLowerCase(),
   isArweaveGatewayRuntimeHost: (hostname: string) =>

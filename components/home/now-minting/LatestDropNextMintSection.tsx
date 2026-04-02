@@ -28,7 +28,7 @@ function NextMintArtistPill({
 }: {
   readonly pfp: string | null | undefined;
   readonly label: string;
-  readonly href?: string;
+  readonly href?: string | undefined;
 }) {
   const content = (
     <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-backdrop-blur-sm">

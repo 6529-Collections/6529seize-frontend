@@ -427,8 +427,12 @@ describe("MemePageArt", () => {
 
   it("shows N/A dimensions for html art without dimension metadata", () => {
     mockNftHelpers.getAnimationFileTypeFromMetadata.mockReturnValue("html");
-    mockNftHelpers.getAnimationMimeTypeFromMetadata.mockReturnValue("text/html");
-    mockNftHelpers.getAnimationDimensionsFromMetadata.mockReturnValue(undefined);
+    mockNftHelpers.getAnimationMimeTypeFromMetadata.mockReturnValue(
+      "text/html"
+    );
+    mockNftHelpers.getAnimationDimensionsFromMetadata.mockReturnValue(
+      undefined
+    );
 
     const nftWithHtmlAnimation = {
       ...nft,

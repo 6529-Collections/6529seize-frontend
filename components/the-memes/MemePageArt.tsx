@@ -191,7 +191,7 @@ export function MemePageArt(props: {
       label: "Artist Profile",
       value: (
         <span className="tw-font-medium">
-          <ArtistProfileHandle nft={props.nft} />
+          {props.nft ? <ArtistProfileHandle nft={props.nft} /> : null}
         </span>
       ),
     },

@@ -1000,9 +1000,7 @@ export default function MemeLabPageComponent({
         })
       : undefined;
   const artImageHref =
-    trimToEmpty(metadata?.image) ||
-    trimToEmpty(nft?.image) ||
-    "";
+    trimToEmpty(metadata?.image) || trimToEmpty(nft?.image) || "";
   const artAnimationHref =
     trimToEmpty(metadata?.animation_url) ||
     trimToEmpty(metadata?.animation) ||
@@ -1013,10 +1011,10 @@ export default function MemeLabPageComponent({
   const fileType = isShowingAnimation ? animationFormat : imageFormat;
   const dimensions = isShowingAnimation ? animationDimensions : imageDimensions;
   const fileMimeType = isShowingAnimation
-    ? getAnimationMimeTypeFromMetadata(nft?.metadata) ??
-      getMimeTypeFromFormat(animationFormat)
-    : getImageMimeTypeFromMetadata(nft?.metadata) ??
-      getMimeTypeFromFormat(imageFormat);
+    ? (getAnimationMimeTypeFromMetadata(nft?.metadata) ??
+      getMimeTypeFromFormat(animationFormat))
+    : (getImageMimeTypeFromMetadata(nft?.metadata) ??
+      getMimeTypeFromFormat(imageFormat));
   const currentFormat = fileType ?? "";
   const arweaveRows = [
     metadataHref

@@ -134,7 +134,8 @@ function getUrlExtension(url: string | null | undefined): string | null {
     return null;
   }
 
-  return parts.at(-1)?.trim().toUpperCase() ?? null;
+  const ext = parts.at(-1)?.trim().toUpperCase();
+  return ext ? ext : null;
 }
 
 export function getAnimationMimeTypeFromMetadata(
