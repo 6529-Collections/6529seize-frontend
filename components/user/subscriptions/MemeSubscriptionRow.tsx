@@ -49,6 +49,10 @@ export default function MemeSubscriptionRow(
   );
 
   const [selectedCount, setSelectedCount] = useState<number>(subscribedCount);
+  const countOptions = useMemo(
+    () => Array.from({ length: props.eligibilityCount }, (_, i) => i + 1),
+    [props.eligibilityCount]
+  );
 
   useEffect(() => {
     setSelectedCount(subscribedCount);
@@ -78,6 +82,11 @@ export default function MemeSubscriptionRow(
   }, [props.subscription.subscribed]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasFinalMetadata =
+    props.first &&
+    !!final?.phase &&
+    final.phase_position !== undefined &&
+    final.phase_position > 0;
 
   const submit = async (): Promise<void> => {
     if (isSubmitting || props.minting_today) {
@@ -187,6 +196,49 @@ export default function MemeSubscriptionRow(
     }
   };
 
+  const handleCountChange = (value: string) => {
+    const nextValue = Number.parseInt(value, 10);
+    setSelectedCount(nextValue);
+    handleUpdateSubscriptionCount(nextValue);
+  };
+
+  const renderCountSelector = ({
+    selectClassName,
+    disableWhenSingleOption,
+  }: {
+    selectClassName: string;
+    disableWhenSingleOption: boolean;
+  }) => {
+    if (!subscribed) {
+      return null;
+    }
+
+    return (
+      <>
+        <select
+          className={selectClassName}
+          value={selectedCount}
+          disabled={
+            (disableWhenSingleOption && props.eligibilityCount <= 1) ||
+            props.readonly ||
+            isSubmitting ||
+            props.minting_today
+          }
+          onChange={(e) => handleCountChange(e.target.value)}
+          style={{ minWidth: "3ch" }}
+          aria-label={`Select subscription quantity for ${props.title}`}
+        >
+          {countOptions.map((num) => (
+            <option key={num} value={num}>
+              {num}
+            </option>
+          ))}
+        </select>
+        <span className="tw-text-iron-400">/ {props.eligibilityCount}</span>
+      </>
+    );
+  };
+
   if (isCompact) {
     return (
       <div className="tw-py-1">
@@ -203,51 +255,23 @@ export default function MemeSubscriptionRow(
               aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
             />
             <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-              {subscribed ? (
-                <>
-                  <select
-                    className="tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400"
-                    value={selectedCount}
-                    disabled={
-                      props.readonly || isSubmitting || props.minting_today
-                    }
-                    onChange={(e) => {
-                      const value = Number.parseInt(e.target.value, 10);
-                      setSelectedCount(value);
-                      handleUpdateSubscriptionCount(value);
-                    }}
-                    style={{ minWidth: "3ch" }}
-                    aria-label={`Select subscription quantity for ${props.title}`}
-                  >
-                    {Array.from(
-                      { length: props.eligibilityCount },
-                      (_, i) => i + 1
-                    ).map((num) => (
-                      <option key={num} value={num}>
-                        {num}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="tw-text-iron-400">
-                    / {props.eligibilityCount}
-                  </span>
-                </>
-              ) : null}
+              {renderCountSelector({
+                selectClassName:
+                  "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
+                disableWhenSingleOption: false,
+              })}
             </span>
           </div>
         </div>
-        {props.first &&
-          final?.phase &&
-          final.phase_position !== undefined &&
-          final.phase_position > 0 && (
-            <div className="tw-mt-2 tw-pr-2 font-smaller font-color-silver">
-              Phase: {final.phase} - Subscription Position:{" "}
-              {final.phase_position.toLocaleString()} /{" "}
-              {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
-              Address: {formatAddress(final.airdrop_address)} - Subscription
-              Count: x{final.subscribed_count}
-            </div>
-          )}
+        {hasFinalMetadata && (
+          <div className="tw-mt-2 tw-pr-2 font-smaller font-color-silver">
+            Phase: {final.phase} - Subscription Position:{" "}
+            {final.phase_position.toLocaleString()} /{" "}
+            {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
+            Address: {formatAddress(final.airdrop_address)} - Subscription
+            Count: x{final.subscribed_count}
+          </div>
+        )}
         {props.minting_today && (
           <div className="font-smaller font-color-silver d-flex align-items-center gap-2 tw-mt-2">
             <span
@@ -315,18 +339,15 @@ export default function MemeSubscriptionRow(
                 </>
               )}
             </span>
-            {props.first &&
-              final?.phase &&
-              final.phase_position !== undefined &&
-              final.phase_position > 0 && (
-                <span className="font-smaller font-color-silver">
-                  Phase: {final.phase} - Subscription Position:{" "}
-                  {final.phase_position.toLocaleString()} /{" "}
-                  {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
-                  Address: {formatAddress(final.airdrop_address)} - Subscription
-                  Count: x{final.subscribed_count}
-                </span>
-              )}
+            {hasFinalMetadata && (
+              <span className="font-smaller font-color-silver">
+                Phase: {final.phase} - Subscription Position:{" "}
+                {final.phase_position.toLocaleString()} /{" "}
+                {(final.phase_subscriptions ?? 0).toLocaleString()} - Airdrop
+                Address: {formatAddress(final.airdrop_address)} - Subscription
+                Count: x{final.subscribed_count}
+              </span>
+            )}
           </div>
           <div className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}
@@ -339,39 +360,11 @@ export default function MemeSubscriptionRow(
               aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
             />
             <span className="tw-flex tw-items-center tw-gap-1 tw-min-w-16">
-              {subscribed ? (
-                <>
-                  <select
-                    className="tw-text-iron-400 tw-bg-transparent tw-border tw-border-iron-400 tw-rounded tw-px-1"
-                    value={selectedCount}
-                    disabled={
-                      props.eligibilityCount <= 1 ||
-                      props.readonly ||
-                      isSubmitting ||
-                      props.minting_today
-                    }
-                    onChange={(e) => {
-                      const value = Number.parseInt(e.target.value, 10);
-                      setSelectedCount(value);
-                      handleUpdateSubscriptionCount(value);
-                    }}
-                    style={{ minWidth: "3ch" }}
-                    aria-label={`Select subscription quantity for ${props.title}`}
-                  >
-                    {Array.from(
-                      { length: props.eligibilityCount },
-                      (_, i) => i + 1
-                    ).map((num) => (
-                      <option key={num} value={num}>
-                        {num}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="tw-text-iron-400">
-                    / {props.eligibilityCount}
-                  </span>
-                </>
-              ) : null}
+              {renderCountSelector({
+                selectClassName:
+                  "tw-text-iron-400 tw-bg-transparent tw-border tw-border-iron-400 tw-rounded tw-px-1",
+                disableWhenSingleOption: true,
+              })}
             </span>
           </div>
         </Col>
