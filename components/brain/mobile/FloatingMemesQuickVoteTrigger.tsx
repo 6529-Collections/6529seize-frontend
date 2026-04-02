@@ -12,7 +12,8 @@ export default function FloatingMemesQuickVoteTrigger({
   onOpenQuickVote,
   onPrefetchQuickVote,
 }: FloatingMemesQuickVoteTriggerProps) {
-  const { isAvailable, unratedCount } = useMemesWaveFooterStats();
+  const { isAvailable, leftThisRoundCount, unratedCount } =
+    useMemesWaveFooterStats();
 
   if (!isAvailable) {
     return null;
@@ -22,6 +23,7 @@ export default function FloatingMemesQuickVoteTrigger({
     <div className="tw-absolute tw-right-2 tw-top-2 tw-z-20 sm:tw-right-4 sm:tw-top-3">
       <MemesWaveQuickVoteTrigger
         isAvailable={isAvailable}
+        leftThisRoundCount={leftThisRoundCount}
         onOpenQuickVote={onOpenQuickVote}
         onPrefetchQuickVote={onPrefetchQuickVote}
         unratedCount={unratedCount}

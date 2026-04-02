@@ -21,6 +21,7 @@ type MemesWaveFooterStats = MemesQuickVoteStats & {
 const EMPTY_STATS: MemesWaveFooterStats = {
   isAvailable: false,
   isReady: false,
+  leftThisRoundCount: 0,
   uncastPower: null,
   unratedCount: 0,
   votingLabel: null,
@@ -74,6 +75,7 @@ export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
 
   return {
     isAvailable,
+    leftThisRoundCount: query.data.left_to_vote_in_current_round,
     uncastPower,
     unratedCount: query.data.total_count,
     votingLabel: WAVE_VOTING_LABELS[activeDrop.wave.voting_credit_type],

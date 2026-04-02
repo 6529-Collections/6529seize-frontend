@@ -11,9 +11,11 @@ export type MemesQuickVoteSessionState = {
   readonly hasDiscoveryError: boolean;
   readonly isExhausted: boolean;
   readonly isLoading: boolean;
+  readonly isRestartingRound: boolean;
+  readonly leftThisRoundCount: number;
   readonly lookaheadDrops: readonly ApiDrop[];
   readonly recentlyHandledDropIds: readonly string[];
-  readonly totalCount: number;
+  readonly unratedCount: number;
 };
 
 export const createInitialOptimisticRemainingPowerState = (
@@ -37,9 +39,11 @@ export const createInitialSessionState = (): MemesQuickVoteSessionState => ({
   hasDiscoveryError: false,
   isExhausted: false,
   isLoading: false,
+  isRestartingRound: false,
+  leftThisRoundCount: 0,
   lookaheadDrops: [],
   recentlyHandledDropIds: [],
-  totalCount: 0,
+  unratedCount: 0,
 });
 
 export const getUniqueDrops = (drops: readonly ApiDrop[]): ApiDrop[] => {
@@ -58,26 +62,28 @@ export const getUniqueDrops = (drops: readonly ApiDrop[]): ApiDrop[] => {
   return uniqueDrops;
 };
 
-const getDisplayRemainingCount = ({
+const getDisplayLeftThisRoundCount = ({
   hiddenDropIds,
-  rawTotalCount,
+  rawLeftThisRoundCount,
 }: {
   readonly hiddenDropIds: ReadonlySet<string>;
-  readonly rawTotalCount: number;
-}): number => Math.max(0, rawTotalCount - hiddenDropIds.size);
+  readonly rawLeftThisRoundCount: number;
+}): number => Math.max(0, rawLeftThisRoundCount - hiddenDropIds.size);
 
 export const applyFetchedWindowState = ({
   current,
   fetchedDrops,
   pendingDropIds,
   primaryDrop,
-  rawTotalCount,
+  rawLeftThisRoundCount,
+  rawUnratedCount,
 }: {
   readonly current: MemesQuickVoteSessionState;
   readonly fetchedDrops: readonly ApiDrop[];
   readonly pendingDropIds: readonly string[];
   readonly primaryDrop: ApiDrop | null;
-  readonly rawTotalCount: number;
+  readonly rawLeftThisRoundCount: number;
+  readonly rawUnratedCount: number;
 }): MemesQuickVoteSessionState => {
   const returnedDropIds = new Set(fetchedDrops.map((drop) => drop.id));
   const resurfacedHandledDropIds = current.recentlyHandledDropIds.filter(
@@ -88,10 +94,7 @@ export const applyFetchedWindowState = ({
       !pendingDropIds.includes(drop.id) &&
       !resurfacedHandledDropIds.includes(drop.id)
   );
-  const recentlyHandledDropIds =
-    rawTotalCount > 0 && safeFetchedDropsWithoutHandled.length === 0
-      ? []
-      : resurfacedHandledDropIds;
+  const recentlyHandledDropIds = resurfacedHandledDropIds;
   const hiddenDropIds = new Set([...recentlyHandledDropIds, ...pendingDropIds]);
   let currentDrop = current.currentDrop;
 
@@ -117,25 +120,33 @@ export const applyFetchedWindowState = ({
   const lookaheadDrops = safeFetchedDrops.filter(
     (drop) => drop.id !== currentDrop?.id
   );
-  const totalCount = getDisplayRemainingCount({
+  const leftThisRoundCount = getDisplayLeftThisRoundCount({
     hiddenDropIds,
-    rawTotalCount,
+    rawLeftThisRoundCount,
   });
-  const isExhausted =
+  const isRestartingRound =
     currentDrop === null &&
     lookaheadDrops.length === 0 &&
-    hiddenDropIds.size === 0 &&
-    primaryDrop === null &&
-    rawTotalCount === 0;
+    rawLeftThisRoundCount === 0 &&
+    rawUnratedCount > 0 &&
+    safeFetchedDropsWithoutHandled.length === 0;
+  const isExhausted =
+    currentDrop === null &&
+      lookaheadDrops.length === 0 &&
+      hiddenDropIds.size === 0 &&
+      primaryDrop === null &&
+      rawUnratedCount === 0;
 
   return {
     currentDrop,
     hasDiscoveryError: false,
     isExhausted,
-    isLoading: currentDrop === null && !isExhausted,
+    isLoading: currentDrop === null && !isExhausted && !isRestartingRound,
+    isRestartingRound,
+    leftThisRoundCount,
     lookaheadDrops,
-    recentlyHandledDropIds,
-    totalCount,
+    recentlyHandledDropIds: isRestartingRound ? [] : recentlyHandledDropIds,
+    unratedCount: rawUnratedCount,
   };
 };
 
@@ -208,10 +219,12 @@ export const applyOptimisticAdvanceState = ({
     currentDrop,
     hasDiscoveryError: false,
     isExhausted: false,
+    isRestartingRound: false,
     isLoading: currentDrop === null,
+    leftThisRoundCount: Math.max(0, current.leftThisRoundCount - 1),
     lookaheadDrops: nextLookaheadDrops.slice(1),
     recentlyHandledDropIds,
-    totalCount: Math.max(0, current.totalCount - 1),
+    unratedCount: current.unratedCount,
   };
 };
 
@@ -232,9 +245,13 @@ export const applyFailedDropRestoreState = ({
     currentDrop: current.currentDrop ?? failedDrop,
     hasDiscoveryError: false,
     isExhausted: false,
+    isRestartingRound: false,
     isLoading: false,
+    leftThisRoundCount: wasHandled
+      ? current.leftThisRoundCount + 1
+      : current.leftThisRoundCount,
     recentlyHandledDropIds,
-    totalCount: wasHandled ? current.totalCount + 1 : current.totalCount,
+    unratedCount: current.unratedCount,
   };
 };
 
