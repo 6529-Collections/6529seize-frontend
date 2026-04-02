@@ -2,8 +2,8 @@ import "@google/model-viewer";
 import { useEffect, useMemo, useRef } from "react";
 import type { SyntheticEvent } from "react";
 import type { BaseNFT } from "@/entities/INFT";
-import { getResolvedAnimationSrc } from "./utils/animation-source";
-import { withArweaveFallback } from "./utils/gateway-fallback";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
+import { withArweaveFallback } from "@/components/nft-image/utils/gateway-fallback";
 
 type ModelViewerElement = HTMLElement & {
   src: string;

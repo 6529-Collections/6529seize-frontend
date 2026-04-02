@@ -1,5 +1,9 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+
+const mockGetArweaveGatewayFallbackUrls = jest.fn();
+const mockShouldUseIframeFallbackTimeout = jest.fn();
+const mockSandboxedExternalIframe = jest.fn();
 
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplayImage",
@@ -26,15 +30,18 @@ jest.mock(
     />
   )
 );
-jest.mock("@/components/common/SandboxedExternalIframe", () => (props: any) => (
-  <div
-    data-testid="iframe"
-    data-src={props.src}
-    data-title={props.title}
-    data-class-name={props.className}
-    data-container-class-name={props.containerClassName}
-  />
-));
+jest.mock("@/components/common/SandboxedExternalIframe", () => (props: any) => {
+  mockSandboxedExternalIframe(props);
+  return (
+    <div
+      data-testid="iframe"
+      data-src={props.src}
+      data-title={props.title}
+      data-class-name={props.className}
+      data-container-class-name={props.containerClassName}
+    />
+  );
+});
 jest.mock(
   "@/components/drops/media/InteractiveMediaLoadGate",
   () => (props: any) => (
@@ -52,9 +59,28 @@ jest.mock(
       : () => <div data-testid="glb" />
 );
 
+jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
+  getArweaveGatewayFallbackUrls: (...args: unknown[]) =>
+    mockGetArweaveGatewayFallbackUrls(...args),
+  shouldUseIframeFallbackTimeout: (...args: unknown[]) =>
+    mockShouldUseIframeFallbackTimeout(...args),
+}));
+
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 
 describe("MediaDisplay", () => {
+  beforeEach(() => {
+    jest.useRealTimers();
+    mockSandboxedExternalIframe.mockClear();
+    mockGetArweaveGatewayFallbackUrls.mockImplementation((url: string) => {
+      if (url === "ipfs://hash") {
+        return ["https://ipfs.io/ipfs/hash"];
+      }
+      return [url];
+    });
+    mockShouldUseIframeFallbackTimeout.mockReturnValue(true);
+  });
+
   it("renders image", () => {
     render(<MediaDisplay media_mime_type="image/png" media_url="img.png" />);
     expect(screen.getByTestId("image")).toHaveAttribute("data-src", "img.png");
@@ -181,5 +207,55 @@ describe("MediaDisplay", () => {
       <MediaDisplay media_mime_type="text/plain" media_url="file.txt" />
     );
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("does not auto-advance ipfs html if the timeout fallback is disabled", () => {
+    jest.useFakeTimers();
+    mockGetArweaveGatewayFallbackUrls.mockReturnValue([
+      "https://ipfs.6529.io/ipfs/hash",
+      "https://ipfs.io/ipfs/hash",
+    ]);
+    mockShouldUseIframeFallbackTimeout.mockReturnValue(false);
+
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="https://ipfs.6529.io/ipfs/hash"
+      />
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(8000);
+    });
+
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-src",
+      "https://ipfs.6529.io/ipfs/hash"
+    );
+  });
+
+  it("auto-advances html when timeout fallback is enabled", () => {
+    jest.useFakeTimers();
+    mockGetArweaveGatewayFallbackUrls.mockReturnValue([
+      "https://arweave.net/tx",
+      "https://ardrive.net/tx",
+    ]);
+    mockShouldUseIframeFallbackTimeout.mockReturnValue(true);
+
+    render(
+      <MediaDisplay
+        media_mime_type="text/html"
+        media_url="https://arweave.net/tx"
+      />
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(8000);
+    });
+
+    expect(screen.getByTestId("iframe")).toHaveAttribute(
+      "data-src",
+      "https://ardrive.net/tx"
+    );
   });
 });

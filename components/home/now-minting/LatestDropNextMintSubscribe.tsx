@@ -86,7 +86,7 @@ export default function LatestDropNextMintSubscribe() {
           }
           readonly={false}
           refresh={() => {
-            void refetchStatus();
+            refetchStatus();
           }}
           minting_today={isMintingToday()}
           first

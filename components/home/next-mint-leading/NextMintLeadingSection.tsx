@@ -7,7 +7,6 @@ import {
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 import { shouldShowNextWinnerInComingUp } from "@/helpers/mint-visibility.helpers";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -24,7 +23,7 @@ export function NextMintLeadingSection() {
   const {
     nft: nowMinting,
     isFetching: isNowMintingFetching,
-    status: nowMintingStatus,
+    isDropComplete: isNowMintingComplete,
   } = useNowMintingStatus();
   const {
     nextMint,
@@ -49,7 +48,7 @@ export function NextMintLeadingSection() {
 
   // Determine what to show
   const canShowNextMint = shouldShowNextWinnerInComingUp({
-    isMintEnded: nowMintingStatus === ManifoldClaimStatus.ENDED,
+    isMintEnded: isNowMintingComplete,
     nextMintExists: !!nextMint,
   });
   const showNextMint =

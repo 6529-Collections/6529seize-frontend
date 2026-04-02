@@ -1,11 +1,10 @@
 "use client";
 
+import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
+import styles from "@/components/nft-image/NFTImage.module.scss";
+import NFTModel from "@/components/nft-image/NFTModel";
+import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import { Col } from "react-bootstrap";
-
-import styles from "../NFTImage.module.scss";
-import NFTImageBalance from "../NFTImageBalance";
-import NFTModel from "../NFTModel";
-import type { BaseRendererProps } from "../types/renderer-props";
 
 export default function NFTModelRenderer(props: Readonly<BaseRendererProps>) {
   // Only render if NFT has metadata (i.e., it's a BaseNFT, not NFTLite)

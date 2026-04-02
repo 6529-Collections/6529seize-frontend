@@ -6,7 +6,10 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
-import { getArweaveGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
+import {
+  getArweaveGatewayFallbackUrls,
+  shouldUseIframeFallbackTimeout,
+} from "@/components/nft-image/utils/gateway-fallback";
 import { ImageScale } from "@/helpers/image.helpers";
 import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
@@ -65,7 +68,12 @@ function InteractiveHtmlMediaDisplay({
   }, [activeUrl]);
 
   useEffect(() => {
-    if (!activeUrl || didLoadCurrentUrl || activeIndex + 1 >= urls.length) {
+    if (
+      !activeUrl ||
+      didLoadCurrentUrl ||
+      activeIndex + 1 >= urls.length ||
+      !shouldUseIframeFallbackTimeout(activeUrl)
+    ) {
       return;
     }
 
