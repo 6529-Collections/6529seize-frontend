@@ -583,10 +583,7 @@ export default function MemesQuickVoteDialog({
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const previousBodyOverflowRef = useRef("");
   const isMobile = useMediaQuery(QUICK_VOTE_MOBILE_QUERY);
-  const showStandaloneStateShellClose =
-    activeDrop === null &&
-    !isExhausted &&
-    (hasDiscoveryError || isRestartingRound);
+  const showStandaloneStateShellClose = activeDrop === null && !isExhausted;
 
   useEffect(() => {
     const dialog = dialogRef.current;
