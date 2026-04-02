@@ -3,9 +3,26 @@
 set -euo pipefail
 
 export COREPACK_HOME="${COREPACK_HOME:-${TMPDIR:-/tmp}/6529-corepack}"
+export COREPACK_ENABLE_DOWNLOAD_PROMPT="0"
 export SEIZE_6529_COMMAND="1"
 
-if ! command -v pnpm >/dev/null 2>&1; then
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+clean_path=""
+IFS=':' read -r -a path_parts <<< "${PATH:-}"
+for part in "${path_parts[@]}"; do
+  if [[ -z "$part" || "$part" == "$SCRIPT_DIR" ]]; then
+    continue
+  fi
+  if [[ -z "$clean_path" ]]; then
+    clean_path="$part"
+  else
+    clean_path="${clean_path}:$part"
+  fi
+done
+
+REAL_PNPM="$(PATH="$clean_path" command -v pnpm || true)"
+
+if [[ -z "$REAL_PNPM" ]]; then
   echo "pnpm is not available. Activate the repo-pinned pnpm with Corepack first." >&2
   exit 1
 fi
@@ -36,21 +53,21 @@ shift
 
 case "$command_name" in
   install)
-    exec pnpm run install:secure "$@"
+    exec "$REAL_PNPM" run install:secure "$@"
     ;;
   install:frozen)
-    exec pnpm run install:secure:frozen "$@"
+    exec "$REAL_PNPM" run install:secure:frozen "$@"
     ;;
   install:prod)
-    exec pnpm run install:secure:prod "$@"
+    exec "$REAL_PNPM" run install:secure:prod "$@"
     ;;
   run)
-    exec pnpm run "$@"
+    exec "$REAL_PNPM" run "$@"
     ;;
   exec)
-    exec pnpm exec "$@"
+    exec "$REAL_PNPM" exec "$@"
     ;;
   *)
-    exec pnpm "$command_name" "$@"
+    exec "$REAL_PNPM" "$command_name" "$@"
     ;;
 esac
