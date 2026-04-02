@@ -40,14 +40,14 @@ function UserPageBrainSidebarMobileWavePill({
       prefetch={false}
       className="tw-group tw-inline-flex tw-h-9 tw-max-w-[14rem] tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-p-1 tw-pr-3 tw-no-underline tw-shadow-sm tw-transition-all tw-duration-200 desktop-hover:hover:tw-border-white/[0.15] desktop-hover:hover:tw-bg-white/[0.05]"
     >
-      <div className="tw-relative tw-flex tw-h-7 tw-w-7 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900">
+      <div className="tw-relative tw-flex tw-h-7 tw-w-7 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900 tw-shadow-sm tw-transition-colors desktop-hover:group-hover:tw-border-white/[0.1]">
         {imageSrc ? (
           <Image
             src={imageSrc}
             alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
             fill
             sizes="28px"
-            className="tw-object-cover tw-transition-transform tw-duration-300 desktop-hover:group-hover:tw-scale-105"
+            className="tw-object-cover"
           />
         ) : (
           <FallbackIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-300" />
