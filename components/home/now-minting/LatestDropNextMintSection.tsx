@@ -15,6 +15,7 @@ import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Image from "next/image";
 import Link from "next/link";
+import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface LatestDropNextMintSectionProps {
@@ -148,6 +149,10 @@ export default function LatestDropNextMintSection({
                     </span>
                   </div>
                 )}
+
+                <div className="tw-mt-4">
+                  <LatestDropNextMintSubscribe />
+                </div>
               </div>
 
               <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">

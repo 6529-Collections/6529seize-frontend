@@ -352,12 +352,12 @@ export function useManifoldClaim({
   });
 
   const getStatus = useCallback((start: number, end: number) => {
-    const now = Time.now().toSeconds();
-    if (now < start) {
-      return ManifoldClaimStatus.UPCOMING;
-    } else if (now >= start && now < end) {
-      return ManifoldClaimStatus.ACTIVE;
-    }
+    // const now = Time.now().toSeconds();
+    // if (now < start) {
+    //   return ManifoldClaimStatus.UPCOMING;
+    // } else if (now >= start && now < end) {
+    //   return ManifoldClaimStatus.ACTIVE;
+    // }
     return ManifoldClaimStatus.ENDED;
   }, []);
 
