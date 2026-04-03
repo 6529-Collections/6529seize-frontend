@@ -138,6 +138,7 @@ ensure_node_ge20() {
   fi
 
   color green "Using Node $(node -v), npm $(npm -v)"
+  return 0
 }
 
 activate_pnpm_with_corepack() {
@@ -148,6 +149,7 @@ activate_pnpm_with_corepack() {
     ( cd "$REPO_ROOT" && sudo bash scripts/setup-corepack-pnpm.sh )
   fi
   color green "pnpm: $(pnpm -v)"
+  return 0
 }
 
 install_socket_firewall() {
