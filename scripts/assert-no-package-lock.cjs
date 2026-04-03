@@ -3,7 +3,7 @@
 const { existsSync } = require("node:fs");
 const { resolve } = require("node:path");
 
-const packageLockPath = resolve(process.cwd(), "package-lock.json");
+const packageLockPath = resolve(__dirname, "..", "package-lock.json");
 
 if (existsSync(packageLockPath)) {
   console.error("package-lock.json must not exist in this repository.");

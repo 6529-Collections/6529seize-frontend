@@ -3,7 +3,8 @@
 ## What changed
 
 This repository now treats `pnpm` as the only supported project package
-manager. The pinned version is declared in [`package.json`](/Users/ppan/Desktop/6529git/6529seize-frontend/package.json) through the `packageManager` field and is activated with Corepack.
+manager. The pinned version is declared in [`package.json`](../../package.json)
+through the `packageManager` field and is activated with Corepack.
 
 Project dependency installs are expected to go through the repo wrapper, which
 in turn runs Socket Firewall Free in wrapper mode.
@@ -92,10 +93,10 @@ If pnpm reports ignored install/build scripts, use:
 
 ## Guardrails in this repo
 
-- [`package.json`](/Users/ppan/Desktop/6529git/6529seize-frontend/package.json) pins `pnpm@10.33.0`.
-- [`package.json`](/Users/ppan/Desktop/6529git/6529seize-frontend/package.json) has a `preinstall` guard that rejects `npm`, `yarn`, and insecure `pnpm install`.
-- [`scripts/require-6529-command.cjs`](/Users/ppan/Desktop/6529git/6529seize-frontend/scripts/require-6529-command.cjs) rejects repo script execution unless it came through `6529`.
-- [`scripts/assert-no-package-lock.cjs`](/Users/ppan/Desktop/6529git/6529seize-frontend/scripts/assert-no-package-lock.cjs) fails if `package-lock.json` reappears.
+- [`package.json`](../../package.json) pins `pnpm@10.33.0`.
+- [`package.json`](../../package.json) has a `preinstall` guard that rejects `npm`, `yarn`, and insecure `pnpm install`.
+- [`scripts/require-6529-command.cjs`](../../scripts/require-6529-command.cjs) rejects repo script execution unless it came through `6529`.
+- [`scripts/assert-no-package-lock.cjs`](../../scripts/assert-no-package-lock.cjs) fails if `package-lock.json` reappears.
 - Helper scripts, Playwright, worktree tooling, staging scripts, and PM2 docs now use pnpm.
 - Production CI builds the Elastic Beanstalk bundle with pnpm and bundles `node_modules`, so EB does not fall back to its default `npm install` behavior.
 
@@ -112,8 +113,9 @@ The production workflow now:
 5. Packages the app together with the pnpm-generated `node_modules`.
 
 At deploy time, Elastic Beanstalk only needs pnpm available for the start
-command. [`Procfile`](/Users/ppan/Desktop/6529git/6529seize-frontend/Procfile)
-uses `pnpm start`, and [`pnpm.config`](/Users/ppan/Desktop/6529git/6529seize-frontend/.ebextensions/pnpm.config) activates the pinned pnpm version with Corepack and verifies that bundled runtime dependencies are present.
+command. [`Procfile`](../../Procfile) uses `pnpm start`, and
+[`pnpm.config`](../../.ebextensions/pnpm.config) activates the pinned pnpm
+version with Corepack and verifies that bundled runtime dependencies are present.
 
 ## Socket Firewall Free limitations
 

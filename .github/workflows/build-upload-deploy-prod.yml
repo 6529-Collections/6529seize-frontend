@@ -33,14 +33,14 @@ jobs:
         with:
           mode: firewall
 
+      - name: Activate pinned pnpm via Corepack
+        run: bash scripts/setup-corepack-pnpm.sh
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "pnpm"
-
-      - name: Activate pinned pnpm via Corepack
-        run: bash scripts/setup-corepack-pnpm.sh
 
       - name: Assert npm lockfile is absent
         run: ./bin/6529 guard:no-package-lock

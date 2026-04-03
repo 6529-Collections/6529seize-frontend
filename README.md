@@ -114,12 +114,15 @@ Bootstrap Corepack and Socket Firewall once on your machine:
 ```bash
 npm install --global corepack@latest sfw
 corepack enable pnpm
-corepack prepare pnpm@10.33.0 --activate
+corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
 ```
+
+That command reads the pinned version directly from the `packageManager` field
+in `package.json` so the bootstrap command stays aligned with the repo pin.
 
 Then install project dependencies through the secure path:
 
-```
+```bash
 6529 install
 ```
 
@@ -151,7 +154,7 @@ source <(./bin/6529 bootstrap --print-export)
 
 ### Build
 
-```
+```bash
 6529 build
 ```
 
@@ -184,26 +187,26 @@ To test end-to-end:
 
 - Locally
 
-```
+```bash
 6529 dev
 ```
 
 - Staging update / rebuild
 
-```
+```bash
 ./bin/6529 staging
 ```
 
 - One-time server bootstrap for plain `6529 ...`
 
-```
+```bash
 ./bin/6529 bootstrap
 source ~/.bashrc
 ```
 
 - After `direnv allow`, the shorthand also works
 
-```
+```bash
 6529 staging
 ```
 

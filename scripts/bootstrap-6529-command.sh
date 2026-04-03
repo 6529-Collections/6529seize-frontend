@@ -70,19 +70,22 @@ if [[ "$print_export_only" == "1" ]]; then
   cat <<EOF
 _6529_old_repo_bin="$REPO_ROOT/bin"
 _6529_clean_path=""
-IFS=':' read -r -a _6529_path_parts <<< "\$PATH"
-for _6529_part in "\${_6529_path_parts[@]}"; do
-  if [[ -z "\$_6529_part" || "\$_6529_part" == "\$_6529_old_repo_bin" ]]; then
+_6529_old_ifs="\$IFS"
+IFS=:
+set -- \$PATH
+IFS="\$_6529_old_ifs"
+for _6529_part in "\$@"; do
+  if [ -z "\$_6529_part" ] || [ "\$_6529_part" = "\$_6529_old_repo_bin" ]; then
     continue
   fi
-  if [[ -z "\$_6529_clean_path" ]]; then
+  if [ -z "\$_6529_clean_path" ]; then
     _6529_clean_path="\$_6529_part"
   else
     _6529_clean_path="\${_6529_clean_path}:\$_6529_part"
   fi
 done
 export PATH="\$_6529_clean_path"
-unset _6529_old_repo_bin _6529_clean_path _6529_path_parts _6529_part
+unset _6529_old_repo_bin _6529_clean_path _6529_old_ifs _6529_part
 
 if [ -d "$LOCAL_BIN_DIR" ]; then
   case ":\$PATH:" in

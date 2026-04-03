@@ -1,5 +1,6 @@
 // dev-open.cjs
 const { spawn } = require("node:child_process");
+const path = require("node:path");
 
 let openModulePromise;
 let browserOpened = false;
@@ -13,7 +14,12 @@ function getOpenModule() {
   return openModulePromise;
 }
 
-const proc = spawn("./bin/6529", ["dev"], {
+const lumoroCommand =
+  process.platform === "win32"
+    ? path.join(process.cwd(), "bin", "6529.cmd")
+    : "./bin/6529";
+
+const proc = spawn(lumoroCommand, ["dev"], {
   stdio: ["inherit", "pipe", "inherit"],
 });
 

@@ -17,16 +17,16 @@ Usage:
   6529 <command> [args...]
 
 Common commands:
-  6529 bootstrap       -> add repo bin/ to your shell PATH for future shells
+  6529 bootstrap       -> install the global 6529 shim for future shells
   6529 install         -> pnpm run install:secure
   6529 i               -> pnpm run install:secure
   6529 install:frozen  -> pnpm run install:secure:frozen
   6529 ci              -> pnpm run install:secure:frozen
   6529 install:prod    -> pnpm run install:secure:prod
-  6529 dev             -> pnpm dev
+  6529 dev             -> node scripts/dev-with-fallback.cjs
   6529 build           -> pnpm build
   6529 approve-builds  -> pnpm approve-builds
-  6529 staging         -> bash scripts/staging.sh
+  6529 staging         -> bash repo-rooted scripts/staging.sh
   6529 start           -> pnpm start
   6529 test            -> pnpm test
   6529 lint            -> pnpm lint
@@ -90,7 +90,7 @@ case "$command_name" in
     exec "$REAL_PNPM" run install:secure:prod "$@"
     ;;
   staging)
-    exec bash scripts/staging.sh "$@"
+    exec bash "$REPO_ROOT/scripts/staging.sh" "$@"
     ;;
   run)
     exec "$REAL_PNPM" run "$@"

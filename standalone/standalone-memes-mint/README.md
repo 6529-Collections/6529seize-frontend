@@ -46,9 +46,9 @@ That lets you check the deployed standalone build directly via
 | Command | Build target | S3 sync | CloudFront invalidation |
 | ------- | ------------ | ------- | ------------------------ |
 | `6529 export-mint-page` | Prod | No | No |
-| `6529 export-mint-page:sync` | Prod | Yes | Yes: distribution id from `aws cloudfront list-distributions` with `--query` on `Aliases.Items` containing `thememes.6529.io` (same as bucket hostname) |
+| `6529 export-mint-page:sync` | Prod | Yes | Yes: distribution id from `aws cloudfront list-distributions` with `--query` on `Aliases.Items[?@ == 'thememes.6529.io']` (exact alias match to the bucket hostname) |
 | `6529 export-mint-page:test` | Test | No | No |
-| `6529 export-mint-page:test:sync` | Test | Yes | Same JMESPath lookup for `thememestest.6529.io` |
+| `6529 export-mint-page:test:sync` | Test | Yes | Same exact-alias JMESPath lookup using `Aliases.Items[?@ == 'thememestest.6529.io']` |
 
 ### Passing flags manually
 
@@ -67,11 +67,14 @@ Same flags as the Node script: `--test`, `--sync`, `--help`.
 
    ```bash
    aws cloudfront list-distributions \
-     --query "DistributionList.Items[?Aliases.Items[?contains(@, 'thememestest.6529.io')]].Id" \
+     --query "DistributionList.Items[?Aliases.Items[?@ == 'thememestest.6529.io']].Id" \
      --output text
    ```
 
-   The hostname in `contains(...)` is the active bucket name (`thememes.6529.io` or `thememestest.6529.io`). Then it runs `aws cloudfront create-invalidation` for that id (your AWS CLI profile/credentials).
+   The hostname in `Aliases.Items[?@ == ...]` is the active bucket name
+   (`thememes.6529.io` or `thememestest.6529.io`). Then it runs
+   `aws cloudfront create-invalidation` for that id (your AWS CLI
+   profile/credentials).
 
 If lookup returns nothing (no alias match, IAM, or the distribution is past the first `list-distributions` page in a huge account), sync still succeeds and invalidation is skipped with a warning. IAM: `cloudfront:ListDistributions` and `cloudfront:CreateInvalidation`.
 

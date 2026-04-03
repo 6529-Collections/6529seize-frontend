@@ -3,8 +3,16 @@
 const { readFileSync } = require("node:fs");
 const { resolve } = require("node:path");
 
-const packageJsonPath = resolve(process.cwd(), "package.json");
-const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+const packageJsonPath = resolve(__dirname, "..", "package.json");
+let packageJson;
+
+try {
+  packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`Failed to read or parse package.json at ${packageJsonPath}: ${message}`);
+  process.exit(1);
+}
 const dependencyFields = ["dependencies", "devDependencies"];
 const invalidEntries = [];
 
