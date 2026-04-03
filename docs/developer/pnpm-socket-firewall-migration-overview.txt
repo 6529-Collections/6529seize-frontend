@@ -69,7 +69,8 @@ package-lock.json
 
 New helper scripts
 - scripts/bootstrap-6529-command.sh
-  Adds the repo-local bin/ directory to the user's shell PATH for future shells.
+  Installs a global `6529` shim under ~/.local/bin without globally exposing the
+  repo's npm/pnpm guard shims.
 - scripts/run-secure-pnpm.cjs
   Runs sfw pnpm ... and prints a clear error if Socket Firewall is missing.
 - scripts/enforce-package-manager.cjs
@@ -112,6 +113,7 @@ Bootstrap once:
 2. corepack enable pnpm
 3. corepack prepare pnpm@10.27.0 --activate
 4. Optional on servers without direnv: ./bin/6529 bootstrap && source ~/.bashrc
+   One-liner for current shell: source <(./bin/6529 bootstrap --print-export)
 
 Install dependencies:
 5. 6529 install

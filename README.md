@@ -142,6 +142,12 @@ If you want plain `6529 ...` commands to work on a server shell without
 source ~/.bashrc
 ```
 
+If you want a one-liner for the current shell, use:
+
+```bash
+source <(./bin/6529 bootstrap --print-export)
+```
+
 ### Build
 
 ```

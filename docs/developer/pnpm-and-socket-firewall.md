@@ -61,6 +61,12 @@ If you want plain `6529 ...` commands to work in server shells without
 source ~/.bashrc
 ```
 
+For a current-shell one-liner, use:
+
+```bash
+source <(./bin/6529 bootstrap --print-export)
+```
+
 For staging refreshes from a fresh clone, use the repo-local wrapper path
 explicitly:
 
