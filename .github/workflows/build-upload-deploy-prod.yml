@@ -28,7 +28,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Socket Firewall
-        uses: socketdev/action@v1
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with:
           mode: firewall
 
@@ -45,6 +46,8 @@ jobs:
         run: ./bin/6529 guard:no-package-lock
 
       - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
 
       - name: Lint package.json versions

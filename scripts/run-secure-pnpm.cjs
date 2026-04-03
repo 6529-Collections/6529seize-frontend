@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+const fs = require("node:fs");
+const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const args = process.argv.slice(2);
@@ -9,7 +11,28 @@ if (args.length === 0) {
   process.exit(1);
 }
 
-const result = spawnSync("sfw", ["pnpm", ...args], {
+function resolveSfwCommand() {
+  const configuredBinary = process.env["SFW_BIN"];
+  if (!configuredBinary) {
+    return "sfw";
+  }
+
+  if (!path.isAbsolute(configuredBinary)) {
+    console.error("SFW_BIN must be an absolute path when set.");
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(configuredBinary)) {
+    console.error(`SFW_BIN does not exist: ${configuredBinary}`);
+    process.exit(1);
+  }
+
+  return configuredBinary;
+}
+
+const sfwCommand = resolveSfwCommand();
+
+const result = spawnSync(sfwCommand, ["pnpm", ...args], {
   stdio: "inherit",
   shell: process.platform === "win32",
   env: {

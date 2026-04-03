@@ -105,6 +105,8 @@ The production workflow now:
 
 1. Activates the pinned pnpm version with Corepack.
 2. Installs dependencies through `sfw pnpm install --frozen-lockfile`.
+   In CI, the workflow passes the Socket action's absolute `firewall-path-binary`
+   output as `SFW_BIN` so the secure install wrapper does not rely on PATH lookup.
 3. Builds the app.
 4. Prunes to production dependencies.
 5. Packages the app together with the pnpm-generated `node_modules`.

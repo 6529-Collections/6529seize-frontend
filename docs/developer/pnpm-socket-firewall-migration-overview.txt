@@ -91,6 +91,8 @@ Before:
 After:
 - CI activates pnpm through Corepack
 - CI installs dependencies with sfw pnpm install --frozen-lockfile
+- CI passes the Socket action's absolute installed binary path into the secure
+  install wrapper instead of relying only on PATH lookup
 - CI builds the app
 - CI runs pnpm prune --prod
 - CI zips the app together with the runtime node_modules tree
