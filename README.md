@@ -131,6 +131,7 @@ If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
 6529 install
 6529 dev
 6529 build
+6529 approve-builds
 6529 staging
 ```
 

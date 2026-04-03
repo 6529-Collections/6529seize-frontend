@@ -17,6 +17,7 @@ The supported entrypoint is the repo-local `6529` command:
 6529 install:prod
 6529 dev
 6529 build
+6529 approve-builds
 6529 staging
 6529 test
 6529 lint
@@ -34,6 +35,7 @@ and you can use the shorthand wrapper:
 6529 install:prod
 6529 dev
 6529 build
+6529 approve-builds
 6529 staging
 ```
 
@@ -80,6 +82,12 @@ PM2 should launch the app through pnpm as well:
 
 ```bash
 pm2 start ./bin/6529 --name=6529seize -- start
+```
+
+If pnpm reports ignored install/build scripts, use:
+
+```bash
+6529 approve-builds
 ```
 
 ## Guardrails in this repo

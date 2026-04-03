@@ -25,6 +25,7 @@ Common commands:
   6529 install:prod    -> pnpm run install:secure:prod
   6529 dev             -> pnpm dev
   6529 build           -> pnpm build
+  6529 approve-builds  -> pnpm approve-builds
   6529 staging         -> bash scripts/staging.sh
   6529 start           -> pnpm start
   6529 test            -> pnpm test

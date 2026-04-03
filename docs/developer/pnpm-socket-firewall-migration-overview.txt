@@ -121,6 +121,7 @@ Install dependencies:
 Normal day-to-day commands:
 - 6529 dev
 - 6529 build
+- 6529 approve-builds
 - 6529 staging
 - 6529 test
 - 6529 lint
