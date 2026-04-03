@@ -68,6 +68,8 @@ package-lock.json
 - removed from the supported workflow
 
 New helper scripts
+- scripts/bootstrap-6529-command.sh
+  Adds the repo-local bin/ directory to the user's shell PATH for future shells.
 - scripts/run-secure-pnpm.cjs
   Runs sfw pnpm ... and prints a clear error if Socket Firewall is missing.
 - scripts/enforce-package-manager.cjs
@@ -109,9 +111,10 @@ Bootstrap once:
 1. npm install --global corepack@latest sfw
 2. corepack enable pnpm
 3. corepack prepare pnpm@10.27.0 --activate
+4. Optional on servers without direnv: ./bin/6529 bootstrap && source ~/.bashrc
 
 Install dependencies:
-4. 6529 install
+5. 6529 install
 
 Normal day-to-day commands:
 - 6529 dev

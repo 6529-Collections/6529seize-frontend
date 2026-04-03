@@ -11,6 +11,7 @@ in turn runs Socket Firewall Free in wrapper mode.
 The supported entrypoint is the repo-local `6529` command:
 
 ```bash
+6529 bootstrap
 6529 install
 6529 install:frozen
 6529 install:prod
@@ -27,6 +28,7 @@ If you use the repo's `.envrc`, the local `bin/` directory is added to `PATH`
 and you can use the shorthand wrapper:
 
 ```bash
+6529 bootstrap
 6529 install
 6529 install:frozen
 6529 install:prod
@@ -49,6 +51,14 @@ Install dependencies through the secure path:
 
 ```bash
 6529 install
+```
+
+If you want plain `6529 ...` commands to work in server shells without
+`direnv`, run:
+
+```bash
+./bin/6529 bootstrap
+source ~/.bashrc
 ```
 
 For staging refreshes from a fresh clone, use the repo-local wrapper path

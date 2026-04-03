@@ -134,6 +134,14 @@ If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
 6529 staging
 ```
 
+If you want plain `6529 ...` commands to work on a server shell without
+`direnv`, run this once from the repo root:
+
+```bash
+./bin/6529 bootstrap
+source ~/.bashrc
+```
+
 ### Build
 
 ```
@@ -177,6 +185,13 @@ To test end-to-end:
 
 ```
 ./bin/6529 staging
+```
+
+- One-time server bootstrap for plain `6529 ...`
+
+```
+./bin/6529 bootstrap
+source ~/.bashrc
 ```
 
 - After `direnv allow`, the shorthand also works
