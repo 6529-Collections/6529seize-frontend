@@ -7,6 +7,42 @@ export COREPACK_ENABLE_DOWNLOAD_PROMPT="0"
 export SEIZE_6529_COMMAND="1"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+command_name="${1:-}"
+
+if [[ -z "$command_name" ]]; then
+  cat <<'EOF'
+Usage:
+  6529 <command> [args...]
+
+Common commands:
+  6529 bootstrap       -> add repo bin/ to your shell PATH for future shells
+  6529 install         -> pnpm run install:secure
+  6529 i               -> pnpm run install:secure
+  6529 install:frozen  -> pnpm run install:secure:frozen
+  6529 ci              -> pnpm run install:secure:frozen
+  6529 install:prod    -> pnpm run install:secure:prod
+  6529 dev             -> pnpm dev
+  6529 build           -> pnpm build
+  6529 staging         -> bash scripts/staging.sh
+  6529 start           -> pnpm start
+  6529 test            -> pnpm test
+  6529 lint            -> pnpm lint
+
+Anything else is forwarded to pnpm unchanged.
+EOF
+  exit 1
+fi
+
+shift
+
+case "$command_name" in
+  bootstrap)
+    exec bash "$REPO_ROOT/scripts/bootstrap-6529-command.sh" "$@"
+    ;;
+esac
+
 clean_path=""
 IFS=':' read -r -a path_parts <<< "${PATH:-}"
 for part in "${path_parts[@]}"; do
@@ -26,33 +62,6 @@ if [[ -z "$REAL_PNPM" ]]; then
   echo "pnpm is not available. Activate the repo-pinned pnpm with Corepack first." >&2
   exit 1
 fi
-
-command_name="${1:-}"
-
-if [[ -z "$command_name" ]]; then
-  cat <<'EOF'
-Usage:
-  6529 <command> [args...]
-
-Common commands:
-  6529 install         -> pnpm run install:secure
-  6529 i               -> pnpm run install:secure
-  6529 install:frozen  -> pnpm run install:secure:frozen
-  6529 ci              -> pnpm run install:secure:frozen
-  6529 install:prod    -> pnpm run install:secure:prod
-  6529 dev             -> pnpm dev
-  6529 build           -> pnpm build
-  6529 staging         -> bash scripts/staging.sh
-  6529 start           -> pnpm start
-  6529 test            -> pnpm test
-  6529 lint            -> pnpm lint
-
-Anything else is forwarded to pnpm unchanged.
-EOF
-  exit 1
-fi
-
-shift
 
 case "$command_name" in
   dev)
