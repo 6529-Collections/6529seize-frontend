@@ -42,6 +42,7 @@ Common commands:
   6529 install:prod    -> pnpm run install:secure:prod
   6529 dev             -> pnpm dev
   6529 build           -> pnpm build
+  6529 staging         -> bash scripts/staging.sh
   6529 start           -> pnpm start
   6529 test            -> pnpm test
   6529 lint            -> pnpm lint
@@ -54,6 +55,15 @@ fi
 shift
 
 case "$command_name" in
+  dev)
+    exec node scripts/dev-with-fallback.cjs "$@"
+    ;;
+  dev:webpack)
+    exec env USE_TURBO=false node scripts/dev-with-fallback.cjs "$@"
+    ;;
+  dev:open)
+    exec node scripts/dev-open.cjs "$@"
+    ;;
   i)
     exec "$REAL_PNPM" run install:secure "$@"
     ;;
@@ -68,6 +78,9 @@ case "$command_name" in
     ;;
   install:prod)
     exec "$REAL_PNPM" run install:secure:prod "$@"
+    ;;
+  staging)
+    exec bash scripts/staging.sh "$@"
     ;;
   run)
     exec "$REAL_PNPM" run "$@"

@@ -131,12 +131,13 @@ If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
 6529 install
 6529 dev
 6529 build
+6529 staging
 ```
 
 ### Build
 
 ```
-pnpm run build
+6529 build
 ```
 
 ### Environment
@@ -170,6 +171,18 @@ To test end-to-end:
 
 ```
 6529 dev
+```
+
+- Staging update / rebuild
+
+```
+./bin/6529 staging
+```
+
+- After `direnv allow`, the shorthand also works
+
+```
+6529 staging
 ```
 
 - Production

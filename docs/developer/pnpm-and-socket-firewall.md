@@ -16,6 +16,7 @@ The supported entrypoint is the repo-local `6529` command:
 6529 install:prod
 6529 dev
 6529 build
+6529 staging
 6529 test
 6529 lint
 ```
@@ -31,6 +32,7 @@ and you can use the shorthand wrapper:
 6529 install:prod
 6529 dev
 6529 build
+6529 staging
 ```
 
 ## Local setup
@@ -47,6 +49,13 @@ Install dependencies through the secure path:
 
 ```bash
 6529 install
+```
+
+For staging refreshes from a fresh clone, use the repo-local wrapper path
+explicitly:
+
+```bash
+./bin/6529 staging
 ```
 
 ## Day-to-day commands

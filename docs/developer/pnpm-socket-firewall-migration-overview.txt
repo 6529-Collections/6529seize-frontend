@@ -116,9 +116,13 @@ Install dependencies:
 Normal day-to-day commands:
 - 6529 dev
 - 6529 build
+- 6529 staging
 - 6529 test
 - 6529 lint
 - pm2 start ./bin/6529 --name=6529seize -- start
+
+Fresh-clone-safe staging entrypoint:
+- ./bin/6529 staging
 
 Files updated for local/dev workflows
 -------------------------------------
@@ -130,6 +134,7 @@ Files updated for local/dev workflows
 - scripts/dev-open.cjs
 - scripts/quality.js
 - scripts/staging.sh
+- bin/6529
 - scripts/worktree/wt-add.sh
 - scripts/worktree/wt-common.sh
 - standalone/standalone-memes-mint/README.md
