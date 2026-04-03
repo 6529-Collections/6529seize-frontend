@@ -27,18 +27,7 @@ The supported entrypoint is the repo-local `6529` command:
 Plain `pnpm install` and direct package-manager script execution are intentionally rejected by the repo guard.
 
 If you use the repo's `.envrc`, the local `bin/` directory is added to `PATH`
-and you can use the shorthand wrapper:
-
-```bash
-6529 bootstrap
-6529 install
-6529 install:frozen
-6529 install:prod
-6529 dev
-6529 build
-6529 approve-builds
-6529 staging
-```
+so the `6529` shorthand commands above work directly inside the repository.
 
 ## Local setup
 
