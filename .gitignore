@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /.pnpm-store
+/.corepack-tmp
 /.pnp
 .pnp.js
 

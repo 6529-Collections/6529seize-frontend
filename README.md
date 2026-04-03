@@ -114,7 +114,7 @@ Bootstrap Corepack and Socket Firewall once on your machine:
 ```bash
 npm install --global corepack@latest sfw
 corepack enable pnpm
-corepack prepare pnpm@10.27.0 --activate
+corepack prepare pnpm@10.33.0 --activate
 ```
 
 Then install project dependencies through the secure path:

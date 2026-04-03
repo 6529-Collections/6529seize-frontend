@@ -44,7 +44,7 @@ Bootstrap the toolchain once:
 ```bash
 npm install --global corepack@latest sfw
 corepack enable pnpm
-corepack prepare pnpm@10.27.0 --activate
+corepack prepare pnpm@10.33.0 --activate
 ```
 
 Install dependencies through the secure path:
@@ -84,7 +84,7 @@ pm2 start ./bin/6529 --name=6529seize -- start
 
 ## Guardrails in this repo
 
-- [`package.json`](/Users/ppan/Desktop/6529git/6529seize-frontend/package.json) pins `pnpm@10.27.0`.
+- [`package.json`](/Users/ppan/Desktop/6529git/6529seize-frontend/package.json) pins `pnpm@10.33.0`.
 - [`package.json`](/Users/ppan/Desktop/6529git/6529seize-frontend/package.json) has a `preinstall` guard that rejects `npm`, `yarn`, and insecure `pnpm install`.
 - [`scripts/require-6529-command.cjs`](/Users/ppan/Desktop/6529git/6529seize-frontend/scripts/require-6529-command.cjs) rejects repo script execution unless it came through `6529`.
 - [`scripts/assert-no-package-lock.cjs`](/Users/ppan/Desktop/6529git/6529seize-frontend/scripts/assert-no-package-lock.cjs) fails if `package-lock.json` reappears.

@@ -51,7 +51,7 @@ Key repo changes
 ----------------
 
 package.json
-- packageManager changed from npm to pnpm@10.27.0
+- packageManager changed from npm to pnpm@10.33.0
 - added secure install scripts:
   - pnpm run install:secure
   - pnpm run install:secure:frozen
@@ -111,7 +111,7 @@ Developer workflow changes
 Bootstrap once:
 1. npm install --global corepack@latest sfw
 2. corepack enable pnpm
-3. corepack prepare pnpm@10.27.0 --activate
+3. corepack prepare pnpm@10.33.0 --activate
 4. Optional on servers without direnv: ./bin/6529 bootstrap && source ~/.bashrc
    One-liner for current shell: source <(./bin/6529 bootstrap --print-export)
 
@@ -201,7 +201,7 @@ Suggested stronger follow-ups
 Verification summary
 --------------------
 
-- pnpm 10.27.0 was activated with Corepack.
+- pnpm 10.33.0 was activated with Corepack.
 - pnpm-lock.yaml was generated with pnpm import.
 - A pnpm install verification was started against the migrated lockfile to
   confirm the repo can resolve through pnpm without npm.
