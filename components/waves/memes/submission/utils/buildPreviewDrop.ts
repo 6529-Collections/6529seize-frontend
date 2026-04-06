@@ -117,7 +117,9 @@ export const buildPreviewDrop = ({
       forbid_negative_votes: wave.voting.forbid_negative_votes,
       pinned: wave.pinned,
       submission_type: wave.participation.submission_strategy?.type ?? null,
+      selections: wave.selections,
     },
+    selections: [],
     author: {
       id: connectedProfile?.id ?? "preview-user",
       handle: connectedProfile?.handle ?? "preview-user",
