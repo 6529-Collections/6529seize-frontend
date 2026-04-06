@@ -38,6 +38,7 @@ const toWaveMin = (wave: ApiWave): ApiWaveMin => {
     forbid_negative_votes: wave.voting.forbid_negative_votes,
     pinned: wave.pinned,
     submission_type: wave.participation.submission_strategy?.type ?? null,
+    selections: wave.selections,
   };
 };
 
