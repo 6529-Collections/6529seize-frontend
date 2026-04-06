@@ -46,62 +46,44 @@ export default function IdentityProfileSupplement({
   variant,
   maxRepCategories,
 }: IdentityProfileSupplementProps) {
-  const isDefault = variant === "default";
-  const isCompact = variant === "compact";
   const bio = normalizeBio(profile.bio);
   const repCategories = getRepCategories(profile.top_rep_categories);
-  let bioClampClassName = "tw-line-clamp-2";
-  if (isCompact) {
-    bioClampClassName = "tw-line-clamp-1";
-  }
-  const bioTextClassName = isDefault
-    ? "tw-text-sm tw-font-medium tw-leading-6"
-    : "tw-text-xs tw-font-medium tw-leading-5";
-  let overflowTagClassName =
-    "tw-border-white/5 tw-bg-iron-900 tw-shadow-inner tw-px-2 tw-text-iron-400";
-  if (isCompact) {
-    overflowTagClassName =
-      "tw-border-white/5 tw-bg-iron-900/40 tw-px-2 tw-text-iron-500";
-  }
   const visibleRepCategories =
     maxRepCategories === undefined
       ? repCategories
       : repCategories.slice(0, maxRepCategories);
-  const hiddenRepCategoryCount =
-    repCategories.length - visibleRepCategories.length;
 
   if (!bio && visibleRepCategories.length === 0) {
     return null;
   }
 
   return (
-    <div className={isDefault ? "tw-space-y-3" : "tw-space-y-2"}>
+    <div>
       {bio && (
         <p
-          className={`tw-mb-0 tw-whitespace-pre-line tw-break-words tw-leading-relaxed tw-text-iron-300 ${bioTextClassName} ${bioClampClassName}`}
+          className={`tw-mb-0 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-leading-relaxed tw-text-iron-300 ${
+            variant === "default"
+              ? "tw-text-sm tw-font-medium tw-leading-6"
+              : "tw-text-[13px] tw-font-medium tw-leading-5"
+          }`}
         >
           {bio}
         </p>
       )}
 
       {visibleRepCategories.length > 0 && (
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
+        <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
           {visibleRepCategories.map((category) => (
             <span
               key={`${category.category}-${category.rep}`}
-              className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-white/5 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-400 tw-shadow-inner"
+              className="tw-inline-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-black/50 tw-px-2 tw-py-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-widest tw-text-iron-200 tw-shadow-inner"
             >
-              {category.category} {formatSignedRep(category.rep)}
+              <span> {category.category}</span>
+              <span className="tw-text-iron-400">
+                {formatSignedRep(category.rep)}
+              </span>
             </span>
           ))}
-
-          {hiddenRepCategoryCount > 0 && (
-            <span
-              className={`tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide ${overflowTagClassName}`}
-            >
-              +{hiddenRepCategoryCount} more
-            </span>
-          )}
         </div>
       )}
     </div>

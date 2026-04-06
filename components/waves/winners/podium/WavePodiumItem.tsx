@@ -11,7 +11,6 @@ import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 
 interface WavePodiumItemProps {
   readonly winner?: ApiWaveDecisionWinner | undefined;
@@ -136,6 +135,9 @@ const getHoverTextColorClass = (position: WavePodiumItemProps["position"]) => {
   return colorMap[position];
 };
 
+const getAuthorProfileLabel = (drop: ExtendedDrop): string =>
+  drop.author.handle ?? drop.author.id;
+
 export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   winner,
   onDropClick,
@@ -157,6 +159,8 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
 
   const drop = winner.drop as ExtendedDrop;
   const animationIndex = customAnimationIndex ?? animationIndexMap[position];
+  const authorProfileLabel = getAuthorProfileLabel(drop);
+  const authorProfileHref = `/${authorProfileLabel}`;
 
   return (
     <motion.div
@@ -175,7 +179,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
           >
             <div className={`tw-absolute tw-inset-0 ${styles.bgGradient}`} />
             <Link
-              href={`/${drop.author.handle}`}
+              href={authorProfileHref}
               onClick={(e) => e.stopPropagation()}
               className="tw-transform tw-transition-all tw-duration-300 hover:tw-scale-105"
             >
@@ -243,14 +247,14 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 user={drop.author.handle ?? drop.author.id}
               >
                 <Link
-                  href={`/${drop.author.handle}`}
+                  href={authorProfileHref}
                   onClick={(e) => e.stopPropagation()}
                   className={`tw-relative tw-mb-2 tw-mt-2 tw-text-center tw-no-underline tw-transition-all sm:tw-mt-4 ${hoverTextColorClass} tw-group/link`}
                 >
                   <span
                     className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 ${hoverTextColorClass} tw-inline-flex tw-items-center tw-transition-colors`}
                   >
-                    {drop.author.handle}
+                    {authorProfileLabel}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -269,12 +273,6 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   </span>
                 </Link>
               </UserProfileTooltipWrapper>
-
-              <WaveWinnerIdentity
-                drop={drop}
-                variant="compact"
-                className="tw-mb-2 tw-w-full tw-px-3 sm:tw-px-4"
-              />
 
               <div className="tw-relative tw-flex tw-flex-col tw-items-center tw-gap-y-2">
                 <div className="tw-flex tw-items-center tw-gap-x-1">

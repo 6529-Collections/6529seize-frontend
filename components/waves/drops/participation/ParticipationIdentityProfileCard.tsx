@@ -1,3 +1,5 @@
+"use client";
+
 import DropPfp from "@/components/drops/create/utils/DropPfp";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
@@ -5,6 +7,7 @@ import type { ApiProfileRepCategorySummary } from "@/generated/models/ApiProfile
 import { formatStatFloor } from "@/helpers/Helpers";
 import { shortenAddress } from "@/helpers/address.helpers";
 import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
+import { useCompactMode } from "@/contexts/CompactModeContext";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -25,6 +28,8 @@ interface ParticipationIdentityProfileCardProps {
   readonly profile: ParticipationIdentityProfileCardProfile;
   readonly contextId?: string | number | undefined;
   readonly variant?: ParticipationIdentityProfileCardVariant | undefined;
+  readonly showIdentityHeader?: boolean | undefined;
+  readonly supplementFullWidth?: boolean | undefined;
 }
 
 interface IdentityStatLinkProps {
@@ -35,6 +40,15 @@ interface IdentityStatLinkProps {
   readonly compact?: boolean | undefined;
 }
 
+const IDENTITY_STAT_LINK_CLASS =
+  "tw-inline-flex tw-items-baseline tw-gap-1.5 tw-no-underline tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-white";
+const IDENTITY_STAT_VALUE_CLASS =
+  "tw-font-semibold tw-leading-none tw-text-iron-100";
+const IDENTITY_STAT_LABEL_CLASS =
+  "tw-text-xs tw-font-medium tw-leading-none tw-tracking-wide tw-text-iron-500 tw-uppercase";
+const IDENTITY_STAT_RATE_CLASS =
+  "tw-text-xs tw-font-medium tw-leading-none tw-text-emerald-400";
+
 function IdentityStatLink({
   href,
   label,
@@ -42,25 +56,21 @@ function IdentityStatLink({
   rate,
   compact = false,
 }: IdentityStatLinkProps) {
-  const valueClass = compact
-    ? "tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-100"
-    : "tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-100";
-  const labelClass =
-    "tw-text-xs tw-font-medium tw-leading-none tw-tracking-wide tw-text-iron-500 tw-uppercase";
-  const rateClass =
-    "tw-ml-0.5 tw-text-xs tw-font-medium tw-leading-none tw-text-emerald-400";
+  const valueClass = `${compact ? "tw-text-xs" : "tw-text-sm"} ${IDENTITY_STAT_VALUE_CLASS}`;
 
   return (
     <Link
       href={href}
       prefetch={false}
       onClick={(event) => event.stopPropagation()}
-      className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-no-underline tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-white"
+      className={IDENTITY_STAT_LINK_CLASS}
     >
       <span className={valueClass}>{formatStatFloor(value)}</span>
-      <span className={labelClass}>{label}</span>
+      <span className={IDENTITY_STAT_LABEL_CLASS}>{label}</span>
       {typeof rate === "number" && rate > 0 && (
-        <span className={rateClass}>+{formatStatFloor(rate)}</span>
+        <span className={IDENTITY_STAT_RATE_CLASS}>
+          +{formatStatFloor(rate)}
+        </span>
       )}
     </Link>
   );
@@ -70,8 +80,13 @@ export default function ParticipationIdentityProfileCard({
   profile,
   contextId,
   variant = "default",
+  showIdentityHeader = true,
+  supplementFullWidth = false,
 }: ParticipationIdentityProfileCardProps) {
+  const compact = useCompactMode();
   const isChat = variant === "chat";
+  const avatarSize =
+    isChat && compact ? ProfileBadgeSize.COMPACT : ProfileBadgeSize.MEDIUM;
   const profileLabel = profile.handle ?? profile.primary_address;
   const routeIdentity = encodeURIComponent(profileLabel.toLowerCase());
   const rootHref = `/${routeIdentity}`;
@@ -81,125 +96,153 @@ export default function ParticipationIdentityProfileCard({
   const displayAddress = shouldShowAddress
     ? shortenAddress(profile.primary_address)
     : null;
+  const hasSupplementContent =
+    !!profile.bio?.trim() ||
+    (profile.top_rep_categories ?? []).some(
+      (category) => category.category.trim().length > 0
+    );
+  const shouldShowStatsDivider = showIdentityHeader || hasSupplementContent;
+  const showInlineSupplement =
+    hasSupplementContent && showIdentityHeader && !supplementFullWidth;
+  const showBelowHeaderSupplement =
+    hasSupplementContent && (!showIdentityHeader || supplementFullWidth);
+  const belowHeaderSupplementClassName = (() => {
+    if (!showIdentityHeader) {
+      return undefined;
+    }
+
+    return isChat ? "tw-mt-3" : "tw-mt-4";
+  })();
 
   return (
-    <div
-      className={`tw-group tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/40 tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900 ${
-        isChat ? "tw-mt-4 tw-px-3 tw-py-3" : "tw-mt-3 tw-p-4"
-      }`}
-    >
-      <div className="tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/15 tw-to-transparent tw-opacity-0 tw-transition-opacity tw-duration-500 group-hover:desktop-hover:tw-opacity-100" />
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-white/5 tw-to-transparent" />
+    <div className="tw-mt-3 tw-w-full tw-@container">
+      <div className="tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-[#18181b] tw-p-3 tw-shadow-2xl tw-shadow-black/40 tw-transition-all tw-duration-300 @sm:tw-p-5">
+        {/* Subtle top glare for premium feel */}
+        <div className="tw-group-hover:tw-opacity-100 tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/[0.15] tw-to-transparent tw-opacity-0 tw-transition-opacity tw-duration-500" />
+        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-white/[0.03] tw-to-transparent" />
 
-      <div className="tw-relative tw-z-10 tw-flex tw-items-start tw-justify-between tw-gap-3">
-        <div
-          className={`tw-flex tw-min-w-0 ${
-            isChat ? "tw-items-center tw-gap-3" : "tw-items-start tw-gap-4"
-          }`}
-        >
-          <Link
-            href={rootHref}
-            prefetch={false}
-            onClick={(event) => event.stopPropagation()}
-            className="tw-flex-shrink-0 tw-no-underline"
-            aria-label={`View ${profileLabel}'s profile`}
-          >
-            <DropPfp
-              pfpUrl={profile.pfp}
-              profileSize={
-                isChat ? ProfileBadgeSize.COMPACT : ProfileBadgeSize.MEDIUM
-              }
-            />
-          </Link>
-
-          <div
-            className={`tw-flex tw-min-w-0 tw-flex-col ${
-              isChat ? "tw-justify-center tw-gap-y-1" : "tw-gap-y-1.5"
-            }`}
-          >
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+        {showIdentityHeader && (
+          <div className="tw-relative tw-z-10 tw-flex tw-items-start tw-justify-between tw-gap-3">
+            <div
+              className={`tw-flex tw-min-w-0 ${
+                isChat ? "tw-items-center tw-gap-3" : "tw-items-start tw-gap-4"
+              }`}
+            >
               <Link
                 href={rootHref}
                 prefetch={false}
                 onClick={(event) => event.stopPropagation()}
-                className="tw-mb-0 tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
+                className="tw-flex-shrink-0 tw-no-underline"
+                aria-label={`View ${profileLabel}'s profile`}
               >
-                <span className="tw-text-sm tw-font-semibold tw-leading-none">
-                  {profileLabel}
-                </span>
+                <DropPfp pfpUrl={profile.pfp} profileSize={avatarSize} />
               </Link>
 
-              <UserCICAndLevel
-                level={profile.level}
-                size={
-                  isChat
-                    ? UserCICAndLevelSize.COMPACT
-                    : UserCICAndLevelSize.SMALL
-                }
-              />
-
-              <DropAuthorBadges
-                profile={profile}
-                tooltipIdPrefix={`identity-profile-card-${contextId ?? profile.id}`}
-                className={
-                  isChat
-                    ? "tw-inline-flex tw-items-center tw-gap-x-1"
-                    : undefined
-                }
-                size={isChat ? "compact" : "default"}
-              />
-            </div>
-
-            {displayAddress && (
-              <p
-                title={profile.primary_address}
-                className="tw-mb-0 tw-font-mono tw-text-xs tw-tracking-tight tw-text-iron-500"
+              <div
+                className={`tw-flex tw-min-w-0 tw-flex-col ${
+                  isChat ? "tw-justify-center tw-gap-y-1" : "tw-gap-y-1.5"
+                }`}
               >
-                {displayAddress}
-              </p>
-            )}
+                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                  <Link
+                    href={rootHref}
+                    prefetch={false}
+                    onClick={(event) => event.stopPropagation()}
+                    className="tw-mb-0 tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
+                  >
+                    <span className="tw-text-sm tw-font-semibold tw-leading-none">
+                      {profileLabel}
+                    </span>
+                  </Link>
+
+                  <UserCICAndLevel
+                    level={profile.level}
+                    size={
+                      isChat
+                        ? UserCICAndLevelSize.COMPACT
+                        : UserCICAndLevelSize.SMALL
+                    }
+                  />
+
+                  <DropAuthorBadges
+                    profile={profile}
+                    tooltipIdPrefix={`identity-profile-card-${contextId ?? profile.id}`}
+                    className={
+                      isChat
+                        ? "tw-inline-flex tw-items-center tw-gap-x-1"
+                        : undefined
+                    }
+                    size={isChat ? "compact" : "default"}
+                  />
+                </div>
+
+                {displayAddress && (
+                  <p
+                    title={profile.primary_address}
+                    className="tw-mb-0 tw-font-mono tw-text-xs tw-tracking-tight tw-text-iron-500"
+                  >
+                    {displayAddress}
+                  </p>
+                )}
+
+                {showInlineSupplement && (
+                  <div className={isChat ? "tw-mt-3" : "tw-mt-4"}>
+                    <IdentityProfileSupplement
+                      profile={profile}
+                      variant={isChat ? "chat" : "default"}
+                      maxRepCategories={2}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+        )}
+
+        {showBelowHeaderSupplement && (
+          <div className={belowHeaderSupplementClassName}>
+            <IdentityProfileSupplement
+              profile={profile}
+              variant={isChat ? "chat" : "default"}
+              maxRepCategories={2}
+            />
+          </div>
+        )}
+
+        <div
+          className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2 ${
+            shouldShowStatsDivider
+              ? "tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3.5"
+              : ""
+          }`}
+        >
+          <IdentityStatLink
+            href={`${rootHref}/collected`}
+            label="TDH"
+            value={profile.tdh}
+            rate={profile.tdh_rate}
+            compact={isChat}
+          />
+          <IdentityStatLink
+            href={`${rootHref}/xtdh`}
+            label="xTDH"
+            value={profile.xtdh}
+            rate={profile.xtdh_rate}
+            compact={isChat}
+          />
+          <IdentityStatLink
+            href={rootHref}
+            label="NIC"
+            value={profile.cic}
+            compact={isChat}
+          />
+          <IdentityStatLink
+            href={rootHref}
+            label="Rep"
+            value={profile.rep}
+            compact={isChat}
+          />
         </div>
-      </div>
-
-      <div className={isChat ? "tw-mt-3" : "tw-mt-4"}>
-        <IdentityProfileSupplement
-          profile={profile}
-          variant={isChat ? "chat" : "default"}
-        />
-      </div>
-
-      <div
-        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 ${
-          isChat ? "tw-mt-3 tw-gap-x-4 tw-pt-2.5" : "tw-mt-4 tw-gap-x-5 tw-pt-3"
-        }`}
-      >
-        <IdentityStatLink
-          href={`${rootHref}/collected`}
-          label="TDH"
-          value={profile.tdh}
-          rate={profile.tdh_rate}
-          compact={isChat}
-        />
-        <IdentityStatLink
-          href={`${rootHref}/xtdh`}
-          label="xTDH"
-          value={profile.xtdh}
-          rate={profile.xtdh_rate}
-          compact={isChat}
-        />
-        <IdentityStatLink
-          href={rootHref}
-          label="NIC"
-          value={profile.cic}
-          compact={isChat}
-        />
-        <IdentityStatLink
-          href={rootHref}
-          label="Rep"
-          value={profile.rep}
-          compact={isChat}
-        />
       </div>
     </div>
   );

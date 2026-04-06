@@ -296,7 +296,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       </div>
 
       {/* Content section */}
-      <div className="tw-min-w-0">
+      <div className="tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
         <AnimatePresence>
           {showToggleableDropInput && (
             <motion.div

@@ -24,18 +24,24 @@ interface WaveLeaderboardIdentityProps {
   readonly variant: WaveLeaderboardIdentityVariant;
   readonly cardVariant?: ParticipationIdentityProfileCardVariant | undefined;
   readonly className?: string | undefined;
+  readonly showIdentityHeader?: boolean | undefined;
+  readonly supplementFullWidth?: boolean | undefined;
 }
 
 interface WaveLeaderboardIdentitySummaryProps {
   readonly profile: ApiDropResolvedIdentityProfile | null;
   readonly fallbackValue: string | null;
   readonly contextId?: string | number | undefined;
+  readonly showIdentityHeader?: boolean | undefined;
+  readonly supplementFullWidth?: boolean | undefined;
 }
 
 function WaveLeaderboardIdentitySummary({
   profile,
   fallbackValue,
   contextId,
+  showIdentityHeader = true,
+  supplementFullWidth = false,
 }: WaveLeaderboardIdentitySummaryProps) {
   const displayLabel =
     profile?.handle ?? profile?.primary_address ?? fallbackValue;
@@ -55,93 +61,123 @@ function WaveLeaderboardIdentitySummary({
   const displayAddress = shouldShowAddress
     ? shortenAddress(primaryAddress)
     : null;
+  const hasSupplementContent =
+    !!profile?.bio?.trim() ||
+    (profile?.top_rep_categories ?? []).some(
+      (category) => category.category.trim().length > 0
+    );
+  const showInlineSupplement =
+    !!profile &&
+    hasSupplementContent &&
+    showIdentityHeader &&
+    !supplementFullWidth;
+  const showBelowHeaderSupplement =
+    !!profile &&
+    hasSupplementContent &&
+    (!showIdentityHeader || supplementFullWidth);
   const avatarFallback = (
     <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-100">
       {displayLabel.slice(0, 1)}
     </span>
   );
 
+  if (profile && !showIdentityHeader && !hasSupplementContent) {
+    return null;
+  }
+
   return (
     <div
       data-testid="wave-leaderboard-identity-summary"
-      className="tw-rounded-lg tw-border tw-border-iron-800/60 tw-bg-iron-900/40 tw-p-3"
+      className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-3"
     >
-      <div className="tw-flex tw-items-start tw-gap-3">
-        {rootHref ? (
-          <Link
-            href={rootHref}
-            prefetch={false}
-            onClick={(event) => event.stopPropagation()}
-            className="tw-flex-shrink-0 tw-no-underline"
-            aria-label={`View ${displayLabel}'s profile`}
-          >
+      {showIdentityHeader && (
+        <div className="tw-flex tw-items-start tw-gap-3">
+          {rootHref ? (
+            <Link
+              href={rootHref}
+              prefetch={false}
+              onClick={(event) => event.stopPropagation()}
+              className="tw-flex-shrink-0 tw-no-underline"
+              aria-label={`View ${displayLabel}'s profile`}
+            >
+              <ProfileAvatar
+                pfpUrl={profile?.pfp ?? null}
+                size={ProfileBadgeSize.SMALL}
+                alt={`${displayLabel} avatar`}
+                fallbackContent={avatarFallback}
+              />
+            </Link>
+          ) : (
             <ProfileAvatar
-              pfpUrl={profile?.pfp ?? null}
+              pfpUrl={null}
               size={ProfileBadgeSize.SMALL}
               alt={`${displayLabel} avatar`}
               fallbackContent={avatarFallback}
             />
-          </Link>
-        ) : (
-          <ProfileAvatar
-            pfpUrl={null}
-            size={ProfileBadgeSize.SMALL}
-            alt={`${displayLabel} avatar`}
-            fallbackContent={avatarFallback}
-          />
-        )}
+          )}
 
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            {rootHref ? (
-              <Link
-                href={rootHref}
-                prefetch={false}
-                onClick={(event) => event.stopPropagation()}
-                className="tw-max-w-full tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50 tw-no-underline desktop-hover:hover:tw-text-iron-300"
+          <div className="tw-min-w-0 tw-flex-1">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+              {rootHref ? (
+                <Link
+                  href={rootHref}
+                  prefetch={false}
+                  onClick={(event) => event.stopPropagation()}
+                  className="tw-max-w-full tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50 tw-no-underline desktop-hover:hover:tw-text-iron-300"
+                >
+                  <span className="tw-block tw-truncate">{displayLabel}</span>
+                </Link>
+              ) : (
+                <span className="tw-break-all tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50">
+                  {displayLabel}
+                </span>
+              )}
+
+              {profile && (
+                <>
+                  <UserCICAndLevel
+                    level={profile.level}
+                    size={UserCICAndLevelSize.SMALL}
+                  />
+                  <DropAuthorBadges
+                    profile={profile}
+                    tooltipIdPrefix={`leaderboard-identity-${contextId ?? profile.id}`}
+                  />
+                </>
+              )}
+            </div>
+
+            {displayAddress && (
+              <p
+                title={primaryAddress}
+                className="tw-mb-0 tw-mt-1 tw-font-mono tw-text-xs tw-tracking-[0.01em] tw-text-iron-400"
               >
-                <span className="tw-block tw-truncate">{displayLabel}</span>
-              </Link>
-            ) : (
-              <span className="tw-break-all tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50">
-                {displayLabel}
-              </span>
+                {displayAddress}
+              </p>
             )}
 
-            {profile && (
-              <>
-                <UserCICAndLevel
-                  level={profile.level}
-                  size={UserCICAndLevelSize.SMALL}
-                />
-                <DropAuthorBadges
+            {showInlineSupplement && (
+              <div className="tw-mt-2">
+                <IdentityProfileSupplement
                   profile={profile}
-                  tooltipIdPrefix={`leaderboard-identity-${contextId ?? profile.id}`}
+                  variant="compact"
+                  maxRepCategories={2}
                 />
-              </>
+              </div>
             )}
           </div>
-
-          {displayAddress && (
-            <p
-              title={primaryAddress}
-              className="tw-mb-0 tw-mt-1 tw-font-mono tw-text-xs tw-tracking-[0.01em] tw-text-iron-400"
-            >
-              {displayAddress}
-            </p>
-          )}
-
-          {profile && (
-            <div className="tw-mt-2">
-              <IdentityProfileSupplement
-                profile={profile}
-                variant="compact"
-                maxRepCategories={3}
-              />
-            </div>
-          )}
         </div>
-      </div>
+      )}
+
+      {showBelowHeaderSupplement && (
+        <div className={showIdentityHeader ? "tw-mt-2" : undefined}>
+          <IdentityProfileSupplement
+            profile={profile}
+            variant="compact"
+            maxRepCategories={2}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -151,6 +187,8 @@ export function WaveLeaderboardIdentity({
   variant,
   cardVariant,
   className,
+  showIdentityHeader = true,
+  supplementFullWidth = false,
 }: WaveLeaderboardIdentityProps) {
   const identityProfile = getDropIdentityProfile({
     wave: drop.wave,
@@ -178,6 +216,8 @@ export function WaveLeaderboardIdentity({
             profile={identityProfile}
             contextId={drop.id}
             variant={cardVariant}
+            showIdentityHeader={showIdentityHeader}
+            supplementFullWidth={supplementFullWidth}
           />
         </div>
         <div className="lg:tw-hidden">
@@ -185,6 +225,8 @@ export function WaveLeaderboardIdentity({
             profile={identityProfile}
             fallbackValue={null}
             contextId={drop.id}
+            showIdentityHeader={showIdentityHeader}
+            supplementFullWidth={supplementFullWidth}
           />
         </div>
       </div>
@@ -197,6 +239,8 @@ export function WaveLeaderboardIdentity({
         profile={identityProfile}
         fallbackValue={fallbackValue}
         contextId={drop.id}
+        showIdentityHeader={showIdentityHeader}
+        supplementFullWidth={supplementFullWidth}
       />
     </div>
   );
