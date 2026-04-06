@@ -138,9 +138,14 @@ test("injects the announcement wave once and excludes it from pinned metadata", 
     result.current.waves.find((wave: any) => wave.id === "4")
   ).toMatchObject({
     id: "4",
-    isAnnouncement: true,
     isPinned: false,
   });
+  expect(
+    Object.prototype.hasOwnProperty.call(
+      result.current.waves.find((wave: any) => wave.id === "4"),
+      "isAnnouncement"
+    )
+  ).toBe(false);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
   expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
 });
@@ -168,7 +173,6 @@ test("preserves pin state for a legacy pinned announcement wave", () => {
     result.current.waves.find((wave: any) => wave.id === "4")
   ).toMatchObject({
     id: "4",
-    isAnnouncement: true,
     isPinned: true,
   });
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
@@ -198,7 +202,6 @@ test("reuses an overview announcement wave without enabling the fallback fetch",
     result.current.waves.find((wave: any) => wave.id === "4")
   ).toMatchObject({
     id: "4",
-    isAnnouncement: true,
   });
   expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
 });

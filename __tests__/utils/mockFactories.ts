@@ -20,7 +20,6 @@ export function createMockMinimalWave(
     },
     picture: null,
     contributors: [],
-    isAnnouncement: false,
     isPinned: false,
     unreadDropsCount: 0,
     latestReadTimestamp: 0,

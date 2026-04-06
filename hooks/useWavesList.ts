@@ -16,7 +16,6 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 // Enhanced wave interface with isPinned field and newDropsCount
 interface EnhancedWave extends ApiWave {
   isPinned: boolean;
-  isAnnouncement: boolean;
 }
 
 /**
@@ -145,7 +144,7 @@ const useWavesList = () => {
     // Add all server-provided pinned waves, filtering out DMs
     serverPinnedWaves.forEach((wave) => {
       if (!waveIsDm(wave) && !isAnnouncementsWave(wave.id)) {
-        result.push({ ...wave, isPinned: true, isAnnouncement: false });
+        result.push({ ...wave, isPinned: true });
       }
     });
 
@@ -169,27 +168,22 @@ const useWavesList = () => {
       allWavesMap.set(wave.id, {
         ...wave,
         isPinned: pinnedWavesSet.has(wave.id),
-        isAnnouncement: false,
       });
     });
+
+    const sortedNonAnnouncementWaves = [...allWavesMap.values()].sort(
+      (a, b) =>
+        b.metrics.latest_drop_timestamp - a.metrics.latest_drop_timestamp
+    );
 
     if (announcementWave) {
       allWavesArray.push({
         ...announcementWave,
         isPinned: pinnedWavesSet.has(announcementWave.id),
-        isAnnouncement: true,
       });
     }
 
-    allWavesArray.push(...allWavesMap.values());
-
-    // Sort all waves by latest_drop_timestamp (most recent first)
-    allWavesArray.sort((a, b) => {
-      if (a.isAnnouncement !== b.isAnnouncement) {
-        return a.isAnnouncement ? -1 : 1;
-      }
-      return b.metrics.latest_drop_timestamp - a.metrics.latest_drop_timestamp;
-    });
+    allWavesArray.push(...sortedNonAnnouncementWaves);
 
     return allWavesArray;
   }, [

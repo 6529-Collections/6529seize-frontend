@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import type { WebUnifiedWavesListWavesHandle } from "@/components/brain/left-sidebar/web/WebUnifiedWavesListWaves";
 import WebUnifiedWavesListWaves from "@/components/brain/left-sidebar/web/WebUnifiedWavesListWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
@@ -42,8 +43,12 @@ jest.mock("react-tooltip", () => ({
   Tooltip: () => null,
 }));
 jest.mock("@/hooks/useVirtualizedWaves");
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettingsOptional: jest.fn(),
+}));
 
 const mockUseVirtualizedWaves = useVirtualizedWaves as jest.Mock;
+const mockUseSeizeSettingsOptional = useSeizeSettingsOptional as jest.Mock;
 
 const scrollRef = {
   current: document.createElement("div"),
@@ -51,13 +56,16 @@ const scrollRef = {
 const sentinel = document.createElement("div");
 
 const baseWaves = [
-  createMockMinimalWave({ id: "a1", isAnnouncement: true }),
+  createMockMinimalWave({ id: "a1" }),
   createMockMinimalWave({ id: "p1", isPinned: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseSeizeSettingsOptional.mockReturnValue({
+    isAnnouncementsWave: (waveId: string) => waveId === "a1",
+  });
   mockUseVirtualizedWaves.mockReturnValue({
     containerRef: { current: document.createElement("div") },
     sentinelRef: { current: sentinel },
@@ -97,7 +105,6 @@ it("passes pin controls through for pinned announcement waves", () => {
       waves={[
         createMockMinimalWave({
           id: "a1",
-          isAnnouncement: true,
           isPinned: true,
         }),
       ]}

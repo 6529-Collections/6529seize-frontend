@@ -5,6 +5,7 @@ import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/Unified
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useAuth } from "@/components/auth/Auth";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
 jest.mock("@/components/utils/switch/CommonSwitch", () => (props: any) => (
@@ -34,10 +35,14 @@ jest.mock(
 jest.mock("@/hooks/useShowFollowingWaves");
 jest.mock("@/components/auth/Auth");
 jest.mock("@/hooks/useVirtualizedWaves");
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettingsOptional: jest.fn(),
+}));
 
 const mockUseShowFollowingWaves = useShowFollowingWaves as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;
 const mockUseVirtualizedWaves = useVirtualizedWaves as jest.Mock;
+const mockUseSeizeSettingsOptional = useSeizeSettingsOptional as jest.Mock;
 
 const scrollRef = {
   current: document.createElement("div"),
@@ -46,7 +51,7 @@ const container = document.createElement("div");
 const sentinel = document.createElement("div");
 
 const baseWaves = [
-  createMockMinimalWave({ id: "a1", isAnnouncement: true }),
+  createMockMinimalWave({ id: "a1" }),
   createMockMinimalWave({ id: "p1", isPinned: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
@@ -57,6 +62,9 @@ beforeEach(() => {
   mockUseAuth.mockReturnValue({
     connectedProfile: { handle: "alice" },
     activeProfileProxy: null,
+  });
+  mockUseSeizeSettingsOptional.mockReturnValue({
+    isAnnouncementsWave: (waveId: string) => waveId === "a1",
   });
   mockUseVirtualizedWaves.mockReturnValue({
     containerRef: { current: container },
@@ -109,7 +117,6 @@ it("passes pin controls through for pinned announcement waves", () => {
       waves={[
         createMockMinimalWave({
           id: "a1",
-          isAnnouncement: true,
           isPinned: true,
         }),
       ]}

@@ -7,6 +7,7 @@ import JoinedToggle from "./JoinedToggle";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 
 // VirtualItem interface is now imported from useVirtualizedWaves
 
@@ -22,7 +23,6 @@ function isValidWave(wave: unknown): wave is MinimalWave {
     typeof w.id === "string" &&
     w.id.length > 0 &&
     typeof w.name === "string" &&
-    typeof w.isAnnouncement === "boolean" &&
     typeof w.isPinned === "boolean"
   );
 }
@@ -111,22 +111,29 @@ const UnifiedWavesListWaves = forwardRef<
     ref
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
+    const seizeSettings = useSeizeSettingsOptional();
 
     const { announcementWaves, pinnedWaves, regularWaves } = useMemo(() => {
-      const announcements = waves.filter((wave) => wave.isAnnouncement);
-      const pinned = waves.filter(
-        (wave) => !wave.isAnnouncement && wave.isPinned
-      );
-      const regular = waves.filter(
-        (wave) => !wave.isAnnouncement && !wave.isPinned
-      );
+      const announcements: MinimalWave[] = [];
+      const pinned: MinimalWave[] = [];
+      const regular: MinimalWave[] = [];
+
+      for (const wave of waves) {
+        if (seizeSettings?.isAnnouncementsWave(wave.id)) {
+          announcements.push(wave);
+        } else if (wave.isPinned) {
+          pinned.push(wave);
+        } else {
+          regular.push(wave);
+        }
+      }
 
       return {
         announcementWaves: announcements,
         pinnedWaves: pinned,
         regularWaves: regular,
       };
-    }, [waves]);
+    }, [waves, seizeSettings]);
 
     const virtual = useVirtualizedWaves<MinimalWave>(
       regularWaves,
@@ -212,7 +219,7 @@ const UnifiedWavesListWaves = forwardRef<
                   <BrainLeftSidebarWave
                     wave={wave}
                     onHover={onHover}
-                    showPin={!hidePin && !wave.isAnnouncement}
+                    showPin={!hidePin}
                     isDirectMessage={isDirectMessage}
                   />
                 </div>

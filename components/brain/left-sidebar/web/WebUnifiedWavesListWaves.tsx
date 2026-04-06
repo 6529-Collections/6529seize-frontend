@@ -14,6 +14,7 @@ import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 
 function isValidWave(wave: unknown): wave is MinimalWave {
   if (wave === null || wave === undefined || typeof wave !== "object") {
@@ -25,7 +26,6 @@ function isValidWave(wave: unknown): wave is MinimalWave {
     typeof w.id === "string" &&
     w.id.length > 0 &&
     typeof w.name === "string" &&
-    typeof w.isAnnouncement === "boolean" &&
     typeof w.isPinned === "boolean"
   );
 }
@@ -72,6 +72,7 @@ const WebUnifiedWavesListWaves = forwardRef<
     const { connectedProfile } = useAuth();
     const { openWave, isApp } = useCreateModalState();
     const isTouchDevice = useIsTouchDevice();
+    const seizeSettings = useSeizeSettingsOptional();
 
     useImperativeHandle(ref, () => ({
       sentinelRef,
@@ -85,7 +86,7 @@ const WebUnifiedWavesListWaves = forwardRef<
       const regular: MinimalWave[] = [];
 
       for (const wave of waves) {
-        if (wave.isAnnouncement) {
+        if (seizeSettings?.isAnnouncementsWave(wave.id)) {
           announcements.push(wave);
         } else if (wave.isPinned) {
           pinned.push(wave);
@@ -99,7 +100,7 @@ const WebUnifiedWavesListWaves = forwardRef<
         pinnedWaves: pinned,
         regularWaves: regular,
       };
-    }, [waves]);
+    }, [waves, seizeSettings]);
 
     const rowHeight = isCollapsed
       ? WAVE_ROW_HEIGHT_COLLAPSED
@@ -224,9 +225,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                       <WebBrainLeftSidebarWave
                         wave={wave}
                         onHover={onHover}
-                        showPin={
-                          !hidePin && !isCollapsed && !wave.isAnnouncement
-                        }
+                        showPin={!hidePin && !isCollapsed}
                         basePath={basePath}
                         collapsed={isCollapsed}
                       />
@@ -281,7 +280,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                       <WebBrainLeftSidebarWave
                         wave={wave}
                         onHover={onHover}
-                        showPin={!hidePin && !wave.isAnnouncement}
+                        showPin={!hidePin && !isCollapsed}
                         basePath={basePath}
                         collapsed={isCollapsed}
                       />
