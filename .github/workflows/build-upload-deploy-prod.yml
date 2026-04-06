@@ -80,7 +80,7 @@ jobs:
           rm -rf .next/node_modules
           mkdir -p target/_next
           cp -R .next/static target/_next/static
-          zip -yr package.zip . -x '*.git*' 'target/*' '.next/static/*' '.next/node_modules/*'
+          zip -yr package.zip . -x '*.git*' 'target/*' 'node_modules/*' '.next/static/*' '.next/node_modules/*'
           mv package.zip target/
 
       - name: Verify package bundle size
