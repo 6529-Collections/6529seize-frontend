@@ -41,7 +41,7 @@ function WaveLeaderboardIdentitySummary({
   fallbackValue,
   contextId,
   showIdentityHeader = true,
-  supplementFullWidth = false,
+  supplementFullWidth: _supplementFullWidth = false,
 }: WaveLeaderboardIdentitySummaryProps) {
   const displayLabel =
     profile?.handle ?? profile?.primary_address ?? fallbackValue;
@@ -66,15 +66,7 @@ function WaveLeaderboardIdentitySummary({
     (profile?.top_rep_categories ?? []).some(
       (category) => category.category.trim().length > 0
     );
-  const showInlineSupplement =
-    !!profile &&
-    hasSupplementContent &&
-    showIdentityHeader &&
-    !supplementFullWidth;
-  const showBelowHeaderSupplement =
-    !!profile &&
-    hasSupplementContent &&
-    (!showIdentityHeader || supplementFullWidth);
+  const showBelowHeaderSupplement = !!profile && hasSupplementContent;
   const avatarFallback = (
     <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-100">
       {displayLabel.slice(0, 1)}
@@ -97,7 +89,7 @@ function WaveLeaderboardIdentitySummary({
               href={rootHref}
               prefetch={false}
               onClick={(event) => event.stopPropagation()}
-              className="tw-flex-shrink-0 tw-no-underline"
+              className="tw-block tw-flex-shrink-0 tw-self-start tw-no-underline"
               aria-label={`View ${displayLabel}'s profile`}
             >
               <ProfileAvatar
@@ -154,16 +146,6 @@ function WaveLeaderboardIdentitySummary({
               >
                 {displayAddress}
               </p>
-            )}
-
-            {showInlineSupplement && (
-              <div className="tw-mt-2">
-                <IdentityProfileSupplement
-                  profile={profile}
-                  variant="compact"
-                  maxRepCategories={2}
-                />
-              </div>
             )}
           </div>
         </div>

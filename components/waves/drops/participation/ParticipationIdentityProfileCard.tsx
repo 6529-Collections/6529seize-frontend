@@ -81,7 +81,7 @@ export default function ParticipationIdentityProfileCard({
   contextId,
   variant = "default",
   showIdentityHeader = true,
-  supplementFullWidth = false,
+  supplementFullWidth: _supplementFullWidth = false,
 }: ParticipationIdentityProfileCardProps) {
   const compact = useCompactMode();
   const isChat = variant === "chat";
@@ -102,10 +102,7 @@ export default function ParticipationIdentityProfileCard({
       (category) => category.category.trim().length > 0
     );
   const shouldShowStatsDivider = showIdentityHeader || hasSupplementContent;
-  const showInlineSupplement =
-    hasSupplementContent && showIdentityHeader && !supplementFullWidth;
-  const showBelowHeaderSupplement =
-    hasSupplementContent && (!showIdentityHeader || supplementFullWidth);
+  const showBelowHeaderSupplement = hasSupplementContent;
   const belowHeaderSupplementClassName = (() => {
     if (!showIdentityHeader) {
       return undefined;
@@ -132,7 +129,7 @@ export default function ParticipationIdentityProfileCard({
                 href={rootHref}
                 prefetch={false}
                 onClick={(event) => event.stopPropagation()}
-                className="tw-flex-shrink-0 tw-no-underline"
+                className="tw-block tw-flex-shrink-0 tw-self-start tw-no-underline"
                 aria-label={`View ${profileLabel}'s profile`}
               >
                 <DropPfp pfpUrl={profile.pfp} profileSize={avatarSize} />
@@ -183,16 +180,6 @@ export default function ParticipationIdentityProfileCard({
                   >
                     {displayAddress}
                   </p>
-                )}
-
-                {showInlineSupplement && (
-                  <div className={isChat ? "tw-mt-3" : "tw-mt-4"}>
-                    <IdentityProfileSupplement
-                      profile={profile}
-                      variant={isChat ? "chat" : "default"}
-                      maxRepCategories={2}
-                    />
-                  </div>
                 )}
               </div>
             </div>

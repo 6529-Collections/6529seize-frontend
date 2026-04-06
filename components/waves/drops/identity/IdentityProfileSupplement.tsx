@@ -61,7 +61,7 @@ export default function IdentityProfileSupplement({
     <div>
       {bio && (
         <p
-          className={`tw-mb-0 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-leading-relaxed tw-text-iron-300 ${
+          className={`tw-mb-3 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-leading-relaxed tw-text-iron-300 ${
             variant === "default"
               ? "tw-text-sm tw-font-medium tw-leading-6"
               : "tw-text-[13px] tw-font-medium tw-leading-5"
@@ -72,7 +72,7 @@ export default function IdentityProfileSupplement({
       )}
 
       {visibleRepCategories.length > 0 && (
-        <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
           {visibleRepCategories.map((category) => (
             <span
               key={`${category.category}-${category.rep}`}

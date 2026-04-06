@@ -275,6 +275,16 @@ export const WaveLeaderboardGridItem: React.FC<
       return;
     }
 
+    const target = event.target as HTMLElement;
+    if (
+      !canOpenGridItemFromClick({
+        isMenuOpen: showMobileContentOnlyActions && isActive,
+        target,
+      })
+    ) {
+      return;
+    }
+
     event.preventDefault();
     openDrop();
   };
