@@ -1,4 +1,4 @@
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 /**
@@ -6,7 +6,9 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
  * @param overrides - Partial properties to override defaults
  * @returns Complete MinimalWave object suitable for testing
  */
-export function createMockMinimalWave(overrides: Partial<MinimalWave> = {}): MinimalWave {
+export function createMockMinimalWave(
+  overrides: Partial<MinimalWave> = {}
+): MinimalWave {
   return {
     id: "mock-wave-id",
     name: "Mock Wave",
@@ -18,6 +20,7 @@ export function createMockMinimalWave(overrides: Partial<MinimalWave> = {}): Min
     },
     picture: null,
     contributors: [],
+    isAnnouncement: false,
     isPinned: false,
     unreadDropsCount: 0,
     latestReadTimestamp: 0,

@@ -1,6 +1,6 @@
 "use client";
 
-export const normalizeCountry = (
+const normalizeCountry = (
   country: string | null | undefined
 ): string | null => {
   if (typeof country !== "string") {

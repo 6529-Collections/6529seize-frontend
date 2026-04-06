@@ -25,6 +25,7 @@ function isValidWave(wave: unknown): wave is MinimalWave {
     typeof w.id === "string" &&
     w.id.length > 0 &&
     typeof w.name === "string" &&
+    typeof w.isAnnouncement === "boolean" &&
     typeof w.isPinned === "boolean"
   );
 }
@@ -78,19 +79,26 @@ const WebUnifiedWavesListWaves = forwardRef<
 
     const showCreateWaveButton = !isApp && !!connectedProfile;
 
-    const { pinnedWaves, regularWaves } = useMemo(() => {
+    const { announcementWaves, pinnedWaves, regularWaves } = useMemo(() => {
+      const announcements: MinimalWave[] = [];
       const pinned: MinimalWave[] = [];
       const regular: MinimalWave[] = [];
 
       for (const wave of waves) {
-        if (wave.isPinned) {
+        if (wave.isAnnouncement) {
+          announcements.push(wave);
+        } else if (wave.isPinned) {
           pinned.push(wave);
         } else {
           regular.push(wave);
         }
       }
 
-      return { pinnedWaves: pinned, regularWaves: regular };
+      return {
+        announcementWaves: announcements,
+        pinnedWaves: pinned,
+        regularWaves: regular,
+      };
     }, [waves]);
 
     const rowHeight = isCollapsed
@@ -163,6 +171,39 @@ const WebUnifiedWavesListWaves = forwardRef<
           )}
 
           <div>
+            {announcementWaves.length > 0 && (
+              <section
+                className={`tw-flex tw-flex-col ${
+                  isCollapsed ? "tw-items-center tw-gap-y-2" : ""
+                }`}
+                aria-label="Announcement waves"
+              >
+                {announcementWaves
+                  .filter((wave): wave is MinimalWave => {
+                    if (!isValidWave(wave)) {
+                      console.warn("Invalid announcement wave object", wave);
+                      return false;
+                    }
+                    return true;
+                  })
+                  .map((wave) => (
+                    <div key={wave.id} className="tw-w-full">
+                      <WebBrainLeftSidebarWave
+                        wave={wave}
+                        onHover={onHover}
+                        showPin={!hidePin && !isCollapsed && wave.isPinned}
+                        basePath={basePath}
+                        collapsed={isCollapsed}
+                      />
+                    </div>
+                  ))}
+              </section>
+            )}
+            {announcementWaves.length > 0 &&
+              !hideHeaders &&
+              (pinnedWaves.length > 0 || regularWaves.length > 0) && (
+                <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+              )}
             {!hideHeaders && pinnedWaves.length > 0 && (
               <section
                 className={`tw-flex tw-flex-col ${
@@ -183,7 +224,9 @@ const WebUnifiedWavesListWaves = forwardRef<
                       <WebBrainLeftSidebarWave
                         wave={wave}
                         onHover={onHover}
-                        showPin={!hidePin && !isCollapsed}
+                        showPin={
+                          !hidePin && !isCollapsed && !wave.isAnnouncement
+                        }
                         basePath={basePath}
                         collapsed={isCollapsed}
                       />
@@ -238,7 +281,7 @@ const WebUnifiedWavesListWaves = forwardRef<
                       <WebBrainLeftSidebarWave
                         wave={wave}
                         onHover={onHover}
-                        showPin={!hidePin}
+                        showPin={!hidePin && !wave.isAnnouncement}
                         basePath={basePath}
                         collapsed={isCollapsed}
                       />

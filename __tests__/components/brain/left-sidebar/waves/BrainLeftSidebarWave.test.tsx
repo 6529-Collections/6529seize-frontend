@@ -54,6 +54,7 @@ describe("BrainLeftSidebarWave", () => {
     picture: "",
     contributors: [],
     newDropsCount: { count: 2, latestDropTimestamp: 123 },
+    isAnnouncement: false,
     isPinned: false,
     unreadDropsCount: 0,
     latestReadTimestamp: 0,
@@ -157,5 +158,26 @@ describe("BrainLeftSidebarWave", () => {
       '[data-icon="bell-slash"]'
     );
     expect(bellSlashIcons.length).toBe(0);
+  });
+
+  it("hides the pin control for the announcement wave", () => {
+    const announcementWave = {
+      ...baseWave,
+      id: "7",
+      isAnnouncement: true,
+    };
+    render(<BrainLeftSidebarWave wave={announcementWave} onHover={onHover} />);
+    expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
+  });
+
+  it("shows the unpin control for a pinned announcement wave", () => {
+    const announcementWave = {
+      ...baseWave,
+      id: "8",
+      isAnnouncement: true,
+      isPinned: true,
+    };
+    render(<BrainLeftSidebarWave wave={announcementWave} onHover={onHover} />);
+    expect(screen.getByTestId("pin")).toHaveTextContent("true");
   });
 });

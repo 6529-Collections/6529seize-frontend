@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { Tooltip } from "react-tooltip";
 import { useAuth } from "@/components/auth/Auth";
 import {
@@ -25,6 +26,8 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   waveId,
 }) => {
   const { waves } = useMyStream();
+  const { isAnnouncementsWave, isLoaded: isSettingsLoaded } =
+    useSeizeSettings();
   const { pinnedIds, isOperationInProgress } = usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
@@ -91,6 +94,14 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   // Don't render if user is not authenticated or using proxy
   if (!connectedProfile?.handle || activeProfileProxy) {
+    return null;
+  }
+
+  if (!isPinned && !isSettingsLoaded) {
+    return null;
+  }
+
+  if (isAnnouncementsWave(waveId) && !isPinned) {
     return null;
   }
 

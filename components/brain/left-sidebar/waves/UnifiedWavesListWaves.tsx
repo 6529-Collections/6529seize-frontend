@@ -22,6 +22,7 @@ function isValidWave(wave: unknown): wave is MinimalWave {
     typeof w.id === "string" &&
     w.id.length > 0 &&
     typeof w.name === "string" &&
+    typeof w.isAnnouncement === "boolean" &&
     typeof w.isPinned === "boolean"
   );
 }
@@ -111,13 +112,17 @@ const UnifiedWavesListWaves = forwardRef<
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
 
-    // Split waves into pinned and regular waves (no separate active section)
-    const { pinnedWaves, regularWaves } = useMemo(() => {
-      const pinned = waves.filter((wave) => wave.isPinned);
-      const regular = waves.filter((wave) => !wave.isPinned);
+    const { announcementWaves, pinnedWaves, regularWaves } = useMemo(() => {
+      const announcements = waves.filter((wave) => wave.isAnnouncement);
+      const pinned = waves.filter(
+        (wave) => !wave.isAnnouncement && wave.isPinned
+      );
+      const regular = waves.filter(
+        (wave) => !wave.isAnnouncement && !wave.isPinned
+      );
 
-      // No special sorting for active waves - keep them in their original position
       return {
+        announcementWaves: announcements,
         pinnedWaves: pinned,
         regularWaves: regular,
       };
@@ -147,6 +152,44 @@ const UnifiedWavesListWaves = forwardRef<
           />
         )}
 
+        {announcementWaves.length > 0 && (
+          <section
+            className="tw-flex tw-flex-col"
+            aria-label="Announcement waves"
+          >
+            {announcementWaves
+              .filter((wave): wave is MinimalWave => {
+                if (!isValidWave(wave)) {
+                  console.warn("Invalid announcement wave object", wave);
+                  if (!validateWaveDetailed(wave)) {
+                    console.warn(
+                      "Announcement wave failed detailed validation:",
+                      wave
+                    );
+                  }
+                  return false;
+                }
+                return true;
+              })
+              .map((wave) => (
+                <div key={wave.id}>
+                  <BrainLeftSidebarWave
+                    wave={wave}
+                    onHover={onHover}
+                    showPin={!hidePin && wave.isPinned}
+                    isDirectMessage={isDirectMessage}
+                  />
+                </div>
+              ))}
+          </section>
+        )}
+
+        {!hideHeaders &&
+          announcementWaves.length > 0 &&
+          (pinnedWaves.length > 0 || regularWaves.length > 0) && (
+            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          )}
+
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedWaves.length > 0 && (
           <section className="tw-flex tw-flex-col" aria-label="Pinned waves">
@@ -169,7 +212,7 @@ const UnifiedWavesListWaves = forwardRef<
                   <BrainLeftSidebarWave
                     wave={wave}
                     onHover={onHover}
-                    showPin={!hidePin}
+                    showPin={!hidePin && !wave.isAnnouncement}
                     isDirectMessage={isDirectMessage}
                   />
                 </div>

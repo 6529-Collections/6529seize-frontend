@@ -3,9 +3,12 @@
 import { useContext, useMemo, useCallback } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { useWavesOverview } from "./useWavesOverview";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
+import { useWaveById } from "./useWaveById";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -13,6 +16,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 // Enhanced wave interface with isPinned field and newDropsCount
 interface EnhancedWave extends ApiWave {
   isPinned: boolean;
+  isAnnouncement: boolean;
 }
 
 /**
@@ -22,6 +26,7 @@ interface EnhancedWave extends ApiWave {
 const useWavesList = () => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
+  const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
   const {
     pinnedIds,
     pinnedWaves: serverPinnedWaves,
@@ -32,6 +37,9 @@ const useWavesList = () => {
     refetch: refetchPinnedWaves,
   } = usePinnedWavesServer();
   const [following] = useShowFollowingWaves();
+  const announcementsWaveId = normalizeOptionalWaveId(
+    seizeSettings.announcements_wave_id
+  );
 
   // Track connected identity state - memoize to prevent re-renders
   const isConnectedIdentity = useMemo(() => {
@@ -66,12 +74,38 @@ const useWavesList = () => {
     viewerIdentityKey,
   });
 
+  const trackedAnnouncementWave = useMemo(
+    () =>
+      mainWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
+      serverPinnedWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
+      null,
+    [mainWaves, serverPinnedWaves, isAnnouncementsWave]
+  );
+  const shouldFetchAnnouncementWave = Boolean(
+    announcementsWaveId && !trackedAnnouncementWave
+  );
+  const { wave: fetchedAnnouncementWave, refetch: refetchAnnouncementWave } =
+    useWaveById(announcementsWaveId, {
+      enabled: shouldFetchAnnouncementWave,
+    });
+  const announcementWave = useMemo(() => {
+    const resolvedWave = trackedAnnouncementWave ?? fetchedAnnouncementWave;
+    if (!resolvedWave || waveIsDm(resolvedWave)) {
+      return null;
+    }
+    return resolvedWave;
+  }, [trackedAnnouncementWave, fetchedAnnouncementWave]);
+
   // Create a map of mainWaves by ID for easy lookup
   const mainWavesMap = useMemo(() => {
     const map = new Map<string, ApiWave>();
-    mainWaves.forEach((wave) => map.set(wave.id, wave));
+    mainWaves.forEach((wave) => {
+      if (!isAnnouncementsWave(wave.id)) {
+        map.set(wave.id, wave);
+      }
+    });
     return map;
-  }, [mainWaves]);
+  }, [mainWaves, isAnnouncementsWave]);
 
   // Set of wave IDs in the main list for quick checking
   const mainWaveIds = useMemo(() => {
@@ -86,13 +120,23 @@ const useWavesList = () => {
     mainWavesRefetch();
     // Refetch server-side pinned waves
     refetchPinnedWaves();
-  }, [mainWavesRefetch, refetchPinnedWaves]);
+    if (shouldFetchAnnouncementWave) {
+      void refetchAnnouncementWave();
+    }
+  }, [
+    mainWavesRefetch,
+    refetchPinnedWaves,
+    refetchAnnouncementWave,
+    shouldFetchAnnouncementWave,
+  ]);
 
   // Use server-provided pinned waves
   const separatelyFetchedPinnedWaves = useMemo(() => {
     // Filter out pinned waves that are already in mainWaves to avoid duplicates
-    return serverPinnedWaves.filter((wave) => !mainWaveIds.has(wave.id));
-  }, [serverPinnedWaves, mainWaveIds]);
+    return serverPinnedWaves.filter(
+      (wave) => !mainWaveIds.has(wave.id) && !isAnnouncementsWave(wave.id)
+    );
+  }, [serverPinnedWaves, mainWaveIds, isAnnouncementsWave]);
 
   // Collect ALL pinned waves (both from mainWaves and server-provided)
   const allPinnedWaves = useMemo(() => {
@@ -100,64 +144,61 @@ const useWavesList = () => {
 
     // Add all server-provided pinned waves, filtering out DMs
     serverPinnedWaves.forEach((wave) => {
-      if (!waveIsDm(wave)) {
-        result.push({ ...wave, isPinned: true });
+      if (!waveIsDm(wave) && !isAnnouncementsWave(wave.id)) {
+        result.push({ ...wave, isPinned: true, isAnnouncement: false });
       }
     });
 
     return result;
-  }, [serverPinnedWaves]);
+  }, [serverPinnedWaves, isAnnouncementsWave]);
 
   // New drops counts are now managed externally
 
   // Combine main waves with separately fetched pinned waves using useMemo
   // Simplified order: All waves sorted by latest_drop_timestamp (most recent first)
   const combinedWaves = useMemo(() => {
-    // Create a Map of all waves by ID for easy lookup
-    const allWavesMap = new Map<string, ApiWave>();
-
-    // Add main waves to the map
-    mainWaves.forEach((wave) => {
-      allWavesMap.set(wave.id, wave);
-    });
-
-    // Add separately fetched pinned waves to the map
-    separatelyFetchedPinnedWaves.forEach((wave) => {
-      allWavesMap.set(wave.id, wave);
-    });
-
-    // Process pinned waves first to mark them accordingly
+    const allWavesMap = new Map<string, EnhancedWave>();
     const pinnedWavesSet = new Set(pinnedIds);
-
-    // Create array of all waves
     const allWavesArray: EnhancedWave[] = [];
 
-    // Process all waves and add them to the array
     [...mainWaves, ...separatelyFetchedPinnedWaves].forEach((wave) => {
-      // Skip duplicates (waves that appear in both collections)
-      if (!allWavesMap.has(wave.id)) return;
-
-      // Remove from map to avoid processing twice
-      allWavesMap.delete(wave.id);
-
-      const isPinned = pinnedWavesSet.has(wave.id);
-
-      if (!waveIsDm(wave)) {
-        allWavesArray.push({
-          ...wave,
-          isPinned,
-        });
+      if (waveIsDm(wave) || isAnnouncementsWave(wave.id)) {
+        return;
       }
+
+      allWavesMap.set(wave.id, {
+        ...wave,
+        isPinned: pinnedWavesSet.has(wave.id),
+        isAnnouncement: false,
+      });
     });
 
+    if (announcementWave) {
+      allWavesArray.push({
+        ...announcementWave,
+        isPinned: pinnedWavesSet.has(announcementWave.id),
+        isAnnouncement: true,
+      });
+    }
+
+    allWavesArray.push(...allWavesMap.values());
+
     // Sort all waves by latest_drop_timestamp (most recent first)
-    allWavesArray.sort(
-      (a, b) =>
-        b.metrics.latest_drop_timestamp - a.metrics.latest_drop_timestamp
-    );
+    allWavesArray.sort((a, b) => {
+      if (a.isAnnouncement !== b.isAnnouncement) {
+        return a.isAnnouncement ? -1 : 1;
+      }
+      return b.metrics.latest_drop_timestamp - a.metrics.latest_drop_timestamp;
+    });
 
     return allWavesArray;
-  }, [mainWaves, separatelyFetchedPinnedWaves, pinnedIds]);
+  }, [
+    mainWaves,
+    separatelyFetchedPinnedWaves,
+    pinnedIds,
+    announcementWave,
+    isAnnouncementsWave,
+  ]);
 
   // Derived data should come directly from memoized inputs
   const allWaves = combinedWaves;

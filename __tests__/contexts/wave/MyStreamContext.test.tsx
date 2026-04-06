@@ -18,7 +18,7 @@ jest.mock("@/contexts/wave/hooks/useActiveWaveManager", () => ({
 const addPinnedWave = jest.fn();
 const removePinnedWave = jest.fn();
 
-jest.mock("@/contexts/wave/hooks/useEnhancedWavesList", () => ({
+jest.mock("@/contexts/wave/hooks/useEnhancedWavesListCore", () => ({
   __esModule: true,
   default: () => ({
     waves: [],

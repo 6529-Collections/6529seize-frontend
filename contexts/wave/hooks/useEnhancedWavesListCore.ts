@@ -15,6 +15,7 @@ export interface MinimalWave {
   newDropsCount: MinimalWaveNewDropsCount;
   picture: string | null;
   contributors: { pfp: string; identity: string }[];
+  isAnnouncement: boolean;
   isPinned: boolean;
   isMuted: boolean;
   unreadDropsCount: number;
@@ -25,6 +26,7 @@ export interface MinimalWave {
 // Wave type that includes the computed isPinned field from useWavesList
 interface EnhancedApiWave extends ApiWave {
   isPinned?: boolean;
+  isAnnouncement?: boolean;
 }
 
 interface WavesDataSource {
@@ -167,6 +169,7 @@ function useEnhancedWavesListCore(
           pfp: c.contributor_pfp,
           identity: c.contributor_identity,
         })),
+        isAnnouncement: wave.isAnnouncement ?? false,
         newDropsCount: newDrops,
         isPinned: options.supportsPinning
           ? (wave.isPinned ?? wave.pinned ?? false)

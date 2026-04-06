@@ -203,7 +203,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           )}
         </div>
       </Link>
-      {showPin && (
+      {showPin && (!wave.isAnnouncement || wave.isPinned) && (
         <BrainLeftSidebarWavePin waveId={wave.id} isPinned={!!wave.isPinned} />
       )}
     </div>
