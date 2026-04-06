@@ -24,7 +24,7 @@ Why this is better
 
 1. Reproducibility is stronger.
    The repo now pins a concrete pnpm version in package.json and commits
-   pnpm-lock.yaml. CI and developers can activate the exact same package manager
+   pnpm-lock.yaml. CI and developers can activate the same package manager
    version with Corepack.
 
 2. Production installs are more deterministic.
@@ -112,6 +112,8 @@ Developer workflow changes
 
 Bootstrap once:
 1. npm install --global sfw
+   Run this outside the repository; the repo's preinstall guard does not apply
+   to that global bootstrap step.
 2. corepack enable pnpm
 3. corepack prepare pnpm@10.33.0 --activate
 4. Optional on servers without direnv: ./bin/6529 bootstrap && source ~/.bashrc
@@ -206,5 +208,5 @@ Verification summary
 
 - pnpm 10.33.0 was activated with Corepack.
 - pnpm-lock.yaml was generated with pnpm import.
-- A pnpm install verification was started against the migrated lockfile to
-  confirm the repo can resolve through pnpm without npm.
+- A pnpm install verification completed successfully against the migrated
+  lockfile, confirming the repo can resolve through pnpm without npm.

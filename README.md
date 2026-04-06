@@ -212,13 +212,13 @@ source ~/.bashrc
 
 - Production
 
-```
+```bash
 6529 start
 ```
 
 ### RUN USING PM2
 
-```
+```bash
 pm2 start ./bin/6529 --name=6529seize -- start
 ```
 
