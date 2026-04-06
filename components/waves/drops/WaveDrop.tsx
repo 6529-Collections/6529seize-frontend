@@ -15,8 +15,9 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createBreakpoint } from "react-use";
-import type { DropInteractionParams } from "./Drop";
-import { DropLocation } from "./Drop";
+import type { DropInteractionParams } from "./drop.types";
+import { DropLocation } from "./drop.types";
+import { getRankHoverRingClass } from "./dropRankStyles";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
@@ -29,9 +30,7 @@ import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
 
-enum GroupingThreshold {
-  TIME_DIFFERENCE = 60000,
-}
+const GROUPING_TIME_DIFFERENCE_MS = 60_000;
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
@@ -46,7 +45,7 @@ const shouldGroupWithDrop = (
   const isSameAuthor = currentDrop.author.handle === otherDrop.author.handle;
   const isWithinTimeThreshold =
     Math.abs(currentDrop.created_at - otherDrop.created_at) <=
-    GroupingThreshold.TIME_DIFFERENCE;
+    GROUPING_TIME_DIFFERENCE_MS;
 
   if (!isSameAuthor || !isWithinTimeThreshold) {
     return false;
@@ -60,10 +59,11 @@ const shouldGroupWithDrop = (
 };
 
 const RANK_STYLES = {
-  1: "tw-border-l tw-border-[#E8D48A]/40 tw-border-y-0 tw-border-r-0",
-  2: "tw-border-l tw-border-[#DDDDDD]/40 tw-border-y-0 tw-border-r-0",
-  3: "tw-border-l tw-border-[#CD7F32]/40 tw-border-y-0 tw-border-r-0",
-  default: "tw-border-l tw-border-iron-600/40 tw-border-y-0 tw-border-r-0",
+  1: `tw-ring-1 tw-ring-inset tw-ring-iron-700/35 ${getRankHoverRingClass(1)}`,
+  2: `tw-ring-1 tw-ring-inset tw-ring-iron-700/35 ${getRankHoverRingClass(2)}`,
+  3: `tw-ring-1 tw-ring-inset tw-ring-iron-700/35 ${getRankHoverRingClass(3)}`,
+  default:
+    "tw-ring-1 tw-ring-inset tw-ring-iron-700/35 desktop-hover:hover:tw-ring-iron-600/45",
 } as const;
 
 const getColorClasses = ({
@@ -78,7 +78,7 @@ const getColorClasses = ({
   location: DropLocation;
 }): string => {
   if (isActiveDrop) {
-    return "tw-bg-[#3CCB7F]/10 tw-border-l tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
+    return "tw-bg-[#3CCB7F]/10 tw-ring-1 tw-ring-inset tw-ring-[#3CCB7F]/55";
   }
 
   if (!isDrop) {
@@ -413,7 +413,7 @@ const WaveDrop = ({
       <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
         {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
         <div
-          className="tw-flex tw-w-full tw-flex-col tw-gap-y-1"
+          className="tw-flex tw-w-full tw-flex-col"
           style={{
             maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
           }}
@@ -430,7 +430,7 @@ const WaveDrop = ({
             />
           )}
           <div
-            className={`tw-w-full ${
+            className={`tw-w-full ${showAuthorInfo ? "tw-mt-2" : ""}${
               shouldGroupWithPreviousDrop && !isProfileView
                 ? "tw-pl-[3.25rem]"
                 : ""

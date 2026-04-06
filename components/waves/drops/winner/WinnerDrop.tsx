@@ -1,11 +1,11 @@
 import { memo } from "react";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { DropInteractionParams, DropLocation } from "../Drop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import MemeWinnerDrop from "@/components/memes/drops/MemeWinnerDrop";
 import DefaultWinnerDrop from "./DefaultWinnerDrop";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import type { DropInteractionParams, DropLocation } from "../drop.types";
 
 interface WinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -26,7 +26,7 @@ interface WinnerDropProps {
 const WinnerDrop = (props: WinnerDropProps) => {
   const { isMemesWave } = useSeizeSettings();
 
-  if (isMemesWave(props.drop.wave?.id?.toLowerCase())) {
+  if (isMemesWave(props.drop.wave.id.toLowerCase())) {
     return <MemeWinnerDrop {...props} />;
   }
 

@@ -73,12 +73,14 @@ export * from '../models/ApiDropId';
 export * from '../models/ApiDropMedia';
 export * from '../models/ApiDropMentionedUser';
 export * from '../models/ApiDropMetadata';
+export * from '../models/ApiDropMetadataResponse';
 export * from '../models/ApiDropNftLink';
 export * from '../models/ApiDropPart';
 export * from '../models/ApiDropRater';
 export * from '../models/ApiDropRatingRequest';
 export * from '../models/ApiDropReaction';
 export * from '../models/ApiDropReferencedNFT';
+export * from '../models/ApiDropResolvedIdentityProfile';
 export * from '../models/ApiDropSearchStrategy';
 export * from '../models/ApiDropSubscriptionActions';
 export * from '../models/ApiDropSubscriptionTargetAction';
@@ -152,6 +154,7 @@ export * from '../models/ApiProfileMinsPage';
 export * from '../models/ApiProfileProxy';
 export * from '../models/ApiProfileProxyAction';
 export * from '../models/ApiProfileProxyActionType';
+export * from '../models/ApiProfileRepCategorySummary';
 export * from '../models/ApiPushNotificationDevice';
 export * from '../models/ApiPushNotificationSettings';
 export * from '../models/ApiPushNotificationSettingsUpdate';
@@ -187,6 +190,7 @@ export * from '../models/ApiUpcomingMemeSubscriptionStatus';
 export * from '../models/ApiUpdateDropRequest';
 export * from '../models/ApiUpdateProxyActionRequest';
 export * from '../models/ApiUpdateWaveDecisionPause';
+export * from '../models/ApiUpdateWaveParticipationConfig';
 export * from '../models/ApiUpdateWaveRequest';
 export * from '../models/ApiUploadItem';
 export * from '../models/ApiUploadPartOfMultipartUploadRequest';
@@ -220,7 +224,12 @@ export * from '../models/ApiWaveOutcomeSubType';
 export * from '../models/ApiWaveOutcomeType';
 export * from '../models/ApiWaveOutcomesPage';
 export * from '../models/ApiWaveParticipationConfig';
+export * from '../models/ApiWaveParticipationIdentitySubmissionAllowDuplicates';
+export * from '../models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted';
 export * from '../models/ApiWaveParticipationRequirement';
+export * from '../models/ApiWaveParticipationSubmissionStrategy';
+export * from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
+export * from '../models/ApiWaveParticipationSubmissionStrategyType';
 export * from '../models/ApiWaveRequiredMetadata';
 export * from '../models/ApiWaveScope';
 export * from '../models/ApiWaveSubscriptionActions';
@@ -373,12 +382,14 @@ import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
+import { ApiDropMetadataResponse } from '../models/ApiDropMetadataResponse';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropRatingRequest } from '../models/ApiDropRatingRequest';
 import { ApiDropReaction } from '../models/ApiDropReaction';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
+import { ApiDropResolvedIdentityProfile } from '../models/ApiDropResolvedIdentityProfile';
 import { ApiDropSearchStrategy } from '../models/ApiDropSearchStrategy';
 import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
@@ -452,6 +463,7 @@ import { ApiProfileMinsPage } from '../models/ApiProfileMinsPage';
 import { ApiProfileProxy } from '../models/ApiProfileProxy';
 import { ApiProfileProxyAction             } from '../models/ApiProfileProxyAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
+import { ApiProfileRepCategorySummary } from '../models/ApiProfileRepCategorySummary';
 import { ApiPushNotificationDevice } from '../models/ApiPushNotificationDevice';
 import { ApiPushNotificationSettings } from '../models/ApiPushNotificationSettings';
 import { ApiPushNotificationSettingsUpdate } from '../models/ApiPushNotificationSettingsUpdate';
@@ -487,6 +499,7 @@ import { ApiUpcomingMemeSubscriptionStatus   , ApiUpcomingMemeSubscriptionStatus
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
 import { ApiUpdateProxyActionRequest } from '../models/ApiUpdateProxyActionRequest';
 import { ApiUpdateWaveDecisionPause } from '../models/ApiUpdateWaveDecisionPause';
+import { ApiUpdateWaveParticipationConfig } from '../models/ApiUpdateWaveParticipationConfig';
 import { ApiUpdateWaveRequest } from '../models/ApiUpdateWaveRequest';
 import { ApiUploadItem } from '../models/ApiUploadItem';
 import { ApiUploadPartOfMultipartUploadRequest } from '../models/ApiUploadPartOfMultipartUploadRequest';
@@ -511,7 +524,7 @@ import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
 import { ApiWaveLog } from '../models/ApiWaveLog';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin                     } from '../models/ApiWaveMin';
+import { ApiWaveMin                      } from '../models/ApiWaveMin';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
@@ -520,7 +533,12 @@ import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { ApiWaveOutcomesPage } from '../models/ApiWaveOutcomesPage';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
+import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from '../models/ApiWaveParticipationIdentitySubmissionAllowDuplicates';
+import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from '../models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted';
 import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
+import { ApiWaveParticipationSubmissionStrategy   } from '../models/ApiWaveParticipationSubmissionStrategy';
+import { ApiWaveParticipationSubmissionStrategyIdentityConf   } from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
+import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
 import { ApiWaveRequiredMetadata   } from '../models/ApiWaveRequiredMetadata';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
@@ -638,7 +656,10 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWaveOutcomeCredit",
     "ApiWaveOutcomeSubType",
     "ApiWaveOutcomeType",
+    "ApiWaveParticipationIdentitySubmissionAllowDuplicates",
+    "ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted",
     "ApiWaveParticipationRequirement",
+    "ApiWaveParticipationSubmissionStrategyType",
     "ApiWaveSubscriptionTargetAction",
     "ApiWaveType",
     "ApiWavesOverviewType",
@@ -724,12 +745,14 @@ let typeMap: {[index: string]: any} = {
     "ApiDropMedia": ApiDropMedia,
     "ApiDropMentionedUser": ApiDropMentionedUser,
     "ApiDropMetadata": ApiDropMetadata,
+    "ApiDropMetadataResponse": ApiDropMetadataResponse,
     "ApiDropNftLink": ApiDropNftLink,
     "ApiDropPart": ApiDropPart,
     "ApiDropRater": ApiDropRater,
     "ApiDropRatingRequest": ApiDropRatingRequest,
     "ApiDropReaction": ApiDropReaction,
     "ApiDropReferencedNFT": ApiDropReferencedNFT,
+    "ApiDropResolvedIdentityProfile": ApiDropResolvedIdentityProfile,
     "ApiDropSubscriptionActions": ApiDropSubscriptionActions,
     "ApiDropTraceItem": ApiDropTraceItem,
     "ApiDropVote": ApiDropVote,
@@ -791,6 +814,7 @@ let typeMap: {[index: string]: any} = {
     "ApiProfileMinsPage": ApiProfileMinsPage,
     "ApiProfileProxy": ApiProfileProxy,
     "ApiProfileProxyAction": ApiProfileProxyAction,
+    "ApiProfileRepCategorySummary": ApiProfileRepCategorySummary,
     "ApiPushNotificationDevice": ApiPushNotificationDevice,
     "ApiPushNotificationSettings": ApiPushNotificationSettings,
     "ApiPushNotificationSettingsUpdate": ApiPushNotificationSettingsUpdate,
@@ -824,6 +848,7 @@ let typeMap: {[index: string]: any} = {
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
     "ApiUpdateProxyActionRequest": ApiUpdateProxyActionRequest,
     "ApiUpdateWaveDecisionPause": ApiUpdateWaveDecisionPause,
+    "ApiUpdateWaveParticipationConfig": ApiUpdateWaveParticipationConfig,
     "ApiUpdateWaveRequest": ApiUpdateWaveRequest,
     "ApiUploadItem": ApiUploadItem,
     "ApiUploadPartOfMultipartUploadRequest": ApiUploadPartOfMultipartUploadRequest,
@@ -851,6 +876,8 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveOutcomeDistributionItemsPage": ApiWaveOutcomeDistributionItemsPage,
     "ApiWaveOutcomesPage": ApiWaveOutcomesPage,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
+    "ApiWaveParticipationSubmissionStrategy": ApiWaveParticipationSubmissionStrategy,
+    "ApiWaveParticipationSubmissionStrategyIdentityConf": ApiWaveParticipationSubmissionStrategyIdentityConf,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,
     "ApiWaveScope": ApiWaveScope,
     "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,

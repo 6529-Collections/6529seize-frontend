@@ -19,6 +19,8 @@ describe("MemesWaveFooter", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: false,
+      leftThisRoundCount: 0,
       uncastPower: null,
       unratedCount: 0,
       votingLabel: null,
@@ -34,8 +36,10 @@ describe("MemesWaveFooter", () => {
 
   it("renders the expanded footer card", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 3,
       uncastPower: 5000,
-      unratedCount: 3,
+      unratedCount: 12,
       votingLabel: "TDH",
       isReady: true,
     });
@@ -44,13 +48,16 @@ describe("MemesWaveFooter", () => {
 
     expect(screen.getByText("Uncast Power")).toBeInTheDocument();
     expect(screen.getByText("5,000 TDH")).toBeInTheDocument();
-    expect(screen.getByText("3 left")).toBeInTheDocument();
+    expect(screen.getByText("3 left this round")).toBeInTheDocument();
+    expect(screen.getByText("12 unrated")).toBeInTheDocument();
   });
 
   it("calls onOpenQuickVote from the expanded card", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 3,
       uncastPower: 5000,
-      unratedCount: 3,
+      unratedCount: 12,
       votingLabel: "TDH",
       isReady: true,
     });
@@ -64,7 +71,7 @@ describe("MemesWaveFooter", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Uncast Power, 5,000 TDH, 3 left",
+        name: "Uncast Power, 5,000 TDH left, 3 left this round, 12 unrated",
       })
     );
 
@@ -73,8 +80,10 @@ describe("MemesWaveFooter", () => {
 
   it("prefetches quick vote from the expanded card on hover and focus", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 3,
       uncastPower: 5000,
-      unratedCount: 3,
+      unratedCount: 12,
       votingLabel: "TDH",
       isReady: true,
     });
@@ -87,7 +96,7 @@ describe("MemesWaveFooter", () => {
     );
 
     const button = screen.getByRole("button", {
-      name: "Uncast Power, 5,000 TDH, 3 left",
+      name: "Uncast Power, 5,000 TDH left, 3 left this round, 12 unrated",
     });
 
     fireEvent.mouseEnter(button);
@@ -98,8 +107,10 @@ describe("MemesWaveFooter", () => {
 
   it("renders the compact collapsed pill", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 4,
       uncastPower: 5000,
-      unratedCount: 4,
+      unratedCount: 9,
       votingLabel: "TDH",
       isReady: true,
     });
@@ -115,15 +126,17 @@ describe("MemesWaveFooter", () => {
     expect(screen.queryByText("Uncast Power")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", {
-        name: "4 submissions left unrated in memes wave",
+        name: "4 left this round, 9 unrated in the memes wave",
       })
     ).toBeInTheDocument();
   });
 
   it("calls onOpenQuickVote from the collapsed pill", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 4,
       uncastPower: 5000,
-      unratedCount: 4,
+      unratedCount: 9,
       votingLabel: "TDH",
       isReady: true,
     });
@@ -132,7 +145,7 @@ describe("MemesWaveFooter", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "4 submissions left unrated in memes wave",
+        name: "4 left this round, 9 unrated in the memes wave",
       })
     );
 
@@ -141,8 +154,10 @@ describe("MemesWaveFooter", () => {
 
   it("prefetches quick vote from the collapsed pill on hover and focus", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
+      leftThisRoundCount: 4,
       uncastPower: 5000,
-      unratedCount: 4,
+      unratedCount: 9,
       votingLabel: "TDH",
       isReady: true,
     });
@@ -156,7 +171,7 @@ describe("MemesWaveFooter", () => {
     );
 
     const button = screen.getByRole("button", {
-      name: "4 submissions left unrated in memes wave",
+      name: "4 left this round, 9 unrated in the memes wave",
     });
 
     fireEvent.mouseEnter(button);
@@ -167,6 +182,8 @@ describe("MemesWaveFooter", () => {
 
   it("ignores expanded-card clicks when no submissions remain", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: false,
+      leftThisRoundCount: 0,
       uncastPower: 5000,
       unratedCount: 0,
       votingLabel: "TDH",
@@ -180,14 +197,6 @@ describe("MemesWaveFooter", () => {
       />
     );
 
-    const button = screen.getByRole("button", {
-      name: "Uncast Power, 5,000 TDH, 0 left",
-    });
-
-    fireEvent.mouseEnter(button);
-    fireEvent.click(button);
-
-    expect(onOpenQuickVote).not.toHaveBeenCalled();
-    expect(onPrefetchQuickVote).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button")).toBeNull();
   });
 });

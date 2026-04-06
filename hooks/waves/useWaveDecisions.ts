@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { prepareWaveDecisionPoint } from "@/helpers/waves/wave-decision.helpers";
 
 interface UseWaveDecisionsProps {
   readonly waveId: string;
@@ -10,13 +12,6 @@ interface UseWaveDecisionsProps {
 
 const DEFAULT_PAGE_SIZE = 100;
 const DEFAULT_STALE_TIME = 60000;
-
-const sortDecisionPoint = (
-  decisionPoint: ApiWaveDecision
-): ApiWaveDecision => ({
-  ...decisionPoint,
-  winners: [...decisionPoint.winners].sort((a, b) => a.place - b.place),
-});
 
 export function useWaveDecisions({
   waveId,
@@ -39,10 +34,13 @@ export function useWaveDecisions({
     staleTime: DEFAULT_STALE_TIME,
   });
 
-  const decisionPoints =
-    data?.data
-      .map((decisionPoint) => sortDecisionPoint(decisionPoint))
-      .sort((a, b) => a.decision_time - b.decision_time) ?? [];
+  const decisionPoints = useMemo(
+    () =>
+      data?.data
+        .map((decisionPoint) => prepareWaveDecisionPoint(decisionPoint, waveId))
+        .sort((a, b) => a.decision_time - b.decision_time) ?? [],
+    [data?.data, waveId]
+  );
 
   return {
     decisionPoints,

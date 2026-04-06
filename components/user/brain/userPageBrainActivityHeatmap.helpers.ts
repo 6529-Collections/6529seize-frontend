@@ -46,8 +46,7 @@ export const LOADING_MONTH_HEADER_SEGMENTS = [
   { key: "feb", labelColumn: 44, widthPx: 18 },
   { key: "mar", labelColumn: 48, widthPx: 20 },
 ] as const;
-export const MONTH_LABEL_MIN_SPACING_PX = 34;
-const MONTH_LABEL_OVERFLOW_TOLERANCE_PX = 18;
+const MONTH_LABEL_MIN_SPACING_PX = 34;
 export const TOOLTIP_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
@@ -62,8 +61,8 @@ export const TOOLTIP_STYLE = {
   pointerEvents: "none",
 } as const;
 export const HEATMAP_VIEWPORT_CLASS_NAME =
-  "tw-[scrollbar-gutter:stable] tw-flex-1 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 desktop-hover:hover:tw-scrollbar-thumb-iron-600/80";
-export const HEATMAP_CONTENT_CLASS_NAME = "tw-inline-flex tw-pr-2";
+  "horizontal-menu-scrollable-x tw-[scrollbar-gutter:stable] tw-flex-1 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-pb-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 [touch-action:pan-x] desktop-hover:hover:tw-scrollbar-thumb-iron-600/80";
+export const HEATMAP_CONTENT_CLASS_NAME = "tw-inline-flex tw-flex-col tw-pr-2";
 export const HEATMAP_GRID_STYLE = {
   gridTemplateRows: `repeat(7, ${CELL_SIZE_PX}px)`,
   gridAutoColumns: `${CELL_SIZE_PX}px`,
@@ -73,6 +72,18 @@ export const CELL_FRAME_STYLE = {
   width: `${CELL_SIZE_PX}px`,
   height: `${CELL_SIZE_PX}px`,
 } as const;
+
+export function getHeatmapColumnLeftPx(column: number): number {
+  return column * COLUMN_STRIDE_PX;
+}
+
+export function getHeatmapGridWidthPx(weekCount: number): number {
+  if (weekCount <= 0) {
+    return 0;
+  }
+
+  return weekCount * COLUMN_STRIDE_PX - CELL_GAP_PX;
+}
 
 // Cell presentation
 const CELL_NODE_CLASS_NAMES: Readonly<
@@ -183,7 +194,7 @@ export function getCellFrameClassName(cell: UserPageBrainActivityCell): string {
   }
 
   return clsx(
-    "tw-flex tw-items-center tw-justify-center tw-rounded tw-transition-colors tw-duration-200",
+    "tw-flex tw-items-center tw-justify-center tw-rounded desktop-hover:tw-transition-colors desktop-hover:tw-duration-200",
     cell.ariaLabel &&
       "tw-cursor-pointer desktop-hover:hover:tw-z-20 desktop-hover:hover:tw-bg-[#171b21]"
   );
@@ -195,36 +206,21 @@ export function getCellNodeClassName(
 ): string {
   return clsx(
     variant === "grid" &&
-      "tw-transform-gpu tw-transition-all tw-duration-200 tw-ease-out",
+      "desktop-hover:tw-transform-gpu desktop-hover:tw-transition-all desktop-hover:tw-duration-200 desktop-hover:tw-ease-out",
     CELL_NODE_CLASS_NAMES[variant][cell.intensity]
   );
 }
 
 // Month label placement
 export function getPlacedMonthLabels(
-  monthLabels: readonly HeatmapMonthLabel[],
-  scrollLeft: number,
-  clientWidth: number
+  monthLabels: readonly HeatmapMonthLabel[]
 ): readonly PlacedMonthLabel[] {
   const placedMonthLabels: PlacedMonthLabel[] = [];
   let nextMinimumLeftPx = 0;
 
   for (const label of monthLabels) {
-    const naturalLeftPx = label.labelColumn * COLUMN_STRIDE_PX - scrollLeft;
+    const leftPx = getHeatmapColumnLeftPx(label.firstVisibleColumn);
 
-    if (
-      clientWidth > 0 &&
-      (naturalLeftPx < -MONTH_LABEL_OVERFLOW_TOLERANCE_PX ||
-        naturalLeftPx > clientWidth)
-    ) {
-      continue;
-    }
-
-    const leftPx = Math.max(-MONTH_LABEL_OVERFLOW_TOLERANCE_PX, naturalLeftPx);
-
-    if (clientWidth > 0 && leftPx >= clientWidth) {
-      continue;
-    }
     if (leftPx < nextMinimumLeftPx) {
       continue;
     }

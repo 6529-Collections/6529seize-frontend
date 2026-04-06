@@ -1,6 +1,7 @@
 "use client";
 
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import RememeImage from "@/components/nft-image/RememeImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
@@ -17,6 +18,7 @@ import {
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
+import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
 import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
@@ -49,6 +51,7 @@ export function MemePageLiveRightMenu(props: {
       return `https://github.com/6529-Collections/thememecards/tree/main/card${id}`;
     return `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
   })();
+  const fileMimeType = getFileMimeTypeFromMetadata(props.nft?.metadata);
 
   if (props.show && props.nft && props.nftMeta) {
     return (
@@ -76,10 +79,10 @@ export function MemePageLiveRightMenu(props: {
                 <tbody>
                   <tr>
                     <td>Edition Size</td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {numberWithCommas(props.nftMeta.edition_size)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.edition_size_rank}/
                       {props.nftMeta.collection_size}
                     </td>
@@ -96,18 +99,18 @@ export function MemePageLiveRightMenu(props: {
                             />
                           </span>
                         </td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {numberWithCommas(props.nftMeta.burnt)}
                         </td>
                       </tr>
                       <tr>
                         <td>Edition Size ex. Burnt</td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {numberWithCommas(
                             props.nftMeta.edition_size_not_burnt
                           )}
                         </td>
-                        <td className="text-right">
+                        <td className="text-right tw-font-medium">
                           {props.nftMeta.edition_size_not_burnt_rank}/
                           {props.nftMeta.collection_size}
                         </td>
@@ -116,10 +119,10 @@ export function MemePageLiveRightMenu(props: {
                   )}
                   <tr>
                     <td>6529 Museum</td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {numberWithCommas(props.nftMeta.museum_holdings)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.museum_holdings_rank}/
                       {props.nftMeta.collection_size}
                     </td>
@@ -129,31 +132,31 @@ export function MemePageLiveRightMenu(props: {
                       Edition Size ex.{props.nftMeta.burnt > 0 && " Burnt and"}{" "}
                       6529 Museum
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {numberWithCommas(props.nftMeta.edition_size_cleaned)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.edition_size_cleaned_rank}/
                       {props.nftMeta.collection_size}
                     </td>
                   </tr>
                   <tr>
                     <td>Collectors</td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {numberWithCommas(props.nftMeta.hodlers)}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.hodlers_rank}/
                       {props.nftMeta.collection_size}
                     </td>
                   </tr>
                   <tr>
                     <td>% Unique</td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {Math.round(props.nftMeta.percent_unique * 100 * 10) / 10}
                       %
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.percent_unique_rank}/
                       {props.nftMeta.collection_size}
                     </td>
@@ -161,13 +164,13 @@ export function MemePageLiveRightMenu(props: {
                   {props.nftMeta.burnt > 0 && (
                     <tr>
                       <td>% Unique ex. Burnt</td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {Math.round(
                           props.nftMeta.percent_unique_not_burnt * 100 * 10
                         ) / 10}
                         %
                       </td>
-                      <td className="text-right">
+                      <td className="text-right tw-font-medium">
                         {props.nftMeta.percent_unique_not_burnt_rank}/
                         {props.nftMeta.collection_size}
                       </td>
@@ -178,13 +181,13 @@ export function MemePageLiveRightMenu(props: {
                       % Unique ex.{props.nftMeta.burnt > 0 && " Burnt and"} 6529
                       Museum
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {Math.round(
                         props.nftMeta.percent_unique_cleaned * 100 * 10
                       ) / 10}
                       %
                     </td>
-                    <td className="text-right">
+                    <td className="text-right tw-font-medium">
                       {props.nftMeta.percent_unique_cleaned_rank}/
                       {props.nftMeta.collection_size}
                     </td>
@@ -204,19 +207,40 @@ export function MemePageLiveRightMenu(props: {
                 <tbody>
                   <tr>
                     <td>Artist Name</td>
-                    <td>{props.nft.artist}</td>
+                    <td className="tw-font-medium">{props.nft.artist}</td>
                   </tr>
                   <tr>
                     <td>Artist Profile</td>
-                    <td>
+                    <td className="tw-font-medium">
                       <ArtistProfileHandle nft={props.nft} />
                     </td>
                   </tr>
                   <tr>
                     <td>Mint Date</td>
-                    <td>{printMintDate(props.nft.mint_date)}</td>
+                    <td className="tw-font-medium">
+                      {printMintDate(props.nft.mint_date)}
+                    </td>
                   </tr>
-                  <NftPageStats nft={props.nft} />
+                  <NftPageStats
+                    nft={props.nft}
+                    afterMetadata={
+                      fileMimeType ? (
+                        <tr>
+                          <td>File Type</td>
+                          <td>
+                            <MediaTypeBadge
+                              mimeType={fileMimeType}
+                              size="sm"
+                              showTooltip={false}
+                              showLabel={true}
+                              tone="color"
+                              labelClassName="tw-text-inherit tw-font-medium"
+                            />
+                          </td>
+                        </tr>
+                      ) : null
+                    }
+                  />
                 </tbody>
               </Table>
             </Col>

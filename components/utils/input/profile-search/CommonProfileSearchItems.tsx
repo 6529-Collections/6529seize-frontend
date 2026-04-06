@@ -13,6 +13,7 @@ export default function CommonProfileSearchItems({
   highlightedIndex = null,
   onHighlightedOptionIdChange,
   listboxId,
+  listClassName,
 }: {
   readonly open: boolean;
   readonly profiles: CommunityMemberMinimal[];
@@ -25,6 +26,7 @@ export default function CommonProfileSearchItems({
     | undefined
     | undefined;
   readonly listboxId?: string | undefined;
+  readonly listClassName?: string | undefined;
 }) {
   const generatedListboxId = useId();
   const resolvedListboxId = listboxId ?? generatedListboxId;
@@ -54,14 +56,8 @@ export default function CommonProfileSearchItems({
   const optionMetadata = profiles.map((profile, index) => {
     const optionId = buildOptionId(profile, index);
     const identity = getSelectableIdentity(profile);
-    const label =
-      profile.display ??
-      profile.handle ??
-      profile.primary_wallet ??
-      profile.wallet ??
-      `Profile ${index + 1}`;
 
-    return { profile, optionId, identity, label, index };
+    return { profile, optionId, identity, index };
   });
 
   const highlightedOptionId =
@@ -86,69 +82,53 @@ export default function CommonProfileSearchItems({
     !searchCriteria || searchCriteria.length < 3
       ? "Type at least 3 characters"
       : "No results";
-  const selectSize = Math.max(Math.min(optionMetadata.length || 1, 10), 1);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       {open && (
         <motion.div
-          className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+          className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2 }}
         >
-          <div className="tw-absolute tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-            <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-              <select
-                id={resolvedListboxId}
-                aria-label="Profile suggestions"
-                tabIndex={-1}
-                size={selectSize}
-                className="tw-sr-only"
-              >
-                {optionMetadata.length ? (
-                  optionMetadata.map((meta) => {
-                    const isOptionSelected =
-                      typeof meta.identity === "string" &&
-                      normalizedSelected === meta.identity.toLowerCase();
-                    return (
-                      <option
-                        key={`sr-${meta.optionId}`}
-                        id={meta.optionId}
-                        value={meta.identity ?? meta.optionId}
-                        aria-selected={isOptionSelected}
-                      >
-                        {meta.label}
-                      </option>
-                    );
-                  })
-                ) : (
-                  <option id={`${resolvedListboxId}-empty`} value="">
-                    {noResultsText}
-                  </option>
-                )}
-              </select>
+          <div className="tw-absolute tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+            <div
+              className={`tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-1 ${
+                listClassName ?? ""
+              }`}
+            >
               <ul
-                aria-hidden="true"
-                className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none"
+                id={resolvedListboxId}
+                role="listbox"
+                aria-label="Profile suggestions"
+                className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-y-1 tw-px-2"
               >
                 {optionMetadata.length ? (
                   optionMetadata.map((meta) => {
                     const isOptionHighlighted = highlightedIndex === meta.index;
+                    const isOptionSelected =
+                      typeof meta.identity === "string" &&
+                      normalizedSelected === meta.identity.toLowerCase();
                     return (
                       <CommonProfileSearchItem
                         key={meta.optionId}
                         id={meta.optionId}
                         profile={meta.profile}
-                        selected={selected}
+                        isSelected={isOptionSelected}
                         isHighlighted={isOptionHighlighted}
                         onProfileSelect={onProfileSelect}
                       />
                     );
                   })
                 ) : (
-                  <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
+                  <li
+                    id={`${resolvedListboxId}-empty`}
+                    role="option"
+                    aria-selected="false"
+                    className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
+                  >
                     {noResultsText}
                   </li>
                 )}

@@ -33,23 +33,15 @@ import {
   type UserPageVisibilityContext,
   getUserPageTabByRoute,
 } from "./userTabs.config";
+import {
+  shouldHideSubscriptions,
+} from "./userPageVisibility";
 import { shouldDelayUserPageBrainRedirect } from "./userPageBrainAccess";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 const subscribeToClientRender = () => () => undefined;
 const getClientRenderSnapshot = () => true;
 const getServerRenderSnapshot = () => false;
-
-// Normalize consent country to uppercase code; empty or non-strings become null.
-const normalizeCountry = (
-  country: string | null | undefined
-): string | null => {
-  if (typeof country !== "string") {
-    return null;
-  }
-  const trimmed = country.trim();
-  return trimmed ? trimmed.toUpperCase() : null;
-};
 
 const getVisibilityContext = ({
   showWaves,
@@ -62,11 +54,12 @@ const getVisibilityContext = ({
   readonly country: string | null | undefined;
   readonly isOwnProfile: boolean;
 }): UserPageVisibilityContext => {
-  const normalizedCountry = normalizeCountry(country);
-
   return {
     showWaves,
-    hideSubscriptions: capacitorIsIos && normalizedCountry !== "US",
+    hideSubscriptions: shouldHideSubscriptions({
+      capacitorIsIos,
+      country,
+    }),
     isOwnProfile,
   };
 };

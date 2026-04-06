@@ -9,7 +9,7 @@ export default function WaveWinnersDropHeaderAuthorPfp({
   winner,
   size = "md",
 }: WaveWinnersDropHeaderAuthorPfpProps) {
-  const sizeClasses = size === "sm" ? "tw-h-8 tw-w-8" : "tw-h-12 tw-w-12";
+  const sizeClasses = size === "sm" ? "tw-h-8 tw-w-8" : "tw-h-10 tw-w-10";
   return (
     <div
       className={`tw-relative tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-900 ${sizeClasses}`}
@@ -18,6 +18,8 @@ export default function WaveWinnersDropHeaderAuthorPfp({
         <div className="tw-h-full tw-w-full tw-rounded-lg">
           <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
             <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
+              {/* Winner avatars can come from arbitrary remote hosts, so this stays unoptimized. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={winner.drop.author.pfp}
                 alt="Profile picture"

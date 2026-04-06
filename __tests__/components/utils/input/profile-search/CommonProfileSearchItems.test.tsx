@@ -1,39 +1,70 @@
-import { render, screen } from '@testing-library/react';
-import CommonProfileSearchItems from '@/components/utils/input/profile-search/CommonProfileSearchItems';
+import { render, screen } from "@testing-library/react";
+import CommonProfileSearchItems from "@/components/utils/input/profile-search/CommonProfileSearchItems";
 
-jest.mock('@/components/utils/input/profile-search/CommonProfileSearchItem', () => (props: any) => (
-  <li data-testid="item" id={props.id} data-highlighted={props.isHighlighted}>
-    {props.profile.wallet}
-  </li>
-));
+jest.mock(
+  "@/components/utils/input/profile-search/CommonProfileSearchItem",
+  () => (props: any) => (
+    <li
+      data-testid="item"
+      id={props.id}
+      role="option"
+      aria-selected={props.isSelected}
+      data-highlighted={props.isHighlighted}
+    >
+      {props.profile.wallet}
+    </li>
+  )
+);
 
-describe('CommonProfileSearchItems', () => {
-  const profiles = [
-    { wallet: 'a' },
-    { wallet: 'b' },
-  ] as any[];
+describe("CommonProfileSearchItems", () => {
+  const profiles = [{ wallet: "a" }, { wallet: "b" }] as any[];
 
-  it('renders items when open', () => {
+  it("renders items inside a listbox when open", () => {
     render(
-      <CommonProfileSearchItems open profiles={profiles} selected={null} searchCriteria="abc" onProfileSelect={jest.fn()} />
+      <CommonProfileSearchItems
+        open
+        profiles={profiles}
+        selected={null}
+        searchCriteria="abc"
+        onProfileSelect={jest.fn()}
+      />
     );
-    expect(screen.getAllByTestId('item')).toHaveLength(2);
+
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+    expect(screen.getAllByTestId("item")).toHaveLength(2);
   });
 
-  it('shows messages for empty results', () => {
+  it("shows messages for empty results", () => {
     const { rerender } = render(
-      <CommonProfileSearchItems open profiles={[]} selected={null} searchCriteria="ab" onProfileSelect={jest.fn()} />
+      <CommonProfileSearchItems
+        open
+        profiles={[]}
+        selected={null}
+        searchCriteria="ab"
+        onProfileSelect={jest.fn()}
+      />
     );
-    expect(screen.getAllByText('Type at least 3 characters')).toHaveLength(2);
+    expect(
+      screen.getByRole("option", { name: "Type at least 3 characters" })
+    ).toBeInTheDocument();
 
     rerender(
-      <CommonProfileSearchItems open profiles={[]} selected={null} searchCriteria="abcd" onProfileSelect={jest.fn()} />
+      <CommonProfileSearchItems
+        open
+        profiles={[]}
+        selected={null}
+        searchCriteria="abcd"
+        onProfileSelect={jest.fn()}
+      />
     );
-    expect(screen.getAllByText('No results')).toHaveLength(2);
+    expect(
+      screen.getByRole("option", { name: "No results" })
+    ).toBeInTheDocument();
   });
 
-  it('notifies highlighted option id when highlighted option changes', () => {
+  it("notifies highlighted option id when highlighted option changes", () => {
     const onHighlightedOptionIdChange = jest.fn();
+
     render(
       <CommonProfileSearchItems
         open
@@ -45,6 +76,9 @@ describe('CommonProfileSearchItems', () => {
         onProfileSelect={jest.fn()}
       />
     );
-    expect(onHighlightedOptionIdChange).toHaveBeenCalledWith('profile-search-item-b-1');
+
+    expect(onHighlightedOptionIdChange).toHaveBeenCalledWith(
+      "profile-search-item-b-1"
+    );
   });
 });

@@ -71,19 +71,18 @@ export default function UserPageBrainSidebarWaveItem({
       prefetch={false}
       className="tw-group tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-3 tw-no-underline tw-shadow-2xl tw-transition-all desktop-hover:hover:tw-border-white/15"
     >
-      <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0 tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/10">
-        <div className="tw-absolute tw-inset-0 tw-z-10 tw-transition-colors desktop-hover:group-hover:tw-bg-transparent" />
+      <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0 tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900 tw-shadow-sm tw-transition-colors desktop-hover:group-hover:tw-border-white/[0.1]">
         {imageSrc ? (
           <Image
             src={imageSrc}
             alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
             fill
             sizes="40px"
-            className="tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-110"
+            className="tw-object-cover"
           />
         ) : (
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-900">
-            <FallbackIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-110" />
+            <FallbackIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300" />
           </div>
         )}
       </div>

@@ -60,6 +60,7 @@ export function useWaveConfig() {
         noOfApplicationsAllowedPerParticipant: null,
         requiredTypes: [],
         requiredMetadata: [],
+        submissionStrategy: null,
         terms: null,
         signatureRequired: false,
         adminCanDeleteDrops: true,

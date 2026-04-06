@@ -11,10 +11,12 @@ jest.mock(
   () => ({
     __esModule: true,
     default: ({
+      leftThisRoundCount,
       onOpenQuickVote,
       onPrefetchQuickVote,
-      unratedCount,
+      unratedCount: _unratedCount,
     }: {
+      readonly leftThisRoundCount: number;
       readonly onOpenQuickVote: () => void;
       readonly onPrefetchQuickVote?: (() => void) | undefined;
       readonly unratedCount: number;
@@ -26,7 +28,7 @@ jest.mock(
         onFocus={onPrefetchQuickVote}
         onMouseEnter={onPrefetchQuickVote}
       >
-        {unratedCount}
+        {leftThisRoundCount}
       </button>
     ),
   })
@@ -44,7 +46,9 @@ describe("FloatingMemesQuickVoteTrigger", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: false,
       isReady: false,
+      leftThisRoundCount: 0,
       uncastPower: null,
       unratedCount: 0,
       votingLabel: null,
@@ -64,9 +68,11 @@ describe("FloatingMemesQuickVoteTrigger", () => {
 
   it("passes hover and focus prefetch intent through to the floating trigger", () => {
     useMemesWaveFooterStatsMock.mockReturnValue({
+      isAvailable: true,
       isReady: true,
+      leftThisRoundCount: 3,
       uncastPower: 5000,
-      unratedCount: 3,
+      unratedCount: 9,
       votingLabel: "TDH",
     });
 

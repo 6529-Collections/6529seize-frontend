@@ -135,18 +135,18 @@ jest.mock(
   () => ({
     __esModule: true,
     default: ({
+      leftThisRoundCount,
       onOpenQuickVote,
-      unratedCount,
     }: {
+      readonly leftThisRoundCount: number;
       readonly onOpenQuickVote: () => void;
-      readonly unratedCount: number;
     }) => (
       <button
         type="button"
         data-testid="quick-vote-trigger"
         onClick={onOpenQuickVote}
       >
-        {unratedCount}
+        {leftThisRoundCount}
       </button>
     ),
   })
@@ -254,9 +254,11 @@ describe("BrainMobile", () => {
       isDm: incomingWave?.chat?.scope?.group?.is_direct_message ?? false,
     }));
     mockUseMemesWaveFooterStats.mockReturnValue({
+      isAvailable: true,
       isReady: true,
+      leftThisRoundCount: 3,
       uncastPower: 5000,
-      unratedCount: 3,
+      unratedCount: 9,
       votingLabel: "TDH",
     });
   });

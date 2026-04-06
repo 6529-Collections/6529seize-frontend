@@ -43,6 +43,7 @@ interface DropAuthorBadgesProps {
   readonly profile: DropAuthorBadgesProfile;
   readonly tooltipIdPrefix?: string | undefined;
   readonly className?: string | undefined;
+  readonly size?: "default" | "compact" | undefined;
   readonly onArtistPreviewOpen?:
     | ((params: {
         readonly user: ApiProfileMin;
@@ -100,6 +101,7 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   profile,
   tooltipIdPrefix = "author-badges",
   className = DEFAULT_CONTAINER_CLASS,
+  size = "default",
   onArtistPreviewOpen,
   onWaveCreatorPreviewOpen,
 }) => {
@@ -158,12 +160,14 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
             trophyCount={trophyCount}
             onBadgeClick={onArtistBadgeClick}
             tooltipId={`${tooltipIdPrefix}-activity`}
+            size={size}
           />
         )}
         {isWaveCreator && (
           <WaveCreatorBadge
             tooltipId={`${tooltipIdPrefix}-wave-creator`}
             onBadgeClick={onWaveCreatorBadgeClick}
+            size={size}
           />
         )}
       </div>

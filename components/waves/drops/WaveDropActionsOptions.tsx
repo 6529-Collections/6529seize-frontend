@@ -51,15 +51,22 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
         aria-label="Delete drop"
         data-tooltip-id={`delete-${drop.id}`}
       >
-        <TrashIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+        <TrashIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
       </button>
       <Tooltip
         id={`delete-${drop.id}`}
-        place="top"
+        place="top-end"
+        offset={8}
+        opacity={1}
+        positionStrategy="fixed"
         style={{
+          borderRadius: "6px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
+          zIndex: 10000,
+          pointerEvents: "none",
         }}
       >
         <span className="tw-text-xs">Delete</span>

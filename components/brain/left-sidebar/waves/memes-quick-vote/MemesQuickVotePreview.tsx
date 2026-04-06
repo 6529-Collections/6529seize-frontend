@@ -8,6 +8,10 @@ import {
   type ExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import {
+  formatMemesQuickVoteLeftThisRoundText,
+  formatMemesQuickVoteUnratedText,
+} from "@/hooks/memesQuickVote.helpers";
 import clsx from "clsx";
 import type { ReactNode, TouchEventHandler } from "react";
 import { useMemo } from "react";
@@ -22,10 +26,11 @@ interface MemesQuickVotePreviewProps {
   readonly drop: ExtendedDrop;
   readonly isBusy: boolean;
   readonly isMobile: boolean;
-  readonly remainingCount: number;
+  readonly leftThisRoundCount: number;
   readonly renderMode: "active" | "preloaded";
   readonly swipeVoteAmount: number | null;
   readonly uncastPower: number | null;
+  readonly unratedCount: number;
   readonly votingLabel: string | null;
   readonly onAdvanceStart: () => void;
   readonly onSkip: () => void;
@@ -211,10 +216,11 @@ function MemesQuickVotePreviewContent({
   drop,
   isBusy,
   isMobile,
-  remainingCount,
+  leftThisRoundCount,
   renderMode,
   swipeVoteAmount,
   uncastPower,
+  unratedCount,
   votingLabel,
   onAdvanceStart,
   onSkip,
@@ -359,12 +365,14 @@ function MemesQuickVotePreviewContent({
           </span>
         )}
         {isInteractive && (
-          <span
-            aria-hidden="true"
-            className="tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.03] tw-px-4 tw-py-1.5 tw-text-[13px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-backdrop-blur-md"
-          >
-            {formatNumberWithCommas(remainingCount)} unrated
-          </span>
+          <>
+            <span className="tw-sr-only">
+              {formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount)}
+            </span>
+            <span className="tw-sr-only">
+              {formatMemesQuickVoteUnratedText(unratedCount)}
+            </span>
+          </>
         )}
       </div>
 

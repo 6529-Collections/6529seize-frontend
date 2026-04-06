@@ -638,6 +638,35 @@ describe("MemeLabPageComponent", () => {
     });
   });
 
+  it("does not crash on live tab when API media fields are null", async () => {
+    mockUseSearchParams.mockReturnValue({
+      get: jest.fn((key: string) => {
+        if (key === "focus") return MEME_FOCUS.LIVE;
+        return null;
+      }),
+    });
+
+    setupMockApiCalls(1, {
+      uri: null,
+      image: null,
+      animation: null,
+      metadata: {
+        attributes: [],
+        image: null,
+        animation: null,
+        animation_url: null,
+      },
+    });
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "NFT" })).toBeInTheDocument();
+    });
+  });
+
   it("treats metadata.animation_url-only NFTs as animated", async () => {
     mockUseSearchParams.mockReturnValue({
       get: jest.fn((key: string) => {
@@ -674,7 +703,7 @@ describe("MemeLabPageComponent", () => {
       expect(
         screen.getByRole("link", { name: "Open animation in new tab" })
       ).toHaveAttribute("href", "https://metadata.example/animation.html");
-      expect(getCardDetailValue("File Type")).toBe("HTML");
+      expect(getCardDetailValue("File Type")).toBe("Interactive - HTML");
       expect(getCardDetailValue("Dimensions")).toBe("1,920 x 1,080");
     });
   });
@@ -709,7 +738,7 @@ describe("MemeLabPageComponent", () => {
     fireEvent.click(screen.getByTestId("carousel-slide-1"));
 
     await waitFor(() => {
-      expect(getCardDetailValue("File Type")).toBe("PNG");
+      expect(getCardDetailValue("File Type")).toBe("Image - PNG");
       expect(getCardDetailValue("Dimensions")).toBe("1,200 x 800");
     });
   });
