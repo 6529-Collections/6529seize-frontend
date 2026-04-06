@@ -15,9 +15,18 @@ describe("useWaveData", () => {
   it("calls useQuery with correct params", () => {
     (useQuery as jest.Mock).mockReturnValue({ data: null });
     renderHook(() =>
-      useWaveData({ waveId: "1", refetchInterval: 1000, onWaveNotFound: jest.fn() })
+      useWaveData({
+        waveId: "1",
+        refetchInterval: 1000,
+        onWaveNotFound: jest.fn(),
+      })
     );
-    expect(useQuery).toHaveBeenCalled();
+    expect(useQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        refetchOnWindowFocus: "always",
+        refetchInterval: 1000,
+      })
+    );
   });
 
   it("does not fetch when waveId is null", () => {
@@ -29,15 +38,18 @@ describe("useWaveData", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('handles retry logic', () => {
+  it("handles retry logic", () => {
     let options: any;
-    (useQuery as jest.Mock).mockImplementation((opts: any) => { options = opts; return { data: null }; });
+    (useQuery as jest.Mock).mockImplementation((opts: any) => {
+      options = opts;
+      return { data: null };
+    });
     const onWaveNotFound = jest.fn();
-    renderHook(() => useWaveData({ waveId: '1', onWaveNotFound }));
-    expect(options.retry(1, 'Wave 1 not found')).toBe(false);
+    renderHook(() => useWaveData({ waveId: "1", onWaveNotFound }));
+    expect(options.retry(1, "Wave 1 not found")).toBe(false);
     expect(onWaveNotFound).toHaveBeenCalled();
-    expect(options.retry(2, new Error('e'))).toBe(true);
-    expect(options.retry(4, new Error('e'))).toBe(false);
+    expect(options.retry(2, new Error("e"))).toBe(true);
+    expect(options.retry(4, new Error("e"))).toBe(false);
     expect(options.retryDelay(3)).toBe(3000);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import type { WavesOverviewParams } from "@/types/waves.types";
@@ -21,6 +21,11 @@ interface UseWavesOverviewProps {
   readonly directMessage?: boolean | undefined;
   readonly refetchInterval?: number | undefined;
 }
+
+const ERROR_COOLDOWN_MS = 30000;
+type TimeoutRef = {
+  current: ReturnType<typeof setTimeout> | null;
+};
 
 export const useWavesOverview = ({
   type,
@@ -52,6 +57,10 @@ export const useWavesOverview = ({
   const [lastErrorTimestamp, setLastErrorTimestamp] = useState<number | null>(
     null
   );
+  const fetchNextPageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const refetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const query = useInfiniteQuery({
     queryKey: [QueryKey.WAVES_OVERVIEW, queryKeyParams],
@@ -101,25 +110,64 @@ export const useWavesOverview = ({
     setWaves(getWaves());
   }, [query.data]);
 
-  const fetchNextPage = useCallback(() => {
-    if (lastErrorTimestamp && Date.now() - lastErrorTimestamp < 30000) {
-      setTimeout(() => {
-        query.fetchNextPage();
-      }, 30000);
+  const getRemainingCooldown = useCallback(() => {
+    if (lastErrorTimestamp === null) {
+      return 0;
+    }
+
+    return Math.max(ERROR_COOLDOWN_MS - (Date.now() - lastErrorTimestamp), 0);
+  }, [lastErrorTimestamp]);
+
+  const clearScheduledAction = useCallback((timeoutRef: TimeoutRef) => {
+    const timeoutId = timeoutRef.current;
+    if (timeoutId === null) {
       return;
     }
-    query.fetchNextPage();
-  }, [lastErrorTimestamp, query]);
+
+    clearTimeout(timeoutId);
+    timeoutRef.current = null;
+  }, []);
+
+  const runWithCooldown = useCallback(
+    (timeoutRef: TimeoutRef, action: () => void) => {
+      const remainingCooldown = getRemainingCooldown();
+      if (remainingCooldown === 0) {
+        action();
+        return;
+      }
+
+      clearScheduledAction(timeoutRef);
+
+      timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = null;
+        action();
+      }, remainingCooldown);
+    },
+    [clearScheduledAction, getRemainingCooldown]
+  );
+
+  useEffect(() => {
+    return () => {
+      clearScheduledAction(fetchNextPageTimeoutRef);
+      clearScheduledAction(refetchTimeoutRef);
+    };
+  }, [clearScheduledAction]);
+
+  const fetchNextPage = useCallback(() => {
+    runWithCooldown(fetchNextPageTimeoutRef, () => {
+      void query.fetchNextPage().catch(() => {
+        // Error surfaced via query state
+      });
+    });
+  }, [query, runWithCooldown]);
 
   const refetch = useCallback(() => {
-    if (lastErrorTimestamp && Date.now() - lastErrorTimestamp < 30000) {
-      setTimeout(() => {
-        query.refetch();
-      }, 30000);
-      return;
-    }
-    query.refetch();
-  }, [lastErrorTimestamp, query]);
+    runWithCooldown(refetchTimeoutRef, () => {
+      void query.refetch().catch(() => {
+        // Error surfaced via query state
+      });
+    });
+  }, [query, runWithCooldown]);
 
   const returnValue = useMemo(() => {
     return {

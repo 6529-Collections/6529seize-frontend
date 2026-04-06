@@ -41,6 +41,7 @@ export function useWaveBoostedDrops({
     enabled: !!waveId,
     staleTime: STALE_TIME,
     refetchInterval: REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
     retry: 2,
     retryDelay: (attemptIndex) => attemptIndex * 1000,
   });

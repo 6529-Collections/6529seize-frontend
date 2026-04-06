@@ -28,6 +28,7 @@ export const useWaveData = ({
     staleTime: 60000,
     enabled: !!waveId,
     refetchInterval,
+    refetchOnWindowFocus: "always",
     retry: (failureCount, error) => {
       if ((error as any)?.message === "Attempted fetch with null waveId") {
         return false; // Don't retry our artificial error

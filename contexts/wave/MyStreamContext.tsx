@@ -11,9 +11,9 @@ import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import type { ReactNode } from "react";
 import React, {
   createContext,
-  useCallback,
   useContext,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -28,6 +28,8 @@ import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
 import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+
+const FOREGROUND_REFRESH_DEBOUNCE_MS = 1000;
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -122,6 +124,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
+  const lastWebForegroundRefreshAtRef = useRef(0);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   // Instantiate the data manager, passing the updater function from the store
@@ -131,18 +134,13 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     removeDrop: waveMessagesStore.removeDrop,
   });
 
-  const wavesRef = useRef(wavesHookData.waves);
-  const dmWavesRef = useRef(dmWavesHookData.waves);
-  wavesRef.current = wavesHookData.waves;
-  dmWavesRef.current = dmWavesHookData.waves;
-
-  const isWaveMuted = useCallback((waveId: string): boolean => {
-    const wave = wavesRef.current.find((w) => w.id === waveId);
+  const isWaveMuted = useEffectEvent((waveId: string): boolean => {
+    const wave = wavesHookData.waves.find((w) => w.id === waveId);
     if (wave) return wave.isMuted;
-    const dmWave = dmWavesRef.current.find((w) => w.id === waveId);
+    const dmWave = dmWavesHookData.waves.find((w) => w.id === waveId);
     if (dmWave) return dmWave.isMuted;
     return false;
-  }, []);
+  });
 
   // Instantiate the real-time updater hook
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
@@ -156,24 +154,82 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     isWaveMuted,
   });
 
+  const refreshWaveViewOnForeground = useEffectEvent(
+    ({
+      dedupe = false,
+      resetNewDrops = false,
+    }: {
+      dedupe?: boolean | undefined;
+      resetNewDrops?: boolean | undefined;
+    } = {}) => {
+      if (dedupe) {
+        const now = Date.now();
+        if (
+          now - lastWebForegroundRefreshAtRef.current <
+          FOREGROUND_REFRESH_DEBOUNCE_MS
+        ) {
+          return;
+        }
+        lastWebForegroundRefreshAtRef.current = now;
+      }
+
+      if (activeWaveId) {
+        waveDataManager.registerWave(activeWaveId, true);
+      }
+
+      mainWavesData.refetchAllWaves();
+      dmWavesData.refetchAllWaves();
+
+      if (resetNewDrops) {
+        wavesHookData.resetAllWavesNewDropsCount();
+        dmWavesHookData.resetAllWavesNewDropsCount();
+      }
+    }
+  );
+
   useEffect(() => {
     if (websocketStatus !== "connected") {
       return;
     }
-    if (activeWaveId) {
-      waveDataManager.registerWave(activeWaveId, true);
-    }
-    wavesHookData.refetchAllWaves();
-    if (isCapacitor) {
-      wavesHookData.resetAllWavesNewDropsCount();
-    }
-  }, [websocketStatus, activeWaveId, isCapacitor]);
+    refreshWaveViewOnForeground({
+      dedupe: !isCapacitor,
+      resetNewDrops: isCapacitor,
+    });
+  }, [websocketStatus, isCapacitor]);
 
   useEffect(() => {
     if (activeWaveId) {
       waveDataManager.registerWave(activeWaveId, true);
     }
   }, [activeWaveId]);
+
+  useEffect(() => {
+    if (isCapacitor) {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshWaveViewOnForeground({
+          dedupe: true,
+        });
+      }
+    };
+
+    const handleWindowFocus = () => {
+      refreshWaveViewOnForeground({
+        dedupe: true,
+      });
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleWindowFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleWindowFocus);
+    };
+  }, [isCapacitor]);
 
   // Detect when app comes to foreground on mobile
   useEffect(() => {
@@ -183,17 +239,12 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
     // Check if app transitioned from background to foreground
     if (!prevIsActiveRef.current && isActive) {
-      // App just became active, do exactly what WebSocket connect does
-      if (activeWaveId) {
-        waveDataManager.registerWave(activeWaveId, true);
-      }
-      wavesHookData.refetchAllWaves();
-      wavesHookData.resetAllWavesNewDropsCount();
+      refreshWaveViewOnForeground({ resetNewDrops: true });
     }
 
     // Update the ref for next comparison
     prevIsActiveRef.current = isActive;
-  }, [isActive, isCapacitor, activeWaveId, waveDataManager, wavesHookData]);
+  }, [isActive, isCapacitor]);
 
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
