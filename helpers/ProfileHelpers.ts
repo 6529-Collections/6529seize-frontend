@@ -8,6 +8,12 @@ type ProfileIdentityForOwnership =
   | null
   | undefined;
 
+type ComparableProfileIdentity = {
+  readonly id?: string | null | undefined;
+  readonly handle?: string | null | undefined;
+  readonly primary_address?: string | null | undefined;
+};
+
 type ProfileViewerContext = "self" | "other" | "anonymous";
 
 const normalizeProfileTarget = (
@@ -66,6 +72,38 @@ export const getProfileViewerContext = ({
   })
     ? "self"
     : "other";
+};
+
+export const areSameProfileIdentity = ({
+  left,
+  right,
+}: {
+  readonly left: ComparableProfileIdentity | null | undefined;
+  readonly right: ComparableProfileIdentity | null | undefined;
+}): boolean => {
+  if (!left || !right) {
+    return false;
+  }
+
+  const leftId = normalizeProfileTarget(left.id);
+  const rightId = normalizeProfileTarget(right.id);
+  if (leftId && rightId && leftId === rightId) {
+    return true;
+  }
+
+  const leftHandle = normalizeProfileTarget(left.handle);
+  const rightHandle = normalizeProfileTarget(right.handle);
+  if (leftHandle && rightHandle && leftHandle === rightHandle) {
+    return true;
+  }
+
+  const leftPrimaryAddress = normalizeProfileTarget(left.primary_address);
+  const rightPrimaryAddress = normalizeProfileTarget(right.primary_address);
+  return !!(
+    leftPrimaryAddress &&
+    rightPrimaryAddress &&
+    leftPrimaryAddress === rightPrimaryAddress
+  );
 };
 
 export const getProfileConnectedStatus = ({
