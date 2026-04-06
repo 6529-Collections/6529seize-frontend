@@ -31,7 +31,6 @@ interface WavesMessagesWrapperProps {
   readonly children: ReactNode;
   readonly defaultPath?: string | undefined; // "/waves" or "/messages"
   readonly showLeftSidebar?: boolean | undefined;
-  readonly allowRightSidebar?: boolean | undefined;
   readonly allowDropOverlay?: boolean | undefined;
   readonly isPublicReadOnly?: boolean | undefined;
 }
@@ -40,7 +39,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   children,
   defaultPath = "/waves",
   showLeftSidebar = true,
-  allowRightSidebar = true,
   allowDropOverlay = true,
   isPublicReadOnly = false,
 }) => {
@@ -78,12 +76,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       closeRightSidebar();
     }
   }, [waveId, isRightSidebarOpen, closeRightSidebar]);
-
-  useEffect(() => {
-    if (!allowRightSidebar && isRightSidebarOpen) {
-      closeRightSidebar();
-    }
-  }, [allowRightSidebar, isRightSidebarOpen, closeRightSidebar]);
 
   const { data: drop, error: dropError } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: effectiveDropId }],
@@ -131,7 +123,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     drop !== undefined &&
     shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(
-    allowRightSidebar && isRightSidebarOpen && waveId && !isDropOpen
+    isRightSidebarOpen && waveId && !isDropOpen
   );
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   let rightVariant: "inline" | "overlay" | null = null;

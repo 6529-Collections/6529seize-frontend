@@ -25,7 +25,6 @@ import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
-import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
@@ -43,7 +42,6 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
-  const { isPublicReadOnly } = useWaveViewerMode();
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -194,23 +192,21 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           >
             <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </button>
-          {!isPublicReadOnly && (
-            <button
-              type="button"
-              onClick={toggleRightSidebar}
-              className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
-              aria-label="Toggle right sidebar"
-            >
-              <ChevronDoubleLeftIcon
-                strokeWidth={2}
-                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
-                  isRightSidebarOpen
-                    ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
-                    : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
-                }`}
-              />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={toggleRightSidebar}
+            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
+            aria-label="Toggle right sidebar"
+          >
+            <ChevronDoubleLeftIcon
+              strokeWidth={2}
+              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
+                isRightSidebarOpen
+                  ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
+                  : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
+              }`}
+            />
+          </button>
         </div>
       </div>
       <div className="tw-border-b tw-border-l-0 tw-border-t-0 tw-border-solid tw-border-iron-800">

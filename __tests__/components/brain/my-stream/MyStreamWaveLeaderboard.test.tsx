@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import MyStreamWaveLeaderboard from "@/components/brain/my-stream/MyStreamWaveLeaderboard";
+import { WaveViewerModeProvider } from "@/components/waves/public/WaveViewerModeContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
@@ -108,19 +109,29 @@ const wave = {
   wave: { type: "RANK" },
 } as ApiWave;
 
-const renderLeaderboard = () =>
-  render(
-    <AuthContext.Provider
-      value={
-        {
-          connectedProfile: { handle: "tester" },
-          activeProfileProxy: null,
-        } as any
-      }
-    >
-      <MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />
+const authContextValue = {
+  connectedProfile: { handle: "tester" },
+  activeProfileProxy: null,
+} as any;
+
+const leaderboardTree = ({
+  waveOverride = wave,
+  isPublicReadOnly = false,
+}: {
+  readonly waveOverride?: ApiWave;
+  readonly isPublicReadOnly?: boolean;
+} = {}) => (
+  <WaveViewerModeProvider isPublicReadOnly={isPublicReadOnly}>
+    <AuthContext.Provider value={authContextValue}>
+      <MyStreamWaveLeaderboard wave={waveOverride} onDropClick={jest.fn()} />
     </AuthContext.Provider>
-  );
+  </WaveViewerModeProvider>
+);
+
+const renderLeaderboard = (options?: {
+  readonly waveOverride?: ApiWave;
+  readonly isPublicReadOnly?: boolean;
+}) => render(leaderboardTree(options));
 
 describe("MyStreamWaveLeaderboard", () => {
   beforeEach(() => {
@@ -214,32 +225,20 @@ describe("MyStreamWaveLeaderboard", () => {
       jest.fn(),
     ]);
 
-    render(
-      <AuthContext.Provider
-        value={
-          {
-            connectedProfile: { handle: "tester" },
-            activeProfileProxy: null,
-          } as any
-        }
-      >
-        <MyStreamWaveLeaderboard
-          wave={{
-            ...wave,
-            participation: {
-              submission_strategy: {
-                type: "IDENTITY",
-                config: {
-                  who_can_be_submitted: "EVERYONE",
-                  duplicates: "NEVER_ALLOW",
-                },
-              },
+    renderLeaderboard({
+      waveOverride: {
+        ...wave,
+        participation: {
+          submission_strategy: {
+            type: "IDENTITY",
+            config: {
+              who_can_be_submitted: "EVERYONE",
+              duplicates: "NEVER_ALLOW",
             },
-          }}
-          onDropClick={jest.fn()}
-        />
-      </AuthContext.Provider>
-    );
+          },
+        },
+      } as ApiWave,
+    });
 
     await user.click(screen.getByTestId("header"));
 
@@ -331,6 +330,93 @@ describe("MyStreamWaveLeaderboard", () => {
     await user.click(screen.getByTestId("header"));
     expect(screen.getByTestId("curation-modal")).toBeInTheDocument();
     expect(curationModalProps.wave).toEqual(wave);
+  });
+
+  it("resets inline create state when public read only toggles on", async () => {
+    const user = userEvent.setup();
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    const { rerender } = renderLeaderboard();
+
+    await user.click(screen.getByTestId("header"));
+    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+
+    rerender(leaderboardTree({ isPublicReadOnly: true }));
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+
+    rerender(leaderboardTree({ isPublicReadOnly: false }));
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("resets memes create state when public read only toggles on", async () => {
+    const user = userEvent.setup();
+    useWave.mockReturnValue({
+      isMemesWave: true,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["grid", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    const { rerender } = renderLeaderboard();
+
+    await user.click(screen.getByTestId("header"));
+    expect(screen.getByTestId("memes")).toBeInTheDocument();
+
+    rerender(leaderboardTree({ isPublicReadOnly: true }));
+    expect(screen.queryByTestId("memes")).not.toBeInTheDocument();
+
+    rerender(leaderboardTree({ isPublicReadOnly: false }));
+    expect(screen.queryByTestId("memes")).not.toBeInTheDocument();
+  });
+
+  it("resets curation create state when public read only toggles on", async () => {
+    const user = userEvent.setup();
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    const { rerender } = renderLeaderboard();
+
+    await user.click(screen.getByTestId("header"));
+    expect(screen.getByTestId("curation-modal")).toBeInTheDocument();
+
+    rerender(leaderboardTree({ isPublicReadOnly: true }));
+    expect(screen.queryByTestId("curation-modal")).not.toBeInTheDocument();
+
+    rerender(leaderboardTree({ isPublicReadOnly: false }));
+    expect(screen.queryByTestId("curation-modal")).not.toBeInTheDocument();
   });
 
   it("updates URL when curation filter changes", () => {
@@ -426,23 +512,20 @@ describe("MyStreamWaveLeaderboard", () => {
       jest.fn(),
     ]);
 
-    const authContextValue = {
-      connectedProfile: { handle: "tester" },
-      activeProfileProxy: null,
-    } as any;
-
     const waveA = { ...wave, id: "1" } as ApiWave;
     const waveB = { ...wave, id: "2" } as ApiWave;
     const onDropClick = jest.fn();
 
     const { rerender } = render(
-      <AuthContext.Provider value={authContextValue}>
-        <MyStreamWaveLeaderboard
-          key={waveA.id}
-          wave={waveA}
-          onDropClick={onDropClick}
-        />
-      </AuthContext.Provider>
+      <WaveViewerModeProvider>
+        <AuthContext.Provider value={authContextValue}>
+          <MyStreamWaveLeaderboard
+            key={waveA.id}
+            wave={waveA}
+            onDropClick={onDropClick}
+          />
+        </AuthContext.Provider>
+      </WaveViewerModeProvider>
     );
 
     act(() => {
@@ -453,13 +536,15 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(dropsProps.maxPrice).toBe(5);
 
     rerender(
-      <AuthContext.Provider value={authContextValue}>
-        <MyStreamWaveLeaderboard
-          key={waveB.id}
-          wave={waveB}
-          onDropClick={onDropClick}
-        />
-      </AuthContext.Provider>
+      <WaveViewerModeProvider>
+        <AuthContext.Provider value={authContextValue}>
+          <MyStreamWaveLeaderboard
+            key={waveB.id}
+            wave={waveB}
+            onDropClick={onDropClick}
+          />
+        </AuthContext.Provider>
+      </WaveViewerModeProvider>
     );
 
     await waitFor(() => {

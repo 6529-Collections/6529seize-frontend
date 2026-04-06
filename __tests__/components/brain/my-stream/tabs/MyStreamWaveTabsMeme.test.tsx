@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveTabsMeme from "@/components/brain/my-stream/tabs/MyStreamWaveTabsMeme";
 import { SidebarProvider } from "@/hooks/useSidebarState";
+import { WaveViewerModeProvider } from "@/components/waves/public/WaveViewerModeContext";
 
 const mockPush = jest.fn();
 const mockUseBreakpoint = jest.fn(() => "LG");
@@ -318,6 +319,25 @@ describe("MyStreamWaveTabsMeme", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Show wave description" })
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the right sidebar toggle visible in public read-only mode", () => {
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <WaveViewerModeProvider isPublicReadOnly={true}>
+          <MyStreamWaveTabsMeme wave={createWave(false)} />
+        </WaveViewerModeProvider>
+      </SidebarProvider>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Toggle right sidebar" })
     ).toBeInTheDocument();
   });
 });

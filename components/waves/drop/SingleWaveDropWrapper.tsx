@@ -146,72 +146,76 @@ function AuthenticatedSingleWaveDropChatController({
 
       {createPortal(
         <>
-          <CompactModeProvider compact={true}>
-            <div
-              className={`tw-hidden tw-h-full tw-flex-col tw-bg-black tw-transition-all tw-duration-300 tw-ease-in-out lg:tw-flex ${
-                isChatOpen
-                  ? "tw-w-[400px] tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/10"
-                  : "tw-w-0 tw-overflow-hidden tw-border-none"
-              } `}
-            >
-              <div className="@container tw-relative tw-flex tw-flex-1 tw-flex-col tw-overflow-hidden">
-                <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-z-50 tw-h-12 tw-bg-gradient-to-b tw-from-black tw-to-transparent" />
-                <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
+          {!isSmallScreen && (
+            <CompactModeProvider compact={true}>
+              <div
+                className={`tw-hidden tw-h-full tw-flex-col tw-bg-black tw-transition-all tw-duration-300 tw-ease-in-out lg:tw-flex ${
+                  isChatOpen
+                    ? "tw-w-[400px] tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/10"
+                    : "tw-w-0 tw-overflow-hidden tw-border-none"
+                } `}
+              >
+                <div className="@container tw-relative tw-flex tw-flex-1 tw-flex-col tw-overflow-hidden">
+                  <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-z-50 tw-h-12 tw-bg-gradient-to-b tw-from-black tw-to-transparent" />
+                  <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
+                </div>
               </div>
-            </div>
-          </CompactModeProvider>
+            </CompactModeProvider>
+          )}
 
-          <CompactModeProvider compact={true}>
-            <Transition show={isChatOpen} as={Fragment}>
-              <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[90] tw-h-[100dvh] tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none lg:tw-hidden">
-                <Transition
-                  as={Fragment}
-                  enter="tw-duration-150 tw-ease-out"
-                  enterFrom="tw-opacity-0"
-                  enterTo="tw-opacity-100"
-                  leave="tw-duration-120 tw-ease-in"
-                  leaveFrom="tw-opacity-100"
-                  leaveTo="tw-opacity-0"
-                >
-                  <div
-                    className="tw-absolute tw-inset-0 tw-bg-black/60"
-                    onClick={toggleChat}
-                  />
-                </Transition>
-                <Transition
-                  as={Fragment}
-                  enter="tw-duration-220 tw-transform tw-transition tw-ease-out"
-                  enterFrom="tw-translate-x-full"
-                  enterTo="tw-translate-x-0"
-                  leave="tw-duration-180 tw-transform tw-transition tw-ease-in"
-                  leaveFrom="tw-translate-x-0"
-                  leaveTo="tw-translate-x-full"
-                >
-                  <div className="@container tw-absolute tw-inset-0 tw-z-[100] tw-flex tw-h-full tw-min-h-0 tw-transform-gpu tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 tw-will-change-transform lg:tw-hidden">
-                    <div className="tw-relative tw-z-10 tw-flex tw-flex-none tw-items-center tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] lg:tw-px-8">
-                      <button
-                        onClick={toggleChat}
-                        className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-white/70 tw-transition-colors desktop-hover:hover:tw-text-white"
-                      >
-                        <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                        <span className="tw-text-sm tw-font-semibold">
-                          Close
-                        </span>
-                      </button>
-                    </div>
+          {isSmallScreen && isChatOpen && (
+            <CompactModeProvider compact={true}>
+              <Transition show={true} as={Fragment}>
+                <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[90] tw-h-[100dvh] tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none lg:tw-hidden">
+                  <Transition
+                    as={Fragment}
+                    enter="tw-duration-150 tw-ease-out"
+                    enterFrom="tw-opacity-0"
+                    enterTo="tw-opacity-100"
+                    leave="tw-duration-120 tw-ease-in"
+                    leaveFrom="tw-opacity-100"
+                    leaveTo="tw-opacity-0"
+                  >
+                    <div
+                      className="tw-absolute tw-inset-0 tw-bg-black/60"
+                      onClick={toggleChat}
+                    />
+                  </Transition>
+                  <Transition
+                    as={Fragment}
+                    enter="tw-duration-220 tw-transform tw-transition tw-ease-out"
+                    enterFrom="tw-translate-x-full"
+                    enterTo="tw-translate-x-0"
+                    leave="tw-duration-180 tw-transform tw-transition tw-ease-in"
+                    leaveFrom="tw-translate-x-0"
+                    leaveTo="tw-translate-x-full"
+                  >
+                    <div className="@container tw-absolute tw-inset-0 tw-z-[100] tw-flex tw-h-full tw-min-h-0 tw-transform-gpu tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 tw-will-change-transform lg:tw-hidden">
+                      <div className="tw-relative tw-z-10 tw-flex tw-flex-none tw-items-center tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] lg:tw-px-8">
+                        <button
+                          onClick={toggleChat}
+                          className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-white/70 tw-transition-colors desktop-hover:hover:tw-text-white"
+                        >
+                          <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+                          <span className="tw-text-sm tw-font-semibold">
+                            Close
+                          </span>
+                        </button>
+                      </div>
 
-                    <div className="@container tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden">
-                      <SingleWaveDropChat
-                        key={drop.id}
-                        wave={wave}
-                        drop={drop}
-                      />
+                      <div className="@container tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden">
+                        <SingleWaveDropChat
+                          key={drop.id}
+                          wave={wave}
+                          drop={drop}
+                        />
+                      </div>
                     </div>
-                  </div>
-                </Transition>
-              </div>
-            </Transition>
-          </CompactModeProvider>
+                  </Transition>
+                </div>
+              </Transition>
+            </CompactModeProvider>
+          )}
         </>,
         trailingContentContainer
       )}

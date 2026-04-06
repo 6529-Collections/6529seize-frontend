@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useRef,
   useCallback,
+  useImperativeHandle,
 } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
@@ -43,6 +44,113 @@ interface MyStreamWaveLeaderboardProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
+type CreateSurfaceState = "closed" | "drop" | "memes" | "curation";
+
+interface WaveCreateControllerProps {
+  readonly wave: ApiWave;
+  readonly canCreateDrop: boolean;
+  readonly isPublicReadOnly: boolean;
+  readonly submissionExperience: WaveSubmissionExperience;
+}
+
+interface WaveCreateControllerHandle {
+  open: () => void;
+}
+
+const WaveCreateController = React.forwardRef<
+  WaveCreateControllerHandle,
+  WaveCreateControllerProps
+>(({ wave, canCreateDrop, isPublicReadOnly, submissionExperience }, ref) => {
+  const mountedRef = useRef(true);
+  const [activeCreateSurface, setActiveCreateSurface] =
+    useState<CreateSurfaceState>("closed");
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const closeSurface = useCallback(() => {
+    if (mountedRef.current) {
+      setActiveCreateSurface("closed");
+    }
+  }, []);
+
+  const openSurface = useCallback(() => {
+    if (!mountedRef.current || isPublicReadOnly) {
+      return;
+    }
+
+    if (submissionExperience === WaveSubmissionExperience.MEMES_LEGACY) {
+      setActiveCreateSurface("memes");
+      return;
+    }
+
+    if (submissionExperience === WaveSubmissionExperience.CURATION_LEGACY) {
+      if (!canCreateDrop) {
+        return;
+      }
+      setActiveCreateSurface("curation");
+      return;
+    }
+
+    setActiveCreateSurface("drop");
+  }, [canCreateDrop, isPublicReadOnly, submissionExperience]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: openSurface,
+    }),
+    [openSurface]
+  );
+
+  const showToggleableDropInput =
+    !isPublicReadOnly &&
+    submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
+    submissionExperience !== WaveSubmissionExperience.CURATION_LEGACY &&
+    activeCreateSurface === "drop";
+
+  return (
+    <>
+      <AnimatePresence>
+        {showToggleableDropInput && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+          >
+            <WaveDropCreate
+              wave={wave}
+              onCancel={closeSurface}
+              onSuccess={closeSurface}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!isPublicReadOnly &&
+        submissionExperience === WaveSubmissionExperience.MEMES_LEGACY &&
+        activeCreateSurface === "memes" && (
+          <MemesArtSubmissionModal isOpen wave={wave} onClose={closeSurface} />
+        )}
+      {!isPublicReadOnly &&
+        submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
+        activeCreateSurface === "curation" && (
+          <WaveLeaderboardCurationDropModal
+            isOpen
+            wave={wave}
+            onClose={closeSurface}
+          />
+        )}
+    </>
+  );
+});
+
+WaveCreateController.displayName = "WaveCreateController";
+
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
@@ -59,22 +167,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     isCurationWave,
     submissionStrategy: wave.participation.submission_strategy ?? null,
   });
-
-  // Track mount status
-  const mountedRef = useRef(true);
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
+  const createControllerRef = useRef<WaveCreateControllerHandle | null>(null);
 
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-min-w-0 tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow tw-px-2 sm:tw-px-4`;
   }, []);
 
-  const [isCreateDropOpen, setIsCreateDropOpen] = useState(false);
-  const [isMemesCreateOpen, setIsMemesCreateOpen] = useState(false);
-  const [isCurationDropModalOpen, setIsCurationDropModalOpen] = useState(false);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
 
@@ -89,32 +187,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       }),
     [activeProfileProxy, isCurationWave, isLoggedIn, participation]
   );
-  const showToggleableDropInput =
-    !isPublicReadOnly &&
-    submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
-    submissionExperience !== WaveSubmissionExperience.CURATION_LEGACY &&
-    isCreateDropOpen;
-
   const onCreateDrop = useCallback(() => {
-    if (!mountedRef.current) {
-      return;
-    }
-
-    if (submissionExperience === WaveSubmissionExperience.MEMES_LEGACY) {
-      setIsMemesCreateOpen(true);
-      return;
-    }
-
-    if (submissionExperience === WaveSubmissionExperience.CURATION_LEGACY) {
-      if (!canCreateDrop) {
-        return;
-      }
-      setIsCurationDropModalOpen(true);
-      return;
-    }
-
-    setIsCreateDropOpen(true);
-  }, [canCreateDrop, submissionExperience]);
+    createControllerRef.current?.open();
+  }, []);
 
   // Generate a unique preference key for this wave
   const viewPreferenceKey = `waveViewMode_${wave.id}`;
@@ -300,49 +375,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 
       {/* Content section */}
       <div className="tw-min-w-0">
-        <AnimatePresence>
-          {showToggleableDropInput && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-            >
-              <WaveDropCreate
-                wave={wave}
-                onCancel={() => {
-                  if (mountedRef.current) {
-                    setIsCreateDropOpen(false);
-                  }
-                }}
-                onSuccess={() => {
-                  if (mountedRef.current) {
-                    setIsCreateDropOpen(false);
-                  }
-                }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {!isPublicReadOnly &&
-          submissionExperience === WaveSubmissionExperience.MEMES_LEGACY &&
-          isMemesCreateOpen && (
-            <MemesArtSubmissionModal
-              isOpen={isMemesCreateOpen}
-              wave={wave}
-              onClose={() => setIsMemesCreateOpen(false)}
-            />
-          )}
-        {!isPublicReadOnly &&
-          submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
-          isCurationDropModalOpen && (
-            <WaveLeaderboardCurationDropModal
-              isOpen={isCurationDropModalOpen}
-              wave={wave}
-              onClose={() => setIsCurationDropModalOpen(false)}
-            />
-          )}
+        <WaveCreateController
+          key={isPublicReadOnly ? "readonly" : "interactive"}
+          ref={createControllerRef}
+          wave={wave}
+          canCreateDrop={canCreateDrop}
+          isPublicReadOnly={isPublicReadOnly}
+          submissionExperience={submissionExperience}
+        />
 
         {leaderboardContent}
       </div>

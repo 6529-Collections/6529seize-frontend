@@ -8,7 +8,6 @@ import WavesMessagesWrapper from "../shared/WavesMessagesWrapper";
 interface Props {
   readonly children: ReactNode;
   readonly showLeftSidebar?: boolean | undefined;
-  readonly allowRightSidebar?: boolean | undefined;
   readonly allowDropOverlay?: boolean | undefined;
   readonly isPublicReadOnly?: boolean | undefined;
 }
@@ -16,7 +15,6 @@ interface Props {
 const WavesDesktop: React.FC<Props> = ({
   children,
   showLeftSidebar = true,
-  allowRightSidebar = true,
   allowDropOverlay = true,
   isPublicReadOnly = false,
 }) => {
@@ -24,7 +22,6 @@ const WavesDesktop: React.FC<Props> = ({
     <WavesMessagesWrapper
       defaultPath="/waves"
       showLeftSidebar={showLeftSidebar}
-      allowRightSidebar={allowRightSidebar}
       allowDropOverlay={allowDropOverlay}
       isPublicReadOnly={isPublicReadOnly}
     >
