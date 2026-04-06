@@ -1,23 +1,39 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  getDropIdentityFallbackValue,
+  getDropIdentityProfile,
+} from "@/components/waves/drops/identityDisplay.helpers";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 
 interface WavePodiumItemProps {
   readonly winner?: ApiWaveDecisionWinner | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly position: "first" | "second" | "third";
   readonly customAnimationIndex?: number | undefined;
+}
+
+interface PodiumAvatarProps {
+  readonly label: string;
+  readonly pfp: string | null | undefined;
+  readonly alt: string;
+  readonly width: number;
+  readonly height: number;
+  readonly className: string;
+  readonly ringClass: string;
+  readonly ringWidthClass?: string | undefined;
+  readonly shadowClass?: string | undefined;
+  readonly fallbackTextClass?: string | undefined;
 }
 
 // Configuration for position-specific styling with CSS ready classes for Tailwind
@@ -136,6 +152,84 @@ const getHoverTextColorClass = (position: WavePodiumItemProps["position"]) => {
   return colorMap[position];
 };
 
+const getAuthorProfileLabel = (drop: ExtendedDrop): string =>
+  drop.author.handle ?? drop.author.primary_address;
+
+const getAuthorTooltipUser = (drop: ExtendedDrop): string =>
+  drop.author.handle ?? drop.author.primary_address;
+
+const getIdentityHref = (value: string) =>
+  `/${encodeURIComponent(value.toLowerCase())}`;
+
+const getPodiumIdentityDisplay = (drop: ExtendedDrop) => {
+  const identityProfile = getDropIdentityProfile({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
+  const fallbackValue = identityProfile
+    ? null
+    : getDropIdentityFallbackValue({
+        wave: drop.wave,
+        metadata: drop.metadata,
+      });
+  const label =
+    identityProfile?.handle ??
+    identityProfile?.primary_address ??
+    fallbackValue;
+
+  if (!label) {
+    return null;
+  }
+
+  return {
+    label,
+    pfp: identityProfile?.pfp ?? null,
+    profileUser:
+      identityProfile?.handle ?? identityProfile?.primary_address ?? null,
+    comparableIdentity:
+      identityProfile ?? {
+        handle: fallbackValue,
+        primary_address: fallbackValue,
+      },
+  };
+};
+
+const PodiumAvatar: React.FC<PodiumAvatarProps> = ({
+  label,
+  pfp,
+  alt,
+  width,
+  height,
+  className,
+  ringClass,
+  ringWidthClass = "tw-ring-2",
+  shadowClass,
+  fallbackTextClass = "tw-text-xs tw-font-semibold tw-text-iron-100",
+}) => {
+  const initial = label.trim().charAt(0).toUpperCase() || "?";
+
+  if (pfp) {
+    return (
+      <Image
+        src={getScaledImageUri(pfp, ImageScale.W_AUTO_H_50)}
+        alt={alt}
+        width={width}
+        height={height}
+        className={`${className} ${ringWidthClass} ${ringClass} tw-object-cover ${shadowClass ?? ""}`}
+      />
+    );
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      className={`${className} ${ringWidthClass} ${ringClass} ${shadowClass ?? ""} tw-flex tw-items-center tw-justify-center tw-bg-iron-900`}
+    >
+      <span className={fallbackTextClass}>{initial}</span>
+    </div>
+  );
+};
+
 export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   winner,
   onDropClick,
@@ -157,6 +251,18 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
 
   const drop = winner.drop as ExtendedDrop;
   const animationIndex = customAnimationIndex ?? animationIndexMap[position];
+  const authorProfileLabel = getAuthorProfileLabel(drop);
+  const authorTooltipUser = getAuthorTooltipUser(drop);
+  const authorProfileHref = `/${authorProfileLabel}`;
+  const identityDisplay = getPodiumIdentityDisplay(drop);
+  const primaryLabel = identityDisplay?.label ?? authorProfileLabel;
+  const primaryPfp = identityDisplay ? identityDisplay.pfp : drop.author.pfp;
+  const isSelfNominated = identityDisplay
+    ? areSameProfileIdentity({
+        left: drop.author,
+        right: identityDisplay.comparableIdentity,
+      })
+    : false;
 
   return (
     <motion.div
@@ -174,28 +280,37 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
             className={`tw-flex tw-flex-col tw-items-center ${styles.marginBottom} tw-relative tw-z-10`}
           >
             <div className={`tw-absolute tw-inset-0 ${styles.bgGradient}`} />
-            <Link
-              href={`/${drop.author.handle}`}
-              onClick={(e) => e.stopPropagation()}
-              className="tw-transform tw-transition-all tw-duration-300 hover:tw-scale-105"
-            >
-              {drop.author.pfp ? (
-                <Image
-                  src={getScaledImageUri(
-                    resolveIpfsUrlSync(drop.author.pfp),
-                    ImageScale.W_AUTO_H_50
-                  )}
-                  alt=""
+            {identityDisplay ? (
+              <div className="tw-transform tw-transition-transform tw-duration-300 group-hover:desktop-hover:tw-scale-[1.02]">
+                <PodiumAvatar
+                  label={primaryLabel}
+                  pfp={primaryPfp}
+                  alt={`${primaryLabel} avatar`}
                   width={56}
                   height={56}
-                  className={`${styles.pfpSize} tw-rounded-xl tw-ring-2 ${styles.ring} tw-object-cover ${styles.shadow}`}
+                  className={`${styles.pfpSize} tw-rounded-xl`}
+                  ringClass={styles.ring}
+                  shadowClass={styles.shadow}
                 />
-              ) : (
-                <div
-                  className={`${styles.pfpSize} tw-rounded-xl tw-ring-2 ${styles.ring} ${styles.shadow} tw-bg-iron-900`}
+              </div>
+            ) : (
+              <Link
+                href={authorProfileHref}
+                onClick={(e) => e.stopPropagation()}
+                className="tw-transform tw-transition-all tw-duration-300 hover:tw-scale-105"
+              >
+                <PodiumAvatar
+                  label={authorProfileLabel}
+                  pfp={drop.author.pfp}
+                  alt={`${authorProfileLabel} avatar`}
+                  width={56}
+                  height={56}
+                  className={`${styles.pfpSize} tw-rounded-xl`}
+                  ringClass={styles.ring}
+                  shadowClass={styles.shadow}
                 />
-              )}
-            </Link>
+              </Link>
+            )}
 
             <div className="tw-absolute tw-inset-x-0 -tw-bottom-3 tw-flex tw-justify-center">
               <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1 tw-shadow-lg tw-backdrop-blur-sm">
@@ -239,42 +354,108 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-3/4 tw-bg-gradient-to-t tw-from-black/20 tw-via-black/10 tw-to-transparent" />
               </div>
 
-              <UserProfileTooltipWrapper
-                user={drop.author.handle ?? drop.author.id}
-              >
-                <Link
-                  href={`/${drop.author.handle}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className={`tw-relative tw-mb-2 tw-mt-2 tw-text-center tw-no-underline tw-transition-all sm:tw-mt-4 ${hoverTextColorClass} tw-group/link`}
-                >
-                  <span
-                    className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 ${hoverTextColorClass} tw-inline-flex tw-items-center tw-transition-colors`}
-                  >
-                    {drop.author.handle}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100`}
+              {identityDisplay ? (
+                <div className="tw-mb-2 tw-mt-2 tw-flex tw-max-w-full tw-flex-col tw-items-center tw-gap-y-1 tw-px-3 sm:tw-mt-3">
+                  {identityDisplay.profileUser ? (
+                    <UserProfileTooltipWrapper
+                      user={identityDisplay.profileUser}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
-                      />
-                    </svg>
-                  </span>
-                </Link>
-              </UserProfileTooltipWrapper>
+                      <Link
+                        href={getIdentityHref(identityDisplay.profileUser)}
+                        onClick={(e) => e.stopPropagation()}
+                        className={`tw-relative tw-block tw-max-w-full tw-text-center tw-no-underline tw-transition-all ${hoverTextColorClass} tw-group/link`}
+                      >
+                        <span
+                          title={primaryLabel}
+                          className={`${styles.autorFontSize} tw-block tw-max-w-full tw-truncate tw-font-semibold tw-text-iron-100 ${hoverTextColorClass} tw-transition-colors`}
+                        >
+                          {primaryLabel}
+                        </span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-top-1/2 tw-ml-2 -tw-translate-y-1/2 desktop-hover:group-hover/link:tw-opacity-100`}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                          />
+                        </svg>
+                      </Link>
+                    </UserProfileTooltipWrapper>
+                  ) : (
+                    <span
+                      title={primaryLabel}
+                      className={`${styles.autorFontSize} tw-block tw-max-w-full tw-truncate tw-text-center tw-font-semibold tw-text-iron-100`}
+                    >
+                      {primaryLabel}
+                    </span>
+                  )}
 
-              <WaveWinnerIdentity
-                drop={drop}
-                variant="compact"
-                className="tw-mb-2 tw-w-full tw-px-3 sm:tw-px-4"
-              />
+                  <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1 tw-gap-y-1 tw-text-[11px] tw-text-iron-500">
+                    {isSelfNominated ? (
+                      <span className="tw-font-normal tw-text-iron-500">
+                        self-nominated
+                      </span>
+                    ) : (
+                      <>
+                        <span className="tw-font-normal tw-text-iron-500">
+                          nominated by
+                        </span>
+
+                        <UserProfileTooltipWrapper user={authorTooltipUser}>
+                          <Link
+                            href={authorProfileHref}
+                            onClick={(e) => e.stopPropagation()}
+                            className="tw-inline-flex tw-max-w-full tw-items-center tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+                          >
+                            <span
+                              title={authorProfileLabel}
+                              className="tw-block tw-max-w-[7rem] tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+                            >
+                              {authorProfileLabel}
+                            </span>
+                          </Link>
+                        </UserProfileTooltipWrapper>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <UserProfileTooltipWrapper user={authorTooltipUser}>
+                  <Link
+                    href={authorProfileHref}
+                    onClick={(e) => e.stopPropagation()}
+                    className={`tw-relative tw-mb-2 tw-mt-2 tw-text-center tw-no-underline tw-transition-all sm:tw-mt-4 ${hoverTextColorClass} tw-group/link`}
+                  >
+                    <span
+                      className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 ${hoverTextColorClass} tw-inline-flex tw-items-center tw-transition-colors`}
+                    >
+                      {authorProfileLabel}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100`}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                        />
+                      </svg>
+                    </span>
+                  </Link>
+                </UserProfileTooltipWrapper>
+              )}
 
               <div className="tw-relative tw-flex tw-flex-col tw-items-center tw-gap-y-2">
                 <div className="tw-flex tw-items-center tw-gap-x-1">

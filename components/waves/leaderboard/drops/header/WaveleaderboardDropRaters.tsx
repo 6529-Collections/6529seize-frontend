@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
@@ -81,18 +82,15 @@ export const WaveLeaderboardDropRaters: React.FC<
                 </div>
                 <Tooltip
                   id={tooltipId}
+                  place="top"
+                  offset={8}
+                  opacity={1}
+                  positionStrategy="fixed"
                   delayShow={0}
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                    zIndex: 1000,
-                  }}
+                  style={TOOLTIP_STYLES}
                 >
-                  <span className="tw-text-sm tw-font-medium">
-                    {voterLabel} • {formatNumberWithCommas(voter.rating)}{" "}
-                    {votingLabel}
-                  </span>
+                  {voterLabel} • {formatNumberWithCommas(voter.rating)}{" "}
+                  {votingLabel}
                 </Tooltip>
               </React.Fragment>
             );
