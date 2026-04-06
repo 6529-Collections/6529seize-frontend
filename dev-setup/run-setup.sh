@@ -55,6 +55,7 @@ resolve_real_binary() {
     exit 1
   fi
   printf -v "$varname" '%s' "$resolved"
+  return 0
 }
 
 require_sudo_if_linux() {
