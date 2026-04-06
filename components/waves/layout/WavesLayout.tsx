@@ -1,17 +1,17 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { usePathname, useSearchParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import ConnectWallet from "../../common/ConnectWallet";
 import HeaderUserConnect from "../../header/user/HeaderUserConnect";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
-import WavesDesktop from "../WavesDesktop";
-import WavesMobile from "../WavesMobile";
 import PublicWaveShell from "../public/PublicWaveShell";
 import WaveScreenMessage from "../WaveScreenMessage";
+import WavesDesktop from "../WavesDesktop";
+import WavesMobile from "../WavesMobile";
 
 function getConnectPrompt(
   contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
@@ -68,7 +68,7 @@ function getNotAuthenticatedContent({
           {activeWaveId === null ? (
             <WaveScreenMessage
               title="Select a Wave"
-              description="Connect your wallet to access waves and join the conversation."
+              description="Connect your wallet to join the conversation."
               action={<HeaderUserConnect label="Connect Wallet" />}
             />
           ) : (
