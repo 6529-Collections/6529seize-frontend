@@ -1009,6 +1009,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: selection_id
+          in: query
+          description: Only include drops that belong to the given selection
+          required: false
+          schema:
+            type: string
         - name: serial_no_less_than
           in: query
           description: Used to find older drops
@@ -5643,6 +5649,12 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/ApiDropType"
+        - name: selection_id
+          in: query
+          description: Only include drops that belong to the given selection
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: successful operation
@@ -5890,6 +5902,122 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropsLeaderboardPage"
+  /waves/{id}/selections:
+    get:
+      tags:
+        - Waves
+      summary: List selections configured for wave
+      operationId: listWaveSelections
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveSelection"
+    post:
+      tags:
+        - Waves
+      summary: Create selection for wave
+      operationId: createWaveSelection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiWaveSelectionRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveSelection"
+  /waves/{id}/selections/{selectionId}:
+    delete:
+      tags:
+        - Waves
+      summary: Delete selection from wave
+      operationId: deleteWaveSelection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: selectionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+  /waves/{id}/selections/{selectionId}/drops:
+    post:
+      tags:
+        - Waves
+      summary: Add drop to selection
+      operationId: addDropToWaveSelection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: selectionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiWaveSelectionDropRequest"
+      responses:
+        "201":
+          description: successful operation
+  /waves/{id}/selections/{selectionId}/drops/{dropId}:
+    delete:
+      tags:
+        - Waves
+      summary: Remove drop from selection
+      operationId: removeDropFromWaveSelection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: selectionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
   /waves/{id}/curation-groups:
     get:
       tags:
@@ -8249,6 +8377,7 @@ components:
         - title
         - context_profile_context
         - subscribed_actions
+        - selections
         - rank
         - is_signed
         - reactions
@@ -8340,6 +8469,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
+        selections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveSelection"
         is_signed:
           type: boolean
         reactions:
@@ -8715,6 +8848,7 @@ components:
         - raters_count
         - title
         - subscribed_actions
+        - selections
         - context_profile_context
         - rank
         - is_signed
@@ -8805,6 +8939,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
+        selections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveSelection"
         is_signed:
           type: boolean
         reactions:
@@ -11221,6 +11359,7 @@ components:
         - subscribed_actions
         - metrics
         - pauses
+        - selections
         - pinned
       properties:
         id:
@@ -11273,6 +11412,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveDecisionPause"
+        selections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveSelection"
         pinned:
           type: boolean
     ApiWaveChatConfig:
@@ -11627,6 +11770,7 @@ components:
         - admin_group_id
         - admin_drop_deletion_enabled
         - forbid_negative_votes
+        - selections
         - pinned
       properties:
         id:
@@ -11683,6 +11827,10 @@ components:
           type: boolean
         forbid_negative_votes:
           type: boolean
+        selections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveSelection"
         pinned:
           type: boolean
     ApiWaveOutcome:
@@ -11872,6 +12020,32 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiGroup"
+    ApiWaveSelection:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+    ApiWaveSelectionDropRequest:
+      type: object
+      required:
+        - drop_id
+      properties:
+        drop_id:
+          type: string
+    ApiWaveSelectionRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 250
     ApiWavesOverviewType:
       type: string
       enum:
