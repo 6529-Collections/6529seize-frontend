@@ -2,11 +2,9 @@
 
 import React, { useState } from "react";
 import { Tooltip } from "react-tooltip";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
-import { faAward } from "@fortawesome/free-solid-svg-icons";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface WaveSmallLeaderboardItemOutcomesProps {
   readonly drop: ApiDrop;
@@ -57,15 +55,9 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
         <div className="tw-space-y-1.5">
           {!!nicTotal && (
             <div className="tw-flex tw-items-center tw-justify-between">
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <FontAwesomeIcon
-                  icon={faAddressCard}
-                  className="tw-size-4 tw-text-blue-300/70"
-                />
-                <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-                  NIC
-                </span>
-              </div>
+              <span className="tw-text-xs tw-font-medium tw-text-iron-300">
+                NIC
+              </span>
               <span className="tw-text-xs tw-font-medium tw-text-blue-200/90">
                 {nicTotal}
               </span>
@@ -73,15 +65,9 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
           )}
           {!!repTotal && (
             <div className="tw-flex tw-items-center tw-justify-between">
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <FontAwesomeIcon
-                  icon={faStar}
-                  className="tw-size-4 tw-text-purple-300/70"
-                />
-                <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-                  Rep
-                </span>
-              </div>
+              <span className="tw-text-xs tw-font-medium tw-text-iron-300">
+                Rep
+              </span>
               <span className="tw-text-xs tw-font-medium tw-text-purple-200/90">
                 {repTotal}
               </span>
@@ -92,15 +78,9 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
               key={outcome}
               className="tw-flex tw-items-center tw-justify-between"
             >
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <FontAwesomeIcon
-                  icon={faAward}
-                  className="tw-size-4 tw-text-amber-300/70"
-                />
-                <span className="tw-text-xs tw-font-medium tw-text-amber-100/90">
-                  {outcome}
-                </span>
-              </div>
+              <span className="tw-text-xs tw-font-medium tw-text-amber-100/90">
+                {outcome}
+              </span>
             </div>
           ))}
         </div>
@@ -122,16 +102,10 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
       <Tooltip
         id={`wave-outcomes-${drop.id}`}
         place="top"
-        style={{
-          padding: "4px 8px",
-          background: "#37373E",
-          color: "white",
-          fontSize: "13px",
-          fontWeight: 500,
-          borderRadius: "6px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          zIndex: 50,
-        }}
+        offset={8}
+        opacity={1}
+        positionStrategy="fixed"
+        style={TOOLTIP_STYLES}
         clickable={true}
         openEvents={isTouch ? { click: true } : { mouseenter: true }}
         closeEvents={isTouch ? { click: true } : { mouseleave: true }}

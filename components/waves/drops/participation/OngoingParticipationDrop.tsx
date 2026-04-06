@@ -3,6 +3,7 @@
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useCallback, useState } from "react";
@@ -59,6 +60,12 @@ export default function OngoingParticipationDrop({
     wave: drop.wave,
     metadata: drop.metadata,
   });
+  const isSelfNominee = identityProfile
+    ? areSameProfileIdentity({
+        left: drop.author,
+        right: identityProfile,
+      })
+    : false;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -117,11 +124,12 @@ export default function OngoingParticipationDrop({
 
       <div className="tw-flex tw-w-full tw-flex-col">
         {identityProfile && (
-          <div className="tw-px-4 sm:tw-ml-[3.25rem]">
+          <div className="tw-ml-[3.25rem] tw-px-4">
             <ParticipationIdentityProfileCard
               profile={identityProfile}
               contextId={drop.id}
               variant="chat"
+              showIdentityHeader={!isSelfNominee}
             />
           </div>
         )}

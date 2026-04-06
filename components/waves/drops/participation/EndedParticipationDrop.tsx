@@ -5,6 +5,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getTimeAgoShort } from "@/helpers/Helpers";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -59,6 +60,12 @@ export default function EndedParticipationDrop({
     wave: drop.wave,
     metadata: drop.metadata,
   });
+  const isSelfNominee = identityProfile
+    ? areSameProfileIdentity({
+        left: drop.author,
+        right: identityProfile,
+      })
+    : false;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -200,11 +207,12 @@ export default function EndedParticipationDrop({
         </div>
 
         {identityProfile && (
-          <div className="sm:tw-ml-[3.25rem]">
+          <div className="tw-ml-[3.25rem]">
             <ParticipationIdentityProfileCard
               profile={identityProfile}
               contextId={drop.id}
               variant="chat"
+              showIdentityHeader={!isSelfNominee}
             />
           </div>
         )}

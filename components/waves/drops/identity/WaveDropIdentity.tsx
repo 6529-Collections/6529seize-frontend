@@ -1,6 +1,7 @@
 import ParticipationIdentityProfileCard, {
   type ParticipationIdentityProfileCardVariant,
 } from "@/components/waves/drops/participation/ParticipationIdentityProfileCard";
+import IdentityProfileSupplement from "@/components/waves/drops/identity/IdentityProfileSupplement";
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import Link from "next/link";
@@ -104,24 +105,34 @@ export function WaveDropIdentity({
     <div className={className}>
       <div
         data-testid={`${testIdPrefix}-compact`}
-        className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800/50 tw-bg-iron-900/40 tw-px-2.5 tw-py-2"
+        className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800/50 tw-bg-iron-900/40 tw-px-3 tw-py-2.5"
       >
-        <span className="tw-flex-shrink-0 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
-          Identity
-        </span>
-        {identityProfile ? (
-          <Link
-            href={getIdentityHref(displayLabel)}
-            prefetch={false}
-            onClick={(event) => event.stopPropagation()}
-            className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-300"
-          >
-            {displayLabel}
-          </Link>
-        ) : (
-          <span className="tw-min-w-0 tw-break-all tw-text-sm tw-font-semibold tw-text-iron-100">
-            {displayLabel}
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+          <span className="tw-flex-shrink-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+            Identity
           </span>
+          {identityProfile ? (
+            <Link
+              href={getIdentityHref(displayLabel)}
+              prefetch={false}
+              onClick={(event) => event.stopPropagation()}
+              className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-300"
+            >
+              {displayLabel}
+            </Link>
+          ) : (
+            <span className="tw-min-w-0 tw-break-all tw-text-sm tw-font-semibold tw-text-iron-100">
+              {displayLabel}
+            </span>
+          )}
+        </div>
+
+        {identityProfile && (
+          <IdentityProfileSupplement
+            profile={identityProfile}
+            variant="compact"
+            maxRepCategories={3}
+          />
         )}
       </div>
     </div>

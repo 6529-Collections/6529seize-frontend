@@ -6,7 +6,11 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import { useRouter } from "next/navigation";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
-import { getDropVisibleMetadata } from "@/components/waves/drops/identityDisplay.helpers";
+import {
+  getDropIdentityProfile,
+  getDropVisibleMetadata,
+} from "@/components/waves/drops/identityDisplay.helpers";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 
@@ -24,6 +28,16 @@ export const WaveLeaderboardDropContent: React.FC<
     wave: drop.wave,
     metadata: drop.metadata,
   });
+  const identityProfile = getDropIdentityProfile({
+    wave: drop.wave,
+    metadata: drop.metadata,
+  });
+  const isSelfNominee = identityProfile
+    ? areSameProfileIdentity({
+        left: drop.author,
+        right: identityProfile,
+      })
+    : false;
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
     const href = getWaveRoute({
@@ -52,6 +66,7 @@ export const WaveLeaderboardDropContent: React.FC<
         variant="responsive"
         cardVariant="chat"
         className="tw-mt-2 lg:tw-mt-0"
+        showIdentityHeader={!isSelfNominee}
       />
       {!!visibleMetadata.length && (
         <WaveDropMetadata metadata={visibleMetadata} />
