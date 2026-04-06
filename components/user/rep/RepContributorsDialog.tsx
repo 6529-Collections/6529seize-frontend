@@ -272,13 +272,21 @@ export default function RepContributorsDialog({
       ? contributorsQuery.error.message
       : "Failed to load contributors.";
 
+  const fetchNextPage = () => {
+    contributorsQuery.fetchNextPage().catch(() => undefined);
+  };
+
+  const refetchContributors = () => {
+    contributorsQuery.refetch().catch(() => undefined);
+  };
+
   const onBottomIntersection = (state: boolean) => {
     if (!state) return;
     if (contributorsQuery.isPending || contributorsQuery.isFetching) return;
     if (contributorsQuery.isFetchNextPageError) return;
     if (!contributorsQuery.hasNextPage) return;
 
-    void contributorsQuery.fetchNextPage();
+    fetchNextPage();
   };
 
   return (
@@ -312,7 +320,7 @@ export default function RepContributorsDialog({
             </p>
             <button
               type="button"
-              onClick={() => void contributorsQuery.refetch()}
+              onClick={refetchContributors}
               className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
             >
               Retry
@@ -351,7 +359,7 @@ export default function RepContributorsDialog({
                 </p>
                 <button
                   type="button"
-                  onClick={() => void contributorsQuery.fetchNextPage()}
+                  onClick={fetchNextPage}
                   className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors hover:tw-text-iron-300"
                 >
                   Retry
