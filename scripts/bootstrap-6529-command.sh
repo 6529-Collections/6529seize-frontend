@@ -16,6 +16,7 @@ fi
 
 log() {
   echo "$*" >&2
+  return 0
 }
 
 resolve_real_binary() {
@@ -39,6 +40,7 @@ resolve_real_binary() {
   fi
 
   printf -v "$varname" '%s' "$resolved"
+  return 0
 }
 
 resolve_npm_global_bin() {
@@ -110,11 +112,13 @@ ensure_socket_firewall() {
     log "Socket Firewall installation completed but 'sfw' is still not usable."
     exit 1
   fi
+  return 0
 }
 
 ensure_pinned_pnpm() {
   log "Activating the repo-pinned pnpm version with Corepack..."
   bash "$REPO_ROOT/scripts/setup-corepack-pnpm.sh" >/dev/stderr
+  return 0
 }
 
 ensure_socket_firewall
@@ -241,6 +245,6 @@ Then install project dependencies:
   6529 install
 
 After that, these commands should resolve:
-  6529 dev
   6529 build
+  6529 dev
 EOF
