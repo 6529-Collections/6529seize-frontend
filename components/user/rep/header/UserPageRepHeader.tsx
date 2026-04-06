@@ -24,6 +24,8 @@ export default function UserPageRepHeader({
   categories,
   profile,
   repDirection,
+  onOpenOverviewContributors,
+  onOpenCategoryContributors,
   onRepDirectionChange,
   loading,
   visibleCount,
@@ -35,6 +37,8 @@ export default function UserPageRepHeader({
   readonly categories: ApiRepCategory[];
   readonly profile: ApiIdentity;
   readonly repDirection: RepDirection;
+  readonly onOpenOverviewContributors: () => void;
+  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly loading: boolean;
   readonly visibleCount: number;
@@ -126,13 +130,31 @@ export default function UserPageRepHeader({
                       maxCount={TOP_CONTRIBUTORS_COUNT}
                     />
                   )}
-                  <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-                    {formatNumberWithCommas(overview.contributor_count)}{" "}
-                    {getContributorLabel(
-                      repDirection,
-                      overview.contributor_count
-                    )}
-                  </span>
+                  {overview.contributor_count > 0 ? (
+                    <button
+                      type="button"
+                      onClick={onOpenOverviewContributors}
+                      aria-label={`View all ${getContributorLabel(
+                        repDirection,
+                        overview.contributor_count
+                      )}`}
+                      className="tw-inline-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-normal tw-text-iron-400 tw-underline tw-decoration-white/20 tw-underline-offset-4 tw-transition-[text-decoration-color] tw-transition-colors hover:tw-text-iron-200 hover:tw-decoration-white/50"
+                    >
+                      {formatNumberWithCommas(overview.contributor_count)}{" "}
+                      {getContributorLabel(
+                        repDirection,
+                        overview.contributor_count
+                      )}
+                    </button>
+                  ) : (
+                    <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+                      {formatNumberWithCommas(overview.contributor_count)}{" "}
+                      {getContributorLabel(
+                        repDirection,
+                        overview.contributor_count
+                      )}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -183,6 +205,7 @@ export default function UserPageRepHeader({
                     category={cat}
                     canEdit={canEditRep && repDirection === "received"}
                     onEdit={setEditCategory}
+                    onOpenContributors={onOpenCategoryContributors}
                     direction={repDirection}
                   />
                 ))}

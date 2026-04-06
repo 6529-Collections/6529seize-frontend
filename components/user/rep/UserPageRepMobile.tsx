@@ -37,6 +37,8 @@ export default function UserPageRepMobile({
   onShowMore,
   hasNextPage,
   isFetchingNextPage,
+  onOpenOverviewContributors,
+  onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
   readonly overview: ApiRepOverview | null;
@@ -50,6 +52,8 @@ export default function UserPageRepMobile({
   readonly onShowMore: () => void;
   readonly hasNextPage: boolean;
   readonly isFetchingNextPage: boolean;
+  readonly onOpenOverviewContributors: () => void;
+  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
@@ -105,6 +109,7 @@ export default function UserPageRepMobile({
         profile={profile}
         repDirection={repDirection}
         cicAvatarItems={cicAvatarItems}
+        onOpenOverviewContributors={onOpenOverviewContributors}
       />
 
       <AnimatePresence mode="wait">
@@ -131,6 +136,8 @@ export default function UserPageRepMobile({
               isFetchingNextPage={isFetchingNextPage}
               onGrantRep={() => setIsGrantRepOpen(true)}
               onEditCategory={setEditCategory}
+              onOpenOverviewContributors={onOpenOverviewContributors}
+              onOpenCategoryContributors={onOpenCategoryContributors}
             />
           </motion.div>
         ) : (

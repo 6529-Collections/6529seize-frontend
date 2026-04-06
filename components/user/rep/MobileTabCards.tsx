@@ -3,6 +3,7 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import UserCICStatus from "../utils/user-cic-status/UserCICStatus";
 import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
@@ -19,6 +20,7 @@ export default function MobileTabCards({
   profile,
   repDirection,
   cicAvatarItems,
+  onOpenOverviewContributors,
 }: {
   readonly activeTab: MobileTab;
   readonly onTabChange: (tab: MobileTab) => void;
@@ -27,75 +29,107 @@ export default function MobileTabCards({
   readonly profile: ApiIdentity;
   readonly repDirection: RepDirection;
   readonly cicAvatarItems: ComponentProps<typeof OverlappingAvatars>["items"];
+  readonly onOpenOverviewContributors: () => void;
 }) {
   const repAvatarItems = useMemo(
-    () => buildRepAvatarItems(overview?.contributors.data ?? [], 3),
+    () =>
+      buildRepAvatarItems(overview?.contributors.data ?? [], 3, {
+        omitHref: true,
+      }),
     [overview?.contributors.data]
   );
-
-  return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-      <button
-        type="button"
-        aria-pressed={activeTab === "rep"}
-        onClick={() => onTabChange("rep")}
-        className={`tw-relative tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-p-4 tw-text-left tw-transition-all tw-duration-300 tw-ease-out ${
-          activeTab === "rep" ? "tw-bg-[#0f1014]" : "tw-bg-white/[0.02]"
-        }`}
+  const isTouchDevice = useIsTouchDevice();
+  const repCardClasses = `tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-p-4 tw-text-left tw-transition-all tw-duration-300 tw-ease-out ${
+    activeTab === "rep" ? "tw-bg-[#0f1014]" : "tw-bg-white/[0.02]"
+  }`;
+  const repCardContent = (
+    <>
+      <div
+        aria-hidden="true"
+        className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-3 tw-z-10"
       >
-        <div
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-3 tw-z-10"
+        <span
+          className={`tw-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-all tw-duration-300 ${
+            activeTab === "rep"
+              ? "tw-border-primary-300/90 tw-bg-transparent tw-ring-2 tw-ring-primary-500/25"
+              : "tw-border-iron-400/45 tw-bg-black/10 tw-ring-1 tw-ring-black/20"
+          }`}
         >
-          <span
-            className={`tw-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-all tw-duration-300 ${
-              activeTab === "rep"
-                ? "tw-border-primary-300/90 tw-bg-transparent tw-ring-2 tw-ring-primary-500/25"
-                : "tw-border-iron-400/45 tw-bg-black/10 tw-ring-1 tw-ring-black/20"
-            }`}
-          >
-            {activeTab === "rep" && (
-              <span className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-primary-300 tw-transition-all tw-duration-300" />
-            )}
-          </span>
+          {activeTab === "rep" && (
+            <span className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-primary-300 tw-transition-all tw-duration-300" />
+          )}
+        </span>
+      </div>
+      {activeTab === "rep" && (
+        <>
+          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-blue-500/[0.05] tw-via-transparent tw-to-transparent" />
+          <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-iron-300/25 tw-to-transparent" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-blue-400/40 tw-to-transparent" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
+        </>
+      )}
+      <div
+        className={`tw-relative tw-transition-opacity tw-duration-300 ${activeTab === "rep" ? "" : "tw-opacity-40"}`}
+      >
+        <div className="tw-mb-1.5 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
+          Total Rep
         </div>
-        {activeTab === "rep" && (
-          <>
-            <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-blue-500/[0.05] tw-via-transparent tw-to-transparent" />
-            <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-iron-300/25 tw-to-transparent" />
-            <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-blue-400/40 tw-to-transparent" />
-            <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
-            <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
-          </>
-        )}
-        <div
-          className={`tw-relative tw-transition-opacity tw-duration-300 ${activeTab === "rep" ? "" : "tw-opacity-40"}`}
-        >
-          <div className="tw-mb-1.5 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
-            Total Rep
-          </div>
-          <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-            {overview ? formatNumberWithCommas(overview.total_rep) : "\u2014"}
-          </div>
-          {overview && (
-            <div className="tw-mt-2.5 tw-flex tw-items-center tw-gap-2">
-              {repAvatarItems.length > 0 && (
-                <div className={activeTab === "rep" ? "tw-pointer-events-none desktop-hover:tw-pointer-events-auto" : "tw-pointer-events-none"}>
-                  <OverlappingAvatars
-                    items={repAvatarItems}
-                    size="sm"
-                    maxCount={3}
-                  />
-                </div>
-              )}
+        <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
+          {overview ? formatNumberWithCommas(overview.total_rep) : "\u2014"}
+        </div>
+        {overview && (
+          <div className="tw-mt-2.5 tw-flex tw-items-center tw-gap-2">
+            {repAvatarItems.length > 0 && (
+              <div className="tw-pointer-events-none">
+                <OverlappingAvatars
+                  items={repAvatarItems}
+                  size="sm"
+                  maxCount={3}
+                />
+              </div>
+            )}
+            {activeTab === "rep" &&
+            !isTouchDevice &&
+            overview.contributor_count > 0 ? (
+              <button
+                type="button"
+                onClick={onOpenOverviewContributors}
+                aria-label={`View all ${getContributorLabel(
+                  repDirection,
+                  overview.contributor_count
+                )}`}
+                className="tw-inline-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-normal tw-text-iron-400 tw-underline tw-decoration-white/20 tw-underline-offset-4 tw-transition-[text-decoration-color] tw-transition-colors hover:tw-text-iron-200 hover:tw-decoration-white/50"
+              >
+                {formatNumberWithCommas(overview.contributor_count)}{" "}
+                {getContributorLabel(repDirection, overview.contributor_count)}
+              </button>
+            ) : (
               <span className="tw-text-xs tw-font-normal tw-text-iron-400">
                 {formatNumberWithCommas(overview.contributor_count)}{" "}
                 {getContributorLabel(repDirection, overview.contributor_count)}
               </span>
-            </div>
-          )}
-        </div>
-      </button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+
+  return (
+    <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+      {activeTab === "rep" ? (
+        <div className={repCardClasses}>{repCardContent}</div>
+      ) : (
+        <button
+          type="button"
+          aria-pressed={false}
+          onClick={() => onTabChange("rep")}
+          className={`${repCardClasses} tw-cursor-pointer`}
+        >
+          {repCardContent}
+        </button>
+      )}
 
       <button
         type="button"
@@ -149,7 +183,13 @@ export default function MobileTabCards({
           </div>
           <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
             {cicAvatarItems.length > 0 && (
-              <div className={activeTab === "identity" ? "tw-pointer-events-none desktop-hover:tw-pointer-events-auto" : "tw-pointer-events-none"}>
+              <div
+                className={
+                  activeTab === "identity"
+                    ? "tw-pointer-events-none desktop-hover:tw-pointer-events-auto"
+                    : "tw-pointer-events-none"
+                }
+              >
                 <OverlappingAvatars
                   items={cicAvatarItems}
                   size="sm"
