@@ -154,11 +154,8 @@ activate_pnpm_with_corepack() {
 
 install_socket_firewall() {
   if command -v sfw >/dev/null 2>&1; then
-    if sfw --help >/dev/null 2>&1; then
-      color green "Socket Firewall: installed"
-      return 0
-    fi
-    color yellow "Socket Firewall found but help failed"
+    color green "Socket Firewall: installed"
+    return 0
   fi
 
   color yellow "Installing Socket Firewall globally…"

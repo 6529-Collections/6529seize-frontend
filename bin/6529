@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export COREPACK_HOME="${COREPACK_HOME:-${TMPDIR:-/tmp}/6529-corepack}"
+export COREPACK_HOME="${COREPACK_HOME:-${HOME}/.cache/6529-corepack}"
 export COREPACK_ENABLE_DOWNLOAD_PROMPT="0"
 export SEIZE_6529_COMMAND="1"
 

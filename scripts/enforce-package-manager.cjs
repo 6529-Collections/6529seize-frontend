@@ -5,13 +5,20 @@ const userAgent = process.env["npm_config_user_agent"] ?? "";
 const secureInstall = process.env["SEIZE_SECURE_INSTALL"] === "1";
 
 if (!userAgent.includes("pnpm/")) {
-  console.error("This repository uses pnpm via Corepack and does not allow npm or yarn installs.");
-  console.error("Run the secure install path instead:");
-  console.error("  1. Use a supported Node.js release that includes Corepack");
-  console.error("  2. corepack enable pnpm");
-  console.error(`  3. corepack prepare ${packageManager} --activate`);
-  console.error("  4. npm install --global sfw");
-  console.error("  5. 6529 install");
+  if (userAgent === "") {
+    console.error("This repository requires installs to run through the `6529` wrapper.");
+    console.error("npm_config_user_agent is not set, which usually means pnpm was not");
+    console.error("invoked via its CLI. Use the wrapper directly instead:");
+    console.error("  6529 install");
+  } else {
+    console.error("This repository uses pnpm via Corepack and does not allow npm or yarn installs.");
+    console.error("Run the secure install path instead:");
+    console.error("  1. Use a supported Node.js release that includes Corepack");
+    console.error("  2. corepack enable pnpm");
+    console.error(`  3. corepack prepare ${packageManager} --activate`);
+    console.error("  4. npm install --global sfw");
+    console.error("  5. 6529 install");
+  }
   process.exit(1);
 }
 

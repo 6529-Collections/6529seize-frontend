@@ -14,12 +14,12 @@ function getOpenModule() {
   return openModulePromise;
 }
 
-const lumoroCommand =
+const repoCommand =
   process.platform === "win32"
     ? path.join(process.cwd(), "bin", "6529.cmd")
     : "./bin/6529";
 
-const proc = spawn(lumoroCommand, ["dev"], {
+const proc = spawn(repoCommand, ["dev"], {
   stdio: ["inherit", "pipe", "inherit"],
 });
 
