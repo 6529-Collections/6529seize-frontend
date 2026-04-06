@@ -80,6 +80,8 @@ if [[ -z "$REAL_PNPM" ]]; then
   exit 1
 fi
 
+cd "$REPO_ROOT"
+
 case "$command_name" in
   i)
     exec "$REAL_PNPM" run install:secure "$@"

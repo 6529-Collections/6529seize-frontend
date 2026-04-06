@@ -34,14 +34,13 @@ so the `6529` shorthand commands above work directly inside the repository.
 Run these once on a fresh clone:
 
 ```bash
-npm install --global sfw
-corepack enable pnpm
-corepack prepare pnpm@10.33.0 --activate
 ./bin/6529 bootstrap
 ```
 
-`./bin/6529 bootstrap` is the only time you ever type the explicit path. It
-installs a global `6529` shim and adds it to your shell's PATH. Open a new
+`./bin/6529 bootstrap` is usually the only time you need the explicit path for
+normal local setup. It installs a global `6529` shim, ensures Socket Firewall
+is installed with the real npm binary, activates the repo-pinned pnpm version
+through Corepack, and adds the needed paths to your shell's PATH. Open a new
 shell after running it, or activate it immediately in the current shell:
 
 ```bash
@@ -54,7 +53,9 @@ Then install dependencies:
 6529 install
 ```
 
-From this point on, always use the bare `6529` command — never `./bin/6529`.
+After bootstrap, prefer the bare `6529` command for day-to-day work. The
+repo-local `./bin/6529` entrypoint is still appropriate for cases like
+fresh-clone staging and the PM2 entrypoint below.
 
 For staging refreshes from a fresh clone, use the repo-local wrapper path
 explicitly:
@@ -84,7 +85,10 @@ If pnpm reports ignored install/build scripts, use:
 - [`scripts/require-6529-command.cjs`](../../scripts/require-6529-command.cjs) rejects repo script execution unless it came through `6529`.
 - [`scripts/assert-no-package-lock.cjs`](../../scripts/assert-no-package-lock.cjs) fails if `package-lock.json` reappears.
 - Helper scripts, Playwright, worktree tooling, staging scripts, and PM2 docs now use pnpm.
-- Production CI builds the Elastic Beanstalk bundle with pnpm and bundles `node_modules`, so EB does not fall back to its default `npm install` behavior.
+- Production CI builds the Elastic Beanstalk bundle with pnpm, uploads
+  `/_next/static` assets to S3/CloudFront, and Elastic Beanstalk installs
+  production `node_modules` with pinned pnpm during deploy instead of falling
+  back to its default npm path.
 
 ## Elastic Beanstalk deployment model
 
@@ -95,14 +99,16 @@ The production workflow now:
    In CI, the workflow passes the Socket action's absolute `firewall-path-binary`
    output as `SFW_BIN` so the secure install wrapper does not rely on PATH lookup.
 3. Builds the app.
-4. Prunes to production dependencies.
-5. Packages the app together with the pnpm-generated `node_modules`.
+4. Packages `package.zip` without `node_modules` or `.next/static`.
+5. Uploads `target/_next/static` and `package.zip` to S3 under the build
+   version path.
 
-At deploy time, Elastic Beanstalk starts the already-built app directly through
-[`scripts/start-next.cjs`](../../scripts/start-next.cjs). The deployment bundle
-includes `node_modules`, and
-[`runtime-bundle.config`](../../.ebextensions/runtime-bundle.config) verifies
-that the runtime bundle is present on the instance.
+At deploy time,
+[`runtime-bundle.config`](../../.ebextensions/runtime-bundle.config) installs
+production dependencies with pinned pnpm on the Elastic Beanstalk instance,
+verifies that `node_modules` and `.next/BUILD_ID` are present, and then
+[`scripts/start-next.cjs`](../../scripts/start-next.cjs) starts the already
+built app.
 
 ## Socket Firewall Free limitations
 
@@ -118,8 +124,9 @@ Because of those limits, the strongest enforcement in this repo comes from:
 
 - standardizing commands on `pnpm`
 - rejecting `npm`/`yarn` installs
-- making CI the production install authority
-- bundling runtime dependencies into the EB artifact
+- making CI the build authority for the deployed app bundle
+- overriding Elastic Beanstalk's default npm install behavior with an explicit
+  pinned-pnpm runtime install
 
 ## When Enterprise is needed
 

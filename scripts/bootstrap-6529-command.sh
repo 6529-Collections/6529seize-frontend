@@ -6,11 +6,119 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOCAL_BIN_DIR="${HOME}/.local/bin"
 GLOBAL_6529="${LOCAL_BIN_DIR}/6529"
+REAL_NPM=""
+NPM_GLOBAL_BIN=""
 
 print_export_only="0"
 if [[ "${1:-}" == "--print-export" ]]; then
   print_export_only="1"
 fi
+
+log() {
+  echo "$*" >&2
+}
+
+resolve_real_binary() {
+  local name="$1" varname="$2"
+  local repo_bin="$REPO_ROOT/bin"
+  local clean_path="" part
+
+  IFS=':' read -r -a _rrb_parts <<< "${PATH:-}"
+  for part in "${_rrb_parts[@]}"; do
+    if [[ -z "$part" || "$part" == "$repo_bin" ]]; then
+      continue
+    fi
+    clean_path="${clean_path:+${clean_path}:}${part}"
+  done
+
+  local resolved=""
+  resolved="$(PATH="$clean_path" command -v "$name" 2>/dev/null || true)"
+  if [[ -z "$resolved" ]]; then
+    log "Cannot find real '$name' outside the repo's bin/ shims."
+    exit 1
+  fi
+
+  printf -v "$varname" '%s' "$resolved"
+}
+
+resolve_npm_global_bin() {
+  if [[ -z "$REAL_NPM" ]]; then
+    return 0
+  fi
+
+  NPM_GLOBAL_BIN="$("$REAL_NPM" bin -g 2>/dev/null || true)"
+  if [[ -z "$NPM_GLOBAL_BIN" ]]; then
+    local npm_global_prefix=""
+    npm_global_prefix="$("$REAL_NPM" prefix -g 2>/dev/null || true)"
+    if [[ -n "$npm_global_prefix" ]]; then
+      NPM_GLOBAL_BIN="${npm_global_prefix}/bin"
+    fi
+  fi
+
+  if [[ -n "$NPM_GLOBAL_BIN" && ! -d "$NPM_GLOBAL_BIN" ]]; then
+    NPM_GLOBAL_BIN=""
+  fi
+
+  return 0
+}
+
+prepend_npm_global_bin_to_path() {
+  if [[ -z "$NPM_GLOBAL_BIN" ]]; then
+    return 0
+  fi
+
+  case ":$PATH:" in
+    *":$NPM_GLOBAL_BIN:"*) ;;
+    *) export PATH="$NPM_GLOBAL_BIN:$PATH" ;;
+  esac
+
+  return 0
+}
+
+ensure_socket_firewall() {
+  resolve_real_binary npm REAL_NPM
+  resolve_npm_global_bin
+  prepend_npm_global_bin_to_path
+
+  if command -v sfw >/dev/null 2>&1 && sfw --help >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if [[ "$print_export_only" == "1" ]]; then
+    log "Socket Firewall ('sfw') is not installed or not usable on PATH."
+    log "Run ./bin/6529 bootstrap first so it can install and wire up sfw."
+    exit 1
+  fi
+
+  log "Installing Socket Firewall globally with the real npm binary..."
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    "$REAL_NPM" install --global sfw
+  else
+    local npm_global_prefix=""
+    npm_global_prefix="$("$REAL_NPM" prefix -g 2>/dev/null || true)"
+    if [[ -n "$npm_global_prefix" && -w "$npm_global_prefix" ]]; then
+      "$REAL_NPM" install --global sfw
+    else
+      sudo "$REAL_NPM" install --global sfw
+    fi
+  fi
+
+  resolve_npm_global_bin
+  prepend_npm_global_bin_to_path
+
+  if ! command -v sfw >/dev/null 2>&1 || ! sfw --help >/dev/null 2>&1; then
+    log "Socket Firewall installation completed but 'sfw' is still not usable."
+    exit 1
+  fi
+}
+
+ensure_pinned_pnpm() {
+  log "Activating the repo-pinned pnpm version with Corepack..."
+  bash "$REPO_ROOT/scripts/setup-corepack-pnpm.sh" >/dev/stderr
+}
+
+ensure_socket_firewall
+ensure_pinned_pnpm
 
 shell_name="${SHELL##*/}"
 case "$shell_name" in
@@ -55,6 +163,12 @@ awk \
 ' "$rc_file" > "$tmp_file"
 
 block="$new_marker_begin
+if [ -d \"$NPM_GLOBAL_BIN\" ]; then
+  case \":\$PATH:\" in
+    *\":$NPM_GLOBAL_BIN:\"*) ;;
+    *) export PATH=\"$NPM_GLOBAL_BIN:\$PATH\" ;;
+  esac
+fi
 if [ -d \"$LOCAL_BIN_DIR\" ]; then
   case \":\$PATH:\" in
     *\":$LOCAL_BIN_DIR:\"*) ;;
@@ -87,6 +201,13 @@ done
 export PATH="\$_6529_clean_path"
 unset _6529_old_repo_bin _6529_clean_path _6529_old_ifs _6529_part
 
+if [ -d "$NPM_GLOBAL_BIN" ]; then
+  case ":\$PATH:" in
+    *":$NPM_GLOBAL_BIN:"*) ;;
+    *) export PATH="$NPM_GLOBAL_BIN:\$PATH" ;;
+  esac
+fi
+
 if [ -d "$LOCAL_BIN_DIR" ]; then
   case ":\$PATH:" in
     *":$LOCAL_BIN_DIR:"*) ;;
@@ -101,6 +222,12 @@ cat <<EOF
 Installed the global 6529 shim at:
   $GLOBAL_6529
 
+Socket Firewall is installed and available at:
+  $(command -v sfw)
+
+Pinned pnpm is active:
+  $(pnpm --version)
+
 Updated:
   $rc_file
 
@@ -110,11 +237,10 @@ Open a new shell, or run:
 If you want a one-liner for the current shell:
   source <("$REPO_ROOT/bin/6529" bootstrap --print-export)
 
-After that, these should resolve:
+Then install project dependencies:
+  6529 install
+
+After that, these commands should resolve:
   6529 dev
   6529 build
-  6529 staging
-
-Fresh-clone-safe fallback remains:
-  ./bin/6529 staging
 EOF

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # ----------------------------------------------------------------------------
-# Script: dev-ec2-setup.sh
+# Script: run-staging-ec2-setup.sh
 #
 # Description:
-#   Bootstraps a host to build & run 6529seize-frontend for staging/dev.
+#   Bootstraps an EC2 host to build & run 6529seize-frontend for staging.
 #   - Accepts Node >= 20; installs Node 20 only if Node missing or < 20.
 #   - Activates the repo-pinned pnpm version via Corepack.
 #   - Installs Socket Firewall for secure dependency installation.
@@ -13,7 +13,7 @@
 #   - Configures PM2 to start on boot + enables pm2-logrotate.
 #
 # Usage:
-#   bash scripts/dev-ec2-setup.sh
+#   bash dev-setup/run-staging-ec2-setup.sh
 # ----------------------------------------------------------------------------
 
 set -Eeuo pipefail
@@ -176,7 +176,36 @@ activate_pnpm_with_corepack() {
   return 0
 }
 
+prepend_real_npm_global_bin_to_path() {
+  if [[ -z "${REAL_NPM:-}" ]]; then
+    return 0
+  fi
+
+  local npm_global_bin=""
+  npm_global_bin="$("$REAL_NPM" bin -g 2>/dev/null || true)"
+  if [[ -z "$npm_global_bin" ]]; then
+    local npm_global_prefix=""
+    npm_global_prefix="$("$REAL_NPM" prefix -g 2>/dev/null || true)"
+    if [[ -n "$npm_global_prefix" ]]; then
+      npm_global_bin="${npm_global_prefix}/bin"
+    fi
+  fi
+
+  if [[ -z "$npm_global_bin" || ! -d "$npm_global_bin" ]]; then
+    return 0
+  fi
+
+  case ":$PATH:" in
+    *":$npm_global_bin:"*) ;;
+    *) export PATH="$npm_global_bin:$PATH" ;;
+  esac
+
+  return 0
+}
+
 install_socket_firewall() {
+  prepend_real_npm_global_bin_to_path
+
   if command -v sfw >/dev/null 2>&1; then
     if sfw --help >/dev/null 2>&1; then
       color green "Socket Firewall: installed"
@@ -191,14 +220,18 @@ install_socket_firewall() {
   else
     sudo "$REAL_NPM" install --global sfw
   fi
+  prepend_real_npm_global_bin_to_path
   command -v sfw >/dev/null 2>&1 || { color red "Socket Firewall installation failed."; exit 1; }
   color green "Socket Firewall installed."
 }
 
 install_pm2() {
+  prepend_real_npm_global_bin_to_path
+
   if ! command -v pm2 >/dev/null 2>&1; then
     color yellow "Installing PM2 globally…"
     if [[ "$(uname -s)" == "Darwin" ]]; then "$REAL_NPM" i -g pm2; else sudo "$REAL_NPM" i -g pm2; fi
+    prepend_real_npm_global_bin_to_path
   fi
   color green "PM2: $(pm2 -v)"
 }

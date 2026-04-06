@@ -109,16 +109,12 @@ Developer package-management guidance lives in [`docs/developer/pnpm-and-socket-
 
 ### Install
 
-Bootstrap Corepack and Socket Firewall once on your machine:
+Bootstrap the repo command shim, ensure Socket Firewall is installed, and
+activate the pinned pnpm version:
 
 ```bash
-npm install --global sfw
-corepack enable pnpm
-corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+./bin/6529 bootstrap
 ```
-
-That command reads the pinned version directly from the `packageManager` field
-in `package.json` so the bootstrap command stays aligned with the repo pin.
 
 Then install project dependencies through the secure path:
 
@@ -138,20 +134,14 @@ If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
 6529 staging
 ```
 
-If you want plain `6529 ...` commands to work on a server shell without
-`direnv`, run this once from the repo root:
-
-```bash
-./bin/6529 bootstrap
-```
-
-Then open a new shell, or source the rc file that matches your shell.
-
-If you want a one-liner for the current shell, use:
+If you want plain `6529 ...` commands to work in your current shell
+immediately, use:
 
 ```bash
 source <(./bin/6529 bootstrap --print-export)
 ```
+
+Otherwise, open a new shell after running `./bin/6529 bootstrap`.
 
 ### Build
 

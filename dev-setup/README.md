@@ -1,6 +1,11 @@
-# 6529seize-frontend — EC2 Setup Guide
+# 6529seize-frontend — Staging EC2 Setup Guide
 
-This repo includes `dev-setup/run-setup.sh` to bootstrap a fresh EC2 host for a per‑developer staging site at `https://<slug>staging.6529.io`.
+This repo includes `dev-setup/run-staging-ec2-setup.sh` to bootstrap a fresh
+EC2 host for a per-developer staging site at `https://<slug>staging.6529.io`.
+
+This is not the normal local developer setup path for a laptop or workstation.
+For ordinary local development, use the `6529` wrapper and secure install flow
+instead of this host-provisioning script.
 
 ---
 
@@ -56,13 +61,13 @@ ssh -i /path/to/key.pem ubuntu@<EC2_PUBLIC_IP>
 
 ---
 
-## 4) Clone the repo & run the setup
+## 4) Clone the repo & run the staging host setup
 
 ```bash
 sudo apt-get update -y && sudo apt-get install -y git
 git clone https://github.com/6529-Collections/6529seize-frontend.git
 cd 6529seize-frontend
-bash dev-setup/run-setup.sh
+bash dev-setup/run-staging-ec2-setup.sh
 ```
 
 ### You’ll be prompted for
@@ -147,7 +152,8 @@ sudo certbot renew --dry-run
 
 ## 🔄 Resetting an Environment
 
-If you need to reset your staging/dev box (e.g., wipe the repo, stop PM2, remove the Nginx vhost), use the provided reset script.  
+If you need to reset your staging EC2 box (e.g., wipe the repo, stop PM2,
+remove the Nginx vhost), use the provided reset script.  
 This does **not uninstall Node, PM2, or Nginx** — it just clears the running app and config so you can re-run setup from scratch.
 
 ```bash
