@@ -77,27 +77,11 @@ jobs:
       - name: Build Target
         run: |
           rm -rf target
-          mkdir -p target/package/.next target/_next
-          cp -RL .next/standalone/. target/package/
-          cp .next/BUILD_ID target/package/.next/BUILD_ID
-          cp -R .next/static target/package/.next/static
+          rm -rf .next/node_modules
+          mkdir -p target/_next
           cp -R .next/static target/_next/static
-          if [ -d public ]; then
-            cp -R public target/package/public
-          fi
-          if [ -d .ebextensions ]; then
-            cp -R .ebextensions target/package/.ebextensions
-          fi
-          if find target/package -type l | grep -q .; then
-            echo "Standalone package still contains symlinks after copy:"
-            find target/package -type l
-            exit 1
-          fi
-          printf 'web: node server.js\n' > target/package/Procfile
-          cd target/package
-          zip -yr ../package.zip .
-          cd ../..
-          rm -rf target/package
+          zip -yr package.zip . -x '*.git*' 'target/*' '.next/static/*' '.next/node_modules/*'
+          mv package.zip target/
 
       - name: Verify package bundle size
         run: |
