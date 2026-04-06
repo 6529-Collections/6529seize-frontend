@@ -226,7 +226,6 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     const handleWindowFocus = () => {
       refreshWaveViewOnForeground({
         dedupe: true,
-        includePinnedWaves: false,
       });
     };
 

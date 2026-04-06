@@ -300,6 +300,36 @@ describe("MyStreamProvider integration", () => {
     expect(mockResetDmWavesNewDropsCount).not.toHaveBeenCalled();
   });
 
+  it("refreshes pinned waves when the window regains focus", () => {
+    mockActiveWaveId = "wave-1";
+
+    renderWithProvider(<div>child</div>);
+
+    mockRegisterWave.mockClear();
+    mockMainWavesRefetch.mockClear();
+    mockDmMainWavesRefetch.mockClear();
+    mockRefetchAllWaves.mockClear();
+    mockRefetchAllDmWaves.mockClear();
+    mockResetMainWavesNewDropsCount.mockClear();
+    mockResetDmWavesNewDropsCount.mockClear();
+
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(2000);
+
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
+
+    expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
+    expect(mockRefetchAllWaves).toHaveBeenCalledTimes(1);
+    expect(mockRefetchAllDmWaves).toHaveBeenCalledTimes(1);
+    expect(mockMainWavesRefetch).not.toHaveBeenCalled();
+    expect(mockDmMainWavesRefetch).not.toHaveBeenCalled();
+    expect(mockResetMainWavesNewDropsCount).not.toHaveBeenCalled();
+    expect(mockResetDmWavesNewDropsCount).not.toHaveBeenCalled();
+
+    nowSpy.mockRestore();
+  });
+
   it("dedupes visibilitychange and focus foreground refreshes", () => {
     mockActiveWaveId = "wave-1";
 
@@ -371,9 +401,9 @@ describe("MyStreamProvider integration", () => {
 
     expect(mockRegisterWave).toHaveBeenCalledTimes(1);
     expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
-    expect(mockMainWavesRefetch).toHaveBeenCalledTimes(1);
-    expect(mockRefetchAllWaves).not.toHaveBeenCalled();
+    expect(mockRefetchAllWaves).toHaveBeenCalledTimes(1);
     expect(mockRefetchAllDmWaves).toHaveBeenCalledTimes(1);
+    expect(mockMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockDmMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockResetMainWavesNewDropsCount).not.toHaveBeenCalled();
     expect(mockResetDmWavesNewDropsCount).not.toHaveBeenCalled();
@@ -381,7 +411,7 @@ describe("MyStreamProvider integration", () => {
     nowSpy.mockRestore();
   });
 
-  it("refreshes the overview lists without re-registering when no active wave is selected", () => {
+  it("refreshes all overview lists without re-registering when focus returns and no active wave is selected", () => {
     renderWithProvider(<div>child</div>);
 
     mockRegisterWave.mockClear();
@@ -399,9 +429,9 @@ describe("MyStreamProvider integration", () => {
     });
 
     expect(mockRegisterWave).not.toHaveBeenCalled();
-    expect(mockMainWavesRefetch).toHaveBeenCalledTimes(1);
-    expect(mockRefetchAllWaves).not.toHaveBeenCalled();
+    expect(mockRefetchAllWaves).toHaveBeenCalledTimes(1);
     expect(mockRefetchAllDmWaves).toHaveBeenCalledTimes(1);
+    expect(mockMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockDmMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockResetMainWavesNewDropsCount).not.toHaveBeenCalled();
     expect(mockResetDmWavesNewDropsCount).not.toHaveBeenCalled();
