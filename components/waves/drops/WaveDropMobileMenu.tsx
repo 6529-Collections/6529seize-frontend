@@ -2,10 +2,10 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import { publicEnv } from "@/config/env";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -50,6 +50,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showCopyOption = true,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { isMemesWave } = useSeizeSettings();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
 
@@ -83,12 +84,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     };
     const isDirectMessage =
       waveDetails.chat?.scope?.group?.is_direct_message ?? false;
-    const dropLink = `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
-      waveId: drop.wave.id,
-      serialNo: drop.serial_no,
+    const dropLink = getCopiedDropLink({
+      drop,
       isDirectMessage,
-      isApp: false,
-    })}`;
+      isMemesWave,
+    });
 
     if (typeof navigator.clipboard.writeText === "function") {
       void navigator.clipboard.writeText(dropLink).then(() => {
