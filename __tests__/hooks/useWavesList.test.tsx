@@ -68,9 +68,11 @@ const announcementWave = {
   metrics: { latest_drop_timestamp: 300 },
   wave: { type: ApiWaveType.Rank },
 } as any;
+let announcementRefetchMock: jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  announcementRefetchMock = jest.fn();
   useWavesOverviewMock.mockReturnValue({
     waves: [dmWave, mainWave],
     isFetching: false,
@@ -99,7 +101,8 @@ beforeEach(() => {
     wave: null,
     isLoading: false,
     isError: false,
-    refetch: jest.fn(),
+    error: null,
+    refetch: announcementRefetchMock,
     isFetching: false,
   });
 });
@@ -113,6 +116,8 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
 });
 
 test("injects the announcement wave once and excludes it from pinned metadata", () => {
+  const fallbackAnnouncementRefetch = jest.fn();
+
   useSeizeSettingsMock.mockReturnValue({
     seizeSettings: {
       announcements_wave_id: "4",
@@ -123,7 +128,8 @@ test("injects the announcement wave once and excludes it from pinned metadata", 
     wave: announcementWave,
     isLoading: false,
     isError: false,
-    refetch: jest.fn(),
+    error: null,
+    refetch: fallbackAnnouncementRefetch,
     isFetching: false,
   });
 
@@ -140,6 +146,11 @@ test("injects the announcement wave once and excludes it from pinned metadata", 
     id: "4",
     isPinned: false,
   });
+  expect(result.current.announcementWave).toMatchObject({ id: "4" });
+  expect(result.current.trackedAnnouncementWave).toBeNull();
+  expect(result.current.announcementQueryLoading).toBe(false);
+  expect(result.current.announcementQueryError).toBeNull();
+  expect(result.current.announcementRefetch).toBe(fallbackAnnouncementRefetch);
   expect(
     Object.prototype.hasOwnProperty.call(
       result.current.waves.find((wave: any) => wave.id === "4"),
@@ -175,6 +186,11 @@ test("preserves pin state for a legacy pinned announcement wave", () => {
     id: "4",
     isPinned: true,
   });
+  expect(result.current.trackedAnnouncementWave).toMatchObject({ id: "4" });
+  expect(result.current.announcementWave).toMatchObject({ id: "4" });
+  expect(result.current.announcementQueryLoading).toBe(false);
+  expect(result.current.announcementQueryError).toBeNull();
+  expect(result.current.announcementRefetch).toBe(announcementRefetchMock);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
   expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
 });
@@ -203,7 +219,69 @@ test("reuses an overview announcement wave without enabling the fallback fetch",
   ).toMatchObject({
     id: "4",
   });
+  expect(result.current.trackedAnnouncementWave).toMatchObject({ id: "4" });
+  expect(result.current.announcementWave).toMatchObject({ id: "4" });
+  expect(result.current.announcementQueryLoading).toBe(false);
+  expect(result.current.announcementQueryError).toBeNull();
+  expect(result.current.announcementRefetch).toBe(announcementRefetchMock);
   expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
+});
+
+test("exposes fallback announcement query loading state when unresolved", () => {
+  const loadingAnnouncementRefetch = jest.fn();
+
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: {
+      announcements_wave_id: "4",
+    },
+    isAnnouncementsWave: (waveId: string | null | undefined) => waveId === "4",
+  });
+  useWaveByIdMock.mockReturnValue({
+    wave: null,
+    isLoading: true,
+    isError: false,
+    error: null,
+    refetch: loadingAnnouncementRefetch,
+    isFetching: true,
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.announcementWave).toBeNull();
+  expect(result.current.trackedAnnouncementWave).toBeNull();
+  expect(result.current.announcementQueryLoading).toBe(true);
+  expect(result.current.announcementQueryError).toBeNull();
+  expect(result.current.announcementRefetch).toBe(loadingAnnouncementRefetch);
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+});
+
+test("exposes fallback announcement query error when unresolved", () => {
+  const failedAnnouncementRefetch = jest.fn();
+  const announcementQueryError = new Error("Failed to load announcement wave");
+
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: {
+      announcements_wave_id: "4",
+    },
+    isAnnouncementsWave: (waveId: string | null | undefined) => waveId === "4",
+  });
+  useWaveByIdMock.mockReturnValue({
+    wave: null,
+    isLoading: false,
+    isError: true,
+    error: announcementQueryError,
+    refetch: failedAnnouncementRefetch,
+    isFetching: false,
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.announcementWave).toBeNull();
+  expect(result.current.trackedAnnouncementWave).toBeNull();
+  expect(result.current.announcementQueryLoading).toBe(false);
+  expect(result.current.announcementQueryError).toBe(announcementQueryError);
+  expect(result.current.announcementRefetch).toBe(failedAnnouncementRefetch);
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
 });
 
 test("indicates loading when pinned wave is still loading", () => {

@@ -83,10 +83,14 @@ const useWavesList = () => {
   const shouldFetchAnnouncementWave = Boolean(
     announcementsWaveId && !trackedAnnouncementWave
   );
-  const { wave: fetchedAnnouncementWave, refetch: refetchAnnouncementWave } =
-    useWaveById(announcementsWaveId, {
-      enabled: shouldFetchAnnouncementWave,
-    });
+  const {
+    wave: fetchedAnnouncementWave,
+    isLoading: announcementQueryLoading,
+    error: announcementQueryError,
+    refetch: announcementRefetch,
+  } = useWaveById(announcementsWaveId, {
+    enabled: shouldFetchAnnouncementWave,
+  });
   const announcementWave = useMemo(() => {
     const resolvedWave = trackedAnnouncementWave ?? fetchedAnnouncementWave;
     if (!resolvedWave || waveIsDm(resolvedWave)) {
@@ -120,12 +124,12 @@ const useWavesList = () => {
     // Refetch server-side pinned waves
     refetchPinnedWaves();
     if (shouldFetchAnnouncementWave) {
-      void refetchAnnouncementWave();
+      void announcementRefetch();
     }
   }, [
     mainWavesRefetch,
     refetchPinnedWaves,
-    refetchAnnouncementWave,
+    announcementRefetch,
     shouldFetchAnnouncementWave,
   ]);
 
@@ -226,6 +230,11 @@ const useWavesList = () => {
       pinnedWaves: allPinnedWaves,
       isPinnedWavesLoading,
       hasPinnedWavesError,
+      trackedAnnouncementWave,
+      announcementWave,
+      announcementQueryLoading,
+      announcementQueryError,
+      announcementRefetch,
 
       // Pinned waves management functions
       addPinnedWave: pinWave,
@@ -249,6 +258,11 @@ const useWavesList = () => {
       allPinnedWaves,
       isPinnedWavesLoading,
       hasPinnedWavesError,
+      trackedAnnouncementWave,
+      announcementWave,
+      announcementQueryLoading,
+      announcementQueryError,
+      announcementRefetch,
       pinWave,
       unpinWave,
       missingPinnedIds,
