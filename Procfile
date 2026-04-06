@@ -1,1 +1,1 @@
-web: ./bin/6529 start
+web: node scripts/start-next.cjs

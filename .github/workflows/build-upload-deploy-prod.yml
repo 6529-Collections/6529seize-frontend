@@ -27,6 +27,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
       - name: Install Socket Firewall
         id: socket_firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
@@ -35,12 +41,6 @@ jobs:
 
       - name: Activate pinned pnpm via Corepack
         run: bash scripts/setup-corepack-pnpm.sh
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "pnpm"
 
       - name: Assert npm lockfile is absent
         run: ./bin/6529 guard:no-package-lock
@@ -73,7 +73,7 @@ jobs:
         run: ./bin/6529 build
 
       - name: Prune to production dependencies
-        run: pnpm prune --prod
+        run: ./bin/6529 prune:prod
 
       - name: Build Target
         run: |

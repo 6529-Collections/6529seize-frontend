@@ -26,8 +26,9 @@ Common commands:
   6529 dev             -> node scripts/dev-with-fallback.cjs
   6529 build           -> pnpm build
   6529 approve-builds  -> pnpm approve-builds
+  6529 prune:prod      -> pnpm run prune:prod
   6529 staging         -> bash repo-rooted scripts/staging.sh
-  6529 start           -> pnpm start
+  6529 start           -> node scripts/start-next.cjs
   6529 test            -> pnpm test
   6529 lint            -> pnpm lint
 
@@ -41,6 +42,21 @@ shift
 case "$command_name" in
   bootstrap)
     exec bash "$REPO_ROOT/scripts/bootstrap-6529-command.sh" "$@"
+    ;;
+  dev)
+    exec node scripts/dev-with-fallback.cjs "$@"
+    ;;
+  dev:webpack)
+    exec env USE_TURBO=false node scripts/dev-with-fallback.cjs "$@"
+    ;;
+  dev:open)
+    exec node scripts/dev-open.cjs "$@"
+    ;;
+  staging)
+    exec bash "$REPO_ROOT/scripts/staging.sh" "$@"
+    ;;
+  start)
+    exec node scripts/start-next.cjs "$@"
     ;;
 esac
 
@@ -65,15 +81,6 @@ if [[ -z "$REAL_PNPM" ]]; then
 fi
 
 case "$command_name" in
-  dev)
-    exec node scripts/dev-with-fallback.cjs "$@"
-    ;;
-  dev:webpack)
-    exec env USE_TURBO=false node scripts/dev-with-fallback.cjs "$@"
-    ;;
-  dev:open)
-    exec node scripts/dev-open.cjs "$@"
-    ;;
   i)
     exec "$REAL_PNPM" run install:secure "$@"
     ;;
@@ -89,8 +96,8 @@ case "$command_name" in
   install:prod)
     exec "$REAL_PNPM" run install:secure:prod "$@"
     ;;
-  staging)
-    exec bash "$REPO_ROOT/scripts/staging.sh" "$@"
+  prune:prod)
+    exec "$REAL_PNPM" run prune:prod "$@"
     ;;
   run)
     exec "$REAL_PNPM" run "$@"

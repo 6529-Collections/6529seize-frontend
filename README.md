@@ -112,7 +112,7 @@ Developer package-management guidance lives in [`docs/developer/pnpm-and-socket-
 Bootstrap Corepack and Socket Firewall once on your machine:
 
 ```bash
-npm install --global corepack@latest sfw
+npm install --global sfw
 corepack enable pnpm
 corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
 ```

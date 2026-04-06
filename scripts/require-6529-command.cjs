@@ -8,6 +8,7 @@ if (process.env["SEIZE_6529_COMMAND"] !== "1") {
   console.error("  6529 test");
   console.error("  6529 lint");
   console.error("  6529 install");
+  console.error("  6529 start");
   console.error("  6529 staging");
   process.exit(1);
 }

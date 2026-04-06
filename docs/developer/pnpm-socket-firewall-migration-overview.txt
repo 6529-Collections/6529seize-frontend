@@ -14,7 +14,7 @@ The migration covers:
 - converting repo scripts and helper scripts from npm/npx to pnpm/pnpm exec
 - updating Playwright, staging, worktree, PM2, and standalone export docs
 - updating production CI to install with Socket Firewall + pnpm
-- updating Elastic Beanstalk startup to use pnpm explicitly
+- updating Elastic Beanstalk startup so runtime no longer depends on pnpm
 - avoiding Elastic Beanstalk's implicit npm install by shipping runtime
   dependencies inside the deployment artifact
 - adding repo guardrails against npm/yarn installs and package-lock reintroduction
@@ -94,13 +94,13 @@ After:
 - CI passes the Socket action's absolute installed binary path into the secure
   install wrapper instead of relying only on PATH lookup
 - CI builds the app
-- CI runs pnpm prune --prod
+- CI runs the repo-scoped production prune command
 - CI zips the app together with the runtime node_modules tree
 - the zip is created with symlink preservation so pnpm's node_modules layout is
   safe in the artifact
-- Procfile starts the app with pnpm start
-- .ebextensions/pnpm.config activates the pinned pnpm version on the instance
-  and verifies that bundled runtime dependencies are present
+- Procfile starts the app directly without pnpm
+- .ebextensions/runtime-bundle.config verifies that bundled runtime
+  dependencies and build output are present
 - EB no longer needs to pull packages from the registry during deploy
 
 This is important because EB's Node.js platform defaults to npm install when it
@@ -111,7 +111,7 @@ Developer workflow changes
 --------------------------
 
 Bootstrap once:
-1. npm install --global corepack@latest sfw
+1. npm install --global sfw
 2. corepack enable pnpm
 3. corepack prepare pnpm@10.33.0 --activate
 4. Optional on servers without direnv: ./bin/6529 bootstrap && source ~/.bashrc

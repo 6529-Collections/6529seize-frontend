@@ -15,7 +15,13 @@ if [[ "$PACKAGE_MANAGER" != pnpm@* ]]; then
   exit 1
 fi
 
-npm install --global corepack@latest
+if ! command -v corepack >/dev/null 2>&1; then
+  echo "corepack is required but was not found on PATH." >&2
+  echo "Install a supported Node.js release that includes Corepack, then rerun." >&2
+  exit 1
+fi
+
+export COREPACK_ENABLE_DOWNLOAD_PROMPT="0"
 corepack enable pnpm
 corepack prepare "$PACKAGE_MANAGER" --activate
 pnpm --version

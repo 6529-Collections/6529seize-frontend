@@ -34,7 +34,7 @@ so the `6529` shorthand commands above work directly inside the repository.
 Bootstrap the toolchain once:
 
 ```bash
-npm install --global corepack@latest sfw
+npm install --global sfw
 corepack enable pnpm
 corepack prepare pnpm@10.33.0 --activate
 ```
@@ -68,7 +68,7 @@ explicitly:
 
 ## Day-to-day commands
 
-PM2 should launch the app through pnpm as well:
+PM2 should launch the app through the repo wrapper:
 
 ```bash
 pm2 start ./bin/6529 --name=6529seize -- start
@@ -101,10 +101,11 @@ The production workflow now:
 4. Prunes to production dependencies.
 5. Packages the app together with the pnpm-generated `node_modules`.
 
-At deploy time, Elastic Beanstalk only needs pnpm available for the start
-command. [`Procfile`](../../Procfile) uses `pnpm start`, and
-[`pnpm.config`](../../.ebextensions/pnpm.config) activates the pinned pnpm
-version with Corepack and verifies that bundled runtime dependencies are present.
+At deploy time, Elastic Beanstalk starts the already-built app directly through
+[`scripts/start-next.cjs`](../../scripts/start-next.cjs). The deployment bundle
+includes `node_modules`, and
+[`runtime-bundle.config`](../../.ebextensions/runtime-bundle.config) verifies
+that the runtime bundle is present on the instance.
 
 ## Socket Firewall Free limitations
 
