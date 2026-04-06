@@ -1,7 +1,7 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import React, { useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -20,6 +20,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   onCopy,
 }) => {
   const [copied, setCopied] = useState(false);
+  const { isMemesWave } = useSeizeSettings();
   const myStream = useMyStreamOptional();
   const directMessageWaves = myStream?.directMessages.list ?? [];
 
@@ -49,12 +50,11 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
       waveDetails,
       directMessageWaves
     );
-    const dropLink = `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
-      waveId: drop.wave.id,
-      serialNo: drop.serial_no,
+    const dropLink = getCopiedDropLink({
+      drop,
       isDirectMessage,
-      isApp: false,
-    })}`;
+      isMemesWave,
+    });
     navigator.clipboard.writeText(dropLink).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
