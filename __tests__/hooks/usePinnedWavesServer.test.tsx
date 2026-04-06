@@ -55,16 +55,18 @@ describe("usePinnedWavesServer", () => {
     });
   });
 
-  it("always refetches pinned waves on window focus", () => {
+  it("uses the expected pinned waves cache policy", () => {
     renderHook(() => usePinnedWavesServer(), { wrapper });
 
-    expect(useQuery).toHaveBeenCalledWith(
+    const queryOptions = (useQuery as jest.Mock).mock.calls[0]?.[0];
+
+    expect(queryOptions).toEqual(
       expect.objectContaining({
         gcTime: 10 * 60 * 1000,
         refetchInterval: 2 * 60 * 1000,
-        refetchOnWindowFocus: "always",
         staleTime: 5 * 60 * 1000,
       })
     );
+    expect(queryOptions).not.toHaveProperty("refetchOnWindowFocus");
   });
 });
