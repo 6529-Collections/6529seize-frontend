@@ -157,12 +157,12 @@ function RepContributorRow({
             )}
           </div>
         )}
-        <p className="tw-mb-0 tw-truncate tw-text-[0.9375rem] tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-white">
           {contributor.display}
         </p>
       </div>
 
-      <span className="tw-flex-shrink-0 tw-text-[0.9375rem] tw-font-semibold tw-text-iron-200">
+      <span className="tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors">
         {formatNumberWithCommas(contributor.contribution)}
       </span>
     </Link>

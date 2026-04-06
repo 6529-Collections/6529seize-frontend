@@ -3,11 +3,10 @@ import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { RateMatter } from "@/types/enums";
-import { getContributorLabel, type RepDirection } from "./UserPageRep.helpers";
-import RepDirectionToggle from "./RepDirectionToggle";
+import type { RepDirection } from "./UserPageRep.helpers";
 import RepCategoryPill from "./RepCategoryPill";
+import RepDirectionToggle from "./RepDirectionToggle";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
@@ -47,7 +46,6 @@ export default function MobileRepTabContent({
   isFetchingNextPage,
   onGrantRep,
   onEditCategory,
-  onOpenOverviewContributors,
   onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
@@ -64,10 +62,8 @@ export default function MobileRepTabContent({
   readonly isFetchingNextPage: boolean;
   readonly onGrantRep: () => void;
   readonly onEditCategory: (category: string) => void;
-  readonly onOpenOverviewContributors: () => void;
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
-  const isTouchDevice = useIsTouchDevice();
   const hiddenLoadedCategoryCount = Math.max(
     categories.length - visibleCount,
     0
@@ -149,36 +145,16 @@ export default function MobileRepTabContent({
         )}
 
       <div className="tw-mt-4">
-        <div className="tw-mb-4 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-          Rep Categories
-        </div>
-
-        {/* Received / Given toggle */}
-        <div className="tw-mb-3">
+        <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <div className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+            Rep Categories
+          </div>
           <RepDirectionToggle
             repDirection={repDirection}
             onRepDirectionChange={onRepDirectionChange}
             compact
           />
         </div>
-
-        {isTouchDevice && overview && overview.contributor_count > 0 && (
-          <button
-            type="button"
-            onClick={onOpenOverviewContributors}
-            aria-label={`View all ${getContributorLabel(
-              repDirection,
-              overview.contributor_count
-            )}`}
-            className="tw-inline-flex tw-items-center tw-gap-1.5 tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-normal tw-text-iron-400 tw-underline tw-decoration-white/20 tw-underline-offset-4 tw-transition-[text-decoration-color] tw-transition-colors hover:tw-text-iron-200 hover:tw-decoration-white/50"
-          >
-            <span>View all</span>
-            <span>
-              {formatNumberWithCommas(overview.contributor_count)}{" "}
-              {getContributorLabel(repDirection, overview.contributor_count)}
-            </span>
-          </button>
-        )}
       </div>
 
       {categories.length > 0 && (

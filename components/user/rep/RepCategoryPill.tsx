@@ -54,6 +54,9 @@ export default function RepCategoryPill({
     category.contributor_count > 0 && !!onOpenContributors;
   const detailClasses =
     "tw-inline-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2.5 tw-gap-y-1.5";
+  const contributorButtonClasses = compact
+    ? "tw-cursor-pointer tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-underline tw-decoration-white/20 tw-underline-offset-4 tw-transition-colors hover:tw-text-iron-200"
+    : "tw-cursor-pointer tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-underline tw-decoration-white/10 tw-underline-offset-4 tw-transition-[text-decoration-color] tw-transition-colors hover:tw-text-iron-200 hover:tw-decoration-white/50";
 
   const details = (
     <>
@@ -117,7 +120,7 @@ export default function RepCategoryPill({
               direction,
               category.contributor_count
             )} for ${category.category}`}
-            className="tw-cursor-pointer tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-text-iron-200 hover:tw-underline"
+            className={contributorButtonClasses}
           >
             {contributorText}
           </button>

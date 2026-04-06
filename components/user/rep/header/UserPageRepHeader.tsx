@@ -138,7 +138,7 @@ export default function UserPageRepHeader({
                         repDirection,
                         overview.contributor_count
                       )}`}
-                      className="tw-inline-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-normal tw-text-iron-400 tw-underline tw-decoration-white/20 tw-underline-offset-4 tw-transition-[text-decoration-color] tw-transition-colors hover:tw-text-iron-200 hover:tw-decoration-white/50"
+                      className="tw-inline-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-normal tw-text-iron-400 tw-underline tw-decoration-white/10 tw-underline-offset-4 tw-transition-[text-decoration-color] hover:tw-text-iron-200 hover:tw-decoration-white/50"
                     >
                       {formatNumberWithCommas(overview.contributor_count)}{" "}
                       {getContributorLabel(

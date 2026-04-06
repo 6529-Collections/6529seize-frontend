@@ -136,7 +136,6 @@ export default function UserPageRepMobile({
               isFetchingNextPage={isFetchingNextPage}
               onGrantRep={() => setIsGrantRepOpen(true)}
               onEditCategory={setEditCategory}
-              onOpenOverviewContributors={onOpenOverviewContributors}
               onOpenCategoryContributors={onOpenCategoryContributors}
             />
           </motion.div>
