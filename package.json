@@ -164,7 +164,8 @@
     "use-debounce": "10.1.0",
     "uuid": "10.0.0",
     "viem": "2.47.6",
-    "wagmi": "2.19.5"
+    "wagmi": "2.19.5",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@jest/globals": "30.3.0",
@@ -222,8 +223,7 @@
     "tsx": "4.21.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.57.2",
-    "yaml": "2.8.3",
-    "zod": "3.25.76"
+    "yaml": "2.8.3"
   },
   "overrides": {
     "@emoji-mart/react": {
