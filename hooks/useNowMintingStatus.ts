@@ -7,6 +7,7 @@ type NowMintingStatus = {
   readonly nft: NFTWithMemesExtendedData | undefined;
   readonly isFetching: boolean;
   readonly status: ManifoldClaimStatus | null;
+  readonly isDropComplete: boolean;
   readonly isStatusLoading: boolean;
   readonly error: unknown;
 };
@@ -19,6 +20,7 @@ export const useNowMintingStatus = (): NowMintingStatus => {
     nft,
     isFetching,
     status: claim?.status ?? null,
+    isDropComplete: claim?.isDropComplete ?? false,
     isStatusLoading: !!nft && !claim,
     error,
   };

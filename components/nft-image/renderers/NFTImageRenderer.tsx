@@ -1,11 +1,11 @@
 "use client";
 
+import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
+import styles from "@/components/nft-image/NFTImage.module.scss";
+import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
+import { withArweaveFallback } from "@/components/nft-image/utils/gateway-fallback";
 import Image from "next/image";
 import { Col } from "react-bootstrap";
-import styles from "../NFTImage.module.scss";
-import NFTImageBalance from "../NFTImageBalance";
-import type { BaseRendererProps } from "../types/renderer-props";
-import { withArweaveFallback } from "../utils/gateway-fallback";
 
 function getSrc(
   nft: BaseRendererProps["nft"],

@@ -1,4 +1,4 @@
-import styles from "./NFTImage.module.scss";
+import styles from "@/components/nft-image/NFTImage.module.scss";
 import { Col } from "react-bootstrap";
 import type { Rememe } from "@/entities/INFT";
 import Image from "next/image";

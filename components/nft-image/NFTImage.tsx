@@ -1,10 +1,10 @@
 import type { BaseNFT, NFTLite } from "@/entities/INFT";
-import styles from "./NFTImage.module.scss";
-import NFTHTMLRenderer from "./renderers/NFTHTMLRenderer";
-import NFTImageRenderer from "./renderers/NFTImageRenderer";
-import NFTModelRenderer from "./renderers/NFTModelRenderer";
-import NFTVideoRenderer from "./renderers/NFTVideoRenderer";
-import { getMediaType } from "./utils/media-type";
+import styles from "@/components/nft-image/NFTImage.module.scss";
+import NFTHTMLRenderer from "@/components/nft-image/renderers/NFTHTMLRenderer";
+import NFTImageRenderer from "@/components/nft-image/renderers/NFTImageRenderer";
+import NFTModelRenderer from "@/components/nft-image/renderers/NFTModelRenderer";
+import NFTVideoRenderer from "@/components/nft-image/renderers/NFTVideoRenderer";
+import { getMediaType } from "@/components/nft-image/utils/media-type";
 
 interface Props {
   nft: BaseNFT | NFTLite;

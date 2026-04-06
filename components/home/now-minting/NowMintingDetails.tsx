@@ -3,6 +3,7 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import {
   getDimensionsFromMetadata,
+  getFileMimeTypeFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import NowMintingCountdown from "./NowMintingCountdown";
@@ -20,6 +21,7 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
     return `${Number.parseFloat(value.toFixed(5))} ETH`;
   };
   const floorPrice = formatEth(nft.floor_price);
+  const fileMimeType = getFileMimeTypeFromMetadata(nft.metadata);
 
   return (
     <div className="tw-w-full">
@@ -29,6 +31,7 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           title={nft.name}
           artistHandle={nft.artist_seize_handle}
           artistName={nft.artist}
+          mediaMimeType={fileMimeType}
         />
         <NowMintingStatsGrid nftId={nft.id} floorPrice={floorPrice} />
         <NowMintingDetailsAccordion

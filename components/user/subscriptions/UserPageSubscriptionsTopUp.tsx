@@ -15,6 +15,7 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import {
   displayedEonNumberFromIndex,
   displayedEpochNumberFromIndex,
@@ -63,6 +64,10 @@ function getTopUpModalEmoji(
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
+  const hideSubscriptions = shouldHideSubscriptions({
+    capacitorIsIos: isIos,
+    country,
+  });
   const [memeCount, setMemeCount] = useState<string>("");
   const sendTransaction = useSendTransaction();
 
@@ -300,7 +305,7 @@ export default function UserPageSubscriptionsTopUp() {
     return null;
   }
 
-  if (isIos && country !== "US") {
+  if (hideSubscriptions) {
     return <></>;
   }
 

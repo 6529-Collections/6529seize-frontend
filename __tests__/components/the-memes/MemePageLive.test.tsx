@@ -32,7 +32,16 @@ jest.mock("@/components/nft-image/RememeImage", () => ({
 }));
 jest.mock("@/components/nft-attributes/NftStats", () => ({
   __esModule: true,
-  NftPageStats: () => <tr data-testid="nft-stats" />,
+  NftPageStats: ({ afterMetadata }: { afterMetadata?: React.ReactNode }) => (
+    <>
+      <tr>
+        <td>Metadata</td>
+        <td>View</td>
+      </tr>
+      {afterMetadata}
+      <tr data-testid="nft-stats" />
+    </>
+  ),
 }));
 
 const mockFetchUrl = jest.fn();
@@ -231,5 +240,31 @@ describe("MemePageLiveRightMenu distribution link", () => {
     });
     const link = screen.getByRole("link", { name: /distribution plan/i });
     expect(link).toHaveAttribute("href", `/the-memes/5/distribution`);
+  });
+
+  it("renders the media type row below metadata", async () => {
+    const nft = createNft({
+      metadata: {
+        animation_details: {
+          format: "HTML",
+        },
+      },
+    });
+    const meta = createMeta();
+
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageLiveRightMenu show nft={nft} nftMeta={meta} nftBalance={0} />
+        </CookieConsentProvider>
+      );
+    });
+
+    const metadataCell = screen.getByText("Metadata");
+    const metadataRow = metadataCell.closest("tr");
+    const fileTypeRow = metadataRow?.nextElementSibling;
+
+    expect(fileTypeRow?.textContent).toContain("File Type");
+    expect(fileTypeRow?.textContent).toContain("Interactive - HTML");
   });
 });

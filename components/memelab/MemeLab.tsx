@@ -2,6 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import styles from "@/components/memelab/MemeLab.module.scss";
@@ -22,6 +23,7 @@ import {
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
+import { getNftMimeType } from "@/helpers/nft.helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
 import {
@@ -536,6 +538,8 @@ export default function MemeLabComponent() {
   }, [sort, sortDir, nftsLoaded, volumeType]);
 
   function printNft(nft: LabNFT) {
+    const mediaMimeType = getNftMimeType(nft);
+
     return (
       <Col
         key={`${nft.contract}-${nft.id}`}
@@ -561,7 +565,18 @@ export default function MemeLabComponent() {
             </Row>
             <Row>
               <Col className="text-center pt-2">
-                #{nft.id} - {nft.name}
+                <span>
+                  {mediaMimeType && (
+                    <MediaTypeBadge
+                      mimeType={mediaMimeType}
+                      dropId={`${nft.contract}-${nft.id}`}
+                      size="sm"
+                      iconClassName="tw-size-5"
+                      className="tw-mr-1.5 tw-inline-flex tw-align-[0.02em]"
+                    />
+                  )}
+                  #{nft.id} - {nft.name}
+                </span>
               </Col>
             </Row>
             <Row>
