@@ -5,6 +5,7 @@ import {
   getDropIdentityFallbackValue,
   getDropIdentityProfile,
 } from "@/components/waves/drops/identityDisplay.helpers";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
@@ -185,6 +186,11 @@ const getPodiumIdentityDisplay = (drop: ExtendedDrop) => {
     pfp: identityProfile?.pfp ?? null,
     profileUser:
       identityProfile?.handle ?? identityProfile?.primary_address ?? null,
+    comparableIdentity:
+      identityProfile ?? {
+        handle: fallbackValue,
+        primary_address: fallbackValue,
+      },
   };
 };
 
@@ -251,6 +257,12 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   const identityDisplay = getPodiumIdentityDisplay(drop);
   const primaryLabel = identityDisplay?.label ?? authorProfileLabel;
   const primaryPfp = identityDisplay ? identityDisplay.pfp : drop.author.pfp;
+  const isSelfNominated = identityDisplay
+    ? areSameProfileIdentity({
+        left: drop.author,
+        right: identityDisplay.comparableIdentity,
+      })
+    : false;
 
   return (
     <motion.div
@@ -386,24 +398,32 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   )}
 
                   <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1 tw-gap-y-1 tw-text-[11px] tw-text-iron-500">
-                    <span className="tw-font-normal tw-text-iron-500">
-                      nominated by
-                    </span>
-
-                    <UserProfileTooltipWrapper user={authorTooltipUser}>
-                      <Link
-                        href={authorProfileHref}
-                        onClick={(e) => e.stopPropagation()}
-                        className="tw-inline-flex tw-max-w-full tw-items-center tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
-                      >
-                        <span
-                          title={authorProfileLabel}
-                          className="tw-block tw-max-w-[7rem] tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-200"
-                        >
-                          {authorProfileLabel}
+                    {isSelfNominated ? (
+                      <span className="tw-font-normal tw-text-iron-500">
+                        self-nominated
+                      </span>
+                    ) : (
+                      <>
+                        <span className="tw-font-normal tw-text-iron-500">
+                          nominated by
                         </span>
-                      </Link>
-                    </UserProfileTooltipWrapper>
+
+                        <UserProfileTooltipWrapper user={authorTooltipUser}>
+                          <Link
+                            href={authorProfileHref}
+                            onClick={(e) => e.stopPropagation()}
+                            className="tw-inline-flex tw-max-w-full tw-items-center tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+                          >
+                            <span
+                              title={authorProfileLabel}
+                              className="tw-block tw-max-w-[7rem] tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+                            >
+                              {authorProfileLabel}
+                            </span>
+                          </Link>
+                        </UserProfileTooltipWrapper>
+                      </>
+                    )}
                   </div>
                 </div>
               ) : (
