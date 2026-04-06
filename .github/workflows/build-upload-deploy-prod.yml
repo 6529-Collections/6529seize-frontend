@@ -77,11 +77,11 @@ jobs:
       - name: Build Target
         run: |
           rm -rf target
-          mkdir -p target/package/.next target/assets/_next
+          mkdir -p target/package/.next target/_next
           cp -R .next/standalone/. target/package/
           cp .next/BUILD_ID target/package/.next/BUILD_ID
           cp -R .next/static target/package/.next/static
-          cp -R .next/static target/assets/_next/static
+          cp -R .next/static target/_next/static
           if [ -d public ]; then
             cp -R public target/package/public
           fi
@@ -91,6 +91,8 @@ jobs:
           printf 'web: node server.js\n' > target/package/Procfile
           cd target/package
           zip -yr ../package.zip .
+          cd ../..
+          rm -rf target/package
 
       - name: Verify package bundle size
         run: |
