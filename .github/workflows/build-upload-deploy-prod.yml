@@ -27,8 +27,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Activate pinned pnpm via Corepack
-        run: bash scripts/setup-corepack-pnpm.sh
+      - name: Install pinned pnpm
+        uses: pnpm/action-setup@v5
 
       - name: Install Node.js
         uses: actions/setup-node@v4

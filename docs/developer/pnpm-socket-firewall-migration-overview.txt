@@ -89,7 +89,7 @@ Before:
 - start behavior depended on npm-oriented defaults
 
 After:
-- CI activates pnpm through Corepack
+- CI installs the pinned pnpm version before dependency installation
 - CI installs dependencies with sfw pnpm install --frozen-lockfile
 - CI passes the Socket action's absolute installed binary path into the secure
   install wrapper instead of relying only on PATH lookup
@@ -116,7 +116,8 @@ Bootstrap once:
    to that global bootstrap step.
 2. corepack enable pnpm
 3. corepack prepare pnpm@10.33.0 --activate
-4. Optional on servers without direnv: ./bin/6529 bootstrap && source ~/.bashrc
+4. Optional on servers without direnv: ./bin/6529 bootstrap, then open a new
+   shell or source the rc file that matches your shell
    One-liner for current shell: source <(./bin/6529 bootstrap --print-export)
 
 Install dependencies:

@@ -100,7 +100,7 @@ Are you sure you want to deploy <branch-name> to production?
 
 If you confirm, it triggers the production workflow from `.github/workflows/build-upload-deploy-prod.yml` against your current branch.
 
-PORT: 3000
+Default app port: `3001` unless `PORT` is set.
 
 ### Documentation
 
@@ -143,8 +143,9 @@ If you want plain `6529 ...` commands to work on a server shell without
 
 ```bash
 ./bin/6529 bootstrap
-source ~/.bashrc
 ```
+
+Then open a new shell, or source the rc file that matches your shell.
 
 If you want a one-liner for the current shell, use:
 
@@ -201,8 +202,9 @@ To test end-to-end:
 
 ```bash
 ./bin/6529 bootstrap
-source ~/.bashrc
 ```
+
+Then open a new shell, or source the rc file that matches your shell.
 
 - After `direnv allow`, the shorthand also works
 

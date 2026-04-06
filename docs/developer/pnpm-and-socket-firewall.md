@@ -50,8 +50,9 @@ If you want plain `6529 ...` commands to work in server shells without
 
 ```bash
 ./bin/6529 bootstrap
-source ~/.bashrc
 ```
+
+Then open a new shell, or source the rc file that matches your shell.
 
 For a current-shell one-liner, use:
 
@@ -93,7 +94,7 @@ If pnpm reports ignored install/build scripts, use:
 
 The production workflow now:
 
-1. Activates the pinned pnpm version with Corepack.
+1. Installs the repo-pinned pnpm version in CI.
 2. Installs dependencies through `sfw pnpm install --frozen-lockfile`.
    In CI, the workflow passes the Socket action's absolute `firewall-path-binary`
    output as `SFW_BIN` so the secure install wrapper does not rely on PATH lookup.
