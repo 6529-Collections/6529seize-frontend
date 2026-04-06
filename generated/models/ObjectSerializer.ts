@@ -232,6 +232,9 @@ export * from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
 export * from '../models/ApiWaveParticipationSubmissionStrategyType';
 export * from '../models/ApiWaveRequiredMetadata';
 export * from '../models/ApiWaveScope';
+export * from '../models/ApiWaveSelection';
+export * from '../models/ApiWaveSelectionDropRequest';
+export * from '../models/ApiWaveSelectionRequest';
 export * from '../models/ApiWaveSubscriptionActions';
 export * from '../models/ApiWaveSubscriptionTargetAction';
 export * from '../models/ApiWaveType';
@@ -373,7 +376,7 @@ import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
-import { ApiDrop                              } from '../models/ApiDrop';
+import { ApiDrop                               } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
@@ -397,7 +400,7 @@ import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropVote } from '../models/ApiDropVote';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
-import { ApiDropWithoutWave                             } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWave                              } from '../models/ApiDropWithoutWave';
 import { ApiDropWithoutWavesPageWithoutCount } from '../models/ApiDropWithoutWavesPageWithoutCount';
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsPage } from '../models/ApiDropsPage';
@@ -524,7 +527,7 @@ import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
 import { ApiWaveLog } from '../models/ApiWaveLog';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin                      } from '../models/ApiWaveMin';
+import { ApiWaveMin                       } from '../models/ApiWaveMin';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
@@ -541,6 +544,9 @@ import { ApiWaveParticipationSubmissionStrategyIdentityConf   } from '../models/
 import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
 import { ApiWaveRequiredMetadata   } from '../models/ApiWaveRequiredMetadata';
 import { ApiWaveScope } from '../models/ApiWaveScope';
+import { ApiWaveSelection } from '../models/ApiWaveSelection';
+import { ApiWaveSelectionDropRequest } from '../models/ApiWaveSelectionDropRequest';
+import { ApiWaveSelectionRequest } from '../models/ApiWaveSelectionRequest';
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
@@ -880,6 +886,9 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveParticipationSubmissionStrategyIdentityConf": ApiWaveParticipationSubmissionStrategyIdentityConf,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,
     "ApiWaveScope": ApiWaveScope,
+    "ApiWaveSelection": ApiWaveSelection,
+    "ApiWaveSelectionDropRequest": ApiWaveSelectionDropRequest,
+    "ApiWaveSelectionRequest": ApiWaveSelectionRequest,
     "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,
     "ApiWaveVisibilityConfig": ApiWaveVisibilityConfig,
     "ApiWaveVoter": ApiWaveVoter,
