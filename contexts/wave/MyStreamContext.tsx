@@ -157,9 +157,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const refreshWaveViewOnForeground = useEffectEvent(
     ({
       dedupe = false,
+      includePinnedWaves = true,
       resetNewDrops = false,
     }: {
       dedupe?: boolean | undefined;
+      includePinnedWaves?: boolean | undefined;
       resetNewDrops?: boolean | undefined;
     } = {}) => {
       if (dedupe) {
@@ -177,7 +179,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
         waveDataManager.registerWave(activeWaveId, true);
       }
 
-      mainWavesData.refetchAllWaves();
+      if (includePinnedWaves) {
+        mainWavesData.refetchAllWaves();
+      } else {
+        mainWavesData.mainWavesRefetch();
+      }
       dmWavesData.refetchAllWaves();
 
       if (resetNewDrops) {
@@ -212,6 +218,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       if (document.visibilityState === "visible") {
         refreshWaveViewOnForeground({
           dedupe: true,
+          includePinnedWaves: false,
         });
       }
     };
@@ -219,6 +226,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     const handleWindowFocus = () => {
       refreshWaveViewOnForeground({
         dedupe: true,
+        includePinnedWaves: false,
       });
     };
 

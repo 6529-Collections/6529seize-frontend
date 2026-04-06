@@ -64,9 +64,9 @@ describe("usePinnedWavesServer", () => {
       expect.objectContaining({
         gcTime: 10 * 60 * 1000,
         refetchInterval: 2 * 60 * 1000,
+        refetchOnWindowFocus: "always",
         staleTime: 5 * 60 * 1000,
       })
     );
-    expect(queryOptions).not.toHaveProperty("refetchOnWindowFocus");
   });
 });

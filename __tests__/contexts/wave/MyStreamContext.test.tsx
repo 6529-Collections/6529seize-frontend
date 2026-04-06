@@ -252,9 +252,9 @@ describe("MyStreamProvider integration", () => {
     });
 
     expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
-    expect(mockRefetchAllWaves).toHaveBeenCalledTimes(1);
+    expect(mockMainWavesRefetch).toHaveBeenCalledTimes(1);
+    expect(mockRefetchAllWaves).not.toHaveBeenCalled();
     expect(mockRefetchAllDmWaves).toHaveBeenCalledTimes(1);
-    expect(mockMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockDmMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockResetMainWavesNewDropsCount).not.toHaveBeenCalled();
     expect(mockResetDmWavesNewDropsCount).not.toHaveBeenCalled();
@@ -325,9 +325,9 @@ describe("MyStreamProvider integration", () => {
     });
 
     expect(mockRegisterWave).toHaveBeenCalledTimes(1);
-    expect(mockRefetchAllWaves).toHaveBeenCalledTimes(1);
+    expect(mockMainWavesRefetch).toHaveBeenCalledTimes(1);
+    expect(mockRefetchAllWaves).not.toHaveBeenCalled();
     expect(mockRefetchAllDmWaves).toHaveBeenCalledTimes(1);
-    expect(mockMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockDmMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockResetMainWavesNewDropsCount).not.toHaveBeenCalled();
     expect(mockResetDmWavesNewDropsCount).not.toHaveBeenCalled();
@@ -371,9 +371,9 @@ describe("MyStreamProvider integration", () => {
 
     expect(mockRegisterWave).toHaveBeenCalledTimes(1);
     expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
-    expect(mockRefetchAllWaves).toHaveBeenCalledTimes(1);
+    expect(mockMainWavesRefetch).toHaveBeenCalledTimes(1);
+    expect(mockRefetchAllWaves).not.toHaveBeenCalled();
     expect(mockRefetchAllDmWaves).toHaveBeenCalledTimes(1);
-    expect(mockMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockDmMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockResetMainWavesNewDropsCount).not.toHaveBeenCalled();
     expect(mockResetDmWavesNewDropsCount).not.toHaveBeenCalled();
@@ -399,9 +399,9 @@ describe("MyStreamProvider integration", () => {
     });
 
     expect(mockRegisterWave).not.toHaveBeenCalled();
-    expect(mockRefetchAllWaves).toHaveBeenCalledTimes(1);
+    expect(mockMainWavesRefetch).toHaveBeenCalledTimes(1);
+    expect(mockRefetchAllWaves).not.toHaveBeenCalled();
     expect(mockRefetchAllDmWaves).toHaveBeenCalledTimes(1);
-    expect(mockMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockDmMainWavesRefetch).not.toHaveBeenCalled();
     expect(mockResetMainWavesNewDropsCount).not.toHaveBeenCalled();
     expect(mockResetDmWavesNewDropsCount).not.toHaveBeenCalled();
