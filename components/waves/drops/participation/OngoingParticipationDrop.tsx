@@ -24,6 +24,7 @@ import {
   getParticipationVisibleMetadata,
 } from "./participationIdentityProfile.helpers";
 import type { DropInteractionParams, DropLocation } from "../drop.types";
+import { useWaveViewerMode } from "../../public/WaveViewerModeContext";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -47,10 +48,13 @@ export default function OngoingParticipationDrop({
   onDropContentClick,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
-  const { canShowVote } = useDropInteractionRules(drop);
+  const { canShowVote: canShowVoteByRules } = useDropInteractionRules(drop);
+  const { isPublicReadOnly } = useWaveViewerMode();
+  const canShowVote = !isPublicReadOnly && canShowVoteByRules;
   const isMobile = useIsMobileDevice();
   const isMobileScreen = useIsMobileScreen();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const hasTouchDevice = useIsTouchDevice();
+  const hasTouch = !isPublicReadOnly && (hasTouchDevice || isMobile);
   const identityProfile = getParticipationIdentityProfile({
     wave: drop.wave,
     metadata: drop.metadata,
@@ -90,7 +94,7 @@ export default function OngoingParticipationDrop({
       isActiveDrop={isActiveDrop}
       location={location}
     >
-      {!isMobile && showReplyAndQuote && (
+      {!isMobile && !isPublicReadOnly && showReplyAndQuote && (
         <WaveDropActions
           drop={drop}
           activePartIndex={activePartIndex}
@@ -132,30 +136,33 @@ export default function OngoingParticipationDrop({
         <ParticipationDropFooter drop={drop} voteAction={voteAction} />
       </div>
 
-      {isMobileScreen ? (
-        <MobileVotingModal
-          drop={drop}
-          isOpen={isVotingModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
-        />
-      ) : (
-        <VotingModal
-          drop={drop}
-          isOpen={isVotingModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
-        />
-      )}
+      {!isPublicReadOnly &&
+        (isMobileScreen ? (
+          <MobileVotingModal
+            drop={drop}
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+          />
+        ) : (
+          <VotingModal
+            drop={drop}
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+          />
+        ))}
 
       {/* Mobile menu */}
-      <WaveDropMobileMenu
-        drop={drop}
-        isOpen={isSlideUp}
-        longPressTriggered={longPressTriggered}
-        showReplyAndQuote={showReplyAndQuote}
-        setOpen={setIsSlideUp}
-        onReply={handleOnReply}
-        onAddReaction={handleOnAddReaction}
-      />
+      {!isPublicReadOnly && (
+        <WaveDropMobileMenu
+          drop={drop}
+          isOpen={isSlideUp}
+          longPressTriggered={longPressTriggered}
+          showReplyAndQuote={showReplyAndQuote}
+          setOpen={setIsSlideUp}
+          onReply={handleOnReply}
+          onAddReaction={handleOnAddReaction}
+        />
+      )}
     </ParticipationDropContainer>
   );
 }

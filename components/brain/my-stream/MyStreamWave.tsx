@@ -24,6 +24,7 @@ import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -39,6 +40,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
+  const { isPublicReadOnly } = useWaveViewerMode();
   const queryClient = useQueryClient();
   const { waves, directMessages } = useMyStream();
   const { data: wave } = useWaveData({
@@ -80,6 +82,10 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Get the active tab and utilities from global context
   const { activeContentTab } = useContentTab();
+  const resolvedActiveContentTab =
+    isPublicReadOnly && activeContentTab === MyStreamWaveTab.MY_VOTES
+      ? MyStreamWaveTab.CHAT
+      : activeContentTab;
 
   // View mode for chat/gallery toggle
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId);
@@ -151,9 +157,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       <div
         className="tw-relative tw-min-w-0 tw-flex-grow tw-overflow-hidden"
         role="tabpanel"
-        id={getContentTabPanelId(activeContentTab)}
+        id={getContentTabPanelId(resolvedActiveContentTab)}
       >
-        {components[activeContentTab]}
+        {components[resolvedActiveContentTab]}
       </div>
     </div>
   );

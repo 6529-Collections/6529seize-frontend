@@ -33,12 +33,14 @@ import {
 } from "./reaction-utils";
 import styles from "./WaveDropReactions.module.scss";
 import WaveDropReactionsDetailDialog from "./WaveDropReactionsDetailDialog";
+import { useWaveViewerMode } from "../public/WaveViewerModeContext";
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
 }
 
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
+  const { isPublicReadOnly } = useWaveViewerMode();
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
   const isTouchDevice = useIsTouchDevice();
 
@@ -59,14 +61,17 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
           isTouchDevice={isTouchDevice}
+          readOnly={isPublicReadOnly}
         />
       ))}
-      <WaveDropReactionsDetailDialog
-        isOpen={dialogReaction !== null}
-        onClose={handleCloseDialog}
-        reactions={drop.reactions}
-        initialReaction={dialogReaction ?? undefined}
-      />
+      {!isPublicReadOnly && (
+        <WaveDropReactionsDetailDialog
+          isOpen={dialogReaction !== null}
+          onClose={handleCloseDialog}
+          reactions={drop.reactions}
+          initialReaction={dialogReaction ?? undefined}
+        />
+      )}
     </>
   );
 };
@@ -76,11 +81,13 @@ function WaveDropReaction({
   reaction,
   onOpenDetailDialog,
   isTouchDevice,
+  readOnly,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
   readonly isTouchDevice: boolean;
+  readonly readOnly: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
@@ -321,6 +328,10 @@ function WaveDropReaction({
   );
 
   const handleClick = useCallback(async () => {
+    if (readOnly) {
+      return;
+    }
+
     if (longPressTriggered) {
       return;
     }
@@ -363,6 +374,7 @@ function WaveDropReaction({
     drop.id,
     longPressTriggered,
     reaction.reaction,
+    readOnly,
     selected,
     setToast,
   ]);
@@ -400,16 +412,18 @@ function WaveDropReaction({
   return (
     <>
       <button
+        type="button"
         onClick={handleClick}
+        disabled={readOnly}
         {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
           "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm hover:tw-text-iron-100",
           borderStyle,
           bgStyle,
-          hoverStyle
+          readOnly ? "tw-cursor-default" : hoverStyle
         )}
-        {...wrappedTouchHandlers}
+        {...(readOnly ? {} : wrappedTouchHandlers)}
       >
         <div className="tw-flex tw-h-full tw-items-center tw-gap-x-1">
           <div className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center">

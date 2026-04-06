@@ -27,6 +27,7 @@ import {
 } from "./participationIdentityProfile.helpers";
 import type { DropInteractionParams } from "../drop.types";
 import { DropLocation } from "../drop.types";
+import { useWaveViewerMode } from "../../public/WaveViewerModeContext";
 
 interface EndedParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -51,6 +52,7 @@ export default function EndedParticipationDrop({
 }: EndedParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
+  const { isPublicReadOnly } = useWaveViewerMode();
   const identityProfile = getParticipationIdentityProfile({
     wave: drop.wave,
     metadata: drop.metadata,
@@ -64,7 +66,8 @@ export default function EndedParticipationDrop({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const hasTouchDevice = useIsTouchDevice();
+  const hasTouch = !isPublicReadOnly && (hasTouchDevice || isMobile);
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
@@ -104,7 +107,7 @@ export default function EndedParticipationDrop({
       <div
         className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${dropBackgroundClass}`}
       >
-        {!isMobile && showReplyAndQuote && (
+        {!isMobile && !isPublicReadOnly && showReplyAndQuote && (
           <WaveDropActions
             drop={drop}
             activePartIndex={activePartIndex}
@@ -215,24 +218,28 @@ export default function EndedParticipationDrop({
           </div>
         )}
         <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <DropCurationButton
-            dropId={drop.id}
-            waveId={drop.wave.id}
-            isCuratable={drop.context_profile_context?.curatable ?? false}
-            isCurated={drop.context_profile_context?.curated ?? false}
-          />
+          {!isPublicReadOnly && (
+            <DropCurationButton
+              dropId={drop.id}
+              waveId={drop.wave.id}
+              isCuratable={drop.context_profile_context?.curatable ?? false}
+              isCurated={drop.context_profile_context?.curated ?? false}
+            />
+          )}
           <WaveDropReactions drop={drop} />
         </div>
 
-        <WaveDropMobileMenu
-          drop={drop}
-          isOpen={isSlideUp}
-          longPressTriggered={longPressTriggered}
-          showReplyAndQuote={showReplyAndQuote}
-          setOpen={setIsSlideUp}
-          onReply={handleOnReply}
-          onAddReaction={handleOnAddReaction}
-        />
+        {!isPublicReadOnly && (
+          <WaveDropMobileMenu
+            drop={drop}
+            isOpen={isSlideUp}
+            longPressTriggered={longPressTriggered}
+            showReplyAndQuote={showReplyAndQuote}
+            setOpen={setIsSlideUp}
+            onReply={handleOnReply}
+            onAddReaction={handleOnAddReaction}
+          />
+        )}
       </div>
     </div>
   );

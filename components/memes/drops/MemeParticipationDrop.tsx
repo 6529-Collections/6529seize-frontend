@@ -20,6 +20,7 @@ import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
 import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
 import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
 import MemeDropTraits from "./MemeDropTraits";
+import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -64,7 +65,9 @@ export default function MemeParticipationDrop({
   onReply,
 }: MemeParticipationDropProps) {
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const { canShowVote } = useDropInteractionRules(drop);
+  const { canShowVote: canShowVoteByRules } = useDropInteractionRules(drop);
+  const { isPublicReadOnly } = useWaveViewerMode();
+  const canShowVote = !isPublicReadOnly && canShowVoteByRules;
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isMobile = useIsMobileDevice();
   const isMobileScreen = useIsMobileScreen();
@@ -162,29 +165,32 @@ export default function MemeParticipationDrop({
             <WaveDropReactions drop={drop} />
           </div>
 
-          <div className="tw-absolute tw-right-4 tw-top-2">
-            <MemeDropActions
-              drop={drop}
-              isMobile={isMobile}
-              showReplyAndQuote={showReplyAndQuote}
-              onReply={handleOnReply}
-            />
-          </div>
+          {!isPublicReadOnly && (
+            <div className="tw-absolute tw-right-4 tw-top-2">
+              <MemeDropActions
+                drop={drop}
+                isMobile={isMobile}
+                showReplyAndQuote={showReplyAndQuote}
+                onReply={handleOnReply}
+              />
+            </div>
+          )}
         </div>
 
-        {isMobileScreen ? (
-          <MobileVotingModal
-            drop={drop}
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
-          />
-        ) : (
-          <VotingModal
-            drop={drop}
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
-          />
-        )}
+        {!isPublicReadOnly &&
+          (isMobileScreen ? (
+            <MobileVotingModal
+              drop={drop}
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+            />
+          ) : (
+            <VotingModal
+              drop={drop}
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+            />
+          ))}
       </div>
     </div>
   );

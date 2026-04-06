@@ -28,6 +28,7 @@ import MemesLeaderboardDropCard from "./MemesLeaderboardDropCard";
 import MemesLeaderboardDropDescription from "./MemesLeaderboardDropDescription";
 import MemesLeaderboardDropHeader from "./MemesLeaderboardDropHeader";
 import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
+import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -43,6 +44,8 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   const isMobileScreen = useIsMobileScreen();
   const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
   const { canDelete } = useDropInteractionRules(drop);
+  const { isPublicReadOnly } = useWaveViewerMode();
+  const canDeleteInView = !isPublicReadOnly && canDelete;
   const [isVotingModalOpen, setIsVotingModalOpen] = useState<boolean>(false);
 
   // Get device info from useDeviceInfo hook
@@ -77,7 +80,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     <div
       className="tw-w-full tw-cursor-pointer tw-@container"
       onClick={() => {
-        if (hasTouchScreen) return;
+        if (hasTouchScreen && !isPublicReadOnly) return;
         startDropOpen({
           dropId: drop.id,
           waveId: drop.wave.id,
@@ -88,7 +91,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
       }}
     >
       <div className="tw-group tw-w-full">
-        <div {...touchHandlers}>
+        <div {...(isPublicReadOnly ? {} : touchHandlers)}>
           <MemesLeaderboardDropCard drop={drop}>
             <div>
               {/* Artist info section with border */}
@@ -99,7 +102,9 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                     {!hasTouchScreen && (
                       <>
                         <WaveDropActionsOpen drop={drop} />
-                        {canDelete && <WaveDropActionsOptions drop={drop} />}
+                        {canDeleteInView && (
+                          <WaveDropActionsOptions drop={drop} />
+                        )}
                       </>
                     )}
                   </div>
@@ -187,33 +192,37 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                         </span>
                       </span>
                     </div>
-                    <VotingModalButton
-                      drop={drop}
-                      onClick={() => setIsVotingModalOpen(true)}
-                    />
+                    {!isPublicReadOnly && (
+                      <VotingModalButton
+                        drop={drop}
+                        onClick={() => setIsVotingModalOpen(true)}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
-            {isMobileScreen ? (
-              <MobileVotingModal
-                drop={drop}
-                isOpen={isVotingModalOpen}
-                onClose={() => setIsVotingModalOpen(false)}
-              />
-            ) : (
-              <VotingModal
-                drop={drop}
-                isOpen={isVotingModalOpen}
-                onClose={() => setIsVotingModalOpen(false)}
-              />
-            )}
+            {!isPublicReadOnly &&
+              (isMobileScreen ? (
+                <MobileVotingModal
+                  drop={drop}
+                  isOpen={isVotingModalOpen}
+                  onClose={() => setIsVotingModalOpen(false)}
+                />
+              ) : (
+                <VotingModal
+                  drop={drop}
+                  isOpen={isVotingModalOpen}
+                  onClose={() => setIsVotingModalOpen(false)}
+                />
+              ))}
           </MemesLeaderboardDropCard>
         </div>
 
         {/* Touch slide-up menu for leaderboard */}
         {hasTouchScreen &&
+          !isPublicReadOnly &&
           createPortal(
             <CommonDropdownItemsMobileWrapper
               isOpen={isActive}
@@ -227,7 +236,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 />
 
                 {/* Delete option - only if user can delete */}
-                {canDelete && (
+                {canDeleteInView && (
                   <WaveDropMobileMenuDelete
                     drop={drop}
                     onDropDeleted={() => setIsActive(false)}

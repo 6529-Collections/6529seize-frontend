@@ -6,6 +6,7 @@ import { Children, type ReactNode } from "react";
 import DropCurationButton from "../DropCurationButton";
 import WaveDropReactions from "../WaveDropReactions";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
+import { useWaveViewerMode } from "../../public/WaveViewerModeContext";
 
 interface ParticipationDropFooterProps {
   readonly drop: ExtendedDrop;
@@ -16,8 +17,11 @@ export default function ParticipationDropFooter({
   drop,
   voteAction,
 }: ParticipationDropFooterProps) {
-  const { canShowVote } = useDropInteractionRules(drop);
-  const canShowCuration = drop.context_profile_context?.curatable ?? false;
+  const { isPublicReadOnly } = useWaveViewerMode();
+  const { canShowVote: canShowVoteByRules } = useDropInteractionRules(drop);
+  const canShowVote = !isPublicReadOnly && canShowVoteByRules;
+  const canShowCuration =
+    !isPublicReadOnly && (drop.context_profile_context?.curatable ?? false);
   const hasRatings = drop.raters_count > 0;
   const hasReactions = drop.reactions.length > 0;
   const normalizedVoteAction = Children.toArray(voteAction);

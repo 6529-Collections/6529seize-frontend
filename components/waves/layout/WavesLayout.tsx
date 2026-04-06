@@ -59,8 +59,9 @@ function getNotAuthenticatedContent({
   return (
     <div className="tw-flex-1" id="waves-content">
       <WavesDesktop
-        allowDropOverlay={false}
+        allowDropOverlay={activeWaveId !== null}
         allowRightSidebar={false}
+        isPublicReadOnly={activeWaveId !== null}
         showLeftSidebar={true}
       >
         <div className={containerClassName}>

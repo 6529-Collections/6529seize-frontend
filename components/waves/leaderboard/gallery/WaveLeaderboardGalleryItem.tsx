@@ -26,6 +26,7 @@ import Link from "next/link";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
+import { useWaveViewerMode } from "../../public/WaveViewerModeContext";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -43,6 +44,8 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
     const { hasTouchScreen } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
+    const { isPublicReadOnly } = useWaveViewerMode();
+    const canShowVoteInView = !isPublicReadOnly && canShowVote;
     const mediaImageScale = isTabletOrSmaller
       ? ImageScale.AUTOx450
       : ImageScale.AUTOx1080;
@@ -247,7 +250,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 </span>
               </span>
             )}
-            {canShowVote && (
+            {canShowVoteInView && (
               <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
                 <VotingModalButton
                   drop={drop}
@@ -259,19 +262,20 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           </div>
         </div>
 
-        {isMobileScreen ? (
-          <MobileVotingModal
-            drop={drop}
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
-          />
-        ) : (
-          <VotingModal
-            drop={drop}
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
-          />
-        )}
+        {!isPublicReadOnly &&
+          (isMobileScreen ? (
+            <MobileVotingModal
+              drop={drop}
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+            />
+          ) : (
+            <VotingModal
+              drop={drop}
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+            />
+          ))}
       </div>
     );
   }

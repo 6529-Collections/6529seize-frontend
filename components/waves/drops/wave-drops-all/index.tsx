@@ -50,6 +50,7 @@ interface WaveDropsAllProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly bottomPaddingClassName?: string | undefined;
   readonly isMuted?: boolean | undefined;
+  readonly readOnly?: boolean | undefined;
 }
 
 const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
@@ -63,6 +64,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   onDropContentClick,
   bottomPaddingClassName,
   isMuted = false,
+  readOnly = false,
 }) => {
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
@@ -78,7 +80,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const typingMessage = useWaveIsTyping(
     waveId,
     connectedProfile?.handle ?? null,
-    isMuted
+    isMuted || readOnly
   );
 
   const { data: boostedDrops } = useWaveBoostedDrops({ waveId });
@@ -98,6 +100,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   useWaveDropsNotificationRead({
     waveId,
     removeWaveDeliveredNotifications,
+    enabled: !readOnly,
   });
 
   const dropsForClipboard = useMemo(
@@ -284,9 +287,10 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           bottomPaddingClassName={bottomPaddingClassName}
           boostedDrops={boostedDrops}
           onBoostedDropClick={queueSerialTarget}
-          onScrollToUnread={queueSerialTarget}
-          unreadCount={unreadCount}
+          onScrollToUnread={readOnly ? undefined : queueSerialTarget}
+          unreadCount={readOnly ? undefined : unreadCount}
           autoCollapseSerials={autoCollapseSerials}
+          readOnly={readOnly}
         />
       </TweetPreviewModeProvider>
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
@@ -308,6 +312,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   onDropContentClick,
   bottomPaddingClassName,
   isMuted = false,
+  readOnly = false,
 }) => {
   return (
     <UnreadDividerProvider
@@ -326,6 +331,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         onDropContentClick={onDropContentClick}
         bottomPaddingClassName={bottomPaddingClassName}
         isMuted={isMuted}
+        readOnly={readOnly}
       />
     </UnreadDividerProvider>
   );

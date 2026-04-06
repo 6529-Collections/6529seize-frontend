@@ -10,6 +10,7 @@ interface Props {
   readonly showLeftSidebar?: boolean | undefined;
   readonly allowRightSidebar?: boolean | undefined;
   readonly allowDropOverlay?: boolean | undefined;
+  readonly isPublicReadOnly?: boolean | undefined;
 }
 
 const WavesDesktop: React.FC<Props> = ({
@@ -17,6 +18,7 @@ const WavesDesktop: React.FC<Props> = ({
   showLeftSidebar = true,
   allowRightSidebar = true,
   allowDropOverlay = true,
+  isPublicReadOnly = false,
 }) => {
   return (
     <WavesMessagesWrapper
@@ -24,6 +26,7 @@ const WavesDesktop: React.FC<Props> = ({
       showLeftSidebar={showLeftSidebar}
       allowRightSidebar={allowRightSidebar}
       allowDropOverlay={allowDropOverlay}
+      isPublicReadOnly={isPublicReadOnly}
     >
       {children}
     </WavesMessagesWrapper>

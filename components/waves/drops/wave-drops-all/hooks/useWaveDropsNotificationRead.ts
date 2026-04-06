@@ -7,15 +7,21 @@ interface UseWaveDropsNotificationReadParams {
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
+  readonly enabled?: boolean | undefined;
 }
 
 export const useWaveDropsNotificationRead = ({
   waveId,
   removeWaveDeliveredNotifications,
+  enabled = true,
 }: UseWaveDropsNotificationReadParams) => {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const syncReadState = async () => {
       try {
         await Promise.resolve(removeWaveDeliveredNotifications(waveId));
@@ -33,5 +39,10 @@ export const useWaveDropsNotificationRead = ({
     };
 
     syncReadState();
-  }, [waveId, removeWaveDeliveredNotifications, invalidateNotifications]);
+  }, [
+    enabled,
+    waveId,
+    removeWaveDeliveredNotifications,
+    invalidateNotifications,
+  ]);
 };

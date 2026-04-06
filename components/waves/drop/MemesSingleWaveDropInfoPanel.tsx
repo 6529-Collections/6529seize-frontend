@@ -28,6 +28,7 @@ import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
 import { WaveDropAdditionalInfo } from "./WaveDropAdditionalInfo";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
 import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
+import { useWaveViewerMode } from "../public/WaveViewerModeContext";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -41,8 +42,11 @@ export const MemesSingleWaveDropInfoPanel = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isVotingOpen, setIsVotingOpen] = useState(false);
   const isMobileScreen = useIsMobileScreen();
+  const { isPublicReadOnly } = useWaveViewerMode();
   const { isWinner, canDelete, canShowVote, isVotingEnded } =
     useDropInteractionRules(drop);
+  const canDeleteInView = !isPublicReadOnly && canDelete;
+  const canShowVoteInView = !isPublicReadOnly && canShowVote;
 
   const { nicTotal, repTotal, manualOutcomes } = useWaveRankReward({
     waveId: drop.wave.id,
@@ -138,7 +142,7 @@ export const MemesSingleWaveDropInfoPanel = ({
                   drop={drop}
                   isWinner={isWinner}
                   isVotingEnded={isVotingEnded}
-                  canShowVote={canShowVote}
+                  canShowVote={canShowVoteInView}
                   onVoteClick={() => setIsVotingOpen(true)}
                 />
               </div>
@@ -154,7 +158,11 @@ export const MemesSingleWaveDropInfoPanel = ({
                 )}
               </div>
 
-              <WaveDropMetaRow drop={drop} isWinner={isWinner} mimeType={artworkMedia?.mime_type}>
+              <WaveDropMetaRow
+                drop={drop}
+                isWinner={isWinner}
+                mimeType={artworkMedia?.mime_type}
+              >
                 {manualOutcomes.length > 0 && (
                   <>
                     <span className="tw-text-white/40">·</span>
@@ -265,7 +273,7 @@ export const MemesSingleWaveDropInfoPanel = ({
               </div>
             ) : null}
 
-            {canDelete && drop.drop_type !== ApiDropType.Winner && (
+            {canDeleteInView && drop.drop_type !== ApiDropType.Winner && (
               <WaveDropDeleteButton drop={drop} />
             )}
           </div>
@@ -320,19 +328,20 @@ export const MemesSingleWaveDropInfoPanel = ({
         )}
       </AnimatePresence>
 
-      {isMobileScreen ? (
-        <MobileVotingModal
-          drop={drop}
-          isOpen={isVotingOpen}
-          onClose={() => setIsVotingOpen(false)}
-        />
-      ) : (
-        <VotingModal
-          drop={drop}
-          isOpen={isVotingOpen}
-          onClose={() => setIsVotingOpen(false)}
-        />
-      )}
+      {!isPublicReadOnly &&
+        (isMobileScreen ? (
+          <MobileVotingModal
+            drop={drop}
+            isOpen={isVotingOpen}
+            onClose={() => setIsVotingOpen(false)}
+          />
+        ) : (
+          <VotingModal
+            drop={drop}
+            isOpen={isVotingOpen}
+            onClose={() => setIsVotingOpen(false)}
+          />
+        ))}
     </>
   );
 };

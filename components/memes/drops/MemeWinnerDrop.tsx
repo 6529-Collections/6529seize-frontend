@@ -18,6 +18,7 @@ import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandle
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropContext } from "@/components/waves/drops/DropContext";
 import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
+import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -35,6 +36,7 @@ export default function MemeWinnerDrop({
   onReply,
 }: MemeWinnerDropProps) {
   const isMobile = useIsMobileDevice();
+  const { isPublicReadOnly } = useWaveViewerMode();
   const { location } = useDropContext();
 
   // Extract metadata
@@ -107,7 +109,7 @@ export default function MemeWinnerDrop({
               </div>
             </>
           </DropMobileMenuHandler>
-          {!isMobile && showReplyAndQuote && (
+          {!isMobile && !isPublicReadOnly && showReplyAndQuote && (
             <div className="tw-absolute tw-right-4 tw-top-2">
               <WaveDropActions
                 drop={drop}

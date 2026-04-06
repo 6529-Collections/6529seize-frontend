@@ -19,6 +19,7 @@ import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview
 import { ApiWaveDecisionPause } from '../models/ApiWaveDecisionPause';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
+import { ApiWaveSelection } from '../models/ApiWaveSelection';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
 import { ApiWaveVotingConfig } from '../models/ApiWaveVotingConfig';
@@ -57,6 +58,7 @@ export class ApiWave {
     'subscribed_actions': Array<ApiWaveSubscriptionTargetAction>;
     'metrics': ApiWaveMetrics;
     'pauses': Array<ApiWaveDecisionPause>;
+    'selections': Array<ApiWaveSelection>;
     'pinned': boolean;
 
     static readonly discriminator: string | undefined = undefined;
@@ -164,6 +166,12 @@ export class ApiWave {
             "name": "pauses",
             "baseName": "pauses",
             "type": "Array<ApiWaveDecisionPause>",
+            "format": ""
+        },
+        {
+            "name": "selections",
+            "baseName": "selections",
+            "type": "Array<ApiWaveSelection>",
             "format": ""
         },
         {

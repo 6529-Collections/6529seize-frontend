@@ -23,6 +23,7 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import { WaveViewerModeProvider } from "../waves/public/WaveViewerModeContext";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
@@ -32,6 +33,7 @@ interface WavesMessagesWrapperProps {
   readonly showLeftSidebar?: boolean | undefined;
   readonly allowRightSidebar?: boolean | undefined;
   readonly allowDropOverlay?: boolean | undefined;
+  readonly isPublicReadOnly?: boolean | undefined;
 }
 
 const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
@@ -40,6 +42,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   showLeftSidebar = true,
   allowRightSidebar = true,
   allowDropOverlay = true,
+  isPublicReadOnly = false,
 }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -142,67 +145,71 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   }
 
   return (
-    <WaveChatScrollProvider>
-      <div className="tw-relative tw-flex tw-flex-col">
-        <div className="tw-relative tw-flex tw-flex-grow">
-          <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-full tw-flex-grow">
-            <div
-              className="tw-relative tw-flex tw-w-full tw-overflow-hidden"
-              style={contentContainerStyle}
-            >
-              {shouldShowLeftSidebar && (
-                <WebBrainLeftSidebar isCollapsed={rightVariant === "inline"} />
-              )}
-              {shouldShowMainContent && (
-                <div className="tw-flex tw-h-full tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
-                  {children}
-                  {shouldShowDropOverlay && (
-                    <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
-                      <BrainDesktopDrop
-                        drop={{
-                          type: DropSize.FULL,
-                          ...drop,
-                          stableKey: drop.id,
-                          stableHash: drop.id,
-                        }}
-                        onClose={onDropClose}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-              {rightVariant === "inline" && (
-                <div className="tw-hidden tw-flex-shrink-0 tw-pl-6 tw-pt-2 lg:tw-block">
-                  <BrainRightSidebar
-                    variant="inline"
-                    waveId={waveId}
-                    activeTab={sidebarTab}
-                    setActiveTab={setSidebarTab}
+    <WaveViewerModeProvider isPublicReadOnly={isPublicReadOnly}>
+      <WaveChatScrollProvider>
+        <div className="tw-relative tw-flex tw-flex-col">
+          <div className="tw-relative tw-flex tw-flex-grow">
+            <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-full tw-flex-grow">
+              <div
+                className="tw-relative tw-flex tw-w-full tw-overflow-hidden"
+                style={contentContainerStyle}
+              >
+                {shouldShowLeftSidebar && (
+                  <WebBrainLeftSidebar
+                    isCollapsed={rightVariant === "inline"}
                   />
-                </div>
-              )}
+                )}
+                {shouldShowMainContent && (
+                  <div className="tw-flex tw-h-full tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
+                    {children}
+                    {shouldShowDropOverlay && (
+                      <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
+                        <BrainDesktopDrop
+                          drop={{
+                            type: DropSize.FULL,
+                            ...drop,
+                            stableKey: drop.id,
+                            stableHash: drop.id,
+                          }}
+                          onClose={onDropClose}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {rightVariant === "inline" && (
+                  <div className="tw-hidden tw-flex-shrink-0 tw-pl-6 tw-pt-2 lg:tw-block">
+                    <BrainRightSidebar
+                      variant="inline"
+                      waveId={waveId}
+                      activeTab={sidebarTab}
+                      setActiveTab={setSidebarTab}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {rightVariant === "overlay" && (
-        <BrainRightSidebar
-          variant="overlay"
-          waveId={waveId}
-          activeTab={sidebarTab}
-          setActiveTab={setSidebarTab}
-        />
-      )}
+        {rightVariant === "overlay" && (
+          <BrainRightSidebar
+            variant="overlay"
+            waveId={waveId}
+            activeTab={sidebarTab}
+            setActiveTab={setSidebarTab}
+          />
+        )}
 
-      {connectedProfile && (
-        <CreateWaveModal
-          isOpen={isWaveModalOpen}
-          onClose={close}
-          profile={connectedProfile}
-        />
-      )}
-    </WaveChatScrollProvider>
+        {connectedProfile && (
+          <CreateWaveModal
+            isOpen={isWaveModalOpen}
+            onClose={close}
+            profile={connectedProfile}
+          />
+        )}
+      </WaveChatScrollProvider>
+    </WaveViewerModeProvider>
   );
 };
 

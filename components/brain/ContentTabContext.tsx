@@ -27,6 +27,7 @@ type WaveTabParams = {
   isCurationWave: boolean;
   votingState: WaveVotingState;
   hasFirstDecisionPassed: boolean;
+  publicReadOnly?: boolean;
 };
 
 interface ContentTabContextType {
@@ -146,6 +147,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         isCurationWave,
         votingState,
         hasFirstDecisionPassed,
+        publicReadOnly = false,
       } = params;
 
       let tabs: MyStreamWaveTab[];
@@ -159,6 +161,10 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
           hasFirstDecisionPassed,
           isCurationWave
         );
+      }
+
+      if (publicReadOnly) {
+        tabs = tabs.filter((tab) => tab !== MyStreamWaveTab.MY_VOTES);
       }
 
       setAvailableTabs(tabs);

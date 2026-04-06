@@ -41,9 +41,8 @@ Use this area for wave and direct-message tasks:
 - `/discover` is public and can render before wallet connect.
 - Signed-out desktop web can still open `/waves`; with no selected wave, the
   thread pane shows `Select a Wave` plus a connect-wallet CTA.
-- Direct `/waves/{waveId}` links on web can render a signed-out locked preview
-  when the wave resolves, but the full thread still requires a connected
-  wallet.
+- Direct `/waves/{waveId}` links on web can render publicly resolvable
+  waves in signed-out read-only mode.
 - Small-screen web `/waves` with no selected wave and native-app waves routes
   still use the regular connect-wallet gate.
 - `/messages` requires authenticated wallet access.
@@ -66,8 +65,8 @@ Use this area for wave and direct-message tasks:
   and navigation entry points.
 - [Create](create/README.md): wave and direct-message creation entry points and
   form/step behavior.
-- [Public Wave Preview](feature-public-wave-preview.md): signed-out locked
-  preview state for direct `/waves/{waveId}` links.
+- [Public Wave Preview](feature-public-wave-preview.md): signed-out read-only
+  wave view for direct `/waves/{waveId}` links on web.
 - [Chat](chat/README.md): in-thread tab behavior, thread scroll/pinning, serial
   jumps, unread controls, typing state, and composer availability.
 - [Composer](composer/README.md): compose and edit drops with markdown,

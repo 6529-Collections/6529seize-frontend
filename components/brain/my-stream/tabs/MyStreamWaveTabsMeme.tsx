@@ -32,6 +32,7 @@ import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
+import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 
@@ -45,6 +46,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
   const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
+  const { isPublicReadOnly } = useWaveViewerMode();
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -211,7 +213,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             )}
           </div>
           <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 md:tw-shrink-0">
-            {!isCompact && (
+            {!isPublicReadOnly && !isCompact && (
               <MyStreamWaveTabsMemeSubmit
                 handleMemesSubmit={handleMemesSubmit}
                 wave={wave}
@@ -237,21 +239,23 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             >
               <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
             </button>
-            <button
-              type="button"
-              onClick={toggleRightSidebar}
-              className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-700 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
-              aria-label="Toggle right sidebar"
-            >
-              <ChevronDoubleLeftIcon
-                strokeWidth={2}
-                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
-                  isRightSidebarOpen
-                    ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
-                    : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
-                }`}
-              />
-            </button>
+            {!isPublicReadOnly && (
+              <button
+                type="button"
+                onClick={toggleRightSidebar}
+                className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-700 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
+                aria-label="Toggle right sidebar"
+              >
+                <ChevronDoubleLeftIcon
+                  strokeWidth={2}
+                  className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
+                    isRightSidebarOpen
+                      ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
+                      : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
+                  }`}
+                />
+              </button>
+            )}
           </div>
         </div>
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800">
@@ -268,11 +272,13 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             )}
         </div>
       </div>
-      <MemesArtSubmissionModal
-        isOpen={isMemesModalOpen}
-        wave={wave}
-        onClose={() => setIsMemesModalOpen(false)}
-      />
+      {!isPublicReadOnly && (
+        <MemesArtSubmissionModal
+          isOpen={isMemesModalOpen}
+          wave={wave}
+          onClose={() => setIsMemesModalOpen(false)}
+        />
+      )}
       <WaveDropsSearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}

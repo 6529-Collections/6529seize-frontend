@@ -10,6 +10,7 @@ import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { Time } from "@/helpers/time";
+import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -46,6 +47,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   // Use the available tabs from context instead of recalculating
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
+  const { isPublicReadOnly } = useWaveViewerMode();
 
   const {
     isChatWave,
@@ -144,6 +146,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             isCurationWave,
             votingState,
             hasFirstDecisionPassed: firstDecisionDone,
+            publicReadOnly: isPublicReadOnly,
           }
         : null
     );
@@ -156,6 +159,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isCompleted,
     isInProgress,
     firstDecisionDone,
+    isPublicReadOnly,
     updateAvailableTabs,
   ]);
 

@@ -32,6 +32,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
+import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 interface InitialDropState {
   readonly waveId: string;
@@ -108,6 +109,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   });
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
+  const { isPublicReadOnly } = useWaveViewerMode();
 
   const [activeDropState, setActiveDropState] = useState<{
     readonly waveId: string;
@@ -175,7 +177,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
 
   let dividerTarget = firstUnreadSerialNo;
-  if (initialDropState?.waveId === wave.id) {
+  if (isPublicReadOnly) {
+    dividerTarget = null;
+  } else if (initialDropState?.waveId === wave.id) {
     dividerTarget = initialDropState.dividerSerialNo;
   } else if (capturedDividerState.waveId === wave.id) {
     dividerTarget = capturedDividerState.serialNo;
@@ -242,7 +246,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       initialSerialNo={dividerTarget ?? null}
       key={`unread-divider-${wave.id}`}
     >
-      <WaveChatLeaveHandler waveId={wave.id} />
+      {!isPublicReadOnly && <WaveChatLeaveHandler waveId={wave.id} />}
       <div
         ref={containerRef}
         className={`${containerClassName}`}
@@ -255,11 +259,14 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           activeDrop={activeDrop}
           initialDrop={scrollTarget}
           dividerSerialNo={dividerTarget}
-          unreadCount={wave.metrics.your_unread_drops_count}
+          unreadCount={
+            isPublicReadOnly ? undefined : wave.metrics.your_unread_drops_count
+          }
           dropId={null}
           isMuted={wave.metrics.muted}
+          readOnly={isPublicReadOnly}
         />
-        {!(isApp && editingDropId) && (
+        {!isPublicReadOnly && !(isApp && editingDropId) && (
           <div className="tw-mt-auto">
             <CreateDropWaveWrapper>
               <PrivilegedDropCreator
@@ -273,9 +280,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             </CreateDropWaveWrapper>
           </div>
         )}
-        {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (
-          <MobileMemesArtSubmissionBtn wave={wave} />
-        )}
+        {!isPublicReadOnly &&
+          submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (
+            <MobileMemesArtSubmissionBtn wave={wave} />
+          )}
       </div>
     </UnreadDividerProvider>
   );

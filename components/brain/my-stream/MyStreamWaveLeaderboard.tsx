@@ -36,6 +36,7 @@ import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
+import { useWaveViewerMode } from "@/components/waves/public/WaveViewerModeContext";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -50,6 +51,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { isPublicReadOnly } = useWaveViewerMode();
   const { isMemesWave, isCurationWave, participation } = useWave(wave);
   const { leaderboardViewStyle } = useLayout(); // Get pre-calculated style from context
   const submissionExperience = resolveWaveSubmissionExperience({
@@ -88,6 +90,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     [activeProfileProxy, isCurationWave, isLoggedIn, participation]
   );
   const showToggleableDropInput =
+    !isPublicReadOnly &&
     submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
     submissionExperience !== WaveSubmissionExperience.CURATION_LEGACY &&
     isCreateDropOpen;
@@ -241,7 +244,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         minPrice={minPrice}
         maxPrice={maxPrice}
         priceCurrency={priceCurrency}
-        onCreateDrop={onCreateDrop}
+        onCreateDrop={isPublicReadOnly ? undefined : onCreateDrop}
       />
     );
   } else if (!isMemesWave) {
@@ -282,7 +285,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           viewMode={effectiveViewMode}
           sort={sort}
           onViewModeChange={(mode) => setViewMode(mode)}
-          onCreateDrop={onCreateDrop}
+          onCreateDrop={isPublicReadOnly ? undefined : onCreateDrop}
           onSortChange={(s) => setSort(s)}
           curationGroups={curationGroups}
           curatedByGroupId={curatedByGroupId ?? null}
@@ -322,7 +325,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           )}
         </AnimatePresence>
 
-        {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY &&
+        {!isPublicReadOnly &&
+          submissionExperience === WaveSubmissionExperience.MEMES_LEGACY &&
           isMemesCreateOpen && (
             <MemesArtSubmissionModal
               isOpen={isMemesCreateOpen}
@@ -330,7 +334,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               onClose={() => setIsMemesCreateOpen(false)}
             />
           )}
-        {submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
+        {!isPublicReadOnly &&
+          submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
           isCurationDropModalOpen && (
             <WaveLeaderboardCurationDropModal
               isOpen={isCurationDropModalOpen}

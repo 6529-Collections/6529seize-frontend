@@ -34,6 +34,7 @@ import { createPortal } from "react-dom";
 import WaveLeaderboardGalleryItemVotes from "../gallery/WaveLeaderboardGalleryItemVotes";
 import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import type { WaveLeaderboardGridMode } from "./WaveLeaderboardGrid";
+import { useWaveViewerMode } from "../../public/WaveViewerModeContext";
 
 interface WaveLeaderboardGridItemProps {
   readonly drop: ExtendedDrop;
@@ -53,6 +54,7 @@ export const WaveLeaderboardGridItem: React.FC<
   const isCuratable = drop.context_profile_context?.curatable ?? false;
   const isCurated = drop.context_profile_context?.curated ?? false;
   const canOpenDrop = drop.drop_type !== ApiDropType.Chat;
+  const { isPublicReadOnly } = useWaveViewerMode();
 
   const cardClassName =
     "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
@@ -72,9 +74,12 @@ export const WaveLeaderboardGridItem: React.FC<
   });
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { canShowVote } = useDropInteractionRules(drop);
+  const isCuratableInView = !isPublicReadOnly && isCuratable;
+  const canShowVoteInView = !isPublicReadOnly && canShowVote;
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [innerEl, setInnerEl] = useState<HTMLDivElement | null>(null);
-  const hasContentOnlyActions = canOpenDrop || isCuratable || canShowVote;
+  const hasContentOnlyActions =
+    canOpenDrop || isCuratableInView || canShowVoteInView;
   const showDesktopContentOnlyActions =
     isContentOnlyMode && !hasTouchScreen && hasContentOnlyActions;
   const showMobileContentOnlyActions =
@@ -212,7 +217,9 @@ export const WaveLeaderboardGridItem: React.FC<
       onClick={onCardClick}
       onKeyDown={onCardKeyDown}
       className={`${cardClassName} tw-group`}
-      {...(showMobileContentOnlyActions ? touchHandlers : {})}
+      {...(showMobileContentOnlyActions && !isPublicReadOnly
+        ? touchHandlers
+        : {})}
     >
       <div ref={setViewportEl} className={viewportClassName}>
         <div ref={setInnerEl} className={contentSpacingClass}>
@@ -257,16 +264,16 @@ export const WaveLeaderboardGridItem: React.FC<
                   <WaveDropActionsOpen drop={drop} />
                 </div>
               )}
-              {isCuratable && (
+              {isCuratableInView && (
                 <DropCurationButton
                   dropId={drop.id}
                   waveId={drop.wave.id}
-                  isCuratable={isCuratable}
+                  isCuratable={isCuratableInView}
                   isCurated={isCurated}
                   className="tw-bg-iron-950/70"
                 />
               )}
-              {canShowVote && (
+              {canShowVoteInView && (
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
@@ -363,13 +370,15 @@ export const WaveLeaderboardGridItem: React.FC<
               </span>
             )}
             <div className="tw-ml-auto tw-flex tw-items-center tw-gap-1.5">
-              <DropCurationButton
-                dropId={drop.id}
-                waveId={drop.wave.id}
-                isCuratable={drop.context_profile_context?.curatable ?? false}
-                isCurated={drop.context_profile_context?.curated ?? false}
-              />
-              {canShowVote && (
+              {isCuratableInView && (
+                <DropCurationButton
+                  dropId={drop.id}
+                  waveId={drop.wave.id}
+                  isCuratable={isCuratableInView}
+                  isCurated={drop.context_profile_context?.curated ?? false}
+                />
+              )}
+              {canShowVoteInView && (
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
@@ -381,7 +390,8 @@ export const WaveLeaderboardGridItem: React.FC<
         </div>
       )}
 
-      {(isCompactMode || isContentOnlyMode) &&
+      {!isPublicReadOnly &&
+        (isCompactMode || isContentOnlyMode) &&
         (isMobileScreen ? (
           <MobileVotingModal
             drop={drop}
@@ -397,6 +407,7 @@ export const WaveLeaderboardGridItem: React.FC<
         ))}
 
       {showMobileContentOnlyActions &&
+        !isPublicReadOnly &&
         createPortal(
           <CommonDropdownItemsMobileWrapper
             isOpen={isActive}
@@ -410,7 +421,7 @@ export const WaveLeaderboardGridItem: React.FC<
                 />
               )}
 
-              {isCuratable && (
+              {isCuratableInView && (
                 <button
                   type="button"
                   onClick={handleMobileCurateClick}
@@ -442,7 +453,7 @@ export const WaveLeaderboardGridItem: React.FC<
                 </button>
               )}
 
-              {canShowVote && (
+              {canShowVoteInView && (
                 <button
                   type="button"
                   onClick={handleMobileVoteClick}

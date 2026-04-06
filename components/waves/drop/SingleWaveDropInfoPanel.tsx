@@ -11,6 +11,7 @@ import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
 import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
+import { useWaveViewerMode } from "../public/WaveViewerModeContext";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -20,9 +21,12 @@ export const SingleWaveDropInfoPanel = ({
   drop,
 }: SingleWaveDropInfoPanelProps) => {
   const [isVotingOpen, setIsVotingOpen] = useState(false);
+  const { isPublicReadOnly } = useWaveViewerMode();
   const { canDelete, canShowVote, isVotingEnded, isWinner } =
     useDropInteractionRules(drop);
   const isChatWave = drop.drop_type === ApiDropType.Chat;
+  const canDeleteInView = !isPublicReadOnly && canDelete;
+  const canShowVoteInView = !isPublicReadOnly && canShowVote;
 
   return (
     <>
@@ -39,7 +43,7 @@ export const SingleWaveDropInfoPanel = ({
                   drop={drop}
                   isWinner={isWinner}
                   isVotingEnded={isVotingEnded}
-                  canShowVote={canShowVote}
+                  canShowVote={canShowVoteInView}
                   onVoteClick={() => setIsVotingOpen(true)}
                 />
               </div>
@@ -52,7 +56,7 @@ export const SingleWaveDropInfoPanel = ({
                 <SingleWaveDropInfoDetails drop={drop} />
               </div>
             )}
-            {canDelete && drop.drop_type !== ApiDropType.Winner && (
+            {canDeleteInView && drop.drop_type !== ApiDropType.Winner && (
               <div className="tw-w-full tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-6">
                 <WaveDropDeleteButton drop={drop} />
               </div>
@@ -61,7 +65,7 @@ export const SingleWaveDropInfoPanel = ({
         </div>
       </SingleWaveDropInfoContainer>
 
-      {!isChatWave && (
+      {!isChatWave && !isPublicReadOnly && (
         <VotingModal
           drop={drop}
           isOpen={isVotingOpen}

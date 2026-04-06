@@ -29,6 +29,7 @@ import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
+import { useWaveViewerMode } from "../public/WaveViewerModeContext";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
 
@@ -170,6 +171,7 @@ const WaveDrop = ({
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
   const dropUpdateMutation = useDropUpdateMutation();
+  const { isPublicReadOnly } = useWaveViewerMode();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
@@ -184,7 +186,7 @@ const WaveDrop = ({
   const hasTouch = useHasTouchInput() || isMobile;
   const breakpoint = useBreakpoint();
   const isMdUp = breakpoint === "MD";
-  const allowLongPress = hasTouch && !isMdUp;
+  const allowLongPress = hasTouch && !isMdUp && !isPublicReadOnly;
   const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
@@ -454,7 +456,7 @@ const WaveDrop = ({
           </div>
         </div>
       </div>
-      {!isMobile && showReplyAndQuote && !isEditing && (
+      {!isMobile && !isPublicReadOnly && showReplyAndQuote && !isEditing && (
         <WaveDropActions
           drop={drop}
           activePartIndex={activePartIndex}
@@ -499,17 +501,19 @@ const WaveDrop = ({
       >
         {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
         {reactionsRow}
-        <WaveDropMobileMenu
-          drop={drop}
-          isOpen={effectiveIsSlideUp}
-          longPressTriggered={longPressTriggered}
-          showReplyAndQuote={showReplyAndQuote}
-          setOpen={setIsSlideUp}
-          onReply={handleOnReply}
-          onAddReaction={handleOnAddReaction}
-          onEdit={handleOnEdit}
-          onBoostAnimation={handleMobileBoostAnimation}
-        />
+        {!isPublicReadOnly && (
+          <WaveDropMobileMenu
+            drop={drop}
+            isOpen={effectiveIsSlideUp}
+            longPressTriggered={longPressTriggered}
+            showReplyAndQuote={showReplyAndQuote}
+            setOpen={setIsSlideUp}
+            onReply={handleOnReply}
+            onAddReaction={handleOnAddReaction}
+            onEdit={handleOnEdit}
+            onBoostAnimation={handleMobileBoostAnimation}
+          />
+        )}
         <DropBoostAnimation
           animation={boostAnimation}
           onComplete={handleBoostAnimationComplete}

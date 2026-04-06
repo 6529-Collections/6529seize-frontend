@@ -21,6 +21,7 @@ import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
 import { WaveLeaderboardDropAuthorAvatar } from "./header/WaveLeaderboardDropAuthor";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
+import { useWaveViewerMode } from "../../public/WaveViewerModeContext";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -31,6 +32,9 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
 > = ({ drop, onDropClick }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
+  const { isPublicReadOnly } = useWaveViewerMode();
+  const canShowVoteInView = !isPublicReadOnly && canShowVote;
+  const canDeleteInView = !isPublicReadOnly && canDelete;
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
@@ -58,7 +62,10 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       }}
       className="tw-group tw-relative tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-@container"
     >
-      <div className={getBorderClasses()} {...touchHandlers}>
+      <div
+        className={getBorderClasses()}
+        {...(isPublicReadOnly ? {} : touchHandlers)}
+      >
         <div className="tw-flex tw-gap-x-3">
           <div className="tw-flex-shrink-0 tw-self-start">
             <WaveLeaderboardDropAuthorAvatar drop={drop} />
@@ -71,7 +78,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                   <WaveDropActionsOpen drop={drop} />
                 </div>
                 <div className="tw-hidden tw-h-8 lg:tw-block">
-                  {canDelete && <WaveDropActionsOptions drop={drop} />}
+                  {canDeleteInView && <WaveDropActionsOptions drop={drop} />}
                 </div>
               </div>
             </div>
@@ -85,13 +92,17 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 className="tw-flex tw-w-full tw-items-center tw-justify-end tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
                 onClick={(e) => e.stopPropagation()}
               >
-                <DropCurationButton
-                  waveId={drop.wave.id}
-                  dropId={drop.id}
-                  isCuratable={drop.context_profile_context?.curatable ?? false}
-                  isCurated={drop.context_profile_context?.curated ?? false}
-                />
-                {canShowVote && (
+                {!isPublicReadOnly && (
+                  <DropCurationButton
+                    waveId={drop.wave.id}
+                    dropId={drop.id}
+                    isCuratable={
+                      drop.context_profile_context?.curatable ?? false
+                    }
+                    isCurated={drop.context_profile_context?.curated ?? false}
+                  />
+                )}
+                {canShowVoteInView && (
                   <VotingModalButton
                     drop={drop}
                     onClick={() => setIsVotingModalOpen(true)}
@@ -105,22 +116,24 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       </div>
 
       {/* Voting modal */}
-      {isMobileScreen ? (
-        <MobileVotingModal
-          drop={drop}
-          isOpen={isVotingModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
-        />
-      ) : (
-        <VotingModal
-          drop={drop}
-          isOpen={isVotingModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
-        />
-      )}
+      {!isPublicReadOnly &&
+        (isMobileScreen ? (
+          <MobileVotingModal
+            drop={drop}
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+          />
+        ) : (
+          <VotingModal
+            drop={drop}
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+          />
+        ))}
 
       {/* Mobile menu slide-up */}
       {hasTouchScreen &&
+        !isPublicReadOnly &&
         createPortal(
           <CommonDropdownItemsMobileWrapper
             isOpen={isActive}
@@ -134,7 +147,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               />
 
               {/* Delete option - only if user can delete */}
-              {canDelete && (
+              {canDeleteInView && (
                 <WaveDropMobileMenuDelete
                   drop={drop}
                   onDropDeleted={() => setIsActive(false)}

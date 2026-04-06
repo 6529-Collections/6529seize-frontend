@@ -35,8 +35,8 @@ is blocked.
 
 - A saved/shared link opens the wrong thread or bounces back to `/waves` or
   `/messages`.
-- A signed-out direct `/waves/{waveId}` link shows the locked preview instead
-  of the full thread.
+- A signed-out direct `/waves/{waveId}` link shows the read-only thread instead
+  of the authenticated writer/viewer.
 - A `serialNo` or `drop` deep link does not reopen the expected in-thread
   context.
 - A memes quick-vote trigger is missing or the quick-vote dialog cannot load.
@@ -47,13 +47,13 @@ is blocked.
 - Link opens the wrong thread:
   verify whether the target is a wave thread (`/waves/{waveId}`) or a direct
   message thread (`/messages?wave={waveId}`), then update saved/shared links.
-- Signed-out direct `/waves/{waveId}` link shows a locked preview instead of the
-  full thread:
-  expected for resolvable member-only waves. Connect a wallet to continue into
-  chat, tabs, and posting surfaces.
+- Signed-out direct `/waves/{waveId}` link shows a read-only thread:
+  expected for publicly resolvable waves on web. Connect a wallet to
+  continue into posting, voting, reactions, `My Votes`, and sidebar surfaces.
 - Signed-out direct `/waves/{waveId}` link shows `This wave isn't available publicly`:
-  the wave could not be resolved for public preview. Connect a wallet to check
-  whether your account can access it, or reopen a different wave from the list.
+  the wave could not be resolved for public read-only viewing. Connect a wallet
+  to check whether your account can access it, or reopen a different wave from
+  the list.
 - Legacy link uses `/waves?wave={waveId}`:
   expected behavior is redirect to `/waves/{waveId}` while preserving other
   query values. Save the normalized URL after load.
@@ -138,8 +138,8 @@ is blocked.
 
 - Temporary drops (`temp-*`) disable `Copy link`.
 - Closing single-drop view removes `drop` from the URL.
-- Signed-out preview mode on `/waves/{waveId}` does not open right sidebar
-  surfaces or single-drop overlays.
+- Signed-out read-only mode on `/waves/{waveId}` does not open right sidebar
+  surfaces, but it does allow read-only single-drop overlays.
 - Unread-jump and pending-message controls can merge into one stacked control
   when both states are active.
 
@@ -148,8 +148,8 @@ is blocked.
 - Reopen the thread from the sidebar/list and save a fresh normalized link.
 - Remove stale `drop`, `serialNo`, and `divider` values before retrying the
   thread root.
-- If a signed-out direct wave link shows only the locked preview, connect a
-  wallet to continue into thread interactions.
+- If a signed-out direct wave link shows the read-only thread, connect a wallet
+  to continue into thread interactions.
 - If posting or submissions stay blocked, use the exact footer copy to identify
   the current restriction and retry after resolving that state.
 - If quick vote stays hidden, confirm that you are inside a supported waves

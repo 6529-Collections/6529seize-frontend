@@ -26,6 +26,7 @@ import WaveDropReply from "../WaveDropReply";
 import WinnerDropBadge from "./WinnerDropBadge";
 import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
 import { getWinnerVisibleMetadata } from "@/components/waves/winners/identity/winnerIdentity.helpers";
+import { useWaveViewerMode } from "../../public/WaveViewerModeContext";
 
 const getRankHoverClass = (rank: number | null): string => {
   return getRankHoverBorderClass(rank);
@@ -71,11 +72,13 @@ const DefaultWinnerDrop = ({
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
+  const { isPublicReadOnly } = useWaveViewerMode();
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const hasTouchDevice = useIsTouchDevice();
+  const hasTouch = !isPublicReadOnly && (hasTouchDevice || isMobile);
 
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
@@ -202,7 +205,7 @@ const DefaultWinnerDrop = ({
             </div>
           </div>
         </div>
-        {!isMobile && showReplyAndQuote && (
+        {!isMobile && !isPublicReadOnly && showReplyAndQuote && (
           <div className="tw-absolute tw-right-0 tw-top-1">
             <WaveDropActions
               drop={drop}
@@ -222,15 +225,17 @@ const DefaultWinnerDrop = ({
           </div>
         </div>
       </div>
-      <WaveDropMobileMenu
-        drop={drop}
-        isOpen={isSlideUp}
-        longPressTriggered={longPressTriggered}
-        showReplyAndQuote={showReplyAndQuote}
-        setOpen={setIsSlideUp}
-        onReply={handleOnReply}
-        onAddReaction={handleOnAddReaction}
-      />
+      {!isPublicReadOnly && (
+        <WaveDropMobileMenu
+          drop={drop}
+          isOpen={isSlideUp}
+          longPressTriggered={longPressTriggered}
+          showReplyAndQuote={showReplyAndQuote}
+          setOpen={setIsSlideUp}
+          onReply={handleOnReply}
+          onAddReaction={handleOnAddReaction}
+        />
+      )}
     </div>
   );
 };
