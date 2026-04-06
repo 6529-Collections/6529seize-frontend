@@ -76,10 +76,32 @@ jobs:
 
       - name: Build Target
         run: |
-          mkdir -p target/_next
-          cp -r .next/static target/_next/
-          zip -yr package.zip . -x '*.git*' 'target/*' 'node_modules/*' '.next/static/*'
-          mv package.zip target/
+          rm -rf target
+          mkdir -p target/package/.next target/assets/_next
+          cp -R .next/standalone/. target/package/
+          cp .next/BUILD_ID target/package/.next/BUILD_ID
+          cp -R .next/static target/package/.next/static
+          cp -R .next/static target/assets/_next/static
+          if [ -d public ]; then
+            cp -R public target/package/public
+          fi
+          if [ -d .ebextensions ]; then
+            cp -R .ebextensions target/package/.ebextensions
+          fi
+          printf 'web: node server.js\n' > target/package/Procfile
+          cd target/package
+          zip -yr ../package.zip .
+
+      - name: Verify package bundle size
+        run: |
+          PACKAGE_SIZE_BYTES=$(stat -c%s target/package.zip)
+          PACKAGE_SIZE_MB=$((PACKAGE_SIZE_BYTES / 1024 / 1024))
+          MAX_SIZE_BYTES=$((500 * 1024 * 1024))
+          echo "package.zip size: ${PACKAGE_SIZE_MB} MB (${PACKAGE_SIZE_BYTES} bytes)"
+          if [ "$PACKAGE_SIZE_BYTES" -gt "$MAX_SIZE_BYTES" ]; then
+            echo "Elastic Beanstalk source bundle exceeds the 500 MB limit."
+            exit 1
+          fi
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

@@ -116,6 +116,12 @@ activate the pinned pnpm version:
 ./bin/6529 bootstrap
 ```
 
+Then open a new shell, or activate the current shell immediately:
+
+```bash
+source <(./bin/6529 bootstrap --print-export)
+```
+
 Then install project dependencies through the secure path:
 
 ```bash
@@ -132,13 +138,6 @@ If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
 6529 build
 6529 approve-builds
 6529 staging
-```
-
-If you want plain `6529 ...` commands to work in your current shell
-immediately, use:
-
-```bash
-source <(./bin/6529 bootstrap --print-export)
 ```
 
 Otherwise, open a new shell after running `./bin/6529 bootstrap`.

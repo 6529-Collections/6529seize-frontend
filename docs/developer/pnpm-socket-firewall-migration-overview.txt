@@ -15,8 +15,8 @@ The migration covers:
 - updating Playwright, staging, worktree, PM2, and standalone export docs
 - updating production CI to install with Socket Firewall + pnpm
 - updating Elastic Beanstalk startup so runtime no longer depends on pnpm
-- avoiding Elastic Beanstalk's implicit npm install by shipping runtime
-  dependencies inside the deployment artifact
+- avoiding Elastic Beanstalk's implicit npm install by shipping a standalone
+  runtime bundle inside the deployment artifact
 - adding repo guardrails against npm/yarn installs and package-lock reintroduction
 
 Why this is better
@@ -30,8 +30,8 @@ Why this is better
 2. Production installs are more deterministic.
    The GitHub Actions deploy workflow now does the full build in CI using the
    committed lockfile, uploads the static asset bundle to S3/CloudFront, and
-   forces Elastic Beanstalk runtime installs through pinned pnpm instead of the
-   platform's default npm behavior.
+   packages the Next standalone runtime bundle into the deploy artifact so
+   Elastic Beanstalk does not need to do its own npm install on-instance.
 
 3. Supply-chain controls are better.
    Socket Firewall is now placed directly in front of pnpm installs for CI and
@@ -94,16 +94,18 @@ After:
 - CI passes the Socket action's absolute installed binary path into the secure
   install wrapper instead of relying only on PATH lookup
 - CI builds the app
-- CI zips the app without node_modules or .next/static
+- CI zips the Next standalone runtime bundle with `server.js`,
+  traced runtime files, `.next/BUILD_ID`, `.next/static`, `public`, and
+  `.ebextensions`
 - CI uploads package.zip and the built .next/static assets to S3
-- Procfile starts the app directly without pnpm
-- .ebextensions/runtime-bundle.config installs production dependencies with
-  pinned pnpm on the instance and verifies node_modules and build output
+- Procfile starts the standalone app with `node server.js`
+- .ebextensions/runtime-bundle.config verifies `server.js` and build output
 - EB runtime no longer falls back to its implicit npm install path
 
 This is important because EB's Node.js platform defaults to npm install when it
-sees package.json and no node_modules directory. This repo now overrides that
-default with an explicit pinned-pnpm runtime install.
+sees package.json and no usable runtime bundle. Shipping the standalone server
+bundle avoids that fallback path entirely and keeps the artifact smaller than a
+full node_modules tree.
 
 Developer workflow changes
 --------------------------
@@ -160,8 +162,7 @@ Guardrails added
 4. direct repo script execution is rejected unless it came through `6529`.
 5. package-lock.json presence can be checked explicitly with guard:no-package-lock.
 6. CI now uses the `6529` wrapper for repo orchestration.
-7. Production deploy overrides EB's default npm install behavior with an
-   explicit pinned-pnpm runtime install.
+7. Production deploy bundles a standalone runtime so EB does not need npm install.
 8. Documentation now points developers to the secure install path.
 
 Socket Firewall Free enforcement limits

@@ -86,9 +86,9 @@ If pnpm reports ignored install/build scripts, use:
 - [`scripts/assert-no-package-lock.cjs`](../../scripts/assert-no-package-lock.cjs) fails if `package-lock.json` reappears.
 - Helper scripts, Playwright, worktree tooling, staging scripts, and PM2 docs now use pnpm.
 - Production CI builds the Elastic Beanstalk bundle with pnpm, uploads
-  `/_next/static` assets to S3/CloudFront, and Elastic Beanstalk installs
-  production `node_modules` with pinned pnpm during deploy instead of falling
-  back to its default npm path.
+  `/_next/static` assets to S3/CloudFront, and packages the Next standalone
+  server bundle for Elastic Beanstalk so deploys do not depend on a runtime npm
+  or pnpm install on-instance.
 
 ## Elastic Beanstalk deployment model
 
@@ -99,16 +99,15 @@ The production workflow now:
    In CI, the workflow passes the Socket action's absolute `firewall-path-binary`
    output as `SFW_BIN` so the secure install wrapper does not rely on PATH lookup.
 3. Builds the app.
-4. Packages `package.zip` without `node_modules` or `.next/static`.
-5. Uploads `target/_next/static` and `package.zip` to S3 under the build
+4. Packages `package.zip` from the Next standalone runtime output, including
+   `server.js`, traced runtime files, `.next/BUILD_ID`, `.next/static`,
+   `public/`, and `.ebextensions/`.
+5. Uploads `target/assets/_next/static` and `package.zip` to S3 under the build
    version path.
 
-At deploy time,
-[`runtime-bundle.config`](../../.ebextensions/runtime-bundle.config) installs
-production dependencies with pinned pnpm on the Elastic Beanstalk instance,
-verifies that `node_modules` and `.next/BUILD_ID` are present, and then
-[`scripts/start-next.cjs`](../../scripts/start-next.cjs) starts the already
-built app.
+At deploy time, [`runtime-bundle.config`](../../.ebextensions/runtime-bundle.config)
+verifies that `server.js` and `.next/BUILD_ID` are present, and then Elastic
+Beanstalk starts the standalone server with `node server.js`.
 
 ## Socket Firewall Free limitations
 
@@ -125,8 +124,7 @@ Because of those limits, the strongest enforcement in this repo comes from:
 - standardizing commands on `pnpm`
 - rejecting `npm`/`yarn` installs
 - making CI the build authority for the deployed app bundle
-- overriding Elastic Beanstalk's default npm install behavior with an explicit
-  pinned-pnpm runtime install
+- packaging a CI-built standalone runtime bundle for Elastic Beanstalk
 
 ## When Enterprise is needed
 
