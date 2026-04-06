@@ -44,19 +44,19 @@ case "$command_name" in
     exec bash "$REPO_ROOT/scripts/bootstrap-6529-command.sh" "$@"
     ;;
   dev)
-    exec node scripts/dev-with-fallback.cjs "$@"
+    exec node "$REPO_ROOT/scripts/dev-with-fallback.cjs" "$@"
     ;;
   dev:webpack)
-    exec env USE_TURBO=false node scripts/dev-with-fallback.cjs "$@"
+    exec env USE_TURBO=false node "$REPO_ROOT/scripts/dev-with-fallback.cjs" "$@"
     ;;
   dev:open)
-    exec node scripts/dev-open.cjs "$@"
+    exec node "$REPO_ROOT/scripts/dev-open.cjs" "$@"
     ;;
   staging)
     exec bash "$REPO_ROOT/scripts/staging.sh" "$@"
     ;;
   start)
-    exec node scripts/start-next.cjs "$@"
+    exec node "$REPO_ROOT/scripts/start-next.cjs" "$@"
     ;;
 esac
 

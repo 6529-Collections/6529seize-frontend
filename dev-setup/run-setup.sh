@@ -36,6 +36,27 @@ color() {
   esac
 }
 
+# Resolve a real binary by stripping the repo's bin/ shim directory from PATH,
+# so calls like `npm -v` and `npm install --global` never hit the repo shims.
+# Usage: resolve_real_binary npm REAL_NPM
+resolve_real_binary() {
+  local name="$1" varname="$2"
+  local repo_bin="$REPO_ROOT/bin"
+  local clean_path="" part
+  IFS=':' read -r -a _rrb_parts <<< "${PATH:-}"
+  for part in "${_rrb_parts[@]}"; do
+    [[ -z "$part" || "$part" == "$repo_bin" ]] && continue
+    clean_path="${clean_path:+${clean_path}:}${part}"
+  done
+  local resolved
+  resolved="$(PATH="$clean_path" command -v "$name" 2>/dev/null || true)"
+  if [[ -z "$resolved" ]]; then
+    color red "Cannot find real '$name' outside the repo's bin/ shims. Ensure it is installed and on PATH."
+    exit 1
+  fi
+  printf -v "$varname" '%s' "$resolved"
+}
+
 require_sudo_if_linux() {
   if [[ "$(uname -s)" != "Darwin" ]]; then
     if [[ "$EUID" -ne 0 ]] && ! command -v sudo >/dev/null 2>&1; then
@@ -137,7 +158,8 @@ ensure_node_ge20() {
     color red "Node $(node -v) < 20 after installation. Please install Node >= 20 and re-run."; exit 1
   fi
 
-  color green "Using Node $(node -v), npm $(npm -v)"
+  resolve_real_binary npm REAL_NPM
+  color green "Using Node $(node -v), npm $("$REAL_NPM" -v)"
   return 0
 }
 
@@ -148,7 +170,8 @@ activate_pnpm_with_corepack() {
   else
     ( cd "$REPO_ROOT" && sudo bash scripts/setup-corepack-pnpm.sh )
   fi
-  color green "pnpm: $(pnpm -v)"
+  resolve_real_binary pnpm REAL_PNPM
+  color green "pnpm: $("$REAL_PNPM" -v)"
   return 0
 }
 
@@ -163,9 +186,9 @@ install_socket_firewall() {
 
   color yellow "Installing Socket Firewall globally…"
   if [[ "$(uname -s)" == "Darwin" ]]; then
-    npm install --global sfw
+    "$REAL_NPM" install --global sfw
   else
-    sudo npm install --global sfw
+    sudo "$REAL_NPM" install --global sfw
   fi
   command -v sfw >/dev/null 2>&1 || { color red "Socket Firewall installation failed."; exit 1; }
   color green "Socket Firewall installed."
@@ -174,7 +197,7 @@ install_socket_firewall() {
 install_pm2() {
   if ! command -v pm2 >/dev/null 2>&1; then
     color yellow "Installing PM2 globally…"
-    if [[ "$(uname -s)" == "Darwin" ]]; then npm i -g pm2; else sudo npm i -g pm2; fi
+    if [[ "$(uname -s)" == "Darwin" ]]; then "$REAL_NPM" i -g pm2; else sudo "$REAL_NPM" i -g pm2; fi
   fi
   color green "PM2: $(pm2 -v)"
 }

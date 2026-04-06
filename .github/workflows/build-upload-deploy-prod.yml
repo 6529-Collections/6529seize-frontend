@@ -72,14 +72,11 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./bin/6529 build
 
-      - name: Prune to production dependencies
-        run: ./bin/6529 prune:prod
-
       - name: Build Target
         run: |
           mkdir -p target/_next
           cp -r .next/static target/_next/
-          zip -yr package.zip . -x '*.git*' 'target/*'
+          zip -yr package.zip . -x '*.git*' 'target/*' 'node_modules/*' '.next/static/*'
           mv package.zip target/
 
       - name: Configure AWS Credentials

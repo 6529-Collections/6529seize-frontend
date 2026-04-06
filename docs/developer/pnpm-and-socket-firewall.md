@@ -31,34 +31,30 @@ so the `6529` shorthand commands above work directly inside the repository.
 
 ## Local setup
 
-Bootstrap the toolchain once:
+Run these once on a fresh clone:
 
 ```bash
 npm install --global sfw
 corepack enable pnpm
 corepack prepare pnpm@10.33.0 --activate
+./bin/6529 bootstrap
 ```
 
-Install dependencies through the secure path:
+`./bin/6529 bootstrap` is the only time you ever type the explicit path. It
+installs a global `6529` shim and adds it to your shell's PATH. Open a new
+shell after running it, or activate it immediately in the current shell:
+
+```bash
+source <(./bin/6529 bootstrap --print-export)
+```
+
+Then install dependencies:
 
 ```bash
 6529 install
 ```
 
-If you want plain `6529 ...` commands to work in server shells without
-`direnv`, run:
-
-```bash
-./bin/6529 bootstrap
-```
-
-Then open a new shell, or source the rc file that matches your shell.
-
-For a current-shell one-liner, use:
-
-```bash
-source <(./bin/6529 bootstrap --print-export)
-```
+From this point on, always use the bare `6529` command — never `./bin/6529`.
 
 For staging refreshes from a fresh clone, use the repo-local wrapper path
 explicitly:

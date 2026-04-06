@@ -110,15 +110,17 @@ that fallback path entirely.
 Developer workflow changes
 --------------------------
 
-Bootstrap once:
+Bootstrap once (fresh clone):
 1. npm install --global sfw
    Run this outside the repository; the repo's preinstall guard does not apply
    to that global bootstrap step.
 2. corepack enable pnpm
 3. corepack prepare pnpm@10.33.0 --activate
-4. Optional on servers without direnv: ./bin/6529 bootstrap, then open a new
-   shell or source the rc file that matches your shell
-   One-liner for current shell: source <(./bin/6529 bootstrap --print-export)
+4. ./bin/6529 bootstrap
+   This is the only time you type the explicit ./bin/6529 path. It installs a
+   global shim so all future shells resolve the bare `6529` command.
+   Then open a new shell, or activate immediately:
+   source <(./bin/6529 bootstrap --print-export)
 
 Install dependencies:
 5. 6529 install
