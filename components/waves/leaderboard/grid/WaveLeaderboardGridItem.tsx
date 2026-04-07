@@ -41,56 +41,81 @@ interface WaveLeaderboardGridItemProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-export const WaveLeaderboardGridItem: React.FC<
-  WaveLeaderboardGridItemProps
-> = ({ drop, mode, onDropClick }) => {
-  const isCompactMode = mode === "compact";
-  const isContentOnlyMode = mode === "content_only";
-  const activePart = drop.parts[0];
-  const author = drop.author;
-  const authorHandle = author.handle ?? null;
-  const primaryMedia = activePart?.media[0];
-  const isCuratable = drop.context_profile_context?.curatable ?? false;
-  const isCurated = drop.context_profile_context?.curated ?? false;
-  const canOpenDrop = drop.drop_type !== ApiDropType.Chat;
+const getVoteStyle = (userVote: number): string =>
+  userVote <= 0 ? "tw-text-iron-400" : "tw-text-iron-300";
 
-  const cardClassName =
-    "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
-  const viewportClassName = isCompactMode
+const canOpenGridItemFromClick = ({
+  isMenuOpen,
+  target,
+}: {
+  readonly isMenuOpen: boolean;
+  readonly target: HTMLElement;
+}): boolean => {
+  if (isMenuOpen) {
+    return false;
+  }
+
+  return !target.closest("a, button");
+};
+
+const isGridItemOpenKey = (key: string): boolean =>
+  key === "Enter" || key === " ";
+
+const getGridViewportClassName = (isCompactMode: boolean): string =>
+  isCompactMode
     ? "tw-relative tw-overflow-hidden tw-bg-iron-950"
-    : "tw-relative tw-overflow-hidden tw-max-h-[20rem] tw-bg-iron-950";
-  const contentSpacingClass = isCompactMode ? "tw-space-y-3" : "tw-space-y-1";
-  const mediaWrapperClass = isCompactMode
+    : "tw-relative tw-max-h-[20rem] tw-overflow-hidden tw-bg-iron-950";
+
+const getGridContentSpacingClassName = (isCompactMode: boolean): string =>
+  isCompactMode ? "tw-space-y-3" : "tw-space-y-1";
+
+const getGridMediaWrapperClassName = (isCompactMode: boolean): string =>
+  isCompactMode
     ? "tw-overflow-hidden tw-rounded-lg tw-bg-iron-900"
     : "tw-overflow-hidden tw-bg-iron-950";
-  const isMobileScreen = useIsMobileScreen();
-  const { hasTouchScreen } = useDeviceInfo();
-  const { toggleCuration, isPending: isCurating } = useDropCurationMutation();
-  const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
-    hasTouchScreen,
-    preventDefault: false,
-  });
-  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const { canShowVote } = useDropInteractionRules(drop);
-  const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
-  const [innerEl, setInnerEl] = useState<HTMLDivElement | null>(null);
-  const hasContentOnlyActions = canOpenDrop || isCuratable || canShowVote;
-  const showDesktopContentOnlyActions =
-    isContentOnlyMode && !hasTouchScreen && hasContentOnlyActions;
-  const showMobileContentOnlyActions =
-    isContentOnlyMode && hasTouchScreen && hasContentOnlyActions;
 
-  const previewImageUrl = useMemo(
-    () => getDropPreviewImageUrl(drop.metadata),
-    [drop.metadata]
+const getGridTextWrapperClassName = ({
+  hasMedia,
+  isCompactMode,
+}: {
+  readonly hasMedia: boolean;
+  readonly isCompactMode: boolean;
+}): string =>
+  `tw-px-3 ${hasMedia ? "tw-pt-2" : "tw-pt-3"} ${
+    isCompactMode ? "tw-pb-4" : "tw-pb-3"
+  }`;
+
+const getCompactTextViewportClassName = (
+  isCompactMode: boolean
+): string | undefined =>
+  isCompactMode
+    ? "tw-relative tw-max-h-56 tw-overflow-hidden [&_p]:tw-whitespace-normal"
+    : undefined;
+
+function GridItemRankBadge({ drop }: { readonly drop: ExtendedDrop }) {
+  if (drop.rank === null) {
+    return (
+      <div className="tw-flex tw-h-6 tw-min-w-6 tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-400">
+        -
+      </div>
+    );
+  }
+
+  return (
+    <WinnerDropBadge
+      rank={drop.rank}
+      decisionTime={drop.winning_context?.decision_time ?? null}
+    />
   );
+}
 
-  const mediaUrl = primaryMedia?.url ?? previewImageUrl ?? null;
-  const mediaMimeType = primaryMedia?.mime_type ?? "image/jpeg";
-  const contentTextWrapperClass = mediaUrl
-    ? "tw-px-3 tw-pb-3 tw-pt-2"
-    : "tw-p-3";
-
+function useOverflowGradient({
+  viewportEl,
+  innerEl,
+}: {
+  readonly viewportEl: HTMLElement | null;
+  readonly innerEl: HTMLElement | null;
+}): boolean {
   const getOverflowSnapshot = useCallback(() => {
     if (!viewportEl || !innerEl) {
       return false;
@@ -125,20 +150,66 @@ export const WaveLeaderboardGridItem: React.FC<
     [innerEl, viewportEl]
   );
 
-  const showGradient = useSyncExternalStore(
+  return useSyncExternalStore(
     subscribeToOverflow,
     getOverflowSnapshot,
     () => false
   );
+}
+
+export const WaveLeaderboardGridItem: React.FC<
+  WaveLeaderboardGridItemProps
+> = ({ drop, mode, onDropClick }) => {
+  const isCompactMode = mode === "compact";
+  const isContentOnlyMode = mode === "content_only";
+  const activePart = drop.parts[0];
+  const author = drop.author;
+  const authorHandle = author.handle ?? null;
+  const primaryMedia = activePart?.media[0];
+  const isCuratable = drop.context_profile_context?.curatable ?? false;
+  const isCurated = drop.context_profile_context?.curated ?? false;
+  const canOpenDrop = drop.drop_type !== ApiDropType.Chat;
+  const isMobileScreen = useIsMobileScreen();
+  const { hasTouchScreen } = useDeviceInfo();
+  const { toggleCuration, isPending: isCurating } = useDropCurationMutation();
+  const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
+    hasTouchScreen,
+    preventDefault: false,
+  });
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const { canShowVote } = useDropInteractionRules(drop);
+  const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
+  const [innerEl, setInnerEl] = useState<HTMLDivElement | null>(null);
+  const [compactTextViewportEl, setCompactTextViewportEl] =
+    useState<HTMLDivElement | null>(null);
+  const [compactTextInnerEl, setCompactTextInnerEl] =
+    useState<HTMLDivElement | null>(null);
+  const hasContentOnlyActions = canOpenDrop || isCuratable || canShowVote;
+  const showDesktopContentOnlyActions =
+    isContentOnlyMode && !hasTouchScreen && hasContentOnlyActions;
+  const showMobileContentOnlyActions =
+    isContentOnlyMode && hasTouchScreen && hasContentOnlyActions;
+
+  const previewImageUrl = useMemo(
+    () => getDropPreviewImageUrl(drop.metadata),
+    [drop.metadata]
+  );
+
+  const mediaUrl = primaryMedia?.url ?? previewImageUrl ?? null;
+  const mediaMimeType = primaryMedia?.mime_type ?? "image/jpeg";
+  const showGradient = useOverflowGradient({
+    viewportEl,
+    innerEl,
+  });
+  const showCompactTextGradient = useOverflowGradient({
+    viewportEl: compactTextViewportEl,
+    innerEl: compactTextInnerEl,
+  });
 
   const hasUserVoted = drop.context_profile_context?.rating !== undefined;
   const userVote = drop.context_profile_context?.rating ?? 0;
   const isNegativeVote = userVote < 0;
-  const isZeroVote = userVote === 0;
-  let voteStyle = "tw-text-iron-300";
-  if (isZeroVote || isNegativeVote) {
-    voteStyle = "tw-text-iron-400";
-  }
+  const voteStyle = getVoteStyle(userVote);
   const votingCreditType = drop.wave.voting_credit_type;
   const votingCreditLabels = WAVE_VOTING_LABELS as Partial<
     Record<typeof votingCreditType, string>
@@ -187,21 +258,35 @@ export const WaveLeaderboardGridItem: React.FC<
   };
 
   const onCardClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
-    if (showMobileContentOnlyActions && isActive) {
-      return;
-    }
     const target = event.target as HTMLElement;
-    if (target.closest("a, button")) {
+    if (
+      !canOpenGridItemFromClick({
+        isMenuOpen: showMobileContentOnlyActions && isActive,
+        target,
+      })
+    ) {
       return;
     }
     openDrop();
   };
 
   const onCardKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      openDrop();
+    if (!isGridItemOpenKey(event.key)) {
+      return;
     }
+
+    const target = event.target as HTMLElement;
+    if (
+      !canOpenGridItemFromClick({
+        isMenuOpen: showMobileContentOnlyActions && isActive,
+        target,
+      })
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    openDrop();
   };
 
   return (
@@ -211,13 +296,19 @@ export const WaveLeaderboardGridItem: React.FC<
       data-testid={`wave-leaderboard-grid-item-${drop.id}`}
       onClick={onCardClick}
       onKeyDown={onCardKeyDown}
-      className={`${cardClassName} tw-group`}
+      className="tw-group tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700"
       {...(showMobileContentOnlyActions ? touchHandlers : {})}
     >
-      <div ref={setViewportEl} className={viewportClassName}>
-        <div ref={setInnerEl} className={contentSpacingClass}>
+      <div
+        ref={setViewportEl}
+        className={getGridViewportClassName(isCompactMode)}
+      >
+        <div
+          ref={setInnerEl}
+          className={getGridContentSpacingClassName(isCompactMode)}
+        >
           {mediaUrl && (
-            <div className={mediaWrapperClass}>
+            <div className={getGridMediaWrapperClassName(isCompactMode)}>
               <MediaDisplay
                 media_mime_type={mediaMimeType}
                 media_url={mediaUrl}
@@ -228,18 +319,33 @@ export const WaveLeaderboardGridItem: React.FC<
             </div>
           )}
           {activePart && (
-            <div className={contentTextWrapperClass}>
-              <LinkPreviewProvider variant="home">
-                <WaveDropPartContentMarkdown
-                  mentionedUsers={drop.mentioned_users}
-                  mentionedWaves={drop.mentioned_waves}
-                  referencedNfts={drop.referenced_nfts}
-                  part={activePart}
-                  wave={drop.wave}
-                  drop={drop}
-                  onQuoteClick={() => {}}
-                />
-              </LinkPreviewProvider>
+            <div
+              className={getGridTextWrapperClassName({
+                hasMedia: mediaUrl !== null,
+                isCompactMode,
+              })}
+            >
+              <div
+                ref={isCompactMode ? setCompactTextViewportEl : undefined}
+                className={getCompactTextViewportClassName(isCompactMode)}
+              >
+                <div ref={isCompactMode ? setCompactTextInnerEl : undefined}>
+                  <LinkPreviewProvider variant="home">
+                    <WaveDropPartContentMarkdown
+                      mentionedUsers={drop.mentioned_users}
+                      mentionedWaves={drop.mentioned_waves}
+                      referencedNfts={drop.referenced_nfts}
+                      part={activePart}
+                      wave={drop.wave}
+                      drop={drop}
+                      onQuoteClick={() => {}}
+                    />
+                  </LinkPreviewProvider>
+                </div>
+                {isCompactMode && showCompactTextGradient && (
+                  <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-14 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/70 tw-to-transparent" />
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -282,14 +388,16 @@ export const WaveLeaderboardGridItem: React.FC<
         <WaveLeaderboardIdentity
           drop={drop}
           variant="responsive"
+          cardVariant="chat"
           className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-bg-iron-950/50 tw-p-3"
+          supplementFullWidth
         />
       )}
 
       {isCompactMode && (
         <div
           data-testid={`wave-leaderboard-grid-item-footer-${drop.id}`}
-          className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3 tw-pt-2"
+          className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3 tw-pt-3"
         >
           <div className="tw-mb-1.5">
             {drop.title && (
@@ -311,22 +419,14 @@ export const WaveLeaderboardGridItem: React.FC<
                   </UserProfileTooltipWrapper>
                 )}
               </div>
-              {drop.rank !== null ? (
-                <WinnerDropBadge
-                  rank={drop.rank}
-                  decisionTime={drop.winning_context?.decision_time ?? null}
-                />
-              ) : (
-                <div className="tw-flex tw-h-6 tw-min-w-6 tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-400">
-                  -
-                </div>
-              )}
+              <GridItemRankBadge drop={drop} />
             </div>
           </div>
           <WaveLeaderboardIdentity
             drop={drop}
             variant="condensed"
             className="tw-mb-3"
+            supplementFullWidth
           />
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-text-xs">
             <WaveLeaderboardGalleryItemVotes drop={drop} variant="subtle" />

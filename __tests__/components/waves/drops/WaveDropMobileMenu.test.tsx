@@ -5,6 +5,9 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+const mockIsMemesWave = jest.fn();
+const writeText = jest.fn().mockResolvedValue(undefined);
+
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
 }));
@@ -44,7 +47,7 @@ jest.mock(
 );
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
-  useSeizeSettings: () => ({ isMemesWave: jest.fn().mockReturnValue(true) }),
+  useSeizeSettings: () => ({ isMemesWave: mockIsMemesWave }),
 }));
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: () => ({
@@ -57,20 +60,21 @@ jest.mock("@/contexts/EmojiContext", () => ({
   }),
   EmojiProvider: ({ children }: any) => children,
 }));
-
-jest.doMock("@/config/env", () => ({
+jest.mock("@/config/env", () => ({
   publicEnv: { BASE_ENDPOINT: "https://base" },
 }));
 
 beforeAll(() => {
   Object.assign(navigator, {
-    clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
+    clipboard: { writeText },
   });
 });
 
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
 
 beforeEach(() => {
+  writeText.mockClear();
+  mockIsMemesWave.mockReturnValue(false);
   mockedUseDropInteractionRules.mockReturnValue({
     canShowVote: true,
     canVote: true,
@@ -83,7 +87,7 @@ beforeEach(() => {
   });
 });
 
-test("copies link and shows feedback", async () => {
+test("copies serial jump links for non-memes drops", async () => {
   const drop = {
     id: "1",
     serial_no: 1,
@@ -113,10 +117,47 @@ test("copies link and shows feedback", async () => {
     </AuthContext.Provider>
   );
   await userEvent.click(screen.getByText("Copy link"));
-  expect(navigator.clipboard.writeText).toHaveBeenCalled();
+  expect(writeText).toHaveBeenCalledWith("https://base/waves/w?serialNo=1");
+});
+
+test("copies canonical drop links for memes submissions", async () => {
+  mockIsMemesWave.mockReturnValue(true);
+
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Participatory,
+    author: { handle: "alice" },
+  } as any;
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "alice" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+  await userEvent.click(screen.getByText("Copy link"));
+  expect(writeText).toHaveBeenCalledWith("https://base/waves/w?drop=1");
 });
 
 test("hides follow and clap when author and memes wave", () => {
+  mockIsMemesWave.mockReturnValue(true);
+
   const drop = {
     id: "1",
     serial_no: 1,

@@ -1,5 +1,5 @@
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiDropResolvedIdentityProfile } from "@/generated/models/ApiDropResolvedIdentityProfile";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import {
@@ -33,7 +33,7 @@ export const getDropIdentityProfile = ({
 }: {
   readonly wave: Pick<ApiWaveMin, "submission_type"> | null | undefined;
   readonly metadata: readonly ApiDropMetadataResponse[] | null | undefined;
-}): ApiProfileMin | null => {
+}): ApiDropResolvedIdentityProfile | null => {
   if (!isIdentitySubmissionWave(wave)) {
     return null;
   }

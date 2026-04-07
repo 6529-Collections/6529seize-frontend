@@ -9,8 +9,9 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
   current thread.
 - Preview cards and quote cards expose a `Link actions` button with
   `Copy link` and `Open link`.
-- `Copy link` copies an absolute share URL that targets the drop with
-  `serialNo={serialNo}`.
+- `Copy link` copies an absolute share URL that targets the drop with:
+  - `serialNo={serialNo}` for most drops
+  - `drop={dropId}` for memes submission drops
 - Link-card `Copy link` copies the original referenced URL shown by that card.
 
 ## Location in the Site
@@ -59,6 +60,8 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 - Desktop copy can still infer DM routes from stream context when DM scope data
   on the drop is incomplete.
 - Mobile copy uses Clipboard API when available and falls back to textarea copy.
+- Memes submission drop copy links use canonical wave drop URLs and open the
+  single-drop overlay when opened.
 
 ## Edge Cases
 
@@ -81,8 +84,9 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 
 ## Limitations / Notes
 
-- `Open` (`drop` query), copied drop links (`serialNo` query), and link-card
-  `Open link` are different navigation mechanisms.
+- `Open` (`drop` query), most copied drop links (`serialNo` query), memes
+  submission copied links (`drop` query), and link-card `Open link` are
+  different navigation mechanisms.
 - Opening a copied link does not force single-drop overlay mode.
 - `Copy link` is unavailable for temporary drops.
 - Link-card actions depend on the preview or quote card being rendered. Once a
