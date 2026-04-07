@@ -4,7 +4,6 @@ import type { FC } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
-import type { ApiWave } from "@/generated/models/ApiWave";
 
 interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;
@@ -12,7 +11,6 @@ interface TimelineToggleHeaderProps {
   readonly nextDecisionTime: number | null;
   readonly isPaused?: boolean | undefined;
   readonly currentPause?: ApiWaveDecisionPause | null | undefined;
-  readonly wave?: ApiWave | undefined;
 }
 
 /**
