@@ -26,7 +26,8 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   waveId,
 }) => {
   const { waves } = useMyStream();
-  const { isAnnouncementsWave } = useSeizeSettings();
+  const { isAnnouncementsWave, isLoaded: isSettingsLoaded } =
+    useSeizeSettings();
   const { pinnedIds, isOperationInProgress, canPinWave } =
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
@@ -89,6 +90,10 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   // Don't render if user is not authenticated or using proxy
   if (!connectedProfile?.handle || activeProfileProxy) {
+    return null;
+  }
+
+  if (!isPinned && !isSettingsLoaded) {
     return null;
   }
 

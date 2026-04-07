@@ -105,16 +105,14 @@ describe("WaveHeaderPinButton", () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it("renders ordinary waves while settings are still loading", () => {
+    it("hides ordinary waves while settings are still loading", () => {
       mockUseSeizeSettings.mockReturnValue({
         isAnnouncementsWave: () => false,
         isLoaded: false,
       });
-      renderComponent();
-      expect(screen.getByRole("button")).toHaveAttribute(
-        "aria-label",
-        "Pin wave"
-      );
+      const { container } = renderComponent();
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
     });
 
     it("renders unpin control for a pinned announcement wave", () => {
@@ -253,6 +251,20 @@ describe("WaveHeaderPinButton", () => {
         type: "error",
         message: "Maximum 3 pinned waves allowed",
       });
+      expect(mockAddPinnedWave).not.toHaveBeenCalled();
+    });
+
+    it("keeps the header control hidden during settings load at max capacity", () => {
+      mockUseSeizeSettings.mockReturnValue({
+        isAnnouncementsWave: () => false,
+        isLoaded: false,
+      });
+
+      const { container } = renderComponent();
+
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      expect(mockAuth.setToast).not.toHaveBeenCalled();
       expect(mockAddPinnedWave).not.toHaveBeenCalled();
     });
   });
