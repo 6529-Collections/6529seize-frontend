@@ -4,6 +4,7 @@ import WavesMessagesWrapper from "@/components/shared/WavesMessagesWrapper";
 
 const mockUseQuery = jest.fn();
 const mockCloseRightSidebar = jest.fn();
+const mockUsePublicWaveShellState = jest.fn();
 
 jest.mock("@tanstack/react-query", () => ({
   keepPreviousData: {},
@@ -37,6 +38,11 @@ jest.mock("@/hooks/useSidebarState", () => ({
     isRightSidebarOpen: true,
     closeRightSidebar: mockCloseRightSidebar,
   }),
+}));
+
+jest.mock("@/components/waves/public/usePublicWaveShellState", () => ({
+  usePublicWaveShellState: (...args: unknown[]) =>
+    mockUsePublicWaveShellState(...args),
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -84,11 +90,54 @@ describe("WavesMessagesWrapper", () => {
   beforeEach(() => {
     mockUseQuery.mockReturnValue({ data: undefined, error: undefined });
     mockCloseRightSidebar.mockClear();
+    mockUsePublicWaveShellState.mockReturnValue({ status: "ready" });
   });
 
-  it("renders the right sidebar in public read-only mode when it is open", () => {
+  it("renders the right sidebar in public read-only mode when the shell is ready", () => {
     render(
       <WavesMessagesWrapper isPublicReadOnly={true}>
+        <div>content</div>
+      </WavesMessagesWrapper>
+    );
+
+    expect(screen.getByTestId("right-sidebar")).toHaveAttribute(
+      "data-wave-id",
+      "wave-1"
+    );
+    expect(mockCloseRightSidebar).not.toHaveBeenCalled();
+  });
+
+  it("does not render the right sidebar in public read-only mode while loading", () => {
+    mockUsePublicWaveShellState.mockReturnValue({ status: "loading" });
+
+    render(
+      <WavesMessagesWrapper isPublicReadOnly={true}>
+        <div>content</div>
+      </WavesMessagesWrapper>
+    );
+
+    expect(screen.queryByTestId("right-sidebar")).not.toBeInTheDocument();
+    expect(mockCloseRightSidebar).not.toHaveBeenCalled();
+  });
+
+  it("does not render the right sidebar in public read-only mode when the wave is unavailable", () => {
+    mockUsePublicWaveShellState.mockReturnValue({ status: "unavailable" });
+
+    render(
+      <WavesMessagesWrapper isPublicReadOnly={true}>
+        <div>content</div>
+      </WavesMessagesWrapper>
+    );
+
+    expect(screen.queryByTestId("right-sidebar")).not.toBeInTheDocument();
+    expect(mockCloseRightSidebar).not.toHaveBeenCalled();
+  });
+
+  it("keeps authenticated flows using the right sidebar even if the public shell is not ready", () => {
+    mockUsePublicWaveShellState.mockReturnValue({ status: "unavailable" });
+
+    render(
+      <WavesMessagesWrapper>
         <div>content</div>
       </WavesMessagesWrapper>
     );

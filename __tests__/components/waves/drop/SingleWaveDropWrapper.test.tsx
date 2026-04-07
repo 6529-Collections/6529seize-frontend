@@ -25,11 +25,6 @@ jest.mock("@/components/waves/drop/SingleWaveDropChat", () => ({
   SingleWaveDropChat: () => <div data-testid="single-drop-chat" />,
 }));
 
-jest.mock("@headlessui/react", () => ({
-  Transition: ({ children, show = true }: any) =>
-    show ? <>{children}</> : null,
-}));
-
 const drop = { id: "drop-1" } as any;
 const wave = { id: "wave-1" } as any;
 
@@ -61,9 +56,8 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.getByRole("button", { name: "Show chat" })
       ).toBeInTheDocument();
+      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
     });
-
-    expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Show chat" }));
 
@@ -94,7 +88,7 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.queryByRole("button", { name: "Hide chat" })
       ).not.toBeInTheDocument();
-      expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
+      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
     });
   });
 
@@ -105,6 +99,7 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.getByRole("button", { name: "Show chat" })
       ).toBeInTheDocument();
+      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Show chat" }));
@@ -124,7 +119,37 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.getByRole("button", { name: "Show chat" })
       ).toBeInTheDocument();
-      expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
+      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+    });
+    expect(document.body.style.overflow).toBe("");
+  });
+
+  it("keeps exactly one mobile chat tree mounted while closed and open", async () => {
+    render(renderWrapper(false));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Show chat" })
+      ).toBeInTheDocument();
+      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Show chat" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Hide chat" })
+      ).toBeInTheDocument();
+      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide chat" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Show chat" })
+      ).toBeInTheDocument();
+      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
     });
     expect(document.body.style.overflow).toBe("");
   });

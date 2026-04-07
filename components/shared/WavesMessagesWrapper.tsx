@@ -24,6 +24,7 @@ import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { WaveViewerModeProvider } from "../waves/public/WaveViewerModeContext";
+import { usePublicWaveShellState } from "../waves/public/usePublicWaveShellState";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
@@ -113,6 +114,12 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       ),
     [effectiveDropId, drop?.id]
   );
+  const publicWaveShellState = usePublicWaveShellState(
+    isPublicReadOnly ? (waveId ?? null) : null,
+    { enabled: isPublicReadOnly }
+  );
+  const isPublicWaveShellReady =
+    !isPublicReadOnly || publicWaveShellState.status === "ready";
 
   // Clear logic for when to show each part
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
@@ -123,7 +130,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     drop !== undefined &&
     shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(
-    isRightSidebarOpen && waveId && !isDropOpen
+    isRightSidebarOpen && waveId && !isDropOpen && isPublicWaveShellReady
   );
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   let rightVariant: "inline" | "overlay" | null = null;
