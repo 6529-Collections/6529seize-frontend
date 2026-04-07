@@ -30,20 +30,14 @@ jest.mock("../../../helpers/navigation.helpers", () => ({
 jest.mock("@/components/waves/WavesDesktop", () => ({
   __esModule: true,
   default: ({
-    allowDropOverlay,
-    allowRightSidebar,
     children,
     showLeftSidebar,
   }: {
-    readonly allowDropOverlay?: boolean;
-    readonly allowRightSidebar?: boolean;
     readonly children: React.ReactNode;
     readonly showLeftSidebar?: boolean;
   }) => (
     <div
       data-testid="waves-desktop"
-      data-allow-drop-overlay={String(allowDropOverlay)}
-      data-allow-right-sidebar={String(allowRightSidebar)}
       data-show-left-sidebar={String(showLeftSidebar)}
     >
       {children}
