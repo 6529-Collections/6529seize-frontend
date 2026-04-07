@@ -69,6 +69,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
     return {
       ...sharedConfig(publicEnv, assetPrefix),
+      output: phase === PHASE_PRODUCTION_BUILD ? "standalone" : undefined,
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,

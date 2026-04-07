@@ -76,42 +76,30 @@ jobs:
 
       - name: Build Target
         run: |
-          rm -rf target
-          mkdir -p target/_next
-          cp -R .next/static target/_next/static
-          if [ -d .next/node_modules ]; then
-            normalized_next_node_modules="$(mktemp -d)"
-            while IFS= read -r module_link; do
-              module_rel="${module_link#.next/node_modules/}"
-              module_real="$(realpath "$module_link")"
-              module_parent="$(dirname "$module_real")"
-              module_copy="$normalized_next_node_modules/$module_rel"
+          rm -rf target .deploy-bundle
+          mkdir -p target/_next .deploy-bundle/.next
 
-              mkdir -p "$(dirname "$module_copy")"
-              cp -RL "$module_real" "$module_copy"
-
-              # Copy the package-local pnpm sibling dependencies Next expects
-              # to resolve from .next/node_modules at runtime.
-              while IFS= read -r sibling; do
-                sibling_name="$(basename "$sibling")"
-                sibling_dest="$normalized_next_node_modules/$sibling_name"
-                if [ ! -e "$sibling_dest" ]; then
-                  cp -RL "$sibling" "$sibling_dest"
-                fi
-              done < <(find "$module_parent" -mindepth 1 -maxdepth 1)
-            done < <(find .next/node_modules -type l)
-
-            rm -rf .next/node_modules
-            mkdir -p .next
-            cp -R "$normalized_next_node_modules" .next/node_modules
-            if find .next/node_modules -type l | grep -q .; then
-              echo ".next/node_modules still contains symlinks after normalization"
-              find .next/node_modules -type l
-              exit 1
-            fi
+          test -f .next/standalone/server.js
+          cp -r .next/standalone/. .deploy-bundle/
+          cp -r .next/static target/_next/
+          cp -r .next/static .deploy-bundle/.next/
+          cp -r public .deploy-bundle/
+          cp Procfile .deploy-bundle/
+          cp -r .ebextensions .deploy-bundle/
+          if [ -d .platform ]; then
+            cp -r .platform .deploy-bundle/
           fi
-          zip -yr package.zip . -x '*.git*' 'target/*' 'node_modules/*'
-          mv package.zip target/
+
+          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
+            if [ -f ".next/$file" ]; then
+              cp ".next/$file" ".deploy-bundle/.next/$file"
+            fi
+          done
+
+          (
+            cd .deploy-bundle
+            zip -r ../target/package.zip .
+          )
 
       - name: Verify package bundle size
         run: |

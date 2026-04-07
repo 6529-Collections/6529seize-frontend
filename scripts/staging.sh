@@ -28,6 +28,8 @@ print_message "Rebuilding the project..."
 
 # Step 5: Restart PM2 services
 print_message "Restarting PM2 services..."
-pm2 restart 6529seize --update-env
+pm2 delete 6529seize >/dev/null 2>&1 || true
+pm2 start ./bin/6529 --name=6529seize -- run start:standalone
+pm2 save >/dev/null 2>&1 || true
 
 print_message "Update completed successfully!"
