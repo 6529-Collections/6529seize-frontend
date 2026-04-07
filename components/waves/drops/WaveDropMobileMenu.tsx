@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -50,6 +51,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showCopyOption = true,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { isConnected } = useSeizeConnectContext();
   const { isMemesWave } = useSeizeSettings();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
@@ -140,131 +142,169 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           longPressTriggered && "tw-select-none"
         }`}
       >
-        <WaveDropActionsQuickReact
-          drop={extendedDrop}
-          isMobile
-          onReacted={closeMenu}
-        />
-        <WaveDropActionsAddReaction
-          drop={extendedDrop}
-          isMobile={true}
-          onAddReaction={onAddReaction}
-        />
-        {showReplyAndQuote && (
-          <button
-            className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
-              isTemporaryDrop
-                ? "tw-cursor-default tw-opacity-50"
-                : "active:tw-bg-iron-800"
-            } tw-transition-colors tw-duration-200`}
-            onClick={() => {
-              setOpen(false);
-              setTimeout(() => onReply(), 250);
-            }}
-            disabled={isTemporaryDrop}
-          >
-            <svg
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
+        {!isConnected ? (
+          showCopyOption && (
+            <button
+              className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
+                isTemporaryDrop
+                  ? "tw-cursor-default tw-opacity-50"
+                  : "active:tw-bg-iron-800"
+              } tw-transition-colors tw-duration-200`}
+              onClick={copyToClipboard}
+              disabled={isTemporaryDrop}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M7.49 12L3.74 8.248m0 0l3.75-3.75m-3.75 3.75h16.5V19.5"
-              />
-            </svg>
-            <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-              Reply
-            </span>
-          </button>
-        )}
-
-        <WaveDropMobileMenuBoost
-          drop={extendedDrop}
-          onBoostChange={closeMenu}
-          onBoostAnimation={onBoostAnimation}
-        />
-
-        {showOpenOption && (
-          <WaveDropMobileMenuOpen
-            drop={{
-              type: DropSize.FULL,
-              ...drop,
-              stableHash: drop.id,
-              stableKey: drop.id,
-            }}
-            onOpenChange={closeMenu}
-          />
-        )}
-
-        {showCopyOption && (
-          <button
-            className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
-              isTemporaryDrop
-                ? "tw-cursor-default tw-opacity-50"
-                : "active:tw-bg-iron-800"
-            } tw-transition-colors tw-duration-200`}
-            onClick={copyToClipboard}
-            disabled={isTemporaryDrop}
-          >
-            <svg
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
-              />
-            </svg>
-            <span
-              className={`tw-text-base tw-font-semibold ${
-                copied ? "tw-text-primary-400" : "tw-text-iron-300"
-              }`}
-            >
-              {copied ? "Copied!" : "Copy link"}
-            </span>
-          </button>
-        )}
-
-        <WaveDropActionsMarkUnread
-          drop={drop}
-          isMobile={true}
-          onMarkUnread={closeMenu}
-        />
-        {!isAuthor && (
-          <WaveDropActionsRate
-            drop={drop}
-            isMobile={true}
-            onRated={closeMenu}
-          />
-        )}
-        {showOptions &&
-          onEdit &&
-          drop.drop_type !== ApiDropType.Participatory && (
-            <WaveDropMobileMenuEdit
-              drop={drop}
-              onEdit={onEdit}
-              onEditTriggered={closeMenu}
+              <svg
+                className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+                />
+              </svg>
+              <span
+                className={`tw-text-base tw-font-semibold ${
+                  copied ? "tw-text-primary-400" : "tw-text-iron-300"
+                }`}
+              >
+                {copied ? "Copied!" : "Copy link"}
+              </span>
+            </button>
+          )
+        ) : (
+          <>
+            <WaveDropActionsQuickReact
+              drop={extendedDrop}
+              isMobile
+              onReacted={closeMenu}
             />
-          )}
-        {canSetPinnedDrop && (
-          <WaveDropMobileMenuSetPinnedDrop
-            drop={drop}
-            onPinnedDropSet={closeMenu}
-          />
-        )}
-        {canDelete && (
-          <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
+            <WaveDropActionsAddReaction
+              drop={extendedDrop}
+              isMobile={true}
+              onAddReaction={onAddReaction}
+            />
+            {showReplyAndQuote && (
+              <button
+                className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
+                  isTemporaryDrop
+                    ? "tw-cursor-default tw-opacity-50"
+                    : "active:tw-bg-iron-800"
+                } tw-transition-colors tw-duration-200`}
+                onClick={() => {
+                  setOpen(false);
+                  setTimeout(() => onReply(), 250);
+                }}
+                disabled={isTemporaryDrop}
+              >
+                <svg
+                  className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M7.49 12L3.74 8.248m0 0l3.75-3.75m-3.75 3.75h16.5V19.5"
+                  />
+                </svg>
+                <span className="tw-text-base tw-font-semibold tw-text-iron-300">
+                  Reply
+                </span>
+              </button>
+            )}
+
+            <WaveDropMobileMenuBoost
+              drop={extendedDrop}
+              onBoostChange={closeMenu}
+              onBoostAnimation={onBoostAnimation}
+            />
+
+            {showOpenOption && (
+              <WaveDropMobileMenuOpen
+                drop={{
+                  type: DropSize.FULL,
+                  ...drop,
+                  stableHash: drop.id,
+                  stableKey: drop.id,
+                }}
+                onOpenChange={closeMenu}
+              />
+            )}
+
+            {showCopyOption && (
+              <button
+                className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
+                  isTemporaryDrop
+                    ? "tw-cursor-default tw-opacity-50"
+                    : "active:tw-bg-iron-800"
+                } tw-transition-colors tw-duration-200`}
+                onClick={copyToClipboard}
+                disabled={isTemporaryDrop}
+              >
+                <svg
+                  className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+                  />
+                </svg>
+                <span
+                  className={`tw-text-base tw-font-semibold ${
+                    copied ? "tw-text-primary-400" : "tw-text-iron-300"
+                  }`}
+                >
+                  {copied ? "Copied!" : "Copy link"}
+                </span>
+              </button>
+            )}
+
+            <WaveDropActionsMarkUnread
+              drop={drop}
+              isMobile={true}
+              onMarkUnread={closeMenu}
+            />
+            {!isAuthor && (
+              <WaveDropActionsRate
+                drop={drop}
+                isMobile={true}
+                onRated={closeMenu}
+              />
+            )}
+            {showOptions &&
+              onEdit &&
+              drop.drop_type !== ApiDropType.Participatory && (
+                <WaveDropMobileMenuEdit
+                  drop={drop}
+                  onEdit={onEdit}
+                  onEditTriggered={closeMenu}
+                />
+              )}
+            {canSetPinnedDrop && (
+              <WaveDropMobileMenuSetPinnedDrop
+                drop={drop}
+                onPinnedDropSet={closeMenu}
+              />
+            )}
+            {canDelete && (
+              <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
+            )}
+          </>
         )}
       </div>
     </CommonDropdownItemsMobileWrapper>,

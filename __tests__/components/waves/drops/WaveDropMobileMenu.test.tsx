@@ -1,4 +1,5 @@
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import WaveDropMobileMenu from "@/components/waves/drops/WaveDropMobileMenu";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -10,6 +11,9 @@ const writeText = jest.fn().mockResolvedValue(undefined);
 
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuDelete", () => () => (
   <div data-testid="delete" />
@@ -71,10 +75,12 @@ beforeAll(() => {
 });
 
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
+const mockedUseSeizeConnectContext = jest.mocked(useSeizeConnectContext);
 
 beforeEach(() => {
   writeText.mockClear();
   mockIsMemesWave.mockReturnValue(false);
+  mockedUseSeizeConnectContext.mockReturnValue({ isConnected: true } as any);
   mockedUseDropInteractionRules.mockReturnValue({
     canShowVote: true,
     canVote: true,
@@ -281,4 +287,48 @@ test("does not show pinned-drop action in the mobile menu for non-admins", () =>
   );
 
   expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
+});
+
+test("shows only copy link in the mobile menu when disconnected", () => {
+  mockedUseSeizeConnectContext.mockReturnValue({ isConnected: false } as any);
+
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: null,
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByText("Copy link")).toBeInTheDocument();
+  expect(screen.queryByTestId("quick-react")).toBeNull();
+  expect(screen.queryByTestId("add-reaction")).toBeNull();
+  expect(screen.queryByText("Reply")).toBeNull();
+  expect(screen.queryByTestId("boost")).toBeNull();
+  expect(screen.queryByTestId("open")).toBeNull();
+  expect(screen.queryByTestId("mark-unread")).toBeNull();
+  expect(screen.queryByTestId("clap")).toBeNull();
+  expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
+  expect(screen.queryByTestId("delete")).toBeNull();
 });
