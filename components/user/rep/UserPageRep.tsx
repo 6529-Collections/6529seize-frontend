@@ -4,6 +4,7 @@ import type { ActivityLogParams } from "@/components/profile-activity/ProfileAct
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
+import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPage";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -13,7 +14,14 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import { RateMatter } from "@/types/enums";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
@@ -23,6 +31,7 @@ import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import type { RepDirection } from "./UserPageRep.helpers";
 import { getCanEditNic } from "./UserPageRep.helpers";
 import UserPageRepHeader from "./header/UserPageRepHeader";
+import RepContributorsDialog from "./RepContributorsDialog";
 import UserPageRepMobile from "./UserPageRepMobile";
 
 const INITIAL_VISIBLE_CATEGORY_COUNT = 5;
@@ -40,6 +49,19 @@ const getDefaultFetchStates = (): Record<RepDirection, boolean> => ({
   received: false,
   given: false,
 });
+
+type RepContributorsDialogState =
+  | {
+      readonly scope: "overview";
+      readonly direction: RepDirection;
+      readonly contributorCount: number;
+    }
+  | {
+      readonly scope: "category";
+      readonly direction: RepDirection;
+      readonly category: string;
+      readonly contributorCount: number;
+    };
 
 function useRepCategories({
   user,
@@ -88,6 +110,8 @@ export default function UserPageRep({
 
   const [repDirection, setRepDirection] = useState<RepDirection>("received");
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
+  const [contributorsDialog, setContributorsDialog] =
+    useState<RepContributorsDialogState | null>(null);
   const [visibleCounts, setVisibleCounts] = useState(getDefaultVisibleCounts);
   const visibleCountsRef = useRef(visibleCounts);
   const isFetchingNextPageRef = useRef(getDefaultFetchStates());
@@ -243,6 +267,31 @@ export default function UserPageRep({
     repDirection,
   ]);
 
+  const handleOpenOverviewContributors = () => {
+    if (!activeOverview || activeOverview.contributor_count <= 0) {
+      return;
+    }
+
+    setContributorsDialog({
+      scope: "overview",
+      direction: repDirection,
+      contributorCount: activeOverview.contributor_count,
+    });
+  };
+
+  const handleOpenCategoryContributors = (category: ApiRepCategory) => {
+    if (category.contributor_count <= 0) {
+      return;
+    }
+
+    setContributorsDialog({
+      scope: "category",
+      direction: repDirection,
+      category: category.category,
+      contributorCount: category.contributor_count,
+    });
+  };
+
   return (
     <div className="tailwind-scope">
       <div className="lg:tw-hidden">
@@ -259,6 +308,8 @@ export default function UserPageRep({
           onShowMore={handleShowMore}
           hasNextPage={activeHasNextPage}
           isFetchingNextPage={activeIsFetchingNextPage}
+          onOpenOverviewContributors={handleOpenOverviewContributors}
+          onOpenCategoryContributors={handleOpenCategoryContributors}
         />
       </div>
       <div className="tw-hidden lg:tw-block">
@@ -269,6 +320,8 @@ export default function UserPageRep({
               categories={activeCategories}
               profile={profile}
               repDirection={repDirection}
+              onOpenOverviewContributors={handleOpenOverviewContributors}
+              onOpenCategoryContributors={handleOpenCategoryContributors}
               onRepDirectionChange={setRepDirection}
               loading={activeLoading}
               visibleCount={activeVisibleCount}
@@ -304,6 +357,20 @@ export default function UserPageRep({
           </div>
         </div>
       </div>
+
+      <RepContributorsDialog
+        identity={user}
+        isOpen={contributorsDialog !== null}
+        scope={contributorsDialog?.scope ?? "overview"}
+        direction={contributorsDialog?.direction ?? repDirection}
+        category={
+          contributorsDialog?.scope === "category"
+            ? contributorsDialog.category
+            : null
+        }
+        contributorCount={contributorsDialog?.contributorCount ?? 0}
+        onClose={() => setContributorsDialog(null)}
+      />
 
       <MobileWrapperDialog
         title="Rate NIC"
