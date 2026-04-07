@@ -5,7 +5,7 @@ const { resolve } = require("node:path");
 
 const repoRoot = resolve(__dirname, "..");
 const nextBin = require.resolve("next/dist/bin/next", { paths: [repoRoot] });
-const port = String(process.env["PORT"] || "3001");
+const port = "3001";
 
 const result = spawnSync(process.execPath, [nextBin, "start", "-p", port], {
   cwd: repoRoot,

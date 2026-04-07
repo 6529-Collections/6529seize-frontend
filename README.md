@@ -100,7 +100,7 @@ Are you sure you want to deploy <branch-name> to production?
 
 If you confirm, it triggers the production workflow from `.github/workflows/build-upload-deploy-prod.yml` against your current branch.
 
-Default app port: `3001` unless `PORT` is set.
+Default app port: `3001`.
 
 ### Documentation
 
