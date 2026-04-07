@@ -24,7 +24,7 @@ print_message "Reinstalling dependencies..."
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
-./bin/6529 build
+./bin/6529 run build
 
 # Step 5: Restart PM2 services
 print_message "Restarting PM2 services..."

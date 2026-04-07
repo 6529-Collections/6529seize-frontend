@@ -9,8 +9,8 @@ if [[ "${SEIZE_6529_COMMAND:-0}" != "1" && "${SEIZE_SECURE_INSTALL:-0}" != "1" ]
   echo "Use the \`6529\` wrapper instead." >&2
   echo "Examples:" >&2
   echo "  6529 install" >&2
-  echo "  6529 dev" >&2
-  echo "  6529 build" >&2
+  echo "  6529 run dev" >&2
+  echo "  6529 run build" >&2
   exit 1
 fi
 

@@ -80,16 +80,30 @@ jobs:
           mkdir -p target/_next
           cp -R .next/static target/_next/static
           if [ -d .next/node_modules ]; then
-            tmp_next_node_modules="$(mktemp -d)"
-            find .next/node_modules -type l | while read -r module_link; do
+            normalized_next_node_modules="$(mktemp -d)"
+            while IFS= read -r module_link; do
               module_rel="${module_link#.next/node_modules/}"
-              module_copy="$tmp_next_node_modules/$module_rel"
+              module_real="$(realpath "$module_link")"
+              module_parent="$(dirname "$module_real")"
+              module_copy="$normalized_next_node_modules/$module_rel"
+
               mkdir -p "$(dirname "$module_copy")"
-              cp -RL "$module_link" "$module_copy"
-              rm "$module_link"
-              mkdir -p "$(dirname "$module_link")"
-              cp -R "$module_copy" "$module_link"
-            done
+              cp -RL "$module_real" "$module_copy"
+
+              # Copy the package-local pnpm sibling dependencies Next expects
+              # to resolve from .next/node_modules at runtime.
+              while IFS= read -r sibling; do
+                sibling_name="$(basename "$sibling")"
+                sibling_dest="$normalized_next_node_modules/$sibling_name"
+                if [ ! -e "$sibling_dest" ]; then
+                  cp -RL "$sibling" "$sibling_dest"
+                fi
+              done < <(find "$module_parent" -mindepth 1 -maxdepth 1)
+            done < <(find .next/node_modules -type l)
+
+            rm -rf .next/node_modules
+            mkdir -p .next
+            cp -R "$normalized_next_node_modules" .next/node_modules
             if find .next/node_modules -type l | grep -q .; then
               echo ".next/node_modules still contains symlinks after normalization"
               find .next/node_modules -type l

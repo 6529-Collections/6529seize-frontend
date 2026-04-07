@@ -54,7 +54,7 @@ From the repo root, you should be able to run:
 ```bash
 which 6529
 which ghruns
-6529 dev --help
+6529 run dev --help
 ghruns
 ```
 
@@ -134,8 +134,8 @@ If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
 
 ```bash
 6529 install
-6529 dev
-6529 build
+6529 run dev
+6529 run build
 6529 approve-builds
 6529 staging
 ```
@@ -145,7 +145,7 @@ Otherwise, open a new shell after running `./bin/6529 bootstrap`.
 ### Build
 
 ```bash
-6529 build
+6529 run build
 ```
 
 ### Environment
@@ -166,7 +166,7 @@ gateway usage:
 
 To test end-to-end:
 
-1. Run `6529 dev`.
+1. Run `6529 run dev`.
 2. Paste any pepe.wtf link in chat, for example `https://pepe.wtf/asset/GOXPEPE`
    or `https://pepe.wtf/artists/Easy-B`, and confirm the preview renders with
    imagery and stats.
@@ -178,7 +178,7 @@ To test end-to-end:
 - Locally
 
 ```bash
-6529 dev
+6529 run dev
 ```
 
 - Staging update / rebuild
@@ -204,13 +204,13 @@ Then open a new shell, or source the rc file that matches your shell.
 - Production
 
 ```bash
-6529 start
+6529 run start
 ```
 
 ### RUN USING PM2
 
 ```bash
-pm2 start ./bin/6529 --name=6529seize -- start
+pm2 start ./bin/6529 --name=6529seize -- run start
 ```
 
 ## Directory Structure

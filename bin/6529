@@ -23,14 +23,14 @@ Common commands:
   6529 install:frozen  -> pnpm run install:secure:frozen
   6529 ci              -> pnpm run install:secure:frozen
   6529 install:prod    -> pnpm run install:secure:prod
-  6529 dev             -> node scripts/dev-with-fallback.cjs
-  6529 build           -> pnpm build
+  6529 run dev         -> pnpm run dev
+  6529 run build       -> pnpm run build
   6529 approve-builds  -> pnpm approve-builds
   6529 prune:prod      -> pnpm run prune:prod
   6529 staging         -> bash repo-rooted scripts/staging.sh
-  6529 start           -> node scripts/start-next.cjs
-  6529 test            -> pnpm test
-  6529 lint            -> pnpm lint
+  6529 run start       -> pnpm run start
+  6529 run test        -> pnpm run test
+  6529 run lint        -> pnpm run lint
 
 Anything else is forwarded to pnpm unchanged.
 EOF
@@ -43,20 +43,8 @@ case "$command_name" in
   bootstrap)
     exec bash "$REPO_ROOT/scripts/bootstrap-6529-command.sh" "$@"
     ;;
-  dev)
-    exec node "$REPO_ROOT/scripts/dev-with-fallback.cjs" "$@"
-    ;;
-  dev:webpack)
-    exec env USE_TURBO=false node "$REPO_ROOT/scripts/dev-with-fallback.cjs" "$@"
-    ;;
-  dev:open)
-    exec node "$REPO_ROOT/scripts/dev-open.cjs" "$@"
-    ;;
   staging)
     exec bash "$REPO_ROOT/scripts/staging.sh" "$@"
-    ;;
-  start)
-    exec node "$REPO_ROOT/scripts/start-next.cjs" "$@"
     ;;
 esac
 
@@ -83,6 +71,10 @@ fi
 cd "$REPO_ROOT"
 
 case "$command_name" in
+  dev|dev:webpack|dev:open|build|test|lint|start)
+    echo "Use \`6529 run $command_name\` for package.json scripts." >&2
+    exit 1
+    ;;
   i)
     exec "$REAL_PNPM" run install:secure "$@"
     ;;

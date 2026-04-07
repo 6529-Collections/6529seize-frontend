@@ -32,7 +32,7 @@ const config = defineConfig({
     // },
   ],
   webServer: {
-    command: './bin/6529 dev',
+    command: './bin/6529 run dev',
     url: 'http://localhost:3001',
     reuseExistingServer: !process.env["CI"],
     timeout: 120000,

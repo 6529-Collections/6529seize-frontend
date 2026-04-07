@@ -356,7 +356,7 @@ install_dependencies() {
 
 build_project() {
   color yellow "Building the Next.js project…"
-  ( cd "$REPO_ROOT" && ./bin/6529 build )
+  ( cd "$REPO_ROOT" && ./bin/6529 run build )
   color green "Build completed."
   return 0
 }
@@ -364,7 +364,7 @@ build_project() {
 start_pm2() {
   local pm2_name="6529seize"
   color yellow "Starting the application with PM2…"
-  ( cd "$REPO_ROOT" && pm2 start ./bin/6529 --name="$pm2_name" -- start )
+  ( cd "$REPO_ROOT" && pm2 start ./bin/6529 --name="$pm2_name" -- run start )
   pm2 save
   color green "App started under PM2 as '$pm2_name'."
   color blue  "Logs: pm2 logs $pm2_name"

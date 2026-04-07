@@ -245,6 +245,6 @@ Then install project dependencies:
   6529 install
 
 After that, these commands should resolve:
-  6529 build
-  6529 dev
+  6529 run build
+  6529 run dev
 EOF
