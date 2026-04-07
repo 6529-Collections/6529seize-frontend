@@ -92,10 +92,13 @@ function mapOverviewContributor(
   contributor: ApiRatingWithProfileInfoAndLevelWithPfp
 ): RepContributorListItem {
   const handle = contributor.handle.trim();
-  const fallbackWallet = contributor.wallets[0] ?? contributor.handle;
-  const display =
-    handle.length > 0 ? contributor.handle : formatAddress(fallbackWallet);
-  const routeValue = handle.length > 0 ? contributor.handle : fallbackWallet;
+  const firstWallet = contributor.wallets[0]?.trim();
+  const fallbackWallet =
+    firstWallet !== undefined && firstWallet.length > 0
+      ? firstWallet
+      : contributor.handle;
+  const display = handle.length > 0 ? handle : formatAddress(fallbackWallet);
+  const routeValue = handle.length > 0 ? handle : fallbackWallet;
 
   return {
     key: contributor.profile_id,
@@ -110,12 +113,13 @@ function mapCategoryContributor(
   contributor: ApiRepContributor
 ): RepContributorListItem {
   const fallbackWallet = contributor.profile.primary_address;
-  const handle = contributor.profile.handle?.trim() ?? null;
-  const display = handle ?? formatAddress(fallbackWallet);
+  const handle = contributor.profile.handle?.trim() ?? "";
+  const routeValue = handle.length > 0 ? handle : fallbackWallet;
+  const display = handle.length > 0 ? handle : formatAddress(fallbackWallet);
 
   return {
     key: contributor.profile.id,
-    href: getRouteHref(handle ?? fallbackWallet),
+    href: getRouteHref(routeValue),
     display,
     pfpUrl: contributor.profile.pfp ?? null,
     contribution: contributor.contribution,
@@ -233,7 +237,11 @@ export default function RepContributorsDialog({
   contributorCount,
   onClose,
 }: RepContributorsDialogProps) {
-  const normalizedCategory = category?.trim() ?? null;
+  const trimmedCategory = category?.trim();
+  let normalizedCategory = trimmedCategory ?? null;
+  if (normalizedCategory === "") {
+    normalizedCategory = null;
+  }
   const contributorsQuery = useInfiniteQuery({
     queryKey: [
       REP_CONTRIBUTORS_QUERY_KEY,
