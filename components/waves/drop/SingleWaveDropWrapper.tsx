@@ -1,5 +1,6 @@
 "use client";
 
+import { Transition, TransitionChild } from "@headlessui/react";
 import { CompactModeProvider } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -10,7 +11,13 @@ import {
   ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import { createPortal } from "react-dom";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 import { useWaveViewerMode } from "../public/WaveViewerModeContext";
 
@@ -121,6 +128,7 @@ function AuthenticatedSingleWaveDropChatController({
     <>
       {createPortal(
         <button
+          type="button"
           onClick={toggleChat}
           aria-label={isChatOpen ? "Hide chat" : "Show chat"}
           className={`tw-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-px-3 tw-text-sm tw-font-medium tw-backdrop-blur-md tw-transition-all sm:tw-h-auto sm:tw-w-auto sm:tw-rounded-lg sm:tw-py-2 ${
@@ -158,45 +166,59 @@ function AuthenticatedSingleWaveDropChatController({
 
           {isSmallScreen && (
             <CompactModeProvider compact={true}>
-              <div
-                aria-hidden={!isChatOpen}
-                inert={!isChatOpen}
-                className={`tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[90] tw-h-[100dvh] tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none tw-transition-opacity tw-duration-150 lg:tw-hidden ${
-                  isChatOpen
-                    ? "tw-pointer-events-auto tw-opacity-100"
-                    : "tw-pointer-events-none tw-opacity-0"
-                }`}
-              >
-                <button
-                  type="button"
-                  aria-label="Close chat overlay"
-                  onClick={toggleChat}
-                  className={`tw-absolute tw-inset-0 tw-bg-black/60 tw-transition-opacity tw-duration-150 ${
-                    isChatOpen ? "tw-opacity-100" : "tw-opacity-0"
-                  }`}
-                />
-
-                <div
-                  className={`@container tw-duration-220 tw-absolute tw-inset-0 tw-z-[100] tw-flex tw-h-full tw-min-h-0 tw-transform-gpu tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 tw-transition-transform tw-ease-out tw-will-change-transform lg:tw-hidden ${
-                    isChatOpen ? "tw-translate-x-0" : "tw-translate-x-full"
-                  }`}
-                >
-                  <div className="tw-relative tw-z-10 tw-flex tw-flex-none tw-items-center tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] lg:tw-px-8">
+              <Transition appear show={isChatOpen} as={Fragment}>
+                <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[90] tw-h-[100dvh] tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none lg:tw-hidden">
+                  <TransitionChild
+                    as={Fragment}
+                    enter="tw-duration-150 tw-ease-out"
+                    enterFrom="tw-opacity-0"
+                    enterTo="tw-opacity-100"
+                    leave="tw-duration-120 tw-ease-in"
+                    leaveFrom="tw-opacity-100"
+                    leaveTo="tw-opacity-0"
+                  >
                     <button
                       type="button"
+                      aria-label="Close chat overlay"
                       onClick={toggleChat}
-                      className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-white/70 tw-transition-colors desktop-hover:hover:tw-text-white"
-                    >
-                      <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                      <span className="tw-text-sm tw-font-semibold">Close</span>
-                    </button>
-                  </div>
+                      className="tw-absolute tw-inset-0 tw-bg-black/60"
+                    />
+                  </TransitionChild>
 
-                  <div className="@container tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden">
-                    <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
-                  </div>
+                  <TransitionChild
+                    as={Fragment}
+                    enter="tw-duration-220 tw-transform tw-transition tw-ease-out"
+                    enterFrom="tw-translate-x-full"
+                    enterTo="tw-translate-x-0"
+                    leave="tw-duration-180 tw-transform tw-transition tw-ease-in"
+                    leaveFrom="tw-translate-x-0"
+                    leaveTo="tw-translate-x-full"
+                  >
+                    <div className="@container tw-absolute tw-inset-0 tw-z-[100] tw-flex tw-h-full tw-min-h-0 tw-transform-gpu tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 tw-will-change-transform lg:tw-hidden">
+                      <div className="tw-relative tw-z-10 tw-flex tw-flex-none tw-items-center tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] lg:tw-px-8">
+                        <button
+                          type="button"
+                          onClick={toggleChat}
+                          className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-white/70 tw-transition-colors desktop-hover:hover:tw-text-white"
+                        >
+                          <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+                          <span className="tw-text-sm tw-font-semibold">
+                            Close
+                          </span>
+                        </button>
+                      </div>
+
+                      <div className="@container tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden">
+                        <SingleWaveDropChat
+                          key={drop.id}
+                          wave={wave}
+                          drop={drop}
+                        />
+                      </div>
+                    </div>
+                  </TransitionChild>
                 </div>
-              </div>
+              </Transition>
             </CompactModeProvider>
           )}
         </>,

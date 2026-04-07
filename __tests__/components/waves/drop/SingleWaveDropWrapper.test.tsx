@@ -56,7 +56,7 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.getByRole("button", { name: "Show chat" })
       ).toBeInTheDocument();
-      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+      expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Show chat" }));
@@ -88,7 +88,7 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.queryByRole("button", { name: "Hide chat" })
       ).not.toBeInTheDocument();
-      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+      expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
     });
   });
 
@@ -99,7 +99,7 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.getByRole("button", { name: "Show chat" })
       ).toBeInTheDocument();
-      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+      expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Show chat" }));
@@ -119,19 +119,19 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.getByRole("button", { name: "Show chat" })
       ).toBeInTheDocument();
-      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+      expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
     });
     expect(document.body.style.overflow).toBe("");
   });
 
-  it("keeps exactly one mobile chat tree mounted while closed and open", async () => {
+  it("mounts the mobile chat tree only while open", async () => {
     render(renderWrapper(false));
 
     await waitFor(() => {
       expect(
         screen.getByRole("button", { name: "Show chat" })
       ).toBeInTheDocument();
-      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+      expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Show chat" }));
@@ -149,7 +149,7 @@ describe("SingleWaveDropWrapper", () => {
       expect(
         screen.getByRole("button", { name: "Show chat" })
       ).toBeInTheDocument();
-      expect(screen.getAllByTestId("single-drop-chat")).toHaveLength(1);
+      expect(screen.queryByTestId("single-drop-chat")).not.toBeInTheDocument();
     });
     expect(document.body.style.overflow).toBe("");
   });
