@@ -196,6 +196,10 @@ test("preserves pin state for a legacy pinned announcement wave", () => {
 });
 
 test("reuses an overview announcement wave without enabling the fallback fetch", () => {
+  const staleAnnouncementQueryError = new Error(
+    "Stale cached announcement query error"
+  );
+
   useWavesOverviewMock.mockReturnValue({
     waves: [announcementWave, mainWave],
     isFetching: false,
@@ -210,6 +214,14 @@ test("reuses an overview announcement wave without enabling the fallback fetch",
       announcements_wave_id: " 4 ",
     },
     isAnnouncementsWave: (waveId: string | null | undefined) => waveId === "4",
+  });
+  useWaveByIdMock.mockReturnValue({
+    wave: null,
+    isLoading: true,
+    isError: true,
+    error: staleAnnouncementQueryError,
+    refetch: announcementRefetchMock,
+    isFetching: false,
   });
 
   const { result } = renderHook(() => useWavesList(), { wrapper });

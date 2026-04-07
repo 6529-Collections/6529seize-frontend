@@ -85,12 +85,17 @@ const useWavesList = () => {
   );
   const {
     wave: fetchedAnnouncementWave,
-    isLoading: announcementQueryLoading,
-    error: announcementQueryError,
+    isLoading: rawAnnouncementQueryLoading,
+    error: rawAnnouncementQueryError,
     refetch: announcementRefetch,
   } = useWaveById(announcementsWaveId, {
     enabled: shouldFetchAnnouncementWave,
   });
+  const announcementQueryLoading =
+    shouldFetchAnnouncementWave && rawAnnouncementQueryLoading;
+  const announcementQueryError = shouldFetchAnnouncementWave
+    ? rawAnnouncementQueryError
+    : null;
   const announcementWave = useMemo(() => {
     const resolvedWave = trackedAnnouncementWave ?? fetchedAnnouncementWave;
     if (!resolvedWave || waveIsDm(resolvedWave)) {
