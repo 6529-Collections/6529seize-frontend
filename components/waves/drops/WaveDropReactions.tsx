@@ -44,15 +44,9 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const isTouchDevice = useIsTouchDevice();
   const { isConnected } = useSeizeConnectContext();
 
-  const handleOpenDialog = useCallback(
-    (reactionKey: string) => {
-      if (!isConnected) {
-        return;
-      }
-      setDialogReaction(reactionKey);
-    },
-    [isConnected]
-  );
+  const handleOpenDialog = useCallback((reactionKey: string) => {
+    setDialogReaction(reactionKey);
+  }, []);
 
   const handleCloseDialog = useCallback(() => {
     setDialogReaction(null);
@@ -97,13 +91,11 @@ function WaveDropReaction({
   const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
   const rollbackRef = useRef<(() => void) | null>(null);
+  const canReact = isConnected;
 
   const handleLongPressStart = useCallback(() => {
-    if (!isConnected) {
-      return;
-    }
     onOpenDetailDialog(reaction.reaction);
-  }, [isConnected, onOpenDetailDialog, reaction.reaction]);
+  }, [onOpenDetailDialog, reaction.reaction]);
 
   const { longPressTriggered, touchHandlers } = useLongPressInteraction({
     hasTouchScreen: isTouchDevice,
@@ -335,7 +327,7 @@ function WaveDropReaction({
   );
 
   const handleClick = useCallback(async () => {
-    if (!isConnected || longPressTriggered) {
+    if (!canReact || longPressTriggered) {
       return;
     }
 
@@ -374,8 +366,8 @@ function WaveDropReaction({
     rollbackRef.current = null;
   }, [
     applyOptimisticReactionChange,
+    canReact,
     drop.id,
-    isConnected,
     longPressTriggered,
     reaction.reaction,
     selected,
@@ -390,20 +382,17 @@ function WaveDropReaction({
 
   const handleMoreClick = useCallback(
     (e: React.MouseEvent) => {
-      if (!isConnected) {
-        return;
-      }
       e.stopPropagation();
       onOpenDetailDialog(reaction.reaction);
     },
-    [isConnected, onOpenDetailDialog, reaction.reaction]
+    [onOpenDetailDialog, reaction.reaction]
   );
 
   // styles
   const borderStyle = selected ? "tw-border-primary-500" : "tw-border-iron-700";
   const bgStyle = selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40";
   let hoverStyle = "";
-  if (isConnected) {
+  if (canReact) {
     hoverStyle = selected
       ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
       : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
@@ -421,18 +410,19 @@ function WaveDropReaction({
   return (
     <>
       <button
+        type="button"
         onClick={handleClick}
-        disabled={!isConnected}
-        {...(!isTouchDevice && isConnected && { "data-tooltip-id": tooltipId })}
+        aria-disabled={!canReact}
+        {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
           "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm",
-          isConnected ? "hover:tw-text-iron-100" : "tw-cursor-default",
+          canReact ? "hover:tw-text-iron-100" : "tw-cursor-default",
           borderStyle,
           bgStyle,
           hoverStyle
         )}
-        {...(isConnected ? wrappedTouchHandlers : {})}
+        {...wrappedTouchHandlers}
       >
         <div className="tw-flex tw-h-full tw-items-center tw-gap-x-1">
           <div className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
@@ -448,7 +438,7 @@ function WaveDropReaction({
           </span>
         </div>
       </button>
-      {!isTouchDevice && isConnected && (
+      {!isTouchDevice && (
         <Tooltip
           id={tooltipId}
           delayShow={250}
