@@ -8,28 +8,54 @@ import {
 } from "@/contexts/wave/MyStreamContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+let mockActiveWaveId: string | null = null;
+const mockSetActiveWave = jest.fn();
+
 jest.mock("@/contexts/wave/hooks/useActiveWaveManager", () => ({
   useActiveWaveManager: () => ({
-    activeWaveId: null,
-    setActiveWave: jest.fn(),
+    activeWaveId: mockActiveWaveId,
+    setActiveWave: mockSetActiveWave,
   }),
 }));
 
 const addPinnedWave = jest.fn();
 const removePinnedWave = jest.fn();
+const refetchAllWaves = jest.fn();
+const resetAllWavesNewDropsCount = jest.fn();
+const fetchNextSidebarPage = jest.fn();
+const restoreWaveUnreadCount = jest.fn();
 
-jest.mock("@/contexts/wave/hooks/useEnhancedWavesList", () => ({
+jest.mock("@/hooks/useWavesList", () => ({
   __esModule: true,
   default: () => ({
+    waves: [],
+  }),
+}));
+
+jest.mock("@/hooks/useDmWavesList", () => ({
+  __esModule: true,
+  default: () => ({
+    waves: [],
+  }),
+}));
+
+jest.mock("@/contexts/wave/hooks/useEnhancedWavesListCore", () => ({
+  __esModule: true,
+  default: (
+    _activeWaveId: string | null,
+    _wavesData: unknown,
+    options: { readonly supportsPinning: boolean }
+  ) => ({
     waves: [],
     isFetching: false,
     isFetchingNextPage: false,
     hasNextPage: true,
-    fetchNextPage: jest.fn(),
-    addPinnedWave,
-    removePinnedWave,
-    refetchAllWaves: jest.fn(),
-    resetAllWavesNewDropsCount: jest.fn(),
+    fetchNextPage: fetchNextSidebarPage,
+    addPinnedWave: options.supportsPinning ? addPinnedWave : jest.fn(),
+    removePinnedWave: options.supportsPinning ? removePinnedWave : jest.fn(),
+    refetchAllWaves,
+    resetAllWavesNewDropsCount,
+    restoreWaveUnreadCount,
   }),
 }));
 
@@ -69,11 +95,14 @@ jest.mock("@/contexts/wave/hooks/useWaveRealtimeUpdater", () => ({
 }));
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
-  useWebsocketStatus: () => "connected",
+  useWebsocketStatus: () => mockWebsocketStatus,
   useWebSocketMessage: jest.fn(),
 }));
 
-jest.mock("@/hooks/useCapacitor", () => () => ({ isCapacitor: false }));
+let mockWebsocketStatus = "disconnected";
+let mockCapacitorState = { isCapacitor: false, isActive: true };
+
+jest.mock("@/hooks/useCapacitor", () => () => mockCapacitorState);
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: () => ({
@@ -83,6 +112,21 @@ jest.mock("@/components/notifications/NotificationsContext", () => ({
 }));
 
 describe("MyStreamProvider integration", () => {
+  const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: state,
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockActiveWaveId = null;
+    mockWebsocketStatus = "disconnected";
+    mockCapacitorState = { isCapacitor: false, isActive: true };
+    setDocumentVisibilityState("visible");
+  });
+
   it("delegates wave actions to underlying hooks", () => {
     function TestComponent() {
       const { registerWave: reg, fetchNextPageForWave, waves } = useMyStream();
@@ -149,5 +193,38 @@ describe("MyStreamProvider integration", () => {
     );
 
     expect(unsubscribe).toHaveBeenCalled();
+  });
+
+  it("resyncs browser waves once when the tab becomes visible again", () => {
+    jest.useFakeTimers();
+    mockActiveWaveId = "wave-1";
+
+    const queryClient = new QueryClient();
+    setDocumentVisibilityState("hidden");
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MyStreamProvider>
+          <div>resume-test</div>
+        </MyStreamProvider>
+      </QueryClientProvider>
+    );
+
+    registerWave.mockClear();
+    refetchAllWaves.mockClear();
+    resetAllWavesNewDropsCount.mockClear();
+
+    act(() => {
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+      window.dispatchEvent(new Event("focus"));
+    });
+
+    expect(registerWave).toHaveBeenCalledTimes(1);
+    expect(registerWave).toHaveBeenCalledWith("wave-1", true);
+    expect(refetchAllWaves).toHaveBeenCalledTimes(1);
+    expect(resetAllWavesNewDropsCount).not.toHaveBeenCalled();
+
+    jest.useRealTimers();
   });
 });

@@ -7,6 +7,9 @@ import { WebSocketStatus } from "./WebSocketTypes";
 
 const AUTH_BROADCAST_CHANNEL = "auth-token-updates";
 const AUTH_BROADCAST_MESSAGE = "auth-token-changed";
+const HEALTH_CHECK_INTERVAL_MS = 10000;
+const RESUME_RECONNECT_HIDDEN_DURATION_MS = 60000;
+const RESUME_EVENT_DEDUPE_WINDOW_MS = 1000;
 
 type CookieChangeInfo = {
   readonly name?: string | null | undefined;
@@ -53,6 +56,8 @@ export function useWebSocketHealth() {
   const lastTokenRef = useRef<string | null>(null);
   const webSocketStateRef = useRef(webSocketState);
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
+  const hiddenAtRef = useRef<number | null>(null);
+  const lastResumeCheckAtRef = useRef(0);
 
   // Keep ref updated with current WebSocket state
   webSocketStateRef.current = webSocketState;
@@ -87,9 +92,71 @@ export function useWebSocketHealth() {
     }
   }, []);
 
+  const performResumeHealthCheck = useCallback(() => {
+    if (
+      typeof document === "undefined" ||
+      document.visibilityState !== "visible"
+    ) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastResumeCheckAtRef.current < RESUME_EVENT_DEDUPE_WINDOW_MS) {
+      return;
+    }
+    lastResumeCheckAtRef.current = now;
+
+    performHealthCheck();
+
+    const currentToken = getAuthJwt();
+    const hiddenAt = hiddenAtRef.current;
+    hiddenAtRef.current = null;
+
+    if (!currentToken || hiddenAt === null) {
+      return;
+    }
+
+    if (now - hiddenAt < RESUME_RECONNECT_HIDDEN_DURATION_MS) {
+      return;
+    }
+
+    const { status: currentStatus, connect: currentConnect } =
+      webSocketStateRef.current;
+    if (currentStatus === WebSocketStatus.CONNECTED) {
+      currentConnect(currentToken);
+    }
+  }, [performHealthCheck]);
+
   useEffect(() => {
     performHealthCheck();
   }, [performHealthCheck, webSocketState.status]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAtRef.current = Date.now();
+        return;
+      }
+
+      performResumeHealthCheck();
+    };
+
+    const handleFocus = () => {
+      performResumeHealthCheck();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [performResumeHealthCheck]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -104,8 +171,8 @@ export function useWebSocketHealth() {
 
     const hasCookieStoreListener = Boolean(
       cookieStore &&
-        (typeof cookieStore.addEventListener === "function" ||
-          "onchange" in cookieStore)
+      (typeof cookieStore.addEventListener === "function" ||
+        "onchange" in cookieStore)
     );
 
     const handleCookieChange = (event: CookieChangeEventLike) => {
@@ -182,7 +249,10 @@ export function useWebSocketHealth() {
   }, [performHealthCheck]);
 
   useEffect(() => {
-    const healthCheck = window.setInterval(performHealthCheck, 10000);
+    const healthCheck = window.setInterval(
+      performHealthCheck,
+      HEALTH_CHECK_INTERVAL_MS
+    );
     return () => window.clearInterval(healthCheck);
   }, [performHealthCheck]);
 }

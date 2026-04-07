@@ -1,13 +1,13 @@
-import { act, renderHook } from '@testing-library/react';
-import { useWebSocketHealth } from '@/services/websocket/useWebSocketHealth';
-import { WebSocketStatus } from '@/services/websocket/WebSocketTypes';
-import { useWebSocket } from '@/services/websocket/useWebSocket';
-import { getAuthJwt, WALLET_AUTH_COOKIE } from '@/services/auth/auth.utils';
+import { act, renderHook } from "@testing-library/react";
+import { useWebSocketHealth } from "@/services/websocket/useWebSocketHealth";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { useWebSocket } from "@/services/websocket/useWebSocket";
+import { getAuthJwt, WALLET_AUTH_COOKIE } from "@/services/auth/auth.utils";
 
-jest.mock('@/services/websocket/useWebSocket');
-jest.mock('@/services/auth/auth.utils', () => ({
+jest.mock("@/services/websocket/useWebSocket");
+jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
-  WALLET_AUTH_COOKIE: 'wallet-auth',
+  WALLET_AUTH_COOKIE: "wallet-auth",
 }));
 
 type CookieChangeEvent = {
@@ -21,14 +21,14 @@ class MockBroadcastChannel {
   public readonly name: string;
   public readonly addEventListener = jest.fn(
     (type: string, listener: EventListener) => {
-      if (type === 'message') {
+      if (type === "message") {
         this.messageListeners.add(listener);
       }
     }
   );
   public readonly removeEventListener = jest.fn(
     (type: string, listener: EventListener) => {
-      if (type === 'message') {
+      if (type === "message") {
         this.messageListeners.delete(listener);
       }
     }
@@ -44,11 +44,13 @@ class MockBroadcastChannel {
 
   dispatch(data: unknown) {
     this.messageListeners.forEach((listener) => {
-      if (typeof listener === 'function') {
+      if (typeof listener === "function") {
         (listener as (event: MessageEvent) => void)({
           data,
         } as MessageEvent);
-      } else if (typeof (listener as EventListenerObject).handleEvent === 'function') {
+      } else if (
+        typeof (listener as EventListenerObject).handleEvent === "function"
+      ) {
         (listener as EventListenerObject).handleEvent({
           data,
         } as MessageEvent);
@@ -57,26 +59,36 @@ class MockBroadcastChannel {
   }
 }
 
-const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;
+const mockUseWebSocket = useWebSocket as jest.MockedFunction<
+  typeof useWebSocket
+>;
 const mockGetAuthJwt = getAuthJwt as jest.Mock;
 const mockConnect = jest.fn();
 const mockDisconnect = jest.fn();
 
 let setIntervalSpy: jest.SpyInstance;
 let clearIntervalSpy: jest.SpyInstance;
+
+const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    value: state,
+  });
+};
+
 const setupCookieStoreWithAddEventListener = () => {
   const listeners = new Set<(event: CookieChangeEvent) => void>();
   const cookieStoreMock = {
     addEventListener: jest.fn(
       (type: string, listener: (event: CookieChangeEvent) => void) => {
-        if (type === 'change') {
+        if (type === "change") {
           listeners.add(listener);
         }
       }
     ),
     removeEventListener: jest.fn(
       (type: string, listener: (event: CookieChangeEvent) => void) => {
-        if (type === 'change') {
+        if (type === "change") {
           listeners.delete(listener);
         }
       }
@@ -96,7 +108,9 @@ const setupCookieStoreWithAddEventListener = () => {
 const setupCookieStoreWithOnChange = (
   initialHandler: ((event: CookieChangeEvent) => void) | null = jest.fn()
 ) => {
-  const cookieStoreMock: { onchange: ((event: CookieChangeEvent) => void) | null } = {
+  const cookieStoreMock: {
+    onchange: ((event: CookieChangeEvent) => void) | null;
+  } = {
     onchange: initialHandler,
   };
 
@@ -112,8 +126,8 @@ const setupCookieStoreWithOnChange = (
 
 beforeAll(() => {
   jest.useFakeTimers();
-  setIntervalSpy = jest.spyOn(window, 'setInterval');
-  clearIntervalSpy = jest.spyOn(window, 'clearInterval');
+  setIntervalSpy = jest.spyOn(window, "setInterval");
+  clearIntervalSpy = jest.spyOn(window, "clearInterval");
 });
 
 afterAll(() => {
@@ -121,7 +135,7 @@ afterAll(() => {
   clearIntervalSpy.mockRestore();
   jest.useRealTimers();
 });
-describe('useWebSocketHealth', () => {
+describe("useWebSocketHealth", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.clearAllTimers();
@@ -134,6 +148,7 @@ describe('useWebSocketHealth', () => {
     delete (window as any).cookieStore;
     delete (window as any).BroadcastChannel;
     MockBroadcastChannel.instances = [];
+    setDocumentVisibilityState("visible");
   });
 
   afterEach(() => {
@@ -142,16 +157,16 @@ describe('useWebSocketHealth', () => {
     delete (window as any).BroadcastChannel;
   });
 
-  it('connects immediately when a token is available', () => {
-    mockGetAuthJwt.mockReturnValue('initial-token');
+  it("connects immediately when a token is available", () => {
+    mockGetAuthJwt.mockReturnValue("initial-token");
 
     renderHook(() => useWebSocketHealth());
 
-    expect(mockConnect).toHaveBeenCalledWith('initial-token');
+    expect(mockConnect).toHaveBeenCalledWith("initial-token");
     expect(mockDisconnect).not.toHaveBeenCalled();
   });
 
-  it('disconnects when no token is present but the socket is connected', () => {
+  it("disconnects when no token is present but the socket is connected", () => {
     mockGetAuthJwt.mockReturnValue(null);
     mockUseWebSocket.mockReturnValue({
       connect: mockConnect,
@@ -165,24 +180,24 @@ describe('useWebSocketHealth', () => {
     expect(mockConnect).not.toHaveBeenCalled();
   });
 
-  it('sets a 10 second health-check interval and reacts on timer', () => {
+  it("sets a 10 second health-check interval and reacts on timer", () => {
     mockGetAuthJwt.mockReturnValue(null);
     renderHook(() => useWebSocketHealth());
 
     expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 10000);
 
-    mockGetAuthJwt.mockReturnValue('timed-token');
+    mockGetAuthJwt.mockReturnValue("timed-token");
 
     act(() => {
       jest.advanceTimersByTime(10000);
     });
 
-    expect(mockConnect).toHaveBeenCalledWith('timed-token');
+    expect(mockConnect).toHaveBeenCalledWith("timed-token");
   });
-  it('responds to cookieStore change events when available', () => {
+  it("responds to cookieStore change events when available", () => {
     const { cookieStoreMock, trigger } = setupCookieStoreWithAddEventListener();
 
-    mockGetAuthJwt.mockReturnValue('token-a');
+    mockGetAuthJwt.mockReturnValue("token-a");
     mockUseWebSocket.mockReturnValue({
       connect: mockConnect,
       disconnect: mockDisconnect,
@@ -192,12 +207,12 @@ describe('useWebSocketHealth', () => {
     renderHook(() => useWebSocketHealth());
 
     expect(cookieStoreMock.addEventListener).toHaveBeenCalledWith(
-      'change',
+      "change",
       expect.any(Function)
     );
 
     mockConnect.mockClear();
-    mockGetAuthJwt.mockReturnValue('token-b');
+    mockGetAuthJwt.mockReturnValue("token-b");
 
     act(() => {
       trigger({
@@ -205,7 +220,7 @@ describe('useWebSocketHealth', () => {
       });
     });
 
-    expect(mockConnect).toHaveBeenCalledWith('token-b');
+    expect(mockConnect).toHaveBeenCalledWith("token-b");
 
     mockDisconnect.mockClear();
     mockGetAuthJwt.mockReturnValue(null);
@@ -219,7 +234,7 @@ describe('useWebSocketHealth', () => {
     expect(mockDisconnect).toHaveBeenCalledTimes(1);
   });
 
-  it('cleans up cookieStore event listeners on unmount', () => {
+  it("cleans up cookieStore event listeners on unmount", () => {
     const { cookieStoreMock } = setupCookieStoreWithAddEventListener();
 
     const { unmount } = renderHook(() => useWebSocketHealth());
@@ -234,24 +249,25 @@ describe('useWebSocketHealth', () => {
     );
   });
 
-  it('supports cookieStore onchange handler fallback', () => {
+  it("supports cookieStore onchange handler fallback", () => {
     const existingHandler = jest.fn();
-    const { cookieStoreMock, trigger } = setupCookieStoreWithOnChange(existingHandler);
+    const { cookieStoreMock, trigger } =
+      setupCookieStoreWithOnChange(existingHandler);
 
-    mockGetAuthJwt.mockReturnValue('primary-token');
+    mockGetAuthJwt.mockReturnValue("primary-token");
 
     const { unmount } = renderHook(() => useWebSocketHealth());
 
     expect(cookieStoreMock.onchange).not.toBe(existingHandler);
 
     mockConnect.mockClear();
-    mockGetAuthJwt.mockReturnValue('updated-token');
+    mockGetAuthJwt.mockReturnValue("updated-token");
 
     act(() => {
       trigger({ changed: [{ name: WALLET_AUTH_COOKIE }] });
     });
 
-    expect(mockConnect).toHaveBeenCalledWith('updated-token');
+    expect(mockConnect).toHaveBeenCalledWith("updated-token");
     expect(existingHandler).toHaveBeenCalledTimes(1);
 
     unmount();
@@ -259,10 +275,11 @@ describe('useWebSocketHealth', () => {
     expect(cookieStoreMock.onchange).toBe(existingHandler);
   });
 
-  it('uses BroadcastChannel messages when cookieStore is unavailable', () => {
-    (window as any).BroadcastChannel = MockBroadcastChannel as unknown as typeof BroadcastChannel;
+  it("uses BroadcastChannel messages when cookieStore is unavailable", () => {
+    (window as any).BroadcastChannel =
+      MockBroadcastChannel as unknown as typeof BroadcastChannel;
 
-    mockGetAuthJwt.mockReturnValue('token-1');
+    mockGetAuthJwt.mockReturnValue("token-1");
     mockUseWebSocket.mockReturnValue({
       connect: mockConnect,
       disconnect: mockDisconnect,
@@ -273,44 +290,121 @@ describe('useWebSocketHealth', () => {
 
     const channel = MockBroadcastChannel.instances[0];
     expect(channel).toBeDefined();
-    expect(channel.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+    expect(channel.addEventListener).toHaveBeenCalledWith(
+      "message",
+      expect.any(Function)
+    );
 
-    const messageHandler = channel.addEventListener.mock.calls[0][1] as EventListener;
+    const messageHandler = channel.addEventListener.mock
+      .calls[0][1] as EventListener;
 
     mockConnect.mockClear();
-    mockGetAuthJwt.mockReturnValue('token-2');
+    mockGetAuthJwt.mockReturnValue("token-2");
 
     act(() => {
       (messageHandler as (event: MessageEvent) => void)({
-        data: { type: 'auth-token-changed' },
+        data: { type: "auth-token-changed" },
       } as MessageEvent);
     });
 
-    expect(mockConnect).toHaveBeenCalledWith('token-2');
+    expect(mockConnect).toHaveBeenCalledWith("token-2");
 
     unmount();
 
-    expect(channel.removeEventListener).toHaveBeenCalledWith('message', messageHandler);
+    expect(channel.removeEventListener).toHaveBeenCalledWith(
+      "message",
+      messageHandler
+    );
     expect(channel.close).toHaveBeenCalledTimes(1);
   });
-  it('broadcasts token changes to other listeners when detected', () => {
-    (window as any).BroadcastChannel = MockBroadcastChannel as unknown as typeof BroadcastChannel;
+  it("broadcasts token changes to other listeners when detected", () => {
+    (window as any).BroadcastChannel =
+      MockBroadcastChannel as unknown as typeof BroadcastChannel;
     const { trigger } = setupCookieStoreWithAddEventListener();
 
-    mockGetAuthJwt.mockReturnValue('initial');
+    mockGetAuthJwt.mockReturnValue("initial");
 
     renderHook(() => useWebSocketHealth());
 
     const channel = MockBroadcastChannel.instances[0];
     channel.postMessage.mockClear();
-    mockGetAuthJwt.mockReturnValue('next');
+    mockGetAuthJwt.mockReturnValue("next");
 
     act(() => {
       trigger({ changed: [{ name: WALLET_AUTH_COOKIE }] });
     });
 
-    expect(channel.postMessage).toHaveBeenCalledWith({ type: 'auth-token-changed' });
+    expect(channel.postMessage).toHaveBeenCalledWith({
+      type: "auth-token-changed",
+    });
   });
 
-});
+  it("reconnects a connected socket when the tab becomes visible after a long hidden period", () => {
+    mockGetAuthJwt.mockReturnValue("resume-token");
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
 
+    renderHook(() => useWebSocketHealth());
+    mockConnect.mockClear();
+
+    act(() => {
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+      jest.advanceTimersByTime(60000);
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(mockConnect).toHaveBeenCalledTimes(1);
+    expect(mockConnect).toHaveBeenCalledWith("resume-token");
+  });
+
+  it("does not reconnect a connected socket when the tab resumes quickly", () => {
+    mockGetAuthJwt.mockReturnValue("resume-token");
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
+
+    renderHook(() => useWebSocketHealth());
+    mockConnect.mockClear();
+
+    act(() => {
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+      jest.advanceTimersByTime(59000);
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(mockConnect).not.toHaveBeenCalled();
+  });
+
+  it("does not double reconnect when focus follows a visibility resume", () => {
+    mockGetAuthJwt.mockReturnValue("resume-token");
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
+
+    renderHook(() => useWebSocketHealth());
+    mockConnect.mockClear();
+
+    act(() => {
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+      jest.advanceTimersByTime(60000);
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+      window.dispatchEvent(new Event("focus"));
+    });
+
+    expect(mockConnect).toHaveBeenCalledTimes(1);
+    expect(mockConnect).toHaveBeenCalledWith("resume-token");
+  });
+});
