@@ -98,7 +98,7 @@ jobs:
 
           (
             cd .deploy-bundle
-            zip -r ../target/package.zip .
+            zip -yr ../target/package.zip .
           )
 
       - name: Verify package bundle size
