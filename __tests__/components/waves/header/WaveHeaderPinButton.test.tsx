@@ -22,6 +22,7 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 // Create mocks that we can modify during tests
 const mockUsePinnedWavesServer = jest.fn();
 const mockIsOperationInProgress = jest.fn(() => false);
+const mockCanPinWave = jest.fn(() => true);
 
 jest.mock("@/hooks/usePinnedWavesServer", () => ({
   usePinnedWavesServer: () => mockUsePinnedWavesServer(),
@@ -70,8 +71,10 @@ describe("WaveHeaderPinButton", () => {
     mockUsePinnedWavesServer.mockReturnValue({
       pinnedIds: [],
       isOperationInProgress: mockIsOperationInProgress,
+      canPinWave: mockCanPinWave,
     });
     mockIsOperationInProgress.mockReturnValue(false);
+    mockCanPinWave.mockReturnValue(true);
   });
 
   const renderComponent = (authContext = mockAuth, waveId = "wave-123") => {
@@ -102,13 +105,16 @@ describe("WaveHeaderPinButton", () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it("does not render while settings are still loading for an unpinned wave", () => {
+    it("renders ordinary waves while settings are still loading", () => {
       mockUseSeizeSettings.mockReturnValue({
         isAnnouncementsWave: () => false,
         isLoaded: false,
       });
-      const { container } = renderComponent();
-      expect(container.firstChild).toBeNull();
+      renderComponent();
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "aria-label",
+        "Pin wave"
+      );
     });
 
     it("renders unpin control for a pinned announcement wave", () => {
@@ -119,6 +125,7 @@ describe("WaveHeaderPinButton", () => {
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
       });
       renderComponent();
       expect(screen.getByRole("button")).toHaveAttribute(
@@ -191,6 +198,7 @@ describe("WaveHeaderPinButton", () => {
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
       });
     });
 
@@ -229,7 +237,9 @@ describe("WaveHeaderPinButton", () => {
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-1", "wave-2", "wave-3"],
         isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
       });
+      mockCanPinWave.mockReturnValue(false);
     });
 
     it("shows error toast when trying to pin beyond limit", async () => {
@@ -254,6 +264,7 @@ describe("WaveHeaderPinButton", () => {
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: [],
         isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
       });
     });
 
@@ -307,6 +318,7 @@ describe("WaveHeaderPinButton", () => {
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
       });
 
       renderComponent();
@@ -350,6 +362,7 @@ describe("WaveHeaderPinButton", () => {
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
       });
 
       renderComponent();
@@ -362,7 +375,9 @@ describe("WaveHeaderPinButton", () => {
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-1", "wave-2", "wave-3"],
         isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
       });
+      mockCanPinWave.mockReturnValue(false);
 
       renderComponent();
       const tooltip = screen.getByTestId("tooltip-wave-header-pin-wave-123");
@@ -387,6 +402,7 @@ describe("WaveHeaderPinButton", () => {
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
       });
 
       renderComponent();

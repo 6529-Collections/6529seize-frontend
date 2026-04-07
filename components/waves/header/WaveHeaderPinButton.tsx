@@ -26,14 +26,18 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   waveId,
 }) => {
   const { waves } = useMyStream();
-  const { isAnnouncementsWave, isLoaded: isSettingsLoaded } =
-    useSeizeSettings();
-  const { pinnedIds, isOperationInProgress } = usePinnedWavesServer();
+  const { isAnnouncementsWave } = useSeizeSettings();
+  const { pinnedIds, isOperationInProgress, canPinWave } =
+    usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
 
   const isCurrentlyProcessing = isOperationInProgress(waveId);
   const isPinned = pinnedIds.includes(waveId);
+  const canPinCurrentWave = useMemo(
+    () => canPinWave(waveId),
+    [canPinWave, waveId]
+  );
 
   // Helper function to hide tooltip
   const hideTooltip = useCallback(() => setShowMaxLimitTooltip(false), []);
@@ -46,21 +50,12 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     [setToast]
   );
 
-  // Check if we can pin this wave using server data
-  const canPinWave = useCallback(() => {
-    // If this wave is already pinned, we can always unpin it
-    if (isPinned) return true;
-
-    // Check if we have room for another pinned wave using the hook's data
-    return pinnedIds.length < MAX_PINNED_WAVES;
-  }, [isPinned, pinnedIds.length]);
-
   // Memoize tooltip content to prevent unnecessary re-calculations
   const tooltipContent = useMemo(() => {
     if (isPinned) return PIN_ACTIONS.UNPIN;
-    if (canPinWave()) return PIN_ACTIONS.PIN;
+    if (canPinCurrentWave) return PIN_ACTIONS.PIN;
     return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
-  }, [isPinned, canPinWave]);
+  }, [isPinned, canPinCurrentWave]);
 
   const buttonStyles = useMemo(() => {
     if (isPinned) {
@@ -80,10 +75,10 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   // Also reset tooltip state when pinnedIds array changes
   useEffect(() => {
-    if (canPinWave()) {
+    if (canPinCurrentWave) {
       hideTooltip();
     }
-  }, [pinnedIds, canPinWave, hideTooltip]);
+  }, [pinnedIds, canPinCurrentWave, hideTooltip]);
 
   // Auto-hide tooltip after 3 seconds with proper cleanup
   useEffect(() => {
@@ -94,10 +89,6 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   // Don't render if user is not authenticated or using proxy
   if (!connectedProfile?.handle || activeProfileProxy) {
-    return null;
-  }
-
-  if (!isPinned && !isSettingsLoaded) {
     return null;
   }
 
@@ -120,7 +111,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
         return;
       }
 
-      if (!canPinWave()) {
+      if (!canPinWave(waveId)) {
         setShowMaxLimitTooltip(true);
         showErrorToast(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
         return;
