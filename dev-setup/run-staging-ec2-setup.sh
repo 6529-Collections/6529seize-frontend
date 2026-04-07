@@ -364,7 +364,7 @@ build_project() {
 start_pm2() {
   local pm2_name="6529seize"
   color yellow "Starting the application with PM2…"
-  ( cd "$REPO_ROOT" && pm2 start ./bin/6529 --name="$pm2_name" -- run start:standalone )
+  ( cd "$REPO_ROOT" && pm2 start ./bin/6529 --interpreter bash --name="$pm2_name" -- run start:standalone )
   pm2 save
   color green "App started under PM2 as '$pm2_name'."
   color blue  "Logs: pm2 logs $pm2_name"

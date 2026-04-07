@@ -222,7 +222,7 @@ Then open a new shell, or source the rc file that matches your shell.
 ### RUN USING PM2
 
 ```bash
-pm2 start ./bin/6529 --name=6529seize -- run start:standalone
+pm2 start ./bin/6529 --interpreter bash --name=6529seize -- run start:standalone
 ```
 
 ## Directory Structure
