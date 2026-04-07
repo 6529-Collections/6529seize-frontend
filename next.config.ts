@@ -36,6 +36,8 @@ function getAssetPrefix(assetsFromS3: boolean, version: string): string {
   return `https://dnclu2fna0b2b.cloudfront.net/web_build/${version}`;
 }
 
+const standaloneOutput = { output: "standalone" as const };
+
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
   logOnceConfig("NODE_ENV", mode);
@@ -69,7 +71,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
     return {
       ...sharedConfig(publicEnv, assetPrefix),
-      ...(phase === PHASE_PRODUCTION_BUILD ? { output: "standalone" as const } : {}),
+      ...standaloneOutput,
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
