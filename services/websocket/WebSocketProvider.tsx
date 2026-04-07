@@ -213,15 +213,29 @@ export function WebSocketProvider({
 
         // Set up event handlers
         ws.onopen = () => {
+          if (wsRef.current !== ws) {
+            return;
+          }
+
           setStatus(WebSocketStatus.CONNECTED);
 
           // Reset reconnect attempts on successful connection
           reconnectAttemptsRef.current = 0;
         };
 
-        ws.onmessage = handleMessage;
+        ws.onmessage = (event) => {
+          if (wsRef.current !== ws) {
+            return;
+          }
+
+          handleMessage(event);
+        };
 
         ws.onclose = (event) => {
+          if (wsRef.current !== ws) {
+            return;
+          }
+
           // Clean up WebSocket
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
@@ -242,6 +256,10 @@ export function WebSocketProvider({
         };
 
         ws.onerror = (error) => {
+          if (wsRef.current !== ws) {
+            return;
+          }
+
           console.error("WebSocket error:", error);
           // State will be updated by onclose handler
         };

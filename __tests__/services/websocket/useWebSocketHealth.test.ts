@@ -339,7 +339,8 @@ describe("useWebSocketHealth", () => {
     });
   });
 
-  it("reconnects a connected socket when the tab becomes visible after a long hidden period", () => {
+  it("does not reconnect an already connected socket when the tab resumes", () => {
+    jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("resume-token");
     mockUseWebSocket.mockReturnValue({
       connect: mockConnect,
@@ -353,30 +354,6 @@ describe("useWebSocketHealth", () => {
     act(() => {
       setDocumentVisibilityState("hidden");
       document.dispatchEvent(new Event("visibilitychange"));
-      jest.advanceTimersByTime(60000);
-      setDocumentVisibilityState("visible");
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
-
-    expect(mockConnect).toHaveBeenCalledTimes(1);
-    expect(mockConnect).toHaveBeenCalledWith("resume-token");
-  });
-
-  it("does not reconnect a connected socket when the tab resumes quickly", () => {
-    mockGetAuthJwt.mockReturnValue("resume-token");
-    mockUseWebSocket.mockReturnValue({
-      connect: mockConnect,
-      disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
-    });
-
-    renderHook(() => useWebSocketHealth());
-    mockConnect.mockClear();
-
-    act(() => {
-      setDocumentVisibilityState("hidden");
-      document.dispatchEvent(new Event("visibilitychange"));
-      jest.advanceTimersByTime(59000);
       setDocumentVisibilityState("visible");
       document.dispatchEvent(new Event("visibilitychange"));
     });
@@ -384,12 +361,13 @@ describe("useWebSocketHealth", () => {
     expect(mockConnect).not.toHaveBeenCalled();
   });
 
-  it("does not double reconnect when focus follows a visibility resume", () => {
+  it("reconnects a disconnected socket once when focus follows a visibility resume", () => {
+    jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("resume-token");
     mockUseWebSocket.mockReturnValue({
       connect: mockConnect,
       disconnect: mockDisconnect,
-      status: WebSocketStatus.CONNECTED,
+      status: WebSocketStatus.DISCONNECTED,
     });
 
     renderHook(() => useWebSocketHealth());
@@ -398,7 +376,6 @@ describe("useWebSocketHealth", () => {
     act(() => {
       setDocumentVisibilityState("hidden");
       document.dispatchEvent(new Event("visibilitychange"));
-      jest.advanceTimersByTime(60000);
       setDocumentVisibilityState("visible");
       document.dispatchEvent(new Event("visibilitychange"));
       window.dispatchEvent(new Event("focus"));

@@ -13,18 +13,18 @@ import { MarketplacePreviewWebSocketSync } from "./MarketplacePreviewWebSocketSy
  *
  * EAGER INITIALIZATION PATTERN:
  * - Connects IMMEDIATELY on mount when auth token exists
- * - Delegates all connection management to useWebSocketHealth()
+ * - Delegates auth-driven desired connection state to useWebSocketHealth()
+ * - WebSocketProvider owns socket lifecycle and replacement safety
  * - Health monitoring detects auth token and connects during first render cycle
  * - Provides cleanup on unmount
  *
  * This ensures immediate connectivity for authenticated users while
- * maintaining centralized connection management through health monitoring.
+ * keeping socket lifecycle logic inside the provider.
  */
 function WebSocketInitializer() {
   const { disconnect } = useWebSocket();
 
-  // EAGER INITIALIZATION: Health monitoring handles immediate connection
-  // Health monitoring will check auth token and connect immediately if needed
+  // Health monitoring checks auth state and requests the desired connection state.
   useWebSocketHealth();
 
   // Only handle cleanup on unmount - no initial connection logic

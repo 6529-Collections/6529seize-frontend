@@ -8,7 +8,6 @@ import { WebSocketStatus } from "./WebSocketTypes";
 const AUTH_BROADCAST_CHANNEL = "auth-token-updates";
 const AUTH_BROADCAST_MESSAGE = "auth-token-changed";
 const HEALTH_CHECK_INTERVAL_MS = 10000;
-const RESUME_RECONNECT_HIDDEN_DURATION_MS = 60000;
 const RESUME_EVENT_DEDUPE_WINDOW_MS = 1000;
 
 type CookieChangeInfo = {
@@ -46,17 +45,17 @@ const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
  * WebSocket health monitoring hook
  *
  * ARCHITECTURE:
- * - Immediate Health Checks: Triggered by status changes for responsive connection management
+ * - Desired State Only: Auth token changes decide whether we should connect or disconnect
+ * - Resume Checks: Visibility/focus only trigger a deduped health check, never a forced reconnect
  * - Periodic Health Checks: Stable 10-second interval for ongoing monitoring
  * - Memory Safe: Single interval prevents leaks during status transitions
- * - Fresh References: Periodic checks use current WebSocket context to avoid stale closures
+ * - Fresh References: Checks use current WebSocket context to avoid stale closures
  */
 export function useWebSocketHealth() {
   const webSocketState = useWebSocket();
   const lastTokenRef = useRef<string | null>(null);
   const webSocketStateRef = useRef(webSocketState);
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
-  const hiddenAtRef = useRef<number | null>(null);
   const lastResumeCheckAtRef = useRef(0);
 
   // Keep ref updated with current WebSocket state
@@ -107,24 +106,6 @@ export function useWebSocketHealth() {
     lastResumeCheckAtRef.current = now;
 
     performHealthCheck();
-
-    const currentToken = getAuthJwt();
-    const hiddenAt = hiddenAtRef.current;
-    hiddenAtRef.current = null;
-
-    if (!currentToken || hiddenAt === null) {
-      return;
-    }
-
-    if (now - hiddenAt < RESUME_RECONNECT_HIDDEN_DURATION_MS) {
-      return;
-    }
-
-    const { status: currentStatus, connect: currentConnect } =
-      webSocketStateRef.current;
-    if (currentStatus === WebSocketStatus.CONNECTED) {
-      currentConnect(currentToken);
-    }
   }, [performHealthCheck]);
 
   useEffect(() => {
@@ -137,8 +118,7 @@ export function useWebSocketHealth() {
     }
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        hiddenAtRef.current = Date.now();
+      if (document.visibilityState !== "visible") {
         return;
       }
 
