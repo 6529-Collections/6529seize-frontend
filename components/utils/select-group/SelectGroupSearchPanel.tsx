@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { GroupsRequestParams } from "@/entities/IGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -18,23 +18,38 @@ const DEFAULT_BODY_CLASSES =
   "tw-h-64 tw-overflow-y-auto tw-mt-4 tw-px-4 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300";
 
 type SelectGroupSearchPanelProps = {
-  readonly onClose: () => void;
+  readonly onClose?: (() => void) | undefined;
   readonly onGroupSelect: (group: ApiGroupFull) => void;
+  readonly selectedGroupId?: string | null | undefined;
   readonly containerClassName?: string | undefined;
   readonly bodyClassName?: string | undefined;
+  readonly showHeader?: boolean | undefined;
+  readonly useDefaultContainerStyles?: boolean | undefined;
+  readonly useDefaultBodyStyles?: boolean | undefined;
 };
 
 export default function SelectGroupSearchPanel({
   onClose,
   onGroupSelect,
+  selectedGroupId,
   containerClassName,
   bodyClassName,
+  showHeader = true,
+  useDefaultContainerStyles = true,
+  useDefaultBodyStyles = true,
 }: SelectGroupSearchPanelProps) {
-  const containerClasses = [DEFAULT_CONTAINER_CLASSES, containerClassName]
+  const handleClose = onClose ?? (() => {});
+  const containerClasses = [
+    useDefaultContainerStyles ? DEFAULT_CONTAINER_CLASSES : null,
+    containerClassName,
+  ]
     .filter(Boolean)
     .join(" ");
 
-  const bodyClasses = [DEFAULT_BODY_CLASSES, bodyClassName]
+  const bodyClasses = [
+    useDefaultBodyStyles ? DEFAULT_BODY_CLASSES : null,
+    bodyClassName,
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -79,19 +94,11 @@ export default function SelectGroupSearchPanel({
     placeholderData: keepPreviousData,
   });
 
-  const [groups, setGroups] = useState<ApiGroupFull[]>([]);
-
-  useEffect(() => {
-    if (data?.length) {
-      setGroups(data);
-    } else {
-      setGroups([]);
-    }
-  }, [data]);
+  const groups = data ?? [];
 
   return (
     <div className={containerClasses}>
-      <SelectGroupModalHeader onClose={onClose} />
+      {showHeader && <SelectGroupModalHeader onClose={handleClose} />}
       <SelectGroupModalSearch
         groupName={filters.group_name}
         groupUser={filters.author_identity}
@@ -101,6 +108,7 @@ export default function SelectGroupSearchPanel({
       <div className={bodyClasses}>
         <SelectGroupModalItems
           groups={groups}
+          selectedGroupId={selectedGroupId ?? null}
           loading={isFetching}
           onGroupSelect={onGroupSelect}
         />

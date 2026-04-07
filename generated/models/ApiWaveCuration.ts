@@ -13,9 +13,13 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiWaveSelection {
+export class ApiWaveCuration {
     'id': string;
-    'title': string;
+    'name': string;
+    'wave_id': string;
+    'group_id': string;
+    'created_at': number;
+    'updated_at': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,14 +33,38 @@ export class ApiWaveSelection {
             "format": ""
         },
         {
-            "name": "title",
-            "baseName": "title",
+            "name": "name",
+            "baseName": "name",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "wave_id",
+            "baseName": "wave_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "group_id",
+            "baseName": "group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "updated_at",
+            "baseName": "updated_at",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveSelection.attributeTypeMap;
+        return ApiWaveCuration.attributeTypeMap;
     }
 
     public constructor() {

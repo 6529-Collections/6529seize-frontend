@@ -116,10 +116,9 @@ export const buildPreviewDrop = ({
       admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
       forbid_negative_votes: wave.voting.forbid_negative_votes,
       pinned: wave.pinned,
+      identity_wave: wave.identity_wave,
       submission_type: wave.participation.submission_strategy?.type ?? null,
-      selections: wave.selections,
     },
-    selections: [],
     author: {
       id: connectedProfile?.id ?? "preview-user",
       handle: connectedProfile?.handle ?? "preview-user",
@@ -134,6 +133,7 @@ export const buildPreviewDrop = ({
       xtdh_rate: connectedProfile?.xtdh_rate ?? 0,
       level: connectedProfile?.level ?? 0,
       primary_address: primaryAddress,
+      profile_wave_id: connectedProfile?.profile_wave_id ?? null,
       subscribed_actions: [],
       archived: false,
       active_main_stage_submission_ids:

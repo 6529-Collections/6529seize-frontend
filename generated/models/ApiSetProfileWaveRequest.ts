@@ -13,13 +13,8 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiWaveCurationGroup {
-    'id': string;
-    'name': string;
+export class ApiSetProfileWaveRequest {
     'wave_id': string;
-    'group_id': string;
-    'created_at': number;
-    'updated_at': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -27,44 +22,14 @@ export class ApiWaveCurationGroup {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "id",
-            "baseName": "id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "name",
-            "baseName": "name",
-            "type": "string",
-            "format": ""
-        },
-        {
             "name": "wave_id",
             "baseName": "wave_id",
             "type": "string",
             "format": ""
-        },
-        {
-            "name": "group_id",
-            "baseName": "group_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "created_at",
-            "baseName": "created_at",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "updated_at",
-            "baseName": "updated_at",
-            "type": "number",
-            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveCurationGroup.attributeTypeMap;
+        return ApiSetProfileWaveRequest.attributeTypeMap;
     }
 
     public constructor() {

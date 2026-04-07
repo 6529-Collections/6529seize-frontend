@@ -35,12 +35,23 @@ import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPr
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 
+const EMPTY_TIME_LEFT: TimeLeft = {
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+};
+
 interface MyStreamWaveTabsMemeProps {
   readonly wave: ApiWave;
+  readonly activeCurationId: string | null;
+  readonly onSelectCuration: (curationId: string | null) => void;
 }
 
 const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   wave,
+  activeCurationId,
+  onSelectCuration,
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
@@ -108,17 +119,11 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
 
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(EMPTY_TIME_LEFT);
 
   useEffect(() => {
     if (typeof nextDecisionTime !== "number") return;
 
-    setTimeLeft(calculateTimeLeft(nextDecisionTime));
     const intervalId = setInterval(() => {
       const newTimeLeft = calculateTimeLeft(nextDecisionTime);
       setTimeLeft(newTimeLeft);
@@ -134,6 +139,9 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     return () => clearInterval(intervalId);
   }, [nextDecisionTime]);
 
+  const displayedTimeLeft =
+    typeof nextDecisionTime === "number" ? timeLeft : EMPTY_TIME_LEFT;
+
   const handleMemesSubmit = () => {
     setIsMemesModalOpen(true);
   };
@@ -144,6 +152,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     params.delete("serialNo");
     params.delete("divider");
     params.delete("drop");
+    params.delete("curation");
     const basePath = getWaveHomeRoute({
       isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
       isApp,
@@ -155,6 +164,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   };
 
   const handleSearchSelect = (serialNo: number) => {
+    onSelectCuration(null);
     setActiveContentTab(MyStreamWaveTab.CHAT);
     if (waveChatScroll) {
       waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
@@ -162,6 +172,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     }
 
     const params = new URLSearchParams(searchParams.toString() || "");
+    params.delete("curation");
     params.set("serialNo", String(serialNo));
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
@@ -259,11 +270,13 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             activeTab={activeContentTab}
             wave={wave}
             setActiveTab={setActiveContentTab}
+            activeCurationId={activeCurationId}
+            onSelectCuration={onSelectCuration}
           />
           {(isMemesWave || isRankWave) &&
             typeof nextDecisionTime === "number" && (
               <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4">
-                <CompactTimeCountdown timeLeft={timeLeft} />
+                <CompactTimeCountdown timeLeft={displayedTimeLeft} />
               </div>
             )}
         </div>

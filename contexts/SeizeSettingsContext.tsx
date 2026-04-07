@@ -51,6 +51,7 @@ export const SeizeSettingsProvider = ({
     all_drops_notifications_subscribers_limit: 0,
     memes_wave_id: null,
     curation_wave_id: null,
+    announcements_wave_id: null,
     distribution_admin_wallets: [],
     claims_admin_wallets: [],
   });

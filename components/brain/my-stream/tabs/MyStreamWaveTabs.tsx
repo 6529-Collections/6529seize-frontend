@@ -14,6 +14,8 @@ interface MyStreamWaveTabsProps {
   readonly viewMode: WaveViewMode;
   readonly onToggleViewMode: () => void;
   readonly showGalleryToggle: boolean;
+  readonly activeCurationId: string | null;
+  readonly onSelectCuration: (curationId: string | null) => void;
 }
 
 export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
@@ -21,6 +23,8 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
   viewMode,
   onToggleViewMode,
   showGalleryToggle,
+  activeCurationId,
+  onSelectCuration,
 }) => {
   const { isMemesWave } = useWave(wave);
   const { registerRef } = useLayout();
@@ -56,13 +60,19 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
       <div className="tw-w-full tw-bg-iron-950">
         <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3">
           {isMemesWave ? (
-            <MyStreamWaveTabsMeme wave={wave} />
+            <MyStreamWaveTabsMeme
+              wave={wave}
+              activeCurationId={activeCurationId}
+              onSelectCuration={onSelectCuration}
+            />
           ) : (
             <MyStreamWaveTabsDefault
               wave={wave}
               viewMode={viewMode}
               onToggleViewMode={onToggleViewMode}
               showGalleryToggle={showGalleryToggle}
+              activeCurationId={activeCurationId}
+              onSelectCuration={onSelectCuration}
             />
           )}
         </div>

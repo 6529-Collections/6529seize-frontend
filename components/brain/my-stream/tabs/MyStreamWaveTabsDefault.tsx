@@ -32,6 +32,8 @@ interface MyStreamWaveTabsDefaultProps {
   readonly viewMode: WaveViewMode;
   readonly onToggleViewMode: () => void;
   readonly showGalleryToggle: boolean;
+  readonly activeCurationId: string | null;
+  readonly onSelectCuration: (curationId: string | null) => void;
 }
 
 const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
@@ -39,6 +41,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   viewMode,
   onToggleViewMode,
   showGalleryToggle,
+  activeCurationId,
+  onSelectCuration,
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
@@ -72,6 +76,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     params.delete("serialNo");
     params.delete("divider");
     params.delete("drop");
+    params.delete("curation");
     const basePath = getWaveHomeRoute({
       isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
       isApp,
@@ -83,6 +88,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   };
 
   const handleSearchSelect = (serialNo: number) => {
+    onSelectCuration(null);
     setActiveContentTab(MyStreamWaveTab.CHAT);
     if (waveChatScroll) {
       waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
@@ -90,6 +96,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     }
 
     const params = new URLSearchParams(searchParams.toString() || "");
+    params.delete("curation");
     params.set("serialNo", String(serialNo));
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
@@ -154,7 +161,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           )}
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch">
-          {showGalleryToggle && (
+          {showGalleryToggle && !activeCurationId && (
             <button
               type="button"
               onClick={onToggleViewMode}
@@ -214,6 +221,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           activeTab={activeContentTab}
           wave={wave}
           setActiveTab={setActiveContentTab}
+          activeCurationId={activeCurationId}
+          onSelectCuration={onSelectCuration}
         />
       </div>
       <WaveDropsSearchModal

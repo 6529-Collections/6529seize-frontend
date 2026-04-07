@@ -1,12 +1,12 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
+import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 
-export const getWaveCurationGroupsQueryKey = (waveId: string) =>
-  [QueryKey.WAVE_CURATION_GROUPS, { wave_id: waveId }] as const;
+export const getWaveCurationsQueryKey = (waveId: string) =>
+  [QueryKey.WAVE_CURATIONS, { wave_id: waveId }] as const;
 
 interface UseWaveCurationGroupsProps {
   readonly waveId: string;
@@ -17,11 +17,11 @@ export function useWaveCurationGroups({
   waveId,
   enabled = true,
 }: UseWaveCurationGroupsProps) {
-  return useQuery<ApiWaveCurationGroup[]>({
-    queryKey: getWaveCurationGroupsQueryKey(waveId),
+  return useQuery<ApiWaveCuration[]>({
+    queryKey: getWaveCurationsQueryKey(waveId),
     queryFn: async () =>
-      await commonApiFetch<ApiWaveCurationGroup[]>({
-        endpoint: `waves/${waveId}/curation-groups`,
+      await commonApiFetch<ApiWaveCuration[]>({
+        endpoint: `waves/${waveId}/curations`,
       }),
     enabled: enabled && !!waveId,
     staleTime: 5 * 60 * 1000,

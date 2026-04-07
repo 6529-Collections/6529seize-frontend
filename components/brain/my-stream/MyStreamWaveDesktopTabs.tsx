@@ -1,30 +1,38 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { TabToggle } from "@/components/common/TabToggle";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
+import { useWave } from "@/hooks/useWave";
+import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
+import { Time } from "@/helpers/time";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, WaveVotingState } from "../ContentTabContext";
-import { useWave } from "@/hooks/useWave";
-import { useWaveTimers } from "@/hooks/useWaveTimers";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
-import { Time } from "@/helpers/time";
+import MyStreamWaveCurationCreateDialog from "./tabs/MyStreamWaveCurationCreateDialog";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
   readonly wave: ApiWave;
   readonly setActiveTab: (tab: MyStreamWaveTab) => void;
+  readonly activeCurationId: string | null;
+  readonly onSelectCuration: (curationId: string | null) => void;
 }
 
 interface TabOption {
-  key: MyStreamWaveTab;
-  label: string;
-  panelId: string;
+  readonly key: string;
+  readonly label: string;
+  readonly panelId: string;
 }
 
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
+
+const getCurationPanelId = (curationId: string): string =>
+  `my-stream-wave-tabpanel-curation-${curationId}`;
 
 const AUTO_EXPAND_LIMIT = 5;
 
@@ -38,15 +46,33 @@ const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.FAQ]: "FAQ",
 };
 
+const getWaveVotingState = ({
+  isUpcoming,
+  isCompleted,
+}: {
+  readonly isUpcoming: boolean;
+  readonly isCompleted: boolean;
+}): WaveVotingState => {
+  if (isUpcoming) {
+    return WaveVotingState.NOT_STARTED;
+  }
+
+  if (isCompleted) {
+    return WaveVotingState.ENDED;
+  }
+
+  return WaveVotingState.ONGOING;
+};
+
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
   setActiveTab,
+  activeCurationId,
+  onSelectCuration,
 }) => {
-  // Use the available tabs from context instead of recalculating
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
-
   const {
     isChatWave,
     isMemesWave,
@@ -54,11 +80,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const {
-    voting: { isUpcoming, isCompleted, isInProgress },
+    voting: { isUpcoming, isCompleted },
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
-
-  // For next decision countdown
   const { allDecisions, hasMoreFuture, loadMoreFuture } = useDecisionPoints(
     wave,
     {
@@ -66,107 +90,83 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       initialFutureWindow: 10,
     }
   );
+  const { data: curations = [] } = useWaveCurationGroups({
+    waveId: wave.id,
+  });
+  const canManageCurations =
+    wave.wave.authenticated_user_eligible_for_admin === true;
 
-  // Filter out decisions that occur during pause periods using the helper from useWave
-  const filteredDecisions = React.useMemo(() => {
-    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
+  const filteredDecisions = useMemo(() => {
     const decisionsAsApiFormat = allDecisions.map((decision) => ({
       decision_time: decision.timestamp,
     }));
-
-    // Apply the filter
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
 
-    // Convert back to DecisionPoint[] format
     return allDecisions.filter((decision) =>
-      filtered.some((f) => f.decision_time === decision.timestamp)
+      filtered.some((item) => item.decision_time === decision.timestamp)
     );
   }, [allDecisions, filterDecisionsDuringPauses]);
 
-  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
     filteredDecisions.find(
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
 
-  const [autoExpandFutureAttempts, setAutoExpandFutureAttempts] = useState(0);
+  const autoExpandFutureAttemptsRef = useRef(0);
+  const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
 
   useEffect(() => {
-    const hasUpcoming = !!nextDecisionTime;
+    const hasUpcoming = typeof nextDecisionTime === "number";
 
-    if (hasUpcoming) {
-      if (autoExpandFutureAttempts !== 0) {
-        setAutoExpandFutureAttempts(0);
-      }
+    if (hasUpcoming || !hasMoreFuture) {
       return;
     }
 
-    if (!hasMoreFuture) {
-      if (autoExpandFutureAttempts !== 0) {
-        setAutoExpandFutureAttempts(0);
-      }
-      return;
-    }
-
-    if (autoExpandFutureAttempts >= AUTO_EXPAND_LIMIT) {
+    if (autoExpandFutureAttemptsRef.current >= AUTO_EXPAND_LIMIT) {
       return;
     }
 
     const timeoutId = globalThis.setTimeout(() => {
-      setAutoExpandFutureAttempts((prev) => prev + 1);
+      autoExpandFutureAttemptsRef.current += 1;
       loadMoreFuture();
     }, 50);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [
-    nextDecisionTime,
-    hasMoreFuture,
-    loadMoreFuture,
-    autoExpandFutureAttempts,
-  ]);
+  }, [nextDecisionTime, hasMoreFuture, loadMoreFuture]);
 
-  // Calculate time left for next decision
-  // Update available tabs when wave changes
+  const votingState = getWaveVotingState({
+    isUpcoming,
+    isCompleted,
+  });
+
   useEffect(() => {
-    const votingState = isUpcoming
-      ? WaveVotingState.NOT_STARTED
-      : isCompleted
-        ? WaveVotingState.ENDED
-        : WaveVotingState.ONGOING;
-    updateAvailableTabs(
-      wave
-        ? {
-            waveId: wave.id,
-            isMemesWave,
-            isChatWave,
-            isCurationWave,
-            votingState,
-            hasFirstDecisionPassed: firstDecisionDone,
-          }
-        : null
-    );
+    updateAvailableTabs({
+      waveId: wave.id,
+      isMemesWave,
+      isChatWave,
+      isCurationWave,
+      votingState,
+      hasFirstDecisionPassed: firstDecisionDone,
+    });
   }, [
     wave,
     isMemesWave,
     isChatWave,
     isCurationWave,
-    isUpcoming,
-    isCompleted,
-    isInProgress,
+    votingState,
     firstDecisionDone,
     updateAvailableTabs,
   ]);
 
-  // Always switch to Chat for Chat-type waves
   useEffect(() => {
-    if (wave?.wave?.type === ApiWaveType.Chat) {
+    if (wave.wave.type === ApiWaveType.Chat && !activeCurationId) {
       setActiveContentTab(MyStreamWaveTab.CHAT);
     }
-  }, [wave?.wave?.type, setActiveContentTab]);
+  }, [wave.wave.type, activeCurationId, setActiveContentTab]);
 
-  const options: TabOption[] = React.useMemo(
+  const standardOptions: TabOption[] = useMemo(
     () =>
       availableTabs
         .filter((tab) => {
@@ -189,6 +189,21 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [availableTabs, isMemesWave, isCurationWave]
   );
 
+  const options: TabOption[] = useMemo(
+    () => [
+      ...standardOptions,
+      ...curations.map((curation) => ({
+        key: `curation:${curation.id}`,
+        label: curation.name,
+        panelId: getCurationPanelId(curation.id),
+      })),
+    ],
+    [curations, standardOptions]
+  );
+
+  // The visible tab set is narrower than ContentTabContext's shared defaults,
+  // so this effect snaps back to the first visible tab when needed.
+  /* eslint-disable react-you-might-not-need-an-effect/no-pass-data-to-parent */
   useEffect(() => {
     const isMyVotesHidden =
       activeTab === MyStreamWaveTab.MY_VOTES && !isMemesWave && !isCurationWave;
@@ -197,26 +212,68 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     const isFaqHidden = activeTab === MyStreamWaveTab.FAQ && !isMemesWave;
 
     if (
+      !activeCurationId &&
       (isMyVotesHidden || isSalesHidden || isFaqHidden) &&
       options.length > 0
     ) {
-      setActiveTab(options[0]?.key!);
+      const firstOption = options[0];
+      if (firstOption) {
+        setActiveTab(firstOption.key as MyStreamWaveTab);
+      }
     }
-  }, [isMemesWave, isCurationWave, activeTab, options, setActiveTab]);
+  }, [
+    isMemesWave,
+    isCurationWave,
+    activeTab,
+    activeCurationId,
+    options,
+    setActiveTab,
+  ]);
+  /* eslint-enable react-you-might-not-need-an-effect/no-pass-data-to-parent */
 
-  // For simple waves, don't render any tabs
-  if (isChatWave) {
-    return null;
-  }
+  const activeKey = activeCurationId
+    ? `curation:${activeCurationId}`
+    : activeTab;
 
   return (
-    <div className="tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-4 tw-overflow-x-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 tw-@container/tabs hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4">
-      <TabToggle
-        options={options}
-        activeKey={activeTab}
-        onSelect={(key) => setActiveTab(key as MyStreamWaveTab)}
-      />
-    </div>
+    <>
+      <div className="tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-4 tw-overflow-x-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 tw-@container/tabs hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4">
+        <TabToggle
+          options={options}
+          activeKey={activeKey}
+          onSelect={(key) => {
+            if (key.startsWith("curation:")) {
+              onSelectCuration(key.replace("curation:", ""));
+              return;
+            }
+
+            onSelectCuration(null);
+            setActiveTab(key as MyStreamWaveTab);
+          }}
+        />
+
+        {canManageCurations && (
+          <button
+            type="button"
+            onClick={() => setIsCreateCurationOpen(true)}
+            className="tw-mt-1 tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
+            aria-label="Create curation"
+            title="Create curation"
+          >
+            <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+          </button>
+        )}
+      </div>
+
+      {isCreateCurationOpen && (
+        <MyStreamWaveCurationCreateDialog
+          wave={wave}
+          isOpen={isCreateCurationOpen}
+          onClose={() => setIsCreateCurationOpen(false)}
+          onSaved={(curation) => onSelectCuration(curation.id)}
+        />
+      )}
+    </>
   );
 };
 

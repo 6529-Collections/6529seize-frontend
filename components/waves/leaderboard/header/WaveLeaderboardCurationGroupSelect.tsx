@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { createBreakpoint } from "react-use";
 import { useQueries } from "@tanstack/react-query";
 import Image from "next/image";
-import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
+import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
@@ -13,7 +13,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface WaveLeaderboardCurationGroupSelectProps {
-  readonly groups: readonly ApiWaveCurationGroup[];
+  readonly groups: readonly ApiWaveCuration[];
   readonly selectedGroupId: string | null;
   readonly onChange: (groupId: string | null) => void;
   readonly mode?: WaveLeaderboardCurationGroupSelectMode;

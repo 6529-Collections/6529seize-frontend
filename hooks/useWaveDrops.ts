@@ -18,6 +18,7 @@ interface UseWaveDropsProps {
   readonly waveId: string;
   readonly dropType?: ApiDropType | undefined;
   readonly containsMedia?: boolean | undefined;
+  readonly curationId?: string | undefined;
   readonly limit?: number | undefined;
   readonly enabled?: boolean | undefined;
 }
@@ -52,6 +53,7 @@ export function useWaveDrops({
   waveId,
   dropType,
   containsMedia = false,
+  curationId,
   limit = DEFAULT_WAVE_DROPS_LIMIT,
   enabled = true,
 }: UseWaveDropsProps) {
@@ -64,10 +66,11 @@ export function useWaveDrops({
           limit,
           dropType: dropType ?? null,
           containsMedia,
+          curationId: curationId ?? null,
           context: "wave-drops",
         },
       ] as const,
-    [waveId, limit, dropType, containsMedia]
+    [waveId, limit, dropType, containsMedia, curationId]
   );
 
   const {
@@ -91,6 +94,10 @@ export function useWaveDrops({
 
       if (dropType !== undefined) {
         params["drop_type"] = dropType;
+      }
+
+      if (curationId) {
+        params["curation_id"] = curationId;
       }
 
       if (typeof pageParam === "number") {

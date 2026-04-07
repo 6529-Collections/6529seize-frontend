@@ -149,7 +149,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
 
-  const rawCuratedByGroupId = searchParams.get("curated_by_group");
+  const rawCuratedByGroupId = searchParams.get("curation_id");
 
   const curationGroupIdSet = useMemo(
     () => new Set(curationGroups.map((group) => group.id)),
@@ -195,9 +195,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       const nextParams = new URLSearchParams(searchParams.toString());
 
       if (groupId) {
-        nextParams.set("curated_by_group", groupId);
+        nextParams.set("curation_id", groupId);
       } else {
-        nextParams.delete("curated_by_group");
+        nextParams.delete("curation_id");
       }
 
       const nextQuery = nextParams.toString();
