@@ -47,8 +47,8 @@ echo "Setting up pre-commit hook..."
 setup_precommit_hook "$WORKTREE_PATH"
 echo "Pre-commit hook configured."
 
-# 5. Run npm install
-echo "Running npm install in $WORKTREE_NAME..."
-(cd "$WORKTREE_PATH" && npm install)
+# 5. Run secure pnpm install
+echo "Running secure pnpm install in $WORKTREE_NAME..."
+(cd "$WORKTREE_PATH" && ./bin/6529 install)
 
 echo "✅ Worktree '$WORKTREE_NAME' is ready."

@@ -1,13 +1,19 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const REMOTE = "origin";
 const BRANCH = "main";
 const TARGET = `${REMOTE}/${BRANCH}`;
-const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
-const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
 const coderabbitCmd =
   process.platform === "win32" ? "coderabbit.cmd" : "coderabbit";
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(scriptDir, "..");
+const repoCommand =
+  process.platform === "win32"
+    ? path.join(repoRoot, "bin", "6529.cmd")
+    : path.join(repoRoot, "bin", "6529");
 
 const args = new Set(process.argv.slice(2));
 const enableCoderabbit = args.has("--coderabbit");
@@ -17,6 +23,7 @@ const runCommand = ({ command, args = [], inheritOutput = false }) => {
   // Sonar hotspot accepted: this is a trusted local developer script.
   const result = spawnSync(command, args, {
     encoding: "utf8",
+    cwd: repoRoot,
     stdio: inheritOutput ? "inherit" : ["ignore", "pipe", "pipe"],
   });
 
@@ -231,7 +238,7 @@ if (!Number.isFinite(behind) || !Number.isFinite(ahead)) {
 
 try {
   const result = runCommand({
-    command: npmCmd,
+    command: repoCommand,
     args: ["run", changedMode ? "format:changed" : "format:uncommitted"],
     inheritOutput: true,
   });
@@ -246,7 +253,7 @@ try {
 
 try {
   const result = runCommand({
-    command: npmCmd,
+    command: repoCommand,
     args: ["run", changedMode ? "lint:changed" : "lint:diff"],
     inheritOutput: true,
   });
@@ -260,19 +267,13 @@ try {
 try {
   const result = changedMode
     ? runCommand({
-        command: "node",
-        args: ["scripts/typecheck-changed.cjs"],
+        command: repoCommand,
+        args: ["run", "typecheck:changed"],
         inheritOutput: true,
       })
     : runCommand({
-        command: npxCmd,
-        args: [
-          "--no-install",
-          "tsc",
-          "--noEmit",
-          "-p",
-          "tsconfig.typecheck.json",
-        ],
+        command: repoCommand,
+        args: ["exec", "tsc", "--noEmit", "-p", "tsconfig.typecheck.json"],
         inheritOutput: true,
       });
   ensureSuccess(result, changedMode ? "typecheck:changed" : "typecheck");
@@ -290,8 +291,8 @@ let knipStderr = "";
 let knipStatus = 0;
 try {
   const result = runCommand({
-    command: npxCmd,
-    args: ["--no-install", "knip", "--reporter", "json"],
+    command: repoCommand,
+    args: ["exec", "knip", "--reporter", "json"],
   });
   knipStdout = result.stdout ?? "";
   knipStderr = result.stderr ?? "";
