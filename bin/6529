@@ -76,19 +76,47 @@ case "$command_name" in
     exit 1
     ;;
   i)
+    if [[ "$#" -gt 0 ]]; then
+      echo "Use \`6529 add <package>\` to add dependencies." >&2
+      exit 1
+    fi
     exec "$REAL_PNPM" run install:secure "$@"
     ;;
   install)
+    if [[ "$#" -gt 0 ]]; then
+      echo "Use \`6529 add <package>\` to add dependencies." >&2
+      exit 1
+    fi
     exec "$REAL_PNPM" run install:secure "$@"
     ;;
   ci)
+    if [[ "$#" -gt 0 ]]; then
+      echo "\`6529 ci\` does not accept package arguments." >&2
+      exit 1
+    fi
     exec "$REAL_PNPM" run install:secure:frozen "$@"
     ;;
   install:frozen)
+    if [[ "$#" -gt 0 ]]; then
+      echo "\`6529 install:frozen\` does not accept package arguments." >&2
+      exit 1
+    fi
     exec "$REAL_PNPM" run install:secure:frozen "$@"
     ;;
   install:prod)
+    if [[ "$#" -gt 0 ]]; then
+      echo "\`6529 install:prod\` does not accept package arguments." >&2
+      exit 1
+    fi
     exec "$REAL_PNPM" run install:secure:prod "$@"
+    ;;
+  add)
+    if [[ "$#" -eq 0 ]]; then
+      echo "Usage: \`6529 add <package>\`" >&2
+      exit 1
+    fi
+    node "$REPO_ROOT/scripts/assert-no-package-lock.cjs"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" add "$@"
     ;;
   prune:prod)
     exec "$REAL_PNPM" run prune:prod "$@"

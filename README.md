@@ -128,6 +128,18 @@ Then install project dependencies through the secure path:
 6529 install
 ```
 
+To add a new package:
+
+```bash
+6529 add <package>
+6529 add -D <package>
+```
+
+`6529 install` and `6529 i` only reinstall the existing dependency set. They do
+not accept package names. To add a dependency, use `6529 add <package>`.
+`6529 add` goes through the same Socket Firewall protected path as secure
+installs.
+
 Plain `pnpm install`, `pnpm dev`, and `npm run ...` repo script execution are intentionally blocked. Use the `6529` wrapper only.
 
 If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
