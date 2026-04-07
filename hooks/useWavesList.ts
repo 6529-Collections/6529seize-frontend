@@ -84,9 +84,13 @@ const useWavesList = () => {
   const refetchAllWaves = useCallback(() => {
     // Refetch main waves overview
     mainWavesRefetch();
-    // Refetch server-side pinned waves
-    refetchPinnedWaves();
-  }, [mainWavesRefetch, refetchPinnedWaves]);
+    if (isConnectedIdentity) {
+      // Refetch server-side pinned waves only when the query is enabled
+      void refetchPinnedWaves().catch(() => {
+        // Error surfaced via query state
+      });
+    }
+  }, [isConnectedIdentity, mainWavesRefetch, refetchPinnedWaves]);
 
   // Use server-provided pinned waves
   const separatelyFetchedPinnedWaves = useMemo(() => {

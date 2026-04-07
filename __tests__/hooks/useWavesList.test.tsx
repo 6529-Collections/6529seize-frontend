@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import React from "react";
 import useWavesList from "@/hooks/useWavesList";
 import { AuthContext } from "@/components/auth/Auth";
@@ -16,6 +16,10 @@ jest.mock("@/hooks/useWaveData", () => ({
   useWaveData: jest.fn(),
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({ address: "0xabc" })),
+}));
+
 jest.mock("@/hooks/useShowFollowingWaves", () => ({
   useShowFollowingWaves: jest.fn(() => [false]),
 }));
@@ -25,16 +29,22 @@ const useWavesOverviewMock = require("@/hooks/useWavesOverview")
 const usePinnedWavesServerMock = require("@/hooks/usePinnedWavesServer")
   .usePinnedWavesServer as jest.Mock;
 const useWaveDataMock = require("@/hooks/useWaveData").useWaveData as jest.Mock;
+const useSeizeConnectContextMock =
+  require("@/components/auth/SeizeConnectContext")
+    .useSeizeConnectContext as jest.Mock;
 
-const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <AuthContext.Provider
-    value={
-      { connectedProfile: { handle: "me" }, activeProfileProxy: null } as any
-    }
-  >
-    {children}
-  </AuthContext.Provider>
-);
+const authContextValue = (overrides: Record<string, unknown> = {}) =>
+  ({
+    connectedProfile: { handle: "me" },
+    activeProfileProxy: null,
+    ...overrides,
+  }) as any;
+
+const createWrapper =
+  (value = authContextValue()): React.FC<{ children: React.ReactNode }> =>
+  ({ children }) => (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
 
 const dmWave = {
   id: "1",
@@ -58,6 +68,9 @@ const pinnedExtra = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  useSeizeConnectContextMock.mockReturnValue({
+    address: "0xabc",
+  });
   useWavesOverviewMock.mockReturnValue({
     waves: [dmWave, mainWave],
     isFetching: false,
@@ -74,7 +87,7 @@ beforeEach(() => {
     unpinWave: jest.fn(),
     isLoading: false,
     isError: false,
-    refetch: jest.fn(),
+    refetch: jest.fn().mockResolvedValue({}),
   });
   useWaveDataMock.mockReturnValue({
     data: pinnedExtra,
@@ -85,7 +98,9 @@ beforeEach(() => {
 });
 
 test("combines main and pinned waves, filtering DMs and flagging pinned", () => {
-  const { result } = renderHook(() => useWavesList(), { wrapper });
+  const { result } = renderHook(() => useWavesList(), {
+    wrapper: createWrapper(),
+  });
   const waves = result.current.waves;
   expect(waves.map((w: any) => w.id)).toEqual(["3", "2"]);
   expect(waves.every((w: any) => w.isPinned)).toBe(true);
@@ -100,8 +115,80 @@ test("indicates loading when pinned wave is still loading", () => {
     unpinWave: jest.fn(),
     isLoading: true,
     isError: false,
-    refetch: jest.fn(),
+    refetch: jest.fn().mockResolvedValue({}),
   });
-  const { result } = renderHook(() => useWavesList(), { wrapper });
+  const { result } = renderHook(() => useWavesList(), {
+    wrapper: createWrapper(),
+  });
   expect(result.current.isPinnedWavesLoading).toBe(true);
+});
+
+test("refetchAllWaves refetches pinned waves for authenticated sessions", () => {
+  const mainWavesRefetch = jest.fn();
+  const refetchPinnedWaves = jest.fn().mockResolvedValue({});
+
+  useWavesOverviewMock.mockReturnValue({
+    waves: [dmWave, mainWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: mainWavesRefetch,
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: ["2", "3"],
+    pinnedWaves: [pinnedExtra],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: refetchPinnedWaves,
+  });
+
+  const { result } = renderHook(() => useWavesList(), {
+    wrapper: createWrapper(),
+  });
+
+  act(() => {
+    result.current.refetchAllWaves();
+  });
+
+  expect(mainWavesRefetch).toHaveBeenCalledTimes(1);
+  expect(refetchPinnedWaves).toHaveBeenCalledTimes(1);
+});
+
+test("refetchAllWaves skips pinned waves when the pinned query is disabled", () => {
+  const mainWavesRefetch = jest.fn();
+  const refetchPinnedWaves = jest.fn().mockResolvedValue({});
+
+  useWavesOverviewMock.mockReturnValue({
+    waves: [dmWave, mainWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: mainWavesRefetch,
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: ["2", "3"],
+    pinnedWaves: [pinnedExtra],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: refetchPinnedWaves,
+  });
+
+  const { result } = renderHook(() => useWavesList(), {
+    wrapper: createWrapper(authContextValue({ connectedProfile: null })),
+  });
+
+  act(() => {
+    result.current.refetchAllWaves();
+  });
+
+  expect(mainWavesRefetch).toHaveBeenCalledTimes(1);
+  expect(refetchPinnedWaves).not.toHaveBeenCalled();
 });
