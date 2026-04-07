@@ -72,7 +72,7 @@ jobs:
           ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./bin/6529 build
+        run: ./bin/6529 run build
 
       - name: Build Target
         run: |
