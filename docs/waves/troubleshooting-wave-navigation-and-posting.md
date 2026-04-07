@@ -77,8 +77,11 @@ is blocked.
 
 ## Posting and Submission Checks
 
+- Footer shows `Connect your wallet to participate in this wave`:
+  both chat and submission are blocked because the current viewer is signed out.
 - Footer shows `You cannot participate in this wave at the moment`:
-  both chat and submission are blocked for your current context.
+  both chat and submission are blocked for your current context, but not
+  because the current viewer is signed out.
 - Footer shows `Wave is closed`:
   chat is disabled for the current chat-type wave context.
 - Footer shows a chat restriction:

@@ -1,4 +1,14 @@
-import { ChatRestriction, SubmissionRestriction } from "@/hooks/useDropPriviledges";
+import {
+  ChatRestriction,
+  SubmissionRestriction,
+} from "@/hooks/useDropPriviledges";
+
+function throwUnhandledRestriction(
+  type: "chat" | "submission",
+  restriction: string
+): never {
+  throw new Error(`Unhandled ${type} restriction: ${restriction}`);
+}
 
 interface DropPlaceholderProps {
   readonly type: "chat" | "submission" | "both";
@@ -6,7 +16,11 @@ interface DropPlaceholderProps {
   readonly submissionRestriction?: SubmissionRestriction | undefined;
 }
 
-export default function DropPlaceholder({ type, chatRestriction, submissionRestriction }: DropPlaceholderProps) {
+export default function DropPlaceholder({
+  type,
+  chatRestriction,
+  submissionRestriction,
+}: DropPlaceholderProps) {
   const getMessage = () => {
     if (type === "chat" && chatRestriction) {
       switch (chatRestriction) {
@@ -19,7 +33,7 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
         case ChatRestriction.DISABLED:
           return "Chat is currently disabled for this wave";
         default: {
-          throw new Error(`Unhandled chat restriction: ${chatRestriction}`);
+          return throwUnhandledRestriction("chat", String(chatRestriction));
         }
       }
     }
@@ -39,12 +53,22 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
         case SubmissionRestriction.MAX_DROPS_REACHED:
           return "You have reached the maximum number of drops allowed";
         default: {
-          throw new Error(`Unhandled submission restriction: ${submissionRestriction}`);
+          return throwUnhandledRestriction(
+            "submission",
+            String(submissionRestriction)
+          );
         }
       }
     }
 
     if (type === "both") {
+      if (
+        chatRestriction === ChatRestriction.NOT_LOGGED_IN &&
+        submissionRestriction === SubmissionRestriction.NOT_LOGGED_IN
+      ) {
+        return "Connect your wallet to participate in this wave";
+      }
+
       return "You cannot participate in this wave at the moment";
     }
 
@@ -52,7 +76,8 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
   };
 
   const getColor = () => {
-    if (type === "chat" && chatRestriction === ChatRestriction.NOT_LOGGED_IN) return "tw-text-primary-400";
+    if (type === "chat" && chatRestriction === ChatRestriction.NOT_LOGGED_IN)
+      return "tw-text-primary-400";
     if (type === "submission") {
       switch (submissionRestriction) {
         case SubmissionRestriction.NOT_LOGGED_IN:
@@ -71,10 +96,12 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
   };
 
   return (
-    <div className="tw-min-h-[48px] tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-bg-iron-900/50 tw-backdrop-blur tw-rounded-xl tw-border tw-border-iron-800/50">
+    <div className="tw-flex tw-min-h-[48px] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-iron-800/50 tw-bg-iron-900/50 tw-px-4 tw-py-3 tw-backdrop-blur">
       <div className="tw-flex tw-flex-col">
-        <p className={`tw-text-sm tw-font-medium tw-mb-0 ${getColor()}`}>{getMessage()}</p>
+        <p className={`tw-mb-0 tw-text-sm tw-font-medium ${getColor()}`}>
+          {getMessage()}
+        </p>
       </div>
     </div>
   );
-} 
+}

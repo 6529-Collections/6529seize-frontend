@@ -17,6 +17,7 @@ const mockRemoveAllDeliveredNotifications = jest
   .fn()
   .mockResolvedValue(undefined);
 const invalidateNotificationsMock = jest.fn();
+const mockUseAuth = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
@@ -91,6 +92,10 @@ jest.mock("@/components/notifications/NotificationsContext", () => ({
   }),
 }));
 
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => mockUseAuth(),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
 }));
@@ -114,6 +119,9 @@ describe("MyStreamWaveChat", () => {
     mockRemoveWaveDeliveredNotifications.mockClear();
     mockRemoveAllDeliveredNotifications.mockClear();
     invalidateNotificationsMock.mockClear();
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { handle: "tester" },
+    });
     (
       commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
         typeof commonApiPostWithoutBodyAndResponse
@@ -195,5 +203,28 @@ describe("MyStreamWaveChat", () => {
       });
       expect(invalidateNotificationsMock).toHaveBeenCalled();
     });
+  });
+
+  it("skips notification cleanup on unmount for anonymous viewers", async () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: null,
+    });
+
+    const { unmount } = renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    await act(async () => {
+      unmount();
+    });
+
+    expect(mockRemoveWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotificationsMock).not.toHaveBeenCalled();
   });
 });
