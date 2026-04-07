@@ -4,7 +4,6 @@ import type { FC } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
-import { useWave } from "@/hooks/useWave";
 import type { ApiWave } from "@/generated/models/ApiWave";
 
 interface TimelineToggleHeaderProps {
@@ -25,9 +24,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
   nextDecisionTime,
   isPaused = false,
   currentPause,
-  wave,
 }) => {
-  const waveData = useWave(wave);
   const hasNextDecision = typeof nextDecisionTime === "number";
 
   // Extract the status display logic
@@ -40,23 +37,14 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
           </span>
           <span className="tw-text-iron-500">•</span>
           <span className="tw-whitespace-nowrap tw-font-medium tw-text-iron-300">
-            Next decision after{" "}
-            {(() => {
-              const mintingDate =
-                waveData.pauses.calculateMintingDate(nextDecisionTime);
-              return typeof mintingDate === "number"
-                ? new Date(mintingDate).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                  })
-                : new Date(currentPause.end_time).toLocaleDateString(
-                    undefined,
-                    {
-                      month: "short",
-                      day: "numeric",
-                    }
-                  );
-            })()}
+            {hasNextDecision
+              ? `Next decision after ${new Date(
+                  nextDecisionTime
+                ).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                })}`
+              : "No decision scheduled"}
           </span>
         </span>
       );
