@@ -199,6 +199,9 @@ To test end-to-end:
 ./bin/6529 staging
 ```
 
+This rebuilds the app and restarts PM2 on the standalone runtime path
+(`6529 run start:standalone`).
+
 - One-time server bootstrap for plain `6529 ...`
 
 ```bash
@@ -218,6 +221,10 @@ Then open a new shell, or source the rc file that matches your shell.
 ```bash
 6529 run start
 ```
+
+This is the repo-local production-style start path.
+Elastic Beanstalk production deploys do not use `6529 run start`; they package
+Next standalone output and start `server.js` through [`Procfile`](./Procfile).
 
 ### RUN USING PM2
 

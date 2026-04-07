@@ -131,7 +131,8 @@ Normal day-to-day commands:
 - 6529 staging
 - 6529 run test
 - 6529 run lint
-- pm2 start ./bin/6529 --name=6529seize -- run start
+- 6529 run start   (local production-style start from the repo root)
+- pm2 start bash --name=6529seize -- -lc 'cd /path/to/repo && ./bin/6529 run start:standalone'   (staging PM2)
 
 Fresh-clone-safe staging entrypoint:
 - ./bin/6529 staging

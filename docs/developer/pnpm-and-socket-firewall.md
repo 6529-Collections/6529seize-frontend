@@ -66,10 +66,17 @@ explicitly:
 
 ## Day-to-day commands
 
-PM2 should launch the app through the repo wrapper:
+For a local production-style start from the repo root:
 
 ```bash
-pm2 start ./bin/6529 --name=6529seize -- run start
+6529 run start
+```
+
+For staging PM2, launch through bash so PM2 does not try to execute the shell
+wrapper as JavaScript:
+
+```bash
+pm2 start bash --name=6529seize -- -lc 'cd /path/to/repo && ./bin/6529 run start:standalone'
 ```
 
 If pnpm reports ignored install/build scripts, use:
@@ -86,9 +93,8 @@ If pnpm reports ignored install/build scripts, use:
 - [`scripts/assert-no-package-lock.cjs`](../../scripts/assert-no-package-lock.cjs) fails if `package-lock.json` reappears.
 - Helper scripts, Playwright, worktree tooling, staging scripts, and PM2 docs now use pnpm.
 - Production CI builds the Elastic Beanstalk bundle with pnpm, uploads
-  `/_next/static` assets to S3/CloudFront, and packages the application bundle
-  for Elastic Beanstalk while EB installs runtime dependencies with the pinned
-  pnpm version on-instance.
+  `/_next/static` assets to S3/CloudFront, and packages a standalone runtime
+  bundle for Elastic Beanstalk.
 
 ## Elastic Beanstalk deployment model
 
@@ -99,15 +105,22 @@ The production workflow now:
    In CI, the workflow passes the Socket action's absolute `firewall-path-binary`
    output as `SFW_BIN` so the secure install wrapper does not rely on PATH lookup.
 3. Builds the app.
-4. Packages `package.zip` from the repo build output, including the built
-   `.next/` tree needed at runtime, `public/`, and Elastic Beanstalk config.
+4. Packages `package.zip` from the standalone build output, including:
+   `.next/standalone`, `.next/static`, `public/`, `Procfile`,
+   `.ebextensions/`, and `.platform/`.
 5. Uploads `target/_next/static` and `package.zip` to S3 under the build
    version path.
 
 At deploy time, [`runtime-bundle.config`](../../.ebextensions/runtime-bundle.config)
-restores the real `package.json`, activates the pinned pnpm version, installs
-production dependencies, verifies the runtime bundle, and then Elastic
-Beanstalk starts the app through `node scripts/start-next.cjs`.
+restores the real `package.json`, verifies the standalone runtime bundle, and
+Elastic Beanstalk starts the app through the top-level `Procfile`, which runs
+`PORT=3001 HOSTNAME=0.0.0.0 node server.js`.
+
+[`01-bypass-eb-npm-install.sh`](../../.platform/hooks/prebuild/01-bypass-eb-npm-install.sh)
+is part of that model. It temporarily swaps in a tiny placeholder
+`package.json` so Elastic Beanstalk's default Node platform install step
+becomes a no-op. The real `package.json` is restored later in the deploy by
+[`runtime-bundle.config`](../../.ebextensions/runtime-bundle.config).
 
 ## Socket Firewall Free limitations
 
@@ -124,8 +137,8 @@ Because of those limits, the strongest enforcement in this repo comes from:
 - standardizing commands on `pnpm`
 - rejecting `npm`/`yarn` installs
 - making CI the build authority for the deployed app bundle
-- preserving the built `.next/` runtime files while keeping dependency
-  installation pinned and explicit on Elastic Beanstalk
+- shipping the standalone runtime bundle directly instead of reconstructing
+  runtime dependencies on Elastic Beanstalk
 
 ## When Enterprise is needed
 

@@ -16,7 +16,7 @@ instead of this host-provisioning script.
 - Installs **Socket Firewall** and uses `6529 install:frozen`
 - Installs **PM2**
 - Prompts you and writes **.env** **before** any build (no `.env.sample` used)
-- Installs deps, **builds**, and **starts** the app with PM2 (default port **3001**)
+- Installs deps, **builds**, and **starts** the app with PM2 on the standalone runtime path (default port **3001**)
 - **Optionally** installs **NGINX + Certbot** and configures HTTPS for `https://<slug>staging.6529.io`
 - Enables PM2 start on boot (Linux)
 
@@ -86,7 +86,9 @@ bash dev-setup/run-staging-ec2-setup.sh
   - `IPFS_GATEWAY_ENDPOINT=https://ipfs.6529.io`
   - `BASE_ENDPOINT=https://<slug>staging.6529.io`
 
-The script then installs deps through Socket Firewall + pnpm, builds, starts the app with PM2, and **offers** to set up NGINX + HTTPS.
+The script then installs deps through Socket Firewall + pnpm, builds,
+starts the app with PM2 via `./bin/6529 run start:standalone`, and **offers**
+to set up NGINX + HTTPS.
 
 ---
 
