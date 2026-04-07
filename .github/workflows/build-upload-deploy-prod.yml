@@ -77,10 +77,26 @@ jobs:
       - name: Build Target
         run: |
           rm -rf target
-          rm -rf .next/node_modules
           mkdir -p target/_next
           cp -R .next/static target/_next/static
-          zip -yr package.zip . -x '*.git*' 'target/*' 'node_modules/*' '.next/node_modules/*'
+          if [ -d .next/node_modules ]; then
+            tmp_next_node_modules="$(mktemp -d)"
+            find .next/node_modules -type l | while read -r module_link; do
+              module_rel="${module_link#.next/node_modules/}"
+              module_copy="$tmp_next_node_modules/$module_rel"
+              mkdir -p "$(dirname "$module_copy")"
+              cp -RL "$module_link" "$module_copy"
+              rm "$module_link"
+              mkdir -p "$(dirname "$module_link")"
+              cp -R "$module_copy" "$module_link"
+            done
+            if find .next/node_modules -type l | grep -q .; then
+              echo ".next/node_modules still contains symlinks after normalization"
+              find .next/node_modules -type l
+              exit 1
+            fi
+          fi
+          zip -yr package.zip . -x '*.git*' 'target/*' 'node_modules/*'
           mv package.zip target/
 
       - name: Verify package bundle size
