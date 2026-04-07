@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
@@ -41,10 +42,17 @@ interface WaveDropReactionsProps {
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
   const isTouchDevice = useIsTouchDevice();
+  const { isConnected } = useSeizeConnectContext();
 
-  const handleOpenDialog = useCallback((reactionKey: string) => {
-    setDialogReaction(reactionKey);
-  }, []);
+  const handleOpenDialog = useCallback(
+    (reactionKey: string) => {
+      if (!isConnected) {
+        return;
+      }
+      setDialogReaction(reactionKey);
+    },
+    [isConnected]
+  );
 
   const handleCloseDialog = useCallback(() => {
     setDialogReaction(null);
@@ -58,6 +66,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           drop={drop}
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
+          isConnected={isConnected}
           isTouchDevice={isTouchDevice}
         />
       ))}
@@ -75,11 +84,13 @@ function WaveDropReaction({
   drop,
   reaction,
   onOpenDetailDialog,
+  isConnected,
   isTouchDevice,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
+  readonly isConnected: boolean;
   readonly isTouchDevice: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
@@ -88,8 +99,11 @@ function WaveDropReaction({
   const rollbackRef = useRef<(() => void) | null>(null);
 
   const handleLongPressStart = useCallback(() => {
+    if (!isConnected) {
+      return;
+    }
     onOpenDetailDialog(reaction.reaction);
-  }, [onOpenDetailDialog, reaction.reaction]);
+  }, [isConnected, onOpenDetailDialog, reaction.reaction]);
 
   const { longPressTriggered, touchHandlers } = useLongPressInteraction({
     hasTouchScreen: isTouchDevice,
@@ -321,7 +335,7 @@ function WaveDropReaction({
   );
 
   const handleClick = useCallback(async () => {
-    if (longPressTriggered) {
+    if (!isConnected || longPressTriggered) {
       return;
     }
 
@@ -361,6 +375,7 @@ function WaveDropReaction({
   }, [
     applyOptimisticReactionChange,
     drop.id,
+    isConnected,
     longPressTriggered,
     reaction.reaction,
     selected,
@@ -375,18 +390,24 @@ function WaveDropReaction({
 
   const handleMoreClick = useCallback(
     (e: React.MouseEvent) => {
+      if (!isConnected) {
+        return;
+      }
       e.stopPropagation();
       onOpenDetailDialog(reaction.reaction);
     },
-    [onOpenDetailDialog, reaction.reaction]
+    [isConnected, onOpenDetailDialog, reaction.reaction]
   );
 
   // styles
   const borderStyle = selected ? "tw-border-primary-500" : "tw-border-iron-700";
   const bgStyle = selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40";
-  const hoverStyle = selected
-    ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
-    : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  let hoverStyle = "";
+  if (isConnected) {
+    hoverStyle = selected
+      ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
+      : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  }
   let animationStyle = "";
   if (animate) {
     if (selected) {
@@ -401,15 +422,17 @@ function WaveDropReaction({
     <>
       <button
         onClick={handleClick}
-        {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
+        disabled={!isConnected}
+        {...(!isTouchDevice && isConnected && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
-          "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm hover:tw-text-iron-100",
+          "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm",
+          isConnected ? "hover:tw-text-iron-100" : "tw-cursor-default",
           borderStyle,
           bgStyle,
           hoverStyle
         )}
-        {...wrappedTouchHandlers}
+        {...(isConnected ? wrappedTouchHandlers : {})}
       >
         <div className="tw-flex tw-h-full tw-items-center tw-gap-x-1">
           <div className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
@@ -425,7 +448,7 @@ function WaveDropReaction({
           </span>
         </div>
       </button>
-      {!isTouchDevice && (
+      {!isTouchDevice && isConnected && (
         <Tooltip
           id={tooltipId}
           delayShow={250}
