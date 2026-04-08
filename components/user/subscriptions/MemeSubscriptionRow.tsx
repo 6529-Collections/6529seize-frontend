@@ -47,7 +47,10 @@ export default function MemeSubscriptionRow(
   );
 
   const subscribedCount = useMemo<number>(
-    () => props.subscription.subscribed_count ?? 1,
+    () => {
+      const count = props.subscription.subscribed_count;
+      return count && count > 0 ? count : 1;
+    },
     [props.subscription.subscribed_count]
   );
 

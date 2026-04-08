@@ -92,7 +92,7 @@ describe("LatestDropNextMintSubscribe", () => {
       /readonly:false/
     );
     expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
-      /balance:/
+      /balance:0/
     );
     expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
       /variant:compact/

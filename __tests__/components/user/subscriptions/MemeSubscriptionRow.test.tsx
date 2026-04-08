@@ -79,4 +79,71 @@ describe("MemeSubscriptionRow", () => {
       screen.getByText(/Phase: Phase 1 - Subscription Position: 4 \/ 12/)
     ).toBeInTheDocument();
   });
+
+  it("renders the compact balance label", () => {
+    renderWithAuth(
+      <MemeSubscriptionRow
+        profileKey="test-key"
+        title="The Memes"
+        subscription={
+          {
+            token_id: 478,
+            contract: "0x123",
+            subscribed: true,
+            subscribed_count: 2,
+          } as any
+        }
+        eligibilityCount={3}
+        readonly
+        refresh={jest.fn()}
+        minting_today={false}
+        first
+        date={null}
+        variant="compact"
+        balanceLabel="0.5"
+        subscribedView
+      />
+    );
+
+    expect(screen.getByText("Balance")).toBeInTheDocument();
+    expect(screen.getByText("0.5")).toBeInTheDocument();
+  });
+
+  it("omits phase metadata when the final subscription is unavailable", () => {
+    useQueryMock.mockImplementation(({ queryKey }) => {
+      if (queryKey[0] === "consolidation-final-subscription") {
+        return { data: null };
+      }
+
+      return {
+        data: null,
+      };
+    });
+
+    renderWithAuth(
+      <MemeSubscriptionRow
+        profileKey="test-key"
+        title="The Memes"
+        subscription={
+          {
+            token_id: 478,
+            contract: "0x123",
+            subscribed: true,
+            subscribed_count: 2,
+          } as any
+        }
+        eligibilityCount={3}
+        readonly
+        refresh={jest.fn()}
+        minting_today={false}
+        first
+        date={null}
+        variant="compact"
+        balanceLabel="0.5"
+        subscribedView
+      />
+    );
+
+    expect(screen.queryByText(/Phase:/)).not.toBeInTheDocument();
+  });
 });
