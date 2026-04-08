@@ -10893,6 +10893,7 @@ components:
         - curation_wave_id
         - distribution_admin_wallets
         - claims_admin_wallets
+        - announcements_wave_id
       properties:
         rememes_submission_tdh_threshold:
           type: integer
@@ -10914,6 +10915,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiEthereumAddress"
+        announcements_wave_id:
+          type: string
+          nullable: true
     ApiSetPinnedDropRequest:
       type: object
       required:
