@@ -22,7 +22,7 @@ function DialogCloseButton({
       title="Close panel"
       aria-label="Close panel"
       className={clsx(
-        "tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.04] hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
+        "-tw-mr-2 -tw-mt-2.5 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.04] hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
         className
       )}
       onClick={onClick}
@@ -50,14 +50,16 @@ function DialogHeader({
   title,
   showDesktopCloseButton,
   onClose,
+  className,
 }: {
   readonly title: string | undefined;
   readonly showDesktopCloseButton: boolean;
   readonly onClose: () => void;
+  readonly className?: string | undefined;
 }) {
   return (
-    <div className="tw-px-4 sm:tw-px-6">
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+    <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         {title && (
           <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
             {title}
@@ -107,6 +109,7 @@ export default function MobileWrapperDialog({
   showScrollbar,
   allowOverflow,
   maxWidthClass,
+  headerClassName,
   dismissible = true,
 }: {
   readonly title?: string | undefined;
@@ -122,6 +125,7 @@ export default function MobileWrapperDialog({
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
+  readonly headerClassName?: string | undefined;
   readonly dismissible?: boolean | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
@@ -249,6 +253,7 @@ export default function MobileWrapperDialog({
                         title={title}
                         showDesktopCloseButton={showDesktopHeaderCloseButton}
                         onClose={handleClose}
+                        className={headerClassName}
                       />
                       {children}
                     </div>

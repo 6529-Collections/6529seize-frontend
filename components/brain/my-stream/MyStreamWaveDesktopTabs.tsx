@@ -13,6 +13,7 @@ import { Time } from "@/helpers/time";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, WaveVotingState } from "../ContentTabContext";
 import MyStreamWaveCurationCreateDialog from "./tabs/MyStreamWaveCurationCreateDialog";
+import MyStreamActionTooltip from "./MyStreamActionTooltip";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -235,6 +236,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const activeKey = activeCurationId
     ? `curation:${activeCurationId}`
     : activeTab;
+  const createCurationTooltipId = `my-stream-create-curation-${wave.id}`;
 
   return (
     <>
@@ -257,14 +259,16 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           <button
             type="button"
             onClick={() => setIsCreateCurationOpen(true)}
+            data-tooltip-id={createCurationTooltipId}
+            data-tooltip-content="Create curation"
             className="tw-mt-1 tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
             aria-label="Create curation"
-            title="Create curation"
           >
             <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </button>
         )}
       </div>
+      <MyStreamActionTooltip id={createCurationTooltipId} />
 
       {isCreateCurationOpen && (
         <MyStreamWaveCurationCreateDialog

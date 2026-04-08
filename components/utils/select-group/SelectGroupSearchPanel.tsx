@@ -20,6 +20,7 @@ const DEFAULT_BODY_CLASSES =
 type SelectGroupSearchPanelProps = {
   readonly onClose?: (() => void) | undefined;
   readonly onGroupSelect: (group: ApiGroupFull) => void;
+  readonly onGroupClear?: (() => void) | undefined;
   readonly selectedGroupId?: string | null | undefined;
   readonly containerClassName?: string | undefined;
   readonly bodyClassName?: string | undefined;
@@ -31,6 +32,7 @@ type SelectGroupSearchPanelProps = {
 export default function SelectGroupSearchPanel({
   onClose,
   onGroupSelect,
+  onGroupClear,
   selectedGroupId,
   containerClassName,
   bodyClassName,
@@ -111,6 +113,7 @@ export default function SelectGroupSearchPanel({
           selectedGroupId={selectedGroupId ?? null}
           loading={isFetching}
           onGroupSelect={onGroupSelect}
+          onGroupClear={onGroupClear}
         />
       </div>
     </div>
