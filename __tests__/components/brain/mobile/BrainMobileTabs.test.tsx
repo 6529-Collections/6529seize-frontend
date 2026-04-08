@@ -52,6 +52,10 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: { handle: "alice" } }),
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
+
 const leaderboardMock = jest.fn();
 jest.mock("@/components/brain/my-stream/MyStreamWaveTabsLeaderboard", () => ({
   __esModule: true,
@@ -71,6 +75,9 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveTabsLeaderboard", () => ({
 const { useWave } = require("@/hooks/useWave");
 const { useUnreadIndicator } = require("@/hooks/useUnreadIndicator");
 const { useUnreadNotifications } = require("@/hooks/useUnreadNotifications");
+const {
+  useSeizeConnectContext,
+} = require("@/components/auth/SeizeConnectContext");
 
 describe("BrainMobileTabs", () => {
   const onViewChange = jest.fn();
@@ -84,6 +91,9 @@ describe("BrainMobileTabs", () => {
     (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
     (useUnreadNotifications as jest.Mock).mockReturnValue({
       haveUnreadNotifications: false,
+    });
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      isConnected: true,
     });
   });
 
@@ -201,6 +211,34 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByText("Sales")).toBeInTheDocument();
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(screen.queryByText("FAQ")).toBeNull();
+  });
+
+  it("hides My Votes for disconnected memes rank wave", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      isMemesWave: true,
+      isCurationWave: false,
+      isRankWave: true,
+    });
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      isConnected: false,
+    });
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={{ id: "1" } as any}
+      />
+    );
+
+    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
+    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.getByText("Outcome")).toBeInTheDocument();
+    expect(screen.getByText("FAQ")).toBeInTheDocument();
   });
 
   it("renders Sales for non-rank curation waves", () => {

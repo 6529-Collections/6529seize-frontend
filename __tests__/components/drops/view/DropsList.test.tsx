@@ -235,6 +235,20 @@ describe("DropsList", () => {
       rank: 1,
       variant: "chat",
     });
+
+    const boostedCard = screen.getByTestId("boosted-card");
+
+    expect(boostedCard.parentElement).toHaveClass(
+      "tw-rounded-2xl",
+      "tw-bg-iron-900/50",
+      "tw-p-2",
+      "sm:tw-p-3"
+    );
+    expect(boostedCard.parentElement?.parentElement).toHaveClass(
+      "tw-px-3",
+      "tw-py-4",
+      "sm:tw-px-4"
+    );
   });
 
   it("clicking an inline boosted card calls onBoostedDropClick with the drop serial", () => {

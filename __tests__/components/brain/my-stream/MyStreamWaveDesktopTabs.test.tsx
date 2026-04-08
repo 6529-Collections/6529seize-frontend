@@ -60,6 +60,10 @@ jest.mock("@/components/waves/leaderboard/time/CompactTimeCountdown", () => ({
   ),
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
+
 import MyStreamWaveDesktopTabs from "@/components/brain/my-stream/MyStreamWaveDesktopTabs";
 
 let mockAvailableTabs: MyStreamWaveTab[] = [];
@@ -71,6 +75,9 @@ let mockWaveInfo: any = {
 };
 let mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
 let mockDecisions: { timestamp: number }[] = [];
+const {
+  useSeizeConnectContext,
+} = require("@/components/auth/SeizeConnectContext");
 
 function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
   return render(
@@ -93,6 +100,9 @@ beforeEach(() => {
   };
   mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
   mockDecisions = [];
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({
+    isConnected: true,
+  });
 });
 
 describe("MyStreamWaveDesktopTabs", () => {
@@ -144,6 +154,32 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(screen.getByText("Sales")).toBeInTheDocument();
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(setActiveTab).not.toHaveBeenCalled();
+  });
+
+  it("hides My Votes for disconnected memes waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isMemesWave: true,
+      isCurationWave: false,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.FAQ,
+    ];
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      isConnected: false,
+    });
+
+    renderComponent(MyStreamWaveTab.MY_VOTES);
+
+    expect(screen.getByText("Leaderboard")).toBeInTheDocument();
+    expect(screen.getByText("Chat")).toBeInTheDocument();
+    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.LEADERBOARD);
   });
 
   it("keeps Sales hidden outside curation waves", () => {

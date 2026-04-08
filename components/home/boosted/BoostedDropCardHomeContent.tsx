@@ -38,6 +38,7 @@ type OverflowElements = {
 const CHAT_MEDIA_FALLBACK_ASPECT_RATIO = "8 / 5";
 const HOME_ASPECT_RATIO_CLASSES =
   "tw-aspect-[2/1] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5]";
+const CHAT_BODY_INSET_X_CLASSES = "tw-px-3 sm:tw-px-4";
 const CHAT_PREVIEW_CONTAINER_CLASSES =
   "tw-relative tw-flex tw-w-full tw-flex-col tw-items-stretch tw-justify-start tw-gap-3 tw-overflow-hidden tw-rounded-xl";
 const CHAT_TEXT_CONTAINER_CLASSES =
@@ -170,6 +171,13 @@ const getContentTextClassName = (hasPreview: boolean): string => {
 
   return `${clampClasses} ${CONTENT_TEXT_BASE_CLASSES}`;
 };
+
+const getChatBodyInsetClasses = ({
+  addBottomPadding,
+}: {
+  readonly addBottomPadding: boolean;
+}): string =>
+  `${CHAT_BODY_INSET_X_CLASSES}${addBottomPadding ? " tw-pb-4" : ""}`;
 
 const getOverflowElements = ({
   container,
@@ -587,6 +595,11 @@ const BoostedDropCardTextSection = memo(
       isChatVariant,
     });
     const contentTextClassName = getContentTextClassName(hasPreview);
+    const previewWrapperClassName = isChatVariant
+      ? `${getChatBodyInsetClasses({
+          addBottomPadding: !hasTextContent,
+        })} tw-min-h-0 tw-overflow-hidden`
+      : "tw-min-h-0 tw-overflow-hidden";
 
     return (
       <div
@@ -596,7 +609,7 @@ const BoostedDropCardTextSection = memo(
       >
         <div className={contentWrapperClasses} ref={contentWrapperRef}>
           {previewUrl && (
-            <div className="tw-min-h-0 tw-overflow-hidden" ref={previewRef}>
+            <div className={previewWrapperClassName} ref={previewRef}>
               <BoostedDropLinkPreview
                 href={previewUrl}
                 variant={isChatVariant ? "chat" : "home"}
@@ -652,7 +665,13 @@ const BoostedDropCardHomeContent = memo(
       if (supplementalChatPart) {
         return (
           <div className={CHAT_MEDIA_WITH_CONTENT_CLASSES}>
-            <BoostedDropCardChatMedia media={media} />
+            <div
+              className={getChatBodyInsetClasses({
+                addBottomPadding: false,
+              })}
+            >
+              <BoostedDropCardChatMedia media={media} />
+            </div>
             <BoostedDropCardTextSection
               isChatVariant={true}
               isSupplementalChatContent={true}
@@ -662,7 +681,11 @@ const BoostedDropCardHomeContent = memo(
         );
       }
 
-      return <BoostedDropCardChatMedia media={media} />;
+      return (
+        <div className={getChatBodyInsetClasses({ addBottomPadding: true })}>
+          <BoostedDropCardChatMedia media={media} />
+        </div>
+      );
     }
 
     return <BoostedDropCardHomeMedia media={media} />;

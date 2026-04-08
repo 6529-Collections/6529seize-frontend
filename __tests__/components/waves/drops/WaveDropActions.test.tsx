@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
@@ -12,6 +13,11 @@ jest.mock("@/components/waves/drops/WaveDropActionsAddReaction", () => ({
 jest.mock("@/components/waves/drops/WaveDropActionsBoost", () => ({
   __esModule: true,
   default: () => <div data-testid="boost" />,
+}));
+
+jest.mock("@/components/waves/drops/WaveDropActionsCopyLink", () => ({
+  __esModule: true,
+  default: () => <div data-testid="copy-link" />,
 }));
 
 jest.mock("@/components/waves/drops/WaveDropActionsEdit", () => ({
@@ -55,7 +61,12 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: jest.fn(),
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
+
 const settingsMock = useSeizeSettings as jest.Mock;
+const seizeConnectContextMock = useSeizeConnectContext as jest.Mock;
 
 const baseDrop: any = {
   id: "drop-1",
@@ -66,6 +77,7 @@ const baseDrop: any = {
 describe("WaveDropActions", () => {
   beforeEach(() => {
     settingsMock.mockReturnValue({ isMemesWave: () => false });
+    seizeConnectContextMock.mockReturnValue({ isConnected: true });
   });
 
   it("keeps hidden actions non-interactive while closed", () => {
@@ -116,6 +128,24 @@ describe("WaveDropActions", () => {
       />
     );
 
+    expect(screen.queryByTestId("rate")).toBeNull();
+  });
+
+  it("shows only copy link when disconnected", () => {
+    seizeConnectContextMock.mockReturnValue({ isConnected: false });
+
+    render(
+      <WaveDropActions drop={baseDrop} activePartIndex={0} onReply={() => {}} />
+    );
+
+    expect(screen.getByTestId("copy-link")).toBeInTheDocument();
+    expect(screen.queryByTestId("quick-react")).toBeNull();
+    expect(screen.queryByTestId("add-reaction")).toBeNull();
+    expect(screen.queryByTestId("reply")).toBeNull();
+    expect(screen.queryByTestId("boost")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Open more actions" })
+    ).toBeNull();
     expect(screen.queryByTestId("rate")).toBeNull();
   });
 });
