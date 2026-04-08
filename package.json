@@ -35,7 +35,7 @@
     "lint:package-json": "node scripts/require-6529-command.cjs && node scripts/lint-package-json.cjs",
     "lint:quiet": "node scripts/require-6529-command.cjs && eslint . --quiet",
     "lint": "node scripts/require-6529-command.cjs && eslint .",
-    "typecheck": "node scripts/require-6529-command.cjs && tsc --noEmit",
+    "typecheck": "node scripts/require-6529-command.cjs && tsc --noEmit -p tsconfig.typecheck.json",
     "typecheck:changed": "node scripts/require-6529-command.cjs && node scripts/typecheck-changed.cjs",
     "lint:csv": "node scripts/require-6529-command.cjs && node scripts/eslint-rule-summary.cjs --output eslint-rule-summary.csv",
     "lint:csv:tight": "node scripts/require-6529-command.cjs && node scripts/eslint-rule-summary.cjs --config eslint.config.tight.mjs --output eslint-rule-summary.csv",

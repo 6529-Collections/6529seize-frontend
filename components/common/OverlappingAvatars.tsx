@@ -1,6 +1,6 @@
 "use client";
 
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getScaledResolvedImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import Image from "next/image";
@@ -50,7 +50,7 @@ function AvatarContent({
   const { activeSrc, isPlaceholder, unoptimized, handleError } =
     useGatewayImageLoadState(pfpUrl);
 
-  if (isPlaceholder) {
+  if (isPlaceholder || activeSrc === null) {
     return (
       <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black">
         <span className="tw-text-[0.625rem] tw-font-semibold tw-text-iron-300">
@@ -63,7 +63,7 @@ function AvatarContent({
   return (
     <Image
       key={`${activeSrc}-${unoptimized ? "unoptimized" : "optimized"}`}
-      src={getScaledImageUri(activeSrc, ImageScale.W_AUTO_H_50)}
+      src={getScaledResolvedImageUri(activeSrc, ImageScale.W_AUTO_H_50)}
       alt={ariaLabel ?? "Profile"}
       fill
       sizes="28px"

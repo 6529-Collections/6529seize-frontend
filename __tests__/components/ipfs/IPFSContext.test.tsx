@@ -61,6 +61,13 @@ describe("IpfsContext", () => {
       .toBe("https://ipfs.test.6529.io/ipfs/sync");
   });
 
+  it("preserves configured gateway port and base path when rewriting ipfs.io urls", () => {
+    publicEnv.IPFS_GATEWAY_ENDPOINT = "https://ipfs.test.6529.io:8443/base/ipfs";
+
+    expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync?x=1#hash"))
+      .toBe("https://ipfs.test.6529.io:8443/base/ipfs/sync?x=1#hash");
+  });
+
   it("returns original url if env missing", async () => {
     publicEnv.IPFS_GATEWAY_ENDPOINT = undefined;
     publicEnv.IPFS_API_ENDPOINT = undefined;

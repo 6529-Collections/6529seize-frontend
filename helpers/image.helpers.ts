@@ -17,8 +17,10 @@ const SCALABLE_PREFIXES = [
   "https://d3lqz0a4bldqgf.cloudfront.net/images/",
 ];
 
-export function getScaledImageUri(url: string, scale: ImageScale): string {
-  const resolvedUrl = resolveIpfsUrlSync(url);
+export function getScaledResolvedImageUri(
+  resolvedUrl: string,
+  scale: ImageScale
+): string {
   const scalableUrl = SCALABLE_PREFIXES.find((prefix) =>
     resolvedUrl.startsWith(prefix)
   );
@@ -46,4 +48,8 @@ export function getScaledImageUri(url: string, scale: ImageScale): string {
     }${scale}/${fileName}`;
   }
   return resolvedUrl;
+}
+
+export function getScaledImageUri(url: string, scale: ImageScale): string {
+  return getScaledResolvedImageUri(resolveIpfsUrlSync(url), scale);
 }

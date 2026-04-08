@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getScaledResolvedImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useGatewayImageLoadState } from "@/components/common/image/useGatewayImageLoadState";
@@ -25,7 +25,7 @@ export default function NotificationHeader({
         {!isPlaceholder && activeSrc ? (
           <Image
             key={`${activeSrc}-${unoptimized ? "unoptimized" : "optimized"}`}
-            src={getScaledImageUri(activeSrc, ImageScale.W_AUTO_H_50)}
+            src={getScaledResolvedImageUri(activeSrc, ImageScale.W_AUTO_H_50)}
             alt={author.handle ?? "User profile"}
             fill
             sizes="28px"
