@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ComponentProps, ContextType } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
 import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
@@ -122,6 +123,10 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: jest.fn(() => ({ isApp: false })),
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
@@ -139,6 +144,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 const useIdentityMock = useIdentity as jest.Mock;
+const useSeizeConnectContextMock = useSeizeConnectContext as jest.Mock;
 const commonApiFetchMock = commonApiFetch as jest.Mock;
 const createDirectMessageWaveMock = createDirectMessageWave as jest.Mock;
 const navigateToDirectMessageMock = navigateToDirectMessage as jest.Mock;
@@ -220,6 +226,7 @@ describe("UserProfileTooltip", () => {
 
     useRouterMock.mockReturnValue(mockRouter);
     useIdentityMock.mockReturnValue({ profile: mockProfile });
+    useSeizeConnectContextMock.mockReturnValue({ isConnected: true });
     createDirectMessageWaveMock.mockResolvedValue({ id: "wave-1" });
 
     commonApiFetchMock.mockImplementation(
@@ -358,6 +365,21 @@ describe("UserProfileTooltip", () => {
     renderTooltip({
       authOverrides: {
         connectedProfile: { handle: "bob" },
+      },
+    });
+
+    expect(screen.queryByTestId("follow-btn")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Send direct message" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not render the follow action when logged out", () => {
+    useSeizeConnectContextMock.mockReturnValue({ isConnected: false });
+
+    renderTooltip({
+      authOverrides: {
+        connectedProfile: null,
       },
     });
 
