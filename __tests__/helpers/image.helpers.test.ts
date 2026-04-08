@@ -37,7 +37,9 @@ describe("getScaledImageUri", () => {
       "https://ipfs-gateway.test/ipfs/QmVdHEkqhPqjBCzS2cSNDhRwz4X2TicEzQtP9ep5Lspyc8"
     );
   });
+});
 
+describe("getScaledResolvedImageUri", () => {
   it("does not re-resolve already concrete urls", () => {
     const url = "https://ipfs.io/ipfs/QmConcrete";
     expect(getScaledResolvedImageUri(url, ImageScale.W_AUTO_H_50)).toBe(url);
