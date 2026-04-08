@@ -32,6 +32,8 @@ interface CookieStoreWithEvents {
   onchange?: ((event: CookieChangeEventLike) => void) | null | undefined;
 }
 
+type HealthCheckAction = "none" | "connect" | "disconnect";
+
 const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
   const matchChanged = event.changed?.some(
     (cookie) => cookie.name === WALLET_AUTH_COOKIE
@@ -64,7 +66,10 @@ export function useWebSocketHealth() {
   // Keep ref updated with current WebSocket state
   webSocketStateRef.current = webSocketState;
 
-  const performHealthCheck = useCallback(() => {
+  const performHealthCheck = useCallback((): {
+    action: HealthCheckAction;
+    token: string | null;
+  } => {
     const currentToken = getAuthJwt();
     const previousToken = lastTokenRef.current;
     lastTokenRef.current = currentToken;
@@ -75,16 +80,21 @@ export function useWebSocketHealth() {
       disconnect: currentDisconnect,
     } = webSocketStateRef.current;
 
+    let action: HealthCheckAction = "none";
+
     if (!currentToken && currentStatus !== WebSocketStatus.DISCONNECTED) {
       currentDisconnect();
+      action = "disconnect";
     } else if (currentToken && currentStatus === WebSocketStatus.DISCONNECTED) {
       currentConnect(currentToken);
+      action = "connect";
     } else if (
       currentToken &&
       currentStatus !== WebSocketStatus.DISCONNECTED &&
       currentToken !== previousToken
     ) {
       currentConnect(currentToken);
+      action = "connect";
     }
 
     if (currentToken !== previousToken) {
@@ -92,6 +102,11 @@ export function useWebSocketHealth() {
         type: AUTH_BROADCAST_MESSAGE,
       });
     }
+
+    return {
+      action,
+      token: currentToken,
+    };
   }, []);
 
   const performResumeHealthCheck = useCallback(() => {
@@ -103,16 +118,21 @@ export function useWebSocketHealth() {
     }
 
     const now = Date.now();
+    const hiddenAt = hiddenAtRef.current;
+    // Clear the hidden marker for this resume attempt even if we dedupe it.
+    hiddenAtRef.current = null;
+
     if (now - lastResumeCheckAtRef.current < RESUME_EVENT_DEDUPE_WINDOW_MS) {
       return;
     }
     lastResumeCheckAtRef.current = now;
 
-    performHealthCheck();
+    const { action, token: currentToken } = performHealthCheck();
 
-    const currentToken = getAuthJwt();
-    const hiddenAt = hiddenAtRef.current;
-    hiddenAtRef.current = null;
+    // Avoid a second reconnect when the health check already replaced the socket.
+    if (action === "connect") {
+      return;
+    }
 
     if (!currentToken || hiddenAt === null) {
       return;

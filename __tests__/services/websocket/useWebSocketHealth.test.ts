@@ -384,4 +384,65 @@ describe("useWebSocketHealth", () => {
     expect(mockConnect).toHaveBeenCalledTimes(1);
     expect(mockConnect).toHaveBeenCalledWith("resume-token");
   });
+
+  it("does not keep a stale hidden timestamp when a resume is deduped", () => {
+    jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
+    mockGetAuthJwt.mockReturnValue("resume-token");
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
+
+    renderHook(() => useWebSocketHealth());
+    mockConnect.mockClear();
+
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
+
+    act(() => {
+      jest.setSystemTime(new Date("2026-04-07T10:00:00.500Z"));
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+      jest.setSystemTime(new Date("2026-04-07T10:00:00.600Z"));
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    act(() => {
+      jest.setSystemTime(new Date("2026-04-07T10:01:02.000Z"));
+      window.dispatchEvent(new Event("focus"));
+    });
+
+    expect(mockConnect).not.toHaveBeenCalled();
+  });
+
+  it("reconnects only once when the token changes during a long-hidden resume", () => {
+    jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
+    mockGetAuthJwt.mockReturnValue("token-a");
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
+
+    renderHook(() => useWebSocketHealth());
+    mockConnect.mockClear();
+
+    act(() => {
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    act(() => {
+      jest.setSystemTime(new Date("2026-04-07T10:01:01.000Z"));
+      mockGetAuthJwt.mockReturnValue("token-b");
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(mockConnect).toHaveBeenCalledTimes(1);
+    expect(mockConnect).toHaveBeenCalledWith("token-b");
+  });
 });
