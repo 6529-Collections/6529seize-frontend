@@ -1,5 +1,4 @@
 import { AuthContext } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import WaveDropMobileMenu from "@/components/waves/drops/WaveDropMobileMenu";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -11,9 +10,6 @@ const writeText = jest.fn().mockResolvedValue(undefined);
 
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
-}));
-jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuDelete", () => () => (
   <div data-testid="delete" />
@@ -40,10 +36,6 @@ jest.mock("@/components/waves/drops/WaveDropActionsAddReaction", () => () => (
 jest.mock("@/components/waves/drops/WaveDropActionsQuickReact", () => () => (
   <div data-testid="quick-react" />
 ));
-jest.mock(
-  "@/components/waves/drops/WaveDropActionsToggleLinkPreview",
-  () => () => <div data-testid="toggle-link-preview" />
-);
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
   () => (props: any) =>
@@ -75,12 +67,10 @@ beforeAll(() => {
 });
 
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
-const mockedUseSeizeConnectContext = jest.mocked(useSeizeConnectContext);
 
 beforeEach(() => {
   writeText.mockClear();
   mockIsMemesWave.mockReturnValue(false);
-  mockedUseSeizeConnectContext.mockReturnValue({ isConnected: true } as any);
   mockedUseDropInteractionRules.mockReturnValue({
     canShowVote: true,
     canVote: true,
@@ -194,7 +184,6 @@ test("hides follow and clap when author and memes wave", () => {
   );
   expect(screen.queryByTestId("follow")).toBeNull();
   expect(screen.queryByTestId("clap")).toBeNull();
-  expect(screen.queryByTestId("toggle-link-preview")).toBeNull();
   expect(screen.getByTestId("delete")).toBeInTheDocument();
 });
 
@@ -289,9 +278,46 @@ test("does not show pinned-drop action in the mobile menu for non-admins", () =>
   expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
 });
 
-test("shows only copy link in the mobile menu when disconnected", () => {
-  mockedUseSeizeConnectContext.mockReturnValue({ isConnected: false } as any);
+test("shows full menu when a profile handle is present", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
 
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "alice" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByText("Copy link")).toBeInTheDocument();
+  expect(screen.getByTestId("quick-react")).toBeInTheDocument();
+  expect(screen.getByTestId("add-reaction")).toBeInTheDocument();
+  expect(screen.getByText("Reply")).toBeInTheDocument();
+  expect(screen.getByTestId("boost")).toBeInTheDocument();
+  expect(screen.getByTestId("open")).toBeInTheDocument();
+  expect(screen.getByTestId("delete")).toBeInTheDocument();
+});
+
+test("shows only copy link in the mobile menu for guests", () => {
   const drop = {
     id: "1",
     serial_no: 1,

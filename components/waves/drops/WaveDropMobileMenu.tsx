@@ -1,7 +1,6 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -51,7 +50,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showCopyOption = true,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { isConnected } = useSeizeConnectContext();
   const { isMemesWave } = useSeizeSettings();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
@@ -134,6 +132,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   }, [connectedProfile, activeProfileProxy, drop.id, drop.author.handle]);
 
   const closeMenu = () => setOpen(false);
+  const showGuestCopyOnly = !connectedProfile?.handle;
 
   return createPortal(
     <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
@@ -142,7 +141,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           longPressTriggered && "tw-select-none"
         }`}
       >
-        {!isConnected ? (
+        {showGuestCopyOnly ? (
           showCopyOption && (
             <button
               className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${

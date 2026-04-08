@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useAuth } from "@/components/auth/Auth";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
@@ -61,12 +61,12 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: jest.fn(),
 }));
 
-jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(),
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
 }));
 
 const settingsMock = useSeizeSettings as jest.Mock;
-const seizeConnectContextMock = useSeizeConnectContext as jest.Mock;
+const authMock = useAuth as jest.Mock;
 
 const baseDrop: any = {
   id: "drop-1",
@@ -77,7 +77,7 @@ const baseDrop: any = {
 describe("WaveDropActions", () => {
   beforeEach(() => {
     settingsMock.mockReturnValue({ isMemesWave: () => false });
-    seizeConnectContextMock.mockReturnValue({ isConnected: true });
+    authMock.mockReturnValue({ connectedProfile: { handle: "alice" } });
   });
 
   it("keeps hidden actions non-interactive while closed", () => {
@@ -131,8 +131,8 @@ describe("WaveDropActions", () => {
     expect(screen.queryByTestId("rate")).toBeNull();
   });
 
-  it("shows only copy link when disconnected", () => {
-    seizeConnectContextMock.mockReturnValue({ isConnected: false });
+  it("shows only copy link for guests", () => {
+    authMock.mockReturnValue({ connectedProfile: null });
 
     render(
       <WaveDropActions drop={baseDrop} activePartIndex={0} onReply={() => {}} />
