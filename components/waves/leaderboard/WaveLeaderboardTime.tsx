@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
@@ -109,11 +115,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
         clearTimeout(timeoutId);
       }
     };
-  }, [
-    nextDecisionTime,
-    hasMoreFuture,
-    loadMoreFuture,
-  ]);
+  }, [nextDecisionTime, hasMoreFuture, loadMoreFuture]);
 
   const handleLoadMorePast = () => {
     if (hasMorePast) {
@@ -154,7 +156,6 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 nextDecisionTime={nextDecisionTime}
                 isPaused={Boolean(currentPause)}
                 currentPause={currentPause}
-                wave={wave}
               />
             );
           })()}
