@@ -20,6 +20,11 @@ jest.mock("@/components/home/now-minting/NowMintingStatsGrid", () => ({
   default: () => <div data-testid="stats-grid" />,
 }));
 
+jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
+  __esModule: true,
+  default: () => <div data-testid="subscribe-section" />,
+}));
+
 jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
   __esModule: true,
   default: () => <div data-testid="countdown" />,
@@ -53,6 +58,7 @@ describe("NowMintingDetails", () => {
     expect(screen.queryByText("Dimensions")).not.toBeInTheDocument();
     expect(screen.getByText("Collection")).toBeInTheDocument();
     expect(screen.getByText("Season")).toBeInTheDocument();
+    expect(screen.getByTestId("subscribe-section")).toBeInTheDocument();
   });
 
   it("renders file metadata rows when image metadata is present", () => {

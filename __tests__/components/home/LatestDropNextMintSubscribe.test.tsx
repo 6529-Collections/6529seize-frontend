@@ -7,16 +7,21 @@ jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
 }));
 
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  useCookieConsent: () => ({ country: "US" }),
+}));
+
 jest.mock(
   "@/components/user/subscriptions/MemeSubscriptionRow",
   () =>
     function MockMemeSubscriptionRow(props: any) {
       return (
         <div data-testid="meme-subscription-row">
-          token:{props.subscription.token_id} eligibility:{props.eligibilityCount}
+          token:{props.subscription.token_id} eligibility:
+          {props.eligibilityCount}
           minting_today:{String(props.minting_today)} readonly:
-          {String(props.readonly)} variant:{props.variant ?? "default"} date:
-          {String(props.date)}
+          {String(props.readonly)} balance:{props.balanceLabel} variant:
+          {props.variant ?? "default"} date:{String(props.date)}
         </div>
       );
     }
@@ -87,6 +92,9 @@ describe("LatestDropNextMintSubscribe", () => {
       /readonly:false/
     );
     expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
+      /balance:/
+    );
+    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
       /variant:compact/
     );
     expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
@@ -125,26 +133,56 @@ describe("LatestDropNextMintSubscribe", () => {
   });
 
   it("does not render when there is no connected profile", () => {
-    const { container } = renderWithAuth(
-      <LatestDropNextMintSubscribe />,
-      { connectedProfile: null }
-    );
+    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />, {
+      connectedProfile: null,
+    });
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it("does not render during an active proxy session", () => {
-    const { container } = renderWithAuth(
-      <LatestDropNextMintSubscribe />,
-      {
-        activeProfileProxy: {
-          id: "proxy-1",
-          granted_to: {} as any,
-          created_at: Date.now(),
-          created_by: {} as any,
-          actions: [],
-        } as any,
+    const { container } = renderWithAuth(<LatestDropNextMintSubscribe />, {
+      activeProfileProxy: {
+        id: "proxy-1",
+        granted_to: {} as any,
+        created_at: Date.now(),
+        created_by: {} as any,
+        actions: [],
+      } as any,
+    });
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("does not render in latest-drop mode when the profile is not subscribed", () => {
+    useQueryMock.mockImplementation(({ queryKey }) => {
+      if (queryKey[0] === "next-mint-subscription-details") {
+        return {
+          data: {
+            subscription_eligibility_count: 3,
+          },
+        };
       }
+
+      if (queryKey[0] === "next-mint-subscription-status") {
+        return {
+          data: {
+            subscribed: false,
+            eligibility: 2,
+            count: 1,
+          },
+          refetch: jest.fn(),
+        };
+      }
+
+      return {
+        data: null,
+        refetch: jest.fn(),
+      };
+    });
+
+    const { container } = renderWithAuth(
+      <LatestDropNextMintSubscribe showOnlyWhenSubscribed readonly />
     );
 
     expect(container).toBeEmptyDOMElement();

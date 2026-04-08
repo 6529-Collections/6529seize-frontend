@@ -18,6 +18,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
+import EthereumIcon from "../utils/icons/EthereumIcon";
 
 export default function MemeSubscriptionRow(
   props: Readonly<{
@@ -31,6 +32,7 @@ export default function MemeSubscriptionRow(
     date: SeasonMintRow | null;
     refresh: () => void;
     variant?: "default" | "compact";
+    balanceLabel?: string;
   }>
 ) {
   const id = `subscription-${props.subscription.token_id}`;
@@ -266,7 +268,20 @@ export default function MemeSubscriptionRow(
     return (
       <div className="tw-py-1">
         <div className="d-flex align-items-center justify-content-between gap-2">
-          <span className="tw-font-medium">Subscribe</span>
+          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
+            <span className="tw-font-medium tw-leading-none">Subscribe</span>
+            {props.balanceLabel && (
+              <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-leading-none tw-text-iron-400">
+                <span className="tw-leading-none">Balance</span>
+                <span className="tw-leading-none tw-text-iron-300">
+                  {props.balanceLabel}
+                </span>
+                <span className="tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-self-center tw-text-iron-400">
+                  <EthereumIcon />
+                </span>
+              </span>
+            )}
+          </span>
           <div className="d-flex align-items-center gap-2">
             {isSubmitting && <Spinner />}
             <Toggle
@@ -287,7 +302,7 @@ export default function MemeSubscriptionRow(
           </div>
         </div>
         {finalWithMetadata && (
-          <div className="tw-mt-2 tw-pr-2 font-smaller font-color-silver">
+          <div className="font-smaller font-color-silver tw-mt-2 tw-pr-2">
             Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
             {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
             {finalWithMetadata.phaseSubscriptions.toLocaleString()} - Airdrop
@@ -324,7 +339,7 @@ export default function MemeSubscriptionRow(
     <Container className="no-padding pt-2 pb-2">
       <Row>
         <Col className="d-flex gap-2 align-items-center justify-content-between">
-          <div className="d-flex flex-column gap-2 tw-flex-1 tw-min-w-0">
+          <div className="d-flex flex-column gap-2 tw-min-w-0 tw-flex-1">
             <span className="d-flex align-items-center gap-2">
               <span className="tw-font-medium">
                 {props.title} #{props.subscription.token_id}{" "}
@@ -368,8 +383,8 @@ export default function MemeSubscriptionRow(
                 {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
                 {finalWithMetadata.phaseSubscriptions.toLocaleString()} -
                 Airdrop Address:{" "}
-                {formatAddress(finalWithMetadata.airdropAddress)} -
-                Subscription Count: x{finalWithMetadata.subscribedCount}
+                {formatAddress(finalWithMetadata.airdropAddress)} - Subscription
+                Count: x{finalWithMetadata.subscribedCount}
               </span>
             )}
           </div>
@@ -383,7 +398,7 @@ export default function MemeSubscriptionRow(
               onChange={submit}
               aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
             />
-            <span className="tw-flex tw-items-center tw-gap-1 tw-min-w-16">
+            <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
               {renderCountSelector({
                 selectClassName:
                   "tw-text-iron-400 tw-bg-transparent tw-border tw-border-iron-400 tw-rounded tw-px-1",
