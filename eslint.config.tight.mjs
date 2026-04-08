@@ -435,6 +435,8 @@ export default defineConfig([
     "standalone/standalone-memes-mint/src/next.config.ts",
     "standalone/standalone-memes-mint/src/postcss.config.js",
     "standalone/standalone-memes-mint/src/tailwind.config.cjs",
+    "standalone/standalone-memes-mint/src/.next-static-export/**",
+    "**/.next-static-export/**",
     ".claude/**",
     ".codex/**",
   ]),
@@ -480,6 +482,7 @@ export default defineConfig([
     ignores: [
       "scripts/**",
       "**/next.config.*",
+      "**/.next-static-export/**",
       "config/env.ts",
       "config/serverEnv.ts",
       "config/alchemyEnv.ts",

@@ -158,4 +158,25 @@ describe("BrainLeftSidebarWave", () => {
     );
     expect(bellSlashIcons.length).toBe(0);
   });
+
+  it("hides the pin control when showPin is false", () => {
+    const wave = {
+      ...baseWave,
+      id: "7",
+    };
+    render(
+      <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={false} />
+    );
+    expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
+  });
+
+  it("shows the unpin control when showPin is true", () => {
+    const wave = {
+      ...baseWave,
+      id: "8",
+      isPinned: true,
+    };
+    render(<BrainLeftSidebarWave wave={wave} onHover={onHover} showPin />);
+    expect(screen.getByTestId("pin")).toHaveTextContent("true");
+  });
 });

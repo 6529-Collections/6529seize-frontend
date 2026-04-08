@@ -43,6 +43,7 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
   if (pathname.startsWith("/nextgen")) return "NextGen | Collections";
   if (pathname.startsWith("/rememes")) return "Rememes | Collections";
   if (pathname.startsWith("/open-data")) return "Open Data | Tools";
+  if (pathname.startsWith("/discover")) return "Discovery";
   // Handle profile pages (e.g., /username)
   if (pathname !== "/" && pathname.split("/").length === 2) {
     const segments = pathname.split("/");
@@ -57,6 +58,7 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
       "nextgen",
       "rememes",
       "open-data",
+      "discover",
       "tools",
       "about",
       "delegation",
@@ -91,9 +93,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     pathname?.startsWith("/messages") ||
     (pathname === "/" && searchParams?.get("view") === "waves");
   const waveParam = isWaveRoute
-    ? myStream?.activeWave.id ??
+    ? (myStream?.activeWave.id ??
       getActiveWaveIdFromUrl({ pathname, searchParams }) ??
-      null
+      null)
     : null;
 
   useEffect(() => {
