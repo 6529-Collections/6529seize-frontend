@@ -18,15 +18,19 @@ test("provides settings and helper", async () => {
     all_drops_notifications_subscribers_limit: 2,
     memes_wave_id: "orig",
     curation_wave_id: "orig-curation",
+    announcements_wave_id: "announcement-wave-id",
   });
 
   function Consumer() {
-    const { seizeSettings, isMemesWave, isCurationWave } = useSeizeSettings();
+    const { seizeSettings, isMemesWave, isCurationWave, isAnnouncementsWave } =
+      useSeizeSettings();
     return (
       <div>{`${seizeSettings.memes_wave_id}-${isMemesWave(
         "test-memes-wave-id"
       )}-${seizeSettings.curation_wave_id}-${isCurationWave(
         "test-curation-wave-id"
+      )}-${seizeSettings.announcements_wave_id}-${isAnnouncementsWave(
+        "announcement-wave-id"
       )}`}</div>
     );
   }
@@ -39,12 +43,39 @@ test("provides settings and helper", async () => {
 
   await waitFor(() =>
     expect(
-      screen.getByText("test-memes-wave-id-true-test-curation-wave-id-true")
+      screen.getByText(
+        "test-memes-wave-id-true-test-curation-wave-id-true-announcement-wave-id-true"
+      )
     ).toBeInTheDocument()
   );
   expect(fetchUrl).toHaveBeenCalledWith(
     "https://api.test.6529.io/api/settings"
   );
+});
+
+test("normalizes announcement wave ids before matching", async () => {
+  fetchUrl.mockResolvedValue({
+    rememes_submission_tdh_threshold: 1,
+    all_drops_notifications_subscribers_limit: 2,
+    memes_wave_id: null,
+    curation_wave_id: null,
+    distribution_admin_wallets: [],
+    claims_admin_wallets: [],
+    announcements_wave_id: "  announcement-wave-id  ",
+  });
+
+  function Consumer() {
+    const { isAnnouncementsWave } = useSeizeSettings();
+    return <div>{String(isAnnouncementsWave("announcement-wave-id"))}</div>;
+  }
+
+  render(
+    <SeizeSettingsProvider>
+      <Consumer />
+    </SeizeSettingsProvider>
+  );
+
+  await waitFor(() => expect(screen.getByText("true")).toBeInTheDocument());
 });
 
 test("captures initial load failures without leaking an unhandled rejection", async () => {

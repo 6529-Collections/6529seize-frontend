@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -21,22 +21,18 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   isPinned,
 }) => {
   const { waves } = useMyStream();
-  const { pinnedIds, isOperationInProgress } = usePinnedWavesServer();
+  const { pinnedIds, isOperationInProgress, canPinWave } =
+    usePinnedWavesServer();
   const { setToast } = useAuth();
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
 
   // Check if this specific wave operation is in progress
   const isCurrentlyProcessing = isOperationInProgress(waveId);
-
-  // Check if we can pin this wave using server data
-  const canPinWave = useCallback(() => {
-    // If this wave is already pinned, we can always unpin it
-    if (isPinned) return true;
-
-    // Check if we have room for another pinned wave using the hook's data
-    return pinnedIds.length < MAX_PINNED_WAVES;
-  }, [isPinned, pinnedIds.length]);
+  const canPinCurrentWave = useMemo(
+    () => canPinWave(waveId),
+    [canPinWave, waveId]
+  );
 
   // // Reset tooltip state when pinned state changes
   useEffect(() => {
@@ -45,10 +41,10 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
   // Also reset tooltip state when pinnedIds array changes
   useEffect(() => {
-    if (canPinWave()) {
+    if (canPinCurrentWave) {
       setShowMaxLimitTooltip(false);
     }
-  }, [pinnedIds, canPinWave]);
+  }, [pinnedIds, canPinCurrentWave]);
 
   // Auto-hide tooltip after 3 seconds with proper cleanup
   useEffect(() => {
@@ -88,16 +84,20 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
     try {
       if (isPinned) {
-        await waves.removePinnedWave(waveId);
+        waves.removePinnedWave(waveId);
         setShowMaxLimitTooltip(false);
-      } else if (!canPinWave()) {
-        setShowMaxLimitTooltip(true);
-        setToast({
-          type: "error",
-          message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
-        });
       } else {
-        await waves.addPinnedWave(waveId);
+        const canPin = canPinWave(waveId);
+
+        if (canPin) {
+          waves.addPinnedWave(waveId);
+        } else {
+          setShowMaxLimitTooltip(true);
+          setToast({
+            type: "error",
+            message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
+          });
+        }
       }
     } catch (error) {
       console.error("Error updating wave pin status:", error);
@@ -123,7 +123,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   // Ensure tooltip is updated immediately by always checking the current state
   const getTooltipContent = () => {
     if (isPinned) return "Unpin";
-    if (canPinWave()) return "Pin";
+    if (canPinCurrentWave) return "Pin";
     return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
   };
   const tooltipContent = getTooltipContent();
