@@ -132,6 +132,41 @@ describe("LatestDropNextMintSubscribe", () => {
     );
   });
 
+  it("falls back to zero balance for non-finite details", () => {
+    useQueryMock.mockImplementation(({ queryKey }) => {
+      if (queryKey[0] === "next-mint-subscription-details") {
+        return {
+          data: {
+            balance: Number.NaN,
+            subscription_eligibility_count: 3,
+          },
+        };
+      }
+
+      if (queryKey[0] === "next-mint-subscription-status") {
+        return {
+          data: {
+            subscribed: true,
+            eligibility: 2,
+            count: 1,
+          },
+          refetch: jest.fn(),
+        };
+      }
+
+      return {
+        data: null,
+        refetch: jest.fn(),
+      };
+    });
+
+    renderWithAuth(<LatestDropNextMintSubscribe />);
+
+    expect(screen.getByTestId("meme-subscription-row")).toHaveTextContent(
+      "balance:0"
+    );
+  });
+
   it("does not render when there is no connected profile", () => {
     const { container } = renderWithAuth(<LatestDropNextMintSubscribe />, {
       connectedProfile: null,

@@ -84,9 +84,10 @@ export default function LatestDropNextMintSubscribe(
 
   const balanceLabel = useMemo(() => {
     const balance = details?.balance ?? 0;
+    const safeBalance = Number.isFinite(balance) ? balance : 0;
     return new Intl.NumberFormat(undefined, {
       maximumFractionDigits: 6,
-    }).format(Math.round(balance * 1_000_000) / 1_000_000);
+    }).format(Math.round(safeBalance * 1_000_000) / 1_000_000);
   }, [details?.balance]);
 
   if (
