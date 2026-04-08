@@ -119,6 +119,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     const hasUpcoming = typeof nextDecisionTime === "number";
 
     if (hasUpcoming || !hasMoreFuture) {
+      autoExpandFutureAttemptsRef.current = 0;
       return;
     }
 

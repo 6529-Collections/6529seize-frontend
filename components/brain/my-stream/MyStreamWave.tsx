@@ -177,6 +177,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       >
         {activeCurationId ? (
           <MyStreamWaveCurationContent
+            key={activeCurationId}
             wave={wave}
             curationId={activeCurationId}
             onDropClick={onDropClick}
