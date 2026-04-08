@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
 import { WaveGallery } from "@/components/waves/gallery";
@@ -47,10 +48,12 @@ interface MyStreamWaveChatProps {
 }
 
 interface WaveChatLeaveHandlerProps {
+  readonly enabled: boolean;
   readonly waveId: string;
 }
 
 const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
+  enabled,
   waveId,
 }) => {
   const { setUnreadDividerSerialNo } = useUnreadDivider();
@@ -58,6 +61,10 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     return () => {
       setUnreadDividerSerialNo(null);
       void (async () => {
@@ -81,6 +88,7 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
       })();
     };
   }, [
+    enabled,
     waveId,
     setUnreadDividerSerialNo,
     removeWaveDeliveredNotifications,
@@ -100,6 +108,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
+  const { connectedProfile } = useAuth();
   const { isMemesWave, isCurationWave } = useWave(wave);
   const submissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -242,7 +251,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       initialSerialNo={dividerTarget ?? null}
       key={`unread-divider-${wave.id}`}
     >
-      <WaveChatLeaveHandler waveId={wave.id} />
+      <WaveChatLeaveHandler
+        enabled={Boolean(connectedProfile?.handle)}
+        waveId={wave.id}
+      />
       <div
         ref={containerRef}
         className={`${containerClassName}`}

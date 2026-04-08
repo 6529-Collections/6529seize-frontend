@@ -30,16 +30,12 @@ interface WavesMessagesWrapperProps {
   readonly children: ReactNode;
   readonly defaultPath?: string | undefined; // "/waves" or "/messages"
   readonly showLeftSidebar?: boolean | undefined;
-  readonly allowRightSidebar?: boolean | undefined;
-  readonly allowDropOverlay?: boolean | undefined;
 }
 
 const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   children,
   defaultPath = "/waves",
   showLeftSidebar = true,
-  allowRightSidebar = true,
-  allowDropOverlay = true,
 }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -76,12 +72,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     }
   }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
-  useEffect(() => {
-    if (!allowRightSidebar && isRightSidebarOpen) {
-      closeRightSidebar();
-    }
-  }, [allowRightSidebar, isRightSidebarOpen, closeRightSidebar]);
-
   const { data: drop, error: dropError } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: effectiveDropId }],
     queryFn: async () => {
@@ -94,7 +84,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       });
     },
     placeholderData: keepPreviousData,
-    enabled: allowDropOverlay && !!effectiveDropId,
+    enabled: !!effectiveDropId,
   });
 
   const onDropClose = useCallback(() => {
@@ -123,12 +113,9 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
   const shouldShowMainContent = !isMobile || waveId !== undefined;
   const shouldShowDropOverlay =
-    allowDropOverlay &&
-    isDropOpen &&
-    drop !== undefined &&
-    shouldShowMainContent;
+    isDropOpen && drop !== undefined && shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(
-    allowRightSidebar && isRightSidebarOpen && waveId && !isDropOpen
+    isRightSidebarOpen && waveId && !isDropOpen
   );
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   let rightVariant: "inline" | "overlay" | null = null;

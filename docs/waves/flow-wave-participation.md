@@ -73,7 +73,8 @@ same context.
 - If no wave is selected on desktop list routes, the UI shows selection
   placeholders (`Select a Wave` or `Select a Conversation`).
 - When posting is blocked, thread content stays readable and the composer area
-  shows blocked states (for example `Wave is closed` or
+  shows blocked states (for example
+  `Connect your wallet to participate in this wave`, `Wave is closed`, or
   `You cannot participate in this wave at the moment`).
 
 ## Edge Cases

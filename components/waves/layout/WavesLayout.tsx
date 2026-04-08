@@ -10,7 +10,6 @@ import HeaderUserConnect from "../../header/user/HeaderUserConnect";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesDesktop from "../WavesDesktop";
 import WavesMobile from "../WavesMobile";
-import PublicWaveShell from "../public/PublicWaveShell";
 import WaveScreenMessage from "../WaveScreenMessage";
 
 function getConnectPrompt(
@@ -43,11 +42,13 @@ function getConnectPrompt(
 
 function getNotAuthenticatedContent({
   activeWaveId,
+  children,
   containerClassName,
   isApp,
   isMobileDevice,
 }: {
   readonly activeWaveId: string | null;
+  readonly children: ReactNode;
   readonly containerClassName: string;
   readonly isApp: boolean;
   readonly isMobileDevice: boolean;
@@ -58,11 +59,7 @@ function getNotAuthenticatedContent({
 
   return (
     <div className="tw-flex-1" id="waves-content">
-      <WavesDesktop
-        allowDropOverlay={false}
-        allowRightSidebar={false}
-        showLeftSidebar={true}
-      >
+      <WavesDesktop showLeftSidebar={true}>
         <div className={containerClassName}>
           {activeWaveId === null ? (
             <WaveScreenMessage
@@ -71,7 +68,7 @@ function getNotAuthenticatedContent({
               action={<HeaderUserConnect label="Connect Wallet" />}
             />
           ) : (
-            <PublicWaveShell waveId={activeWaveId} />
+            children
           )}
         </div>
       </WavesDesktop>
@@ -105,6 +102,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   } else if (contentState === "not-authenticated") {
     content = getNotAuthenticatedContent({
       activeWaveId,
+      children,
       containerClassName,
       isApp,
       isMobileDevice,

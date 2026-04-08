@@ -10,6 +10,7 @@ import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { Time } from "@/helpers/time";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -46,6 +47,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   // Use the available tabs from context instead of recalculating
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
+  const { isConnected } = useSeizeConnectContext();
 
   const {
     isChatWave,
@@ -141,6 +143,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             waveId: wave.id,
             isMemesWave,
             isChatWave,
+            isConnected,
             isCurationWave,
             votingState,
             hasFirstDecisionPassed: firstDecisionDone,
@@ -151,6 +154,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     wave,
     isMemesWave,
     isChatWave,
+    isConnected,
     isCurationWave,
     isUpcoming,
     isCompleted,
@@ -171,7 +175,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       availableTabs
         .filter((tab) => {
           if (tab === MyStreamWaveTab.MY_VOTES) {
-            return isMemesWave || isCurationWave;
+            return isCurationWave || (isMemesWave && isConnected);
           }
           if (tab === MyStreamWaveTab.SALES) {
             return isCurationWave;
@@ -186,12 +190,13 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           label: TAB_LABELS[tab],
           panelId: getContentTabPanelId(tab),
         })),
-    [availableTabs, isMemesWave, isCurationWave]
+    [availableTabs, isConnected, isMemesWave, isCurationWave]
   );
 
   useEffect(() => {
     const isMyVotesHidden =
-      activeTab === MyStreamWaveTab.MY_VOTES && !isMemesWave && !isCurationWave;
+      activeTab === MyStreamWaveTab.MY_VOTES &&
+      ((isMemesWave && !isConnected) || (!isMemesWave && !isCurationWave));
     const isSalesHidden =
       activeTab === MyStreamWaveTab.SALES && !isCurationWave;
     const isFaqHidden = activeTab === MyStreamWaveTab.FAQ && !isMemesWave;
@@ -202,7 +207,14 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ) {
       setActiveTab(options[0]?.key!);
     }
-  }, [isMemesWave, isCurationWave, activeTab, options, setActiveTab]);
+  }, [
+    isConnected,
+    isMemesWave,
+    isCurationWave,
+    activeTab,
+    options,
+    setActiveTab,
+  ]);
 
   // For simple waves, don't render any tabs
   if (isChatWave) {

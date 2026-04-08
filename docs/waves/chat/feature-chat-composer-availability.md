@@ -22,8 +22,11 @@ the current account.
 ## Footer States
 
 - Composer visible: at least one mode is allowed.
-- Generic blocked panel: if both modes are blocked, footer shows
-  `You cannot participate in this wave at the moment`.
+- Logged-out blocked panel: if both modes are blocked because the viewer is not
+  authenticated, footer shows
+  `Connect your wallet to participate in this wave`.
+- Generic blocked panel: if both modes are blocked for any other reason, footer
+  shows `You cannot participate in this wave at the moment`.
 - Closed-chat panel: if composer rendering reaches a chat-type wave with chat
   disabled, footer shows `Wave is closed`.
 

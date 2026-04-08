@@ -446,6 +446,35 @@ describe("BoostedDropCardHome", () => {
         variant: "chat",
       })
     );
+
+    expect(screen.getByTestId("link-preview").parentElement).toHaveClass(
+      "tw-px-3",
+      "sm:tw-px-4"
+    );
+  });
+
+  it("adds bottom spacing to preview-only chat cards", () => {
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop({
+          parts: [
+            {
+              content: "https://example.com/article",
+              media: [],
+            },
+          ],
+        })}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={1}
+      />
+    );
+
+    expect(screen.getByTestId("link-preview").parentElement).toHaveClass(
+      "tw-px-3",
+      "sm:tw-px-4",
+      "tw-pb-4"
+    );
   });
 
   it("keeps caption content for chat cards with lead media", () => {
@@ -587,6 +616,9 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
+    expect(
+      screen.getByTestId("boosted-drop-media-frame").parentElement
+    ).toHaveClass("tw-px-3", "sm:tw-px-4", "tw-pb-4");
     expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
       aspectRatio: "8 / 5",
     });

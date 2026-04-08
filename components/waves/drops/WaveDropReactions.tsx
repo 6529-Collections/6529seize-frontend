@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
@@ -41,6 +42,7 @@ interface WaveDropReactionsProps {
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
   const isTouchDevice = useIsTouchDevice();
+  const { isConnected } = useSeizeConnectContext();
 
   const handleOpenDialog = useCallback((reactionKey: string) => {
     setDialogReaction(reactionKey);
@@ -58,6 +60,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           drop={drop}
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
+          isConnected={isConnected}
           isTouchDevice={isTouchDevice}
         />
       ))}
@@ -75,17 +78,20 @@ function WaveDropReaction({
   drop,
   reaction,
   onOpenDetailDialog,
+  isConnected,
   isTouchDevice,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
+  readonly isConnected: boolean;
   readonly isTouchDevice: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
   const rollbackRef = useRef<(() => void) | null>(null);
+  const canReact = isConnected;
 
   const handleLongPressStart = useCallback(() => {
     onOpenDetailDialog(reaction.reaction);
@@ -321,7 +327,7 @@ function WaveDropReaction({
   );
 
   const handleClick = useCallback(async () => {
-    if (longPressTriggered) {
+    if (!canReact || longPressTriggered) {
       return;
     }
 
@@ -360,6 +366,7 @@ function WaveDropReaction({
     rollbackRef.current = null;
   }, [
     applyOptimisticReactionChange,
+    canReact,
     drop.id,
     longPressTriggered,
     reaction.reaction,
@@ -384,9 +391,12 @@ function WaveDropReaction({
   // styles
   const borderStyle = selected ? "tw-border-primary-500" : "tw-border-iron-700";
   const bgStyle = selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40";
-  const hoverStyle = selected
-    ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
-    : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  let hoverStyle = "";
+  if (canReact) {
+    hoverStyle = selected
+      ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
+      : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  }
   let animationStyle = "";
   if (animate) {
     if (selected) {
@@ -400,11 +410,14 @@ function WaveDropReaction({
   return (
     <>
       <button
+        type="button"
         onClick={handleClick}
+        aria-disabled={!canReact}
         {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
-          "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm hover:tw-text-iron-100",
+          "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm",
+          canReact ? "hover:tw-text-iron-100" : "tw-cursor-default",
           borderStyle,
           bgStyle,
           hoverStyle

@@ -88,6 +88,12 @@ jest.mock("@/hooks/useWaveTimers", () => ({
   }),
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(() => ({
+    isConnected: true,
+  })),
+}));
+
 jest.mock("@/components/brain/BrainDesktopDrop", () => ({
   __esModule: true,
   default: (props: any) => (

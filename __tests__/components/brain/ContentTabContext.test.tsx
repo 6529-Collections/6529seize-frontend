@@ -28,6 +28,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "chat-wave",
         isChatWave: true,
+        isConnected: true,
         isMemesWave: false,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -44,6 +45,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "meme-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: true,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -59,12 +61,34 @@ describe("ContentTabContext", () => {
     ]);
   });
 
+  it("omits My Votes for disconnected memes waves", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "meme-wave",
+        isChatWave: false,
+        isConnected: false,
+        isMemesWave: true,
+        isCurationWave: false,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.FAQ,
+    ]);
+  });
+
   it("defaults to LEADERBOARD for memes waves", () => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
         waveId: "meme-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: true,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -80,6 +104,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "default-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: false,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -95,6 +120,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "curation-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: false,
         isCurationWave: true,
         votingState: WaveVotingState.NOT_STARTED,
@@ -116,6 +142,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "meme-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: true,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -127,6 +154,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "default-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: false,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -137,6 +165,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "meme-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: true,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -152,6 +181,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "default-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: false,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -163,6 +193,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "default-wave",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: false,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -179,6 +210,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "wave-1",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: false,
         isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
@@ -191,6 +223,7 @@ describe("ContentTabContext", () => {
       result.current.updateAvailableTabs({
         waveId: "wave-1",
         isChatWave: false,
+        isConnected: true,
         isMemesWave: false,
         isCurationWave: true,
         votingState: WaveVotingState.NOT_STARTED,
