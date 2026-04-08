@@ -4,7 +4,6 @@ import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { parseIpfsUrl } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type {
@@ -348,7 +347,7 @@ export default function NotificationDropReactedGroup({
                   const title = displayName || undefined;
                   return {
                     key,
-                    pfpUrl: profile.pfp ? parseIpfsUrl(profile.pfp) : null,
+                    pfpUrl: profile.pfp ?? null,
                     ariaLabel: normalizedHandle
                       ? `View @${normalizedHandle}`
                       : "View profile",

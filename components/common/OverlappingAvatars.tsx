@@ -6,8 +6,9 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import Image from "next/image";
 import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
-import { useId, useState } from "react";
+import { useId } from "react";
 import { Tooltip } from "react-tooltip";
+import { useGatewayImageLoadState } from "@/components/common/image/useGatewayImageLoadState";
 
 interface OverlappingAvatarItem {
   readonly key: string;
@@ -46,9 +47,10 @@ function AvatarContent({
   readonly fallback?: string | undefined;
   readonly avatarRing: string;
 }) {
-  const [imgError, setImgError] = useState(false);
+  const { activeSrc, isPlaceholder, unoptimized, handleError } =
+    useGatewayImageLoadState(pfpUrl);
 
-  if (!pfpUrl || imgError) {
+  if (isPlaceholder) {
     return (
       <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black">
         <span className="tw-text-[0.625rem] tw-font-semibold tw-text-iron-300">
@@ -60,12 +62,13 @@ function AvatarContent({
 
   return (
     <Image
-      src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
+      key={`${activeSrc}-${unoptimized ? "unoptimized" : "optimized"}`}
+      src={getScaledImageUri(activeSrc, ImageScale.W_AUTO_H_50)}
       alt={ariaLabel ?? "Profile"}
       fill
       sizes="28px"
-      unoptimized
-      onError={() => setImgError(true)}
+      unoptimized={unoptimized}
+      onError={handleError}
       className={`tw-object-cover tw-rounded-full ${avatarRing}`}
     />
   );

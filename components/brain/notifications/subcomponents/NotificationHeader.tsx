@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { parseIpfsUrl } from "@/helpers/Helpers";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { useGatewayImageLoadState } from "@/components/common/image/useGatewayImageLoadState";
 
 interface NotificationHeaderProps {
   readonly author: ApiProfileMin;
@@ -16,15 +16,21 @@ export default function NotificationHeader({
   children,
   actions,
 }: NotificationHeaderProps) {
+  const { activeSrc, isPlaceholder, unoptimized, handleError } =
+    useGatewayImageLoadState(author.pfp);
+
   return (
     <div className="tw-flex tw-items-start tw-gap-x-3">
       <div className="tw-h-7 tw-w-7 tw-flex-shrink-0 tw-relative">
-        {author.pfp ? (
+        {!isPlaceholder && activeSrc ? (
           <Image
-            src={getScaledImageUri(parseIpfsUrl(author.pfp), ImageScale.W_AUTO_H_50)}
+            key={`${activeSrc}-${unoptimized ? "unoptimized" : "optimized"}`}
+            src={getScaledImageUri(activeSrc, ImageScale.W_AUTO_H_50)}
             alt={author.handle ?? "User profile"}
             fill
             sizes="28px"
+            unoptimized={unoptimized}
+            onError={handleError}
             className="tw-flex-shrink-0 tw-object-contain tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
           />
         ) : (
