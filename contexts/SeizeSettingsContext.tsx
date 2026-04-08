@@ -13,6 +13,7 @@ import { publicEnv } from "@/config/env";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
+import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { fetchUrl } from "@/services/6529api";
 import { SeizeSettingsMode } from "@/types/enums";
 import type { ReactNode } from "react";
@@ -25,6 +26,7 @@ type SeizeSettingsContextType = {
   seizeSettings: TempApiSeizeSettings;
   isMemesWave: (waveId: string | undefined | null) => boolean;
   isCurationWave: (waveId: string | undefined | null) => boolean;
+  isAnnouncementsWave: (waveId: string | undefined | null) => boolean;
   isMemesSubmission: (drop: ApiDrop | undefined | null) => boolean;
   // True once at least one fetch succeeds; stays true during background refreshes
   // unless callers opt into reset=true before reloading.
@@ -54,6 +56,7 @@ export const SeizeSettingsProvider = ({
     announcements_wave_id: null,
     distribution_admin_wallets: [],
     claims_admin_wallets: [],
+    announcements_wave_id: null,
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
@@ -121,7 +124,12 @@ export const SeizeSettingsProvider = ({
     };
   }, [loadSeizeSettings, mode]);
 
-  const { memes_wave_id, curation_wave_id } = seizeSettings;
+  const { memes_wave_id, curation_wave_id, announcements_wave_id } =
+    seizeSettings;
+  const normalizedAnnouncementsWaveId = useMemo(
+    () => normalizeOptionalWaveId(announcements_wave_id),
+    [announcements_wave_id]
+  );
 
   const isMemesWave = useCallback(
     (waveId: string | undefined | null): boolean => {
@@ -137,6 +145,17 @@ export const SeizeSettingsProvider = ({
       return curation_wave_id === waveId;
     },
     [curation_wave_id]
+  );
+
+  const isAnnouncementsWave = useCallback(
+    (waveId: string | undefined | null): boolean => {
+      const normalizedWaveId = normalizeOptionalWaveId(waveId);
+      if (!normalizedWaveId || !normalizedAnnouncementsWaveId) {
+        return false;
+      }
+      return normalizedAnnouncementsWaveId === normalizedWaveId;
+    },
+    [normalizedAnnouncementsWaveId]
   );
 
   const isMemesSubmission = useCallback(
@@ -156,6 +175,7 @@ export const SeizeSettingsProvider = ({
       seizeSettings,
       isMemesWave,
       isCurationWave,
+      isAnnouncementsWave,
       isMemesSubmission,
       isLoaded,
       loadError,
@@ -165,6 +185,7 @@ export const SeizeSettingsProvider = ({
       seizeSettings,
       isMemesWave,
       isCurationWave,
+      isAnnouncementsWave,
       isMemesSubmission,
       isLoaded,
       loadError,

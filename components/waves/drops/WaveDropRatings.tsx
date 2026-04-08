@@ -7,7 +7,6 @@ import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressi
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
@@ -83,11 +82,9 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
                   >
                     {rater.profile.pfp ? (
                       <Image
-                        src={resolveIpfsUrlSync(
-                          getScaledImageUri(
-                            rater.profile.pfp,
-                            ImageScale.W_AUTO_H_50
-                          )
+                        src={getScaledImageUri(
+                          rater.profile.pfp,
+                          ImageScale.W_AUTO_H_50
                         )}
                         alt={`${raterLabel}'s avatar`}
                         width={20}

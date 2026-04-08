@@ -1,5 +1,4 @@
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveLog } from "@/generated/models/ApiWaveLog";
@@ -101,7 +100,7 @@ export const SingleWaveDropLog = ({
   const avatar = log.invoker.pfp ? (
     <Image
       unoptimized
-      src={getScaledImageUri(resolveIpfsUrlSync(log.invoker.pfp), ImageScale.W_AUTO_H_50)}
+      src={getScaledImageUri(log.invoker.pfp, ImageScale.W_AUTO_H_50)}
       alt="User profile picture"
       width={28}
       height={28}

@@ -17,7 +17,7 @@ Usage:
   6529 <command> [args...]
 
 Common commands:
-  6529 bootstrap       -> install the global 6529 shim for future shells
+  6529 bootstrap       -> enable the repo-scoped 6529 command for future shells
   6529 install         -> pnpm run install:secure
   6529 i               -> pnpm run install:secure
   6529 install:frozen  -> pnpm run install:secure:frozen
