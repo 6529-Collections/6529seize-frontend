@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
@@ -37,11 +38,13 @@ interface UsePinnedWavesServerReturn {
   unpinWave: (waveId: string) => Promise<void>;
   refetch: () => Promise<QueryObserverResult<ApiWave[], Error>>;
   isOperationInProgress: (waveId: string) => boolean;
+  canPinWave: (waveId: string) => boolean;
 }
 
 export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
+  const seizeSettings = useSeizeSettingsOptional();
   const queryClient = useQueryClient();
 
   // Track ongoing operations to prevent concurrent pins
@@ -92,6 +95,42 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const pinnedIds = useMemo(
     () => pinnedWaves.map((wave) => wave.id),
     [pinnedWaves]
+  );
+  const countsTowardPinBudget = useCallback(
+    (waveId: string) => !seizeSettings?.isAnnouncementsWave(waveId),
+    [seizeSettings]
+  );
+  const pinnedBudgetCount = useMemo(
+    () => pinnedIds.filter(countsTowardPinBudget).length,
+    [pinnedIds, countsTowardPinBudget]
+  );
+  const getOngoingPinCount = useCallback(
+    (waveId: string) => {
+      let ongoingPinCount = 0;
+
+      ongoingOperations.current.forEach((id) => {
+        if (id === waveId) {
+          return;
+        }
+
+        if (!pinnedIds.includes(id) && countsTowardPinBudget(id)) {
+          ongoingPinCount++;
+        }
+      });
+
+      return ongoingPinCount;
+    },
+    [pinnedIds, countsTowardPinBudget]
+  );
+  const canPinWave = useCallback(
+    (waveId: string) => {
+      if (pinnedIds.includes(waveId)) {
+        return true;
+      }
+
+      return pinnedBudgetCount + getOngoingPinCount(waveId) < MAX_PINNED_WAVES;
+    },
+    [pinnedIds, pinnedBudgetCount, getOngoingPinCount]
   );
 
   // Shared invalidation logic for both pin and unpin operations
@@ -241,16 +280,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
         throw new Error("Operation already in progress for this wave");
       }
 
-      // Check limit including ongoing pin operations
-      let ongoingPinCount = 0;
-      ongoingOperations.current.forEach((id) => {
-        if (!pinnedIds.includes(id)) {
-          ongoingPinCount++;
-        }
-      });
-      const totalPinnedCount = pinnedIds.length + ongoingPinCount;
-
-      if (totalPinnedCount >= MAX_PINNED_WAVES) {
+      if (!canPinWave(waveId)) {
         throw new Error(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
       }
 
@@ -264,7 +294,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
         ongoingOperations.current.delete(waveId);
       }
     },
-    [pinnedIds, pinMutation]
+    [canPinWave, pinMutation]
   );
 
   const unpinWave = useCallback(
@@ -297,5 +327,6 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     refetch,
     isOperationInProgress: (waveId: string) =>
       ongoingOperations.current.has(waveId),
+    canPinWave,
   };
 }

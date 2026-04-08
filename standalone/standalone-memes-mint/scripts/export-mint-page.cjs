@@ -62,14 +62,14 @@ Options:
 
 Default (no --test): bucket ${S3_BUCKET_PROD}, BASE_ENDPOINT https://${S3_BUCKET_PROD}
 
-npm (pass flags after --):
-  npm run export-mint-page -- --test --sync
+6529 wrapper:
+  6529 export-mint-page -- --test --sync
 
-Shorthand npm scripts (no extra --):
-  npm run export-mint-page          prod, no sync
-  npm run export-mint-page:sync     prod + sync
-  npm run export-mint-page:test     test, no sync
-  npm run export-mint-page:test:sync  test + sync
+Shorthand 6529 commands:
+  6529 export-mint-page            prod, no sync
+  6529 export-mint-page:sync       prod + sync
+  6529 export-mint-page:test       test, no sync
+  6529 export-mint-page:test:sync  test + sync
 
 Env overrides:
   STANDALONE_S3_BUCKET_PROD   (default ${S3_BUCKET_PROD})
