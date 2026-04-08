@@ -11,8 +11,8 @@ type GatewayImageLoadState = {
   mode: GatewayImageLoadMode;
 };
 
-export function useGatewayImageLoadState(src: string | null | undefined) {
-  const normalizedSrc = src ?? null;
+export function useGatewayImageLoadState(src: string | null = null) {
+  const normalizedSrc = src;
   const candidateUrls = useMemo(
     () => (normalizedSrc ? getArweaveGatewayFallbackUrls(normalizedSrc) : []),
     [normalizedSrc]
