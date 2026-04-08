@@ -5,8 +5,8 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RateMatter } from "@/types/enums";
 import type { RepDirection } from "./UserPageRep.helpers";
-import RepDirectionToggle from "./RepDirectionToggle";
 import RepCategoryPill from "./RepCategoryPill";
+import RepDirectionToggle from "./RepDirectionToggle";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
@@ -46,6 +46,7 @@ export default function MobileRepTabContent({
   isFetchingNextPage,
   onGrantRep,
   onEditCategory,
+  onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
   readonly overview: ApiRepOverview | null;
@@ -61,6 +62,7 @@ export default function MobileRepTabContent({
   readonly isFetchingNextPage: boolean;
   readonly onGrantRep: () => void;
   readonly onEditCategory: (category: string) => void;
+  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const hiddenLoadedCategoryCount = Math.max(
     categories.length - visibleCount,
@@ -143,12 +145,10 @@ export default function MobileRepTabContent({
         )}
 
       <div className="tw-mt-4">
-        <div className="tw-mb-4 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-          Rep Categories
-        </div>
-
-        {/* Received / Given toggle */}
-        <div className="tw-mb-3">
+        <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <div className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+            Rep Categories
+          </div>
           <RepDirectionToggle
             repDirection={repDirection}
             onRepDirectionChange={onRepDirectionChange}
@@ -166,6 +166,7 @@ export default function MobileRepTabContent({
                 category={cat}
                 canEdit={canEditRep && repDirection === "received"}
                 onEdit={onEditCategory}
+                onOpenContributors={onOpenCategoryContributors}
                 direction={repDirection}
                 compact
               />

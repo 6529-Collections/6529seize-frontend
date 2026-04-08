@@ -1,5 +1,4 @@
 import { withSentryConfig } from "@sentry/nextjs";
-import dotenv from "dotenv";
 import {
   PHASE_DEVELOPMENT_SERVER,
   PHASE_PRODUCTION_BUILD,
@@ -37,12 +36,15 @@ function getAssetPrefix(assetsFromS3: boolean, version: string): string {
   return `https://dnclu2fna0b2b.cloudfront.net/web_build/${version}`;
 }
 
+const standaloneOutput = { output: "standalone" as const };
+
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
   logOnceConfig("NODE_ENV", mode);
 
   // Build & Dev phases
   if (phase === PHASE_DEVELOPMENT_SERVER || phase === PHASE_PRODUCTION_BUILD) {
+    const dotenv = require("dotenv");
     if (mode) dotenv.config({ path: `.env.${mode}` });
     dotenv.config({ path: `.env` });
 
@@ -69,6 +71,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
     return {
       ...sharedConfig(publicEnv, assetPrefix),
+      ...standaloneOutput,
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,

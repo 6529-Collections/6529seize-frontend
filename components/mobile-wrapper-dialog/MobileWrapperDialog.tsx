@@ -9,6 +9,90 @@ import {
 import clsx from "clsx";
 import { Fragment } from "react";
 
+function DialogCloseButton({
+  onClick,
+  className,
+}: {
+  readonly onClick: () => void;
+  readonly className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      title="Close panel"
+      aria-label="Close panel"
+      className={clsx(
+        "tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.04] hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
+        className
+      )}
+      onClick={onClick}
+    >
+      <svg
+        className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-current"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M18 6L6 18M6 6L18 18"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  );
+}
+
+function DialogHeader({
+  title,
+  showDesktopCloseButton,
+  onClose,
+}: {
+  readonly title: string | undefined;
+  readonly showDesktopCloseButton: boolean;
+  readonly onClose: () => void;
+}) {
+  return (
+    <div className="tw-px-4 sm:tw-px-6">
+      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+        {title && (
+          <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {title}
+          </DialogTitle>
+        )}
+        {showDesktopCloseButton && (
+          <DialogCloseButton
+            onClick={onClose}
+            className="tw-hidden md:tw-inline-flex"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function getSlideTransition(tabletModal?: boolean) {
+  return {
+    enter:
+      "tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out",
+    enterFrom: clsx(
+      "tw-translate-y-full",
+      tabletModal && "md:tw-translate-y-4 md:tw-opacity-0"
+    ),
+    enterTo: clsx("tw-translate-y-0", tabletModal && "md:tw-opacity-100"),
+    leave:
+      "tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out",
+    leaveFrom: clsx("tw-translate-y-0", tabletModal && "md:tw-opacity-100"),
+    leaveTo: clsx(
+      "tw-translate-y-full",
+      tabletModal && "md:tw-translate-y-4 md:tw-opacity-0"
+    ),
+  };
+}
+
 export default function MobileWrapperDialog({
   title,
   isOpen,
@@ -71,22 +155,9 @@ export default function MobileWrapperDialog({
     tabletModal && "md:tw-inset-0 md:tw-items-center md:tw-p-6 md:tw-pt-0"
   );
 
-  const slideTransition = {
-    enter:
-      "tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out",
-    enterFrom: clsx(
-      "tw-translate-y-full",
-      tabletModal && "md:tw-translate-y-4 md:tw-opacity-0"
-    ),
-    enterTo: clsx("tw-translate-y-0", tabletModal && "md:tw-opacity-100"),
-    leave:
-      "tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out",
-    leaveFrom: clsx("tw-translate-y-0", tabletModal && "md:tw-opacity-100"),
-    leaveTo: clsx(
-      "tw-translate-y-full",
-      tabletModal && "md:tw-translate-y-4 md:tw-opacity-0"
-    ),
-  };
+  const slideTransition = getSlideTransition(tabletModal);
+
+  const showDesktopHeaderCloseButton = dismissible && !!tabletModal;
 
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
@@ -137,30 +208,13 @@ export default function MobileWrapperDialog({
                       leaveFrom="tw-opacity-100"
                       leaveTo="tw-opacity-0"
                     >
-                      <div className="tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pr-2 tw-pt-4 md:tw-pr-0">
-                        <button
-                          type="button"
-                          title="Close panel"
-                          aria-label="Close panel"
-                          className="tw-relative tw-rounded-md tw-border-none tw-bg-transparent tw-p-2.5 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white"
-                          onClick={handleClose}
-                        >
-                          <svg
-                            className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-white"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M18 6L6 18M6 6L18 18"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
+                      <div
+                        className={clsx(
+                          "tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pr-2 tw-pt-4 md:tw-pr-0",
+                          tabletModal && "md:tw-hidden"
+                        )}
+                      >
+                        <DialogCloseButton onClick={handleClose} />
                       </div>
                     </TransitionChild>
                   )}
@@ -191,13 +245,11 @@ export default function MobileWrapperDialog({
                       )}
                       style={{ paddingBottom: bottomPadding }}
                     >
-                      <div className="tw-px-4 sm:tw-px-6">
-                        {title && (
-                          <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
-                            {title}
-                          </DialogTitle>
-                        )}
-                      </div>
+                      <DialogHeader
+                        title={title}
+                        showDesktopCloseButton={showDesktopHeaderCloseButton}
+                        onClose={handleClose}
+                      />
                       {children}
                     </div>
                   </div>
