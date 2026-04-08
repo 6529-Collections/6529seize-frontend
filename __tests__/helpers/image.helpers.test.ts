@@ -1,4 +1,8 @@
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  getScaledImageUri,
+  getScaledResolvedImageUri,
+  ImageScale,
+} from "@/helpers/image.helpers";
 
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (url: string) => {
@@ -32,5 +36,12 @@ describe("getScaledImageUri", () => {
     expect(getScaledImageUri(ipfsUrl, ImageScale.W_AUTO_H_50)).toBe(
       "https://ipfs-gateway.test/ipfs/QmVdHEkqhPqjBCzS2cSNDhRwz4X2TicEzQtP9ep5Lspyc8"
     );
+  });
+});
+
+describe("getScaledResolvedImageUri", () => {
+  it("does not re-resolve already concrete urls", () => {
+    const url = "https://ipfs.io/ipfs/QmConcrete";
+    expect(getScaledResolvedImageUri(url, ImageScale.W_AUTO_H_50)).toBe(url);
   });
 });

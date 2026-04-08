@@ -11,7 +11,6 @@ import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
 } from "@/helpers/waves/waves.constants";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
@@ -64,11 +63,9 @@ export const WaveLeaderboardDropRaters: React.FC<
                   <Link href={`/${voterLabel}`}>
                     {voter.profile.pfp ? (
                       <Image
-                        src={resolveIpfsUrlSync(
-                          getScaledImageUri(
-                            voter.profile.pfp,
-                            ImageScale.W_AUTO_H_50
-                          )
+                        src={getScaledImageUri(
+                          voter.profile.pfp,
+                          ImageScale.W_AUTO_H_50
                         )}
                         alt={`${voterLabel}'s Profile`}
                         width={20}
