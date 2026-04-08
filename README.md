@@ -52,7 +52,9 @@ again to approve the updated file.
 From the repo root, you should be able to run:
 
 ```bash
+which 6529
 which ghruns
+6529 run dev --help
 ghruns
 ```
 
@@ -98,22 +100,64 @@ Are you sure you want to deploy <branch-name> to production?
 
 If you confirm, it triggers the production workflow from `.github/workflows/build-upload-deploy-prod.yml` against your current branch.
 
-PORT: 3000
+Default app port: `3001`.
 
 ### Documentation
 
 User-facing documentation lives in [`docs/README.md`](docs/README.md).
+Developer package-management guidance lives in [`docs/developer/pnpm-and-socket-firewall.md`](docs/developer/pnpm-and-socket-firewall.md).
 
 ### Install
 
+Bootstrap the repo command shim, ensure Socket Firewall is installed, and
+activate the pinned pnpm version:
+
+```bash
+./bin/6529 bootstrap
 ```
-npm i
+
+Then open a new shell, or activate the current shell immediately:
+
+```bash
+source <(./bin/6529 bootstrap --print-export)
 ```
+
+Then install project dependencies through the secure path:
+
+```bash
+6529 install
+```
+
+To add a new package:
+
+```bash
+6529 add <package>
+6529 add -D <package>
+```
+
+`6529 install` and `6529 i` only reinstall the existing dependency set. They do
+not accept package names. To add a dependency, use `6529 add <package>`.
+`6529 add` goes through the same Socket Firewall protected path as secure
+installs.
+
+Plain `pnpm install`, `pnpm dev`, and `npm run ...` repo script execution are intentionally blocked. Use the `6529` wrapper only.
+
+If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
+
+```bash
+6529 install
+6529 run dev
+6529 run build
+6529 approve-builds
+6529 staging
+```
+
+Otherwise, open a new shell after running `./bin/6529 bootstrap`.
 
 ### Build
 
-```
-npm run build
+```bash
+6529 run build
 ```
 
 ### Environment
@@ -134,7 +178,7 @@ gateway usage:
 
 To test end-to-end:
 
-1. Run `npm run dev`.
+1. Run `6529 run dev`.
 2. Paste any pepe.wtf link in chat, for example `https://pepe.wtf/asset/GOXPEPE`
    or `https://pepe.wtf/artists/Easy-B`, and confirm the preview renders with
    imagery and stats.
@@ -145,20 +189,47 @@ To test end-to-end:
 
 - Locally
 
+```bash
+6529 run dev
 ```
-npm run dev
+
+- Staging update / rebuild
+
+```bash
+./bin/6529 staging
+```
+
+This rebuilds the app and restarts PM2 on the standalone runtime path
+(`6529 run start:standalone`).
+
+- One-time server bootstrap for plain `6529 ...`
+
+```bash
+./bin/6529 bootstrap
+```
+
+Then open a new shell, or source the rc file that matches your shell.
+
+- After `direnv allow`, the shorthand also works
+
+```bash
+6529 staging
 ```
 
 - Production
 
+```bash
+6529 run start
 ```
-npm run start
-```
+
+This is the repo-local production-style start path.
+Elastic Beanstalk production deploys do not use `6529 run start`; they package
+Next standalone output and start `server.js` through [`Procfile`](./Procfile).
 
 ### RUN USING PM2
 
-```
-pm2 start npm --name=6529seize -- run start
+```bash
+pm2 start bash --name=6529seize -- -lc 'cd /path/to/repo && ./bin/6529 run start:standalone'
 ```
 
 ## Directory Structure

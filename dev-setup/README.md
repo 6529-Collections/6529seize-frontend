@@ -1,15 +1,22 @@
-# 6529seize-frontend — EC2 Setup Guide
+# 6529seize-frontend — Staging EC2 Setup Guide
 
-This repo includes `dev-setup/run-setup.sh` to bootstrap a fresh EC2 host for a per‑developer staging site at `https://<slug>staging.6529.io`.
+This repo includes `dev-setup/run-staging-ec2-setup.sh` to bootstrap a fresh
+EC2 host for a per-developer staging site at `https://<slug>staging.6529.io`.
+
+This is not the normal local developer setup path for a laptop or workstation.
+For ordinary local development, use the `6529` wrapper and secure install flow
+instead of this host-provisioning script.
 
 ---
 
 ## What the script does
 
-- Ensures **Node ≥ 20** (keeps 21/22 if present) and **npm ≥ 10**
+- Ensures **Node ≥ 20** (keeps 21/22 if present)
+- Activates the repo-pinned **pnpm** version with **Corepack**
+- Installs **Socket Firewall** and uses `6529 install:frozen`
 - Installs **PM2**
 - Prompts you and writes **.env** **before** any build (no `.env.sample` used)
-- Installs deps, **builds**, and **starts** the app with PM2 (default port **3001**)
+- Installs deps, **builds**, and **starts** the app with PM2 on the standalone runtime path (default port **3001**)
 - **Optionally** installs **NGINX + Certbot** and configures HTTPS for `https://<slug>staging.6529.io`
 - Enables PM2 start on boot (Linux)
 
@@ -54,13 +61,13 @@ ssh -i /path/to/key.pem ubuntu@<EC2_PUBLIC_IP>
 
 ---
 
-## 4) Clone the repo & run the setup
+## 4) Clone the repo & run the staging host setup
 
 ```bash
 sudo apt-get update -y && sudo apt-get install -y git
 git clone https://github.com/6529-Collections/6529seize-frontend.git
 cd 6529seize-frontend
-bash dev-setup/run-setup.sh
+bash dev-setup/run-staging-ec2-setup.sh
 ```
 
 ### You’ll be prompted for
@@ -79,7 +86,9 @@ bash dev-setup/run-setup.sh
   - `IPFS_GATEWAY_ENDPOINT=https://ipfs.6529.io`
   - `BASE_ENDPOINT=https://<slug>staging.6529.io`
 
-The script then installs deps, builds, starts the app with PM2, and **offers** to set up NGINX + HTTPS.
+The script then installs deps through Socket Firewall + pnpm, builds,
+starts the app with PM2 via `./bin/6529 run start:standalone`, and **offers**
+to set up NGINX + HTTPS.
 
 ---
 
@@ -145,7 +154,8 @@ sudo certbot renew --dry-run
 
 ## 🔄 Resetting an Environment
 
-If you need to reset your staging/dev box (e.g., wipe the repo, stop PM2, remove the Nginx vhost), use the provided reset script.  
+If you need to reset your staging EC2 box (e.g., wipe the repo, stop PM2,
+remove the Nginx vhost), use the provided reset script.  
 This does **not uninstall Node, PM2, or Nginx** — it just clears the running app and config so you can re-run setup from scratch.
 
 ```bash

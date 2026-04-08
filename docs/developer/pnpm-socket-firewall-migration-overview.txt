@@ -1,0 +1,215 @@
+pnpm + Socket Firewall migration overview
+=========================================
+
+What we changed
+---------------
+
+This repo was migrated from npm-oriented project workflows to pnpm-oriented
+workflows, with Socket Firewall added on top of dependency installation paths.
+
+The migration covers:
+- package manager pinning with Corepack
+- committing pnpm-lock.yaml
+- removing package-lock.json from the supported workflow
+- converting repo scripts and helper scripts from npm/npx to pnpm/pnpm exec
+- updating Playwright, staging, worktree, PM2, and standalone export docs
+- updating production CI to install with Socket Firewall + pnpm
+- updating Elastic Beanstalk startup so runtime no longer depends on pnpm
+- avoiding Elastic Beanstalk's implicit npm install by shipping a standalone
+  runtime bundle inside the deployment artifact
+- adding repo guardrails against npm/yarn installs and package-lock reintroduction
+
+Why this is better
+------------------
+
+1. Reproducibility is stronger.
+   The repo now pins a concrete pnpm version in package.json and commits
+   pnpm-lock.yaml. CI and developers can activate the same package manager
+   version with Corepack.
+
+2. Production installs are more deterministic.
+   The GitHub Actions deploy workflow now does the full build in CI using the
+   committed lockfile, uploads the static asset bundle to S3/CloudFront, and
+   packages the Next standalone runtime bundle into the deploy artifact so
+   Elastic Beanstalk does not need to do its own npm install on-instance.
+
+3. Supply-chain controls are better.
+   Socket Firewall is now placed directly in front of pnpm installs for CI and
+   the documented local install path. That means package downloads are evaluated
+   before they land in the environment.
+
+4. Tooling is consistent.
+   Local scripts, helper scripts, Playwright, worktree automation, and PM2
+   examples all point at pnpm now instead of mixing package managers.
+
+5. Accidental backsliding is less likely.
+   The repo now rejects npm/yarn installs through a preinstall guard, checks
+   that package-lock.json is absent, blocks plain pnpm installs, and documents
+   the secure path everywhere developers are likely to look.
+
+Key repo changes
+----------------
+
+package.json
+- packageManager changed from npm to pnpm@10.33.0
+- added secure install scripts:
+  - pnpm run install:secure
+  - pnpm run install:secure:frozen
+  - pnpm run install:secure:prod
+- added preinstall guard to reject npm/yarn
+- added guard:no-package-lock
+- replaced internal npm run chains with pnpm run
+- replaced npx usage with pnpm exec
+
+pnpm-lock.yaml
+- generated and committed as the source-of-truth lockfile
+
+package-lock.json
+- removed from the supported workflow
+
+New helper scripts
+- scripts/bootstrap-6529-command.sh
+  Installs a global `6529` shim under ~/.local/bin without globally exposing the
+  repo's npm/pnpm guard shims.
+- scripts/run-secure-pnpm.cjs
+  Runs sfw pnpm ... and prints a clear error if Socket Firewall is missing.
+- scripts/enforce-package-manager.cjs
+  Rejects npm/yarn installs and points developers to the Corepack + pnpm path.
+- scripts/assert-no-package-lock.cjs
+  Fails if package-lock.json is present.
+- scripts/setup-corepack-pnpm.sh
+  Activates the repo-pinned pnpm version through Corepack.
+
+Elastic Beanstalk and production deployment
+-------------------------------------------
+
+Before:
+- CI used npm ci
+- EB had a container command that ran npm install
+- start behavior depended on npm-oriented defaults
+
+After:
+- CI installs the pinned pnpm version before dependency installation
+- CI installs dependencies with sfw pnpm install --frozen-lockfile
+- CI passes the Socket action's absolute installed binary path into the secure
+  install wrapper instead of relying only on PATH lookup
+- CI builds the app
+- CI zips the Next standalone runtime bundle with `server.js`,
+  traced runtime files, `.next/BUILD_ID`, `.next/static`, `public`, and
+  `.ebextensions`
+- CI uploads package.zip and the built .next/static assets to S3
+- Procfile starts the standalone app with `node server.js`
+- .ebextensions/runtime-bundle.config verifies `server.js` and build output
+- EB runtime no longer falls back to its implicit npm install path
+
+This is important because EB's Node.js platform defaults to npm install when it
+sees package.json and no usable runtime bundle. Shipping the standalone server
+bundle avoids that fallback path entirely and keeps the artifact smaller than a
+full node_modules tree.
+
+Developer workflow changes
+--------------------------
+
+Bootstrap once (fresh clone):
+1. ./bin/6529 bootstrap
+   This is usually the only time you need the explicit ./bin/6529 path for
+   normal local setup. It installs a global shim, ensures Socket Firewall is
+   installed with the real npm binary, activates the repo-pinned pnpm version
+   through Corepack, and makes future shells resolve the bare `6529` command.
+   Prefer `6529` after bootstrap, but `./bin/6529` remains correct for
+   fresh-clone staging and PM2-style entrypoints.
+   Then open a new shell, or activate immediately:
+   source <(./bin/6529 bootstrap --print-export)
+
+Install dependencies:
+2. 6529 install
+
+Normal day-to-day commands:
+- 6529 run dev
+- 6529 run build
+- 6529 approve-builds
+- 6529 staging
+- 6529 run test
+- 6529 run lint
+- 6529 run start   (local production-style start from the repo root)
+- pm2 start bash --name=6529seize -- -lc 'cd /path/to/repo && ./bin/6529 run start:standalone'   (staging PM2)
+
+Fresh-clone-safe staging entrypoint:
+- ./bin/6529 staging
+
+Files updated for local/dev workflows
+-------------------------------------
+
+- README.md
+- dev-setup/README.md
+- dev-setup/run-staging-ec2-setup.sh
+- playwright.config.ts
+- scripts/dev-open.cjs
+- scripts/quality.js
+- scripts/staging.sh
+- bin/6529
+- scripts/worktree/wt-add.sh
+- scripts/worktree/wt-common.sh
+- standalone/standalone-memes-mint/README.md
+- standalone/standalone-memes-mint/scripts/export-mint-page.cjs
+- AGENTS.md
+
+Guardrails added
+----------------
+
+1. pnpm is pinned in package.json.
+2. npm/yarn installs are rejected by preinstall.
+3. plain pnpm installs are rejected unless the secure-install env flag is present.
+4. direct repo script execution is rejected unless it came through `6529`.
+5. package-lock.json presence can be checked explicitly with guard:no-package-lock.
+6. CI now uses the `6529` wrapper for repo orchestration.
+7. Production deploy bundles a standalone runtime so EB does not need npm install.
+8. Documentation now points developers to the secure install path.
+
+Socket Firewall Free enforcement limits
+---------------------------------------
+
+Socket Firewall Free improves security, but it is not true centralized
+enforcement.
+
+Important limits:
+- It is wrapper mode. Protection only applies when the command is prefixed with
+  sfw.
+- It blocks confirmed malware, but AI-flagged packages may only warn.
+- It does not support private/custom registries in Free mode.
+- It cannot stop cached packages from being reused if no network request occurs.
+- It does not provide a centrally managed mandatory proxy/service path by itself.
+
+What requires Socket Enterprise for real centralized enforcement
+---------------------------------------------------------------
+
+Use Socket Firewall Enterprise when you need:
+- proxy/service mode with managed routing
+- enforced org-wide policy that does not depend on developers typing sfw
+- private/custom registry support
+- API-key-backed centralized configuration
+- custom block/warn behavior and policy tuning
+- organization-level deployment patterns where CI, build hosts, and developer
+  machines are all forced through the same managed Socket path
+
+Suggested stronger follow-ups
+-----------------------------
+
+1. Add Socket Enterprise proxy/service mode if centralized enforcement is a hard
+   requirement.
+2. Consider pnpm build-script allowlisting with pnpm's build approval features
+   after validating which dependencies truly need install scripts.
+3. Add a CI assertion that fails if packageManager changes away from pnpm or if
+   package-lock.json is reintroduced.
+4. Add additional workflows that use the same Corepack + pnpm + sfw bootstrap
+   if more CI jobs are introduced later.
+5. Periodically refresh the pinned pnpm version with:
+   corepack use pnpm@latest-10
+
+Verification summary
+--------------------
+
+- pnpm 10.33.0 was activated with Corepack.
+- pnpm-lock.yaml was generated with pnpm import.
+- A pnpm install verification completed successfully against the migrated
+  lockfile, confirming the repo can resolve through pnpm without npm.

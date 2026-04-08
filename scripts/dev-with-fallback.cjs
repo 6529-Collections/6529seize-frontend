@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 const { spawn } = require("child_process");
 const net = require("net");
+const { resolve } = require("node:path");
 
 const DEFAULT_START_PORT = Number(process.env.PORT || 3001);
 const MAX_OFFSET = Number(process.env.PORT_SEARCH_LIMIT || 20);
+const repoRoot = resolve(__dirname, "..");
+const nextBin = require.resolve("next/dist/bin/next", { paths: [repoRoot] });
 
 const extraArgs = process.argv.slice(2);
 
@@ -55,14 +58,15 @@ async function run() {
     console.log(`Starting Next.js dev server on port ${port}${useTurbo ? "" : " (Turbopack disabled)"}...`);
 
     const devArgs = useTurbo
-      ? ["dev", "-p", String(port), ...extraArgs]
-      : ["dev", "--webpack", "-p", String(port), ...extraArgs];
+      ? [nextBin, "dev", "-p", String(port), ...extraArgs]
+      : [nextBin, "dev", "--webpack", "-p", String(port), ...extraArgs];
 
     const child = spawn(
-      "next",
+      process.execPath,
       devArgs,
       {
         stdio: "inherit",
+        cwd: repoRoot,
         env,
       }
     );

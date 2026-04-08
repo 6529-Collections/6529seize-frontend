@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "Direct npx usage is blocked in this repository." >&2
+echo "Use the \`6529\` wrapper instead." >&2
+exit 1
