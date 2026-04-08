@@ -33,6 +33,7 @@ export default function MemeSubscriptionRow(
     refresh: () => void;
     variant?: "default" | "compact";
     balanceLabel?: string;
+    subscribedView?: boolean;
   }>
 ) {
   const id = `subscription-${props.subscription.token_id}`;
@@ -265,11 +266,14 @@ export default function MemeSubscriptionRow(
   };
 
   if (isCompact) {
+    const isSubscribedView = !!props.subscribedView;
     return (
       <div className="tw-py-1">
         <div className="d-flex align-items-center justify-content-between gap-2">
           <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-none">
-            <span className="tw-font-medium tw-leading-none">Subscribe</span>
+            <span className="tw-font-medium tw-leading-none">
+              {isSubscribedView ? "Subscribed" : "Subscribe"}
+            </span>
             {props.balanceLabel && (
               <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-leading-none tw-text-iron-400">
                 <span className="tw-leading-none">Balance</span>
@@ -282,24 +286,30 @@ export default function MemeSubscriptionRow(
               </span>
             )}
           </span>
-          <div className="d-flex align-items-center gap-2">
-            {isSubmitting && <Spinner />}
-            <Toggle
-              disabled={isToggleDisabled}
-              id={id}
-              checked={subscribed}
-              icons={false}
-              onChange={submit}
-              aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
-            />
-            <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-              {renderCountSelector({
-                selectClassName:
-                  "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
-                disableWhenSingleOption: false,
-              })}
+          {isSubscribedView ? (
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300">
+              {subscribedCount} / {props.eligibilityCount}
             </span>
-          </div>
+          ) : (
+            <div className="d-flex align-items-center gap-2">
+              {isSubmitting && <Spinner />}
+              <Toggle
+                disabled={isToggleDisabled}
+                id={id}
+                checked={subscribed}
+                icons={false}
+                onChange={submit}
+                aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+              />
+              <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
+                {renderCountSelector({
+                  selectClassName:
+                    "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
+                  disableWhenSingleOption: false,
+                })}
+              </span>
+            </div>
+          )}
         </div>
         {finalWithMetadata && (
           <div className="font-smaller font-color-silver tw-mt-2 tw-pr-2">
