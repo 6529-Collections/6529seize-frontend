@@ -32,6 +32,7 @@ jest.mock("@/components/auth/Auth");
 
 const addPinnedWave = jest.fn();
 const removePinnedWave = jest.fn();
+const setToast = jest.fn();
 const mockedUseMyStream = useMyStream as jest.Mock;
 const mockedUsePinnedWavesServer = usePinnedWavesServer as jest.Mock;
 const mockedUseAuth = useAuth as jest.Mock;
@@ -50,7 +51,7 @@ function setup(
     canPinWave: jest.fn().mockImplementation(canPinWave),
   });
   mockedUseAuth.mockReturnValue({
-    setToast: jest.fn(),
+    setToast,
   });
   localStorage.setItem("pinnedWave", JSON.stringify(storedPinned));
   return render(<BrainLeftSidebarWavePin waveId="1" isPinned={isPinned} />);
@@ -84,6 +85,10 @@ describe("BrainLeftSidebarWavePin", () => {
     setup(false, maxList, () => false);
     await user.click(screen.getByRole("button", { name: /pin wave/i }));
     expect(addPinnedWave).not.toHaveBeenCalled();
+    expect(setToast).toHaveBeenCalledWith({
+      type: "error",
+      message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
+    });
     const tooltip = screen.getByTestId("tooltip-wave-pin-1");
     expect(tooltip).toHaveTextContent(
       `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`
