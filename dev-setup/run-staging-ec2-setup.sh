@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 
 # ----------------------------------------------------------------------------
-# Script: dev-ec2-setup.sh
+# Script: run-staging-ec2-setup.sh
 #
 # Description:
-#   Bootstraps a host to build & run 6529seize-frontend for staging/dev.
+#   Bootstraps an EC2 host to build & run 6529seize-frontend for staging.
 #   - Accepts Node >= 20; installs Node 20 only if Node missing or < 20.
-#   - Ensures npm >= 10 (upgrades if < 10; leaves 10+ unchanged).
+#   - Activates the repo-pinned pnpm version via Corepack.
+#   - Installs Socket Firewall for secure dependency installation.
 #   - Installs PM2, prompts ONCE at the beginning for all inputs (.env + nginx),
 #     builds, starts via PM2, optionally configures NGINX + Let's Encrypt.
 #   - Configures PM2 to start on boot + enables pm2-logrotate.
 #
 # Usage:
-#   bash scripts/dev-ec2-setup.sh
+#   bash dev-setup/run-staging-ec2-setup.sh
 # ----------------------------------------------------------------------------
 
 set -Eeuo pipefail
@@ -20,6 +21,8 @@ trap 'echo -e "\033[31m[ERROR]\033[0m line $LINENO: \"$BASH_COMMAND\" failed. Ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+OS_NAME="$(uname -s)"
+OS_DARWIN="Darwin"
 
 color() {
   local code="$1"; shift
@@ -33,15 +36,37 @@ color() {
     cyan)    echo -e "\033[36m${text}\033[0m";;
     *)       echo "$text";;
   esac
+  return 0
+}
+
+# Resolve a real binary by stripping the repo's bin/ shim directory from PATH,
+# so calls like `npm -v` and `npm install --global` never hit the repo shims.
+# Usage: resolve_real_binary npm REAL_NPM
+resolve_real_binary() {
+  local name="$1" varname="$2"
+  local repo_bin="$REPO_ROOT/bin"
+  local clean_path="" part
+  IFS=':' read -r -a _rrb_parts <<< "${PATH:-}"
+  for part in "${_rrb_parts[@]}"; do
+    [[ -z "$part" || "$part" == "$repo_bin" ]] && continue
+    clean_path="${clean_path:+${clean_path}:}${part}"
+  done
+  local resolved
+  resolved="$(PATH="$clean_path" command -v "$name" 2>/dev/null || true)"
+  if [[ -z "$resolved" ]]; then
+    color red "Cannot find real '$name' outside the repo's bin/ shims. Ensure it is installed and on PATH."
+    exit 1
+  fi
+  printf -v "$varname" '%s' "$resolved"
+  return 0
 }
 
 require_sudo_if_linux() {
-  if [[ "$(uname -s)" != "Darwin" ]]; then
-    if [[ "$EUID" -ne 0 ]] && ! command -v sudo >/dev/null 2>&1; then
-      color red "This script needs root or sudo privileges on Linux. Aborting."
-      exit 1
-    fi
+  if [[ "$OS_NAME" != "$OS_DARWIN" && "$EUID" -ne 0 ]] && ! command -v sudo >/dev/null 2>&1; then
+    color red "This script needs root or sudo privileges on Linux. Aborting."
+    exit 1
   fi
+  return 0
 }
 
 # ---------- Prompt helpers (one-shot input phase) ----------
@@ -54,7 +79,13 @@ prompt_choice() {
   exec 3</dev/tty || true
   color cyan "$question"
   declare -a labels values
-  while (( "$#" )); do labels+=("$1"); values+=("$2"); shift 2; done
+  while (( "$#" )); do
+    local option_label="$1"
+    local option_value="$2"
+    labels+=("$option_label")
+    values+=("$option_value")
+    shift 2
+  done
   for i in "${!labels[@]}"; do
     local n=$((i+1))
     if [[ "${values[$i]}" == "$default" ]]; then
@@ -76,6 +107,7 @@ prompt_choice() {
     fi
   fi
   exec 3<&- || true
+  return 0
 }
 
 prompt_input_required() {
@@ -96,13 +128,14 @@ prompt_input_required() {
   done
   printf -v "$__varname" '%s' "$val"
   exec 3<&- || true
+  return 0
 }
 
 # ---------- Tech prerequisites ----------
 
-ensure_node_ge20_and_npm_ge10() {
+ensure_node_ge20() {
   # Accept Node >= 20; install Node 20 only if missing or < 20.
-  local os="$(uname -s)"; local need_major=20; local have_major=0
+  local need_major=20; local have_major=0
   if command -v node >/dev/null 2>&1; then
     local have_ver; have_ver="$(node -v | sed 's/^v//')"; have_major="${have_ver%%.*}"
     if [[ "$have_major" -ge "$need_major" ]]; then
@@ -115,7 +148,7 @@ ensure_node_ge20_and_npm_ge10() {
   fi
 
   if [[ "$have_major" -lt "$need_major" ]]; then
-    if [[ "$os" == "Darwin" ]]; then
+    if [[ "$OS_NAME" == "$OS_DARWIN" ]]; then
       if command -v brew >/dev/null 2>&1; then
         brew install node@20
         brew unlink node >/dev/null 2>&1 || true
@@ -136,20 +169,83 @@ ensure_node_ge20_and_npm_ge10() {
     color red "Node $(node -v) < 20 after installation. Please install Node >= 20 and re-run."; exit 1
   fi
 
-  local npm_major; npm_major="$(npm -v | cut -d. -f1 || echo 0)"
-  if [[ "$npm_major" -lt 10 ]]; then
-    color yellow "Upgrading npm to >=10…"
-    if [[ "$(uname -s)" == "Darwin" ]]; then npm i -g npm@^10; else sudo npm i -g npm@^10; fi
+  resolve_real_binary npm REAL_NPM
+  color green "Using Node $(node -v), npm $("$REAL_NPM" -v)"
+  return 0
+}
+
+activate_pnpm_with_corepack() {
+  color yellow "Activating the repo-pinned pnpm version with Corepack…"
+  if [[ "$OS_NAME" == "$OS_DARWIN" ]]; then
+    ( cd "$REPO_ROOT" && bash scripts/setup-corepack-pnpm.sh )
+  else
+    ( cd "$REPO_ROOT" && sudo bash scripts/setup-corepack-pnpm.sh )
   fi
-  color green "Using Node $(node -v), npm $(npm -v)"
+  resolve_real_binary pnpm REAL_PNPM
+  color green "pnpm: $("$REAL_PNPM" -v)"
+  return 0
+}
+
+prepend_real_npm_global_bin_to_path() {
+  if [[ -z "${REAL_NPM:-}" ]]; then
+    return 0
+  fi
+
+  local npm_global_bin=""
+  npm_global_bin="$("$REAL_NPM" bin -g 2>/dev/null || true)"
+  if [[ -z "$npm_global_bin" ]]; then
+    local npm_global_prefix=""
+    npm_global_prefix="$("$REAL_NPM" prefix -g 2>/dev/null || true)"
+    if [[ -n "$npm_global_prefix" ]]; then
+      npm_global_bin="${npm_global_prefix}/bin"
+    fi
+  fi
+
+  if [[ -z "$npm_global_bin" || ! -d "$npm_global_bin" ]]; then
+    return 0
+  fi
+
+  case ":$PATH:" in
+    *":$npm_global_bin:"*) ;;
+    *) export PATH="$npm_global_bin:$PATH" ;;
+  esac
+
+  return 0
+}
+
+install_socket_firewall() {
+  prepend_real_npm_global_bin_to_path
+
+  if command -v sfw >/dev/null 2>&1; then
+    if sfw --help >/dev/null 2>&1; then
+      color green "Socket Firewall: installed"
+      return 0
+    fi
+    color yellow "Socket Firewall found but does not appear usable; reinstalling…"
+  fi
+
+  color yellow "Installing Socket Firewall globally…"
+  if [[ "$OS_NAME" == "$OS_DARWIN" ]]; then
+    "$REAL_NPM" install --global sfw
+  else
+    sudo "$REAL_NPM" install --global sfw
+  fi
+  prepend_real_npm_global_bin_to_path
+  command -v sfw >/dev/null 2>&1 || { color red "Socket Firewall installation failed."; exit 1; }
+  color green "Socket Firewall installed."
+  return 0
 }
 
 install_pm2() {
+  prepend_real_npm_global_bin_to_path
+
   if ! command -v pm2 >/dev/null 2>&1; then
     color yellow "Installing PM2 globally…"
-    if [[ "$(uname -s)" == "Darwin" ]]; then npm i -g pm2; else sudo npm i -g pm2; fi
+    if [[ "$OS_NAME" == "$OS_DARWIN" ]]; then "$REAL_NPM" i -g pm2; else sudo "$REAL_NPM" i -g pm2; fi
+    prepend_real_npm_global_bin_to_path
   fi
   color green "PM2: $(pm2 -v)"
+  return 0
 }
 
 ensure_java_for_openapi() {
@@ -157,7 +253,7 @@ ensure_java_for_openapi() {
     color green "Java detected: $(java -version 2>&1 | head -n1)"; return 0
   fi
   color yellow "Java not found. Installing OpenJDK 17 (headless)…"
-  if [[ "$(uname -s)" == "Darwin" ]]; then
+  if [[ "$OS_NAME" == "$OS_DARWIN" ]]; then
     if command -v brew >/dev/null 2>&1; then
       brew install openjdk@17
       if [[ -d "/opt/homebrew/opt/openjdk@17/bin" ]]; then
@@ -174,13 +270,14 @@ ensure_java_for_openapi() {
   fi
   command -v java >/dev/null 2>&1 || { color red "Java installation failed."; exit 1; }
   color green "Java installed: $(java -version 2>&1 | head -n1)"
+  return 0
 }
 
 # ---------- NGINX + Certbot ----------
 
 install_nginx_and_certbot() {
   color yellow "Installing NGINX and Certbot…"
-  if [[ "$(uname -s)" == "Darwin" ]]; then
+  if [[ "$OS_NAME" == "$OS_DARWIN" ]]; then
     color red "NGINX/Certbot automation is intended for Ubuntu/Debian on EC2."; return 0
   fi
   sudo apt-get update -y
@@ -193,6 +290,7 @@ install_nginx_and_certbot() {
   sudo systemctl enable nginx
   sudo systemctl start nginx
   color green "NGINX: $(nginx -v 2>&1) ; Certbot: $(certbot --version 2>&1)"
+  return 0
 }
 
 create_nginx_vhost_http_only() {
@@ -223,6 +321,7 @@ EOF
   sudo nginx -t
   sudo systemctl reload nginx
   color green "NGINX vhost created and reloaded."
+  return 0
 }
 
 confirm_dns_ready() {
@@ -239,34 +338,38 @@ obtain_cert_and_enable_https() {
   sudo certbot --nginx -d "$domain" --non-interactive --agree-tos --no-eff-email -m "$email" --redirect
   color green "Certificate installed (auto-renew via systemd timer)."
   sudo systemctl list-timers | grep certbot || true
+  return 0
 }
 
 # ---------- Build & Run ----------
 
 install_dependencies() {
-  color yellow "Installing project dependencies…"
+  color yellow "Installing project dependencies through Socket Firewall + pnpm…"
   if [[ -d "$REPO_ROOT/node_modules" ]]; then
-    color yellow "Removing existing node_modules and lockfile for a clean install…"
-    rm -rf "$REPO_ROOT/node_modules" "$REPO_ROOT/package-lock.json"
+    color yellow "Removing existing node_modules for a clean install…"
+    rm -rf "$REPO_ROOT/node_modules"
   fi
-  ( cd "$REPO_ROOT" && npm install )
+  ( cd "$REPO_ROOT" && ./bin/6529 install:frozen )
   color green "Dependencies installed."
+  return 0
 }
 
 build_project() {
   color yellow "Building the Next.js project…"
-  ( cd "$REPO_ROOT" && npm run build )
+  ( cd "$REPO_ROOT" && ./bin/6529 run build )
   color green "Build completed."
+  return 0
 }
 
 start_pm2() {
   local pm2_name="6529seize"
   color yellow "Starting the application with PM2…"
-  ( cd "$REPO_ROOT" && pm2 start npm --name="$pm2_name" -- run start )
+  ( cd "$REPO_ROOT" && pm2 start bash --name="$pm2_name" -- -lc "cd \"$REPO_ROOT\" && ./bin/6529 run start:standalone" )
   pm2 save
   color green "App started under PM2 as '$pm2_name'."
   color blue  "Logs: pm2 logs $pm2_name"
   color blue  "Port: $DEV_PORT (proxy target). Ensure your app listens on this port."
+  return 0
 }
 
 enable_pm2_logrotate() {
@@ -280,10 +383,11 @@ enable_pm2_logrotate() {
   pm2 set pm2-logrotate:dateFormat "YYYY-MM-DD_HH-mm-ss" >/dev/null
   pm2 set pm2-logrotate:rotateInterval "0 0 * * *" >/dev/null  # daily at 00:00
   color green "pm2-logrotate configured (10M, keep 7, daily, compress)."
+  return 0
 }
 
 enable_pm2_startup() {
-  if [[ "$(uname -s)" == "Darwin" ]]; then
+  if [[ "$OS_NAME" == "$OS_DARWIN" ]]; then
     color yellow "Skipping PM2 startup on macOS."
     return 0
   fi
@@ -298,6 +402,7 @@ enable_pm2_startup() {
   else
     color yellow "systemd not detected; skipping pm2 startup registration."
   fi
+  return 0
 }
 
 # ---------- One-shot input phase (all prompts first) ----------
@@ -361,16 +466,17 @@ collect_all_inputs() {
     CERTBOT_EMAIL=""
   fi
   exec 3<&- || true
+  return 0
 }
 
 # ---------- .env creation ----------
 
 create_env_file() {
   local env_file="$REPO_ROOT/.env"
-  local BASE_ENDPOINT="$DEV_DOMAIN_URL"
-  local CORE_SCHEME="core6529"
-  local IPFS_API_ENDPOINT="https://api-ipfs.6529.io"
-  local IPFS_GATEWAY_ENDPOINT="https://ipfs.6529.io"
+  local base_endpoint="$DEV_DOMAIN_URL"
+  local core_scheme="core6529"
+  local ipfs_api_endpoint="https://api-ipfs.6529.io"
+  local ipfs_gateway_endpoint="https://ipfs.6529.io"
 
   color yellow "Creating/replacing $env_file …"
   cat > "$env_file" <<EOF
@@ -383,7 +489,7 @@ API_ENDPOINT=$API_ENDPOINT
 ALLOWLIST_API_ENDPOINT=$ALLOWLIST_API_ENDPOINT
 
 # BASE ENDPOINT (must match nginx/certbot domain)
-BASE_ENDPOINT=$BASE_ENDPOINT
+BASE_ENDPOINT=$base_endpoint
 
 # API KEYS
 ALCHEMY_API_KEY=$ALCHEMY_API_KEY
@@ -398,13 +504,14 @@ NEXTGEN_CHAIN_ID=$NEXTGEN_CHAIN_ID
 MOBILE_APP_SCHEME=$MOBILE_APP_SCHEME
 
 # 6529 CORE SCHEME
-CORE_SCHEME=$CORE_SCHEME
+CORE_SCHEME=$core_scheme
 
 # IPFS ENDPOINTS
-IPFS_API_ENDPOINT=$IPFS_API_ENDPOINT
-IPFS_GATEWAY_ENDPOINT=$IPFS_GATEWAY_ENDPOINT
+IPFS_API_ENDPOINT=$ipfs_api_endpoint
+IPFS_GATEWAY_ENDPOINT=$ipfs_gateway_endpoint
 EOF
   color green "Wrote $env_file"
+  return 0
 }
 
 # ---------- Main ----------
@@ -416,7 +523,9 @@ main() {
 
   # 1) Prerequisites
   require_sudo_if_linux
-  ensure_node_ge20_and_npm_ge10
+  ensure_node_ge20
+  activate_pnpm_with_corepack
+  install_socket_firewall
   install_pm2
   ensure_java_for_openapi
 
@@ -451,6 +560,7 @@ main() {
 
   color green "Done. App should be reachable via NGINX at ${DEV_DOMAIN_URL} (if configured), or directly on port ${DEV_PORT}."
   color blue  "PM2 logs → pm2 logs 6529seize"
+  return 0
 }
 
 main "$@"

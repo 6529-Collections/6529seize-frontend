@@ -27,7 +27,12 @@ function getProfileKey(
   );
 }
 
-export default function LatestDropNextMintSubscribe() {
+export default function LatestDropNextMintSubscribe(
+  props: Readonly<{
+    showOnlyWhenSubscribed?: boolean;
+    readonly?: boolean;
+  }> = {}
+) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { country } = useCookieConsent();
   const { isIos } = useCapacitor();
@@ -53,17 +58,15 @@ export default function LatestDropNextMintSubscribe() {
     enabled: !hideSubscriptions && !!profileKey,
   });
 
-  const {
-    data: status,
-    refetch: refetchStatus,
-  } = useQuery<ApiUpcomingMemeSubscriptionStatus>({
-    queryKey: ["next-mint-subscription-status", profileKey, tokenId],
-    queryFn: async () =>
-      await commonApiFetch<ApiUpcomingMemeSubscriptionStatus>({
-        endpoint: `subscriptions/consolidation/upcoming-memes/${tokenId}/${profileKey}`,
-      }),
-    enabled: !hideSubscriptions && !!profileKey && hasTokenId,
-  });
+  const { data: status, refetch: refetchStatus } =
+    useQuery<ApiUpcomingMemeSubscriptionStatus>({
+      queryKey: ["next-mint-subscription-status", profileKey, tokenId],
+      queryFn: async () =>
+        await commonApiFetch<ApiUpcomingMemeSubscriptionStatus>({
+          endpoint: `subscriptions/consolidation/upcoming-memes/${tokenId}/${profileKey}`,
+        }),
+      enabled: !hideSubscriptions && !!profileKey && hasTokenId,
+    });
 
   const subscription = useMemo<NFTSubscription | null>(() => {
     if (!profileKey || !hasTokenId || !status) {
@@ -79,7 +82,20 @@ export default function LatestDropNextMintSubscribe() {
     } as NFTSubscription;
   }, [hasTokenId, profileKey, status, tokenId]);
 
-  if (hideSubscriptions || !profileKey || !subscription) {
+  const balanceLabel = useMemo(() => {
+    const balance = details?.balance ?? 0;
+    const safeBalance = Number.isFinite(balance) ? balance : 0;
+    return new Intl.NumberFormat(undefined, {
+      maximumFractionDigits: 6,
+    }).format(Math.round(safeBalance * 1_000_000) / 1_000_000);
+  }, [details?.balance]);
+
+  if (
+    hideSubscriptions ||
+    !profileKey ||
+    !subscription ||
+    (props.showOnlyWhenSubscribed && !subscription.subscribed)
+  ) {
     return null;
   }
 
@@ -93,7 +109,8 @@ export default function LatestDropNextMintSubscribe() {
           eligibilityCount={
             details?.subscription_eligibility_count ?? status?.eligibility ?? 1
           }
-          readonly={false}
+          balanceLabel={balanceLabel}
+          readonly={props.readonly ?? false}
           refresh={() => {
             refetchStatus();
           }}
