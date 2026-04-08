@@ -114,7 +114,7 @@ export const SingleWaveDropLog = ({
         className="tw-group tw-no-underline tw-transition-all tw-duration-300 desktop-hover:hover:tw-opacity-80"
       >
         <span
-          className={`tw-inline-block${
+          className={`tw-inline-block ${
             shouldLimit ? "tw-max-w-[8rem] tw-truncate" : ""
           }`}
         >

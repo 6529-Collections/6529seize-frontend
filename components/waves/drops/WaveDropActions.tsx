@@ -60,9 +60,7 @@ export default function WaveDropActions({
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-h-9 tw-items-center tw-gap-x-0.5 tw-rounded-xl tw-bg-iron-950 tw-px-1 tw-shadow-md tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/40">
-          {!isConnected ? (
-            <WaveDropActionsCopyLink drop={drop} />
-          ) : (
+          {isConnected ? (
             <>
               <WaveDropActionsQuickReact drop={drop} />
               <WaveDropActionsAddReaction drop={drop} />
@@ -80,6 +78,8 @@ export default function WaveDropActions({
                 onOpenChange={setIsMoreDropdownOpen}
               />
             </>
+          ) : (
+            <WaveDropActionsCopyLink drop={drop} />
           )}
         </div>
         {isConnected && shouldShowVoting && <WaveDropActionsRate drop={drop} />}
