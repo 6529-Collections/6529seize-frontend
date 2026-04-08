@@ -21,7 +21,7 @@ export default function NotificationHeader({
 
   return (
     <div className="tw-flex tw-items-start tw-gap-x-3">
-      <div className="tw-h-7 tw-w-7 tw-flex-shrink-0 tw-relative">
+      <div className="tw-relative tw-h-7 tw-w-7 tw-flex-shrink-0">
         {!isPlaceholder && activeSrc ? (
           <Image
             key={`${activeSrc}-${unoptimized ? "unoptimized" : "optimized"}`}
@@ -31,28 +31,25 @@ export default function NotificationHeader({
             sizes="28px"
             unoptimized={unoptimized}
             onError={handleError}
-            className="tw-flex-shrink-0 tw-object-contain tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+            className="tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-iron-700"
           />
         ) : (
-          <div className="tw-flex-shrink-0 tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+          <div className="tw-h-full tw-w-full tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
         )}
       </div>
-      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-start min-[390px]:tw-flex-row min-[390px]:tw-justify-between min-[390px]:tw-items-center tw-gap-y-2 min-[390px]:tw-gap-x-2 tw-min-w-0">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start tw-gap-y-2 min-[390px]:tw-flex-row min-[390px]:tw-items-center min-[390px]:tw-justify-between min-[390px]:tw-gap-x-2">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
           <UserProfileTooltipWrapper user={author.handle ?? ""}>
             <Link
               href={`/${author.handle}`}
-              className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
+              className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-no-underline"
+            >
               {author.handle}
             </Link>
           </UserProfileTooltipWrapper>
           {children}
         </div>
-        {actions && (
-          <div className="tw-flex-shrink-0">
-            {actions}
-          </div>
-        )}
+        {actions && <div className="tw-flex-shrink-0">{actions}</div>}
       </div>
     </div>
   );

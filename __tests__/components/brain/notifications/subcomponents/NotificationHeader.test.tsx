@@ -48,10 +48,7 @@ jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
 jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
   getArweaveGatewayFallbackUrls: (url: string) =>
     url === "ipfs://gelato"
-      ? [
-          "https://ipfs.6529.io/ipfs/gelato",
-          "https://ipfs.io/ipfs/gelato",
-        ]
+      ? ["https://ipfs.6529.io/ipfs/gelato", "https://ipfs.io/ipfs/gelato"]
       : [url],
 }));
 
@@ -59,11 +56,13 @@ describe("NotificationHeader", () => {
   it("prefers the configured ipfs gateway and falls back to ipfs.io on failure", () => {
     render(
       <NotificationHeader
-        author={{
-          id: "gelato-id",
-          handle: "GelatoGenesis",
-          pfp: "ipfs://gelato",
-        } as any}
+        author={
+          {
+            id: "gelato-id",
+            handle: "GelatoGenesis",
+            pfp: "ipfs://gelato",
+          } as any
+        }
       >
         <span>posted</span>
       </NotificationHeader>
@@ -94,10 +93,7 @@ describe("NotificationHeader", () => {
     const thirdAttempt = screen.getByRole("img", {
       name: "GelatoGenesis",
     });
-    expect(thirdAttempt).toHaveAttribute(
-      "src",
-      "https://ipfs.io/ipfs/gelato"
-    );
+    expect(thirdAttempt).toHaveAttribute("src", "https://ipfs.io/ipfs/gelato");
     expect(thirdAttempt).toHaveAttribute("data-unoptimized", "false");
   });
 });

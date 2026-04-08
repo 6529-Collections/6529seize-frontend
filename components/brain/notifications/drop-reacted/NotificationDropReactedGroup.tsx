@@ -72,7 +72,9 @@ type LatestPerUserEntry = {
   identity: ApiProfileMin;
 };
 
-function getFallbackIdentityKey(notification: INotificationDropReacted): string {
+function getFallbackIdentityKey(
+  notification: INotificationDropReacted
+): string {
   const identityKey = getIdentityKey(notification.related_identity);
   if (identityKey !== "unknown-profile") {
     return identityKey;
@@ -351,7 +353,8 @@ export default function NotificationDropReactedGroup({
                     ariaLabel: normalizedHandle
                       ? `View @${normalizedHandle}`
                       : "View profile",
-                    fallback: normalizedHandle?.slice(0, 2).toUpperCase() ?? "?",
+                    fallback:
+                      normalizedHandle?.slice(0, 2).toUpperCase() ?? "?",
                     ...(href !== undefined && { href }),
                     ...(title !== undefined && { title }),
                   };

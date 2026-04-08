@@ -69,7 +69,7 @@ function AvatarContent({
       sizes="28px"
       unoptimized={unoptimized}
       onError={handleError}
-      className={`tw-object-cover tw-rounded-full ${avatarRing}`}
+      className={`tw-rounded-full tw-object-cover ${avatarRing}`}
     />
   );
 }

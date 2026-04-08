@@ -22,7 +22,7 @@ beforeEach(() => {
 describe("IpfsContext", () => {
   it("initializes IpfsService on mount", async () => {
     const init = jest.fn();
-    MockIpfsService.mockImplementation(() => ({ init } as any));
+    MockIpfsService.mockImplementation(() => ({ init }) as any);
 
     render(
       <IpfsProvider>
@@ -52,20 +52,24 @@ describe("IpfsContext", () => {
   });
 
   it("resolves synchronously when needed", () => {
-    expect(resolveIpfsUrlSync("ipfs://sync"))
-      .toBe("https://ipfs.test.6529.io/ipfs/sync");
+    expect(resolveIpfsUrlSync("ipfs://sync")).toBe(
+      "https://ipfs.test.6529.io/ipfs/sync"
+    );
   });
 
   it("normalizes ipfs.io urls back to the configured gateway", () => {
-    expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync"))
-      .toBe("https://ipfs.test.6529.io/ipfs/sync");
+    expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync")).toBe(
+      "https://ipfs.test.6529.io/ipfs/sync"
+    );
   });
 
   it("preserves configured gateway port and base path when rewriting ipfs.io urls", () => {
-    publicEnv.IPFS_GATEWAY_ENDPOINT = "https://ipfs.test.6529.io:8443/base/ipfs";
+    publicEnv.IPFS_GATEWAY_ENDPOINT =
+      "https://ipfs.test.6529.io:8443/base/ipfs";
 
-    expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync?x=1#hash"))
-      .toBe("https://ipfs.test.6529.io:8443/base/ipfs/sync?x=1#hash");
+    expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync?x=1#hash")).toBe(
+      "https://ipfs.test.6529.io:8443/base/ipfs/sync?x=1#hash"
+    );
   });
 
   it("returns original url if env missing", async () => {
