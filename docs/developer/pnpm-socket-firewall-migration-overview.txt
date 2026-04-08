@@ -69,8 +69,8 @@ package-lock.json
 
 New helper scripts
 - scripts/bootstrap-6529-command.sh
-  Installs a global `6529` shim under ~/.local/bin without globally exposing the
-  repo's npm/pnpm guard shims.
+  Removes the old managed global `6529` shim and installs a repo-scoped shell
+  hook so `6529` only resolves inside this repository tree.
 - scripts/run-secure-pnpm.cjs
   Runs sfw pnpm ... and prints a clear error if Socket Firewall is missing.
 - scripts/enforce-package-manager.cjs
@@ -113,11 +113,12 @@ Developer workflow changes
 Bootstrap once (fresh clone):
 1. ./bin/6529 bootstrap
    This is usually the only time you need the explicit ./bin/6529 path for
-   normal local setup. It installs a global shim, ensures Socket Firewall is
-   installed with the real npm binary, activates the repo-pinned pnpm version
-   through Corepack, and makes future shells resolve the bare `6529` command.
-   Prefer `6529` after bootstrap, but `./bin/6529` remains correct for
-   fresh-clone staging and PM2-style entrypoints.
+   normal local setup. It removes the old managed global shim if present,
+   ensures Socket Firewall is installed with the real npm binary, activates the
+   repo-pinned pnpm version through Corepack, and makes future shells resolve
+   the bare `6529` command only inside this repository tree. Prefer `6529`
+   after bootstrap while you are in the repo, but `./bin/6529` remains correct
+   for fresh-clone staging and PM2-style entrypoints.
    Then open a new shell, or activate immediately:
    source <(./bin/6529 bootstrap --print-export)
 

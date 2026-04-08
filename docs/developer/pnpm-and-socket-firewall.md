@@ -38,9 +38,10 @@ Run these once on a fresh clone:
 ```
 
 `./bin/6529 bootstrap` is usually the only time you need the explicit path for
-normal local setup. It installs a global `6529` shim, ensures Socket Firewall
-is installed with the real npm binary, activates the repo-pinned pnpm version
-through Corepack, and adds the needed paths to your shell's PATH. Open a new
+normal local setup. It removes the old managed global shim if one exists,
+ensures Socket Firewall is installed with the real npm binary, activates the
+repo-pinned pnpm version through Corepack, and adds a repo-scoped shell hook so
+`6529` only resolves while you are inside this repository tree. Open a new
 shell after running it, or activate it immediately in the current shell:
 
 ```bash
@@ -53,8 +54,9 @@ Then install dependencies:
 6529 install
 ```
 
-After bootstrap, prefer the bare `6529` command for day-to-day work. The
-repo-local `./bin/6529` entrypoint is still appropriate for cases like
+After bootstrap, prefer the bare `6529` command for day-to-day work while you
+are inside this repository. Outside the repo, `6529` should remain unavailable.
+The repo-local `./bin/6529` entrypoint is still appropriate for cases like
 fresh-clone staging and the PM2 entrypoint below.
 
 For staging refreshes from a fresh clone, use the repo-local wrapper path
