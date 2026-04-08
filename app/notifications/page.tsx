@@ -25,10 +25,14 @@ export default async function NotificationsPage() {
     !notificationsFetched ||
     +notificationsFetched < Time.now().toMillis() - 60000
   ) {
-    await prefetchAuthenticatedNotifications({
-      queryClient,
-      headers,
-    });
+    try {
+      await prefetchAuthenticatedNotifications({
+        queryClient,
+        headers,
+      });
+    } catch (error) {
+      console.warn("Notifications prefetch failed", { error });
+    }
   }
 
   return (

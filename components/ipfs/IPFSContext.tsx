@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { getConfiguredIpfsGatewayHost } from "@/lib/media/ipfs-gateways";
 import React, {
   createContext,
   useContext,
@@ -79,14 +80,50 @@ export const useIpfsService = (): IpfsService => {
   return context.ipfsService;
 };
 
-export const resolveIpfsUrlSync = (url: string) => {
-  if (!url.startsWith("ipfs://")) {
-    return url;
+function joinUrlPaths(basePathname: string, pathName: string): string {
+  const normalizedBase = basePathname.endsWith("/")
+    ? basePathname.slice(0, -1)
+    : basePathname;
+  const normalizedPath = pathName.startsWith("/") ? pathName : `/${pathName}`;
+
+  if (!normalizedBase) {
+    return normalizedPath;
   }
 
+  return `${normalizedBase}${normalizedPath}`;
+}
+
+export const resolveIpfsUrlSync = (url: string) => {
   try {
     const { gatewayBase } = readIpfsConfig();
-    return `${gatewayBase}/ipfs/${url.slice(7)}`;
+    if (url.startsWith("ipfs://")) {
+      return `${gatewayBase}/ipfs/${url.slice(7)}`;
+    }
+
+    const configuredHost = getConfiguredIpfsGatewayHost();
+    if (!configuredHost) {
+      return url;
+    }
+
+    const configuredGatewayBase = new URL(gatewayBase);
+    const parsedUrl = new URL(url);
+    const normalizedHost = parsedUrl.hostname.toLowerCase();
+    if (normalizedHost !== "ipfs.io" && normalizedHost !== "www.ipfs.io") {
+      return url;
+    }
+
+    if (!parsedUrl.pathname.startsWith("/ipfs/")) {
+      return url;
+    }
+
+    parsedUrl.protocol = configuredGatewayBase.protocol;
+    parsedUrl.hostname = configuredGatewayBase.hostname;
+    parsedUrl.port = configuredGatewayBase.port;
+    parsedUrl.pathname = joinUrlPaths(
+      configuredGatewayBase.pathname,
+      parsedUrl.pathname
+    );
+    return parsedUrl.toString();
   } catch (error) {
     console.error("Error resolving IPFS URL", error);
     return url;

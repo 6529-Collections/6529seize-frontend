@@ -117,4 +117,24 @@ describe("TitleContext", () => {
       expect(document.title).toBe("Messages | Brain");
     });
   });
+
+  it("uses the discovery route title instead of the profile fallback", async () => {
+    mockPathname = "/discover";
+    mockSearchParams = new URLSearchParams();
+    mockActiveWaveId = null;
+
+    render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Discovery")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(document.title).toBe("Discovery");
+    });
+  });
 });

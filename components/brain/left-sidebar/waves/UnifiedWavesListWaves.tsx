@@ -7,6 +7,7 @@ import JoinedToggle from "./JoinedToggle";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 
 // VirtualItem interface is now imported from useVirtualizedWaves
 
@@ -110,18 +111,29 @@ const UnifiedWavesListWaves = forwardRef<
     ref
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
+    const seizeSettings = useSeizeSettingsOptional();
 
-    // Split waves into pinned and regular waves (no separate active section)
-    const { pinnedWaves, regularWaves } = useMemo(() => {
-      const pinned = waves.filter((wave) => wave.isPinned);
-      const regular = waves.filter((wave) => !wave.isPinned);
+    const { announcementWaves, pinnedWaves, regularWaves } = useMemo(() => {
+      const announcements: MinimalWave[] = [];
+      const pinned: MinimalWave[] = [];
+      const regular: MinimalWave[] = [];
 
-      // No special sorting for active waves - keep them in their original position
+      for (const wave of waves) {
+        if (seizeSettings?.isAnnouncementsWave(wave.id)) {
+          announcements.push(wave);
+        } else if (wave.isPinned) {
+          pinned.push(wave);
+        } else {
+          regular.push(wave);
+        }
+      }
+
       return {
+        announcementWaves: announcements,
         pinnedWaves: pinned,
         regularWaves: regular,
       };
-    }, [waves]);
+    }, [waves, seizeSettings]);
 
     const virtual = useVirtualizedWaves<MinimalWave>(
       regularWaves,
@@ -146,6 +158,44 @@ const UnifiedWavesListWaves = forwardRef<
             rightContent={hideToggle ? undefined : <JoinedToggle />}
           />
         )}
+
+        {announcementWaves.length > 0 && (
+          <section
+            className="tw-flex tw-flex-col"
+            aria-label="Announcement waves"
+          >
+            {announcementWaves
+              .filter((wave): wave is MinimalWave => {
+                if (!isValidWave(wave)) {
+                  console.warn("Invalid announcement wave object", wave);
+                  if (!validateWaveDetailed(wave)) {
+                    console.warn(
+                      "Announcement wave failed detailed validation:",
+                      wave
+                    );
+                  }
+                  return false;
+                }
+                return true;
+              })
+              .map((wave) => (
+                <div key={wave.id}>
+                  <BrainLeftSidebarWave
+                    wave={wave}
+                    onHover={onHover}
+                    showPin={!hidePin && wave.isPinned}
+                    isDirectMessage={isDirectMessage}
+                  />
+                </div>
+              ))}
+          </section>
+        )}
+
+        {!hideHeaders &&
+          announcementWaves.length > 0 &&
+          (pinnedWaves.length > 0 || regularWaves.length > 0) && (
+            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          )}
 
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedWaves.length > 0 && (

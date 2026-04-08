@@ -13,7 +13,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject } from "react";
 import { memo, useCallback, useMemo, useState } from "react";
-import BoostedDropCard from "./BoostedDropCard";
+import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import UnreadDivider from "./UnreadDivider";
 
@@ -182,12 +182,17 @@ const DropsList = memo(
         const boostedDrop = boostedDrops[boostedIndex];
         if (!boostedDrop) return null;
         return (
-          <BoostedDropCard
+          <div
             key={`boost-card-${boostedIndex}-${boostedDrop.id}`}
-            drop={boostedDrop}
-            rank={boostedIndex + 1}
-            onClick={() => onBoostedDropClick(boostedDrop.serial_no)}
-          />
+            className="tw-p-3"
+          >
+            <BoostedDropCardHome
+              drop={boostedDrop}
+              variant="chat"
+              rank={boostedIndex + 1}
+              onClick={() => onBoostedDropClick(boostedDrop.serial_no)}
+            />
+          </div>
         );
       },
       [boostCardAtIndex, boostedDrops, onBoostedDropClick]

@@ -25,21 +25,35 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
 
-      - name: Verify registry signatures
-        run: npm audit signatures
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
 
       - name: Lint package.json versions
-        run: npm run lint:package-json
+        run: ./bin/6529 lint:package-json
 
       - name: Build App
         env:
@@ -58,14 +72,49 @@ jobs:
           ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: npm run build
+        run: ./bin/6529 run build
 
       - name: Build Target
         run: |
-          mkdir -p target/_next
+          rm -rf target .deploy-bundle
+          mkdir -p target/_next .deploy-bundle/.next
+
+          test -f .next/standalone/server.js
+          cp -r .next/standalone/. .deploy-bundle/
           cp -r .next/static target/_next/
-          zip -r package.zip . -x '*.git*' 'node_modules/*' 'target/*'
-          mv package.zip target/
+          cp -r .next/static .deploy-bundle/.next/
+          cp -r public .deploy-bundle/
+          cp Procfile .deploy-bundle/
+          cp -r .ebextensions .deploy-bundle/
+          if [ -d .platform ]; then
+            cp -r .platform .deploy-bundle/
+          fi
+
+          # Next standalone includes a dangling pnpm symlink for semver that
+          # Elastic Beanstalk trips over during StageApplication ownership fixes.
+          rm -f .deploy-bundle/node_modules/.pnpm/node_modules/semver
+
+          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
+            if [ -f ".next/$file" ]; then
+              cp ".next/$file" ".deploy-bundle/.next/$file"
+            fi
+          done
+
+          (
+            cd .deploy-bundle
+            zip -yr ../target/package.zip .
+          )
+
+      - name: Verify package bundle size
+        run: |
+          PACKAGE_SIZE_BYTES=$(stat -c%s target/package.zip)
+          PACKAGE_SIZE_MB=$((PACKAGE_SIZE_BYTES / 1024 / 1024))
+          MAX_SIZE_BYTES=$((500 * 1024 * 1024))
+          echo "package.zip size: ${PACKAGE_SIZE_MB} MB (${PACKAGE_SIZE_BYTES} bytes)"
+          if [ "$PACKAGE_SIZE_BYTES" -gt "$MAX_SIZE_BYTES" ]; then
+            echo "Elastic Beanstalk source bundle exceeds the 500 MB limit."
+            exit 1
+          fi
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -101,7 +150,8 @@ jobs:
             --option-settings \
               "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_ID,Value=${SSR_CLIENT_ID}" \
               "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_SECRET,Value=${SSR_CLIENT_SECRET}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=ALCHEMY_API_KEY,Value=${ALCHEMY_API_KEY}"
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=ALCHEMY_API_KEY,Value=${ALCHEMY_API_KEY}" \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SENTRY_SERVER_INSTRUMENTATION,Value=false"
 
       - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
         run: |

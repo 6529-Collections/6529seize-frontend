@@ -1,5 +1,6 @@
 // dev-open.cjs
 const { spawn } = require("node:child_process");
+const path = require("node:path");
 
 let openModulePromise;
 let browserOpened = false;
@@ -13,7 +14,14 @@ function getOpenModule() {
   return openModulePromise;
 }
 
-const proc = spawn("npm", ["run", "dev"], { stdio: ["inherit", "pipe", "inherit"] });
+const repoCommand =
+  process.platform === "win32"
+    ? path.join(process.cwd(), "bin", "6529.cmd")
+    : "./bin/6529";
+
+const proc = spawn(repoCommand, ["dev"], {
+  stdio: ["inherit", "pipe", "inherit"],
+});
 
 proc.on("error", (error) => {
   console.error("Failed to start dev server:", error);
