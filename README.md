@@ -142,6 +142,9 @@ installs.
 
 Plain `pnpm install`, `pnpm dev`, and `npm run ...` repo script execution are intentionally blocked. Use the `6529` wrapper only.
 
+After bootstrap, `6529` resolves only while you are inside this repository tree.
+Outside the repo, the default experience is still `command not found`.
+
 If `direnv` is enabled for the repo, you can also use the repo-local wrapper:
 
 ```bash
@@ -202,13 +205,15 @@ To test end-to-end:
 This rebuilds the app and restarts PM2 on the standalone runtime path
 (`6529 run start:standalone`).
 
-- One-time server bootstrap for plain `6529 ...`
+- One-time server bootstrap for repo-scoped `6529 ...`
 
 ```bash
 ./bin/6529 bootstrap
 ```
 
 Then open a new shell, or source the rc file that matches your shell.
+The bootstrap step also removes the old managed global shim at
+`~/.local/bin/6529` when it finds one.
 
 - After `direnv allow`, the shorthand also works
 
