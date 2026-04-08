@@ -214,6 +214,8 @@ elif [ -n "\${BASH_VERSION:-}" ]; then
   esac
 fi
 EOF
+
+  return 0
 }
 
 ensure_socket_firewall
