@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
@@ -42,7 +41,6 @@ interface WaveDropReactionsProps {
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
   const isTouchDevice = useIsTouchDevice();
-  const { isConnected } = useSeizeConnectContext();
 
   const handleOpenDialog = useCallback((reactionKey: string) => {
     setDialogReaction(reactionKey);
@@ -60,7 +58,6 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           drop={drop}
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
-          isConnected={isConnected}
           isTouchDevice={isTouchDevice}
         />
       ))}
@@ -78,20 +75,18 @@ function WaveDropReaction({
   drop,
   reaction,
   onOpenDetailDialog,
-  isConnected,
   isTouchDevice,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
-  readonly isConnected: boolean;
   readonly isTouchDevice: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
   const rollbackRef = useRef<(() => void) | null>(null);
-  const canReact = isConnected;
+  const canReact = Boolean(connectedProfile?.handle);
 
   const handleLongPressStart = useCallback(() => {
     onOpenDetailDialog(reaction.reaction);
@@ -412,6 +407,7 @@ function WaveDropReaction({
       <button
         type="button"
         onClick={handleClick}
+        disabled={!canReact}
         aria-disabled={!canReact}
         {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"

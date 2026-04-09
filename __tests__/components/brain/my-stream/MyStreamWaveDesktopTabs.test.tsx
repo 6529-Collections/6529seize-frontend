@@ -60,8 +60,8 @@ jest.mock("@/components/waves/leaderboard/time/CompactTimeCountdown", () => ({
   ),
 }));
 
-jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(),
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
 }));
 
 import MyStreamWaveDesktopTabs from "@/components/brain/my-stream/MyStreamWaveDesktopTabs";
@@ -75,9 +75,7 @@ let mockWaveInfo: any = {
 };
 let mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
 let mockDecisions: { timestamp: number }[] = [];
-const {
-  useSeizeConnectContext,
-} = require("@/components/auth/SeizeConnectContext");
+const { useAuth } = require("@/components/auth/Auth");
 
 function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
   return render(
@@ -100,8 +98,8 @@ beforeEach(() => {
   };
   mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
   mockDecisions = [];
-  (useSeizeConnectContext as jest.Mock).mockReturnValue({
-    isConnected: true,
+  (useAuth as jest.Mock).mockReturnValue({
+    connectedProfile: { handle: "alice" },
   });
 });
 
@@ -156,7 +154,7 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(setActiveTab).not.toHaveBeenCalled();
   });
 
-  it("hides My Votes for disconnected memes waves", () => {
+  it("hides My Votes for guests on memes waves", () => {
     mockWaveInfo = {
       isChatWave: false,
       isMemesWave: true,
@@ -170,8 +168,8 @@ describe("MyStreamWaveDesktopTabs", () => {
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ];
-    (useSeizeConnectContext as jest.Mock).mockReturnValue({
-      isConnected: false,
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: null,
     });
 
     renderComponent(MyStreamWaveTab.MY_VOTES);
@@ -238,6 +236,7 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(updateAvailableTabs).toHaveBeenCalledWith(
       expect.objectContaining({
         isChatWave: false,
+        hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: true,
       })

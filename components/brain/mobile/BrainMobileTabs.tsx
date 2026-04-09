@@ -11,7 +11,6 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAuth } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
 
 interface BrainMobileTabsProps {
@@ -36,7 +35,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const router = useRouter();
   const { registerRef } = useLayout();
   const { connectedProfile } = useAuth();
-  const { isConnected } = useSeizeConnectContext();
+  const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
 
   // Local ref for component-specific needs
   const mobileTabsRef = useRef<HTMLDivElement | null>(null);
@@ -266,7 +265,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               }}
               renderAfterLeaderboard={salesTabButton}
             />
-            {(isCurationWave || (isMemesWave && isConnected)) && (
+            {(isCurationWave || (isMemesWave && hasAuthenticatedProfile)) && (
               <>
                 <button
                   ref={(el) => {

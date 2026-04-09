@@ -1,6 +1,6 @@
 "use client";
 
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useAuth } from "@/components/auth/Auth";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -33,9 +33,10 @@ export default function WaveDropActions({
   suppressed = false,
 }: WaveDropActionsProps) {
   const { isMemesWave } = useSeizeSettings();
-  const { isConnected } = useSeizeConnectContext();
+  const { connectedProfile } = useAuth();
   const compact = useCompactMode();
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
+  const showGuestCopyOnly = !connectedProfile?.handle;
 
   // Hide voting for participation drops in memes waves
   const shouldShowVoting =
@@ -60,7 +61,9 @@ export default function WaveDropActions({
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-h-9 tw-items-center tw-gap-x-0.5 tw-rounded-xl tw-bg-iron-950 tw-px-1 tw-shadow-md tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/40">
-          {isConnected ? (
+          {showGuestCopyOnly ? (
+            <WaveDropActionsCopyLink drop={drop} />
+          ) : (
             <>
               <WaveDropActionsQuickReact drop={drop} />
               <WaveDropActionsAddReaction drop={drop} />
@@ -78,11 +81,11 @@ export default function WaveDropActions({
                 onOpenChange={setIsMoreDropdownOpen}
               />
             </>
-          ) : (
-            <WaveDropActionsCopyLink drop={drop} />
           )}
         </div>
-        {isConnected && shouldShowVoting && <WaveDropActionsRate drop={drop} />}
+        {!showGuestCopyOnly && shouldShowVoting && (
+          <WaveDropActionsRate drop={drop} />
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useAuth } from "@/components/auth/Auth";
 import { useEmoji } from "@/contexts/EmojiContext";
 import * as commonApi from "@/services/api/common-api";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -15,8 +15,8 @@ jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: jest.fn(),
 }));
 
-jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(() => ({ isConnected: true })),
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
 }));
 
 jest.mock("@/helpers/Helpers", () => ({
@@ -47,7 +47,7 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
 }));
 
 const mockUseEmoji = useEmoji as jest.Mock;
-const mockUseSeizeConnectContext = useSeizeConnectContext as jest.Mock;
+const mockUseAuth = useAuth as jest.Mock;
 
 type NativeEmojiMock = { skins: Array<{ native: string }> };
 
@@ -93,7 +93,10 @@ describe("WaveDropReactions", () => {
   beforeEach(() => {
     // Reset call history without removing default implementations
     jest.clearAllMocks();
-    mockUseSeizeConnectContext.mockReturnValue({ isConnected: true });
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { id: "profile-1", handle: "alice" },
+      setToast: jest.fn(),
+    });
     getMyStreamMock().mockReturnValue({
       applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
     });
@@ -270,7 +273,10 @@ describe("WaveDropReactions", () => {
   });
 
   it("renders reaction pills as non-interactive when disconnected", () => {
-    mockUseSeizeConnectContext.mockReturnValue({ isConnected: false });
+    mockUseAuth.mockReturnValue({
+      connectedProfile: null,
+      setToast: jest.fn(),
+    });
     mockUseEmoji.mockReturnValue(
       createEmojiContextValue(
         [

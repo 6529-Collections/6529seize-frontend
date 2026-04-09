@@ -23,7 +23,7 @@ export enum WaveVotingState {
 type WaveTabParams = {
   waveId: string | null;
   isChatWave: boolean;
-  isConnected: boolean;
+  hasAuthenticatedProfile: boolean;
   isMemesWave: boolean;
   isCurationWave: boolean;
   votingState: WaveVotingState;
@@ -53,7 +53,7 @@ const isValidWaveTabMap = (
 };
 
 const buildMemesTabs = (
-  isConnected: boolean,
+  hasAuthenticatedProfile: boolean,
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean
 ) => {
@@ -65,7 +65,7 @@ const buildMemesTabs = (
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }
-  if (isConnected) {
+  if (hasAuthenticatedProfile) {
     tabs.push(MyStreamWaveTab.MY_VOTES);
   }
   tabs.push(MyStreamWaveTab.OUTCOME);
@@ -146,7 +146,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       const {
         waveId,
         isChatWave,
-        isConnected,
+        hasAuthenticatedProfile,
         isMemesWave,
         isCurationWave,
         votingState,
@@ -157,7 +157,11 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       if (isChatWave) {
         tabs = [MyStreamWaveTab.CHAT];
       } else if (isMemesWave) {
-        tabs = buildMemesTabs(isConnected, votingState, hasFirstDecisionPassed);
+        tabs = buildMemesTabs(
+          hasAuthenticatedProfile,
+          votingState,
+          hasFirstDecisionPassed
+        );
       } else {
         tabs = buildDefaultTabs(
           votingState,
