@@ -87,7 +87,9 @@ const buildDefaultTabs = (
   if (!isCurationWave) {
     tabs.push(MyStreamWaveTab.OUTCOME);
   }
-  tabs.push(MyStreamWaveTab.MY_VOTES);
+  if (isCurationWave) {
+    tabs.push(MyStreamWaveTab.MY_VOTES);
+  }
   return tabs;
 };
 

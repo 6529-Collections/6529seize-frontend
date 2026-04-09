@@ -3,18 +3,94 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import { Spinner } from "@/components/dotLoader/DotLoader";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
+import { useDropCurations } from "@/hooks/drops/useDropCurations";
 import { useWaveDrops } from "@/hooks/useWaveDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useMemo, type ReactNode } from "react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useCallback, useMemo, type ReactNode } from "react";
+import { MyStreamActiveCurationProvider } from "./MyStreamActiveCurationContext";
 
 interface MyStreamWaveCurationContentProps {
   readonly wave: ApiWave;
   readonly curationId: string;
   readonly curationName?: string | null | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+}
+
+function MyStreamWaveCurationDropItem({
+  drop,
+  previousDrop,
+  nextDrop,
+  curationId,
+  canManageActiveCuration,
+  onDropClick,
+}: {
+  readonly drop: ExtendedDrop;
+  readonly previousDrop: ExtendedDrop | null;
+  readonly nextDrop: ExtendedDrop | null;
+  readonly curationId: string;
+  readonly canManageActiveCuration: boolean;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
+}) {
+  const { updateMembership, isPending } = useDropCurationMembershipMutation({
+    dropId: drop.id,
+  });
+
+  const handleRemove = () => {
+    updateMembership(curationId, "remove");
+  };
+
+  return (
+    <div className="tw-group tw-relative">
+      <Drop
+        key={drop.stableKey}
+        drop={drop}
+        previousDrop={previousDrop}
+        nextDrop={nextDrop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={() => {}}
+        onReplyClick={() => {}}
+        onQuoteClick={() => {}}
+        onDropContentClick={onDropClick}
+      />
+
+      {canManageActiveCuration && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleRemove();
+          }}
+          disabled={isPending}
+          aria-label="Remove drop from this curation"
+          className="tw-absolute tw-right-7 tw-top-4 tw-z-20 tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-rose-500/25 tw-bg-rose-500/10 tw-p-0 tw-text-rose-400 tw-shadow-[0_10px_30px_rgba(0,0,0,0.32)] tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-ease-out active:tw-bg-rose-500/15 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:tw-pointer-events-none desktop-hover:tw-w-auto desktop-hover:tw-translate-y-1 desktop-hover:tw-gap-1.5 desktop-hover:tw-border-iron-700/80 desktop-hover:tw-bg-iron-950/90 desktop-hover:tw-px-2.5 desktop-hover:tw-text-xs desktop-hover:tw-font-medium desktop-hover:tw-text-iron-200 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-translate-y-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+        >
+          {isPending ? (
+            <>
+              <Spinner dimension={12} />
+              <span className="tw-hidden desktop-hover:tw-inline">
+                Removing
+              </span>
+            </>
+          ) : (
+            <>
+              <XMarkIcon className="tw-size-4 tw-flex-shrink-0 desktop-hover:tw-size-3.5" />
+              <span className="tw-hidden desktop-hover:tw-inline">Remove</span>
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  );
 }
 
 export default function MyStreamWaveCurationContent({
@@ -28,43 +104,48 @@ export default function MyStreamWaveCurationContent({
       waveId: wave.id,
       curationId,
     });
+  const permissionProbeDropId = drops[0]?.id ?? "";
+  const { data: permissionProbeCurations = [] } = useDropCurations({
+    dropId: permissionProbeDropId,
+    enabled: permissionProbeDropId.length > 0,
+  });
 
   const isInitialLoading = isFetching && drops.length === 0;
 
-  const handleBottomIntersection = async (isIntersecting: boolean) => {
-    if (!isIntersecting || !hasNextPage || isFetchingNextPage) {
-      return;
-    }
+  const handleBottomIntersection = useCallback(
+    (isIntersecting: boolean) => {
+      if (!isIntersecting || !hasNextPage || isFetchingNextPage) {
+        return;
+      }
 
-    await fetchNextPage();
-  };
+      void fetchNextPage();
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  );
 
   const trimmedCurationName = curationName?.trim();
   const curationTitle =
     trimmedCurationName && trimmedCurationName.length > 0
       ? trimmedCurationName
       : "Curation";
+  const canManageActiveCuration =
+    permissionProbeCurations.find((curation) => curation.id === curationId)
+      ?.authenticated_user_can_curate ?? false;
 
   const renderedDrops = useMemo(
     () =>
       drops.map((drop, index) => (
-        <Drop
+        <MyStreamWaveCurationDropItem
           key={drop.stableKey}
           drop={drop}
           previousDrop={index > 0 ? (drops[index - 1] ?? null) : null}
           nextDrop={drops[index + 1] ?? null}
-          showWaveInfo={false}
-          activeDrop={null}
-          showReplyAndQuote={false}
-          location={DropLocation.WAVE}
-          dropViewDropId={null}
-          onReply={() => {}}
-          onReplyClick={() => {}}
-          onQuoteClick={() => {}}
-          onDropContentClick={onDropClick}
+          curationId={curationId}
+          canManageActiveCuration={canManageActiveCuration}
+          onDropClick={onDropClick}
         />
       )),
-    [drops, onDropClick]
+    [canManageActiveCuration, curationId, drops, onDropClick]
   );
 
   let content: ReactNode;
@@ -110,8 +191,10 @@ export default function MyStreamWaveCurationContent({
   }
 
   return (
-    <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-      {content}
-    </div>
+    <MyStreamActiveCurationProvider curationId={curationId}>
+      <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+        {content}
+      </div>
+    </MyStreamActiveCurationProvider>
   );
 }

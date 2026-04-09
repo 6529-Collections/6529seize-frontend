@@ -1481,7 +1481,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get curations containing a drop
+      summary: Get curations for a drop
       operationId: getDropCurations
       parameters:
         - name: dropId
@@ -1497,7 +1497,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ApiWaveCuration"
+                  $ref: "#/components/schemas/ApiDropCuration"
         "404":
           description: Drop not found
     post:
@@ -8487,6 +8487,18 @@ components:
         curatable:
           type: boolean
         curated:
+          type: boolean
+    ApiDropCuration:
+      type: object
+      required:
+        - drop_included
+        - authenticated_user_can_curate
+      allOf:
+        - $ref: "#/components/schemas/ApiWaveCuration"
+      properties:
+        drop_included:
+          type: boolean
+        authenticated_user_can_curate:
           type: boolean
     ApiDropCurationRequest:
       type: object

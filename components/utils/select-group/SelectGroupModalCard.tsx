@@ -1,8 +1,10 @@
 "use client";
 
-import GroupCardHeader from "@/components/groups/page/list/card/GroupCardHeader";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { getRandomColorWithSeed } from "@/helpers/Helpers";
+import { getRandomColorWithSeed, getTimeAgo } from "@/helpers/Helpers";
+import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
+import Link from "next/link";
+import Image from "next/image";
 
 interface SelectGroupModalCardProps {
   readonly group: ApiGroupFull;
@@ -17,12 +19,16 @@ export default function SelectGroupModalCard({
   onSelect,
   onClear,
 }: SelectGroupModalCardProps) {
-  const banner1 =
+  const avatarAccentStart =
     group.created_by.banner1_color ??
     getRandomColorWithSeed(group.created_by.handle ?? "");
-  const banner2 =
+  const avatarAccentEnd =
     group.created_by.banner2_color ??
     getRandomColorWithSeed(group.created_by.handle ?? "");
+  const creatorIdentity =
+    group.created_by.handle ?? group.created_by.primary_address;
+  const timeAgo = getTimeAgo(new Date(group.created_at).getTime());
+  const avatarFallbackLabel = creatorIdentity.charAt(0).toUpperCase();
 
   return (
     <div className="tw-relative tw-col-span-1">
@@ -38,71 +44,146 @@ export default function SelectGroupModalCard({
             onSelect(group);
           }
         }}
-        className={`tw-group tw-relative tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-shadow-md desktop-hover:hover:tw-shadow-black/25 ${
+        className={`tw-group tw-relative tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-p-3 tw-no-underline tw-outline-none tw-transition-all tw-duration-200 ${
           isSelected
-            ? "tw-shadow-primary-900/20 tw-border-primary-300 tw-shadow-md tw-ring-1 tw-ring-primary-400/25"
-            : "tw-border-white/10"
-        } focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500`}
+            ? "tw-border-white/20 tw-bg-iron-900 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_10px_24px_rgba(0,0,0,0.28),0_0_18px_rgba(255,255,255,0.06)]"
+            : "tw-border-white/[0.06] tw-bg-iron-950 hover:tw-border-white/10 hover:tw-bg-iron-900/60"
+        } focus-visible:tw-border-white/30 focus-visible:tw-bg-iron-900 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-white/30`}
       >
-        {isSelected && onClear && (
-          <div className="tw-absolute tw-right-3 tw-top-3 tw-z-20">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
+          <div
+            className="tw-relative tw-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_2px_8px_rgba(0,0,0,0.4)]"
+            style={{
+              background: `linear-gradient(135deg, ${avatarAccentStart} 0%, ${avatarAccentEnd} 100%)`,
+            }}
+          >
+            {group.created_by.pfp ? (
+              <Image
+                src={getScaledImageUri(
+                  group.created_by.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
+                width={40}
+                height={40}
+                alt={
+                  group.created_by.handle
+                    ? `${group.created_by.handle} profile picture`
+                    : "Group creator profile picture"
+                }
+                className="tw-h-full tw-w-full tw-object-cover"
+              />
+            ) : (
+              <>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="tw-h-4 tw-w-4 tw-text-iron-50 tw-drop-shadow-md"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                <span className="tw-sr-only">{avatarFallbackLabel}</span>
+              </>
+            )}
+          </div>
+
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-justify-center">
+            <p
+              className={`tw-mb-0 tw-block tw-max-w-[12rem] tw-truncate tw-text-sm tw-font-semibold tw-leading-tight tw-transition-colors ${
+                isSelected
+                  ? "tw-text-iron-50"
+                  : "tw-text-iron-200 group-hover:tw-text-iron-100"
+              }`}
+              title={group.name}
+            >
+              {group.name}
+            </p>
+            <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-[11px]">
+              {group.created_by.handle ? (
+                <Link
+                  href={`/${group.created_by.handle}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
+                  className={`tw-inline-block tw-max-w-[8rem] tw-truncate tw-font-medium tw-no-underline tw-transition-colors ${
+                    isSelected
+                      ? "tw-text-iron-300"
+                      : "tw-text-iron-400 group-hover:tw-text-iron-300"
+                  }`}
+                >
+                  {group.created_by.handle}
+                </Link>
+              ) : (
+                <span
+                  className={`tw-inline-block tw-max-w-[8rem] tw-truncate tw-font-medium ${
+                    isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
+                  }`}
+                >
+                  {creatorIdentity}
+                </span>
+              )}
+              {timeAgo && (
+                <>
+                  <span className="tw-leading-none tw-text-iron-600">
+                    &middot;
+                  </span>
+                  <p className="tw-mb-0 tw-text-iron-500">Created {timeAgo}</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-pl-2">
+          {isSelected && onClear ? (
             <button
               type="button"
               onClick={(event) => {
                 event.stopPropagation();
                 onClear();
               }}
-              className="tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-400 tw-shadow-sm tw-shadow-black/30 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50"
+              className="tw-flex tw-h-[18px] tw-w-[18px] tw-flex-shrink-0 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-100 tw-p-0 tw-leading-none tw-shadow-[0_0_10px_rgba(255,255,255,0.2)] tw-transition-all tw-duration-300 hover:tw-scale-110 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30"
               aria-label={`Clear selected group ${group.name}`}
             >
               <svg
-                className="tw-h-4 tw-w-4"
                 viewBox="0 0 24 24"
                 fill="none"
+                className="tw-h-3 tw-w-3 tw-flex-shrink-0 tw-text-iron-950"
+                stroke="currentColor"
+                strokeWidth="3.5"
                 aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  d="M18 6L6 18M6 6L18 18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <polyline points="20 6 9 17 4 12" />
               </svg>
             </button>
-          </div>
-        )}
-        <div className="tw-absolute tw-inset-0 tw-h-1 tw-rounded-t-xl">
-          <div
-            className="tw-absolute tw-inset-0 tw-opacity-80 tw-transition-opacity tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-opacity-95"
-            style={{
-              background: `linear-gradient(135deg, ${banner1} 0%, ${banner2} 100%)`,
-            }}
-          />
-          <div className="from-black/25 via-black/10 to-transparent tw-absolute tw-inset-0 tw-bg-gradient-to-b" />
-        </div>
-        <div
-          className={`tw-flex tw-flex-1 tw-flex-col tw-rounded-b-xl tw-transition-colors tw-duration-300 tw-ease-out ${
-            isSelected
-              ? "tw-bg-iron-900/90"
-              : "tw-bg-iron-950 desktop-hover:group-hover:tw-bg-iron-900"
-          }`}
-        >
-          <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-y-4 tw-px-4 tw-py-4 sm:tw-px-5 sm:tw-py-5">
-            <GroupCardHeader group={group} />
-            <div className="tw-h-px tw-w-full tw-rounded-full tw-bg-white/10 tw-shadow-[0_1px_0_rgba(8,15,29,0.35)]" />
-            <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-y-3">
-              <div className="tw-min-w-0 tw-flex-1">
-                <p
-                  className="tw-mb-0 tw-line-clamp-2 tw-block tw-max-w-full tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50"
-                  title={group.name}
+          ) : (
+            <div
+              className={`tw-flex tw-h-[18px] tw-w-[18px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-all tw-duration-300 ${
+                isSelected
+                  ? "tw-border-iron-100 tw-bg-iron-100 tw-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                  : "tw-border-white/10 tw-bg-transparent group-hover:tw-border-white/30"
+              }`}
+              aria-hidden="true"
+            >
+              {isSelected && (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="tw-h-3 tw-w-3 tw-flex-shrink-0 tw-text-iron-950"
+                  stroke="currentColor"
+                  strokeWidth="3.5"
                 >
-                  {group.name}
-                </p>
-              </div>
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

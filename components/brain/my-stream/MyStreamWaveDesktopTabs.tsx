@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { TabToggle } from "@/components/common/TabToggle";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -36,6 +37,7 @@ const getCurationPanelId = (curationId: string): string =>
   `my-stream-wave-tabpanel-curation-${curationId}`;
 
 const AUTO_EXPAND_LIMIT = 5;
+const MOBILE_INLINE_CURATION_LIMIT = 1;
 
 const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.CHAT]: "Chat",
@@ -114,6 +116,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     )?.timestamp ?? null;
 
   const autoExpandFutureAttemptsRef = useRef(0);
+  const desktopTabsScrollerRef = useRef<HTMLDivElement | null>(null);
+  const mobileTabsScrollerRef = useRef<HTMLDivElement | null>(null);
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
 
   useEffect(() => {
@@ -170,102 +174,189 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   const standardOptions: TabOption[] = useMemo(
     () =>
-      availableTabs
-        .filter((tab) => {
-          if (tab === MyStreamWaveTab.MY_VOTES) {
-            return isMemesWave || isCurationWave;
-          }
-          if (tab === MyStreamWaveTab.SALES) {
-            return isCurationWave;
-          }
-          if (tab === MyStreamWaveTab.FAQ) {
-            return isMemesWave;
-          }
-          return true;
-        })
-        .map((tab) => ({
-          key: tab,
-          label: TAB_LABELS[tab],
-          panelId: getContentTabPanelId(tab),
-        })),
-    [availableTabs, isMemesWave, isCurationWave]
+      availableTabs.map((tab) => ({
+        key: tab,
+        label: TAB_LABELS[tab],
+        panelId: getContentTabPanelId(tab),
+      })),
+    [availableTabs]
   );
 
-  const options: TabOption[] = useMemo(
-    () => [
-      ...standardOptions,
-      ...curations.map((curation) => ({
+  const curationOptions: TabOption[] = useMemo(
+    () =>
+      curations.map((curation) => ({
         key: `curation:${curation.id}`,
         label: curation.name,
         panelId: getCurationPanelId(curation.id),
       })),
-    ],
-    [curations, standardOptions]
+    [curations]
   );
 
-  // The visible tab set is narrower than ContentTabContext's shared defaults,
-  // so this effect snaps back to the first visible tab when needed.
-  /* eslint-disable react-you-might-not-need-an-effect/no-pass-data-to-parent */
-  useEffect(() => {
-    const isMyVotesHidden =
-      activeTab === MyStreamWaveTab.MY_VOTES && !isMemesWave && !isCurationWave;
-    const isSalesHidden =
-      activeTab === MyStreamWaveTab.SALES && !isCurationWave;
-    const isFaqHidden = activeTab === MyStreamWaveTab.FAQ && !isMemesWave;
-
-    if (
-      !activeCurationId &&
-      (isMyVotesHidden || isSalesHidden || isFaqHidden) &&
-      options.length > 0
-    ) {
-      const firstOption = options[0];
-      if (firstOption) {
-        setActiveTab(firstOption.key as MyStreamWaveTab);
-      }
-    }
-  }, [
-    isMemesWave,
-    isCurationWave,
-    activeTab,
-    activeCurationId,
-    options,
-    setActiveTab,
-  ]);
-  /* eslint-enable react-you-might-not-need-an-effect/no-pass-data-to-parent */
+  const options: TabOption[] = useMemo(
+    () => [...standardOptions, ...curationOptions],
+    [curationOptions, standardOptions]
+  );
 
   const activeKey = activeCurationId
     ? `curation:${activeCurationId}`
     : activeTab;
+
+  const mobileVisibleCurationOptions = useMemo(() => {
+    if (curationOptions.length <= MOBILE_INLINE_CURATION_LIMIT) {
+      return curationOptions;
+    }
+
+    const activeCurationOption =
+      curationOptions.find((option) => option.key === activeKey) ?? null;
+    const visibleOptions = activeCurationOption ? [activeCurationOption] : [];
+
+    for (const option of curationOptions) {
+      if (visibleOptions.length >= MOBILE_INLINE_CURATION_LIMIT) {
+        break;
+      }
+
+      if (option.key === activeCurationOption?.key) {
+        continue;
+      }
+
+      visibleOptions.push(option);
+    }
+
+    return visibleOptions;
+  }, [activeKey, curationOptions]);
+
+  const mobileOverflowCurationOptions = useMemo(() => {
+    const visibleKeys = new Set(
+      mobileVisibleCurationOptions.map((option) => option.key)
+    );
+
+    return curationOptions.filter((option) => !visibleKeys.has(option.key));
+  }, [curationOptions, mobileVisibleCurationOptions]);
+
+  const mobileOptions: TabOption[] = useMemo(
+    () => [...standardOptions, ...mobileVisibleCurationOptions],
+    [mobileVisibleCurationOptions, standardOptions]
+  );
+
+  const mobileOverflowItems: CompactMenuItem[] = useMemo(
+    () =>
+      mobileOverflowCurationOptions.map((option) => ({
+        id: option.key,
+        label: option.label,
+        onSelect: () => onSelectCuration(option.key.replace("curation:", "")),
+      })),
+    [mobileOverflowCurationOptions, onSelectCuration]
+  );
+
   const createCurationTooltipId = `my-stream-create-curation-${wave.id}`;
+  const showCreateFirstCurationCallout =
+    canManageCurations && curations.length === 0;
+  const createButtonTooltipProps = showCreateFirstCurationCallout
+    ? {}
+    : {
+        "data-tooltip-id": createCurationTooltipId,
+        "data-tooltip-content": "Create curation",
+      };
+
+  useEffect(() => {
+    const frameId = globalThis.window.requestAnimationFrame(() => {
+      [desktopTabsScrollerRef.current, mobileTabsScrollerRef.current].forEach(
+        (scroller) => {
+          if (!scroller) {
+            return;
+          }
+
+          const activeTabElement = scroller.querySelector<HTMLElement>(
+            '[role="tab"][aria-selected="true"]'
+          );
+          activeTabElement?.scrollIntoView({
+            block: "nearest",
+            inline: "nearest",
+          });
+        }
+      );
+    });
+
+    return () => {
+      globalThis.window.cancelAnimationFrame(frameId);
+    };
+  }, [activeKey, options]);
 
   return (
     <>
-      <div className="tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-4 tw-overflow-x-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 tw-@container/tabs hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4">
-        <TabToggle
-          options={options}
-          activeKey={activeKey}
-          onSelect={(key) => {
-            if (key.startsWith("curation:")) {
-              onSelectCuration(key.replace("curation:", ""));
-              return;
-            }
-
-            onSelectCuration(null);
-            setActiveTab(key as MyStreamWaveTab);
-          }}
-        />
-
-        {canManageCurations && (
-          <button
-            type="button"
-            onClick={() => setIsCreateCurationOpen(true)}
-            data-tooltip-id={createCurationTooltipId}
-            data-tooltip-content="Create curation"
-            className="tw-mt-1 tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
-            aria-label="Create curation"
+      <div className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-2 tw-@container/tabs sm:tw-px-4">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 sm:tw-hidden">
+          <div
+            ref={mobileTabsScrollerRef}
+            className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
           >
-            <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-          </button>
+            <div className="tw-inline-flex tw-items-center tw-gap-1">
+              <TabToggle
+                options={mobileOptions}
+                activeKey={activeKey}
+                onSelect={(key) => {
+                  if (key.startsWith("curation:")) {
+                    onSelectCuration(key.replace("curation:", ""));
+                    return;
+                  }
+
+                  onSelectCuration(null);
+                  setActiveTab(key as MyStreamWaveTab);
+                }}
+              />
+              {mobileOverflowItems.length > 0 && (
+                <CompactMenu
+                  triggerClassName="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+                  trigger={<EllipsisVerticalIcon className="tw-h-5 tw-w-5" />}
+                  aria-label="More curations"
+                  items={mobileOverflowItems}
+                  menuWidthClassName="tw-w-52"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+        <div
+          ref={desktopTabsScrollerRef}
+          className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
+        >
+          <TabToggle
+            options={options}
+            activeKey={activeKey}
+            onSelect={(key) => {
+              if (key.startsWith("curation:")) {
+                onSelectCuration(key.replace("curation:", ""));
+                return;
+              }
+
+              onSelectCuration(null);
+              setActiveTab(key as MyStreamWaveTab);
+            }}
+          />
+        </div>
+        {canManageCurations && (
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+            <button
+              type="button"
+              onClick={() => setIsCreateCurationOpen(true)}
+              {...createButtonTooltipProps}
+              className={
+                showCreateFirstCurationCallout
+                  ? "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
+                  : "tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
+              }
+              aria-label="Create curation"
+            >
+              <PlusIcon
+                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 ${
+                  showCreateFirstCurationCallout ? "-tw-ml-1" : ""
+                }`}
+              />
+              {showCreateFirstCurationCallout && (
+                <span>Create first curation</span>
+              )}
+            </button>
+          </div>
         )}
       </div>
       <MyStreamActionTooltip id={createCurationTooltipId} />

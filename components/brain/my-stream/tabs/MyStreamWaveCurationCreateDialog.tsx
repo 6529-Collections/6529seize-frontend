@@ -12,38 +12,14 @@ import type { ApiWaveCurationRequest } from "@/generated/models/ApiWaveCurationR
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import SelectGroupSearchPanel from "@/components/utils/select-group/SelectGroupSearchPanel";
 
 const CURATION_NAME_PRESETS = [
-  {
-    label: "Art",
-    baseClassName:
-      "tw-border-primary-500/30 tw-bg-primary-500/15 tw-text-primary-200 desktop-hover:hover:tw-border-primary-400/40 desktop-hover:hover:tw-bg-primary-500/20",
-    activeClassName:
-      "tw-border-primary-300 tw-bg-primary-500/25 tw-text-white tw-shadow-[0_12px_28px_rgba(64,106,254,0.22)]",
-  },
-  {
-    label: "Favourites",
-    baseClassName:
-      "tw-border-emerald-400/25 tw-bg-emerald-500/12 tw-text-emerald-100 desktop-hover:hover:tw-border-emerald-300/35 desktop-hover:hover:tw-bg-emerald-500/18",
-    activeClassName:
-      "tw-border-emerald-300/60 tw-bg-emerald-500/22 tw-text-white tw-shadow-[0_12px_28px_rgba(16,185,129,0.18)]",
-  },
-  {
-    label: "Marketplace",
-    baseClassName:
-      "tw-border-amber-400/25 tw-bg-amber-500/12 tw-text-amber-100 desktop-hover:hover:tw-border-amber-300/35 desktop-hover:hover:tw-bg-amber-500/18",
-    activeClassName:
-      "tw-border-amber-300/60 tw-bg-amber-500/22 tw-text-white tw-shadow-[0_12px_28px_rgba(245,158,11,0.18)]",
-  },
-  {
-    label: "Important",
-    baseClassName:
-      "tw-border-fuchsia-400/25 tw-bg-fuchsia-500/12 tw-text-fuchsia-100 desktop-hover:hover:tw-border-fuchsia-300/35 desktop-hover:hover:tw-bg-fuchsia-500/18",
-    activeClassName:
-      "tw-border-fuchsia-300/60 tw-bg-fuchsia-500/22 tw-text-white tw-shadow-[0_12px_28px_rgba(217,70,239,0.18)]",
-  },
+  "Art",
+  "Favourites",
+  "Marketplace",
+  "Important",
 ] as const;
 
 const getMatchingPresetLabel = (
@@ -55,17 +31,18 @@ const getMatchingPresetLabel = (
   }
 
   const matchingPreset = CURATION_NAME_PRESETS.find(
-    (preset) => preset.label.toLowerCase() === normalizedValue
+    (preset) => preset.toLowerCase() === normalizedValue
   );
 
-  return matchingPreset?.label ?? null;
+  return matchingPreset ?? null;
 };
 
 interface MyStreamWaveCurationCreateDialogProps {
-  readonly wave: ApiWave;
+  readonly wave: Pick<ApiWave, "id">;
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onSaved: (curation: ApiWaveCuration) => void;
+  readonly showSuccessToast?: boolean | undefined;
   readonly curation?: ApiWaveCuration | null | undefined;
   readonly initialGroup?: ApiGroupFull | null | undefined;
 }
@@ -75,6 +52,7 @@ export default function MyStreamWaveCurationCreateDialog({
   isOpen,
   onClose,
   onSaved,
+  showSuccessToast = true,
   curation,
   initialGroup,
 }: MyStreamWaveCurationCreateDialogProps) {
@@ -82,18 +60,15 @@ export default function MyStreamWaveCurationCreateDialog({
   const { requestAuth, setToast } = useAuth();
   const isEditMode = !!curation;
   const initialName = curation?.name ?? "";
-  const initialPresetLabel = getMatchingPresetLabel(initialName);
   const dialogTitle = isEditMode ? "Edit curation" : "Create curation";
   const fallbackErrorMessage = isEditMode
     ? "Failed to update curation."
     : "Failed to create curation.";
   const [name, setName] = useState(() => initialName);
-  const [isCustomName, setIsCustomName] = useState(
-    () => initialName.trim().length > 0 && initialPresetLabel === null
-  );
   const [selectedGroup, setSelectedGroup] = useState<ApiGroupFull | null>(
     () => initialGroup ?? null
   );
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const trimmedName = name.trim();
   const selectedPresetLabel = getMatchingPresetLabel(name);
@@ -105,14 +80,14 @@ export default function MyStreamWaveCurationCreateDialog({
 
   const handlePresetSelect = (presetLabel: string) => {
     setName(presetLabel);
-    setIsCustomName(false);
+    globalThis.window.requestAnimationFrame(() => {
+      nameInputRef.current?.focus();
+      nameInputRef.current?.select();
+    });
   };
 
-  const handleCustomSelect = () => {
-    setIsCustomName(true);
-    if (selectedPresetLabel) {
-      setName("");
-    }
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setName(event.target.value);
   };
 
   const handleGroupClear = () => {
@@ -164,10 +139,12 @@ export default function MyStreamWaveCurationCreateDialog({
       void queryClient.invalidateQueries({
         queryKey: getWaveCurationsQueryKey(wave.id),
       });
-      setToast({
-        type: "success",
-        message: isEditMode ? "Curation updated." : "Curation created.",
-      });
+      if (showSuccessToast) {
+        setToast({
+          type: "success",
+          message: isEditMode ? "Curation updated." : "Curation created.",
+        });
+      }
       onSaved(saved);
       onClose();
     },
@@ -194,76 +171,54 @@ export default function MyStreamWaveCurationCreateDialog({
       noPadding
       tabletModal={true}
       tall={true}
-      fixedHeight
       maxWidthClass="md:tw-max-w-lg"
-      headerClassName="tw-mb-5 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-iron-800 tw-pb-3 tw-pt-6"
+      headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-pb-4 tw-pt-6"
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-          <div className="tw-flex tw-flex-col tw-gap-5 tw-px-4 tw-pb-6 sm:tw-px-6">
-            <div className="tw-space-y-2">
-              <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
+          <div className="tw-flex tw-flex-col tw-gap-8 tw-px-4 tw-py-6 sm:tw-px-6">
+            <div className="tw-space-y-4">
+              <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
                 Name
               </label>
               <div className="tw-flex tw-flex-wrap tw-gap-2.5">
                 {CURATION_NAME_PRESETS.map((preset) => {
-                  const isSelected =
-                    !isCustomName && selectedPresetLabel === preset.label;
+                  const isSelected = selectedPresetLabel === preset;
 
                   return (
                     <button
-                      key={preset.label}
+                      key={preset}
                       type="button"
-                      onClick={() => handlePresetSelect(preset.label)}
+                      onClick={() => handlePresetSelect(preset)}
                       aria-pressed={isSelected}
                       className={clsx(
-                        "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/15",
-                        preset.baseClassName,
-                        isSelected && preset.activeClassName
+                        "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-shadow-sm tw-transition-all tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20",
+                        isSelected
+                          ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
+                          : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
                       )}
                     >
-                      {preset.label}
+                      {preset}
                     </button>
                   );
                 })}
-                <button
-                  type="button"
-                  onClick={handleCustomSelect}
-                  aria-pressed={isCustomName}
-                  className={clsx(
-                    "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-px-4 tw-py-2.5 tw-text-sm tw-font-medium tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/10",
-                    isCustomName
-                      ? "tw-border-iron-500 tw-bg-iron-800 tw-text-iron-50"
-                      : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-                  )}
-                >
-                  Create your own custom...
-                </button>
               </div>
-              {isCustomName && (
-                <div className="tw-relative tw-w-full">
-                  <input
-                    id="curation-name"
-                    type="text"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    autoComplete="off"
-                    autoFocus
-                    placeholder=" "
-                    className="tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-pb-3 tw-pt-3 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-                  />
-                  <label
-                    htmlFor="curation-name"
-                    className="tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4"
-                  >
-                    Curation name
-                  </label>
-                </div>
-              )}
+              <div className="tw-relative tw-w-full sm:tw-max-w-[260px]">
+                <input
+                  ref={nameInputRef}
+                  id="curation-name"
+                  type="text"
+                  value={name}
+                  onChange={handleNameChange}
+                  autoComplete="off"
+                  placeholder="Create your own custom..."
+                  className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+                />
+              </div>
             </div>
 
-            <div className="tw-space-y-2">
-              <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
+            <div className="tw-space-y-4">
+              <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
                 Who can curate?
               </span>
               <SelectGroupSearchPanel
@@ -273,21 +228,26 @@ export default function MyStreamWaveCurationCreateDialog({
                 showHeader={false}
                 useDefaultContainerStyles={false}
                 useDefaultBodyStyles={false}
-                containerClassName="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/30"
-                bodyClassName="tw-mt-4 tw-max-h-72 tw-overflow-y-auto tw-px-4 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-pb-4"
+                containerClassName="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/40 tw-shadow-sm"
+                bodyClassName="tw-mt-3 tw-max-h-[260px] tw-overflow-y-auto tw-pb-0 tw-pl-4 tw-pr-2 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 desktop-hover:hover:tw-scrollbar-thumb-white/20"
               />
             </div>
           </div>
         </div>
 
-        <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-4 sm:tw-px-6">
+        <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-5 sm:tw-px-6">
           <div className="tw-flex tw-justify-end tw-gap-3">
-            <SecondaryButton onClicked={onClose}>Cancel</SecondaryButton>
+            <SecondaryButton
+              onClicked={onClose}
+              className="tw-border-white/[0.06] tw-bg-transparent tw-text-iron-400 tw-ring-0 desktop-hover:hover:tw-border-white/[0.06] desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-100"
+            >
+              Cancel
+            </SecondaryButton>
             <PrimaryButton
               loading={saveMutation.isPending}
               disabled={isSubmitDisabled}
               onClicked={handleSubmit}
-              padding="tw-px-4 tw-py-2.5"
+              padding="tw-px-6 tw-py-2.5"
             >
               {submitButtonLabel}
             </PrimaryButton>

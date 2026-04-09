@@ -11,6 +11,8 @@ import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { useMemo, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
+import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
+import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
 import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsOpen from "./WaveDropActionsOpen";
@@ -29,8 +31,10 @@ export default function WaveDropActionsMore({
 }: WaveDropActionsMoreProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
+  const showCurationsAction = !drop.id.startsWith("temp-");
 
   const handleOpenChange = (newIsOpen: boolean) => {
     setIsOpen(newIsOpen);
@@ -102,6 +106,20 @@ export default function WaveDropActionsMore({
               isDropdownItem={true}
               onCopy={closeDropdown}
             />
+            {showCurationsAction && (
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  closeDropdown();
+                  setIsCurationsDialogOpen(true);
+                }}
+                className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+              >
+                <WaveDropCurationsActionIcon className="tw-size-4 tw-flex-shrink-0" />
+                <span className="tw-text-sm tw-font-medium">Curate</span>
+              </button>
+            )}
             <WaveDropActionsRestoreLinkPreviews
               drop={drop}
               onRestored={closeDropdown}
@@ -152,6 +170,14 @@ export default function WaveDropActionsMore({
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>
+      {showCurationsAction && (
+        <WaveDropCurationsDialog
+          dropId={drop.id}
+          wave={drop.wave}
+          isOpen={isCurationsDialogOpen}
+          onClose={() => setIsCurationsDialogOpen(false)}
+        />
+      )}
     </>
   );
 }
