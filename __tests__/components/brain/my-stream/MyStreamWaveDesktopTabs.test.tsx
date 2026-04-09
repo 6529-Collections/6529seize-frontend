@@ -5,8 +5,14 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
 
 const setActiveTab = jest.fn();
-const setActiveContentTab = jest.fn();
 const updateAvailableTabs = jest.fn();
+const searchParamsGet = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => ({
+    get: searchParamsGet,
+  }),
+}));
 
 jest.mock("@/components/brain/ContentTabContext", () => {
   const actual = jest.requireActual(
@@ -17,7 +23,6 @@ jest.mock("@/components/brain/ContentTabContext", () => {
     ...actual,
     useContentTab: () => ({
       availableTabs: mockAvailableTabs,
-      setActiveContentTab,
       updateAvailableTabs,
     }),
   };
@@ -89,6 +94,7 @@ function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  searchParamsGet.mockReturnValue(null);
   mockAvailableTabs = [MyStreamWaveTab.CHAT];
   mockWaveInfo = {
     isChatWave: false,
@@ -241,5 +247,18 @@ describe("MyStreamWaveDesktopTabs", () => {
         isCurationWave: true,
       })
     );
+  });
+
+  it("forces a transient switch to Chat when serialNo is present", () => {
+    searchParamsGet.mockImplementation((key: string) =>
+      key === "serialNo" ? "42" : null
+    );
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
+
+    renderComponent(MyStreamWaveTab.LEADERBOARD);
+
+    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.CHAT, {
+      persist: false,
+    });
   });
 });
