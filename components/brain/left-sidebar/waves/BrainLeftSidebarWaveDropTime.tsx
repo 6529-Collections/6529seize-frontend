@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useEffectEvent, useState } from "react";
+import React, { useEffect, useEffectEvent, useReducer } from "react";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 
 interface BrainLeftSidebarWaveDropTimeProps {
@@ -10,10 +10,10 @@ interface BrainLeftSidebarWaveDropTimeProps {
 const BrainLeftSidebarWaveDropTime: React.FC<
   BrainLeftSidebarWaveDropTimeProps
 > = ({ time }) => {
-  const [, forceRefresh] = useState(0);
+  const [, forceRefresh] = useReducer((value: number) => value + 1, 0);
 
   const refreshNow = useEffectEvent(() => {
-    forceRefresh((value) => value + 1);
+    forceRefresh();
   });
 
   useEffect(() => {
