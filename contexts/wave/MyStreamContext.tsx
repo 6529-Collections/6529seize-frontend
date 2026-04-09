@@ -7,6 +7,8 @@ import type { Drop } from "@/helpers/waves/drop.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDmWavesList from "@/hooks/useDmWavesList";
 import useWavesList from "@/hooks/useWavesList";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { logWebSocketDebug } from "@/services/websocket/webSocketDebug";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import type { ReactNode } from "react";
 import React, {
@@ -14,6 +16,8 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useEffectEvent,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -92,6 +96,14 @@ interface MyStreamProviderProps {
   readonly children: ReactNode;
 }
 
+const BROWSER_RESUME_SYNC_COOLDOWN_MS = 1000;
+
+type StreamSyncSource =
+  | "browser-resume"
+  | "websocket-connected"
+  | "capacitor-resume";
+type BrowserResumeSource = "visibilitychange" | "focus";
+
 // Create the context
 const MyStreamContext = createContext<MyStreamContextType | null>(null);
 
@@ -122,6 +134,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
+  const lastBrowserResumeSyncAtRef = useRef(0);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   // Instantiate the data manager, passing the updater function from the store
@@ -130,11 +143,21 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     getData: waveMessagesStore.getData,
     removeDrop: waveMessagesStore.removeDrop,
   });
+  const { refetchAllWaves, resetAllWavesNewDropsCount } = wavesHookData;
+  const {
+    registerWave,
+    syncNewestMessages,
+    fetchNextPage,
+    fetchAroundSerialNo,
+  } = waveDataManager;
 
   const wavesRef = useRef(wavesHookData.waves);
   const dmWavesRef = useRef(dmWavesHookData.waves);
-  wavesRef.current = wavesHookData.waves;
-  dmWavesRef.current = dmWavesHookData.waves;
+
+  useLayoutEffect(() => {
+    wavesRef.current = wavesHookData.waves;
+    dmWavesRef.current = dmWavesHookData.waves;
+  }, [wavesHookData.waves, dmWavesHookData.waves]);
 
   const isWaveMuted = useCallback((waveId: string): boolean => {
     const wave = wavesRef.current.find((w) => w.id === waveId);
@@ -149,31 +172,96 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     activeWaveId,
     getData: waveMessagesStore.getData,
     updateData: waveMessagesStore.updateData,
-    registerWave: waveDataManager.registerWave,
-    syncNewestMessages: waveDataManager.syncNewestMessages,
+    registerWave,
+    syncNewestMessages,
     removeDrop: waveMessagesStore.removeDrop,
     removeWaveDeliveredNotifications,
     isWaveMuted,
   });
 
-  useEffect(() => {
-    if (websocketStatus !== "connected") {
+  const syncActiveWaveAndRefetch = useEffectEvent(
+    (source: StreamSyncSource) => {
+      logWebSocketDebug("Running stream sync", {
+        source,
+        hasActiveWave: Boolean(activeWaveId),
+      });
+
+      if (activeWaveId) {
+        registerWave(activeWaveId, true);
+      }
+      refetchAllWaves();
+    }
+  );
+
+  const runBrowserResumeSync = useEffectEvent((source: BrowserResumeSource) => {
+    if (document.visibilityState !== "visible") {
+      logWebSocketDebug(
+        "Browser resume sync skipped because document is hidden",
+        {
+          source,
+          visibilityState: document.visibilityState,
+        }
+      );
       return;
     }
-    if (activeWaveId) {
-      waveDataManager.registerWave(activeWaveId, true);
+
+    const now = Date.now();
+    const sinceLastBrowserResumeSyncMs =
+      now - lastBrowserResumeSyncAtRef.current;
+    if (sinceLastBrowserResumeSyncMs < BROWSER_RESUME_SYNC_COOLDOWN_MS) {
+      logWebSocketDebug("Browser resume sync suppressed by cooldown", {
+        source,
+        sinceLastBrowserResumeSyncMs,
+        cooldownMs: BROWSER_RESUME_SYNC_COOLDOWN_MS,
+      });
+      return;
     }
-    wavesHookData.refetchAllWaves();
+
+    lastBrowserResumeSyncAtRef.current = now;
+    logWebSocketDebug("Browser resume sync triggered", {
+      source,
+      hasActiveWave: Boolean(activeWaveId),
+    });
+    syncActiveWaveAndRefetch("browser-resume");
+  });
+
+  const handleConnectedWebSocket = useEffectEvent(() => {
+    logWebSocketDebug("WebSocket connected; triggering stream sync", {
+      hasActiveWave: Boolean(activeWaveId),
+      isCapacitor,
+    });
+
+    syncActiveWaveAndRefetch("websocket-connected");
+
     if (isCapacitor) {
-      wavesHookData.resetAllWavesNewDropsCount();
+      logWebSocketDebug(
+        "Resetting new drop counts after websocket reconnect on capacitor"
+      );
+      resetAllWavesNewDropsCount();
     }
-  }, [websocketStatus, activeWaveId, isCapacitor]);
+  });
+
+  const handleCapacitorResume = useEffectEvent(() => {
+    logWebSocketDebug("Capacitor app resumed; triggering stream sync", {
+      hasActiveWave: Boolean(activeWaveId),
+    });
+
+    syncActiveWaveAndRefetch("capacitor-resume");
+    resetAllWavesNewDropsCount();
+  });
+
+  useEffect(() => {
+    if (websocketStatus !== WebSocketStatus.CONNECTED) {
+      return;
+    }
+    handleConnectedWebSocket();
+  }, [websocketStatus]);
 
   useEffect(() => {
     if (activeWaveId) {
-      waveDataManager.registerWave(activeWaveId, true);
+      registerWave(activeWaveId, true);
     }
-  }, [activeWaveId]);
+  }, [activeWaveId, registerWave]);
 
   // Detect when app comes to foreground on mobile
   useEffect(() => {
@@ -183,17 +271,38 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
     // Check if app transitioned from background to foreground
     if (!prevIsActiveRef.current && isActive) {
-      // App just became active, do exactly what WebSocket connect does
-      if (activeWaveId) {
-        waveDataManager.registerWave(activeWaveId, true);
-      }
-      wavesHookData.refetchAllWaves();
-      wavesHookData.resetAllWavesNewDropsCount();
+      handleCapacitorResume();
     }
 
     // Update the ref for next comparison
     prevIsActiveRef.current = isActive;
-  }, [isActive, isCapacitor, activeWaveId, waveDataManager, wavesHookData]);
+  }, [isActive, isCapacitor]);
+
+  useEffect(() => {
+    if (isCapacitor) {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
+      runBrowserResumeSync("visibilitychange");
+    };
+
+    const handleFocus = () => {
+      runBrowserResumeSync("focus");
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [isCapacitor]);
 
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
@@ -236,9 +345,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       directMessages,
       activeWave,
       waveMessagesStore: waveMessagesStoreData,
-      registerWave: waveDataManager.registerWave,
-      fetchNextPageForWave: waveDataManager.fetchNextPage,
-      fetchAroundSerialNo: waveDataManager.fetchAroundSerialNo,
+      registerWave,
+      fetchNextPageForWave: fetchNextPage,
+      fetchAroundSerialNo,
       processIncomingDrop,
       processDropRemoved,
       applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
@@ -265,9 +374,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     waveMessagesStore.getData,
     waveMessagesStore.subscribe,
     waveMessagesStore.unsubscribe,
-    waveDataManager.registerWave,
-    waveDataManager.fetchNextPage,
-    waveDataManager.fetchAroundSerialNo,
+    registerWave,
+    fetchNextPage,
+    fetchAroundSerialNo,
     processIncomingDrop,
     processDropRemoved,
     waveMessagesStore.optimisticUpdateDrop,

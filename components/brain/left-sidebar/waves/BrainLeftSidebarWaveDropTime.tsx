@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useEffectEvent, useReducer } from "react";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 
 interface BrainLeftSidebarWaveDropTimeProps {
@@ -10,11 +10,15 @@ interface BrainLeftSidebarWaveDropTimeProps {
 const BrainLeftSidebarWaveDropTime: React.FC<
   BrainLeftSidebarWaveDropTimeProps
 > = ({ time }) => {
-  const [now, setNow] = useState(() => Date.now());
+  const [, forceRefresh] = useReducer((value: number) => value + 1, 0);
+
+  const refreshNow = useEffectEvent(() => {
+    forceRefresh();
+  });
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
-      setNow(Date.now());
+      refreshNow();
     }, 60000);
 
     return () => {
@@ -23,13 +27,26 @@ const BrainLeftSidebarWaveDropTime: React.FC<
   }, []);
 
   useEffect(() => {
-    setNow((previousNow) => {
-      const currentNow = Date.now();
-      return previousNow === currentNow ? previousNow : currentNow;
-    });
-  }, [time]);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshNow();
+      }
+    };
 
-  const label = getTimeAgoShort(time, now);
+    const handleFocus = () => {
+      refreshNow();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
+
+  const label = getTimeAgoShort(time);
 
   return <span className="tw-text-iron-300">{label}</span>;
 };
