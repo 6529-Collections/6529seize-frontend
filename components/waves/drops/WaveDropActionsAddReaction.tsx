@@ -14,7 +14,8 @@ const WaveDropActionsAddReaction: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean | undefined;
   readonly onAddReaction?: (() => void) | undefined;
-}> = ({ drop, isMobile = false, onAddReaction }) => {
+  readonly dialogZIndexClassName?: string | undefined;
+}> = ({ drop, isMobile = false, onAddReaction, dialogZIndexClassName }) => {
   const { react, canReact } = useDropReaction(drop, onAddReaction);
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -181,6 +182,7 @@ const WaveDropActionsAddReaction: React.FC<{
         <MobileWrapperDialog
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
+          zIndexClassName={dialogZIndexClassName}
         >
           <div
             className="tw-flex tw-size-full tw-items-center tw-justify-center"

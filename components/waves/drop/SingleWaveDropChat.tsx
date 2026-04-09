@@ -13,6 +13,7 @@ import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import PrivilegedDropCreator from "../PrivilegedDropCreator";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import { DropMode } from "../dropComposer.types";
+import { WaveDropLayerProvider } from "../drops/WaveDropLayerContext";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
@@ -62,61 +63,68 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   };
 
   return (
-    <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-1 tw-flex-col">
-      <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-bg-iron-950 lg:tw-border lg:tw-border-r lg:tw-border-solid">
-        <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
-          <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col">
+    <WaveDropLayerProvider
+      value={{
+        mobileMenuZIndexClassName: "tw-z-[1020]",
+        mobileDialogZIndexClassName: "tw-z-[1030]",
+      }}
+    >
+      <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-1 tw-flex-col">
+        <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-bg-iron-950 lg:tw-border lg:tw-border-r lg:tw-border-solid">
+          <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
             <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col">
-              <div className="tw-min-h-0 tw-flex-1">
-                <WaveDropsAll
-                  waveId={wave.id}
-                  onReply={({
-                    drop: repliedDrop,
-                    partId,
-                  }: {
-                    drop: ApiDrop;
-                    partId: number;
-                  }) =>
-                    handleDropAction({
-                      targetDrop: repliedDrop,
+              <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col">
+                <div className="tw-min-h-0 tw-flex-1">
+                  <WaveDropsAll
+                    waveId={wave.id}
+                    onReply={({
+                      drop: repliedDrop,
                       partId,
-                      action: ActiveDropAction.REPLY,
-                    })
-                  }
-                  activeDrop={activeDrop}
-                  initialDrop={null}
-                  unreadCount={wave.metrics.your_unread_drops_count}
-                  dropId={drop.id}
-                  isMuted={wave.metrics.muted}
-                />
-              </div>
-              <div
-                style={
-                  isApp
-                    ? inputContainerStyle
-                    : {
-                        paddingBottom: "calc(env(safe-area-inset-bottom))",
-                      }
-                }
-                className="tw-mt-auto"
-              >
-                <CreateDropWaveWrapper
-                  context={CreateDropWaveWrapperContext.SINGLE_DROP}
-                >
-                  <PrivilegedDropCreator
+                    }: {
+                      drop: ApiDrop;
+                      partId: number;
+                    }) =>
+                      handleDropAction({
+                        targetDrop: repliedDrop,
+                        partId,
+                        action: ActiveDropAction.REPLY,
+                      })
+                    }
                     activeDrop={activeDrop}
-                    onCancelReplyQuote={resetActiveDrop}
-                    onDropAddedToQueue={resetActiveDrop}
-                    wave={wave}
+                    initialDrop={null}
+                    unreadCount={wave.metrics.your_unread_drops_count}
                     dropId={drop.id}
-                    fixedDropMode={DropMode.BOTH}
+                    isMuted={wave.metrics.muted}
                   />
-                </CreateDropWaveWrapper>
+                </div>
+                <div
+                  style={
+                    isApp
+                      ? inputContainerStyle
+                      : {
+                          paddingBottom: "calc(env(safe-area-inset-bottom))",
+                        }
+                  }
+                  className="tw-mt-auto"
+                >
+                  <CreateDropWaveWrapper
+                    context={CreateDropWaveWrapperContext.SINGLE_DROP}
+                  >
+                    <PrivilegedDropCreator
+                      activeDrop={activeDrop}
+                      onCancelReplyQuote={resetActiveDrop}
+                      onDropAddedToQueue={resetActiveDrop}
+                      wave={wave}
+                      dropId={drop.id}
+                      fixedDropMode={DropMode.BOTH}
+                    />
+                  </CreateDropWaveWrapper>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </WaveDropLayerProvider>
   );
 };

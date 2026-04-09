@@ -21,6 +21,7 @@ import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
 import WaveDropMobileMenuSetPinnedDrop from "./WaveDropMobileMenuSetPinnedDrop";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
+import { useWaveDropLayers } from "./WaveDropLayerContext";
 
 interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -53,6 +54,8 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   const { isMemesWave } = useSeizeSettings();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
+  const { mobileMenuZIndexClassName, mobileDialogZIndexClassName } =
+    useWaveDropLayers();
 
   const extendedDrop = useMemo<ExtendedDrop>(
     () => ({
@@ -135,7 +138,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   const showGuestCopyOnly = !connectedProfile?.handle;
 
   return createPortal(
-    <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
+    <CommonDropdownItemsMobileWrapper
+      isOpen={isOpen}
+      setOpen={setOpen}
+      zIndexClassName={mobileMenuZIndexClassName}
+    >
       <div
         className={`tw-grid tw-grid-cols-1 ${
           longPressTriggered && "tw-select-none"
@@ -186,6 +193,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
               drop={extendedDrop}
               isMobile={true}
               onAddReaction={onAddReaction}
+              dialogZIndexClassName={mobileDialogZIndexClassName}
             />
             {showReplyAndQuote && (
               <button
