@@ -49,7 +49,7 @@ const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
   const matchDeleted = event.deleted?.some(
     (cookie) => cookie.name === WALLET_AUTH_COOKIE
   );
-  return Boolean(matchChanged || matchDeleted);
+  return Boolean(matchChanged ?? matchDeleted);
 };
 
 /**
