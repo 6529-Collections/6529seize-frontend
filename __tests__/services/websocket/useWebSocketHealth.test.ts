@@ -249,6 +249,31 @@ describe("useWebSocketHealth", () => {
     );
   });
 
+  it("handles deleted auth-cookie events even when changed is present without a match", () => {
+    const { trigger } = setupCookieStoreWithAddEventListener();
+
+    mockGetAuthJwt.mockReturnValue("token-a");
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
+
+    renderHook(() => useWebSocketHealth());
+
+    mockDisconnect.mockClear();
+    mockGetAuthJwt.mockReturnValue(null);
+
+    act(() => {
+      trigger({
+        changed: [{ name: "other-cookie" }],
+        deleted: [{ name: WALLET_AUTH_COOKIE }],
+      });
+    });
+
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+  });
+
   it("supports cookieStore onchange handler fallback", () => {
     const existingHandler = jest.fn();
     const { cookieStoreMock, trigger } =
