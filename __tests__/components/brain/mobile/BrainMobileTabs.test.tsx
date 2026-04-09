@@ -49,11 +49,7 @@ jest.mock("@/hooks/useUnreadNotifications", () => ({
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ connectedProfile: { handle: "alice" } }),
-}));
-
-jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(),
+  useAuth: jest.fn(),
 }));
 
 const leaderboardMock = jest.fn();
@@ -75,9 +71,7 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveTabsLeaderboard", () => ({
 const { useWave } = require("@/hooks/useWave");
 const { useUnreadIndicator } = require("@/hooks/useUnreadIndicator");
 const { useUnreadNotifications } = require("@/hooks/useUnreadNotifications");
-const {
-  useSeizeConnectContext,
-} = require("@/components/auth/SeizeConnectContext");
+const { useAuth } = require("@/components/auth/Auth");
 
 describe("BrainMobileTabs", () => {
   const onViewChange = jest.fn();
@@ -92,8 +86,8 @@ describe("BrainMobileTabs", () => {
     (useUnreadNotifications as jest.Mock).mockReturnValue({
       haveUnreadNotifications: false,
     });
-    (useSeizeConnectContext as jest.Mock).mockReturnValue({
-      isConnected: true,
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: { handle: "alice" },
     });
   });
 
@@ -213,14 +207,14 @@ describe("BrainMobileTabs", () => {
     expect(screen.queryByText("FAQ")).toBeNull();
   });
 
-  it("hides My Votes for disconnected memes rank wave", () => {
+  it("hides My Votes for guests on memes rank wave", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: true,
       isCurationWave: false,
       isRankWave: true,
     });
-    (useSeizeConnectContext as jest.Mock).mockReturnValue({
-      isConnected: false,
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: null,
     });
 
     render(

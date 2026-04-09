@@ -33,7 +33,6 @@ import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
 import FloatingMemesQuickVoteTrigger from "./mobile/FloatingMemesQuickVoteTrigger";
 import { BrainView } from "./mobile/brainMobileViews";
 import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface Props {
   readonly children: ReactNode;
@@ -45,7 +44,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
-  const { isConnected } = useSeizeConnectContext();
+  const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const quickVote = useMemesQuickVoteDialogController();
   const hydrated = useSyncExternalStore(
     () => () => {},
@@ -102,7 +101,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     firstDecisionDone,
     isApp,
     isCompleted,
-    isConnected,
+    hasAuthenticatedProfile,
     isCurationWave,
     isMemesWave,
     isRankWave,
