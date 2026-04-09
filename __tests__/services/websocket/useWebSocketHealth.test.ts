@@ -445,4 +445,31 @@ describe("useWebSocketHealth", () => {
     expect(mockConnect).toHaveBeenCalledTimes(1);
     expect(mockConnect).toHaveBeenCalledWith("token-b");
   });
+
+  it("recreates a connecting socket after a long-hidden resume", () => {
+    jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
+    mockGetAuthJwt.mockReturnValue("resume-token");
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTING,
+    });
+
+    renderHook(() => useWebSocketHealth());
+    mockConnect.mockClear();
+
+    act(() => {
+      setDocumentVisibilityState("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    act(() => {
+      jest.setSystemTime(new Date("2026-04-07T10:01:01.000Z"));
+      setDocumentVisibilityState("visible");
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(mockConnect).toHaveBeenCalledTimes(1);
+    expect(mockConnect).toHaveBeenCalledWith("resume-token");
+  });
 });
