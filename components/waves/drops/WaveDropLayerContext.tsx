@@ -23,10 +23,14 @@ export function WaveDropLayerProvider({
   readonly children: React.ReactNode;
   readonly value?: Partial<WaveDropLayerContextValue> | undefined;
 }) {
-  const mergedValue = useMemo(
+  const mergedValue = useMemo<WaveDropLayerContextValue>(
     () => ({
-      ...DEFAULT_WAVE_DROP_LAYER_CONTEXT,
-      ...value,
+      mobileMenuZIndexClassName:
+        value?.mobileMenuZIndexClassName ??
+        DEFAULT_WAVE_DROP_LAYER_CONTEXT.mobileMenuZIndexClassName,
+      mobileDialogZIndexClassName:
+        value?.mobileDialogZIndexClassName ??
+        DEFAULT_WAVE_DROP_LAYER_CONTEXT.mobileDialogZIndexClassName,
     }),
     [value]
   );

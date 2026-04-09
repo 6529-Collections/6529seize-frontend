@@ -419,3 +419,50 @@ test("uses single-drop layer overrides when provided by context", () => {
     "tw-z-[1030]"
   );
 });
+
+test("preserves default layer values when context overrides are undefined", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
+
+  render(
+    <WaveDropLayerProvider
+      value={{
+        mobileMenuZIndexClassName: undefined,
+        mobileDialogZIndexClassName: "tw-z-[1030]",
+      }}
+    >
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "alice" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <WaveDropMobileMenu
+          drop={drop}
+          isOpen
+          showReplyAndQuote
+          longPressTriggered={false}
+          setOpen={jest.fn()}
+          onReply={jest.fn()}
+          onAddReaction={jest.fn()}
+        />
+      </AuthContext.Provider>
+    </WaveDropLayerProvider>
+  );
+
+  expect(screen.getByTestId("wrapper")).toHaveAttribute(
+    "data-z-index",
+    "tw-z-[1000]"
+  );
+  expect(screen.getByTestId("add-reaction")).toHaveAttribute(
+    "data-dialog-z-index",
+    "tw-z-[1030]"
+  );
+});
