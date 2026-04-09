@@ -16,8 +16,8 @@ import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import WaveGroupScope from "@/components/waves/specs/groups/group/WaveGroupScope";
 import {
   getWaveCurationsQueryKey,
-  useWaveCurationGroups,
-} from "@/hooks/waves/useWaveCurationGroups";
+  useWaveCurations,
+} from "@/hooks/waves/useWaveCurations";
 import { commonApiDelete, commonApiFetch } from "@/services/api/common-api";
 
 const toScopeGroup = (group: ApiGroupFull): ApiGroup => ({
@@ -45,7 +45,7 @@ export default function WaveActiveCurationSection({
   const canManageCurations =
     wave.wave.authenticated_user_eligible_for_admin === true;
 
-  const { data: curations = [] } = useWaveCurationGroups({
+  const { data: curations = [] } = useWaveCurations({
     waveId: wave.id,
     enabled: !!activeCurationId,
   });

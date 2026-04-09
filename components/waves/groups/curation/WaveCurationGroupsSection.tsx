@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
+import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import MyStreamWaveCurationCreateDialog from "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog";
 
 interface WaveCurationGroupsSectionProps {
@@ -34,7 +34,7 @@ export default function WaveCurationGroupsSection({
   const activeCurationId = searchParams.get("curation");
   const canManageCurations =
     wave.wave.authenticated_user_eligible_for_admin === true;
-  const { data: curations = [] } = useWaveCurationGroups({
+  const { data: curations = [] } = useWaveCurations({
     waveId: wave.id,
     enabled: isApp,
   });

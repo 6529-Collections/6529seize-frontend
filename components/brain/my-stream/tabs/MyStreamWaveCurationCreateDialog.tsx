@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurationGroups";
+import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";

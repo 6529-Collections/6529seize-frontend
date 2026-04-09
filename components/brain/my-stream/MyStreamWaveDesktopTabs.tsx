@@ -6,7 +6,7 @@ import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { TabToggle } from "@/components/common/TabToggle";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
+import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useWave } from "@/hooks/useWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
@@ -93,7 +93,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       initialFutureWindow: 10,
     }
   );
-  const { data: curations = [] } = useWaveCurationGroups({
+  const { data: curations = [] } = useWaveCurations({
     waveId: wave.id,
   });
   const canManageCurations =

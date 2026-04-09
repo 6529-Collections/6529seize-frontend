@@ -30,7 +30,7 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
+import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
@@ -144,7 +144,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     data: curationGroups = [],
     isLoading: isLoadingCurationGroups,
     isError: isCurationGroupsError,
-  } = useWaveCurationGroups({
+  } = useWaveCurations({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
