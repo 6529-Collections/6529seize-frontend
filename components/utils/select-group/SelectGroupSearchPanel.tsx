@@ -27,6 +27,10 @@ type SelectGroupSearchPanelProps = {
   readonly showHeader?: boolean | undefined;
   readonly useDefaultContainerStyles?: boolean | undefined;
   readonly useDefaultBodyStyles?: boolean | undefined;
+  readonly showIdentitySearch?: boolean | undefined;
+  readonly requireSearchQuery?: boolean | undefined;
+  readonly idleStateMessage?: string | undefined;
+  readonly emptyStateMessage?: string | undefined;
 };
 
 export default function SelectGroupSearchPanel({
@@ -39,6 +43,10 @@ export default function SelectGroupSearchPanel({
   showHeader = true,
   useDefaultContainerStyles = true,
   useDefaultBodyStyles = true,
+  showIdentitySearch = true,
+  requireSearchQuery = false,
+  idleStateMessage,
+  emptyStateMessage,
 }: SelectGroupSearchPanelProps) {
   const handleClose = onClose ?? (() => {});
   const containerClasses = [
@@ -74,15 +82,23 @@ export default function SelectGroupSearchPanel({
     }));
   };
 
+  const trimmedGroupName = filters.group_name?.trim() ?? "";
+  const trimmedAuthorIdentity = filters.author_identity?.trim() ?? "";
+  const hasGroupNameFilter = trimmedGroupName.length > 0;
+  const hasUserFilter = showIdentitySearch && trimmedAuthorIdentity.length > 0;
+  const isQueryEnabled = requireSearchQuery
+    ? hasGroupNameFilter || hasUserFilter
+    : true;
+
   const { data, isFetching } = useQuery<ApiGroupFull[]>({
     queryKey: [QueryKey.GROUPS, filters],
     queryFn: async () => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
-      if (filters.group_name) {
-        params.group_name = filters.group_name;
+      if (hasGroupNameFilter) {
+        params.group_name = trimmedGroupName;
       }
-      if (filters.author_identity) {
-        params.author_identity = filters.author_identity;
+      if (showIdentitySearch && trimmedAuthorIdentity.length > 0) {
+        params.author_identity = trimmedAuthorIdentity;
       }
 
       return await commonApiFetch<
@@ -94,9 +110,13 @@ export default function SelectGroupSearchPanel({
       });
     },
     placeholderData: keepPreviousData,
+    enabled: isQueryEnabled,
   });
 
-  const groups = data ?? [];
+  const groups = isQueryEnabled ? (data ?? []) : [];
+  const resolvedEmptyStateMessage = isQueryEnabled
+    ? emptyStateMessage
+    : (idleStateMessage ?? emptyStateMessage);
 
   return (
     <div className={containerClasses}>
@@ -106,6 +126,7 @@ export default function SelectGroupSearchPanel({
         groupUser={filters.author_identity}
         onUserSelect={onUserSelect}
         onFilterNameSearch={onFilterNameSearch}
+        showIdentitySearch={showIdentitySearch}
       />
       <div className={bodyClasses}>
         <SelectGroupModalItems
@@ -114,6 +135,7 @@ export default function SelectGroupSearchPanel({
           loading={isFetching}
           onGroupSelect={onGroupSelect}
           onGroupClear={onGroupClear}
+          emptyStateMessage={resolvedEmptyStateMessage}
         />
       </div>
     </div>

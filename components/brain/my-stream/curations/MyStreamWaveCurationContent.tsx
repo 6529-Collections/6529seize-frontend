@@ -13,6 +13,7 @@ import { useWaveDrops } from "@/hooks/useWaveDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, type ReactNode } from "react";
+import { useLayout } from "../layout/LayoutContext";
 import { MyStreamActiveCurationProvider } from "./MyStreamActiveCurationContext";
 
 interface MyStreamWaveCurationContentProps {
@@ -99,6 +100,7 @@ export default function MyStreamWaveCurationContent({
   curationName,
   onDropClick,
 }: MyStreamWaveCurationContentProps) {
+  const { leaderboardViewStyle } = useLayout();
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDrops({
       waveId: wave.id,
@@ -192,7 +194,10 @@ export default function MyStreamWaveCurationContent({
 
   return (
     <MyStreamActiveCurationProvider curationId={curationId}>
-      <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+      <div
+        className="tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+        style={leaderboardViewStyle}
+      >
         {content}
       </div>
     </MyStreamActiveCurationProvider>

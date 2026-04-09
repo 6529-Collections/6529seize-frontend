@@ -4,9 +4,11 @@ const DARK_AUTOFILL_CLASSES =
 export default function SelectGroupModalSearchName({
   filterName,
   setFilterName,
+  autoFocus = false,
 }: {
   readonly filterName: string | null;
   readonly setFilterName: (name: string | null) => void;
+  readonly autoFocus?: boolean | undefined;
 }) {
   return (
     <div className="tw-relative">
@@ -27,6 +29,7 @@ export default function SelectGroupModalSearchName({
         onChange={(e) => setFilterName(e.target.value)}
         type="text"
         id="search-group-name"
+        autoFocus={autoFocus}
         autoComplete="off"
         placeholder=" "
         className={`tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-pb-3 tw-pl-9 tw-pr-4 tw-pt-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${DARK_AUTOFILL_CLASSES}`}

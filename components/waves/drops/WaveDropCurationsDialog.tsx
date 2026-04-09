@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import MyStreamWaveCurationCreateDialog from "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { Spinner } from "@/components/dotLoader/DotLoader";
@@ -15,6 +16,53 @@ import {
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (typeof error === "string" && error.trim().length > 0) {
+    return error;
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  return fallback;
+};
+
+const isPermissionErrorMessage = (message: string): boolean => {
+  const normalizedMessage = message.toLowerCase();
+
+  return (
+    normalizedMessage.includes("permission") ||
+    normalizedMessage.includes("forbidden") ||
+    normalizedMessage.includes("not authorized") ||
+    normalizedMessage.includes("not allowed") ||
+    normalizedMessage.includes("cannot curate") ||
+    normalizedMessage.includes("can't curate") ||
+    normalizedMessage.includes("not a member")
+  );
+};
+
+const CREATE_AND_ADD_PERMISSION_MESSAGE =
+  "Curation created, but you can't add drops with that group.";
+const CREATE_AND_ADD_FALLBACK_MESSAGE =
+  "Curation created, but the drop could not be added. Please try again.";
+
+const getCreateAndAddErrorMessage = (error: unknown): string => {
+  const fallbackErrorMessage = "Failed to add drop to curation.";
+  const errorMessage = getErrorMessage(error, fallbackErrorMessage);
+
+  if (isPermissionErrorMessage(errorMessage)) {
+    return CREATE_AND_ADD_PERMISSION_MESSAGE;
+  }
+
+  if (errorMessage === fallbackErrorMessage) {
+    return CREATE_AND_ADD_FALLBACK_MESSAGE;
+  }
+
+  return `Curation created, but the drop could not be added: ${errorMessage}`;
+};
 
 function CurationsSection({
   title,
@@ -138,10 +186,11 @@ export default function WaveDropCurationsDialog({
   onClose,
 }: {
   readonly dropId: string;
-  readonly wave: { readonly id: string };
+  readonly wave: Pick<ApiWaveMin, "id" | "admin_group_id">;
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }) {
+  const { setToast } = useAuth();
   const queryClient = useQueryClient();
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const {
@@ -153,10 +202,14 @@ export default function WaveDropCurationsDialog({
     dropId,
     enabled: isOpen,
   });
-  const { updateMembership, isPending, pendingCurationId } =
-    useDropCurationMembershipMutation({
-      dropId,
-    });
+  const {
+    updateMembership,
+    updateMembershipAsync,
+    isPending,
+    pendingCurationId,
+  } = useDropCurationMembershipMutation({
+    dropId,
+  });
 
   const sortedCurations = useMemo(
     () =>
@@ -191,14 +244,14 @@ export default function WaveDropCurationsDialog({
   );
   const showInlineCreateButton = sortedCurations.length > 0;
 
-  const handleCreatedFromCurate = (curation: ApiWaveCuration) => {
+  const handleCreatedFromCurate = async (curation: ApiWaveCuration) => {
     queryClient.setQueryData<DropCurationMembership[]>(
       getDropCurationsQueryKey(dropId),
       (current) => {
         const nextRow: DropCurationMembership = {
           ...curation,
           drop_included: false,
-          authenticated_user_can_curate: true,
+          authenticated_user_can_curate: false,
         };
 
         if (!current) {
@@ -218,7 +271,33 @@ export default function WaveDropCurationsDialog({
       }
     );
 
-    updateMembership(curation.id, "add");
+    const refreshResult = await refetch();
+    const createdCuration = refreshResult.isError
+      ? null
+      : refreshResult.data?.find((item) => item.id === curation.id);
+
+    if (createdCuration && !createdCuration.authenticated_user_can_curate) {
+      setToast({
+        type: "warning",
+        message: CREATE_AND_ADD_PERMISSION_MESSAGE,
+      });
+      return;
+    }
+
+    try {
+      await updateMembershipAsync(curation.id, "add", {
+        suppressToast: true,
+      });
+      setToast({
+        type: "success",
+        message: "Curation created and drop added.",
+      });
+    } catch (error) {
+      setToast({
+        type: "error",
+        message: getCreateAndAddErrorMessage(error),
+      });
+    }
   };
 
   return (

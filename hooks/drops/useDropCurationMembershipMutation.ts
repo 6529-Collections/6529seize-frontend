@@ -15,9 +15,14 @@ import {
 
 type DropCurationMembershipAction = "add" | "remove";
 
+interface DropCurationMembershipMutationOptions {
+  readonly suppressToast?: boolean | undefined;
+}
+
 interface DropCurationMembershipMutationVariables {
   readonly curationId: string;
   readonly action: DropCurationMembershipAction;
+  readonly options?: DropCurationMembershipMutationOptions | undefined;
 }
 
 const getDropCurationMembershipEndpoint = (dropId: string): string =>
@@ -81,6 +86,51 @@ const addDropToCuration = async ({
   }
 };
 
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (typeof error === "string" && error.trim().length > 0) {
+    return error;
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  return fallback;
+};
+
+const isPermissionErrorMessage = (message: string): boolean => {
+  const normalizedMessage = message.toLowerCase();
+
+  return (
+    normalizedMessage.includes("permission") ||
+    normalizedMessage.includes("forbidden") ||
+    normalizedMessage.includes("not authorized") ||
+    normalizedMessage.includes("not allowed") ||
+    normalizedMessage.includes("cannot curate") ||
+    normalizedMessage.includes("can't curate") ||
+    normalizedMessage.includes("not a member")
+  );
+};
+
+const getCurationMembershipErrorMessage = (
+  error: unknown,
+  action: DropCurationMembershipAction
+): string => {
+  const fallbackErrorMessage =
+    action === "add"
+      ? "Failed to add drop to curation."
+      : "Failed to remove drop from curation.";
+  const errorMessage = getErrorMessage(error, fallbackErrorMessage);
+
+  if (isPermissionErrorMessage(errorMessage)) {
+    return action === "add"
+      ? "You can't add this drop because you can't curate with the selected group."
+      : "You can't remove this drop because you can't curate with the selected group.";
+  }
+
+  return errorMessage;
+};
+
 export function useDropCurationMembershipMutation({
   dropId,
 }: {
@@ -139,13 +189,15 @@ export function useDropCurationMembershipMutation({
       return { previousCurations };
     },
     onSuccess: (_data, variables) => {
-      setToast({
-        type: "success",
-        message:
-          variables.action === "add"
-            ? "Drop added to curation."
-            : "Drop removed from curation.",
-      });
+      if (!variables.options?.suppressToast) {
+        setToast({
+          type: "success",
+          message:
+            variables.action === "add"
+              ? "Drop added to curation."
+              : "Drop removed from curation.",
+        });
+      }
       invalidateDrops();
     },
     onError: (error, variables, context) => {
@@ -156,15 +208,12 @@ export function useDropCurationMembershipMutation({
         );
       }
 
-      const fallbackErrorMessage =
-        variables.action === "add"
-          ? "Failed to add drop to curation."
-          : "Failed to remove drop from curation.";
-
-      setToast({
-        type: "error",
-        message: error instanceof Error ? error.message : fallbackErrorMessage,
-      });
+      if (!variables.options?.suppressToast) {
+        setToast({
+          type: "error",
+          message: getCurationMembershipErrorMessage(error, variables.action),
+        });
+      }
     },
     onSettled: () => {
       void queryClient.invalidateQueries({
@@ -176,8 +225,14 @@ export function useDropCurationMembershipMutation({
   return {
     updateMembership: (
       curationId: string,
-      action: DropCurationMembershipAction
-    ) => mutation.mutate({ curationId, action }),
+      action: DropCurationMembershipAction,
+      options?: DropCurationMembershipMutationOptions
+    ) => mutation.mutate({ curationId, action, options }),
+    updateMembershipAsync: (
+      curationId: string,
+      action: DropCurationMembershipAction,
+      options?: DropCurationMembershipMutationOptions
+    ) => mutation.mutateAsync({ curationId, action, options }),
     isPending: mutation.isPending,
     pendingCurationId: mutation.isPending
       ? mutation.variables.curationId
