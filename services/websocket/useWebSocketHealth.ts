@@ -144,10 +144,7 @@ export function useWebSocketHealth() {
 
     const { status: currentStatus, connect: currentConnect } =
       webSocketStateRef.current;
-    if (
-      currentStatus === WebSocketStatus.CONNECTED ||
-      currentStatus === WebSocketStatus.CONNECTING
-    ) {
+    if (currentStatus === WebSocketStatus.CONNECTED) {
       currentConnect(currentToken);
     }
   }, [performHealthCheck]);
