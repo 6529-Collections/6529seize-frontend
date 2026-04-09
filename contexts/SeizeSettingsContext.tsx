@@ -56,7 +56,6 @@ export const SeizeSettingsProvider = ({
     announcements_wave_id: null,
     distribution_admin_wallets: [],
     claims_admin_wallets: [],
-    announcements_wave_id: null,
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
