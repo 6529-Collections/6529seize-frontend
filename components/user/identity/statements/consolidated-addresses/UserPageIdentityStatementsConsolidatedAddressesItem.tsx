@@ -35,6 +35,16 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   readonly onToggleOpen: () => void;
 }) {
   const { setToast } = useAuth();
+  const ensName = (() => {
+    const value = address.display.trim();
+    if (!value) {
+      return null;
+    }
+    if (value.toLowerCase() === address.wallet.toLowerCase()) {
+      return null;
+    }
+    return value.endsWith(".eth") ? value : null;
+  })();
 
   const goToOpensea = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
@@ -75,12 +85,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   const handleCopyEns = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    if (!address.display) {
+    if (!ensName) {
       return;
     }
 
     event.stopPropagation();
-    copyToClipboard(address.display);
+    copyToClipboard(ensName);
     setCopiedItem("ens");
     if (resetTimerRef.current) {
       clearTimeout(resetTimerRef.current);
@@ -122,7 +132,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     if (writeDelegation.isPending) {
       setStatusMessage("Confirm in your wallet...");
     } else if (writeDelegation.data) {
-      let trxLink = (
+      const trxLink = (
         <>
           {writeDelegation.data && (
             <a
@@ -209,7 +219,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 isAssigningPrimary={assigningPrimary}
               />
             </div>
-            {address.display && (
+            {ensName && (
               <button
                 type="button"
                 aria-expanded={isOpen}
@@ -217,7 +227,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 onClick={onToggleOpen}
                 className="tw-mt-1 tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-mono tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
               >
-                {address.display}
+                {ensName}
               </button>
             )}
           </div>
@@ -319,14 +329,14 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 </div>
               </div>
 
-              {address.display && (
+              {ensName && (
                 <div>
                   <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
                     ENS Name
                   </div>
                   <div className="tw-mt-1 tw-flex tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1.5">
                     <span className="tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
-                      {address.display}
+                      {ensName}
                     </span>
                     <button
                       type="button"
