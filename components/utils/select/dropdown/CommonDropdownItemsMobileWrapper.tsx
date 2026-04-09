@@ -16,12 +16,14 @@ export default function CommonDropdownItemsMobileWrapper({
   setOpen,
   label,
   hideOnDesktopHover = true,
+  zIndexClassName = "tw-z-[1000]",
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly label?: string | undefined;
   readonly hideOnDesktopHover?: boolean | undefined;
+  readonly zIndexClassName?: string | undefined;
   readonly children: ReactNode;
 }) {
   const hasTouchInput = useHasTouchInput();
@@ -31,7 +33,7 @@ export default function CommonDropdownItemsMobileWrapper({
     <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className={`tailwind-scope tw-absolute tw-z-[1000] ${shouldHideOnDesktopHover ? "lg:desktop-hover:tw-hidden" : ""}`}
+        className={`tailwind-scope tw-absolute ${zIndexClassName} ${shouldHideOnDesktopHover ? "lg:desktop-hover:tw-hidden" : ""}`}
         onClose={setOpen}
       >
         <TransitionChild
