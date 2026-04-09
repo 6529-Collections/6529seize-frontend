@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 
 import { getTimeAgo, getTimeAgoShort } from "@/helpers/Helpers";
 
@@ -11,11 +11,11 @@ export default function CommonTimeAgo({
   readonly short?: boolean | undefined;
   readonly className?: string | undefined;
 }) {
-  const [, forceUpdate] = useState(0);
+  const [, forceUpdate] = useReducer((value: number) => value + 1, 0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      forceUpdate((value) => value + 1);
+      forceUpdate();
     }, 60_000);
 
     return () => {
