@@ -446,7 +446,7 @@ describe("useWebSocketHealth", () => {
     expect(mockConnect).toHaveBeenCalledWith("token-b");
   });
 
-  it("does not restart a connecting socket after a long-hidden resume", () => {
+  it("reconnects a connecting socket after a long-hidden resume", () => {
     jest.setSystemTime(new Date("2026-04-07T10:00:00.000Z"));
     mockGetAuthJwt.mockReturnValue("resume-token");
     mockUseWebSocket.mockReturnValue({
@@ -469,6 +469,7 @@ describe("useWebSocketHealth", () => {
       document.dispatchEvent(new Event("visibilitychange"));
     });
 
-    expect(mockConnect).not.toHaveBeenCalled();
+    expect(mockConnect).toHaveBeenCalledTimes(1);
+    expect(mockConnect).toHaveBeenCalledWith("resume-token");
   });
 });
