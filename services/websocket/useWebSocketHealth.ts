@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { getAuthJwt, WALLET_AUTH_COOKIE } from "../auth/auth.utils";
 import { useWebSocket } from "./useWebSocket";
 import { WebSocketStatus } from "./WebSocketTypes";
+import { logWebSocketDebug } from "./webSocketDebug";
 
 const AUTH_BROADCAST_CHANNEL = "auth-token-updates";
 const AUTH_BROADCAST_MESSAGE = "auth-token-changed";
@@ -33,6 +34,13 @@ interface CookieStoreWithEvents {
 }
 
 type HealthCheckAction = "none" | "connect" | "disconnect";
+type HealthCheckSource =
+  | "status-effect"
+  | "resume"
+  | "cookie-change"
+  | "broadcast-channel"
+  | "interval";
+type ResumeEventSource = "visibilitychange" | "focus";
 
 const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
   const matchChanged = event.changed?.some(
@@ -66,95 +74,192 @@ export function useWebSocketHealth() {
   // Keep ref updated with current WebSocket state
   webSocketStateRef.current = webSocketState;
 
-  const performHealthCheck = useCallback((): {
-    action: HealthCheckAction;
-    token: string | null;
-  } => {
-    const currentToken = getAuthJwt();
-    const previousToken = lastTokenRef.current;
-    lastTokenRef.current = currentToken;
+  const performHealthCheckForSource = useCallback(
+    (
+      source: HealthCheckSource
+    ): {
+      action: HealthCheckAction;
+      token: string | null;
+      reason: string | null;
+    } => {
+      const currentToken = getAuthJwt();
+      const previousToken = lastTokenRef.current;
+      const tokenChanged = currentToken !== previousToken;
+      lastTokenRef.current = currentToken;
 
-    const {
-      status: currentStatus,
-      connect: currentConnect,
-      disconnect: currentDisconnect,
-    } = webSocketStateRef.current;
+      const {
+        status: currentStatus,
+        connect: currentConnect,
+        disconnect: currentDisconnect,
+      } = webSocketStateRef.current;
 
-    let action: HealthCheckAction = "none";
+      let action: HealthCheckAction = "none";
+      let reason: string | null = null;
 
-    if (!currentToken && currentStatus !== WebSocketStatus.DISCONNECTED) {
-      currentDisconnect();
-      action = "disconnect";
-    } else if (currentToken && currentStatus === WebSocketStatus.DISCONNECTED) {
-      currentConnect(currentToken);
-      action = "connect";
-    } else if (
-      currentToken &&
-      currentStatus !== WebSocketStatus.DISCONNECTED &&
-      currentToken !== previousToken
-    ) {
-      currentConnect(currentToken);
-      action = "connect";
-    }
+      if (!currentToken && currentStatus !== WebSocketStatus.DISCONNECTED) {
+        currentDisconnect();
+        action = "disconnect";
+        reason = "missing-token";
+      } else if (
+        currentToken &&
+        currentStatus === WebSocketStatus.DISCONNECTED
+      ) {
+        currentConnect(currentToken);
+        action = "connect";
+        reason = "connect-while-disconnected";
+      } else if (
+        currentToken &&
+        currentStatus !== WebSocketStatus.DISCONNECTED &&
+        currentToken !== previousToken
+      ) {
+        currentConnect(currentToken);
+        action = "connect";
+        reason = "token-changed";
+      }
 
-    if (currentToken !== previousToken) {
-      broadcastChannelRef.current?.postMessage({
-        type: AUTH_BROADCAST_MESSAGE,
+      if (
+        source === "resume" ||
+        source === "status-effect" ||
+        action !== "none"
+      ) {
+        logWebSocketDebug("Health check completed", {
+          source,
+          action,
+          reason,
+          status: currentStatus,
+          hasToken: Boolean(currentToken),
+          tokenChanged,
+        });
+      }
+
+      if (tokenChanged) {
+        broadcastChannelRef.current?.postMessage({
+          type: AUTH_BROADCAST_MESSAGE,
+        });
+      }
+
+      return {
+        action,
+        token: currentToken,
+        reason,
+      };
+    },
+    []
+  );
+
+  const performResumeHealthCheck = useCallback(
+    (source: ResumeEventSource) => {
+      if (
+        typeof document === "undefined" ||
+        document.visibilityState !== "visible"
+      ) {
+        logWebSocketDebug(
+          "Resume health check skipped because document is hidden",
+          {
+            source,
+            visibilityState:
+              typeof document === "undefined"
+                ? "undefined"
+                : document.visibilityState,
+          }
+        );
+        return;
+      }
+
+      const now = Date.now();
+      const hiddenAt = hiddenAtRef.current;
+      const hiddenDurationMs = hiddenAt === null ? null : now - hiddenAt;
+      // Clear the hidden marker for this resume attempt even if we dedupe it.
+      hiddenAtRef.current = null;
+
+      const sinceLastResumeCheckMs = now - lastResumeCheckAtRef.current;
+      if (sinceLastResumeCheckMs < RESUME_EVENT_DEDUPE_WINDOW_MS) {
+        logWebSocketDebug("Resume health check deduped", {
+          source,
+          sinceLastResumeCheckMs,
+          hiddenDurationMs,
+        });
+        return;
+      }
+      lastResumeCheckAtRef.current = now;
+
+      logWebSocketDebug("Running resume health check", {
+        source,
+        hiddenDurationMs,
+        status: webSocketStateRef.current.status,
       });
-    }
 
-    return {
-      action,
-      token: currentToken,
-    };
-  }, []);
+      const {
+        action,
+        token: currentToken,
+        reason: healthCheckReason,
+      } = performHealthCheckForSource("resume");
 
-  const performResumeHealthCheck = useCallback(() => {
-    if (
-      typeof document === "undefined" ||
-      document.visibilityState !== "visible"
-    ) {
-      return;
-    }
+      // Avoid a second reconnect when the health check already replaced the socket.
+      if (action === "connect") {
+        logWebSocketDebug("Resume reconnect already handled by health check", {
+          source,
+          hiddenDurationMs,
+          reason: healthCheckReason,
+        });
+        return;
+      }
 
-    const now = Date.now();
-    const hiddenAt = hiddenAtRef.current;
-    // Clear the hidden marker for this resume attempt even if we dedupe it.
-    hiddenAtRef.current = null;
+      if (!currentToken || hiddenDurationMs === null) {
+        logWebSocketDebug("Resume reconnect skipped", {
+          source,
+          hiddenDurationMs,
+          reason: currentToken ? "missing-hidden-marker" : "missing-token",
+        });
+        return;
+      }
 
-    if (now - lastResumeCheckAtRef.current < RESUME_EVENT_DEDUPE_WINDOW_MS) {
-      return;
-    }
-    lastResumeCheckAtRef.current = now;
+      if (hiddenDurationMs < RESUME_RECONNECT_HIDDEN_DURATION_MS) {
+        logWebSocketDebug(
+          "Resume reconnect skipped because hidden duration is below threshold",
+          {
+            source,
+            hiddenDurationMs,
+            thresholdMs: RESUME_RECONNECT_HIDDEN_DURATION_MS,
+          }
+        );
+        return;
+      }
 
-    const { action, token: currentToken } = performHealthCheck();
+      const { status: currentStatus, connect: currentConnect } =
+        webSocketStateRef.current;
+      if (
+        currentStatus === WebSocketStatus.CONNECTED ||
+        currentStatus === WebSocketStatus.CONNECTING
+      ) {
+        logWebSocketDebug(
+          "Forcing websocket reconnect after long hidden interval",
+          {
+            source,
+            hiddenDurationMs,
+            status: currentStatus,
+            thresholdMs: RESUME_RECONNECT_HIDDEN_DURATION_MS,
+          }
+        );
+        currentConnect(currentToken);
+        return;
+      }
 
-    // Avoid a second reconnect when the health check already replaced the socket.
-    if (action === "connect") {
-      return;
-    }
-
-    if (!currentToken || hiddenAt === null) {
-      return;
-    }
-
-    if (now - hiddenAt < RESUME_RECONNECT_HIDDEN_DURATION_MS) {
-      return;
-    }
-
-    const { status: currentStatus, connect: currentConnect } =
-      webSocketStateRef.current;
-    if (
-      currentStatus === WebSocketStatus.CONNECTED ||
-      currentStatus === WebSocketStatus.CONNECTING
-    ) {
-      currentConnect(currentToken);
-    }
-  }, [performHealthCheck]);
+      logWebSocketDebug(
+        "Resume reconnect skipped because socket is disconnected",
+        {
+          source,
+          hiddenDurationMs,
+          status: currentStatus,
+        }
+      );
+    },
+    [performHealthCheckForSource]
+  );
 
   useEffect(() => {
-    performHealthCheck();
-  }, [performHealthCheck, webSocketState.status]);
+    performHealthCheckForSource("status-effect");
+  }, [performHealthCheckForSource, webSocketState.status]);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -164,14 +269,26 @@ export function useWebSocketHealth() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
         hiddenAtRef.current = Date.now();
+        logWebSocketDebug("Document became hidden", {
+          hiddenAt: hiddenAtRef.current,
+        });
         return;
       }
 
-      performResumeHealthCheck();
+      logWebSocketDebug("Document became visible", {
+        hiddenDurationMs:
+          hiddenAtRef.current === null
+            ? null
+            : Date.now() - hiddenAtRef.current,
+      });
+      performResumeHealthCheck("visibilitychange");
     };
 
     const handleFocus = () => {
-      performResumeHealthCheck();
+      logWebSocketDebug("Window focus event received", {
+        visibilityState: document.visibilityState,
+      });
+      performResumeHealthCheck("focus");
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -202,7 +319,7 @@ export function useWebSocketHealth() {
 
     const handleCookieChange = (event: CookieChangeEventLike) => {
       if (isAuthCookieChange(event)) {
-        performHealthCheck();
+        performHealthCheckForSource("cookie-change");
       }
     };
 
@@ -241,7 +358,7 @@ export function useWebSocketHealth() {
             (event.data as { type?: string | undefined })?.type ===
             AUTH_BROADCAST_MESSAGE
           ) {
-            performHealthCheck();
+            performHealthCheckForSource("broadcast-channel");
           }
         };
         channel.addEventListener("message", handleMessage as EventListener);
@@ -271,13 +388,12 @@ export function useWebSocketHealth() {
       removeCookieListener?.();
       closeBroadcastChannel?.();
     };
-  }, [performHealthCheck]);
+  }, [performHealthCheckForSource]);
 
   useEffect(() => {
-    const healthCheck = window.setInterval(
-      performHealthCheck,
-      HEALTH_CHECK_INTERVAL_MS
-    );
+    const healthCheck = window.setInterval(() => {
+      performHealthCheckForSource("interval");
+    }, HEALTH_CHECK_INTERVAL_MS);
     return () => window.clearInterval(healthCheck);
-  }, [performHealthCheck]);
+  }, [performHealthCheckForSource]);
 }

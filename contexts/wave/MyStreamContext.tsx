@@ -8,6 +8,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import useDmWavesList from "@/hooks/useDmWavesList";
 import useWavesList from "@/hooks/useWavesList";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { logWebSocketDebug } from "@/services/websocket/webSocketDebug";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import type { ReactNode } from "react";
 import React, {
@@ -97,6 +98,12 @@ interface MyStreamProviderProps {
 
 const BROWSER_RESUME_SYNC_COOLDOWN_MS = 1000;
 
+type StreamSyncSource =
+  | "browser-resume"
+  | "websocket-connected"
+  | "capacitor-resume";
+type BrowserResumeSource = "visibilitychange" | "focus";
+
 // Create the context
 const MyStreamContext = createContext<MyStreamContextType | null>(null);
 
@@ -172,39 +179,83 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     isWaveMuted,
   });
 
-  const syncActiveWaveAndRefetch = useEffectEvent(() => {
-    if (activeWaveId) {
-      registerWave(activeWaveId, true);
-    }
-    refetchAllWaves();
-  });
+  const syncActiveWaveAndRefetch = useEffectEvent(
+    (source: StreamSyncSource) => {
+      logWebSocketDebug("Running stream sync", {
+        source,
+        hasActiveWave: Boolean(activeWaveId),
+      });
 
-  const runBrowserResumeSync = useEffectEvent(() => {
+      if (activeWaveId) {
+        registerWave(activeWaveId, true);
+      }
+      refetchAllWaves();
+    }
+  );
+
+  const runBrowserResumeSync = useEffectEvent((source: BrowserResumeSource) => {
     if (document.visibilityState !== "visible") {
+      logWebSocketDebug(
+        "Browser resume sync skipped because document is hidden",
+        {
+          source,
+          visibilityState: document.visibilityState,
+        }
+      );
       return;
     }
 
     const now = Date.now();
-    if (
-      now - lastBrowserResumeSyncAtRef.current <
-      BROWSER_RESUME_SYNC_COOLDOWN_MS
-    ) {
+    const sinceLastBrowserResumeSyncMs =
+      now - lastBrowserResumeSyncAtRef.current;
+    if (sinceLastBrowserResumeSyncMs < BROWSER_RESUME_SYNC_COOLDOWN_MS) {
+      logWebSocketDebug("Browser resume sync suppressed by cooldown", {
+        source,
+        sinceLastBrowserResumeSyncMs,
+        cooldownMs: BROWSER_RESUME_SYNC_COOLDOWN_MS,
+      });
       return;
     }
 
     lastBrowserResumeSyncAtRef.current = now;
-    syncActiveWaveAndRefetch();
+    logWebSocketDebug("Browser resume sync triggered", {
+      source,
+      hasActiveWave: Boolean(activeWaveId),
+    });
+    syncActiveWaveAndRefetch("browser-resume");
+  });
+
+  const handleConnectedWebSocket = useEffectEvent(() => {
+    logWebSocketDebug("WebSocket connected; triggering stream sync", {
+      hasActiveWave: Boolean(activeWaveId),
+      isCapacitor,
+    });
+
+    syncActiveWaveAndRefetch("websocket-connected");
+
+    if (isCapacitor) {
+      logWebSocketDebug(
+        "Resetting new drop counts after websocket reconnect on capacitor"
+      );
+      resetAllWavesNewDropsCount();
+    }
+  });
+
+  const handleCapacitorResume = useEffectEvent(() => {
+    logWebSocketDebug("Capacitor app resumed; triggering stream sync", {
+      hasActiveWave: Boolean(activeWaveId),
+    });
+
+    syncActiveWaveAndRefetch("capacitor-resume");
+    resetAllWavesNewDropsCount();
   });
 
   useEffect(() => {
     if (websocketStatus !== WebSocketStatus.CONNECTED) {
       return;
     }
-    syncActiveWaveAndRefetch();
-    if (isCapacitor) {
-      resetAllWavesNewDropsCount();
-    }
-  }, [websocketStatus, isCapacitor, resetAllWavesNewDropsCount]);
+    handleConnectedWebSocket();
+  }, [websocketStatus]);
 
   useEffect(() => {
     if (activeWaveId) {
@@ -220,29 +271,36 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
     // Check if app transitioned from background to foreground
     if (!prevIsActiveRef.current && isActive) {
-      syncActiveWaveAndRefetch();
-      resetAllWavesNewDropsCount();
+      handleCapacitorResume();
     }
 
     // Update the ref for next comparison
     prevIsActiveRef.current = isActive;
-  }, [isActive, isCapacitor, resetAllWavesNewDropsCount]);
+  }, [isActive, isCapacitor]);
 
   useEffect(() => {
     if (isCapacitor) {
       return;
     }
 
-    const handleBrowserResume = () => {
-      runBrowserResumeSync();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
+      runBrowserResumeSync("visibilitychange");
     };
 
-    document.addEventListener("visibilitychange", handleBrowserResume);
-    window.addEventListener("focus", handleBrowserResume);
+    const handleFocus = () => {
+      runBrowserResumeSync("focus");
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleBrowserResume);
-      window.removeEventListener("focus", handleBrowserResume);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
     };
   }, [isCapacitor]);
 

@@ -15,6 +15,7 @@ import { WebSocketStatus } from "./WebSocketTypes";
 import type { WsMessageType } from "@/helpers/Types";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { getAuthJwt } from "../auth/auth.utils";
+import { logWebSocketDebug } from "./webSocketDebug";
 
 // Default values for reconnection
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
@@ -156,6 +157,10 @@ export function WebSocketProvider({
     const maxAttempts =
       config.maxReconnectAttempts ?? DEFAULT_MAX_RECONNECT_ATTEMPTS;
     if (reconnectAttemptsRef.current >= maxAttempts) {
+      logWebSocketDebug("Reconnect attempts exhausted", {
+        attempts: reconnectAttemptsRef.current,
+        maxAttempts,
+      });
       console.warn(
         `WebSocket reconnect failed after ${reconnectAttemptsRef.current} attempts`
       );
@@ -169,10 +174,22 @@ export function WebSocketProvider({
       baseDelay,
       MAX_RECONNECT_DELAY
     );
+    const nextAttempt = reconnectAttemptsRef.current + 1;
+
+    logWebSocketDebug("Scheduling reconnect attempt", {
+      attempt: nextAttempt,
+      delayMs: delay,
+      maxAttempts,
+      hasToken: Boolean(reconnectTokenRef.current),
+    });
 
     // Schedule reconnection
     reconnectTimerRef.current = setTimeout(() => {
       reconnectAttemptsRef.current += 1;
+      logWebSocketDebug("Running scheduled reconnect attempt", {
+        attempt: reconnectAttemptsRef.current,
+        hasToken: Boolean(reconnectTokenRef.current),
+      });
       // Attempt reconnection with the stored token
       connect(reconnectTokenRef.current);
     }, delay);
@@ -189,8 +206,17 @@ export function WebSocketProvider({
       // Reset manual disconnect flag
       isManualDisconnectRef.current = false;
 
+      logWebSocketDebug("connect() requested", {
+        hasToken: Boolean(token),
+        reconnectAttempt: reconnectAttemptsRef.current,
+        replacingExistingSocket: Boolean(wsRef.current),
+      });
+
       // Close existing connection if any
       if (wsRef.current) {
+        logWebSocketDebug("Closing existing websocket before replacement", {
+          readyState: wsRef.current.readyState,
+        });
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -208,6 +234,11 @@ export function WebSocketProvider({
       }
 
       try {
+        logWebSocketDebug("Opening websocket connection", {
+          hasToken: Boolean(token),
+          reconnectAttempt: reconnectAttemptsRef.current,
+        });
+
         // Create new WebSocket connection
         const ws = new WebSocket(url);
 
@@ -218,6 +249,10 @@ export function WebSocketProvider({
           }
 
           setStatus(WebSocketStatus.CONNECTED);
+
+          logWebSocketDebug("WebSocket opened", {
+            reconnectAttempt: reconnectAttemptsRef.current,
+          });
 
           // Reset reconnect attempts on successful connection
           reconnectAttemptsRef.current = 0;
@@ -240,14 +275,31 @@ export function WebSocketProvider({
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
 
+          const shouldReconnect =
+            event.code !== 1000 && !isManualDisconnectRef.current;
+          const freshToken = shouldReconnect
+            ? (getAuthJwt() ?? reconnectTokenRef.current)
+            : undefined;
+
+          logWebSocketDebug("WebSocket closed", {
+            code: event.code,
+            reason: event.reason || null,
+            wasClean: event.wasClean,
+            manualDisconnect: isManualDisconnectRef.current,
+            willReconnect: Boolean(freshToken),
+          });
+
           // Only attempt reconnect for unexpected closure (not code 1000)
           // and if this wasn't a manual disconnect
-          if (event.code !== 1000 && !isManualDisconnectRef.current) {
+          if (shouldReconnect) {
             // Get fresh token before reconnecting
-            const freshToken = getAuthJwt() || reconnectTokenRef.current;
             if (freshToken) {
               reconnectTokenRef.current = freshToken; // Update stored token
               attemptReconnect();
+            } else {
+              logWebSocketDebug(
+                "Skipping reconnect after close because auth token is missing"
+              );
             }
           } else {
             // Reset reconnect attempts for intentional disconnects
@@ -260,6 +312,10 @@ export function WebSocketProvider({
             return;
           }
 
+          logWebSocketDebug("WebSocket error event received", {
+            readyState: ws.readyState,
+            reconnectAttempt: reconnectAttemptsRef.current,
+          });
           console.error("WebSocket error:", error);
           // State will be updated by onclose handler
         };
@@ -267,6 +323,10 @@ export function WebSocketProvider({
         // Store the WebSocket reference
         wsRef.current = ws;
       } catch (error) {
+        logWebSocketDebug("WebSocket construction failed", {
+          hasToken: Boolean(token),
+          reconnectAttempt: reconnectAttemptsRef.current,
+        });
         console.error("Failed to connect to WebSocket:", error);
         setStatus(WebSocketStatus.DISCONNECTED);
 
@@ -283,6 +343,10 @@ export function WebSocketProvider({
   const disconnect = useCallback(() => {
     // Set flag to indicate this is intentional
     isManualDisconnectRef.current = true;
+
+    logWebSocketDebug("disconnect() requested", {
+      hasSocket: Boolean(wsRef.current),
+    });
 
     // Clear any pending reconnect
     clearReconnectTimer();
