@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "next-devtools": {
-      "command": "npx",
+      "command": "/opt/homebrew/bin/npx",
       "args": ["-y", "next-devtools-mcp@latest"]
     }
   }
