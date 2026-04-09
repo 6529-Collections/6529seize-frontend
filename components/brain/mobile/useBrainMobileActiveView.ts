@@ -22,6 +22,7 @@ interface UseBrainMobileActiveViewParams {
   readonly firstDecisionDone: boolean;
   readonly isApp: boolean;
   readonly isCompleted: boolean;
+  readonly hasAuthenticatedProfile: boolean;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
@@ -83,6 +84,7 @@ function normalizeActiveView({
   firstDecisionDone,
   hasWave,
   isCompleted,
+  hasAuthenticatedProfile,
   isCurationWave,
   isMemesWave,
   isRankWave,
@@ -93,6 +95,7 @@ function normalizeActiveView({
   readonly firstDecisionDone: boolean;
   readonly hasWave: boolean;
   readonly isCompleted: boolean;
+  readonly hasAuthenticatedProfile: boolean;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
@@ -120,7 +123,9 @@ function normalizeActiveView({
     (activeView === BrainView.SALES && !isCurationWave) ||
     (activeView === BrainView.WINNERS && (!isRankWave || !firstDecisionDone)) ||
     (activeView === BrainView.OUTCOME && !isRankWave) ||
-    (activeView === BrainView.MY_VOTES && !isMemesWave && !isCurationWave) ||
+    (activeView === BrainView.MY_VOTES &&
+      ((isMemesWave && !hasAuthenticatedProfile) ||
+        (!isMemesWave && !isCurationWave))) ||
     (activeView === BrainView.FAQ && !isMemesWave);
 
   return shouldResetToDefault ? BrainView.DEFAULT : activeView;
@@ -135,6 +140,7 @@ export function useBrainMobileActiveView({
   firstDecisionDone,
   isApp,
   isCompleted,
+  hasAuthenticatedProfile,
   isCurationWave,
   isMemesWave,
   isRankWave,
@@ -178,6 +184,7 @@ export function useBrainMobileActiveView({
     firstDecisionDone,
     hasWave,
     isCompleted,
+    hasAuthenticatedProfile,
     isCurationWave,
     isMemesWave,
     isRankWave,

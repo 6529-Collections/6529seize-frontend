@@ -60,6 +60,10 @@ jest.mock("@/components/waves/leaderboard/time/CompactTimeCountdown", () => ({
   ),
 }));
 
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
+}));
+
 import MyStreamWaveDesktopTabs from "@/components/brain/my-stream/MyStreamWaveDesktopTabs";
 
 let mockAvailableTabs: MyStreamWaveTab[] = [];
@@ -71,6 +75,7 @@ let mockWaveInfo: any = {
 };
 let mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
 let mockDecisions: { timestamp: number }[] = [];
+const { useAuth } = require("@/components/auth/Auth");
 
 function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
   return render(
@@ -93,6 +98,9 @@ beforeEach(() => {
   };
   mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
   mockDecisions = [];
+  (useAuth as jest.Mock).mockReturnValue({
+    connectedProfile: { handle: "alice" },
+  });
 });
 
 describe("MyStreamWaveDesktopTabs", () => {
@@ -144,6 +152,32 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(screen.getByText("Sales")).toBeInTheDocument();
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(setActiveTab).not.toHaveBeenCalled();
+  });
+
+  it("hides My Votes for guests on memes waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isMemesWave: true,
+      isCurationWave: false,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.FAQ,
+    ];
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: null,
+    });
+
+    renderComponent(MyStreamWaveTab.MY_VOTES);
+
+    expect(screen.getByText("Leaderboard")).toBeInTheDocument();
+    expect(screen.getByText("Chat")).toBeInTheDocument();
+    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.LEADERBOARD);
   });
 
   it("keeps Sales hidden outside curation waves", () => {
@@ -202,6 +236,7 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(updateAvailableTabs).toHaveBeenCalledWith(
       expect.objectContaining({
         isChatWave: false,
+        hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: true,
       })

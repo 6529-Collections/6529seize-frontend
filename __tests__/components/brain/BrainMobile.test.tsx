@@ -88,6 +88,10 @@ jest.mock("@/hooks/useWaveTimers", () => ({
   }),
 }));
 
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
+}));
+
 jest.mock("@/components/brain/BrainDesktopDrop", () => ({
   __esModule: true,
   default: (props: any) => (
@@ -220,6 +224,8 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveFAQ", () => ({
   default: () => <div data-testid="faq" />,
 }));
 
+const { useAuth } = require("@/components/auth/Auth");
+
 // Tests
 
 describe("BrainMobile", () => {
@@ -247,6 +253,9 @@ describe("BrainMobile", () => {
     mockFirstDecisionDone = true;
     latestTabsProps = null;
     mockDialogMountCount = 0;
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: { handle: "alice" },
+    });
     mockUseWave.mockImplementation((incomingWave?: any) => ({
       isMemesWave: false,
       isCurationWave: false,
@@ -323,6 +332,33 @@ describe("BrainMobile", () => {
 
     expect(mockUseMemesWaveFooterStats).toHaveBeenCalled();
     expect(mockDialogMountCount).toBe(1);
+  });
+
+  it("keeps My Votes unavailable for guests on memes waves", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: null,
+    });
+    mockUseWave.mockReturnValue({
+      isMemesWave: true,
+      isCurationWave: false,
+      isRankWave: true,
+      isDm: false,
+    });
+
+    render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.MY_VOTES);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("myvotes")).toBeNull();
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
   });
 
   it("keeps the floating quick-vote trigger inside the flex pane wrapper", async () => {

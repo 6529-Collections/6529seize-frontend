@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -7,6 +8,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useState } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsBoost from "./WaveDropActionsBoost";
+import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
 import WaveDropActionsMore from "./WaveDropActionsMore";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
@@ -31,8 +33,10 @@ export default function WaveDropActions({
   suppressed = false,
 }: WaveDropActionsProps) {
   const { isMemesWave } = useSeizeSettings();
+  const { connectedProfile } = useAuth();
   const compact = useCompactMode();
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
+  const showGuestCopyOnly = !connectedProfile?.handle;
 
   // Hide voting for participation drops in memes waves
   const shouldShowVoting =
@@ -57,23 +61,31 @@ export default function WaveDropActions({
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-h-9 tw-items-center tw-gap-x-0.5 tw-rounded-xl tw-bg-iron-950 tw-px-1 tw-shadow-md tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/40">
-          <WaveDropActionsQuickReact drop={drop} />
-          <WaveDropActionsAddReaction drop={drop} />
-          <WaveDropActionsReply
-            onReply={onReply}
-            drop={drop}
-            activePartIndex={activePartIndex}
-          />
-          <WaveDropActionsBoost drop={drop} />
-          {onEdit && drop.drop_type !== ApiDropType.Participatory && (
-            <WaveDropActionsEdit drop={drop} onEdit={onEdit} />
+          {showGuestCopyOnly ? (
+            <WaveDropActionsCopyLink drop={drop} />
+          ) : (
+            <>
+              <WaveDropActionsQuickReact drop={drop} />
+              <WaveDropActionsAddReaction drop={drop} />
+              <WaveDropActionsReply
+                onReply={onReply}
+                drop={drop}
+                activePartIndex={activePartIndex}
+              />
+              <WaveDropActionsBoost drop={drop} />
+              {onEdit && drop.drop_type !== ApiDropType.Participatory && (
+                <WaveDropActionsEdit drop={drop} onEdit={onEdit} />
+              )}
+              <WaveDropActionsMore
+                drop={drop}
+                onOpenChange={setIsMoreDropdownOpen}
+              />
+            </>
           )}
-          <WaveDropActionsMore
-            drop={drop}
-            onOpenChange={setIsMoreDropdownOpen}
-          />
         </div>
-        {shouldShowVoting && <WaveDropActionsRate drop={drop} />}
+        {!showGuestCopyOnly && shouldShowVoting && (
+          <WaveDropActionsRate drop={drop} />
+        )}
       </div>
     </div>
   );

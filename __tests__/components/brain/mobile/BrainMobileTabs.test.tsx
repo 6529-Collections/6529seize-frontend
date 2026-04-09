@@ -49,7 +49,7 @@ jest.mock("@/hooks/useUnreadNotifications", () => ({
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ connectedProfile: { handle: "alice" } }),
+  useAuth: jest.fn(),
 }));
 
 const leaderboardMock = jest.fn();
@@ -71,6 +71,7 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveTabsLeaderboard", () => ({
 const { useWave } = require("@/hooks/useWave");
 const { useUnreadIndicator } = require("@/hooks/useUnreadIndicator");
 const { useUnreadNotifications } = require("@/hooks/useUnreadNotifications");
+const { useAuth } = require("@/components/auth/Auth");
 
 describe("BrainMobileTabs", () => {
   const onViewChange = jest.fn();
@@ -84,6 +85,9 @@ describe("BrainMobileTabs", () => {
     (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
     (useUnreadNotifications as jest.Mock).mockReturnValue({
       haveUnreadNotifications: false,
+    });
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: { handle: "alice" },
     });
   });
 
@@ -201,6 +205,34 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByText("Sales")).toBeInTheDocument();
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(screen.queryByText("FAQ")).toBeNull();
+  });
+
+  it("hides My Votes for guests on memes rank wave", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      isMemesWave: true,
+      isCurationWave: false,
+      isRankWave: true,
+    });
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: null,
+    });
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={{ id: "1" } as any}
+      />
+    );
+
+    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
+    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.getByText("Outcome")).toBeInTheDocument();
+    expect(screen.getByText("FAQ")).toBeInTheDocument();
   });
 
   it("renders Sales for non-rank curation waves", () => {

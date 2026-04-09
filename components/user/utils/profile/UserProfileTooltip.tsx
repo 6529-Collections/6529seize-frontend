@@ -123,6 +123,7 @@ export default function UserProfileTooltip({
     [connectedProfile?.handle]
   );
   const showFollowButton = Boolean(
+    normalizedConnectedHandle &&
     normalizedProfileHandle &&
     normalizedProfileHandle !== normalizedConnectedHandle
   );

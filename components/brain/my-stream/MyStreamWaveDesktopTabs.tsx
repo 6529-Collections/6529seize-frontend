@@ -11,6 +11,7 @@ import { useWave } from "@/hooks/useWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
+import { useAuth } from "@/components/auth/Auth";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, WaveVotingState } from "../ContentTabContext";
 import MyStreamWaveCurationCreateDialog from "./tabs/MyStreamWaveCurationCreateDialog";
@@ -76,6 +77,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 }) => {
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
+  const { connectedProfile } = useAuth();
+  const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const {
     isChatWave,
     isMemesWave,
@@ -152,6 +155,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       waveId: wave.id,
       isMemesWave,
       isChatWave,
+      hasAuthenticatedProfile,
       isCurationWave,
       votingState,
       hasFirstDecisionPassed: firstDecisionDone,
@@ -160,6 +164,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     wave,
     isMemesWave,
     isChatWave,
+    hasAuthenticatedProfile,
     isCurationWave,
     votingState,
     firstDecisionDone,
@@ -174,12 +179,25 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   const standardOptions: TabOption[] = useMemo(
     () =>
-      availableTabs.map((tab) => ({
-        key: tab,
-        label: TAB_LABELS[tab],
-        panelId: getContentTabPanelId(tab),
-      })),
-    [availableTabs]
+      availableTabs
+        .filter((tab) => {
+          if (tab === MyStreamWaveTab.MY_VOTES) {
+            return isCurationWave || (isMemesWave && hasAuthenticatedProfile);
+          }
+          if (tab === MyStreamWaveTab.SALES) {
+            return isCurationWave;
+          }
+          if (tab === MyStreamWaveTab.FAQ) {
+            return isMemesWave;
+          }
+          return true;
+        })
+        .map((tab) => ({
+          key: tab,
+          label: TAB_LABELS[tab],
+          panelId: getContentTabPanelId(tab),
+        })),
+    [availableTabs, hasAuthenticatedProfile, isMemesWave, isCurationWave]
   );
 
   const curationOptions: TabOption[] = useMemo(
@@ -281,6 +299,11 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       globalThis.window.cancelAnimationFrame(frameId);
     };
   }, [activeKey, options]);
+
+  // For simple waves, don't render any tabs
+  if (isChatWave) {
+    return null;
+  }
 
   return (
     <>

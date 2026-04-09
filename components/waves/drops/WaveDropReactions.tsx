@@ -86,6 +86,7 @@ function WaveDropReaction({
   const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
   const rollbackRef = useRef<(() => void) | null>(null);
+  const canReact = Boolean(connectedProfile?.handle);
 
   const handleLongPressStart = useCallback(() => {
     onOpenDetailDialog(reaction.reaction);
@@ -321,7 +322,7 @@ function WaveDropReaction({
   );
 
   const handleClick = useCallback(async () => {
-    if (longPressTriggered) {
+    if (!canReact || longPressTriggered) {
       return;
     }
 
@@ -360,6 +361,7 @@ function WaveDropReaction({
     rollbackRef.current = null;
   }, [
     applyOptimisticReactionChange,
+    canReact,
     drop.id,
     longPressTriggered,
     reaction.reaction,
@@ -384,9 +386,12 @@ function WaveDropReaction({
   // styles
   const borderStyle = selected ? "tw-border-primary-500" : "tw-border-iron-700";
   const bgStyle = selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40";
-  const hoverStyle = selected
-    ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
-    : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  let hoverStyle = "";
+  if (canReact) {
+    hoverStyle = selected
+      ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
+      : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  }
   let animationStyle = "";
   if (animate) {
     if (selected) {
@@ -400,11 +405,15 @@ function WaveDropReaction({
   return (
     <>
       <button
+        type="button"
         onClick={handleClick}
+        disabled={!canReact}
+        aria-disabled={!canReact}
         {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
-          "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm hover:tw-text-iron-100",
+          "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm",
+          canReact ? "hover:tw-text-iron-100" : "tw-cursor-default",
           borderStyle,
           bgStyle,
           hoverStyle

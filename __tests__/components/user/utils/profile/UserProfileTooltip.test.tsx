@@ -367,6 +367,19 @@ describe("UserProfileTooltip", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("does not render the follow action when logged out", () => {
+    renderTooltip({
+      authOverrides: {
+        connectedProfile: null,
+      },
+    });
+
+    expect(screen.queryByTestId("follow-btn")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Send direct message" })
+    ).not.toBeInTheDocument();
+  });
+
   it("hides the DM action when acting through a proxy", () => {
     renderTooltip({
       authOverrides: {

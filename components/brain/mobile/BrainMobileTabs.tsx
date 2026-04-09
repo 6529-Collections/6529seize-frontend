@@ -35,6 +35,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const router = useRouter();
   const { registerRef } = useLayout();
   const { connectedProfile } = useAuth();
+  const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
 
   // Local ref for component-specific needs
   const mobileTabsRef = useRef<HTMLDivElement | null>(null);
@@ -264,7 +265,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               }}
               renderAfterLeaderboard={salesTabButton}
             />
-            {(isMemesWave || isCurationWave) && (
+            {(isCurationWave || (isMemesWave && hasAuthenticatedProfile)) && (
               <>
                 <button
                   ref={(el) => {

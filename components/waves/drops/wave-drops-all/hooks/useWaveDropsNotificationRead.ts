@@ -4,6 +4,7 @@ import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 
 interface UseWaveDropsNotificationReadParams {
   readonly waveId: string;
+  readonly enabled?: boolean | undefined;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -11,11 +12,16 @@ interface UseWaveDropsNotificationReadParams {
 
 export const useWaveDropsNotificationRead = ({
   waveId,
+  enabled = true,
   removeWaveDeliveredNotifications,
 }: UseWaveDropsNotificationReadParams) => {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const syncReadState = async () => {
       try {
         await Promise.resolve(removeWaveDeliveredNotifications(waveId));
@@ -33,5 +39,10 @@ export const useWaveDropsNotificationRead = ({
     };
 
     syncReadState();
-  }, [waveId, removeWaveDeliveredNotifications, invalidateNotifications]);
+  }, [
+    enabled,
+    waveId,
+    removeWaveDeliveredNotifications,
+    invalidateNotifications,
+  ]);
 };

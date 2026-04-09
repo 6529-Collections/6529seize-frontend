@@ -10,6 +10,7 @@ import NowMintingCountdown from "./NowMintingCountdown";
 import NowMintingDetailsAccordion from "./NowMintingDetailsAccordion";
 import NowMintingHeader from "./NowMintingHeader";
 import NowMintingStatsGrid from "./NowMintingStatsGrid";
+import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 
 interface NowMintingDetailsProps {
   readonly nft: NFTWithMemesExtendedData;
@@ -34,6 +35,7 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           mediaMimeType={fileMimeType}
         />
         <NowMintingStatsGrid nftId={nft.id} floorPrice={floorPrice} />
+        <LatestDropNextMintSubscribe showOnlyWhenSubscribed readonly />
         <NowMintingDetailsAccordion
           nftId={nft.id}
           mintDate={nft.mint_date}

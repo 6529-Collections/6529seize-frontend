@@ -44,6 +44,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
+  const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const quickVote = useMemesQuickVoteDialogController();
   const hydrated = useSyncExternalStore(
     () => () => {},
@@ -100,6 +101,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     firstDecisionDone,
     isApp,
     isCompleted,
+    hasAuthenticatedProfile,
     isCurationWave,
     isMemesWave,
     isRankWave,

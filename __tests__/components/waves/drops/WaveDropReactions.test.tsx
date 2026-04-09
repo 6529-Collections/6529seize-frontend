@@ -1,4 +1,5 @@
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
+import { useAuth } from "@/components/auth/Auth";
 import { useEmoji } from "@/contexts/EmojiContext";
 import * as commonApi from "@/services/api/common-api";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -12,6 +13,10 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: jest.fn(),
+}));
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
 }));
 
 jest.mock("@/helpers/Helpers", () => ({
@@ -42,6 +47,7 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
 }));
 
 const mockUseEmoji = useEmoji as jest.Mock;
+const mockUseAuth = useAuth as jest.Mock;
 
 type NativeEmojiMock = { skins: Array<{ native: string }> };
 
@@ -87,6 +93,10 @@ describe("WaveDropReactions", () => {
   beforeEach(() => {
     // Reset call history without removing default implementations
     jest.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { id: "profile-1", handle: "alice" },
+      setToast: jest.fn(),
+    });
     getMyStreamMock().mockReturnValue({
       applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
     });
@@ -247,12 +257,69 @@ describe("WaveDropReactions", () => {
     await waitFor(() => {
       expect(button).toHaveTextContent("3");
     });
+    expect(commonApi.commonApiPost).toHaveBeenCalledWith({
+      endpoint: "drops/test-drop/reaction",
+      body: { reaction: ":gm:" },
+    });
 
     // Click button again to decrement
     fireEvent.click(button);
     await waitFor(() => {
       expect(button).toHaveTextContent("2");
     });
+    expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
+      endpoint: "drops/test-drop/reaction",
+    });
+  });
+
+  it("renders reaction pills as non-interactive when disconnected", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: null,
+      setToast: jest.fn(),
+    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [
+                  { handle: "user1", id: "1" },
+                  { handle: "user2", id: "2" },
+                  { handle: "user3", id: "3" },
+                  { handle: "user4", id: "4" },
+                ],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeDisabled();
+    expect(button).not.toHaveAttribute("data-tooltip-id");
+    expect(button).toHaveTextContent("4");
+
+    fireEvent.click(button);
+
+    expect(button).toHaveTextContent("4");
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+    expect(screen.queryByText("Reactions")).not.toBeInTheDocument();
   });
 
   it("shows 'and X more' in tooltip when more than 3 profiles", async () => {
