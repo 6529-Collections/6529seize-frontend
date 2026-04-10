@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 const getMediaQueryList = (query: string): MediaQueryList | null => {
   if (
@@ -12,45 +12,46 @@ const getMediaQueryList = (query: string): MediaQueryList | null => {
 };
 
 export function useMediaQuery(query: string): boolean {
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      const mediaQueryList = getMediaQueryList(query);
-      if (!mediaQueryList) {
-        return () => {};
+  const [matches, setMatches] = useState(false);
+  const syncMatches = useEffectEvent((nextMatches: boolean) => {
+    setMatches((currentMatches) =>
+      currentMatches === nextMatches ? currentMatches : nextMatches
+    );
+  });
+
+  useEffect(() => {
+    const mediaQueryList = getMediaQueryList(query);
+    if (!mediaQueryList) {
+      return;
+    }
+
+    syncMatches(mediaQueryList.matches);
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      syncMatches(event.matches);
+    };
+
+    if (typeof mediaQueryList.addEventListener === "function") {
+      mediaQueryList.addEventListener("change", handleChange);
+      return () => mediaQueryList.removeEventListener("change", handleChange);
+    }
+
+    const previousOnChange = mediaQueryList.onchange;
+    const fallbackHandler: NonNullable<MediaQueryList["onchange"]> = (
+      event
+    ) => {
+      previousOnChange?.call(mediaQueryList, event);
+      syncMatches(mediaQueryList.matches);
+    };
+
+    mediaQueryList.onchange = fallbackHandler;
+
+    return () => {
+      if (mediaQueryList.onchange === fallbackHandler) {
+        mediaQueryList.onchange = previousOnChange;
       }
+    };
+  }, [query]);
 
-      const handler = () => {
-        onStoreChange();
-      };
-
-      if (typeof mediaQueryList.addEventListener === "function") {
-        mediaQueryList.addEventListener("change", handler);
-        return () => mediaQueryList.removeEventListener("change", handler);
-      }
-
-      const previousOnChange = mediaQueryList.onchange;
-      const fallbackHandler: NonNullable<MediaQueryList["onchange"]> = (
-        event
-      ) => {
-        previousOnChange?.call(mediaQueryList, event);
-        onStoreChange();
-      };
-
-      mediaQueryList.onchange = fallbackHandler;
-
-      return () => {
-        if (mediaQueryList.onchange === fallbackHandler) {
-          mediaQueryList.onchange = previousOnChange;
-        }
-      };
-    },
-    [query]
-  );
-
-  const getSnapshot = useCallback(
-    () => getMediaQueryList(query)?.matches ?? false,
-    [query]
-  );
-
-  return useSyncExternalStore(subscribe, getSnapshot, () => false);
+  return matches;
 }
