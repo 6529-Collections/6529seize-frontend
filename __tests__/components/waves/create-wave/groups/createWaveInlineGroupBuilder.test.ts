@@ -1,7 +1,9 @@
 import {
   buildInlineGroupName,
   createEmptyInlineGroupPayload,
+  dedupeInlineIdentities,
   getInlineGroupDraftSummary,
+  getInlineIdentityAddresses,
   getInlineGroupRuleCount,
 } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 
@@ -39,5 +41,33 @@ describe("createWaveInlineGroupBuilder", () => {
         identityCount: 2,
       })
     ).toBe("2 identities · 1 rule");
+  });
+
+  it("dedupes and serializes inline identities by selected wallet", () => {
+    const firstSelectedWallet = {
+      profile_id: "profile-1",
+      handle: "alpha",
+      normalised_handle: "alpha",
+      primary_wallet: "0xPRIMARY",
+      display: "Alpha",
+      tdh: 0,
+      level: 0,
+      cic_rating: 0,
+      wallet: "0xAAA1",
+      pfp: null,
+    };
+    const secondSelectedWallet = {
+      ...firstSelectedWallet,
+      wallet: "0xAAA2",
+    };
+
+    expect(
+      dedupeInlineIdentities([firstSelectedWallet, secondSelectedWallet]).map(
+        (identity) => identity.wallet
+      )
+    ).toEqual(["0xAAA1", "0xAAA2"]);
+    expect(
+      getInlineIdentityAddresses([firstSelectedWallet, secondSelectedWallet])
+    ).toEqual(["0xaaa1", "0xaaa2"]);
   });
 });

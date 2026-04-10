@@ -335,9 +335,7 @@ export function useWaveConfig() {
     const normalizedWallet = wallet.trim().toLowerCase();
     updateGroupBuilder(groupType, (current) => {
       const identities = current.identities.filter((identity) => {
-        const key = (identity.primary_wallet ?? identity.wallet)
-          .trim()
-          .toLowerCase();
+        const key = identity.wallet.trim().toLowerCase();
         return key !== normalizedWallet;
       });
 

@@ -7,13 +7,22 @@ const exampleIdentity = {
   profile_id: "profile-1",
   handle: "alpha",
   normalised_handle: "alpha",
-  primary_wallet: "0xABC",
+  primary_wallet: "0xPRIMARY",
   display: "Alpha",
   tdh: 0,
   level: 0,
   cic_rating: 0,
   wallet: "0xABC",
   pfp: null,
+};
+
+const secondSelectedWalletIdentity = {
+  ...exampleIdentity,
+  profile_id: "profile-2",
+  handle: "beta",
+  normalised_handle: "beta",
+  display: "Beta",
+  wallet: "0xDEF",
 };
 
 describe("useWaveConfig", () => {
@@ -59,6 +68,57 @@ describe("useWaveConfig", () => {
       result.current.groupBuilders[CreateWaveGroupConfigType.CAN_VOTE]
         .identities
     ).toHaveLength(0);
+  });
+
+  it("keeps distinct selected wallets for multi-wallet identities", () => {
+    const { result } = renderHook(() => useWaveConfig());
+
+    act(() => {
+      result.current.addGroupBuilderIdentity(
+        CreateWaveGroupConfigType.CAN_VIEW,
+        exampleIdentity
+      );
+      result.current.addGroupBuilderIdentity(
+        CreateWaveGroupConfigType.CAN_VIEW,
+        secondSelectedWalletIdentity
+      );
+    });
+
+    expect(
+      result.current.groupBuilders[CreateWaveGroupConfigType.CAN_VIEW]
+        .identities
+    ).toHaveLength(2);
+    expect(
+      result.current.groupBuilders[CreateWaveGroupConfigType.CAN_VIEW].draft
+        .group.identity_addresses
+    ).toEqual(["0xabc", "0xdef"]);
+  });
+
+  it("removes inline identities by selected wallet", () => {
+    const { result } = renderHook(() => useWaveConfig());
+
+    act(() => {
+      result.current.addGroupBuilderIdentity(
+        CreateWaveGroupConfigType.CAN_VIEW,
+        exampleIdentity
+      );
+    });
+
+    act(() => {
+      result.current.removeGroupBuilderIdentity(
+        CreateWaveGroupConfigType.CAN_VIEW,
+        exampleIdentity.wallet
+      );
+    });
+
+    expect(
+      result.current.groupBuilders[CreateWaveGroupConfigType.CAN_VIEW]
+        .identities
+    ).toHaveLength(0);
+    expect(
+      result.current.groupBuilders[CreateWaveGroupConfigType.CAN_VIEW].draft
+        .group.identity_addresses
+    ).toBeNull();
   });
 
   it("resets inline group builder state when overview type changes", () => {

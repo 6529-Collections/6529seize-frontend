@@ -13,9 +13,7 @@ export default function CreateWaveInlineGroupIdentities({
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
   readonly onRemove: (wallet: string) => void;
 }) {
-  const selectedWallets = identities.map(
-    (identity) => identity.primary_wallet ?? identity.wallet
-  );
+  const selectedWallets = identities.map((identity) => identity.wallet);
 
   return (
     <div className="tw-space-y-3">

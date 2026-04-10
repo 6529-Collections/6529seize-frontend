@@ -118,7 +118,7 @@ export const dedupeInlineIdentities = (
   const next: CommunityMemberMinimal[] = [];
 
   for (const identity of identities) {
-    const key = normalizeAddress(identity.primary_wallet ?? identity.wallet);
+    const key = normalizeAddress(identity.wallet);
     if (seen.has(key)) {
       continue;
     }
@@ -133,9 +133,7 @@ export const getInlineIdentityAddresses = (
   identities: readonly CommunityMemberMinimal[]
 ): string[] | null => {
   const addresses = dedupeInlineIdentities(identities)
-    .map((identity) =>
-      normalizeAddress(identity.primary_wallet ?? identity.wallet)
-    )
+    .map((identity) => normalizeAddress(identity.wallet))
     .filter((address) => address.length > 0);
 
   return addresses.length ? addresses : null;
