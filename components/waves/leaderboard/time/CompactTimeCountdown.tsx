@@ -8,19 +8,17 @@ interface CompactTimeCountdownProps {
 }
 
 /**
- * Displays a compact countdown with time units inline
- * Used in tab headers and other space-constrained areas
+ * Legacy compact countdown markup kept for compatibility with existing tests.
  */
 export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
   timeLeft,
 }) => {
   return (
-    <div className="tw-hidden md:tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xxs tw-font-medium tw-text-iron-300">
-      <span className="tw-text-iron-300 tw-font-medium tw-whitespace-nowrap">
+    <div className="tw-hidden tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-300 md:tw-inline-flex">
+      <span className="tw-whitespace-nowrap tw-font-medium tw-text-iron-300">
         Next winner:
       </span>
       <div className="tw-flex tw-items-center tw-gap-x-1.5">
-        {/* Days - only show when > 0 */}
         {timeLeft.days > 0 && (
           <TimeUnitDisplay value={timeLeft.days} label="days" />
         )}
