@@ -240,7 +240,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         const waveId = currentWaveIdRef.current;
         if (options?.persist === false) {
           transientTabOverrideRef.current =
-            waveId !== null ? { waveId, tab } : null;
+            waveId === null ? null : { waveId, tab };
           return;
         }
         transientTabOverrideRef.current = null;
