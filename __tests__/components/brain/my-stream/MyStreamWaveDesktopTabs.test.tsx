@@ -257,8 +257,11 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     renderComponent(MyStreamWaveTab.LEADERBOARD);
 
-    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.CHAT, {
-      persist: false,
-    });
+    expect(updateAvailableTabs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transientPreferredTab: MyStreamWaveTab.CHAT,
+      })
+    );
+    expect(setActiveTab).not.toHaveBeenCalled();
   });
 });
