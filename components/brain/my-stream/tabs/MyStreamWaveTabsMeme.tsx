@@ -33,6 +33,7 @@ import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
+import MyStreamWaveCreateCurationAction from "./MyStreamWaveCreateCurationAction";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 
@@ -64,6 +65,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   const { isApp } = useDeviceInfo();
   const breakpoint = useBreakpoint();
   const isCompact = breakpoint === "S";
+  const showExternalCreateCurationAction = breakpoint === "LG";
   const showBackButton = breakpoint !== "LG";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
@@ -278,16 +280,25 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         </div>
         <MyStreamActionTooltip id={headerActionsTooltipId} />
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800">
-          <MyStreamWaveDesktopTabs
-            activeTab={activeContentTab}
-            wave={wave}
-            setActiveTab={setActiveContentTab}
-            activeCurationId={activeCurationId}
-            onSelectCuration={onSelectCuration}
-          />
+          <div className="tw-min-w-0 tw-flex-1">
+            <MyStreamWaveDesktopTabs
+              activeTab={activeContentTab}
+              wave={wave}
+              setActiveTab={setActiveContentTab}
+              activeCurationId={activeCurationId}
+              onSelectCuration={onSelectCuration}
+              showCreateCurationAction={!showExternalCreateCurationAction}
+            />
+          </div>
+          {showExternalCreateCurationAction && (
+            <MyStreamWaveCreateCurationAction
+              wave={wave}
+              onCreated={onSelectCuration}
+            />
+          )}
           {(isMemesWave || isRankWave) &&
             typeof nextDecisionTime === "number" && (
-              <div className="tw-flex-shrink-0 tw-px-2 sm:tw-px-4">
+              <div className="tw-hidden md:tw-flex md:tw-flex-shrink-0 md:tw-pr-4">
                 <CompactTimeCountdown timeLeft={displayedTimeLeft} />
               </div>
             )}

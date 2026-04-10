@@ -256,16 +256,19 @@ function CurationGroupRow({
             {group.name}
           </p>
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-[11px]">
-            <span className="tw-inline-block tw-max-w-[8rem] tw-truncate tw-font-medium tw-text-iron-400">
+            <span className="tw-inline-block tw-min-w-0 tw-max-w-[8rem] tw-truncate tw-font-medium tw-text-iron-400">
               {getGroupCreatorLabel(group)}
             </span>
             {timeAgo && (
-              <>
+              <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-whitespace-nowrap">
                 <span className="tw-leading-none tw-text-iron-600">
                   &middot;
                 </span>
-                <span className="tw-text-iron-500">Created {timeAgo}</span>
-              </>
+                <span className="tw-text-iron-500">
+                  <span className="tw-hidden sm:tw-inline">Created </span>
+                  {timeAgo}
+                </span>
+              </div>
             )}
           </div>
         </div>
