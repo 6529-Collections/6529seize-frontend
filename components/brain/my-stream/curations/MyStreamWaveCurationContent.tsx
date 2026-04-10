@@ -145,12 +145,12 @@ export default function MyStreamWaveCurationContent({
   const isInitialLoading = isFetching && drops.length === 0;
 
   const handleBottomIntersection = useCallback(
-    async (isIntersecting: boolean) => {
+    (isIntersecting: boolean) => {
       if (!isIntersecting || !hasNextPage || isFetchingNextPage) {
         return;
       }
 
-      await fetchNextPage();
+      void fetchNextPage();
     },
     [fetchNextPage, hasNextPage, isFetchingNextPage]
   );
