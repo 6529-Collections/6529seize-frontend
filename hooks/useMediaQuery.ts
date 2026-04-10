@@ -2,13 +2,13 @@ import { useCallback, useSyncExternalStore } from "react";
 
 const getMediaQueryList = (query: string): MediaQueryList | null => {
   if (
-    typeof window === "undefined" ||
-    typeof window.matchMedia !== "function"
+    typeof globalThis.window === "undefined" ||
+    typeof globalThis.window.matchMedia !== "function"
   ) {
     return null;
   }
 
-  return window.matchMedia(query);
+  return globalThis.window.matchMedia(query);
 };
 
 export function useMediaQuery(query: string): boolean {
@@ -28,8 +28,21 @@ export function useMediaQuery(query: string): boolean {
         return () => mediaQueryList.removeEventListener("change", handler);
       }
 
-      mediaQueryList.addListener(handler);
-      return () => mediaQueryList.removeListener(handler);
+      const previousOnChange = mediaQueryList.onchange;
+      const fallbackHandler: NonNullable<MediaQueryList["onchange"]> = (
+        event
+      ) => {
+        previousOnChange?.call(mediaQueryList, event);
+        onStoreChange();
+      };
+
+      mediaQueryList.onchange = fallbackHandler;
+
+      return () => {
+        if (mediaQueryList.onchange === fallbackHandler) {
+          mediaQueryList.onchange = previousOnChange;
+        }
+      };
     },
     [query]
   );

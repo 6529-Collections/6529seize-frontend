@@ -4,11 +4,10 @@ import { TimeUnitDisplay } from "./TimeUnitDisplay";
 
 interface CompactTimeCountdownProps {
   readonly timeLeft: TimeLeft;
-  readonly label?: string | undefined;
 }
 
 /**
- * Legacy compact countdown markup kept for compatibility with existing tests.
+ * Displays a compact inline countdown for upcoming decisions.
  */
 export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
   timeLeft,

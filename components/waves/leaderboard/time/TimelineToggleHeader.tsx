@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
 import type { TimeLeft } from "@/helpers/waves/time.utils";
-import { TimeUnitDisplay } from "./TimeUnitDisplay";
+import { CompactTimeCountdown } from "./CompactTimeCountdown";
 
 interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;
@@ -63,20 +63,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
     if (hasNextDecision) {
       return (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-4 tw-gap-y-1">
-          <div className="tw-hidden tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-300 md:tw-inline-flex">
-            <span className="tw-whitespace-nowrap tw-font-medium tw-text-iron-300">
-              Next winner:
-            </span>
-            <div className="tw-flex tw-items-center tw-gap-x-1.5">
-              {timeLeft.days > 0 && (
-                <TimeUnitDisplay value={timeLeft.days} label="days" />
-              )}
-              <TimeUnitDisplay value={timeLeft.hours} label="hrs" />
-              <TimeUnitDisplay value={timeLeft.minutes} label="min" />
-              <TimeUnitDisplay value={timeLeft.seconds} label="sec" />
-            </div>
-          </div>
-
+          <CompactTimeCountdown timeLeft={timeLeft} />
           <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-300">
             {formattedNextDecisionDate}
           </span>
