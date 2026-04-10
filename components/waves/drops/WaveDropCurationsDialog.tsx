@@ -6,15 +6,13 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import { getDropCurationsQueryKey } from "@/hooks/drops/useDropCurations";
 import clsx from "clsx";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   type DropCurationMembership,
   useDropCurations,
 } from "@/hooks/drops/useDropCurations";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
-import { useQueryClient } from "@tanstack/react-query";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 
@@ -48,6 +46,7 @@ const CREATE_AND_ADD_PERMISSION_MESSAGE =
   "Curation created, but you can't add drops with that group.";
 const CREATE_AND_ADD_FALLBACK_MESSAGE =
   "Curation created, but the drop could not be added. Please try again.";
+const AUTO_CLOSE_DELAY_MS = 350;
 
 const getCreateAndAddErrorMessage = (error: unknown): string => {
   const fallbackErrorMessage = "Failed to add drop to curation.";
@@ -64,22 +63,16 @@ const getCreateAndAddErrorMessage = (error: unknown): string => {
   return `Curation created, but the drop could not be added: ${errorMessage}`;
 };
 
-function CurationsSection({
-  title,
-  children,
-}: {
-  readonly title: string;
-  readonly children: React.ReactNode;
-}) {
-  return (
-    <section className="tw-flex tw-flex-col tw-gap-3">
-      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
-        {title}
-      </p>
-      <div className="tw-flex tw-flex-col tw-gap-2">{children}</div>
-    </section>
-  );
-}
+const sortCurationsForDialog = (
+  left: DropCurationMembership,
+  right: DropCurationMembership
+): number => {
+  if (left.drop_included !== right.drop_included) {
+    return Number(right.drop_included) - Number(left.drop_included);
+  }
+
+  return left.name.localeCompare(right.name);
+};
 
 function MembershipActionButton({
   action,
@@ -130,16 +123,16 @@ function CurationMembershipRow({
   return (
     <div
       className={clsx(
-        "tw-group tw-relative tw-flex tw-items-center tw-justify-between tw-gap-3 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-transition-all tw-duration-300",
+        "tw-group tw-relative tw-flex tw-h-16 tw-items-center tw-justify-between tw-gap-3 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-transition-all tw-duration-300",
         curation.drop_included
           ? "tw-border-white/30 tw-bg-iron-800 tw-p-3.5 tw-shadow-[0_4px_15px_rgba(0,0,0,0.4)]"
           : "tw-border-white/[0.06] tw-bg-iron-950 tw-p-3.5 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/60"
       )}
     >
-      <div className="tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2.5 sm:tw-flex">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-2.5">
         <p
           className={clsx(
-            "tw-mb-0 tw-truncate tw-text-[15px] tw-font-semibold tw-leading-tight tw-transition-colors",
+            "tw-mb-0 tw-min-w-0 tw-flex-shrink tw-truncate tw-text-md tw-font-semibold tw-leading-tight tw-transition-colors",
             curation.drop_included
               ? "tw-text-iron-50"
               : "tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-50"
@@ -147,34 +140,33 @@ function CurationMembershipRow({
         >
           {curation.name}
         </p>
-        {curation.drop_included && (
-          <span className="tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-white/15">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="tw-h-2.5 tw-w-2.5 tw-text-iron-100"
-              stroke="currentColor"
-              strokeWidth="4"
-              aria-hidden="true"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </span>
-        )}
+        <span
+          className={clsx(
+            "tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-transition-opacity",
+            curation.drop_included
+              ? "tw-bg-white/15 tw-opacity-100"
+              : "tw-opacity-0"
+          )}
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="tw-h-2.5 tw-w-2.5 tw-text-iron-100"
+            stroke="currentColor"
+            strokeWidth="4"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
       </div>
 
-      {curation.authenticated_user_can_curate ? (
-        <MembershipActionButton
-          action={membershipAction}
-          disabled={disabled}
-          loading={loading}
-          onClick={() => onUpdateMembership(membershipAction)}
-        />
-      ) : (
-        <span className="tw-inline-flex tw-min-w-[5.5rem] tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950/50 tw-px-3.5 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-500">
-          Read only
-        </span>
-      )}
+      <MembershipActionButton
+        action={membershipAction}
+        disabled={disabled}
+        loading={loading}
+        onClick={() => onUpdateMembership(membershipAction)}
+      />
     </div>
   );
 }
@@ -191,8 +183,10 @@ export default function WaveDropCurationsDialog({
   readonly onClose: () => void;
 }) {
   const { setToast } = useAuth();
-  const queryClient = useQueryClient();
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
+  const autoCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const {
     data: curations = [],
     isLoading,
@@ -202,81 +196,63 @@ export default function WaveDropCurationsDialog({
     dropId,
     enabled: isOpen,
   });
-  const {
-    updateMembership,
-    updateMembershipAsync,
-    isPending,
-    pendingCurationId,
-  } = useDropCurationMembershipMutation({
-    dropId,
-  });
+  const { updateMembershipAsync, isPending, pendingCurationId } =
+    useDropCurationMembershipMutation({
+      dropId,
+    });
 
   const sortedCurations = useMemo(
     () =>
-      [...curations].sort((left, right) => {
-        if (left.drop_included !== right.drop_included) {
-          return Number(right.drop_included) - Number(left.drop_included);
-        }
-
-        return left.name.localeCompare(right.name);
-      }),
+      curations
+        .filter((curation) => curation.authenticated_user_can_curate === true)
+        .sort(sortCurationsForDialog),
     [curations]
   );
-  const includedCurations = useMemo(
-    () => sortedCurations.filter((curation) => curation.drop_included),
-    [sortedCurations]
+  const hasVisibleCurations = sortedCurations.length > 0;
+  const hasHiddenCurations = curations.length > 0 && !hasVisibleCurations;
+
+  const clearAutoCloseTimeout = () => {
+    if (autoCloseTimeoutRef.current) {
+      clearTimeout(autoCloseTimeoutRef.current);
+      autoCloseTimeoutRef.current = null;
+    }
+  };
+
+  useEffect(
+    () => () => {
+      clearAutoCloseTimeout();
+    },
+    []
   );
-  const availableCurations = useMemo(
-    () =>
-      sortedCurations.filter(
-        (curation) =>
-          !curation.drop_included && curation.authenticated_user_can_curate
-      ),
-    [sortedCurations]
-  );
-  const readOnlyCurations = useMemo(
-    () =>
-      sortedCurations.filter(
-        (curation) =>
-          !curation.drop_included && !curation.authenticated_user_can_curate
-      ),
-    [sortedCurations]
-  );
-  const showInlineCreateButton = sortedCurations.length > 0;
+
+  const handleClose = () => {
+    clearAutoCloseTimeout();
+    onClose();
+  };
+
+  const handleUpdateMembership = async (
+    curationId: string,
+    action: "add" | "remove"
+  ) => {
+    try {
+      await updateMembershipAsync(curationId, action);
+      clearAutoCloseTimeout();
+      autoCloseTimeoutRef.current = globalThis.setTimeout(() => {
+        autoCloseTimeoutRef.current = null;
+        onClose();
+      }, AUTO_CLOSE_DELAY_MS);
+    } catch {
+      clearAutoCloseTimeout();
+    }
+  };
 
   const handleCreatedFromCurate = async (curation: ApiWaveCuration) => {
-    queryClient.setQueryData<DropCurationMembership[]>(
-      getDropCurationsQueryKey(dropId),
-      (current) => {
-        const nextRow: DropCurationMembership = {
-          ...curation,
-          drop_included: false,
-          authenticated_user_can_curate: false,
-        };
-
-        if (!current) {
-          return [nextRow];
-        }
-
-        const existingIndex = current.findIndex(
-          (item) => item.id === curation.id
-        );
-        if (existingIndex === -1) {
-          return [...current, nextRow];
-        }
-
-        return current.map((item) =>
-          item.id === curation.id ? { ...item, ...nextRow } : item
-        );
-      }
-    );
-
     const refreshResult = await refetch();
     const createdCuration = refreshResult.isError
-      ? null
+      ? undefined
       : refreshResult.data?.find((item) => item.id === curation.id);
 
-    if (createdCuration && !createdCuration.authenticated_user_can_curate) {
+    if (createdCuration?.authenticated_user_can_curate === false) {
       setToast({
         type: "warning",
         message: CREATE_AND_ADD_PERMISSION_MESSAGE,
@@ -304,12 +280,13 @@ export default function WaveDropCurationsDialog({
     <MobileWrapperDialog
       title="Curate"
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       noPadding
       tabletModal={true}
       tall={true}
       maxWidthClass="md:tw-max-w-lg"
       headerClassName="tw-mb-4 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-iron-800 tw-pb-3 tw-pt-6"
+      mobileCloseButtonClassName="-tw-translate-x-0.5 tw-translate-y-2 tw-z-10 tw-bg-transparent tw-text-white tw-shadow-lg"
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-2">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
@@ -318,7 +295,7 @@ export default function WaveDropCurationsDialog({
               <p className="tw-mb-0 tw-text-sm tw-text-iron-400 sm:tw-flex-1 sm:tw-pr-4">
                 Add or remove this drop from curations in this wave.
               </p>
-              {showInlineCreateButton && (
+              {hasVisibleCurations && (
                 <div className="tw-flex tw-flex-shrink-0">
                   <SecondaryButton
                     onClicked={() => setIsCreateCurationOpen(true)}
@@ -360,11 +337,14 @@ export default function WaveDropCurationsDialog({
             {!isLoading && !isError && sortedCurations.length === 0 && (
               <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-8 tw-text-center tw-shadow-sm">
                 <p className="tw-mb-2 tw-text-base tw-font-semibold tw-text-iron-100">
-                  No curations yet
+                  {hasHiddenCurations
+                    ? "No curations you can manage"
+                    : "No curations yet"}
                 </p>
                 <p className="tw-mb-6 tw-text-sm tw-text-iron-400">
-                  Create the first curation for this wave and add this drop to
-                  it.
+                  {hasHiddenCurations
+                    ? "Create a new curation for this wave and add this drop to it."
+                    : "Create the first curation for this wave and add this drop to it."}
                 </p>
                 <div className="tw-flex tw-justify-center">
                   <PrimaryButton
@@ -380,52 +360,18 @@ export default function WaveDropCurationsDialog({
             )}
 
             {!isLoading && !isError && sortedCurations.length > 0 && (
-              <div className="tw-flex tw-flex-col tw-gap-6">
-                {includedCurations.length > 0 && (
-                  <CurationsSection title="Included">
-                    {includedCurations.map((curation) => (
-                      <CurationMembershipRow
-                        key={curation.id}
-                        curation={curation}
-                        disabled={isPending}
-                        loading={pendingCurationId === curation.id}
-                        onUpdateMembership={(action) =>
-                          updateMembership(curation.id, action)
-                        }
-                      />
-                    ))}
-                  </CurationsSection>
-                )}
-
-                {availableCurations.length > 0 && (
-                  <CurationsSection title="Available to curate">
-                    {availableCurations.map((curation) => (
-                      <CurationMembershipRow
-                        key={curation.id}
-                        curation={curation}
-                        disabled={isPending}
-                        loading={pendingCurationId === curation.id}
-                        onUpdateMembership={(action) =>
-                          updateMembership(curation.id, action)
-                        }
-                      />
-                    ))}
-                  </CurationsSection>
-                )}
-
-                {readOnlyCurations.length > 0 && (
-                  <div className="tw-flex tw-flex-col tw-gap-2">
-                    {readOnlyCurations.map((curation) => (
-                      <CurationMembershipRow
-                        key={curation.id}
-                        curation={curation}
-                        disabled={true}
-                        loading={false}
-                        onUpdateMembership={() => undefined}
-                      />
-                    ))}
-                  </div>
-                )}
+              <div className="tw-flex tw-flex-col tw-gap-2">
+                {sortedCurations.map((curation) => (
+                  <CurationMembershipRow
+                    key={curation.id}
+                    curation={curation}
+                    disabled={isPending}
+                    loading={pendingCurationId === curation.id}
+                    onUpdateMembership={(action) =>
+                      void handleUpdateMembership(curation.id, action)
+                    }
+                  />
+                ))}
               </div>
             )}
           </div>

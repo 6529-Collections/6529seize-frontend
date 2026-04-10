@@ -9,6 +9,8 @@ import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useDropCurations } from "@/hooks/drops/useDropCurations";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useWaveDrops } from "@/hooks/useWaveDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -38,16 +40,45 @@ function MyStreamWaveCurationDropItem({
   readonly canManageActiveCuration: boolean;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }) {
+  const { hasTouchScreen, isApp } = useDeviceInfo();
+  const isTouchDevice = useIsTouchDevice();
   const { updateMembership, isPending } = useDropCurationMembershipMutation({
     dropId: drop.id,
   });
+  const shouldUseDetachedRemoveButton =
+    isTouchDevice || (isApp && hasTouchScreen);
 
   const handleRemove = () => {
     updateMembership(curationId, "remove");
   };
 
   return (
-    <div className="tw-group tw-relative">
+    <div
+      className={`tw-group tw-relative ${
+        canManageActiveCuration && shouldUseDetachedRemoveButton
+          ? "tw-pt-5"
+          : ""
+      }`}
+    >
+      {canManageActiveCuration && shouldUseDetachedRemoveButton && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleRemove();
+          }}
+          disabled={isPending}
+          aria-label="Remove drop from this curation"
+          className="tw-absolute tw-right-5 tw-top-0 tw-z-20 tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-text-iron-100 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+        >
+          {isPending ? (
+            <Spinner dimension={12} />
+          ) : (
+            <XMarkIcon className="tw-size-4 tw-flex-shrink-0" />
+          )}
+        </button>
+      )}
+
       <Drop
         key={drop.stableKey}
         drop={drop}
@@ -64,7 +95,7 @@ function MyStreamWaveCurationDropItem({
         onDropContentClick={onDropClick}
       />
 
-      {canManageActiveCuration && (
+      {canManageActiveCuration && !shouldUseDetachedRemoveButton && (
         <button
           type="button"
           onClick={(event) => {
@@ -173,7 +204,7 @@ export default function MyStreamWaveCurationContent({
     );
   } else {
     content = (
-      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-px-2 tw-py-4 sm:tw-px-4">
+      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-py-4 md:tw-px-4">
         {renderedDrops}
         {(hasNextPage || isFetchingNextPage) && (
           <div className="tw-py-4">

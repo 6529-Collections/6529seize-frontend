@@ -76,7 +76,7 @@ export default function IdentityProfileSupplement({
           {visibleRepCategories.map((category) => (
             <span
               key={`${category.category}-${category.rep}`}
-              className="tw-inline-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-black/50 tw-px-2 tw-py-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-widest tw-text-iron-200 tw-shadow-inner"
+              className="tw-inline-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-black/50 tw-px-2 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-shadow-inner"
             >
               <span> {category.category}</span>
               <span className="tw-text-iron-400">

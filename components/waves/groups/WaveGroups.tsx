@@ -2,7 +2,6 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveGroup from "../specs/groups/group/WaveGroup";
 import { WaveGroupType } from "../specs/groups/group/WaveGroup.types";
-import WaveCurationGroupsSection from "./curation/WaveCurationGroupsSection";
 import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
 
 interface WaveGroupsProps {
@@ -20,7 +19,6 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
       <div className={`tw-relative tw-h-full tw-bg-iron-950 ${ringClasses}`}>
         <div className="no-scrollbar tw-h-full tw-overflow-y-auto tw-overflow-x-hidden">
           <div className="tw-pb-4">
-            <WaveCurationGroupsSection wave={wave} />
             <WaveActiveCurationSection wave={wave} />
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
               <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">

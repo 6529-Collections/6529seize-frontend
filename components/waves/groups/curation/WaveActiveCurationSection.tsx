@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import WaveGroupScope from "@/components/waves/specs/groups/group/WaveGroupScope";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   getWaveCurationsQueryKey,
   useWaveCurations,
@@ -33,6 +35,7 @@ export default function WaveActiveCurationSection({
 }: {
   readonly wave: ApiWave;
 }) {
+  const { isApp } = useDeviceInfo();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -47,7 +50,7 @@ export default function WaveActiveCurationSection({
 
   const { data: curations = [] } = useWaveCurations({
     waveId: wave.id,
-    enabled: !!activeCurationId,
+    enabled: isApp,
   });
 
   const activeCuration = useMemo(
@@ -73,9 +76,15 @@ export default function WaveActiveCurationSection({
       staleTime: 5 * 60 * 1000,
     });
 
-  const removeActiveCurationFromUrl = () => {
+  const setSelectedCuration = (curationId: string | null) => {
     const params = new URLSearchParams(searchParams.toString() || "");
-    params.delete("curation");
+
+    if (curationId) {
+      params.set("curation", curationId);
+    } else {
+      params.delete("curation");
+    }
+
     const nextQuery = params.toString();
     const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
     router.replace(nextUrl, { scroll: false });
@@ -114,7 +123,7 @@ export default function WaveActiveCurationSection({
         message: "Curation deleted.",
       });
       setIsDeleteOpen(false);
-      removeActiveCurationFromUrl();
+      setSelectedCuration(null);
     },
     onError: (error) => {
       const message =
@@ -141,7 +150,7 @@ export default function WaveActiveCurationSection({
     },
   ];
 
-  if (!activeCurationId || !activeCuration) {
+  if (!isApp || curations.length === 0) {
     return null;
   }
 
@@ -149,41 +158,81 @@ export default function WaveActiveCurationSection({
     <>
       <div className="tw-pb-4">
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
-          <div className="tw-min-w-0">
-            <p className="tw-mb-1 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
-              Curation
-            </p>
-            <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-400">
-              {activeCuration.name}
-            </p>
-          </div>
-
-          {canManageCurations && (
-            <CompactMenu
-              triggerClassName="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-              trigger={<EllipsisHorizontalIcon className="tw-size-5" />}
-              aria-label="Active curation options"
-              items={menuItems}
-              menuWidthClassName="tw-w-44"
-            />
-          )}
+          <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
+            Curation
+          </p>
         </div>
 
-        <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4">
-          <div className="tw-flex tw-h-6 tw-items-center tw-justify-between tw-text-sm">
-            <span className="tw-font-medium tw-text-iron-500">Group</span>
-            {activeGroup ? (
-              <WaveGroupScope group={toScopeGroup(activeGroup)} />
-            ) : (
-              <span className="tw-max-w-40 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
-                {isFetchingActiveGroup ? "Loading..." : activeCuration.group_id}
-              </span>
-            )}
-          </div>
+        <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-1 tw-px-4">
+          {curations.map((curation) => {
+            const isActive = curation.id === activeCurationId;
+
+            return (
+              <div
+                key={curation.id}
+                className={clsx(
+                  "tw-rounded-xl tw-border tw-border-solid tw-transition-colors tw-duration-200",
+                  isActive
+                    ? "tw-border-iron-800 tw-bg-iron-950/70"
+                    : "tw-border-transparent"
+                )}
+              >
+                <div className="tw-flex tw-items-center">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCuration(curation.id)}
+                    className={clsx(
+                      "tw-flex tw-h-10 tw-min-w-0 tw-flex-1 tw-items-center tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-4 tw-text-left tw-transition-colors tw-duration-200",
+                      isActive
+                        ? "tw-text-iron-50"
+                        : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900/55 desktop-hover:hover:tw-text-iron-100"
+                    )}
+                    aria-pressed={isActive}
+                  >
+                    <span
+                      className={clsx(
+                        "tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-leading-tight",
+                        isActive ? "tw-font-semibold" : "tw-font-medium"
+                      )}
+                    >
+                      {curation.name}
+                    </span>
+                  </button>
+
+                  {isActive && canManageCurations && (
+                    <CompactMenu
+                      triggerClassName="tw-mr-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+                      trigger={<EllipsisHorizontalIcon className="tw-size-5" />}
+                      aria-label="Active curation options"
+                      items={menuItems}
+                      menuWidthClassName="tw-w-44"
+                    />
+                  )}
+                </div>
+
+                {isActive && (
+                  <div className="tw-flex tw-min-h-6 tw-items-center tw-justify-between tw-gap-x-4 tw-pb-2.5 tw-pl-4 tw-pr-4 tw-text-sm">
+                    <span className="tw-font-medium tw-text-iron-500">
+                      Group
+                    </span>
+                    {activeGroup ? (
+                      <WaveGroupScope group={toScopeGroup(activeGroup)} />
+                    ) : (
+                      <span className="tw-max-w-40 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
+                        {isFetchingActiveGroup
+                          ? "Loading..."
+                          : activeCuration?.group_id}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {isEditOpen && activeGroup && (
+      {isEditOpen && activeCuration && activeGroup && (
         <MyStreamWaveCurationCreateDialog
           key={`${activeCuration.id}:${activeGroup.id}`}
           wave={wave}
@@ -200,7 +249,11 @@ export default function WaveActiveCurationSection({
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={() => deleteMutation.mutate()}
         title="Delete curation"
-        message={`Delete "${activeCuration.name}" from this wave?`}
+        message={
+          activeCuration
+            ? `Delete "${activeCuration.name}" from this wave?`
+            : "Delete this curation from this wave?"
+        }
         confirmText="Delete"
         isConfirming={deleteMutation.isPending}
       />

@@ -536,8 +536,7 @@ export default function MyStreamWaveCurationCreateDialog({
   const shouldShowDefaultGroupError =
     selectedGroup === null && !isInitialGroupLoading && isInitialGroupError;
   const canCloseGroupSearch = selectedGroup !== null;
-  const isGroupSearchVisible =
-    isGroupSearchOpen || shouldShowDefaultGroupError;
+  const isGroupSearchVisible = isGroupSearchOpen || shouldShowDefaultGroupError;
   const groupSearchParams = isSearchFiltered
     ? {
         group_name: trimmedGroupSearchName,
@@ -579,8 +578,14 @@ export default function MyStreamWaveCurationCreateDialog({
   const handlePresetSelect = (presetLabel: string) => {
     setName(presetLabel);
     globalThis.window.requestAnimationFrame(() => {
-      nameInputRef.current?.focus();
-      nameInputRef.current?.select();
+      const input = nameInputRef.current;
+      if (input === null) {
+        return;
+      }
+
+      input.focus();
+      const caretPosition = presetLabel.length;
+      input.setSelectionRange(caretPosition, caretPosition);
     });
   };
 

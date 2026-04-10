@@ -95,6 +95,28 @@ function getSlideTransition(tabletModal?: boolean) {
   };
 }
 
+function getBottomPadding(noPadding?: boolean): string {
+  return noPadding
+    ? "env(safe-area-inset-bottom,0px)"
+    : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
+}
+
+function getDialogHeight({
+  tall,
+  isCapacitor,
+}: {
+  readonly tall?: boolean | undefined;
+  readonly isCapacitor: boolean;
+}): string {
+  const viewportHeight = "min(100vh, 100svh)";
+
+  if (tall && !isCapacitor) {
+    return `calc(${viewportHeight} - 4rem)`;
+  }
+
+  return `calc(${viewportHeight} - 10rem)`;
+}
+
 export default function MobileWrapperDialog({
   title,
   isOpen,
@@ -110,6 +132,7 @@ export default function MobileWrapperDialog({
   allowOverflow,
   maxWidthClass,
   headerClassName,
+  mobileCloseButtonClassName,
   dismissible = true,
 }: {
   readonly title?: string | undefined;
@@ -126,6 +149,7 @@ export default function MobileWrapperDialog({
   readonly allowOverflow?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
   readonly headerClassName?: string | undefined;
+  readonly mobileCloseButtonClassName?: string | undefined;
   readonly dismissible?: boolean | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
@@ -135,17 +159,11 @@ export default function MobileWrapperDialog({
     }
   };
 
-  const bottomPadding = noPadding
-    ? "env(safe-area-inset-bottom,0px)"
-    : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
-
-  const viewportHeight = "min(100vh, 100svh)";
-  const getHeight = () => {
-    if (tall && !isCapacitor) {
-      return `calc(${viewportHeight} - 4rem)`;
-    }
-    return `calc(${viewportHeight} - 10rem)`;
-  };
+  const bottomPadding = getBottomPadding(noPadding);
+  const dialogHeight = getDialogHeight({
+    tall,
+    isCapacitor,
+  });
 
   const panelClassNames = clsx(
     "mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen",
@@ -218,7 +236,12 @@ export default function MobileWrapperDialog({
                           tabletModal && "md:tw-hidden"
                         )}
                       >
-                        <DialogCloseButton onClick={handleClose} />
+                        <DialogCloseButton
+                          onClick={handleClose}
+                          {...(mobileCloseButtonClassName
+                            ? { className: mobileCloseButtonClassName }
+                            : {})}
+                        />
                       </div>
                     </TransitionChild>
                   )}
@@ -232,8 +255,8 @@ export default function MobileWrapperDialog({
                     )}
                     style={{
                       ...(fixedHeight
-                        ? { height: getHeight() }
-                        : { maxHeight: getHeight() }),
+                        ? { height: dialogHeight }
+                        : { maxHeight: dialogHeight }),
                     }}
                   >
                     <div

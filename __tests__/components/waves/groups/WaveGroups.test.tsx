@@ -4,7 +4,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 // Capture props passed to the mocked WaveGroup component
 const captured: any[] = [];
-const capturedCuration: any[] = [];
+const capturedActiveCuration: any[] = [];
 jest.mock("@/components/waves/specs/groups/group/WaveGroup", () => {
   const { WaveGroupType } = jest.requireActual(
     "../../../../components/waves/specs/groups/group/WaveGroup.types"
@@ -20,12 +20,12 @@ jest.mock("@/components/waves/specs/groups/group/WaveGroup", () => {
 });
 
 jest.mock(
-  "@/components/waves/groups/curation/WaveCurationGroupsSection",
+  "@/components/waves/groups/curation/WaveActiveCurationSection",
   () => ({
     __esModule: true,
     default: (props: any) => {
-      capturedCuration.push(props);
-      return <div data-testid="curation-section" />;
+      capturedActiveCuration.push(props);
+      return <div data-testid="curation-section">Curation</div>;
     },
   })
 );
@@ -45,7 +45,7 @@ describe("WaveGroups", () => {
 
   beforeEach(() => {
     captured.length = 0;
-    capturedCuration.length = 0;
+    capturedActiveCuration.length = 0;
   });
 
   it("renders all groups with ring by default", () => {
@@ -53,11 +53,11 @@ describe("WaveGroups", () => {
       <WaveGroups wave={baseWave} />
     );
     expect(screen.getByText("General")).toBeInTheDocument();
-    expect(screen.getByText("Curation Groups")).toBeInTheDocument();
+    expect(screen.getByText("Curation")).toBeInTheDocument();
     expect(getAllByTestId(/group-/)).toHaveLength(5);
     expect(getByTestId("curation-section")).toBeInTheDocument();
-    expect(capturedCuration).toHaveLength(1);
-    expect(capturedCuration[0].wave).toBe(baseWave);
+    expect(capturedActiveCuration).toHaveLength(1);
+    expect(capturedActiveCuration[0].wave).toBe(baseWave);
     expect(captured.map((c) => c.type)).toEqual([
       "VIEW",
       "DROP",
@@ -79,8 +79,8 @@ describe("WaveGroups", () => {
     );
     expect(getAllByTestId(/group-/)).toHaveLength(3);
     expect(getByTestId("curation-section")).toBeInTheDocument();
-    expect(capturedCuration).toHaveLength(1);
-    expect(capturedCuration[0].wave).toBe(wave);
+    expect(capturedActiveCuration).toHaveLength(1);
+    expect(capturedActiveCuration[0].wave).toBe(wave);
     expect(captured.map((c) => c.type)).toEqual(["VIEW", "CHAT", "ADMIN"]);
     const inner = container.querySelector(".tw-h-full") as HTMLElement;
     expect(inner.className).toContain("tw-rounded-b-xl");
