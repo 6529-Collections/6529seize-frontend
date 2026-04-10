@@ -58,7 +58,9 @@ const buildMemesTabs = (
   hasFirstDecisionPassed: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [];
-  if (votingState !== WaveVotingState.ENDED) {
+  if (votingState === WaveVotingState.ENDED) {
+    tabs.push(MyStreamWaveTab.SUBMISSIONS);
+  } else {
     tabs.push(MyStreamWaveTab.LEADERBOARD);
   }
   tabs.push(MyStreamWaveTab.CHAT);
@@ -79,7 +81,9 @@ const buildDefaultTabs = (
   isCurationWave: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
-  if (votingState !== WaveVotingState.ENDED) {
+  if (votingState === WaveVotingState.ENDED) {
+    tabs.push(MyStreamWaveTab.SUBMISSIONS);
+  } else {
     tabs.push(MyStreamWaveTab.LEADERBOARD);
   }
   if (isCurationWave) {
@@ -174,10 +178,15 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       currentWaveIdRef.current = waveId ?? null;
 
       const storedTab = waveId ? tabsByWaveIdRef.current[waveId] : undefined;
-      const defaultTab =
-        isMemesWave && tabs.includes(MyStreamWaveTab.LEADERBOARD)
-          ? MyStreamWaveTab.LEADERBOARD
-          : MyStreamWaveTab.CHAT;
+      let defaultTab = MyStreamWaveTab.CHAT;
+      if (
+        votingState === WaveVotingState.ENDED &&
+        tabs.includes(MyStreamWaveTab.SUBMISSIONS)
+      ) {
+        defaultTab = MyStreamWaveTab.SUBMISSIONS;
+      } else if (isMemesWave && tabs.includes(MyStreamWaveTab.LEADERBOARD)) {
+        defaultTab = MyStreamWaveTab.LEADERBOARD;
+      }
 
       const nextTab =
         storedTab !== undefined && tabs.includes(storedTab)

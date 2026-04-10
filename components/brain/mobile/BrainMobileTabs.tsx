@@ -69,6 +69,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [BrainView.DEFAULT]: null,
     [BrainView.ABOUT]: null,
     [BrainView.LEADERBOARD]: null,
+    [BrainView.SUBMISSIONS]: null,
     [BrainView.SALES]: null,
     [BrainView.WINNERS]: null,
     [BrainView.OUTCOME]: null,

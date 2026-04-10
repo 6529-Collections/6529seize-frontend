@@ -42,6 +42,14 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveLeaderboard", () => ({
   default: (props: any) => mockMyStreamWaveLeaderboard(props),
 }));
 
+const mockMyStreamWaveSubmissions = jest.fn(() => (
+  <div data-testid="submissions" />
+));
+jest.mock("@/components/brain/my-stream/MyStreamWaveSubmissions", () => ({
+  __esModule: true,
+  default: (props: any) => mockMyStreamWaveSubmissions(props),
+}));
+
 const mockMyStreamWaveOutcome = jest.fn(() => <div data-testid="outcome" />);
 jest.mock("@/components/brain/my-stream/MyStreamWaveOutcome", () => ({
   __esModule: true,
@@ -201,6 +209,34 @@ describe("BrainMobileViewContent", () => {
     );
   });
 
+  it("renders submissions and forwards wave props when available", () => {
+    const onDropClick = jest.fn();
+    const wave = { id: "wave-1" } as any;
+
+    render(
+      <BrainMobileViewContent
+        activeView={BrainView.SUBMISSIONS}
+        activeWaveId="1"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={true}
+        onDropClick={onDropClick}
+        onOpenQuickVote={jest.fn()}
+        wave={wave}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("submissions")).toBeInTheDocument();
+    expect(mockMyStreamWaveSubmissions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onDropClick,
+        wave,
+      })
+    );
+  });
+
   it("renders sales when the wave is curation-enabled", () => {
     render(
       <BrainMobileViewContent
@@ -313,6 +349,13 @@ describe("BrainMobileViewContent", () => {
   it.each([
     {
       activeView: BrainView.LEADERBOARD,
+      isCurationWave: false,
+      isMemesWave: false,
+      isRankWave: false,
+      wave: { id: "wave-1" } as any,
+    },
+    {
+      activeView: BrainView.SUBMISSIONS,
       isCurationWave: false,
       isMemesWave: false,
       isRankWave: false,

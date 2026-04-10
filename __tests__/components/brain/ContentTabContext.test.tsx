@@ -136,6 +136,65 @@ describe("ContentTabContext", () => {
     ]);
   });
 
+  it("shows SUBMISSIONS and defaults to it when voting ended", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "ended-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: false,
+        isCurationWave: false,
+        votingState: WaveVotingState.ENDED,
+        hasFirstDecisionPassed: true,
+      })
+    );
+
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.SUBMISSIONS,
+      MyStreamWaveTab.WINNERS,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.MY_VOTES,
+    ]);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
+  });
+
+  it("normalizes stored LEADERBOARD to SUBMISSIONS once voting ends", () => {
+    const { result } = setup();
+
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "ended-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: true,
+        isCurationWave: false,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.LEADERBOARD));
+
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "ended-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: true,
+        isCurationWave: false,
+        votingState: WaveVotingState.ENDED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.availableTabs).toContain(MyStreamWaveTab.SUBMISSIONS);
+    expect(result.current.availableTabs).not.toContain(
+      MyStreamWaveTab.LEADERBOARD
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
+  });
+
   it("restores stored tab for memes wave even when it is CHAT", () => {
     const { result } = setup();
     act(() =>

@@ -58,6 +58,7 @@ describe("MyStreamWaveTabsLeaderboard", () => {
     mockCompleted = true;
     renderComponent();
     expect(screen.queryByText("Leaderboard")).toBeNull();
+    expect(screen.getByText("Submissions")).toBeInTheDocument();
   });
 
   it("renders injected content between leaderboard and winners", () => {
@@ -69,5 +70,19 @@ describe("MyStreamWaveTabsLeaderboard", () => {
     expect(
       screen.getAllByRole("button").map((button) => button.textContent)
     ).toEqual(["Leaderboard", "Sales", "Winners"]);
+  });
+
+  it("routes the primary tab to submissions when voting completed", async () => {
+    mockCompleted = true;
+    const { onViewChange, registerTabRef } = renderComponent();
+    const button = screen.getByText("Submissions");
+
+    expect(registerTabRef).toHaveBeenCalledWith(
+      BrainView.SUBMISSIONS,
+      expect.any(HTMLButtonElement)
+    );
+
+    await userEvent.click(button);
+    expect(onViewChange).toHaveBeenCalledWith(BrainView.SUBMISSIONS);
   });
 });

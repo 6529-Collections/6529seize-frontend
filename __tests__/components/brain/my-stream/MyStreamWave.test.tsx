@@ -29,6 +29,15 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveLeaderboard", () => ({
   ),
 }));
 
+jest.mock("@/components/brain/my-stream/MyStreamWaveSubmissions", () => ({
+  __esModule: true,
+  default: ({ onDropClick }: any) => (
+    <button data-testid="submissions" onClick={() => onDropClick({ id: "d2" })}>
+      submissions
+    </button>
+  ),
+}));
+
 jest.mock("@/components/brain/my-stream/MyStreamWaveOutcome", () => ({
   __esModule: true,
   default: () => <div data-testid="outcome" />,
@@ -166,5 +175,17 @@ describe("MyStreamWave", () => {
     render(<MyStreamWave waveId="1" />);
     expect(screen.getByTestId("sales")).toBeInTheDocument();
     expect(mockMyStreamWaveSales).toHaveBeenCalledWith({ waveId: "1" });
+  });
+
+  it("renders submissions tab and handles drop click", () => {
+    useWaveData.mockReturnValue({ data: wave });
+    useContentTab.mockReturnValue({
+      activeContentTab: MyStreamWaveTab.SUBMISSIONS,
+    });
+    render(<MyStreamWave waveId="1" />);
+    fireEvent.click(screen.getByTestId("submissions"));
+    expect(mockRouterPush).toHaveBeenCalledWith("/path?wave=1&drop=d2", {
+      scroll: false,
+    });
   });
 });

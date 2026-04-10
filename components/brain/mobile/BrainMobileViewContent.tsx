@@ -5,6 +5,7 @@ import BrainMobileAbout from "./BrainMobileAbout";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveLeaderboard from "../my-stream/MyStreamWaveLeaderboard";
+import MyStreamWaveSubmissions from "../my-stream/MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "../my-stream/MyStreamWaveOutcome";
 import MyStreamWaveSales from "../my-stream/MyStreamWaveSales";
 import MyStreamWaveMyVotes from "../my-stream/votes/MyStreamWaveMyVotes";
@@ -52,6 +53,10 @@ export default function BrainMobileViewContent({
     />
   ) : null;
 
+  const submissionsContent = rankWave ? (
+    <MyStreamWaveSubmissions wave={rankWave} onDropClick={onDropClick} />
+  ) : null;
+
   const salesContent = curationWave ? (
     <MyStreamWaveSales waveId={curationWave.id} />
   ) : null;
@@ -76,6 +81,7 @@ export default function BrainMobileViewContent({
     [BrainView.DEFAULT]: <>{children}</>,
     [BrainView.ABOUT]: <BrainMobileAbout activeWaveId={activeWaveId} />,
     [BrainView.LEADERBOARD]: leaderboardContent,
+    [BrainView.SUBMISSIONS]: submissionsContent,
     [BrainView.SALES]: salesContent,
     [BrainView.WINNERS]: winnersContent,
     [BrainView.OUTCOME]: outcomeContent,
