@@ -19,7 +19,6 @@ import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview
 import { ApiWaveDecisionPause } from '../models/ApiWaveDecisionPause';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
-import { ApiWaveSelection } from '../models/ApiWaveSelection';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
 import { ApiWaveVotingConfig } from '../models/ApiWaveVotingConfig';
@@ -58,8 +57,8 @@ export class ApiWave {
     'subscribed_actions': Array<ApiWaveSubscriptionTargetAction>;
     'metrics': ApiWaveMetrics;
     'pauses': Array<ApiWaveDecisionPause>;
-    'selections': Array<ApiWaveSelection>;
     'pinned': boolean;
+    'identity_wave': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -169,14 +168,14 @@ export class ApiWave {
             "format": ""
         },
         {
-            "name": "selections",
-            "baseName": "selections",
-            "type": "Array<ApiWaveSelection>",
+            "name": "pinned",
+            "baseName": "pinned",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "pinned",
-            "baseName": "pinned",
+            "name": "identity_wave",
+            "baseName": "identity_wave",
             "type": "boolean",
             "format": ""
         }    ];

@@ -13,7 +13,6 @@
 
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
-import { ApiWaveSelection } from '../models/ApiWaveSelection';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveMin {
@@ -40,8 +39,8 @@ export class ApiWaveMin {
     'voting_credit_type': ApiWaveCreditType;
     'admin_drop_deletion_enabled': boolean;
     'forbid_negative_votes': boolean;
-    'selections': Array<ApiWaveSelection>;
     'pinned': boolean;
+    'identity_wave': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -169,14 +168,14 @@ export class ApiWaveMin {
             "format": ""
         },
         {
-            "name": "selections",
-            "baseName": "selections",
-            "type": "Array<ApiWaveSelection>",
+            "name": "pinned",
+            "baseName": "pinned",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "pinned",
-            "baseName": "pinned",
+            "name": "identity_wave",
+            "baseName": "identity_wave",
             "type": "boolean",
             "format": ""
         }    ];

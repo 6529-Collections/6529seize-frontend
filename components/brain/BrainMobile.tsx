@@ -30,7 +30,6 @@ import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
-import FloatingMemesQuickVoteTrigger from "./mobile/FloatingMemesQuickVoteTrigger";
 import { BrainView } from "./mobile/brainMobileViews";
 import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
 
@@ -91,7 +90,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const { isMemesWave, isCurationWave, isRankWave, isDm } = useWave(wave);
+  const { isMemesWave, isCurationWave, isRankWave } = useWave(wave);
 
   const {
     voting: { isCompleted },
@@ -174,17 +173,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     return null;
   }, [isApp, searchParams, connectedProfile, closeCreateOverlay]);
 
-  const shouldMountFloatingQuickVoteEntry =
-    isApp &&
-    hasWave &&
-    !!wave &&
-    activeView === BrainView.DEFAULT &&
-    !isDropOpen &&
-    !isDm;
   const shouldMountQuickVoteDialog =
-    quickVote.isQuickVoteOpen ||
-    shouldMountFloatingQuickVoteEntry ||
-    activeView === BrainView.WAVES;
+    quickVote.isQuickVoteOpen || activeView === BrainView.WAVES;
 
   const dropOverlayClass = isApp
     ? "tw-fixed tw-inset-0 tw-z-[1010] tw-bg-black tailwind-scope"
@@ -226,12 +216,6 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           transition={{ duration: 0.2, ease: "easeInOut" }}
           className="tw-relative tw-min-w-0 tw-flex-1"
         >
-          {shouldMountFloatingQuickVoteEntry && (
-            <FloatingMemesQuickVoteTrigger
-              onOpenQuickVote={quickVote.openQuickVote}
-              onPrefetchQuickVote={quickVote.prefetchQuickVote}
-            />
-          )}
           <BrainMobileViewContent
             activeView={activeView}
             activeWaveId={waveId}

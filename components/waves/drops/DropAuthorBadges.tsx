@@ -36,6 +36,7 @@ interface DropAuthorBadgesProfile {
   readonly active_main_stage_submission_ids?: readonly string[] | null;
   readonly winner_main_stage_drop_ids?: readonly string[] | null;
   readonly artist_of_prevote_cards?: readonly number[] | null;
+  readonly profile_wave_id?: string | null;
   readonly is_wave_creator?: boolean | null;
 }
 
@@ -93,6 +94,7 @@ const toApiProfileMin = (profile: DropAuthorBadgesProfile): ApiProfileMin => {
       profile.artist_of_prevote_cards !== undefined
         ? [...profile.artist_of_prevote_cards]
         : [],
+    profile_wave_id: profile.profile_wave_id ?? null,
     is_wave_creator: profile.is_wave_creator === true,
   };
 };

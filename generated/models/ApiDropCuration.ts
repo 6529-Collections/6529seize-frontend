@@ -13,7 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiWaveCurationGroup {
+export class ApiDropCuration {
+    'drop_included': boolean;
+    'authenticated_user_can_curate': boolean;
     'id': string;
     'name': string;
     'wave_id': string;
@@ -26,6 +28,18 @@ export class ApiWaveCurationGroup {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "drop_included",
+            "baseName": "drop_included",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_can_curate",
+            "baseName": "authenticated_user_can_curate",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",
@@ -64,7 +78,7 @@ export class ApiWaveCurationGroup {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveCurationGroup.attributeTypeMap;
+        return ApiDropCuration.attributeTypeMap;
     }
 
     public constructor() {

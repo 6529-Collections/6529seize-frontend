@@ -135,7 +135,7 @@ export function useWaveDropsLeaderboard({
           page_size: WAVE_DROPS_PARAMS.limit,
           sort,
           sort_direction: sortDirection,
-          curated_by_group: normalizedCuratedByGroupId ?? null,
+          curation_id: normalizedCuratedByGroupId ?? null,
           min_price: canonicalPriceFilters.normalizedPriceLower ?? null,
           max_price: canonicalPriceFilters.normalizedPriceUpper ?? null,
           price_currency: canonicalPriceFilters.normalizedPriceCurrency ?? null,
@@ -178,7 +178,7 @@ export function useWaveDropsLeaderboard({
       }
 
       if (normalizedCuratedByGroupId) {
-        params["curated_by_group"] = normalizedCuratedByGroupId;
+        params["curation_id"] = normalizedCuratedByGroupId;
       }
       if (canonicalPriceFilters.normalizedPriceLower) {
         params["min_price"] = canonicalPriceFilters.normalizedPriceLower;

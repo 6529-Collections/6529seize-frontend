@@ -10,8 +10,6 @@ participatory submissions in the configured memes wave.
 - Desktop web waves sidebar footer on non-`/messages` shells
 - Collapsed desktop waves sidebar quick-vote pill
 - App/mobile `Waves` view footer
-- App/mobile non-DM wave-thread default view floating quick-vote trigger
-  (top-right)
 - Quick-vote dialog overlay
 
 ## Entry Points
@@ -22,9 +20,8 @@ participatory submissions in the configured memes wave.
   at least one unrated memes submission left.
 - Expanded footer surfaces open quick vote from the `Uncast Power` card.
 - Compact surfaces open quick vote from the bolt-count trigger.
-- In app/mobile thread view, the floating trigger appears only in the main
-  non-DM wave view. It is hidden on other tabs and while a single-drop overlay
-  is open.
+- On app/mobile, quick vote opens from the `Waves` view footer rather than a
+  floating thread trigger.
 
 ## User Journey
 
