@@ -136,7 +136,7 @@ const BoostedDropCardHeader = memo(
     readonly remainingBoosts: number;
   }) => (
     <div
-      className={`${HEADER_CLASSES}${isChatVariant ? "tw-justify-end" : ""}`}
+      className={`${HEADER_CLASSES} ${isChatVariant ? "tw-justify-end" : ""}`}
     >
       {!isChatVariant && (
         <div className={HEADER_LEFT_CLASSES}>
