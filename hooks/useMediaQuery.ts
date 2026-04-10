@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useState } from "react";
 
 const getMediaQueryList = (query: string): MediaQueryList | null => {
   if (
-    typeof globalThis.window === "undefined" ||
+    globalThis.window === undefined ||
     typeof globalThis.window.matchMedia !== "function"
   ) {
     return null;
