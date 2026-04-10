@@ -3,8 +3,8 @@
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getRandomColorWithSeed, getTimeAgo } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 
 interface SelectGroupModalCardProps {
   readonly group: ApiGroupFull;
@@ -29,6 +29,50 @@ export default function SelectGroupModalCard({
     group.created_by.handle ?? group.created_by.primary_address;
   const timeAgo = getTimeAgo(new Date(group.created_at).getTime());
   const avatarFallbackLabel = creatorIdentity.charAt(0).toUpperCase();
+  const selectionIndicator =
+    isSelected && onClear ? (
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onClear();
+        }}
+        className="tw-flex tw-h-[18px] tw-w-[18px] tw-flex-shrink-0 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-100 tw-p-0 tw-leading-none tw-shadow-[0_0_10px_rgba(255,255,255,0.2)] tw-transition-all tw-duration-300 hover:tw-scale-110 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30"
+        aria-label={`Clear selected group ${group.name}`}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          className="tw-h-3 tw-w-3 tw-flex-shrink-0 tw-text-iron-950"
+          stroke="currentColor"
+          strokeWidth="3.5"
+          aria-hidden="true"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </button>
+    ) : (
+      <div
+        className={`tw-flex tw-h-[18px] tw-w-[18px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-all tw-duration-300 ${
+          isSelected
+            ? "tw-border-iron-100 tw-bg-iron-100 tw-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+            : "tw-border-white/10 tw-bg-transparent group-hover:tw-border-white/30"
+        }`}
+        aria-hidden="true"
+      >
+        {isSelected && (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="tw-h-3 tw-w-3 tw-flex-shrink-0 tw-text-iron-950"
+            stroke="currentColor"
+            strokeWidth="3.5"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </div>
+    );
 
   return (
     <div className="tw-relative tw-col-span-1">
@@ -122,7 +166,9 @@ export default function SelectGroupModalCard({
               ) : (
                 <span
                   className={`tw-inline-block tw-max-w-[8rem] tw-truncate tw-font-medium ${
-                    isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
+                    isSelected
+                      ? "tw-text-iron-300"
+                      : "tw-text-iron-400 group-hover:tw-text-iron-300"
                   }`}
                 >
                   {creatorIdentity}
@@ -141,49 +187,7 @@ export default function SelectGroupModalCard({
         </div>
 
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-pl-2">
-          {isSelected && onClear ? (
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                onClear();
-              }}
-              className="tw-flex tw-h-[18px] tw-w-[18px] tw-flex-shrink-0 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-100 tw-p-0 tw-leading-none tw-shadow-[0_0_10px_rgba(255,255,255,0.2)] tw-transition-all tw-duration-300 hover:tw-scale-110 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30"
-              aria-label={`Clear selected group ${group.name}`}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="tw-h-3 tw-w-3 tw-flex-shrink-0 tw-text-iron-950"
-                stroke="currentColor"
-                strokeWidth="3.5"
-                aria-hidden="true"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </button>
-          ) : (
-            <div
-              className={`tw-flex tw-h-[18px] tw-w-[18px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-all tw-duration-300 ${
-                isSelected
-                  ? "tw-border-iron-100 tw-bg-iron-100 tw-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-                  : "tw-border-white/10 tw-bg-transparent group-hover:tw-border-white/30"
-              }`}
-              aria-hidden="true"
-            >
-              {isSelected && (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="tw-h-3 tw-w-3 tw-flex-shrink-0 tw-text-iron-950"
-                  stroke="currentColor"
-                  strokeWidth="3.5"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
-            </div>
-          )}
+          {selectionIndicator}
         </div>
       </div>
     </div>

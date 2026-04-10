@@ -105,7 +105,7 @@ export default function WaveActiveCurationSection({
         endpoint: `waves/${wave.id}/curations/${activeCuration.id}`,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       if (!activeCuration) {
         return;
       }
@@ -115,7 +115,7 @@ export default function WaveActiveCurationSection({
         (current) =>
           current?.filter((item) => item.id !== activeCuration.id) ?? current
       );
-      void queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: getWaveCurationsQueryKey(wave.id),
       });
       setToast({

@@ -16,7 +16,6 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, type ReactNode } from "react";
 import { useLayout } from "../layout/LayoutContext";
-import { MyStreamActiveCurationProvider } from "./MyStreamActiveCurationContext";
 
 interface MyStreamWaveCurationContentProps {
   readonly wave: ApiWave;
@@ -140,27 +139,23 @@ export default function MyStreamWaveCurationContent({
   const permissionProbeDropId = drops[0]?.id ?? "";
   const { data: permissionProbeCurations = [] } = useDropCurations({
     dropId: permissionProbeDropId,
-    enabled: permissionProbeDropId.length > 0,
+    enabled: Boolean(permissionProbeDropId),
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
 
   const handleBottomIntersection = useCallback(
-    (isIntersecting: boolean) => {
+    async (isIntersecting: boolean) => {
       if (!isIntersecting || !hasNextPage || isFetchingNextPage) {
         return;
       }
 
-      void fetchNextPage();
+      await fetchNextPage();
     },
     [fetchNextPage, hasNextPage, isFetchingNextPage]
   );
 
-  const trimmedCurationName = curationName?.trim();
-  const curationTitle =
-    trimmedCurationName && trimmedCurationName.length > 0
-      ? trimmedCurationName
-      : "Curation";
+  const curationTitle = curationName?.trim() ?? "Curation";
   const canManageActiveCuration =
     permissionProbeCurations.find((curation) => curation.id === curationId)
       ?.authenticated_user_can_curate ?? false;
@@ -224,13 +219,11 @@ export default function MyStreamWaveCurationContent({
   }
 
   return (
-    <MyStreamActiveCurationProvider curationId={curationId}>
-      <div
-        className="tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-        style={leaderboardViewStyle}
-      >
-        {content}
-      </div>
-    </MyStreamActiveCurationProvider>
+    <div
+      className="tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+      style={leaderboardViewStyle}
+    >
+      {content}
+    </div>
   );
 }

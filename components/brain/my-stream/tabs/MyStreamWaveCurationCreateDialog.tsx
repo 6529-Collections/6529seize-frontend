@@ -26,13 +26,7 @@ import {
 } from "@tanstack/react-query";
 import clsx from "clsx";
 import Image from "next/image";
-import {
-  useRef,
-  useState,
-  type ReactNode,
-  type ChangeEvent,
-  type KeyboardEvent,
-} from "react";
+import { useRef, useState, type ReactNode, type ChangeEvent } from "react";
 
 const CURATION_NAME_PRESETS = [
   "Art",
@@ -206,16 +200,6 @@ function CurationGroupRow({
 
     onSelect(group);
   };
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-    if (onSelect === undefined) {
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      handleSelect();
-    }
-  };
   let rowClassName = "tw-border-white/[0.06] tw-bg-iron-900/40";
 
   if (isInteractive) {
@@ -227,18 +211,8 @@ function CurationGroupRow({
   const selectionIndicatorClassName = isSelected
     ? "tw-border-iron-100 tw-bg-iron-100 tw-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
     : "tw-border-white/10 tw-bg-transparent desktop-hover:group-hover:tw-border-white/30";
-
-  return (
-    <div
-      role={isInteractive ? "button" : undefined}
-      tabIndex={isInteractive ? 0 : undefined}
-      onClick={isInteractive ? handleSelect : undefined}
-      onKeyDown={isInteractive ? handleKeyDown : undefined}
-      className={clsx(
-        "tw-group tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition-all",
-        rowClassName
-      )}
-    >
+  const rowContent = (
+    <>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
         <div
           className="tw-relative tw-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),0_2px_8px_rgba(0,0,0,0.4)]"
@@ -322,8 +296,30 @@ function CurationGroupRow({
           )}
         </div>
       )}
-    </div>
+    </>
   );
+  const rowClassNames = clsx(
+    "tw-group tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition-all",
+    rowClassName
+  );
+
+  if (isInteractive) {
+    return (
+      <button
+        type="button"
+        onClick={handleSelect}
+        aria-pressed={isSelected}
+        className={clsx(
+          rowClassNames,
+          "tw-w-full tw-bg-transparent tw-text-left"
+        )}
+      >
+        {rowContent}
+      </button>
+    );
+  }
+
+  return <div className={rowClassNames}>{rowContent}</div>;
 }
 
 function CurationGroupSearchState({
@@ -619,7 +615,7 @@ export default function MyStreamWaveCurationCreateDialog({
         errorMode: "structured",
       });
     },
-    onSuccess: (saved) => {
+    onSuccess: async (saved) => {
       queryClient.setQueryData<ApiWaveCuration[]>(
         getWaveCurationsQueryKey(wave.id),
         (current) => {
@@ -636,7 +632,7 @@ export default function MyStreamWaveCurationCreateDialog({
           return current.map((item) => (item.id === saved.id ? saved : item));
         }
       );
-      void queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: getWaveCurationsQueryKey(wave.id),
       });
       if (showSuccessToast) {
@@ -705,7 +701,10 @@ export default function MyStreamWaveCurationCreateDialog({
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
           <div className="tw-flex tw-flex-col tw-gap-8 tw-px-4 tw-py-6 sm:tw-px-6">
             <div className="tw-space-y-4">
-              <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
+              <label
+                htmlFor="curation-name"
+                className="tw-block tw-text-sm tw-font-medium tw-text-iron-300"
+              >
                 Name
               </label>
               <div className="tw-flex tw-flex-wrap tw-gap-2.5">

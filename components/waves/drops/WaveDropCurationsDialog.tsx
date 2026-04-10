@@ -116,7 +116,9 @@ function CurationMembershipRow({
   readonly curation: DropCurationMembership;
   readonly disabled: boolean;
   readonly loading: boolean;
-  readonly onUpdateMembership: (action: "add" | "remove") => void;
+  readonly onUpdateMembership: (
+    action: "add" | "remove"
+  ) => Promise<void> | void;
 }) {
   const membershipAction = curation.drop_included ? "remove" : "add";
 
@@ -210,6 +212,9 @@ export default function WaveDropCurationsDialog({
   );
   const hasVisibleCurations = sortedCurations.length > 0;
   const hasHiddenCurations = curations.length > 0 && !hasVisibleCurations;
+  const handleRetry = async () => {
+    await refetch();
+  };
 
   const clearAutoCloseTimeout = () => {
     if (autoCloseTimeoutRef.current) {
@@ -324,7 +329,7 @@ export default function WaveDropCurationsDialog({
                 </p>
                 <div className="tw-flex tw-justify-center">
                   <SecondaryButton
-                    onClicked={() => void refetch()}
+                    onClicked={handleRetry}
                     size="sm"
                     className="!tw-text-xs"
                   >
@@ -367,8 +372,8 @@ export default function WaveDropCurationsDialog({
                     curation={curation}
                     disabled={isPending}
                     loading={pendingCurationId === curation.id}
-                    onUpdateMembership={(action) =>
-                      void handleUpdateMembership(curation.id, action)
+                    onUpdateMembership={async (action) =>
+                      await handleUpdateMembership(curation.id, action)
                     }
                   />
                 ))}

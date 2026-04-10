@@ -215,8 +215,8 @@ export function useDropCurationMembershipMutation({
         });
       }
     },
-    onSettled: () => {
-      void queryClient.invalidateQueries({
+    onSettled: async () => {
+      await queryClient.invalidateQueries({
         queryKey: getDropCurationsQueryKey(dropId),
       });
     },
