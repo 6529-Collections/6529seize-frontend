@@ -10,6 +10,7 @@ import {
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useWaveCurationGroupSelection } from "@/hooks/waves/useWaveCurationGroupSelection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ParticipationDrop from "@/components/waves/drops/participation/ParticipationDrop";
 import { DropLocation } from "@/components/waves/drops/drop.types";
@@ -29,10 +30,12 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { leaderboardViewStyle } = useLayout();
+  const { curatedByGroupId } = useWaveCurationGroupSelection({ wave });
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort: WaveDropsLeaderboardSort.RANK,
+      curatedByGroupId,
     });
   const handleReply = useCallback(() => undefined, []);
 

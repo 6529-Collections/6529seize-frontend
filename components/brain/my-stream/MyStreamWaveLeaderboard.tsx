@@ -11,7 +11,6 @@ import React, {
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
@@ -30,7 +29,7 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
+import { useWaveCurationGroupSelection } from "@/hooks/waves/useWaveCurationGroupSelection";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
@@ -140,44 +139,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       (isCurationWave && value === WaveDropsLeaderboardSort.PRICE)
   );
 
-  const {
-    data: curationGroups = [],
-    isLoading: isLoadingCurationGroups,
-    isError: isCurationGroupsError,
-  } = useWaveCurationGroups({
-    waveId: wave.id,
-    enabled: wave.wave.type !== ApiWaveType.Chat,
+  const { curatedByGroupId, curationGroups } = useWaveCurationGroupSelection({
+    wave,
   });
-
-  const rawCuratedByGroupId = searchParams.get("curated_by_group");
-
-  const curationGroupIdSet = useMemo(
-    () => new Set(curationGroups.map((group) => group.id)),
-    [curationGroups]
-  );
-
-  const curatedByGroupId = useMemo(() => {
-    if (!rawCuratedByGroupId) {
-      return undefined;
-    }
-
-    if (isCurationGroupsError) {
-      return undefined;
-    }
-
-    if (isLoadingCurationGroups) {
-      return rawCuratedByGroupId;
-    }
-
-    return curationGroupIdSet.has(rawCuratedByGroupId)
-      ? rawCuratedByGroupId
-      : undefined;
-  }, [
-    rawCuratedByGroupId,
-    isCurationGroupsError,
-    isLoadingCurationGroups,
-    curationGroupIdSet,
-  ]);
   const priceCurrency = useMemo(() => {
     const hasPriceFilter =
       typeof minPrice === "number" || typeof maxPrice === "number";

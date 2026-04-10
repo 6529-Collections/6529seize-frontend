@@ -1,3 +1,4 @@
+import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import BrainMobileViewContent from "@/components/brain/mobile/BrainMobileViewContent";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
@@ -42,9 +43,28 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveLeaderboard", () => ({
   default: (props: any) => mockMyStreamWaveLeaderboard(props),
 }));
 
-const mockMyStreamWaveSubmissions = jest.fn(() => (
-  <div data-testid="submissions" />
-));
+let submissionsInstanceCounter = 0;
+const mockSubmissionsUnmount = jest.fn();
+const mockMyStreamWaveSubmissions = jest.fn(() => {
+  const instanceIdRef = React.useRef<number | null>(null);
+  if (instanceIdRef.current === null) {
+    submissionsInstanceCounter += 1;
+    instanceIdRef.current = submissionsInstanceCounter;
+  }
+
+  React.useEffect(() => {
+    return () => {
+      mockSubmissionsUnmount(instanceIdRef.current);
+    };
+  }, []);
+
+  return (
+    <div
+      data-testid="submissions"
+      data-instance-id={String(instanceIdRef.current)}
+    />
+  );
+});
 jest.mock("@/components/brain/my-stream/MyStreamWaveSubmissions", () => ({
   __esModule: true,
   default: (props: any) => mockMyStreamWaveSubmissions(props),
@@ -83,6 +103,7 @@ jest.mock("@/components/waves/winners/WaveWinners", () => ({
 describe("BrainMobileViewContent", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    submissionsInstanceCounter = 0;
   });
 
   it("renders children for the default view", () => {
@@ -235,6 +256,50 @@ describe("BrainMobileViewContent", () => {
         wave,
       })
     );
+  });
+
+  it("remounts submissions when the active wave changes", () => {
+    const onDropClick = jest.fn();
+    const { rerender } = render(
+      <BrainMobileViewContent
+        activeView={BrainView.SUBMISSIONS}
+        activeWaveId="wave-1"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={true}
+        onDropClick={onDropClick}
+        onOpenQuickVote={jest.fn()}
+        wave={{ id: "wave-1" } as any}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("submissions")).toHaveAttribute(
+      "data-instance-id",
+      "1"
+    );
+
+    rerender(
+      <BrainMobileViewContent
+        activeView={BrainView.SUBMISSIONS}
+        activeWaveId="wave-2"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={true}
+        onDropClick={onDropClick}
+        onOpenQuickVote={jest.fn()}
+        wave={{ id: "wave-2" } as any}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("submissions")).toHaveAttribute(
+      "data-instance-id",
+      "2"
+    );
+    expect(mockSubmissionsUnmount).toHaveBeenCalledWith(1);
   });
 
   it("renders sales when the wave is curation-enabled", () => {

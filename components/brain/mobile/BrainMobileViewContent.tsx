@@ -54,7 +54,11 @@ export default function BrainMobileViewContent({
   ) : null;
 
   const submissionsContent = rankWave ? (
-    <MyStreamWaveSubmissions wave={rankWave} onDropClick={onDropClick} />
+    <MyStreamWaveSubmissions
+      key={rankWave.id}
+      wave={rankWave}
+      onDropClick={onDropClick}
+    />
   ) : null;
 
   const salesContent = curationWave ? (
