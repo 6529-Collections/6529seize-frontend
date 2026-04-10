@@ -37,7 +37,6 @@ function getAssetPrefix(assetsFromS3: boolean, version: string): string {
 }
 
 const standaloneOutput = { output: "standalone" as const };
-
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
   logOnceConfig("NODE_ENV", mode);

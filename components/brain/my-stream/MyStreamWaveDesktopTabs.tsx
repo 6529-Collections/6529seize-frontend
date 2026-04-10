@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { EllipsisVerticalIcon, PlusIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useMemo, useRef } from "react";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { TabToggle } from "@/components/common/TabToggle";
 import { useSearchParams } from "next/navigation";
@@ -19,8 +19,7 @@ import {
   WaveVotingState,
   type SetActiveContentTab,
 } from "../ContentTabContext";
-import MyStreamWaveCurationCreateDialog from "./tabs/MyStreamWaveCurationCreateDialog";
-import MyStreamActionTooltip from "./MyStreamActionTooltip";
+import MyStreamWaveCreateCurationAction from "./tabs/MyStreamWaveCreateCurationAction";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -28,6 +27,7 @@ interface MyStreamWaveDesktopTabsProps {
   readonly setActiveTab: SetActiveContentTab;
   readonly activeCurationId: string | null;
   readonly onSelectCuration: (curationId: string | null) => void;
+  readonly showCreateCurationAction?: boolean | undefined;
 }
 
 interface TabOption {
@@ -79,6 +79,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   setActiveTab,
   activeCurationId,
   onSelectCuration,
+  showCreateCurationAction = true,
 }) => {
   const searchParams = useSearchParams();
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
@@ -127,7 +128,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const autoExpandFutureAttemptsRef = useRef(0);
   const desktopTabsScrollerRef = useRef<HTMLDivElement | null>(null);
   const mobileTabsScrollerRef = useRef<HTMLDivElement | null>(null);
-  const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
 
   useEffect(() => {
     const hasUpcoming = typeof nextDecisionTime === "number";
@@ -275,16 +275,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [mobileOverflowCurationOptions, onSelectCuration]
   );
 
-  const createCurationTooltipId = `my-stream-create-curation-${wave.id}`;
-  const showCreateFirstCurationCallout =
-    canManageCurations && curations.length === 0;
-  const createButtonTooltipProps = showCreateFirstCurationCallout
-    ? {}
-    : {
-        "data-tooltip-id": createCurationTooltipId,
-        "data-tooltip-content": "Create curation",
-      };
-
   useEffect(() => {
     const frameId = globalThis.window.requestAnimationFrame(() => {
       [desktopTabsScrollerRef.current, mobileTabsScrollerRef.current].forEach(
@@ -309,8 +299,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     };
   }, [activeKey, options]);
 
-  // For simple waves, don't render any tabs
-  if (isChatWave) {
+  if (isChatWave && !canManageCurations && curations.length === 0) {
     return null;
   }
 
@@ -366,41 +355,14 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             }}
           />
         </div>
-        {canManageCurations && (
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-            <button
-              type="button"
-              onClick={() => setIsCreateCurationOpen(true)}
-              {...createButtonTooltipProps}
-              className={
-                showCreateFirstCurationCallout
-                  ? "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
-                  : "tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
-              }
-              aria-label="Create curation"
-            >
-              <PlusIcon
-                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 ${
-                  showCreateFirstCurationCallout ? "-tw-ml-1" : ""
-                }`}
-              />
-              {showCreateFirstCurationCallout && (
-                <span>Create first curation</span>
-              )}
-            </button>
-          </div>
+        {showCreateCurationAction && (
+          <MyStreamWaveCreateCurationAction
+            wave={wave}
+            onCreated={onSelectCuration}
+            className="sm:tw-ml-auto"
+          />
         )}
       </div>
-      <MyStreamActionTooltip id={createCurationTooltipId} />
-
-      {isCreateCurationOpen && (
-        <MyStreamWaveCurationCreateDialog
-          wave={wave}
-          isOpen={isCreateCurationOpen}
-          onClose={() => setIsCreateCurationOpen(false)}
-          onSaved={(curation) => onSelectCuration(curation.id)}
-        />
-      )}
     </>
   );
 };

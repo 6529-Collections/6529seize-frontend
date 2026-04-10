@@ -165,9 +165,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
     return [{ id: activeCurationId, name: "Curation" }, ...mappedCurations];
   }, [activeCurationId, curations]);
-  const showCreateFirstCurationCallout =
-    isApp && canManageCurations && curations.length === 0;
-
   const handleWaveViewChange = (view: BrainView) => {
     const shouldPreserveSelectedCuration =
       isApp && view === BrainView.ABOUT && activeCurationId !== null;
@@ -382,23 +379,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <button
             type="button"
             onClick={() => setIsCreateCurationOpen(true)}
-            className={
-              showCreateFirstCurationCallout
-                ? "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
-                : "tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
-            }
+            className="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
             aria-label="Create curation"
           >
-            <PlusIcon
-              className={`tw-size-4 tw-flex-shrink-0 ${
-                showCreateFirstCurationCallout ? "-tw-ml-1" : ""
-              }`}
-            />
-            {showCreateFirstCurationCallout && (
-              <span className="tw-whitespace-nowrap tw-text-xs tw-font-semibold sm:tw-text-sm">
-                Create
-              </span>
-            )}
+            <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
           </button>
         )}
         {!isApp && !waveActive && (
