@@ -74,6 +74,13 @@ jest.mock("@/hooks/useWaveData", () => ({
   useWaveData: (...args: any[]) => useWaveData(...args),
 }));
 
+const mockSetViewMode = jest.fn();
+const mockToggleViewMode = jest.fn();
+const useWaveViewMode = jest.fn();
+jest.mock("@/hooks/useWaveViewMode", () => ({
+  useWaveViewMode: (...args: any[]) => useWaveViewMode(...args),
+}));
+
 const mockRouterPush = jest.fn();
 const mockSearchParams = new URLSearchParams("wave=1");
 const mockPathname = "/path";
@@ -123,12 +130,20 @@ describe("MyStreamWave", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRouterPush.mockClear();
+    mockSetViewMode.mockClear();
+    mockToggleViewMode.mockClear();
     mockSearchParams.set("wave", "1");
+    mockSearchParams.delete("serialNo");
     mockBreakpoint = "LG";
     useWave.mockReturnValue({
       isRankWave: true,
       isMemesWave: false,
       isDm: false,
+    });
+    useWaveViewMode.mockReturnValue({
+      viewMode: "chat",
+      setViewMode: mockSetViewMode,
+      toggleViewMode: mockToggleViewMode,
     });
   });
 
@@ -166,5 +181,64 @@ describe("MyStreamWave", () => {
     render(<MyStreamWave waveId="1" />);
     expect(screen.getByTestId("sales")).toBeInTheDocument();
     expect(mockMyStreamWaveSales).toHaveBeenCalledWith({ waveId: "1" });
+  });
+
+  it("resets gallery mode to chat when serialNo is present on eligible waves", () => {
+    mockSearchParams.set("serialNo", "42");
+    useWaveData.mockReturnValue({ data: wave });
+    useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.CHAT });
+    useWave.mockReturnValue({
+      isRankWave: false,
+      isMemesWave: false,
+      isDm: false,
+    });
+    useWaveViewMode.mockReturnValue({
+      viewMode: "gallery",
+      setViewMode: mockSetViewMode,
+      toggleViewMode: mockToggleViewMode,
+    });
+
+    render(<MyStreamWave waveId="1" />);
+
+    expect(mockSetViewMode).toHaveBeenCalledWith("chat");
+  });
+
+  it("does not reset gallery mode when serialNo is absent", () => {
+    useWaveData.mockReturnValue({ data: wave });
+    useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.CHAT });
+    useWave.mockReturnValue({
+      isRankWave: false,
+      isMemesWave: false,
+      isDm: false,
+    });
+    useWaveViewMode.mockReturnValue({
+      viewMode: "gallery",
+      setViewMode: mockSetViewMode,
+      toggleViewMode: mockToggleViewMode,
+    });
+
+    render(<MyStreamWave waveId="1" />);
+
+    expect(mockSetViewMode).not.toHaveBeenCalled();
+  });
+
+  it("does not reset gallery mode on waves without gallery support", () => {
+    mockSearchParams.set("serialNo", "42");
+    useWaveData.mockReturnValue({ data: wave });
+    useContentTab.mockReturnValue({ activeContentTab: MyStreamWaveTab.CHAT });
+    useWave.mockReturnValue({
+      isRankWave: false,
+      isMemesWave: true,
+      isDm: false,
+    });
+    useWaveViewMode.mockReturnValue({
+      viewMode: "gallery",
+      setViewMode: mockSetViewMode,
+      toggleViewMode: mockToggleViewMode,
+    });
+
+    render(<MyStreamWave waveId="1" />);
+
+    expect(mockSetViewMode).not.toHaveBeenCalled();
   });
 });

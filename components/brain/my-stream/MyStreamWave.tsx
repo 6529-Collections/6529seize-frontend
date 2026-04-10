@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type JSX, useMemo } from "react";
+import React, { type JSX, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSetWaveData } from "@/contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
@@ -82,12 +82,26 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { activeContentTab } = useContentTab();
 
   // View mode for chat/gallery toggle
-  const { viewMode, toggleViewMode } = useWaveViewMode(waveId);
+  const { viewMode, setViewMode, toggleViewMode } = useWaveViewMode(waveId);
 
   // Get wave type info to determine if gallery toggle should be shown
   // Show for CHAT type waves (normal waves), hide for RANK, MEMES, and DMs
   const { isRankWave, isMemesWave, isDm } = useWave(wave);
   const showGalleryToggle = !isRankWave && !isMemesWave && !isDm;
+  const hasSerialTarget = searchParams.get("serialNo") !== null;
+
+  useEffect(() => {
+    if (
+      !wave ||
+      !hasSerialTarget ||
+      !showGalleryToggle ||
+      viewMode !== "gallery"
+    ) {
+      return;
+    }
+
+    setViewMode("chat");
+  }, [hasSerialTarget, setViewMode, showGalleryToggle, viewMode, wave]);
 
   useBreakpoint();
 

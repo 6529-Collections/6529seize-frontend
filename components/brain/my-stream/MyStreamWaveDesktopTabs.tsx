@@ -2,12 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import { TabToggle } from "@/components/common/TabToggle";
+import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
-import { useContentTab, WaveVotingState } from "../ContentTabContext";
+import {
+  useContentTab,
+  WaveVotingState,
+  type SetActiveContentTab,
+} from "../ContentTabContext";
 import { useWave } from "@/hooks/useWave";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { Time } from "@/helpers/time";
 import { useAuth } from "@/components/auth/Auth";
@@ -15,7 +19,7 @@ import { useAuth } from "@/components/auth/Auth";
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
   readonly wave: ApiWave;
-  readonly setActiveTab: (tab: MyStreamWaveTab) => void;
+  readonly setActiveTab: SetActiveContentTab;
 }
 
 interface TabOption {
@@ -44,9 +48,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   wave,
   setActiveTab,
 }) => {
+  const searchParams = useSearchParams();
   // Use the available tabs from context instead of recalculating
-  const { availableTabs, updateAvailableTabs, setActiveContentTab } =
-    useContentTab();
+  const { availableTabs, updateAvailableTabs } = useContentTab();
   const { connectedProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
 
@@ -57,7 +61,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const {
-    voting: { isUpcoming, isCompleted, isInProgress },
+    voting: { isUpcoming, isCompleted },
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
 
@@ -133,6 +137,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   // Calculate time left for next decision
   // Update available tabs when wave changes
   useEffect(() => {
+    const hasSerialTarget = searchParams.get("serialNo") !== null;
     const votingState = isUpcoming
       ? WaveVotingState.NOT_STARTED
       : isCompleted
@@ -148,6 +153,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             isCurationWave,
             votingState,
             hasFirstDecisionPassed: firstDecisionDone,
+            transientPreferredTab: hasSerialTarget
+              ? MyStreamWaveTab.CHAT
+              : null,
           }
         : null
     );
@@ -159,17 +167,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isCurationWave,
     isUpcoming,
     isCompleted,
-    isInProgress,
     firstDecisionDone,
+    searchParams,
     updateAvailableTabs,
   ]);
-
-  // Always switch to Chat for Chat-type waves
-  useEffect(() => {
-    if (wave?.wave?.type === ApiWaveType.Chat) {
-      setActiveContentTab(MyStreamWaveTab.CHAT);
-    }
-  }, [wave?.wave?.type, setActiveContentTab]);
 
   const options: TabOption[] = React.useMemo(
     () =>
