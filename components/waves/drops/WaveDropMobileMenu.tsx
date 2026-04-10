@@ -8,6 +8,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import type { FC } from "react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -178,6 +179,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   showCopyOption,
   copied,
   onCopyToClipboard,
+  showCurationsAction,
   onCurationsClick,
   isAuthor,
   showOptions,
@@ -198,6 +200,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly showCopyOption: boolean;
   readonly copied: boolean;
   readonly onCopyToClipboard: () => void;
+  readonly showCurationsAction: boolean;
   readonly onCurationsClick: () => void;
   readonly isAuthor: boolean;
   readonly showOptions: boolean;
@@ -279,7 +282,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         />
       )}
 
-      {!isTemporaryDrop && (
+      {showCurationsAction && (
         <button
           type="button"
           onClick={onCurationsClick}
@@ -391,6 +394,13 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
 
   const closeMenu = () => setOpen(false);
   const showGuestCopyOnly = connectedProfileHandle === null;
+  const showCurationsAction = useCanShowDropCurationsAction({
+    dropId: drop.id,
+    isTemporaryDrop,
+    isWaveAdmin: drop.wave.authenticated_user_admin === true,
+    enabled:
+      (isOpen || isCurationsDialogOpen) && connectedProfileHandle !== null,
+  });
 
   const handleCurationsClick = () =>
     openCurationsDialogAfterMenuClose({
@@ -434,6 +444,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                 showCopyOption={showCopyOption}
                 copied={copied}
                 onCopyToClipboard={copyToClipboard}
+                showCurationsAction={showCurationsAction}
                 onCurationsClick={handleCurationsClick}
                 isAuthor={isAuthor}
                 showOptions={showOptions}
@@ -447,7 +458,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         </CommonDropdownItemsMobileWrapper>,
         document.body
       )}
-      {!isTemporaryDrop && (
+      {showCurationsAction && (
         <WaveDropCurationsDialog
           dropId={drop.id}
           wave={drop.wave}

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import MyStreamWaveCurationCreateDialog from "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
@@ -184,6 +185,9 @@ export default function WaveDropCurationsDialog({
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { setToast } = useAuth();
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const autoCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -212,8 +216,24 @@ export default function WaveDropCurationsDialog({
   );
   const hasVisibleCurations = sortedCurations.length > 0;
   const hasHiddenCurations = curations.length > 0 && !hasVisibleCurations;
+  const isFirstCurationEmptyState =
+    !isLoading && !isError && !hasHiddenCurations && !hasVisibleCurations;
+  const emptyStateTitle = hasHiddenCurations
+    ? "No curations you can manage"
+    : "No curations yet";
+  const emptyStateDescription = hasHiddenCurations
+    ? "Create a new curation for this wave and add this drop to it."
+    : "Create the first curation for this wave and add this drop to it.";
   const handleRetry = async () => {
     await refetch();
+  };
+
+  const navigateToCuration = (curationId: string) => {
+    const params = new URLSearchParams(searchParams.toString() || "");
+    params.set("curation", curationId);
+    const nextQuery = params.toString();
+    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+    router.replace(nextUrl, { scroll: false });
   };
 
   const clearAutoCloseTimeout = () => {
@@ -221,6 +241,15 @@ export default function WaveDropCurationsDialog({
       clearTimeout(autoCloseTimeoutRef.current);
       autoCloseTimeoutRef.current = null;
     }
+  };
+
+  const scheduleAutoClose = () => {
+    clearAutoCloseTimeout();
+    autoCloseTimeoutRef.current = globalThis.setTimeout(() => {
+      autoCloseTimeoutRef.current = null;
+      setIsCreateCurationOpen(false);
+      onClose();
+    }, AUTO_CLOSE_DELAY_MS);
   };
 
   useEffect(
@@ -232,6 +261,7 @@ export default function WaveDropCurationsDialog({
 
   const handleClose = () => {
     clearAutoCloseTimeout();
+    setIsCreateCurationOpen(false);
     onClose();
   };
 
@@ -241,11 +271,7 @@ export default function WaveDropCurationsDialog({
   ) => {
     try {
       await updateMembershipAsync(curationId, action);
-      clearAutoCloseTimeout();
-      autoCloseTimeoutRef.current = globalThis.setTimeout(() => {
-        autoCloseTimeoutRef.current = null;
-        onClose();
-      }, AUTO_CLOSE_DELAY_MS);
+      scheduleAutoClose();
     } catch {
       clearAutoCloseTimeout();
     }
@@ -273,6 +299,8 @@ export default function WaveDropCurationsDialog({
         type: "success",
         message: "Curation created and drop added.",
       });
+      handleClose();
+      navigateToCuration(curation.id);
     } catch (error) {
       setToast({
         type: "error",
@@ -296,22 +324,24 @@ export default function WaveDropCurationsDialog({
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-2">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
           <div className="tw-flex tw-flex-col tw-gap-6 tw-px-4 tw-pb-6 sm:tw-px-6">
-            <div className="tw-flex tw-flex-col tw-gap-4 tw-pt-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-              <p className="tw-mb-0 tw-text-sm tw-text-iron-400 sm:tw-flex-1 sm:tw-pr-4">
-                Add or remove this drop from curations in this wave.
-              </p>
-              {hasVisibleCurations && (
-                <div className="tw-flex tw-flex-shrink-0">
-                  <SecondaryButton
-                    onClicked={() => setIsCreateCurationOpen(true)}
-                    size="sm"
-                    className="!tw-text-xs"
-                  >
-                    Create and add curation
-                  </SecondaryButton>
-                </div>
-              )}
-            </div>
+            {!isFirstCurationEmptyState && (
+              <div className="tw-flex tw-flex-col tw-gap-4 tw-pt-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+                <p className="tw-mb-0 tw-text-sm tw-text-iron-400 sm:tw-flex-1 sm:tw-pr-4">
+                  Add or remove this drop from curations in this wave.
+                </p>
+                {hasVisibleCurations && (
+                  <div className="tw-flex tw-flex-shrink-0">
+                    <SecondaryButton
+                      onClicked={() => setIsCreateCurationOpen(true)}
+                      size="sm"
+                      className="!tw-text-xs"
+                    >
+                      Create and add curation
+                    </SecondaryButton>
+                  </div>
+                )}
+              </div>
+            )}
 
             {isLoading && (
               <div className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-py-16">
@@ -342,14 +372,10 @@ export default function WaveDropCurationsDialog({
             {!isLoading && !isError && sortedCurations.length === 0 && (
               <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-8 tw-text-center tw-shadow-sm">
                 <p className="tw-mb-2 tw-text-base tw-font-semibold tw-text-iron-100">
-                  {hasHiddenCurations
-                    ? "No curations you can manage"
-                    : "No curations yet"}
+                  {emptyStateTitle}
                 </p>
-                <p className="tw-mb-6 tw-text-sm tw-text-iron-400">
-                  {hasHiddenCurations
-                    ? "Create a new curation for this wave and add this drop to it."
-                    : "Create the first curation for this wave and add this drop to it."}
+                <p className="tw-mx-auto tw-mb-6 tw-max-w-sm tw-text-sm tw-text-iron-400">
+                  {emptyStateDescription}
                 </p>
                 <div className="tw-flex tw-justify-center">
                   <PrimaryButton

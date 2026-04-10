@@ -16,6 +16,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import WaveGroupScope from "@/components/waves/specs/groups/group/WaveGroupScope";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import type { DropCurationMembership } from "@/hooks/drops/useDropCurations";
 import {
   getWaveCurationsQueryKey,
   useWaveCurations,
@@ -47,16 +48,20 @@ export default function WaveActiveCurationSection({
   const activeCurationId = searchParams.get("curation");
   const canManageCurations =
     wave.wave.authenticated_user_eligible_for_admin === true;
+  const shouldLoadCurations = isApp || activeCurationId !== null;
 
   const { data: curations = [] } = useWaveCurations({
     waveId: wave.id,
-    enabled: isApp,
+    enabled: shouldLoadCurations,
   });
+  const resolvedActiveCurationId =
+    activeCurationId ?? (isApp ? (curations[0]?.id ?? null) : null);
 
   const activeCuration = useMemo(
     () =>
-      curations.find((curation) => curation.id === activeCurationId) ?? null,
-    [curations, activeCurationId]
+      curations.find((curation) => curation.id === resolvedActiveCurationId) ??
+      null,
+    [curations, resolvedActiveCurationId]
   );
   const activeGroupId = activeCuration?.group_id ?? null;
 
@@ -115,8 +120,16 @@ export default function WaveActiveCurationSection({
         (current) =>
           current?.filter((item) => item.id !== activeCuration.id) ?? current
       );
+      queryClient.setQueriesData<DropCurationMembership[]>(
+        { queryKey: ["drop-curations"] },
+        (current) =>
+          current?.filter((item) => item.id !== activeCuration.id) ?? current
+      );
       await queryClient.invalidateQueries({
         queryKey: getWaveCurationsQueryKey(wave.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["drop-curations"],
       });
       setToast({
         type: "success",
@@ -150,87 +163,133 @@ export default function WaveActiveCurationSection({
     },
   ];
 
-  if (!isApp || curations.length === 0) {
+  if (!isApp && (!activeCurationId || !activeCuration)) {
     return null;
   }
 
+  const desktopActiveCuration = isApp ? null : activeCuration;
+
   return (
     <>
-      <div className="tw-pb-4">
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
-          <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
-            Curation
-          </p>
-        </div>
+      {isApp ? (
+        curations.length > 0 && (
+          <div className="tw-pb-4">
+            <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
+              <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
+                Curation
+              </p>
+            </div>
 
-        <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-1 tw-px-4">
-          {curations.map((curation) => {
-            const isActive = curation.id === activeCurationId;
+            <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-1 tw-px-4">
+              {curations.map((curation) => {
+                const isActive = curation.id === resolvedActiveCurationId;
 
-            return (
-              <div
-                key={curation.id}
-                className={clsx(
-                  "tw-rounded-xl tw-border tw-border-solid tw-transition-colors tw-duration-200",
-                  isActive
-                    ? "tw-border-iron-800 tw-bg-iron-950/70"
-                    : "tw-border-transparent"
-                )}
-              >
-                <div className="tw-flex tw-items-center">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCuration(curation.id)}
+                return (
+                  <div
+                    key={curation.id}
                     className={clsx(
-                      "tw-flex tw-h-10 tw-min-w-0 tw-flex-1 tw-items-center tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-4 tw-text-left tw-transition-colors tw-duration-200",
+                      "tw-rounded-xl tw-border tw-border-solid tw-transition-colors tw-duration-200",
                       isActive
-                        ? "tw-text-iron-50"
-                        : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900/55 desktop-hover:hover:tw-text-iron-100"
+                        ? "tw-border-iron-800 tw-bg-iron-950/70"
+                        : "tw-border-transparent"
                     )}
-                    aria-pressed={isActive}
                   >
-                    <span
-                      className={clsx(
-                        "tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-leading-tight",
-                        isActive ? "tw-font-semibold" : "tw-font-medium"
+                    <div className="tw-flex tw-items-center">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCuration(curation.id)}
+                        className={clsx(
+                          "tw-flex tw-h-10 tw-min-w-0 tw-flex-1 tw-items-center tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-4 tw-text-left tw-transition-colors tw-duration-200",
+                          isActive
+                            ? "tw-text-iron-50"
+                            : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900/55 desktop-hover:hover:tw-text-iron-100"
+                        )}
+                        aria-pressed={isActive}
+                      >
+                        <span
+                          className={clsx(
+                            "tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-leading-tight",
+                            isActive ? "tw-font-semibold" : "tw-font-medium"
+                          )}
+                        >
+                          {curation.name}
+                        </span>
+                      </button>
+
+                      {isActive && canManageCurations && (
+                        <CompactMenu
+                          triggerClassName="tw-mr-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+                          trigger={
+                            <EllipsisHorizontalIcon className="tw-size-5" />
+                          }
+                          aria-label="Active curation options"
+                          items={menuItems}
+                          menuWidthClassName="tw-w-44"
+                        />
                       )}
-                    >
-                      {curation.name}
-                    </span>
-                  </button>
+                    </div>
 
-                  {isActive && canManageCurations && (
-                    <CompactMenu
-                      triggerClassName="tw-mr-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-                      trigger={<EllipsisHorizontalIcon className="tw-size-5" />}
-                      aria-label="Active curation options"
-                      items={menuItems}
-                      menuWidthClassName="tw-w-44"
-                    />
-                  )}
-                </div>
-
-                {isActive && (
-                  <div className="tw-flex tw-min-h-6 tw-items-center tw-justify-between tw-gap-x-4 tw-pb-2.5 tw-pl-4 tw-pr-4 tw-text-sm">
-                    <span className="tw-font-medium tw-text-iron-500">
-                      Group
-                    </span>
-                    {activeGroup ? (
-                      <WaveGroupScope group={toScopeGroup(activeGroup)} />
-                    ) : (
-                      <span className="tw-max-w-40 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
-                        {isFetchingActiveGroup
-                          ? "Loading..."
-                          : activeCuration?.group_id}
-                      </span>
+                    {isActive && (
+                      <div className="tw-flex tw-min-h-6 tw-items-center tw-justify-between tw-gap-x-4 tw-pb-2.5 tw-pl-4 tw-pr-4 tw-text-sm">
+                        <span className="tw-font-medium tw-text-iron-500">
+                          Group
+                        </span>
+                        {activeGroup ? (
+                          <WaveGroupScope group={toScopeGroup(activeGroup)} />
+                        ) : (
+                          <span className="tw-max-w-40 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
+                            {isFetchingActiveGroup
+                              ? "Loading..."
+                              : activeCuration?.group_id}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          </div>
+        )
+      ) : (
+        <div className="tw-pb-4">
+          <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
+            <div className="tw-min-w-0">
+              <p className="tw-mb-1 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
+                Curation
+              </p>
+              <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-400">
+                {desktopActiveCuration?.name}
+              </p>
+            </div>
+
+            {canManageCurations && (
+              <CompactMenu
+                triggerClassName="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+                trigger={<EllipsisHorizontalIcon className="tw-size-5" />}
+                aria-label="Active curation options"
+                items={menuItems}
+                menuWidthClassName="tw-w-44"
+              />
+            )}
+          </div>
+
+          <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4">
+            <div className="tw-flex tw-h-6 tw-items-center tw-justify-between tw-text-sm">
+              <span className="tw-font-medium tw-text-iron-500">Group</span>
+              {activeGroup ? (
+                <WaveGroupScope group={toScopeGroup(activeGroup)} />
+              ) : (
+                <span className="tw-max-w-40 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
+                  {isFetchingActiveGroup
+                    ? "Loading..."
+                    : desktopActiveCuration?.group_id}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {isEditOpen && activeCuration && activeGroup && (
         <MyStreamWaveCurationCreateDialog

@@ -4,8 +4,10 @@ import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/d
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
+import { useAuth } from "@/components/auth/Auth";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { useMemo, useRef, useState } from "react";
@@ -29,12 +31,19 @@ export default function WaveDropActionsMore({
   drop,
   onOpenChange,
 }: WaveDropActionsMoreProps) {
+  const { connectedProfile } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
-  const showCurationsAction = !drop.id.startsWith("temp-");
+  const showCurationsAction = useCanShowDropCurationsAction({
+    dropId: drop.id,
+    isTemporaryDrop: drop.id.startsWith("temp-"),
+    isWaveAdmin: drop.wave.authenticated_user_admin === true,
+    enabled:
+      (isOpen || isCurationsDialogOpen) && Boolean(connectedProfile?.handle),
+  });
 
   const handleOpenChange = (newIsOpen: boolean) => {
     setIsOpen(newIsOpen);

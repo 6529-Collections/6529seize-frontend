@@ -56,7 +56,7 @@ interface MyStreamWaveCurationCreateDialogProps {
     | Pick<ApiWaveMin, "id" | "admin_group_id">;
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly onSaved: (curation: ApiWaveCuration) => void;
+  readonly onSaved: (curation: ApiWaveCuration) => Promise<void> | void;
   readonly showSuccessToast?: boolean | undefined;
   readonly curation?: ApiWaveCuration | null | undefined;
   readonly initialGroup?: ApiGroupFull | null | undefined;
@@ -641,7 +641,7 @@ export default function MyStreamWaveCurationCreateDialog({
           message: isEditMode ? "Curation updated." : "Curation created.",
         });
       }
-      onSaved(saved);
+      await onSaved(saved);
       onClose();
     },
     onError: (error) => {
