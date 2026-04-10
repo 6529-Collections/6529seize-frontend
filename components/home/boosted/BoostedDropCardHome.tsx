@@ -128,30 +128,25 @@ const BoostedDropCardHeader = memo(
     createdAt,
     fireIconsToShow,
     isChatVariant,
-    rank,
     remainingBoosts,
   }: {
     readonly createdAt: ApiDrop["created_at"];
     readonly fireIconsToShow: number;
     readonly isChatVariant: boolean;
-    readonly rank?: number | undefined;
     readonly remainingBoosts: number;
   }) => (
-    <div className={HEADER_CLASSES}>
-      <div className={HEADER_LEFT_CLASSES}>
-        {isChatVariant && typeof rank === "number" && (
+    <div
+      className={`${HEADER_CLASSES}${isChatVariant ? "tw-justify-end" : ""}`}
+    >
+      {!isChatVariant && (
+        <div className={HEADER_LEFT_CLASSES}>
           <div className={PILL_CLASSES}>
-            <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-iron-100">
-              #{rank}
+            <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-iron-300">
+              {getTimeAgoShort(createdAt)}
             </span>
           </div>
-        )}
-        <div className={PILL_CLASSES}>
-          <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-iron-300">
-            {getTimeAgoShort(createdAt)}
-          </span>
         </div>
-      </div>
+      )}
       <div className={`${PILL_CLASSES} tw-gap-0.5 sm:tw-ml-auto`}>
         {Array.from({ length: fireIconsToShow }).map((_, index) => (
           <BoostIcon
@@ -233,7 +228,7 @@ const BoostedDropCardFooter = memo(
 BoostedDropCardFooter.displayName = "BoostedDropCardFooter";
 
 const BoostedDropCardHome = memo(
-  ({ drop, onClick, variant = "home", rank }: BoostedDropCardHomeProps) => {
+  ({ drop, onClick, variant = "home" }: BoostedDropCardHomeProps) => {
     const part = drop.parts[0];
     const { author, wave, boosts } = drop;
     const fireIconsToShow = Math.min(boosts, MAX_FIRE_ICONS);
@@ -259,7 +254,6 @@ const BoostedDropCardHome = memo(
           createdAt={drop.created_at}
           fireIconsToShow={fireIconsToShow}
           isChatVariant={isChatVariant}
-          rank={rank}
           remainingBoosts={remainingBoosts}
         />
         <BoostedDropCardHomeContent isChatVariant={isChatVariant} part={part} />
