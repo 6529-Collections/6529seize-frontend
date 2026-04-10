@@ -680,7 +680,9 @@ describe("WebSocketProvider", () => {
       consoleSpy.mockRestore();
     });
 
-    it("closes existing connection before creating new one", () => {
+    it("closes existing connection before creating new one and ignores stale close events", () => {
+      jest.useFakeTimers();
+
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
         wrapper,
@@ -702,11 +704,69 @@ describe("WebSocketProvider", () => {
         result.current.connect("token2");
       });
 
+      const ws2 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[1]?.value as MockWebSocket;
+
       expect(ws1.close).toHaveBeenCalled();
       expect(global.WebSocket).toHaveBeenCalledTimes(2);
       expect(global.WebSocket).toHaveBeenLastCalledWith(
         "ws://test?token=token2"
       );
+
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
+
+      act(() => {
+        ws1.triggerClose(1006, "Stale socket close");
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
+
+      act(() => {
+        ws2.triggerOpen();
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
+    });
+
+    it("ignores open events from a replaced socket", () => {
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect("token1");
+      });
+
+      const ws1 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+
+      act(() => {
+        result.current.connect("token2");
+      });
+
+      const ws2 = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[1]?.value as MockWebSocket;
+
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
+
+      act(() => {
+        ws1.triggerOpen();
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
+
+      act(() => {
+        ws2.triggerOpen();
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
     });
   });
 

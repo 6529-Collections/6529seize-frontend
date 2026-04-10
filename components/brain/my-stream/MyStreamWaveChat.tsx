@@ -191,7 +191,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   }
 
   useEffect(() => {
-    if (!initialDropState) {
+    if (!initialDropState || viewMode === "gallery") {
       return;
     }
 
@@ -205,7 +205,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeRoute();
     router.replace(href, { scroll: false });
-  }, [initialDropState, searchParams, router, pathname]);
+  }, [initialDropState, pathname, router, searchParams, viewMode]);
 
   const { waveViewStyle } = useLayout();
 

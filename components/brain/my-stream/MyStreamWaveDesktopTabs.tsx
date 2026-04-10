@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { EllipsisVerticalIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { TabToggle } from "@/components/common/TabToggle";
+import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
@@ -13,14 +14,18 @@ import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
 import { useAuth } from "@/components/auth/Auth";
 import { MyStreamWaveTab } from "@/types/waves.types";
-import { useContentTab, WaveVotingState } from "../ContentTabContext";
+import {
+  useContentTab,
+  WaveVotingState,
+  type SetActiveContentTab,
+} from "../ContentTabContext";
 import MyStreamWaveCurationCreateDialog from "./tabs/MyStreamWaveCurationCreateDialog";
 import MyStreamActionTooltip from "./MyStreamActionTooltip";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
   readonly wave: ApiWave;
-  readonly setActiveTab: (tab: MyStreamWaveTab) => void;
+  readonly setActiveTab: SetActiveContentTab;
   readonly activeCurationId: string | null;
   readonly onSelectCuration: (curationId: string | null) => void;
 }
@@ -75,6 +80,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeCurationId,
   onSelectCuration,
 }) => {
+  const searchParams = useSearchParams();
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
   const { connectedProfile } = useAuth();
@@ -151,6 +157,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   });
 
   useEffect(() => {
+    const hasSerialTarget = searchParams.get("serialNo") !== null;
     updateAvailableTabs({
       waveId: wave.id,
       isMemesWave,
@@ -159,6 +166,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isCurationWave,
       votingState,
       hasFirstDecisionPassed: firstDecisionDone,
+      transientPreferredTab: hasSerialTarget ? MyStreamWaveTab.CHAT : null,
     });
   }, [
     wave,
@@ -168,6 +176,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isCurationWave,
     votingState,
     firstDecisionDone,
+    searchParams,
     updateAvailableTabs,
   ]);
 

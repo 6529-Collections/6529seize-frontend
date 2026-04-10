@@ -4,27 +4,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 
 const mockToggleBoost = jest.fn();
-const mockUseInView = jest.fn();
 const mockBoostedDropLinkPreview = jest.fn();
-const originalImage = global.Image;
-
-type MockImageInstance = {
-  naturalHeight: number;
-  naturalWidth: number;
-  onload: null | (() => void);
-  src: string;
-};
-type MockVideoInstance = {
-  addEventListener: jest.Mock;
-  dispatchLoadedMetadata: () => void;
-  load: jest.Mock;
-  preload: string;
-  removeAttribute: jest.Mock;
-  removeEventListener: jest.Mock;
-  src: string;
-  videoHeight: number;
-  videoWidth: number;
-};
 type ResizeObserverHarness = {
   restore: () => void;
   trigger: () => void;
@@ -75,10 +55,6 @@ jest.mock("@/components/home/boosted/BoostedDropLinkPreview", () => ({
     mockBoostedDropLinkPreview(props);
     return <div data-testid="link-preview">{props.href}</div>;
   },
-}));
-
-jest.mock("@/hooks/useInView", () => ({
-  useInView: (...args: any[]) => mockUseInView(...args),
 }));
 
 jest.mock("@/hooks/drops/useDropBoostMutation", () => ({
@@ -148,93 +124,6 @@ const renderWithAuth = (
     </AuthContext.Provider>
   );
 
-const createInViewResult = (inView = true) =>
-  [{ current: null }, inView] as const;
-
-const installImageMock = () => {
-  const imageInstances: MockImageInstance[] = [];
-  const MockImage = jest.fn().mockImplementation(() => {
-    const instance: MockImageInstance = {
-      naturalHeight: 0,
-      naturalWidth: 0,
-      onload: null,
-      src: "",
-    };
-    imageInstances.push(instance);
-    return instance;
-  });
-
-  Object.defineProperty(global, "Image", {
-    configurable: true,
-    value: MockImage,
-    writable: true,
-  });
-
-  return imageInstances;
-};
-
-const restoreImageMock = () => {
-  Object.defineProperty(global, "Image", {
-    configurable: true,
-    value: originalImage,
-    writable: true,
-  });
-};
-
-const installVideoElementMock = () => {
-  const videoInstances: MockVideoInstance[] = [];
-  const originalCreateElement = document.createElement.bind(document);
-  const createElementSpy = jest
-    .spyOn(document, "createElement")
-    .mockImplementation(((
-      tagName: string,
-      options?: ElementCreationOptions
-    ) => {
-      if (tagName !== "video") {
-        return originalCreateElement(tagName, options);
-      }
-
-      const listeners = new Map<string, Array<() => void>>();
-      const instance: MockVideoInstance = {
-        addEventListener: jest.fn((eventName: string, listener: () => void) => {
-          listeners.set(eventName, [
-            ...(listeners.get(eventName) ?? []),
-            listener,
-          ]);
-        }),
-        dispatchLoadedMetadata: () => {
-          for (const listener of listeners.get("loadedmetadata") ?? []) {
-            listener();
-          }
-        },
-        load: jest.fn(),
-        preload: "",
-        removeAttribute: jest.fn(),
-        removeEventListener: jest.fn(
-          (eventName: string, listener: () => void) => {
-            listeners.set(
-              eventName,
-              (listeners.get(eventName) ?? []).filter(
-                (registeredListener) => registeredListener !== listener
-              )
-            );
-          }
-        ),
-        src: "",
-        videoHeight: 0,
-        videoWidth: 0,
-      };
-
-      videoInstances.push(instance);
-      return instance as any;
-    }) as any);
-
-  return {
-    restore: () => createElementSpy.mockRestore(),
-    videoInstances,
-  };
-};
-
 const createMediaDrop = (url: string, mimeType = "image/png") =>
   createDrop({
     parts: [
@@ -294,12 +183,6 @@ describe("BoostedDropCardHome", () => {
   beforeEach(() => {
     mockBoostedDropLinkPreview.mockClear();
     mockToggleBoost.mockReset();
-    mockUseInView.mockImplementation(() => createInViewResult(true));
-    restoreImageMock();
-  });
-
-  afterAll(() => {
-    restoreImageMock();
   });
 
   it("renders the wave pill in the default home variant", () => {
@@ -323,7 +206,7 @@ describe("BoostedDropCardHome", () => {
     );
   });
 
-  it("renders chat variant rank and hides the wave pill", () => {
+  it("hides chat header metadata and the wave pill", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop()}
@@ -333,12 +216,13 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
-    expect(screen.getByText("#2")).toBeInTheDocument();
+    expect(screen.queryByText("#2")).not.toBeInTheDocument();
+    expect(screen.queryByText("1m")).not.toBeInTheDocument();
     expect(screen.queryByText("Spec Wave")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Boost" })).toBeInTheDocument();
   });
 
-  it("drops the fixed-height text frame in the chat variant", () => {
+  it("uses a capped auto-height text frame in the chat variant", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop()}
@@ -348,6 +232,9 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
+    expect(screen.getByTestId("boosted-drop-content-frame")).toHaveClass(
+      "tw-max-h-[11rem]"
+    );
     expect(screen.getByTestId("boosted-drop-content-frame")).not.toHaveClass(
       "tw-aspect-[2/1]"
     );
@@ -375,7 +262,7 @@ describe("BoostedDropCardHome", () => {
     );
   });
 
-  it("drops the homepage media ratio classes in the chat variant", () => {
+  it("caps the media frame height in the chat variant", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createMediaDrop("https://example.com/a.png")}
@@ -385,8 +272,11 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
-    expect(screen.getByTestId("boosted-drop-media-frame")).not.toHaveClass(
+    expect(screen.getByTestId("boosted-drop-media-frame")).toHaveClass(
       "tw-aspect-[2/1]"
+    );
+    expect(screen.getByTestId("boosted-drop-media-frame")).toHaveClass(
+      "tw-max-h-[11rem]"
     );
   });
 
@@ -423,7 +313,7 @@ describe("BoostedDropCardHome", () => {
     );
   });
 
-  it("passes the chat preview variant for standalone urls in chat boosted cards", () => {
+  it("reuses the homepage preview variant for standalone urls in chat boosted cards", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop({
@@ -443,17 +333,19 @@ describe("BoostedDropCardHome", () => {
     expect(mockBoostedDropLinkPreview).toHaveBeenLastCalledWith(
       expect.objectContaining({
         href: "https://example.com/article",
-        variant: "chat",
+        variant: "home",
       })
     );
 
-    expect(screen.getByTestId("link-preview").parentElement).toHaveClass(
-      "tw-px-3",
-      "sm:tw-px-4"
+    expect(screen.getByTestId("boosted-drop-content-frame")).toHaveClass(
+      "tw-max-h-[11rem]"
+    );
+    expect(screen.getByTestId("boosted-drop-content-frame")).not.toHaveClass(
+      "tw-aspect-[2/1]"
     );
   });
 
-  it("adds bottom spacing to preview-only chat cards", () => {
+  it("lets preview-only chat cards shrink below the old fixed frame", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop({
@@ -470,14 +362,15 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
-    expect(screen.getByTestId("link-preview").parentElement).toHaveClass(
-      "tw-px-3",
-      "sm:tw-px-4",
-      "tw-pb-4"
+    expect(screen.getByTestId("boosted-drop-content-frame")).toHaveClass(
+      "tw-max-h-[11rem]"
+    );
+    expect(screen.getByTestId("boosted-drop-content-frame")).not.toHaveClass(
+      "tw-aspect-[2/1]"
     );
   });
 
-  it("keeps caption content for chat cards with lead media", () => {
+  it("matches the homepage media-only content in chat cards with lead media", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop({
@@ -497,12 +390,10 @@ describe("BoostedDropCardHome", () => {
     );
 
     expect(screen.getAllByTestId("drop-media")).toHaveLength(1);
-    expect(screen.getByTestId("content-display")).toHaveTextContent(
-      "Caption context"
-    );
+    expect(screen.queryByTestId("content-display")).not.toBeInTheDocument();
   });
 
-  it("keeps only supplemental attachments in the chat content block after the lead media", () => {
+  it("does not render supplemental chat content after the lead media", () => {
     renderWithAuth(
       <BoostedDropCardHome
         drop={createDrop({
@@ -523,15 +414,7 @@ describe("BoostedDropCardHome", () => {
     );
 
     expect(screen.getAllByTestId("drop-media")).toHaveLength(1);
-    expect(screen.getByTestId("content-display")).toHaveTextContent(
-      "Caption context"
-    );
-    expect(screen.getByTestId("content-display")).toHaveTextContent(
-      "https://example.com/b.png"
-    );
-    expect(screen.getByTestId("content-display")).not.toHaveTextContent(
-      "https://example.com/a.png"
-    );
+    expect(screen.queryByTestId("content-display")).not.toBeInTheDocument();
   });
 
   it("hides the home preview text when the link preview overflows the frame", () => {
@@ -601,140 +484,6 @@ describe("BoostedDropCardHome", () => {
       textRectSpy?.mockRestore();
       getComputedStyleSpy?.mockRestore();
       resizeObserver.restore();
-    }
-  });
-
-  it("uses the fallback ratio until image metadata resolves in the chat variant", () => {
-    const imageInstances = installImageMock();
-
-    renderWithAuth(
-      <BoostedDropCardHome
-        drop={createMediaDrop("https://example.com/a.png")}
-        onClick={jest.fn()}
-        variant="chat"
-        rank={1}
-      />
-    );
-
-    expect(
-      screen.getByTestId("boosted-drop-media-frame").parentElement
-    ).toHaveClass("tw-px-3", "sm:tw-px-4", "tw-pb-4");
-    expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
-      aspectRatio: "8 / 5",
-    });
-
-    act(() => {
-      const firstImage = imageInstances[0]!;
-      firstImage.naturalWidth = 1200;
-      firstImage.naturalHeight = 600;
-      firstImage.onload?.();
-    });
-
-    expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
-      aspectRatio: "1200 / 600",
-    });
-  });
-
-  it("does not preload chat image metadata while the card is out of view", () => {
-    const imageInstances = installImageMock();
-    mockUseInView.mockImplementation(() => createInViewResult(false));
-
-    renderWithAuth(
-      <BoostedDropCardHome
-        drop={createMediaDrop("https://example.com/a.png")}
-        onClick={jest.fn()}
-        variant="chat"
-        rank={1}
-      />
-    );
-
-    expect(imageInstances).toHaveLength(0);
-    expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
-      aspectRatio: "8 / 5",
-    });
-  });
-
-  it("does not keep the previous media ratio while a new chat image is loading", () => {
-    const imageInstances = installImageMock();
-
-    const { rerender } = renderWithAuth(
-      <BoostedDropCardHome
-        drop={createMediaDrop("https://example.com/a.png")}
-        onClick={jest.fn()}
-        variant="chat"
-        rank={1}
-      />
-    );
-
-    act(() => {
-      const firstImage = imageInstances[0]!;
-      firstImage.naturalWidth = 1200;
-      firstImage.naturalHeight = 600;
-      firstImage.onload?.();
-    });
-
-    expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
-      aspectRatio: "1200 / 600",
-    });
-
-    rerender(
-      <AuthContext.Provider
-        value={{ connectedProfile: { handle: "viewer" } } as any}
-      >
-        <BoostedDropCardHome
-          drop={createMediaDrop("https://example.com/b.png")}
-          onClick={jest.fn()}
-          variant="chat"
-          rank={1}
-        />
-      </AuthContext.Provider>
-    );
-
-    expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
-      aspectRatio: "8 / 5",
-    });
-
-    act(() => {
-      const secondImage = imageInstances[1]!;
-      secondImage.naturalWidth = 900;
-      secondImage.naturalHeight = 1200;
-      secondImage.onload?.();
-    });
-
-    expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
-      aspectRatio: "900 / 1200",
-    });
-  });
-
-  it("updates the chat media ratio after video metadata resolves", () => {
-    const { restore, videoInstances } = installVideoElementMock();
-
-    try {
-      renderWithAuth(
-        <BoostedDropCardHome
-          drop={createMediaDrop("https://example.com/a.mp4", "video/mp4")}
-          onClick={jest.fn()}
-          variant="chat"
-          rank={1}
-        />
-      );
-
-      expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
-        aspectRatio: "8 / 5",
-      });
-
-      act(() => {
-        const firstVideo = videoInstances[0]!;
-        firstVideo.videoWidth = 1920;
-        firstVideo.videoHeight = 1080;
-        firstVideo.dispatchLoadedMetadata();
-      });
-
-      expect(screen.getByTestId("boosted-drop-media-frame")).toHaveStyle({
-        aspectRatio: "1920 / 1080",
-      });
-    } finally {
-      restore();
     }
   });
 

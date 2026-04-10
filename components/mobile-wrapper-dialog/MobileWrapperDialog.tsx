@@ -131,6 +131,7 @@ export default function MobileWrapperDialog({
   showScrollbar,
   allowOverflow,
   maxWidthClass,
+  zIndexClassName = "tw-z-[1010]",
   headerClassName,
   mobileCloseButtonClassName,
   dismissible = true,
@@ -148,6 +149,7 @@ export default function MobileWrapperDialog({
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
+  readonly zIndexClassName?: string | undefined;
   readonly headerClassName?: string | undefined;
   readonly mobileCloseButtonClassName?: string | undefined;
   readonly dismissible?: boolean | undefined;
@@ -185,7 +187,7 @@ export default function MobileWrapperDialog({
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-absolute tw-z-[1010]"
+        className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
         onClose={handleClose}
       >
         <TransitionChild
