@@ -37,7 +37,6 @@ function getAssetPrefix(assetsFromS3: boolean, version: string): string {
 }
 
 const standaloneOutput = { output: "standalone" as const };
-const allowedDevOrigins = ["192.168.1.151"];
 
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
@@ -73,7 +72,6 @@ const nextConfigFactory = (phase: string): NextConfig => {
     return {
       ...sharedConfig(publicEnv, assetPrefix),
       ...standaloneOutput,
-      ...(phase === PHASE_DEVELOPMENT_SERVER ? { allowedDevOrigins } : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
