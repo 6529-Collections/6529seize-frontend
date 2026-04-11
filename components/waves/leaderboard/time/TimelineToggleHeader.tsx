@@ -4,11 +4,14 @@ import type { FC } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
+import type { TimeLeft } from "@/helpers/waves/time.utils";
+import { CompactTimeCountdown } from "./CompactTimeCountdown";
 
 interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;
   readonly setIsOpen: (isOpen: boolean) => void;
   readonly nextDecisionTime: number | null;
+  readonly timeLeft: TimeLeft;
   readonly isPaused?: boolean | undefined;
   readonly currentPause?: ApiWaveDecisionPause | null | undefined;
 }
@@ -20,10 +23,19 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
   isOpen,
   setIsOpen,
   nextDecisionTime,
+  timeLeft,
   isPaused = false,
   currentPause,
 }) => {
   const hasNextDecision = typeof nextDecisionTime === "number";
+  const formattedNextDecisionDate = hasNextDecision
+    ? new Date(nextDecisionTime).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
 
   // Extract the status display logic
   const getStatusDisplay = () => {
@@ -50,14 +62,12 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
 
     if (hasNextDecision) {
       return (
-        <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-          {new Date(nextDecisionTime).toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </span>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-4 tw-gap-y-1">
+          <CompactTimeCountdown timeLeft={timeLeft} />
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-300">
+            {formattedNextDecisionDate}
+          </span>
+        </div>
       );
     }
 
@@ -80,7 +90,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
           {hasNextDecision ? "Decision Timeline" : "Announcement history"}
         </span>
 
-        <div className="tw-flex tw-flex-1 tw-items-center tw-justify-end tw-text-xs tw-font-medium">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-text-xs tw-font-medium">
           {getStatusDisplay()}
         </div>
 

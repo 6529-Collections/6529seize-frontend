@@ -1,17 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
-import { useWave } from "../../../../hooks/useWave";
-import { useDecisionPoints } from "../../../../hooks/waves/useDecisionPoints";
-import { Time } from "../../../../helpers/time";
-import type { TimeLeft } from "../../../../helpers/waves/time.utils";
-import { calculateTimeLeft } from "../../../../helpers/waves/time.utils";
-import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import {
   ChevronDoubleLeftIcon,
@@ -36,13 +30,6 @@ import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import MyStreamWaveCreateCurationAction from "./MyStreamWaveCreateCurationAction";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
-
-const EMPTY_TIME_LEFT: TimeLeft = {
-  days: 0,
-  hours: 0,
-  minutes: 0,
-  seconds: 0,
-};
 
 interface MyStreamWaveTabsMemeProps {
   readonly wave: ApiWave;
@@ -103,52 +90,6 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
 
     return <LinkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
   };
-
-  const {
-    isMemesWave,
-    isRankWave,
-    pauses: { filterDecisionsDuringPauses },
-  } = useWave(wave);
-
-  const { allDecisions } = useDecisionPoints(wave);
-
-  const filteredDecisions = React.useMemo(() => {
-    const decisionsAsApiFormat: { decision_time: number }[] = allDecisions.map(
-      (decision) => ({ decision_time: decision.timestamp })
-    );
-    const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
-    return allDecisions.filter((decision) =>
-      filtered.some((f) => f.decision_time === decision.timestamp)
-    );
-  }, [allDecisions, filterDecisionsDuringPauses]);
-
-  const nextDecisionTime =
-    filteredDecisions.find(
-      (decision) => decision.timestamp > Time.currentMillis()
-    )?.timestamp ?? null;
-
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(EMPTY_TIME_LEFT);
-
-  useEffect(() => {
-    if (typeof nextDecisionTime !== "number") return;
-
-    const intervalId = setInterval(() => {
-      const newTimeLeft = calculateTimeLeft(nextDecisionTime);
-      setTimeLeft(newTimeLeft);
-      if (
-        newTimeLeft.days === 0 &&
-        newTimeLeft.hours === 0 &&
-        newTimeLeft.minutes === 0 &&
-        newTimeLeft.seconds === 0
-      ) {
-        clearInterval(intervalId);
-      }
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, [nextDecisionTime]);
-
-  const displayedTimeLeft =
-    typeof nextDecisionTime === "number" ? timeLeft : EMPTY_TIME_LEFT;
 
   const handleMemesSubmit = () => {
     setIsMemesModalOpen(true);
@@ -296,12 +237,6 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
               onCreated={onSelectCuration}
             />
           )}
-          {(isMemesWave || isRankWave) &&
-            typeof nextDecisionTime === "number" && (
-              <div className="tw-hidden md:tw-flex md:tw-flex-shrink-0 md:tw-pr-4">
-                <CompactTimeCountdown timeLeft={displayedTimeLeft} />
-              </div>
-            )}
         </div>
       </div>
       <MemesArtSubmissionModal

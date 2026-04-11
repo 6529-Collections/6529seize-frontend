@@ -305,62 +305,63 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   return (
     <div className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-2 tw-@container/tabs sm:tw-px-4">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 sm:tw-hidden">
-          <div
-            ref={mobileTabsScrollerRef}
-            className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
-          >
-            <div className="tw-inline-flex tw-items-center tw-gap-1">
-              <TabToggle
-                options={mobileOptions}
-                activeKey={activeKey}
-                onSelect={(key) => {
-                  if (key.startsWith("curation:")) {
-                    onSelectCuration(key.replace("curation:", ""));
-                    return;
-                  }
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 sm:tw-hidden">
+        <div
+          ref={mobileTabsScrollerRef}
+          className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
+        >
+          <div className="tw-inline-flex tw-items-center tw-gap-1">
+            <TabToggle
+              options={mobileOptions}
+              activeKey={activeKey}
+              onSelect={(key) => {
+                if (key.startsWith("curation:")) {
+                  onSelectCuration(key.replace("curation:", ""));
+                  return;
+                }
 
-                  onSelectCuration(null);
-                  setActiveTab(key as MyStreamWaveTab);
-                }}
+                onSelectCuration(null);
+                setActiveTab(key as MyStreamWaveTab);
+              }}
+            />
+            {mobileOverflowItems.length > 0 && (
+              <CompactMenu
+                triggerClassName="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+                trigger={<EllipsisVerticalIcon className="tw-h-5 tw-w-5" />}
+                aria-label="More curations"
+                items={mobileOverflowItems}
+                menuWidthClassName="tw-w-52"
               />
-              {mobileOverflowItems.length > 0 && (
-                <CompactMenu
-                  triggerClassName="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
-                  trigger={<EllipsisVerticalIcon className="tw-h-5 tw-w-5" />}
-                  aria-label="More curations"
-                  items={mobileOverflowItems}
-                  menuWidthClassName="tw-w-52"
-                />
-              )}
-            </div>
+            )}
           </div>
         </div>
-        <div
-          ref={desktopTabsScrollerRef}
-          className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
-        >
-          <TabToggle
-            options={options}
-            activeKey={activeKey}
-            onSelect={(key) => {
-              if (key.startsWith("curation:")) {
-                onSelectCuration(key.replace("curation:", ""));
-                return;
-              }
+      </div>
+      <div
+        ref={desktopTabsScrollerRef}
+        className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
+      >
+        <TabToggle
+          options={options}
+          activeKey={activeKey}
+          onSelect={(key) => {
+            if (key.startsWith("curation:")) {
+              onSelectCuration(key.replace("curation:", ""));
+              return;
+            }
 
-              onSelectCuration(null);
-              setActiveTab(key as MyStreamWaveTab);
-            }}
-          />
-        </div>
-        {showCreateCurationAction && (
+            onSelectCuration(null);
+            setActiveTab(key as MyStreamWaveTab);
+          }}
+        />
+      </div>
+      {showCreateCurationAction && (
+        <div className="sm:tw-ml-auto">
           <MyStreamWaveCreateCurationAction
             wave={wave}
             onCreated={onSelectCuration}
-            className="sm:tw-ml-auto"
           />
-        )}
+        </div>
+      )}
     </div>
   );
 };
