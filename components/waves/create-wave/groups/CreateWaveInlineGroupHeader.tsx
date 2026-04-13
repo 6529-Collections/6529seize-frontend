@@ -48,6 +48,7 @@ export default function CreateWaveInlineGroupHeader({
             label={identityChipLabel}
             disabled={disabled}
             active={isIdentityPanel}
+            isToggle={true}
             onClick={onIdentityToggle}
           />
           {!isRulePanel &&
@@ -63,12 +64,14 @@ export default function CreateWaveInlineGroupHeader({
             label="Add rule"
             disabled={disabled}
             active={isRulePanel}
+            isToggle={true}
             onClick={onRulesToggle}
           />
           <DraftChipButton
             label="Use existing group"
             disabled={disabled}
             active={isSearchPanel}
+            isToggle={true}
             onClick={onSearchToggle}
           />
         </div>

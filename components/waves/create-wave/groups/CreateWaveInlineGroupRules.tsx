@@ -57,6 +57,7 @@ export function CreateWaveInlineGroupRuleEditorPanel({
             disabled={disabled}
             active={activeRule === rule}
             compact={true}
+            isToggle={true}
             onClick={() => onRuleToggle(rule)}
           />
         ))}

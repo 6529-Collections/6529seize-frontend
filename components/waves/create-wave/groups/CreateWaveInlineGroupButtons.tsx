@@ -25,12 +25,14 @@ export function DraftChipButton({
   disabled = false,
   active = false,
   compact = false,
+  isToggle = false,
 }: {
   readonly label: string;
   readonly onClick: () => void;
   readonly disabled?: boolean | undefined;
   readonly active?: boolean | undefined;
   readonly compact?: boolean | undefined;
+  readonly isToggle?: boolean | undefined;
 }) {
   const stateClasses = active
     ? "tw-border-primary-400 tw-bg-primary-500/15 tw-text-primary-200 desktop-hover:hover:tw-border-primary-300 desktop-hover:hover:tw-bg-primary-500/20"
@@ -44,7 +46,7 @@ export function DraftChipButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-pressed={active}
+      aria-pressed={isToggle ? active : undefined}
       className={`tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 ${sizeClasses} ${stateClasses}`}
     >
       {label}
