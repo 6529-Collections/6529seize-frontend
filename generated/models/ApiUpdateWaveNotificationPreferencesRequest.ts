@@ -11,10 +11,12 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { HttpFile } from '../http/http';
 
-export class GetWaveSubscription200Response {
+export class ApiUpdateWaveNotificationPreferencesRequest {
     'subscribed'?: boolean;
+    'enabled_group_notifications'?: Array<ApiDropGroupMention>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,10 +28,16 @@ export class GetWaveSubscription200Response {
             "baseName": "subscribed",
             "type": "boolean",
             "format": ""
+        },
+        {
+            "name": "enabled_group_notifications",
+            "baseName": "enabled_group_notifications",
+            "type": "Array<ApiDropGroupMention>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return GetWaveSubscription200Response.attributeTypeMap;
+        return ApiUpdateWaveNotificationPreferencesRequest.attributeTypeMap;
     }
 
     public constructor() {

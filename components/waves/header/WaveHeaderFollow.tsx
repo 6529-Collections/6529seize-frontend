@@ -35,15 +35,19 @@ const LOADER_SIZES: Record<WaveFollowBtnSize, CircleLoaderSize> = {
   [WaveFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
 };
 
+interface WaveHeaderFollowProps {
+  readonly wave: ApiWave;
+  readonly subscribeToAllDrops?: boolean | undefined;
+  readonly size?: WaveFollowBtnSize | undefined;
+  readonly fullWidth?: boolean | undefined;
+}
+
 export default function WaveHeaderFollow({
   wave,
   subscribeToAllDrops = false,
   size = WaveFollowBtnSize.MEDIUM,
-}: {
-  readonly wave: ApiWave;
-  readonly subscribeToAllDrops?: boolean | undefined;
-  readonly size?: WaveFollowBtnSize | undefined;
-}) {
+  fullWidth = false,
+}: WaveHeaderFollowProps) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
   const following = !!wave.subscribed_actions.length;
@@ -134,11 +138,12 @@ export default function WaveHeaderFollow({
     } else if (following) {
       return (
         <svg
-          className="tw-h-3 tw-w-3 tw-flex-shrink-0 -tw-ml-1"
+          className="-tw-ml-1 tw-h-3 tw-w-3 tw-flex-shrink-0"
           viewBox="0 0 17 15"
           fill="none"
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -150,11 +155,12 @@ export default function WaveHeaderFollow({
     } else {
       return (
         <svg
-          className={`${SVG_CLASSES[size]} tw-h-3 tw-w-3 tw-flex-shrink-0 -tw-ml-1`}
+          className={`${SVG_CLASSES[size]} -tw-ml-1 tw-h-3 tw-w-3 tw-flex-shrink-0`}
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M12 5V19M5 12H19"
             stroke="currentColor"
@@ -168,16 +174,17 @@ export default function WaveHeaderFollow({
   };
 
   return (
-    <div className="tw-flex tw-items-center">
+    <div className={`tw-flex tw-items-center ${fullWidth ? "tw-w-full" : ""}`}>
       <button
         onClick={onFollow}
         disabled={mutating}
         type="button"
         className={`${BUTTON_CLASSES[size]} ${
           following
-            ? "tw-bg-iron-800 tw-ring-iron-700 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
-            : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
-        } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
+            ? "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
+            : "tw-bg-primary-500 tw-text-white tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600"
+        } ${fullWidth ? "tw-h-10 tw-w-full tw-justify-center lg:tw-h-9" : ""} tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+      >
         {printIcon()}
         <span>{label}</span>
       </button>
