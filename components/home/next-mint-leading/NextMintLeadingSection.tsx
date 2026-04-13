@@ -36,7 +36,7 @@ export function NextMintLeadingSection() {
   const { drops, isFetching: isLeaderboardFetching } = useWaveDropsLeaderboard({
     waveId: waveId ?? "",
     sort: WaveDropsLeaderboardSort.RATING_PREDICTION,
-    pausePolling: !waveId,
+    enabled: !!waveId,
   });
 
   // Compare with nowMinting name (case-insensitive, trimmed)
