@@ -36,11 +36,11 @@ export default function SelectGroupModal({
   useKeyPressEvent("Escape", onClose);
 
   return createPortal(
-    <div className="tw-relative tw-z-1000 tailwind-scope">
+    <div className="tailwind-scope tw-relative tw-z-1000">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
-        <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
-          <div ref={modalRef} className="tw-w-full sm:tw-max-w-sm">
+        <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-2 tw-text-center sm:tw-items-center lg:tw-p-0">
+          <div ref={modalRef} className="tw-w-full sm:tw-max-w-md">
             <SelectGroupSearchPanel
               onClose={onClose}
               onGroupSelect={onGroupSelect}

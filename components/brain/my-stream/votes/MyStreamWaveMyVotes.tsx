@@ -22,12 +22,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   wave,
   onDropClick,
 }) => {
-  const [pausePolling, setPausePolling] = useState(false);
+  const [isResettingVotes, setIsResettingVotes] = useState(false);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
-      pausePolling,
+      enabled: !isResettingVotes,
     });
 
   const { myVotesViewStyle } = useLayout();
@@ -111,7 +111,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
             onToggleSelectAll={handleToggleSelectAll}
             allItemsSelected={allItemsSelected}
             removeSelected={removeSelected}
-            setPausePolling={setPausePolling}
+            onResettingChange={setIsResettingVotes}
           />
           <div className="tw-space-y-2">
             {drops.map((drop) => (
@@ -121,7 +121,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                 onDropClick={onDropClick}
                 isChecked={checkedDrops.has(drop.id)}
                 onToggleCheck={handleToggleCheck}
-                isResetting={pausePolling}
+                isResetting={isResettingVotes}
               />
             ))}
             {isFetchingNextPage && <WaveLeaderboardLoadingBar />}

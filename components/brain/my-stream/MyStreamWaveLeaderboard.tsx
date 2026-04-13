@@ -30,7 +30,7 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
+import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
@@ -144,12 +144,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     data: curationGroups = [],
     isLoading: isLoadingCurationGroups,
     isError: isCurationGroupsError,
-  } = useWaveCurationGroups({
+  } = useWaveCurations({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
 
-  const rawCuratedByGroupId = searchParams.get("curated_by_group");
+  const rawCuratedByGroupId = searchParams.get("curation_id");
 
   const curationGroupIdSet = useMemo(
     () => new Set(curationGroups.map((group) => group.id)),
@@ -195,9 +195,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       const nextParams = new URLSearchParams(searchParams.toString());
 
       if (groupId) {
-        nextParams.set("curated_by_group", groupId);
+        nextParams.set("curation_id", groupId);
       } else {
-        nextParams.delete("curated_by_group");
+        nextParams.delete("curation_id");
       }
 
       const nextQuery = nextParams.toString();

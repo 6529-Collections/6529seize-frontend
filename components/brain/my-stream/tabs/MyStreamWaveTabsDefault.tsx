@@ -25,6 +25,7 @@ import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
+import MyStreamActionTooltip from "../MyStreamActionTooltip";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
@@ -32,6 +33,8 @@ interface MyStreamWaveTabsDefaultProps {
   readonly viewMode: WaveViewMode;
   readonly onToggleViewMode: () => void;
   readonly showGalleryToggle: boolean;
+  readonly activeCurationId: string | null;
+  readonly onSelectCuration: (curationId: string | null) => void;
 }
 
 const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
@@ -39,6 +42,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   viewMode,
   onToggleViewMode,
   showGalleryToggle,
+  activeCurationId,
+  onSelectCuration,
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
@@ -72,6 +77,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     params.delete("serialNo");
     params.delete("divider");
     params.delete("drop");
+    params.delete("curation");
     const basePath = getWaveHomeRoute({
       isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
       isApp,
@@ -83,6 +89,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   };
 
   const handleSearchSelect = (serialNo: number) => {
+    onSelectCuration(null);
     setActiveContentTab(MyStreamWaveTab.CHAT);
     if (waveChatScroll) {
       waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
@@ -90,6 +97,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     }
 
     const params = new URLSearchParams(searchParams.toString() || "");
+    params.delete("curation");
     params.set("serialNo", String(serialNo));
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
@@ -98,6 +106,13 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     waveLinkActionFeedbackState === "idle"
       ? "tw-text-iron-200"
       : "tw-text-emerald-300";
+  const headerActionsTooltipId = `my-stream-wave-header-actions-${wave.id}`;
+  const galleryToggleLabel =
+    viewMode === "chat" ? "Switch to gallery view" : "Switch to chat view";
+  const searchMessagesLabel = "Search messages in this wave";
+  const rightSidebarActionLabel = isRightSidebarOpen
+    ? "Hide right sidebar"
+    : "Show right sidebar";
   const renderWaveLinkActionIcon = () => {
     if (waveLinkActionFeedbackState !== "idle") {
       return <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
@@ -154,15 +169,13 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           )}
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch">
-          {showGalleryToggle && (
+          {showGalleryToggle && !activeCurationId && (
             <button
               type="button"
               onClick={onToggleViewMode}
-              aria-label={
-                viewMode === "chat"
-                  ? "Switch to gallery view"
-                  : "Switch to chat view"
-              }
+              aria-label={galleryToggleLabel}
+              data-tooltip-id={headerActionsTooltipId}
+              data-tooltip-content={galleryToggleLabel}
               className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
             >
               {viewMode === "chat" ? (
@@ -177,7 +190,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
               type="button"
               onClick={handleWaveLinkActionClick}
               aria-label={waveLinkActionLabel}
-              title={waveLinkActionLabel}
+              data-tooltip-id={headerActionsTooltipId}
+              data-tooltip-content={waveLinkActionLabel}
               data-wave-link-action-mode={waveLinkActionMode}
               className={`tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white ${waveLinkActionIconColor}`}
             >
@@ -187,7 +201,9 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            aria-label="Search messages in this wave"
+            aria-label={searchMessagesLabel}
+            data-tooltip-id={headerActionsTooltipId}
+            data-tooltip-content={searchMessagesLabel}
             className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
           >
             <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
@@ -195,8 +211,10 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           <button
             type="button"
             onClick={toggleRightSidebar}
+            data-tooltip-id={headerActionsTooltipId}
+            data-tooltip-content={rightSidebarActionLabel}
             className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
-            aria-label="Toggle right sidebar"
+            aria-label={rightSidebarActionLabel}
           >
             <ChevronDoubleLeftIcon
               strokeWidth={2}
@@ -209,11 +227,14 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           </button>
         </div>
       </div>
+      <MyStreamActionTooltip id={headerActionsTooltipId} />
       <div className="tw-border-b tw-border-l-0 tw-border-t-0 tw-border-solid tw-border-iron-800">
         <MyStreamWaveDesktopTabs
           activeTab={activeContentTab}
           wave={wave}
           setActiveTab={setActiveContentTab}
+          activeCurationId={activeCurationId}
+          onSelectCuration={onSelectCuration}
         />
       </div>
       <WaveDropsSearchModal

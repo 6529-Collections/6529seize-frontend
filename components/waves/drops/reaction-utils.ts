@@ -104,5 +104,6 @@ export const toProfileMin = (
     winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids,
     is_wave_creator: profile.is_wave_creator,
     artist_of_prevote_cards: profile.artist_of_prevote_cards,
+    profile_wave_id: profile.profile_wave_id,
   };
 };

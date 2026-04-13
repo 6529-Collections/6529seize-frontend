@@ -1,17 +1,56 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
+
+const getMediaQueryList = (query: string): MediaQueryList | null => {
+  if (
+    globalThis.window === undefined ||
+    typeof globalThis.window.matchMedia !== "function"
+  ) {
+    return null;
+  }
+
+  return globalThis.window.matchMedia(query);
+};
 
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
+  const syncMatches = useEffectEvent((nextMatches: boolean) => {
+    setMatches((currentMatches) =>
+      currentMatches === nextMatches ? currentMatches : nextMatches
+    );
+  });
 
   useEffect(() => {
-    const m = globalThis.window?.matchMedia?.(query);
-    if (!m) return;
+    const mediaQueryList = getMediaQueryList(query);
+    if (!mediaQueryList) {
+      return;
+    }
 
-    setMatches(m.matches);
+    syncMatches(mediaQueryList.matches);
 
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
-    m.addEventListener("change", handler);
-    return () => m.removeEventListener("change", handler);
+    const handleChange = (event: MediaQueryListEvent) => {
+      syncMatches(event.matches);
+    };
+
+    if (typeof mediaQueryList.addEventListener === "function") {
+      mediaQueryList.addEventListener("change", handleChange);
+      return () => mediaQueryList.removeEventListener("change", handleChange);
+    }
+
+    const previousOnChange = mediaQueryList.onchange;
+    const fallbackHandler: NonNullable<MediaQueryList["onchange"]> = (
+      event
+    ) => {
+      previousOnChange?.call(mediaQueryList, event);
+      syncMatches(mediaQueryList.matches);
+    };
+
+    mediaQueryList.onchange = fallbackHandler;
+
+    return () => {
+      if (mediaQueryList.onchange === fallbackHandler) {
+        mediaQueryList.onchange = previousOnChange;
+      }
+    };
   }, [query]);
 
   return matches;

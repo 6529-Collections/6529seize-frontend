@@ -2,35 +2,52 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import GroupItem from "@/components/groups/select/item/GroupItem";
+import SelectGroupModalCard from "./SelectGroupModalCard";
 
 export default function SelectGroupModalItems({
   groups,
+  selectedGroupId,
   loading,
   onGroupSelect,
+  onGroupClear,
+  emptyStateMessage = "No groups found.",
 }: {
   readonly groups: ApiGroupFull[];
+  readonly selectedGroupId?: string | null | undefined;
   readonly loading: boolean;
   readonly onGroupSelect: (group: ApiGroupFull) => void;
+  readonly onGroupClear?: (() => void) | undefined;
+  readonly emptyStateMessage?: string | undefined;
 }) {
   if (loading) {
     return (
-      <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-        <CircleLoader size={CircleLoaderSize.XXLARGE} />
+      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-pb-4">
+        <CircleLoader size={CircleLoaderSize.SMALL} />
+      </div>
+    );
+  }
+
+  if (groups.length === 0) {
+    return (
+      <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-white/[0.08] tw-bg-iron-950/60 tw-px-4 tw-py-5 tw-text-center">
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+          {emptyStateMessage}
+        </p>
       </div>
     );
   }
 
   return (
-    <ul className="tw-list-none tw-pl-0 tw-gap-y-4 tw-flex tw-flex-col">
+    <div className="tw-grid tw-grid-cols-1 tw-gap-2">
       {groups.map((group) => (
-        <GroupItem
+        <SelectGroupModalCard
           key={group.id}
           group={group}
-          activeGroupId={null}
-          onActiveGroupId={() => onGroupSelect(group)}
+          isSelected={selectedGroupId === group.id}
+          onSelect={onGroupSelect}
+          onClear={onGroupClear}
         />
       ))}
-    </ul>
+    </div>
   );
 }

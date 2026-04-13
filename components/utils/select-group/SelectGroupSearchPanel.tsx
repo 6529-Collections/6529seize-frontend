@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { GroupsRequestParams } from "@/entities/IGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -18,23 +18,48 @@ const DEFAULT_BODY_CLASSES =
   "tw-h-64 tw-overflow-y-auto tw-mt-4 tw-px-4 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300";
 
 type SelectGroupSearchPanelProps = {
-  readonly onClose: () => void;
+  readonly onClose?: (() => void) | undefined;
   readonly onGroupSelect: (group: ApiGroupFull) => void;
+  readonly onGroupClear?: (() => void) | undefined;
+  readonly selectedGroupId?: string | null | undefined;
   readonly containerClassName?: string | undefined;
   readonly bodyClassName?: string | undefined;
+  readonly showHeader?: boolean | undefined;
+  readonly useDefaultContainerStyles?: boolean | undefined;
+  readonly useDefaultBodyStyles?: boolean | undefined;
+  readonly showIdentitySearch?: boolean | undefined;
+  readonly requireSearchQuery?: boolean | undefined;
+  readonly idleStateMessage?: string | undefined;
+  readonly emptyStateMessage?: string | undefined;
 };
 
 export default function SelectGroupSearchPanel({
   onClose,
   onGroupSelect,
+  onGroupClear,
+  selectedGroupId,
   containerClassName,
   bodyClassName,
+  showHeader = true,
+  useDefaultContainerStyles = true,
+  useDefaultBodyStyles = true,
+  showIdentitySearch = true,
+  requireSearchQuery = false,
+  idleStateMessage,
+  emptyStateMessage,
 }: SelectGroupSearchPanelProps) {
-  const containerClasses = [DEFAULT_CONTAINER_CLASSES, containerClassName]
+  const handleClose = onClose ?? (() => {});
+  const containerClasses = [
+    useDefaultContainerStyles ? DEFAULT_CONTAINER_CLASSES : null,
+    containerClassName,
+  ]
     .filter(Boolean)
     .join(" ");
 
-  const bodyClasses = [DEFAULT_BODY_CLASSES, bodyClassName]
+  const bodyClasses = [
+    useDefaultBodyStyles ? DEFAULT_BODY_CLASSES : null,
+    bodyClassName,
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -57,15 +82,23 @@ export default function SelectGroupSearchPanel({
     }));
   };
 
+  const trimmedGroupName = filters.group_name?.trim() ?? "";
+  const trimmedAuthorIdentity = filters.author_identity?.trim() ?? "";
+  const hasGroupNameFilter = trimmedGroupName.length > 0;
+  const hasUserFilter = showIdentitySearch && trimmedAuthorIdentity.length > 0;
+  const isQueryEnabled = requireSearchQuery
+    ? hasGroupNameFilter || hasUserFilter
+    : true;
+
   const { data, isFetching } = useQuery<ApiGroupFull[]>({
     queryKey: [QueryKey.GROUPS, filters],
     queryFn: async () => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
-      if (filters.group_name) {
-        params.group_name = filters.group_name;
+      if (hasGroupNameFilter) {
+        params.group_name = trimmedGroupName;
       }
-      if (filters.author_identity) {
-        params.author_identity = filters.author_identity;
+      if (showIdentitySearch && trimmedAuthorIdentity.length > 0) {
+        params.author_identity = trimmedAuthorIdentity;
       }
 
       return await commonApiFetch<
@@ -77,32 +110,32 @@ export default function SelectGroupSearchPanel({
       });
     },
     placeholderData: keepPreviousData,
+    enabled: isQueryEnabled,
   });
 
-  const [groups, setGroups] = useState<ApiGroupFull[]>([]);
-
-  useEffect(() => {
-    if (data?.length) {
-      setGroups(data);
-    } else {
-      setGroups([]);
-    }
-  }, [data]);
+  const groups = isQueryEnabled ? (data ?? []) : [];
+  const resolvedEmptyStateMessage = isQueryEnabled
+    ? emptyStateMessage
+    : (idleStateMessage ?? emptyStateMessage);
 
   return (
     <div className={containerClasses}>
-      <SelectGroupModalHeader onClose={onClose} />
+      {showHeader && <SelectGroupModalHeader onClose={handleClose} />}
       <SelectGroupModalSearch
         groupName={filters.group_name}
         groupUser={filters.author_identity}
         onUserSelect={onUserSelect}
         onFilterNameSearch={onFilterNameSearch}
+        showIdentitySearch={showIdentitySearch}
       />
       <div className={bodyClasses}>
         <SelectGroupModalItems
           groups={groups}
+          selectedGroupId={selectedGroupId ?? null}
           loading={isFetching}
           onGroupSelect={onGroupSelect}
+          onGroupClear={onGroupClear}
+          emptyStateMessage={resolvedEmptyStateMessage}
         />
       </div>
     </div>

@@ -1,33 +1,49 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { TabToggle } from "@/components/common/TabToggle";
+import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { MyStreamWaveTab } from "@/types/waves.types";
-import { useContentTab, WaveVotingState } from "../ContentTabContext";
-import { useWave } from "@/hooks/useWave";
-import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
+import { useWave } from "@/hooks/useWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
 import { useAuth } from "@/components/auth/Auth";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import {
+  useContentTab,
+  WaveVotingState,
+  type SetActiveContentTab,
+} from "../ContentTabContext";
+import MyStreamWaveCreateCurationAction from "./tabs/MyStreamWaveCreateCurationAction";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
   readonly wave: ApiWave;
-  readonly setActiveTab: (tab: MyStreamWaveTab) => void;
+  readonly setActiveTab: SetActiveContentTab;
+  readonly activeCurationId: string | null;
+  readonly onSelectCuration: (curationId: string | null) => void;
+  readonly showCreateCurationAction?: boolean | undefined;
 }
 
 interface TabOption {
-  key: MyStreamWaveTab;
-  label: string;
-  panelId: string;
+  readonly key: string;
+  readonly label: string;
+  readonly panelId: string;
 }
 
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
+const getCurationPanelId = (curationId: string): string =>
+  `my-stream-wave-tabpanel-curation-${curationId}`;
+
 const AUTO_EXPAND_LIMIT = 5;
+const MOBILE_INLINE_CURATION_LIMIT = 1;
 
 const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.CHAT]: "Chat",
@@ -39,17 +55,37 @@ const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.FAQ]: "FAQ",
 };
 
+const getWaveVotingState = ({
+  isUpcoming,
+  isCompleted,
+}: {
+  readonly isUpcoming: boolean;
+  readonly isCompleted: boolean;
+}): WaveVotingState => {
+  if (isUpcoming) {
+    return WaveVotingState.NOT_STARTED;
+  }
+
+  if (isCompleted) {
+    return WaveVotingState.ENDED;
+  }
+
+  return WaveVotingState.ONGOING;
+};
+
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
   setActiveTab,
+  activeCurationId,
+  onSelectCuration,
+  showCreateCurationAction = true,
 }) => {
-  // Use the available tabs from context instead of recalculating
+  const searchParams = useSearchParams();
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
   const { connectedProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
-
   const {
     isChatWave,
     isMemesWave,
@@ -57,11 +93,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const {
-    voting: { isUpcoming, isCompleted, isInProgress },
+    voting: { isUpcoming, isCompleted },
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
-
-  // For next decision countdown
   const { allDecisions, hasMoreFuture, loadMoreFuture } = useDecisionPoints(
     wave,
     {
@@ -69,109 +103,90 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       initialFutureWindow: 10,
     }
   );
+  const { data: curations = [] } = useWaveCurations({
+    waveId: wave.id,
+  });
+  const canManageCurations =
+    wave.wave.authenticated_user_eligible_for_admin === true;
 
-  // Filter out decisions that occur during pause periods using the helper from useWave
-  const filteredDecisions = React.useMemo(() => {
-    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
+  const filteredDecisions = useMemo(() => {
     const decisionsAsApiFormat = allDecisions.map((decision) => ({
       decision_time: decision.timestamp,
     }));
-
-    // Apply the filter
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
 
-    // Convert back to DecisionPoint[] format
     return allDecisions.filter((decision) =>
-      filtered.some((f) => f.decision_time === decision.timestamp)
+      filtered.some((item) => item.decision_time === decision.timestamp)
     );
   }, [allDecisions, filterDecisionsDuringPauses]);
 
-  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
     filteredDecisions.find(
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
 
-  const [autoExpandFutureAttempts, setAutoExpandFutureAttempts] = useState(0);
+  const autoExpandFutureAttemptsRef = useRef(0);
+  const desktopTabsScrollerRef = useRef<HTMLDivElement | null>(null);
+  const mobileTabsScrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const hasUpcoming = !!nextDecisionTime;
+    const hasUpcoming = typeof nextDecisionTime === "number";
 
-    if (hasUpcoming) {
-      if (autoExpandFutureAttempts !== 0) {
-        setAutoExpandFutureAttempts(0);
-      }
+    if (hasUpcoming || !hasMoreFuture) {
+      autoExpandFutureAttemptsRef.current = 0;
       return;
     }
 
-    if (!hasMoreFuture) {
-      if (autoExpandFutureAttempts !== 0) {
-        setAutoExpandFutureAttempts(0);
-      }
-      return;
-    }
-
-    if (autoExpandFutureAttempts >= AUTO_EXPAND_LIMIT) {
+    if (autoExpandFutureAttemptsRef.current >= AUTO_EXPAND_LIMIT) {
       return;
     }
 
     const timeoutId = globalThis.setTimeout(() => {
-      setAutoExpandFutureAttempts((prev) => prev + 1);
+      autoExpandFutureAttemptsRef.current += 1;
       loadMoreFuture();
     }, 50);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [
-    nextDecisionTime,
-    hasMoreFuture,
-    loadMoreFuture,
-    autoExpandFutureAttempts,
-  ]);
+  }, [nextDecisionTime, hasMoreFuture, loadMoreFuture]);
 
-  // Calculate time left for next decision
-  // Update available tabs when wave changes
+  const votingState = getWaveVotingState({
+    isUpcoming,
+    isCompleted,
+  });
+
   useEffect(() => {
-    const votingState = isUpcoming
-      ? WaveVotingState.NOT_STARTED
-      : isCompleted
-        ? WaveVotingState.ENDED
-        : WaveVotingState.ONGOING;
-    updateAvailableTabs(
-      wave
-        ? {
-            waveId: wave.id,
-            isMemesWave,
-            isChatWave,
-            hasAuthenticatedProfile,
-            isCurationWave,
-            votingState,
-            hasFirstDecisionPassed: firstDecisionDone,
-          }
-        : null
-    );
+    const hasSerialTarget = searchParams.get("serialNo") !== null;
+    updateAvailableTabs({
+      waveId: wave.id,
+      isMemesWave,
+      isChatWave,
+      hasAuthenticatedProfile,
+      isCurationWave,
+      votingState,
+      hasFirstDecisionPassed: firstDecisionDone,
+      transientPreferredTab: hasSerialTarget ? MyStreamWaveTab.CHAT : null,
+    });
   }, [
     wave,
     isMemesWave,
     isChatWave,
     hasAuthenticatedProfile,
     isCurationWave,
-    isUpcoming,
-    isCompleted,
-    isInProgress,
+    votingState,
     firstDecisionDone,
+    searchParams,
     updateAvailableTabs,
   ]);
 
-  // Always switch to Chat for Chat-type waves
   useEffect(() => {
-    if (wave?.wave?.type === ApiWaveType.Chat) {
+    if (wave.wave.type === ApiWaveType.Chat && !activeCurationId) {
       setActiveContentTab(MyStreamWaveTab.CHAT);
     }
-  }, [wave?.wave?.type, setActiveContentTab]);
+  }, [wave.wave.type, activeCurationId, setActiveContentTab]);
 
-  const options: TabOption[] = React.useMemo(
+  const standardOptions: TabOption[] = useMemo(
     () =>
       availableTabs
         .filter((tab) => {
@@ -194,42 +209,159 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [availableTabs, hasAuthenticatedProfile, isMemesWave, isCurationWave]
   );
 
-  useEffect(() => {
-    const isMyVotesHidden =
-      activeTab === MyStreamWaveTab.MY_VOTES &&
-      ((isMemesWave && !hasAuthenticatedProfile) ||
-        (!isMemesWave && !isCurationWave));
-    const isSalesHidden =
-      activeTab === MyStreamWaveTab.SALES && !isCurationWave;
-    const isFaqHidden = activeTab === MyStreamWaveTab.FAQ && !isMemesWave;
+  const curationOptions: TabOption[] = useMemo(
+    () =>
+      curations.map((curation) => ({
+        key: `curation:${curation.id}`,
+        label: curation.name,
+        panelId: getCurationPanelId(curation.id),
+      })),
+    [curations]
+  );
 
-    if (
-      (isMyVotesHidden || isSalesHidden || isFaqHidden) &&
-      options.length > 0
-    ) {
-      setActiveTab(options[0]?.key!);
+  const options: TabOption[] = useMemo(
+    () => [...standardOptions, ...curationOptions],
+    [curationOptions, standardOptions]
+  );
+
+  const activeKey = activeCurationId
+    ? `curation:${activeCurationId}`
+    : activeTab;
+
+  const mobileVisibleCurationOptions = useMemo(() => {
+    if (curationOptions.length <= MOBILE_INLINE_CURATION_LIMIT) {
+      return curationOptions;
     }
-  }, [
-    hasAuthenticatedProfile,
-    isMemesWave,
-    isCurationWave,
-    activeTab,
-    options,
-    setActiveTab,
-  ]);
 
-  // For simple waves, don't render any tabs
-  if (isChatWave) {
+    const activeCurationOption =
+      curationOptions.find((option) => option.key === activeKey) ?? null;
+    const visibleOptions = activeCurationOption ? [activeCurationOption] : [];
+
+    for (const option of curationOptions) {
+      if (visibleOptions.length >= MOBILE_INLINE_CURATION_LIMIT) {
+        break;
+      }
+
+      if (option.key === activeCurationOption?.key) {
+        continue;
+      }
+
+      visibleOptions.push(option);
+    }
+
+    return visibleOptions;
+  }, [activeKey, curationOptions]);
+
+  const mobileOverflowCurationOptions = useMemo(() => {
+    const visibleKeys = new Set(
+      mobileVisibleCurationOptions.map((option) => option.key)
+    );
+
+    return curationOptions.filter((option) => !visibleKeys.has(option.key));
+  }, [curationOptions, mobileVisibleCurationOptions]);
+
+  const mobileOptions: TabOption[] = useMemo(
+    () => [...standardOptions, ...mobileVisibleCurationOptions],
+    [mobileVisibleCurationOptions, standardOptions]
+  );
+
+  const mobileOverflowItems: CompactMenuItem[] = useMemo(
+    () =>
+      mobileOverflowCurationOptions.map((option) => ({
+        id: option.key,
+        label: option.label,
+        onSelect: () => onSelectCuration(option.key.replace("curation:", "")),
+      })),
+    [mobileOverflowCurationOptions, onSelectCuration]
+  );
+
+  useEffect(() => {
+    const frameId = globalThis.window.requestAnimationFrame(() => {
+      [desktopTabsScrollerRef.current, mobileTabsScrollerRef.current].forEach(
+        (scroller) => {
+          if (!scroller) {
+            return;
+          }
+
+          const activeTabElement = scroller.querySelector<HTMLElement>(
+            '[role="tab"][aria-selected="true"]'
+          );
+          activeTabElement?.scrollIntoView({
+            block: "nearest",
+            inline: "nearest",
+          });
+        }
+      );
+    });
+
+    return () => {
+      globalThis.window.cancelAnimationFrame(frameId);
+    };
+  }, [activeKey, options]);
+
+  if (isChatWave && !canManageCurations && curations.length === 0) {
     return null;
   }
 
   return (
-    <div className="tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-4 tw-overflow-x-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 tw-@container/tabs hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4">
-      <TabToggle
-        options={options}
-        activeKey={activeTab}
-        onSelect={(key) => setActiveTab(key as MyStreamWaveTab)}
-      />
+    <div className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-2 tw-@container/tabs sm:tw-px-4">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 sm:tw-hidden">
+        <div
+          ref={mobileTabsScrollerRef}
+          className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
+        >
+          <div className="tw-inline-flex tw-items-center tw-gap-1">
+            <TabToggle
+              options={mobileOptions}
+              activeKey={activeKey}
+              onSelect={(key) => {
+                if (key.startsWith("curation:")) {
+                  onSelectCuration(key.replace("curation:", ""));
+                  return;
+                }
+
+                onSelectCuration(null);
+                setActiveTab(key as MyStreamWaveTab);
+              }}
+            />
+            {mobileOverflowItems.length > 0 && (
+              <CompactMenu
+                triggerClassName="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+                trigger={<EllipsisVerticalIcon className="tw-h-5 tw-w-5" />}
+                aria-label="More curations"
+                items={mobileOverflowItems}
+                menuWidthClassName="tw-w-52"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+      <div
+        ref={desktopTabsScrollerRef}
+        className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
+      >
+        <TabToggle
+          options={options}
+          activeKey={activeKey}
+          onSelect={(key) => {
+            if (key.startsWith("curation:")) {
+              onSelectCuration(key.replace("curation:", ""));
+              return;
+            }
+
+            onSelectCuration(null);
+            setActiveTab(key as MyStreamWaveTab);
+          }}
+        />
+      </div>
+      {showCreateCurationAction && (
+        <div className="sm:tw-ml-auto">
+          <MyStreamWaveCreateCurationAction
+            wave={wave}
+            onCreated={onSelectCuration}
+          />
+        </div>
+      )}
     </div>
   );
 };

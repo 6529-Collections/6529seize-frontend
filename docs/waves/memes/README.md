@@ -11,8 +11,6 @@ metadata shown on memes single-drop views after submit.
 - Desktop waves sidebar footer on non-`/messages` web surfaces:
   expanded `Uncast Power` card or collapsed bolt-count pill
 - App/mobile `Waves` view footer quick-vote entry
-- App/mobile non-DM wave-thread default view: floating quick-vote trigger
-  (top-right)
 - Quick-vote dialog overlay
 - Desktop memes header action (non-compact header mode):
   `Submit Work to The Memes` (label can vary with deadline state; compact

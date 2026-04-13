@@ -9,7 +9,7 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 const useWave = jest.fn();
 const useLayout = jest.fn();
 const useLocalPreference = jest.fn();
-const useWaveCurationGroups = jest.fn();
+const useWaveCurations = jest.fn();
 const replace = jest.fn();
 let searchParamsString = "";
 let dropsProps: any;
@@ -33,8 +33,8 @@ jest.mock(
     (...args: any[]) =>
       useLocalPreference(...args)
 );
-jest.mock("@/hooks/waves/useWaveCurationGroups", () => ({
-  useWaveCurationGroups: (...args: any[]) => useWaveCurationGroups(...args),
+jest.mock("@/hooks/waves/useWaveCurations", () => ({
+  useWaveCurations: (...args: any[]) => useWaveCurations(...args),
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
@@ -130,7 +130,7 @@ describe("MyStreamWaveLeaderboard", () => {
     createDropProps = [];
     curationModalProps = undefined;
     useLayout.mockReturnValue({ leaderboardViewStyle: {} });
-    useWaveCurationGroups.mockReturnValue({
+    useWaveCurations.mockReturnValue({
       data: [],
       isLoading: false,
       isError: false,
@@ -273,7 +273,7 @@ describe("MyStreamWaveLeaderboard", () => {
   });
 
   it("reads curation group from URL and keeps price filters local", () => {
-    searchParamsString = "curated_by_group=group-1&min_price=1.5&max_price=4.2";
+    searchParamsString = "curation_id=group-1&min_price=1.5&max_price=4.2";
     useWave.mockReturnValue({
       isMemesWave: false,
       isCurationWave: true,
@@ -283,7 +283,7 @@ describe("MyStreamWaveLeaderboard", () => {
         hasReachedLimit: false,
       },
     });
-    useWaveCurationGroups.mockReturnValue({
+    useWaveCurations.mockReturnValue({
       data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
       isLoading: false,
       isError: false,
@@ -343,7 +343,7 @@ describe("MyStreamWaveLeaderboard", () => {
         hasReachedLimit: false,
       },
     });
-    useWaveCurationGroups.mockReturnValue({
+    useWaveCurations.mockReturnValue({
       data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
       isLoading: false,
       isError: false,
@@ -357,7 +357,7 @@ describe("MyStreamWaveLeaderboard", () => {
     renderLeaderboard();
 
     headerProps.onCurationGroupChange("group-1");
-    expect(replace).toHaveBeenCalledWith("/waves?curated_by_group=group-1", {
+    expect(replace).toHaveBeenCalledWith("/waves?curation_id=group-1", {
       scroll: false,
     });
 
@@ -366,7 +366,7 @@ describe("MyStreamWaveLeaderboard", () => {
   });
 
   it("updates local price filters without touching URL", () => {
-    searchParamsString = "curated_by_group=group-1";
+    searchParamsString = "curation_id=group-1";
     useWave.mockReturnValue({
       isMemesWave: false,
       isCurationWave: true,
@@ -376,7 +376,7 @@ describe("MyStreamWaveLeaderboard", () => {
         hasReachedLimit: false,
       },
     });
-    useWaveCurationGroups.mockReturnValue({
+    useWaveCurations.mockReturnValue({
       data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
       isLoading: false,
       isError: false,

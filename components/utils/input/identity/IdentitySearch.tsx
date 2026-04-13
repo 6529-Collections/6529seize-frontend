@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { KeyboardEvent } from "react";
-import { useEffect, useRef, useState, useId } from "react";
+import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleExclamation,
@@ -71,9 +71,10 @@ export default function IdentitySearch({
     [IdentitySearchSize.MD]: "tw-text-md",
   };
 
-  const ICON_CLASSES: Record<IdentitySearchSize, string> = {
-    [IdentitySearchSize.SM]: "tw-top-3",
-    [IdentitySearchSize.MD]: "tw-top-3.5",
+  const ICON_TOP_CLASS = "tw-top-3.5";
+  const SEARCH_ICON_SIZE_CLASSES: Record<IdentitySearchSize, string> = {
+    [IdentitySearchSize.SM]: "tw-h-4 tw-w-4",
+    [IdentitySearchSize.MD]: "tw-h-5 tw-w-5",
   };
 
   const inputId = useId();
@@ -112,13 +113,45 @@ export default function IdentitySearch({
       }),
     enabled: !!debouncedValue && debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
+  const searchResults = useMemo(() => data ?? [], [data]);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [manualHighlightedIndex, setManualHighlightedIndex] = useState<
+    number | null
+  >(null);
   const [highlightedOptionId, setHighlightedOptionId] = useState<
     string | undefined
   >(undefined);
-  const [shouldSubmit, setShouldSubmit] = useState(false);
+  const selectedResultIndex = useMemo(() => {
+    if (searchResults.length === 0 || !identity) {
+      return null;
+    }
+
+    const matchingIndex = searchResults.findIndex((profile) => {
+      const value = getSelectableIdentity(profile);
+      return value?.toLowerCase() === identity.toLowerCase();
+    });
+
+    return matchingIndex >= 0 ? matchingIndex : null;
+  }, [identity, searchResults]);
+
+  const effectiveHighlightedIndex = useMemo(() => {
+    if (!isOpen || searchResults.length === 0) {
+      return null;
+    }
+
+    if (manualHighlightedIndex !== null) {
+      return Math.min(manualHighlightedIndex, searchResults.length - 1);
+    }
+
+    return selectedResultIndex;
+  }, [isOpen, manualHighlightedIndex, searchResults.length, selectedResultIndex]);
+
+  const closeDropdown = () => {
+    setIsOpen(false);
+    setManualHighlightedIndex(null);
+  };
+
   const onValueChange = (
     newValue: string | null,
     options?: {
@@ -134,8 +167,7 @@ export default function IdentitySearch({
       baseResolvedDisplayValue: resolvedDisplayValue,
       preservedResolvedValues: [newValue, options?.displayValue ?? null],
     });
-    setIsOpen(false);
-    setHighlightedIndex(null);
+    closeDropdown();
   };
 
   const onFocusChange = (newV: boolean) => {
@@ -144,8 +176,7 @@ export default function IdentitySearch({
       setIsOpen(len >= MIN_SEARCH_LENGTH);
       return;
     }
-    setIsOpen(false);
-    setHighlightedIndex(null);
+    closeDropdown();
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
@@ -160,7 +191,7 @@ export default function IdentitySearch({
       setIdentity(null);
       onSelectionChange?.(null);
     }
-    setHighlightedIndex(null);
+    setManualHighlightedIndex(null);
   };
 
   const selectProfile = (profile: CommunityMemberMinimal) => {
@@ -177,8 +208,8 @@ export default function IdentitySearch({
   };
 
   const wrapperRef = useRef<HTMLDivElement>(null);
-  useClickAway(wrapperRef, () => setIsOpen(false));
-  useKeyPressEvent("Escape", () => setIsOpen(false));
+  useClickAway(wrapperRef, closeDropdown);
+  useKeyPressEvent("Escape", closeDropdown);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const shouldAutoFocus = useRef(autoFocus);
@@ -188,88 +219,45 @@ export default function IdentitySearch({
     }
   }, []);
 
-  useEffect(() => {
-    if (!shouldSubmit) {
-      return;
-    }
-
-    const formElement = inputRef.current?.form;
-    if (formElement) {
-      formElement.requestSubmit();
-    }
-    setShouldSubmit(false);
-  }, [shouldSubmit]);
-
   const handleArrowNavigation = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (!data?.length) {
+    const resultCount = searchResults.length;
+    if (resultCount === 0) {
       return;
     }
 
-    const maxIndex = data.length - 1;
+    const maxIndex = resultCount - 1;
+    const currentHighlightIndex = effectiveHighlightedIndex;
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setIsOpen(true);
-      setHighlightedIndex((current) => {
-        if (current === null || current >= maxIndex) {
-          return 0;
-        }
-        return current + 1;
-      });
+      setManualHighlightedIndex(
+        currentHighlightIndex === null || currentHighlightIndex >= maxIndex
+          ? 0
+          : currentHighlightIndex + 1
+      );
       return;
     }
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
       setIsOpen(true);
-      setHighlightedIndex((current) => {
-        if (current === null || current <= 0) {
-          return maxIndex;
-        }
-        return current - 1;
-      });
+      setManualHighlightedIndex(
+        currentHighlightIndex === null || currentHighlightIndex <= 0
+          ? maxIndex
+          : currentHighlightIndex - 1
+      );
       return;
     }
 
-    if (event.key === "Enter" && highlightedIndex !== null) {
+    if (event.key === "Enter" && effectiveHighlightedIndex !== null) {
       event.preventDefault();
-      const profile = data[highlightedIndex];
-      if (profile) {
-        if (selectProfile(profile)) {
-          setShouldSubmit(true);
-        }
+      const profile = searchResults[effectiveHighlightedIndex];
+      if (profile !== undefined && selectProfile(profile)) {
+        inputRef.current?.form?.requestSubmit();
       }
     }
   };
-
-  useEffect(() => {
-    if (!isOpen) {
-      setHighlightedIndex(null);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!data?.length) {
-      setHighlightedIndex(null);
-      return;
-    }
-
-    if (identity) {
-      const matchingIndex = data.findIndex((profile) => {
-        const value = getSelectableIdentity(profile);
-        return value?.toLowerCase() === identity.toLowerCase();
-      });
-
-      if (matchingIndex >= 0) {
-        setHighlightedIndex(matchingIndex);
-        return;
-      }
-    }
-
-    setHighlightedIndex((current) =>
-      current === null ? null : Math.min(current, data.length - 1)
-    );
-  }, [data, identity]);
 
   const hasIdentity = identity !== null && identity.length > 0;
 
@@ -301,7 +289,7 @@ export default function IdentitySearch({
           error
             ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
             : "tw-caret-primary-400 tw-ring-iron-700 hover:tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
-        } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-pl-10 tw-pr-4 tw-text-base tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset ${
+        } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-pl-9 tw-pr-4 tw-text-base tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset ${
           searchCriteria
             ? "tw-text-primary-400 focus:tw-text-white"
             : "tw-text-white"
@@ -309,7 +297,7 @@ export default function IdentitySearch({
         placeholder=" "
       />
       <MagnifyingGlassIcon
-        className={`${ICON_CLASSES[size]} tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300`}
+        className={`${ICON_TOP_CLASS} ${SEARCH_ICON_SIZE_CLASSES[size]} tw-pointer-events-none tw-absolute tw-left-3 tw-text-iron-300`}
         aria-hidden="true"
       />
       {clearable && hasIdentity && (
@@ -317,9 +305,12 @@ export default function IdentitySearch({
           type="button"
           aria-label="Clear identity"
           onClick={() => onValueChange(null)}
-          className={`${ICON_CLASSES[size]} tw-absolute tw-right-3 tw-flex tw-h-5 tw-w-5 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus:tw-outline-none focus:tw-ring-0`}
+          className={`${ICON_TOP_CLASS} tw-absolute tw-right-3 tw-flex tw-h-5 tw-w-5 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus:tw-outline-none focus:tw-ring-0`}
         >
-          <FontAwesomeIcon icon={faXmark} className="tw-h-5 tw-w-5" />
+          <FontAwesomeIcon
+            icon={faXmark}
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+          />
         </button>
       )}
       <label
@@ -328,7 +319,7 @@ export default function IdentitySearch({
           error
             ? "peer-placeholder-shown:tw-top-1/4 peer-placeholder-shown:-tw-translate-y-1/4 peer-focus:tw-text-error"
             : "peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-focus:tw-text-primary-400"
-        } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
+        } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-6 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
       >
         {label}
       </label>
@@ -336,8 +327,8 @@ export default function IdentitySearch({
         open={isOpen}
         selected={identity}
         searchCriteria={searchCriteria}
-        profiles={data ?? []}
-        highlightedIndex={highlightedIndex}
+        profiles={searchResults}
+        highlightedIndex={effectiveHighlightedIndex}
         listboxId={listboxId}
         listClassName={dropdownListClassName}
         onHighlightedOptionIdChange={setHighlightedOptionId}

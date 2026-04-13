@@ -1,11 +1,12 @@
 "use client";
 
-import React, { type JSX, useMemo } from "react";
+import React, { type JSX, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSetWaveData } from "@/contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
+import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
 import { useWaveData } from "@/hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
@@ -80,14 +81,29 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Get the active tab and utilities from global context
   const { activeContentTab } = useContentTab();
+  const activeCurationId = searchParams.get("curation");
 
   // View mode for chat/gallery toggle
-  const { viewMode, toggleViewMode } = useWaveViewMode(waveId);
+  const { viewMode, setViewMode, toggleViewMode } = useWaveViewMode(waveId);
 
   // Get wave type info to determine if gallery toggle should be shown
   // Show for CHAT type waves (normal waves), hide for RANK, MEMES, and DMs
   const { isRankWave, isMemesWave, isDm } = useWave(wave);
   const showGalleryToggle = !isRankWave && !isMemesWave && !isDm;
+  const hasSerialTarget = searchParams.get("serialNo") !== null;
+
+  useEffect(() => {
+    if (
+      !wave ||
+      !hasSerialTarget ||
+      !showGalleryToggle ||
+      viewMode !== "gallery"
+    ) {
+      return;
+    }
+
+    setViewMode("chat");
+  }, [hasSerialTarget, setViewMode, showGalleryToggle, viewMode, wave]);
 
   useBreakpoint();
 
@@ -100,6 +116,20 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     const params = new URLSearchParams(searchParams.toString() || "");
     params.set("drop", drop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const onSelectCuration = (curationId: string | null) => {
+    const params = new URLSearchParams(searchParams.toString() || "");
+
+    if (curationId) {
+      params.set("curation", curationId);
+    } else {
+      params.delete("curation");
+    }
+
+    const nextQuery = params.toString();
+    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+    router.replace(nextUrl, { scroll: false });
   };
 
   // Early return if no wave data - all hooks must be called before this
@@ -146,14 +176,29 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         viewMode={viewMode}
         onToggleViewMode={toggleViewMode}
         showGalleryToggle={showGalleryToggle}
+        activeCurationId={activeCurationId}
+        onSelectCuration={onSelectCuration}
       />
 
       <div
         className="tw-relative tw-min-w-0 tw-flex-grow tw-overflow-hidden"
         role="tabpanel"
-        id={getContentTabPanelId(activeContentTab)}
+        id={
+          activeCurationId
+            ? `my-stream-wave-tabpanel-curation-${activeCurationId}`
+            : getContentTabPanelId(activeContentTab)
+        }
       >
-        {components[activeContentTab]}
+        {activeCurationId ? (
+          <MyStreamWaveCurationContent
+            key={activeCurationId}
+            wave={wave}
+            curationId={activeCurationId}
+            onDropClick={onDropClick}
+          />
+        ) : (
+          components[activeContentTab]
+        )}
       </div>
     </div>
   );

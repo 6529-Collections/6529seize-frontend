@@ -22,7 +22,7 @@ function DialogCloseButton({
       title="Close panel"
       aria-label="Close panel"
       className={clsx(
-        "tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.04] hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
+        "-tw-mr-2 -tw-mt-2.5 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.04] hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
         className
       )}
       onClick={onClick}
@@ -50,14 +50,16 @@ function DialogHeader({
   title,
   showDesktopCloseButton,
   onClose,
+  className,
 }: {
   readonly title: string | undefined;
   readonly showDesktopCloseButton: boolean;
   readonly onClose: () => void;
+  readonly className?: string | undefined;
 }) {
   return (
-    <div className="tw-px-4 sm:tw-px-6">
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+    <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         {title && (
           <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
             {title}
@@ -93,6 +95,28 @@ function getSlideTransition(tabletModal?: boolean) {
   };
 }
 
+function getBottomPadding(noPadding?: boolean): string {
+  return noPadding
+    ? "env(safe-area-inset-bottom,0px)"
+    : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
+}
+
+function getDialogHeight({
+  tall,
+  isCapacitor,
+}: {
+  readonly tall?: boolean | undefined;
+  readonly isCapacitor: boolean;
+}): string {
+  const viewportHeight = "min(100vh, 100svh)";
+
+  if (tall && !isCapacitor) {
+    return `calc(${viewportHeight} - 4rem)`;
+  }
+
+  return `calc(${viewportHeight} - 10rem)`;
+}
+
 export default function MobileWrapperDialog({
   title,
   isOpen,
@@ -108,6 +132,8 @@ export default function MobileWrapperDialog({
   allowOverflow,
   maxWidthClass,
   zIndexClassName = "tw-z-[1010]",
+  headerClassName,
+  mobileCloseButtonClassName,
   dismissible = true,
 }: {
   readonly title?: string | undefined;
@@ -124,6 +150,8 @@ export default function MobileWrapperDialog({
   readonly allowOverflow?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
   readonly zIndexClassName?: string | undefined;
+  readonly headerClassName?: string | undefined;
+  readonly mobileCloseButtonClassName?: string | undefined;
   readonly dismissible?: boolean | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
@@ -133,17 +161,11 @@ export default function MobileWrapperDialog({
     }
   };
 
-  const bottomPadding = noPadding
-    ? "env(safe-area-inset-bottom,0px)"
-    : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
-
-  const viewportHeight = "min(100vh, 100svh)";
-  const getHeight = () => {
-    if (tall && !isCapacitor) {
-      return `calc(${viewportHeight} - 4rem)`;
-    }
-    return `calc(${viewportHeight} - 10rem)`;
-  };
+  const bottomPadding = getBottomPadding(noPadding);
+  const dialogHeight = getDialogHeight({
+    tall,
+    isCapacitor,
+  });
 
   const panelClassNames = clsx(
     "mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen",
@@ -216,7 +238,12 @@ export default function MobileWrapperDialog({
                           tabletModal && "md:tw-hidden"
                         )}
                       >
-                        <DialogCloseButton onClick={handleClose} />
+                        <DialogCloseButton
+                          onClick={handleClose}
+                          {...(mobileCloseButtonClassName
+                            ? { className: mobileCloseButtonClassName }
+                            : {})}
+                        />
                       </div>
                     </TransitionChild>
                   )}
@@ -230,8 +257,8 @@ export default function MobileWrapperDialog({
                     )}
                     style={{
                       ...(fixedHeight
-                        ? { height: getHeight() }
-                        : { maxHeight: getHeight() }),
+                        ? { height: dialogHeight }
+                        : { maxHeight: dialogHeight }),
                     }}
                   >
                     <div
@@ -251,6 +278,7 @@ export default function MobileWrapperDialog({
                         title={title}
                         showDesktopCloseButton={showDesktopHeaderCloseButton}
                         onClose={handleClose}
+                        className={headerClassName}
                       />
                       {children}
                     </div>

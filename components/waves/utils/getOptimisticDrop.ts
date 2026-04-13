@@ -66,9 +66,8 @@ export const getOptimisticDrop = (
       authenticated_user_admin: false,
       forbid_negative_votes: wave.voting.forbid_negative_votes,
       submission_type: wave.participation.submission_strategy?.type ?? null,
-      selections: wave.selections,
+      identity_wave: wave.identity_wave,
     },
-    selections: [],
     author: {
       id: connectedProfile.id,
       handle: connectedProfile.handle,
@@ -88,6 +87,7 @@ export const getOptimisticDrop = (
       subscribed_actions: [],
       archived: false,
       primary_address: connectedProfile.primary_wallet,
+      profile_wave_id: connectedProfile.profile_wave_id,
       is_wave_creator: connectedProfile.is_wave_creator,
       artist_of_prevote_cards: connectedProfile.artist_of_prevote_cards,
     },
