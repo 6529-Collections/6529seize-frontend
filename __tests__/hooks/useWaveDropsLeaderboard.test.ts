@@ -29,6 +29,7 @@ const queryClientMock = {
   data: { pages: [] },
   fetchNextPage: jest.fn(),
   hasNextPage: true,
+  isError: false,
   isFetching: false,
   isFetchingNextPage: false,
   refetch: jest.fn(),
@@ -42,6 +43,7 @@ describe("useWaveDropsLeaderboard", () => {
       data: { pages: [] },
       fetchNextPage: fetchNext,
       hasNextPage: true,
+      isError: false,
       isFetching: false,
       isFetchingNextPage: false,
       refetch: jest.fn(),
@@ -71,6 +73,7 @@ describe("useWaveDropsLeaderboard", () => {
       data: { pages: [] },
       fetchNextPage: fetchNext,
       hasNextPage: false,
+      isError: false,
       isFetching: false,
       isFetchingNextPage: false,
       refetch: jest.fn(),
@@ -82,5 +85,23 @@ describe("useWaveDropsLeaderboard", () => {
       await result.current.manualFetch();
     });
     expect(fetchNext).not.toHaveBeenCalled();
+  });
+
+  it("returns the leaderboard query error state", () => {
+    (useInfiniteQuery as jest.Mock).mockReturnValue({
+      data: { pages: [] },
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isError: true,
+      isFetching: false,
+      isFetchingNextPage: false,
+      refetch: jest.fn(),
+    });
+
+    const { result } = renderHook(() =>
+      useWaveDropsLeaderboard({ waveId: "4" })
+    );
+
+    expect(result.current.isError).toBe(true);
   });
 });

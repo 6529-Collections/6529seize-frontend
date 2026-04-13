@@ -102,8 +102,11 @@ function normalizeActiveView({
   readonly routeDefaultView: BrainView | null;
   readonly wave: ApiWave | null | undefined;
 }): BrainView {
+  const hasLoadedWave = wave !== null && wave !== undefined;
   const waveDefaultView =
-    isRankWave && isCompleted ? BrainView.SUBMISSIONS : BrainView.DEFAULT;
+    hasLoadedWave && isRankWave && isCompleted
+      ? BrainView.SUBMISSIONS
+      : BrainView.DEFAULT;
 
   if (!hasWave) {
     if (!GLOBAL_VIEWS.has(activeView)) {
@@ -174,8 +177,9 @@ export function useBrainMobileActiveView({
     () => Symbol(currentContextKey),
     [currentContextKey]
   );
+  const hasLoadedWave = wave !== null && wave !== undefined;
   const waveDefaultView =
-    hasWave && isRankWave && isCompleted
+    hasWave && hasLoadedWave && isRankWave && isCompleted
       ? BrainView.SUBMISSIONS
       : BrainView.DEFAULT;
   const baseView = hasWave

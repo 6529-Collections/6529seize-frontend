@@ -62,8 +62,10 @@ describe("MyStreamWaveSubmissions", () => {
       drops: [],
       fetchNextPage: jest.fn(),
       hasNextPage: false,
+      isError: false,
       isFetching: false,
       isFetchingNextPage: false,
+      refetch: jest.fn(),
     });
   });
 
@@ -103,8 +105,10 @@ describe("MyStreamWaveSubmissions", () => {
       drops: [{ id: "drop-1" }],
       fetchNextPage: jest.fn(),
       hasNextPage: false,
+      isError: false,
       isFetching: false,
       isFetchingNextPage: false,
+      refetch: jest.fn(),
     });
 
     render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
@@ -113,5 +117,30 @@ describe("MyStreamWaveSubmissions", () => {
     expect(push).toHaveBeenCalledWith("/waves?wave=wave-1&drop=drop-1", {
       scroll: false,
     });
+  });
+
+  it("shows a retryable error state instead of the empty state", () => {
+    const refetch = jest.fn();
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isError: true,
+      isFetching: true,
+      isFetchingNextPage: false,
+      refetch,
+    });
+
+    render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
+
+    expect(screen.getByText("Unable to load submissions.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("No submissions to show.")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 });

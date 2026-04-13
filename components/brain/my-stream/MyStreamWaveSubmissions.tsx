@@ -32,13 +32,23 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
   const { leaderboardViewStyle } = useLayout();
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDropsLeaderboard({
-      waveId: wave.id,
-      sort: WaveDropsLeaderboardSort.RANK,
-      curatedByGroupId: undefined,
-    });
+  const {
+    drops,
+    fetchNextPage,
+    hasNextPage,
+    isError,
+    isFetching,
+    isFetchingNextPage,
+    refetch,
+  } = useWaveDropsLeaderboard({
+    waveId: wave.id,
+    sort: WaveDropsLeaderboardSort.RANK,
+    curatedByGroupId: undefined,
+  });
   const handleReply = useCallback(() => undefined, []);
+  const handleRetry = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParamsString || "");
@@ -83,7 +93,22 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const intersectionElementRef = useIntersectionObserver(handleIntersection);
 
   let content: React.ReactNode;
-  if (isFetching && drops.length === 0) {
+  if (isError && drops.length === 0) {
+    content = (
+      <div className="tw-mt-10 tw-flex tw-flex-col tw-items-center tw-gap-4 tw-text-center">
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
+          Unable to load submissions.
+        </p>
+        <button
+          type="button"
+          onClick={handleRetry}
+          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-bg-iron-800"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  } else if (isFetching && drops.length === 0) {
     content = <WaveLeaderboardLoading />;
   } else if (drops.length === 0) {
     content = (
