@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -10,7 +10,6 @@ import {
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
-import { useWaveCurationGroupSelection } from "@/hooks/waves/useWaveCurationGroupSelection";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ParticipationDrop from "@/components/waves/drops/participation/ParticipationDrop";
 import { DropLocation } from "@/components/waves/drops/drop.types";
@@ -29,23 +28,37 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const searchParamsString = searchParams.toString();
   const { leaderboardViewStyle } = useLayout();
-  const { curatedByGroupId } = useWaveCurationGroupSelection({ wave });
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort: WaveDropsLeaderboardSort.RANK,
-      curatedByGroupId,
+      curatedByGroupId: undefined,
     });
   const handleReply = useCallback(() => undefined, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(searchParamsString || "");
+    if (!params.has("curated_by_group")) {
+      return;
+    }
+
+    params.delete("curated_by_group");
+
+    const nextQuery = params.toString();
+    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+    router.replace(nextUrl, { scroll: false });
+  }, [pathname, router, searchParamsString]);
+
   const openDropById = useCallback(
     (dropId: string) => {
-      const params = new URLSearchParams(searchParams.toString() || "");
+      const params = new URLSearchParams(searchParamsString || "");
+      params.delete("curated_by_group");
       params.set("drop", dropId);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [pathname, router, searchParams]
+    [pathname, router, searchParamsString]
   );
 
   const handleQuoteClick = useCallback(

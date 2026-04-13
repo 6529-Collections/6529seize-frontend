@@ -1,16 +1,15 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import MyStreamWaveSubmissions from "@/components/brain/my-stream/MyStreamWaveSubmissions";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
-import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
 
 let searchParamsString = "";
 const push = jest.fn();
+const replace = jest.fn();
 
 jest.mock("@/hooks/useWaveDropsLeaderboard");
-jest.mock("@/hooks/waves/useWaveCurationGroups");
 jest.mock("@/hooks/useIntersectionObserver", () => ({
   useIntersectionObserver: jest.fn(() => ({ current: null })),
 }));
@@ -18,20 +17,25 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ leaderboardViewStyle: {} }),
 }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
+  useRouter: () => ({ push, replace }),
   usePathname: () => "/waves",
   useSearchParams: () => {
     const params = new URLSearchParams(searchParamsString);
 
     return {
       get: (key: string) => params.get(key),
+      has: (key: string) => params.has(key),
       toString: () => searchParamsString,
     };
   },
 }));
 jest.mock("@/components/waves/drops/participation/ParticipationDrop", () => ({
   __esModule: true,
-  default: (props: any) => <div data-testid="drop">{props.drop.id}</div>,
+  default: (props: any) => (
+    <button data-testid="drop" onClick={() => props.onQuoteClick(props.drop)}>
+      {props.drop.id}
+    </button>
+  ),
 }));
 jest.mock(
   "@/components/waves/leaderboard/drops/WaveLeaderboardLoading",
@@ -47,7 +51,6 @@ jest.mock(
 );
 
 const useWaveDropsLeaderboardMock = useWaveDropsLeaderboard as jest.Mock;
-const useWaveCurationGroupsMock = useWaveCurationGroups as jest.Mock;
 
 describe("MyStreamWaveSubmissions", () => {
   const wave = { id: "1", wave: { type: "RANK" } } as any;
@@ -62,37 +65,10 @@ describe("MyStreamWaveSubmissions", () => {
       isFetching: false,
       isFetchingNextPage: false,
     });
-    useWaveCurationGroupsMock.mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    });
   });
 
-  it("forwards a valid curated_by_group filter to the submissions query", () => {
+  it("does not forward curated_by_group to the submissions query", () => {
     searchParamsString = "curated_by_group=group-1";
-    useWaveCurationGroupsMock.mockReturnValue({
-      data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
-      isLoading: false,
-      isError: false,
-    });
-
-    render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
-
-    expect(useWaveDropsLeaderboardMock).toHaveBeenCalledWith({
-      waveId: "1",
-      sort: WaveDropsLeaderboardSort.RANK,
-      curatedByGroupId: "group-1",
-    });
-  });
-
-  it("drops an unknown curated_by_group filter after groups load", () => {
-    searchParamsString = "curated_by_group=group-1";
-    useWaveCurationGroupsMock.mockReturnValue({
-      data: [{ id: "group-2", name: "Other Curators", group_id: "g2" }],
-      isLoading: false,
-      isError: false,
-    });
 
     render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
 
@@ -103,20 +79,39 @@ describe("MyStreamWaveSubmissions", () => {
     });
   });
 
-  it("keeps the raw curated_by_group filter while groups are loading", () => {
-    searchParamsString = "curated_by_group=group-1";
-    useWaveCurationGroupsMock.mockReturnValue({
-      data: [],
-      isLoading: true,
-      isError: false,
-    });
+  it("removes curated_by_group from the URL and preserves other params", () => {
+    searchParamsString = "wave=wave-1&curated_by_group=group-1&drop=drop-1";
 
     render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
 
-    expect(useWaveDropsLeaderboardMock).toHaveBeenCalledWith({
-      waveId: "1",
-      sort: WaveDropsLeaderboardSort.RANK,
-      curatedByGroupId: "group-1",
+    expect(replace).toHaveBeenCalledWith("/waves?wave=wave-1&drop=drop-1", {
+      scroll: false,
+    });
+  });
+
+  it("does not replace the URL when curated_by_group is absent", () => {
+    searchParamsString = "wave=wave-1";
+
+    render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
+
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("does not preserve curated_by_group when opening a drop", () => {
+    searchParamsString = "wave=wave-1&curated_by_group=group-1";
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [{ id: "drop-1" }],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+
+    render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
+    fireEvent.click(screen.getByTestId("drop"));
+
+    expect(push).toHaveBeenCalledWith("/waves?wave=wave-1&drop=drop-1", {
+      scroll: false,
     });
   });
 });
