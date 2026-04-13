@@ -297,9 +297,8 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "TDH" }));
 
     expect(screen.queryByTestId("rule-tdh")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "TDH" })).toHaveAttribute(
-      "aria-pressed",
-      "false"
+    expect(screen.getByRole("button", { name: "TDH" })).not.toHaveAttribute(
+      "aria-pressed"
     );
   });
 
