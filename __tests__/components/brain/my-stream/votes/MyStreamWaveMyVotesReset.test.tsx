@@ -48,7 +48,7 @@ test("returns null when no drops", () => {
           allItemsSelected={false}
           onToggleSelectAll={jest.fn()}
           removeSelected={jest.fn()}
-          setPausePolling={jest.fn()}
+          onResettingChange={jest.fn()}
         />
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
@@ -67,7 +67,7 @@ test("shows available votes when provided", () => {
           allItemsSelected={false}
           onToggleSelectAll={jest.fn()}
           removeSelected={jest.fn()}
-          setPausePolling={jest.fn()}
+          onResettingChange={jest.fn()}
         />
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
@@ -87,7 +87,7 @@ test("hides available votes when missing", () => {
           allItemsSelected={false}
           onToggleSelectAll={jest.fn()}
           removeSelected={jest.fn()}
-          setPausePolling={jest.fn()}
+          onResettingChange={jest.fn()}
         />
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
@@ -98,7 +98,7 @@ test("hides available votes when missing", () => {
 
 test("resets votes for selected drops", async () => {
   const removeSelected = jest.fn();
-  const setPausePolling = jest.fn();
+  const onResettingChange = jest.fn();
   const selected = new Set(["a", "b"]);
   render(
     <AuthContext.Provider value={auth}>
@@ -110,7 +110,7 @@ test("resets votes for selected drops", async () => {
           allItemsSelected={false}
           onToggleSelectAll={jest.fn()}
           removeSelected={removeSelected}
-          setPausePolling={setPausePolling}
+          onResettingChange={onResettingChange}
         />
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
@@ -118,7 +118,8 @@ test("resets votes for selected drops", async () => {
   await act(async () => {
     fireEvent.click(screen.getAllByRole("button")[1]);
   });
-  expect(setPausePolling).toHaveBeenCalledWith(true);
+  expect(onResettingChange).toHaveBeenNthCalledWith(1, true);
+  expect(onResettingChange).toHaveBeenNthCalledWith(2, false);
   expect(removeSelected).toHaveBeenCalledTimes(2);
   // onDropRateChange is handled by React Query elsewhere, not directly by this component
 });
