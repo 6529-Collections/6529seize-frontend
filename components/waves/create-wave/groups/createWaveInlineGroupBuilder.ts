@@ -177,6 +177,22 @@ export const getInlineGroupRuleCount = (draft: ApiCreateGroup): number =>
     hasGrantRule(draft),
   ].filter(Boolean).length;
 
+export const getInlineGroupConfiguredRules = (
+  draft: ApiCreateGroup
+): CreateWaveInlineGroupRuleType[] => {
+  const ruleChecks: Array<readonly [CreateWaveInlineGroupRuleType, boolean]> = [
+    [CreateWaveInlineGroupRuleType.LEVEL, hasLevelRule(draft)],
+    [CreateWaveInlineGroupRuleType.TDH, hasTdhRule(draft)],
+    [CreateWaveInlineGroupRuleType.CIC, hasCicRule(draft)],
+    [CreateWaveInlineGroupRuleType.REP, hasRepRule(draft)],
+    [CreateWaveInlineGroupRuleType.NFTS, hasNftRule(draft)],
+    [CreateWaveInlineGroupRuleType.COLLECTIONS, hasCollectionRule(draft)],
+    [CreateWaveInlineGroupRuleType.XTDH_GRANT, hasGrantRule(draft)],
+  ];
+
+  return ruleChecks.filter(([, hasRule]) => hasRule).map(([rule]) => rule);
+};
+
 export const getInlineGroupDraftSummary = ({
   draft,
   identityCount,

@@ -2,9 +2,11 @@ import {
   buildInlineGroupName,
   createEmptyInlineGroupPayload,
   dedupeInlineIdentities,
+  getInlineGroupConfiguredRules,
   getInlineGroupDraftSummary,
   getInlineIdentityAddresses,
   getInlineGroupRuleCount,
+  CreateWaveInlineGroupRuleType,
 } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 
 describe("createWaveInlineGroupBuilder", () => {
@@ -26,6 +28,25 @@ describe("createWaveInlineGroupBuilder", () => {
     ];
 
     expect(getInlineGroupRuleCount(draft)).toBe(3);
+  });
+
+  it("returns configured rules in display order", () => {
+    const draft = createEmptyInlineGroupPayload();
+    draft.group.tdh = { ...draft.group.tdh, min: 10 };
+    draft.group.cic = { ...draft.group.cic, max: 200 };
+    draft.group.owns_nfts = [
+      { name: "Memes" as any, tokens: [] },
+      { name: "Gradients" as any, tokens: ["12"] },
+    ];
+    draft.group.is_beneficiary_of_grant_id = "grant-1";
+
+    expect(getInlineGroupConfiguredRules(draft)).toEqual([
+      CreateWaveInlineGroupRuleType.TDH,
+      CreateWaveInlineGroupRuleType.CIC,
+      CreateWaveInlineGroupRuleType.NFTS,
+      CreateWaveInlineGroupRuleType.COLLECTIONS,
+      CreateWaveInlineGroupRuleType.XTDH_GRANT,
+    ]);
   });
 
   it("builds a compact draft summary", () => {

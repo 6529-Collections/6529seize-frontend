@@ -235,7 +235,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       screen.getByRole("button", { name: "Add rule" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Add a group" })
+      screen.getByRole("button", { name: "Use existing group" })
     ).toBeInTheDocument();
   });
 
@@ -246,6 +246,9 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Add identity" }));
 
     expect(screen.getByText("Add identity")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Back to options" })
+    ).toBeInTheDocument();
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
   });
 
@@ -257,6 +260,29 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "TDH" }));
 
     expect(screen.getByTestId("rule-tdh")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Back to rules" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows all rule options without an extra more-rules step", async () => {
+    const user = userEvent.setup();
+    render(<TestHarness />);
+
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+
+    expect(
+      screen.getByRole("button", { name: "Required NFTs" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Collection Access" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "xTDH Grant" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "More rules" })
+    ).not.toBeInTheDocument();
   });
 
   it("returns to the actions view after selecting an existing group", async () => {
@@ -264,7 +290,9 @@ describe("CreateWaveGroupInlinePanel", () => {
     const onGroupSelect = jest.fn();
     render(<TestHarness onGroupSelect={onGroupSelect} />);
 
-    await user.click(screen.getByRole("button", { name: "Add a group" }));
+    await user.click(
+      screen.getByRole("button", { name: "Use existing group" })
+    );
     await user.click(screen.getByRole("button", { name: "select group" }));
 
     expect(onGroupSelect).toHaveBeenCalledWith(
@@ -328,6 +356,28 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByRole("button", { name: "Create + use" })).toBeDisabled();
   });
 
+  it("opens configured rules from the draft chips", async () => {
+    const user = userEvent.setup();
+    const draft = createEmptyInlineGroupPayload();
+    draft.group.rep = {
+      ...draft.group.rep,
+      min: 5,
+    };
+
+    render(
+      <TestHarness
+        initialBuilder={{
+          ...createInitialInlineGroupBuilderState(),
+          draft,
+        }}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+
+    expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
+  });
+
   it("updates the draft summary after adding an identity", async () => {
     const user = userEvent.setup();
     render(<TestHarness />);
@@ -335,6 +385,11 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));
 
-    expect(screen.getByText("Draft: 1 identity")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "1 identity" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "+ Add rule" })
+    ).toBeInTheDocument();
   });
 });
