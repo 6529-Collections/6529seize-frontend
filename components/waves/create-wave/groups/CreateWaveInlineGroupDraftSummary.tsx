@@ -1,7 +1,6 @@
 export default function CreateWaveInlineGroupDraftSummary({
   draftSummary,
   isValid,
-  canResetDraft,
   canCreateDraft,
   isCreating,
   onStartOver,
@@ -9,7 +8,6 @@ export default function CreateWaveInlineGroupDraftSummary({
 }: {
   readonly draftSummary: string;
   readonly isValid: boolean;
-  readonly canResetDraft: boolean;
   readonly canCreateDraft: boolean;
   readonly isCreating: boolean;
   readonly onStartOver: () => void;
@@ -30,7 +28,7 @@ export default function CreateWaveInlineGroupDraftSummary({
       <div className="tw-flex tw-items-center tw-gap-2">
         <button
           type="button"
-          disabled={!canResetDraft}
+          disabled={!canCreateDraft}
           onClick={onStartOver}
           className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800"
         >
