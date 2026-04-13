@@ -17,7 +17,7 @@ interface MyStreamWaveMyVotesResetProps {
   readonly allItemsSelected: boolean;
   readonly onToggleSelectAll: () => void;
   readonly removeSelected: (dropId: string) => void;
-  readonly setPausePolling: (pausePolling: boolean) => void;
+  readonly onResettingChange: (isResetting: boolean) => void;
 }
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
@@ -29,7 +29,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   allItemsSelected,
   onToggleSelectAll,
   removeSelected,
-  setPausePolling,
+  onResettingChange,
 }) => {
   const { setToast } = useContext(AuthContext);
   // State for reset progress
@@ -67,7 +67,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   const handleReset = async () => {
     if (!selectedCount || isResetting) return;
     setTotalCount(selectedCount);
-    setPausePolling(true);
+    onResettingChange(true);
     setIsResetting(true);
     setResetProgress(0);
 
@@ -81,7 +81,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
 
     setIsResetting(false);
     setResetProgress(0);
-    setPausePolling(false);
+    onResettingChange(false);
     setTotalCount(0);
   };
 
