@@ -345,6 +345,35 @@ describe("WaveNotificationSettings", () => {
     expect(commonApiPost).not.toHaveBeenCalled();
   });
 
+  it("lets users retry when notification preferences fail to load", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const refetch = jest.fn();
+
+    mockUseWaveNotificationSubscription.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isFetching: false,
+      isPending: false,
+      refetch,
+    });
+
+    renderComponent();
+
+    const retryButton = screen.getByLabelText("Retry notification settings");
+    expect(retryButton).toBeEnabled();
+    expect(
+      screen.queryByLabelText("Receive ALL mention notifications")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Receive all drop notifications")
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(retryButton);
+
+    expect(refetch).toHaveBeenCalled();
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
   it("handles API error when enabling all drop notifications", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
 
