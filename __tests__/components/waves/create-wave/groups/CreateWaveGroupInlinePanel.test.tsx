@@ -396,7 +396,8 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(onGroupSelect).toHaveBeenCalledWith(createdGroup);
   });
 
-  it("keeps create disabled when the draft is invalid", () => {
+  it("keeps reset available when the draft is invalid", async () => {
+    const user = userEvent.setup();
     const draft = createEmptyInlineGroupPayload();
     draft.group.tdh = {
       ...draft.group.tdh,
@@ -414,6 +415,14 @@ describe("CreateWaveGroupInlinePanel", () => {
     );
 
     expect(screen.getByRole("button", { name: "Create + use" })).toBeDisabled();
+    const startOverButton = screen.getByRole("button", { name: "Start over" });
+    expect(startOverButton).toBeEnabled();
+
+    await user.click(startOverButton);
+
+    expect(
+      screen.queryByText("Ready to create this inline group")
+    ).not.toBeInTheDocument();
   });
 
   it("opens configured rules from the draft chips", async () => {

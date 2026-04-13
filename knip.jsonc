@@ -88,7 +88,8 @@
       "ts-morph",
       "tsx",
       "baseline-browser-mapping",
-      "yaml"
+      "yaml",
+      "react-doctor"
     ],
 
     // Disable Jest and Playwright plugins so test-only usages are reported
