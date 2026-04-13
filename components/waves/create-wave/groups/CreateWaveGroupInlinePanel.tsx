@@ -34,31 +34,6 @@ const CREATE_WAVE_INLINE_GROUP_RULE_OPTIONS = [
   ...CREATE_WAVE_INLINE_GROUP_MORE_RULES,
 ] as const;
 
-function PanelHeader({
-  title,
-  backLabel,
-  onBack,
-}: {
-  readonly title: string;
-  readonly backLabel: string;
-  readonly onBack: () => void;
-}) {
-  return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-      <button
-        type="button"
-        onClick={onBack}
-        className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
-      >
-        {backLabel}
-      </button>
-      <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
-        {title}
-      </p>
-    </div>
-  );
-}
-
 function ActionButton({
   label,
   onClick,
@@ -84,17 +59,29 @@ function DraftChipButton({
   label,
   onClick,
   disabled = false,
+  active = false,
+  compact = false,
 }: {
   readonly label: string;
   readonly onClick: () => void;
   readonly disabled?: boolean | undefined;
+  readonly active?: boolean | undefined;
+  readonly compact?: boolean | undefined;
 }) {
+  const stateClasses = active
+    ? "tw-border-primary-400 tw-bg-primary-500/15 tw-text-primary-200 desktop-hover:hover:tw-border-primary-300 desktop-hover:hover:tw-bg-primary-500/20"
+    : "tw-border-iron-700 tw-bg-iron-950 tw-text-iron-200 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800";
+  const sizeClasses = compact
+    ? "tw-px-2.5 tw-py-1 tw-text-xs"
+    : "tw-px-3 tw-py-1.5 tw-text-xs";
+
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800"
+      aria-pressed={active}
+      className={`tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 ${sizeClasses} ${stateClasses}`}
     >
       {label}
     </button>
@@ -154,6 +141,14 @@ export default function CreateWaveGroupInlinePanel({
   const canCreateDraft = validation.valid && !disabled && !isCreating;
   const currentStateLabel = selectedGroup?.name ?? defaultLabel;
   const identityCount = groupBuilder.identities.length;
+  const identityLabel = identityCount === 1 ? "identity" : "identities";
+  const isIdentityPanel = groupBuilder.panel === "identity";
+  const isRulePanel =
+    groupBuilder.panel === "rule-list" || groupBuilder.panel === "rule-editor";
+  const isSearchPanel = groupBuilder.panel === "search";
+  const showModeChips = groupBuilder.panel !== "actions" || !!draftSummary;
+  const identityChipLabel =
+    identityCount > 0 ? `${identityCount} ${identityLabel}` : "Add identity";
 
   const updateDraft = (draft: ApiCreateGroup) => {
     setGroupBuilderDraft(draft);
@@ -162,6 +157,30 @@ export default function CreateWaveGroupInlinePanel({
   const openPanel = (panel: CreateWaveInlineGroupPanel) => {
     setGroupBuilderRule(null);
     setGroupBuilderPanel(panel);
+  };
+
+  const togglePanel = (
+    panel: CreateWaveInlineGroupPanel,
+    isActive: boolean
+  ) => {
+    openPanel(isActive ? "actions" : panel);
+  };
+
+  const openRule = (rule: CreateWaveInlineGroupRuleType) => {
+    setGroupBuilderRule(rule);
+  };
+
+  const toggleRule = (rule: CreateWaveInlineGroupRuleType) => {
+    if (
+      groupBuilder.panel === "rule-editor" &&
+      groupBuilder.activeRule === rule
+    ) {
+      setGroupBuilderRule(null);
+      setGroupBuilderPanel("rule-list");
+      return;
+    }
+
+    openRule(rule);
   };
 
   const onCreateAndUse = async () => {
@@ -314,43 +333,37 @@ export default function CreateWaveGroupInlinePanel({
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
             {currentStateLabel}
           </p>
-          {draftSummary && (
+          {showModeChips && (
             <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
               <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
                 Draft
               </span>
-              {identityCount > 0 ? (
-                <DraftChipButton
-                  label={`${identityCount} ${
-                    identityCount === 1 ? "identity" : "identities"
-                  }`}
-                  disabled={disabled}
-                  onClick={() => openPanel("identity")}
-                />
-              ) : (
-                <DraftChipButton
-                  label="+ Add identity"
-                  disabled={disabled}
-                  onClick={() => openPanel("identity")}
-                />
-              )}
-              {configuredRules.map((rule) => (
-                <DraftChipButton
-                  key={rule}
-                  label={CREATE_WAVE_INLINE_GROUP_RULE_LABELS[rule]}
-                  disabled={disabled}
-                  onClick={() => setGroupBuilderRule(rule)}
-                />
-              ))}
               <DraftChipButton
-                label="+ Add rule"
+                label={identityChipLabel}
                 disabled={disabled}
-                onClick={() => openPanel("rule-list")}
+                active={isIdentityPanel}
+                onClick={() => togglePanel("identity", isIdentityPanel)}
+              />
+              {!isRulePanel &&
+                configuredRules.map((rule) => (
+                  <DraftChipButton
+                    key={rule}
+                    label={CREATE_WAVE_INLINE_GROUP_RULE_LABELS[rule]}
+                    disabled={disabled}
+                    onClick={() => openRule(rule)}
+                  />
+                ))}
+              <DraftChipButton
+                label="Add rule"
+                disabled={disabled}
+                active={isRulePanel}
+                onClick={() => togglePanel("rule-list", isRulePanel)}
               />
               <DraftChipButton
                 label="Use existing group"
                 disabled={disabled}
-                onClick={() => openPanel("search")}
+                active={isSearchPanel}
+                onClick={() => togglePanel("search", isSearchPanel)}
               />
             </div>
           )}
@@ -378,11 +391,6 @@ export default function CreateWaveGroupInlinePanel({
 
         {groupBuilder.panel === "identity" && (
           <div className="tw-space-y-3">
-            <PanelHeader
-              title="Add identity"
-              backLabel="Back to options"
-              onBack={() => openPanel("actions")}
-            />
             <CreateWaveInlineGroupIdentities
               identities={groupBuilder.identities}
               onIdentitySelect={addGroupBuilderIdentity}
@@ -393,18 +401,14 @@ export default function CreateWaveGroupInlinePanel({
 
         {groupBuilder.panel === "rule-list" && (
           <div className="tw-space-y-3">
-            <PanelHeader
-              title="Add rule"
-              backLabel="Back to options"
-              onBack={() => openPanel("actions")}
-            />
-            <div className="tw-flex tw-flex-wrap tw-gap-2">
+            <div className="tw-flex tw-flex-wrap tw-gap-1.5">
               {CREATE_WAVE_INLINE_GROUP_RULE_OPTIONS.map((rule) => (
-                <ActionButton
+                <DraftChipButton
                   key={rule}
                   label={CREATE_WAVE_INLINE_GROUP_RULE_LABELS[rule]}
                   disabled={disabled}
-                  onClick={() => setGroupBuilderRule(rule)}
+                  compact={true}
+                  onClick={() => openRule(rule)}
                 />
               ))}
             </div>
@@ -414,27 +418,24 @@ export default function CreateWaveGroupInlinePanel({
         {groupBuilder.panel === "rule-editor" &&
           groupBuilder.activeRule !== null && (
             <div className="tw-space-y-3">
-              <PanelHeader
-                title={
-                  CREATE_WAVE_INLINE_GROUP_RULE_LABELS[groupBuilder.activeRule]
-                }
-                backLabel="Back to rules"
-                onBack={() => {
-                  setGroupBuilderRule(null);
-                  setGroupBuilderPanel("rule-list");
-                }}
-              />
+              <div className="tw-flex tw-flex-wrap tw-gap-1.5">
+                {CREATE_WAVE_INLINE_GROUP_RULE_OPTIONS.map((rule) => (
+                  <DraftChipButton
+                    key={rule}
+                    label={CREATE_WAVE_INLINE_GROUP_RULE_LABELS[rule]}
+                    disabled={disabled}
+                    active={groupBuilder.activeRule === rule}
+                    compact={true}
+                    onClick={() => toggleRule(rule)}
+                  />
+                ))}
+              </div>
               {renderRuleEditor()}
             </div>
           )}
 
         {groupBuilder.panel === "search" && (
           <div className="tw-space-y-3">
-            <PanelHeader
-              title="Use existing group"
-              backLabel="Back to options"
-              onBack={() => openPanel("actions")}
-            />
             <CreateWaveGroupSearchField
               label="Search groups…"
               defaultLabel={defaultLabel}

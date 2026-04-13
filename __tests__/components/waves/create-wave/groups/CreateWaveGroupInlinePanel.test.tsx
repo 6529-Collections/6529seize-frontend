@@ -245,11 +245,26 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     await user.click(screen.getByRole("button", { name: "Add identity" }));
 
-    expect(screen.getByText("Add identity")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Back to options" })
-    ).toBeInTheDocument();
+      screen.getByRole("button", { name: "Add identity" })
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.queryByRole("button", { name: "Back to options" })
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
+  });
+
+  it("returns to options when the active identity pill is clicked", async () => {
+    const user = userEvent.setup();
+    render(<TestHarness />);
+
+    await user.click(screen.getByRole("button", { name: "Add identity" }));
+    await user.click(screen.getByRole("button", { name: "Add identity" }));
+
+    expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Use existing group" })
+    ).toBeInTheDocument();
   });
 
   it("opens a quick rule editor", async () => {
@@ -260,9 +275,32 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "TDH" }));
 
     expect(screen.getByTestId("rule-tdh")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add rule" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "TDH" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
     expect(
-      screen.getByRole("button", { name: "Back to rules" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Back to rules" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("returns to rule options when the active rule pill is clicked", async () => {
+    const user = userEvent.setup();
+    render(<TestHarness />);
+
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "TDH" }));
+    await user.click(screen.getByRole("button", { name: "TDH" }));
+
+    expect(screen.queryByTestId("rule-tdh")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "TDH" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
   });
 
   it("shows all rule options without an extra more-rules step", async () => {
@@ -283,6 +321,28 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.queryByRole("button", { name: "More rules" })
     ).not.toBeInTheDocument();
+  });
+
+  it("returns to options when the active existing group pill is clicked", async () => {
+    const user = userEvent.setup();
+    render(<TestHarness />);
+
+    await user.click(
+      screen.getByRole("button", { name: "Use existing group" })
+    );
+    expect(screen.getByTestId("group-search")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Use existing group" })
+    ).toHaveAttribute("aria-pressed", "true");
+
+    await user.click(
+      screen.getByRole("button", { name: "Use existing group" })
+    );
+
+    expect(screen.queryByTestId("group-search")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Add identity" })
+    ).toBeInTheDocument();
   });
 
   it("returns to the actions view after selecting an existing group", async () => {
@@ -389,7 +449,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       screen.getByRole("button", { name: "1 identity" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "+ Add rule" })
+      screen.getByRole("button", { name: "Add rule" })
     ).toBeInTheDocument();
   });
 });
