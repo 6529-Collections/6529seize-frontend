@@ -5,8 +5,7 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { validateGroupPayload } from "@/services/groups/groupMutations";
-import type {
-  CreateWaveInlineGroupRuleType,
+import {
   buildInlineGroupName,
   getInlineGroupConfiguredRules,
   getInlineGroupDraftSummary,
@@ -14,6 +13,7 @@ import type {
 import type {
   CreateWaveInlineGroupBuilderState,
   CreateWaveInlineGroupPanel,
+  CreateWaveInlineGroupRuleType,
 } from "./createWaveInlineGroupBuilder";
 import CreateWaveInlineGroupActions from "./CreateWaveInlineGroupActions";
 import CreateWaveInlineGroupDraftSummary from "./CreateWaveInlineGroupDraftSummary";
@@ -118,7 +118,7 @@ export default function CreateWaveGroupInlinePanel({
     openRule(rule);
   };
 
-  const createAndUse = async () => {
+  const onCreateAndUse = async () => {
     if (!canCreateDraft) {
       return;
     }
@@ -145,10 +145,6 @@ export default function CreateWaveGroupInlinePanel({
     } finally {
       setIsCreating(false);
     }
-  };
-
-  const onCreateAndUse = () => {
-    void createAndUse();
   };
 
   const onStartOver = () => {
