@@ -223,6 +223,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
                     <button
                       key={status}
                       type="button"
+                      aria-pressed={isActive}
                       onClick={() => setSelectedStatus(status)}
                       className={`tw-rounded-md tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition tw-duration-200 ${
                         isActive

@@ -212,6 +212,14 @@ export default function CreateWaveGroupInlinePanel({
     }
   };
 
+  const onStartOver = () => {
+    if (!canCreateDraft) {
+      return;
+    }
+
+    resetGroupBuilder();
+  };
+
   const onExistingGroupSelect = (group: ApiGroupFull | null) => {
     onGroupSelect(group);
     if (group) {
@@ -461,8 +469,9 @@ export default function CreateWaveGroupInlinePanel({
             <div className="tw-flex tw-items-center tw-gap-2">
               <button
                 type="button"
-                onClick={resetGroupBuilder}
-                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+                disabled={!canCreateDraft}
+                onClick={onStartOver}
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800"
               >
                 Start over
               </button>
