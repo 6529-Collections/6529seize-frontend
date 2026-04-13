@@ -22,6 +22,7 @@ interface MyStreamWaveCurationContentProps {
   readonly curationId: string;
   readonly curationName?: string | null | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly constrainToViewport?: boolean | undefined;
 }
 
 function MyStreamWaveCurationDropItem({
@@ -129,6 +130,7 @@ export default function MyStreamWaveCurationContent({
   curationId,
   curationName,
   onDropClick,
+  constrainToViewport = true,
 }: MyStreamWaveCurationContentProps) {
   const { leaderboardViewStyle } = useLayout();
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
@@ -220,8 +222,12 @@ export default function MyStreamWaveCurationContent({
 
   return (
     <div
-      className="tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-      style={leaderboardViewStyle}
+      className={
+        constrainToViewport
+          ? "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+          : "tw-flex tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-col"
+      }
+      style={constrainToViewport ? leaderboardViewStyle : undefined}
     >
       {content}
     </div>

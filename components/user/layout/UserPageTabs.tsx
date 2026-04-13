@@ -5,6 +5,8 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useIdentity } from "@/hooks/useIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
   faChevronRight,
@@ -33,9 +35,7 @@ import {
   type UserPageVisibilityContext,
   getUserPageTabByRoute,
 } from "./userTabs.config";
-import {
-  shouldHideSubscriptions,
-} from "./userPageVisibility";
+import { shouldHideSubscriptions } from "./userPageVisibility";
 import { shouldDelayUserPageBrainRedirect } from "./userPageBrainAccess";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
@@ -45,17 +45,20 @@ const getServerRenderSnapshot = () => false;
 
 const getVisibilityContext = ({
   showWaves,
+  hasProfileWave,
   capacitorIsIos,
   country,
   isOwnProfile,
 }: {
   readonly showWaves: boolean;
+  readonly hasProfileWave: boolean;
   readonly capacitorIsIos: boolean;
   readonly country: string | null | undefined;
   readonly isOwnProfile: boolean;
 }): UserPageVisibilityContext => {
   return {
     showWaves,
+    hasProfileWave,
     hideSubscriptions: shouldHideSubscriptions({
       capacitorIsIos,
       country,
@@ -71,7 +74,11 @@ const resolveTabFromPath = (pathname: string): UserPageTabKey => {
   return match?.id ?? DEFAULT_TAB;
 };
 
-export default function UserPageTabs() {
+export default function UserPageTabs({
+  initialProfile,
+}: {
+  readonly initialProfile: ApiIdentity;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const params = useParams();
@@ -82,6 +89,11 @@ export default function UserPageTabs() {
   const { country } = useCookieConsent();
   const { showWaves, connectedProfile, fetchingProfile } = useAuth();
   const { address, connectionState } = useSeizeConnectContext();
+  const { profile: viewedProfile } = useIdentity({
+    handleOrWallet,
+    initialProfile,
+  });
+  const resolvedViewedProfile = viewedProfile ?? initialProfile;
 
   const isOwnProfile = useMemo(() => {
     return isOwnProfileRoute({
@@ -90,15 +102,18 @@ export default function UserPageTabs() {
     });
   }, [connectedProfile, handleOrWallet]);
 
+  const hasProfileWave = Boolean(resolvedViewedProfile.profile_wave_id);
+
   const visibilityContext = useMemo(
     () =>
       getVisibilityContext({
         showWaves,
+        hasProfileWave,
         capacitorIsIos: capacitor.isIos,
         country,
         isOwnProfile,
       }),
-    [capacitor.isIos, country, isOwnProfile, showWaves]
+    [capacitor.isIos, country, hasProfileWave, isOwnProfile, showWaves]
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);

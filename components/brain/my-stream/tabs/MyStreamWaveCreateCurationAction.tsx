@@ -35,7 +35,7 @@ export default function MyStreamWaveCreateCurationAction({
 
   return (
     <>
-      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 tw-pr-2 sm:tw-pr-4">
+      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
         {showCreateFirstCurationCallout ? (
           <button
             type="button"
