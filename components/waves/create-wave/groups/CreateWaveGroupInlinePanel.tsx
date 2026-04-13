@@ -77,6 +77,7 @@ export default function CreateWaveGroupInlinePanel({
   );
   const validation = validateGroupPayload(groupBuilder.draft);
   const canCreateDraft = validation.valid && !disabled && !isCreating;
+  const canResetDraft = !!draftSummary && !disabled && !isCreating;
   const currentStateLabel = selectedGroup?.name ?? defaultLabel;
   const identityCount = groupBuilder.identities.length;
   const identityLabel = identityCount === 1 ? "identity" : "identities";
@@ -147,7 +148,7 @@ export default function CreateWaveGroupInlinePanel({
   };
 
   const onStartOver = () => {
-    if (!canCreateDraft) {
+    if (!canResetDraft) {
       return;
     }
 
@@ -235,6 +236,7 @@ export default function CreateWaveGroupInlinePanel({
           <CreateWaveInlineGroupDraftSummary
             draftSummary={draftSummary}
             isValid={validation.valid}
+            canResetDraft={canResetDraft}
             canCreateDraft={canCreateDraft}
             isCreating={isCreating}
             onStartOver={onStartOver}
