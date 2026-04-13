@@ -1,5 +1,3 @@
-import { cloneElement, isValidElement } from "react";
-import type { ReactElement } from "react";
 import { MenuButton } from "@headlessui/react";
 import clsx from "clsx";
 import type { CompactMenuProps } from "../types";
@@ -29,10 +27,6 @@ export function CompactMenuTrigger({
       return trigger({ isOpen, close });
     }
 
-    if (isCustomTriggerElement(trigger)) {
-      return cloneElement(trigger, { isOpen, close });
-    }
-
     return trigger;
   };
 
@@ -43,17 +37,10 @@ export function CompactMenuTrigger({
       disabled={disabled}
       className={clsx(
         unstyledTrigger ? undefined : DEFAULT_TRIGGER_CLASSES,
-        triggerClassName,
+        triggerClassName
       )}
     >
       {renderTrigger()}
     </MenuButton>
   );
 }
-
-type TriggerRenderProps = { isOpen: boolean; close: () => void };
-
-const isCustomTriggerElement = (
-  element: CompactMenuProps["trigger"],
-): element is ReactElement<TriggerRenderProps> =>
-  isValidElement(element) && typeof element.type !== "string";

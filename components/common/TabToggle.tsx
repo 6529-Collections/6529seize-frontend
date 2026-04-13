@@ -32,19 +32,19 @@ export const TabToggle: React.FC<TabToggleProps> = ({
           role="tab"
           aria-selected={activeKey === option.key}
           aria-controls={option.panelId}
-          className={`tw-whitespace-nowrap tw-px-2 tw-py-3 tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 tw-relative ${
+          className={`tw-relative tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
             fullWidth
-              ? "tw-flex-1 tw-text-center tw-justify-center tw-flex"
+              ? "tw-flex tw-flex-1 tw-justify-center tw-text-center"
               : ""
           } ${
             activeKey === option.key
-              ? "tw-text-white tw-border-primary-300"
-              : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 tw-border-transparent"
+              ? "tw-border-primary-300 tw-text-white"
+              : "tw-border-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
           }`}
         >
           {option.label}
           {option.hasIndicator && (
-            <div className="tw-absolute tw-rounded-full -tw-right-1 tw-top-1 tw-bg-red tw-h-2 tw-w-2"></div>
+            <div className="tw-absolute -tw-right-1 tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
           )}
         </button>
       ))}

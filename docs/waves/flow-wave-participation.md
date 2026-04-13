@@ -61,7 +61,7 @@ same context.
 6. Use drop actions (reply, react, vote, open drop, copy link, boost,
    admin-only pinned-drop updates, and other available actions) based on wave
    and drop eligibility. In memes-wave contexts, quick vote can also appear
-   from dedicated footer or floating triggers when unrated memes remain.
+   from dedicated footer triggers when unrated memes remain.
 7. Submit new content when participation is allowed.
 8. Share links so others can reopen the same wave or target drop.
 

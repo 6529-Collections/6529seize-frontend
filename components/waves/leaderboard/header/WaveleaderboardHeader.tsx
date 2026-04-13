@@ -3,7 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
+import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
@@ -40,7 +40,7 @@ interface WaveLeaderboardHeaderProps {
   readonly onViewModeChange: (mode: LeaderboardViewMode) => void;
   readonly sort: WaveDropsLeaderboardSort;
   readonly onSortChange: (sort: WaveDropsLeaderboardSort) => void;
-  readonly curationGroups?: readonly ApiWaveCurationGroup[] | undefined;
+  readonly curationGroups?: readonly ApiWaveCuration[] | undefined;
   readonly curatedByGroupId?: string | null | undefined;
   readonly onCurationGroupChange?:
     | ((groupId: string | null) => void)

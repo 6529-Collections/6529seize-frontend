@@ -179,6 +179,45 @@ describe("MyStreamWaveChat", () => {
     expect(screen.queryByTestId("memes-btn")).toBeNull();
   });
 
+  it("keeps serialNo until chat view renders", async () => {
+    searchParamsMock.get.mockImplementation((key: string) =>
+      key === "serialNo" ? "5" : null
+    );
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
+
+    const { rerender } = renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="gallery"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    expect(screen.getByTestId("gallery")).toBeInTheDocument();
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    rerender(
+      <ReactQueryWrapperContext.Provider
+        value={{ invalidateNotifications: invalidateNotificationsMock } as any}
+      >
+        <Provider store={store}>
+          <MyStreamWaveChat
+            wave={wave}
+            firstUnreadSerialNo={null}
+            viewMode="chat"
+            onDropClick={mockOnDropClick}
+          />
+        </Provider>
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledTimes(1);
+      expect(capturedPropsHolder.current.initialDrop).toBe(5);
+    });
+  });
+
   it("invalidates notifications on unmount", async () => {
     searchParamsMock.get.mockReturnValueOnce("5").mockReturnValue(null);
     searchParamsMock.toString.mockReturnValue("serialNo=5");

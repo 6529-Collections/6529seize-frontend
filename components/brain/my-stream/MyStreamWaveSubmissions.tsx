@@ -16,6 +16,8 @@ import { DropLocation } from "@/components/waves/drops/drop.types";
 import { WaveLeaderboardLoading } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoading";
 import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
 
+const CURATION_FILTER_PARAM = "curation_id";
+
 interface MyStreamWaveSubmissionsProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -40,11 +42,11 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
 
   useEffect(() => {
     const params = new URLSearchParams(searchParamsString || "");
-    if (!params.has("curated_by_group")) {
+    if (!params.has(CURATION_FILTER_PARAM)) {
       return;
     }
 
-    params.delete("curated_by_group");
+    params.delete(CURATION_FILTER_PARAM);
 
     const nextQuery = params.toString();
     const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
@@ -54,7 +56,7 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const openDropById = useCallback(
     (dropId: string) => {
       const params = new URLSearchParams(searchParamsString || "");
-      params.delete("curated_by_group");
+      params.delete(CURATION_FILTER_PARAM);
       params.set("drop", dropId);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },

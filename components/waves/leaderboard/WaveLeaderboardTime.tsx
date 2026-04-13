@@ -8,6 +8,8 @@ import React, {
   useState,
 } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { TimeLeft } from "@/helpers/waves/time.utils";
+import { calculateTimeLeft } from "@/helpers/waves/time.utils";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
 import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
@@ -22,6 +24,12 @@ interface WaveLeaderboardTimeProps {
 }
 
 const AUTO_EXPAND_LIMIT = 5;
+const EMPTY_TIME_LEFT: TimeLeft = {
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+};
 
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
@@ -46,6 +54,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
+  const [, setTimerTick] = useState(0);
   const autoExpandFutureAttemptsRef = useRef(0);
   const [timelineFocus, setTimelineFocus] = useState<"start" | "end" | null>(
     null
@@ -74,6 +83,19 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     filteredDecisions.find(
       (decision) => decision.timestamp > Time.currentMillis()
     )?.timestamp ?? null;
+
+  useEffect(() => {
+    if (typeof nextDecisionTime !== "number") {
+      return;
+    }
+
+    const intervalId = globalThis.setInterval(() => {
+      setTimerTick((currentTick) => currentTick + 1);
+    }, 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [nextDecisionTime]);
 
   useEffect(() => {
     if (nextDecisionTime !== null) {
@@ -117,6 +139,11 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     };
   }, [nextDecisionTime, hasMoreFuture, loadMoreFuture]);
 
+  const displayedTimeLeft =
+    typeof nextDecisionTime === "number"
+      ? calculateTimeLeft(nextDecisionTime)
+      : EMPTY_TIME_LEFT;
+
   const handleLoadMorePast = () => {
     if (hasMorePast) {
       setTimelineFocus("start");
@@ -154,6 +181,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 isOpen={isDecisionDetailsOpen}
                 setIsOpen={handleDecisionDetailsOpenChange}
                 nextDecisionTime={nextDecisionTime}
+                timeLeft={displayedTimeLeft}
                 isPaused={Boolean(currentPause)}
                 currentPause={currentPause}
               />

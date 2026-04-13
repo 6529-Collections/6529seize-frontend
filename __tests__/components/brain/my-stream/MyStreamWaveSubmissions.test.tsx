@@ -67,8 +67,8 @@ describe("MyStreamWaveSubmissions", () => {
     });
   });
 
-  it("does not forward curated_by_group to the submissions query", () => {
-    searchParamsString = "curated_by_group=group-1";
+  it("does not forward curation_id to the submissions query", () => {
+    searchParamsString = "curation_id=group-1";
 
     render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
 
@@ -79,8 +79,8 @@ describe("MyStreamWaveSubmissions", () => {
     });
   });
 
-  it("removes curated_by_group from the URL and preserves other params", () => {
-    searchParamsString = "wave=wave-1&curated_by_group=group-1&drop=drop-1";
+  it("removes curation_id from the URL and preserves other params", () => {
+    searchParamsString = "wave=wave-1&curation_id=group-1&drop=drop-1";
 
     render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
 
@@ -89,7 +89,7 @@ describe("MyStreamWaveSubmissions", () => {
     });
   });
 
-  it("does not replace the URL when curated_by_group is absent", () => {
+  it("does not replace the URL when curation_id is absent", () => {
     searchParamsString = "wave=wave-1";
 
     render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
@@ -97,8 +97,8 @@ describe("MyStreamWaveSubmissions", () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it("does not preserve curated_by_group when opening a drop", () => {
-    searchParamsString = "wave=wave-1&curated_by_group=group-1";
+  it("does not preserve curation_id when opening a drop", () => {
+    searchParamsString = "wave=wave-1&curation_id=group-1";
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [{ id: "drop-1" }],
       fetchNextPage: jest.fn(),

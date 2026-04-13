@@ -16,10 +16,13 @@ export interface TimeLeft {
  * Calculates the time remaining until a target timestamp
  *
  * @param targetTime - Target timestamp in milliseconds
+ * @param now - Current timestamp in milliseconds
  * @returns TimeLeft object with days, hours, minutes, seconds
  */
-export const calculateTimeLeft = (targetTime: number): TimeLeft => {
-  const now = Time.currentMillis();
+export const calculateTimeLeft = (
+  targetTime: number,
+  now: number = Time.currentMillis()
+): TimeLeft => {
   const difference = targetTime - now;
 
   if (difference <= 0) {

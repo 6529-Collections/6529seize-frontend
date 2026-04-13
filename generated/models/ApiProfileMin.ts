@@ -33,6 +33,7 @@ export class ApiProfileMin {
     'active_main_stage_submission_ids': Array<string>;
     'winner_main_stage_drop_ids': Array<string>;
     'artist_of_prevote_cards': Array<number>;
+    'profile_wave_id': string | null;
     'is_wave_creator': boolean;
 
     static readonly discriminator: string | undefined = undefined;
@@ -147,6 +148,12 @@ export class ApiProfileMin {
             "baseName": "artist_of_prevote_cards",
             "type": "Array<number>",
             "format": "int64"
+        },
+        {
+            "name": "profile_wave_id",
+            "baseName": "profile_wave_id",
+            "type": "string",
+            "format": ""
         },
         {
             "name": "is_wave_creator",
