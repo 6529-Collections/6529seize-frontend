@@ -1,0 +1,7 @@
+{
+  "deadCode": false,
+  "customRulesOnly": true,
+  "ignore": {
+    "files": ["generated/**"]
+  }
+}
