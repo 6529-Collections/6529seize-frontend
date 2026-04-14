@@ -26,15 +26,17 @@ const MyStreamWaveTabsLeaderboard: React.FC<
     voting: { isCompleted },
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
+  const primaryView = isCompleted
+    ? BrainView.SUBMISSIONS
+    : BrainView.LEADERBOARD;
+  const primaryLabel = isCompleted ? "Submissions" : "Leaderboard";
 
   // Leaderboard tab classes
   const leaderboardButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-7 tw-rounded-lg ${
-    activeView === BrainView.LEADERBOARD ? "tw-bg-iron-800" : "tw-bg-iron-950"
+    activeView === primaryView ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
   const leaderboardButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    activeView === BrainView.LEADERBOARD
-      ? "tw-text-iron-300"
-      : "tw-text-iron-400"
+    activeView === primaryView ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
   // Winners tab classes
@@ -47,18 +49,15 @@ const MyStreamWaveTabsLeaderboard: React.FC<
 
   return (
     <>
-      {/* Show Leaderboard tab always except when voting has ended */}
-      {!isCompleted && (
-        <button
-          ref={(el) => {
-            registerTabRef?.(BrainView.LEADERBOARD, el);
-          }}
-          onClick={() => onViewChange(BrainView.LEADERBOARD)}
-          className={leaderboardButtonClasses}
-        >
-          <span className={leaderboardButtonTextClasses}>Leaderboard</span>
-        </button>
-      )}
+      <button
+        ref={(el) => {
+          registerTabRef?.(primaryView, el);
+        }}
+        onClick={() => onViewChange(primaryView)}
+        className={leaderboardButtonClasses}
+      >
+        <span className={leaderboardButtonTextClasses}>{primaryLabel}</span>
+      </button>
       {renderAfterLeaderboard}
       {/* Show Winners tab if first decision has passed */}
       {firstDecisionDone && (

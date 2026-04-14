@@ -145,7 +145,12 @@ export default function IdentitySearch({
     }
 
     return selectedResultIndex;
-  }, [isOpen, manualHighlightedIndex, searchResults.length, selectedResultIndex]);
+  }, [
+    isOpen,
+    manualHighlightedIndex,
+    searchResults.length,
+    selectedResultIndex,
+  ]);
 
   const closeDropdown = () => {
     setIsOpen(false);

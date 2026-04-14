@@ -102,6 +102,12 @@ function normalizeActiveView({
   readonly routeDefaultView: BrainView | null;
   readonly wave: ApiWave | null | undefined;
 }): BrainView {
+  const hasLoadedWave = wave !== null && wave !== undefined;
+  const waveDefaultView =
+    hasLoadedWave && isRankWave && isCompleted
+      ? BrainView.SUBMISSIONS
+      : BrainView.DEFAULT;
+
   if (!hasWave) {
     if (!GLOBAL_VIEWS.has(activeView)) {
       return routeDefaultView ?? BrainView.DEFAULT;
@@ -118,8 +124,13 @@ function normalizeActiveView({
     return BrainView.DEFAULT;
   }
 
+  if (activeView === BrainView.LEADERBOARD && isRankWave && isCompleted) {
+    return BrainView.SUBMISSIONS;
+  }
+
   const shouldResetToDefault =
-    (activeView === BrainView.LEADERBOARD && (!isRankWave || isCompleted)) ||
+    (activeView === BrainView.LEADERBOARD && !isRankWave) ||
+    (activeView === BrainView.SUBMISSIONS && (!isRankWave || !isCompleted)) ||
     (activeView === BrainView.SALES && !isCurationWave) ||
     (activeView === BrainView.WINNERS && (!isRankWave || !firstDecisionDone)) ||
     (activeView === BrainView.OUTCOME && !isRankWave) ||
@@ -128,7 +139,7 @@ function normalizeActiveView({
         (!isMemesWave && !isCurationWave))) ||
     (activeView === BrainView.FAQ && !isMemesWave);
 
-  return shouldResetToDefault ? BrainView.DEFAULT : activeView;
+  return shouldResetToDefault ? waveDefaultView : activeView;
 }
 
 interface ActiveViewSelection {
@@ -166,8 +177,13 @@ export function useBrainMobileActiveView({
     () => Symbol(currentContextKey),
     [currentContextKey]
   );
+  const hasLoadedWave = wave !== null && wave !== undefined;
+  const waveDefaultView =
+    hasWave && hasLoadedWave && isRankWave && isCompleted
+      ? BrainView.SUBMISSIONS
+      : BrainView.DEFAULT;
   const baseView = hasWave
-    ? BrainView.DEFAULT
+    ? waveDefaultView
     : (routeDefaultView ?? BrainView.DEFAULT);
   const candidateView =
     selection?.contextToken === currentContextToken ? selection.view : baseView;
