@@ -135,7 +135,8 @@ export default function WaveHeaderFollow({
   const printIcon = () => {
     if (mutating) {
       return <CircleLoader size={LOADER_SIZES[size]} />;
-    } else if (following) {
+    }
+    if (following) {
       return (
         <svg
           className="-tw-ml-1 tw-h-3 tw-w-3 tw-flex-shrink-0"
@@ -152,25 +153,24 @@ export default function WaveHeaderFollow({
           />
         </svg>
       );
-    } else {
-      return (
-        <svg
-          className={`${SVG_CLASSES[size]} -tw-ml-1 tw-h-3 tw-w-3 tw-flex-shrink-0`}
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M12 5V19M5 12H19"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      );
     }
+    return (
+      <svg
+        className={`${SVG_CLASSES[size]} -tw-ml-1 tw-flex-shrink-0`}
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 5V19M5 12H19"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
   };
 
   return (
