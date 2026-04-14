@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type {
   CreateWaveConfig,
   CreateWaveOutcomeType,
@@ -15,6 +17,15 @@ import type { Period } from "../types/period";
 import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.validation";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import {
+  createInitialInlineGroupBuilderMap,
+  createInitialInlineGroupBuilderState,
+  dedupeInlineIdentities,
+  getInlineIdentityAddresses,
+  type CreateWaveInlineGroupBuilderState,
+  type CreateWaveInlineGroupPanel,
+  type CreateWaveInlineGroupRuleType,
+} from "../groups/createWaveInlineGroupBuilder";
 
 interface EndDateConfig {
   time: number | null;
@@ -104,6 +115,9 @@ export function useWaveConfig() {
   const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
     {}
   );
+  const [groupBuilders, setGroupBuilders] = useState<
+    Record<CreateWaveGroupConfigType, CreateWaveInlineGroupBuilderState>
+  >(createInitialInlineGroupBuilderMap());
 
   // Update end date config when config changes
   useEffect(() => {
@@ -123,6 +137,7 @@ export function useWaveConfig() {
       ...getInitialConfig({ type: overview.type }),
       overview,
     }));
+    setGroupBuilders(createInitialInlineGroupBuilderMap());
   };
 
   const setDates = (dates: CreateWaveConfig["dates"]) => {
@@ -247,6 +262,101 @@ export function useWaveConfig() {
     }
   };
 
+  const updateGroupBuilder = (
+    groupType: CreateWaveGroupConfigType,
+    updater: (
+      current: CreateWaveInlineGroupBuilderState
+    ) => CreateWaveInlineGroupBuilderState
+  ) => {
+    setGroupBuilders((prev) => ({
+      ...prev,
+      [groupType]: updater(prev[groupType]),
+    }));
+  };
+
+  const setGroupBuilderPanel = (
+    groupType: CreateWaveGroupConfigType,
+    panel: CreateWaveInlineGroupPanel
+  ) => {
+    updateGroupBuilder(groupType, (current) => ({
+      ...current,
+      panel,
+    }));
+  };
+
+  const setGroupBuilderRule = (
+    groupType: CreateWaveGroupConfigType,
+    rule: CreateWaveInlineGroupRuleType | null
+  ) => {
+    updateGroupBuilder(groupType, (current) => ({
+      ...current,
+      activeRule: rule,
+      panel: rule === null ? current.panel : "rule-editor",
+    }));
+  };
+
+  const setGroupBuilderDraft = (
+    groupType: CreateWaveGroupConfigType,
+    draft: ApiCreateGroup
+  ) => {
+    updateGroupBuilder(groupType, (current) => ({
+      ...current,
+      draft,
+    }));
+  };
+
+  const addGroupBuilderIdentity = (
+    groupType: CreateWaveGroupConfigType,
+    identity: CommunityMemberMinimal
+  ) => {
+    updateGroupBuilder(groupType, (current) => {
+      const identities = dedupeInlineIdentities([
+        ...current.identities,
+        identity,
+      ]);
+      return {
+        ...current,
+        identities,
+        draft: {
+          ...current.draft,
+          group: {
+            ...current.draft.group,
+            identity_addresses: getInlineIdentityAddresses(identities),
+          },
+        },
+      };
+    });
+  };
+
+  const removeGroupBuilderIdentity = (
+    groupType: CreateWaveGroupConfigType,
+    wallet: string
+  ) => {
+    const normalizedWallet = wallet.trim().toLowerCase();
+    updateGroupBuilder(groupType, (current) => {
+      const identities = current.identities.filter((identity) => {
+        const key = identity.wallet.trim().toLowerCase();
+        return key !== normalizedWallet;
+      });
+
+      return {
+        ...current,
+        identities,
+        draft: {
+          ...current.draft,
+          group: {
+            ...current.draft.group,
+            identity_addresses: getInlineIdentityAddresses(identities),
+          },
+        },
+      };
+    });
+  };
+
+  const resetGroupBuilder = (groupType: CreateWaveGroupConfigType) => {
+    updateGroupBuilder(groupType, () => createInitialInlineGroupBuilderState());
+  };
+
   // Voting type changes
   const onVotingTypeChange = (type: ApiWaveCreditType) => {
     setConfig((prev) => ({
@@ -330,6 +440,7 @@ export function useWaveConfig() {
     selectedOutcomeType,
     errors,
     groupsCache,
+    groupBuilders,
     // Section updaters
     setOverview,
     setDates,
@@ -342,6 +453,12 @@ export function useWaveConfig() {
     onOutcomeTypeChange,
     // Group handling
     onGroupSelect,
+    setGroupBuilderPanel,
+    setGroupBuilderRule,
+    setGroupBuilderDraft,
+    addGroupBuilderIdentity,
+    removeGroupBuilderIdentity,
+    resetGroupBuilder,
     // Voting
     onVotingTypeChange,
     onCategoryChange,

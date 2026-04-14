@@ -898,7 +898,7 @@ export default function Auth({
       }}
     >
       {children}
-      <ToastContainer />
+      <ToastContainer style={{ zIndex: 100000 }} />
       {enableWalletAuthentication && (
         <Modal
           show={shouldShowSignModal}
