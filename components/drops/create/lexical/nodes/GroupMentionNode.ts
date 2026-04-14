@@ -18,10 +18,16 @@ type SerializedGroupMentionNode = Spread<
   SerializedTextNode
 >;
 
-function convertGroupMentionElement(domNode: HTMLElement): DOMConversionOutput {
-  return {
-    node: $createGroupMentionNode(domNode.textContent),
-  };
+function convertGroupMentionElement(domNode: Node): DOMConversionOutput | null {
+  const textContent = domNode.textContent;
+
+  if (textContent !== null) {
+    return {
+      node: $createGroupMentionNode(textContent),
+    };
+  }
+
+  return null;
 }
 
 export class GroupMentionNode extends TextNode {
