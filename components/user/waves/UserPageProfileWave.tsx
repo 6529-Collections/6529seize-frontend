@@ -113,22 +113,25 @@ function UnavailableState({
 }
 
 function LoadErrorState({
+  description,
   isRetrying,
   onRetry,
+  title,
 }: {
+  readonly description: string;
   readonly isRetrying: boolean;
   readonly onRetry: () => void;
+  readonly title: string;
 }) {
   return (
     <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/70 tw-p-6 sm:tw-p-8">
       <div className="tw-flex tw-flex-col tw-gap-5 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-max-w-xl">
           <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
-            Unable to load official wave
+            {title}
           </h2>
           <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-            There was a temporary problem loading this profile curation. Try
-            again.
+            {description}
           </p>
         </div>
         <SecondaryButton
@@ -279,13 +282,21 @@ const getProfileCurationTitle = (
 };
 
 function ProfileCurationBody({
+  areCurationsError,
+  areCurationsFetching,
   areCurationsLoading,
+  hasLoadedCurations,
+  onRetryCurations,
   profileCuration,
   profileIdentity,
   viewMode,
   wave,
 }: {
+  readonly areCurationsError: boolean;
+  readonly areCurationsFetching: boolean;
   readonly areCurationsLoading: boolean;
+  readonly hasLoadedCurations: boolean;
+  readonly onRetryCurations: () => void;
   readonly profileCuration: ApiWaveCuration | null;
   readonly profileIdentity: {
     readonly id?: string | null | undefined;
@@ -301,6 +312,17 @@ function ProfileCurationBody({
         <Spinner dimension={18} />
         <span className="tw-ml-3">Loading curation...</span>
       </div>
+    );
+  }
+
+  if (areCurationsError && !hasLoadedCurations) {
+    return (
+      <LoadErrorState
+        title="Unable to load curations"
+        description="There was a temporary problem loading the curations in this official wave. Try again."
+        isRetrying={areCurationsFetching}
+        onRetry={onRetryCurations}
+      />
     );
   }
 
@@ -361,11 +383,16 @@ export default function UserPageProfileWave({
   const profileWaveId = resolvedProfile.profile_wave_id;
   const { wave, isLoading, isError, error, refetch, isFetching } =
     useWaveById(profileWaveId);
-  const { data: curations = [], isLoading: areCurationsLoading } =
-    useWaveCurations({
-      waveId: wave?.id ?? "",
-      enabled: !!wave?.id,
-    });
+  const {
+    data: curations,
+    isLoading: areCurationsLoading,
+    isError: areCurationsError,
+    isFetching: areCurationsFetching,
+    refetch: refetchCurations,
+  } = useWaveCurations({
+    waveId: wave?.id ?? "",
+    enabled: !!wave?.id,
+  });
   const { clearSelectedProfileWave, isPending, pendingAction } =
     useProfileWaveMutation(resolvedProfile);
   const { viewMode, setViewMode } = useProfileCurationViewMode();
@@ -379,8 +406,9 @@ export default function UserPageProfileWave({
     () => getProfilePageSearchString(searchString),
     [searchString]
   );
+  const hasLoadedCurations = curations !== undefined;
   const profileCuration = useMemo(
-    () => resolveProfileCuration(curations),
+    () => resolveProfileCuration(curations ?? []),
     [curations]
   );
   const profileCurationTitle = useMemo(
@@ -436,6 +464,9 @@ export default function UserPageProfileWave({
   const retryLoad = useCallback(async () => {
     await refetch();
   }, [refetch]);
+  const retryCurationsLoad = useCallback(async () => {
+    await refetchCurations();
+  }, [refetchCurations]);
   const clearProfileWave = useCallback(async () => {
     await clearSelectedProfileWave();
   }, [clearSelectedProfileWave]);
@@ -471,6 +502,8 @@ export default function UserPageProfileWave({
   if (isError || !wave) {
     return (
       <LoadErrorState
+        title="Unable to load official wave"
+        description="There was a temporary problem loading this profile curation. Try again."
         isRetrying={isFetching}
         onRetry={retryLoad}
       />
@@ -527,7 +560,11 @@ export default function UserPageProfileWave({
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-overflow-hidden tw-rounded-2xl">
             <ProfileCurationBody
+              areCurationsError={areCurationsError}
+              areCurationsFetching={areCurationsFetching}
               areCurationsLoading={areCurationsLoading}
+              hasLoadedCurations={hasLoadedCurations}
+              onRetryCurations={retryCurationsLoad}
               profileCuration={profileCuration}
               profileIdentity={profileIdentityForMasonry}
               viewMode={viewMode}
