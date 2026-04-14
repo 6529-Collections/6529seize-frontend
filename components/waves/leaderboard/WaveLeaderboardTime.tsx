@@ -54,7 +54,9 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(EMPTY_TIME_LEFT);
+  const [currentMillis, setCurrentMillis] = useState(() =>
+    Time.currentMillis()
+  );
   const autoExpandFutureAttemptsRef = useRef(0);
   const [timelineFocus, setTimelineFocus] = useState<"start" | "end" | null>(
     null
@@ -80,23 +82,17 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   }, [allDecisions, filterDecisionsDuringPauses]);
 
   const nextDecisionTime =
-    filteredDecisions.find(
-      (decision) => decision.timestamp > Time.currentMillis()
-    )?.timestamp ?? null;
+    filteredDecisions.find((decision) => decision.timestamp > currentMillis)
+      ?.timestamp ?? null;
 
   useEffect(() => {
     if (typeof nextDecisionTime !== "number") {
-      setTimeLeft(EMPTY_TIME_LEFT);
       return;
     }
 
-    const updateTimeLeft = () => {
-      setTimeLeft(calculateTimeLeft(nextDecisionTime));
-    };
-
-    updateTimeLeft();
-
-    const intervalId = globalThis.setInterval(updateTimeLeft, 1000);
+    const intervalId = globalThis.setInterval(() => {
+      setCurrentMillis(Time.currentMillis());
+    }, 1000);
     return () => {
       clearInterval(intervalId);
     };
@@ -145,7 +141,9 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   }, [nextDecisionTime, hasMoreFuture, loadMoreFuture]);
 
   const displayedTimeLeft =
-    typeof nextDecisionTime === "number" ? timeLeft : EMPTY_TIME_LEFT;
+    typeof nextDecisionTime === "number"
+      ? calculateTimeLeft(nextDecisionTime, currentMillis)
+      : EMPTY_TIME_LEFT;
 
   const handleLoadMorePast = () => {
     if (hasMorePast) {

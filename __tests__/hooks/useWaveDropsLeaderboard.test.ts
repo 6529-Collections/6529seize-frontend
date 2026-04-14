@@ -22,15 +22,18 @@ const mockInfiniteQueryReturn = ({
   data = { pages: [] },
   fetchNextPage = jest.fn(),
   hasNextPage = true,
+  isError = false,
 }: {
   readonly data?: unknown;
   readonly fetchNextPage?: jest.Mock;
   readonly hasNextPage?: boolean;
+  readonly isError?: boolean;
 } = {}) => {
   (useInfiniteQuery as jest.Mock).mockReturnValue({
     data,
     fetchNextPage,
     hasNextPage,
+    isError,
     isFetching: false,
     isFetchingNextPage: false,
     refetch: jest.fn(),
@@ -82,6 +85,16 @@ describe("useWaveDropsLeaderboard", () => {
       await result.current.manualFetch();
     });
     expect(fetchNext).not.toHaveBeenCalled();
+  });
+
+  it("returns the leaderboard query error state", () => {
+    mockInfiniteQueryReturn({ hasNextPage: false, isError: true });
+
+    const { result } = renderHook(() =>
+      useWaveDropsLeaderboard({ waveId: "4" })
+    );
+
+    expect(result.current.isError).toBe(true);
   });
 
   it("enables the main query only when enabled and waveId are truthy", () => {

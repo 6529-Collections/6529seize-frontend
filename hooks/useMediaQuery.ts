@@ -1,14 +1,27 @@
 import { useEffect, useEffectEvent, useState } from "react";
 
+type MediaQueryListOptionalListeners = {
+  addEventListener?: MediaQueryList["addEventListener"];
+  removeEventListener?: MediaQueryList["removeEventListener"];
+};
+
+type BrowserWindowWithMatchMedia = {
+  readonly matchMedia?: (query: string) => MediaQueryList;
+};
+
+const getBrowserWindow = (): BrowserWindowWithMatchMedia | undefined =>
+  (globalThis as { window?: BrowserWindowWithMatchMedia }).window;
+
 const getMediaQueryList = (query: string): MediaQueryList | null => {
+  const browserWindow = getBrowserWindow();
   if (
-    globalThis.window === undefined ||
-    typeof globalThis.window.matchMedia !== "function"
+    browserWindow === undefined ||
+    typeof browserWindow.matchMedia !== "function"
   ) {
     return null;
   }
 
-  return globalThis.window.matchMedia(query);
+  return browserWindow.matchMedia(query);
 };
 
 export function useMediaQuery(query: string): boolean {
@@ -31,9 +44,16 @@ export function useMediaQuery(query: string): boolean {
       syncMatches(event.matches);
     };
 
-    if (typeof mediaQueryList.addEventListener === "function") {
-      mediaQueryList.addEventListener("change", handleChange);
-      return () => mediaQueryList.removeEventListener("change", handleChange);
+    const mediaQueryListListeners =
+      mediaQueryList as MediaQueryListOptionalListeners;
+
+    if (
+      typeof mediaQueryListListeners.addEventListener === "function" &&
+      typeof mediaQueryListListeners.removeEventListener === "function"
+    ) {
+      mediaQueryListListeners.addEventListener("change", handleChange);
+      return () =>
+        mediaQueryListListeners.removeEventListener?.("change", handleChange);
     }
 
     const previousOnChange = mediaQueryList.onchange;
