@@ -63,7 +63,7 @@ export class GroupMentionNode extends TextNode {
 
   override createDOM(config: EditorConfig): HTMLElement {
     const dom = super.createDOM(config);
-    dom.className = "editor-group-mention";
+    dom.classList.add("editor-group-mention");
     return dom;
   }
 
