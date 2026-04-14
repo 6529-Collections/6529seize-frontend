@@ -85,7 +85,7 @@ export default function CreateWaveGroupInlinePanel({
   const isRulePanel =
     groupBuilder.panel === "rule-list" || groupBuilder.panel === "rule-editor";
   const isSearchPanel = groupBuilder.panel === "search";
-  const showModeChips = groupBuilder.panel !== "actions" || !!draftSummary;
+  const showModeChips = !!draftSummary || groupBuilder.panel !== "actions";
   const identityChipLabel =
     identityCount > 0 ? `${identityCount} ${identityLabel}` : "Add identity";
 
