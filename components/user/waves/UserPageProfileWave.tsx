@@ -527,14 +527,14 @@ export default function UserPageProfileWave({
                 onChange={setViewMode}
               />
             )}
-            <SecondaryButton
-              onClicked={openWave}
-              size="sm"
-              className="tw-whitespace-nowrap"
+            <button
+              type="button"
+              onClick={openWave}
+              className="tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-950 tw-shadow-sm tw-ring-1 tw-ring-white/15 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-200 hover:tw-bg-iron-100 hover:tw-ring-white/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
             >
               <span>Open wave</span>
               <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-            </SecondaryButton>
+            </button>
             {canClear && (
               <button
                 type="button"

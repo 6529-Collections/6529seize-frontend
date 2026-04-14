@@ -38,8 +38,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
 
   const mediaStackClassName = clsx(
     topSpacingClassName,
-    "tw-space-y-3",
-    fullWidthMedia && "-tw-mx-4"
+    "tw-space-y-3"
   );
 
   return (
