@@ -13,8 +13,6 @@ import DropMinimalIdentityRow from "@/components/waves/drops/DropMinimalIdentity
 import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
-import WaveDropRatings from "@/components/waves/drops/WaveDropRatings";
-import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import WaveDropReply from "@/components/waves/drops/WaveDropReply";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -57,8 +55,17 @@ type ProfileMasonryIdentityMode = "default" | "minimal" | "hidden";
 type ProfileMasonryCardLayout = {
   readonly contentWrapperClassName: string;
   readonly identityMode: ProfileMasonryIdentityMode;
+  readonly shouldUseInlineMinimalLayout: boolean;
   readonly showMinimalIdentityRow: boolean;
   readonly usesDefaultDropRenderer: boolean;
+};
+
+type ProfileMasonryItem = {
+  readonly drop: ExtendedDrop;
+  readonly curationId: string;
+  readonly canManageActiveCuration: boolean;
+  readonly showIdentity: boolean;
+  readonly profileIdentity: ProfileIdentitySummary | undefined;
 };
 
 const getProfileMasonryCardLayout = ({
@@ -87,17 +94,26 @@ const getProfileMasonryCardLayout = ({
     Boolean(activePart?.content?.trim()) ||
     Boolean(activePart?.quoted_drop?.drop_id) ||
     (activePart?.media.length ?? 0) === 0;
+  const showMinimalIdentityRow = identityMode === "minimal";
+  const shouldUseInlineMinimalLayout =
+    showMinimalIdentityRow &&
+    Boolean(activePart?.content?.trim()) &&
+    !replyTo &&
+    !activePart?.quoted_drop?.drop_id &&
+    (activePart?.media.length ?? 0) === 0;
+  let contentWrapperClassName = "tw-pt-2 tw-pb-2";
+  if (hasContentPadding) {
+    const topPaddingClass = showMinimalIdentityRow ? "tw-pt-2" : "tw-pt-4";
+    contentWrapperClassName = `tw-px-4 ${topPaddingClass} tw-pb-4`;
+  } else if (showMinimalIdentityRow) {
+    contentWrapperClassName = "tw-pt-1 tw-pb-2";
+  }
 
   return {
-    contentWrapperClassName: [
-      hasContentPadding ? "tw-px-4 tw-pt-4" : "",
-      !hasContentPadding ? "tw-pt-2" : "",
-      hasContentPadding ? "tw-pb-4" : "tw-pb-2",
-    ]
-      .filter(Boolean)
-      .join(" "),
+    contentWrapperClassName,
     identityMode,
-    showMinimalIdentityRow: identityMode === "minimal",
+    shouldUseInlineMinimalLayout,
+    showMinimalIdentityRow,
     usesDefaultDropRenderer:
       showIdentity || drop.drop_type !== ApiDropType.Chat,
   };
@@ -265,6 +281,19 @@ function UserPageProfileWaveMasonryCard({
   const removeButton = canManageActiveCuration ? (
     <CurationMasonryRemoveButton drop={drop} curationId={curationId} />
   ) : null;
+  const dropContent = (
+    <WaveDropContent
+      drop={drop}
+      activePartIndex={activePartIndex}
+      setActivePartIndex={setActivePartIndex}
+      onQuoteClick={(_quotedDrop: ApiDrop) => {}}
+      onLongPress={() => {}}
+      setLongPressTriggered={(_triggered: boolean) => {}}
+      onDropContentClick={undefined}
+      mediaImageScale={ImageScale.AUTOx1080}
+      fullWidthMedia={true}
+    />
+  );
 
   if (layout.usesDefaultDropRenderer) {
     return (
@@ -284,6 +313,7 @@ function UserPageProfileWaveMasonryCard({
           onReplyClick={() => {}}
           onQuoteClick={() => {}}
           identityMode={layout.identityMode}
+          showInteractions={false}
         />
       </article>
     );
@@ -294,51 +324,70 @@ function UserPageProfileWaveMasonryCard({
       {removeButton}
 
       <div className="tw-overflow-hidden tw-rounded-xl tw-bg-black/70 tw-ring-1 tw-ring-inset tw-ring-white/10">
-        {layout.showMinimalIdentityRow && (
-          <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pt-4">
+        {layout.shouldUseInlineMinimalLayout ? (
+          <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pb-4 tw-pt-4">
             <WaveDropAuthorPfp drop={drop} />
             <div className="tw-min-w-0 tw-flex-1">
               <DropMinimalIdentityRow drop={drop} />
+              <div className="tw-mt-2">{dropContent}</div>
+              {drop.metadata.length > 0 && (
+                <WaveDropMetadata metadata={drop.metadata} />
+              )}
             </div>
           </div>
-        )}
+        ) : (
+          <>
+            {layout.showMinimalIdentityRow && (
+              <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pt-4">
+                <WaveDropAuthorPfp drop={drop} />
+                <div className="tw-min-w-0 tw-flex-1">
+                  <DropMinimalIdentityRow drop={drop} />
+                </div>
+              </div>
+            )}
 
-        <div className={layout.contentWrapperClassName}>
-          {replyTo && (
-            <div className="tw-mb-3">
-              <WaveDropReply
-                dropId={replyTo.drop_id}
-                dropPartId={replyTo.drop_part_id}
-                maybeDrop={
-                  replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null
-                }
-                onReplyClick={(_serialNo: number) => {}}
-              />
+            <div className={layout.contentWrapperClassName}>
+              {replyTo && (
+                <div className="tw-mb-3">
+                  <WaveDropReply
+                    dropId={replyTo.drop_id}
+                    dropPartId={replyTo.drop_part_id}
+                    maybeDrop={
+                      replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null
+                    }
+                    onReplyClick={(_serialNo: number) => {}}
+                  />
+                </div>
+              )}
+
+              {dropContent}
             </div>
-          )}
 
-          <WaveDropContent
-            drop={drop}
-            activePartIndex={activePartIndex}
-            setActivePartIndex={setActivePartIndex}
-            onQuoteClick={(_quotedDrop: ApiDrop) => {}}
-            onLongPress={() => {}}
-            setLongPressTriggered={(_triggered: boolean) => {}}
-            onDropContentClick={undefined}
-            mediaImageScale={ImageScale.AUTOx1080}
-            fullWidthMedia={true}
-          />
-        </div>
-
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
-          {drop.metadata.length > 0 && (
-            <WaveDropMetadata metadata={drop.metadata} />
-          )}
-          {!!drop.raters_count && <WaveDropRatings drop={drop} />}
-          <WaveDropReactions drop={drop} />
-        </div>
+            {drop.metadata.length > 0 && (
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+                <WaveDropMetadata metadata={drop.metadata} />
+              </div>
+            )}
+          </>
+        )}
       </div>
     </article>
+  );
+}
+
+function UserPageProfileWaveMasonryRenderItem({
+  data,
+}: {
+  readonly data: ProfileMasonryItem;
+}) {
+  return (
+    <UserPageProfileWaveMasonryCard
+      drop={data.drop}
+      curationId={data.curationId}
+      canManageActiveCuration={data.canManageActiveCuration}
+      showIdentity={data.showIdentity}
+      profileIdentity={data.profileIdentity}
+    />
   );
 }
 
@@ -367,6 +416,17 @@ export default function UserPageProfileWaveMasonry({
     curationId,
     dropCount: drops.length,
   });
+  const masonryItems = useMemo(
+    () =>
+      drops.map((drop) => ({
+        drop,
+        curationId,
+        canManageActiveCuration,
+        showIdentity,
+        profileIdentity,
+      })),
+    [canManageActiveCuration, curationId, drops, profileIdentity, showIdentity]
+  );
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
@@ -377,22 +437,6 @@ export default function UserPageProfileWaveMasonry({
       void fetchNextPage();
     },
     [fetchNextPage, hasNextPage, isFetchingNextPage]
-  );
-
-  const masonryCard = useMemo(
-    () =>
-      function MasonryCard({ data }: { readonly data: ExtendedDrop }) {
-        return (
-          <UserPageProfileWaveMasonryCard
-            drop={data}
-            curationId={curationId}
-            canManageActiveCuration={canManageActiveCuration}
-            showIdentity={showIdentity}
-            profileIdentity={profileIdentity}
-          />
-        );
-      },
-    [canManageActiveCuration, curationId, profileIdentity, showIdentity]
   );
 
   if (isInitialLoading) {
@@ -420,9 +464,9 @@ export default function UserPageProfileWaveMasonry({
       {containerWidth > 0 ? (
         <Masonry
           key={masonryKey}
-          items={drops}
-          render={masonryCard}
-          itemKey={(drop) => drop.stableKey}
+          items={masonryItems}
+          render={UserPageProfileWaveMasonryRenderItem}
+          itemKey={(item) => item.drop.stableKey}
           itemHeightEstimate={420}
           columnWidth={MASONRY_COLUMN_WIDTH}
           columnGutter={MASONRY_GUTTER}

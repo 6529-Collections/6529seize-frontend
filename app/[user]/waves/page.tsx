@@ -1,22 +1,60 @@
-import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import UserPageProfileWave from "@/components/user/waves/UserPageProfileWave";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  USER_PAGE_TAB_IDS,
-  USER_PAGE_TAB_MAP,
-} from "@/components/user/layout/userTabs.config";
+import { redirect } from "next/navigation";
 
-function WaveTab({ profile }: { readonly profile: ApiIdentity }) {
-  return <UserPageProfileWave profile={profile} />;
+type UserRouteParams = { user: string };
+type UserSearchParams = Record<string, string | string[] | undefined>;
+
+const normalizeSearchParams = (
+  params?: UserSearchParams | URLSearchParams
+): URLSearchParams => {
+  const normalizedParams = new URLSearchParams();
+
+  if (!params) {
+    return normalizedParams;
+  }
+
+  if (params instanceof URLSearchParams) {
+    for (const [key, value] of params.entries()) {
+      normalizedParams.append(key, value);
+    }
+    return normalizedParams;
+  }
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) {
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      for (const entry of value) {
+        normalizedParams.append(key, entry);
+      }
+      continue;
+    }
+
+    normalizedParams.append(key, value);
+  }
+
+  return normalizedParams;
+};
+
+export default async function LegacyWavesPage({
+  params,
+  searchParams,
+}: {
+  readonly params?: Promise<UserRouteParams> | undefined;
+  readonly searchParams?: Promise<UserSearchParams> | undefined;
+}) {
+  const resolvedParams = params ? await params : undefined;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const user = resolvedParams?.user;
+
+  if (!user) {
+    redirect("/");
+  }
+
+  const queryString = normalizeSearchParams(resolvedSearchParams).toString();
+  const basePath = `/${encodeURIComponent(user)}/curations`;
+  const destination = queryString ? `${basePath}?${queryString}` : basePath;
+
+  redirect(destination);
 }
-
-const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.WAVES];
-
-const { Page, generateMetadata } = createUserTabPage({
-  subroute: TAB_CONFIG.route,
-  metaLabel: TAB_CONFIG.metaLabel,
-  Tab: WaveTab,
-});
-
-export default Page;
-export { generateMetadata };

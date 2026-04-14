@@ -105,7 +105,8 @@ function MyStreamWaveCurationDropItem({
           }}
           disabled={isPending}
           aria-label="Remove drop from this curation"
-          className="tw-absolute tw-right-7 tw-top-4 tw-z-20 tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-rose-500/25 tw-bg-rose-500/10 tw-p-0 tw-text-rose-400 tw-shadow-[0_10px_30px_rgba(0,0,0,0.32)] tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-ease-out active:tw-bg-rose-500/15 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:tw-pointer-events-none desktop-hover:tw-w-auto desktop-hover:tw-translate-y-1 desktop-hover:tw-gap-1.5 desktop-hover:tw-border-iron-700/80 desktop-hover:tw-bg-iron-950/90 desktop-hover:tw-px-2.5 desktop-hover:tw-text-xs desktop-hover:tw-font-medium desktop-hover:tw-text-iron-200 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-translate-y-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+          title="Remove from wave"
+          className="tw-absolute tw-right-7 tw-top-4 tw-z-20 tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-p-0 tw-text-iron-400 tw-shadow-[0_10px_30px_rgba(0,0,0,0.32)] tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-ease-out hover:tw-border-rose-500/30 hover:tw-bg-rose-500/20 hover:tw-text-rose-300 active:tw-bg-rose-500/15 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:tw-pointer-events-none desktop-hover:tw-w-auto desktop-hover:tw-translate-y-1 desktop-hover:tw-gap-1.5 desktop-hover:tw-px-2.5 desktop-hover:tw-text-xs desktop-hover:tw-font-medium desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-translate-y-0 desktop-hover:group-hover:tw-opacity-100"
         >
           {isPending ? (
             <>
@@ -197,7 +198,7 @@ export default function MyStreamWaveCurationContent({
     );
   } else {
     content = (
-      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-py-4 md:tw-px-4">
+      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         {renderedDrops}
         {(hasNextPage || isFetchingNextPage) && (
           <div className="tw-py-4">

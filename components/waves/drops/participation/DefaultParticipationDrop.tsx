@@ -22,6 +22,7 @@ interface DefaultParticipationDropProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly showInteractions?: boolean | undefined;
 }
 
 export default function ParticipationDrop(

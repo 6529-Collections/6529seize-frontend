@@ -48,9 +48,7 @@ export default function WaveProfileWaveAction({
 
   const buttonLabel = (() => {
     if (isPending) {
-      return isSelectedProfileWave
-        ? "Clearing profile wave"
-        : "Saving profile wave";
+      return isSelectedProfileWave ? "Clearing wave" : "Saving wave";
     }
 
     return isSelectedProfileWave ? "Clear profile wave" : "Set as profile wave";
@@ -64,9 +62,9 @@ export default function WaveProfileWaveAction({
     <button
       type="button"
       disabled={isPending}
-      onClick={(event) => {
+      onClick={async (event) => {
         event.stopPropagation();
-        void handleClick();
+        await handleClick();
       }}
       className="tw-flex tw-w-full tw-items-center tw-gap-2 tw-border-none tw-bg-transparent tw-px-3 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
       role="menuitem"

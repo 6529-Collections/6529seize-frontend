@@ -60,6 +60,7 @@ function renderInlineImageContent({
   loadStrategy,
   resolvedObjectPosition,
   handleImageLoad,
+  handleNaturalHeightImageClick,
   handleImageClick,
   handleError,
   loaded,
@@ -79,6 +80,9 @@ function renderInlineImageContent({
   readonly loadStrategy: MediaLoadStrategy;
   readonly resolvedObjectPosition: string;
   readonly handleImageLoad: () => void;
+  readonly handleNaturalHeightImageClick: (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => void;
   readonly handleImageClick: (
     event: React.MouseEvent<HTMLImageElement>
   ) => void;
@@ -90,7 +94,7 @@ function renderInlineImageContent({
   readonly manualRetry: () => void;
 }) {
   if (naturalHeight && shouldLoadImage && errorCount <= maxRetries) {
-    return (
+    const naturalHeightImage = (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         ref={imgRef}
@@ -98,14 +102,26 @@ function renderInlineImageContent({
         src={getScaledImageUri(src, imageScale)}
         alt="Drop media"
         loading={loadStrategy === "eager" ? "eager" : "lazy"}
-        className={`tw-block tw-h-auto tw-w-full tw-max-w-full tw-object-contain ${
-          disableModal ? "" : "tw-cursor-pointer"
-        }`}
+        className="tw-block tw-h-auto tw-w-full tw-max-w-full tw-object-contain"
         style={{ objectPosition: resolvedObjectPosition }}
         onLoad={handleImageLoad}
-        onClick={handleImageClick}
         onError={handleError}
       />
+    );
+
+    if (disableModal) {
+      return naturalHeightImage;
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={handleNaturalHeightImageClick}
+        aria-label="Open drop media"
+        className="tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
+      >
+        {naturalHeightImage}
+      </button>
     );
   }
 
@@ -214,6 +230,17 @@ function DropListItemContentMediaImage({
 
   const handleImageClick = useCallback(
     (event: React.MouseEvent<HTMLImageElement>) => {
+      if (disableModal) {
+        return;
+      }
+      event.stopPropagation();
+      setIsModalOpen(true);
+    },
+    [disableModal]
+  );
+
+  const handleNaturalHeightImageClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
       if (disableModal) {
         return;
       }
@@ -440,6 +467,7 @@ function DropListItemContentMediaImage({
           loadStrategy,
           resolvedObjectPosition,
           handleImageLoad,
+          handleNaturalHeightImageClick,
           handleImageClick,
           handleError,
           loaded,

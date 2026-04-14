@@ -1,20 +1,11 @@
 "use client";
 
-import useLocalPreference from "@/hooks/useLocalPreference";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
-export type ProfileCurationViewMode = "masonry" | "list";
+type ProfileCurationViewMode = "masonry" | "list";
 
-const isProfileCurationViewMode = (
-  value: unknown
-): value is ProfileCurationViewMode => value === "masonry" || value === "list";
-
-export function useProfileCurationViewMode(key: string) {
-  const [viewMode, setViewMode] = useLocalPreference<ProfileCurationViewMode>(
-    `profile-curation-view:${key}`,
-    "masonry",
-    isProfileCurationViewMode
-  );
+export function useProfileCurationViewMode() {
+  const [viewMode, setViewMode] = useState<ProfileCurationViewMode>("masonry");
 
   const toggleViewMode = useCallback(() => {
     setViewMode(viewMode === "masonry" ? "list" : "masonry");

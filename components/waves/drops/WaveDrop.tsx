@@ -293,6 +293,7 @@ const getContentBlock = ({
   allowLongPress,
   handleLinkCardActionsActiveChange,
   isMobile,
+  showInteractions,
   showReplyAndQuote,
   handleOnReply,
   handleOnEdit,
@@ -326,6 +327,7 @@ const getContentBlock = ({
     active: boolean
   ) => void;
   readonly isMobile: boolean;
+  readonly showInteractions: boolean;
   readonly showReplyAndQuote: boolean;
   readonly handleOnReply: () => void;
   readonly handleOnEdit: () => void;
@@ -374,7 +376,7 @@ const getContentBlock = ({
         </div>
       </div>
     </div>
-    {!isMobile && showReplyAndQuote && !isEditing && (
+    {!isMobile && showInteractions && showReplyAndQuote && !isEditing && (
       <WaveDropActions
         drop={drop}
         activePartIndex={activePartIndex}
@@ -403,6 +405,7 @@ interface WaveDropProps {
     | ((content: React.ReactNode) => React.ReactNode)
     | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly showInteractions?: boolean | undefined;
 }
 
 const WaveDrop = ({
@@ -420,6 +423,7 @@ const WaveDrop = ({
   showReplyAndQuote,
   wrapContentOnly,
   identityMode = "default",
+  showInteractions = true,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -450,7 +454,7 @@ const WaveDrop = ({
   const hasTouch = useHasTouchInput() || isMobile;
   const breakpoint = useBreakpoint();
   const isMdUp = breakpoint === "MD";
-  const allowLongPress = hasTouch && !isMdUp;
+  const allowLongPress = showInteractions && hasTouch && !isMdUp;
   const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
@@ -461,7 +465,11 @@ const WaveDrop = ({
     isProfileView,
   });
   const showActionsButton =
-    hasTouch && showReplyAndQuote && !isEditing && identityMode === "default";
+    showInteractions &&
+    hasTouch &&
+    showReplyAndQuote &&
+    !isEditing &&
+    identityMode === "default";
   const groupingClass = getGroupingClass({
     isProfileView,
     shouldGroupWithPreviousDrop,
@@ -692,13 +700,14 @@ const WaveDrop = ({
     allowLongPress,
     handleLinkCardActionsActiveChange,
     isMobile,
+    showInteractions,
     showReplyAndQuote,
     handleOnReply,
     handleOnEdit,
     hasActiveLinkCardActions,
   });
 
-  const reactionsRow = (
+  const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
     <div
       className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${
         compact
@@ -709,8 +718,10 @@ const WaveDrop = ({
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
       )}
-      {!!drop.raters_count && <WaveDropRatings drop={drop} />}
-      <WaveDropReactions drop={drop} />
+      {showInteractions && !!drop.raters_count && (
+        <WaveDropRatings drop={drop} />
+      )}
+      {showInteractions && <WaveDropReactions drop={drop} />}
     </div>
   );
 
@@ -731,17 +742,19 @@ const WaveDrop = ({
       >
         {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
         {reactionsRow}
-        <WaveDropMobileMenu
-          drop={drop}
-          isOpen={effectiveIsSlideUp}
-          longPressTriggered={longPressTriggered}
-          showReplyAndQuote={showReplyAndQuote}
-          setOpen={setIsSlideUp}
-          onReply={handleOnReply}
-          onAddReaction={handleOnAddReaction}
-          onEdit={handleOnEdit}
-          onBoostAnimation={handleMobileBoostAnimation}
-        />
+        {showInteractions && (
+          <WaveDropMobileMenu
+            drop={drop}
+            isOpen={effectiveIsSlideUp}
+            longPressTriggered={longPressTriggered}
+            showReplyAndQuote={showReplyAndQuote}
+            setOpen={setIsSlideUp}
+            onReply={handleOnReply}
+            onAddReaction={handleOnAddReaction}
+            onEdit={handleOnEdit}
+            onBoostAnimation={handleMobileBoostAnimation}
+          />
+        )}
         <DropBoostAnimation
           animation={boostAnimation}
           onComplete={handleBoostAnimationComplete}

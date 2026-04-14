@@ -41,6 +41,7 @@ interface OngoingParticipationDropProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly showInteractions?: boolean | undefined;
 }
 
 export default function OngoingParticipationDrop({
@@ -53,6 +54,7 @@ export default function OngoingParticipationDrop({
   onQuoteClick,
   onDropContentClick,
   identityMode = "default",
+  showInteractions = true,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const { canShowVote } = useDropInteractionRules(drop);
@@ -81,10 +83,10 @@ export default function OngoingParticipationDrop({
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
 
   const handleLongPress = useCallback(() => {
-    if (!hasTouch) return;
+    if (!showInteractions || !hasTouch) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch]);
+  }, [hasTouch, showInteractions]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -95,9 +97,13 @@ export default function OngoingParticipationDrop({
     setIsSlideUp(false);
   }, []);
 
-  const voteAction = canShowVote ? (
-    <VotingModalButton drop={drop} onClick={() => setIsVotingModalOpen(true)} />
-  ) : null;
+  const voteAction =
+    canShowVote && showInteractions ? (
+      <VotingModalButton
+        drop={drop}
+        onClick={() => setIsVotingModalOpen(true)}
+      />
+    ) : null;
 
   return (
     <ParticipationDropContainer
@@ -105,7 +111,7 @@ export default function OngoingParticipationDrop({
       isActiveDrop={isActiveDrop}
       location={location}
     >
-      {!isMobile && showReplyAndQuote && (
+      {!isMobile && showInteractions && showReplyAndQuote && (
         <WaveDropActions
           drop={drop}
           activePartIndex={activePartIndex}
@@ -153,33 +159,39 @@ export default function OngoingParticipationDrop({
           metadata={visibleMetadata}
           contextId={drop.id}
         />
-        <ParticipationDropFooter drop={drop} voteAction={voteAction} />
+        <ParticipationDropFooter
+          drop={drop}
+          voteAction={voteAction}
+          showInteractions={showInteractions}
+        />
       </div>
 
-      {isMobileScreen ? (
-        <MobileVotingModal
+      {showInteractions &&
+        (isMobileScreen ? (
+          <MobileVotingModal
+            drop={drop}
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+          />
+        ) : (
+          <VotingModal
+            drop={drop}
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+          />
+        ))}
+
+      {showInteractions && (
+        <WaveDropMobileMenu
           drop={drop}
-          isOpen={isVotingModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
-        />
-      ) : (
-        <VotingModal
-          drop={drop}
-          isOpen={isVotingModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
+          isOpen={isSlideUp}
+          longPressTriggered={longPressTriggered}
+          showReplyAndQuote={showReplyAndQuote}
+          setOpen={setIsSlideUp}
+          onReply={handleOnReply}
+          onAddReaction={handleOnAddReaction}
         />
       )}
-
-      {/* Mobile menu */}
-      <WaveDropMobileMenu
-        drop={drop}
-        isOpen={isSlideUp}
-        longPressTriggered={longPressTriggered}
-        showReplyAndQuote={showReplyAndQuote}
-        setOpen={setIsSlideUp}
-        onReply={handleOnReply}
-        onAddReaction={handleOnAddReaction}
-      />
     </ParticipationDropContainer>
   );
 }

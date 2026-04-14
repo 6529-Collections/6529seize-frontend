@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
@@ -34,13 +35,11 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     topSpacingClassName = "tw-mt-0";
   }
 
-  const mediaStackClassName = [
+  const mediaStackClassName = clsx(
     topSpacingClassName,
     "tw-space-y-3",
-    fullWidthMedia ? "-tw-mx-4" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    fullWidthMedia && "-tw-mx-4"
+  );
 
   return (
     <div className={mediaStackClassName}>
@@ -49,12 +48,10 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           fullWidthMedia && media.mime_type.includes("image");
         const mediaContainerClassName = useNaturalHeightImage
           ? "tw-w-full"
-          : [
+          : clsx(
               "tw-flex tw-h-64 tw-items-center tw-justify-center",
-              fullWidthMedia ? "tw-w-full" : "",
-            ]
-              .filter(Boolean)
-              .join(" ");
+              fullWidthMedia && "tw-w-full"
+            );
 
         return (
           <div

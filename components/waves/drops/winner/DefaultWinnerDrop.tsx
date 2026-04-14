@@ -56,6 +56,7 @@ interface DefautWinnerDropProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly showInteractions?: boolean | undefined;
 }
 
 const DefaultWinnerDrop = ({
@@ -70,6 +71,7 @@ const DefaultWinnerDrop = ({
   onDropContentClick,
   showReplyAndQuote,
   identityMode = "default",
+  showInteractions = true,
 }: DefautWinnerDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -97,10 +99,10 @@ const DefaultWinnerDrop = ({
     : getBackgroundColorClass(location);
 
   const handleLongPress = useCallback(() => {
-    if (!hasTouch) return;
+    if (!showInteractions || !hasTouch) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch]);
+  }, [hasTouch, showInteractions]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -212,7 +214,7 @@ const DefaultWinnerDrop = ({
             </div>
           </div>
         </div>
-        {!isMobile && showReplyAndQuote && (
+        {!isMobile && showInteractions && showReplyAndQuote && (
           <div className="tw-absolute tw-right-0 tw-top-1">
             <WaveDropActions
               drop={drop}
@@ -228,21 +230,25 @@ const DefaultWinnerDrop = ({
           {visibleMetadata.length > 0 && (
             <WaveDropMetadata metadata={visibleMetadata} />
           )}
-          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            {!!drop.raters_count && <WaveDropRatings drop={drop} />}
-            <WaveDropReactions drop={drop} />
-          </div>
+          {showInteractions && (
+            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+              {!!drop.raters_count && <WaveDropRatings drop={drop} />}
+              <WaveDropReactions drop={drop} />
+            </div>
+          )}
         </div>
       </div>
-      <WaveDropMobileMenu
-        drop={drop}
-        isOpen={isSlideUp}
-        longPressTriggered={longPressTriggered}
-        showReplyAndQuote={showReplyAndQuote}
-        setOpen={setIsSlideUp}
-        onReply={handleOnReply}
-        onAddReaction={handleOnAddReaction}
-      />
+      {showInteractions && (
+        <WaveDropMobileMenu
+          drop={drop}
+          isOpen={isSlideUp}
+          longPressTriggered={longPressTriggered}
+          showReplyAndQuote={showReplyAndQuote}
+          setOpen={setIsSlideUp}
+          onReply={handleOnReply}
+          onAddReaction={handleOnAddReaction}
+        />
+      )}
     </div>
   );
 };

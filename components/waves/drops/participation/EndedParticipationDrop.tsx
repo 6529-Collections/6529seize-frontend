@@ -40,6 +40,7 @@ interface EndedParticipationDropProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly showInteractions?: boolean | undefined;
 }
 
 export default function EndedParticipationDrop({
@@ -52,6 +53,7 @@ export default function EndedParticipationDrop({
   onQuoteClick,
   onDropContentClick,
   identityMode = "default",
+  showInteractions = true,
 }: EndedParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
@@ -84,10 +86,10 @@ export default function EndedParticipationDrop({
   };
 
   const handleLongPress = useCallback(() => {
-    if (!hasTouch) return;
+    if (!showInteractions || !hasTouch) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch]);
+  }, [hasTouch, showInteractions]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -115,7 +117,7 @@ export default function EndedParticipationDrop({
       <div
         className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${dropBackgroundClass}`}
       >
-        {!isMobile && showReplyAndQuote && (
+        {!isMobile && showInteractions && showReplyAndQuote && (
           <WaveDropActions
             drop={drop}
             activePartIndex={activePartIndex}
@@ -232,25 +234,29 @@ export default function EndedParticipationDrop({
             <WaveDropMetadata metadata={visibleMetadata} />
           </div>
         )}
-        <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <DropCurationButton
-            dropId={drop.id}
-            waveId={drop.wave.id}
-            isCuratable={drop.context_profile_context?.curatable ?? false}
-            isCurated={drop.context_profile_context?.curated ?? false}
-          />
-          <WaveDropReactions drop={drop} />
-        </div>
+        {showInteractions && (
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+            <DropCurationButton
+              dropId={drop.id}
+              waveId={drop.wave.id}
+              isCuratable={drop.context_profile_context?.curatable ?? false}
+              isCurated={drop.context_profile_context?.curated ?? false}
+            />
+            <WaveDropReactions drop={drop} />
+          </div>
+        )}
 
-        <WaveDropMobileMenu
-          drop={drop}
-          isOpen={isSlideUp}
-          longPressTriggered={longPressTriggered}
-          showReplyAndQuote={showReplyAndQuote}
-          setOpen={setIsSlideUp}
-          onReply={handleOnReply}
-          onAddReaction={handleOnAddReaction}
-        />
+        {showInteractions && (
+          <WaveDropMobileMenu
+            drop={drop}
+            isOpen={isSlideUp}
+            longPressTriggered={longPressTriggered}
+            showReplyAndQuote={showReplyAndQuote}
+            setOpen={setIsSlideUp}
+            onReply={handleOnReply}
+            onAddReaction={handleOnAddReaction}
+          />
+        )}
       </div>
     </div>
   );
