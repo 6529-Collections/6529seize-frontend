@@ -86,7 +86,7 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
         return;
       }
 
-      void fetchNextPage();
+      fetchNextPage();
     },
     [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]
   );
