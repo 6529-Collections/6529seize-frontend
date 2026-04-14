@@ -16,8 +16,9 @@ export default function WaveMutedNotificationButton({
   return (
     <div className="tw-w-full">
       <OverlayTrigger
+        placement="top"
         overlay={
-          <Tooltip id={`mute-tooltip-${waveId}`} placement="top">
+          <Tooltip id={`mute-tooltip-${waveId}`}>
             {settings.muteTooltip}
           </Tooltip>
         }
