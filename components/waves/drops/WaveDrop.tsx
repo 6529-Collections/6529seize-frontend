@@ -15,11 +15,12 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createBreakpoint } from "react-use";
-import type { DropInteractionParams } from "./drop.types";
+import type { DropIdentityMode, DropInteractionParams } from "./drop.types";
 import { DropLocation } from "./drop.types";
 import { getRankHoverRingClass } from "./dropRankStyles";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
+import DropMinimalIdentityRow from "./DropMinimalIdentityRow";
 import WaveDropActions from "./WaveDropActions";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropContent from "./WaveDropContent";
@@ -122,6 +123,269 @@ const getDropClasses = (
   return `${baseClasses} ${groupingClass} ${locationClasses} ${rankClasses}`.trim();
 };
 
+const shouldShowAuthorInfo = ({
+  identityMode,
+  shouldGroupWithPreviousDrop,
+  isProfileView,
+}: {
+  readonly identityMode: DropIdentityMode;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly isProfileView: boolean;
+}): boolean =>
+  identityMode !== "hidden" &&
+  (!shouldGroupWithPreviousDrop || isProfileView || identityMode === "minimal");
+
+const getGroupingClass = ({
+  isProfileView,
+  shouldGroupWithPreviousDrop,
+  shouldGroupWithNextDrop,
+}: {
+  readonly isProfileView: boolean;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly shouldGroupWithNextDrop: boolean;
+}): string => {
+  if (isProfileView) return "tw-py-4";
+  if (shouldGroupWithPreviousDrop) return "tw-pt-1";
+  if (shouldGroupWithNextDrop) return "tw-pt-4 tw-pb-1";
+  return "tw-py-4";
+};
+
+const clearLongPressTimeout = ({
+  longPressTimeoutRef,
+}: {
+  readonly longPressTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
+}) => {
+  if (longPressTimeoutRef.current) {
+    clearTimeout(longPressTimeoutRef.current);
+  }
+};
+
+const handleTouchStartInternal = ({
+  allowLongPress,
+  isEditing,
+  event,
+  touchStartPosition,
+  longPressTimeoutRef,
+  onLongPress,
+}: {
+  readonly allowLongPress: boolean;
+  readonly isEditing: boolean;
+  readonly event: React.TouchEvent;
+  readonly touchStartPosition: React.RefObject<{
+    x: number;
+    y: number;
+  } | null>;
+  readonly longPressTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
+  readonly onLongPress: () => void;
+}) => {
+  if (!allowLongPress || isEditing) {
+    return;
+  }
+
+  const touch = event.touches[0];
+  touchStartPosition.current = { x: touch!.clientX, y: touch!.clientY };
+  longPressTimeoutRef.current = setTimeout(onLongPress, 500);
+};
+
+const handleTouchEndInternal = ({
+  longPressTimeoutRef,
+  touchStartPosition,
+}: {
+  readonly longPressTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
+  readonly touchStartPosition: React.RefObject<{
+    x: number;
+    y: number;
+  } | null>;
+}) => {
+  clearLongPressTimeout({ longPressTimeoutRef });
+  touchStartPosition.current = null;
+};
+
+const handleTouchMoveInternal = ({
+  allowLongPress,
+  event,
+  touchStartPosition,
+  longPressTimeoutRef,
+}: {
+  readonly allowLongPress: boolean;
+  readonly event: React.TouchEvent;
+  readonly touchStartPosition: React.RefObject<{
+    x: number;
+    y: number;
+  } | null>;
+  readonly longPressTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
+}) => {
+  if (!allowLongPress || !touchStartPosition.current) {
+    return;
+  }
+
+  const touch = event.touches[0];
+  const moveThreshold = 10;
+  const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
+  const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
+
+  if (deltaX > moveThreshold || deltaY > moveThreshold) {
+    clearLongPressTimeout({ longPressTimeoutRef });
+  }
+};
+
+const getAuthorHeader = ({
+  showAuthorInfo,
+  identityMode,
+  drop,
+  showWaveInfo,
+  isStorm,
+  activePartIndex,
+  showActionsButton,
+  handleOpenTouchActions,
+}: {
+  readonly showAuthorInfo: boolean;
+  readonly identityMode: DropIdentityMode;
+  readonly drop: ExtendedDrop;
+  readonly showWaveInfo: boolean;
+  readonly isStorm: boolean;
+  readonly activePartIndex: number;
+  readonly showActionsButton: boolean;
+  readonly handleOpenTouchActions: (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => void;
+}): React.ReactNode => {
+  if (!showAuthorInfo) {
+    return null;
+  }
+
+  if (identityMode === "default") {
+    return (
+      <WaveDropHeader
+        drop={drop}
+        showWaveInfo={showWaveInfo}
+        isStorm={isStorm}
+        currentPartIndex={activePartIndex}
+        partsCount={drop.parts.length}
+        showActionsButton={showActionsButton}
+        onOpenActions={handleOpenTouchActions}
+      />
+    );
+  }
+
+  return <DropMinimalIdentityRow drop={drop} />;
+};
+
+const getContentBlock = ({
+  shouldShowReplyHeader,
+  onReplyClick,
+  replyTo,
+  drop,
+  showAuthorInfo,
+  authorHeader,
+  shouldGroupWithPreviousDrop,
+  isProfileView,
+  activePartIndex,
+  setActivePartIndex,
+  handleLongPress,
+  onDropContentClick,
+  onQuoteClick,
+  setLongPressTriggered,
+  isEditing,
+  isSaving,
+  handleEditSave,
+  handleEditCancel,
+  allowLongPress,
+  handleLinkCardActionsActiveChange,
+  isMobile,
+  showReplyAndQuote,
+  handleOnReply,
+  handleOnEdit,
+  hasActiveLinkCardActions,
+}: {
+  readonly shouldShowReplyHeader: boolean;
+  readonly onReplyClick: (serialNo: number) => void;
+  readonly replyTo: ExtendedDrop["reply_to"];
+  readonly drop: ExtendedDrop;
+  readonly showAuthorInfo: boolean;
+  readonly authorHeader: React.ReactNode;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly isProfileView: boolean;
+  readonly activePartIndex: number;
+  readonly setActivePartIndex: (index: number) => void;
+  readonly handleLongPress: () => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly setLongPressTriggered: (triggered: boolean) => void;
+  readonly isEditing: boolean;
+  readonly isSaving: boolean;
+  readonly handleEditSave: (
+    newContent: string,
+    mentions?: ApiDropMentionedUser[],
+    mentionedWaves?: ApiMentionedWave[]
+  ) => void;
+  readonly handleEditCancel: () => void;
+  readonly allowLongPress: boolean;
+  readonly handleLinkCardActionsActiveChange: (
+    actionId: string,
+    active: boolean
+  ) => void;
+  readonly isMobile: boolean;
+  readonly showReplyAndQuote: boolean;
+  readonly handleOnReply: () => void;
+  readonly handleOnEdit: () => void;
+  readonly hasActiveLinkCardActions: boolean;
+}): React.ReactNode => (
+  <>
+    {shouldShowReplyHeader && replyTo && (
+      <WaveDropReply
+        onReplyClick={onReplyClick}
+        dropId={replyTo.drop_id}
+        dropPartId={replyTo.drop_part_id}
+        maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
+      />
+    )}
+    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
+      {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
+      <div
+        className="tw-flex tw-w-full tw-flex-col"
+        style={{
+          maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
+        }}
+      >
+        {authorHeader}
+        <div
+          className={`tw-w-full ${showAuthorInfo ? "tw-mt-2" : ""}${
+            shouldGroupWithPreviousDrop && !isProfileView
+              ? "tw-pl-[3.25rem]"
+              : ""
+          }`}
+        >
+          <WaveDropContent
+            drop={drop}
+            activePartIndex={activePartIndex}
+            setActivePartIndex={setActivePartIndex}
+            onLongPress={handleLongPress}
+            onDropContentClick={onDropContentClick}
+            onQuoteClick={onQuoteClick}
+            setLongPressTriggered={setLongPressTriggered}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            onSave={handleEditSave}
+            onCancel={handleEditCancel}
+            hasTouch={allowLongPress}
+            onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
+          />
+        </div>
+      </div>
+    </div>
+    {!isMobile && showReplyAndQuote && !isEditing && (
+      <WaveDropActions
+        drop={drop}
+        activePartIndex={activePartIndex}
+        onReply={handleOnReply}
+        onEdit={handleOnEdit}
+        suppressed={hasActiveLinkCardActions}
+      />
+    )}
+  </>
+);
+
 interface WaveDropProps {
   readonly drop: ExtendedDrop;
   readonly previousDrop: ExtendedDrop | null;
@@ -138,6 +402,7 @@ interface WaveDropProps {
   readonly wrapContentOnly?:
     | ((content: React.ReactNode) => React.ReactNode)
     | undefined;
+  readonly identityMode?: DropIdentityMode | undefined;
 }
 
 const WaveDrop = ({
@@ -154,6 +419,7 @@ const WaveDrop = ({
   onDropContentClick,
   showReplyAndQuote,
   wrapContentOnly,
+  identityMode = "default",
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -189,16 +455,18 @@ const WaveDrop = ({
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
   const isProfileView = location === DropLocation.PROFILE;
-  const showAuthorInfo = !shouldGroupWithPreviousDrop || isProfileView;
-
-  const getGroupingClass = () => {
-    if (isProfileView) return "tw-py-4";
-    if (shouldGroupWithPreviousDrop) return "tw-pt-1";
-    if (shouldGroupWithNextDrop) return "tw-pt-4 tw-pb-1";
-    return "tw-py-4";
-  };
-
-  const groupingClass = getGroupingClass();
+  const showAuthorInfo = shouldShowAuthorInfo({
+    identityMode,
+    shouldGroupWithPreviousDrop,
+    isProfileView,
+  });
+  const showActionsButton =
+    hasTouch && showReplyAndQuote && !isEditing && identityMode === "default";
+  const groupingClass = getGroupingClass({
+    isProfileView,
+    shouldGroupWithPreviousDrop,
+    shouldGroupWithNextDrop,
+  });
   const replyTo = drop.reply_to;
 
   const isGroupedReplyWithPrevious =
@@ -222,40 +490,33 @@ const WaveDrop = ({
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      if (!allowLongPress) return;
-      // Don't allow mobile menu when in edit mode
-      if (isEditing) return;
-      const touch = e.touches[0];
-      touchStartPosition.current = { x: touch!.clientX, y: touch!.clientY };
-      longPressTimeoutRef.current = setTimeout(handleLongPress, 500);
+      handleTouchStartInternal({
+        allowLongPress,
+        isEditing,
+        event: e,
+        touchStartPosition,
+        longPressTimeoutRef,
+        onLongPress: handleLongPress,
+      });
     },
     [allowLongPress, handleLongPress, isEditing]
   );
 
   const handleTouchEnd = useCallback(() => {
-    if (longPressTimeoutRef.current) {
-      clearTimeout(longPressTimeoutRef.current);
-    }
-    touchStartPosition.current = null;
+    handleTouchEndInternal({
+      longPressTimeoutRef,
+      touchStartPosition,
+    });
   }, []);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      if (!allowLongPress) return;
-      if (!touchStartPosition.current) return;
-
-      const touch = e.touches[0];
-      const moveThreshold = 10; // pixels
-
-      const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
-      const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
-
-      if (
-        (deltaX > moveThreshold || deltaY > moveThreshold) &&
-        longPressTimeoutRef.current
-      ) {
-        clearTimeout(longPressTimeoutRef.current);
-      }
+      handleTouchMoveInternal({
+        allowLongPress,
+        event: e,
+        touchStartPosition,
+        longPressTimeoutRef,
+      });
     },
     [allowLongPress]
   );
@@ -285,6 +546,17 @@ const WaveDrop = ({
     },
     []
   );
+
+  const authorHeader = getAuthorHeader({
+    showAuthorInfo,
+    identityMode,
+    drop,
+    showWaveInfo,
+    isStorm,
+    activePartIndex,
+    showActionsButton,
+    handleOpenTouchActions,
+  });
 
   const handleOnEdit = useCallback(() => {
     setIsSlideUp(false); // Close mobile menu when entering edit mode
@@ -383,9 +655,7 @@ const WaveDrop = ({
 
   useEffect(() => {
     return () => {
-      if (longPressTimeoutRef.current) {
-        clearTimeout(longPressTimeoutRef.current);
-      }
+      clearLongPressTimeout({ longPressTimeoutRef });
     };
   }, []);
 
@@ -400,71 +670,33 @@ const WaveDrop = ({
     isDrop
   );
 
-  const contentBlock = (
-    <>
-      {shouldShowReplyHeader && (
-        <WaveDropReply
-          onReplyClick={onReplyClick}
-          dropId={replyTo.drop_id}
-          dropPartId={replyTo.drop_part_id}
-          maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
-        />
-      )}
-      <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-        {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
-        <div
-          className="tw-flex tw-w-full tw-flex-col"
-          style={{
-            maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
-          }}
-        >
-          {showAuthorInfo && (
-            <WaveDropHeader
-              drop={drop}
-              showWaveInfo={showWaveInfo}
-              isStorm={isStorm}
-              currentPartIndex={activePartIndex}
-              partsCount={drop.parts.length}
-              showActionsButton={hasTouch && showReplyAndQuote && !isEditing}
-              onOpenActions={handleOpenTouchActions}
-            />
-          )}
-          <div
-            className={`tw-w-full ${showAuthorInfo ? "tw-mt-2" : ""}${
-              shouldGroupWithPreviousDrop && !isProfileView
-                ? "tw-pl-[3.25rem]"
-                : ""
-            }`}
-          >
-            <WaveDropContent
-              drop={drop}
-              activePartIndex={activePartIndex}
-              setActivePartIndex={setActivePartIndex}
-              onLongPress={handleLongPress}
-              onDropContentClick={onDropContentClick}
-              onQuoteClick={onQuoteClick}
-              setLongPressTriggered={setLongPressTriggered}
-              isEditing={isEditing}
-              isSaving={dropUpdateMutation.isPending}
-              onSave={handleEditSave}
-              onCancel={handleEditCancel}
-              hasTouch={allowLongPress}
-              onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
-            />
-          </div>
-        </div>
-      </div>
-      {!isMobile && showReplyAndQuote && !isEditing && (
-        <WaveDropActions
-          drop={drop}
-          activePartIndex={activePartIndex}
-          onReply={handleOnReply}
-          onEdit={handleOnEdit}
-          suppressed={hasActiveLinkCardActions}
-        />
-      )}
-    </>
-  );
+  const contentBlock = getContentBlock({
+    shouldShowReplyHeader,
+    onReplyClick,
+    replyTo,
+    drop,
+    showAuthorInfo,
+    authorHeader,
+    shouldGroupWithPreviousDrop,
+    isProfileView,
+    activePartIndex,
+    setActivePartIndex,
+    handleLongPress,
+    onDropContentClick,
+    onQuoteClick,
+    setLongPressTriggered,
+    isEditing,
+    isSaving: dropUpdateMutation.isPending,
+    handleEditSave,
+    handleEditCancel,
+    allowLongPress,
+    handleLinkCardActionsActiveChange,
+    isMobile,
+    showReplyAndQuote,
+    handleOnReply,
+    handleOnEdit,
+    hasActiveLinkCardActions,
+  });
 
   const reactionsRow = (
     <div

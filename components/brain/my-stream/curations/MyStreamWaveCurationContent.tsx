@@ -3,12 +3,13 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import CurationEmptyState from "@/components/brain/my-stream/curations/CurationEmptyState";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
-import { useDropCurations } from "@/hooks/drops/useDropCurations";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useWaveDrops } from "@/hooks/useWaveDrops";
@@ -21,7 +22,7 @@ interface MyStreamWaveCurationContentProps {
   readonly wave: ApiWave;
   readonly curationId: string;
   readonly curationName?: string | null | undefined;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly constrainToViewport?: boolean | undefined;
 }
 
@@ -38,7 +39,7 @@ function MyStreamWaveCurationDropItem({
   readonly nextDrop: ExtendedDrop | null;
   readonly curationId: string;
   readonly canManageActiveCuration: boolean;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
   const { hasTouchScreen, isApp } = useDeviceInfo();
   const isTouchDevice = useIsTouchDevice();
@@ -139,9 +140,9 @@ export default function MyStreamWaveCurationContent({
       curationId,
     });
   const permissionProbeDropId = drops[0]?.id ?? "";
-  const { data: permissionProbeCurations = [] } = useDropCurations({
-    dropId: permissionProbeDropId,
-    enabled: Boolean(permissionProbeDropId),
+  const canManageActiveCuration = useCurationManagementPermission({
+    curationId,
+    probeDropId: permissionProbeDropId,
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
@@ -158,9 +159,6 @@ export default function MyStreamWaveCurationContent({
   );
 
   const curationTitle = curationName?.trim() ?? "Curation";
-  const canManageActiveCuration =
-    permissionProbeCurations.find((curation) => curation.id === curationId)
-      ?.authenticated_user_can_curate ?? false;
 
   const renderedDrops = useMemo(
     () =>
@@ -188,16 +186,14 @@ export default function MyStreamWaveCurationContent({
     );
   } else if (drops.length === 0) {
     content = (
-      <div className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-px-6">
-        <div className="tw-max-w-md tw-rounded-2xl tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-950/70 tw-px-6 tw-py-8 tw-text-center">
-          <p className="tw-mb-2 tw-text-base tw-font-semibold tw-text-iron-100">
-            {curationTitle} is empty
-          </p>
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-            This tab will show the drops added to this curation.
-          </p>
-        </div>
-      </div>
+      <CurationEmptyState
+        curationTitle={curationTitle}
+        containerClassName={
+          constrainToViewport
+            ? "tw-flex tw-flex-1 tw-items-center tw-justify-center tw-px-6"
+            : undefined
+        }
+      />
     );
   } else {
     content = (

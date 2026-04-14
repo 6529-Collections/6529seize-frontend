@@ -8,12 +8,13 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { memo, useCallback, useState } from "react";
-import type { DropInteractionParams } from "../drop.types";
+import type { DropIdentityMode, DropInteractionParams } from "../drop.types";
 import { DropLocation } from "../drop.types";
 import {
   getRankHoverBorderClass,
   getRankStaticBorderClass,
 } from "../dropRankStyles";
+import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
@@ -54,6 +55,7 @@ interface DefautWinnerDropProps {
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly identityMode?: DropIdentityMode | undefined;
 }
 
 const DefaultWinnerDrop = ({
@@ -67,6 +69,7 @@ const DefaultWinnerDrop = ({
   onQuoteClick,
   onDropContentClick,
   showReplyAndQuote,
+  identityMode = "default",
 }: DefautWinnerDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -80,6 +83,7 @@ const DefaultWinnerDrop = ({
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
   const decisionTime = drop.winning_context?.decision_time;
+  const showIdentity = identityMode !== "hidden";
 
   const visibleMetadata = getWinnerVisibleMetadata({
     wave: drop.wave,
@@ -136,23 +140,29 @@ const DefaultWinnerDrop = ({
         )}
 
         <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-          <WaveDropAuthorPfp drop={drop} />
+          {showIdentity && <WaveDropAuthorPfp drop={drop} />}
           <div className="tw-flex tw-w-full tw-flex-col">
             <div className="tw-flex tw-flex-col tw-items-start">
-              <WaveDropHeader
-                drop={drop}
-                showWaveInfo={false}
-                isStorm={isStorm}
-                currentPartIndex={activePartIndex}
-                partsCount={drop.parts.length}
-                badge={
-                  <WinnerDropBadge
-                    rank={effectiveRank}
-                    decisionTime={decisionTime ?? null}
+              {showIdentity &&
+                (identityMode === "minimal" ? (
+                  <DropMinimalIdentityRow drop={drop} />
+                ) : (
+                  <WaveDropHeader
+                    drop={drop}
+                    showWaveInfo={false}
+                    isStorm={isStorm}
+                    currentPartIndex={activePartIndex}
+                    partsCount={drop.parts.length}
+                    badge={
+                      <WinnerDropBadge
+                        rank={effectiveRank}
+                        decisionTime={decisionTime ?? null}
+                      />
+                    }
                   />
-                }
-              />
-              {showWaveInfo &&
+                ))}
+              {identityMode === "default" &&
+                showWaveInfo &&
                 (() => {
                   const waveDetails = drop.wave as unknown as {
                     chat?:
@@ -187,7 +197,7 @@ const DefaultWinnerDrop = ({
                   );
                 })()}
             </div>
-            <div className="tw-mt-2">
+            <div className={showIdentity ? "tw-mt-2" : ""}>
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}
@@ -211,7 +221,9 @@ const DefaultWinnerDrop = ({
             />
           </div>
         )}
-        <div className="tw-ml-[3.25rem] tw-flex tw-flex-col tw-gap-2">
+        <div
+          className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-flex tw-flex-col tw-gap-2`}
+        >
           <WaveWinnerIdentity drop={drop} variant="full" cardVariant="chat" />
           {visibleMetadata.length > 0 && (
             <WaveDropMetadata metadata={visibleMetadata} />

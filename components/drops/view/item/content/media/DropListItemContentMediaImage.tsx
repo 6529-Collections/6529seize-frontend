@@ -29,6 +29,137 @@ const tooltipProps = {
 const modalButtonClasses =
   "tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out";
 
+function getImageContainerClassName({
+  naturalHeight,
+  isCompetitionDrop,
+}: {
+  readonly naturalHeight: boolean;
+  readonly isCompetitionDrop: boolean;
+}): string {
+  if (naturalHeight) {
+    return "tw-relative tw-w-full";
+  }
+
+  return [
+    "tw-relative tw-flex tw-h-full tw-w-full tw-items-center",
+    isCompetitionDrop ? "tw-justify-center" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function renderInlineImageContent({
+  naturalHeight,
+  shouldLoadImage,
+  errorCount,
+  maxRetries,
+  imgRef,
+  retryTick,
+  src,
+  imageScale,
+  loadStrategy,
+  resolvedObjectPosition,
+  handleImageLoad,
+  handleImageClick,
+  handleError,
+  loaded,
+  disableModal,
+  hasTouchScreen,
+  loadingPlaceholderStyle,
+  manualRetry,
+}: {
+  readonly naturalHeight: boolean;
+  readonly shouldLoadImage: boolean;
+  readonly errorCount: number;
+  readonly maxRetries: number;
+  readonly imgRef: React.RefObject<HTMLImageElement | null>;
+  readonly retryTick: number;
+  readonly src: string;
+  readonly imageScale: ImageScale;
+  readonly loadStrategy: MediaLoadStrategy;
+  readonly resolvedObjectPosition: string;
+  readonly handleImageLoad: () => void;
+  readonly handleImageClick: (
+    event: React.MouseEvent<HTMLImageElement>
+  ) => void;
+  readonly handleError: () => void;
+  readonly loaded: boolean;
+  readonly disableModal: boolean;
+  readonly hasTouchScreen: boolean;
+  readonly loadingPlaceholderStyle: React.CSSProperties;
+  readonly manualRetry: () => void;
+}) {
+  if (naturalHeight && shouldLoadImage && errorCount <= maxRetries) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        ref={imgRef}
+        key={retryTick}
+        src={getScaledImageUri(src, imageScale)}
+        alt="Drop media"
+        loading={loadStrategy === "eager" ? "eager" : "lazy"}
+        className={`tw-block tw-h-auto tw-w-full tw-max-w-full tw-object-contain ${
+          disableModal ? "" : "tw-cursor-pointer"
+        }`}
+        style={{ objectPosition: resolvedObjectPosition }}
+        onLoad={handleImageLoad}
+        onClick={handleImageClick}
+        onError={handleError}
+      />
+    );
+  }
+
+  return (
+    <>
+      {!loaded && errorCount <= maxRetries && (
+        <div
+          className={`${naturalHeight ? "" : "tw-rounded-xl"} tw-bg-iron-800 ${
+            hasTouchScreen ? "" : "tw-animate-pulse"
+          }`}
+          style={loadingPlaceholderStyle}
+        />
+      )}
+
+      {shouldLoadImage && errorCount <= maxRetries && (
+        <FallbackImage
+          key={retryTick}
+          ref={imgRef}
+          primarySrc={getScaledImageUri(src, imageScale)}
+          fallbackSrc={src}
+          alt="Drop media"
+          fill
+          loading={loadStrategy === "eager" ? "eager" : undefined}
+          sizes="(max-width: 768px) 100vw, 768px"
+          className={`tw-max-h-full tw-max-w-full ${
+            !loaded ? "tw-opacity-0" : "tw-opacity-100"
+          } ${disableModal ? "" : "tw-cursor-pointer"}`}
+          style={{
+            objectFit: "contain",
+            objectPosition: resolvedObjectPosition,
+          }}
+          onLoad={handleImageLoad}
+          onClick={handleImageClick}
+          onError={handleError}
+        />
+      )}
+
+      {errorCount > maxRetries && (
+        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2">
+          <span className="tw-text-sm tw-text-iron-400">
+            Couldn’t load image.
+          </span>
+          <button
+            onClick={manualRetry}
+            className="tw-rounded-md tw-bg-iron-700 tw-px-3 tw-py-1 tw-text-xs tw-text-white hover:tw-bg-iron-600"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
 function DropListItemContentMediaImage({
   src,
   maxRetries = 0,
@@ -37,6 +168,7 @@ function DropListItemContentMediaImage({
   disableModal = false,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx450,
+  naturalHeight = false,
   loadStrategy = "in-view",
 }: {
   readonly src: string;
@@ -46,6 +178,7 @@ function DropListItemContentMediaImage({
   readonly disableModal?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly naturalHeight?: boolean | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
@@ -124,7 +257,7 @@ function DropListItemContentMediaImage({
     left: "50%",
     transform: "translate(-50%, -50%)",
   };
-  const shouldLoadImage = loadStrategy === "eager" || inView;
+  const shouldLoadImage = naturalHeight || loadStrategy === "eager" || inView;
 
   useKeyPressEvent("Escape", () => {
     if (!disableModal) {
@@ -287,59 +420,34 @@ function DropListItemContentMediaImage({
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
+  const containerClassName = getImageContainerClassName({
+    naturalHeight,
+    isCompetitionDrop,
+  });
 
   return (
     <>
-      <div
-        ref={ref}
-        className={`tw-relative tw-flex tw-h-full tw-w-full tw-items-center ${
-          isCompetitionDrop ? "tw-justify-center" : ""
-        }`}
-      >
-        {!loaded && errorCount <= maxRetries && (
-          <div
-            className={`tw-rounded-xl tw-bg-iron-800 ${
-              hasTouchScreen ? "" : "tw-animate-pulse"
-            }`}
-            style={loadingPlaceholderStyle}
-          />
-        )}
-
-        {shouldLoadImage && errorCount <= maxRetries && (
-          <FallbackImage
-            key={retryTick}
-            ref={imgRef}
-            primarySrc={getScaledImageUri(src, imageScale)}
-            fallbackSrc={src}
-            alt="Drop media"
-            fill
-            loading={loadStrategy === "eager" ? "eager" : undefined}
-            sizes="(max-width: 768px) 100vw, 768px"
-            className={`tw-max-h-full tw-max-w-full ${
-              !loaded ? "tw-opacity-0" : "tw-opacity-100"
-            } ${disableModal ? "" : "tw-cursor-pointer"}`}
-            style={{
-              objectFit: "contain",
-              objectPosition: resolvedObjectPosition,
-            }}
-            onLoad={handleImageLoad}
-            onClick={handleImageClick}
-            onError={handleError}
-          />
-        )}
-        {errorCount > maxRetries && (
-          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2">
-            <span className="tw-text-sm tw-text-iron-400">
-              Couldn’t load image.
-            </span>
-            <button
-              onClick={manualRetry}
-              className="tw-rounded-md tw-bg-iron-700 tw-px-3 tw-py-1 tw-text-xs tw-text-white hover:tw-bg-iron-600"
-            >
-              Retry
-            </button>
-          </div>
-        )}
+      <div ref={ref} className={containerClassName}>
+        {renderInlineImageContent({
+          naturalHeight,
+          shouldLoadImage,
+          errorCount,
+          maxRetries,
+          imgRef,
+          retryTick,
+          src,
+          imageScale,
+          loadStrategy,
+          resolvedObjectPosition,
+          handleImageLoad,
+          handleImageClick,
+          handleError,
+          loaded,
+          disableModal,
+          hasTouchScreen,
+          loadingPlaceholderStyle,
+          manualRetry,
+        })}
       </div>
       {!disableModal &&
         isModalOpen &&

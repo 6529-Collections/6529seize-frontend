@@ -5,6 +5,8 @@ export interface DropInteractionParams {
   partId: number;
 }
 
+export type DropIdentityMode = "default" | "minimal" | "hidden";
+
 export enum DropLocation {
   MY_STREAM = "MY_STREAM",
   WAVE = "WAVE",

@@ -9,6 +9,7 @@ interface WaveDropPartContentMediasProps {
   readonly disableMediaInteraction?: boolean | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
 }
 
 const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
@@ -16,37 +17,72 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   disableMediaInteraction = false,
   isCompetitionDrop = false,
   imageScale = ImageScale.AUTOx450,
+  fullWidthMedia = false,
 }) => {
   if (!activePart.media.length) {
     return null;
   }
 
+  const hasContentBeforeMedia =
+    Boolean(activePart.content?.trim()) ||
+    Boolean(activePart.quoted_drop?.drop_id);
+  let topSpacingClassName = "tw-mt-1";
+
+  if (hasContentBeforeMedia) {
+    topSpacingClassName = "tw-mt-4";
+  } else if (fullWidthMedia) {
+    topSpacingClassName = "tw-mt-0";
+  }
+
+  const mediaStackClassName = [
+    topSpacingClassName,
+    "tw-space-y-3",
+    fullWidthMedia ? "-tw-mx-4" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div
-      className={`${activePart.content ? "tw-mt-3" : "tw-mt-1"} tw-space-y-3`}
-    >
-      {activePart.media.map((media, i) => (
-        <div
-          key={`part-${i}-media-${media.url}`}
-          className="tw-flex tw-h-64"
-        >
-          {disableMediaInteraction ? (
-            <MediaDisplay
-              media_mime_type={media.mime_type}
-              media_url={media.url}
-              disableMediaInteraction={disableMediaInteraction}
-              imageScale={imageScale}
-            />
-          ) : (
-            <DropListItemContentMedia
-              media_mime_type={media.mime_type}
-              media_url={media.url}
-              isCompetitionDrop={isCompetitionDrop}
-              imageScale={imageScale}
-            />
-          )}
-        </div>
-      ))}
+    <div className={mediaStackClassName}>
+      {activePart.media.map((media, i) => {
+        const useNaturalHeightImage =
+          fullWidthMedia && media.mime_type.includes("image");
+        const mediaContainerClassName = useNaturalHeightImage
+          ? "tw-w-full"
+          : [
+              "tw-flex tw-h-64 tw-items-center tw-justify-center",
+              fullWidthMedia ? "tw-w-full" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+
+        return (
+          <div
+            key={`part-${i}-media-${media.url}`}
+            className={mediaContainerClassName}
+          >
+            {disableMediaInteraction ? (
+              <MediaDisplay
+                media_mime_type={media.mime_type}
+                media_url={media.url}
+                disableMediaInteraction={disableMediaInteraction}
+                imageScale={imageScale}
+              />
+            ) : (
+              <DropListItemContentMedia
+                media_mime_type={media.mime_type}
+                media_url={media.url}
+                isCompetitionDrop={isCompetitionDrop}
+                imageScale={imageScale}
+                imageObjectPosition={
+                  useNaturalHeightImage ? "center" : undefined
+                }
+                naturalHeight={useNaturalHeightImage}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

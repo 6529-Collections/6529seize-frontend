@@ -10,7 +10,11 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useMemo } from "react";
 import DropContext from "./DropContext";
-import type { DropInteractionParams, DropLocation } from "./drop.types";
+import type {
+  DropIdentityMode,
+  DropInteractionParams,
+  DropLocation,
+} from "./drop.types";
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
 import WinnerDrop from "./winner/WinnerDrop";
@@ -32,6 +36,7 @@ interface DropProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
   readonly wrapContentOnly?: (content: React.ReactNode) => React.ReactNode;
+  readonly identityMode?: DropIdentityMode | undefined;
 }
 
 export default function Drop({
@@ -49,6 +54,7 @@ export default function Drop({
   showReplyAndQuote,
   parentContainerRef,
   wrapContentOnly,
+  identityMode,
 }: DropProps) {
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
@@ -62,6 +68,7 @@ export default function Drop({
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
+        identityMode={identityMode}
       />
     ),
     [ApiDropType.Winner]: (
@@ -79,6 +86,7 @@ export default function Drop({
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
+        identityMode={identityMode}
       />
     ),
     [ApiDropType.Chat]: (
@@ -98,6 +106,7 @@ export default function Drop({
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         wrapContentOnly={wrapContentOnly}
+        identityMode={identityMode}
       />
     ),
   };
