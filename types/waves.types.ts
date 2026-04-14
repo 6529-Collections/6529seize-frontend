@@ -9,6 +9,7 @@ import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 export enum MyStreamWaveTab {
   CHAT = "CHAT",
   LEADERBOARD = "LEADERBOARD",
+  SUBMISSIONS = "SUBMISSIONS",
   SALES = "SALES",
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
