@@ -23,7 +23,10 @@ import { $createMentionNode } from "@/components/drops/create/lexical/nodes/Ment
 import MentionsTypeaheadMenu from "./MentionsTypeaheadMenu";
 import type { MentionedUser } from "@/entities/IDrop";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
-import { useIdentitiesSearch } from "@/hooks/useIdentitiesSearch";
+import {
+  IDENTITY_SEARCH_MIN_HANDLE_LENGTH,
+  useIdentitiesSearch,
+} from "@/hooks/useIdentitiesSearch";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 
 const PUNCTUATION =
@@ -180,7 +183,9 @@ const NewMentionsPlugin = forwardRef<
   const options = useMemo(() => {
     const normalizedQuery = (queryString ?? "").toLowerCase();
     const allOption =
-      canMentionAll && "all".startsWith(normalizedQuery)
+      canMentionAll &&
+      normalizedQuery.length >= IDENTITY_SEARCH_MIN_HANDLE_LENGTH &&
+      "all".startsWith(normalizedQuery)
         ? [
             new MentionTypeaheadOption({
               id: ApiDropGroupMention.All,

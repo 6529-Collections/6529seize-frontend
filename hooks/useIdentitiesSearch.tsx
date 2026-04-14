@@ -9,6 +9,8 @@ interface UseIdentitiesSearchProps {
   readonly waveId: string | null;
 }
 
+export const IDENTITY_SEARCH_MIN_HANDLE_LENGTH = 3;
+
 export function useIdentitiesSearch({
   handle,
   waveId,
@@ -34,7 +36,7 @@ export function useIdentitiesSearch({
         params,
       });
     },
-    enabled: handle.length >= 3,
+    enabled: handle.length >= IDENTITY_SEARCH_MIN_HANDLE_LENGTH,
   });
 
   return { identities: identities ?? [] };

@@ -19,6 +19,7 @@ jest.mock("@lexical/react/LexicalTypeaheadMenuPlugin", () => ({
 }));
 
 jest.mock("@/hooks/useIdentitiesSearch", () => ({
+  IDENTITY_SEARCH_MIN_HANDLE_LENGTH: 3,
   useIdentitiesSearch: jest.fn(),
 }));
 
@@ -98,6 +99,21 @@ describe("MentionsPlugin", () => {
         ref={createRef()}
       />
     );
+    expect(capturedProps.options).toHaveLength(0);
+
+    act(() => {
+      capturedProps.onQueryChange("a");
+    });
+    expect(capturedProps.options).toHaveLength(0);
+
+    act(() => {
+      capturedProps.onQueryChange("al");
+    });
+    expect(capturedProps.options).toHaveLength(0);
+
+    act(() => {
+      capturedProps.onQueryChange("all");
+    });
     const option = capturedProps.options[0];
     const close = jest.fn();
 
