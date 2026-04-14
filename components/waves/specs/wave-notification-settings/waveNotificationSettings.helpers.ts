@@ -32,7 +32,7 @@ export function getAllDropsTooltip({
   readonly subscribedToAllDrops: boolean;
   readonly subscribersLimit: number;
 }) {
-  if (disableAllDropsSelection) {
+  if (disableAllDropsSelection && !subscribedToAllDrops) {
     return `'All' notifications unavailable for waves with ${subscribersLimit.toLocaleString()}+ followers.`;
   }
 

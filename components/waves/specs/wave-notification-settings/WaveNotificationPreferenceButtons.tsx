@@ -15,7 +15,7 @@ const getButtonStyle = (active: boolean) => {
 
 function getAllDropsButtonStyle(settings: WaveNotificationSettingsState) {
   const buttonStyle = getButtonStyle(settings.allDropsEnabled);
-  return settings.disableAllDropsSelection
+  return settings.disableAllDropsSelection && !settings.allDropsEnabled
     ? `${buttonStyle} tw-cursor-not-allowed`
     : buttonStyle;
 }
@@ -43,17 +43,15 @@ export default function WaveNotificationPreferenceButtons({
   waveId,
   settings,
 }: WaveNotificationPreferenceButtonsProps) {
+  const allDropsSelectionDisabled =
+    settings.disableAllDropsSelection && !settings.allDropsEnabled;
   const allDropsButton = (
     <button
-      disabled={settings.loading || settings.disableAllDropsSelection}
+      disabled={settings.loading || allDropsSelectionDisabled}
       onClick={settings.onAllDropsNotificationsClick}
       className={`tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-px-2.5 tw-py-2 tw-transition tw-duration-300 tw-ease-out lg:tw-h-9 ${getAllDropsButtonStyle(settings)}`}
       aria-label="Receive all drop notifications"
-      style={
-        settings.disableAllDropsSelection
-          ? { pointerEvents: "none" }
-          : undefined
-      }
+      style={allDropsSelectionDisabled ? { pointerEvents: "none" } : undefined}
     >
       {settings.loadingTarget === "all-drops" ? (
         <Spinner dimension={12} />
@@ -93,7 +91,7 @@ export default function WaveNotificationPreferenceButtons({
           </Tooltip>
         }
       >
-        {settings.disableAllDropsSelection ? (
+        {allDropsSelectionDisabled ? (
           <span
             className="tw-inline-block tw-w-full"
             style={{ cursor: "not-allowed" }}

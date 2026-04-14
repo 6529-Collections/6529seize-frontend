@@ -179,29 +179,46 @@ describe("WaveNotificationSettings", () => {
     expect(allMentionsButton).not.toBeDisabled();
     expect(allButton).toBeDisabled();
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
-    expect(allButton).toHaveStyle({ pointerEvents: "none" });
+    expect(allButton).toHaveAttribute("style", "pointer-events: none;");
 
     const allButtonWrapper = allButton.parentElement as HTMLElement;
     expect(allButtonWrapper.tagName).toBe("SPAN");
     expect(allButtonWrapper).toHaveClass("tw-inline-block", "tw-w-full");
-    expect(allButtonWrapper).toHaveStyle({ cursor: "not-allowed" });
+    expect(allButtonWrapper).toHaveAttribute("style", "cursor: not-allowed;");
   });
 
-  it("keeps all drop button visually active when subscribed and subscriber limit reached", () => {
+  it("allows disabling all drop notifications when subscribed and subscriber limit reached", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const refetch = jest.fn();
+
     mockUseWaveNotificationSubscription.mockReturnValue({
       data: { subscribed: true, enabled_group_notifications: [] },
-      refetch: jest.fn(),
+      refetch,
     });
+    commonApiPost.mockResolvedValue({});
 
     renderComponent(mockWaveHighSubscribers);
 
     const allButton = screen.getByLabelText("Receive all drop notifications");
-    expect(allButton).toBeDisabled();
-    expect(allButton).toHaveClass(
-      "tw-bg-iron-800",
-      "tw-text-primary-400",
-      "tw-cursor-not-allowed"
-    );
+    expect(allButton).toBeEnabled();
+    expect(allButton).toHaveClass("tw-bg-iron-800", "tw-text-primary-400");
+    expect(allButton).not.toHaveClass("tw-cursor-not-allowed");
+    expect(allButton).not.toHaveAttribute("style");
+    expect(allButton.parentElement?.tagName).toBe("DIV");
+
+    await userEvent.click(allButton);
+
+    await waitFor(() => {
+      expect(commonApiPost).toHaveBeenCalledWith({
+        endpoint: "notifications/wave-subscription/wave-456",
+        body: {
+          subscribed: false,
+          enabled_group_notifications: [],
+        },
+      });
+    });
+
+    expect(refetch).toHaveBeenCalled();
   });
 
   it("enables ALL mention notifications while preserving all drop preference", async () => {
