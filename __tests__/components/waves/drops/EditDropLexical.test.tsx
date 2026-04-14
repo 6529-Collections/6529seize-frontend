@@ -221,6 +221,19 @@ const {
   normalizeDropMarkdown: jest.Mock;
   exportDropMarkdown: jest.Mock;
 };
+jest.mock(
+  "@/components/drops/create/lexical/utils/groupMentionDetection",
+  () => ({
+    getMentionedGroupsFromEditorState: jest.fn(() => []),
+  })
+);
+const {
+  getMentionedGroupsFromEditorState: getMentionedGroupsFromEditorStateMock,
+} = jest.requireMock(
+  "@/components/drops/create/lexical/utils/groupMentionDetection"
+) as {
+  getMentionedGroupsFromEditorState: jest.Mock;
+};
 jest.mock("lexical", () => ({
   $getRoot: getRootMock,
   COMMAND_PRIORITY_HIGH: 4,
@@ -262,6 +275,7 @@ describe("EditDropLexical", () => {
     jest.clearAllMocks();
     exportDropMarkdownMock.mockReturnValue("mock markdown");
     normalizeDropMarkdownMock.mockImplementation((value: string) => value);
+    getMentionedGroupsFromEditorStateMock.mockReturnValue([]);
     convertFromMarkdownStringMock.mockReset();
     rootMock.getChildren.mockReturnValue([]);
     rootMock.getAllTextNodes.mockReturnValue([]);
@@ -311,16 +325,42 @@ describe("EditDropLexical", () => {
     expect(onCancel).not.toHaveBeenCalled();
   });
 
-  it("saves group mention when unchanged content gains ALL group metadata", async () => {
+  it("does not create group mention metadata from raw markdown text", async () => {
     const user = userEvent.setup();
     const onSave = jest.fn();
     const onCancel = jest.fn();
-    exportDropMarkdownMock.mockReturnValue("@all");
+    exportDropMarkdownMock.mockReturnValue("Use `@all` here");
 
     render(
       <EditDropLexical
         {...defaultProps}
-        initialContent="@all"
+        initialContent="Initial content here"
+        initialGroupMentions={[]}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    await user.click(saveButton);
+
+    expect(onSave).toHaveBeenCalledWith("Use `@all` here", [], [], []);
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("saves group mention metadata from editor group mention nodes", async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const onCancel = jest.fn();
+    exportDropMarkdownMock.mockReturnValue("@all");
+    getMentionedGroupsFromEditorStateMock.mockReturnValue([
+      ApiDropGroupMention.All,
+    ]);
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        initialContent="Initial content here"
         initialGroupMentions={[]}
         onSave={onSave}
         onCancel={onCancel}
@@ -344,6 +384,9 @@ describe("EditDropLexical", () => {
     const onSave = jest.fn();
     const onCancel = jest.fn();
     exportDropMarkdownMock.mockReturnValue("@all");
+    getMentionedGroupsFromEditorStateMock.mockReturnValue([
+      ApiDropGroupMention.All,
+    ]);
 
     render(
       <EditDropLexical

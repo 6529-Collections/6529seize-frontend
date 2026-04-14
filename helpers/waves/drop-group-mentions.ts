@@ -13,26 +13,22 @@ export const hasAllGroupMention = (content: string | null | undefined) => {
   return createAllGroupMentionPattern().test(content);
 };
 
-export const getMentionedGroupsFromContent = (
-  content: string | null | undefined,
-  canMentionAll: boolean
-): ApiDropGroupMention[] => {
-  if (!canMentionAll || !hasAllGroupMention(content)) {
-    return [];
-  }
-
-  return [ApiDropGroupMention.All];
-};
-
 export const getMentionedGroupsFromParts = (
-  parts: readonly { readonly content?: string | null | undefined }[],
+  parts: readonly {
+    readonly mentioned_groups?:
+      | readonly ApiDropGroupMention[]
+      | null
+      | undefined;
+  }[],
   canMentionAll: boolean
 ): ApiDropGroupMention[] => {
   if (!canMentionAll) {
     return [];
   }
 
-  return parts.some((part) => hasAllGroupMention(part.content))
+  return parts.some((part) =>
+    part.mentioned_groups?.includes(ApiDropGroupMention.All)
+  )
     ? [ApiDropGroupMention.All]
     : [];
 };

@@ -53,6 +53,7 @@ import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
 
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
@@ -90,10 +91,7 @@ import {
 } from "../utils/input/profile-search/getSelectableIdentity";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
-import {
-  getMentionedGroupsFromParts,
-  hasAllGroupMention,
-} from "@/helpers/waves/drop-group-mentions";
+import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -280,7 +278,6 @@ const getUpdatedWaves = (
 
 type HandleDropPartResult = {
   updatedMentions: ApiDropMentionedUser[];
-  updatedGroups: ApiDropGroupMention[];
   updatedNfts: ReferencedNft[];
   updatedWaves: ApiMentionedWave[];
   updatedMarkdown: string;
@@ -289,23 +286,14 @@ type HandleDropPartResult = {
 const handleDropPart = (
   markdown: string | null,
   existingMentions: ApiDropMentionedUser[],
-  existingGroups: ApiDropGroupMention[],
   existingNfts: ReferencedNft[],
   existingWaves: ApiMentionedWave[],
   mentionedUsers: Omit<MentionedUser, "current_handle">[],
   referencedNfts: ReferencedNft[],
-  mentionedWaves: MentionedWave[],
-  canMentionAll: boolean
+  mentionedWaves: MentionedWave[]
 ): HandleDropPartResult => {
   const partMentions = getPartMentions(markdown, mentionedUsers);
   const updatedMentions = getUpdatedMentions(partMentions, existingMentions);
-
-  const updatedGroups =
-    canMentionAll &&
-    hasAllGroupMention(markdown) &&
-    !existingGroups.includes(ApiDropGroupMention.All)
-      ? [...existingGroups, ApiDropGroupMention.All]
-      : existingGroups;
 
   const partNfts = getPartNfts(markdown, referencedNfts);
   const updatedNfts = getUpdatedNfts(partNfts, existingNfts);
@@ -317,7 +305,6 @@ const handleDropPart = (
 
   return {
     updatedMentions,
-    updatedGroups,
     updatedNfts,
     updatedWaves,
     updatedMarkdown,
@@ -358,7 +345,8 @@ const generatePart = async (
     part.media.map((media) => generateMediaForPart(media, setUploadingFiles))
   );
   return {
-    ...part,
+    content: part.content,
+    quoted_drop: part.quoted_drop,
     media,
   };
 };
@@ -579,6 +567,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         : null,
     [canMentionAll, editorState]
   );
+  const currentPartMentionedGroups = useMemo(
+    () =>
+      editorState
+        ? getMentionedGroupsFromEditorState(editorState, canMentionAll)
+        : [],
+    [canMentionAll, editorState]
+  );
 
   const isStormModeActive = isStormMode;
 
@@ -748,7 +743,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         ...replyToObj,
         parts: ensurePartsWithFallback(baseParts, hasMetadata),
         mentioned_users: drop?.mentioned_users ?? [],
-        mentioned_groups: drop?.mentioned_groups ?? [],
+        mentioned_groups: getMentionedGroupsFromParts(baseParts, canMentionAll),
         mentioned_waves: drop?.mentioned_waves ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
         metadata: getSubmissionMetadata(),
@@ -765,26 +760,29 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const replyToObj = replyTo ? { reply_to: replyTo } : {};
 
   const createGifDrop = (gif: string): CreateDropConfig => {
+    const parts: CreateDropPart[] = [
+      ...(drop?.parts ?? []),
+      {
+        content: gif,
+        quoted_drop:
+          activeDrop?.action === ActiveDropAction.QUOTE
+            ? {
+                drop_id: activeDrop.drop.id,
+                drop_part_id: activeDrop.partId,
+              }
+            : null,
+        media: files,
+        mentioned_groups: [],
+      },
+    ];
+
     return {
       title: null,
       drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       ...replyToObj,
-      parts: [
-        ...(drop?.parts ?? []),
-        {
-          content: gif,
-          quoted_drop:
-            activeDrop?.action === ActiveDropAction.QUOTE
-              ? {
-                  drop_id: activeDrop.drop.id,
-                  drop_part_id: activeDrop.partId,
-                }
-              : null,
-          media: files,
-        },
-      ],
+      parts,
       mentioned_users: [],
-      mentioned_groups: [],
+      mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
       mentioned_waves: [],
       referenced_nfts: [],
       metadata: getSubmissionMetadata(),
@@ -797,9 +795,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const createCurrentDrop = (
     markdown: string | null,
     allMentions: ApiDropMentionedUser[],
-    allGroups: ApiDropGroupMention[],
     allNfts: ReferencedNft[],
-    allWaves: ApiMentionedWave[]
+    allWaves: ApiMentionedWave[],
+    currentMentionedGroups: ApiDropGroupMention[]
   ): CreateDropConfig => {
     const availableFiles = files;
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
@@ -824,6 +822,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               content: markdown?.length ? markdown : null,
               quoted_drop: quotedDrop,
               media: availableFiles,
+              mentioned_groups: currentMentionedGroups,
             },
           ];
 
@@ -836,7 +835,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       ...replyToObj,
       parts,
       mentioned_users: allMentions,
-      mentioned_groups: allGroups,
+      mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
       mentioned_waves: allWaves,
       referenced_nfts: allNfts,
       metadata: getSubmissionMetadata(),
@@ -854,33 +853,25 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     const markdown = getMarkdown;
     const existingMentions = drop?.mentioned_users ?? [];
-    const existingGroups = drop?.mentioned_groups ?? [];
     const existingNfts = drop?.referenced_nfts ?? [];
     const existingWaves = drop?.mentioned_waves ?? [];
-    const {
-      updatedMentions,
-      updatedGroups,
-      updatedNfts,
-      updatedWaves,
-      updatedMarkdown,
-    } = handleDropPart(
-      markdown,
-      existingMentions,
-      existingGroups,
-      existingNfts,
-      existingWaves,
-      mentionedUsers,
-      referencedNfts,
-      mentionedWaves,
-      canMentionAll
-    );
+    const { updatedMentions, updatedNfts, updatedWaves, updatedMarkdown } =
+      handleDropPart(
+        markdown,
+        existingMentions,
+        existingNfts,
+        existingWaves,
+        mentionedUsers,
+        referencedNfts,
+        mentionedWaves
+      );
 
     return createCurrentDrop(
       updatedMarkdown,
       updatedMentions,
-      updatedGroups,
       updatedNfts,
-      updatedWaves
+      updatedWaves,
+      currentPartMentionedGroups
     );
   };
 

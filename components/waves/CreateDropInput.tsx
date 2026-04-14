@@ -60,7 +60,6 @@ import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
-import { GROUP_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/GroupMentionTransformer";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -316,11 +315,7 @@ const CreateDropInput = forwardRef<
               <ListPlugin />
               <PlainTextPastePlugin />
               <MarkdownShortcutPlugin
-                transformers={
-                  canMentionAll
-                    ? [...SAFE_MARKDOWN_TRANSFORMERS, GROUP_MENTION_TRANSFORMER]
-                    : SAFE_MARKDOWN_TRANSFORMERS
-                }
+                transformers={SAFE_MARKDOWN_TRANSFORMERS}
               />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />

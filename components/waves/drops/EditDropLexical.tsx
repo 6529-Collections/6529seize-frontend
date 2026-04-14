@@ -64,6 +64,7 @@ import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transform
 import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
 import { GROUP_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/GroupMentionTransformer";
+import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { WAVE_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/WaveMentionTransformer";
 import type { MentionedUser, MentionedWave } from "@/entities/IDrop";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -79,10 +80,7 @@ import {
   exportDropMarkdown,
   normalizeDropMarkdown,
 } from "./normalizeDropMarkdown";
-import {
-  areMentionedGroupsEqual,
-  getMentionedGroupsFromContent,
-} from "@/helpers/waves/drop-group-mentions";
+import { areMentionedGroupsEqual } from "@/helpers/waves/drop-group-mentions";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
@@ -425,8 +423,8 @@ function KeyboardPlugin({
           );
           const sanitizedCurrentMarkdown =
             removeBlankLinePlaceholders(currentMarkdown);
-          const currentMentionedGroups = getMentionedGroupsFromContent(
-            sanitizedCurrentMarkdown,
+          const currentMentionedGroups = getMentionedGroupsFromEditorState(
+            editor.getEditorState(),
             canResolveAllGroupMention
           );
           if (
@@ -498,16 +496,24 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     () => addBlankLinePlaceholders(normalizedInitialContent),
     [normalizedInitialContent]
   );
-  const canResolveAllGroupMention =
-    canMentionAll || initialGroupMentions.includes(ApiDropGroupMention.All);
-  const editMarkdownTransformers = useMemo(
+  const hasInitialAllGroupMention = initialGroupMentions.includes(
+    ApiDropGroupMention.All
+  );
+  const canResolveAllGroupMention = canMentionAll || hasInitialAllGroupMention;
+  const importMarkdownTransformers = useMemo(
+    () =>
+      hasInitialAllGroupMention
+        ? [...BASE_EDIT_MARKDOWN_TRANSFORMERS, GROUP_MENTION_TRANSFORMER]
+        : BASE_EDIT_MARKDOWN_TRANSFORMERS,
+    [hasInitialAllGroupMention]
+  );
+  const exportMarkdownTransformers = useMemo(
     () =>
       canResolveAllGroupMention
         ? [...BASE_EDIT_MARKDOWN_TRANSFORMERS, GROUP_MENTION_TRANSFORMER]
         : BASE_EDIT_MARKDOWN_TRANSFORMERS,
     [canResolveAllGroupMention]
   );
-
   const initialConfig: InitialConfigType = {
     namespace: "EditDropLexical",
     theme: ExampleTheme,
@@ -574,11 +580,14 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   const handleSave = useCallback(() => {
     if (!editorState) return;
 
-    const markdown = exportDropMarkdown(editorState, editMarkdownTransformers);
+    const markdown = exportDropMarkdown(
+      editorState,
+      exportMarkdownTransformers
+    );
 
     const sanitizedMarkdown = removeBlankLinePlaceholders(markdown);
-    const sanitizedMentionedGroups = getMentionedGroupsFromContent(
-      sanitizedMarkdown,
+    const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
+      editorState,
       canResolveAllGroupMention
     );
 
@@ -598,7 +607,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     );
   }, [
     editorState,
-    editMarkdownTransformers,
+    exportMarkdownTransformers,
     mentionedUsers,
     mentionedWaves,
     canResolveAllGroupMention,
@@ -635,7 +644,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <OnChangePlugin onChange={handleEditorChange} />
           <HistoryPlugin />
           <PlainTextPastePlugin />
-          <MarkdownShortcutPlugin transformers={editMarkdownTransformers} />
+          <MarkdownShortcutPlugin
+            transformers={BASE_EDIT_MARKDOWN_TRANSFORMERS}
+          />
           <ListPlugin />
           <LinkPlugin />
           <NewMentionsPlugin
@@ -651,7 +662,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <EmojiPlugin />
           <InitialContentPlugin
             initialContent={editorInitialContent}
-            transformers={editMarkdownTransformers}
+            transformers={importMarkdownTransformers}
           />
           <FocusPlugin isApp={isApp} />
           <KeyboardPlugin
@@ -662,7 +673,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             initialContent={normalizedInitialContent}
             initialGroupMentions={initialGroupMentions}
             canResolveAllGroupMention={canResolveAllGroupMention}
-            transformers={editMarkdownTransformers}
+            transformers={exportMarkdownTransformers}
             mentionsRef={mentionsRef}
             waveMentionsRef={waveMentionsRef}
           />

@@ -32,7 +32,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
       <div className="tw-pr-8">
         <DropPartMarkdown
           mentionedUsers={mentionedUsers}
-          mentionedGroups={mentionedGroups}
+          mentionedGroups={part.mentioned_groups ?? mentionedGroups}
           mentionedWaves={mentionedWaves}
           referencedNfts={referencedNfts}
           partContent={part.content ?? ""}

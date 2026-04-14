@@ -2,11 +2,15 @@
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  hasAllGroupMention,
+  hasMentionedGroup,
+} from "@/helpers/waves/drop-group-mentions";
 import {
   useDropUpdateMutation,
   type ApiUpdateDropRequestWithGroups,
@@ -59,6 +63,31 @@ const shouldGroupWithDrop = (
     currentDrop.reply_to?.drop_id === otherDrop.reply_to?.drop_id;
 
   return bothNotReplies || repliesInSameThread;
+};
+
+const getMentionedGroupsForUpdatedParts = ({
+  drop,
+  activePartIndex,
+  activePartMentionedGroups,
+}: {
+  readonly drop: ExtendedDrop;
+  readonly activePartIndex: number;
+  readonly activePartMentionedGroups: readonly ApiDropGroupMention[];
+}): ApiDropGroupMention[] => {
+  if (hasMentionedGroup(activePartMentionedGroups, ApiDropGroupMention.All)) {
+    return [ApiDropGroupMention.All];
+  }
+
+  if (!hasMentionedGroup(drop.mentioned_groups, ApiDropGroupMention.All)) {
+    return [];
+  }
+
+  const hasAllInUntouchedPart = drop.parts.some(
+    (part, index) =>
+      index !== activePartIndex && hasAllGroupMention(part.content)
+  );
+
+  return hasAllInUntouchedPart ? [ApiDropGroupMention.All] : [];
 };
 
 const RANK_STYLES = {
@@ -315,18 +344,24 @@ const WaveDrop = ({
           wave_name_in_content: wave.wave_name_in_content,
         })
       );
+      const updatedParts = drop.parts.map((part, index) => ({
+        content: index === activePartIndex ? newContent : part.content,
+        quoted_drop: part.quoted_drop ?? null,
+        media: part.media,
+      }));
+      const updatedMentionedGroups = getMentionedGroupsForUpdatedParts({
+        drop,
+        activePartIndex,
+        activePartMentionedGroups: mentionedGroups ?? [],
+      });
 
       const updateRequest: ApiUpdateDropRequestWithGroups = {
-        parts: drop.parts.map((part, index) => ({
-          content: index === activePartIndex ? newContent : part.content,
-          quoted_drop: part.quoted_drop ?? null,
-          media: part.media,
-        })),
+        parts: updatedParts,
         title: drop.title,
         metadata: drop.metadata,
         referenced_nfts: drop.referenced_nfts,
         mentioned_users: cleanedMentions,
-        mentioned_groups: mentionedGroups ?? drop.mentioned_groups,
+        mentioned_groups: updatedMentionedGroups,
         mentioned_waves: cleanedWaves,
         signature: null,
       };
