@@ -36,6 +36,7 @@ import type {
 } from "@/entities/IDrop";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { MentionNode } from "../drops/create/lexical/nodes/MentionNode";
+import { GroupMentionNode } from "../drops/create/lexical/nodes/GroupMentionNode";
 import { HashtagNode } from "../drops/create/lexical/nodes/HashtagNode";
 import { WaveMentionNode } from "../drops/create/lexical/nodes/WaveMentionNode";
 import { ImageNode } from "../drops/create/lexical/nodes/ImageNode";
@@ -59,6 +60,7 @@ import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
+import { GROUP_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/GroupMentionTransformer";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -98,6 +100,7 @@ const CreateDropInput = forwardRef<
     readonly isStormMode: boolean;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
+    readonly canMentionAll?: boolean | undefined;
     readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onEditorBlur?: (event: FocusEvent<HTMLDivElement>) => void;
@@ -116,6 +119,7 @@ const CreateDropInput = forwardRef<
       canSubmit,
       isStormMode,
       isDropMode,
+      canMentionAll = false,
       submitting,
       onEditorState,
       onEditorBlur,
@@ -131,6 +135,7 @@ const CreateDropInput = forwardRef<
       namespace: "User Drop",
       nodes: [
         MentionNode,
+        GroupMentionNode,
         HashtagNode,
         WaveMentionNode,
         RootNode,
@@ -295,6 +300,7 @@ const CreateDropInput = forwardRef<
               <NewMentionsPlugin
                 waveId={waveId}
                 onSelect={onMentionedUserAdded}
+                canMentionAll={canMentionAll}
                 ref={mentionsPluginRef}
               />
               <NewWaveMentionsPlugin
@@ -310,7 +316,11 @@ const CreateDropInput = forwardRef<
               <ListPlugin />
               <PlainTextPastePlugin />
               <MarkdownShortcutPlugin
-                transformers={SAFE_MARKDOWN_TRANSFORMERS}
+                transformers={
+                  canMentionAll
+                    ? [...SAFE_MARKDOWN_TRANSFORMERS, GROUP_MENTION_TRANSFORMER]
+                    : SAFE_MARKDOWN_TRANSFORMERS
+                }
               />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />

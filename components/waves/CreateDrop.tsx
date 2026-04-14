@@ -182,6 +182,7 @@ export default function CreateDrop({
         parts: newParts,
         referenced_nfts: prevDrop.referenced_nfts,
         mentioned_users: prevDrop.mentioned_users,
+        mentioned_groups: prevDrop.mentioned_groups ?? [],
         mentioned_waves: prevDrop.mentioned_waves ?? [],
         metadata: prevDrop.metadata,
       };
@@ -344,6 +345,7 @@ export default function CreateDrop({
             <CreateDropStormParts
               parts={drop?.parts ?? []}
               mentionedUsers={drop?.mentioned_users ?? []}
+              mentionedGroups={drop?.mentioned_groups ?? []}
               mentionedWaves={drop?.mentioned_waves ?? []}
               referencedNfts={drop?.referenced_nfts ?? []}
               onRemovePart={onRemovePart}

@@ -1,8 +1,9 @@
-"use client"
+"use client";
 
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useContext } from "react";
@@ -10,9 +11,13 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 
+export type ApiUpdateDropRequestWithGroups = ApiUpdateDropRequest & {
+  mentioned_groups?: ApiDropGroupMention[] | undefined;
+};
+
 interface DropUpdateMutationParams {
   dropId: string;
-  request: ApiUpdateDropRequest;
+  request: ApiUpdateDropRequestWithGroups;
   currentDrop: ApiDrop;
 }
 
@@ -23,7 +28,7 @@ export const useDropUpdateMutation = () => {
 
   return useMutation({
     mutationFn: async ({ dropId, request }: DropUpdateMutationParams) => {
-      return await commonApiPost<ApiUpdateDropRequest, ApiDrop>({
+      return await commonApiPost<ApiUpdateDropRequestWithGroups, ApiDrop>({
         endpoint: `drops/${dropId}`,
         body: request,
       });
@@ -37,7 +42,7 @@ export const useDropUpdateMutation = () => {
       // Update the drop in wave messages store using existing processIncomingDrop
       if (myStreamContext?.processIncomingDrop) {
         myStreamContext.processIncomingDrop(
-          updatedDrop, 
+          updatedDrop,
           ProcessIncomingDropType.DROP_INSERT // This will merge/update the drop
         );
       }
@@ -47,12 +52,14 @@ export const useDropUpdateMutation = () => {
     },
     onError: (error) => {
       console.error("Failed to update drop:", error);
-      
+
       // Check if it's a time limit error
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       if (errorMessage.includes("can't be edited after")) {
         setToast({
-          message: "This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.",
+          message:
+            "This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.",
           type: "error",
         });
       } else {

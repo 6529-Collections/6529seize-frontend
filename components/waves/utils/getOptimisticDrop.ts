@@ -128,6 +128,6 @@ export const getOptimisticDrop = (
     reactions: [],
     boosts: 0,
     hide_link_preview: false,
-    mentioned_groups: [],
+    mentioned_groups: dropRequest.mentioned_groups ?? [],
   };
 };

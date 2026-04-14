@@ -26,6 +26,8 @@ describe("CreateDropStormParts", () => {
         <CreateDropStormParts
           parts={parts}
           mentionedUsers={[]}
+          mentionedGroups={[]}
+          mentionedWaves={[]}
           referencedNfts={[]}
           onRemovePart={jest.fn()}
         />

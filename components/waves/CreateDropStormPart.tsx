@@ -1,6 +1,7 @@
 import React from "react";
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import DropPartMarkdown from "../drops/view/part/DropPartMarkdown";
 
@@ -8,6 +9,7 @@ interface CreateDropStormPartProps {
   readonly partIndex: number;
   readonly part: CreateDropPart;
   readonly mentionedUsers: ApiDropMentionedUser[];
+  readonly mentionedGroups: ApiDropGroupMention[];
   readonly mentionedWaves: ApiMentionedWave[];
   readonly referencedNfts: ReferencedNft[];
   readonly onRemovePart: (partIndex: number) => void;
@@ -17,6 +19,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
   partIndex,
   part,
   mentionedUsers,
+  mentionedGroups,
   mentionedWaves,
   referencedNfts,
   onRemovePart,
@@ -29,6 +32,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
       <div className="tw-pr-8">
         <DropPartMarkdown
           mentionedUsers={mentionedUsers}
+          mentionedGroups={mentionedGroups}
           mentionedWaves={mentionedWaves}
           referencedNfts={referencedNfts}
           partContent={part.content ?? ""}

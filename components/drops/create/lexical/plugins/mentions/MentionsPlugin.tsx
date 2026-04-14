@@ -1,8 +1,7 @@
 "use client";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import type {
-  MenuTextMatch} from "@lexical/react/LexicalTypeaheadMenuPlugin";
+import type { MenuTextMatch } from "@lexical/react/LexicalTypeaheadMenuPlugin";
 import {
   LexicalTypeaheadMenuPlugin,
   MenuOption,
@@ -19,9 +18,11 @@ import {
 } from "react";
 import * as ReactDOM from "react-dom";
 
+import { $createGroupMentionNode } from "@/components/drops/create/lexical/nodes/GroupMentionNode";
 import { $createMentionNode } from "@/components/drops/create/lexical/nodes/MentionNode";
 import MentionsTypeaheadMenu from "./MentionsTypeaheadMenu";
 import type { MentionedUser } from "@/entities/IDrop";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { useIdentitiesSearch } from "@/hooks/useIdentitiesSearch";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 
@@ -102,9 +103,9 @@ function checkForAtSignMentions(
     // length to add it to the leadOffset
     const maybeLeadingWhitespace = match[1] ?? "";
 
-    const matchingString = match[3];
+    const matchingString = match[3] ?? "";
     const replaceableString = match[2] ?? "";
-    if (matchingString && matchingString.length >= minMatchLength) {
+    if (matchingString.length >= minMatchLength) {
       return {
         leadOffset: match.index + maybeLeadingWhitespace.length,
         matchingString,
@@ -116,11 +117,12 @@ function checkForAtSignMentions(
 }
 
 function getPossibleQueryMatch(text: string): MenuTextMatch | null {
-  return checkForAtSignMentions(text, 1);
+  return checkForAtSignMentions(text, 0);
 }
 
 export class MentionTypeaheadOption extends MenuOption {
-  id: string;
+  type: "identity" | "group";
+  id: string | null;
   handle: string;
   display: string | null;
   picture: string | null;
@@ -130,13 +132,16 @@ export class MentionTypeaheadOption extends MenuOption {
     handle,
     display,
     picture,
+    type = "identity",
   }: {
-    id: string;
+    id: string | null;
     handle: string;
     display: string | null;
     picture: string | null;
+    type?: "identity" | "group" | undefined;
   }) {
     super(handle);
+    this.type = type;
     this.id = id;
     this.handle = handle;
     this.display = display;
@@ -153,8 +158,12 @@ const NewMentionsPlugin = forwardRef<
   {
     readonly waveId: string | null;
     readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
+    readonly canMentionAll?: boolean | undefined;
+    readonly onSelectGroupMention?:
+      | ((group: ApiDropGroupMention) => void)
+      | undefined;
   }
->(({ waveId, onSelect }, ref) => {
+>(({ waveId, onSelect, canMentionAll = false, onSelectGroupMention }, ref) => {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
   const { identities } = useIdentitiesSearch({
@@ -162,30 +171,48 @@ const NewMentionsPlugin = forwardRef<
     waveId,
   });
   const [isOpen, setIsOpen] = useState(false);
-  const isMentionsOpen = () => isOpen;
   const modalRef = useRef<HTMLDivElement>(null);
-  useImperativeHandle(ref, () => ({
-    isMentionsOpen,
-  }));
 
   const checkForSlashTriggerMatch = useBasicTypeaheadTriggerMatch("/", {
     minLength: 0,
   });
 
-  const options = useMemo(
-    () =>
-      identities
-        .map(
-          (identity) =>
+  const options = useMemo(() => {
+    const normalizedQuery = (queryString ?? "").toLowerCase();
+    const allOption =
+      canMentionAll && "all".startsWith(normalizedQuery)
+        ? [
             new MentionTypeaheadOption({
-              id: identity.id ?? identity.primary_wallet,
-              handle: identity.handle ?? identity.primary_wallet,
-              display: identity.display,
-              picture: identity.pfp,
-            })
-        )
-        .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
-    [identities]
+              id: ApiDropGroupMention.All,
+              handle: "@all",
+              display: "Mention everyone",
+              picture: null,
+              type: "group",
+            }),
+          ]
+        : [];
+    const identityLimit = SUGGESTION_LIST_LENGTH_LIMIT - allOption.length;
+    const identityOptions = identities
+      .map(
+        (identity) =>
+          new MentionTypeaheadOption({
+            id: identity.id ?? identity.primary_wallet,
+            handle: identity.handle ?? identity.primary_wallet,
+            display: identity.display,
+            picture: identity.pfp,
+          })
+      )
+      .slice(0, identityLimit);
+
+    return [...allOption, ...identityOptions];
+  }, [canMentionAll, identities, queryString]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      isMentionsOpen: () => isOpen && options.length > 0,
+    }),
+    [isOpen, options.length]
   );
 
   const onSelectOption = useCallback(
@@ -195,6 +222,22 @@ const NewMentionsPlugin = forwardRef<
       closeMenu: () => void
     ) => {
       editor.update(() => {
+        if (selectedOption.type === "group") {
+          const mentionNode = $createGroupMentionNode("@all");
+          if (nodeToReplace) {
+            nodeToReplace.replace(mentionNode);
+          }
+          mentionNode.select();
+          onSelectGroupMention?.(ApiDropGroupMention.All);
+          closeMenu();
+          return;
+        }
+
+        if (!selectedOption.id) {
+          closeMenu();
+          return;
+        }
+
         const mentionNode = $createMentionNode(`@${selectedOption.handle}`);
         if (nodeToReplace) {
           nodeToReplace.replace(mentionNode);
@@ -207,7 +250,7 @@ const NewMentionsPlugin = forwardRef<
         closeMenu();
       });
     },
-    [editor]
+    [editor, onSelect, onSelectGroupMention]
   );
 
   const checkForMentionMatch = useCallback(
@@ -238,7 +281,7 @@ const NewMentionsPlugin = forwardRef<
           anchorElementRef,
           { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
         ) => {
-          return anchorElementRef.current && identities.length
+          return anchorElementRef.current && options.length
             ? ReactDOM.createPortal(
                 <div className="tw-absolute -tw-top-12 tw-left-0 tw-z-[1000]">
                   <MentionsTypeaheadMenu

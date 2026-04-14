@@ -2,12 +2,15 @@
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
+import {
+  useDropUpdateMutation,
+  type ApiUpdateDropRequestWithGroups,
+} from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
@@ -295,6 +298,7 @@ const WaveDrop = ({
     (
       newContent: string,
       mentions?: ApiDropMentionedUser[],
+      mentionedGroups?: ApiDropGroupMention[],
       mentionedWaves?: ApiMentionedWave[]
     ) => {
       // Clean mentioned users to only include allowed fields for API
@@ -312,7 +316,7 @@ const WaveDrop = ({
         })
       );
 
-      const updateRequest: ApiUpdateDropRequest = {
+      const updateRequest: ApiUpdateDropRequestWithGroups = {
         parts: drop.parts.map((part, index) => ({
           content: index === activePartIndex ? newContent : part.content,
           quoted_drop: part.quoted_drop ?? null,
@@ -322,6 +326,7 @@ const WaveDrop = ({
         metadata: drop.metadata,
         referenced_nfts: drop.referenced_nfts,
         mentioned_users: cleanedMentions,
+        mentioned_groups: mentionedGroups ?? drop.mentioned_groups,
         mentioned_waves: cleanedWaves,
         signature: null,
       };

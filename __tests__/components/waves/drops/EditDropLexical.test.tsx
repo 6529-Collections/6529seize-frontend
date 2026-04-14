@@ -2,6 +2,7 @@ import React from "react";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 type MentionSelectHandler = (user: {
   mentioned_profile_id: string;
@@ -158,6 +159,9 @@ jest.mock("@/components/drops/create/lexical/nodes/MentionNode", () => ({
   MentionNode: class MockMentionNode {},
   $createMentionNode: jest.fn(() => ({ type: "mention" })),
 }));
+jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
+  GroupMentionNode: class MockGroupMentionNode {},
+}));
 jest.mock("@/components/drops/create/lexical/nodes/HashtagNode", () => ({
   HashtagNode: class MockHashtagNode {},
 }));
@@ -172,6 +176,12 @@ jest.mock(
   "@/components/drops/create/lexical/transformers/MentionTransformer",
   () => ({
     MENTION_TRANSFORMER: {},
+  })
+);
+jest.mock(
+  "@/components/drops/create/lexical/transformers/GroupMentionTransformer",
+  () => ({
+    GROUP_MENTION_TRANSFORMER: {},
   })
 );
 jest.mock(
@@ -239,7 +249,9 @@ describe("EditDropLexical", () => {
   const defaultProps = {
     initialContent: "Initial content here",
     initialMentions: [] as ApiDropMentionedUser[],
+    initialGroupMentions: [],
     initialWaveMentions: [],
+    canMentionAll: true,
     waveId: "wave-123",
     isSaving: false,
     onSave: jest.fn(),
@@ -293,9 +305,62 @@ describe("EditDropLexical", () => {
     expect(onSave).toHaveBeenCalledWith(
       "updated markdown",
       [{ mentioned_profile_id: "profile-1", handle_in_content: "user1" }],
+      [],
       []
     );
     expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("saves group mention when unchanged content gains ALL group metadata", async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const onCancel = jest.fn();
+    exportDropMarkdownMock.mockReturnValue("@all");
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        initialContent="@all"
+        initialGroupMentions={[]}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    await user.click(saveButton);
+
+    expect(onSave).toHaveBeenCalledWith(
+      "@all",
+      [],
+      [ApiDropGroupMention.All],
+      []
+    );
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("does not strip existing ALL group metadata for non-admin unchanged content", async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const onCancel = jest.fn();
+    exportDropMarkdownMock.mockReturnValue("@all");
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        initialContent="@all"
+        initialGroupMentions={[ApiDropGroupMention.All]}
+        canMentionAll={false}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    await user.click(saveButton);
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onSave).not.toHaveBeenCalled();
   });
 
   it("calls onCancel when markdown has not changed", async () => {

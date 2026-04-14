@@ -40,6 +40,7 @@ import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/Hastag
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
 import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
 import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
+import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateDropActions from "./CreateDropActions";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
@@ -88,6 +89,11 @@ import {
   type SelectableIdentityOption,
 } from "../utils/input/profile-search/getSelectableIdentity";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import {
+  getMentionedGroupsFromParts,
+  hasAllGroupMention,
+} from "@/helpers/waves/drop-group-mentions";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -274,6 +280,7 @@ const getUpdatedWaves = (
 
 type HandleDropPartResult = {
   updatedMentions: ApiDropMentionedUser[];
+  updatedGroups: ApiDropGroupMention[];
   updatedNfts: ReferencedNft[];
   updatedWaves: ApiMentionedWave[];
   updatedMarkdown: string;
@@ -282,14 +289,23 @@ type HandleDropPartResult = {
 const handleDropPart = (
   markdown: string | null,
   existingMentions: ApiDropMentionedUser[],
+  existingGroups: ApiDropGroupMention[],
   existingNfts: ReferencedNft[],
   existingWaves: ApiMentionedWave[],
   mentionedUsers: Omit<MentionedUser, "current_handle">[],
   referencedNfts: ReferencedNft[],
-  mentionedWaves: MentionedWave[]
+  mentionedWaves: MentionedWave[],
+  canMentionAll: boolean
 ): HandleDropPartResult => {
   const partMentions = getPartMentions(markdown, mentionedUsers);
   const updatedMentions = getUpdatedMentions(partMentions, existingMentions);
+
+  const updatedGroups =
+    canMentionAll &&
+    hasAllGroupMention(markdown) &&
+    !existingGroups.includes(ApiDropGroupMention.All)
+      ? [...existingGroups, ApiDropGroupMention.All]
+      : existingGroups;
 
   const partNfts = getPartNfts(markdown, referencedNfts);
   const updatedNfts = getUpdatedNfts(partNfts, existingNfts);
@@ -301,6 +317,7 @@ const handleDropPart = (
 
   return {
     updatedMentions,
+    updatedGroups,
     updatedNfts,
     updatedWaves,
     updatedMarkdown,
@@ -545,6 +562,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const hasMetadataValidationErrors = Object.keys(metadataErrorById).length > 0;
 
   const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
+  const canMentionAll = wave.wave.authenticated_user_eligible_for_admin;
 
   const getMarkdown = useMemo(
     () =>
@@ -552,13 +570,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         ? exportDropMarkdown(editorState, [
             ...SAFE_MARKDOWN_TRANSFORMERS,
             MENTION_TRANSFORMER,
+            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
             HASHTAG_TRANSFORMER,
             WAVE_MENTION_TRANSFORMER,
             IMAGE_TRANSFORMER,
             EMOJI_TRANSFORMER,
           ])
         : null,
-    [editorState]
+    [canMentionAll, editorState]
   );
 
   const isStormModeActive = isStormMode;
@@ -729,6 +748,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         ...replyToObj,
         parts: ensurePartsWithFallback(baseParts, hasMetadata),
         mentioned_users: drop?.mentioned_users ?? [],
+        mentioned_groups: drop?.mentioned_groups ?? [],
         mentioned_waves: drop?.mentioned_waves ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
         metadata: getSubmissionMetadata(),
@@ -764,6 +784,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         },
       ],
       mentioned_users: [],
+      mentioned_groups: [],
       mentioned_waves: [],
       referenced_nfts: [],
       metadata: getSubmissionMetadata(),
@@ -776,6 +797,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const createCurrentDrop = (
     markdown: string | null,
     allMentions: ApiDropMentionedUser[],
+    allGroups: ApiDropGroupMention[],
     allNfts: ReferencedNft[],
     allWaves: ApiMentionedWave[]
   ): CreateDropConfig => {
@@ -814,6 +836,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       ...replyToObj,
       parts,
       mentioned_users: allMentions,
+      mentioned_groups: allGroups,
       mentioned_waves: allWaves,
       referenced_nfts: allNfts,
       metadata: getSubmissionMetadata(),
@@ -831,22 +854,31 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     const markdown = getMarkdown;
     const existingMentions = drop?.mentioned_users ?? [];
+    const existingGroups = drop?.mentioned_groups ?? [];
     const existingNfts = drop?.referenced_nfts ?? [];
     const existingWaves = drop?.mentioned_waves ?? [];
-    const { updatedMentions, updatedNfts, updatedWaves, updatedMarkdown } =
-      handleDropPart(
-        markdown,
-        existingMentions,
-        existingNfts,
-        existingWaves,
-        mentionedUsers,
-        referencedNfts,
-        mentionedWaves
-      );
+    const {
+      updatedMentions,
+      updatedGroups,
+      updatedNfts,
+      updatedWaves,
+      updatedMarkdown,
+    } = handleDropPart(
+      markdown,
+      existingMentions,
+      existingGroups,
+      existingNfts,
+      existingWaves,
+      mentionedUsers,
+      referencedNfts,
+      mentionedWaves,
+      canMentionAll
+    );
 
     return createCurrentDrop(
       updatedMarkdown,
       updatedMentions,
+      updatedGroups,
       updatedNfts,
       updatedWaves
     );
@@ -889,6 +921,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         part.content?.includes(`#[${w.wave_name_in_content}]`)
       )
     );
+
+  const filterMentionedGroups = ({
+    parts,
+  }: {
+    readonly parts: CreateDropPart[];
+  }): ApiDropGroupMention[] =>
+    getMentionedGroupsFromParts(parts, canMentionAll);
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
@@ -999,6 +1038,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         }),
         mentioned_waves: filterMentionedWaves({
           mentionedWaves: dropRequest.mentioned_waves ?? [],
+          parts: dropRequest.parts,
+        }),
+        mentioned_groups: filterMentionedGroups({
           parts: dropRequest.parts,
         }),
         metadata: dropRequest.metadata,
@@ -1602,6 +1644,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               submitting={submitting}
               isStormMode={isStormModeActive}
               isDropMode={isDropMode}
+              canMentionAll={canMentionAll}
               canSubmit={canSubmit}
               onEditorState={handleEditorStateChange}
               onEditorBlur={handleEditorBlur}

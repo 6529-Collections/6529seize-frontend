@@ -1,0 +1,67 @@
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+
+export const ALL_GROUP_MENTION_TEXT = "@all";
+
+const createAllGroupMentionPattern = () =>
+  /(^|[^A-Za-z0-9_@])(@all)(?![A-Za-z0-9_@])/g;
+
+export const hasAllGroupMention = (content: string | null | undefined) => {
+  if (!content) {
+    return false;
+  }
+
+  return createAllGroupMentionPattern().test(content);
+};
+
+export const getMentionedGroupsFromContent = (
+  content: string | null | undefined,
+  canMentionAll: boolean
+): ApiDropGroupMention[] => {
+  if (!canMentionAll || !hasAllGroupMention(content)) {
+    return [];
+  }
+
+  return [ApiDropGroupMention.All];
+};
+
+export const getMentionedGroupsFromParts = (
+  parts: readonly { readonly content?: string | null | undefined }[],
+  canMentionAll: boolean
+): ApiDropGroupMention[] => {
+  if (!canMentionAll) {
+    return [];
+  }
+
+  return parts.some((part) => hasAllGroupMention(part.content))
+    ? [ApiDropGroupMention.All]
+    : [];
+};
+
+export const hasMentionedGroup = (
+  mentionedGroups: readonly ApiDropGroupMention[] | null | undefined,
+  group: ApiDropGroupMention
+) => mentionedGroups?.includes(group) ?? false;
+
+export const areMentionedGroupsEqual = (
+  a: readonly ApiDropGroupMention[],
+  b: readonly ApiDropGroupMention[]
+) => {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  return a.every((group) => b.includes(group));
+};
+
+export const markAllGroupMentionTokens = ({
+  content,
+  marker,
+}: {
+  readonly content: string;
+  readonly marker: string;
+}) =>
+  content.replace(
+    createAllGroupMentionPattern(),
+    (_match, prefix: string, token: string) =>
+      `${prefix}${marker}${token}${marker}`
+  );

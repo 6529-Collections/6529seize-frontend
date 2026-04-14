@@ -1,13 +1,15 @@
-import React, { createRef } from 'react';
-import { render, act } from '@testing-library/react';
-import NewMentionsPlugin, { MentionTypeaheadOption } from '@/components/drops/create/lexical/plugins/mentions/MentionsPlugin';
+import React, { createRef } from "react";
+import { render, act } from "@testing-library/react";
+import NewMentionsPlugin, {
+  MentionTypeaheadOption,
+} from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 
-jest.mock('@lexical/react/LexicalComposerContext', () => ({
+jest.mock("@lexical/react/LexicalComposerContext", () => ({
   useLexicalComposerContext: () => [{ update: (fn: any) => fn() }],
 }));
 
 let capturedProps: any;
-jest.mock('@lexical/react/LexicalTypeaheadMenuPlugin', () => ({
+jest.mock("@lexical/react/LexicalTypeaheadMenuPlugin", () => ({
   LexicalTypeaheadMenuPlugin: (props: any) => {
     capturedProps = props;
     return <div data-testid="typeahead" />;
@@ -16,23 +18,35 @@ jest.mock('@lexical/react/LexicalTypeaheadMenuPlugin', () => ({
   useBasicTypeaheadTriggerMatch: () => jest.fn(),
 }));
 
-jest.mock('@/hooks/useIdentitiesSearch', () => ({
+jest.mock("@/hooks/useIdentitiesSearch", () => ({
   useIdentitiesSearch: jest.fn(),
 }));
 
-jest.mock('@/components/drops/create/lexical/nodes/MentionNode', () => ({
-  $createMentionNode: jest.fn(() => ({ replace: jest.fn(), select: jest.fn() })),
+jest.mock("@/components/drops/create/lexical/nodes/MentionNode", () => ({
+  $createMentionNode: jest.fn(() => ({
+    replace: jest.fn(),
+    select: jest.fn(),
+  })),
+}));
+jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
+  $createGroupMentionNode: jest.fn(() => ({
+    replace: jest.fn(),
+    select: jest.fn(),
+  })),
 }));
 
-const { useIdentitiesSearch } = require('@/hooks/useIdentitiesSearch');
-const { $createMentionNode } = require('@/components/drops/create/lexical/nodes/MentionNode');
+const { useIdentitiesSearch } = require("@/hooks/useIdentitiesSearch");
+const {
+  $createMentionNode,
+} = require("@/components/drops/create/lexical/nodes/MentionNode");
+const {
+  $createGroupMentionNode,
+} = require("@/components/drops/create/lexical/nodes/GroupMentionNode");
 
-describe('MentionsPlugin', () => {
-  it('builds options from identities and exposes open state', () => {
+describe("MentionsPlugin", () => {
+  it("builds options from identities and exposes open state", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
-      identities: [
-        { id: '1', handle: 'alice', display: 'Alice', pfp: null },
-      ],
+      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
     });
     const ref = createRef<any>();
     render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
@@ -49,12 +63,14 @@ describe('MentionsPlugin', () => {
     expect(ref.current.isMentionsOpen()).toBe(false);
   });
 
-  it('calls onSelect with mention info', () => {
+  it("calls onSelect with mention info", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
-      identities: [{ id: '1', handle: 'alice', display: 'Alice', pfp: null }],
+      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
     });
     const onSelect = jest.fn();
-    render(<NewMentionsPlugin waveId="w1" onSelect={onSelect} ref={createRef()} />);
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={onSelect} ref={createRef()} />
+    );
     const option = capturedProps.options[0];
     const close = jest.fn();
     act(() => {
@@ -65,6 +81,33 @@ describe('MentionsPlugin', () => {
       mentioned_profile_id: option.id,
       handle_in_content: option.handle,
     });
+    expect(close).toHaveBeenCalled();
+  });
+
+  it("adds @all option for admins and emits group mention", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [],
+    });
+    const onSelectGroupMention = jest.fn();
+    render(
+      <NewMentionsPlugin
+        waveId="w1"
+        onSelect={jest.fn()}
+        onSelectGroupMention={onSelectGroupMention}
+        canMentionAll={true}
+        ref={createRef()}
+      />
+    );
+    const option = capturedProps.options[0];
+    const close = jest.fn();
+
+    act(() => {
+      capturedProps.onSelectOption(option, null, close);
+    });
+
+    expect(option.handle).toBe("@all");
+    expect($createGroupMentionNode).toHaveBeenCalledWith("@all");
+    expect(onSelectGroupMention).toHaveBeenCalledWith("ALL");
     expect(close).toHaveBeenCalled();
   });
 });
