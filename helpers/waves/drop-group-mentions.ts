@@ -5,14 +5,6 @@ export const ALL_GROUP_MENTION_TEXT = "@all";
 const createAllGroupMentionPattern = () =>
   /(^|[^A-Za-z0-9_@])(@all)(?![A-Za-z0-9_@])/g;
 
-export const hasAllGroupMention = (content: string | null | undefined) => {
-  if (!content) {
-    return false;
-  }
-
-  return createAllGroupMentionPattern().test(content);
-};
-
 export const getMentionedGroupsFromParts = (
   parts: readonly {
     readonly mentioned_groups?:

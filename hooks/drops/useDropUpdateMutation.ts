@@ -3,7 +3,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
-import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useContext } from "react";
@@ -11,13 +10,9 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 
-export type ApiUpdateDropRequestWithGroups = ApiUpdateDropRequest & {
-  mentioned_groups?: ApiDropGroupMention[] | undefined;
-};
-
 interface DropUpdateMutationParams {
   dropId: string;
-  request: ApiUpdateDropRequestWithGroups;
+  request: ApiUpdateDropRequest;
   currentDrop: ApiDrop;
 }
 
@@ -28,7 +23,7 @@ export const useDropUpdateMutation = () => {
 
   return useMutation({
     mutationFn: async ({ dropId, request }: DropUpdateMutationParams) => {
-      return await commonApiPost<ApiUpdateDropRequestWithGroups, ApiDrop>({
+      return await commonApiPost<ApiUpdateDropRequest, ApiDrop>({
         endpoint: `drops/${dropId}`,
         body: request,
       });

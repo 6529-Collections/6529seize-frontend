@@ -198,8 +198,9 @@ describe("WaveDrop", () => {
     );
   });
 
-  it("preserves existing ALL metadata when an untouched storm part still has @all", () => {
+  it("omits group mention metadata from edit update requests", () => {
     isMobileMock.mockReturnValue(false);
+    mockEditMentionedGroups = [ApiDropGroupMention.All];
     const stormDrop = {
       ...drop,
       mentioned_groups: [ApiDropGroupMention.All],
@@ -228,51 +229,7 @@ describe("WaveDrop", () => {
 
     fireEvent.click(screen.getByTestId("save-edit"));
 
-    expect(mockMutate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        request: expect.objectContaining({
-          mentioned_groups: [ApiDropGroupMention.All],
-        }),
-      })
-    );
-  });
-
-  it("clears ALL metadata when the updated storm has no remaining @all", () => {
-    isMobileMock.mockReturnValue(false);
-    const stormDrop = {
-      ...drop,
-      mentioned_groups: [ApiDropGroupMention.All],
-      parts: [
-        { ...drop.parts[0], content: "@all" },
-        { ...drop.parts[0], part_id: 2, content: "plain text" },
-      ],
-    };
-
-    renderWithRedux(
-      <WaveDrop
-        drop={stormDrop}
-        previousDrop={null}
-        nextDrop={null}
-        showWaveInfo={false}
-        activeDrop={null}
-        showReplyAndQuote={true}
-        location={0 as any}
-        dropViewDropId={null}
-        onReply={jest.fn()}
-        onQuote={jest.fn()}
-        onReplyClick={jest.fn()}
-        onQuoteClick={jest.fn()}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId("save-edit"));
-
-    expect(mockMutate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        request: expect.objectContaining({
-          mentioned_groups: [],
-        }),
-      })
-    );
+    const request = mockMutate.mock.calls[0][0].request;
+    expect(request).not.toHaveProperty("mentioned_groups");
   });
 });
