@@ -9,6 +9,7 @@ import MyStreamWaveChat from "./MyStreamWaveChat";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
 import { useWaveData } from "@/hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
+import MyStreamWaveSubmissions from "./MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { WaveWinners } from "@/components/waves/winners/WaveWinners";
@@ -153,6 +154,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         wave={wave}
         onDropClick={onDropClick}
       />
+    ),
+    [MyStreamWaveTab.SUBMISSIONS]: (
+      <MyStreamWaveSubmissions wave={wave} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.SALES]: <MyStreamWaveSales waveId={wave.id} />,
     [MyStreamWaveTab.WINNERS]: (

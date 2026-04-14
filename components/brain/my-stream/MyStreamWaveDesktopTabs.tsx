@@ -48,6 +48,7 @@ const MOBILE_INLINE_CURATION_LIMIT = 1;
 const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.CHAT]: "Chat",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
+  [MyStreamWaveTab.SUBMISSIONS]: "Submissions",
   [MyStreamWaveTab.SALES]: "Sales",
   [MyStreamWaveTab.WINNERS]: "Winners",
   [MyStreamWaveTab.OUTCOME]: "Outcome",

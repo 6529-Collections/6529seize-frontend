@@ -1,3 +1,4 @@
+import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import BrainMobileViewContent from "@/components/brain/mobile/BrainMobileViewContent";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
@@ -42,6 +43,33 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveLeaderboard", () => ({
   default: (props: any) => mockMyStreamWaveLeaderboard(props),
 }));
 
+let submissionsInstanceCounter = 0;
+const mockSubmissionsUnmount = jest.fn();
+const mockMyStreamWaveSubmissions = jest.fn(() => {
+  const instanceIdRef = React.useRef<number | null>(null);
+  if (instanceIdRef.current === null) {
+    submissionsInstanceCounter += 1;
+    instanceIdRef.current = submissionsInstanceCounter;
+  }
+
+  React.useEffect(() => {
+    return () => {
+      mockSubmissionsUnmount(instanceIdRef.current);
+    };
+  }, []);
+
+  return (
+    <div
+      data-testid="submissions"
+      data-instance-id={String(instanceIdRef.current)}
+    />
+  );
+});
+jest.mock("@/components/brain/my-stream/MyStreamWaveSubmissions", () => ({
+  __esModule: true,
+  default: (props: any) => mockMyStreamWaveSubmissions(props),
+}));
+
 const mockMyStreamWaveOutcome = jest.fn(() => <div data-testid="outcome" />);
 jest.mock("@/components/brain/my-stream/MyStreamWaveOutcome", () => ({
   __esModule: true,
@@ -75,6 +103,7 @@ jest.mock("@/components/waves/winners/WaveWinners", () => ({
 describe("BrainMobileViewContent", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    submissionsInstanceCounter = 0;
   });
 
   it("renders children for the default view", () => {
@@ -201,6 +230,78 @@ describe("BrainMobileViewContent", () => {
     );
   });
 
+  it("renders submissions and forwards wave props when available", () => {
+    const onDropClick = jest.fn();
+    const wave = { id: "wave-1" } as any;
+
+    render(
+      <BrainMobileViewContent
+        activeView={BrainView.SUBMISSIONS}
+        activeWaveId="1"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={true}
+        onDropClick={onDropClick}
+        onOpenQuickVote={jest.fn()}
+        wave={wave}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("submissions")).toBeInTheDocument();
+    expect(mockMyStreamWaveSubmissions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onDropClick,
+        wave,
+      })
+    );
+  });
+
+  it("remounts submissions when the active wave changes", () => {
+    const onDropClick = jest.fn();
+    const { rerender } = render(
+      <BrainMobileViewContent
+        activeView={BrainView.SUBMISSIONS}
+        activeWaveId="wave-1"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={true}
+        onDropClick={onDropClick}
+        onOpenQuickVote={jest.fn()}
+        wave={{ id: "wave-1" } as any}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("submissions")).toHaveAttribute(
+      "data-instance-id",
+      "1"
+    );
+
+    rerender(
+      <BrainMobileViewContent
+        activeView={BrainView.SUBMISSIONS}
+        activeWaveId="wave-2"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={true}
+        onDropClick={onDropClick}
+        onOpenQuickVote={jest.fn()}
+        wave={{ id: "wave-2" } as any}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("submissions")).toHaveAttribute(
+      "data-instance-id",
+      "2"
+    );
+    expect(mockSubmissionsUnmount).toHaveBeenCalledWith(1);
+  });
+
   it("renders sales when the wave is curation-enabled", () => {
     render(
       <BrainMobileViewContent
@@ -313,6 +414,13 @@ describe("BrainMobileViewContent", () => {
   it.each([
     {
       activeView: BrainView.LEADERBOARD,
+      isCurationWave: false,
+      isMemesWave: false,
+      isRankWave: false,
+      wave: { id: "wave-1" } as any,
+    },
+    {
+      activeView: BrainView.SUBMISSIONS,
       isCurationWave: false,
       isMemesWave: false,
       isRankWave: false,
