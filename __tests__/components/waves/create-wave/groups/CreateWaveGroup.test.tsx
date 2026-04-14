@@ -7,13 +7,7 @@ import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 
-jest.mock("@tanstack/react-query", () => {
-  const actual = jest.requireActual("@tanstack/react-query");
-  return {
-    ...actual,
-    useQuery: jest.fn(),
-  };
-});
+let inlinePanelProps: any;
 
 jest.mock("@/components/waves/create-wave/utils/CreateWaveToggle", () => {
   return function CreateWaveToggle({
@@ -41,54 +35,24 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveToggle", () => {
   };
 });
 
-jest.mock("@/helpers/waves/waves.constants", () => {
-  const { CreateWaveGroupConfigType } = jest.requireActual(
-    "../../../../../types/waves.types"
-  );
-  const { ApiWaveType } = jest.requireActual(
-    "../../../../../generated/models/ApiWaveType"
-  );
-
-  return {
-    CREATE_WAVE_NONE_GROUP_LABELS: {
-      [CreateWaveGroupConfigType.ADMIN]: "Only me",
-      [CreateWaveGroupConfigType.CAN_VIEW]: "Anyone",
-      [CreateWaveGroupConfigType.CAN_DROP]: "Anyone",
-      [CreateWaveGroupConfigType.CAN_VOTE]: "Anyone",
-      [CreateWaveGroupConfigType.CAN_CHAT]: "Anyone",
-    },
-    CREATE_WAVE_SELECT_GROUP_LABELS: {
-      [ApiWaveType.Approve]: {
-        [CreateWaveGroupConfigType.ADMIN]: "Admin",
-        [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
-        [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
-        [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
-        [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
-      },
-      [ApiWaveType.Rank]: {
-        [CreateWaveGroupConfigType.ADMIN]: "Admin",
-        [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
-        [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
-        [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
-        [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
-      },
-      [ApiWaveType.Chat]: {
-        [CreateWaveGroupConfigType.ADMIN]: "Admin",
-        [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
-        [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
-        [CreateWaveGroupConfigType.CAN_VOTE]: "Who can rate",
-        [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
-      },
-    },
-  };
-});
-
-const { useQuery } = jest.requireMock("@tanstack/react-query");
+jest.mock(
+  "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel",
+  () =>
+    function MockCreateWaveGroupInlinePanel(props: any) {
+      inlinePanelProps = props;
+      return (
+        <div data-testid="inline-panel">
+          {props.selectedGroup?.name ?? "none"}
+        </div>
+      );
+    }
+);
 
 describe("CreateWaveGroup", () => {
   const mockOnGroupSelect = jest.fn();
   const mockSetChatEnabled = jest.fn();
   const mockSetDropsAdminCanDelete = jest.fn();
+  const mockOnInlineGroupCreate = jest.fn();
 
   const exampleGroup: ApiGroupFull = {
     id: "group-1",
@@ -110,37 +74,57 @@ describe("CreateWaveGroup", () => {
   };
 
   const defaultProps = {
+    waveName: "Test Wave",
     waveType: ApiWaveType.Approve,
     groupType: CreateWaveGroupConfigType.CAN_DROP,
     chatEnabled: true,
     adminCanDeleteDrops: false,
     setChatEnabled: mockSetChatEnabled,
     onGroupSelect: mockOnGroupSelect,
+    onInlineGroupCreate: mockOnInlineGroupCreate,
     groupsCache: {},
     groups: defaultGroups,
+    groupBuilder: {
+      draft: { group: {} },
+      identities: [],
+      panel: "actions",
+      activeRule: null,
+    } as any,
+    setGroupBuilderPanel: jest.fn(),
+    setGroupBuilderRule: jest.fn(),
+    setGroupBuilderDraft: jest.fn(),
+    addGroupBuilderIdentity: jest.fn(),
+    removeGroupBuilderIdentity: jest.fn(),
+    resetGroupBuilder: jest.fn(),
     setDropsAdminCanDelete: mockSetDropsAdminCanDelete,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useQuery as jest.Mock).mockReturnValue({
-      data: [exampleGroup],
-      isFetching: false,
-    });
+    inlinePanelProps = null;
   });
 
-  const renderComponent = (props = {}) => {
-    return render(<CreateWaveGroup {...defaultProps} {...props} />);
-  };
+  const renderComponent = (props = {}) =>
+    render(<CreateWaveGroup {...defaultProps} {...props} />);
 
   it("shows the scope title", () => {
     renderComponent();
     expect(screen.getByText("Who can drop")).toBeInTheDocument();
   });
 
-  it("renders the search field label", () => {
-    renderComponent();
-    expect(screen.getByLabelText("Search groups…")).toBeInTheDocument();
+  it("passes the resolved selected group to the inline panel", () => {
+    renderComponent({
+      groups: {
+        ...defaultGroups,
+        canDrop: exampleGroup.id,
+      },
+      groupsCache: {
+        [exampleGroup.id]: exampleGroup,
+      },
+    });
+
+    expect(screen.getByTestId("inline-panel")).toHaveTextContent("Alpha Group");
+    expect(inlinePanelProps.selectedGroup).toEqual(exampleGroup);
   });
 
   it("shows the chat toggle for non-chat waves when editing chat scope", async () => {
@@ -149,7 +133,6 @@ describe("CreateWaveGroup", () => {
       groupType: CreateWaveGroupConfigType.CAN_CHAT,
     });
 
-    expect(screen.getByText("Enable chat")).toBeInTheDocument();
     const chatToggle = screen.getByLabelText("Enable chat");
     await user.click(chatToggle);
     expect(mockSetChatEnabled).toHaveBeenCalledWith(false);
@@ -160,6 +143,7 @@ describe("CreateWaveGroup", () => {
       groupType: CreateWaveGroupConfigType.CAN_CHAT,
       waveType: ApiWaveType.Chat,
     });
+
     expect(screen.queryByTestId("wave-toggle")).not.toBeInTheDocument();
   });
 
@@ -168,98 +152,17 @@ describe("CreateWaveGroup", () => {
     renderComponent({
       groupType: CreateWaveGroupConfigType.ADMIN,
     });
-    const toggle = screen.getByLabelText("Allow admins to delete posts");
-    await user.click(toggle);
+
+    await user.click(screen.getByLabelText("Allow admins to delete posts"));
     expect(mockSetDropsAdminCanDelete).toHaveBeenCalledWith(true);
   });
 
-  it("renders the admin delete toggle for chat waves", () => {
-    renderComponent({
-      groupType: CreateWaveGroupConfigType.ADMIN,
-      waveType: ApiWaveType.Chat,
-    });
-
-    expect(
-      screen.getByLabelText("Allow admins to delete posts")
-    ).toBeInTheDocument();
-  });
-
-  it("does not render helper text under the admin toggle", () => {
-    renderComponent({
-      groupType: CreateWaveGroupConfigType.ADMIN,
-      adminCanDeleteDrops: true,
-    });
-
-    expect(
-      screen.queryByText("Admins will be able to delete posts.")
-    ).not.toBeInTheDocument();
-  });
-
-  it("displays the helper text for defaults", () => {
-    renderComponent();
-    expect(screen.getByText("Default: Anyone")).toBeInTheDocument();
-  });
-
-  it("disables the search input when chat is disabled", () => {
+  it("passes disabled to the inline panel when chat is disabled", () => {
     renderComponent({
       groupType: CreateWaveGroupConfigType.CAN_CHAT,
       chatEnabled: false,
     });
-    expect(screen.getByLabelText("Search groups…")).toBeDisabled();
-  });
 
-  it("pre-populates the field when a selection exists in cache", () => {
-    renderComponent({
-      groups: {
-        ...defaultGroups,
-        canDrop: exampleGroup.id,
-      },
-      groupsCache: {
-        [exampleGroup.id]: exampleGroup,
-      },
-    });
-
-    expect(screen.getByDisplayValue("Alpha Group")).toBeInTheDocument();
-    expect(screen.getByText("Selected: Alpha Group")).toBeInTheDocument();
-  });
-
-  it("calls onGroupSelect when a suggestion is chosen", async () => {
-    const user = userEvent.setup();
-    renderComponent();
-
-    await user.click(screen.getByLabelText("Search groups…"));
-    await user.click(screen.getByText("Alpha Group"));
-
-    expect(mockOnGroupSelect).toHaveBeenCalledWith(exampleGroup);
-  });
-
-  it("clears the selected group when using the clear button", async () => {
-    const user = userEvent.setup();
-    renderComponent({
-      groups: {
-        ...defaultGroups,
-        canDrop: exampleGroup.id,
-      },
-      groupsCache: {
-        [exampleGroup.id]: exampleGroup,
-      },
-    });
-
-    const clearButton = screen.getByLabelText("Clear selected group");
-    await user.click(clearButton);
-    expect(mockOnGroupSelect).toHaveBeenCalledWith(null);
-  });
-
-  it("shows an empty state when no groups match", async () => {
-    const user = userEvent.setup();
-    (useQuery as jest.Mock).mockReturnValue({
-      data: [],
-      isFetching: false,
-    });
-
-    renderComponent();
-    await user.click(screen.getByLabelText("Search groups…"));
-
-    expect(await screen.findByText("No groups found")).toBeInTheDocument();
+    expect(inlinePanelProps.disabled).toBe(true);
   });
 });
