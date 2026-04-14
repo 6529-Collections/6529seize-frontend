@@ -30,6 +30,43 @@ import {
 import { useCallback, useEffect, useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 
+type ApiErrorLike = {
+  readonly status?: number | undefined;
+  readonly response?: {
+    readonly status?: number | undefined;
+  };
+};
+
+const getErrorStatus = (error: unknown): number | null => {
+  if (error === null || error === undefined || typeof error !== "object") {
+    return null;
+  }
+
+  const apiError = error as ApiErrorLike;
+  return apiError.status ?? apiError.response?.status ?? null;
+};
+
+const getErrorMessage = (error: unknown): string => {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "";
+};
+
+const isUnavailableWaveError = (error: unknown): boolean => {
+  const status = getErrorStatus(error);
+  if (status === 403 || status === 404) {
+    return true;
+  }
+
+  return /not found|forbidden/i.test(getErrorMessage(error));
+};
+
 function UnavailableState({
   canClear,
   onClear,
@@ -70,6 +107,38 @@ function UnavailableState({
             <span>Clear official wave</span>
           </button>
         )}
+      </div>
+    </section>
+  );
+}
+
+function LoadErrorState({
+  isRetrying,
+  onRetry,
+}: {
+  readonly isRetrying: boolean;
+  readonly onRetry: () => void;
+}) {
+  return (
+    <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/70 tw-p-6 sm:tw-p-8">
+      <div className="tw-flex tw-flex-col tw-gap-5 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+        <div className="tw-max-w-xl">
+          <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+            Unable to load official wave
+          </h2>
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+            There was a temporary problem loading this profile curation. Try
+            again.
+          </p>
+        </div>
+        <SecondaryButton
+          onClicked={onRetry}
+          disabled={isRetrying}
+          size="sm"
+          className="tw-whitespace-nowrap"
+        >
+          {isRetrying ? <CircleLoader /> : "Retry"}
+        </SecondaryButton>
       </div>
     </section>
   );
@@ -292,7 +361,8 @@ export default function UserPageProfileWave({
   });
   const resolvedProfile = profile ?? initialProfile;
   const profileWaveId = resolvedProfile.profile_wave_id;
-  const { wave, isLoading, isError } = useWaveById(profileWaveId);
+  const { wave, isLoading, isError, error, refetch, isFetching } =
+    useWaveById(profileWaveId);
   const { data: curations = [], isLoading: areCurationsLoading } =
     useWaveCurations({
       waveId: wave?.id ?? "",
@@ -306,6 +376,7 @@ export default function UserPageProfileWave({
     handleOrWallet,
   });
   const canClear = isOwnProfile && !activeProfileProxy;
+  const hasUnavailableWaveError = isUnavailableWaveError(error);
   const profileSearchString = useMemo(
     () => getProfilePageSearchString(searchString),
     [searchString]
@@ -383,12 +454,23 @@ export default function UserPageProfileWave({
     );
   }
 
-  if (shouldForceUnavailableState || isError || !wave) {
+  if (shouldForceUnavailableState || hasUnavailableWaveError) {
     return (
       <UnavailableState
         canClear={canClear}
         isPending={isPending}
         onClear={clearSelectedProfileWave}
+      />
+    );
+  }
+
+  if (isError || !wave) {
+    return (
+      <LoadErrorState
+        isRetrying={isFetching}
+        onRetry={() => {
+          void refetch();
+        }}
       />
     );
   }

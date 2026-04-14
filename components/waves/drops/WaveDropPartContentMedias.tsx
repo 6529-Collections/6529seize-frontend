@@ -4,6 +4,7 @@ import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { ImageScale } from "@/helpers/image.helpers";
+import WaveDropPartContentFullWidthImage from "./WaveDropPartContentFullWidthImage";
 
 interface WaveDropPartContentMediasProps {
   readonly activePart: ApiDropPart;
@@ -52,31 +53,41 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
               "tw-flex tw-h-64 tw-items-center tw-justify-center",
               fullWidthMedia && "tw-w-full"
             );
+        let mediaContent;
+
+        if (disableMediaInteraction) {
+          mediaContent = (
+            <MediaDisplay
+              media_mime_type={media.mime_type}
+              media_url={media.url}
+              disableMediaInteraction={disableMediaInteraction}
+              imageScale={imageScale}
+            />
+          );
+        } else if (useNaturalHeightImage) {
+          mediaContent = (
+            <WaveDropPartContentFullWidthImage
+              src={media.url}
+              imageScale={imageScale}
+            />
+          );
+        } else {
+          mediaContent = (
+            <DropListItemContentMedia
+              media_mime_type={media.mime_type}
+              media_url={media.url}
+              isCompetitionDrop={isCompetitionDrop}
+              imageScale={imageScale}
+            />
+          );
+        }
 
         return (
           <div
             key={`part-${i}-media-${media.url}`}
             className={mediaContainerClassName}
           >
-            {disableMediaInteraction ? (
-              <MediaDisplay
-                media_mime_type={media.mime_type}
-                media_url={media.url}
-                disableMediaInteraction={disableMediaInteraction}
-                imageScale={imageScale}
-              />
-            ) : (
-              <DropListItemContentMedia
-                media_mime_type={media.mime_type}
-                media_url={media.url}
-                isCompetitionDrop={isCompetitionDrop}
-                imageScale={imageScale}
-                imageObjectPosition={
-                  useNaturalHeightImage ? "center" : undefined
-                }
-                naturalHeight={useNaturalHeightImage}
-              />
-            )}
+            {mediaContent}
           </div>
         );
       })}

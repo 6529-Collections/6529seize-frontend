@@ -35,7 +35,6 @@ export default function DropListItemContentMedia({
   disableAutoPlay = false,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
-  naturalHeight = false,
   htmlIframeContainerClassName,
   htmlPreviewImageUrl,
   loadStrategy = "in-view",
@@ -48,7 +47,6 @@ export default function DropListItemContentMedia({
   readonly disableAutoPlay?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
-  readonly naturalHeight?: boolean | undefined;
   readonly htmlIframeContainerClassName?: string | undefined;
   readonly htmlPreviewImageUrl?: string | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
@@ -89,7 +87,6 @@ export default function DropListItemContentMedia({
           disableModal={disableModal}
           imageObjectPosition={imageObjectPosition}
           imageScale={imageScale}
-          naturalHeight={naturalHeight}
           loadStrategy={loadStrategy}
         />
       );

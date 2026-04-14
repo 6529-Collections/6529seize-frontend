@@ -10,12 +10,14 @@ import { ParticipationDropRatings } from "./ParticipationDropRatings";
 interface ParticipationDropFooterProps {
   readonly drop: ExtendedDrop;
   readonly voteAction?: ReactNode;
+  readonly showIdentity?: boolean | undefined;
   readonly showInteractions?: boolean | undefined;
 }
 
 export default function ParticipationDropFooter({
   drop,
   voteAction,
+  showIdentity = true,
   showInteractions = true,
 }: ParticipationDropFooterProps) {
   const { canShowVote } = useDropInteractionRules(drop);
@@ -38,7 +40,9 @@ export default function ParticipationDropFooter({
     <>
       {shouldShowVoteFooter && (
         <div
-          className="tw-mt-4 tw-@container sm:tw-ml-[3.25rem]"
+          className={`tw-mt-4 tw-@container ${
+            showIdentity ? "sm:tw-ml-[3.25rem]" : ""
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-justify-between">
@@ -65,13 +69,21 @@ export default function ParticipationDropFooter({
 
       {/* Show ratings if no vote button */}
       {shouldShowRatingsOnlyFooter && (
-        <div className="tw-ml-[3.25rem] tw-mt-4 tw-px-4">
+        <div
+          className={`tw-mt-4 tw-px-4 ${showIdentity ? "tw-ml-[3.25rem]" : ""}`}
+        >
           <ParticipationDropRatings drop={drop} rank={drop.rank} />
         </div>
       )}
 
       {shouldShowReactionsFooter && (
-        <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+        <div
+          className={`tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4 ${
+            showIdentity
+              ? "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
+              : "tw-w-full"
+          }`}
+        >
           {!canShowVote && (
             <DropCurationButton
               dropId={drop.id}

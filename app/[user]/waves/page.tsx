@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { getUserProfile } from "@/helpers/server.helpers";
 
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
@@ -53,7 +55,22 @@ export default async function LegacyWavesPage({
   }
 
   const queryString = normalizeSearchParams(resolvedSearchParams).toString();
-  const basePath = `/${encodeURIComponent(user)}/curations`;
+  let basePath = `/${encodeURIComponent(user)}`;
+
+  try {
+    const profile = await getUserProfile({
+      user: user.toLowerCase(),
+      headers: await getAppCommonHeaders(),
+    });
+    const canonicalUser = profile.handle ?? profile.primary_wallet;
+
+    basePath = profile.profile_wave_id
+      ? `/${encodeURIComponent(canonicalUser)}/curations`
+      : `/${encodeURIComponent(canonicalUser)}`;
+  } catch {
+    basePath = `/${encodeURIComponent(user)}`;
+  }
+
   const destination = queryString ? `${basePath}?${queryString}` : basePath;
 
   redirect(destination);

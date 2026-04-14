@@ -35,12 +35,6 @@ interface UserPageProfileWaveMasonryProps {
   readonly profileIdentity?: ProfileIdentitySummary | undefined;
 }
 
-interface ProfileMasonryState {
-  readonly curationId: string;
-  readonly lastDropCount: number;
-  readonly resetVersion: number;
-}
-
 const MASONRY_COLUMN_WIDTH = 300;
 const MASONRY_GUTTER = 16;
 
@@ -162,52 +156,6 @@ function useProfileMasonryContainerWidth() {
   }, [container]);
 
   return { containerRef, containerWidth };
-}
-
-function useProfileMasonryRenderState({
-  containerWidth,
-  curationId,
-  dropCount,
-}: {
-  readonly containerWidth: number;
-  readonly curationId: string;
-  readonly dropCount: number;
-}) {
-  const [state, setState] = useState<ProfileMasonryState>(() => ({
-    curationId,
-    lastDropCount: dropCount,
-    resetVersion: 0,
-  }));
-
-  let resetVersion = state.resetVersion;
-  let shouldResetMasonry = false;
-
-  if (state.curationId !== curationId) {
-    resetVersion = 0;
-    setState({
-      curationId,
-      lastDropCount: dropCount,
-      resetVersion,
-    });
-  } else if (dropCount < state.lastDropCount) {
-    resetVersion = state.resetVersion + 1;
-    shouldResetMasonry = true;
-    setState({
-      curationId,
-      lastDropCount: dropCount,
-      resetVersion,
-    });
-  } else if (dropCount > state.lastDropCount) {
-    setState({
-      ...state,
-      lastDropCount: dropCount,
-    });
-  }
-
-  return {
-    masonryKey: `${curationId}-${resetVersion}-${containerWidth}`,
-    shouldResetMasonry,
-  };
 }
 
 function CurationMasonryRemoveButton({
@@ -411,11 +359,6 @@ export default function UserPageProfileWaveMasonry({
   const isInitialLoading = isFetching && drops.length === 0;
   const curationTitle = curationName?.trim() ?? "Curation";
   const { containerRef, containerWidth } = useProfileMasonryContainerWidth();
-  const { masonryKey, shouldResetMasonry } = useProfileMasonryRenderState({
-    containerWidth,
-    curationId,
-    dropCount: drops.length,
-  });
   const masonryItems = useMemo(
     () =>
       drops.map((drop) => ({
@@ -427,6 +370,15 @@ export default function UserPageProfileWaveMasonry({
       })),
     [canManageActiveCuration, curationId, drops, profileIdentity, showIdentity]
   );
+  const masonryTopItemsKey = useMemo(
+    () =>
+      drops
+        .slice(0, 8)
+        .map((drop) => drop.stableKey)
+        .join("|"),
+    [drops]
+  );
+  const masonryKey = `${curationId}-${containerWidth}-${masonryTopItemsKey}`;
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
@@ -449,14 +401,6 @@ export default function UserPageProfileWaveMasonry({
 
   if (drops.length === 0) {
     return <CurationEmptyState curationTitle={curationTitle} />;
-  }
-
-  if (shouldResetMasonry) {
-    return (
-      <div className="tw-flex tw-min-h-[12rem] tw-items-center tw-justify-center">
-        <CircleLoader size={CircleLoaderSize.MEDIUM} />
-      </div>
-    );
   }
 
   return (

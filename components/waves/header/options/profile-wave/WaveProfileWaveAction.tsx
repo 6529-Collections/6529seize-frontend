@@ -4,6 +4,7 @@ import { Spinner } from "@/components/dotLoader/DotLoader";
 import { useAuth } from "@/components/auth/Auth";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import { isPublicNonDirectMessageWave } from "@/helpers/waves/wave.helpers";
 import { useCallback } from "react";
 
@@ -20,9 +21,18 @@ export default function WaveProfileWaveAction({
 
   const isSelectedProfileWave = connectedProfile?.profile_wave_id === wave.id;
   const canManageProfileWave =
-    Boolean(connectedProfile?.handle) &&
+    Boolean(connectedProfile) &&
     !activeProfileProxy &&
-    connectedProfile?.handle === wave.author.handle &&
+    areSameProfileIdentity({
+      left: connectedProfile
+        ? {
+            id: connectedProfile.id,
+            handle: connectedProfile.handle,
+            primary_address: connectedProfile.primary_wallet,
+          }
+        : null,
+      right: wave.author,
+    }) &&
     isPublicNonDirectMessageWave(wave);
 
   const handleClick = useCallback(async () => {
