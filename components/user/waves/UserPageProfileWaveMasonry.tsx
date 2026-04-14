@@ -386,7 +386,7 @@ export default function UserPageProfileWaveMasonry({
         return;
       }
 
-      void fetchNextPage();
+      fetchNextPage().catch(() => undefined);
     },
     [fetchNextPage, hasNextPage, isFetchingNextPage]
   );

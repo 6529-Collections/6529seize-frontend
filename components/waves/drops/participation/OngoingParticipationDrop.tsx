@@ -162,7 +162,6 @@ export default function OngoingParticipationDrop({
         <ParticipationDropFooter
           drop={drop}
           voteAction={voteAction}
-          showIdentity={showIdentity}
           showInteractions={showInteractions}
         />
       </div>

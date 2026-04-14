@@ -51,7 +51,6 @@ function NaturalHeightImage({
   }, [fallbackSrc, onFinalError, usedFallback]);
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       key={retryTick}
       ref={imgRef}
@@ -104,18 +103,9 @@ export default function WaveDropPartContentFullWidthImage({
     []
   );
 
-  const handleCloseModal = useCallback(
-    (
-      event?:
-        | React.MouseEvent<HTMLDivElement>
-        | React.KeyboardEvent<HTMLDivElement>
-        | React.MouseEvent<HTMLButtonElement>
-    ) => {
-      event?.stopPropagation();
-      setIsModalOpen(false);
-    },
-    []
-  );
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
 
   const handleFullScreen = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -133,14 +123,13 @@ export default function WaveDropPartContentFullWidthImage({
   });
 
   const modalContent = (
-    <div
-      className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
-      onClick={handleCloseModal}
-      onTouchStart={(event) => event.stopPropagation()}
-      onTouchEnd={(event) => event.stopPropagation()}
-      onTouchMove={(event) => event.stopPropagation()}
-    >
-      <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80" />
+    <div className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default">
+      <button
+        type="button"
+        aria-label="Close modal"
+        onClick={handleCloseModal}
+        className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
+      />
       <TransformWrapper
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
@@ -148,25 +137,13 @@ export default function WaveDropPartContentFullWidthImage({
         onZoom={(event) => setIsZoomed(event.state.scale > 1)}
       >
         {({ resetTransform }) => (
-          <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-            <div className="tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col lg:tw-flex-row">
-              <div
-                role="button"
-                className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center"
-                onClick={(event) => event.stopPropagation()}
-                tabIndex={0}
-                aria-label="Full size drop media"
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.stopPropagation();
-                  }
-                }}
-              >
+          <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
+            <div className="tw-pointer-events-auto tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col lg:tw-flex-row">
+              <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     ref={modalImageRef}
                     src={src}
@@ -197,16 +174,15 @@ export default function WaveDropPartContentFullWidthImage({
                   </button>
                 )}
 
-                <Link href={src} target="_blank" rel="noopener noreferrer">
-                  <button
-                    type="button"
-                    onClick={(event) => event.stopPropagation()}
-                    data-tooltip-id={`open-browser-${src}`}
-                    className={modalButtonClasses}
-                    aria-label="Open image in new tab"
-                  >
-                    <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                  </button>
+                <Link
+                  href={src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-tooltip-id={`open-browser-${src}`}
+                  className={modalButtonClasses}
+                  aria-label="Open image in new tab"
+                >
+                  <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                 </Link>
 
                 {fullScreenSupported() && !isCapacitor && (

@@ -91,7 +91,7 @@ function UnavailableState({
         {canClear && (
           <button
             type="button"
-            onClick={() => void onClear()}
+            onClick={onClear}
             disabled={isPending}
             className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-shadow-sm tw-ring-1 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 ${
               isPending
@@ -235,41 +235,39 @@ function ProfileCurationViewToggle({
   };
 
   return (
-    <>
-      <div
-        role="tablist"
-        aria-label="Profile curation view modes"
-        className="tw-flex tw-flex-shrink-0 tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
-      >
-        {viewModes.map((mode) => (
-          <div key={mode.mode}>
-            <button
-              type="button"
-              role="tab"
-              aria-label={mode.label}
-              aria-selected={viewMode === mode.mode}
-              tabIndex={viewMode === mode.mode ? 0 : -1}
-              className={getViewModeTabClass(mode.mode)}
-              onClick={() => onChange(mode.mode)}
-              data-tooltip-id={mode.tooltipId}
-            >
-              {mode.icon}
-              <span className="tw-sr-only">{mode.label}</span>
-            </button>
-            <Tooltip
-              id={mode.tooltipId}
-              place="top"
-              offset={8}
-              opacity={1}
-              positionStrategy="fixed"
-              style={TOOLTIP_STYLES}
-            >
-              <span className="tw-text-xs">{mode.label}</span>
-            </Tooltip>
-          </div>
-        ))}
-      </div>
-    </>
+    <div
+      role="tablist"
+      aria-label="Profile curation view modes"
+      className="tw-flex tw-flex-shrink-0 tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
+    >
+      {viewModes.map((mode) => (
+        <div key={mode.mode}>
+          <button
+            type="button"
+            role="tab"
+            aria-label={mode.label}
+            aria-selected={viewMode === mode.mode}
+            tabIndex={viewMode === mode.mode ? 0 : -1}
+            className={getViewModeTabClass(mode.mode)}
+            onClick={() => onChange(mode.mode)}
+            data-tooltip-id={mode.tooltipId}
+          >
+            {mode.icon}
+            <span className="tw-sr-only">{mode.label}</span>
+          </button>
+          <Tooltip
+            id={mode.tooltipId}
+            place="top"
+            offset={8}
+            opacity={1}
+            positionStrategy="fixed"
+            style={TOOLTIP_STYLES}
+          >
+            <span className="tw-text-xs">{mode.label}</span>
+          </Tooltip>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -435,6 +433,12 @@ export default function UserPageProfileWave({
 
     router.push(waveHref, { scroll: false });
   }, [router, waveHref]);
+  const retryLoad = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+  const clearProfileWave = useCallback(async () => {
+    await clearSelectedProfileWave();
+  }, [clearSelectedProfileWave]);
 
   if (!profileWaveId && !shouldForceUnavailableState) {
     return null;
@@ -459,7 +463,7 @@ export default function UserPageProfileWave({
       <UnavailableState
         canClear={canClear}
         isPending={isPending}
-        onClear={clearSelectedProfileWave}
+        onClear={clearProfileWave}
       />
     );
   }
@@ -468,9 +472,7 @@ export default function UserPageProfileWave({
     return (
       <LoadErrorState
         isRetrying={isFetching}
-        onRetry={() => {
-          void refetch();
-        }}
+        onRetry={retryLoad}
       />
     );
   }
@@ -503,7 +505,7 @@ export default function UserPageProfileWave({
             {canClear && (
               <button
                 type="button"
-                onClick={() => void clearSelectedProfileWave()}
+                onClick={clearProfileWave}
                 disabled={isPending}
                 className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-shadow-sm tw-ring-1 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 ${
                   isPending

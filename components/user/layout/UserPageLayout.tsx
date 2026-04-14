@@ -15,7 +15,8 @@ export default function UserPageLayout({
   readonly children: ReactNode;
 }) {
   const normalizedHandleOrWallet = handleOrWallet.toLowerCase();
-  const mainAddress = initialProfile.primary_wallet;
+  const mainAddress =
+    initialProfile?.primary_wallet ?? normalizedHandleOrWallet;
 
   return (
     <main className="tailwind-scope tw-flex tw-min-h-[100dvh] tw-flex-col">
