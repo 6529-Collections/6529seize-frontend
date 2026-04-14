@@ -14,10 +14,10 @@ const getButtonStyle = (active: boolean) => {
 };
 
 function getAllDropsButtonStyle(settings: WaveNotificationSettingsState) {
-  if (settings.disableAllDropsSelection) {
-    return "tw-text-iron-500 tw-bg-transparent tw-cursor-not-allowed";
-  }
-  return getButtonStyle(settings.allDropsEnabled);
+  const buttonStyle = getButtonStyle(settings.allDropsEnabled);
+  return settings.disableAllDropsSelection
+    ? `${buttonStyle} tw-cursor-not-allowed`
+    : buttonStyle;
 }
 
 function AllDropsIcon({ className }: { readonly className: string }) {

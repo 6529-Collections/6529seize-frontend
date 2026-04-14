@@ -37,7 +37,7 @@ export function useWavePreferenceSettings(wave: ApiWave) {
   );
 
   const subscribedToAllDrops = !!data?.subscribed;
-  const allDropsEnabled = subscribedToAllDrops && !disableAllDropsSelection;
+  const allDropsEnabled = subscribedToAllDrops;
   const allGroupNotificationsEnabled =
     enabledGroupNotifications.includes(ALL_GROUP_MENTION);
   const loading =

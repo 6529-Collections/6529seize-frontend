@@ -181,6 +181,23 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
   });
 
+  it("keeps all drop button visually active when subscribed and subscriber limit reached", () => {
+    mockUseWaveNotificationSubscription.mockReturnValue({
+      data: { subscribed: true, enabled_group_notifications: [] },
+      refetch: jest.fn(),
+    });
+
+    renderComponent(mockWaveHighSubscribers);
+
+    const allButton = screen.getByLabelText("Receive all drop notifications");
+    expect(allButton).toBeDisabled();
+    expect(allButton).toHaveClass(
+      "tw-bg-iron-800",
+      "tw-text-primary-400",
+      "tw-cursor-not-allowed"
+    );
+  });
+
   it("enables ALL mention notifications while preserving all drop preference", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
