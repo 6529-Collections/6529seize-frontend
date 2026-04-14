@@ -126,6 +126,29 @@ describe("WaveLeaderboardEmptyState", () => {
     expect(screen.getByText("No drops to show")).toBeInTheDocument();
   });
 
+  it("uses proposal copy for quorum waves", async () => {
+    (useWave as jest.Mock).mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: true,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+        status: SubmissionStatus.ACTIVE,
+      },
+    });
+    const onCreateDrop = jest.fn();
+    const user = userEvent.setup();
+    renderWithAuth(
+      <WaveLeaderboardEmptyState wave={wave} onCreateDrop={onCreateDrop} />
+    );
+
+    expect(screen.getByText("No proposals to show")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Create Proposal" }));
+    expect(onCreateDrop).toHaveBeenCalled();
+  });
+
   it("prioritizes memes state when both wave flags are true", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: true,
