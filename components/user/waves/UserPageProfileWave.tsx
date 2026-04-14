@@ -371,8 +371,6 @@ export default function UserPageProfileWave({
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchString = searchParams.toString();
-  const shouldForceUnavailableState =
-    searchParams.get("mockProfileWaveUnavailable") === "1";
   const handleOrWallet = params["user"]?.toString() ?? "";
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { profile } = useIdentity({
@@ -471,11 +469,11 @@ export default function UserPageProfileWave({
     await clearSelectedProfileWave();
   }, [clearSelectedProfileWave]);
 
-  if (!profileWaveId && !shouldForceUnavailableState) {
+  if (!profileWaveId) {
     return null;
   }
 
-  if (!shouldForceUnavailableState && isLoading) {
+  if (isLoading) {
     return (
       <section
         className="tw-flex tw-min-h-[16rem] tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/70"
@@ -489,7 +487,7 @@ export default function UserPageProfileWave({
     );
   }
 
-  if (shouldForceUnavailableState || hasUnavailableWaveError) {
+  if (hasUnavailableWaveError) {
     return (
       <UnavailableState
         canClear={canClear}
