@@ -7,9 +7,9 @@ import {
   forwardRef,
   useImperativeHandle,
   useRef,
+  useId,
 } from "react";
 import mojs from "@mojs/core";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import styles from "./VoteButton.module.scss";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
@@ -26,6 +26,10 @@ type ThemeColors = {
 export interface SingleWaveDropVoteSubmitHandles {
   handleClick: () => Promise<void>;
 }
+
+type VoteAnimationTimeline = {
+  replay: () => void;
+};
 
 const defaultTheme: ThemeColors = {
   primary: "rgba(255, 255, 255, 0.9)",
@@ -49,6 +53,7 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
+  readonly onVoteApplied?: ((drop: ApiDrop) => void) | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
 }
@@ -61,6 +66,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     {
       drop,
       newRating,
+      onVoteApplied,
       onVoteSuccess,
       size = SingleWaveDropVoteSize.NORMAL,
     }: Props,
@@ -68,19 +74,14 @@ const SingleWaveDropVoteSubmit = forwardRef<
   ) => {
     const position = drop.rank;
     const { requestAuth, setToast } = useContext(AuthContext);
-    const [animationTimeline, setAnimationTimeline] = useState<any>(null);
-    const [triangleBurst, setTriangleBurst] = useState<any>(null);
-    const [circleBurst, setCircleBurst] = useState<any>(null);
-    const [smallBurst, setSmallBurst] = useState<any>(null);
-    const [scaleButton, setScaleButton] = useState<any>(null);
-    const [init, setInit] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [isSpinnerExiting, setIsSpinnerExiting] = useState(false);
     const [isTextExiting, setIsTextExiting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const animationTimelineRef = useRef<VoteAnimationTimeline | null>(null);
     const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
-    const randomID = getRandomObjectId();
+    const randomID = useId().replace(/[^a-zA-Z0-9_-]/g, "");
     const tlDuration = 300;
     const particlesDuration = 800;
     const particlesDelay = 50;
@@ -102,7 +103,6 @@ const SingleWaveDropVoteSubmit = forwardRef<
           message: error as unknown as string,
           type: "error",
         });
-        throw error;
       },
     });
 
@@ -110,93 +110,93 @@ const SingleWaveDropVoteSubmit = forwardRef<
       position && position <= 3 ? rankingThemes[position] : defaultTheme;
 
     useEffect(() => {
-      setTriangleBurst(
-        new mojs.Burst({
-          parent: `.vote-button-container-${randomID}`,
-          radius: { 50: 110 },
-          count: 8,
-          angle: 45,
-          children: {
-            shape: "polygon",
-            radius: { 8: 0 },
-            scale: 1,
-            stroke: theme?.primary,
-            strokeWidth: 2,
-            angle: 210,
-            delay: 30,
-            speed: 0.2,
-            easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
-            duration: particlesDuration,
-            isShowEnd: false,
-          },
-        })
-      );
+      const triangleBurst = new mojs.Burst({
+        parent: `.vote-button-container-${randomID}`,
+        radius: { 50: 110 },
+        count: 8,
+        angle: 45,
+        children: {
+          shape: "polygon",
+          radius: { 8: 0 },
+          scale: 1,
+          stroke: theme?.primary,
+          strokeWidth: 2,
+          angle: 210,
+          delay: 30,
+          speed: 0.2,
+          easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
+          duration: particlesDuration,
+          isShowEnd: false,
+        },
+      });
 
-      setCircleBurst(
-        new mojs.Burst({
-          parent: `.vote-button-container-${randomID}`,
-          radius: { 30: 90 },
-          count: 10,
-          angle: 0,
-          children: {
-            shape: "circle",
-            fill: [theme?.primary, theme?.secondary],
-            delay: "stagger(0, 50)",
-            speed: 0.2,
-            radius: { 4: 0 },
-            easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
-            duration: particlesDuration,
-            isShowEnd: false,
-          },
-        })
-      );
+      const circleBurst = new mojs.Burst({
+        parent: `.vote-button-container-${randomID}`,
+        radius: { 30: 90 },
+        count: 10,
+        angle: 0,
+        children: {
+          shape: "circle",
+          fill: [theme?.primary, theme?.secondary],
+          delay: "stagger(0, 50)",
+          speed: 0.2,
+          radius: { 4: 0 },
+          easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
+          duration: particlesDuration,
+          isShowEnd: false,
+        },
+      });
 
-      setSmallBurst(
-        new mojs.Burst({
-          parent: `.vote-button-container-${randomID}`,
-          radius: { 20: 70 },
-          count: particleCount,
-          angle: 90,
-          children: {
-            shape: "circle",
-            fill: [theme?.secondary, theme?.primary],
-            delay: `stagger(0, ${particlesDelay})`,
-            speed: 0.3,
-            radius: { 3: 0 },
-            easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
-            duration: particlesDuration,
-            isShowEnd: false,
-          },
-        })
-      );
+      const smallBurst = new mojs.Burst({
+        parent: `.vote-button-container-${randomID}`,
+        radius: { 20: 70 },
+        count: particleCount,
+        angle: 90,
+        children: {
+          shape: "circle",
+          fill: [theme?.secondary, theme?.primary],
+          delay: `stagger(0, ${particlesDelay})`,
+          speed: 0.3,
+          radius: { 3: 0 },
+          easing: mojs.easing.bezier(0.1, 1, 0.3, 1),
+          duration: particlesDuration,
+          isShowEnd: false,
+        },
+      });
 
-      setScaleButton(
-        new mojs.Html({
-          el: `#vote-button-${randomID}`,
-          duration: tlDuration,
-          scale: { 1.3: 1 },
-          easing: mojs.easing.out,
-        })
-      );
+      const scaleButton = new mojs.Html({
+        el: `#vote-button-${randomID}`,
+        duration: tlDuration,
+        scale: { 1.3: 1 },
+        easing: mojs.easing.out,
+      });
 
-      const button = document.getElementById(`vote-button-${randomID}`);
-      if (button) {
-        button.style.transform = "scale(1, 1)";
-      }
-      setInit(true);
-    }, []);
-
-    useEffect(() => {
-      if (!init) return;
-      const tempAnimationTimeline = new mojs.Timeline();
-      tempAnimationTimeline.add([
+      const animationTimeline = new mojs.Timeline();
+      animationTimeline.add([
         circleBurst,
         triangleBurst,
         smallBurst,
         scaleButton,
       ]);
-      setAnimationTimeline(tempAnimationTimeline);
-    }, [init]);
+      animationTimelineRef.current = animationTimeline;
+
+      const button = document.getElementById(`vote-button-${randomID}`);
+      if (button) {
+        button.style.transform = "scale(1, 1)";
+      }
+
+      return () => {
+        animationTimelineRef.current = null;
+      };
+    }, [
+      particleCount,
+      particlesDelay,
+      particlesDuration,
+      randomID,
+      theme?.primary,
+      theme?.secondary,
+      tlDuration,
+    ]);
 
     // Cleanup timeouts on unmount
     useEffect(() => {
@@ -224,9 +224,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
           setIsProcessing(false);
           return;
         }
-        await rateChangeMutation.mutateAsync({
+        const updatedDrop = await rateChangeMutation.mutateAsync({
           rate: newRating,
         });
+        onVoteApplied?.(updatedDrop);
       } catch {
         setLoading(false);
         setIsTextExiting(false);
@@ -241,9 +242,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
       setIsSpinnerExiting(false);
       setShowSuccess(true);
 
-      if (animationTimeline) {
-        animationTimeline.replay();
-      }
+      animationTimelineRef.current?.replay();
 
       // Allow animation to show before closing modal
       const successTimeout = setTimeout(() => {
