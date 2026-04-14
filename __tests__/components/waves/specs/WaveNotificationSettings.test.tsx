@@ -179,6 +179,12 @@ describe("WaveNotificationSettings", () => {
     expect(allMentionsButton).not.toBeDisabled();
     expect(allButton).toBeDisabled();
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
+    expect(allButton).toHaveStyle({ pointerEvents: "none" });
+
+    const allButtonWrapper = allButton.parentElement as HTMLElement;
+    expect(allButtonWrapper.tagName).toBe("SPAN");
+    expect(allButtonWrapper).toHaveClass("tw-inline-block", "tw-w-full");
+    expect(allButtonWrapper).toHaveStyle({ cursor: "not-allowed" });
   });
 
   it("keeps all drop button visually active when subscribed and subscriber limit reached", () => {
@@ -333,7 +339,7 @@ describe("WaveNotificationSettings", () => {
     renderComponent(mockWaveHighSubscribers);
 
     const allButton = screen.getByLabelText("Receive all drop notifications");
-    await userEvent.click(allButton);
+    await userEvent.click(allButton.parentElement as HTMLElement);
 
     expect(commonApiPost).not.toHaveBeenCalled();
   });

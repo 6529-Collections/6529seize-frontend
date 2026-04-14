@@ -43,6 +43,26 @@ export default function WaveNotificationPreferenceButtons({
   waveId,
   settings,
 }: WaveNotificationPreferenceButtonsProps) {
+  const allDropsButton = (
+    <button
+      disabled={settings.loading || settings.disableAllDropsSelection}
+      onClick={settings.onAllDropsNotificationsClick}
+      className={`tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-px-2.5 tw-py-2 tw-transition tw-duration-300 tw-ease-out lg:tw-h-9 ${getAllDropsButtonStyle(settings)}`}
+      aria-label="Receive all drop notifications"
+      style={
+        settings.disableAllDropsSelection
+          ? { pointerEvents: "none" }
+          : undefined
+      }
+    >
+      {settings.loadingTarget === "all-drops" ? (
+        <Spinner dimension={12} />
+      ) : (
+        <AllDropsIcon className="tw-size-4 tw-flex-shrink-0" />
+      )}
+    </button>
+  );
+
   return (
     <div className="tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs">
       <OverlayTrigger
@@ -73,18 +93,16 @@ export default function WaveNotificationPreferenceButtons({
           </Tooltip>
         }
       >
-        <button
-          disabled={settings.loading || settings.disableAllDropsSelection}
-          onClick={settings.onAllDropsNotificationsClick}
-          className={`tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-px-2.5 tw-py-2 tw-transition tw-duration-300 tw-ease-out lg:tw-h-9 ${getAllDropsButtonStyle(settings)}`}
-          aria-label="Receive all drop notifications"
-        >
-          {settings.loadingTarget === "all-drops" ? (
-            <Spinner dimension={12} />
-          ) : (
-            <AllDropsIcon className="tw-size-4 tw-flex-shrink-0" />
-          )}
-        </button>
+        {settings.disableAllDropsSelection ? (
+          <span
+            className="tw-inline-block tw-w-full"
+            style={{ cursor: "not-allowed" }}
+          >
+            {allDropsButton}
+          </span>
+        ) : (
+          allDropsButton
+        )}
       </OverlayTrigger>
     </div>
   );
