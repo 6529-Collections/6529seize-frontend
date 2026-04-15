@@ -84,18 +84,6 @@ describe("CreateWaveGroup", () => {
     onInlineGroupCreate: mockOnInlineGroupCreate,
     groupsCache: {},
     groups: defaultGroups,
-    groupBuilder: {
-      draft: { group: {} },
-      identities: [],
-      panel: "actions",
-      activeRule: null,
-    } as any,
-    setGroupBuilderPanel: jest.fn(),
-    setGroupBuilderRule: jest.fn(),
-    setGroupBuilderDraft: jest.fn(),
-    addGroupBuilderIdentity: jest.fn(),
-    removeGroupBuilderIdentity: jest.fn(),
-    resetGroupBuilder: jest.fn(),
     setDropsAdminCanDelete: mockSetDropsAdminCanDelete,
   };
 
@@ -125,6 +113,15 @@ describe("CreateWaveGroup", () => {
 
     expect(screen.getByTestId("inline-panel")).toHaveTextContent("Alpha Group");
     expect(inlinePanelProps.selectedGroup).toEqual(exampleGroup);
+  });
+
+  it("passes the suggested group name and simplified callbacks to the inline panel", () => {
+    renderComponent();
+
+    expect(inlinePanelProps.suggestedName).toBe("Test Wave Who can drop");
+    expect(inlinePanelProps.onChange).toBe(mockOnGroupSelect);
+    expect(inlinePanelProps.onCreateGroup).toBe(mockOnInlineGroupCreate);
+    expect(inlinePanelProps.groupBuilder).toBeUndefined();
   });
 
   it("shows the chat toggle for non-chat waves when editing chat scope", async () => {
