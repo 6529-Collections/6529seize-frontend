@@ -5,13 +5,15 @@ import { useDropCurations } from "@/hooks/drops/useDropCurations";
 export function useCurationManagementPermission({
   curationId,
   probeDropId,
+  enabled = true,
 }: {
   readonly curationId: string;
   readonly probeDropId: string;
+  readonly enabled?: boolean | undefined;
 }) {
   const { data: probeCurations = [] } = useDropCurations({
     dropId: probeDropId,
-    enabled: Boolean(probeDropId),
+    enabled: enabled && Boolean(probeDropId),
   });
 
   return (

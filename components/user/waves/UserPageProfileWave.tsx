@@ -4,18 +4,23 @@ import { useAuth } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import MoveIcon from "@/components/utils/icons/MoveIcon";
+import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmationModal";
 import UserPageProfileWaveMasonry from "@/components/user/waves/UserPageProfileWaveMasonry";
-import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
-import { useWaveById } from "@/hooks/useWaveById";
-import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
-import { useIdentity } from "@/hooks/useIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
+import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
+import { useWaveById } from "@/hooks/useWaveById";
+import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import {
   ArrowTopRightOnSquareIcon,
+  CheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -24,7 +29,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ApiErrorLike = {
   readonly status?: number | undefined;
@@ -65,11 +70,11 @@ const isUnavailableWaveError = (error: unknown): boolean => {
 
 function UnavailableState({
   canClear,
-  onClear,
+  onRequestClear,
   isPending,
 }: {
   readonly canClear: boolean;
-  readonly onClear: () => Promise<unknown>;
+  readonly onRequestClear: () => void;
   readonly isPending: boolean;
 }) {
   return (
@@ -87,7 +92,7 @@ function UnavailableState({
         {canClear && (
           <button
             type="button"
-            onClick={onClear}
+            onClick={onRequestClear}
             disabled={isPending}
             className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-shadow-sm tw-ring-1 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 ${
               isPending
@@ -179,7 +184,10 @@ function ProfileCurationBody({
   areCurationsError,
   areCurationsFetching,
   areCurationsLoading,
+  canManageProfileWave,
   hasLoadedCurations,
+  isReorderMode,
+  onReorderModeChange,
   onRetryCurations,
   profileCuration,
   profileIdentity,
@@ -188,7 +196,10 @@ function ProfileCurationBody({
   readonly areCurationsError: boolean;
   readonly areCurationsFetching: boolean;
   readonly areCurationsLoading: boolean;
+  readonly canManageProfileWave: boolean;
   readonly hasLoadedCurations: boolean;
+  readonly isReorderMode: boolean;
+  readonly onReorderModeChange: (nextIsReorderMode: boolean) => void;
   readonly onRetryCurations: () => void;
   readonly profileCuration: ApiWaveCuration | null;
   readonly profileIdentity: {
@@ -233,12 +244,194 @@ function ProfileCurationBody({
 
   return (
     <UserPageProfileWaveMasonry
+      key={`${profileCuration.id}-${isReorderMode ? "reorder" : "browse"}`}
       wave={wave}
       curationId={profileCuration.id}
       curationName={profileCuration.name}
+      canManageProfileWave={canManageProfileWave}
       showIdentity={false}
       profileIdentity={profileIdentity}
+      isReorderMode={isReorderMode}
+      onReorderModeChange={onReorderModeChange}
     />
+  );
+}
+
+function LoadedProfileWaveState({
+  areCurationsError,
+  areCurationsFetching,
+  areCurationsLoading,
+  canClear,
+  clearSelectedProfileWave,
+  hasLoadedCurations,
+  isPending,
+  onOpenWave,
+  onRetryCurations,
+  pendingAction,
+  profileCuration,
+  profileCurationTitle,
+  profileIdentity,
+  wave,
+}: {
+  readonly areCurationsError: boolean;
+  readonly areCurationsFetching: boolean;
+  readonly areCurationsLoading: boolean;
+  readonly canClear: boolean;
+  readonly clearSelectedProfileWave: () => Promise<unknown>;
+  readonly hasLoadedCurations: boolean;
+  readonly isPending: boolean;
+  readonly onOpenWave: () => void;
+  readonly onRetryCurations: () => void;
+  readonly pendingAction?: string | null | undefined;
+  readonly profileCuration: ApiWaveCuration | null;
+  readonly profileCurationTitle: string;
+  readonly profileIdentity: {
+    readonly id?: string | null | undefined;
+    readonly handle?: string | null | undefined;
+    readonly primary_address?: string | null | undefined;
+  };
+  readonly wave: NonNullable<ReturnType<typeof useWaveById>["wave"]>;
+}) {
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
+  const activeCurationId = profileCuration?.id ?? "";
+  const { drops: curationDrops } = useWaveCurationDrops({
+    wave,
+    curationId: activeCurationId,
+    enabled: canClear && !!profileCuration,
+  });
+  const canManageProfileCuration = useCurationManagementPermission({
+    curationId: activeCurationId,
+    probeDropId: curationDrops[0]?.id ?? "",
+    enabled: canClear && !!profileCuration,
+  });
+  const canManageProfileWave = canClear && canManageProfileCuration;
+  const canReorder = canManageProfileWave && curationDrops.length > 1;
+  const isReorderModeActive = isReorderMode && canReorder;
+  const isClearPending = isPending && pendingAction === "clear";
+  const reorderButtonClassName = isReorderModeActive
+    ? "tw-border-primary-400/50 tw-bg-primary-500/25 tw-text-primary-50 tw-ring-primary-400/40 hover:tw-border-primary-300/55 hover:tw-bg-primary-500/30 hover:tw-ring-primary-300/45"
+    : "tw-border-iron-950 tw-bg-iron-950 tw-text-iron-300 tw-ring-iron-800 hover:tw-border-iron-800 hover:tw-bg-iron-800 hover:tw-ring-iron-700";
+  const reorderButtonContent = isReorderModeActive ? (
+    <>
+      <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+      <span>Done</span>
+    </>
+  ) : (
+    <>
+      <MoveIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+      <span>Reorder</span>
+    </>
+  );
+
+  function openClearConfirm() {
+    setIsClearConfirmOpen(true);
+  }
+
+  function closeClearConfirm() {
+    if (isClearPending) {
+      return;
+    }
+
+    setIsClearConfirmOpen(false);
+  }
+
+  async function confirmClearProfileWave() {
+    await clearSelectedProfileWave();
+    setIsClearConfirmOpen(false);
+  }
+
+  function toggleReorderMode() {
+    setIsReorderMode((current) => !current);
+  }
+
+  return (
+    <>
+      <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-black tw-p-4 sm:tw-p-5">
+        <div className="tw-flex tw-flex-col tw-gap-5">
+          <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+            <div className="tw-min-w-0">
+              <h2 className="tw-mb-1 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
+                {profileCurationTitle}
+              </h2>
+            </div>
+
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 sm:tw-justify-end">
+              {canReorder && (
+                <button
+                  type="button"
+                  onClick={toggleReorderMode}
+                  aria-label={isReorderModeActive ? "Done" : "Reorder"}
+                  className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-shadow-sm tw-ring-1 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 ${reorderButtonClassName}`}
+                >
+                  {reorderButtonContent}
+                </button>
+              )}
+              {!isReorderModeActive && (
+                <button
+                  type="button"
+                  onClick={onOpenWave}
+                  className="tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-950 tw-shadow-sm tw-ring-1 tw-ring-white/15 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-200 hover:tw-bg-iron-100 hover:tw-ring-white/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                >
+                  <span>Open wave</span>
+                  <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                </button>
+              )}
+              {!isReorderModeActive && canClear && (
+                <button
+                  type="button"
+                  onClick={openClearConfirm}
+                  disabled={isPending}
+                  className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-shadow-sm tw-ring-1 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 ${
+                    isPending
+                      ? "tw-cursor-not-allowed tw-border-iron-950 tw-text-iron-600 tw-ring-iron-900"
+                      : "tw-border-iron-950 tw-text-iron-300 tw-ring-iron-800 hover:tw-border-iron-800 hover:tw-bg-iron-800 hover:tw-ring-iron-700"
+                  }`}
+                >
+                  {isClearPending ? (
+                    <CircleLoader />
+                  ) : (
+                    <XMarkIcon className="-tw-ml-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                  )}
+                  <span>Clear official wave</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="tw-min-w-0 tw-flex-1">
+            <div className="tw-overflow-hidden tw-rounded-2xl">
+              <ProfileCurationBody
+                areCurationsError={areCurationsError}
+                areCurationsFetching={areCurationsFetching}
+                areCurationsLoading={areCurationsLoading}
+                canManageProfileWave={canManageProfileWave}
+                hasLoadedCurations={hasLoadedCurations}
+                isReorderMode={isReorderModeActive}
+                onReorderModeChange={setIsReorderMode}
+                onRetryCurations={onRetryCurations}
+                profileCuration={profileCuration}
+                profileIdentity={profileIdentity}
+                wave={wave}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+      {canClear && (
+        <CommonConfirmationModal
+          isOpen={isClearConfirmOpen}
+          onClose={closeClearConfirm}
+          onConfirm={() => {
+            confirmClearProfileWave().catch(() => undefined);
+          }}
+          title="Clear official wave"
+          message="Are you sure you want to clear the official wave from this profile?"
+          confirmText="Clear official wave"
+          isConfirming={isClearPending}
+        />
+      )}
+    </>
   );
 }
 
@@ -258,6 +451,8 @@ export default function UserPageProfileWave({
     handleOrWallet,
     initialProfile,
   });
+  const [isUnavailableClearConfirmOpen, setIsUnavailableClearConfirmOpen] =
+    useState(false);
   const resolvedProfile = profile ?? initialProfile;
   const profileWaveId = resolvedProfile.profile_wave_id;
   const { wave, isLoading, isError, error, refetch, isFetching } =
@@ -339,15 +534,31 @@ export default function UserPageProfileWave({
 
     router.push(waveHref, { scroll: false });
   }, [router, waveHref]);
+
   const retryLoad = useCallback(async () => {
     await refetch();
   }, [refetch]);
+
   const retryCurationsLoad = useCallback(async () => {
     await refetchCurations();
   }, [refetchCurations]);
-  const clearProfileWave = useCallback(async () => {
+
+  function openUnavailableClearConfirm() {
+    setIsUnavailableClearConfirmOpen(true);
+  }
+
+  function closeUnavailableClearConfirm() {
+    if (isPending && pendingAction === "clear") {
+      return;
+    }
+
+    setIsUnavailableClearConfirmOpen(false);
+  }
+
+  async function confirmUnavailableClearProfileWave() {
     await clearSelectedProfileWave();
-  }, [clearSelectedProfileWave]);
+    setIsUnavailableClearConfirmOpen(false);
+  }
 
   if (!profileWaveId) {
     return null;
@@ -369,11 +580,26 @@ export default function UserPageProfileWave({
 
   if (hasUnavailableWaveError) {
     return (
-      <UnavailableState
-        canClear={canClear}
-        isPending={isPending}
-        onClear={clearProfileWave}
-      />
+      <>
+        <UnavailableState
+          canClear={canClear}
+          isPending={isPending}
+          onRequestClear={openUnavailableClearConfirm}
+        />
+        {canClear && (
+          <CommonConfirmationModal
+            isOpen={isUnavailableClearConfirmOpen}
+            onClose={closeUnavailableClearConfirm}
+            onConfirm={() => {
+              confirmUnavailableClearProfileWave().catch(() => undefined);
+            }}
+            title="Clear official wave"
+            message="Are you sure you want to clear the official wave from this profile?"
+            confirmText="Clear official wave"
+            isConfirming={isPending && pendingAction === "clear"}
+          />
+        )}
+      </>
     );
   }
 
@@ -389,61 +615,22 @@ export default function UserPageProfileWave({
   }
 
   return (
-    <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-black tw-p-4 sm:tw-p-5">
-      <div className="tw-flex tw-flex-col tw-gap-5">
-        <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
-          <div className="tw-min-w-0">
-            <h2 className="tw-mb-1 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
-              {profileCurationTitle}
-            </h2>
-          </div>
-
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 sm:tw-justify-end">
-            <button
-              type="button"
-              onClick={openWave}
-              className="tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-950 tw-shadow-sm tw-ring-1 tw-ring-white/15 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-200 hover:tw-bg-iron-100 hover:tw-ring-white/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-            >
-              <span>Open wave</span>
-              <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-            </button>
-            {canClear && (
-              <button
-                type="button"
-                onClick={clearProfileWave}
-                disabled={isPending}
-                className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-shadow-sm tw-ring-1 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 ${
-                  isPending
-                    ? "tw-cursor-not-allowed tw-border-iron-950 tw-text-iron-600 tw-ring-iron-900"
-                    : "tw-border-iron-950 tw-text-iron-300 tw-ring-iron-800 hover:tw-border-iron-800 hover:tw-bg-iron-800 hover:tw-ring-iron-700"
-                }`}
-              >
-                {isPending && pendingAction === "clear" ? (
-                  <CircleLoader />
-                ) : (
-                  <XMarkIcon className="-tw-ml-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                )}
-                <span>Clear official wave</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-overflow-hidden tw-rounded-2xl">
-            <ProfileCurationBody
-              areCurationsError={areCurationsError}
-              areCurationsFetching={areCurationsFetching}
-              areCurationsLoading={areCurationsLoading}
-              hasLoadedCurations={hasLoadedCurations}
-              onRetryCurations={retryCurationsLoad}
-              profileCuration={profileCuration}
-              profileIdentity={profileIdentityForMasonry}
-              wave={wave}
-            />
-          </div>
-        </div>
-      </div>
-    </section>
+    <LoadedProfileWaveState
+      key={`${wave.id}:${profileCuration?.id ?? "none"}`}
+      areCurationsError={areCurationsError}
+      areCurationsFetching={areCurationsFetching}
+      areCurationsLoading={areCurationsLoading}
+      canClear={canClear}
+      clearSelectedProfileWave={clearSelectedProfileWave}
+      hasLoadedCurations={hasLoadedCurations}
+      isPending={isPending}
+      onOpenWave={openWave}
+      onRetryCurations={retryCurationsLoad}
+      pendingAction={pendingAction}
+      profileCuration={profileCuration}
+      profileCurationTitle={profileCurationTitle}
+      profileIdentity={profileIdentityForMasonry}
+      wave={wave}
+    />
   );
 }
