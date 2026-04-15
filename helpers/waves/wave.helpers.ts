@@ -7,8 +7,23 @@ interface WaveDetailsLike {
                 | {
                     readonly is_direct_message?: boolean | undefined;
                   }
+                | null
                 | undefined;
             }
+          | null
+          | undefined;
+      }
+    | undefined;
+  readonly visibility?:
+    | {
+        readonly scope?:
+          | {
+              readonly group?:
+                | { readonly id?: string | undefined }
+                | null
+                | undefined;
+            }
+          | null
           | undefined;
       }
     | undefined;
@@ -36,3 +51,12 @@ export const isWaveDirectMessage = (
 
   return waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
 };
+
+export const isPublicNonDirectMessageWave = (
+  wave?: WaveDetailsLike | null
+): boolean =>
+  Boolean(
+    wave &&
+    !wave.chat?.scope?.group?.is_direct_message &&
+    !wave.visibility?.scope?.group?.id
+  );

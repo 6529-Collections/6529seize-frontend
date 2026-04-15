@@ -5,7 +5,11 @@ import React from "react";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import OngoingParticipationDrop from "./OngoingParticipationDrop";
 import EndedParticipationDrop from "./EndedParticipationDrop";
-import type { DropInteractionParams, DropLocation } from "../drop.types";
+import type {
+  DropIdentityMode,
+  DropInteractionParams,
+  DropLocation,
+} from "../drop.types";
 
 interface DefaultParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -17,6 +21,8 @@ interface DefaultParticipationDropProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
+  readonly identityMode?: DropIdentityMode | undefined;
+  readonly showInteractions?: boolean | undefined;
 }
 
 export default function ParticipationDrop(
