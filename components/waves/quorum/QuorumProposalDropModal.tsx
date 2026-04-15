@@ -380,6 +380,7 @@ export default function QuorumProposalDropModal({
     setValues(EMPTY_QUORUM_PROPOSAL_FORM_VALUES);
     setCurrentStepIndex(0);
     setShowValidation(false);
+    setSubmitting(false);
     onClose();
   }, [onClose]);
 
