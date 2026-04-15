@@ -5,6 +5,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -14,7 +15,6 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import WaveDropReply from "@/components/waves/drops/WaveDropReply";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -22,15 +22,18 @@ import { useCurationManagementPermission } from "@/hooks/useCurationManagementPe
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { useWaveDrops } from "@/hooks/useWaveDrops";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Masonry } from "masonic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface UserPageProfileWaveMasonryProps {
-  readonly wave: ApiWave;
   readonly curationId: string;
   readonly curationName?: string | null | undefined;
+  readonly containerWidth: number;
+  readonly drops: readonly ExtendedDrop[];
+  readonly fetchNextPage: () => Promise<void>;
+  readonly hasNextPage: boolean | undefined;
+  readonly isFetchingNextPage: boolean;
   readonly showIdentity?: boolean | undefined;
   readonly profileIdentity?: ProfileIdentitySummary | undefined;
 }
@@ -38,7 +41,7 @@ interface UserPageProfileWaveMasonryProps {
 const MASONRY_COLUMN_WIDTH = 300;
 const MASONRY_GUTTER = 16;
 
-type ProfileIdentitySummary = {
+export type ProfileIdentitySummary = {
   readonly id?: string | null | undefined;
   readonly handle?: string | null | undefined;
   readonly primary_address?: string | null | undefined;
@@ -113,7 +116,7 @@ const getProfileMasonryCardLayout = ({
   };
 };
 
-function useProfileMasonryContainerWidth() {
+export function useProfileMasonryContainerWidth() {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -340,25 +343,22 @@ function UserPageProfileWaveMasonryRenderItem({
 }
 
 export default function UserPageProfileWaveMasonry({
-  wave,
   curationId,
   curationName,
+  containerWidth,
+  drops,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
   showIdentity = false,
   profileIdentity,
 }: UserPageProfileWaveMasonryProps) {
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDrops({
-      waveId: wave.id,
-      curationId,
-    });
   const permissionProbeDropId = drops[0]?.id ?? "";
   const canManageActiveCuration = useCurationManagementPermission({
     curationId,
     probeDropId: permissionProbeDropId,
   });
-  const isInitialLoading = isFetching && drops.length === 0;
   const curationTitle = curationName?.trim() ?? "Curation";
-  const { containerRef, containerWidth } = useProfileMasonryContainerWidth();
   const masonryItems = useMemo(
     () =>
       drops.map((drop) => ({
@@ -391,21 +391,17 @@ export default function UserPageProfileWaveMasonry({
     [fetchNextPage, hasNextPage, isFetchingNextPage]
   );
 
-  if (isInitialLoading) {
+  if (drops.length === 0) {
     return (
-      <div className="tw-flex tw-min-h-[20rem] tw-items-center tw-justify-center">
-        <CircleLoader size={CircleLoaderSize.XXLARGE} />
-      </div>
+      <TweetPreviewModeProvider mode="never">
+        <CurationEmptyState curationTitle={curationTitle} />
+      </TweetPreviewModeProvider>
     );
   }
 
-  if (drops.length === 0) {
-    return <CurationEmptyState curationTitle={curationTitle} />;
-  }
-
   return (
-    <div ref={containerRef} className="tw-px-1 tw-pb-2">
-      {containerWidth > 0 ? (
+    <TweetPreviewModeProvider mode="never">
+      <div className="tw-px-1 tw-pb-2">
         <Masonry
           key={masonryKey}
           items={masonryItems}
@@ -419,23 +415,19 @@ export default function UserPageProfileWaveMasonry({
           ssrWidth={containerWidth}
           ssrHeight={900}
         />
-      ) : (
-        <div className="tw-flex tw-min-h-[12rem] tw-items-center tw-justify-center">
-          <CircleLoader size={CircleLoaderSize.MEDIUM} />
-        </div>
-      )}
 
-      {(hasNextPage || isFetchingNextPage) && (
-        <div className="tw-flex tw-justify-center tw-py-6">
-          {isFetchingNextPage ? (
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          ) : (
-            <CommonIntersectionElement
-              onIntersection={handleBottomIntersection}
-            />
-          )}
-        </div>
-      )}
-    </div>
+        {((hasNextPage ?? false) || isFetchingNextPage) && (
+          <div className="tw-flex tw-justify-center tw-py-6">
+            {isFetchingNextPage ? (
+              <CircleLoader size={CircleLoaderSize.MEDIUM} />
+            ) : (
+              <CommonIntersectionElement
+                onIntersection={handleBottomIntersection}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    </TweetPreviewModeProvider>
   );
 }
