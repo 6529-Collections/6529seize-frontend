@@ -2,16 +2,18 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { publicEnv } from "@/config/env";
 import type { ApiDropCurationRequest } from "@/generated/models/ApiDropCurationRequest";
-import { commonApiDeleteWithBody } from "@/services/api/common-api";
-import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
+import {
+  deleteDropCuration,
+  postDropCuration,
+} from "@/services/api/drop-curations-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
 import {
   getDropCurationsQueryKey,
   type DropCurationMembership,
 } from "./useDropCurations";
+import { getAuthJwt } from "@/services/auth/auth.utils";
 
 type DropCurationMembershipAction = "add" | "remove";
 
@@ -24,67 +26,6 @@ interface DropCurationMembershipMutationVariables {
   readonly action: DropCurationMembershipAction;
   readonly options?: DropCurationMembershipMutationOptions | undefined;
 }
-
-const getDropCurationMembershipEndpoint = (dropId: string): string =>
-  `${publicEnv.API_ENDPOINT}/api/drops/${dropId}/curations`;
-
-const getDropCurationMembershipHeaders = (): Record<string, string> => {
-  const apiAuth = getStagingAuth();
-  const walletAuth = getAuthJwt();
-
-  return {
-    "Content-Type": "application/json",
-    ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
-    ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
-  };
-};
-
-const getErrorMessageFromResponse = async (
-  response: Response
-): Promise<string> => {
-  const fallbackErrorMessage = response.statusText || "Something went wrong";
-
-  try {
-    const rawContent = await response.text();
-    if (!rawContent) {
-      return fallbackErrorMessage;
-    }
-
-    try {
-      const parsedBody = JSON.parse(rawContent) as Record<string, unknown>;
-      if (typeof parsedBody["error"] === "string") {
-        return parsedBody["error"];
-      }
-      if (typeof parsedBody["message"] === "string") {
-        return parsedBody["message"];
-      }
-    } catch {
-      return rawContent;
-    }
-
-    return rawContent;
-  } catch {
-    return fallbackErrorMessage;
-  }
-};
-
-const addDropToCuration = async ({
-  dropId,
-  body,
-}: {
-  readonly dropId: string;
-  readonly body: ApiDropCurationRequest;
-}): Promise<void> => {
-  const response = await fetch(getDropCurationMembershipEndpoint(dropId), {
-    method: "POST",
-    headers: getDropCurationMembershipHeaders(),
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    throw new Error(await getErrorMessageFromResponse(response));
-  }
-};
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (typeof error === "string" && error.trim().length > 0) {
@@ -138,7 +79,13 @@ export function useDropCurationMembershipMutation({
 }) {
   const queryClient = useQueryClient();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { setToast } = useAuth();
+  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
+  const dropCurationsQueryKey = getDropCurationsQueryKey({
+    dropId,
+    connectedProfileId: connectedProfile?.id ?? null,
+    activeProfileProxyId: activeProfileProxy?.id ?? null,
+    hasAuthJwt: Boolean(getAuthJwt()),
+  });
 
   const mutation = useMutation<
     void,
@@ -152,29 +99,29 @@ export function useDropCurationMembershipMutation({
       };
 
       if (action === "add") {
-        await addDropToCuration({
+        await postDropCuration({
           dropId,
           body,
         });
         return;
       }
 
-      await commonApiDeleteWithBody<ApiDropCurationRequest, void>({
-        endpoint: `drops/${dropId}/curations`,
+      await deleteDropCuration({
+        dropId,
         body,
       });
     },
     onMutate: async ({ curationId, action }) => {
       await queryClient.cancelQueries({
-        queryKey: getDropCurationsQueryKey(dropId),
+        queryKey: dropCurationsQueryKey,
       });
 
       const previousCurations = queryClient.getQueryData<
         DropCurationMembership[]
-      >(getDropCurationsQueryKey(dropId));
+      >(dropCurationsQueryKey);
 
       queryClient.setQueryData<DropCurationMembership[]>(
-        getDropCurationsQueryKey(dropId),
+        dropCurationsQueryKey,
         (current) =>
           current?.map((curation) =>
             curation.id === curationId
@@ -203,7 +150,7 @@ export function useDropCurationMembershipMutation({
     onError: (error, variables, context) => {
       if (context?.previousCurations !== undefined) {
         queryClient.setQueryData(
-          getDropCurationsQueryKey(dropId),
+          dropCurationsQueryKey,
           context.previousCurations
         );
       }
@@ -217,7 +164,7 @@ export function useDropCurationMembershipMutation({
     },
     onSettled: async () => {
       await queryClient.invalidateQueries({
-        queryKey: getDropCurationsQueryKey(dropId),
+        queryKey: dropCurationsQueryKey,
       });
     },
   });
