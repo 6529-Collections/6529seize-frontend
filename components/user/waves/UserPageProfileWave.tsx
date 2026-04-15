@@ -4,9 +4,13 @@ import { useAuth } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import UserPageProfileWaveMasonry from "@/components/user/waves/UserPageProfileWaveMasonry";
+import UserPageProfileWaveMasonry, {
+  type ProfileIdentitySummary,
+  useProfileMasonryContainerWidth,
+} from "@/components/user/waves/UserPageProfileWaveMasonry";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { useWaveById } from "@/hooks/useWaveById";
+import { useWaveDrops } from "@/hooks/useWaveDrops";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useIdentity } from "@/hooks/useIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -178,35 +182,30 @@ const getProfileCurationTitle = (
 function ProfileCurationBody({
   areCurationsError,
   areCurationsFetching,
-  areCurationsLoading,
+  containerWidth,
+  drops,
+  fetchNextPage,
   hasLoadedCurations,
+  hasNextPage,
+  isFetchingNextPage,
   onRetryCurations,
   profileCuration,
   profileIdentity,
-  wave,
 }: {
   readonly areCurationsError: boolean;
   readonly areCurationsFetching: boolean;
-  readonly areCurationsLoading: boolean;
+  readonly containerWidth: number;
+  readonly drops: ReturnType<typeof useWaveDrops>["drops"];
+  readonly fetchNextPage: ReturnType<typeof useWaveDrops>["fetchNextPage"];
   readonly hasLoadedCurations: boolean;
+  readonly hasNextPage: ReturnType<typeof useWaveDrops>["hasNextPage"];
+  readonly isFetchingNextPage: ReturnType<
+    typeof useWaveDrops
+  >["isFetchingNextPage"];
   readonly onRetryCurations: () => void;
   readonly profileCuration: ApiWaveCuration | null;
-  readonly profileIdentity: {
-    readonly id?: string | null | undefined;
-    readonly handle?: string | null | undefined;
-    readonly primary_address?: string | null | undefined;
-  };
-  readonly wave: NonNullable<ReturnType<typeof useWaveById>["wave"]>;
+  readonly profileIdentity: ProfileIdentitySummary;
 }) {
-  if (areCurationsLoading) {
-    return (
-      <div className="tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-text-sm tw-text-iron-400">
-        <Spinner dimension={18} />
-        <span className="tw-ml-3">Loading curation...</span>
-      </div>
-    );
-  }
-
   if (areCurationsError && !hasLoadedCurations) {
     return (
       <LoadErrorState
@@ -233,9 +232,13 @@ function ProfileCurationBody({
 
   return (
     <UserPageProfileWaveMasonry
-      wave={wave}
       curationId={profileCuration.id}
       curationName={profileCuration.name}
+      containerWidth={containerWidth}
+      drops={drops}
+      fetchNextPage={fetchNextPage}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
       showIdentity={false}
       profileIdentity={profileIdentity}
     />
@@ -253,6 +256,7 @@ export default function UserPageProfileWave({
   const searchParams = useSearchParams();
   const searchString = searchParams.toString();
   const handleOrWallet = params["user"]?.toString() ?? "";
+  const { containerRef, containerWidth } = useProfileMasonryContainerWidth();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { profile } = useIdentity({
     handleOrWallet,
@@ -269,8 +273,8 @@ export default function UserPageProfileWave({
     isFetching: areCurationsFetching,
     refetch: refetchCurations,
   } = useWaveCurations({
-    waveId: wave?.id ?? "",
-    enabled: !!wave?.id,
+    waveId: profileWaveId ?? "",
+    enabled: !!profileWaveId,
   });
   const { clearSelectedProfileWave, isPending, pendingAction } =
     useProfileWaveMutation(resolvedProfile);
@@ -289,11 +293,22 @@ export default function UserPageProfileWave({
     () => resolveProfileCuration(curations ?? []),
     [curations]
   );
+  const {
+    drops,
+    fetchNextPage,
+    hasLoadedInitialPage: hasLoadedInitialDrops,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useWaveDrops({
+    waveId: profileWaveId ?? "",
+    curationId: profileCuration?.id,
+    enabled: profileCuration !== null,
+  });
   const profileCurationTitle = useMemo(
     () => getProfileCurationTitle(profileCuration),
     [profileCuration]
   );
-  const profileIdentityForMasonry = useMemo(
+  const profileIdentityForMasonry = useMemo<ProfileIdentitySummary>(
     () => ({
       id: resolvedProfile.id,
       handle: resolvedProfile.handle,
@@ -348,23 +363,17 @@ export default function UserPageProfileWave({
   const clearProfileWave = useCallback(async () => {
     await clearSelectedProfileWave();
   }, [clearSelectedProfileWave]);
+  const shouldWaitForDrops = profileCuration !== null && !hasLoadedInitialDrops;
+  const shouldWaitForMasonryWidth =
+    profileCuration !== null && drops.length > 0 && containerWidth === 0;
+  const isInitialLoading =
+    isLoading ||
+    areCurationsLoading ||
+    shouldWaitForDrops ||
+    shouldWaitForMasonryWidth;
 
   if (!profileWaveId) {
     return null;
-  }
-
-  if (isLoading) {
-    return (
-      <section
-        className="tw-flex tw-min-h-[16rem] tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/70"
-        aria-label="Loading profile wave"
-      >
-        <div className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-400">
-          <Spinner dimension={18} />
-          Loading profile wave...
-        </div>
-      </section>
-    );
   }
 
   if (hasUnavailableWaveError) {
@@ -377,7 +386,7 @@ export default function UserPageProfileWave({
     );
   }
 
-  if (isError || !wave) {
+  if (!isLoading && (isError || !wave)) {
     return (
       <LoadErrorState
         title="Unable to load official wave"
@@ -385,6 +394,25 @@ export default function UserPageProfileWave({
         isRetrying={isFetching}
         onRetry={retryLoad}
       />
+    );
+  }
+
+  if (isInitialLoading) {
+    return (
+      <section
+        className="tw-flex tw-min-h-[16rem] tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/70"
+        aria-label="Loading profile curation"
+      >
+        <div
+          ref={containerRef}
+          className="tw-flex tw-min-h-[16rem] tw-w-full tw-items-center tw-justify-center"
+        >
+          <div className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-400">
+            <Spinner dimension={18} />
+            Loading curation...
+          </div>
+        </div>
+      </section>
     );
   }
 
@@ -429,17 +457,20 @@ export default function UserPageProfileWave({
           </div>
         </div>
 
-        <div className="tw-min-w-0 tw-flex-1">
+        <div ref={containerRef} className="tw-min-w-0 tw-flex-1">
           <div className="tw-overflow-hidden tw-rounded-2xl">
             <ProfileCurationBody
               areCurationsError={areCurationsError}
               areCurationsFetching={areCurationsFetching}
-              areCurationsLoading={areCurationsLoading}
+              containerWidth={containerWidth}
+              drops={drops}
+              fetchNextPage={fetchNextPage}
               hasLoadedCurations={hasLoadedCurations}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
               onRetryCurations={retryCurationsLoad}
               profileCuration={profileCuration}
               profileIdentity={profileIdentityForMasonry}
-              wave={wave}
             />
           </div>
         </div>

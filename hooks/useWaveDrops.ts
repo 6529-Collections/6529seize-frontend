@@ -126,6 +126,7 @@ export function useWaveDrops({
   }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
 
   const drops = useMemo(() => processDrops(data?.pages), [data?.pages]);
+  const hasLoadedInitialPage = data !== undefined;
   const requestRefetch = useDebouncedQueryRefetch({
     refetch,
     isFetching,
@@ -150,6 +151,7 @@ export function useWaveDrops({
     drops,
     fetchNextPage,
     hasNextPage,
+    hasLoadedInitialPage,
     isFetching,
     isFetchingNextPage,
     refetch,
