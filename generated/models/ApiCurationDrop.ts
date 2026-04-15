@@ -28,7 +28,8 @@ import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { HttpFile } from '../http/http';
 
-export class ApiDropWithoutWave {
+export class ApiCurationDrop {
+    'drop_priority_order': number | null;
     'id': string;
     /**
     * Sequence number of the drop in Seize
@@ -63,7 +64,7 @@ export class ApiDropWithoutWave {
     'rating_prediction': number;
     'top_raters': Array<ApiDropRater>;
     'raters_count': number;
-    'context_profile_context': ApiDropContextProfileContext | null;
+    'context_profile_context': ApiDropContextProfileContext;
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
     'reactions': Array<ApiDropReaction>;
@@ -76,6 +77,12 @@ export class ApiDropWithoutWave {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "drop_priority_order",
+            "baseName": "drop_priority_order",
+            "type": "number",
+            "format": "int64"
+        },
         {
             "name": "id",
             "baseName": "id",
@@ -252,7 +259,7 @@ export class ApiDropWithoutWave {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropWithoutWave.attributeTypeMap;
+        return ApiCurationDrop.attributeTypeMap;
     }
 
     public constructor() {

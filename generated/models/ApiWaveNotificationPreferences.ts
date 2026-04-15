@@ -11,12 +11,12 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { HttpFile } from '../http/http';
 
-export class ApiWaveCurationRequest {
-    'name': string;
-    'group_id': string;
-    'priority_order'?: number;
+export class ApiWaveNotificationPreferences {
+    'subscribed': boolean;
+    'enabled_group_notifications': Array<ApiDropGroupMention>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +24,20 @@ export class ApiWaveCurationRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "name",
-            "baseName": "name",
-            "type": "string",
+            "name": "subscribed",
+            "baseName": "subscribed",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "group_id",
-            "baseName": "group_id",
-            "type": "string",
+            "name": "enabled_group_notifications",
+            "baseName": "enabled_group_notifications",
+            "type": "Array<ApiDropGroupMention>",
             "format": ""
-        },
-        {
-            "name": "priority_order",
-            "baseName": "priority_order",
-            "type": "number",
-            "format": "int32"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveCurationRequest.attributeTypeMap;
+        return ApiWaveNotificationPreferences.attributeTypeMap;
     }
 
     public constructor() {
