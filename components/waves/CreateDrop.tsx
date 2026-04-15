@@ -1,11 +1,13 @@
 "use client";
 
 import { useRef, useState, useCallback, useContext, useMemo } from "react";
+import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
 import CreateCurationDropContent from "./CreateCurationDropContent";
+import QuorumProposalDropModal from "./quorum/QuorumProposalDropModal";
 import { useMutation } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
@@ -76,11 +78,14 @@ export default function CreateDrop({
     scopeKey: string;
     url: string;
   } | null>(null);
+  const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
+    useState<string | null>(null);
   const { processDropRemoved, processIncomingDrop } = useMyStream();
-  const { isMemesWave, isCurationWave } = useWave(wave);
+  const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const submissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
+    isQuorumWave,
     submissionStrategy: wave.participation.submission_strategy ?? null,
   });
   const getDefaultIsDropMode = () => {
@@ -114,6 +119,13 @@ export default function CreateDrop({
   const isCurationDropMode =
     submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
     isDropMode;
+  const isQuorumProposalDropMode =
+    submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL &&
+    isDropMode;
+  const quorumProposalScopeKey = `${modeScopeToken}:${submissionExperience}`;
+  const isQuorumProposalModalOpen =
+    isQuorumProposalDropMode &&
+    dismissedQuorumProposalScope !== quorumProposalScopeKey;
   const canMentionAll =
     wave.wave.authenticated_user_eligible_for_admin === true;
 
@@ -152,6 +164,7 @@ export default function CreateDrop({
         onExitFixedDropMode
       ) {
         setCurationPrefillSeed(null);
+        setDismissedQuorumProposalScope(null);
         onExitFixedDropMode();
         return;
       }
@@ -160,6 +173,7 @@ export default function CreateDrop({
         return;
       }
       setCurationPrefillSeed(null);
+      setDismissedQuorumProposalScope(null);
       setDropModeOverride({ scopeKey: modeScopeToken, value: newIsDropMode });
     },
     [canSwitchDropMode, fixedDropMode, modeScopeToken, onExitFixedDropMode]
@@ -171,10 +185,44 @@ export default function CreateDrop({
         return;
       }
       setCurationPrefillSeed({ scopeKey: modeScopeToken, url });
+      setDismissedQuorumProposalScope(null);
       setDropModeOverride({ scopeKey: modeScopeToken, value: true });
     },
     [canSwitchDropMode, modeScopeToken]
   );
+
+  const onCloseQuorumProposal = useCallback(() => {
+    if (
+      fixedDropMode === DropMode.BOTH &&
+      wave.chat.authenticated_user_eligible
+    ) {
+      onDropModeChange(false);
+      return;
+    }
+
+    if (
+      fixedDropMode === DropMode.PARTICIPATION &&
+      onExitFixedDropMode !== undefined
+    ) {
+      onDropModeChange(false);
+      return;
+    }
+
+    setDismissedQuorumProposalScope(quorumProposalScopeKey);
+  }, [
+    fixedDropMode,
+    onExitFixedDropMode,
+    onDropModeChange,
+    quorumProposalScopeKey,
+    wave.chat.authenticated_user_eligible,
+  ]);
+
+  const onOpenQuorumProposal = useCallback(() => {
+    setDismissedQuorumProposalScope(null);
+    if (!isDropMode) {
+      onDropModeChange(true);
+    }
+  }, [isDropMode, onDropModeChange]);
 
   const onRemovePart = useCallback(
     (partIndex: number) => {
@@ -341,10 +389,59 @@ export default function CreateDrop({
     onExitFixedDropMode,
   ]);
 
+  let dropComposerContent: ReactNode;
+  if (isQuorumProposalDropMode) {
+    dropComposerContent = (
+      <>
+        <QuorumProposalDropModal
+          isOpen={isQuorumProposalModalOpen}
+          activeDrop={activeDrop}
+          onCancelReplyQuote={onCancelReplyQuote}
+          wave={wave}
+          dropId={dropId}
+          submitDrop={submitDrop}
+          onClose={onCloseQuorumProposal}
+        />
+        {!isQuorumProposalModalOpen && (
+          <div className="tw-flex tw-w-full tw-justify-end">
+            <button
+              type="button"
+              onClick={onOpenQuorumProposal}
+              className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800"
+            >
+              Create Proposal
+            </button>
+          </div>
+        )}
+      </>
+    );
+  } else if (isCurationDropMode) {
+    dropComposerContent = (
+      <CreateCurationDropContent
+        activeDrop={activeDrop}
+        onCancelReplyQuote={onCancelReplyQuote}
+        wave={wave}
+        dropId={dropId}
+        isDropMode={isDropMode}
+        initialUrl={initialCurationUrl}
+        submitDrop={submitDrop}
+        curationComposerVariant={curationComposerVariant}
+      />
+    );
+  } else {
+    dropComposerContent = (
+      <CreateDropContent
+        {...createDropContentProps}
+        wave={wave}
+        submissionExperience={submissionExperience}
+      />
+    );
+  }
+
   return (
     <>
       <AnimatePresence>
-        {isStormMode && !isCurationDropMode && (
+        {isStormMode && !isCurationDropMode && !isQuorumProposalDropMode && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -363,24 +460,7 @@ export default function CreateDrop({
         )}
       </AnimatePresence>
 
-      {isCurationDropMode ? (
-        <CreateCurationDropContent
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-          wave={wave}
-          dropId={dropId}
-          isDropMode={isDropMode}
-          initialUrl={initialCurationUrl}
-          submitDrop={submitDrop}
-          curationComposerVariant={curationComposerVariant}
-        />
-      ) : (
-        <CreateDropContent
-          {...createDropContentProps}
-          wave={wave}
-          submissionExperience={submissionExperience}
-        />
-      )}
+      {dropComposerContent}
     </>
   );
 }

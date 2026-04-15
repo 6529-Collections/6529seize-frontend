@@ -90,7 +90,7 @@ import {
   type SelectableIdentityOption,
 } from "../utils/input/profile-search/getSelectableIdentity";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
-import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 
 // Use next/dynamic for lazy loading with SSR support
@@ -151,6 +151,20 @@ interface CreateDropContentProps {
 
 const CONTAINER_WIDTH_THRESHOLD = 500;
 const SELECT_OTHER_IDENTITY_ERROR = "Select someone else to nominate.";
+
+const getInactiveDropActionLabel = (
+  submissionExperience: WaveSubmissionExperience
+): "drop" | "nominate" | "proposal" => {
+  if (submissionExperience === WaveSubmissionExperience.IDENTITY) {
+    return "nominate";
+  }
+
+  if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
+    return "proposal";
+  }
+
+  return "drop";
+};
 
 const normalizeIdentityValue = (identity: string | null | undefined) =>
   identity?.trim().toLowerCase() ?? null;
@@ -470,6 +484,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     submissionExperience === WaveSubmissionExperience.IDENTITY;
   const isCurationSubmissionExperience =
     submissionExperience === WaveSubmissionExperience.CURATION_LEGACY;
+  const inactiveDropActionLabel =
+    getInactiveDropActionLabel(submissionExperience);
   const identitySubmissionMode = isIdentitySubmissionExperience
     ? (wave.participation.submission_strategy?.config.who_can_be_submitted ??
       null)
@@ -1670,11 +1686,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   onDropModeChange={handleDropModeChange}
                   privileges={privileges}
                   exitLabel={dropModeToggleExitLabel}
-                  inactiveActionLabel={
-                    submissionExperience === WaveSubmissionExperience.IDENTITY
-                      ? "nominate"
-                      : "drop"
-                  }
+                  inactiveActionLabel={inactiveDropActionLabel}
                 />
               )}
             <CreateDropSubmit

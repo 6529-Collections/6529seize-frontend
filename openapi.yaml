@@ -10906,6 +10906,7 @@ components:
         - all_drops_notifications_subscribers_limit
         - memes_wave_id
         - curation_wave_id
+        - quorum_wave_id
         - distribution_admin_wallets
         - claims_admin_wallets
         - announcements_wave_id
@@ -10920,6 +10921,9 @@ components:
           type: string
           nullable: true
         curation_wave_id:
+          type: string
+          nullable: true
+        quorum_wave_id:
           type: string
           nullable: true
         distribution_admin_wallets:
