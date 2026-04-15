@@ -134,41 +134,50 @@ const createdGroup: ApiGroupFull = {
   created_by: { handle: "builder" },
 } as ApiGroupFull;
 
-function TestHarness({
+function renderInlinePanel({
   suggestedName = "My Wave Who can view",
   onChange = jest.fn(),
   onCreateGroup = jest.fn().mockResolvedValue(createdGroup),
   selectedGroup = null,
   disabled = false,
+  allowGroupClear = true,
 }: {
   readonly suggestedName?: string;
   readonly onChange?: jest.Mock;
   readonly onCreateGroup?: jest.Mock;
   readonly selectedGroup?: ApiGroupFull | null;
   readonly disabled?: boolean;
-}) {
-  const [currentGroup, setCurrentGroup] = React.useState<ApiGroupFull | null>(
-    selectedGroup
-  );
+  readonly allowGroupClear?: boolean;
+} = {}) {
+  const initialSelectedGroup = selectedGroup;
 
-  return (
-    <CreateWaveGroupInlinePanel
-      suggestedName={suggestedName}
-      defaultLabel="Anyone"
-      disabled={disabled}
-      selectedGroup={currentGroup}
-      onChange={(group) => {
-        setCurrentGroup(group);
-        onChange(group);
-      }}
-      onCreateGroup={onCreateGroup}
-    />
-  );
+  function ControlledPanel() {
+    const [currentGroup, setCurrentGroup] = React.useState<ApiGroupFull | null>(
+      () => initialSelectedGroup
+    );
+
+    return (
+      <CreateWaveGroupInlinePanel
+        suggestedName={suggestedName}
+        defaultLabel="Anyone"
+        disabled={disabled}
+        selectedGroup={currentGroup}
+        allowGroupClear={allowGroupClear}
+        onChange={(group) => {
+          setCurrentGroup(group);
+          onChange(group);
+        }}
+        onCreateGroup={onCreateGroup}
+      />
+    );
+  }
+
+  return render(<ControlledPanel />);
 }
 
 describe("CreateWaveGroupInlinePanel", () => {
   it("renders the current state and primary actions", () => {
-    render(<TestHarness />);
+    renderInlinePanel();
 
     expect(screen.getByText("Current state")).toBeInTheDocument();
     expect(screen.getByText("Anyone")).toBeInTheDocument();
@@ -185,7 +194,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("opens the identity panel", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add identity" }));
 
@@ -200,7 +209,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("returns to options when the active identity pill is clicked", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "Add identity" }));
@@ -213,7 +222,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("opens a quick rule editor", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
@@ -234,7 +243,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("returns to rule options when the active rule pill is clicked", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
@@ -248,7 +257,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("shows all rule options without an extra more-rules step", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
 
@@ -268,7 +277,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("returns to options when the active existing group pill is clicked", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(
       screen.getByRole("button", { name: "Use existing group" })
@@ -291,7 +300,7 @@ describe("CreateWaveGroupInlinePanel", () => {
   it("returns to the actions view after selecting an existing group", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
-    render(<TestHarness onChange={onChange} />);
+    renderInlinePanel({ onChange });
 
     await user.click(
       screen.getByRole("button", { name: "Use existing group" })
@@ -309,14 +318,10 @@ describe("CreateWaveGroupInlinePanel", () => {
   it("returns null when clearing an existing group", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
-    render(
-      <TestHarness
-        onChange={onChange}
-        selectedGroup={
-          { id: "group-1", name: "Existing Group" } as ApiGroupFull
-        }
-      />
-    );
+    renderInlinePanel({
+      onChange,
+      selectedGroup: { id: "group-1", name: "Existing Group" } as ApiGroupFull,
+    });
 
     await user.click(
       screen.getByRole("button", { name: "Use existing group" })
@@ -327,11 +332,29 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Anyone")).toBeInTheDocument();
   });
 
+  it("keeps the selected group when clearing is disabled", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    renderInlinePanel({
+      onChange,
+      allowGroupClear: false,
+      selectedGroup: { id: "group-1", name: "Existing Group" } as ApiGroupFull,
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Use existing group" })
+    );
+    await user.click(screen.getByRole("button", { name: "clear group" }));
+
+    expect(onChange).not.toHaveBeenCalledWith(null);
+    expect(screen.getByText("Existing Group")).toBeInTheDocument();
+  });
+
   it("creates and attaches a valid inline group draft", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
     const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
-    render(<TestHarness onChange={onChange} onCreateGroup={onCreateGroup} />);
+    renderInlinePanel({ onChange, onCreateGroup });
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
@@ -350,7 +373,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("keeps reset available when the draft is invalid", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
@@ -373,7 +396,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("opens configured rules from the draft chips", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
@@ -386,7 +409,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("updates the draft summary after adding an identity", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));

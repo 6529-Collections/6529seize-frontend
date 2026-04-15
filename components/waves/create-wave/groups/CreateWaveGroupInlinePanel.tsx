@@ -39,6 +39,7 @@ export default function CreateWaveGroupInlinePanel({
   defaultLabel,
   disabled = false,
   selectedGroup,
+  allowGroupClear = true,
   onChange,
   onCreateGroup,
 }: {
@@ -46,7 +47,8 @@ export default function CreateWaveGroupInlinePanel({
   readonly defaultLabel: string;
   readonly disabled?: boolean;
   readonly selectedGroup: ApiGroupFull | null;
-  readonly onChange: (group: ApiGroupFull | null) => void;
+  readonly allowGroupClear?: boolean;
+  readonly onChange: (group: ApiGroupFull | null) => void | Promise<void>;
   readonly onCreateGroup: (
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
@@ -204,7 +206,7 @@ export default function CreateWaveGroupInlinePanel({
         return;
       }
 
-      onChange(createdGroup);
+      await onChange(createdGroup);
       resetBuilder();
     } finally {
       setIsCreating(false);
@@ -223,8 +225,12 @@ export default function CreateWaveGroupInlinePanel({
     resetBuilder();
   };
 
-  const onExistingGroupSelect = (group: ApiGroupFull | null) => {
-    onChange(group);
+  const onExistingGroupSelect = async (group: ApiGroupFull | null) => {
+    if (!group && !allowGroupClear) {
+      return;
+    }
+
+    await onChange(group);
     if (group) {
       resetBuilder();
     }
@@ -294,7 +300,10 @@ export default function CreateWaveGroupInlinePanel({
             defaultLabel={defaultLabel}
             disabled={disabled}
             selectedGroup={selectedGroup}
-            onSelect={onExistingGroupSelect}
+            allowGroupClear={allowGroupClear}
+            onSelect={(group) => {
+              void onExistingGroupSelect(group);
+            }}
           />
         )}
 
