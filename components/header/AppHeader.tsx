@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
@@ -33,6 +33,7 @@ import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "@/components/waves/WavePicture";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -41,6 +42,15 @@ const COLLECTION_TITLES: Record<string, string> = {
   nextgen: "NextGen",
 };
 const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
+
+interface HeaderConnectedAccount {
+  readonly address: string;
+  readonly isActive: boolean;
+}
+
+interface HeaderTimeoutRef {
+  current: ReturnType<typeof setTimeout> | null;
+}
 
 const sliceString = (str: string, length: number): string => {
   if (str.length <= length) return str;
@@ -86,6 +96,229 @@ const getDropForgeTitle = (pathSegments: string[]): string | null => {
   }
 
   return null;
+};
+
+const getHeaderTitle = ({
+  pathname,
+  waveId,
+  wave,
+  isWaveResolving,
+  isWavesRoute,
+  isMessagesRoute,
+  basePath,
+  pageTitle,
+  pathSegments,
+}: {
+  readonly pathname: string;
+  readonly waveId: string | null;
+  readonly wave: { readonly name?: string | null } | null | undefined;
+  readonly isWaveResolving: boolean;
+  readonly isWavesRoute: boolean;
+  readonly isMessagesRoute: boolean;
+  readonly basePath: string;
+  readonly pageTitle: string;
+  readonly pathSegments: string[];
+}): ReactNode => {
+  if (pathname === "/waves/create") return "Waves";
+  if (pathname === "/messages/create") return "Messages";
+  if (isWavesRoute && !waveId) return "Waves";
+  if (isMessagesRoute && !waveId) return "Messages";
+  if (waveId) {
+    if (isWaveResolving) return <Spinner />;
+    return wave?.name;
+  }
+
+  const collectionTitle = getCollectionTitle(basePath, pageTitle);
+  if (collectionTitle) return collectionTitle;
+
+  const rememesTitle = getRememesTitle(pathSegments);
+  if (rememesTitle) return rememesTitle;
+
+  const dropForgeTitle = getDropForgeTitle(pathSegments);
+  if (dropForgeTitle) return dropForgeTitle;
+
+  return sliceString(capitalizeEveryWord(pageTitle), 20);
+};
+
+const HeaderTitleContent = ({
+  activeWave,
+  isWaveResolving,
+  isDm,
+  previewText,
+  finalTitle,
+}: {
+  readonly activeWave: ApiWave | null;
+  readonly isWaveResolving: boolean;
+  readonly isDm: boolean;
+  readonly previewText: string | null;
+  readonly finalTitle: ReactNode;
+}) => {
+  if (activeWave === null || isWaveResolving) {
+    return <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>;
+  }
+
+  return (
+    <div className="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-items-center tw-gap-2">
+      <div className="tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
+        <WavePicture
+          name={activeWave.name}
+          picture={activeWave.picture ?? null}
+          contributors={activeWave.contributors_overview.map((c) => ({
+            pfp: c.contributor_pfp,
+            identity: c.contributor_identity,
+          }))}
+        />
+      </div>
+      {!isDm && previewText !== null ? (
+        <WaveDescriptionPopover
+          wave={activeWave}
+          align="center"
+          ariaLabel="Show wave description"
+          triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+        >
+          <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+            {activeWave.name}
+          </span>
+          <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
+            {previewText}
+          </span>
+        </WaveDescriptionPopover>
+      ) : (
+        <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
+          {activeWave.name}
+        </span>
+      )}
+    </div>
+  );
+};
+
+const HeaderGalleryToggle = ({
+  showGalleryToggle,
+  viewMode,
+  toggleViewMode,
+}: {
+  readonly showGalleryToggle: boolean;
+  readonly viewMode: "chat" | "gallery";
+  readonly toggleViewMode: () => void;
+}) => {
+  if (!showGalleryToggle) {
+    return null;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggleViewMode}
+      aria-label={
+        viewMode === "chat" ? "Switch to gallery view" : "Switch to chat view"
+      }
+      className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300"
+    >
+      {viewMode === "chat" ? (
+        <Squares2X2Icon className="tw-h-5 tw-w-5" />
+      ) : (
+        <ChatBubbleLeftIcon className="tw-h-5 tw-w-5" />
+      )}
+    </button>
+  );
+};
+
+const HeaderWaveLinkAction = ({
+  showWaveLinkAction,
+  handleWaveLinkActionClick,
+  waveLinkActionLabel,
+  waveLinkActionMode,
+  waveLinkActionIconColor,
+  renderWaveLinkActionIcon,
+}: {
+  readonly showWaveLinkAction: boolean;
+  readonly handleWaveLinkActionClick: () => void;
+  readonly waveLinkActionLabel: string;
+  readonly waveLinkActionMode: string;
+  readonly waveLinkActionIconColor: string;
+  readonly renderWaveLinkActionIcon: () => ReactNode;
+}) => {
+  if (!showWaveLinkAction) {
+    return null;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleWaveLinkActionClick}
+      aria-label={waveLinkActionLabel}
+      title={waveLinkActionLabel}
+      data-wave-link-action-mode={waveLinkActionMode}
+      className={`tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 ${waveLinkActionIconColor}`}
+    >
+      {renderWaveLinkActionIcon()}
+    </button>
+  );
+};
+
+const switchToNextConnectedAccount = ({
+  connectedAccounts,
+  seizeSwitchConnectedAccount,
+  onFailure,
+}: {
+  readonly connectedAccounts: readonly HeaderConnectedAccount[];
+  readonly seizeSwitchConnectedAccount: (address: string) => void;
+  readonly onFailure: (error: unknown) => void;
+}): boolean => {
+  if (connectedAccounts.length < 2) {
+    return false;
+  }
+
+  const activeIndex = connectedAccounts.findIndex(
+    (account) => account.isActive
+  );
+  const currentIndex = Math.max(activeIndex, 0);
+  const nextAccount =
+    connectedAccounts[(currentIndex + 1) % connectedAccounts.length];
+
+  if (!nextAccount) {
+    return false;
+  }
+
+  try {
+    seizeSwitchConnectedAccount(nextAccount.address);
+    return true;
+  } catch (error) {
+    onFailure(error);
+    return false;
+  }
+};
+
+const handleProfileActivate = ({
+  address,
+  profileClickTimeoutRef,
+  openMenu,
+  switchConnectedAccount,
+}: {
+  readonly address: string | null | undefined;
+  readonly profileClickTimeoutRef: HeaderTimeoutRef;
+  readonly openMenu: () => void;
+  readonly switchConnectedAccount: () => boolean;
+}) => {
+  if (!address) {
+    openMenu();
+    return;
+  }
+
+  if (profileClickTimeoutRef.current) {
+    clearTimeout(profileClickTimeoutRef.current);
+    profileClickTimeoutRef.current = null;
+
+    if (!switchConnectedAccount()) {
+      openMenu();
+    }
+    return;
+  }
+
+  profileClickTimeoutRef.current = setTimeout(() => {
+    profileClickTimeoutRef.current = null;
+    openMenu();
+  }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
 };
 
 export default function AppHeader() {
@@ -139,13 +372,12 @@ export default function AppHeader() {
   );
 
   const pathSegments = pathname.split("/").filter(Boolean);
-  const basePath = pathSegments.length ? pathSegments[0] : "";
-  const pageTitle = pathSegments.length
-    ? pathSegments
-        .at(-1)
-        ?.replaceAll(/[-_]/g, " ")
-        .replace(/^./, (c) => c.toUpperCase())
-    : "Home";
+  const basePath = pathSegments[0] ?? "";
+  const pageTitle =
+    pathSegments
+      .at(-1)
+      ?.replaceAll(/[-_]/g, " ")
+      .replace(/^./, (c) => c.toUpperCase()) ?? "Home";
 
   const waveId = myStream?.activeWave.id ?? null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
@@ -234,76 +466,36 @@ export default function AppHeader() {
     <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
   );
   const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
+  const openMenu = () => setMenuOpen(true);
+  const onProfileActivate = () =>
+    handleProfileActivate({
+      address,
+      profileClickTimeoutRef,
+      openMenu,
+      switchConnectedAccount: () =>
+        switchToNextConnectedAccount({
+          connectedAccounts,
+          seizeSwitchConnectedAccount,
+          onFailure: (error) => {
+            console.error(
+              "Failed to switch connected account from header",
+              error
+            );
+          },
+        }),
+    });
 
-  const switchToNextConnectedAccount = (): boolean => {
-    if (connectedAccounts.length < 2) {
-      return false;
-    }
-
-    const activeIndex = connectedAccounts.findIndex(
-      (account) => account.isActive
-    );
-    const currentIndex = Math.max(activeIndex, 0);
-    const nextAccount =
-      connectedAccounts[(currentIndex + 1) % connectedAccounts.length];
-    if (!nextAccount) {
-      return false;
-    }
-
-    try {
-      seizeSwitchConnectedAccount(nextAccount.address);
-      return true;
-    } catch (error) {
-      console.error("Failed to switch connected account from header", error);
-      setMenuOpen(true);
-      return false;
-    }
-  };
-
-  const onProfileActivate = () => {
-    if (!address) {
-      setMenuOpen(true);
-      return;
-    }
-
-    if (profileClickTimeoutRef.current) {
-      clearTimeout(profileClickTimeoutRef.current);
-      profileClickTimeoutRef.current = null;
-
-      const didSwitchAccount = switchToNextConnectedAccount();
-      if (!didSwitchAccount) {
-        setMenuOpen(true);
-      }
-      return;
-    }
-
-    profileClickTimeoutRef.current = setTimeout(() => {
-      profileClickTimeoutRef.current = null;
-      setMenuOpen(true);
-    }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
-  };
-
-  const finalTitle: React.ReactNode = (() => {
-    if (pathname === "/waves/create") return "Waves";
-    if (pathname === "/messages/create") return "Messages";
-    if (isWavesRoute && !waveId) return "Waves";
-    if (isMessagesRoute && !waveId) return "Messages";
-    if (waveId) {
-      if (isWaveResolving) return <Spinner />;
-      return wave?.name;
-    }
-
-    const collectionTitle = getCollectionTitle(basePath!, pageTitle!);
-    if (collectionTitle) return collectionTitle;
-
-    const rememesTitle = getRememesTitle(pathSegments);
-    if (rememesTitle) return rememesTitle;
-
-    const dropForgeTitle = getDropForgeTitle(pathSegments);
-    if (dropForgeTitle) return dropForgeTitle;
-
-    return sliceString(capitalizeEveryWord(pageTitle!), 20);
-  })();
+  const finalTitle = getHeaderTitle({
+    pathname,
+    waveId,
+    wave,
+    isWaveResolving,
+    isWavesRoute,
+    isMessagesRoute,
+    basePath,
+    pageTitle,
+    pathSegments,
+  });
 
   return (
     <div className="tw-w-full tw-bg-black tw-pt-[env(safe-area-inset-top,0px)] tw-text-iron-50">
@@ -324,77 +516,32 @@ export default function AppHeader() {
           </button>
         )}
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
-          {activeWave !== null && !isWaveResolving ? (
-            <div className="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-items-center tw-gap-2">
-              <div className="tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
-                <WavePicture
-                  name={activeWave.name}
-                  picture={activeWave.picture ?? null}
-                  contributors={activeWave.contributors_overview.map((c) => ({
-                    pfp: c.contributor_pfp,
-                    identity: c.contributor_identity,
-                  }))}
-                />
-              </div>
-              {!isDm && previewText !== null ? (
-                <WaveDescriptionPopover
-                  wave={activeWave}
-                  align="center"
-                  ariaLabel="Show wave description"
-                  triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
-                >
-                  <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
-                    {activeWave.name}
-                  </span>
-                  <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
-                    {previewText}
-                  </span>
-                </WaveDescriptionPopover>
-              ) : (
-                <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-                  {activeWave.name}
-                </span>
-              )}
-            </div>
-          ) : (
-            <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>
-          )}
+          <HeaderTitleContent
+            activeWave={activeWave}
+            isWaveResolving={isWaveResolving}
+            isDm={isDm}
+            previewText={previewText}
+            finalTitle={finalTitle}
+          />
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-x-1">
-          {showGalleryToggle && (
-            <button
-              type="button"
-              onClick={toggleViewMode}
-              aria-label={
-                viewMode === "chat"
-                  ? "Switch to gallery view"
-                  : "Switch to chat view"
-              }
-              className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300"
-            >
-              {viewMode === "chat" ? (
-                <Squares2X2Icon className="tw-h-5 tw-w-5" />
-              ) : (
-                <ChatBubbleLeftIcon className="tw-h-5 tw-w-5" />
-              )}
-            </button>
-          )}
+          <HeaderGalleryToggle
+            showGalleryToggle={showGalleryToggle}
+            viewMode={viewMode}
+            toggleViewMode={toggleViewMode}
+          />
           <div className="tw-flex-shrink-0">
             <HeaderActionButtons />
           </div>
           {isHomeRoute && <NetworkHealthCTA className="md:tw-hidden" />}
-          {showWaveLinkAction && (
-            <button
-              type="button"
-              onClick={handleWaveLinkActionClick}
-              aria-label={waveLinkActionLabel}
-              title={waveLinkActionLabel}
-              data-wave-link-action-mode={waveLinkActionMode}
-              className={`tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 ${waveLinkActionIconColor}`}
-            >
-              {renderWaveLinkActionIcon()}
-            </button>
-          )}
+          <HeaderWaveLinkAction
+            showWaveLinkAction={showWaveLinkAction}
+            handleWaveLinkActionClick={handleWaveLinkActionClick}
+            waveLinkActionLabel={waveLinkActionLabel}
+            waveLinkActionMode={waveLinkActionMode}
+            waveLinkActionIconColor={waveLinkActionIconColor}
+            renderWaveLinkActionIcon={renderWaveLinkActionIcon}
+          />
           <div className="tw-flex-shrink-0">
             <HeaderSearchButton
               wave={

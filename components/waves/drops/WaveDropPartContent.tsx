@@ -39,6 +39,7 @@ interface WaveDropPartContentProps {
   readonly drop?: ApiDrop | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
@@ -64,6 +65,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   drop,
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
+  fullWidthMedia = false,
   onLinkCardActionsActiveChange,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -167,6 +169,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
               activePart={activePart}
               isCompetitionDrop={isCompetitionDrop}
               imageScale={mediaImageScale}
+              fullWidthMedia={fullWidthMedia}
             />
           )}
         </div>

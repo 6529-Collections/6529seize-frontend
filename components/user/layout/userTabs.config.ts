@@ -1,5 +1,6 @@
 export type UserPageVisibilityContext = {
   readonly showWaves: boolean;
+  readonly hasProfileWave: boolean;
   readonly hideSubscriptions: boolean;
   readonly isOwnProfile: boolean;
 };
@@ -26,6 +27,13 @@ const TAB_DEFINITIONS = [
     title: "Brain",
     route: "brain",
     isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
+  },
+  {
+    id: "waves",
+    title: "Curation",
+    route: "curations",
+    isVisible: ({ hasProfileWave }: UserPageVisibilityContext) =>
+      hasProfileWave,
   },
   {
     id: "collected",

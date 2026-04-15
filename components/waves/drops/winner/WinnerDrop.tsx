@@ -5,7 +5,11 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import MemeWinnerDrop from "@/components/memes/drops/MemeWinnerDrop";
 import DefaultWinnerDrop from "./DefaultWinnerDrop";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import type { DropInteractionParams, DropLocation } from "../drop.types";
+import type {
+  DropIdentityMode,
+  DropInteractionParams,
+  DropLocation,
+} from "../drop.types";
 
 interface WinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -21,6 +25,8 @@ interface WinnerDropProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
+  readonly identityMode?: DropIdentityMode | undefined;
+  readonly showInteractions?: boolean | undefined;
 }
 
 const WinnerDrop = (props: WinnerDropProps) => {

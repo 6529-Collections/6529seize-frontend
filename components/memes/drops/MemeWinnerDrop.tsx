@@ -23,6 +23,7 @@ interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
   readonly showReplyAndQuote: boolean;
   readonly onReply: (param: DropInteractionParams) => void;
+  readonly showInteractions?: boolean | undefined;
 }
 
 const getRankHoverClass = (rank: number | null): string => {
@@ -33,6 +34,7 @@ export default function MemeWinnerDrop({
   drop,
   showReplyAndQuote,
   onReply,
+  showInteractions = true,
 }: MemeWinnerDropProps) {
   const isMobile = useIsMobileDevice();
   const { location } = useDropContext();
@@ -53,6 +55,41 @@ export default function MemeWinnerDrop({
   }, [onReply, drop]);
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
+  const content = (
+    <>
+      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 tw-pb-3">
+        <MemeWinnerArtistInfo drop={drop} />
+      </div>
+
+      <div className="tw-px-4 tw-pb-4 tw-pt-4">
+        <div className="tw-space-y-1">
+          <MemeWinnerHeader title={title} />
+          <MemeWinnerDescription description={description} />
+        </div>
+      </div>
+
+      <WaveWinnerIdentity
+        drop={drop}
+        variant="full"
+        className="tw-px-4 tw-pb-4"
+      />
+
+      {artworkMedia && (
+        <div className="tw-mx-0.5 tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">
+          <DropListItemContentMedia
+            media_mime_type={artworkMedia.mime_type}
+            media_url={artworkMedia.url}
+            isCompetitionDrop={true}
+          />
+        </div>
+      )}
+
+      <div className="tw-mt-4 tw-hidden tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 lg:tw-block">
+        <MemeDropTraits drop={drop} />
+      </div>
+    </>
+  );
+
   return (
     <div className="tw-mb-3 tw-w-full">
       <div
@@ -69,45 +106,18 @@ export default function MemeWinnerDrop({
               : "tw-bg-iron-950"
           } ${getRankHoverClass(effectiveRank)}`}
         >
-          <DropMobileMenuHandler
-            drop={drop}
-            showReplyAndQuote={showReplyAndQuote}
-            onReply={handleOnReply}
-          >
-            <>
-              <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 tw-pb-3">
-                <MemeWinnerArtistInfo drop={drop} />
-              </div>
-
-              <div className="tw-px-4 tw-pb-4 tw-pt-4">
-                <div className="tw-space-y-1">
-                  <MemeWinnerHeader title={title} />
-                  <MemeWinnerDescription description={description} />
-                </div>
-              </div>
-
-              <WaveWinnerIdentity
-                drop={drop}
-                variant="full"
-                className="tw-px-4 tw-pb-4"
-              />
-
-              {artworkMedia && (
-                <div className="tw-mx-0.5 tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">
-                  <DropListItemContentMedia
-                    media_mime_type={artworkMedia.mime_type}
-                    media_url={artworkMedia.url}
-                    isCompetitionDrop={true}
-                  />
-                </div>
-              )}
-
-              <div className="tw-mt-4 tw-hidden tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 lg:tw-block">
-                <MemeDropTraits drop={drop} />
-              </div>
-            </>
-          </DropMobileMenuHandler>
-          {!isMobile && showReplyAndQuote && (
+          {showInteractions ? (
+            <DropMobileMenuHandler
+              drop={drop}
+              showReplyAndQuote={showReplyAndQuote}
+              onReply={handleOnReply}
+            >
+              {content}
+            </DropMobileMenuHandler>
+          ) : (
+            content
+          )}
+          {!isMobile && showInteractions && showReplyAndQuote && (
             <div className="tw-absolute tw-right-4 tw-top-2">
               <WaveDropActions
                 drop={drop}

@@ -27,6 +27,7 @@ interface MemeParticipationDropProps {
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
+  readonly showInteractions?: boolean | undefined;
 }
 
 // Border styling based on rank
@@ -62,6 +63,7 @@ export default function MemeParticipationDrop({
   showReplyAndQuote,
   location,
   onReply,
+  showInteractions = true,
 }: MemeParticipationDropProps) {
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { canShowVote } = useDropInteractionRules(drop);
@@ -86,6 +88,37 @@ export default function MemeParticipationDrop({
     onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
 
+  const content = (
+    <>
+      <div className="tw-p-4">
+        <MemeDropArtistInfo drop={drop} />
+        <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-1.5">
+          <MemeDropHeader title={title} />
+          <MemeDropDescription description={description} />
+        </div>
+      </div>
+      {artworkMedia && (
+        <div
+          className={`tw-flex tw-h-96 tw-justify-center ${
+            location === DropLocation.WAVE
+              ? "tw-bg-iron-800/30"
+              : "tw-bg-iron-900/40"
+          }`}
+        >
+          <DropListItemContentMedia
+            media_mime_type={artworkMedia.mime_type}
+            media_url={artworkMedia.url}
+            isCompetitionDrop={true}
+          />
+        </div>
+      )}
+
+      <div className="tw-px-4 tw-py-4">
+        <MemeDropTraits drop={drop} />
+      </div>
+    </>
+  );
+
   return (
     <div className="tw-w-full tw-@container">
       <div
@@ -100,40 +133,17 @@ export default function MemeParticipationDrop({
               : "tw-bg-iron-950"
           }`}
         >
-          <DropMobileMenuHandler
-            drop={drop}
-            showReplyAndQuote={showReplyAndQuote}
-            onReply={handleOnReply}
-          >
-            <>
-              <div className="tw-p-4">
-                <MemeDropArtistInfo drop={drop} />
-                <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-1.5">
-                  <MemeDropHeader title={title} />
-                  <MemeDropDescription description={description} />
-                </div>
-              </div>
-              {artworkMedia && (
-                <div
-                  className={`tw-flex tw-h-96 tw-justify-center ${
-                    location === DropLocation.WAVE
-                      ? "tw-bg-iron-800/30"
-                      : "tw-bg-iron-900/40"
-                  }`}
-                >
-                  <DropListItemContentMedia
-                    media_mime_type={artworkMedia.mime_type}
-                    media_url={artworkMedia.url}
-                    isCompetitionDrop={true}
-                  />
-                </div>
-              )}
-
-              <div className="tw-px-4 tw-py-4">
-                <MemeDropTraits drop={drop} />
-              </div>
-            </>
-          </DropMobileMenuHandler>
+          {showInteractions ? (
+            <DropMobileMenuHandler
+              drop={drop}
+              showReplyAndQuote={showReplyAndQuote}
+              onReply={handleOnReply}
+            >
+              {content}
+            </DropMobileMenuHandler>
+          ) : (
+            content
+          )}
           <div className="tw-flex tw-flex-col tw-justify-between tw-gap-3 tw-pb-4 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-gap-y-0 @[700px]:tw-px-4">
             <div className="tw-px-4 @[700px]:tw-px-0">
               <MemeDropVoteStats
@@ -146,7 +156,7 @@ export default function MemeParticipationDrop({
               />
             </div>
 
-            {canShowVote && (
+            {canShowVote && showInteractions && (
               <div className="tw-flex tw-w-full tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-w-auto @[700px]:tw-border-none @[700px]:tw-px-0 @[700px]:tw-pt-0">
                 <div onClick={(e) => e.stopPropagation()}>
                   <VotingModalButton
@@ -158,33 +168,38 @@ export default function MemeParticipationDrop({
             )}
           </div>
 
-          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
-            <WaveDropReactions drop={drop} />
-          </div>
+          {showInteractions && (
+            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+              <WaveDropReactions drop={drop} />
+            </div>
+          )}
 
-          <div className="tw-absolute tw-right-4 tw-top-2">
-            <MemeDropActions
-              drop={drop}
-              isMobile={isMobile}
-              showReplyAndQuote={showReplyAndQuote}
-              onReply={handleOnReply}
-            />
-          </div>
+          {showInteractions && (
+            <div className="tw-absolute tw-right-4 tw-top-2">
+              <MemeDropActions
+                drop={drop}
+                isMobile={isMobile}
+                showReplyAndQuote={showReplyAndQuote}
+                onReply={handleOnReply}
+              />
+            </div>
+          )}
         </div>
 
-        {isMobileScreen ? (
-          <MobileVotingModal
-            drop={drop}
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
-          />
-        ) : (
-          <VotingModal
-            drop={drop}
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
-          />
-        )}
+        {showInteractions &&
+          (isMobileScreen ? (
+            <MobileVotingModal
+              drop={drop}
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+            />
+          ) : (
+            <VotingModal
+              drop={drop}
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+            />
+          ))}
       </div>
     </div>
   );
