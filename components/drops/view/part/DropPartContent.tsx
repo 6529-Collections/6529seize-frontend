@@ -2,11 +2,13 @@ import React from "react";
 import DropPartMarkdown from "./DropPartMarkdown";
 import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { MentionedWave } from "@/entities/IDrop";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 
 interface DropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];
+  readonly mentionedGroups?: ApiDropGroupMention[] | undefined;
   readonly mentionedWaves: MentionedWave[];
   readonly referencedNfts: ApiDropReferencedNFT[];
   readonly partContent: string | null;
@@ -21,6 +23,7 @@ interface DropPartContentProps {
 
 const DropPartContent: React.FC<DropPartContentProps> = ({
   mentionedUsers,
+  mentionedGroups = [],
   mentionedWaves,
   referencedNfts,
   partContent,
@@ -34,6 +37,7 @@ const DropPartContent: React.FC<DropPartContentProps> = ({
       <div className="tw-group">
         <DropPartMarkdown
           mentionedUsers={mentionedUsers}
+          mentionedGroups={mentionedGroups}
           mentionedWaves={mentionedWaves}
           referencedNfts={referencedNfts}
           partContent={partContent}

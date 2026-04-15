@@ -52,6 +52,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 const setQueryDataMock = jest.fn();
 
@@ -216,6 +217,36 @@ describe("DropPartMarkdown", () => {
     const a = screen.getByRole("link", { name: "link" });
     expect(a).toHaveAttribute("target", "_blank");
     expect(a).toHaveAttribute("rel", "noopener noreferrer nofollow");
+  });
+
+  it("renders @all as a blue group mention only when ALL is in mentioned groups", () => {
+    const { rerender } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedGroups={[ApiDropGroupMention.All]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"hello @all"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("@all")).toHaveClass("tw-text-primary-400");
+
+    rerender(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedGroups={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"hello @all"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("hello @all")).not.toHaveClass(
+      "tw-text-primary-400"
+    );
   });
 
   it("renders Art Blocks token card when feature enabled", async () => {

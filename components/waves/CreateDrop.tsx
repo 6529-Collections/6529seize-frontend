@@ -26,6 +26,7 @@ import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
+import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -113,6 +114,8 @@ export default function CreateDrop({
   const isCurationDropMode =
     submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
     isDropMode;
+  const canMentionAll =
+    wave.wave.authenticated_user_eligible_for_admin === true;
 
   const canSwitchDropMode = useCallback(
     (newIsDropMode: boolean) => {
@@ -173,20 +176,27 @@ export default function CreateDrop({
     [canSwitchDropMode, modeScopeToken]
   );
 
-  const onRemovePart = useCallback((partIndex: number) => {
-    setDrop((prevDrop) => {
-      if (!prevDrop) return null;
-      const newParts = prevDrop.parts.filter((_, i) => i !== partIndex);
-      return {
-        ...prevDrop,
-        parts: newParts,
-        referenced_nfts: prevDrop.referenced_nfts,
-        mentioned_users: prevDrop.mentioned_users,
-        mentioned_waves: prevDrop.mentioned_waves ?? [],
-        metadata: prevDrop.metadata,
-      };
-    });
-  }, []);
+  const onRemovePart = useCallback(
+    (partIndex: number) => {
+      setDrop((prevDrop) => {
+        if (!prevDrop) return null;
+        const newParts = prevDrop.parts.filter((_, i) => i !== partIndex);
+        return {
+          ...prevDrop,
+          parts: newParts,
+          referenced_nfts: prevDrop.referenced_nfts,
+          mentioned_users: prevDrop.mentioned_users,
+          mentioned_groups: getMentionedGroupsFromParts(
+            newParts,
+            canMentionAll
+          ),
+          mentioned_waves: prevDrop.mentioned_waves ?? [],
+          metadata: prevDrop.metadata,
+        };
+      });
+    },
+    [canMentionAll]
+  );
 
   const addDropMutation = useMutation({
     mutationFn: async (body: DropMutationBody) => {
@@ -344,6 +354,7 @@ export default function CreateDrop({
             <CreateDropStormParts
               parts={drop?.parts ?? []}
               mentionedUsers={drop?.mentioned_users ?? []}
+              mentionedGroups={drop?.mentioned_groups ?? []}
               mentionedWaves={drop?.mentioned_waves ?? []}
               referencedNfts={drop?.referenced_nfts ?? []}
               onRemovePart={onRemovePart}

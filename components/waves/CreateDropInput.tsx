@@ -36,6 +36,7 @@ import type {
 } from "@/entities/IDrop";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { MentionNode } from "../drops/create/lexical/nodes/MentionNode";
+import { GroupMentionNode } from "../drops/create/lexical/nodes/GroupMentionNode";
 import { HashtagNode } from "../drops/create/lexical/nodes/HashtagNode";
 import { WaveMentionNode } from "../drops/create/lexical/nodes/WaveMentionNode";
 import { ImageNode } from "../drops/create/lexical/nodes/ImageNode";
@@ -98,6 +99,7 @@ const CreateDropInput = forwardRef<
     readonly isStormMode: boolean;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
+    readonly canMentionAll?: boolean | undefined;
     readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onEditorBlur?: (event: FocusEvent<HTMLDivElement>) => void;
@@ -116,6 +118,7 @@ const CreateDropInput = forwardRef<
       canSubmit,
       isStormMode,
       isDropMode,
+      canMentionAll = false,
       submitting,
       onEditorState,
       onEditorBlur,
@@ -131,6 +134,7 @@ const CreateDropInput = forwardRef<
       namespace: "User Drop",
       nodes: [
         MentionNode,
+        GroupMentionNode,
         HashtagNode,
         WaveMentionNode,
         RootNode,
@@ -295,6 +299,7 @@ const CreateDropInput = forwardRef<
               <NewMentionsPlugin
                 waveId={waveId}
                 onSelect={onMentionedUserAdded}
+                canMentionAll={canMentionAll}
                 ref={mentionsPluginRef}
               />
               <NewWaveMentionsPlugin
