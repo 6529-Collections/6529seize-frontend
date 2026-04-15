@@ -4,10 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import MyStreamWaveCurationContent from "@/components/brain/my-stream/curations/MyStreamWaveCurationContent";
 import UserPageProfileWaveMasonry from "@/components/user/waves/UserPageProfileWaveMasonry";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { useProfileCurationViewMode } from "@/hooks/useProfileCurationViewMode";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
@@ -28,7 +25,6 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
-import { Tooltip } from "react-tooltip";
 
 type ApiErrorLike = {
   readonly status?: number | undefined;
@@ -172,108 +168,6 @@ const getProfilePageSearchString = (searchString: string): string => {
   return params.toString();
 };
 
-function ProfileCurationViewToggle({
-  viewMode,
-  onChange,
-}: {
-  readonly viewMode: "masonry" | "list";
-  readonly onChange: (mode: "masonry" | "list") => void;
-}) {
-  const viewModes = [
-    {
-      mode: "list" as const,
-      label: "List view",
-      tooltipId: "profile-curation-view-toggle-list",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="tw-size-5 tw-flex-shrink-0"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-          />
-        </svg>
-      ),
-    },
-    {
-      mode: "masonry" as const,
-      label: "Grid view",
-      tooltipId: "profile-curation-view-toggle-grid",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="tw-size-5 tw-flex-shrink-0"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
-          />
-        </svg>
-      ),
-    },
-  ];
-
-  const getViewModeTabClass = (mode: "masonry" | "list"): string => {
-    const baseClassName =
-      "tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-transparent tw-transition-colors";
-
-    if (viewMode === mode) {
-      return `${baseClassName} tw-border-primary-500/50 tw-bg-primary-600/20 tw-text-primary-400`;
-    }
-
-    return `${baseClassName} tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-300`;
-  };
-
-  return (
-    <div
-      role="tablist"
-      aria-label="Profile curation view modes"
-      className="tw-flex tw-flex-shrink-0 tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
-    >
-      {viewModes.map((mode) => (
-        <div key={mode.mode}>
-          <button
-            type="button"
-            role="tab"
-            aria-label={mode.label}
-            aria-selected={viewMode === mode.mode}
-            tabIndex={viewMode === mode.mode ? 0 : -1}
-            className={getViewModeTabClass(mode.mode)}
-            onClick={() => onChange(mode.mode)}
-            data-tooltip-id={mode.tooltipId}
-          >
-            {mode.icon}
-            <span className="tw-sr-only">{mode.label}</span>
-          </button>
-          <Tooltip
-            id={mode.tooltipId}
-            place="top"
-            offset={8}
-            opacity={1}
-            positionStrategy="fixed"
-            style={TOOLTIP_STYLES}
-          >
-            <span className="tw-text-xs">{mode.label}</span>
-          </Tooltip>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 const getProfileCurationTitle = (
   profileCuration: ApiWaveCuration | null
 ): string => {
@@ -289,7 +183,6 @@ function ProfileCurationBody({
   onRetryCurations,
   profileCuration,
   profileIdentity,
-  viewMode,
   wave,
 }: {
   readonly areCurationsError: boolean;
@@ -303,7 +196,6 @@ function ProfileCurationBody({
     readonly handle?: string | null | undefined;
     readonly primary_address?: string | null | undefined;
   };
-  readonly viewMode: "masonry" | "list";
   readonly wave: NonNullable<ReturnType<typeof useWaveById>["wave"]>;
 }) {
   if (areCurationsLoading) {
@@ -339,24 +231,13 @@ function ProfileCurationBody({
     );
   }
 
-  if (viewMode === "masonry") {
-    return (
-      <UserPageProfileWaveMasonry
-        wave={wave}
-        curationId={profileCuration.id}
-        curationName={profileCuration.name}
-        showIdentity={false}
-        profileIdentity={profileIdentity}
-      />
-    );
-  }
-
   return (
-    <MyStreamWaveCurationContent
+    <UserPageProfileWaveMasonry
       wave={wave}
       curationId={profileCuration.id}
       curationName={profileCuration.name}
-      constrainToViewport={false}
+      showIdentity={false}
+      profileIdentity={profileIdentity}
     />
   );
 }
@@ -393,7 +274,6 @@ export default function UserPageProfileWave({
   });
   const { clearSelectedProfileWave, isPending, pendingAction } =
     useProfileWaveMutation(resolvedProfile);
-  const { viewMode, setViewMode } = useProfileCurationViewMode();
   const isOwnProfile = isOwnProfileRoute({
     connectedProfile,
     handleOrWallet,
@@ -519,12 +399,6 @@ export default function UserPageProfileWave({
           </div>
 
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 sm:tw-justify-end">
-            {profileCuration && (
-              <ProfileCurationViewToggle
-                viewMode={viewMode}
-                onChange={setViewMode}
-              />
-            )}
             <button
               type="button"
               onClick={openWave}
@@ -565,7 +439,6 @@ export default function UserPageProfileWave({
               onRetryCurations={retryCurationsLoad}
               profileCuration={profileCuration}
               profileIdentity={profileIdentityForMasonry}
-              viewMode={viewMode}
               wave={wave}
             />
           </div>
