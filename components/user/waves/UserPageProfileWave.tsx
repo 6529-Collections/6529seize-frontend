@@ -293,15 +293,20 @@ export default function UserPageProfileWave({
     () => resolveProfileCuration(curations ?? []),
     [curations]
   );
+  const activeProfileCurationId = profileCuration?.id ?? null;
   const {
+    dataUpdatedAt: dropsDataUpdatedAt,
     drops,
     fetchNextPage,
-    hasLoadedInitialPage: hasLoadedInitialDrops,
     hasNextPage,
+    isError: areDropsError,
+    isFetching: areDropsFetching,
     isFetchingNextPage,
+    isPlaceholderData: areDropsPlaceholderData,
+    refetch: refetchDrops,
   } = useWaveDrops({
     waveId: profileWaveId ?? "",
-    curationId: profileCuration?.id,
+    curationId: activeProfileCurationId ?? undefined,
     enabled: profileCuration !== null,
   });
   const profileCurationTitle = useMemo(
@@ -360,12 +365,26 @@ export default function UserPageProfileWave({
   const retryCurationsLoad = useCallback(async () => {
     await refetchCurations();
   }, [refetchCurations]);
+  const retryDropsLoad = useCallback(async () => {
+    await refetchDrops();
+  }, [refetchDrops]);
   const clearProfileWave = useCallback(async () => {
     await clearSelectedProfileWave();
   }, [clearSelectedProfileWave]);
-  const shouldWaitForDrops = profileCuration !== null && !hasLoadedInitialDrops;
+  const hasResolvedCurrentDrops =
+    activeProfileCurationId !== null &&
+    dropsDataUpdatedAt > 0 &&
+    !areDropsPlaceholderData;
+  const hasDropsLoadError =
+    activeProfileCurationId !== null &&
+    !hasResolvedCurrentDrops &&
+    areDropsError;
+  const shouldWaitForDrops =
+    activeProfileCurationId !== null &&
+    !hasResolvedCurrentDrops &&
+    !hasDropsLoadError;
   const shouldWaitForMasonryWidth =
-    profileCuration !== null && drops.length > 0 && containerWidth === 0;
+    hasResolvedCurrentDrops && drops.length > 0 && containerWidth === 0;
   const isInitialLoading =
     isLoading ||
     areCurationsLoading ||
@@ -393,6 +412,17 @@ export default function UserPageProfileWave({
         description="There was a temporary problem loading this profile curation. Try again."
         isRetrying={isFetching}
         onRetry={retryLoad}
+      />
+    );
+  }
+
+  if (hasDropsLoadError) {
+    return (
+      <LoadErrorState
+        title="Unable to load curation"
+        description="There was a temporary problem loading this curation. Try again."
+        isRetrying={areDropsFetching}
+        onRetry={retryDropsLoad}
       />
     );
   }

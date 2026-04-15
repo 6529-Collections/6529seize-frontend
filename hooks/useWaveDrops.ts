@@ -75,10 +75,14 @@ export function useWaveDrops({
 
   const {
     data,
+    dataUpdatedAt,
+    error,
     fetchNextPage: onFetchNextPage,
     hasNextPage,
+    isError,
     isFetching,
     isFetchingNextPage,
+    isPlaceholderData,
     refetch,
   } = useInfiniteQuery({
     queryKey,
@@ -126,7 +130,6 @@ export function useWaveDrops({
   }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
 
   const drops = useMemo(() => processDrops(data?.pages), [data?.pages]);
-  const hasLoadedInitialPage = data !== undefined;
   const requestRefetch = useDebouncedQueryRefetch({
     refetch,
     isFetching,
@@ -148,12 +151,15 @@ export function useWaveDrops({
   );
 
   return {
+    dataUpdatedAt,
     drops,
+    error,
     fetchNextPage,
     hasNextPage,
-    hasLoadedInitialPage,
+    isError,
     isFetching,
     isFetchingNextPage,
+    isPlaceholderData,
     refetch,
   };
 }
