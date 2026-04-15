@@ -74,12 +74,6 @@ const MASONRY_COLUMN_WIDTH = 300;
 const MASONRY_GUTTER = 16;
 const REORDER_PAGE_SIZE = 100;
 
-export type UserPageProfileWaveMasonryReorderState = {
-  readonly canReorder: boolean;
-  readonly isPreparing: boolean;
-  readonly isSaving: boolean;
-};
-
 type ProfileIdentitySummary = {
   readonly id?: string | null | undefined;
   readonly handle?: string | null | undefined;
