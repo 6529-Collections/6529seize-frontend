@@ -14,6 +14,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
+import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
 import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
@@ -293,12 +294,19 @@ function LoadedProfileWaveState({
 }) {
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
+  const activeCurationId = profileCuration?.id ?? "";
   const { drops: curationDrops } = useWaveCurationDrops({
     wave,
-    curationId: profileCuration?.id ?? "",
+    curationId: activeCurationId,
     enabled: canClear && !!profileCuration,
   });
-  const canReorder = canClear && !!profileCuration && curationDrops.length > 1;
+  const canManageProfileCuration = useCurationManagementPermission({
+    curationId: activeCurationId,
+    probeDropId: curationDrops[0]?.id ?? "",
+    enabled: canClear && !!profileCuration,
+  });
+  const canManageProfileWave = canClear && canManageProfileCuration;
+  const canReorder = canManageProfileWave && curationDrops.length > 1;
   const isReorderModeActive = isReorderMode && canReorder;
   const isClearPending = isPending && pendingAction === "clear";
   const reorderButtonClassName = isReorderModeActive
@@ -397,7 +405,7 @@ function LoadedProfileWaveState({
                 areCurationsError={areCurationsError}
                 areCurationsFetching={areCurationsFetching}
                 areCurationsLoading={areCurationsLoading}
-                canManageProfileWave={canClear}
+                canManageProfileWave={canManageProfileWave}
                 hasLoadedCurations={hasLoadedCurations}
                 isReorderMode={isReorderModeActive}
                 onReorderModeChange={setIsReorderMode}

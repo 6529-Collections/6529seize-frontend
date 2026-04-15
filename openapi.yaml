@@ -8631,10 +8631,6 @@ components:
       properties:
         curation_id:
           type: string
-    ApiDropGroupMention:
-      type: string
-      enum:
-        - ALL
         priority_order:
           type: integer
           format: int64

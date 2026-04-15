@@ -22,7 +22,7 @@ export function useDropCurationOrderMutation({
 
   const mutation = useMutation({
     mutationFn: async (updates: readonly DropCurationOrderUpdate[]) => {
-      await Promise.all(
+      const results = await Promise.allSettled(
         updates.map(async ({ dropId, priorityOrder }) => {
           const body: ApiDropCurationRequest = {
             curation_id: curationId,
@@ -35,6 +35,14 @@ export function useDropCurationOrderMutation({
           });
         })
       );
+
+      const firstRejected = results.find(
+        (result): result is PromiseRejectedResult => result.status === "rejected"
+      );
+
+      if (firstRejected) {
+        throw firstRejected.reason;
+      }
     },
     onSuccess: () => {
       invalidateDrops();
