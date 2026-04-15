@@ -575,6 +575,7 @@ const WaveDrop = ({
     (
       newContent: string,
       mentions?: ApiDropMentionedUser[],
+      _mentionedGroups?: unknown,
       mentionedWaves?: ApiMentionedWave[]
     ) => {
       // Clean mentioned users to only include allowed fields for API
@@ -591,13 +592,14 @@ const WaveDrop = ({
           wave_name_in_content: wave.wave_name_in_content,
         })
       );
+      const updatedParts = drop.parts.map((part, index) => ({
+        content: index === activePartIndex ? newContent : part.content,
+        quoted_drop: part.quoted_drop ?? null,
+        media: part.media,
+      }));
 
       const updateRequest: ApiUpdateDropRequest = {
-        parts: drop.parts.map((part, index) => ({
-          content: index === activePartIndex ? newContent : part.content,
-          quoted_drop: part.quoted_drop ?? null,
-          media: part.media,
-        })),
+        parts: updatedParts,
         title: drop.title,
         metadata: drop.metadata,
         referenced_nfts: drop.referenced_nfts,

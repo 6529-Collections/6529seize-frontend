@@ -1,6 +1,9 @@
 "use client";
 
-import { $convertFromMarkdownString } from "@lexical/markdown";
+import {
+  $convertFromMarkdownString,
+  type Transformer,
+} from "@lexical/markdown";
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -50,6 +53,7 @@ import {
   $createMentionNode,
   MentionNode,
 } from "@/components/drops/create/lexical/nodes/MentionNode";
+import { GroupMentionNode } from "@/components/drops/create/lexical/nodes/GroupMentionNode";
 import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
 import type { NewMentionsPluginHandles } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
@@ -59,8 +63,11 @@ import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/Plai
 import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
 import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
+import { GROUP_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/GroupMentionTransformer";
+import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { WAVE_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/WaveMentionTransformer";
 import type { MentionedUser, MentionedWave } from "@/entities/IDrop";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -73,16 +80,20 @@ import {
   exportDropMarkdown,
   normalizeDropMarkdown,
 } from "./normalizeDropMarkdown";
+import { areMentionedGroupsEqual } from "@/helpers/waves/drop-group-mentions";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
   readonly initialMentions: ApiDropMentionedUser[];
+  readonly initialGroupMentions: ApiDropGroupMention[];
   readonly initialWaveMentions: ApiMentionedWave[];
+  readonly canMentionAll: boolean;
   readonly waveId: string | null;
   readonly isSaving: boolean;
   readonly onSave: (
     content: string,
     mentions: ApiDropMentionedUser[],
+    mentionedGroups: ApiDropGroupMention[],
     mentionedWaves: ApiMentionedWave[]
   ) => void;
   readonly onCancel: () => void;
@@ -90,7 +101,7 @@ interface EditDropLexicalProps {
 
 const MAX_MENTION_RECONSTRUCTION_PASSES = 20;
 
-const EDIT_MARKDOWN_TRANSFORMERS = [
+const BASE_EDIT_MARKDOWN_TRANSFORMERS = [
   ...SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE,
   MENTION_TRANSFORMER,
   HASHTAG_TRANSFORMER,
@@ -266,13 +277,19 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
   return false;
 }
 
-function InitialContentPlugin({ initialContent }: { initialContent: string }) {
+function InitialContentPlugin({
+  initialContent,
+  transformers,
+}: {
+  initialContent: string;
+  transformers: Transformer[];
+}) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
     editor.update(() => {
       const normalizedContent = normalizeDropMarkdown(initialContent);
-      $convertFromMarkdownString(normalizedContent, EDIT_MARKDOWN_TRANSFORMERS);
+      $convertFromMarkdownString(normalizedContent, transformers);
 
       const root = $getRoot();
       convertCodeNodesToFences(root);
@@ -306,7 +323,7 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
 
       root.selectEnd();
     });
-  }, [editor, initialContent]);
+  }, [editor, initialContent, transformers]);
 
   return null;
 }
@@ -351,6 +368,9 @@ function KeyboardPlugin({
   isSaving,
   isMobileOrApp,
   initialContent,
+  initialGroupMentions,
+  canResolveAllGroupMention,
+  transformers,
   mentionsRef,
   waveMentionsRef,
 }: {
@@ -359,6 +379,9 @@ function KeyboardPlugin({
   isSaving: boolean;
   isMobileOrApp: boolean;
   initialContent: string;
+  initialGroupMentions: ApiDropGroupMention[];
+  canResolveAllGroupMention: boolean;
+  transformers: Transformer[];
   mentionsRef: React.RefObject<NewMentionsPluginHandles | null>;
   waveMentionsRef: React.RefObject<NewWaveMentionsPluginHandles | null>;
 }) {
@@ -396,12 +419,21 @@ function KeyboardPlugin({
         if (!isSaving) {
           const currentMarkdown = exportDropMarkdown(
             editor.getEditorState(),
-            EDIT_MARKDOWN_TRANSFORMERS
+            transformers
           );
           const sanitizedCurrentMarkdown =
             removeBlankLinePlaceholders(currentMarkdown);
+          const currentMentionedGroups = getMentionedGroupsFromEditorState(
+            editor.getEditorState(),
+            canResolveAllGroupMention
+          );
           if (
-            sanitizedCurrentMarkdown.trim() === sanitizedInitialContent.trim()
+            sanitizedCurrentMarkdown.trim() ===
+              sanitizedInitialContent.trim() &&
+            areMentionedGroupsEqual(
+              currentMentionedGroups,
+              initialGroupMentions
+            )
           ) {
             onCancel();
           } else {
@@ -424,6 +456,9 @@ function KeyboardPlugin({
     isSaving,
     isMobileOrApp,
     initialContent,
+    initialGroupMentions,
+    canResolveAllGroupMention,
+    transformers,
     mentionsRef,
     waveMentionsRef,
     sanitizedInitialContent,
@@ -435,7 +470,9 @@ function KeyboardPlugin({
 const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   initialContent,
   initialMentions,
+  initialGroupMentions,
   initialWaveMentions,
+  canMentionAll,
   waveId,
   isSaving,
   onSave,
@@ -459,7 +496,24 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     () => addBlankLinePlaceholders(normalizedInitialContent),
     [normalizedInitialContent]
   );
-
+  const hasInitialAllGroupMention = initialGroupMentions.includes(
+    ApiDropGroupMention.All
+  );
+  const canResolveAllGroupMention = canMentionAll || hasInitialAllGroupMention;
+  const importMarkdownTransformers = useMemo(
+    () =>
+      hasInitialAllGroupMention
+        ? [...BASE_EDIT_MARKDOWN_TRANSFORMERS, GROUP_MENTION_TRANSFORMER]
+        : BASE_EDIT_MARKDOWN_TRANSFORMERS,
+    [hasInitialAllGroupMention]
+  );
+  const exportMarkdownTransformers = useMemo(
+    () =>
+      canResolveAllGroupMention
+        ? [...BASE_EDIT_MARKDOWN_TRANSFORMERS, GROUP_MENTION_TRANSFORMER]
+        : BASE_EDIT_MARKDOWN_TRANSFORMERS,
+    [canResolveAllGroupMention]
+  );
   const initialConfig: InitialConfigType = {
     namespace: "EditDropLexical",
     theme: ExampleTheme,
@@ -477,6 +531,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       AutoLinkNode,
       LinkNode,
       MentionNode,
+      GroupMentionNode,
       HashtagNode,
       WaveMentionNode,
       EmojiNode,
@@ -527,21 +582,36 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
 
     const markdown = exportDropMarkdown(
       editorState,
-      EDIT_MARKDOWN_TRANSFORMERS
+      exportMarkdownTransformers
     );
 
     const sanitizedMarkdown = removeBlankLinePlaceholders(markdown);
+    const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
+      editorState,
+      canResolveAllGroupMention
+    );
 
-    if (sanitizedMarkdown.trim() === normalizedInitialContent.trim()) {
+    if (
+      sanitizedMarkdown.trim() === normalizedInitialContent.trim() &&
+      areMentionedGroupsEqual(sanitizedMentionedGroups, initialGroupMentions)
+    ) {
       onCancel();
       return;
     }
 
-    onSave(sanitizedMarkdown, mentionedUsers, mentionedWaves);
+    onSave(
+      sanitizedMarkdown,
+      mentionedUsers,
+      sanitizedMentionedGroups,
+      mentionedWaves
+    );
   }, [
     editorState,
+    exportMarkdownTransformers,
     mentionedUsers,
     mentionedWaves,
+    canResolveAllGroupMention,
+    initialGroupMentions,
     onSave,
     normalizedInitialContent,
     onCancel,
@@ -575,7 +645,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <HistoryPlugin />
           <PlainTextPastePlugin />
           <MarkdownShortcutPlugin
-            transformers={SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE}
+            transformers={BASE_EDIT_MARKDOWN_TRANSFORMERS}
           />
           <ListPlugin />
           <LinkPlugin />
@@ -583,13 +653,17 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             ref={mentionsRef}
             waveId={waveId}
             onSelect={handleMentionSelect}
+            canMentionAll={canMentionAll}
           />
           <NewWaveMentionsPlugin
             ref={waveMentionsRef}
             onSelect={handleWaveMentionSelect}
           />
           <EmojiPlugin />
-          <InitialContentPlugin initialContent={editorInitialContent} />
+          <InitialContentPlugin
+            initialContent={editorInitialContent}
+            transformers={importMarkdownTransformers}
+          />
           <FocusPlugin isApp={isApp} />
           <KeyboardPlugin
             onSave={handleSave}
@@ -597,6 +671,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             isSaving={isSaving}
             isMobileOrApp={isMobileOrApp}
             initialContent={normalizedInitialContent}
+            initialGroupMentions={initialGroupMentions}
+            canResolveAllGroupMention={canResolveAllGroupMention}
+            transformers={exportMarkdownTransformers}
             mentionsRef={mentionsRef}
             waveMentionsRef={waveMentionsRef}
           />

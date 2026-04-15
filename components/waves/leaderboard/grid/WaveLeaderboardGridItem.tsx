@@ -333,6 +333,7 @@ export const WaveLeaderboardGridItem: React.FC<
                   <LinkPreviewProvider variant="home">
                     <WaveDropPartContentMarkdown
                       mentionedUsers={drop.mentioned_users}
+                      mentionedGroups={drop.mentioned_groups}
                       mentionedWaves={drop.mentioned_waves}
                       referencedNfts={drop.referenced_nfts}
                       part={activePart}

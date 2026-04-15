@@ -5,8 +5,11 @@ import { configureStore } from "@reduxjs/toolkit";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { editSlice } from "@/store/editSlice";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 const mockWaveDropActions = jest.fn();
+const mockMutate = jest.fn();
+let mockEditMentionedGroups: ApiDropGroupMention[] = [];
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => {
   mockWaveDropActions(props);
   return <div data-testid="actions" />;
@@ -15,13 +18,20 @@ jest.mock("@/components/waves/drops/WaveDropReply", () => () => (
   <div data-testid="reply" />
 ));
 jest.mock("@/components/waves/drops/WaveDropContent", () => (props: any) => (
-  <button
-    type="button"
-    data-testid="content"
-    onClick={() =>
-      props.onLinkCardActionsActiveChange?.("https://example.com", true)
-    }
-  />
+  <div>
+    <button
+      type="button"
+      data-testid="content"
+      onClick={() =>
+        props.onLinkCardActionsActiveChange?.("https://example.com", true)
+      }
+    />
+    <button
+      type="button"
+      data-testid="save-edit"
+      onClick={() => props.onSave?.("edited", [], mockEditMentionedGroups, [])}
+    />
+  </div>
 ));
 jest.mock("@/components/waves/drops/WaveDropHeader", () => () => (
   <div data-testid="header" />
@@ -53,7 +63,7 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/hooks/drops/useDropUpdateMutation", () => ({
   useDropUpdateMutation: jest.fn(() => ({
-    mutate: jest.fn(),
+    mutate: mockMutate,
     isPending: false,
   })),
 }));
@@ -97,6 +107,7 @@ const drop: any = {
   parts_count: 1,
   referenced_nfts: [],
   mentioned_users: [],
+  mentioned_groups: [],
   metadata: [],
   rating: 0,
   realtime_rating: 0,
@@ -114,6 +125,8 @@ const drop: any = {
 describe("WaveDrop", () => {
   beforeEach(() => {
     mockWaveDropActions.mockClear();
+    mockMutate.mockClear();
+    mockEditMentionedGroups = [];
   });
 
   it("shows actions on desktop", () => {
@@ -183,5 +196,40 @@ describe("WaveDrop", () => {
       expect.objectContaining({ suppressed: true }),
       undefined
     );
+  });
+
+  it("omits group mention metadata from edit update requests", () => {
+    isMobileMock.mockReturnValue(false);
+    mockEditMentionedGroups = [ApiDropGroupMention.All];
+    const stormDrop = {
+      ...drop,
+      mentioned_groups: [ApiDropGroupMention.All],
+      parts: [
+        { ...drop.parts[0], content: "edited part" },
+        { ...drop.parts[0], part_id: 2, content: "hello @all" },
+      ],
+    };
+
+    renderWithRedux(
+      <WaveDrop
+        drop={stormDrop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("save-edit"));
+
+    const request = mockMutate.mock.calls[0][0].request;
+    expect(request).not.toHaveProperty("mentioned_groups");
   });
 });

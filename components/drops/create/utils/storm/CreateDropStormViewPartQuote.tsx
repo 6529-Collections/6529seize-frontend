@@ -9,6 +9,7 @@ import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import DropPart from "@/components/drops/view/part/DropPart";
 import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
@@ -24,6 +25,7 @@ interface PartConfig {
   readonly dropId: string;
   readonly part: ApiDropPart;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly mentionedGroups: Array<ApiDropGroupMention>;
   readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly createdAt: number;
@@ -62,6 +64,7 @@ export default function CreateDropStormViewPartQuote({
       dropId: drop.id,
       part,
       mentionedUsers: drop.mentioned_users,
+      mentionedGroups: drop.mentioned_groups,
       mentionedWaves: drop.mentioned_waves,
       referencedNfts: drop.referenced_nfts,
       createdAt: drop.created_at,
@@ -85,6 +88,7 @@ export default function CreateDropStormViewPartQuote({
           dropId={partConfig.dropId}
           profile={profile}
           mentionedUsers={partConfig.mentionedUsers}
+          mentionedGroups={partConfig.mentionedGroups}
           mentionedWaves={partConfig.mentionedWaves}
           referencedNfts={partConfig.referencedNfts}
           smallMenuIsShown={false}
