@@ -2,6 +2,7 @@ import { useDropLinkPreviewToggleControl } from "@/components/waves/drops/useDro
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
@@ -12,6 +13,7 @@ import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
 
 interface WaveDropPartContentMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly mentionedGroups?: Array<ApiDropGroupMention> | undefined;
   readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly part: ApiDropPart;
@@ -23,6 +25,7 @@ interface WaveDropPartContentMarkdownProps {
     | ((
         newContent: string,
         mentions?: ApiDropMentionedUser[],
+        mentionedGroups?: ApiDropGroupMention[],
         mentionedWaves?: ApiMentionedWave[]
       ) => void)
     | undefined;
@@ -37,6 +40,7 @@ const WaveDropPartContentMarkdown: React.FC<
   WaveDropPartContentMarkdownProps
 > = ({
   mentionedUsers,
+  mentionedGroups = [],
   mentionedWaves,
   referencedNfts,
   part,
@@ -58,16 +62,19 @@ const WaveDropPartContentMarkdown: React.FC<
       <EditDropLexical
         initialContent={part.content ?? ""}
         initialMentions={mentionedUsers}
+        initialGroupMentions={mentionedGroups}
         initialWaveMentions={mentionedWaves}
+        canMentionAll={drop?.wave.authenticated_user_admin === true}
         waveId={wave.id}
         isSaving={isSaving}
         onSave={(
           content: string,
           mentions: ApiDropMentionedUser[],
+          groups: ApiDropGroupMention[],
           waves: ApiMentionedWave[]
         ) => {
           if (onSave) {
-            onSave(content, mentions, waves);
+            onSave(content, mentions, groups, waves);
           }
         }}
         onCancel={() => {
@@ -84,6 +91,7 @@ const WaveDropPartContentMarkdown: React.FC<
       <div>
         <DropPartMarkdownWithPropLogger
           mentionedUsers={mentionedUsers}
+          mentionedGroups={mentionedGroups}
           mentionedWaves={mentionedWaves}
           referencedNfts={referencedNfts}
           nftLinks={drop?.nft_links}

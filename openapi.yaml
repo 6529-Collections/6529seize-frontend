@@ -960,10 +960,24 @@ paths:
             type: integer
             format: int64
             minimum: 1
+        - name: min_serial_no
+          in: query
+          required: false
+          description: Oldest message if null
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: older_first
+          in: query
+          required: false
+          description: By default this endpoint orders things newer first, but if you set it to true then it starts from older drops.
+          schema:
+            type: boolean
         - name: wave_id
           in: query
           description: Drops in wave with given ID
-          required: true
+          required: false
           schema:
             type: string
       responses:
@@ -1018,6 +1032,17 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: curation_name
+          in: query
+          description: >-
+            Only include drops with persisted membership in curations with this
+            ApiWaveCuration.name across all visible waves. Cannot be combined
+            with curation_id.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
         - name: serial_no_less_than
           in: query
           description: Used to find older drops
@@ -1887,6 +1912,13 @@ paths:
           schema:
             type: number
             format: int64
+        - name: include_profile_groups
+          description: Include pure profile groups in search results
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: successful operation
@@ -2993,10 +3025,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  subscribed:
-                    type: boolean
+                $ref: "#/components/schemas/ApiWaveNotificationPreferences"
     post:
       tags:
         - Notifications
@@ -3008,16 +3037,19 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUpdateWaveNotificationPreferencesRequest"
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  subscribed:
-                    type: boolean
+                $ref: "#/components/schemas/ApiWaveNotificationPreferences"
     delete:
       tags:
         - Notifications
@@ -3035,10 +3067,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  subscribed:
-                    type: boolean
+                $ref: "#/components/schemas/ApiWaveNotificationPreferences"
   /blocks:
     get:
       tags:
@@ -4088,7 +4117,7 @@ paths:
       tags:
         - Ratings
       summary: >-
-        Change REP rating of multiple targets and categories in one go. Targets 
+        Change REP rating of multiple targets and categories in one go. Targets
         final REP value will be the value you supply here. If you supply
         multiple  addresses for one consolidation group then those amounts will
         be summed together.
@@ -7783,8 +7812,10 @@ components:
           $ref: "#/components/schemas/ApiReplyToDrop"
         drop_type:
           $ref: "#/components/schemas/ApiDropType"
-        mentions_all:
-          type: boolean
+        mentioned_groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropGroupMention"
     ApiCreateGroup:
       type: object
       required:
@@ -8049,7 +8080,7 @@ components:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
           description: |
-            The metadata that must be provided by the participant. 
+            The metadata that must be provided by the participant.
             Empty array if nothing is required.
           type: array
           items:
@@ -8305,6 +8336,7 @@ components:
         - updated_at
         - referenced_nfts
         - mentioned_users
+        - mentioned_groups
         - mentioned_waves
         - metadata
         - parts
@@ -8376,6 +8408,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMentionedUser"
+        mentioned_groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropGroupMention"
         mentioned_waves:
           type: array
           items:
@@ -8507,6 +8543,10 @@ components:
       properties:
         curation_id:
           type: string
+    ApiDropGroupMention:
+      type: string
+      enum:
+        - ALL
     ApiDropId:
       type: object
       required:
@@ -8791,6 +8831,7 @@ components:
         - updated_at
         - referenced_nfts
         - mentioned_users
+        - mentioned_groups
         - mentioned_waves
         - metadata
         - parts
@@ -8860,6 +8901,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMentionedUser"
+        mentioned_groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropGroupMention"
         mentioned_waves:
           type: array
           items:
@@ -9338,6 +9383,10 @@ components:
       type: object
       required:
         - id
+        - wave_id
+        - wave_name
+        - author
+        - created_at
         - serial_no
         - drop_type
         - part_1_text
@@ -9348,6 +9397,15 @@ components:
       properties:
         id:
           type: string
+        wave_id:
+          type: string
+        wave_name:
+          type: string
+        author:
+          type: string
+        created_at:
+          type: number
+          format: int64
         serial_no:
           description: Sequence number of the drop in Seize
           type: number
@@ -11130,9 +11188,6 @@ components:
       type: object
       allOf:
         - $ref: "#/components/schemas/ApiCreateWaveDropRequest"
-      properties:
-        mentions_all:
-          type: boolean
     ApiUpdateProxyActionRequest:
       type: object
       properties:
@@ -11172,6 +11227,15 @@ components:
             Decisions before this time will not be made. Should not overlap with
             other pauses. Needs to be after start_time, after now and after
             wave.next_decision_time
+    ApiUpdateWaveNotificationPreferencesRequest:
+      type: object
+      properties:
+        subscribed:
+          type: boolean
+        enabled_group_notifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropGroupMention"
     ApiUpdateWaveParticipationConfig:
       type: object
       required:
@@ -11198,7 +11262,7 @@ components:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
           description: |
-            The metadata that must be provided by the participant. 
+            The metadata that must be provided by the participant.
             Empty array if nothing is required.
           type: array
           items:
@@ -11467,7 +11531,7 @@ components:
           type: string
     ApiWaveCreditScope:
       description: |
-        The scope of the credit. 
+        The scope of the credit.
         * WAVE - Credit is spendable across all drops in wave.
       enum:
         - WAVE
@@ -11803,6 +11867,18 @@ components:
           type: boolean
         identity_wave:
           type: boolean
+    ApiWaveNotificationPreferences:
+      type: object
+      required:
+        - subscribed
+        - enabled_group_notifications
+      properties:
+        subscribed:
+          type: boolean
+        enabled_group_notifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropGroupMention"
     ApiWaveOutcome:
       type: object
       required:
@@ -11900,7 +11976,7 @@ components:
           nullable: true
         required_metadata:
           description: |
-            The metadata that must be provided by the participant. 
+            The metadata that must be provided by the participant.
             Empty array if nothing is required.
           type: array
           items:

@@ -5,6 +5,7 @@ import type {
   MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import DropPart from "@/components/drops/view/part/DropPart";
 import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
@@ -19,6 +20,7 @@ interface CreateDropStormViewPartProps {
   readonly profile: ProfileMinWithoutSubs;
   readonly part: CreateDropPart;
   readonly mentionedUsers: Array<Omit<MentionedUser, "current_handle">>;
+  readonly mentionedGroups: ApiDropGroupMention[];
   readonly mentionedWaves: MentionedWave[];
   readonly referencedNfts: Array<ReferencedNft>;
   readonly createdAt: number;
@@ -33,6 +35,7 @@ const CreateDropStormViewPart = memo(
     profile,
     part,
     mentionedUsers,
+    mentionedGroups,
     mentionedWaves,
     referencedNfts,
     createdAt,
@@ -56,6 +59,7 @@ const CreateDropStormViewPart = memo(
               <DropPart
                 profile={profile}
                 mentionedUsers={mentionedUsers}
+                mentionedGroups={mentionedGroups}
                 mentionedWaves={mentionedWaves}
                 referencedNfts={referencedNfts}
                 partContent={part.content}

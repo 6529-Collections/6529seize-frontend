@@ -1,4 +1,5 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 export interface ReferencedNft {
   readonly contract: string;
@@ -45,6 +46,7 @@ export interface CreateDropRequestPart {
 
 export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
   readonly media: Array<File>;
+  readonly mentioned_groups?: Array<ApiDropGroupMention>;
 }
 
 export interface CreateDropConfig extends Omit<

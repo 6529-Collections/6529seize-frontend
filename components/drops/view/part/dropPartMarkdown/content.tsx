@@ -5,12 +5,20 @@ import type { ExtraProps } from "react-markdown";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import type { DropListItemContentPartProps } from "@/components/drops/view/item/content/DropListItemContentPart";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import { ApiDropGroupMention as ApiDropGroupMentionValue } from "@/generated/models/ApiDropGroupMention";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import DropListItemContentPart from "@/components/drops/view/item/content/DropListItemContentPart";
+import {
+  ALL_GROUP_MENTION_TEXT,
+  hasMentionedGroup,
+  markAllGroupMentionTokens,
+} from "@/helpers/waves/drop-group-mentions";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
+  GROUP_MENTION = "GROUP_MENTION",
   HASHTAG = "HASHTAG",
   WAVE_MENTION = "WAVE_MENTION",
 }
@@ -28,6 +36,7 @@ type FindNativeEmoji = (emojiId: string) => { skins: NativeEmojiSkin[] } | null;
 interface MarkdownContentConfig {
   readonly textSizeClass: string;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly mentionedGroups: Array<ApiDropGroupMention>;
   readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly emojiMap: EmojiCategory[];
@@ -50,6 +59,7 @@ const emojiRegex = /(:\w+:)/g;
 export const createMarkdownContentRenderers = ({
   textSizeClass,
   mentionedUsers,
+  mentionedGroups,
   mentionedWaves,
   referencedNfts,
   emojiMap,
@@ -102,6 +112,15 @@ export const createMarkdownContentRenderers = ({
         }),
         {}
       ),
+      ...(hasMentionedGroup(mentionedGroups, ApiDropGroupMentionValue.All)
+        ? {
+            [ALL_GROUP_MENTION_TEXT]: {
+              type: DropContentPartType.GROUP_MENTION,
+              value: ApiDropGroupMentionValue.All,
+              match: ALL_GROUP_MENTION_TEXT,
+            },
+          }
+        : {}),
       ...mentionedWaves.reduce(
         (acc, wave) => ({
           ...acc,
@@ -140,10 +159,20 @@ export const createMarkdownContentRenderers = ({
     let currentContent = content;
 
     for (const token of Object.values(values)) {
+      if (token.type === DropContentPartType.GROUP_MENTION) {
+        continue;
+      }
       currentContent = currentContent.replaceAll(
         token.match,
         `${splitter}${token.match}${splitter}`
       );
+    }
+
+    if (hasMentionedGroup(mentionedGroups, ApiDropGroupMentionValue.All)) {
+      currentContent = markAllGroupMentionTokens({
+        content: currentContent,
+        marker: splitter,
+      });
     }
 
     const parts = currentContent
