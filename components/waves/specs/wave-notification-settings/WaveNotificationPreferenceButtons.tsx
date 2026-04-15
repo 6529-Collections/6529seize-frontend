@@ -45,18 +45,33 @@ export default function WaveNotificationPreferenceButtons({
 }: WaveNotificationPreferenceButtonsProps) {
   const allDropsSelectionDisabled =
     settings.disableAllDropsSelection && !settings.allDropsEnabled;
+  const allDropsTooltipId = `all-drops-tooltip-${waveId}`;
+  const allDropsDisabledDescriptionId = `${allDropsTooltipId}-disabled-description`;
   const allDropsButton = (
     <button
-      disabled={settings.loading || allDropsSelectionDisabled}
-      onClick={settings.onAllDropsNotificationsClick}
+      type="button"
+      disabled={settings.loading}
+      aria-disabled={allDropsSelectionDisabled || undefined}
+      aria-describedby={
+        allDropsSelectionDisabled ? allDropsDisabledDescriptionId : undefined
+      }
+      onClick={
+        allDropsSelectionDisabled
+          ? undefined
+          : settings.onAllDropsNotificationsClick
+      }
       className={`tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-px-2.5 tw-py-2 tw-transition tw-duration-300 tw-ease-out lg:tw-h-9 ${getAllDropsButtonStyle(settings)}`}
       aria-label="Receive all drop notifications"
-      style={allDropsSelectionDisabled ? { pointerEvents: "none" } : undefined}
     >
       {settings.loadingTarget === "all-drops" ? (
         <Spinner dimension={12} />
       ) : (
         <AllDropsIcon className="tw-size-4 tw-flex-shrink-0" />
+      )}
+      {allDropsSelectionDisabled && (
+        <span id={allDropsDisabledDescriptionId} className="tw-sr-only">
+          {settings.allDropsTooltip}
+        </span>
       )}
     </button>
   );
@@ -86,21 +101,12 @@ export default function WaveNotificationPreferenceButtons({
 
       <OverlayTrigger
         overlay={
-          <Tooltip id={`all-drops-tooltip-${waveId}`} placement="top">
+          <Tooltip id={allDropsTooltipId} placement="top">
             {settings.allDropsTooltip}
           </Tooltip>
         }
       >
-        {allDropsSelectionDisabled ? (
-          <span
-            className="tw-inline-block tw-w-full"
-            style={{ cursor: "not-allowed" }}
-          >
-            {allDropsButton}
-          </span>
-        ) : (
-          allDropsButton
-        )}
+        {allDropsButton}
       </OverlayTrigger>
     </div>
   );

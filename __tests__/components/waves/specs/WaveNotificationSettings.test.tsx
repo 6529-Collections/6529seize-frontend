@@ -169,7 +169,7 @@ describe("WaveNotificationSettings", () => {
     );
   });
 
-  it("disables only all drop notifications button when subscriber limit reached", () => {
+  it("marks only all drop notifications unavailable when subscriber limit reached", () => {
     renderComponent(mockWaveHighSubscribers);
 
     const allMentionsButton = screen.getByLabelText(
@@ -177,14 +177,14 @@ describe("WaveNotificationSettings", () => {
     );
     const allButton = screen.getByLabelText("Receive all drop notifications");
     expect(allMentionsButton).not.toBeDisabled();
-    expect(allButton).toBeDisabled();
+    expect(allButton).not.toBeDisabled();
+    expect(allButton).toHaveAttribute("aria-disabled", "true");
+    expect(allButton).toHaveAccessibleDescription(
+      "'All' notifications unavailable for waves with 1,000+ followers."
+    );
     expect(allButton).toHaveClass("tw-cursor-not-allowed");
-    expect(allButton).toHaveAttribute("style", "pointer-events: none;");
-
-    const allButtonWrapper = allButton.parentElement as HTMLElement;
-    expect(allButtonWrapper.tagName).toBe("SPAN");
-    expect(allButtonWrapper).toHaveClass("tw-inline-block", "tw-w-full");
-    expect(allButtonWrapper).toHaveAttribute("style", "cursor: not-allowed;");
+    expect(allButton).not.toHaveAttribute("style");
+    expect(allButton.parentElement).toHaveClass("tw-grid");
   });
 
   it("allows disabling all drop notifications when subscribed and subscriber limit reached", async () => {
@@ -356,7 +356,7 @@ describe("WaveNotificationSettings", () => {
     renderComponent(mockWaveHighSubscribers);
 
     const allButton = screen.getByLabelText("Receive all drop notifications");
-    await userEvent.click(allButton.parentElement as HTMLElement);
+    await userEvent.click(allButton);
 
     expect(commonApiPost).not.toHaveBeenCalled();
   });
@@ -488,11 +488,12 @@ describe("WaveNotificationSettings", () => {
     });
   });
 
-  it("disables all button when wave has high subscriber count", () => {
+  it("keeps all button focusable when wave has high subscriber count", () => {
     renderComponent(mockWaveHighSubscribers);
 
     const allButton = screen.getByLabelText("Receive all drop notifications");
-    expect(allButton).toBeDisabled();
+    expect(allButton).not.toBeDisabled();
+    expect(allButton).toHaveAttribute("aria-disabled", "true");
   });
 
   it("renders muted button when wave is muted", () => {
