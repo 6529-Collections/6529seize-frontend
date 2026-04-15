@@ -10,7 +10,6 @@ import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import type { InteractiveMediaMimeType } from "../constants/media";
 import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
@@ -25,10 +24,16 @@ import {
  */
 interface ArtworkSubmissionData {
   imageFile?: File | undefined;
+  existingMedia?:
+    | {
+        url: string;
+        mimeType: string;
+      }
+    | undefined;
   externalMedia?:
     | {
         url: string;
-        mimeType: InteractiveMediaMimeType;
+        mimeType: string;
       }
     | undefined;
   traits: TraitsData;
@@ -232,12 +237,22 @@ export function useArtworkSubmissionMutation() {
 
       // Validate required fields
       const hasFile = Boolean(data.imageFile);
+      const existingUrl = data.existingMedia?.url.trim() ?? "";
+      const hasExisting = existingUrl.length > 0;
       const externalUrl = data.externalMedia?.url?.trim() ?? "";
       const hasExternal = externalUrl.length > 0;
 
-      if (!hasFile && !hasExternal) {
+      if (!hasFile && !hasExisting && !hasExternal) {
         setToast({
-          message: "Please upload a file or provide a valid media URL",
+          message: "Please upload a file or provide valid media",
+          type: "error",
+        });
+        return null;
+      }
+
+      if (hasExisting && !data.existingMedia?.mimeType) {
+        setToast({
+          message: "Current media is missing a media type",
           type: "error",
         });
         return null;
@@ -286,6 +301,11 @@ export function useArtworkSubmissionMutation() {
           file: data.imageFile,
           callbacks,
         });
+      } else if (hasExisting && data.existingMedia) {
+        media = {
+          url: existingUrl,
+          mime_type: data.existingMedia.mimeType,
+        };
       } else if (hasExternal && data.externalMedia) {
         media = {
           url: externalUrl,

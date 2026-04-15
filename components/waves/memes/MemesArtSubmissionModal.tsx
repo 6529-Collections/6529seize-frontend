@@ -5,18 +5,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useKeyPressEvent } from "react-use";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MemesArtSubmissionContainer from "./submission/MemesArtSubmissionContainer";
 
 interface MemesArtSubmissionModalProps {
   readonly isOpen: boolean;
   readonly wave: ApiWave;
   readonly onClose: () => void;
+  readonly sourceDrop?: ExtendedDrop | undefined;
 }
 
 const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   isOpen,
   wave,
   onClose,
+  sourceDrop,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +52,11 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
               }}
             >
               <div className="tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
-                <MemesArtSubmissionContainer onClose={onClose} wave={wave} />
+                <MemesArtSubmissionContainer
+                  onClose={onClose}
+                  wave={wave}
+                  sourceDrop={sourceDrop}
+                />
               </div>
             </motion.div>
           </div>

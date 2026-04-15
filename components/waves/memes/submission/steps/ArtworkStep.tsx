@@ -130,6 +130,7 @@ interface ArtworkStepProps {
   readonly traits: TraitsData;
   readonly artworkUploaded: boolean;
   readonly artworkUrl: string;
+  readonly artworkMimeType?: string | null | undefined;
   readonly setArtworkUploaded: (uploaded: boolean) => void;
   readonly handleFileSelect: (file: File) => void;
   readonly mediaSource: "upload" | "url";
@@ -174,6 +175,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   traits,
   artworkUploaded,
   artworkUrl,
+  artworkMimeType,
   setArtworkUploaded,
   handleFileSelect,
   mediaSource,
@@ -303,6 +305,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     <MemesArtSubmissionFile
       artworkUploaded={artworkUploaded}
       artworkUrl={artworkUrl}
+      artworkMimeType={artworkMimeType}
       setArtworkUploaded={setArtworkUploaded}
       handleFileSelect={handleFileSelect}
       mediaSource={mediaSource}

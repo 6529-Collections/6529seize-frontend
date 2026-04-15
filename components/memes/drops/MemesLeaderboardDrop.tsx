@@ -10,6 +10,8 @@ import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -32,12 +34,14 @@ import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly wave?: ApiWave | undefined;
   readonly location?: DropLocation | undefined;
 }
 
 export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   drop,
   onDropClick,
+  wave,
   location = DropLocation.WAVE,
 }) => {
   const isMobileScreen = useIsMobileScreen();
@@ -99,6 +103,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                     {!hasTouchScreen && (
                       <>
                         <WaveDropActionsOpen drop={drop} />
+                        <MemesArtResubmitAction drop={drop} wave={wave} />
                         {canDelete && <WaveDropActionsOptions drop={drop} />}
                       </>
                     )}
@@ -224,6 +229,13 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <WaveDropMobileMenuOpen
                   drop={drop}
                   onOpenChange={() => setIsActive(false)}
+                />
+
+                <MemesArtResubmitAction
+                  drop={drop}
+                  wave={wave}
+                  variant="menu"
+                  onModalClose={() => setIsActive(false)}
                 />
 
                 {/* Delete option - only if user can delete */}

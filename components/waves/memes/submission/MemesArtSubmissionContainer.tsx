@@ -2,13 +2,18 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { commonApiDelete } from "@/services/api/common-api";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import type { FC } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { ResubmitDeleteConfirmation } from "./ResubmitDeleteConfirmation";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { MemesSubmissionPreviewScreen } from "./preview/MemesSubmissionPreviewScreen";
@@ -18,10 +23,12 @@ import ArtworkStep from "./steps/ArtworkStep";
 import { SubmissionStep } from "./types/Steps";
 import type { SubmissionPhase } from "./ui/SubmissionProgress";
 import { buildPreviewDrop } from "./utils/buildPreviewDrop";
+import { buildMemesSubmissionDraftFromDrop } from "./utils/submissionDraft";
 
 interface MemesArtSubmissionContainerProps {
   readonly onClose: () => void;
   readonly wave: ApiWave;
+  readonly sourceDrop?: ExtendedDrop | undefined;
 }
 
 /**
@@ -38,13 +45,31 @@ interface MemesArtSubmissionContainerProps {
 const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   onClose,
   wave,
+  sourceDrop,
 }) => {
+  const initialDraft = useMemo(
+    () =>
+      sourceDrop ? buildMemesSubmissionDraftFromDrop(sourceDrop) : undefined,
+    [sourceDrop]
+  );
+  const isResubmission = Boolean(sourceDrop);
+  const submitLabel = isResubmission ? "Submit New Version" : "Submit Artwork";
+
   // Use the form hook to manage all state
-  const form = useArtworkSubmissionForm();
-  const { connectedProfile } = useAuth();
+  const form = useArtworkSubmissionForm(initialDraft);
+  const { connectedProfile, requestAuth, setToast } = useAuth();
   const { isSafeWallet, address } = useSeizeConnectContext();
+  const { addOptimisticDrop, invalidateDrops } = useContext(
+    ReactQueryWrapperContext
+  );
+  const myStream = useMyStreamOptional();
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewDrop, setPreviewDrop] = useState<ExtendedDrop | null>(null);
+  const [replacementDrop, setReplacementDrop] = useState<ApiDrop | null>(null);
+  const [isDeletingOriginal, setIsDeletingOriginal] = useState(false);
+  const [deleteOriginalError, setDeleteOriginalError] = useState<string | null>(
+    null
+  );
 
   // Use the mutation hook for submission
   const {
@@ -57,13 +82,14 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
 
   // Auto-close on successful submission after a short delay
   useEffect(() => {
+    if (isResubmission) return;
     if (submissionPhase !== "success") return;
     const timer = setTimeout(() => {
       onClose();
     }, 1200); // Brief delay to show success state
 
     return () => clearTimeout(timer);
-  }, [submissionPhase, onClose]);
+  }, [isResubmission, submissionPhase, onClose]);
 
   const resetPreviewState = useCallback(() => {
     setIsPreviewMode(false);
@@ -129,19 +155,48 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   };
 
   // Handle final submission
-  const handleSubmit = async () => {
+  const handleResubmissionSuccess = useCallback(
+    async (drop: ApiDrop) => {
+      try {
+        await addOptimisticDrop({ drop });
+      } catch (error) {
+        console.error(
+          "[MemesArtSubmissionContainer] Failed to cache resubmitted drop",
+          error
+        );
+        invalidateDrops();
+      }
+      setReplacementDrop(drop);
+      setDeleteOriginalError(null);
+      setIsPreviewMode(false);
+      setPreviewDrop(null);
+    },
+    [addOptimisticDrop, invalidateDrops]
+  );
+
+  const handleSubmit = useCallback(async () => {
     // Get submission data including all traits
     const { traits, operationalData } = form.getSubmissionData();
     const media = form.getMediaSelection();
+    const onSubmitted = async (drop: ApiDrop | null) => {
+      if (drop && isResubmission) {
+        await handleResubmissionSuccess(drop);
+      }
+
+      return drop;
+    };
 
     if (media.mediaSource === "upload") {
-      if (!media.selectedFile) {
+      if (!media.selectedFile && !media.existingMedia) {
         return null;
       }
 
-      return submitArtwork(
+      const result = await submitArtwork(
         {
-          imageFile: media.selectedFile,
+          ...(media.selectedFile ? { imageFile: media.selectedFile } : {}),
+          ...(media.existingMedia
+            ? { existingMedia: media.existingMedia }
+            : {}),
           traits,
           operationalData,
           waveId: wave.id,
@@ -153,13 +208,14 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
           onPhaseChange: handlePhaseChange,
         }
       );
+      return onSubmitted(result);
     }
 
     if (!media.isExternalValid) {
       return null;
     }
 
-    return submitArtwork(
+    const result = await submitArtwork(
       {
         externalMedia: {
           url: media.externalUrl,
@@ -176,7 +232,88 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         onPhaseChange: handlePhaseChange,
       }
     );
-  };
+    return onSubmitted(result);
+  }, [
+    form,
+    handlePhaseChange,
+    handleResubmissionSuccess,
+    isResubmission,
+    address,
+    isSafeWallet,
+    submitArtwork,
+    wave.id,
+    wave.participation.terms,
+  ]);
+
+  const handleSubmitClick = useCallback(() => {
+    void handleSubmit();
+  }, [handleSubmit]);
+
+  const handleDeleteOriginal = useCallback(async () => {
+    if (!sourceDrop || isDeletingOriginal) {
+      return;
+    }
+
+    setIsDeletingOriginal(true);
+    setDeleteOriginalError(null);
+
+    const { success } = await requestAuth();
+    if (!success) {
+      setIsDeletingOriginal(false);
+      return;
+    }
+
+    let didClose = false;
+
+    try {
+      await commonApiDelete({
+        endpoint: `drops/${sourceDrop.id}`,
+      });
+
+      setToast({
+        message: "Original submission deleted.",
+        type: "warning",
+      });
+      invalidateDrops();
+      myStream?.processDropRemoved(sourceDrop.wave.id, sourceDrop.id);
+      setIsDeletingOriginal(false);
+      didClose = true;
+      onClose();
+    } catch (error) {
+      let message = "Unable to delete the original submission.";
+      if (error instanceof Error) {
+        message = error.message;
+      } else if (typeof error === "string") {
+        message = error;
+      }
+      setDeleteOriginalError(message);
+      setToast({
+        message,
+        type: "error",
+      });
+    } finally {
+      if (didClose) {
+        return;
+      }
+      setIsDeletingOriginal(false);
+    }
+  }, [
+    sourceDrop,
+    isDeletingOriginal,
+    requestAuth,
+    setToast,
+    invalidateDrops,
+    myStream,
+    onClose,
+  ]);
+
+  const handleDeleteOriginalClick = useCallback(() => {
+    void handleDeleteOriginal();
+  }, [handleDeleteOriginal]);
+
+  const handleKeepBoth = useCallback(() => {
+    onClose();
+  }, [onClose]);
 
   const fileInfo = form.selectedFile
     ? {
@@ -200,6 +337,11 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     if (form.mediaSource === "upload" && form.selectedFile) {
       const label = getMediaTypeLabel(form.selectedFile.type);
       const isInteractive = isInteractiveMedia(form.selectedFile.type);
+      return { label, isInteractive };
+    }
+    if (form.mediaSource === "upload" && form.existingMedia) {
+      const label = getMediaTypeLabel(form.existingMedia.mimeType);
+      const isInteractive = isInteractiveMedia(form.existingMedia.mimeType);
       return { label, isInteractive };
     }
     if (form.mediaSource === "url" && form.isExternalMediaValid) {
@@ -229,6 +371,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         traits={form.traits}
         artworkUploaded={form.artworkUploaded}
         artworkUrl={form.artworkUrl}
+        artworkMimeType={form.existingMedia?.mimeType ?? null}
         setArtworkUploaded={form.setArtworkUploaded}
         handleFileSelect={handleFileSelect}
         mediaSource={form.mediaSource}
@@ -261,8 +404,9 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         <MemesSubmissionPreviewScreen
           previewDrop={previewDrop}
           onBackToEdit={handleBackToEdit}
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmitClick}
           isSubmitting={isSubmitting}
+          submitLabel={submitLabel}
         />
       ) : (
         <AdditionalInfoStep
@@ -290,8 +434,9 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
           onAboutArtistChange={form.setAboutArtist}
           onBack={handleBackFromAdditionalInfo}
           onPreview={handleOpenPreview}
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmitClick}
           isSubmitting={isSubmitting}
+          submitLabel={submitLabel}
         />
       ),
   };
@@ -301,11 +446,11 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-backdrop-blur">
         <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col">
           <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-6 md:tw-px-8">
-            <div
-              className="tw-flex tw-w-full tw-items-center tw-flex-shrink-0 tw-justify-between tw-pt-6 lg:tw-border-b-0"
-            >
-              <motion.h3 className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-text-2xl tw-mb-0">
-                Submit Work to The Memes
+            <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-between tw-pt-6 lg:tw-border-b-0">
+              <motion.h3 className="tw-mb-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-text-2xl">
+                {isResubmission
+                  ? "Resubmit Work to The Memes"
+                  : "Submit Work to The Memes"}
               </motion.h3>
               <motion.button
                 onClick={onClose}
@@ -318,9 +463,26 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
                 />
               </motion.button>
             </div>
+            {isResubmission && !replacementDrop && (
+              <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+                Resubmitting creates a new submission with this data, then asks
+                you to confirm deleting the original.
+              </p>
+            )}
           </div>
           <div className="tw-min-h-0 tw-flex-1">
-            {stepComponents[form.currentStep]}
+            {sourceDrop && replacementDrop ? (
+              <ResubmitDeleteConfirmation
+                originalDrop={sourceDrop}
+                replacementDrop={replacementDrop}
+                isDeleting={isDeletingOriginal}
+                error={deleteOriginalError}
+                onDeleteOriginal={handleDeleteOriginalClick}
+                onKeepBoth={handleKeepBoth}
+              />
+            ) : (
+              stepComponents[form.currentStep]
+            )}
           </div>
         </div>
       </div>

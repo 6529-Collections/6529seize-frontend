@@ -4,6 +4,7 @@ import Download from "@/components/download/Download";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
+import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
@@ -154,7 +155,11 @@ export const MemesSingleWaveDropInfoPanel = ({
                 )}
               </div>
 
-              <WaveDropMetaRow drop={drop} isWinner={isWinner} mimeType={artworkMedia?.mime_type}>
+              <WaveDropMetaRow
+                drop={drop}
+                isWinner={isWinner}
+                mimeType={artworkMedia?.mime_type}
+              >
                 {manualOutcomes.length > 0 && (
                   <>
                     <span className="tw-text-white/40">·</span>
@@ -265,9 +270,18 @@ export const MemesSingleWaveDropInfoPanel = ({
               </div>
             ) : null}
 
-            {canDelete && drop.drop_type !== ApiDropType.Winner && (
-              <WaveDropDeleteButton drop={drop} />
-            )}
+            <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row">
+              {wave && (
+                <MemesArtResubmitAction
+                  drop={drop}
+                  wave={wave}
+                  variant="button"
+                />
+              )}
+              {canDelete && drop.drop_type !== ApiDropType.Winner && (
+                <WaveDropDeleteButton drop={drop} />
+              )}
+            </div>
           </div>
         </div>
       </div>

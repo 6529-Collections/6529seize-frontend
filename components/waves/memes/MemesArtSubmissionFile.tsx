@@ -56,6 +56,7 @@ const renderPreviewMessage = (primary: string, secondary: string) => (
 const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   artworkUploaded,
   artworkUrl,
+  artworkMimeType,
   setArtworkUploaded,
   handleFileSelect,
   mediaSource,
@@ -336,6 +337,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               <FilePreview
                 url={previewUrl}
                 file={currentFile}
+                mimeType={artworkMimeType}
                 onRemove={handleRemoveFile}
                 videoCompatibility={videoCompatibility}
                 isCheckingCompatibility={isCheckingCompatibility}
