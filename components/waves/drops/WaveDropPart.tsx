@@ -28,6 +28,7 @@ interface WaveDropPartProps {
   readonly onCancel?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
   readonly hasTouch?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -52,6 +53,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     onCancel,
     isCompetitionDrop = false,
     mediaImageScale = ImageScale.AUTOx450,
+    fullWidthMedia = false,
     hasTouch = false,
     onLinkCardActionsActiveChange,
   }) => {
@@ -150,6 +152,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
             onCancel={onCancel}
             isCompetitionDrop={isCompetitionDrop}
             mediaImageScale={mediaImageScale}
+            fullWidthMedia={fullWidthMedia}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />
         </div>

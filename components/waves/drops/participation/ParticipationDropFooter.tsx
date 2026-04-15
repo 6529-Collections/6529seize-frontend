@@ -10,11 +10,13 @@ import { ParticipationDropRatings } from "./ParticipationDropRatings";
 interface ParticipationDropFooterProps {
   readonly drop: ExtendedDrop;
   readonly voteAction?: ReactNode;
+  readonly showInteractions?: boolean | undefined;
 }
 
 export default function ParticipationDropFooter({
   drop,
   voteAction,
+  showInteractions = true,
 }: ParticipationDropFooterProps) {
   const { canShowVote } = useDropInteractionRules(drop);
   const canShowCuration = drop.context_profile_context?.curatable ?? false;
@@ -27,6 +29,10 @@ export default function ParticipationDropFooter({
   const shouldShowRatingsOnlyFooter = !canShowVote && hasRatings;
   const shouldShowReactionsFooter =
     hasReactions || (!canShowVote && canShowCuration);
+
+  if (!showInteractions) {
+    return <div className="tw-pb-4" />;
+  }
 
   return (
     <>

@@ -5,7 +5,11 @@ import React from "react";
 import DefaultParticipationDrop from "./DefaultParticipationDrop";
 import MemeParticipationDrop from "@/components/memes/drops/MemeParticipationDrop";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import type { DropInteractionParams, DropLocation } from "../drop.types";
+import type {
+  DropIdentityMode,
+  DropInteractionParams,
+  DropLocation,
+} from "../drop.types";
 
 interface ParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -17,6 +21,8 @@ interface ParticipationDropProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
+  readonly identityMode?: DropIdentityMode | undefined;
+  readonly showInteractions?: boolean | undefined;
 }
 
 export default function ParticipationDrop(props: ParticipationDropProps) {
