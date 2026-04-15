@@ -2,6 +2,7 @@
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -318,6 +319,7 @@ const getContentBlock = ({
   readonly handleEditSave: (
     newContent: string,
     mentions?: ApiDropMentionedUser[],
+    mentionedGroups?: ApiDropGroupMention[],
     mentionedWaves?: ApiMentionedWave[]
   ) => void;
   readonly handleEditCancel: () => void;
@@ -575,7 +577,7 @@ const WaveDrop = ({
     (
       newContent: string,
       mentions?: ApiDropMentionedUser[],
-      _mentionedGroups?: unknown,
+      _mentionedGroups?: ApiDropGroupMention[],
       mentionedWaves?: ApiMentionedWave[]
     ) => {
       // Clean mentioned users to only include allowed fields for API
