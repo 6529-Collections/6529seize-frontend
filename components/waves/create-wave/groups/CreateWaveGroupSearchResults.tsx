@@ -161,7 +161,12 @@ function CreateWaveGroupSearchResultsList({
 }) {
   if (isFetching) {
     return (
-      <li className="tw-flex tw-items-center tw-justify-center tw-py-4">
+      <li
+        role="option"
+        aria-selected={false}
+        aria-disabled="true"
+        className="tw-flex tw-items-center tw-justify-center tw-py-4"
+      >
         <div role="status" aria-live="polite">
           <span className="tw-sr-only">Loading groups</span>
           <CircleLoader size={CircleLoaderSize.SMALL} />
@@ -191,7 +196,12 @@ function CreateWaveGroupSearchResultsList({
   }
 
   return (
-    <li className="tw-relative tw-w-full tw-select-none tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white">
+    <li
+      role="option"
+      aria-selected={false}
+      aria-disabled="true"
+      className="tw-relative tw-w-full tw-select-none tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
+    >
       {showNoResults ? "No groups found" : helperText}
     </li>
   );
