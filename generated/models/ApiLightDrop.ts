@@ -17,6 +17,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiLightDrop {
     'id': string;
+    'wave_id': string;
+    'wave_name': string;
+    'author': string;
+    'created_at': number;
     /**
     * Sequence number of the drop in Seize
     */
@@ -38,6 +42,30 @@ export class ApiLightDrop {
             "baseName": "id",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "wave_id",
+            "baseName": "wave_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wave_name",
+            "baseName": "wave_name",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "author",
+            "baseName": "author",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "serial_no",

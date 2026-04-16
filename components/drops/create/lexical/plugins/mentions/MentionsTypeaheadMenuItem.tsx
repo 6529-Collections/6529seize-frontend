@@ -1,5 +1,6 @@
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
+
 export default function MentionsTypeaheadMenuItem({
   index,
   isSelected,
@@ -39,11 +40,13 @@ export default function MentionsTypeaheadMenuItem({
               <div className="tw-h-6 tw-w-6 tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
                 <div className="tw-h-full tw-w-full tw-max-w-full">
                   <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-center">
+                    {/* Typeahead avatar URLs can use hosts outside next/image remotePatterns, so this stays unoptimized. */}
                     <Image
                       src={getScaledImageUri(picture, ImageScale.W_AUTO_H_50)}
                       alt={`Profile for ${handle}`}
                       width={24}
                       height={24}
+                      unoptimized
                       className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain"
                     />
                   </div>

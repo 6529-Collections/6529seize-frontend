@@ -17,7 +17,8 @@ export const WaveLeaderboardEmptyState: React.FC<
 > = ({ onCreateDrop, wave }) => {
   const { connectedProfile, activeProfileProxy } =
     React.useContext(AuthContext);
-  const { isMemesWave, isCurationWave, participation } = useWave(wave);
+  const { isMemesWave, isCurationWave, isQuorumWave, participation } =
+    useWave(wave);
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop, restrictionMessage, restrictionLink } =
     getWaveDropEligibility({
@@ -47,6 +48,13 @@ export const WaveLeaderboardEmptyState: React.FC<
       onCreateDrop={onCreateDrop}
       canCreateDrop={canCreateDrop}
       dropRestrictionMessage={restrictionMessage}
+      createDropLabel={isQuorumWave ? "Create Proposal" : undefined}
+      emptyTitle={isQuorumWave ? "No proposals to show" : undefined}
+      emptyDescription={
+        isQuorumWave
+          ? "Be the first to create a proposal in this wave"
+          : undefined
+      }
     />
   );
 };

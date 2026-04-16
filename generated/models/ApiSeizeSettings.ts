@@ -18,6 +18,7 @@ export class ApiSeizeSettings {
     'all_drops_notifications_subscribers_limit': number;
     'memes_wave_id': string | null;
     'curation_wave_id': string | null;
+    'quorum_wave_id': string | null;
     'distribution_admin_wallets': Array<string>;
     'claims_admin_wallets': Array<string>;
     'announcements_wave_id': string | null;
@@ -48,6 +49,12 @@ export class ApiSeizeSettings {
         {
             "name": "curation_wave_id",
             "baseName": "curation_wave_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "quorum_wave_id",
+            "baseName": "quorum_wave_id",
             "type": "string",
             "format": ""
         },

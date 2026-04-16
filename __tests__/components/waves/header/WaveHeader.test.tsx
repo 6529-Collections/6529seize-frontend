@@ -6,7 +6,12 @@ import WaveHeader, {
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { AuthContext } from "@/components/auth/Auth";
 
-jest.mock("@/components/waves/header/WaveHeaderFollow", () => () => <div />);
+jest.mock("@/components/waves/header/WaveHeaderFollow", () => (props: any) => (
+  <div
+    data-full-width={String(props.fullWidth)}
+    data-testid="wave-header-follow"
+  />
+));
 jest.mock("@/components/waves/header/options/WaveHeaderOptions", () => () => (
   <div />
 ));
@@ -19,7 +24,7 @@ jest.mock("@/components/waves/header/WaveHeaderDescription", () => () => (
 ));
 jest.mock("@/components/waves/WavePicture", () => () => <div />);
 jest.mock("@/components/waves/specs/WaveNotificationSettings", () => () => (
-  <div />
+  <div data-testid="wave-notification-settings" />
 ));
 jest.mock("@/helpers/waves/waves.helpers", () => ({ canEditWave: jest.fn() }));
 
@@ -43,10 +48,12 @@ describe("WaveHeader", () => {
     (canEditWave as jest.Mock).mockReturnValue(false);
   });
 
-  const wrapper = (wave: any, props?: any) =>
+  const wrapper = (wave: any, props?: any, auth?: any) =>
     render(
       <AuthContext.Provider
-        value={{ connectedProfile: null, activeProfileProxy: null } as any}
+        value={
+          { connectedProfile: null, activeProfileProxy: null, ...auth } as any
+        }
       >
         <WaveHeader wave={wave} onFollowersClick={jest.fn()} {...props} />
       </AuthContext.Provider>
@@ -80,5 +87,25 @@ describe("WaveHeader", () => {
       chat: { scope: { group: { is_direct_message: true } } },
     });
     expect(screen.queryByLabelText("Edit wave picture")).toBeNull();
+  });
+
+  it("stacks follow and notification controls for connected users", () => {
+    wrapper(baseWave, undefined, { connectedProfile: { handle: "alice" } });
+
+    const follow = screen.getByTestId("wave-header-follow");
+    const notifications = screen.getByTestId("wave-notification-settings");
+
+    expect(follow).toHaveAttribute("data-full-width", "true");
+    expect(follow.parentElement).toHaveClass(
+      "tw-flex",
+      "tw-w-48",
+      "tw-flex-col",
+      "tw-items-stretch",
+      "tw-gap-y-1.5"
+    );
+    expect(
+      follow.compareDocumentPosition(notifications) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 });

@@ -5,6 +5,7 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
     isMemesWave: (id: string) => id === "memes",
     isCurationWave: (id: string) => id === "curation",
+    isQuorumWave: (id: string) => id === "quorum",
   }),
 }));
 jest.mock("@/helpers/time", () => ({
@@ -49,5 +50,11 @@ describe("useWave", () => {
     const wave = { ...baseWave, id: "curation" };
     const { result } = renderHook(() => useWave(wave));
     expect(result.current.isCurationWave).toBe(true);
+  });
+
+  it("flags quorum wave", () => {
+    const wave = { ...baseWave, id: "quorum" };
+    const { result } = renderHook(() => useWave(wave));
+    expect(result.current.isQuorumWave).toBe(true);
   });
 });

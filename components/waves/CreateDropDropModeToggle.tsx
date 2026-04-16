@@ -15,7 +15,7 @@ interface CreateDropDropModeToggleProps {
   readonly onDropModeChange: (isDropMode: boolean) => void;
   readonly privileges: DropPrivileges;
   readonly exitLabel?: string | null;
-  readonly inactiveActionLabel?: "drop" | "nominate";
+  readonly inactiveActionLabel?: "drop" | "nominate" | "proposal";
 }
 
 export const CreateDropDropModeToggle: React.FC<
@@ -33,6 +33,7 @@ export const CreateDropDropModeToggle: React.FC<
   const hasSubmissionRestriction = submissionRestriction !== null;
   const isExitOnly = isDropMode && hasExitLabel;
   const isIdentityEntry = inactiveActionLabel === "nominate";
+  const isProposalEntry = inactiveActionLabel === "proposal";
   const isDisabled =
     !isExitOnly &&
     ((isDropMode && hasChatRestriction) ||
@@ -46,7 +47,12 @@ export const CreateDropDropModeToggle: React.FC<
   const handleToggleClick = canToggle
     ? () => onDropModeChange(isExitOnly ? false : !isDropMode)
     : undefined;
-  const inactiveModeLabel = isIdentityEntry ? "Nominate" : "Drop";
+  let inactiveModeLabel = "Drop";
+  if (isIdentityEntry) {
+    inactiveModeLabel = "Nominate";
+  } else if (isProposalEntry) {
+    inactiveModeLabel = "Proposal";
+  }
   const targetModeLabel = isDropMode ? "Chat" : inactiveModeLabel;
 
   const buttonClassName = useMemo(() => {
@@ -72,7 +78,12 @@ export const CreateDropDropModeToggle: React.FC<
     restriction: ChatRestriction | SubmissionRestriction,
     isChat: boolean
   ): string => {
-    const actionLabel = isChat ? inactiveActionLabel : "chat";
+    let actionLabel = "chat";
+    if (isChat && inactiveActionLabel === "proposal") {
+      actionLabel = "create a proposal";
+    } else if (isChat) {
+      actionLabel = inactiveActionLabel;
+    }
     switch (restriction) {
       case ChatRestriction.NOT_LOGGED_IN:
       case SubmissionRestriction.NOT_LOGGED_IN:
@@ -92,7 +103,10 @@ export const CreateDropDropModeToggle: React.FC<
       case SubmissionRestriction.MAX_DROPS_REACHED:
         return "You have reached the maximum number of drops allowed";
       default:
-        return `${isChat ? inactiveActionLabel : "chat"} mode is unavailable`;
+        if (isChat && inactiveActionLabel === "proposal") {
+          return "Creating a proposal is unavailable";
+        }
+        return `${actionLabel} mode is unavailable`;
     }
   };
 

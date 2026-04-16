@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { memo, useRef } from "react";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import DropPfp from "@/components/drops/create/utils/DropPfp";
@@ -31,6 +32,7 @@ interface DropPartProps {
   readonly profile: ProfileMinWithoutSubs;
   readonly dropTitle: string | null;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly mentionedGroups?: Array<ApiDropGroupMention> | undefined;
   readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly partContent: string | null;
@@ -56,6 +58,7 @@ const DropPart = memo(
     dropId,
     profile,
     mentionedUsers,
+    mentionedGroups = [],
     mentionedWaves,
     referencedNfts,
     partContent,
@@ -221,6 +224,7 @@ const DropPart = memo(
                 )}
                 <DropPartContent
                   mentionedUsers={mentionedUsers}
+                  mentionedGroups={mentionedGroups}
                   mentionedWaves={mentionedWaves}
                   referencedNfts={referencedNfts}
                   partContent={partContent}

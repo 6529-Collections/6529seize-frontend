@@ -50,11 +50,13 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { isMemesWave, isCurationWave, participation } = useWave(wave);
+  const { isMemesWave, isCurationWave, isQuorumWave, participation } =
+    useWave(wave);
   const { leaderboardViewStyle } = useLayout(); // Get pre-calculated style from context
   const submissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
+    isQuorumWave,
     submissionStrategy: wave.participation.submission_strategy ?? null,
   });
 
@@ -90,6 +92,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const showToggleableDropInput =
     submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
     submissionExperience !== WaveSubmissionExperience.CURATION_LEGACY &&
+    submissionExperience !== WaveSubmissionExperience.QUORUM_PROPOSAL &&
     isCreateDropOpen;
 
   const onCreateDrop = useCallback(() => {
@@ -107,6 +110,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         return;
       }
       setIsCurationDropModalOpen(true);
+      return;
+    }
+
+    if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
+      if (!canCreateDrop) {
+        return;
+      }
+      setIsCreateDropOpen(true);
       return;
     }
 
@@ -336,6 +347,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               isOpen={isCurationDropModalOpen}
               wave={wave}
               onClose={() => setIsCurationDropModalOpen(false)}
+            />
+          )}
+        {submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL &&
+          isCreateDropOpen && (
+            <WaveDropCreate
+              wave={wave}
+              onCancel={() => setIsCreateDropOpen(false)}
+              onSuccess={() => setIsCreateDropOpen(false)}
             />
           )}
 

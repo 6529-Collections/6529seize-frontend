@@ -5,6 +5,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import CurationEmptyState from "@/components/brain/my-stream/curations/CurationEmptyState";
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -218,15 +219,17 @@ export default function MyStreamWaveCurationContent({
   }
 
   return (
-    <div
-      className={
-        constrainToViewport
-          ? "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-          : "tw-flex tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-col"
-      }
-      style={constrainToViewport ? leaderboardViewStyle : undefined}
-    >
-      {content}
-    </div>
+    <TweetPreviewModeProvider mode="never">
+      <div
+        className={
+          constrainToViewport
+            ? "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+            : "tw-flex tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-col"
+        }
+        style={constrainToViewport ? leaderboardViewStyle : undefined}
+      >
+        {content}
+      </div>
+    </TweetPreviewModeProvider>
   );
 }
