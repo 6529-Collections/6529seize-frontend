@@ -202,7 +202,7 @@ export function OfficialWaveSummary({
             </button>
 
             {changeWaveDropdown !== undefined && (
-              <div className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-hidden tw-w-72 lg:tw-block">
+              <div className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-56 lg:tw-block">
                 {changeWaveDropdown}
               </div>
             )}
