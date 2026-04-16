@@ -311,8 +311,14 @@ describe("CreateWaveGroupSearchField", () => {
     await user.click(input);
     expect(await screen.findByRole("listbox")).toBeInTheDocument();
 
-    await user.keyboard("{Escape}");
-    await waitFor(() => expect(screen.queryByRole("listbox")).toBeNull());
+    const stopPropagationSpy = jest.spyOn(Event.prototype, "stopPropagation");
+    try {
+      await user.keyboard("{Escape}");
+      await waitFor(() => expect(screen.queryByRole("listbox")).toBeNull());
+      expect(stopPropagationSpy).toHaveBeenCalled();
+    } finally {
+      stopPropagationSpy.mockRestore();
+    }
 
     await user.click(input);
     expect(await screen.findByRole("listbox")).toBeInTheDocument();

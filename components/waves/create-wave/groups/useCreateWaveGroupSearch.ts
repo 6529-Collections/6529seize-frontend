@@ -164,6 +164,7 @@ function useCreateWaveGroupKeyboardNavigation({
         }
       } else if (event.key === "Escape") {
         event.preventDefault();
+        event.stopPropagation();
         closeSearch();
       }
     },
