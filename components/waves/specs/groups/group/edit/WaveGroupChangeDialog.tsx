@@ -17,6 +17,7 @@ import type { ApiGroup } from "@/generated/models/ApiGroup";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { WaveGroupType } from "../WaveGroup.types";
@@ -58,6 +59,29 @@ const createEmptyGroupDescription = (): ApiGroupFull["group"] => ({
   is_beneficiary_of_grant: null,
 });
 
+const createUnknownGroupAuthor = (): ApiProfileMin => ({
+  id: "unknown",
+  handle: null,
+  pfp: null,
+  banner1_color: null,
+  banner2_color: null,
+  cic: 0,
+  rep: 0,
+  tdh: 0,
+  tdh_rate: 0,
+  xtdh: 0,
+  xtdh_rate: 0,
+  level: 0,
+  primary_address: "",
+  subscribed_actions: [],
+  archived: false,
+  active_main_stage_submission_ids: [],
+  winner_main_stage_drop_ids: [],
+  artist_of_prevote_cards: [],
+  profile_wave_id: null,
+  is_wave_creator: false,
+});
+
 const getSelectedGroup = (group: ApiGroup | null): ApiGroupFull | null => {
   if (!group?.id || !group.name) {
     return null;
@@ -68,11 +92,11 @@ const getSelectedGroup = (group: ApiGroup | null): ApiGroupFull | null => {
     name: group.name,
     group: createEmptyGroupDescription(),
     created_at: group.created_at ?? 0,
-    created_by: group.author,
+    created_by: group.author ?? createUnknownGroupAuthor(),
     visible: !group.is_hidden,
     is_private: false,
-    is_direct_message: group.is_direct_message,
-  } as ApiGroupFull;
+    is_direct_message: group.is_direct_message ?? false,
+  };
 };
 
 export default function WaveGroupChangeDialog({

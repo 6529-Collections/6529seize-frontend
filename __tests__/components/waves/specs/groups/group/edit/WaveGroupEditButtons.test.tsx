@@ -319,6 +319,62 @@ describe("WaveGroupEditButtons", () => {
     );
   });
 
+  it("provides a safe created_by fallback for groups without authors", async () => {
+    const groupWithoutAuthor = {
+      id: "group-without-author",
+      name: "Group Without Author",
+      created_at: 100,
+      is_hidden: false,
+      is_direct_message: false,
+    };
+    const waveWithAuthorlessGroup = {
+      ...wave,
+      visibility: {
+        scope: { group: groupWithoutAuthor },
+      },
+    };
+
+    render(
+      <WaveGroupEditButtons
+        haveGroup
+        wave={waveWithAuthorlessGroup}
+        type={WaveGroupType.VIEW}
+      />,
+      { wrapper }
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
+    fireEvent.click(screen.getByText("Change group"));
+
+    expect(mockInlinePanelProps.selectedGroup).toEqual(
+      expect.objectContaining({
+        id: "group-without-author",
+        name: "Group Without Author",
+        created_by: {
+          id: "unknown",
+          handle: null,
+          pfp: null,
+          banner1_color: null,
+          banner2_color: null,
+          cic: 0,
+          rep: 0,
+          tdh: 0,
+          tdh_rate: 0,
+          xtdh: 0,
+          xtdh_rate: 0,
+          level: 0,
+          primary_address: "",
+          subscribed_actions: [],
+          archived: false,
+          active_main_stage_submission_ids: [],
+          winner_main_stage_drop_ids: [],
+          artist_of_prevote_cards: [],
+          profile_wave_id: null,
+          is_wave_creator: false,
+        },
+      })
+    );
+  });
+
   it("updates the wave when selecting an existing group", async () => {
     render(
       <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />,
