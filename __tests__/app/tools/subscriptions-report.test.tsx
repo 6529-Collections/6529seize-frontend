@@ -127,9 +127,7 @@ describe("Subscriptions report page", () => {
       </AuthContext.Provider>
     );
 
-    await user.click(
-      await screen.findByRole("button", { name: "Download" })
-    );
+    await user.click(await screen.findByRole("button", { name: "Download" }));
 
     await waitFor(() => {
       expect(mockUseDownloader).toHaveBeenCalledWith({
