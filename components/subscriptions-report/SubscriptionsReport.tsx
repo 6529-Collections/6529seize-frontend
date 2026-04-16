@@ -244,8 +244,7 @@ export default function SubscriptionsReportComponent() {
     !upcomingLoading && !redeemedLoading && seasonOptionsLoaded;
 
   return (
-    <>
-      <Container className="tw-mx-auto tw-px-2 tw-py-5 lg:tw-px-6 xl:tw-px-8">
+    <Container className="tw-mx-auto tw-px-2 tw-py-5 lg:tw-px-6 xl:tw-px-8">
         <Row>
           <Col className="d-flex flex-wrap align-items-center justify-content-between">
             <h1>Subscriptions Report</h1>
@@ -505,8 +504,7 @@ export default function SubscriptionsReportComponent() {
             </Col>
           </Row>
         )}
-      </Container>
-    </>
+    </Container>
   );
 }
 
