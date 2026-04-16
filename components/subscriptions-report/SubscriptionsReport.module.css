@@ -1,4 +1,4 @@
-@keyframes upcomingRowIn {
+@keyframes upcoming-row-in {
   from {
     opacity: 0;
     transform: translateY(-6px);
@@ -10,5 +10,11 @@
 }
 
 .upcomingRowNew {
-  animation: upcomingRowIn 0.22s ease-out both;
+  animation: upcoming-row-in 0.22s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upcomingRowNew {
+    animation: none;
+  }
 }
