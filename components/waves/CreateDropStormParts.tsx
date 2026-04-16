@@ -2,6 +2,7 @@
 
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -16,6 +17,7 @@ import CreateDropStormPart from "./CreateDropStormPart";
 interface CreateDropStormPartsProps {
   parts: CreateDropPart[];
   mentionedUsers: ApiDropMentionedUser[];
+  mentionedGroups: ApiDropGroupMention[];
   mentionedWaves: ApiMentionedWave[];
   referencedNfts: ReferencedNft[];
   onRemovePart: (partIndex: number) => void;
@@ -24,6 +26,7 @@ interface CreateDropStormPartsProps {
 const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   parts,
   mentionedUsers,
+  mentionedGroups,
   mentionedWaves,
   referencedNfts,
   onRemovePart,
@@ -115,6 +118,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
                       partIndex={partIndex}
                       part={part}
                       mentionedUsers={mentionedUsers}
+                      mentionedGroups={mentionedGroups}
                       mentionedWaves={mentionedWaves}
                       referencedNfts={referencedNfts}
                       onRemovePart={onRemovePart}

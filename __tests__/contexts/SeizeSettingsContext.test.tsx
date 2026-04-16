@@ -18,20 +18,28 @@ test("provides settings and helper", async () => {
     all_drops_notifications_subscribers_limit: 2,
     memes_wave_id: "orig",
     curation_wave_id: "orig-curation",
+    quorum_wave_id: "orig-quorum",
     announcements_wave_id: "announcement-wave-id",
   });
 
   function Consumer() {
-    const { seizeSettings, isMemesWave, isCurationWave, isAnnouncementsWave } =
-      useSeizeSettings();
+    const {
+      seizeSettings,
+      isMemesWave,
+      isCurationWave,
+      isQuorumWave,
+      isAnnouncementsWave,
+    } = useSeizeSettings();
     return (
       <div>{`${seizeSettings.memes_wave_id}-${isMemesWave(
         "test-memes-wave-id"
       )}-${seizeSettings.curation_wave_id}-${isCurationWave(
         "test-curation-wave-id"
-      )}-${seizeSettings.announcements_wave_id}-${isAnnouncementsWave(
-        "announcement-wave-id"
-      )}`}</div>
+      )}-${seizeSettings.quorum_wave_id}-${isQuorumWave(
+        "test-quorum-wave-id"
+      )}-${isQuorumWave("other")}-${isQuorumWave(null)}-${
+        seizeSettings.announcements_wave_id
+      }-${isAnnouncementsWave("announcement-wave-id")}`}</div>
     );
   }
 
@@ -44,7 +52,7 @@ test("provides settings and helper", async () => {
   await waitFor(() =>
     expect(
       screen.getByText(
-        "test-memes-wave-id-true-test-curation-wave-id-true-announcement-wave-id-true"
+        "test-memes-wave-id-true-test-curation-wave-id-true-test-quorum-wave-id-true-false-false-announcement-wave-id-true"
       )
     ).toBeInTheDocument()
   );
@@ -59,6 +67,7 @@ test("normalizes announcement wave ids before matching", async () => {
     all_drops_notifications_subscribers_limit: 2,
     memes_wave_id: null,
     curation_wave_id: null,
+    quorum_wave_id: null,
     distribution_admin_wallets: [],
     claims_admin_wallets: [],
     announcements_wave_id: "  announcement-wave-id  ",

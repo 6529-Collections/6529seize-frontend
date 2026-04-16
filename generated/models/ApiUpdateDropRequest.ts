@@ -19,7 +19,6 @@ import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { HttpFile } from '../http/http';
 
 export class ApiUpdateDropRequest {
-    'mentions_all'?: boolean;
     'title'?: string | null;
     'parts': Array<ApiCreateDropPart>;
     'referenced_nfts': Array<ApiDropReferencedNFT>;
@@ -38,12 +37,6 @@ export class ApiUpdateDropRequest {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "mentions_all",
-            "baseName": "mentions_all",
-            "type": "boolean",
-            "format": ""
-        },
         {
             "name": "title",
             "baseName": "title",

@@ -40,6 +40,7 @@ import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/Hastag
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
 import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
 import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
+import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateDropActions from "./CreateDropActions";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
@@ -52,6 +53,7 @@ import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
 
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
@@ -88,6 +90,8 @@ import {
   type SelectableIdentityOption,
 } from "../utils/input/profile-search/getSelectableIdentity";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -147,6 +151,20 @@ interface CreateDropContentProps {
 
 const CONTAINER_WIDTH_THRESHOLD = 500;
 const SELECT_OTHER_IDENTITY_ERROR = "Select someone else to nominate.";
+
+const getInactiveDropActionLabel = (
+  submissionExperience: WaveSubmissionExperience
+): "drop" | "nominate" | "proposal" => {
+  if (submissionExperience === WaveSubmissionExperience.IDENTITY) {
+    return "nominate";
+  }
+
+  if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
+    return "proposal";
+  }
+
+  return "drop";
+};
 
 const normalizeIdentityValue = (identity: string | null | undefined) =>
   identity?.trim().toLowerCase() ?? null;
@@ -341,7 +359,8 @@ const generatePart = async (
     part.media.map((media) => generateMediaForPart(media, setUploadingFiles))
   );
   return {
-    ...part,
+    content: part.content,
+    quoted_drop: part.quoted_drop,
     media,
   };
 };
@@ -465,6 +484,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     submissionExperience === WaveSubmissionExperience.IDENTITY;
   const isCurationSubmissionExperience =
     submissionExperience === WaveSubmissionExperience.CURATION_LEGACY;
+  const inactiveDropActionLabel =
+    getInactiveDropActionLabel(submissionExperience);
   const identitySubmissionMode = isIdentitySubmissionExperience
     ? (wave.participation.submission_strategy?.config.who_can_be_submitted ??
       null)
@@ -545,6 +566,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const hasMetadataValidationErrors = Object.keys(metadataErrorById).length > 0;
 
   const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
+  const canMentionAll = wave.wave.authenticated_user_eligible_for_admin;
 
   const getMarkdown = useMemo(
     () =>
@@ -552,13 +574,21 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         ? exportDropMarkdown(editorState, [
             ...SAFE_MARKDOWN_TRANSFORMERS,
             MENTION_TRANSFORMER,
+            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
             HASHTAG_TRANSFORMER,
             WAVE_MENTION_TRANSFORMER,
             IMAGE_TRANSFORMER,
             EMOJI_TRANSFORMER,
           ])
         : null,
-    [editorState]
+    [canMentionAll, editorState]
+  );
+  const currentPartMentionedGroups = useMemo(
+    () =>
+      editorState
+        ? getMentionedGroupsFromEditorState(editorState, canMentionAll)
+        : [],
+    [canMentionAll, editorState]
   );
 
   const isStormModeActive = isStormMode;
@@ -729,6 +759,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         ...replyToObj,
         parts: ensurePartsWithFallback(baseParts, hasMetadata),
         mentioned_users: drop?.mentioned_users ?? [],
+        mentioned_groups: getMentionedGroupsFromParts(baseParts, canMentionAll),
         mentioned_waves: drop?.mentioned_waves ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
         metadata: getSubmissionMetadata(),
@@ -745,25 +776,29 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const replyToObj = replyTo ? { reply_to: replyTo } : {};
 
   const createGifDrop = (gif: string): CreateDropConfig => {
+    const parts: CreateDropPart[] = [
+      ...(drop?.parts ?? []),
+      {
+        content: gif,
+        quoted_drop:
+          activeDrop?.action === ActiveDropAction.QUOTE
+            ? {
+                drop_id: activeDrop.drop.id,
+                drop_part_id: activeDrop.partId,
+              }
+            : null,
+        media: files,
+        mentioned_groups: [],
+      },
+    ];
+
     return {
       title: null,
       drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       ...replyToObj,
-      parts: [
-        ...(drop?.parts ?? []),
-        {
-          content: gif,
-          quoted_drop:
-            activeDrop?.action === ActiveDropAction.QUOTE
-              ? {
-                  drop_id: activeDrop.drop.id,
-                  drop_part_id: activeDrop.partId,
-                }
-              : null,
-          media: files,
-        },
-      ],
+      parts,
       mentioned_users: [],
+      mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
       mentioned_waves: [],
       referenced_nfts: [],
       metadata: getSubmissionMetadata(),
@@ -777,7 +812,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     markdown: string | null,
     allMentions: ApiDropMentionedUser[],
     allNfts: ReferencedNft[],
-    allWaves: ApiMentionedWave[]
+    allWaves: ApiMentionedWave[],
+    currentMentionedGroups: ApiDropGroupMention[]
   ): CreateDropConfig => {
     const availableFiles = files;
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
@@ -802,6 +838,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               content: markdown?.length ? markdown : null,
               quoted_drop: quotedDrop,
               media: availableFiles,
+              mentioned_groups: currentMentionedGroups,
             },
           ];
 
@@ -814,6 +851,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       ...replyToObj,
       parts,
       mentioned_users: allMentions,
+      mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
       mentioned_waves: allWaves,
       referenced_nfts: allNfts,
       metadata: getSubmissionMetadata(),
@@ -848,7 +886,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       updatedMarkdown,
       updatedMentions,
       updatedNfts,
-      updatedWaves
+      updatedWaves,
+      currentPartMentionedGroups
     );
   };
 
@@ -889,6 +928,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         part.content?.includes(`#[${w.wave_name_in_content}]`)
       )
     );
+
+  const filterMentionedGroups = ({
+    parts,
+  }: {
+    readonly parts: CreateDropPart[];
+  }): ApiDropGroupMention[] =>
+    getMentionedGroupsFromParts(parts, canMentionAll);
 
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
@@ -999,6 +1045,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         }),
         mentioned_waves: filterMentionedWaves({
           mentionedWaves: dropRequest.mentioned_waves ?? [],
+          parts: dropRequest.parts,
+        }),
+        mentioned_groups: filterMentionedGroups({
           parts: dropRequest.parts,
         }),
         metadata: dropRequest.metadata,
@@ -1602,6 +1651,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               submitting={submitting}
               isStormMode={isStormModeActive}
               isDropMode={isDropMode}
+              canMentionAll={canMentionAll}
               canSubmit={canSubmit}
               onEditorState={handleEditorStateChange}
               onEditorBlur={handleEditorBlur}
@@ -1636,11 +1686,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   onDropModeChange={handleDropModeChange}
                   privileges={privileges}
                   exitLabel={dropModeToggleExitLabel}
-                  inactiveActionLabel={
-                    submissionExperience === WaveSubmissionExperience.IDENTITY
-                      ? "nominate"
-                      : "drop"
-                  }
+                  inactiveActionLabel={inactiveDropActionLabel}
                 />
               )}
             <CreateDropSubmit

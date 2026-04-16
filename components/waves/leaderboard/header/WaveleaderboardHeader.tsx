@@ -318,7 +318,8 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   onPriceRangeChange,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { isMemesWave, isCurationWave, participation } = useWave(wave);
+  const { isMemesWave, isCurationWave, isQuorumWave, participation } =
+    useWave(wave);
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop } = getWaveDropEligibility({
     isLoggedIn,
@@ -527,6 +528,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   const showHeaderActions =
     showCurationActions && !shouldRenderActionsInPriceRow;
   const showDefaultCreateRow = !showCurationActions && isLoggedIn;
+  const defaultCreateLabel = isQuorumWave ? "Create Proposal" : "Drop";
   const curationActionControls = (
     <>
       <button
@@ -680,7 +682,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 padding="tw-px-3 tw-py-2"
               >
                 <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                <span>Drop</span>
+                <span>{defaultCreateLabel}</span>
               </PrimaryButton>
             )}
           </div>

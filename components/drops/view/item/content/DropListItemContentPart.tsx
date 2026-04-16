@@ -2,6 +2,8 @@ import type { MentionedUser, ReferencedNft } from "@/entities/IDrop";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentNft from "./nft-tag/DropListItemContentNft";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import DropListItemContentGroupMention from "./DropListItemContentGroupMention";
 import DropListItemContentMention from "./DropListItemContentMention";
 import DropListItemContentWaveMention from "./DropListItemContentWaveMention";
 import { DropContentPartType } from "@/components/drops/view/part/DropPartMarkdown";
@@ -18,6 +20,12 @@ interface DropListItemContentHashtagProps {
   readonly match: string;
 }
 
+interface DropListItemContentGroupMentionProps {
+  readonly type: DropContentPartType.GROUP_MENTION;
+  readonly value: ApiDropGroupMention;
+  readonly match: string;
+}
+
 interface DropListItemContentWaveMentionProps {
   readonly type: DropContentPartType.WAVE_MENTION;
   readonly value: ApiMentionedWave;
@@ -26,6 +34,7 @@ interface DropListItemContentWaveMentionProps {
 
 export type DropListItemContentPartProps =
   | DropListItemContentMentionProps
+  | DropListItemContentGroupMentionProps
   | DropListItemContentHashtagProps
   | DropListItemContentWaveMentionProps;
 
@@ -38,6 +47,8 @@ export default function DropListItemContentPart({
   switch (type) {
     case DropContentPartType.MENTION:
       return <DropListItemContentMention user={value} />;
+    case DropContentPartType.GROUP_MENTION:
+      return <DropListItemContentGroupMention />;
     case DropContentPartType.HASHTAG:
       return <DropListItemContentNft nft={value} />;
     case DropContentPartType.WAVE_MENTION:

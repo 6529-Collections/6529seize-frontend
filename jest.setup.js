@@ -92,6 +92,7 @@ if (!process.env.PUBLIC_RUNTIME) {
     WS_ENDPOINT: "wss://ws.test.6529.io",
     DEV_MODE_MEMES_WAVE_ID: "test-memes-wave-id",
     DEV_MODE_CURATION_WAVE_ID: "test-curation-wave-id",
+    DEV_MODE_QUORUM_WAVE_ID: "test-quorum-wave-id",
   });
 }
 

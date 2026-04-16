@@ -117,13 +117,13 @@ export default function WaveHeader({
           </div>
         </div>
 
-        <div className="tw-mt-10 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-gap-x-3 tw-pb-1">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-gap-x-3 tw-pb-1">
           <div className="tw-min-w-0 tw-flex-1">
             <div className="tw-flex tw-flex-col tw-items-end">
               {!!connectedProfile?.handle && !activeProfileProxy && (
-                <div className="tw-inline-flex tw-items-center tw-space-x-2">
+                <div className="tw-flex tw-w-48 tw-max-w-full tw-flex-col tw-items-stretch tw-gap-y-1.5">
+                  <WaveHeaderFollow wave={wave} fullWidth />
                   <WaveNotificationSettings wave={wave} />
-                  <WaveHeaderFollow wave={wave} />
                 </div>
               )}
             </div>

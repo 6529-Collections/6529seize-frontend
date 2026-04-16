@@ -71,6 +71,7 @@ export const publicEnvSchema = z.object({
   DEV_MODE_AUTH_JWT: z.string().optional(),
   DEV_MODE_MEMES_WAVE_ID: z.string().optional(),
   DEV_MODE_CURATION_WAVE_ID: z.string().optional(),
+  DEV_MODE_QUORUM_WAVE_ID: z.string().optional(),
   DEV_MODE_WALLET_ADDRESS: z.string().optional(),
   MOBILE_APP_SCHEME: z.string().optional(),
   NEXTGEN_CHAIN_ID: z.coerce.number().int().positive().optional(),

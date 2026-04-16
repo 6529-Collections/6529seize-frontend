@@ -13,6 +13,11 @@ jest.mock(
 );
 
 jest.mock(
+  "@/components/drops/view/item/content/DropListItemContentGroupMention",
+  () => () => <div data-testid="group-mention">@all</div>
+);
+
+jest.mock(
   "@/components/drops/view/item/content/DropListItemContentWaveMention",
   () => (props: any) => (
     <div data-testid="wave-mention">{props.wave.wave_name_in_content}</div>
@@ -57,5 +62,18 @@ describe("DropListItemContentPart", () => {
       />
     );
     expect(screen.getByTestId("wave-mention")).toHaveTextContent("Wave One");
+  });
+
+  it("renders group mention", () => {
+    render(
+      <DropListItemContentPart
+        part={{
+          type: DropContentPartType.GROUP_MENTION,
+          value: "ALL" as any,
+          match: "",
+        }}
+      />
+    );
+    expect(screen.getByTestId("group-mention")).toHaveTextContent("@all");
   });
 });

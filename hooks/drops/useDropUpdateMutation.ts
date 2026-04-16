@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
@@ -37,7 +37,7 @@ export const useDropUpdateMutation = () => {
       // Update the drop in wave messages store using existing processIncomingDrop
       if (myStreamContext?.processIncomingDrop) {
         myStreamContext.processIncomingDrop(
-          updatedDrop, 
+          updatedDrop,
           ProcessIncomingDropType.DROP_INSERT // This will merge/update the drop
         );
       }
@@ -47,12 +47,14 @@ export const useDropUpdateMutation = () => {
     },
     onError: (error) => {
       console.error("Failed to update drop:", error);
-      
+
       // Check if it's a time limit error
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       if (errorMessage.includes("can't be edited after")) {
         setToast({
-          message: "This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.",
+          message:
+            "This drop can no longer be edited. Drops can only be edited within 5 minutes of creation.",
           type: "error",
         });
       } else {

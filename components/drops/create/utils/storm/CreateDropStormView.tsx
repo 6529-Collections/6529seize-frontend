@@ -31,6 +31,7 @@ const CreateDropStormView = memo(
               part={part}
               referencedNfts={drop.referenced_nfts}
               mentionedUsers={drop.mentioned_users}
+              mentionedGroups={drop.mentioned_groups ?? []}
               mentionedWaves={drop.mentioned_waves ?? []}
               createdAt={now}
               partIndex={index}

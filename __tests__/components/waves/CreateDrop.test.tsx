@@ -78,6 +78,25 @@ jest.mock("@/components/waves/CreateCurationDropContent", () => ({
     </div>
   ),
 }));
+jest.mock("@/components/waves/quorum/QuorumProposalDropModal", () => ({
+  __esModule: true,
+  default: (props: any) =>
+    props.isOpen ? (
+      <div data-testid="quorum-modal">
+        <button onClick={props.onClose}>close quorum</button>
+        <button
+          onClick={() =>
+            props.submitDrop({
+              drop: { wave_id: "1" },
+              dropId: null,
+            } as DropMutationBody)
+          }
+        >
+          submit quorum
+        </button>
+      </div>
+    ) : null,
+}));
 
 const useWaveMock = useWave as jest.MockedFunction<typeof useWave>;
 const commonApiPostMock = commonApiPost as jest.Mock;
@@ -317,5 +336,36 @@ describe("CreateDrop", () => {
     expect(screen.getByTestId("submission-experience")).toHaveTextContent(
       "IDENTITY"
     );
+  });
+
+  it("opens quorum proposal modal through the custom proposal experience", () => {
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: true,
+    } as any);
+
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"PARTICIPATION" as any}
+            privileges={{} as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByTestId("quorum-modal")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("submission-experience")
+    ).not.toBeInTheDocument();
   });
 });
