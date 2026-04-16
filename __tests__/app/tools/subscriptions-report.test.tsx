@@ -27,7 +27,7 @@ jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn((opts) => {
-    if (opts && opts.endpoint === "subscriptions/redeemed-memes-counts") {
+    if (opts?.endpoint === "subscriptions/redeemed-memes-counts") {
       return Promise.resolve({
         count: 0,
         page: 1,
@@ -35,7 +35,7 @@ jest.mock("@/services/api/common-api", () => ({
         data: [],
       });
     }
-    if (opts && opts.endpoint === "new_memes_seasons") {
+    if (opts?.endpoint === "new_memes_seasons") {
       return Promise.resolve([
         {
           id: 14,
@@ -106,7 +106,7 @@ describe("Subscriptions report page", () => {
       expect(commonApiFetch).toHaveBeenCalledWith({
         endpoint: "subscriptions/redeemed-memes-counts",
         params: {
-          page_size: "20",
+          page_size: "10",
           page: "1",
         },
       });
@@ -128,7 +128,7 @@ describe("Subscriptions report page", () => {
     );
 
     await user.click(
-      await screen.findByRole("button", { name: "Download CSV" })
+      await screen.findByRole("button", { name: "Download" })
     );
 
     await waitFor(() => {
@@ -161,7 +161,7 @@ describe("Subscriptions report page", () => {
       await screen.findByLabelText("Redeemed meme subscription counts season"),
       "14"
     );
-    await user.click(screen.getByRole("button", { name: "Download CSV" }));
+    await user.click(screen.getByRole("button", { name: "Download" }));
 
     await waitFor(() => {
       expect(mockDownload).toHaveBeenCalledWith(
@@ -187,7 +187,7 @@ describe("Subscriptions report page", () => {
     );
 
     expect(
-      await screen.findByRole("button", { name: "Downloading CSV..." })
+      await screen.findByRole("button", { name: "Downloading" })
     ).toBeDisabled();
     expect(mockDownload).not.toHaveBeenCalled();
   });
@@ -209,7 +209,7 @@ describe("Subscriptions report page", () => {
       </AuthContext.Provider>
     );
 
-    await screen.findByRole("button", { name: "Download CSV" });
+    await screen.findByRole("button", { name: "Download" });
 
     await waitFor(() => {
       expect(setToast).toHaveBeenCalledWith({

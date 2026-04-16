@@ -1,5 +1,6 @@
 "use client";
 
+import styles from "./SubscriptionsReport.module.css";
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
@@ -180,7 +181,7 @@ export default function SubscriptionsReportComponent() {
       (season) => season.id.toString() === selectedSeasonId
     ) ?? null;
 
-  const downloadHeaders = useMemo(() => {
+  const buildDownloadHeaders = (): Record<string, string> => {
     const headers: Record<string, string> = {};
     const apiAuth = getStagingAuth();
     const allowlistAuth = getAuthJwt();
@@ -194,13 +195,13 @@ export default function SubscriptionsReportComponent() {
     }
 
     return headers;
-  }, []);
+  };
 
   const {
     download,
     error: csvDownloadError,
     isInProgress: isDownloadingCsv,
-  } = useDownloader({ headers: downloadHeaders });
+  } = useDownloader({ headers: buildDownloadHeaders() });
 
   const csvDownloadUrl = useMemo(() => {
     const downloadUrl = new URL(
@@ -244,15 +245,6 @@ export default function SubscriptionsReportComponent() {
 
   return (
     <>
-      <style>{`
-        @keyframes upcomingRowIn {
-          from { opacity: 0; transform: translateY(-6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .upcoming-row-new {
-          animation: upcomingRowIn 0.22s ease-out both;
-        }
-      `}</style>
       <Container className="tw-mx-auto tw-px-2 tw-py-5 lg:tw-px-6 xl:tw-px-8">
         <Row>
           <Col className="d-flex flex-wrap align-items-center justify-content-between">
@@ -323,7 +315,7 @@ export default function SubscriptionsReportComponent() {
                               index % 2 === 0
                                 ? "tw-bg-iron-800 hover:tw-bg-iron-700"
                                 : "tw-bg-iron-900 hover:tw-bg-iron-700",
-                              isNew ? "upcoming-row-new" : "",
+                              isNew ? styles.upcomingRowNew : "",
                             ].join(" ")}
                           >
                             <SubscriptionDayDetails
