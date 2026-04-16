@@ -187,6 +187,13 @@ export function OfficialWaveSummary({
               ref={changeWaveButtonRef}
               type="button"
               onClick={onOpenChangeWave}
+              aria-expanded={isChangeWaveOpen}
+              aria-haspopup="menu"
+              aria-controls={
+                changeWaveDropdown !== undefined
+                  ? "change-wave-dropdown"
+                  : undefined
+              }
               className={`tw-inline-flex tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-4 sm:tw-py-2.5 sm:tw-text-sm md:tw-w-auto md:tw-justify-center md:tw-py-2 ${
                 isChangeWaveOpen
                   ? "tw-border-white/15 tw-bg-white/10 tw-text-iron-100 tw-shadow-inner"
@@ -195,6 +202,7 @@ export function OfficialWaveSummary({
             >
               <span>Switch wave</span>
               <ChevronDownIcon
+                aria-hidden="true"
                 className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
                   isChangeWaveOpen ? "tw-rotate-180" : ""
                 }`}
@@ -202,7 +210,10 @@ export function OfficialWaveSummary({
             </button>
 
             {changeWaveDropdown !== undefined && (
-              <div className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block">
+              <div
+                id="change-wave-dropdown"
+                className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block"
+              >
                 {changeWaveDropdown}
               </div>
             )}
