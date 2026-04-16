@@ -41,6 +41,7 @@ const config = {
     "<rootDir>/tests/", // Ignore Playwright tests folder
     "<rootDir>/e2e/", // Ignore Playwright e2e folder
   ],
+  modulePathIgnorePatterns: ["<rootDir>/.next/"],
   // Transformation - use ts-jest
   transform: {
     // Use ts-jest for ts/tsx files
