@@ -15,7 +15,6 @@ import { HttpFile } from '../http/http';
 
 export class ApiDropCurationRequest {
     'curation_id': string;
-    'priority_order'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -27,12 +26,6 @@ export class ApiDropCurationRequest {
             "baseName": "curation_id",
             "type": "string",
             "format": ""
-        },
-        {
-            "name": "priority_order",
-            "baseName": "priority_order",
-            "type": "number",
-            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
