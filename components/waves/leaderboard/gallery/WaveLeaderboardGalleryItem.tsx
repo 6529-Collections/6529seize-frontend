@@ -43,13 +43,16 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
     const { hasTouchScreen } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
+    const primaryMedia = drop.parts[0]?.media[0];
+    const isPrimaryMediaVideo = primaryMedia?.mime_type.startsWith("video/");
     const mediaImageScale = isTabletOrSmaller
       ? ImageScale.AUTOx450
       : ImageScale.AUTOx1080;
 
     const previewImageUrl = useMemo(
-      () => getDropPreviewImageUrl(drop.metadata),
-      [drop.metadata]
+      () =>
+        isPrimaryMediaVideo ? null : getDropPreviewImageUrl(drop.metadata),
+      [drop.metadata, isPrimaryMediaVideo]
     );
 
     const isFirstRenderRef = useRef(true);
@@ -157,10 +160,8 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
           >
             <MediaDisplay
-              media_mime_type={
-                drop.parts[0]?.media[0]!.mime_type || "image/jpeg"
-              }
-              media_url={drop.parts[0]?.media[0]!.url!}
+              media_mime_type={primaryMedia?.mime_type ?? "image/jpeg"}
+              media_url={primaryMedia?.url ?? ""}
               disableMediaInteraction={true}
               imageScale={mediaImageScale}
               previewImageUrl={previewImageUrl}
@@ -172,7 +173,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
               <div className="tw-flex tw-items-center tw-gap-1.5">
                 <MediaTypeBadge
-                  mimeType={drop.parts[0]?.media[0]?.mime_type}
+                  mimeType={primaryMedia?.mime_type}
                   dropId={drop.id}
                   size="sm"
                 />
