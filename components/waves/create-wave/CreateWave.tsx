@@ -60,7 +60,6 @@ export default function CreateWave({
     selectedOutcomeType,
     errors,
     groupsCache,
-    groupBuilders,
     // Section updaters
     setOverview,
     setDates,
@@ -73,12 +72,6 @@ export default function CreateWave({
     onOutcomeTypeChange,
     // Group handling
     onGroupSelect,
-    setGroupBuilderPanel,
-    setGroupBuilderRule,
-    setGroupBuilderDraft,
-    addGroupBuilderIdentity,
-    removeGroupBuilderIdentity,
-    resetGroupBuilder,
     // Voting
     onVotingTypeChange,
     onCategoryChange,
@@ -249,18 +242,11 @@ export default function CreateWave({
         waveType={config.overview.type}
         groups={config.groups}
         groupsCache={groupsCache}
-        groupBuilders={groupBuilders}
         chatEnabled={config.chat.enabled}
         adminCanDeleteDrops={config.drops.adminCanDeleteDrops}
         setChatEnabled={onChatEnabledChange}
         onGroupSelect={onGroupSelect}
         onInlineGroupCreate={onInlineGroupCreate}
-        setGroupBuilderPanel={setGroupBuilderPanel}
-        setGroupBuilderRule={setGroupBuilderRule}
-        setGroupBuilderDraft={setGroupBuilderDraft}
-        addGroupBuilderIdentity={addGroupBuilderIdentity}
-        removeGroupBuilderIdentity={removeGroupBuilderIdentity}
-        resetGroupBuilder={resetGroupBuilder}
         setDropsAdminCanDelete={setDropsAdminCanDelete}
       />
     ),

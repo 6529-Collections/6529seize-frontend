@@ -5,11 +5,13 @@ export default function CreateWaveInlineGroupSearch({
   defaultLabel,
   disabled,
   selectedGroup,
+  allowGroupClear = true,
   onSelect,
 }: {
   readonly defaultLabel: string;
   readonly disabled: boolean;
   readonly selectedGroup: ApiGroupFull | null;
+  readonly allowGroupClear?: boolean;
   readonly onSelect: (group: ApiGroupFull | null) => void;
 }) {
   return (
@@ -19,6 +21,7 @@ export default function CreateWaveInlineGroupSearch({
         defaultLabel={defaultLabel}
         disabled={disabled}
         selectedGroup={selectedGroup}
+        allowClear={allowGroupClear}
         onSelect={onSelect}
       />
     </div>
