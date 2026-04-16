@@ -81,6 +81,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
     refetchInterval: PINNED_WAVES_REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
   });
 
   // Clear pinned waves data when user logs out

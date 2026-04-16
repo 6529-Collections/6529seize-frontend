@@ -1,95 +1,123 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { WAVE_FOLLOWING_WAVES_PARAMS } from "./query-utils";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { QueryKey } from "../ReactQueryWrapper";
 
 type WavesOverviewQueryData = {
   pages?: ApiWave[][] | undefined;
 };
 
+type WavesOverviewCacheData = ApiWave[] | WavesOverviewQueryData;
+
+const updateWaveDropMetrics = (wave: ApiWave, timestamp: number): ApiWave => {
+  const latestDropTimestamp = Math.max(
+    timestamp,
+    wave.last_drop_time,
+    wave.metrics.latest_drop_timestamp
+  );
+
+  return {
+    ...wave,
+    last_drop_time: latestDropTimestamp,
+    metrics: {
+      ...wave.metrics,
+      drops_count: wave.metrics.drops_count + 1,
+      your_drops_count: (wave.metrics.your_drops_count ?? 0) + 1,
+      latest_drop_timestamp: latestDropTimestamp,
+      your_latest_drop_timestamp: latestDropTimestamp,
+    },
+  };
+};
+
+const updateWaveInArray = (
+  waves: ApiWave[],
+  waveId: string,
+  timestamp: number
+): { waves: ApiWave[]; didUpdate: boolean } => {
+  let didUpdate = false;
+
+  const updatedWaves = waves.map((wave) => {
+    if (wave.id !== waveId) {
+      return wave;
+    }
+
+    didUpdate = true;
+    return updateWaveDropMetrics(wave, timestamp);
+  });
+
+  return { waves: updatedWaves, didUpdate };
+};
+
+const hasWaveInArray = (waves: ApiWave[], waveId: string): boolean =>
+  waves.some((wave) => wave.id === waveId);
+
+const hasWaveInCacheData = (
+  data: WavesOverviewCacheData | undefined,
+  waveId: string
+): boolean => {
+  if (!data) {
+    return false;
+  }
+
+  if (Array.isArray(data)) {
+    return hasWaveInArray(data, waveId);
+  }
+
+  return data.pages?.some((page) => hasWaveInArray(page, waveId)) ?? false;
+};
+
+const updateWavesOverviewCacheData = (
+  oldData: WavesOverviewCacheData | undefined,
+  waveId: string,
+  timestamp: number
+): WavesOverviewCacheData | undefined => {
+  if (!oldData) {
+    return oldData;
+  }
+
+  if (Array.isArray(oldData)) {
+    const { waves, didUpdate } = updateWaveInArray(oldData, waveId, timestamp);
+    return didUpdate ? waves : oldData;
+  }
+
+  if (!oldData.pages || oldData.pages.length === 0) {
+    return oldData;
+  }
+
+  const pageUpdates = oldData.pages.map((page) =>
+    updateWaveInArray(page, waveId, timestamp)
+  );
+
+  if (!pageUpdates.some(({ didUpdate }) => didUpdate)) {
+    return oldData;
+  }
+
+  return {
+    ...oldData,
+    pages: pageUpdates.map(({ waves }) => waves),
+  };
+};
+
 export const increaseWavesOverviewDropsCount = async (
   queryClient: QueryClient,
   waveId: string
 ) => {
-  for (const type of Object.values(ApiWavesOverviewType)) {
-    const queryKey = [
-      QueryKey.WAVES_OVERVIEW,
-      {
-        limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
-        type,
-        only_waves_followed_by_authenticated_user:
-          WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
-      },
-    ];
+  const timestamp = Date.now();
+  const overviewQueries = queryClient.getQueriesData<WavesOverviewCacheData>({
+    queryKey: [QueryKey.WAVES_OVERVIEW],
+  });
+
+  for (const [queryKey, data] of overviewQueries) {
+    if (!hasWaveInCacheData(data, waveId)) {
+      continue;
+    }
 
     await queryClient.cancelQueries({ queryKey });
 
-    queryClient.setQueryData<WavesOverviewQueryData | undefined>(
+    queryClient.setQueryData<WavesOverviewCacheData | undefined>(
       queryKey,
-      (
-        oldData: WavesOverviewQueryData | undefined
-      ): WavesOverviewQueryData | undefined => {
-        if (!oldData?.pages || oldData.pages.length === 0) {
-          return oldData;
-        }
-
-        const pages: ApiWave[][] = JSON.parse(JSON.stringify(oldData.pages));
-        let matchingWave: ApiWave | undefined;
-        let matchingWaveIndex: number = -1;
-        let matchingWavePage: number = -1;
-
-        for (let i = 0; i < pages.length; i++) {
-          const page = pages[i];
-          if (!page) continue;
-          matchingWaveIndex = page.findIndex((wave) => wave.id === waveId);
-          if (matchingWaveIndex !== -1) {
-            matchingWavePage = i;
-            matchingWave = page[matchingWaveIndex];
-            break;
-          }
-        }
-
-        if (!matchingWave) {
-          return oldData;
-        }
-
-        const updatedMatchingWave = {
-          ...matchingWave,
-          metrics: {
-            ...matchingWave.metrics,
-            drops_count: matchingWave.metrics.drops_count + 1,
-            your_drops_count: (matchingWave.metrics.your_drops_count ?? 0) + 1,
-            latest_drop_timestamp: Date.now(),
-            your_latest_drop_timestamp: Date.now(),
-          },
-        };
-
-        const updatedPages = pages
-          .flat()
-          .filter((wave) => wave.id !== waveId)
-          .splice(
-            matchingWaveIndex +
-              matchingWavePage * WAVE_FOLLOWING_WAVES_PARAMS.limit,
-            0,
-            updatedMatchingWave
-          );
-
-        const newPages: ApiWave[][] = [];
-        for (
-          let i = 0;
-          i < updatedPages.length;
-          i += WAVE_FOLLOWING_WAVES_PARAMS.limit
-        ) {
-          newPages.push(
-            updatedPages.slice(i, i + WAVE_FOLLOWING_WAVES_PARAMS.limit)
-          );
-        }
-
-        return { ...oldData, pages: newPages };
-      },
+      (oldData) => updateWavesOverviewCacheData(oldData, waveId, timestamp),
       {
-        updatedAt: Date.now(),
+        updatedAt: timestamp,
       }
     );
   }
