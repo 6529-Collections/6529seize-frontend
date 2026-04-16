@@ -315,7 +315,7 @@ export default function SubscriptionsReportComponent() {
                               index % 2 === 0
                                 ? "tw-bg-iron-800 hover:tw-bg-iron-700"
                                 : "tw-bg-iron-900 hover:tw-bg-iron-700",
-                              isNew ? styles.upcomingRowNew : "",
+                              isNew ? styles["upcomingRowNew"] : "",
                             ].join(" ")}
                           >
                             <SubscriptionDayDetails
