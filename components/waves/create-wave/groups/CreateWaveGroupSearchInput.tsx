@@ -80,7 +80,9 @@ export default function CreateWaveGroupSearchInput({
         <button
           type="button"
           onClick={onClearSelection}
-          aria-label="Clear selected group"
+          aria-label={
+            hasSelectedGroup ? "Clear selected group" : "Clear search"
+          }
           className="tw-absolute tw-right-3 tw-top-3.5 tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error"
         >
           <svg
