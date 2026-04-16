@@ -550,10 +550,17 @@ export default function UserPageProfileWavePicker({
   });
   const isDropdown = variant === "dropdown";
   const isMobileSheet = variant === "mobile-sheet";
+  const retryWavePickerLoad = async () => {
+    await refetch();
+  };
 
   useEffect(() => {
     if (status === "success" && hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
+      const fetchRemainingWaves = async () => {
+        await fetchNextPage();
+      };
+
+      fetchRemainingWaves().catch(() => undefined);
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage, status]);
 
@@ -562,7 +569,7 @@ export default function UserPageProfileWavePicker({
       state,
       isDropdown,
       isMobileSheet,
-      onRetry: () => void refetch(),
+      onRetry: retryWavePickerLoad,
     });
   }
 

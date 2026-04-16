@@ -69,6 +69,9 @@ export default function UserPageProfileWaveContent({
     hasNextPage,
     isFetchingNextPage,
   });
+  const retryDropsLoad = async () => {
+    await refetchDrops();
+  };
 
   switch (state.kind) {
     case "curations_error":
@@ -114,7 +117,7 @@ export default function UserPageProfileWaveContent({
           actions={
             <RetryButton
               isLoading={areDropsFetching}
-              onClick={() => void refetchDrops()}
+              onClick={retryDropsLoad}
             />
           }
         />

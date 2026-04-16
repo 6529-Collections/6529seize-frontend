@@ -112,6 +112,18 @@ export default function UserPageProfileWave({
     router.push(waveHref, { scroll: false });
   };
 
+  const retryOfficialWaveLoad = async () => {
+    await refetch();
+  };
+
+  const retryCurationsLoad = async () => {
+    await refetchCurations();
+  };
+
+  const handleRemoveOfficialWave = async () => {
+    await removeOfficialWave();
+  };
+
   const removeOfficialWave = async () => {
     await clearSelectedProfileWave();
   };
@@ -152,7 +164,7 @@ export default function UserPageProfileWave({
           canManageOwnOfficialWave ? (
             <button
               type="button"
-              onClick={() => void removeOfficialWave()}
+              onClick={handleRemoveOfficialWave}
               disabled={isPending}
               aria-label="Unset official wave"
               title="Unset official wave"
@@ -181,7 +193,7 @@ export default function UserPageProfileWave({
         title="Unable to load official wave"
         message="There was a temporary problem loading this profile curation."
         actions={
-          <RetryButton isLoading={isFetching} onClick={() => void refetch()} />
+          <RetryButton isLoading={isFetching} onClick={retryOfficialWaveLoad} />
         }
       />
     );
@@ -218,7 +230,7 @@ export default function UserPageProfileWave({
           isRemoving={isPending && pendingAction === "clear"}
           onOpenWave={openWave}
           onOpenChangeWave={() => setIsChangeWaveOpen((open) => !open)}
-          onRemoveWave={() => void removeOfficialWave()}
+          onRemoveWave={handleRemoveOfficialWave}
         />
       </div>
 
@@ -250,7 +262,7 @@ export default function UserPageProfileWave({
           areCurationsFetching={areCurationsFetching}
           areCurationsLoading={areCurationsLoading}
           hasLoadedCurations={hasLoadedCurations}
-          onRetryCurations={() => void refetchCurations()}
+          onRetryCurations={retryCurationsLoad}
           profileCuration={profileCuration}
           profileWaveId={profileWaveId}
         />
