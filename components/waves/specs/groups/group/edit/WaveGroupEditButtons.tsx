@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -16,6 +16,14 @@ import {
   WaveGroupManageIdentitiesMode,
   type WaveGroupManageIdentitiesConfirmEvent,
 } from "./WaveGroupManageIdentitiesModal";
+import WaveGroupChangeDialog from "./WaveGroupChangeDialog";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
+import {
+  buildWaveUpdateBody,
+  getScopedGroup,
+} from "./buttons/utils/waveGroupEdit";
 
 interface WaveGroupEditButtonsProps {
   readonly haveGroup: boolean;
@@ -28,9 +36,15 @@ export default function WaveGroupEditButtons({
   wave,
   type,
 }: WaveGroupEditButtonsProps) {
-  const { setToast, requestAuth, connectedProfile } =
-    useContext(AuthContext);
-  const { onWaveCreated } = useContext(ReactQueryWrapperContext);
+  const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
+  const { onWaveCreated, onGroupCreate } = useContext(ReactQueryWrapperContext);
+  const [isGroupChangeOpen, setIsGroupChangeOpen] = useState(false);
+  const skipNextGroupChangeAuthRef = useRef(false);
+  const scopedGroup = useMemo(() => getScopedGroup(wave, type), [wave, type]);
+  const { submit: submitInlineGroup } = useGroupMutations({
+    requestAuth,
+    onGroupCreate,
+  });
 
   const {
     mutating,
@@ -58,28 +72,87 @@ export default function WaveGroupEditButtons({
         mode === WaveGroupManageIdentitiesMode.INCLUDE
           ? WaveGroupIdentitiesModal.INCLUDE
           : WaveGroupIdentitiesModal.EXCLUDE;
-      onIdentityConfirm({ identity, mode: normalizedMode });
+      void onIdentityConfirm({ identity, mode: normalizedMode });
     },
-    [onIdentityConfirm],
+    [onIdentityConfirm]
   );
 
   const handleIncludeIdentity = useCallback(
     () => openIdentitiesModal(WaveGroupIdentitiesModal.INCLUDE),
-    [openIdentitiesModal],
+    [openIdentitiesModal]
   );
 
   const handleExcludeIdentity = useCallback(
     () => openIdentitiesModal(WaveGroupIdentitiesModal.EXCLUDE),
-    [openIdentitiesModal],
+    [openIdentitiesModal]
+  );
+
+  const handleChangeGroupOpen = useCallback(() => {
+    setIsGroupChangeOpen(true);
+  }, []);
+
+  const handleChangeGroupClose = useCallback(() => {
+    skipNextGroupChangeAuthRef.current = false;
+    setIsGroupChangeOpen(false);
+  }, []);
+
+  const handleGroupChange = useCallback(
+    async (group: ApiGroupFull | null) => {
+      if (!group) {
+        return;
+      }
+
+      const skipAuth = skipNextGroupChangeAuthRef.current;
+      skipNextGroupChangeAuthRef.current = false;
+
+      try {
+        await updateWave(buildWaveUpdateBody(wave, type, group.id), {
+          skipAuth,
+        });
+        setIsGroupChangeOpen(false);
+      } catch {
+        // updateWave already surfaces mutation failures through the shared toast.
+      }
+    },
+    [type, updateWave, wave]
+  );
+
+  const handleInlineGroupCreate = useCallback(
+    async (payload: ApiCreateGroup): Promise<ApiGroupFull | null> => {
+      const result = await submitInlineGroup({
+        payload,
+        currentHandle: connectedProfile?.handle ?? null,
+      });
+
+      if (!result.ok) {
+        if (result.reason !== "auth") {
+          setToast({
+            message: result.error,
+            type: "error",
+          });
+        }
+        return null;
+      }
+
+      setToast({
+        message: "Group created.",
+        type: "success",
+      });
+      skipNextGroupChangeAuthRef.current = true;
+
+      return result.group;
+    },
+    [connectedProfile?.handle, setToast, submitInlineGroup]
   );
 
   if (mutating) {
     return (
       <output
         aria-live="polite"
-        className="tw-inline-flex tw-items-center tw-gap-2">
+        className="tw-inline-flex tw-items-center tw-gap-2"
+      >
         <CircleLoader />
-        <span className="tw-sr-only">Updating wave group identities</span>
+        <span className="tw-sr-only">Updating wave group</span>
       </output>
     );
   }
@@ -96,7 +169,18 @@ export default function WaveGroupEditButtons({
         canRemoveGroup={canRemoveGroup}
         onIncludeIdentity={handleIncludeIdentity}
         onExcludeIdentity={handleExcludeIdentity}
+        onChangeGroup={handleChangeGroupOpen}
       />
+      {isGroupChangeOpen && (
+        <WaveGroupChangeDialog
+          wave={wave}
+          type={type}
+          currentGroup={scopedGroup}
+          onClose={handleChangeGroupClose}
+          onGroupChange={handleGroupChange}
+          onCreateGroup={handleInlineGroupCreate}
+        />
+      )}
       <WaveGroupManageIdentitiesModals
         activeModal={activeIdentitiesModal}
         onClose={closeIdentitiesModal}

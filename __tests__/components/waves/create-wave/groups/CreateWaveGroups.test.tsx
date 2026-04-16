@@ -25,22 +25,7 @@ describe("CreateWaveGroups", () => {
         chatEnabled={false}
         adminCanDeleteDrops={false}
         groupsCache={{}}
-        groupBuilders={
-          {
-            CAN_VIEW: {},
-            CAN_DROP: {},
-            CAN_VOTE: {},
-            CAN_CHAT: {},
-            ADMIN: {},
-          } as any
-        }
         setChatEnabled={jest.fn()}
-        setGroupBuilderPanel={jest.fn()}
-        setGroupBuilderRule={jest.fn()}
-        setGroupBuilderDraft={jest.fn()}
-        addGroupBuilderIdentity={jest.fn()}
-        removeGroupBuilderIdentity={jest.fn()}
-        resetGroupBuilder={jest.fn()}
         setDropsAdminCanDelete={jest.fn()}
       />
     );
