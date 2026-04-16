@@ -5,10 +5,11 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MemesArtSubmissionShell } from "./MemesArtSubmissionShell";
 import { MemesArtSubmissionStepContent } from "./MemesArtSubmissionStepContent";
+import { ResubmitAcknowledgement } from "./ResubmitAcknowledgement";
 import { ResubmitDeleteConfirmation } from "./ResubmitDeleteConfirmation";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
@@ -48,6 +49,8 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   );
   const isResubmission = Boolean(sourceDrop);
   const submitLabel = isResubmission ? "Submit New Version" : "Submit Artwork";
+  const [hasAcknowledgedResubmission, setHasAcknowledgedResubmission] =
+    useState(!isResubmission);
 
   // Use the form hook to manage all state
   const form = useArtworkSubmissionForm(initialDraft);
@@ -231,10 +234,58 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     void handleSubmit();
   }, [handleSubmit]);
 
+  const handleAcceptResubmissionAcknowledgement = useCallback(() => {
+    setHasAcknowledgedResubmission(true);
+  }, []);
+
   const shellDescription =
-    isResubmission && !replacementDrop
+    isResubmission && hasAcknowledgedResubmission && !replacementDrop
       ? "Resubmitting creates a new submission with this data, then asks you to confirm deleting the original."
       : undefined;
+
+  let submissionContent: ReactNode;
+
+  if (isResubmission && !hasAcknowledgedResubmission) {
+    submissionContent = (
+      <ResubmitAcknowledgement
+        onAccept={handleAcceptResubmissionAcknowledgement}
+        onCancel={onClose}
+      />
+    );
+  } else if (sourceDrop && replacementDrop) {
+    submissionContent = (
+      <ResubmitDeleteConfirmation
+        originalDrop={sourceDrop}
+        replacementDrop={replacementDrop}
+        isDeleting={isDeletingOriginal}
+        error={deleteOriginalError}
+        onDeleteOriginal={handleDeleteOriginalClick}
+        onKeepBoth={handleKeepBoth}
+      />
+    );
+  } else {
+    submissionContent = (
+      <MemesArtSubmissionStepContent
+        form={form}
+        wave={wave}
+        isPreviewMode={isPreviewMode}
+        previewDrop={previewDrop}
+        isSubmitting={isSubmitting}
+        submissionPhase={submissionPhase}
+        uploadProgress={uploadProgress}
+        submissionError={submissionError}
+        submitLabel={submitLabel}
+        onClose={onClose}
+        onBackToEdit={handleBackToEdit}
+        onBackFromAdditionalInfo={handleBackFromAdditionalInfo}
+        onOpenPreview={handleOpenPreview}
+        onSubmitClick={handleSubmitClick}
+        onArtworkCommentaryMediaChange={handleArtworkCommentaryMediaChange}
+        onPreviewImageChange={handlePreviewImageChange}
+        onPromoVideoChange={handlePromoVideoChange}
+      />
+    );
+  }
 
   return (
     <MemesArtSubmissionShell
@@ -246,36 +297,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       description={shellDescription}
       onClose={onClose}
     >
-      {sourceDrop && replacementDrop ? (
-        <ResubmitDeleteConfirmation
-          originalDrop={sourceDrop}
-          replacementDrop={replacementDrop}
-          isDeleting={isDeletingOriginal}
-          error={deleteOriginalError}
-          onDeleteOriginal={handleDeleteOriginalClick}
-          onKeepBoth={handleKeepBoth}
-        />
-      ) : (
-        <MemesArtSubmissionStepContent
-          form={form}
-          wave={wave}
-          isPreviewMode={isPreviewMode}
-          previewDrop={previewDrop}
-          isSubmitting={isSubmitting}
-          submissionPhase={submissionPhase}
-          uploadProgress={uploadProgress}
-          submissionError={submissionError}
-          submitLabel={submitLabel}
-          onClose={onClose}
-          onBackToEdit={handleBackToEdit}
-          onBackFromAdditionalInfo={handleBackFromAdditionalInfo}
-          onOpenPreview={handleOpenPreview}
-          onSubmitClick={handleSubmitClick}
-          onArtworkCommentaryMediaChange={handleArtworkCommentaryMediaChange}
-          onPreviewImageChange={handlePreviewImageChange}
-          onPromoVideoChange={handlePromoVideoChange}
-        />
-      )}
+      {submissionContent}
     </MemesArtSubmissionShell>
   );
 };

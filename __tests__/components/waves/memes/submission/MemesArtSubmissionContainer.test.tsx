@@ -259,7 +259,7 @@ describe("MemesArtSubmissionContainer", () => {
 
   it("submits artwork when file selected", async () => {
     const submitArtwork = jest.fn(async () => "result");
-    mockMutation.mockReturnValueOnce({
+    mockMutation.mockReturnValue({
       submitArtwork,
       uploadProgress: 0,
       submissionPhase: "idle",
@@ -275,7 +275,80 @@ describe("MemesArtSubmissionContainer", () => {
     expect(res).toBeTruthy();
   });
 
-  it("treats existing GLTF resubmissions as interactive media", () => {
+  it("shows resubmission acknowledgement before the prefilled form", () => {
+    render(
+      <MemesArtSubmissionContainer
+        onClose={onClose}
+        wave={wave}
+        sourceDrop={
+          {
+            id: "source-1",
+            title: "Source",
+            metadata: [],
+            parts: [{ content: "", media: [] }],
+          } as any
+        }
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { name: /this creates a new submission/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("artwork")).not.toBeInTheDocument();
+  });
+
+  it("closes resubmission acknowledgement when canceled", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemesArtSubmissionContainer
+        onClose={onClose}
+        wave={wave}
+        sourceDrop={
+          {
+            id: "source-1",
+            title: "Source",
+            metadata: [],
+            parts: [{ content: "", media: [] }],
+          } as any
+        }
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /cancel/i }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the prefilled form after accepting resubmission acknowledgement", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemesArtSubmissionContainer
+        onClose={onClose}
+        wave={wave}
+        sourceDrop={
+          {
+            id: "source-1",
+            title: "Source",
+            metadata: [],
+            parts: [{ content: "", media: [] }],
+          } as any
+        }
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /i understand, start resubmission/i,
+      })
+    );
+
+    expect(screen.getByTestId("artwork")).toBeInTheDocument();
+  });
+
+  it("treats existing GLTF resubmissions as interactive media", async () => {
+    const user = userEvent.setup();
     formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
     formState.existingMedia = {
       url: "https://example.com/model.gltf",
@@ -299,6 +372,12 @@ describe("MemesArtSubmissionContainer", () => {
       />
     );
 
+    await user.click(
+      screen.getByRole("button", {
+        name: /i understand, start resubmission/i,
+      })
+    );
+
     expect(additionalInfoProps.requiresPreviewImage).toBe(true);
     expect(additionalInfoProps.requiresPromoVideoOption).toBe(true);
     expect(additionalInfoProps.previewRequiredMediaType).toBe("GLTF");
@@ -319,7 +398,7 @@ describe("MemesArtSubmissionContainer", () => {
     };
     formState.artworkUploaded = true;
     formState.artworkUrl = formState.existingMedia.url;
-    mockMutation.mockReturnValueOnce({
+    mockMutation.mockReturnValue({
       submitArtwork,
       uploadProgress: 0,
       submissionPhase: "idle",
@@ -352,6 +431,12 @@ describe("MemesArtSubmissionContainer", () => {
         }
         onSourceDropDeleted={onSourceDropDeleted}
       />
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /i understand, start resubmission/i,
+      })
     );
 
     await user.click(screen.getByTestId("additional-submit"));
