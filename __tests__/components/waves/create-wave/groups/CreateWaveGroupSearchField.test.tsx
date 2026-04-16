@@ -237,6 +237,59 @@ describe("CreateWaveGroupSearchField", () => {
     expect(screen.getByText("Selected: Alpha Group")).toBeInTheDocument();
   });
 
+  it("syncs input and search query when selected group changes externally", async () => {
+    const user = userEvent.setup();
+    const onSelect = jest.fn();
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+    const renderField = (selectedGroup: ApiGroupFull | null) => (
+      <QueryClientProvider client={queryClient}>
+        <CreateWaveGroupSearchField
+          label="Search groups..."
+          defaultLabel="Anyone"
+          disabled={false}
+          selectedGroup={selectedGroup}
+          onSelect={onSelect}
+        />
+      </QueryClientProvider>
+    );
+
+    const { rerender } = render(renderField(groups[0]));
+    const input = screen.getByRole("combobox", { name: "Search groups..." });
+
+    expect(input).toHaveValue("Alpha Group");
+
+    rerender(renderField(groups[1]));
+
+    expect(input).toHaveValue("Beta Group");
+    expect(screen.getByText("Selected: Beta Group")).toBeInTheDocument();
+
+    await user.click(input);
+
+    await waitFor(() =>
+      expect(mockCommonApiFetch).toHaveBeenCalledWith({
+        endpoint: "groups",
+        params: { group_name: "Beta Group" },
+      })
+    );
+
+    rerender(renderField(null));
+
+    await waitFor(() => expect(input).toHaveValue(""));
+    expect(screen.getByText("Default: Anyone")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(mockCommonApiFetch).toHaveBeenCalledWith({
+        endpoint: "groups",
+        params: {},
+      })
+    );
+  });
+
   it("clears selected group while preserving typed search text", async () => {
     const { onSelect } = renderStatefulSearchField({
       selectedGroup: groups[0],

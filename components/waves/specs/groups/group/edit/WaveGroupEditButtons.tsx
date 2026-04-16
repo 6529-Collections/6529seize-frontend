@@ -121,13 +121,6 @@ export default function WaveGroupEditButtons({
     async (payload: ApiCreateGroup): Promise<ApiGroupFull | null> => {
       const result = await submitInlineGroup({
         payload,
-        previousGroup: scopedGroup?.id
-          ? ({
-              id: scopedGroup.id,
-              name: scopedGroup.name ?? "",
-              created_by: scopedGroup.author,
-            } as ApiGroupFull)
-          : null,
         currentHandle: connectedProfile?.handle ?? null,
       });
 
@@ -149,7 +142,7 @@ export default function WaveGroupEditButtons({
 
       return result.group;
     },
-    [connectedProfile?.handle, scopedGroup, setToast, submitInlineGroup]
+    [connectedProfile?.handle, setToast, submitInlineGroup]
   );
 
   if (mutating) {

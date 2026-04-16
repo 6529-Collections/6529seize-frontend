@@ -338,13 +338,14 @@ describe("WaveGroupEditButtons", () => {
     fireEvent.click(screen.getByText("create inline group"));
 
     await waitFor(() => expect(mockSubmitInlineGroup).toHaveBeenCalled());
-    expect(mockSubmitInlineGroup).toHaveBeenCalledWith(
+    const submitArgs = mockSubmitInlineGroup.mock.calls[0][0];
+    expect(submitArgs).toEqual(
       expect.objectContaining({
         payload: expect.objectContaining({ name: "Draft Group" }),
-        previousGroup: expect.objectContaining({ id: "group-1" }),
         currentHandle: "alice",
       })
     );
+    expect(submitArgs).not.toHaveProperty("previousGroup");
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
     expect(auth.requestAuth).toHaveBeenCalledTimes(1);
     expect(mutateAsync.mock.calls[0][0].visibility.scope.group_id).toBe(

@@ -28,6 +28,52 @@ type CreateWaveGroupSearchParams = {
   readonly wrapperRef: RefObject<HTMLDivElement | null>;
 };
 
+type CreateWaveGroupSearchState = {
+  readonly selectedGroupKey: string | null;
+  readonly inputValue: string;
+  readonly searchCriteria: string;
+  readonly activeIndex: number;
+};
+
+function getSelectedGroupKey(group: ApiGroupFull | null): string | null {
+  if (!group) {
+    return null;
+  }
+
+  return JSON.stringify([group.id, group.name]);
+}
+
+function createSearchState({
+  selectedGroupKey,
+  selectedGroupName,
+}: {
+  readonly selectedGroupKey: string | null;
+  readonly selectedGroupName: string;
+}): CreateWaveGroupSearchState {
+  return {
+    selectedGroupKey,
+    inputValue: selectedGroupName,
+    searchCriteria: selectedGroupName,
+    activeIndex: -1,
+  };
+}
+
+function getEffectiveSearchState({
+  searchState,
+  selectedGroupKey,
+  selectedGroupName,
+}: {
+  readonly searchState: CreateWaveGroupSearchState;
+  readonly selectedGroupKey: string | null;
+  readonly selectedGroupName: string;
+}): CreateWaveGroupSearchState {
+  if (searchState.selectedGroupKey === selectedGroupKey) {
+    return searchState;
+  }
+
+  return createSearchState({ selectedGroupKey, selectedGroupName });
+}
+
 function useCreateWaveGroupSuggestions({
   debouncedValue,
   disabled,
@@ -133,6 +179,75 @@ function useCreateWaveGroupKeyboardNavigation({
   );
 }
 
+function useCreateWaveGroupSearchState({
+  selectedGroupKey,
+  selectedGroupName,
+}: {
+  readonly selectedGroupKey: string | null;
+  readonly selectedGroupName: string;
+}) {
+  const [searchState, setSearchState] = useState<CreateWaveGroupSearchState>(
+    () => createSearchState({ selectedGroupKey, selectedGroupName })
+  );
+  const [debouncedValue, setDebouncedValue] =
+    useState<string>(selectedGroupName);
+  const effectiveSearchState = getEffectiveSearchState({
+    searchState,
+    selectedGroupKey,
+    selectedGroupName,
+  });
+  const { activeIndex, inputValue, searchCriteria } = effectiveSearchState;
+
+  const updateSearchState = useCallback(
+    (
+      getNextState: (
+        current: CreateWaveGroupSearchState
+      ) => CreateWaveGroupSearchState
+    ) => {
+      setSearchState((current) => {
+        const effectiveCurrent = getEffectiveSearchState({
+          searchState: current,
+          selectedGroupKey,
+          selectedGroupName,
+        });
+
+        return getNextState(effectiveCurrent);
+      });
+    },
+    [selectedGroupKey, selectedGroupName]
+  );
+
+  const setActiveIndex = useCallback<Dispatch<SetStateAction<number>>>(
+    (nextActiveIndex) => {
+      updateSearchState((current) => ({
+        ...current,
+        activeIndex:
+          typeof nextActiveIndex === "function"
+            ? nextActiveIndex(current.activeIndex)
+            : nextActiveIndex,
+      }));
+    },
+    [updateSearchState]
+  );
+
+  useDebounce(
+    () => {
+      setDebouncedValue(searchCriteria.trim());
+    },
+    DEBOUNCE_MS,
+    [searchCriteria]
+  );
+
+  return {
+    activeIndex,
+    debouncedValue,
+    inputValue,
+    searchCriteria,
+    setActiveIndex,
+    setSearchState,
+  };
+}
+
 export function useCreateWaveGroupSearch({
   defaultLabel,
   disabled,
@@ -145,26 +260,20 @@ export function useCreateWaveGroupSearch({
   const baseId = useId();
   const inputId = `${baseId}-input`;
   const listboxId = `${baseId}-listbox`;
-
-  const [inputValue, setInputValue] = useState<string>(
-    selectedGroup?.name ?? ""
-  );
-  const [searchCriteria, setSearchCriteria] = useState<string>(
-    selectedGroup?.name ?? ""
-  );
-  const [debouncedValue, setDebouncedValue] = useState<string>(
-    selectedGroup?.name ?? ""
-  );
+  const selectedGroupKey = getSelectedGroupKey(selectedGroup);
+  const selectedGroupName = selectedGroup?.name ?? "";
   const [isOpen, setIsOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
-
-  useDebounce(
-    () => {
-      setDebouncedValue(searchCriteria.trim());
-    },
-    DEBOUNCE_MS,
-    [searchCriteria]
-  );
+  const {
+    activeIndex,
+    debouncedValue,
+    inputValue,
+    searchCriteria,
+    setActiveIndex,
+    setSearchState,
+  } = useCreateWaveGroupSearchState({
+    selectedGroupKey,
+    selectedGroupName,
+  });
 
   const { isFetching, suggestions } = useCreateWaveGroupSuggestions({
     debouncedValue,
@@ -175,20 +284,23 @@ export function useCreateWaveGroupSearch({
   const closeSearch = useCallback(() => {
     setIsOpen(false);
     setActiveIndex(-1);
-  }, []);
+  }, [setActiveIndex]);
 
   const clearSelection = useCallback(() => {
     if (!allowClear || disabled) {
       return;
     }
 
-    setInputValue("");
-    setSearchCriteria("");
+    setSearchState({
+      selectedGroupKey: null,
+      inputValue: "",
+      searchCriteria: "",
+      activeIndex: -1,
+    });
     onSelect(null);
     setIsOpen(true);
-    setActiveIndex(-1);
     inputRef.current?.focus();
-  }, [allowClear, disabled, inputRef, onSelect]);
+  }, [allowClear, disabled, inputRef, onSelect, setSearchState]);
 
   useClickAway(wrapperRef, () => {
     if (!isOpen) {
@@ -213,10 +325,13 @@ export function useCreateWaveGroupSearch({
   };
 
   const handleInputChange = (value: string) => {
-    setInputValue(value);
-    setSearchCriteria(value);
+    setSearchState({
+      selectedGroupKey: selectedGroup && allowClear ? null : selectedGroupKey,
+      inputValue: value,
+      searchCriteria: value,
+      activeIndex: -1,
+    });
     setIsOpen(true);
-    setActiveIndex(-1);
     if (selectedGroup && allowClear) {
       onSelect(null);
     }
@@ -224,13 +339,17 @@ export function useCreateWaveGroupSearch({
 
   const onOptionSelect = useCallback(
     (group: ApiGroupFull) => {
-      setInputValue(group.name);
-      setSearchCriteria(group.name);
+      setSearchState({
+        selectedGroupKey,
+        inputValue: group.name,
+        searchCriteria: group.name,
+        activeIndex: -1,
+      });
       onSelect(group);
       closeSearch();
       inputRef.current?.focus();
     },
-    [closeSearch, inputRef, onSelect]
+    [closeSearch, inputRef, onSelect, selectedGroupKey, setSearchState]
   );
 
   const handleKeyDown = useCreateWaveGroupKeyboardNavigation({
