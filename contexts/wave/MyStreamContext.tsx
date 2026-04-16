@@ -45,17 +45,16 @@ interface WavesContextData {
   readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
+interface ActiveWaveSetOptions {
+  readonly isDirectMessage?: boolean | undefined;
+  readonly replace?: boolean | undefined;
+  readonly serialNo?: number | string | null | undefined;
+  readonly divider?: number | null | undefined;
+}
+
 interface ActiveWaveContextData {
   readonly id: string | null;
-  readonly set: (
-    waveId: string | null,
-    options?: {
-      isDirectMessage?: boolean | undefined;
-      replace?: boolean | undefined;
-      serialNo?: number | string | null | undefined;
-      divider?: number | null | undefined;
-    }
-  ) => void;
+  readonly set: (waveId: string | null, options?: ActiveWaveSetOptions) => void;
 }
 
 // Define the interface for the wave messages store functions
@@ -102,7 +101,7 @@ type StreamSyncSource =
   | "browser-resume"
   | "websocket-connected"
   | "capacitor-resume";
-type BrowserResumeSource = "visibilitychange" | "focus";
+type BrowserResumeSource = "visibilitychange" | "focus" | "online";
 
 // Create the context
 const MyStreamContext = createContext<MyStreamContextType | null>(null);
@@ -143,13 +142,18 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     getData: waveMessagesStore.getData,
     removeDrop: waveMessagesStore.removeDrop,
   });
-  const { refetchAllWaves, resetAllWavesNewDropsCount } = wavesHookData;
   const {
     registerWave,
     syncNewestMessages,
     fetchNextPage,
     fetchAroundSerialNo,
   } = waveDataManager;
+  const refetchAllMainWaves = wavesHookData.refetchAllWaves;
+  const refetchAllDmWaves = dmWavesHookData.refetchAllWaves;
+  const resetAllMainWavesNewDropsCount =
+    wavesHookData.resetAllWavesNewDropsCount;
+  const resetAllDmWavesNewDropsCount =
+    dmWavesHookData.resetAllWavesNewDropsCount;
 
   const wavesRef = useRef(wavesHookData.waves);
   const dmWavesRef = useRef(dmWavesHookData.waves);
@@ -179,6 +183,16 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     isWaveMuted,
   });
 
+  const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
+    (waveId, options) => {
+      if (waveId) {
+        registerWave(waveId, true);
+      }
+      setActiveWave(waveId, options);
+    },
+    [registerWave, setActiveWave]
+  );
+
   const syncActiveWaveAndRefetch = useEffectEvent(
     (source: StreamSyncSource) => {
       logWebSocketDebug("Running stream sync", {
@@ -189,7 +203,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       if (activeWaveId) {
         registerWave(activeWaveId, true);
       }
-      refetchAllWaves();
+      refetchAllMainWaves();
+      refetchAllDmWaves();
     }
   );
 
@@ -237,7 +252,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       logWebSocketDebug(
         "Resetting new drop counts after websocket reconnect on capacitor"
       );
-      resetAllWavesNewDropsCount();
+      resetAllMainWavesNewDropsCount();
+      resetAllDmWavesNewDropsCount();
     }
   });
 
@@ -247,7 +263,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     });
 
     syncActiveWaveAndRefetch("capacitor-resume");
-    resetAllWavesNewDropsCount();
+    resetAllMainWavesNewDropsCount();
+    resetAllDmWavesNewDropsCount();
   });
 
   useEffect(() => {
@@ -256,12 +273,6 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     }
     handleConnectedWebSocket();
   }, [websocketStatus]);
-
-  useEffect(() => {
-    if (activeWaveId) {
-      registerWave(activeWaveId, true);
-    }
-  }, [activeWaveId, registerWave]);
 
   // Detect when app comes to foreground on mobile
   useEffect(() => {
@@ -295,12 +306,18 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       runBrowserResumeSync("focus");
     };
 
+    const handleOnline = () => {
+      runBrowserResumeSync("online");
+    };
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("focus", handleFocus);
+    window.addEventListener("online", handleOnline);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("online", handleOnline);
     };
   }, [isCapacitor]);
 
@@ -330,7 +347,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
     const activeWave: ActiveWaveContextData = {
       id: activeWaveId,
-      set: setActiveWave,
+      set: setActiveWaveAndRegister,
     };
 
     // Prepare the store data for the context (only read/subscribe parts)
@@ -370,7 +387,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.removePinnedWave,
     dmWavesHookData.restoreWaveUnreadCount,
     activeWaveId,
-    setActiveWave,
+    setActiveWaveAndRegister,
     waveMessagesStore.getData,
     waveMessagesStore.subscribe,
     waveMessagesStore.unsubscribe,

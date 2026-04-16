@@ -4,6 +4,7 @@ import useWavesList from "@/hooks/useWavesList";
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveById } from "@/hooks/useWaveById";
+import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
 
 jest.mock("@/hooks/useWavesOverview", () => ({
   useWavesOverview: jest.fn(),
@@ -113,6 +114,12 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
   expect(waves.map((w: any) => w.id)).toEqual(["3", "2"]);
   expect(waves.every((w: any) => w.isPinned)).toBe(true);
   expect(result.current.pinnedWaves.map((w: any) => w.id)).toEqual(["3"]);
+  expect(useWavesOverviewMock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+      refetchIntervalInBackground: false,
+    })
+  );
 });
 
 test("injects the announcement wave once and excludes it from pinned metadata", () => {
