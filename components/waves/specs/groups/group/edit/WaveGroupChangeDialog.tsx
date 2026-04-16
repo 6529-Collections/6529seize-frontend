@@ -14,7 +14,9 @@ import {
 } from "@/helpers/waves/waves.constants";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { WaveGroupType } from "../WaveGroup.types";
@@ -27,6 +29,35 @@ const WAVE_GROUP_TO_CREATE_GROUP_TYPE = {
   [WaveGroupType.ADMIN]: CreateWaveGroupConfigType.ADMIN,
 } satisfies Record<WaveGroupType, CreateWaveGroupConfigType>;
 
+const createEmptyGroupDescription = (): ApiGroupFull["group"] => ({
+  tdh: {
+    min: null,
+    max: null,
+    inclusion_strategy: ApiGroupTdhInclusionStrategy.Both,
+  },
+  rep: {
+    min: null,
+    max: null,
+    direction: ApiGroupFilterDirection.Received,
+    user_identity: null,
+    category: null,
+  },
+  cic: {
+    min: null,
+    max: null,
+    direction: ApiGroupFilterDirection.Received,
+    user_identity: null,
+  },
+  level: { min: null, max: null },
+  owns_nfts: [],
+  identity_group_id: null,
+  identity_group_identities_count: 0,
+  excluded_identity_group_id: null,
+  excluded_identity_group_identities_count: 0,
+  is_beneficiary_of_grant_id: null,
+  is_beneficiary_of_grant: null,
+});
+
 const getSelectedGroup = (group: ApiGroup | null): ApiGroupFull | null => {
   if (!group?.id || !group.name) {
     return null;
@@ -35,6 +66,7 @@ const getSelectedGroup = (group: ApiGroup | null): ApiGroupFull | null => {
   return {
     id: group.id,
     name: group.name,
+    group: createEmptyGroupDescription(),
     created_at: group.created_at ?? 0,
     created_by: group.author,
     visible: !group.is_hidden,

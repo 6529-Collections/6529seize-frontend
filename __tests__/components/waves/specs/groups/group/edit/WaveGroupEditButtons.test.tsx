@@ -4,6 +4,8 @@ import WaveGroupEditButtons from "@/components/waves/specs/groups/group/edit/Wav
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const mockSubmitInlineGroup = jest.fn();
@@ -282,7 +284,38 @@ describe("WaveGroupEditButtons", () => {
     );
     expect(screen.getByText("Group 1")).toBeInTheDocument();
     expect(mockInlinePanelProps.selectedGroup).toEqual(
-      expect.objectContaining({ id: "group-1", name: "Group 1" })
+      expect.objectContaining({
+        id: "group-1",
+        name: "Group 1",
+        group: expect.objectContaining({
+          tdh: {
+            min: null,
+            max: null,
+            inclusion_strategy: ApiGroupTdhInclusionStrategy.Both,
+          },
+          rep: {
+            min: null,
+            max: null,
+            direction: ApiGroupFilterDirection.Received,
+            user_identity: null,
+            category: null,
+          },
+          cic: {
+            min: null,
+            max: null,
+            direction: ApiGroupFilterDirection.Received,
+            user_identity: null,
+          },
+          level: { min: null, max: null },
+          owns_nfts: [],
+          identity_group_id: null,
+          identity_group_identities_count: 0,
+          excluded_identity_group_id: null,
+          excluded_identity_group_identities_count: 0,
+          is_beneficiary_of_grant_id: null,
+          is_beneficiary_of_grant: null,
+        }),
+      })
     );
   });
 
