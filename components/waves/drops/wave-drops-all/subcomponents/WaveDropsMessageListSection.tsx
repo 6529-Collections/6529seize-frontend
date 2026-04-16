@@ -44,6 +44,7 @@ interface WaveDropsMessageListSectionProps {
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
   readonly onDismissUnread: () => void;
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
+  readonly suspendLightDropHydration?: boolean | undefined;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;
@@ -77,6 +78,7 @@ export const WaveDropsMessageListSection: React.FC<
   onScrollToUnread,
   onDismissUnread,
   autoCollapseSerials,
+  suspendLightDropHydration = false,
 }) => {
   const hasNextPage =
     !!waveMessages?.hasNextPage &&
@@ -112,6 +114,7 @@ export const WaveDropsMessageListSection: React.FC<
           boostedDrops={boostedDrops}
           onBoostedDropClick={onBoostedDropClick}
           autoCollapseSerials={autoCollapseSerials}
+          suspendLightDropHydration={suspendLightDropHydration}
           key="drops-list"
         />
         <div ref={anchorRef} style={{ height: "1px" }} />

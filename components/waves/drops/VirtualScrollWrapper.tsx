@@ -1,13 +1,7 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import type { ReactNode } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
@@ -26,6 +20,7 @@ interface VirtualScrollWrapperProps {
   readonly dropSerialNo: number;
   readonly waveId: string;
   readonly type: DropSize;
+  readonly suspendLightDropHydration?: boolean | undefined;
 
   /**
    * The child components to be rendered or virtualized.
@@ -61,6 +56,7 @@ export default function VirtualScrollWrapper({
   dropSerialNo,
   waveId,
   type,
+  suspendLightDropHydration = false,
 }: VirtualScrollWrapperProps) {
   const { fetchAroundSerialNo } = useMyStream();
 
@@ -126,7 +122,7 @@ export default function VirtualScrollWrapper({
         if (inView !== isInView) {
           setIsInView(inView);
         }
-        if (inView && type === DropSize.LIGHT) {
+        if (inView && type === DropSize.LIGHT && !suspendLightDropHydration) {
           fetchAroundSerialNo(waveId, dropSerialNo);
         }
       },
@@ -150,7 +146,16 @@ export default function VirtualScrollWrapper({
         observer.unobserve(containerRef.current);
       }
     };
-  }, [isInView, measureHeight]);
+  }, [
+    dropSerialNo,
+    fetchAroundSerialNo,
+    isInView,
+    measureHeight,
+    scrollContainerRef,
+    suspendLightDropHydration,
+    type,
+    waveId,
+  ]);
 
   /**
    * Determine if we should render the actual children
