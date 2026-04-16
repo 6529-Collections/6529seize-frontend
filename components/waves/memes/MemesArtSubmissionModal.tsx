@@ -13,6 +13,7 @@ interface MemesArtSubmissionModalProps {
   readonly wave: ApiWave;
   readonly onClose: () => void;
   readonly sourceDrop?: ExtendedDrop | undefined;
+  readonly onSourceDropDeleted?: (() => void) | undefined;
 }
 
 const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
@@ -20,6 +21,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   wave,
   onClose,
   sourceDrop,
+  onSourceDropDeleted,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +58,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
                   onClose={onClose}
                   wave={wave}
                   sourceDrop={sourceDrop}
+                  onSourceDropDeleted={onSourceDropDeleted}
                 />
               </div>
             </motion.div>

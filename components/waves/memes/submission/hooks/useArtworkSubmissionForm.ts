@@ -126,3 +126,5 @@ export function useArtworkSubmissionForm(
     getMediaSelection: formActions.getMediaSelection,
   };
 }
+
+export type ArtworkSubmissionForm = ReturnType<typeof useArtworkSubmissionForm>;

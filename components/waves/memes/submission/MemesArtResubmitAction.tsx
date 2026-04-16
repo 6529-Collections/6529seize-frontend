@@ -16,14 +16,18 @@ interface MemesArtResubmitActionProps {
   readonly drop: ExtendedDrop;
   readonly wave?: ApiWave | null | undefined;
   readonly variant?: ResubmitActionVariant | undefined;
+  readonly onOpenModal?: (() => void) | undefined;
   readonly onModalClose?: (() => void) | undefined;
+  readonly onSourceDropDeleted?: (() => void) | undefined;
 }
 
 interface MemesArtResubmitActionWithWaveProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
   readonly variant: ResubmitActionVariant;
+  readonly onOpenModal?: (() => void) | undefined;
   readonly onModalClose?: (() => void) | undefined;
+  readonly onSourceDropDeleted?: (() => void) | undefined;
 }
 
 const getDisabledReason = ({
@@ -60,7 +64,9 @@ export function MemesArtResubmitAction({
   drop,
   wave,
   variant = "icon",
+  onOpenModal,
   onModalClose,
+  onSourceDropDeleted,
 }: MemesArtResubmitActionProps) {
   if (!wave) {
     return null;
@@ -71,7 +77,9 @@ export function MemesArtResubmitAction({
       drop={drop}
       wave={wave}
       variant={variant}
+      onOpenModal={onOpenModal}
       onModalClose={onModalClose}
+      onSourceDropDeleted={onSourceDropDeleted}
     />
   );
 }
@@ -80,7 +88,9 @@ function MemesArtResubmitActionWithWave({
   drop,
   wave,
   variant,
+  onOpenModal,
   onModalClose,
+  onSourceDropDeleted,
 }: MemesArtResubmitActionWithWaveProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { canDelete, isAuthor, isWinner } = useDropInteractionRules(drop);
@@ -111,9 +121,13 @@ function MemesArtResubmitActionWithWave({
       if (disabled) {
         return;
       }
+      if (onOpenModal) {
+        onOpenModal();
+        return;
+      }
       setIsModalOpen(true);
     },
-    [disabled]
+    [disabled, onOpenModal]
   );
 
   const closeModal = useCallback(() => {
@@ -134,6 +148,7 @@ function MemesArtResubmitActionWithWave({
       wave={wave}
       sourceDrop={drop}
       onClose={closeModal}
+      onSourceDropDeleted={onSourceDropDeleted}
     />
   );
 

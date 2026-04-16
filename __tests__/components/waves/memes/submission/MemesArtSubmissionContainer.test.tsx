@@ -1,4 +1,4 @@
-import { render, act } from "@testing-library/react";
+import { render, act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import MemesArtSubmissionContainer from "@/components/waves/memes/submission/MemesArtSubmissionContainer";
@@ -6,13 +6,22 @@ import { SubmissionStep } from "@/components/waves/memes/submission/types/Steps"
 import { useArtworkSubmissionForm } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useAuth } from "@/components/auth/Auth";
+import { commonApiDelete } from "@/services/api/common-api";
 import type { InteractiveMediaMimeType } from "@/components/waves/memes/submission/constants/media";
 
+jest.mock("@/components/auth/Auth");
 jest.mock("@/components/waves/memes/submission/hooks/useArtworkSubmissionForm");
 jest.mock(
   "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation"
 );
 jest.mock("@/components/auth/SeizeConnectContext");
+jest.mock("@/services/api/common-api", () => ({
+  commonApiDelete: jest.fn(),
+}));
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => ({ processDropRemoved: jest.fn() }),
+}));
 jest.mock(
   "@/components/waves/memes/submission/layout/ModalLayout",
   () =>
@@ -30,6 +39,32 @@ jest.mock(
     return <div data-testid="artwork" />;
   }
 );
+let additionalInfoProps: any;
+jest.mock(
+  "@/components/waves/memes/submission/steps/AdditionalInfoStep",
+  () => (props: any) => {
+    additionalInfoProps = props;
+    return (
+      <button data-testid="additional-submit" onClick={props.onSubmit}>
+        submit
+      </button>
+    );
+  }
+);
+let deleteConfirmationProps: any;
+jest.mock(
+  "@/components/waves/memes/submission/ResubmitDeleteConfirmation",
+  () => ({
+    ResubmitDeleteConfirmation: (props: any) => {
+      deleteConfirmationProps = props;
+      return (
+        <button data-testid="delete-original" onClick={props.onDeleteOriginal}>
+          delete original
+        </button>
+      );
+    },
+  })
+);
 
 const mockForm = useArtworkSubmissionForm as jest.MockedFunction<
   typeof useArtworkSubmissionForm
@@ -40,14 +75,22 @@ const mockMutation = useArtworkSubmissionMutation as jest.MockedFunction<
 const mockSeizeConnect = useSeizeConnectContext as jest.MockedFunction<
   typeof useSeizeConnectContext
 >;
+const mockAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockCommonApiDelete = commonApiDelete as jest.MockedFunction<
+  typeof commonApiDelete
+>;
 
 describe("MemesArtSubmissionContainer", () => {
   const wave = { id: "w1", participation: { terms: "t" } } as any;
   const onClose = jest.fn();
+  let formState: any;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     artworkProps = undefined;
-    const formState: any = {
+    additionalInfoProps = undefined;
+    deleteConfirmationProps = undefined;
+    formState = {
       currentStep: SubmissionStep.ARTWORK,
       agreements: false,
       setAgreements: jest.fn(),
@@ -59,6 +102,7 @@ describe("MemesArtSubmissionContainer", () => {
       artworkUploaded: false,
       artworkUrl: "",
       selectedFile: null,
+      existingMedia: null,
       mediaSource: "upload",
       externalMediaUrl: "",
       externalMediaPreviewUrl: "",
@@ -157,6 +201,7 @@ describe("MemesArtSubmissionContainer", () => {
     formState.getMediaSelection = jest.fn(() => ({
       mediaSource: formState.mediaSource,
       selectedFile: formState.selectedFile,
+      existingMedia: formState.existingMedia,
       externalUrl: formState.externalMediaUrl,
       externalPreviewUrl: formState.externalMediaPreviewUrl,
       externalProvider: formState.externalMediaProvider,
@@ -166,6 +211,12 @@ describe("MemesArtSubmissionContainer", () => {
     }));
 
     mockForm.mockReturnValue(formState);
+    mockAuth.mockReturnValue({
+      connectedProfile: null,
+      requestAuth: jest.fn(async () => ({ success: true })),
+      setToast: jest.fn(),
+    } as any);
+    mockCommonApiDelete.mockResolvedValue(undefined as any);
     mockMutation.mockReturnValue({
       submitArtwork: jest.fn(async () => "ok"),
       uploadProgress: 0,
@@ -188,6 +239,10 @@ describe("MemesArtSubmissionContainer", () => {
     } as any);
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("auto closes on success", () => {
     jest.useFakeTimers();
     mockMutation.mockReturnValueOnce({
@@ -203,7 +258,6 @@ describe("MemesArtSubmissionContainer", () => {
   });
 
   it("submits artwork when file selected", async () => {
-    const user = userEvent.setup();
     const submitArtwork = jest.fn(async () => "result");
     mockMutation.mockReturnValueOnce({
       submitArtwork,
@@ -219,5 +273,100 @@ describe("MemesArtSubmissionContainer", () => {
     });
     const res = await artworkProps.onSubmit();
     expect(res).toBeTruthy();
+  });
+
+  it("treats existing GLTF resubmissions as interactive media", () => {
+    formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
+    formState.existingMedia = {
+      url: "https://example.com/model.gltf",
+      mimeType: "model/gltf+json",
+    };
+    formState.artworkUploaded = true;
+    formState.artworkUrl = formState.existingMedia.url;
+
+    render(
+      <MemesArtSubmissionContainer
+        onClose={onClose}
+        wave={wave}
+        sourceDrop={
+          {
+            id: "source-1",
+            title: "Source",
+            metadata: [],
+            parts: [{ content: "", media: [] }],
+          } as any
+        }
+      />
+    );
+
+    expect(additionalInfoProps.requiresPreviewImage).toBe(true);
+    expect(additionalInfoProps.requiresPromoVideoOption).toBe(true);
+    expect(additionalInfoProps.previewRequiredMediaType).toBe("GLTF");
+  });
+
+  it("closes the source drop after deleting the original resubmission", async () => {
+    const user = userEvent.setup();
+    const onSourceDropDeleted = jest.fn();
+    const submitArtwork = jest.fn(async () => ({
+      id: "replacement-1",
+      title: "Replacement",
+      metadata: [],
+    }));
+    formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
+    formState.existingMedia = {
+      url: "https://example.com/art.png",
+      mimeType: "image/png",
+    };
+    formState.artworkUploaded = true;
+    formState.artworkUrl = formState.existingMedia.url;
+    mockMutation.mockReturnValueOnce({
+      submitArtwork,
+      uploadProgress: 0,
+      submissionPhase: "idle",
+      submissionError: undefined,
+      isSubmitting: false,
+    } as any);
+
+    render(
+      <MemesArtSubmissionContainer
+        onClose={onClose}
+        wave={wave}
+        sourceDrop={
+          {
+            id: "source-1",
+            title: "Original",
+            wave: { id: "w1" },
+            metadata: [],
+            parts: [
+              {
+                content: "",
+                media: [
+                  {
+                    url: "https://example.com/art.png",
+                    mime_type: "image/png",
+                  },
+                ],
+              },
+            ],
+          } as any
+        }
+        onSourceDropDeleted={onSourceDropDeleted}
+      />
+    );
+
+    await user.click(screen.getByTestId("additional-submit"));
+    await screen.findByTestId("delete-original");
+
+    expect(deleteConfirmationProps.replacementDrop.id).toBe("replacement-1");
+
+    await user.click(screen.getByTestId("delete-original"));
+
+    await waitFor(() => {
+      expect(mockCommonApiDelete).toHaveBeenCalledWith({
+        endpoint: "drops/source-1",
+      });
+    });
+    expect(onClose).toHaveBeenCalled();
+    expect(onSourceDropDeleted).toHaveBeenCalledTimes(1);
   });
 });
