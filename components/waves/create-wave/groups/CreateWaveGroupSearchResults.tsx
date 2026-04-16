@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -6,6 +6,7 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 
 type HighlightedTextPart = {
   readonly isMatch: boolean;
+  readonly startIndex: number;
   readonly value: string;
 };
 
@@ -15,7 +16,7 @@ function getHighlightedTextParts(
 ): readonly HighlightedTextPart[] {
   const trimmed = query.trim();
   if (!trimmed) {
-    return [{ isMatch: false, value: text }];
+    return [{ isMatch: false, startIndex: 0, value: text }];
   }
 
   const parts: HighlightedTextPart[] = [];
@@ -33,20 +34,27 @@ function getHighlightedTextParts(
     if (partStartIndex < searchIndex) {
       parts.push({
         isMatch: false,
+        startIndex: partStartIndex,
         value: text.slice(partStartIndex, searchIndex),
       });
     }
-    parts.push({ isMatch: true, value: candidate });
+    parts.push({ isMatch: true, startIndex: searchIndex, value: candidate });
 
     searchIndex += trimmed.length;
     partStartIndex = searchIndex;
   }
 
   if (partStartIndex < text.length) {
-    parts.push({ isMatch: false, value: text.slice(partStartIndex) });
+    parts.push({
+      isMatch: false,
+      startIndex: partStartIndex,
+      value: text.slice(partStartIndex),
+    });
   }
 
-  return parts.length ? parts : [{ isMatch: false, value: text }];
+  return parts.length
+    ? parts
+    : [{ isMatch: false, startIndex: 0, value: text }];
 }
 
 function HighlightedText({
@@ -65,17 +73,16 @@ function HighlightedText({
 
   return (
     <>
-      {parts.map((part, index) =>
-        part.isMatch ? (
-          <span key={`${part.value}-${index}`} className="tw-text-primary-300">
-            {part.value}
-          </span>
-        ) : (
-          <span key={`${part.value}-${index}`} className="tw-text-inherit">
-            {part.value}
-          </span>
-        )
-      )}
+      {parts.map((part) => (
+        <span
+          key={`${part.startIndex}-${part.value.length}-${
+            part.isMatch ? "match" : "text"
+          }`}
+          className={part.isMatch ? "tw-text-primary-300" : "tw-text-inherit"}
+        >
+          {part.value}
+        </span>
+      ))}
     </>
   );
 }
@@ -129,6 +136,67 @@ function CreateWaveGroupSearchResultOption({
   );
 }
 
+function CreateWaveGroupSearchResultsList({
+  isFetching,
+  suggestions,
+  selectedGroupId,
+  activeIndex,
+  listboxId,
+  searchCriteria,
+  showNoResults,
+  helperText,
+  onActiveIndexChange,
+  onOptionSelect,
+}: {
+  readonly isFetching: boolean;
+  readonly suggestions: readonly ApiGroupFull[];
+  readonly selectedGroupId: string | null;
+  readonly activeIndex: number;
+  readonly listboxId: string;
+  readonly searchCriteria: string;
+  readonly showNoResults: boolean;
+  readonly helperText: string;
+  readonly onActiveIndexChange: (index: number) => void;
+  readonly onOptionSelect: (group: ApiGroupFull) => void;
+}) {
+  if (isFetching) {
+    return (
+      <li className="tw-flex tw-items-center tw-justify-center tw-py-4">
+        <div role="status" aria-live="polite">
+          <span className="tw-sr-only">Loading groups</span>
+          <CircleLoader size={CircleLoaderSize.SMALL} />
+        </div>
+      </li>
+    );
+  }
+
+  if (suggestions.length > 0) {
+    return (
+      <>
+        {suggestions.map((group, index) => (
+          <CreateWaveGroupSearchResultOption
+            key={group.id}
+            group={group}
+            index={index}
+            listboxId={listboxId}
+            searchCriteria={searchCriteria}
+            isActive={index === activeIndex}
+            isSelected={selectedGroupId === group.id}
+            onHover={onActiveIndexChange}
+            onSelect={onOptionSelect}
+          />
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <li className="tw-relative tw-w-full tw-select-none tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white">
+      {showNoResults ? "No groups found" : helperText}
+    </li>
+  );
+}
+
 export default function CreateWaveGroupSearchResults({
   isOpen,
   disabled,
@@ -156,61 +224,42 @@ export default function CreateWaveGroupSearchResults({
   readonly onActiveIndexChange: (index: number) => void;
   readonly onOptionSelect: (group: ApiGroupFull) => void;
 }) {
-  function renderSearchResults() {
-    if (isFetching) {
-      return (
-        <li className="tw-flex tw-items-center tw-justify-center tw-py-4">
-          <CircleLoader size={CircleLoaderSize.SMALL} />
-        </li>
-      );
-    }
-
-    if (suggestions.length > 0) {
-      return suggestions.map((group, index) => (
-        <CreateWaveGroupSearchResultOption
-          key={group.id}
-          group={group}
-          index={index}
-          listboxId={listboxId}
-          searchCriteria={searchCriteria}
-          isActive={index === activeIndex}
-          isSelected={selectedGroup?.id === group.id}
-          onHover={onActiveIndexChange}
-          onSelect={onOptionSelect}
-        />
-      ));
-    }
-
-    return (
-      <li className="tw-relative tw-w-full tw-select-none tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white">
-        {showNoResults ? "No groups found" : helperText}
-      </li>
-    );
-  }
-
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      {isOpen && !disabled && (
-        <motion.div
-          className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="tw-absolute tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-            <div className="tw-flow-root tw-max-h-64 tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
-              <ul
-                id={listboxId}
-                role="listbox"
-                className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-y-1 tw-px-2"
-              >
-                {renderSearchResults()}
-              </ul>
+    <LazyMotion features={domAnimation}>
+      <AnimatePresence mode="wait" initial={false}>
+        {isOpen && !disabled && (
+          <m.div
+            className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="tw-absolute tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+              <div className="tw-flow-root tw-max-h-64 tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
+                <ul
+                  id={listboxId}
+                  role="listbox"
+                  className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-y-1 tw-px-2"
+                >
+                  <CreateWaveGroupSearchResultsList
+                    isFetching={isFetching}
+                    suggestions={suggestions}
+                    selectedGroupId={selectedGroup?.id ?? null}
+                    activeIndex={activeIndex}
+                    listboxId={listboxId}
+                    searchCriteria={searchCriteria}
+                    showNoResults={showNoResults}
+                    helperText={helperText}
+                    onActiveIndexChange={onActiveIndexChange}
+                    onOptionSelect={onOptionSelect}
+                  />
+                </ul>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </m.div>
+        )}
+      </AnimatePresence>
+    </LazyMotion>
   );
 }
