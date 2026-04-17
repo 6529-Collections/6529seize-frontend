@@ -153,6 +153,10 @@ export function OfficialWaveSummary({
   readonly onOpenChangeWave: () => void;
   readonly onRemoveWave: () => void;
 }) {
+  const changeWaveDropdownId = changeWaveDropdown
+    ? "change-wave-dropdown"
+    : undefined;
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
       <div className="tw-min-w-0 tw-max-w-2xl tw-flex-1">
@@ -188,11 +192,7 @@ export function OfficialWaveSummary({
                 onClick={onOpenChangeWave}
                 aria-expanded={isChangeWaveOpen}
                 aria-haspopup="menu"
-                aria-controls={
-                  changeWaveDropdown !== undefined
-                    ? "change-wave-dropdown"
-                    : undefined
-                }
+                aria-controls={changeWaveDropdownId}
                 className={`tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
                   isChangeWaveOpen
                     ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
@@ -208,9 +208,9 @@ export function OfficialWaveSummary({
                 />
               </button>
 
-              {changeWaveDropdown !== undefined && (
+              {changeWaveDropdownId && (
                 <div
-                  id="change-wave-dropdown"
+                  id={changeWaveDropdownId}
                   className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block"
                 >
                   {changeWaveDropdown}
