@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { MemesDropFullscreenOverlay } from "@/components/waves/drop/MemesDropFullscreenOverlay";
 import { MemesSingleWaveDropInfoPanel } from "@/components/waves/drop/MemesSingleWaveDropInfoPanel";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 
@@ -107,7 +108,7 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Exit fullscreen view" })
     );
-    expect(setState).toHaveBeenCalled();
+    expect(setState).toHaveBeenCalledWith(false);
     spy.mockRestore();
   });
 
@@ -125,5 +126,124 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     await userEvent.click(screen.getByTestId("resubmit"));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("MemesDropFullscreenOverlay", () => {
+  const artworkMedia = baseDrop.parts[0].media[0];
+
+  it("closes when Escape is pressed", () => {
+    const onClose = jest.fn();
+
+    render(
+      <MemesDropFullscreenOverlay
+        isOpen={true}
+        artworkMedia={artworkMedia}
+        drop={baseDrop}
+        title="Title"
+        description="Desc"
+        onClose={onClose}
+      />
+    );
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes only when the backdrop is clicked", () => {
+    const onClose = jest.fn();
+
+    render(
+      <MemesDropFullscreenOverlay
+        isOpen={true}
+        artworkMedia={artworkMedia}
+        drop={baseDrop}
+        title="Title"
+        description="Desc"
+        onClose={onClose}
+      />
+    );
+
+    fireEvent.click(screen.getByAltText("Title"));
+    expect(onClose).not.toHaveBeenCalled();
+
+    const dialog = screen.getByRole("dialog", { name: "Title" });
+    const backdrop = dialog.parentElement;
+    expect(backdrop).not.toBeNull();
+
+    fireEvent.click(backdrop as HTMLElement);
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns focus to the previously focused element when closed", async () => {
+    const user = userEvent.setup();
+
+    function OverlayHarness() {
+      const [isOpen, setIsOpen] = React.useState(false);
+
+      return (
+        <>
+          <button type="button" onClick={() => setIsOpen(true)}>
+            Open fullscreen
+          </button>
+          <MemesDropFullscreenOverlay
+            isOpen={isOpen}
+            artworkMedia={artworkMedia}
+            drop={baseDrop}
+            title="Title"
+            description="Desc"
+            onClose={() => setIsOpen(false)}
+          />
+        </>
+      );
+    }
+
+    render(<OverlayHarness />);
+
+    const trigger = screen.getByRole("button", { name: "Open fullscreen" });
+    await user.click(trigger);
+
+    const closeButton = screen.getByRole("button", {
+      name: "Exit fullscreen view",
+    });
+    await waitFor(() => expect(closeButton).toHaveFocus());
+
+    await user.click(closeButton);
+
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it("does not render when closed or media is missing", () => {
+    const { rerender } = render(
+      <MemesDropFullscreenOverlay
+        isOpen={false}
+        artworkMedia={artworkMedia}
+        drop={baseDrop}
+        title="Title"
+        description="Desc"
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Exit fullscreen view" })
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <MemesDropFullscreenOverlay
+        isOpen={true}
+        artworkMedia={null}
+        drop={baseDrop}
+        title="Title"
+        description="Desc"
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Exit fullscreen view" })
+    ).not.toBeInTheDocument();
   });
 });

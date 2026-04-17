@@ -11,7 +11,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
-import { useCallback, useMemo, useState, type MouseEvent } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { MemesDropArtworkHero } from "./MemesDropArtworkHero";
 import { MemesDropDetailsSection } from "./MemesDropDetailsSection";
 import { MemesDropFullscreenOverlay } from "./MemesDropFullscreenOverlay";
@@ -96,10 +96,8 @@ export const MemesSingleWaveDropInfoPanel = ({
     return name;
   }, [title, wave?.name, drop.author?.handle]);
 
-  const toggleFullscreen = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFullscreen((prev) => !prev);
+  const handleCloseFullscreen = useCallback(() => {
+    setIsFullscreen(false);
   }, []);
   const handleOpenVoting = useCallback(() => {
     setIsVotingOpen(true);
@@ -147,7 +145,7 @@ export const MemesSingleWaveDropInfoPanel = ({
         drop={drop}
         title={title}
         description={description}
-        onClose={toggleFullscreen}
+        onClose={handleCloseFullscreen}
       />
 
       {isMobileScreen ? (
