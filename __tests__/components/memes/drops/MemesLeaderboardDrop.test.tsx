@@ -102,7 +102,12 @@ jest.mock("@/components/waves/memes/submission/MemesArtResubmitAction", () => ({
 }));
 jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
   __esModule: true,
-  default: (p: any) => (p.isOpen ? <div data-testid="resubmit-modal" /> : null),
+  default: (p: any) =>
+    p.isOpen ? (
+      <button data-testid="resubmit-modal" onClick={p.onSourceDropDeleted}>
+        source deleted
+      </button>
+    ) : null,
 }));
 jest.mock("react-dom", () => ({
   ...jest.requireActual("react-dom"),
@@ -198,4 +203,31 @@ test("opens mobile resubmit modal after the touch menu leaves", async () => {
   await userEvent.click(screen.getByTestId("after-leave"));
 
   expect(screen.getByTestId("resubmit-modal")).toBeInTheDocument();
+});
+
+test("notifies when mobile resubmit deletes the source drop", async () => {
+  const setIsActive = jest.fn();
+  const onSourceDropDeleted = jest.fn();
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useIsMobileScreen.mockReturnValue(false);
+  useLongPressInteraction.mockReturnValueOnce({
+    isActive: true,
+    setIsActive,
+    touchHandlers: {},
+  });
+
+  render(
+    <MemesLeaderboardDrop
+      drop={drop}
+      wave={{ id: "w1" } as any}
+      onDropClick={jest.fn()}
+      onSourceDropDeleted={onSourceDropDeleted}
+    />
+  );
+
+  await userEvent.click(screen.getByTestId("resubmit-action"));
+  await userEvent.click(screen.getByTestId("after-leave"));
+  await userEvent.click(screen.getByTestId("resubmit-modal"));
+
+  expect(onSourceDropDeleted).toHaveBeenCalledTimes(1);
 });

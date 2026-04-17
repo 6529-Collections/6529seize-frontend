@@ -37,6 +37,7 @@ interface MemesLeaderboardDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly wave?: ApiWave | undefined;
   readonly location?: DropLocation | undefined;
+  readonly onSourceDropDeleted?: (() => void) | undefined;
 }
 
 export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
@@ -44,6 +45,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   onDropClick,
   wave,
   location = DropLocation.WAVE,
+  onSourceDropDeleted,
 }) => {
   const isMobileScreen = useIsMobileScreen();
   const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
@@ -122,7 +124,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                     {!hasTouchScreen && (
                       <>
                         <WaveDropActionsOpen drop={drop} />
-                        <MemesArtResubmitAction drop={drop} wave={wave} />
+                        <MemesArtResubmitAction
+                          drop={drop}
+                          wave={wave}
+                          onSourceDropDeleted={onSourceDropDeleted}
+                        />
                         {canDelete && <WaveDropActionsOptions drop={drop} />}
                       </>
                     )}
@@ -256,6 +262,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   wave={wave}
                   variant="menu"
                   onOpenModal={openResubmitAfterMobileMenuCloses}
+                  onSourceDropDeleted={onSourceDropDeleted}
                 />
 
                 {/* Delete option - only if user can delete */}
@@ -275,6 +282,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             wave={wave}
             sourceDrop={drop}
             onClose={() => setIsResubmitModalOpen(false)}
+            onSourceDropDeleted={onSourceDropDeleted}
           />
         )}
       </div>
