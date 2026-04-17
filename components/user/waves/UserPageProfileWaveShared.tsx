@@ -90,17 +90,17 @@ export function CurationEmptyPanel({
           </svg>
         </div>
 
-        <div className="tw-mt-8 tw-max-w-2xl">
-          <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-100">
+        <div className="tw-mt-6 tw-max-w-xl md:tw-mt-8">
+          <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100 md:tw-text-xl">
             {title}
           </h2>
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-3">
             {message}
           </p>
         </div>
 
         {primaryAction !== undefined && (
-          <div className="tw-mt-8 tw-flex tw-flex-col tw-items-center tw-gap-4">
+          <div className="tw-mt-6 tw-flex tw-flex-col tw-items-center tw-gap-4 md:tw-mt-8">
             {primaryAction}
           </div>
         )}
@@ -133,6 +133,7 @@ export function OfficialWaveSummary({
   metadataLabel,
   canManageOwnOfficialWave,
   changeWaveDropdown,
+  changeWaveDropdownRef,
   changeWaveButtonRef,
   isChangeWaveOpen,
   isRemoving,
@@ -144,6 +145,7 @@ export function OfficialWaveSummary({
   readonly metadataLabel: string;
   readonly canManageOwnOfficialWave: boolean;
   readonly changeWaveDropdown?: ReactNode;
+  readonly changeWaveDropdownRef?: RefObject<HTMLDivElement | null>;
   readonly changeWaveButtonRef?: RefObject<HTMLButtonElement | null>;
   readonly isChangeWaveOpen: boolean;
   readonly isRemoving: boolean;
@@ -151,100 +153,89 @@ export function OfficialWaveSummary({
   readonly onOpenChangeWave: () => void;
   readonly onRemoveWave: () => void;
 }) {
-  const actionRowClassName = canManageOwnOfficialWave
-    ? "tw-flex tw-w-full tw-items-center tw-gap-1.5 sm:tw-gap-2 md:tw-w-auto md:tw-justify-end lg:tw-gap-3"
-    : "tw-hidden lg:tw-flex lg:tw-items-center lg:tw-gap-3";
-
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
       <div className="tw-min-w-0 tw-max-w-2xl tw-flex-1">
-        <div className="tw-flex tw-items-start">
+        <div className="tw-flex tw-items-center">
+          <h2 className="tw-mb-0 tw-min-w-0 tw-max-w-full tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
+            {waveName}
+          </h2>
           <button
             type="button"
             onClick={onOpenWave}
             aria-label={`Open wave ${waveName}`}
             title="Open wave"
-            className="-tw-ml-1 tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-1 tw-text-left tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 desktop-hover:hover:tw-text-iron-100 lg:tw-hidden"
+            className="tw-ml-2 tw-inline-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100"
           >
-            <span className="tw-min-w-0 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
-              {waveName}
-            </span>
-            <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-100" />
+            <ArrowTopRightOnSquareIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0" />
           </button>
-          <h2 className="tw-mb-0 tw-hidden tw-min-w-0 tw-max-w-full tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100 lg:tw-block">
-            {waveName}
-          </h2>
         </div>
         <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-leading-6 tw-text-iron-400">
           {metadataLabel}
         </p>
       </div>
 
-      <div className={actionRowClassName}>
-        {canManageOwnOfficialWave && (
-          <div className="tw-relative">
-            <button
-              ref={changeWaveButtonRef}
-              type="button"
-              onClick={onOpenChangeWave}
-              aria-expanded={isChangeWaveOpen}
-              aria-haspopup="menu"
-              aria-controls={
-                changeWaveDropdown !== undefined
-                  ? "change-wave-dropdown"
-                  : undefined
-              }
-              className={`tw-inline-flex tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-4 sm:tw-py-2.5 sm:tw-text-sm md:tw-w-auto md:tw-justify-center md:tw-py-2 ${
-                isChangeWaveOpen
-                  ? "tw-border-white/15 tw-bg-white/10 tw-text-iron-100 tw-shadow-inner"
-                  : "tw-border-white/10 tw-bg-white/5 tw-text-iron-100 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/10"
-              }`}
+      {canManageOwnOfficialWave && (
+        <div className="tw-flex tw-w-full tw-items-center md:tw-w-auto md:tw-justify-end">
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0.5 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)] md:tw-w-auto">
+            <div
+              ref={changeWaveDropdownRef}
+              className="tw-relative tw-min-w-0 tw-flex-1 md:tw-flex-none"
             >
-              <span>Switch wave</span>
-              <ChevronDownIcon
-                aria-hidden="true"
-                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
-                  isChangeWaveOpen ? "tw-rotate-180" : ""
+              <button
+                ref={changeWaveButtonRef}
+                type="button"
+                onClick={onOpenChangeWave}
+                aria-expanded={isChangeWaveOpen}
+                aria-haspopup="menu"
+                aria-controls={
+                  changeWaveDropdown !== undefined
+                    ? "change-wave-dropdown"
+                    : undefined
+                }
+                className={`tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
+                  isChangeWaveOpen
+                    ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
+                    : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
                 }`}
-              />
-            </button>
-
-            {changeWaveDropdown !== undefined && (
-              <div
-                id="change-wave-dropdown"
-                className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block"
               >
-                {changeWaveDropdown}
-              </div>
-            )}
+                <span>Switch wave</span>
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className={`-tw-mr-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
+                    isChangeWaveOpen ? "tw-rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {changeWaveDropdown !== undefined && (
+                <div
+                  id="change-wave-dropdown"
+                  className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block"
+                >
+                  {changeWaveDropdown}
+                </div>
+              )}
+            </div>
+            <div className="tw-hidden tw-h-3.5 tw-w-px tw-bg-white/10 sm:tw-mx-1 sm:tw-block" />
+            <button
+              type="button"
+              onClick={onRemoveWave}
+              disabled={isRemoving}
+              aria-label="Unset official wave"
+              title="Unset official wave"
+              className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-[10px] tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-zinc-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400 sm:tw-px-3.5 sm:tw-py-1.5"
+            >
+              {isRemoving ? (
+                <CircleLoader />
+              ) : (
+                <XMarkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+              )}
+              <span>Unset</span>
+            </button>
           </div>
-        )}
-        <button
-          type="button"
-          onClick={onOpenWave}
-          className="tw-hidden tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/10 lg:tw-inline-flex"
-        >
-          <span>Open wave</span>
-          <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        </button>
-        {canManageOwnOfficialWave && (
-          <button
-            type="button"
-            onClick={onRemoveWave}
-            disabled={isRemoving}
-            aria-label="Unset official wave"
-            title="Unset official wave"
-            className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-zinc-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400 sm:tw-px-4 sm:tw-py-2 sm:tw-text-sm"
-          >
-            {isRemoving ? (
-              <CircleLoader />
-            ) : (
-              <XMarkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 md:-tw-ml-1.5" />
-            )}
-            <span>Unset</span>
-          </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

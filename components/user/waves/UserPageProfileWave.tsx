@@ -201,7 +201,7 @@ export default function UserPageProfileWave({
 
   return (
     <div className="tw-space-y-5">
-      <div ref={changeWaveDropdownRef} className="tw-relative">
+      <div className="tw-relative">
         <OfficialWaveSummary
           waveName={wave.name}
           metadataLabel={getOfficialWaveMetadataLabel({
@@ -225,6 +225,7 @@ export default function UserPageProfileWave({
               />
             ) : undefined
           }
+          changeWaveDropdownRef={changeWaveDropdownRef}
           changeWaveButtonRef={changeWaveButtonRef}
           isChangeWaveOpen={isChangeWaveOpen}
           isRemoving={isPending && pendingAction === "clear"}
