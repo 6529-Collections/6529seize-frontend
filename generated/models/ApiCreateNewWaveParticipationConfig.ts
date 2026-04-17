@@ -26,7 +26,7 @@ export class ApiCreateNewWaveParticipationConfig {
     'no_of_applications_allowed_per_participant': number | null;
     'required_media': Array<ApiWaveParticipationRequirement>;
     /**
-    * The metadata that must be provided by the participant. Empty array if nothing is required. 
+    * The metadata that must be provided by the participant.  Empty array if nothing is required. 
     */
     'required_metadata': Array<ApiWaveRequiredMetadata>;
     /**
