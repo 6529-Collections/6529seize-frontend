@@ -45,8 +45,8 @@
 .collectionDelegationsAccordion {
   --bs-accordion-bg: #{variables.$very-dark-grey};
   --bs-accordion-border-color: transparent;
-  --bs-accordion-btn-bg: rgb(30, 30, 30);
-  --bs-accordion-active-bg: rgb(30, 30, 30);
+  --bs-accordion-btn-bg: #{variables.$almost-very-dark-grey};
+  --bs-accordion-active-bg: #{variables.$almost-very-dark-grey};
   --bs-accordion-btn-color: #{variables.$font-color};
   --bs-accordion-active-color: #{variables.$font-color};
   --bs-accordion-body-padding-x: 1rem;
