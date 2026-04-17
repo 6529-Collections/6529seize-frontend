@@ -110,12 +110,12 @@ test("keeps raw pinned ids but ignores a legacy announcement pin for budget chec
   expect(pinMutateAsync).toHaveBeenCalledWith("new-wave");
 });
 
-test("refetches pinned waves on window focus", () => {
+test("always refetches pinned waves on window focus", () => {
   renderHook(() => usePinnedWavesServer(), { wrapper });
 
   expect(useQueryMock).toHaveBeenCalledWith(
     expect.objectContaining({
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: "always",
     })
   );
 });
