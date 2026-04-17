@@ -229,17 +229,5 @@
     "typescript-eslint": "8.57.2",
     "yaml": "2.8.3"
   },
-  "overrides": {
-    "@emoji-mart/react": {
-      "react": "$react",
-      "react-dom": "$react-dom"
-    },
-    "eslint-plugin-react-hooks": "7.0.0",
-    "react-toggle": {
-      "react": "$react",
-      "react-dom": "$react-dom"
-    },
-    "serialize-javascript": "7.0.4"
-  },
   "packageManager": "pnpm@10.33.0"
 }
