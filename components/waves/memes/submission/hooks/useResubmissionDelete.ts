@@ -80,6 +80,10 @@ export function useResubmissionDelete({
       onClose();
       onSourceDropDeleted?.();
     } catch (error) {
+      if (didClose) {
+        throw error;
+      }
+
       let message = "Unable to delete the original submission.";
       if (error instanceof Error) {
         message = error.message;
@@ -91,10 +95,6 @@ export function useResubmissionDelete({
         message,
         type: "error",
       });
-    } finally {
-      if (didClose) {
-        return;
-      }
       setIsDeletingOriginal(false);
     }
   }, [
