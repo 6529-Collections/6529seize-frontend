@@ -57,7 +57,7 @@ function useEnhancedWavesListCore(
   const { newDropsCounts, resetAllWavesNewDropsCount } = useNewDropCounter(
     activeWaveId,
     wavesData.waves,
-    wavesData.mainWavesRefetch,
+    wavesData.refetchAllWaves,
     {
       otherListWaveIds: options.otherListWaveIds,
       unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,

@@ -4,7 +4,10 @@ import { useCallback, useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useWavesOverview } from "./useWavesOverview";
-import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+import {
+  SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+  WAVE_FOLLOWING_WAVES_PARAMS,
+} from "@/components/react-query-wrapper/utils/query-utils";
 
 const useDmWavesList = () => {
   const { address } = useSeizeConnectContext();
@@ -35,6 +38,8 @@ const useDmWavesList = () => {
     limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     directMessage: true,
     viewerIdentityKey,
+    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
   });
 
   // sort by latest drop
