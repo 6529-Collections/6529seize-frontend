@@ -245,6 +245,42 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.artworkUploaded).toBe(true);
   });
 
+  it("preserves existing resubmission media after a replacement read error", () => {
+    const existingMedia = {
+      url: "https://example.com/original.png",
+      mimeType: "image/png",
+    };
+    const initialDraft = createDraftWithExistingMedia(existingMedia);
+    class MockFileReader {
+      onerror: (() => void) | null = null;
+      onloadend: (() => void) | null = null;
+      result = "stale-replacement";
+
+      readAsDataURL() {
+        this.onerror?.();
+        this.onloadend?.();
+      }
+    }
+    global.FileReader = MockFileReader as any;
+
+    const { result } = renderArtworkSubmissionForm(initialDraft);
+
+    act(() => {
+      result.current.handleFileSelect(
+        new File(["replacement"], "replacement.png", { type: "image/png" })
+      );
+    });
+
+    expect(result.current.selectedFile).toBeNull();
+    expect(result.current.existingMedia).toEqual(existingMedia);
+    expect(result.current.artworkUrl).toBe(existingMedia.url);
+    expect(result.current.artworkUploaded).toBe(true);
+    expect(result.current.mediaSource).toBe("upload");
+    expect(result.current.uploadError).toBe(
+      "Unable to read the selected file. Please try again."
+    );
+  });
+
   it("applies fetched bio when continuing to additional info", () => {
     const { result } = renderArtworkSubmissionForm(undefined, [
       createBioStatement("Alice bio"),

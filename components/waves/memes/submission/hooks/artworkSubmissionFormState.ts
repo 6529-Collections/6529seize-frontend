@@ -664,13 +664,15 @@ const reduceUploadError = (
     };
   }
 
+  const fallbackArtworkUrl = state.existingMedia?.url ?? "";
+
   return {
     ...state,
     selectedFile: null,
-    artworkUrl: "",
+    artworkUrl: fallbackArtworkUrl,
     uploadArtworkUrl: "",
     uploadError,
-    artworkUploaded: false,
+    artworkUploaded: fallbackArtworkUrl.length > 0,
     mediaSource: "upload",
   };
 };
