@@ -1,0 +1,20 @@
+@keyframes upcoming-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.upcomingRowNew {
+  animation: upcoming-row-in 0.22s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upcomingRowNew {
+    animation: none;
+  }
+}

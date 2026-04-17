@@ -1,16 +1,8 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CreateWaveGroupInlinePanel from "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel";
-import {
-  createEmptyInlineGroupPayload,
-  createInitialInlineGroupBuilderState,
-  type CreateWaveInlineGroupBuilderState,
-  type CreateWaveInlineGroupPanel,
-  type CreateWaveInlineGroupRuleType,
-} from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 
 jest.mock(
   "@/components/waves/create-wave/groups/CreateWaveInlineGroupIdentities",
@@ -69,6 +61,9 @@ jest.mock(
           >
             select group
           </button>
+          <button type="button" onClick={() => props.onSelect(null)}>
+            clear group
+          </button>
         </div>
       );
     }
@@ -81,8 +76,18 @@ jest.mock("@/components/groups/page/create/config/GroupCreateLevel", () => {
 });
 
 jest.mock("@/components/groups/page/create/config/GroupCreateTDH", () => {
-  return function MockGroupCreateTDH() {
-    return <div data-testid="rule-tdh">TDH</div>;
+  return function MockGroupCreateTDH(props: any) {
+    return (
+      <div data-testid="rule-tdh">
+        TDH
+        <button
+          type="button"
+          onClick={() => props.setTDH({ ...props.tdh, min: 10, max: 5 })}
+        >
+          set invalid tdh
+        </button>
+      </div>
+    );
   };
 });
 
@@ -93,8 +98,18 @@ jest.mock("@/components/groups/page/create/config/GroupCreateCIC", () => {
 });
 
 jest.mock("@/components/groups/page/create/config/GroupCreateRep", () => {
-  return function MockGroupCreateRep() {
-    return <div data-testid="rule-rep">Rep</div>;
+  return function MockGroupCreateRep(props: any) {
+    return (
+      <div data-testid="rule-rep">
+        Rep
+        <button
+          type="button"
+          onClick={() => props.setRep({ ...props.rep, min: 5 })}
+        >
+          set rep min
+        </button>
+      </div>
+    );
   };
 });
 
@@ -113,118 +128,56 @@ jest.mock("@/components/groups/page/create/config/nfts/GroupCreateNfts", () => {
   };
 });
 
-const exampleIdentity: CommunityMemberMinimal = {
-  profile_id: "profile-1",
-  handle: "alpha",
-  normalised_handle: "alpha",
-  primary_wallet: "0xABC",
-  display: "Alpha",
-  tdh: 0,
-  level: 0,
-  cic_rating: 0,
-  wallet: "0xABC",
-  pfp: null,
-};
-
 const createdGroup: ApiGroupFull = {
   id: "group-created",
   name: "Created Group",
   created_by: { handle: "builder" },
 } as ApiGroupFull;
 
-function TestHarness({
-  initialBuilder = createInitialInlineGroupBuilderState(),
-  onGroupSelect = jest.fn(),
-  onInlineGroupCreate = jest.fn().mockResolvedValue(createdGroup),
+function renderInlinePanel({
+  suggestedName = "My Wave Who can view",
+  onChange = jest.fn(),
+  onCreateGroup = jest.fn().mockResolvedValue(createdGroup),
   selectedGroup = null,
   disabled = false,
+  allowGroupClear = true,
 }: {
-  readonly initialBuilder?: CreateWaveInlineGroupBuilderState;
-  readonly onGroupSelect?: jest.Mock;
-  readonly onInlineGroupCreate?: jest.Mock;
+  readonly suggestedName?: string;
+  readonly onChange?: jest.Mock;
+  readonly onCreateGroup?: jest.Mock;
   readonly selectedGroup?: ApiGroupFull | null;
   readonly disabled?: boolean;
-}) {
-  const [builder, setBuilder] =
-    React.useState<CreateWaveInlineGroupBuilderState>(initialBuilder);
-  const [currentGroup, setCurrentGroup] = React.useState<ApiGroupFull | null>(
-    selectedGroup
-  );
+  readonly allowGroupClear?: boolean;
+} = {}) {
+  const initialSelectedGroup = selectedGroup;
 
-  const updatePanel = (panel: CreateWaveInlineGroupPanel) => {
-    setBuilder((prev) => ({
-      ...prev,
-      panel,
-    }));
-  };
+  function ControlledPanel() {
+    const [currentGroup, setCurrentGroup] = React.useState<ApiGroupFull | null>(
+      () => initialSelectedGroup
+    );
 
-  const updateRule = (rule: CreateWaveInlineGroupRuleType | null) => {
-    setBuilder((prev) => ({
-      ...prev,
-      activeRule: rule,
-      panel: rule ? "rule-editor" : prev.panel,
-    }));
-  };
+    return (
+      <CreateWaveGroupInlinePanel
+        suggestedName={suggestedName}
+        defaultLabel="Anyone"
+        disabled={disabled}
+        selectedGroup={currentGroup}
+        allowGroupClear={allowGroupClear}
+        onChange={(group) => {
+          setCurrentGroup(group);
+          onChange(group);
+        }}
+        onCreateGroup={onCreateGroup}
+      />
+    );
+  }
 
-  return (
-    <CreateWaveGroupInlinePanel
-      waveName="My Wave"
-      groupLabel="Who can view"
-      defaultLabel="Anyone"
-      disabled={disabled}
-      selectedGroup={currentGroup}
-      groupBuilder={builder}
-      onGroupSelect={(group) => {
-        setCurrentGroup(group);
-        onGroupSelect(group);
-      }}
-      onInlineGroupCreate={onInlineGroupCreate}
-      setGroupBuilderPanel={updatePanel}
-      setGroupBuilderRule={updateRule}
-      setGroupBuilderDraft={(draft) =>
-        setBuilder((prev) => ({
-          ...prev,
-          draft,
-        }))
-      }
-      addGroupBuilderIdentity={(identity) =>
-        setBuilder((prev) => ({
-          ...prev,
-          identities: [identity],
-          draft: {
-            ...prev.draft,
-            group: {
-              ...prev.draft.group,
-              identity_addresses: [
-                (identity.primary_wallet ?? identity.wallet).toLowerCase(),
-              ],
-            },
-          },
-        }))
-      }
-      removeGroupBuilderIdentity={() =>
-        setBuilder((prev) => ({
-          ...prev,
-          identities: [],
-          draft: {
-            ...prev.draft,
-            group: {
-              ...prev.draft.group,
-              identity_addresses: null,
-            },
-          },
-        }))
-      }
-      resetGroupBuilder={() =>
-        setBuilder(createInitialInlineGroupBuilderState())
-      }
-    />
-  );
+  return render(<ControlledPanel />);
 }
 
 describe("CreateWaveGroupInlinePanel", () => {
   it("renders the current state and primary actions", () => {
-    render(<TestHarness />);
+    renderInlinePanel();
 
     expect(screen.getByText("Current state")).toBeInTheDocument();
     expect(screen.getByText("Anyone")).toBeInTheDocument();
@@ -241,7 +194,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("opens the identity panel", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add identity" }));
 
@@ -256,7 +209,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("returns to options when the active identity pill is clicked", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "Add identity" }));
@@ -269,7 +222,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("opens a quick rule editor", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
@@ -290,7 +243,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("returns to rule options when the active rule pill is clicked", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
@@ -304,7 +257,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("shows all rule options without an extra more-rules step", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
 
@@ -324,7 +277,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("returns to options when the active existing group pill is clicked", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(
       screen.getByRole("button", { name: "Use existing group" })
@@ -346,15 +299,15 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("returns to the actions view after selecting an existing group", async () => {
     const user = userEvent.setup();
-    const onGroupSelect = jest.fn();
-    render(<TestHarness onGroupSelect={onGroupSelect} />);
+    const onChange = jest.fn();
+    renderInlinePanel({ onChange });
 
     await user.click(
       screen.getByRole("button", { name: "Use existing group" })
     );
     await user.click(screen.getByRole("button", { name: "select group" }));
 
-    expect(onGroupSelect).toHaveBeenCalledWith(
+    expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({ name: "Selected Group" })
     );
     expect(
@@ -362,57 +315,69 @@ describe("CreateWaveGroupInlinePanel", () => {
     ).toBeInTheDocument();
   });
 
+  it("returns null when clearing an existing group", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    renderInlinePanel({
+      onChange,
+      selectedGroup: { id: "group-1", name: "Existing Group" } as ApiGroupFull,
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Use existing group" })
+    );
+    await user.click(screen.getByRole("button", { name: "clear group" }));
+
+    expect(onChange).toHaveBeenCalledWith(null);
+    expect(screen.getByText("Anyone")).toBeInTheDocument();
+  });
+
+  it("keeps the selected group when clearing is disabled", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    renderInlinePanel({
+      onChange,
+      allowGroupClear: false,
+      selectedGroup: { id: "group-1", name: "Existing Group" } as ApiGroupFull,
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Use existing group" })
+    );
+    await user.click(screen.getByRole("button", { name: "clear group" }));
+
+    expect(onChange).not.toHaveBeenCalledWith(null);
+    expect(screen.getByText("Existing Group")).toBeInTheDocument();
+  });
+
   it("creates and attaches a valid inline group draft", async () => {
     const user = userEvent.setup();
-    const onGroupSelect = jest.fn();
-    const onInlineGroupCreate = jest.fn().mockResolvedValue(createdGroup);
-    const draft = createEmptyInlineGroupPayload();
-    draft.group.rep = {
-      ...draft.group.rep,
-      min: 5,
-    };
+    const onChange = jest.fn();
+    const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
+    renderInlinePanel({ onChange, onCreateGroup });
 
-    render(
-      <TestHarness
-        onGroupSelect={onGroupSelect}
-        onInlineGroupCreate={onInlineGroupCreate}
-        initialBuilder={{
-          ...createInitialInlineGroupBuilderState(),
-          draft,
-        }}
-      />
-    );
-
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
     await user.click(screen.getByRole("button", { name: "Create + use" }));
 
     await waitFor(() => {
-      expect(onInlineGroupCreate).toHaveBeenCalledWith(
+      expect(onCreateGroup).toHaveBeenCalledWith(
         expect.objectContaining({
           name: "My Wave Who can view",
         })
       );
     });
-    expect(onGroupSelect).toHaveBeenCalledWith(createdGroup);
+    expect(onChange).toHaveBeenCalledWith(createdGroup);
   });
 
   it("keeps reset available when the draft is invalid", async () => {
     const user = userEvent.setup();
-    const draft = createEmptyInlineGroupPayload();
-    draft.group.tdh = {
-      ...draft.group.tdh,
-      min: 10,
-      max: 5,
-    };
+    renderInlinePanel();
 
-    render(
-      <TestHarness
-        initialBuilder={{
-          ...createInitialInlineGroupBuilderState(),
-          draft,
-        }}
-      />
-    );
-
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "TDH" }));
+    await user.click(screen.getByRole("button", { name: "set invalid tdh" }));
     expect(screen.getByRole("button", { name: "Create + use" })).toBeDisabled();
     const startOverButton = screen.getByRole("button", { name: "Start over" });
     expect(startOverButton).toBeEnabled();
@@ -431,21 +396,12 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("opens configured rules from the draft chips", async () => {
     const user = userEvent.setup();
-    const draft = createEmptyInlineGroupPayload();
-    draft.group.rep = {
-      ...draft.group.rep,
-      min: 5,
-    };
+    renderInlinePanel();
 
-    render(
-      <TestHarness
-        initialBuilder={{
-          ...createInitialInlineGroupBuilderState(),
-          draft,
-        }}
-      />
-    );
-
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
 
     expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
@@ -453,7 +409,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
   it("updates the draft summary after adding an identity", async () => {
     const user = userEvent.setup();
-    render(<TestHarness />);
+    renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));
