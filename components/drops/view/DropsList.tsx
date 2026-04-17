@@ -47,6 +47,7 @@ interface DropsListProps {
   readonly boostedDrops?: ApiDrop[] | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
+  readonly suspendLightDropHydration?: boolean | undefined;
 }
 
 const MemoizedDrop = memo(Drop);
@@ -71,6 +72,7 @@ const DropsList = memo(
     boostedDrops,
     onBoostedDropClick,
     autoCollapseSerials,
+    suspendLightDropHydration = false,
   }: DropsListProps) => {
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
@@ -274,6 +276,7 @@ const DropsList = memo(
               dropSerialNo={drop.serial_no}
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
               type={drop.type}
+              suspendLightDropHydration={suspendLightDropHydration}
             >
               {dropContentWithPreviewMode}
             </VirtualScrollWrapper>
@@ -289,6 +292,7 @@ const DropsList = memo(
       renderBoostCard,
       renderUnreadDivider,
       autoCollapseSerials,
+      suspendLightDropHydration,
     ]);
   }
 );

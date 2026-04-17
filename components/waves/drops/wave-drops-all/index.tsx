@@ -288,6 +288,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           onScrollToUnread={queueSerialTarget}
           unreadCount={unreadCount}
           autoCollapseSerials={autoCollapseSerials}
+          suspendLightDropHydration={isScrolling || serialTarget !== null}
         />
       </TweetPreviewModeProvider>
       <WaveDropsScrollingOverlay isVisible={isScrolling} />

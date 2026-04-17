@@ -47,6 +47,7 @@ interface WaveDropsContentProps {
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
   readonly unreadCount?: number | undefined;
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
+  readonly suspendLightDropHydration?: boolean | undefined;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -75,6 +76,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onScrollToUnread,
   unreadCount,
   autoCollapseSerials,
+  suspendLightDropHydration = false,
 }) => {
   const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
     useUnreadDivider();
@@ -131,6 +133,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onScrollToUnread={onScrollToUnread}
         onDismissUnread={handleDismissUnread}
         autoCollapseSerials={autoCollapseSerials}
+        suspendLightDropHydration={suspendLightDropHydration}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>
