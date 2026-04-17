@@ -1,11 +1,14 @@
 import type { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
-import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
-import ProfileBadge from "@/components/common/profile/ProfileBadge";
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
 import {
   ETHEREUM_ICON_TEXT,
   NEXTGEN_MEDIA_BASE_URL,
 } from "@/constants/constants";
-import { CICType } from "@/entities/IProfile";
 import type { NextGenToken } from "@/entities/INextgen";
 import { formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -48,14 +51,35 @@ export function NextGenTokenImage(
     if (props.show_owner_info) {
       const handleOrWallet =
         props.token.normalised_handle ?? formatAddress(props.token.owner);
+      const profileHref = `/${props.token.normalised_handle ?? props.token.owner}`;
+      const initial =
+        handleOrWallet.trim().charAt(0) || "?";
       const ownerInfo = (
-        <ProfileBadge
-          handle={handleOrWallet}
-          href={`/${props.token.normalised_handle ?? props.token.owner}`}
-          level={props.token.level}
-          cicType={CICType.UNKNOWN}
-          size={ProfileBadgeSize.SMALL}
-        />
+        <div className="tailwind-scope tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2.5">
+          <ProfileAvatar
+            pfpUrl={undefined}
+            size={ProfileBadgeSize.SMALL}
+            alt={`${handleOrWallet} profile`}
+            fallbackContent={
+              <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-300">
+                {initial}
+              </span>
+            }
+          />
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
+            <Link
+              href={profileHref}
+              onClick={(e) => e.stopPropagation()}
+              className="tw-truncate tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50 tw-no-underline desktop-hover:hover:tw-text-iron-200"
+            >
+              {handleOrWallet}
+            </Link>
+            <UserCICAndLevel
+              level={props.token.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
+          </div>
+        </div>
       );
 
       ownerInfoDisplay = (
@@ -95,11 +119,11 @@ export function NextGenTokenImage(
               ...({ "--rt-opacity": 1 } as CSSProperties),
             }}
           >
-            <div className="tw-flex tw-flex-col tw-gap-3">
-              <div className="tw-border-b tw-border-white/10 tw-pb-3">
+            <div className="tw-flex tw-flex-col tw-gap-1.5 tw-text-left">
+              <div className="tw-border-b tw-border-white/10 tw-pb-1.5">
                 {ownerInfo}
               </div>
-              <div className="tw-flex tw-flex-col tw-gap-1.5 tw-font-semibold">
+              <div className="tw-flex tw-flex-col tw-gap-1 tw-font-semibold">
                 <span>
                   Opensea:{" "}
                   {props.token.opensea_price > 0
