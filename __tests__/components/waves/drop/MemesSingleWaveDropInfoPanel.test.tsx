@@ -151,6 +151,33 @@ describe("MemesDropFullscreenOverlay", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("prevents Escape from closing the parent drop modal", () => {
+    const onClose = jest.fn();
+    const parentDropModalClose = jest.fn();
+
+    document.addEventListener("keydown", parentDropModalClose);
+
+    try {
+      render(
+        <MemesDropFullscreenOverlay
+          isOpen={true}
+          artworkMedia={artworkMedia}
+          drop={baseDrop}
+          title="Title"
+          description="Desc"
+          onClose={onClose}
+        />
+      );
+
+      fireEvent.keyDown(document, { key: "Escape" });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(parentDropModalClose).not.toHaveBeenCalled();
+    } finally {
+      document.removeEventListener("keydown", parentDropModalClose);
+    }
+  });
+
   it("closes only when the backdrop is clicked", () => {
     const onClose = jest.fn();
 
