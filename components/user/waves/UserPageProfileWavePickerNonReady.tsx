@@ -28,15 +28,27 @@ function CreateWaveLink() {
   );
 }
 
+function renderNotOwnProfileState(variant: WavePickerVariant) {
+  const title = "No official wave yet";
+  const message =
+    "This profile hasn't selected an official wave for Curation yet.";
+
+  if (variant === "panel") {
+    return <CurationEmptyPanel title={title} message={message} />;
+  }
+
+  return <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>;
+}
+
 function renderProxyMode(variant: WavePickerVariant) {
+  const message =
+    "Switch out of proxy mode to change the official wave shown in Curation.";
+
   if (variant === DROPDOWN_VARIANT) {
     return (
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
         <div className="tw-px-4 tw-py-4">
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-            Official wave setup is only available when you are acting as
-            yourself.
-          </p>
+          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
         </div>
       </section>
     );
@@ -45,19 +57,12 @@ function renderProxyMode(variant: WavePickerVariant) {
   if (variant === MOBILE_SHEET_VARIANT) {
     return (
       <div className="tw-px-4 sm:tw-px-6">
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-          Official wave setup is only available when you are acting as yourself.
-        </p>
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
       </div>
     );
   }
 
-  return (
-    <InfoPanel
-      title="Switch out of proxy mode"
-      message="Official wave setup is only available when you are acting as yourself."
-    />
-  );
+  return <InfoPanel title="Switch out of proxy mode" message={message} />;
 }
 
 function renderLoadingState(variant: WavePickerVariant) {
@@ -139,10 +144,10 @@ function renderNoPublicWavesState({
   readonly hasCreatedWaves: boolean;
   readonly variant: WavePickerVariant;
 }) {
-  const title = hasCreatedWaves ? "No eligible waves yet" : "No waves yet";
+  const title = hasCreatedWaves ? "No official wave yet" : "No waves yet";
   const message = hasCreatedWaves
-    ? "Only public, non-DM waves can be featured in Curation. Create a public wave to set it as your official wave."
-    : "Create your first public wave to feature it in Curation.";
+    ? "Only public waves can be used here. Create one to set it as your official wave."
+    : "Create your first public wave to set it as your official wave.";
 
   if (variant === "panel") {
     return (
@@ -190,11 +195,7 @@ export default function UserPageProfileWavePickerNonReady({
 }) {
   switch (state.kind) {
     case "not_own_profile":
-      return (
-        <p className="tw-py-4 tw-text-sm tw-italic tw-text-iron-500">
-          This profile has not selected an official wave yet.
-        </p>
-      );
+      return renderNotOwnProfileState(variant);
     case "proxy_mode":
       return renderProxyMode(variant);
     case "loading":

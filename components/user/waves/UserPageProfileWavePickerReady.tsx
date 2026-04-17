@@ -256,7 +256,7 @@ export default function UserPageProfileWavePickerReady({
             {title}
           </h2>
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-2">
-            Choose the wave you want to feature on your profile.
+            Choose the wave you want to use as your official wave.
           </p>
         </div>
 
