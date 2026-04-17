@@ -65,9 +65,12 @@ export default function UserPageSubscriptionsBalance(
                 {props.details && props.details.balance > 0 && (
                   <>
                     (
-                    {(props.details.balance / MEMES_MINT_PRICE)
-                      .toFixed(0)
-                      .toLocaleString()}{" "}
+                    {(props.details.balance / MEMES_MINT_PRICE).toLocaleString(
+                      undefined,
+                      {
+                        maximumFractionDigits: 0,
+                      }
+                    )}{" "}
                     cards)
                   </>
                 )}
