@@ -9,6 +9,7 @@ describe("resolveWaveSubmissionExperience", () => {
       resolveWaveSubmissionExperience({
         isMemesWave: true,
         isCurationWave: false,
+        isQuorumWave: false,
         submissionStrategy: {
           type: "IDENTITY" as any,
           config: {
@@ -25,6 +26,7 @@ describe("resolveWaveSubmissionExperience", () => {
       resolveWaveSubmissionExperience({
         isMemesWave: false,
         isCurationWave: true,
+        isQuorumWave: false,
         submissionStrategy: {
           type: "IDENTITY" as any,
           config: {
@@ -36,11 +38,29 @@ describe("resolveWaveSubmissionExperience", () => {
     ).toBe(WaveSubmissionExperience.CURATION_LEGACY);
   });
 
+  it("uses quorum proposal behavior over submission strategy", () => {
+    expect(
+      resolveWaveSubmissionExperience({
+        isMemesWave: false,
+        isCurationWave: false,
+        isQuorumWave: true,
+        submissionStrategy: {
+          type: "IDENTITY" as any,
+          config: {
+            who_can_be_submitted: "EVERYONE" as any,
+            duplicates: "NEVER_ALLOW" as any,
+          },
+        },
+      })
+    ).toBe(WaveSubmissionExperience.QUORUM_PROPOSAL);
+  });
+
   it("uses identity experience for non-legacy waves with submission strategy", () => {
     expect(
       resolveWaveSubmissionExperience({
         isMemesWave: false,
         isCurationWave: false,
+        isQuorumWave: false,
         submissionStrategy: {
           type: "IDENTITY" as any,
           config: {
@@ -57,6 +77,7 @@ describe("resolveWaveSubmissionExperience", () => {
       resolveWaveSubmissionExperience({
         isMemesWave: false,
         isCurationWave: false,
+        isQuorumWave: false,
         submissionStrategy: null,
       })
     ).toBe(WaveSubmissionExperience.DEFAULT);

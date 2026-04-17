@@ -65,6 +65,7 @@ interface WaveInfo {
   isRankWave: boolean;
   isMemesWave: boolean;
   isCurationWave: boolean;
+  isQuorumWave: boolean;
   isDm: boolean;
 }
 
@@ -123,7 +124,7 @@ function getSubmissionStatus(
 export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   // Current time for all timestamp comparisons (consistent throughout the hook)
   const now = useMemo(() => Time.currentMillis(), []);
-  const { isMemesWave, isCurationWave } = useSeizeSettings();
+  const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
 
   // Calculate pause information
   const currentPause = useMemo(() => {
@@ -431,6 +432,7 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     isRankWave: wave?.wave.type === "RANK",
     isMemesWave: isMemesWave(wave?.id.toLowerCase()),
     isCurationWave: isCurationWave(wave?.id.toLowerCase()),
+    isQuorumWave: isQuorumWave(wave?.id.toLowerCase()),
     isDm: !!wave?.chat?.scope?.group?.is_direct_message,
   };
 }

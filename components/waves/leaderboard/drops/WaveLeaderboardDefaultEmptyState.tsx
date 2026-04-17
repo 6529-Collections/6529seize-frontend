@@ -5,19 +5,27 @@ interface WaveLeaderboardDefaultEmptyStateProps {
   readonly onCreateDrop?: (() => void) | undefined;
   readonly canCreateDrop: boolean;
   readonly dropRestrictionMessage: string | null;
+  readonly createDropLabel?: string | undefined;
+  readonly emptyTitle?: string | undefined;
+  readonly emptyDescription?: string | undefined;
 }
 
 export const WaveLeaderboardDefaultEmptyState: React.FC<
   WaveLeaderboardDefaultEmptyStateProps
-> = ({ onCreateDrop, canCreateDrop, dropRestrictionMessage }) => {
+> = ({
+  onCreateDrop,
+  canCreateDrop,
+  dropRestrictionMessage,
+  createDropLabel = "Drop",
+  emptyTitle = "No drops to show",
+  emptyDescription = "Be the first to create a drop in this wave",
+}) => {
   return (
-    <div className="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-950 tw-p-8 tw-text-center">
+    <div className="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-950 tw-p-8 tw-text-center">
       <h3 className="tw-mb-2 tw-text-xl tw-font-medium tw-text-iron-400">
-        No drops to show
+        {emptyTitle}
       </h3>
-      <p className="tw-mb-4 tw-text-iron-500">
-        Be the first to create a drop in this wave
-      </p>
+      <p className="tw-mb-4 tw-text-iron-500">{emptyDescription}</p>
       {onCreateDrop && (
         <PrimaryButton
           loading={false}
@@ -38,7 +46,7 @@ export const WaveLeaderboardDefaultEmptyState: React.FC<
               clipRule="evenodd"
             />
           </svg>
-          <span>Drop</span>
+          <span>{createDropLabel}</span>
         </PrimaryButton>
       )}
       {!canCreateDrop && dropRestrictionMessage && (

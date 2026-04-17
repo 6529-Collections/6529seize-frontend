@@ -6,16 +6,11 @@ import {
   CREATE_WAVE_NONE_GROUP_LABELS,
   CREATE_WAVE_SELECT_GROUP_LABELS,
 } from "@/helpers/waves/waves.constants";
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import CreateWaveToggle from "../utils/CreateWaveToggle";
-import type {
-  CreateWaveInlineGroupBuilderState,
-  CreateWaveInlineGroupPanel,
-  CreateWaveInlineGroupRuleType,
-} from "./createWaveInlineGroupBuilder";
+import { buildInlineGroupName } from "./createWaveInlineGroupBuilder";
 import CreateWaveGroupInlinePanel from "./CreateWaveGroupInlinePanel";
 
 export default function CreateWaveGroup({
@@ -29,13 +24,6 @@ export default function CreateWaveGroup({
   onInlineGroupCreate,
   groupsCache,
   groups,
-  groupBuilder,
-  setGroupBuilderPanel,
-  setGroupBuilderRule,
-  setGroupBuilderDraft,
-  addGroupBuilderIdentity,
-  removeGroupBuilderIdentity,
-  resetGroupBuilder,
   setDropsAdminCanDelete,
 }: {
   readonly waveName: string;
@@ -50,15 +38,6 @@ export default function CreateWaveGroup({
   ) => Promise<ApiGroupFull | null>;
   readonly groupsCache: Record<string, ApiGroupFull>;
   readonly groups: WaveGroupsConfig;
-  readonly groupBuilder: CreateWaveInlineGroupBuilderState;
-  readonly setGroupBuilderPanel: (panel: CreateWaveInlineGroupPanel) => void;
-  readonly setGroupBuilderRule: (
-    rule: CreateWaveInlineGroupRuleType | null
-  ) => void;
-  readonly setGroupBuilderDraft: (draft: ApiCreateGroup) => void;
-  readonly addGroupBuilderIdentity: (identity: CommunityMemberMinimal) => void;
-  readonly removeGroupBuilderIdentity: (wallet: string) => void;
-  readonly resetGroupBuilder: () => void;
   readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
 }) {
   const getSelectedGroupId = () => {
@@ -91,13 +70,7 @@ export default function CreateWaveGroup({
     !chatEnabled;
   const defaultLabel = CREATE_WAVE_NONE_GROUP_LABELS[groupType];
   const groupLabel = CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType];
-  const resolvedGroupBuilder = inputDisabled
-    ? {
-        ...groupBuilder,
-        panel: "actions" as const,
-        activeRule: null,
-      }
-    : groupBuilder;
+  const suggestedName = buildInlineGroupName({ waveName, groupLabel });
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4">
@@ -124,20 +97,12 @@ export default function CreateWaveGroup({
       </div>
 
       <CreateWaveGroupInlinePanel
-        waveName={waveName}
-        groupLabel={groupLabel}
+        suggestedName={suggestedName}
         defaultLabel={defaultLabel}
         disabled={inputDisabled}
         selectedGroup={selectedGroup}
-        groupBuilder={resolvedGroupBuilder}
-        onGroupSelect={onGroupSelect}
-        onInlineGroupCreate={onInlineGroupCreate}
-        setGroupBuilderPanel={setGroupBuilderPanel}
-        setGroupBuilderRule={setGroupBuilderRule}
-        setGroupBuilderDraft={setGroupBuilderDraft}
-        addGroupBuilderIdentity={addGroupBuilderIdentity}
-        removeGroupBuilderIdentity={removeGroupBuilderIdentity}
-        resetGroupBuilder={resetGroupBuilder}
+        onChange={onGroupSelect}
+        onCreateGroup={onInlineGroupCreate}
       />
     </div>
   );

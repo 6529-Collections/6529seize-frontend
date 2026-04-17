@@ -1,5 +1,6 @@
 "use client";
 
+import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
@@ -12,28 +13,6 @@ interface WaveLeaderboardCurationDropModalProps {
   readonly wave: ApiWave;
   readonly onClose: () => void;
 }
-
-const FOCUSABLE_SELECTOR =
-  "a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex='-1']),[contenteditable='true']";
-
-const getFocusableElements = (container: HTMLElement): HTMLElement[] =>
-  Array.from(
-    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-  ).filter((element) => {
-    if (!element.isConnected) {
-      return false;
-    }
-
-    if (element.getAttribute("aria-hidden") === "true") {
-      return false;
-    }
-
-    if (element instanceof HTMLInputElement && element.type === "hidden") {
-      return false;
-    }
-
-    return !element.hasAttribute("disabled");
-  });
 
 export function WaveLeaderboardCurationDropModal({
   isOpen,
@@ -86,56 +65,7 @@ export function WaveLeaderboardCurationDropModal({
         return;
       }
 
-      const focusableElements = getFocusableElements(panel);
-      if (focusableElements.length === 0) {
-        event.preventDefault();
-        panel.focus();
-        return;
-      }
-
-      const firstFocusableElement = focusableElements[0];
-      const lastFocusableElement =
-        focusableElements[focusableElements.length - 1];
-      if (!firstFocusableElement || !lastFocusableElement) {
-        event.preventDefault();
-        panel.focus();
-        return;
-      }
-      const activeFocusableElement =
-        document.activeElement instanceof HTMLElement
-          ? document.activeElement
-          : null;
-
-      if (activeFocusableElement === panel) {
-        event.preventDefault();
-        if (event.shiftKey) {
-          lastFocusableElement.focus();
-        } else {
-          firstFocusableElement.focus();
-        }
-        return;
-      }
-
-      if (!activeFocusableElement || !panel.contains(activeFocusableElement)) {
-        event.preventDefault();
-        if (event.shiftKey) {
-          lastFocusableElement.focus();
-        } else {
-          firstFocusableElement.focus();
-        }
-        return;
-      }
-
-      if (event.shiftKey && activeFocusableElement === firstFocusableElement) {
-        event.preventDefault();
-        lastFocusableElement.focus();
-        return;
-      }
-
-      if (!event.shiftKey && activeFocusableElement === lastFocusableElement) {
-        event.preventDefault();
-        firstFocusableElement.focus();
-      }
+      trapTabFocus(event, panel);
     };
     document.addEventListener("keydown", onKeyDown);
 

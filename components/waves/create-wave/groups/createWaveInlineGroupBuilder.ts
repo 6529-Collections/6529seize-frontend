@@ -4,7 +4,6 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
-import { CreateWaveGroupConfigType } from "@/types/waves.types";
 
 export type CreateWaveInlineGroupPanel =
   | "actions"
@@ -96,17 +95,6 @@ export const createInitialInlineGroupBuilderState =
     panel: "actions",
     activeRule: null,
   });
-
-export const createInitialInlineGroupBuilderMap = (): Record<
-  CreateWaveGroupConfigType,
-  CreateWaveInlineGroupBuilderState
-> => ({
-  [CreateWaveGroupConfigType.CAN_VIEW]: createInitialInlineGroupBuilderState(),
-  [CreateWaveGroupConfigType.CAN_DROP]: createInitialInlineGroupBuilderState(),
-  [CreateWaveGroupConfigType.CAN_VOTE]: createInitialInlineGroupBuilderState(),
-  [CreateWaveGroupConfigType.CAN_CHAT]: createInitialInlineGroupBuilderState(),
-  [CreateWaveGroupConfigType.ADMIN]: createInitialInlineGroupBuilderState(),
-});
 
 const normalizeAddress = (address: string): string =>
   address.trim().toLowerCase();

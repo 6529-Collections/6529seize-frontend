@@ -75,10 +75,14 @@ export function useWaveDrops({
 
   const {
     data,
+    dataUpdatedAt,
+    error,
     fetchNextPage: onFetchNextPage,
     hasNextPage,
+    isError,
     isFetching,
     isFetchingNextPage,
+    isPlaceholderData,
     refetch,
   } = useInfiniteQuery({
     queryKey,
@@ -147,11 +151,15 @@ export function useWaveDrops({
   );
 
   return {
+    dataUpdatedAt,
     drops,
+    error,
     fetchNextPage,
     hasNextPage,
+    isError,
     isFetching,
     isFetchingNextPage,
+    isPlaceholderData,
     refetch,
   };
 }

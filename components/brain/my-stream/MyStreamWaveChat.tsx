@@ -109,10 +109,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const { connectedProfile } = useAuth();
-  const { isMemesWave, isCurationWave } = useWave(wave);
+  const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const submissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
+    isQuorumWave,
     submissionStrategy: wave.participation.submission_strategy ?? null,
   });
   const editingDropId = useSelector(selectEditingDropId);

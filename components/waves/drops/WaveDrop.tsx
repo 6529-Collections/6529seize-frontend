@@ -2,6 +2,7 @@
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -318,6 +319,7 @@ const getContentBlock = ({
   readonly handleEditSave: (
     newContent: string,
     mentions?: ApiDropMentionedUser[],
+    mentionedGroups?: ApiDropGroupMention[],
     mentionedWaves?: ApiMentionedWave[]
   ) => void;
   readonly handleEditCancel: () => void;
@@ -575,6 +577,7 @@ const WaveDrop = ({
     (
       newContent: string,
       mentions?: ApiDropMentionedUser[],
+      _mentionedGroups?: ApiDropGroupMention[],
       mentionedWaves?: ApiMentionedWave[]
     ) => {
       // Clean mentioned users to only include allowed fields for API
@@ -591,13 +594,14 @@ const WaveDrop = ({
           wave_name_in_content: wave.wave_name_in_content,
         })
       );
+      const updatedParts = drop.parts.map((part, index) => ({
+        content: index === activePartIndex ? newContent : part.content,
+        quoted_drop: part.quoted_drop ?? null,
+        media: part.media,
+      }));
 
       const updateRequest: ApiUpdateDropRequest = {
-        parts: drop.parts.map((part, index) => ({
-          content: index === activePartIndex ? newContent : part.content,
-          quoted_drop: part.quoted_drop ?? null,
-          media: part.media,
-        })),
+        parts: updatedParts,
         title: drop.title,
         metadata: drop.metadata,
         referenced_nfts: drop.referenced_nfts,

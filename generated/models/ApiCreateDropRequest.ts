@@ -13,6 +13,7 @@
 
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
+import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
@@ -24,7 +25,7 @@ export class ApiCreateDropRequest {
     'wave_id': string;
     'reply_to'?: ApiReplyToDrop;
     'drop_type'?: ApiDropType;
-    'mentions_all'?: boolean;
+    'mentioned_groups'?: Array<ApiDropGroupMention>;
     'title'?: string | null;
     'parts': Array<ApiCreateDropPart>;
     'referenced_nfts': Array<ApiDropReferencedNFT>;
@@ -62,9 +63,9 @@ export class ApiCreateDropRequest {
             "format": ""
         },
         {
-            "name": "mentions_all",
-            "baseName": "mentions_all",
-            "type": "boolean",
+            "name": "mentioned_groups",
+            "baseName": "mentioned_groups",
+            "type": "Array<ApiDropGroupMention>",
             "format": ""
         },
         {

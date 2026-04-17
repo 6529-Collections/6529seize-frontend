@@ -184,5 +184,6 @@ export const buildPreviewDrop = ({
     reactions: [],
     boosts: 0,
     hide_link_preview: false,
+    mentioned_groups: [],
   };
 };

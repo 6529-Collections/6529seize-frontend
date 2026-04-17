@@ -248,6 +248,33 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(screen.queryByTestId("curation-modal")).not.toBeInTheDocument();
   });
 
+  it("routes quorum proposal creation through the create flow", async () => {
+    const user = userEvent.setup();
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: true,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard();
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+    expect(screen.queryByTestId("memes")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("curation-modal")).not.toBeInTheDocument();
+  });
+
   it("renders non-meme content-only grid mode", () => {
     useWave.mockReturnValue({
       isMemesWave: false,
