@@ -45,6 +45,36 @@ const createBioStatement = (statementValue: string): CicStatement => ({
   updated_at: null,
 });
 
+const createDraftWithExistingMedia = (
+  existingMedia: NonNullable<MemesSubmissionInitialDraft["existingMedia"]>
+): MemesSubmissionInitialDraft =>
+  ({
+    traits: {
+      title: "Draft title",
+      description: "Draft description",
+      artist: "draft-artist",
+      seizeArtistProfile: "draft-profile",
+    },
+    operationalData: {
+      airdrop_config: [],
+      payment_info: {
+        payment_address: "0xdraft",
+        has_designated_payee: false,
+        designated_payee_name: "",
+      },
+      allowlist_batches: [],
+      additional_media: {
+        artist_profile_media: [],
+        artwork_commentary_media: [],
+        preview_image: "",
+        promo_video: "",
+      },
+      commentary: "",
+      about_artist: "",
+    },
+    existingMedia,
+  }) as MemesSubmissionInitialDraft;
+
 const createQueryWrapper = (profileStatements?: CicStatement[]) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -158,37 +188,31 @@ describe("useArtworkSubmissionForm", () => {
     expect(commonApiFetch).not.toHaveBeenCalled();
   });
 
+  it("clears existing resubmission media to allow first replacement selection", () => {
+    const existingMedia = {
+      url: "https://example.com/original.png",
+      mimeType: "image/png",
+    };
+    const initialDraft = createDraftWithExistingMedia(existingMedia);
+
+    const { result } = renderArtworkSubmissionForm(initialDraft);
+
+    act(() => {
+      result.current.setArtworkUploaded(false);
+    });
+
+    expect(result.current.selectedFile).toBeNull();
+    expect(result.current.existingMedia).toEqual(existingMedia);
+    expect(result.current.artworkUrl).toBe("");
+    expect(result.current.artworkUploaded).toBe(false);
+  });
+
   it("restores existing resubmission media after clearing a replacement upload", () => {
     const existingMedia = {
       url: "https://example.com/original.png",
       mimeType: "image/png",
     };
-    const initialDraft = {
-      traits: {
-        title: "Draft title",
-        description: "Draft description",
-        artist: "draft-artist",
-        seizeArtistProfile: "draft-profile",
-      },
-      operationalData: {
-        airdrop_config: [],
-        payment_info: {
-          payment_address: "0xdraft",
-          has_designated_payee: false,
-          designated_payee_name: "",
-        },
-        allowlist_batches: [],
-        additional_media: {
-          artist_profile_media: [],
-          artwork_commentary_media: [],
-          preview_image: "",
-          promo_video: "",
-        },
-        commentary: "",
-        about_artist: "",
-      },
-      existingMedia,
-    } as MemesSubmissionInitialDraft;
+    const initialDraft = createDraftWithExistingMedia(existingMedia);
     class MockFileReader {
       onloadend: (() => void) | null = null;
       result = "data-replacement";

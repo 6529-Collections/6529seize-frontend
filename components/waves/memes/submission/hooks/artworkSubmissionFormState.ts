@@ -622,11 +622,17 @@ const reduceExternalMediaValidation = (
 };
 
 const reduceResetUploadMedia = (state: FormState): FormState => {
+  const existingMedia = state.existingMedia;
   const shouldFallbackToExternal =
     state.mediaSource === "url" && state.externalMedia.isValid;
-  const fallbackArtworkUrl = shouldFallbackToExternal
-    ? state.externalMedia.url
-    : (state.existingMedia?.url ?? "");
+  const shouldFallbackToExisting =
+    state.selectedFile !== null && existingMedia !== null;
+  let fallbackArtworkUrl = "";
+  if (shouldFallbackToExternal) {
+    fallbackArtworkUrl = state.externalMedia.url;
+  } else if (shouldFallbackToExisting) {
+    fallbackArtworkUrl = existingMedia.url;
+  }
 
   return {
     ...state,
