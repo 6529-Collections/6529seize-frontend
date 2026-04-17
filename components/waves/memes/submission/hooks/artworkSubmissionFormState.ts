@@ -67,6 +67,7 @@ export type FormAction =
       type: "SET_UPLOAD_MEDIA";
       payload: { file: File; artworkUrl: string };
     }
+  | { type: "SET_UPLOAD_ERROR"; payload: string | null }
   | { type: "RESET_UPLOAD_MEDIA" }
   | { type: "SET_AIRDROP_CONFIG"; payload: AirdropEntry[] }
   | { type: "SET_PAYMENT_INFO"; payload: PaymentInfo }
@@ -81,6 +82,7 @@ export interface FormState {
   artworkUploaded: boolean;
   artworkUrl: string;
   uploadArtworkUrl: string;
+  uploadError: string | null;
   traits: TraitsData;
   mediaSource: MediaSource;
   selectedFile: File | null;
@@ -344,6 +346,7 @@ export const createInitialState = ({
     artworkUploaded: Boolean(existingMedia),
     artworkUrl: existingMedia?.url ?? "",
     uploadArtworkUrl: "",
+    uploadError: null,
     traits: initialDraft?.traits ?? getInitialTraitsValues(),
     mediaSource: "upload",
     selectedFile: null,
@@ -404,9 +407,13 @@ export function formReducer(state: FormState, action: FormAction): FormState {
         selectedFile: action.payload.file,
         artworkUrl: action.payload.artworkUrl,
         uploadArtworkUrl: action.payload.artworkUrl,
+        uploadError: null,
         artworkUploaded: true,
         mediaSource: "upload",
       };
+
+    case "SET_UPLOAD_ERROR":
+      return reduceUploadError(state, action.payload);
 
     case "RESET_UPLOAD_MEDIA":
       return reduceResetUploadMedia(state);
@@ -555,6 +562,7 @@ const reduceMediaSource = (
     return {
       ...state,
       mediaSource: nextSource,
+      uploadError: null,
       artworkUploaded: hasFile || hasExistingMedia,
       artworkUrl: hasFile
         ? state.uploadArtworkUrl
@@ -565,6 +573,7 @@ const reduceMediaSource = (
   return {
     ...state,
     mediaSource: nextSource,
+    uploadError: null,
     artworkUploaded: state.externalMedia.isValid,
     artworkUrl: state.externalMedia.isValid ? state.externalMedia.url : "",
   };
@@ -639,6 +648,29 @@ const reduceResetUploadMedia = (state: FormState): FormState => {
     selectedFile: null,
     artworkUrl: fallbackArtworkUrl,
     uploadArtworkUrl: "",
+    uploadError: null,
     artworkUploaded: fallbackArtworkUrl.length > 0,
+  };
+};
+
+const reduceUploadError = (
+  state: FormState,
+  uploadError: string | null
+): FormState => {
+  if (!uploadError) {
+    return {
+      ...state,
+      uploadError: null,
+    };
+  }
+
+  return {
+    ...state,
+    selectedFile: null,
+    artworkUrl: "",
+    uploadArtworkUrl: "",
+    uploadError,
+    artworkUploaded: false,
+    mediaSource: "upload",
   };
 };

@@ -296,6 +296,85 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.artworkUrl).toBe("url");
   });
 
+  it("surfaces FileReader errors and clears stale upload state", () => {
+    class MockFileReader {
+      static shouldFail = false;
+      onabort: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      onloadend: (() => void) | null = null;
+      result: string | null = null;
+
+      readAsDataURL() {
+        if (MockFileReader.shouldFail) {
+          this.result = "stale-url";
+          this.onerror?.();
+          this.onloadend?.();
+          return;
+        }
+
+        this.result = "fresh-url";
+        this.onloadend?.();
+      }
+    }
+    global.FileReader = MockFileReader as any;
+
+    const { result } = renderArtworkSubmissionForm();
+    const firstFile = new File(["x"], "first.png", { type: "image/png" });
+
+    act(() => {
+      result.current.handleFileSelect(firstFile);
+    });
+
+    expect(result.current.selectedFile).toBe(firstFile);
+    expect(result.current.artworkUploaded).toBe(true);
+    expect(result.current.artworkUrl).toBe("fresh-url");
+    expect(result.current.uploadError).toBeNull();
+
+    MockFileReader.shouldFail = true;
+    act(() => {
+      result.current.handleFileSelect(
+        new File(["x"], "second.png", { type: "image/png" })
+      );
+    });
+
+    expect(result.current.selectedFile).toBeNull();
+    expect(result.current.artworkUploaded).toBe(false);
+    expect(result.current.artworkUrl).toBe("");
+    expect(result.current.uploadError).toBe(
+      "Unable to read the selected file. Please try again."
+    );
+  });
+
+  it("surfaces FileReader aborts and ignores loadend after abort", () => {
+    class MockFileReader {
+      onabort: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      onloadend: (() => void) | null = null;
+      result = "stale-url";
+
+      readAsDataURL() {
+        this.onabort?.();
+        this.onloadend?.();
+      }
+    }
+    global.FileReader = MockFileReader as any;
+
+    const { result } = renderArtworkSubmissionForm();
+
+    act(() => {
+      result.current.handleFileSelect(
+        new File(["x"], "aborted.png", { type: "image/png" })
+      );
+    });
+
+    expect(result.current.selectedFile).toBeNull();
+    expect(result.current.artworkUploaded).toBe(false);
+    expect(result.current.artworkUrl).toBe("");
+    expect(result.current.uploadError).toBe(
+      "File reading was cancelled. Select the artwork again."
+    );
+  });
+
   it("clears external media errors when the hash is empty", () => {
     const { result } = renderArtworkSubmissionForm();
 

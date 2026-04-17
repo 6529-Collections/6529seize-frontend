@@ -19,6 +19,11 @@ interface UseArtworkSubmissionMediaControlsParams {
   readonly dispatch: Dispatch<FormAction>;
 }
 
+const FILE_READ_ERROR_MESSAGE =
+  "Unable to read the selected file. Please try again.";
+const FILE_READ_ABORT_MESSAGE =
+  "File reading was cancelled. Select the artwork again.";
+
 export function useArtworkSubmissionMediaControls({
   state,
   dispatch,
@@ -77,13 +82,45 @@ export function useArtworkSubmissionMediaControls({
   const handleFileSelect = useCallback(
     (file: File) => {
       const reader = new FileReader();
+      let readFailed = false;
+
+      const setUploadError = (message: string): void => {
+        if (readFailed) {
+          return;
+        }
+        readFailed = true;
+        dispatch({ type: "SET_UPLOAD_ERROR", payload: message });
+      };
+
+      dispatch({ type: "SET_UPLOAD_ERROR", payload: null });
+
+      reader.onerror = () => {
+        setUploadError(FILE_READ_ERROR_MESSAGE);
+      };
+      reader.onabort = () => {
+        setUploadError(FILE_READ_ABORT_MESSAGE);
+      };
       reader.onloadend = () => {
+        if (readFailed) {
+          return;
+        }
+
+        if (typeof reader.result !== "string") {
+          setUploadError(FILE_READ_ERROR_MESSAGE);
+          return;
+        }
+
         dispatch({
           type: "SET_UPLOAD_MEDIA",
-          payload: { file, artworkUrl: reader.result as string },
+          payload: { file, artworkUrl: reader.result },
         });
       };
-      reader.readAsDataURL(file);
+
+      try {
+        reader.readAsDataURL(file);
+      } catch {
+        setUploadError(FILE_READ_ERROR_MESSAGE);
+      }
     },
     [dispatch]
   );

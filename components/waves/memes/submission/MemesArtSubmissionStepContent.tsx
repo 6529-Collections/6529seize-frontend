@@ -100,6 +100,7 @@ export function MemesArtSubmissionStepContent({
           traits={form.traits}
           artworkUploaded={form.artworkUploaded}
           artworkUrl={form.artworkUrl}
+          uploadError={form.uploadError}
           artworkMimeType={form.existingMedia?.mimeType ?? null}
           setArtworkUploaded={form.setArtworkUploaded}
           handleFileSelect={form.handleFileSelect}

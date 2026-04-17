@@ -73,6 +73,8 @@ export interface MemesArtSubmissionFileProps {
   readonly artworkUploaded: boolean;
   /** URL of the uploaded artwork */
   readonly artworkUrl: string;
+  /** Error raised while reading the selected upload */
+  readonly uploadError: string | null;
   /** MIME type for server-provided artwork */
   readonly artworkMimeType?: string | null | undefined;
   /** Callback to update artwork upload state */

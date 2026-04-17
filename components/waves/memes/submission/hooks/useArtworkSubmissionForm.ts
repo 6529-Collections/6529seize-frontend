@@ -91,6 +91,7 @@ export function useArtworkSubmissionForm(
 
     artworkUploaded: state.artworkUploaded,
     artworkUrl: state.artworkUrl,
+    uploadError: state.uploadError,
     selectedFile: state.selectedFile,
     existingMedia: state.existingMedia,
     mediaSource: state.mediaSource,
