@@ -158,6 +158,69 @@ describe("useArtworkSubmissionForm", () => {
     expect(commonApiFetch).not.toHaveBeenCalled();
   });
 
+  it("restores existing resubmission media after clearing a replacement upload", () => {
+    const existingMedia = {
+      url: "https://example.com/original.png",
+      mimeType: "image/png",
+    };
+    const initialDraft = {
+      traits: {
+        title: "Draft title",
+        description: "Draft description",
+        artist: "draft-artist",
+        seizeArtistProfile: "draft-profile",
+      },
+      operationalData: {
+        airdrop_config: [],
+        payment_info: {
+          payment_address: "0xdraft",
+          has_designated_payee: false,
+          designated_payee_name: "",
+        },
+        allowlist_batches: [],
+        additional_media: {
+          artist_profile_media: [],
+          artwork_commentary_media: [],
+          preview_image: "",
+          promo_video: "",
+        },
+        commentary: "",
+        about_artist: "",
+      },
+      existingMedia,
+    } as MemesSubmissionInitialDraft;
+    class MockFileReader {
+      onloadend: (() => void) | null = null;
+      result = "data-replacement";
+      readAsDataURL() {
+        this.onloadend?.();
+      }
+    }
+    global.FileReader = MockFileReader as any;
+
+    const { result } = renderArtworkSubmissionForm(initialDraft);
+    const replacementFile = new File(["replacement"], "replacement.png", {
+      type: "image/png",
+    });
+
+    act(() => {
+      result.current.handleFileSelect(replacementFile);
+    });
+
+    expect(result.current.selectedFile).toBe(replacementFile);
+    expect(result.current.existingMedia).toEqual(existingMedia);
+    expect(result.current.artworkUrl).toBe("data-replacement");
+
+    act(() => {
+      result.current.setArtworkUploaded(false);
+    });
+
+    expect(result.current.selectedFile).toBeNull();
+    expect(result.current.existingMedia).toEqual(existingMedia);
+    expect(result.current.artworkUrl).toBe(existingMedia.url);
+    expect(result.current.artworkUploaded).toBe(true);
+  });
+
   it("applies fetched bio when continuing to additional info", () => {
     const { result } = renderArtworkSubmissionForm(undefined, [
       createBioStatement("Alice bio"),

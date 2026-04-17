@@ -402,7 +402,6 @@ export function formReducer(state: FormState, action: FormAction): FormState {
       return {
         ...state,
         selectedFile: action.payload.file,
-        existingMedia: null,
         artworkUrl: action.payload.artworkUrl,
         uploadArtworkUrl: action.payload.artworkUrl,
         artworkUploaded: true,
@@ -625,13 +624,15 @@ const reduceExternalMediaValidation = (
 const reduceResetUploadMedia = (state: FormState): FormState => {
   const shouldFallbackToExternal =
     state.mediaSource === "url" && state.externalMedia.isValid;
+  const fallbackArtworkUrl = shouldFallbackToExternal
+    ? state.externalMedia.url
+    : (state.existingMedia?.url ?? "");
 
   return {
     ...state,
     selectedFile: null,
-    existingMedia: null,
-    artworkUrl: shouldFallbackToExternal ? state.externalMedia.url : "",
+    artworkUrl: fallbackArtworkUrl,
     uploadArtworkUrl: "",
-    artworkUploaded: shouldFallbackToExternal,
+    artworkUploaded: fallbackArtworkUrl.length > 0,
   };
 };
