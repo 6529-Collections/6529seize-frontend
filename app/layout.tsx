@@ -7,6 +7,8 @@ import "@/components/drops/create/lexical/lexical.styles.scss";
 import "@/styles/Home.module.scss";
 import "@/styles/seize-bootstrap.scss";
 import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import "@/styles/swiper.scss";
 //keep this last so that we can override the styles of the above css files
 import "@/styles/animations.scss";
