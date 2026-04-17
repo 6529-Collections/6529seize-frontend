@@ -154,7 +154,7 @@ const getMissingCurationConfig = (
       }
     : {
         title: "No curations yet",
-        message: "This profile hasn't curated anything from this wave yet.",
+        message: "This identity hasn't curated anything from this wave yet.",
       };
 
 const getEmptyDropsConfig = (
@@ -166,7 +166,7 @@ const getEmptyDropsConfig = (
     : "No curated drops yet",
   message: canManageOwnOfficialWave
     ? `Open the official wave and choose which drops to include in "${curationTitle}".`
-    : "This profile hasn't added any drops to this curation yet.",
+    : "This identity hasn't added any drops to this curation yet.",
 });
 
 export const resolveWavePickerViewState = ({
