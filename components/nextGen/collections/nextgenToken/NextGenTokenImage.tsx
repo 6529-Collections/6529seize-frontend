@@ -1,9 +1,11 @@
 import type { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
-import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
+import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
+import ProfileBadge from "@/components/common/profile/ProfileBadge";
 import {
   ETHEREUM_ICON_TEXT,
   NEXTGEN_MEDIA_BASE_URL,
 } from "@/constants/constants";
+import { CICType } from "@/entities/IProfile";
 import type { NextGenToken } from "@/entities/INextgen";
 import { formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -11,7 +13,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import type { CSSProperties } from "react";
 import { Tooltip } from "react-tooltip";
 import { TraitScore } from "./NextGenTokenAbout";
 
@@ -44,11 +46,16 @@ export function NextGenTokenImage(
   function getOwnerInfo() {
     let ownerInfoDisplay;
     if (props.show_owner_info) {
+      const handleOrWallet =
+        props.token.normalised_handle ?? formatAddress(props.token.owner);
       const ownerInfo = (
-        <span className="d-flex align-items-center gap-2">
-          <UserCICAndLevel level={props.token.level} color="black" />
-          {props.token.normalised_handle ?? formatAddress(props.token.owner)}
-        </span>
+        <ProfileBadge
+          handle={handleOrWallet}
+          href={`/${props.token.normalised_handle ?? props.token.owner}`}
+          level={props.token.level}
+          cicType={CICType.UNKNOWN}
+          size={ProfileBadgeSize.SMALL}
+        />
       );
 
       ownerInfoDisplay = (
@@ -76,40 +83,43 @@ export function NextGenTokenImage(
             place="right"
             delayShow={250}
             style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
+              backgroundColor: "#26272B",
+              color: "#F4F4F5",
+              padding: "10px 12px",
+              maxWidth: "min(280px, calc(100vw - 24px))",
+              fontSize: "12px",
+              lineHeight: "1.35",
+              borderRadius: "8px",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+              ...({ "--rt-opacity": 1 } as CSSProperties),
             }}
           >
-            <Container>
-              <Row className="pt-2 pb-2">
-                <Col>{ownerInfo}</Col>
-              </Row>
-              <Row className="pt-1">
-                <Col>
+            <div className="tw-flex tw-flex-col tw-gap-3">
+              <div className="tw-border-b tw-border-white/10 tw-pb-3">
+                {ownerInfo}
+              </div>
+              <div className="tw-flex tw-flex-col tw-gap-1.5 tw-font-semibold">
+                <span>
                   Opensea:{" "}
                   {props.token.opensea_price > 0
                     ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
                     : "Not Listed"}
-                </Col>
-              </Row>
-              <Row className="pt-1">
-                <Col>
+                </span>
+                <span>
                   Blur:{" "}
                   {props.token.blur_price > 0
                     ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
                     : "Not Listed"}
-                </Col>
-              </Row>
-              <Row className="pt-1">
-                <Col>
+                </span>
+                <span>
                   Magic Eden:{" "}
                   {props.token.me_price > 0
                     ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
                     : "Not Listed"}
-                </Col>
-              </Row>
-            </Container>
+                </span>
+              </div>
+            </div>
           </Tooltip>
         </button>
       );

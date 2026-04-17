@@ -49,6 +49,8 @@
   --bs-accordion-active-bg: rgb(30, 30, 30);
   --bs-accordion-btn-color: #{variables.$font-color};
   --bs-accordion-active-color: #{variables.$font-color};
+  --bs-accordion-body-padding-x: 1rem;
+  --bs-accordion-body-padding-y: 0.75rem;
 
   h1,
   h2,
@@ -672,6 +674,6 @@
 }
 
 .delegationAccordionBlock {
-  padding: 15px;
+  padding: 12px 15px 10px;
   background-color: variables.$very-dark-grey !important;
 }

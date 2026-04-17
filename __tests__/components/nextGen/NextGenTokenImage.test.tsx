@@ -10,9 +10,11 @@ jest.mock("@/hooks/isMobileScreen", () => ({
   default: () => false,
 }));
 
-jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
+jest.mock("@/components/common/profile/ProfileBadge", () => ({
   __esModule: true,
-  default: () => <div data-testid="cic" />,
+  default: ({ handle }: { handle: string }) => (
+    <div data-testid="profile-badge">{handle}</div>
+  ),
 }));
 import { render, screen } from "@testing-library/react";
 import {

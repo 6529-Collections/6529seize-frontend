@@ -839,7 +839,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="pt-5 pb-1">
+        <h5 className="pt-4 pb-1">
           Use A Delegation Manager (For Delegations or Consolidations)
         </h5>
         <Accordion
@@ -910,7 +910,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printConsolidations() {
     return (
       <>
-        <h5 className="pt-5 pb-1">Consolidations</h5>
+        <h5 className="pt-4 pb-1">Consolidations</h5>
         <Accordion
           alwaysOpen
           className={`${styles["collectionDelegationsAccordion"]}`}
@@ -1200,7 +1200,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return (
       <Container className="no-padding">
         <Row className={styles["delegationsTableScrollContainer"]}>
-          <Col className="pb-3">
+          <Col>
             <Table className={styles["delegationsTable"]}>
               <tbody>
                 {delegations > 0 ? (
@@ -1379,7 +1379,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return (
       <Container className="no-padding">
         <Row className={styles["delegationsTableScrollContainer"]}>
-          <Col className="pb-3">
+          <Col>
             <Table className={styles["delegationsTable"]}>
               <tbody>
                 {delegations > 0 ? (
