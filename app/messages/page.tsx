@@ -1,28 +1,31 @@
-import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import {
+  QueryClient,
+  dehydrate,
+  HydrationBoundary,
+} from "@tanstack/react-query";
+import { Suspense } from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import MessagesPageClient from "./page.client";
 
-export default async function MessagesPage({
+export const metadata = getAppMetadata({
+  title: "Messages",
+  description: "Direct Messages",
+});
+
+export default function MessagesPage({
   searchParams: _searchParams,
 }: {
-  readonly searchParams: Promise<{ wave?: string | undefined; drop?: string | undefined }>;
+  readonly searchParams: Promise<{
+    wave?: string | undefined;
+    drop?: string | undefined;
+  }>;
 }) {
   const queryClient = new QueryClient();
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <MessagesPageClient />
+      <Suspense fallback={null}>
+        <MessagesPageClient />
+      </Suspense>
     </HydrationBoundary>
   );
-}
-
-export async function generateMetadata() {
-  const title = "Messages";
-  const image = "";
-  const description = "Direct Messages";
-  
-  return getAppMetadata({ 
-    title, 
-    description, 
-    ...(image ? { ogImage: image } : {})
-  });
 }

@@ -1,8 +1,6 @@
 import "@/components/drops/create/lexical/lexical.styles.scss";
 import "@/styles/Home.module.scss";
 import "@/styles/seize-bootstrap.scss";
-import "swiper/css";
-import "@/styles/swiper.scss";
 import "@/styles/animations.scss";
 import "@/styles/globals.scss";
 
