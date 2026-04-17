@@ -1762,13 +1762,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <Col>
           {props.collection && (
             <Container>
-              <Row>
+              <Row className={styles["collectionDelegationBackRow"]}>
                 <Col>
-                  <h1 className="mb-0">{props.collection.title}</h1>
-                </Col>
-              </Row>
-              <Row className="pb-4">
-                <Col className="d-flex align-items-center justify-content-start">
                   <button
                     className={styles["backBtn"]}
                     onClick={() =>
@@ -1780,6 +1775,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       Back to Delegation Center
                     </span>
                   </button>
+                </Col>
+              </Row>
+              <Row className={styles["collectionDelegationTitleRow"]}>
+                <Col>
+                  <h1 className="mb-0">{props.collection.title}</h1>
                 </Col>
               </Row>
               {!showUpdateDelegation &&
@@ -1803,7 +1803,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             }
                           >
                             <FontAwesomeIcon icon={faCircleArrowLeft} />
-                            Back to Delegation Center
+                            <span className="font-smaller">
+                              Back to Delegation Center
+                            </span>
                           </button>
                         </Col>
                       </Row>

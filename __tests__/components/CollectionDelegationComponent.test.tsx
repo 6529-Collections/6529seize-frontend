@@ -60,6 +60,28 @@ describe("CollectionDelegationComponent", () => {
     expect(setSection).toHaveBeenCalledWith(DelegationCenterSection.CENTER);
   });
 
+  it("renders the top back button before the collection title", () => {
+    render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    const heading = screen.getByRole("heading", {
+      name: "Test Collection",
+      level: 1,
+    });
+    const topBackButton = screen.getAllByRole("button", {
+      name: /Back to Delegation Center/i,
+    })[0];
+
+    expect(
+      topBackButton.compareDocumentPosition(heading) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it("shows fetching messages initially", () => {
     render(
       <CollectionDelegationComponent

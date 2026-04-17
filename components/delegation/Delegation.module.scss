@@ -43,6 +43,13 @@
 }
 
 .collectionDelegationsAccordion {
+  --bs-accordion-bg: #{variables.$very-dark-grey};
+  --bs-accordion-border-color: transparent;
+  --bs-accordion-btn-bg: rgb(30, 30, 30);
+  --bs-accordion-active-bg: rgb(30, 30, 30);
+  --bs-accordion-btn-color: #{variables.$font-color};
+  --bs-accordion-active-color: #{variables.$font-color};
+
   h1,
   h2,
   h3,
@@ -54,11 +61,16 @@
   button {
     font-weight: bold;
   }
+
+  :global(.accordion-body) {
+    background-color: variables.$very-dark-grey;
+    color: variables.$font-color;
+  }
 }
 
 .collectionDelegationsAccordionItem {
   border-radius: 0 !important;
-  background-color: rgb(25, 25, 25);
+  background-color: variables.$very-dark-grey;
 }
 
 .collectionDelegationsAccordionItemDisabled {
@@ -329,17 +341,29 @@
   cursor: pointer;
   text-decoration: none;
   font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  line-height: 1.2;
 
   svg {
     width: 20px;
     height: 20px;
-    margin-right: 8px;
-    margin-top: -2px;
+    flex-shrink: 0;
   }
 
   &:hover {
     color: variables.$font-color-h;
   }
+}
+
+.collectionDelegationBackRow {
+  padding-bottom: 12px;
+}
+
+.collectionDelegationTitleRow {
+  padding-bottom: 32px;
 }
 
 .leftBorder {
