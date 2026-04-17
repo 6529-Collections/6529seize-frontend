@@ -139,11 +139,16 @@ function renderNoPublicWavesState({
   readonly hasCreatedWaves: boolean;
   readonly variant: WavePickerVariant;
 }) {
-  if (variant === "panel" && !hasCreatedWaves) {
+  const title = hasCreatedWaves ? "No eligible waves yet" : "No waves yet";
+  const message = hasCreatedWaves
+    ? "Only public, non-DM waves can be featured in Curation. Create a public wave to set it as your official wave."
+    : "Create your first public wave to feature it in Curation.";
+
+  if (variant === "panel") {
     return (
       <CurationEmptyPanel
-        title="No waves yet"
-        message="Create your first public wave to start curating on your profile."
+        title={title}
+        message={message}
         primaryAction={<CreateWaveLink />}
       />
     );
@@ -154,37 +159,23 @@ function renderNoPublicWavesState({
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
         <div className="tw-space-y-3 tw-px-4 tw-py-4">
           <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-            No public waves available yet
+            {title}
           </p>
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-            Create a public wave to feature it on your profile.
-          </p>
+          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
           <CreateWaveLink />
         </div>
       </section>
     );
   }
 
-  if (variant === MOBILE_SHEET_VARIANT) {
-    return (
-      <div className="tw-space-y-3 tw-px-4 sm:tw-px-6">
-        <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-          No public waves available yet
-        </p>
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-          Create a public wave to feature it on your profile.
-        </p>
-        <CreateWaveLink />
-      </div>
-    );
-  }
-
   return (
-    <InfoPanel
-      title="No public waves available yet"
-      message="Official wave must be public and non-DM. Create a new public wave if none of your existing waves fit."
-      actions={<CreateWaveLink />}
-    />
+    <div className="tw-space-y-3 tw-px-4 sm:tw-px-6">
+      <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+        {title}
+      </p>
+      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+      <CreateWaveLink />
+    </div>
   );
 }
 
