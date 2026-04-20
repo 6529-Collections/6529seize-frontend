@@ -131,7 +131,9 @@ function getClaimPresentationState({
     hasImage: Boolean(claim?.image_url),
     hasAnimation: Boolean(claim?.animation_url),
     animationMimeType: claim ? getAnimationMimeType(claim) : null,
-    activeMediaTypeLabel: claim ? getMediaTypeLabel(claim, activeMediaTab) : "—",
+    activeMediaTypeLabel: claim
+      ? getMediaTypeLabel(claim, activeMediaTab)
+      : "—",
     safeClaimExternalUrl: claim ? getSafeExternalUrl(claim.external_url) : null,
   };
 }
@@ -240,7 +242,7 @@ function getSelectedPhaseIsUpdateAction(
 ): boolean {
   return Boolean(
     selectedPhaseConfig &&
-      !(selectedPhaseConfig.key === "phase0" && !isInitialized)
+    !(selectedPhaseConfig.key === "phase0" && !isInitialized)
   );
 }
 
@@ -1231,12 +1233,7 @@ export default function DropForgeLaunchClaimPageClient({
             payArtistCompleted,
           })
         : null,
-    [
-      primaryStatus,
-      manifoldClaim,
-      researchAirdropCompleted,
-      payArtistCompleted,
-    ]
+    [primaryStatus, manifoldClaim, researchAirdropCompleted, payArtistCompleted]
   );
   const mintTimeline = useMemo(
     () => (claimId > 0 ? getClaimTimelineDetails(claimId) : null),

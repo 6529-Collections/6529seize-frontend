@@ -122,9 +122,7 @@ function normalizePhaseName(value: string): string {
   return value.replaceAll(/\s+/g, "").toLowerCase();
 }
 
-function getLaunchActionLookupTerms(
-  kind: LaunchActionLookupKind
-): {
+function getLaunchActionLookupTerms(kind: LaunchActionLookupKind): {
   required: readonly string[];
   preferred: readonly string[];
   excluded: readonly string[];
@@ -280,7 +278,9 @@ export function getLaunchPhaseLabel(
     phaseName,
     "(Allowlist)"
   );
-  return collapseWhitespace(trimCaseInsensitiveSuffix(withoutAllowlist, "Phase"));
+  return collapseWhitespace(
+    trimCaseInsensitiveSuffix(withoutAllowlist, "Phase")
+  );
 }
 
 export function getLaunchListStatus({

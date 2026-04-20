@@ -414,11 +414,10 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
           actionNames,
           "research"
         );
-        const payArtistActionName =
-          findBestMatchingLaunchActionName(
-            actionNames,
-            "payartist"
-          );
+        const payArtistActionName = findBestMatchingLaunchActionName(
+          actionNames,
+          "payartist"
+        );
 
         setResearchAirdropCompleted(
           researchActionName
