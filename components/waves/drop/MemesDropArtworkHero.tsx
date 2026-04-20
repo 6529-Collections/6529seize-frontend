@@ -2,7 +2,10 @@ import DropListItemContentMedia from "@/components/drops/view/item/content/media
 import { ImageScale } from "@/helpers/image.helpers";
 import { faExpand } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { MemesDropMedia } from "./memesDropPanelTypes";
+import {
+  isMemesDropImageMedia,
+  type MemesDropMedia,
+} from "./memesDropPanelTypes";
 
 interface MemesDropArtworkHeroProps {
   readonly artworkMedia?: MemesDropMedia | null | undefined;
@@ -13,6 +16,8 @@ export function MemesDropArtworkHero({
   artworkMedia,
   onOpenFullscreen,
 }: MemesDropArtworkHeroProps) {
+  const canOpenFullscreen = isMemesDropImageMedia(artworkMedia);
+
   return (
     <div className="tw-flex tw-min-h-screen tw-w-full tw-flex-col">
       <div className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-py-8 xl:tw-px-20">
@@ -26,14 +31,16 @@ export function MemesDropArtworkHero({
                 imageScale={ImageScale.AUTOx1080}
                 disableModal={true}
               />
-              <button
-                type="button"
-                onClick={onOpenFullscreen}
-                className="tw-absolute tw-right-3 tw-top-3 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/15 tw-bg-iron-950/75 tw-text-iron-100 tw-backdrop-blur tw-transition-colors tw-duration-200 hover:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
-                aria-label="Open fullscreen view"
-              >
-                <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
-              </button>
+              {canOpenFullscreen && (
+                <button
+                  type="button"
+                  onClick={onOpenFullscreen}
+                  className="tw-absolute tw-right-3 tw-top-3 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/15 tw-bg-iron-950/75 tw-text-iron-100 tw-backdrop-blur tw-transition-colors tw-duration-200 hover:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
+                  aria-label="Open fullscreen view"
+                >
+                  <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
+                </button>
+              )}
             </div>
           </div>
         )}

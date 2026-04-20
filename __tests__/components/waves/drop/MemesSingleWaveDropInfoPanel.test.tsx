@@ -7,7 +7,10 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 
 jest.mock("framer-motion", () => ({
   motion: { div: (p: any) => <div {...p} /> },
+  m: { div: (p: any) => <div {...p} /> },
   AnimatePresence: ({ children }: any) => <div>{children}</div>,
+  LazyMotion: ({ children }: any) => <div>{children}</div>,
+  domAnimation: {},
 }));
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: (p: any) => <svg data-testid="fa" {...p} />,
@@ -53,6 +56,7 @@ jest.mock(
     <div
       data-testid="media"
       data-disable-modal={String(props.disableModal)}
+      data-media-mime-type={props.media_mime_type}
       data-media-url={props.media_url}
     />
   )
@@ -91,6 +95,11 @@ const baseDrop: any = {
   parts: [{ media: [{ mime_type: "image/png", url: "img.png" }] }],
 };
 
+const dropWithMedia = (mime_type: string, url = "media") => ({
+  ...baseDrop,
+  parts: [{ media: [{ mime_type, url }] }],
+});
+
 describe("MemesSingleWaveDropInfoPanel", () => {
   it("renders drop info and delete button", () => {
     render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
@@ -126,6 +135,28 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     expect(
       screen.getByRole("button", { name: "Exit fullscreen view" })
     ).toBeInTheDocument();
+  });
+
+  it.each([
+    ["video/mp4", "video.mp4"],
+    ["text/html", "interactive.html"],
+    ["model/gltf-binary", "model.glb"],
+  ])("hides fullscreen while rendering %s hero media", (mime_type, url) => {
+    render(
+      <MemesSingleWaveDropInfoPanel
+        drop={dropWithMedia(mime_type, url)}
+        wave={null}
+      />
+    );
+
+    expect(screen.getByTestId("media")).toHaveAttribute("data-media-url", url);
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-media-mime-type",
+      mime_type
+    );
+    expect(
+      screen.queryByRole("button", { name: "Open fullscreen view" })
+    ).not.toBeInTheDocument();
   });
 
   it("closes fullscreen when button clicked", async () => {
@@ -302,4 +333,25 @@ describe("MemesDropFullscreenOverlay", () => {
       screen.queryByRole("button", { name: "Exit fullscreen view" })
     ).not.toBeInTheDocument();
   });
+
+  it.each(["video/mp4", "text/html", "model/gltf-binary"])(
+    "does not render image-only overlay for %s media",
+    (mime_type) => {
+      render(
+        <MemesDropFullscreenOverlay
+          isOpen={true}
+          artworkMedia={{ mime_type, url: "media" }}
+          drop={baseDrop}
+          title="Title"
+          description="Desc"
+          onClose={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Exit fullscreen view" })
+      ).not.toBeInTheDocument();
+    }
+  );
 });
