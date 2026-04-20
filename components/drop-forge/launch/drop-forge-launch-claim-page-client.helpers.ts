@@ -15,9 +15,9 @@ export type LaunchPhaseKey =
   | "research"
   | "payartist";
 
-export type LaunchAirdropActionKey = "artist" | "team";
+type LaunchAirdropActionKey = "artist" | "team";
 
-export type LaunchActionLookupKind = LaunchPhaseKey | LaunchAirdropActionKey;
+type LaunchActionLookupKind = LaunchPhaseKey | LaunchAirdropActionKey;
 
 type ClaimTxModalStatus = "confirm_wallet" | "submitted" | "success" | "error";
 type LaunchMediaTab = "image" | "animation";
@@ -111,7 +111,7 @@ export function isNotFoundError(message: string): boolean {
   );
 }
 
-export function normalizeMintingClaimActionName(actionName: string): string {
+function normalizeMintingClaimActionName(actionName: string): string {
   return actionName
     .trim()
     .toLowerCase()
@@ -261,7 +261,7 @@ function trimCaseInsensitiveSuffix(value: string, suffix: string): string {
   return trimmed.slice(0, trimmed.length - suffix.length).trimEnd();
 }
 
-export function getLaunchPhaseLabel(
+function getLaunchPhaseLabel(
   phase: Pick<NonNullable<ManifoldClaim["memePhase"]>, "id" | "name"> | null
 ): string {
   if (phase?.id === "0") return "Phase 0";
