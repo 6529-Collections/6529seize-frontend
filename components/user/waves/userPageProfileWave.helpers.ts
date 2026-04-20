@@ -93,55 +93,32 @@ export const getWaveHref = (
 };
 
 export const resolveProfileCuration = (
-  curations: readonly ApiWaveCuration[]
+  curations: readonly ApiWaveCuration[],
+  profileCurationId?: string | null
 ): ApiWaveCuration | null => {
-  let firstCreatedCuration: ApiWaveCuration | null = null;
-
-  for (const curation of curations) {
-    if (
-      !firstCreatedCuration ||
-      curation.created_at < firstCreatedCuration.created_at ||
-      (curation.created_at === firstCreatedCuration.created_at &&
-        curation.id.localeCompare(firstCreatedCuration.id) < 0)
-    ) {
-      firstCreatedCuration = curation;
+  if (profileCurationId) {
+    const selectedCuration =
+      curations.find((curation) => curation.id === profileCurationId) ?? null;
+    if (selectedCuration) {
+      return selectedCuration;
     }
   }
 
-  return firstCreatedCuration;
+  return curations[0] ?? null;
 };
 
-const getProfileCurationTitle = (
+export const getProfileCurationTitle = (
   profileCuration: ApiWaveCuration | null
 ): string => {
   const trimmedTitle = profileCuration?.name.trim() ?? "";
   return trimmedTitle.length > 0 ? trimmedTitle : "Curation";
 };
 
-export const getOfficialWaveMetadataLabel = ({
-  wave,
-  areCurationsLoading,
-  profileCuration,
-}: {
-  readonly wave: ApiWave;
-  readonly areCurationsLoading: boolean;
-  readonly profileCuration: ApiWaveCuration | null;
-}): string => {
-  const metadataParts = [
+export const getOfficialWaveMetadataLabel = (wave: ApiWave): string =>
+  [
     `${wave.metrics.drops_count} posts`,
     `${wave.metrics.subscribers_count} joined`,
-  ];
-
-  if (profileCuration) {
-    metadataParts.push(`Showing: ${getProfileCurationTitle(profileCuration)}`);
-  } else if (areCurationsLoading) {
-    metadataParts.push("Loading curation...");
-  } else {
-    metadataParts.push("No curation yet");
-  }
-
-  return metadataParts.join(" • ");
-};
+  ].join(" • ");
 
 const getMissingCurationConfig = (
   canManageOwnOfficialWave: boolean

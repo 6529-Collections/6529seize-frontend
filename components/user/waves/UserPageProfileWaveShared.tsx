@@ -131,31 +131,50 @@ export function RetryButton({
 export function OfficialWaveSummary({
   waveName,
   metadataLabel,
+  profileCurationLabel,
   canManageOwnOfficialWave,
   changeWaveDropdown,
+  changeCurationDropdown,
   changeWaveDropdownRef,
+  changeCurationDropdownRef,
   changeWaveButtonRef,
+  changeCurationButtonRef,
   isChangeWaveOpen,
+  isChangeCurationOpen = false,
   isRemoving,
+  isChangingCuration = false,
+  showChangeCuration = false,
   onOpenWave,
   onOpenChangeWave,
+  onOpenChangeCuration,
   onRemoveWave,
 }: {
   readonly waveName: string;
   readonly metadataLabel: string;
+  readonly profileCurationLabel?: string | null | undefined;
   readonly canManageOwnOfficialWave: boolean;
   readonly changeWaveDropdown?: ReactNode;
+  readonly changeCurationDropdown?: ReactNode;
   readonly changeWaveDropdownRef?: RefObject<HTMLDivElement | null>;
+  readonly changeCurationDropdownRef?: RefObject<HTMLDivElement | null>;
   readonly changeWaveButtonRef?: RefObject<HTMLButtonElement | null>;
+  readonly changeCurationButtonRef?: RefObject<HTMLButtonElement | null>;
   readonly isChangeWaveOpen: boolean;
+  readonly isChangeCurationOpen?: boolean | undefined;
   readonly isRemoving: boolean;
+  readonly isChangingCuration?: boolean | undefined;
+  readonly showChangeCuration?: boolean | undefined;
   readonly onOpenWave: () => void;
   readonly onOpenChangeWave: () => void;
+  readonly onOpenChangeCuration?: (() => void) | undefined;
   readonly onRemoveWave: () => void;
 }) {
-  const changeWaveDropdownId = changeWaveDropdown
-    ? "change-wave-dropdown"
-    : undefined;
+  const changeWaveDropdownId =
+    changeWaveDropdown !== undefined ? "change-wave-dropdown" : undefined;
+  const changeCurationDropdownId =
+    changeCurationDropdown !== undefined
+      ? "change-curation-dropdown"
+      : undefined;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
@@ -174,9 +193,22 @@ export function OfficialWaveSummary({
             <ArrowTopRightOnSquareIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0" />
           </button>
         </div>
-        <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-          {metadataLabel}
-        </p>
+        <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-leading-6">
+          <span className="tw-text-iron-400">{metadataLabel}</span>
+          {profileCurationLabel && (
+            <>
+              <span className="tw-text-iron-600">•</span>
+              <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-2 tw-py-0.5 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300">
+                <span className="tw-flex-shrink-0 tw-text-iron-500">
+                  Curation:
+                </span>
+                <span className="tw-min-w-0 tw-truncate tw-text-iron-200">
+                  {profileCurationLabel}
+                </span>
+              </span>
+            </>
+          )}
+        </div>
       </div>
 
       {canManageOwnOfficialWave && (
@@ -217,6 +249,47 @@ export function OfficialWaveSummary({
                 </div>
               )}
             </div>
+            {showChangeCuration && onOpenChangeCuration !== undefined && (
+              <>
+                <div className="tw-hidden tw-h-3.5 tw-w-px tw-bg-white/10 sm:tw-mx-1 sm:tw-block" />
+                <div
+                  ref={changeCurationDropdownRef}
+                  className="tw-relative tw-min-w-0 tw-flex-1 md:tw-flex-none"
+                >
+                  <button
+                    ref={changeCurationButtonRef}
+                    type="button"
+                    onClick={onOpenChangeCuration}
+                    disabled={isChangingCuration}
+                    aria-expanded={isChangeCurationOpen}
+                    aria-haspopup="menu"
+                    aria-controls={changeCurationDropdownId}
+                    className={`tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
+                      isChangeCurationOpen
+                        ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
+                        : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
+                    }`}
+                  >
+                    <span>Switch curation</span>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className={`-tw-mr-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
+                        isChangeCurationOpen ? "tw-rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {changeCurationDropdownId && (
+                    <div
+                      id={changeCurationDropdownId}
+                      className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block"
+                    >
+                      {changeCurationDropdown}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
             <div className="tw-hidden tw-h-3.5 tw-w-px tw-bg-white/10 sm:tw-mx-1 sm:tw-block" />
             <button
               type="button"

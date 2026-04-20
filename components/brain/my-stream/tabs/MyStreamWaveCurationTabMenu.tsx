@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  EllipsisVerticalIcon,
-} from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { useAuth } from "@/components/auth/Auth";
 import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmationModal";
@@ -14,7 +10,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { DropCurationMembership } from "@/hooks/drops/useDropCurations";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
-import type { WaveCurationMoveDirection } from "@/hooks/waves/useWaveCurationReorderMutation";
+import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { commonApiDelete } from "@/services/api/common-api";
 import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog";
 
@@ -22,12 +18,8 @@ interface MyStreamWaveCurationTabMenuProps {
   readonly wave: ApiWave;
   readonly curation: ApiWaveCuration;
   readonly onDeleted?: (() => void) | undefined;
-  readonly onMove?:
-    | ((direction: WaveCurationMoveDirection) => void)
-    | undefined;
-  readonly canMovePrevious?: boolean | undefined;
-  readonly canMoveNext?: boolean | undefined;
-  readonly isMovePending?: boolean | undefined;
+  readonly canSetAsProfileCuration?: boolean | undefined;
+  readonly isSetAsProfileCurationPending?: boolean | undefined;
 }
 
 const getErrorMessage = (error: unknown): string =>
@@ -37,15 +29,17 @@ export default function MyStreamWaveCurationTabMenu({
   wave,
   curation,
   onDeleted,
-  onMove,
-  canMovePrevious = false,
-  canMoveNext = false,
-  isMovePending = false,
+  canSetAsProfileCuration = false,
+  isSetAsProfileCurationPending = false,
 }: MyStreamWaveCurationTabMenuProps) {
   const queryClient = useQueryClient();
-  const { requestAuth, setToast } = useAuth();
+  const { connectedProfile, requestAuth, setToast } = useAuth();
+  const { updateProfileWave, isPending: isProfileWavePending } =
+    useProfileWaveMutation(connectedProfile);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const isSettingProfileCuration =
+    isSetAsProfileCurationPending || isProfileWavePending;
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -88,33 +82,24 @@ export default function MyStreamWaveCurationTabMenu({
     },
   });
 
-  const moveItems: CompactMenuItem[] =
-    onMove === undefined
-      ? []
-      : [
-          {
-            id: "move-left",
-            label: "Move left",
-            icon: <ArrowLeftIcon className="tw-h-4 tw-w-4" />,
-            onSelect: () => onMove("previous"),
-            disabled: isMovePending || !canMovePrevious,
-          },
-          {
-            id: "move-right",
-            label: "Move right",
-            icon: <ArrowRightIcon className="tw-h-4 tw-w-4" />,
-            onSelect: () => onMove("next"),
-            disabled: isMovePending || !canMoveNext,
-          },
-        ];
-
   const menuItems: CompactMenuItem[] = [
-    ...moveItems,
     {
       id: "edit",
       label: "Edit curation",
       onSelect: () => setIsEditOpen(true),
     },
+    ...(canSetAsProfileCuration
+      ? [
+          {
+            id: "set-profile-curation",
+            label: "Set as profile curation",
+            onSelect: () => {
+              void updateProfileWave(wave.id, curation.id);
+            },
+            disabled: isSettingProfileCuration,
+          },
+        ]
+      : []),
     {
       id: "delete",
       label: "Delete curation",
@@ -126,12 +111,14 @@ export default function MyStreamWaveCurationTabMenu({
   return (
     <>
       <CompactMenu
-        triggerClassName="tw-mx-0.5 tw-flex tw-h-8 tw-w-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-bg-iron-900 hover:tw-text-iron-200"
-        trigger={<EllipsisVerticalIcon className="tw-h-4 tw-w-4" />}
+        triggerClassName="tw-mx-0.5 tw-flex tw-h-8 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-bg-iron-900 hover:tw-text-iron-200"
+        trigger={
+          <EllipsisVerticalIcon className="tw-block tw-size-4 tw-flex-shrink-0" />
+        }
         aria-label={`${curation.name} curation options`}
         items={menuItems}
-        menuWidthClassName="tw-w-44"
-        disabled={deleteMutation.isPending}
+        menuWidthClassName="tw-w-52"
+        disabled={deleteMutation.isPending || isSettingProfileCuration}
       />
 
       {isEditOpen && (

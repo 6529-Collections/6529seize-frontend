@@ -2,10 +2,25 @@
 
 import React, { useEffect, useMemo, useRef } from "react";
 import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
   EllipsisVerticalIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  type DragEndEvent,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  horizontalListSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { TabToggle } from "@/components/common/TabToggle";
 import { useSearchParams } from "next/navigation";
@@ -13,6 +28,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
+import { useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
@@ -24,6 +40,7 @@ import {
   WaveVotingState,
   type SetActiveContentTab,
 } from "../ContentTabContext";
+import MyStreamActionTooltip from "./MyStreamActionTooltip";
 import MyStreamWaveCreateCurationAction from "./tabs/MyStreamWaveCreateCurationAction";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 
@@ -40,7 +57,18 @@ interface TabOption {
   readonly key: string;
   readonly label: string;
   readonly panelId: string;
+  readonly leadingIcon?: React.ReactNode | undefined;
+  readonly leadingIconTooltipId?: string | undefined;
+  readonly hasIndicator?: boolean | undefined;
   readonly action?: React.ReactNode | undefined;
+}
+
+interface ProfileLookupSource {
+  readonly query?: string | null | undefined;
+  readonly handle?: string | null | undefined;
+  readonly primary_wallet?: string | null | undefined;
+  readonly primary_address?: string | null | undefined;
+  readonly id?: string | null | undefined;
 }
 
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
@@ -48,6 +76,53 @@ const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
 
 const getCurationPanelId = (curationId: string): string =>
   `my-stream-wave-tabpanel-curation-${curationId}`;
+
+const getCurationTabKey = (curationId: string): string =>
+  `curation:${curationId}`;
+
+const getCurationIdFromTabKey = (key: string): string =>
+  key.replace("curation:", "");
+
+const getProfileCurationTooltipId = (curationId: string): string =>
+  `my-stream-profile-curation-${curationId}`;
+
+const getProfileLookupKey = (
+  profile: ProfileLookupSource | null | undefined
+): string | null => {
+  const identity =
+    profile?.query ??
+    profile?.handle ??
+    profile?.primary_wallet ??
+    profile?.primary_address ??
+    profile?.id ??
+    null;
+
+  const normalizedIdentity = identity?.trim() ?? "";
+  return normalizedIdentity.length > 0 ? normalizedIdentity : null;
+};
+
+const getEffectiveProfileCurationId = ({
+  curations,
+  isProfileWave,
+  profileCurationId,
+}: {
+  readonly curations: readonly { id: string }[];
+  readonly isProfileWave: boolean;
+  readonly profileCurationId: string | null | undefined;
+}): string | null => {
+  if (!isProfileWave) {
+    return null;
+  }
+
+  if (
+    profileCurationId &&
+    curations.some((curation) => curation.id === profileCurationId)
+  ) {
+    return profileCurationId;
+  }
+
+  return curations[0]?.id ?? null;
+};
 
 const AUTO_EXPAND_LIMIT = 5;
 const MOBILE_INLINE_CURATION_LIMIT = 1;
@@ -81,6 +156,173 @@ const getWaveVotingState = ({
   return WaveVotingState.ONGOING;
 };
 
+interface DesktopTabButtonProps {
+  readonly option: TabOption;
+  readonly activeKey: string;
+  readonly onSelect: (key: string) => void;
+  readonly fullWidth?: boolean | undefined;
+}
+
+function DesktopTabButton({
+  option,
+  activeKey,
+  onSelect,
+  fullWidth = false,
+}: DesktopTabButtonProps) {
+  return (
+    <button
+      onClick={() => onSelect(option.key)}
+      role="tab"
+      aria-selected={activeKey === option.key}
+      aria-controls={option.panelId}
+      className={`tw-relative tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
+        fullWidth ? "tw-flex tw-flex-1 tw-justify-center tw-text-center" : ""
+      } ${
+        activeKey === option.key
+          ? "tw-border-primary-300 tw-text-white"
+          : "tw-border-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
+      }`}
+    >
+      <span className="tw-inline-flex tw-h-5 tw-items-center tw-gap-1 tw-align-middle tw-leading-5">
+        {option.leadingIcon}
+        <span className="tw-leading-5">{option.label}</span>
+      </span>
+      {option.hasIndicator && (
+        <div className="tw-absolute -tw-right-1 tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
+      )}
+    </button>
+  );
+}
+
+function ProfileCurationIcon({ tooltipId }: { readonly tooltipId: string }) {
+  return (
+    <span
+      aria-label="Profile curation"
+      data-tooltip-id={tooltipId}
+      data-tooltip-content="Profile curation"
+      className="tw-inline-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-leading-none tw-text-primary-300"
+    >
+      <UserCircleIcon
+        aria-hidden="true"
+        className="tw-block tw-size-4 tw-flex-shrink-0"
+      />
+    </span>
+  );
+}
+
+function ReorderHandleIcon({
+  className,
+}: {
+  readonly className?: string | undefined;
+}) {
+  return (
+    <svg
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+    >
+      <circle cx="9" cy="6" r="1.5" />
+      <circle cx="15" cy="6" r="1.5" />
+      <circle cx="9" cy="12" r="1.5" />
+      <circle cx="15" cy="12" r="1.5" />
+      <circle cx="9" cy="18" r="1.5" />
+      <circle cx="15" cy="18" r="1.5" />
+    </svg>
+  );
+}
+
+function DesktopTabOption({
+  option,
+  activeKey,
+  onSelect,
+}: DesktopTabButtonProps) {
+  return (
+    <div role="presentation" className="tw-flex tw-items-center">
+      <DesktopTabButton
+        option={option}
+        activeKey={activeKey}
+        onSelect={onSelect}
+      />
+      {option.leadingIconTooltipId !== undefined && (
+        <MyStreamActionTooltip id={option.leadingIconTooltipId} />
+      )}
+      {option.action !== undefined && option.action !== null && (
+        <div className="tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-border-transparent">
+          {option.action}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SortableCurationTabOption({
+  option,
+  activeKey,
+  isSortingDisabled,
+  onSelect,
+}: DesktopTabButtonProps & {
+  readonly isSortingDisabled: boolean;
+}) {
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: option.key,
+    disabled: isSortingDisabled,
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : undefined,
+    opacity: isDragging ? 0.85 : undefined,
+  };
+  const reorderTooltipId = `${option.key}-reorder-tooltip`;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      role="presentation"
+      className="tw-flex tw-items-center"
+    >
+      <button
+        ref={setActivatorNodeRef}
+        type="button"
+        disabled={isSortingDisabled}
+        aria-label={`Drag ${option.label} curation tab`}
+        data-tooltip-id={reorderTooltipId}
+        data-tooltip-content="Drag to reorder"
+        className="tw-inline-flex tw-h-8 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-600 tw-transition hover:tw-bg-iron-900 hover:tw-text-iron-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
+        {...attributes}
+        {...listeners}
+      >
+        <ReorderHandleIcon className="tw-block tw-size-4 tw-flex-shrink-0" />
+      </button>
+      <MyStreamActionTooltip id={reorderTooltipId} />
+      <DesktopTabButton
+        option={option}
+        activeKey={activeKey}
+        onSelect={onSelect}
+      />
+      {option.leadingIconTooltipId !== undefined && (
+        <MyStreamActionTooltip id={option.leadingIconTooltipId} />
+      )}
+      {option.action !== undefined && option.action !== null && (
+        <div className="tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-border-transparent">
+          {option.action}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
@@ -92,7 +334,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const searchParams = useSearchParams();
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
-  const { connectedProfile } = useAuth();
+  const { activeProfileProxy, connectedProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const {
     isChatWave,
@@ -114,10 +356,28 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const { data: curations = [] } = useWaveCurations({
     waveId: wave.id,
   });
-  const { moveCuration, isPending: isCurationReorderPending } =
+  const isConnectedProfileWaveAuthor = connectedProfile?.id === wave.author.id;
+  const profileWaveIdentity = getProfileLookupKey(
+    isConnectedProfileWaveAuthor ? connectedProfile : wave.author
+  );
+  const { data: profileWave } = useProfileWave({
+    identity: profileWaveIdentity,
+    enabled: profileWaveIdentity !== null && curations.length > 0,
+  });
+  const { reorderCuration, isPending: isCurationReorderPending } =
     useWaveCurationReorderMutation({ waveId: wave.id });
   const canManageCurations =
     wave.wave.authenticated_user_eligible_for_admin === true;
+  const isProfileWave = profileWave?.profile_wave_id === wave.id;
+  const profileCurationId = getEffectiveProfileCurationId({
+    curations,
+    isProfileWave,
+    profileCurationId: profileWave?.profile_curation_id,
+  });
+  const canSetProfileCuration =
+    isProfileWave &&
+    isConnectedProfileWaveAuthor &&
+    activeProfileProxy === null;
 
   const filteredDecisions = useMemo(() => {
     const decisionsAsApiFormat = allDecisions.map((decision) => ({
@@ -138,6 +398,16 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const autoExpandFutureAttemptsRef = useRef(0);
   const desktopTabsScrollerRef = useRef<HTMLDivElement | null>(null);
   const mobileTabsScrollerRef = useRef<HTMLDivElement | null>(null);
+  const sortableSensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     const hasUpcoming = typeof nextDecisionTime === "number";
@@ -221,23 +491,26 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   const curationOptions: TabOption[] = useMemo(
     () =>
-      curations.map((curation, index) => ({
-        key: `curation:${curation.id}`,
+      curations.map((curation) => ({
+        key: getCurationTabKey(curation.id),
         label: curation.name,
         panelId: getCurationPanelId(curation.id),
+        leadingIcon:
+          curation.id === profileCurationId ? (
+            <ProfileCurationIcon
+              tooltipId={getProfileCurationTooltipId(curation.id)}
+            />
+          ) : undefined,
+        leadingIconTooltipId:
+          curation.id === profileCurationId
+            ? getProfileCurationTooltipId(curation.id)
+            : undefined,
         action: canManageCurations ? (
           <MyStreamWaveCurationTabMenu
             wave={wave}
             curation={curation}
-            canMovePrevious={index > 0}
-            canMoveNext={index < curations.length - 1}
-            isMovePending={isCurationReorderPending}
-            onMove={(direction) =>
-              moveCuration({
-                curation,
-                direction,
-                curations,
-              })
+            canSetAsProfileCuration={
+              canSetProfileCuration && curation.id !== profileCurationId
             }
             onDeleted={
               activeCurationId === curation.id
@@ -250,10 +523,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [
       activeCurationId,
       canManageCurations,
+      canSetProfileCuration,
       curations,
-      isCurationReorderPending,
-      moveCuration,
       onSelectCuration,
+      profileCurationId,
       wave,
     ]
   );
@@ -264,43 +537,31 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   );
 
   const activeKey = activeCurationId
-    ? `curation:${activeCurationId}`
+    ? getCurationTabKey(activeCurationId)
     : activeTab;
-  const activeCuration = useMemo(
-    () =>
-      activeCurationId
-        ? (curations.find((curation) => curation.id === activeCurationId) ??
-          null)
-        : null,
-    [activeCurationId, curations]
+  const curationTabKeys = useMemo(
+    () => curations.map((curation) => getCurationTabKey(curation.id)),
+    [curations]
   );
-  const activeCurationIndex = useMemo(
-    () =>
-      activeCurationId
-        ? curations.findIndex((curation) => curation.id === activeCurationId)
-        : -1,
-    [activeCurationId, curations]
-  );
-  const canMoveActiveCuration =
-    canManageCurations && activeCuration !== null && curations.length > 1;
-  const showCurationActions = canMoveActiveCuration || showCreateCurationAction;
-  const moveLeftDisabled =
-    activeCuration === null ||
-    activeCurationIndex <= 0 ||
-    isCurationReorderPending;
-  const moveRightDisabled =
-    activeCuration === null ||
-    activeCurationIndex < 0 ||
-    activeCurationIndex >= curations.length - 1 ||
-    isCurationReorderPending;
-  const moveActiveCuration = (direction: "previous" | "next") => {
-    if (activeCuration === null) {
+  const canDragCurations = canManageCurations && curations.length > 1;
+  const handleCurationDragEnd = ({ active, over }: DragEndEvent) => {
+    if (over === null || active.id === over.id) {
       return;
     }
 
-    moveCuration({
-      curation: activeCuration,
-      direction,
+    const curationId = getCurationIdFromTabKey(String(active.id));
+    const targetIndex = curations.findIndex(
+      (curation) => getCurationTabKey(curation.id) === over.id
+    );
+    const curation = curations.find((item) => item.id === curationId) ?? null;
+
+    if (curation === null || targetIndex < 0) {
+      return;
+    }
+
+    reorderCuration({
+      curation,
+      targetPriorityOrder: targetIndex + 1,
       curations,
     });
   };
@@ -347,7 +608,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       mobileOverflowCurationOptions.map((option) => ({
         id: option.key,
         label: option.label,
-        onSelect: () => onSelectCuration(option.key.replace("curation:", "")),
+        icon: option.leadingIcon,
+        onSelect: () => onSelectCuration(getCurationIdFromTabKey(option.key)),
       })),
     [mobileOverflowCurationOptions, onSelectCuration]
   );
@@ -393,7 +655,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
               activeKey={activeKey}
               onSelect={(key) => {
                 if (key.startsWith("curation:")) {
-                  onSelectCuration(key.replace("curation:", ""));
+                  onSelectCuration(getCurationIdFromTabKey(key));
                   return;
                 }
 
@@ -417,55 +679,59 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         ref={desktopTabsScrollerRef}
         className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
       >
-        <TabToggle
-          options={options}
-          activeKey={activeKey}
-          onSelect={(key) => {
-            if (key.startsWith("curation:")) {
-              onSelectCuration(key.replace("curation:", ""));
-              return;
-            }
-
-            onSelectCuration(null);
-            setActiveTab(key as MyStreamWaveTab);
-          }}
-        />
-      </div>
-      {showCurationActions && (
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 sm:tw-ml-auto">
-          {canMoveActiveCuration && (
-            <div
-              className="tw-flex tw-items-center tw-gap-1"
-              aria-label="Curation tab order controls"
-            >
-              <button
-                type="button"
-                onClick={() => moveActiveCuration("previous")}
-                disabled={moveLeftDisabled}
-                aria-label="Move curation tab left"
-                title="Move tab left"
-                className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
-              >
-                <ArrowLeftIcon className="tw-h-4 tw-w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => moveActiveCuration("next")}
-                disabled={moveRightDisabled}
-                aria-label="Move curation tab right"
-                title="Move tab right"
-                className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
-              >
-                <ArrowRightIcon className="tw-h-4 tw-w-4" />
-              </button>
-            </div>
-          )}
-          {showCreateCurationAction && (
-            <MyStreamWaveCreateCurationAction
-              wave={wave}
-              onCreated={onSelectCuration}
+        <div className="tw-flex tw-w-auto tw-gap-x-1" role="tablist">
+          {standardOptions.map((option) => (
+            <DesktopTabOption
+              key={option.key}
+              option={option}
+              activeKey={activeKey}
+              onSelect={(key) => {
+                onSelectCuration(null);
+                setActiveTab(key as MyStreamWaveTab);
+              }}
             />
-          )}
+          ))}
+          <DndContext
+            sensors={sortableSensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleCurationDragEnd}
+          >
+            <SortableContext
+              items={curationTabKeys}
+              strategy={horizontalListSortingStrategy}
+            >
+              {curationOptions.map((option) => (
+                <React.Fragment key={option.key}>
+                  {canDragCurations ? (
+                    <SortableCurationTabOption
+                      option={option}
+                      activeKey={activeKey}
+                      isSortingDisabled={isCurationReorderPending}
+                      onSelect={(key) =>
+                        onSelectCuration(getCurationIdFromTabKey(key))
+                      }
+                    />
+                  ) : (
+                    <DesktopTabOption
+                      option={option}
+                      activeKey={activeKey}
+                      onSelect={(key) =>
+                        onSelectCuration(getCurationIdFromTabKey(key))
+                      }
+                    />
+                  )}
+                </React.Fragment>
+              ))}
+            </SortableContext>
+          </DndContext>
+        </div>
+      </div>
+      {showCreateCurationAction && (
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 sm:tw-ml-auto">
+          <MyStreamWaveCreateCurationAction
+            wave={wave}
+            onCreated={onSelectCuration}
+          />
         </div>
       )}
     </div>

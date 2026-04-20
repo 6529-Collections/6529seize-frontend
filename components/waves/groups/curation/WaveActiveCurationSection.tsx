@@ -324,17 +324,6 @@ export default function WaveActiveCurationSection({
                 {desktopActiveCuration?.name}
               </p>
             </div>
-
-            {canManageCurations && (
-              <CompactMenu
-                triggerClassName="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-                trigger={<EllipsisHorizontalIcon className="tw-size-5" />}
-                aria-label="Active curation options"
-                items={menuItems}
-                menuWidthClassName="tw-w-44"
-                disabled={activeCurationIsReordering}
-              />
-            )}
           </div>
 
           <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4">

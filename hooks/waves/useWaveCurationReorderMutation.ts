@@ -11,7 +11,7 @@ import {
   sortWaveCurations,
 } from "./useWaveCurations";
 
-export type WaveCurationMoveDirection = "previous" | "next";
+type WaveCurationMoveDirection = "previous" | "next";
 
 interface MoveWaveCurationVariables {
   readonly curation: ApiWaveCuration;
@@ -25,6 +25,12 @@ interface MoveWaveCurationContext {
 interface MoveCurationParams {
   readonly curation: ApiWaveCuration;
   readonly direction: WaveCurationMoveDirection;
+  readonly curations: readonly ApiWaveCuration[];
+}
+
+interface ReorderCurationParams {
+  readonly curation: ApiWaveCuration;
+  readonly targetPriorityOrder: number;
   readonly curations: readonly ApiWaveCuration[];
 }
 
@@ -193,8 +199,34 @@ export function useWaveCurationReorderMutation({
     [mutate]
   );
 
+  const reorderCuration = useCallback(
+    ({ curation, targetPriorityOrder, curations }: ReorderCurationParams) => {
+      const orderedCurations = sortWaveCurations(curations);
+      const currentIndex = orderedCurations.findIndex(
+        (item) => item.id === curation.id
+      );
+      const targetIndex = targetPriorityOrder - 1;
+
+      if (
+        currentIndex < 0 ||
+        targetIndex < 0 ||
+        targetIndex >= orderedCurations.length ||
+        targetIndex === currentIndex
+      ) {
+        return;
+      }
+
+      mutate({
+        curation,
+        targetPriorityOrder,
+      });
+    },
+    [mutate]
+  );
+
   return {
     moveCuration,
+    reorderCuration,
     isPending,
     pendingCurationId: isPending ? variables.curation.id : null,
   };

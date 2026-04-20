@@ -4,14 +4,20 @@ import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
+  type ApiProfileWaveResponse,
   clearProfileWave,
   setProfileWave,
 } from "@/services/api/profile-wave-api";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
+import { getProfileWaveQueryKey } from "./useProfileWave";
 
 type ProfileWaveAction =
-  | { readonly type: "set"; readonly waveId: string }
+  | {
+      readonly type: "set";
+      readonly waveId: string;
+      readonly profileCurationId?: string | null | undefined;
+    }
   | { readonly type: "clear" };
 
 const getProfileIdentityKey = (profile: ApiIdentity | null): string | null =>
@@ -22,6 +28,7 @@ const getProfileIdentityKey = (profile: ApiIdentity | null): string | null =>
   null;
 
 export function useProfileWaveMutation(profile: ApiIdentity | null) {
+  const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
@@ -36,6 +43,7 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
         return await setProfileWave({
           identity,
           waveId: action.waveId,
+          profileCurationId: action.profileCurationId,
         });
       }
 
@@ -46,6 +54,19 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
         profile: updatedProfile,
         previousProfile: profile,
       });
+      const identity = getProfileIdentityKey(profile);
+      if (identity) {
+        const queryKey = getProfileWaveQueryKey(identity);
+        queryClient.setQueryData<ApiProfileWaveResponse>(queryKey, {
+          profile_wave_id:
+            action.type === "set"
+              ? action.waveId
+              : updatedProfile.profile_wave_id,
+          profile_curation_id:
+            action.type === "set" ? (action.profileCurationId ?? null) : null,
+        });
+        void queryClient.invalidateQueries({ queryKey });
+      }
       setToast({
         message:
           action.type === "set"
@@ -85,10 +106,14 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
     }
   };
 
-  const updateProfileWave = async (waveId: string) =>
+  const updateProfileWave = async (
+    waveId: string,
+    profileCurationId?: string | null
+  ) =>
     await runProfileWaveMutation({
       type: "set",
       waveId,
+      profileCurationId,
     });
 
   const clearSelectedProfileWave = async () =>

@@ -3,6 +3,7 @@ import React from "react";
 interface TabOption {
   readonly key: string;
   readonly label: string;
+  readonly leadingIcon?: React.ReactNode | undefined;
   readonly hasIndicator?: boolean | undefined;
   readonly panelId: string;
   readonly action?: React.ReactNode | undefined;
@@ -48,7 +49,10 @@ export const TabToggle: React.FC<TabToggleProps> = ({
                 : "tw-border-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
             }`}
           >
-            {option.label}
+            <span className="tw-inline-flex tw-h-5 tw-items-center tw-gap-1 tw-align-middle tw-leading-5">
+              {option.leadingIcon}
+              <span className="tw-leading-5">{option.label}</span>
+            </span>
             {option.hasIndicator && (
               <div className="tw-absolute -tw-right-1 tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
             )}
@@ -84,7 +88,10 @@ export const TabToggle: React.FC<TabToggleProps> = ({
                 : "tw-border-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
             }`}
           >
-            {option.label}
+            <span className="tw-inline-flex tw-h-5 tw-items-center tw-gap-1 tw-align-middle tw-leading-5">
+              {option.leadingIcon}
+              <span className="tw-leading-5">{option.label}</span>
+            </span>
             {option.hasIndicator && (
               <div className="tw-absolute -tw-right-1 tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
             )}
