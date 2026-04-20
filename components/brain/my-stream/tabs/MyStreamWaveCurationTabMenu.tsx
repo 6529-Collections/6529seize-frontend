@@ -9,6 +9,7 @@ import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmation
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { DropCurationMembership } from "@/hooks/drops/useDropCurations";
+import { invalidateProfileWaveQueries } from "@/hooks/useProfileWave";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { commonApiDelete } from "@/services/api/common-api";
@@ -67,6 +68,10 @@ export default function MyStreamWaveCurationTabMenu({
       await queryClient.invalidateQueries({
         queryKey: ["drop-curations"],
       });
+      await invalidateProfileWaveQueries(queryClient, [
+        connectedProfile,
+        wave.author,
+      ]);
       setToast({
         type: "success",
         message: "Curation deleted.",

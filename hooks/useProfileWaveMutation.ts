@@ -10,7 +10,10 @@ import {
 } from "@/services/api/profile-wave-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
-import { getProfileWaveQueryKey } from "./useProfileWave";
+import {
+  getProfileWaveIdentity,
+  setProfileWaveQueryData,
+} from "./useProfileWave";
 
 type ProfileWaveAction =
   | {
@@ -20,51 +23,6 @@ type ProfileWaveAction =
     }
   | { readonly type: "clear" };
 
-interface ProfileWaveIdentitySource {
-  readonly query?: string | null | undefined;
-  readonly handle?: string | null | undefined;
-  readonly normalised_handle?: string | null | undefined;
-  readonly primary_wallet?: string | null | undefined;
-  readonly primary_address?: string | null | undefined;
-  readonly id?: string | null | undefined;
-}
-
-const getProfileIdentityKey = (
-  profile: ProfileWaveIdentitySource | null
-): string | null =>
-  profile?.query ??
-  profile?.handle ??
-  profile?.primary_wallet ??
-  profile?.primary_address ??
-  profile?.id ??
-  null;
-
-const getProfileIdentityAliases = (
-  ...profiles: readonly (ProfileWaveIdentitySource | null | undefined)[]
-): string[] => {
-  const aliases = new Set<string>();
-
-  for (const profile of profiles) {
-    const candidates = [
-      profile?.query,
-      profile?.handle,
-      profile?.normalised_handle,
-      profile?.primary_wallet,
-      profile?.primary_address,
-      profile?.id,
-    ];
-
-    for (const candidate of candidates) {
-      const normalizedCandidate = candidate?.trim().toLowerCase() ?? "";
-      if (normalizedCandidate.length > 0) {
-        aliases.add(normalizedCandidate);
-      }
-    }
-  }
-
-  return [...aliases];
-};
-
 export function useProfileWaveMutation(profile: ApiIdentity | null) {
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
@@ -72,8 +30,8 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
 
   const mutation = useMutation({
     mutationFn: async (action: ProfileWaveAction) => {
-      const identity = getProfileIdentityKey(profile);
-      if (!identity) {
+      const identity = getProfileWaveIdentity(profile);
+      if (identity.length === 0) {
         throw new Error("Unable to determine the profile identity.");
       }
 
@@ -92,18 +50,19 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
         profile: updatedProfile,
         previousProfile: profile,
       });
-      const aliases = getProfileIdentityAliases(profile, updatedProfile);
-      for (const alias of aliases) {
-        const queryKey = getProfileWaveQueryKey(alias);
-        queryClient.setQueryData<ApiProfileWaveResponse>(queryKey, {
-          profile_wave_id:
-            action.type === "set"
-              ? action.waveId
-              : updatedProfile.profile_wave_id,
-          profile_curation_id:
-            action.type === "set" ? (action.profileCurationId ?? null) : null,
-        });
-      }
+      const profileWaveData: ApiProfileWaveResponse = {
+        profile_wave_id:
+          action.type === "set"
+            ? action.waveId
+            : updatedProfile.profile_wave_id,
+        profile_curation_id:
+          action.type === "set" ? (action.profileCurationId ?? null) : null,
+      };
+      setProfileWaveQueryData(
+        queryClient,
+        [profile, updatedProfile],
+        profileWaveData
+      );
       setToast({
         message:
           action.type === "set"

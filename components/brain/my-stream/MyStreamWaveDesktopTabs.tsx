@@ -24,7 +24,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
-import { useProfileWave } from "@/hooks/useProfileWave";
+import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
@@ -59,14 +59,6 @@ interface TabOption {
   readonly action?: React.ReactNode | undefined;
 }
 
-interface ProfileLookupSource {
-  readonly query?: string | null | undefined;
-  readonly handle?: string | null | undefined;
-  readonly primary_wallet?: string | null | undefined;
-  readonly primary_address?: string | null | undefined;
-  readonly id?: string | null | undefined;
-}
-
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
@@ -81,21 +73,6 @@ const getCurationIdFromTabKey = (key: string): string =>
 
 const getProfileCurationTooltipId = (curationId: string): string =>
   `my-stream-profile-curation-${curationId}`;
-
-const getProfileLookupKey = (
-  profile: ProfileLookupSource | null | undefined
-): string | null => {
-  const identity =
-    profile?.query ??
-    profile?.handle ??
-    profile?.primary_wallet ??
-    profile?.primary_address ??
-    profile?.id ??
-    null;
-
-  const normalizedIdentity = identity?.trim() ?? "";
-  return normalizedIdentity.length > 0 ? normalizedIdentity : null;
-};
 
 const getEffectiveProfileCurationId = ({
   curations,
@@ -343,12 +320,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     waveId: wave.id,
   });
   const isConnectedProfileWaveAuthor = connectedProfile?.id === wave.author.id;
-  const profileWaveIdentity = getProfileLookupKey(
+  const profileWaveIdentity = getProfileWaveIdentity(
     isConnectedProfileWaveAuthor ? connectedProfile : wave.author
   );
   const { data: profileWave } = useProfileWave({
     identity: profileWaveIdentity,
-    enabled: profileWaveIdentity !== null && curations.length > 0,
+    enabled: profileWaveIdentity.length > 0 && curations.length > 0,
   });
   const { reorderCuration, isPending: isCurationReorderPending } =
     useWaveCurationReorderMutation({ waveId: wave.id });

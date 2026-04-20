@@ -172,6 +172,9 @@ export function useWaveCurationReorderMutation({
     },
   });
   const { isPending, mutate, variables } = mutation;
+  const pendingVariables: MoveWaveCurationVariables | undefined = isPending
+    ? variables
+    : undefined;
 
   const moveCuration = useCallback(
     ({ curation, direction, curations }: MoveCurationParams) => {
@@ -228,6 +231,6 @@ export function useWaveCurationReorderMutation({
     moveCuration,
     reorderCuration,
     isPending,
-    pendingCurationId: isPending ? variables.curation.id : null,
+    pendingCurationId: pendingVariables?.curation.id ?? null,
   };
 }
