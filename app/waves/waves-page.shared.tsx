@@ -3,7 +3,7 @@ import {
   dehydrate,
   HydrationBoundary,
 } from "@tanstack/react-query";
-import { cache } from "react";
+import { Suspense, cache } from "react";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
 
@@ -135,7 +135,9 @@ export async function renderWavesPageContent({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <WavesPageClient />
+      <Suspense fallback={null}>
+        <WavesPageClient />
+      </Suspense>
     </HydrationBoundary>
   );
 }

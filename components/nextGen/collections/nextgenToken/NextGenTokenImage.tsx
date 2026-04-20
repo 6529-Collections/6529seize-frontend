@@ -1,5 +1,10 @@
 import type { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
-import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
 import {
   ETHEREUM_ICON_TEXT,
   NEXTGEN_MEDIA_BASE_URL,
@@ -11,7 +16,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
+import type { CSSProperties } from "react";
 import { Tooltip } from "react-tooltip";
 import { TraitScore } from "./NextGenTokenAbout";
 
@@ -44,11 +49,37 @@ export function NextGenTokenImage(
   function getOwnerInfo() {
     let ownerInfoDisplay;
     if (props.show_owner_info) {
+      const handleOrWallet =
+        props.token.normalised_handle ?? formatAddress(props.token.owner);
+      const profileHref = `/${props.token.normalised_handle ?? props.token.owner}`;
+      const initial =
+        handleOrWallet.trim().charAt(0) || "?";
       const ownerInfo = (
-        <span className="d-flex align-items-center gap-2">
-          <UserCICAndLevel level={props.token.level} color="black" />
-          {props.token.normalised_handle ?? formatAddress(props.token.owner)}
-        </span>
+        <div className="tailwind-scope tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2.5">
+          <ProfileAvatar
+            pfpUrl={undefined}
+            size={ProfileBadgeSize.SMALL}
+            alt={`${handleOrWallet} profile`}
+            fallbackContent={
+              <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-300">
+                {initial}
+              </span>
+            }
+          />
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
+            <Link
+              href={profileHref}
+              onClick={(e) => e.stopPropagation()}
+              className="tw-truncate tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50 tw-no-underline desktop-hover:hover:tw-text-iron-200"
+            >
+              {handleOrWallet}
+            </Link>
+            <UserCICAndLevel
+              level={props.token.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
+          </div>
+        </div>
       );
 
       ownerInfoDisplay = (
@@ -76,40 +107,43 @@ export function NextGenTokenImage(
             place="right"
             delayShow={250}
             style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
+              backgroundColor: "#26272B",
+              color: "#F4F4F5",
+              padding: "10px 12px",
+              maxWidth: "min(280px, calc(100vw - 24px))",
+              fontSize: "12px",
+              lineHeight: "1.35",
+              borderRadius: "8px",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+              ...({ "--rt-opacity": 1 } as CSSProperties),
             }}
           >
-            <Container>
-              <Row className="pt-2 pb-2">
-                <Col>{ownerInfo}</Col>
-              </Row>
-              <Row className="pt-1">
-                <Col>
+            <div className="tw-flex tw-flex-col tw-gap-1.5 tw-text-left">
+              <div className="tw-border-b tw-border-white/10 tw-pb-1.5">
+                {ownerInfo}
+              </div>
+              <div className="tw-flex tw-flex-col tw-gap-1 tw-font-semibold">
+                <span>
                   Opensea:{" "}
                   {props.token.opensea_price > 0
                     ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
                     : "Not Listed"}
-                </Col>
-              </Row>
-              <Row className="pt-1">
-                <Col>
+                </span>
+                <span>
                   Blur:{" "}
                   {props.token.blur_price > 0
                     ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
                     : "Not Listed"}
-                </Col>
-              </Row>
-              <Row className="pt-1">
-                <Col>
+                </span>
+                <span>
                   Magic Eden:{" "}
                   {props.token.me_price > 0
                     ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
                     : "Not Listed"}
-                </Col>
-              </Row>
-            </Container>
+                </span>
+              </div>
+            </div>
           </Tooltip>
         </button>
       );

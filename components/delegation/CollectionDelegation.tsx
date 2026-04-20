@@ -839,7 +839,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="pt-5 pb-1">
+        <h5 className="pt-4 pb-1">
           Use A Delegation Manager (For Delegations or Consolidations)
         </h5>
         <Accordion
@@ -910,7 +910,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printConsolidations() {
     return (
       <>
-        <h5 className="pt-5 pb-1">Consolidations</h5>
+        <h5 className="pt-4 pb-1">Consolidations</h5>
         <Accordion
           alwaysOpen
           className={`${styles["collectionDelegationsAccordion"]}`}
@@ -1200,7 +1200,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return (
       <Container className="no-padding">
         <Row className={styles["delegationsTableScrollContainer"]}>
-          <Col className="pb-3">
+          <Col>
             <Table className={styles["delegationsTable"]}>
               <tbody>
                 {delegations > 0 ? (
@@ -1379,7 +1379,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return (
       <Container className="no-padding">
         <Row className={styles["delegationsTableScrollContainer"]}>
-          <Col className="pb-3">
+          <Col>
             <Table className={styles["delegationsTable"]}>
               <tbody>
                 {delegations > 0 ? (
@@ -1762,13 +1762,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <Col>
           {props.collection && (
             <Container>
-              <Row>
+              <Row className={styles["collectionDelegationBackRow"]}>
                 <Col>
-                  <h1 className="mb-0">{props.collection.title}</h1>
-                </Col>
-              </Row>
-              <Row className="pb-4">
-                <Col className="d-flex align-items-center justify-content-start">
                   <button
                     className={styles["backBtn"]}
                     onClick={() =>
@@ -1780,6 +1775,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       Back to Delegation Center
                     </span>
                   </button>
+                </Col>
+              </Row>
+              <Row className={styles["collectionDelegationTitleRow"]}>
+                <Col>
+                  <h1 className="mb-0">{props.collection.title}</h1>
                 </Col>
               </Row>
               {!showUpdateDelegation &&
@@ -1803,7 +1803,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             }
                           >
                             <FontAwesomeIcon icon={faCircleArrowLeft} />
-                            Back to Delegation Center
+                            <span className="font-smaller">
+                              Back to Delegation Center
+                            </span>
                           </button>
                         </Col>
                       </Row>

@@ -6,7 +6,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { useWavesOverview } from "./useWavesOverview";
-import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+import {
+  SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+  WAVE_FOLLOWING_WAVES_PARAMS,
+} from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveById } from "./useWaveById";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -71,6 +74,8 @@ const useWavesList = () => {
     limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity && following,
     viewerIdentityKey,
+    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
   });
 
   const trackedAnnouncementWave = useMemo(

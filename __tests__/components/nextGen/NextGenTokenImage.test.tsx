@@ -12,6 +12,10 @@ jest.mock("@/hooks/isMobileScreen", () => ({
 
 jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   __esModule: true,
+  UserCICAndLevelSize: {
+    SMALL: "SMALL",
+    MEDIUM: "MEDIUM",
+  },
   default: () => <div data-testid="cic" />,
 }));
 import { render, screen } from "@testing-library/react";

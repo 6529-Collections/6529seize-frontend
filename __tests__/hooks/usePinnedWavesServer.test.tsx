@@ -110,6 +110,16 @@ test("keeps raw pinned ids but ignores a legacy announcement pin for budget chec
   expect(pinMutateAsync).toHaveBeenCalledWith("new-wave");
 });
 
+test("always refetches pinned waves on window focus", () => {
+  renderHook(() => usePinnedWavesServer(), { wrapper });
+
+  expect(useQueryMock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      refetchOnWindowFocus: "always",
+    })
+  );
+});
+
 test("still enforces the cap once non-announcement pins reach the limit", async () => {
   const pinnedWaves = [
     createWave("announcement-wave"),

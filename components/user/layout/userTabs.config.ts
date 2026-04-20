@@ -32,8 +32,6 @@ const TAB_DEFINITIONS = [
     id: "waves",
     title: "Curation",
     route: "curations",
-    isVisible: ({ hasProfileWave }: UserPageVisibilityContext) =>
-      hasProfileWave,
   },
   {
     id: "collected",
