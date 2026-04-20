@@ -23,7 +23,7 @@ type TitleContextType = {
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
 
-export const DEFAULT_TITLE = publicEnv.BASE_ENDPOINT?.includes("staging")
+const DEFAULT_TITLE = publicEnv.BASE_ENDPOINT?.includes("staging")
   ? "6529 Staging"
   : "6529.io";
 
