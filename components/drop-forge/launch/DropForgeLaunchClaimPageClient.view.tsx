@@ -1933,7 +1933,7 @@ function DropForgePhaseSelectionSection({
           }`}
         >
           <span>Phase 0</span>
-          <span className="lg:tw-inline tw-hidden">- Initialize Claim</span>
+          <span className="tw-hidden lg:tw-inline">- Initialize Claim</span>
         </button>
         <button
           type="button"
