@@ -5,7 +5,7 @@ import type {
 
 /**
  * Type definitions for the file upload system
- * 
+ *
  * This file contains all types and interfaces used throughout the file upload components.
  */
 
@@ -20,7 +20,7 @@ export interface FileValidationResult {
 /**
  * Visual state for the upload area
  */
-type VisualState = 'idle' | 'dragging' | 'invalid' | 'processing';
+type VisualState = "idle" | "dragging" | "invalid" | "processing";
 
 /**
  * Main state interface for the file uploader reducer
@@ -40,7 +40,7 @@ export interface FileUploaderState {
   processingTimeout: number | null;
   /** Whether recovery option is available */
   hasRecoveryOption: boolean;
-  
+
   /** Currently uploaded file */
   currentFile: File | null;
   /** Video compatibility check result */
@@ -53,17 +53,17 @@ export interface FileUploaderState {
  * Actions for the file uploader reducer
  */
 export type FileUploaderAction =
-  | { type: 'SET_VISUAL_STATE'; payload: VisualState }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_OBJECT_URL'; payload: string | null }
-  | { type: 'RESET_STATE' }
-  | { type: 'START_PROCESSING'; payload: File }
-  | { type: 'PROCESSING_SUCCESS'; payload: { objectUrl: string; file: File } }
-  | { type: 'PROCESSING_ERROR'; payload: string }
-  | { type: 'PROCESSING_RETRY' }
-  | { type: 'PROCESSING_TIMEOUT' }
-  | { type: 'START_COMPATIBILITY_CHECK'; payload: File }
-  | { type: 'SET_COMPATIBILITY_RESULT'; payload: VideoCompatibilityResult };
+  | { type: "SET_VISUAL_STATE"; payload: VisualState }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "SET_OBJECT_URL"; payload: string | null }
+  | { type: "RESET_STATE" }
+  | { type: "START_PROCESSING"; payload: File }
+  | { type: "PROCESSING_SUCCESS"; payload: { objectUrl: string; file: File } }
+  | { type: "PROCESSING_ERROR"; payload: string }
+  | { type: "PROCESSING_RETRY" }
+  | { type: "PROCESSING_TIMEOUT" }
+  | { type: "START_COMPATIBILITY_CHECK"; payload: File }
+  | { type: "SET_COMPATIBILITY_RESULT"; payload: VideoCompatibilityResult };
 
 /**
  * Props for the MemesArtSubmissionFile component
@@ -73,6 +73,10 @@ export interface MemesArtSubmissionFileProps {
   readonly artworkUploaded: boolean;
   /** URL of the uploaded artwork */
   readonly artworkUrl: string;
+  /** Error raised while reading the selected upload */
+  readonly uploadError: string | null;
+  /** MIME type for server-provided artwork */
+  readonly artworkMimeType?: string | null | undefined;
   /** Callback to update artwork upload state */
   readonly setArtworkUploaded: (uploaded: boolean) => void;
   /** Callback for handling file selection */
@@ -100,13 +104,9 @@ export interface MemesArtSubmissionFileProps {
   /** Handler for changing the interactive hash input */
   readonly onExternalHashChange: (value: string) => void;
   /** Handler for changing the hosting provider */
-  readonly onExternalProviderChange: (
-    value: InteractiveMediaProvider
-  ) => void;
+  readonly onExternalProviderChange: (value: InteractiveMediaProvider) => void;
   /** Handler for changing the external media MIME type */
-  readonly onExternalMimeTypeChange: (
-    value: InteractiveMediaMimeType
-  ) => void;
+  readonly onExternalMimeTypeChange: (value: InteractiveMediaMimeType) => void;
   /** Reset external media selection */
   readonly onClearExternalMedia: () => void;
 }
@@ -155,6 +155,8 @@ export interface FilePreviewProps {
   readonly url: string;
   /** File object */
   readonly file: File | null;
+  /** MIME type for server-provided media */
+  readonly mimeType?: string | null | undefined;
   /** Handler for removing the file */
   readonly onRemove: (e: React.MouseEvent<HTMLButtonElement>) => void;
   /** Video compatibility information */

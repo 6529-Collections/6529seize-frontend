@@ -13,6 +13,7 @@ interface MemesSubmissionPreviewScreenProps {
   readonly onBackToEdit: () => void;
   readonly onSubmit: () => void;
   readonly isSubmitting: boolean;
+  readonly submitLabel?: string | undefined;
 }
 
 export function MemesSubmissionPreviewScreen({
@@ -20,6 +21,7 @@ export function MemesSubmissionPreviewScreen({
   onBackToEdit,
   onSubmit,
   isSubmitting,
+  submitLabel = "Submit Artwork",
 }: MemesSubmissionPreviewScreenProps) {
   const onDropClick = useCallback((_drop: ExtendedDrop) => {}, []);
 
@@ -61,7 +63,7 @@ export function MemesSubmissionPreviewScreen({
           loading={isSubmitting}
           padding="tw-px-6 tw-py-3"
         >
-          Submit Artwork
+          {submitLabel}
         </PrimaryButton>
       </div>
     </motion.div>
