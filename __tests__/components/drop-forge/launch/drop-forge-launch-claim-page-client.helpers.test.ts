@@ -2,8 +2,11 @@ import {
   clampResearchTargetEditionSize,
   getAutoSelectedLaunchPhase,
   getDefaultResearchTargetEditionSize,
+  getLaunchListStatus,
   getResearchTargetEditionSizeLimit,
 } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
+import type { ClaimPrimaryStatus } from "@/components/drop-forge/drop-forge-status.helpers";
+import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 
 describe("getAutoSelectedLaunchPhase", () => {
   const phases = [
@@ -179,5 +182,48 @@ describe("research target edition size helpers", () => {
 
   it("keeps the research target uncapped when there is no edition size limit", () => {
     expect(clampResearchTargetEditionSize(310, null)).toBe(310);
+  });
+});
+
+describe("getLaunchListStatus", () => {
+  const livePrimaryStatus: ClaimPrimaryStatus = {
+    key: "live",
+    label: "Live",
+    tone: "success",
+    reason: "DB, Arweave, and onchain metadata all match",
+  };
+
+  it("keeps live claims live when the current manifold phase is upcoming", () => {
+    expect(
+      getLaunchListStatus({
+        primaryStatus: livePrimaryStatus,
+        manifoldClaim: {
+          status: ManifoldClaimStatus.UPCOMING,
+          nextMemePhase: {
+            id: "1",
+            name: "Phase 1",
+          },
+        } as any,
+        researchAirdropCompleted: false,
+        payArtistCompleted: false,
+      })
+    ).toEqual(livePrimaryStatus);
+  });
+
+  it("keeps live claims live when manifold only exposes a next phase", () => {
+    expect(
+      getLaunchListStatus({
+        primaryStatus: livePrimaryStatus,
+        manifoldClaim: {
+          status: ManifoldClaimStatus.ENDED,
+          nextMemePhase: {
+            id: "public",
+            name: "Public Phase",
+          },
+        } as any,
+        researchAirdropCompleted: false,
+        payArtistCompleted: false,
+      })
+    ).toEqual(livePrimaryStatus);
   });
 });

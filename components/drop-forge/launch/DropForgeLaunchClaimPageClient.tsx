@@ -21,6 +21,7 @@ import {
   getAnimationMimeType,
   getDefaultResearchTargetEditionSize,
   getErrorMessage,
+  getLaunchListStatus,
   getMediaTypeLabel,
   getResearchTargetEditionSizeLimit,
   getRootForPhase,
@@ -1220,6 +1221,23 @@ export default function DropForgeLaunchClaimPageClient({
       }),
     [mintingClaimActionsByName, availableMintingClaimActionNames]
   );
+  const headerStatus = useMemo(
+    () =>
+      primaryStatus
+        ? getLaunchListStatus({
+            primaryStatus,
+            manifoldClaim,
+            researchAirdropCompleted,
+            payArtistCompleted,
+          })
+        : null,
+    [
+      primaryStatus,
+      manifoldClaim,
+      researchAirdropCompleted,
+      payArtistCompleted,
+    ]
+  );
   const mintTimeline = useMemo(
     () => (claimId > 0 ? getClaimTimelineDetails(claimId) : null),
     [claimId]
@@ -2261,6 +2279,7 @@ export default function DropForgeLaunchClaimPageClient({
         claim={claim}
         claimId={claimId}
         mintTimeline={mintTimeline}
+        headerStatus={headerStatus}
         primaryStatus={primaryStatus}
         hasImage={hasImage}
         hasAnimation={hasAnimation}

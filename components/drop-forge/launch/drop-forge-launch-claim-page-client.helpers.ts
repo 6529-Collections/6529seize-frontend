@@ -326,22 +326,11 @@ export function getLaunchListStatus({
     };
   }
 
-  if (manifoldClaim.status === ManifoldClaimStatus.UPCOMING) {
-    return {
-      key: "pending_initialization",
-      label: "Pending Initialization",
-      tone: "pending",
-      reason: "Claim is initialized onchain but not live yet",
-    };
-  }
-
-  if (manifoldClaim.nextMemePhase) {
-    return {
-      key: "pending_initialization",
-      label: "Pending Initialization",
-      tone: "pending",
-      reason: `${getLaunchPhaseLabel(manifoldClaim.nextMemePhase)} is next and still needs the onchain update`,
-    };
+  if (
+    manifoldClaim.status === ManifoldClaimStatus.UPCOMING ||
+    manifoldClaim.nextMemePhase
+  ) {
+    return primaryStatus;
   }
 
   return {

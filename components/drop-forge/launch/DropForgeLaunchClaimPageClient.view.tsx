@@ -115,6 +115,7 @@ interface DropForgeLaunchClaimPageViewProps {
   claim: MintingClaim | null;
   claimId: number;
   mintTimeline: LaunchClaimMintTimeline | null;
+  headerStatus: LaunchClaimPrimaryStatus;
   primaryStatus: LaunchClaimPrimaryStatus;
   hasImage: boolean;
   hasAnimation: boolean;
@@ -597,10 +598,10 @@ function DropForgeLaunchClaimArweaveSection({
 
 function DropForgeLaunchClaimTimelineRow({
   mintTimeline,
-  primaryStatus,
+  headerStatus,
 }: Readonly<{
   mintTimeline: LaunchClaimMintTimeline | null;
-  primaryStatus: LaunchClaimPrimaryStatus;
+  headerStatus: LaunchClaimPrimaryStatus;
 }>) {
   if (!mintTimeline) {
     return null;
@@ -612,15 +613,15 @@ function DropForgeLaunchClaimTimelineRow({
         Scheduled for {formatScheduledLabel(mintTimeline.instantUtc)}
       </p>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        {primaryStatus && (
+        {headerStatus && (
           <DropForgeStatusPill
-            className={getPrimaryStatusPillClassName(primaryStatus.tone)}
-            label={primaryStatus.label}
+            className={getPrimaryStatusPillClassName(headerStatus.tone)}
+            label={headerStatus.label}
             showLoader={
-              primaryStatus.key === "publishing" ||
-              primaryStatus.key === "checking_onchain"
+              headerStatus.key === "publishing" ||
+              headerStatus.key === "checking_onchain"
             }
-            tooltipText={primaryStatus.reason ?? ""}
+            tooltipText={headerStatus.reason ?? ""}
           />
         )}
       </div>
@@ -2300,6 +2301,7 @@ function DropForgeLaunchClaimContent({
   claim,
   claimId,
   mintTimeline,
+  headerStatus,
   primaryStatus,
   hasImage,
   hasAnimation,
@@ -2380,7 +2382,7 @@ function DropForgeLaunchClaimContent({
     <div className="tw-flex tw-flex-col tw-gap-5 sm:tw-gap-6">
       <DropForgeLaunchClaimTimelineRow
         mintTimeline={mintTimeline}
-        primaryStatus={primaryStatus}
+        headerStatus={headerStatus}
       />
 
       <DropForgeLaunchClaimMediaSection
