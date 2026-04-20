@@ -21,6 +21,7 @@ import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
+import EmojiReactionDebugSetup from "./EmojiReactionDebugSetup";
 import IpfsImageSetup from "./IpfsImageSetup";
 import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
@@ -58,6 +59,7 @@ export default function Providers({
       <AppWalletsProvider>
         <WagmiSetup>
           <CapacitorSetup />
+          <EmojiReactionDebugSetup />
           <IpfsImageSetup />
           <ReactQueryWrapper>
             <RefreshProvider>

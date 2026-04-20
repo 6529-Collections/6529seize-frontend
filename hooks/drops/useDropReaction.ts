@@ -5,6 +5,14 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import {
+  buildEmojiReactionDebugState,
+  createEmojiReactionAttemptId,
+  getEmojiReactionDebugError,
+  getEmojiReactionDebugValueShape,
+  logEmojiReactionDebug,
+  type EmojiReactionDebugMeta,
+} from "@/helpers/reactions/emojiReactionDebug";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -18,7 +26,10 @@ import {
 } from "@/components/waves/drops/reaction-utils";
 
 interface UseDropReactionResult {
-  readonly react: (reactionCode: string) => Promise<void>;
+  readonly react: (
+    reactionCode: string,
+    debugMeta?: EmojiReactionDebugMeta
+  ) => Promise<void>;
   readonly canReact: boolean;
 }
 
@@ -116,33 +127,115 @@ export function useDropReaction(
   );
 
   const react = useCallback(
-    async (reactionCode: string) => {
+    async (reactionCode: string, debugMeta?: EmojiReactionDebugMeta) => {
       if (!canReact) return;
 
       const isRemoving = reactionCode === contextProfileContext?.reaction;
+      const attemptId = debugMeta?.attemptId ?? createEmojiReactionAttemptId();
+      const source = debugMeta?.source ?? "unknown";
+      const profileId = connectedProfile?.id ?? null;
+      const previousReaction = contextProfileContext?.reaction ?? null;
 
-      rollbackRef.current?.();
+      logEmojiReactionDebug("click", {
+        attemptId,
+        source,
+        dropId,
+        waveId,
+        profileId,
+        reaction: reactionCode,
+        previous_reaction: previousReaction,
+        next_reaction: isRemoving ? null : reactionCode,
+        is_removing: isRemoving,
+      });
+
+      if (rollbackRef.current) {
+        logEmojiReactionDebug("rollback", {
+          attemptId,
+          source,
+          dropId,
+          waveId,
+          profileId,
+          reason: "superseded_attempt",
+        });
+        rollbackRef.current();
+      }
       rollbackRef.current = applyOptimisticReaction(
         isRemoving ? null : reactionCode
       );
+
+      logEmojiReactionDebug("optimistic_applied", {
+        attemptId,
+        source,
+        dropId,
+        waveId,
+        profileId,
+        previous_reaction: previousReaction,
+        next_reaction: isRemoving ? null : reactionCode,
+        is_removing: isRemoving,
+        has_rollback: Boolean(rollbackRef.current),
+        before_state: buildEmojiReactionDebugState(drop, profileId),
+      });
 
       if (!isRemoving) {
         recordReaction(reactionCode);
       }
 
+      const endpoint = `drops/${drop.id}/reaction`;
+      const method = isRemoving ? "DELETE" : "POST";
+      const startedAt = performance.now();
+
+      logEmojiReactionDebug("request_start", {
+        attemptId,
+        source,
+        dropId,
+        waveId,
+        profileId,
+        method,
+        endpoint,
+        reaction: reactionCode,
+      });
+
       try {
-        const endpoint = `drops/${drop.id}/reaction`;
+        let responseShape = "void";
         if (isRemoving) {
           await commonApiDelete({ endpoint });
         } else {
-          await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+          const response = await commonApiPost<
+            ApiAddReactionToDropRequest,
+            ApiDrop
+          >({
             endpoint,
             body: { reaction: reactionCode },
           });
+          responseShape = getEmojiReactionDebugValueShape(response);
         }
+        logEmojiReactionDebug("request_success", {
+          attemptId,
+          source,
+          dropId,
+          waveId,
+          profileId,
+          method,
+          endpoint,
+          reaction: reactionCode,
+          duration_ms: Math.round(performance.now() - startedAt),
+          response_shape: responseShape,
+        });
         rollbackRef.current = null;
         onSuccess?.();
       } catch (error) {
+        logEmojiReactionDebug("request_error", {
+          attemptId,
+          source,
+          dropId,
+          waveId,
+          profileId,
+          method,
+          endpoint,
+          reaction: reactionCode,
+          duration_ms: Math.round(performance.now() - startedAt),
+          ...getEmojiReactionDebugError(error),
+        });
         let errorMessage = isRemoving
           ? "Error removing reaction"
           : "Error adding reaction";
@@ -150,6 +243,14 @@ export function useDropReaction(
           errorMessage = error;
         }
         setToast({ message: errorMessage, type: "error" });
+        logEmojiReactionDebug("rollback", {
+          attemptId,
+          source,
+          dropId,
+          waveId,
+          profileId,
+          reason: "api_error",
+        });
         rollbackRef.current?.();
         rollbackRef.current = null;
       }
@@ -159,6 +260,10 @@ export function useDropReaction(
       applyOptimisticReaction,
       contextProfileContext?.reaction,
       drop.id,
+      drop,
+      dropId,
+      waveId,
+      connectedProfile?.id,
       setToast,
       onSuccess,
     ]

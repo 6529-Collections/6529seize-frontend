@@ -28,7 +28,9 @@ const WaveDropActionsAddReaction: React.FC<{
   }) => {
     const emojiText = `:${emoji.id ?? ""}:`;
     setShowPicker(false);
-    react(emojiText);
+    void react(emojiText, {
+      source: isMobile ? "picker_mobile" : "picker_desktop",
+    });
   };
 
   useEffect(() => {

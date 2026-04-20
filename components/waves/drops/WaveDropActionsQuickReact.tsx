@@ -7,6 +7,7 @@ import {
   getTopReactions,
   subscribeToReactionStore,
 } from "@/helpers/reactions/reactionHistory";
+import type { EmojiReactionDebugMeta } from "@/helpers/reactions/emojiReactionDebug";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
@@ -62,7 +63,10 @@ const QuickReactButton: React.FC<{
   readonly reactionCode: string;
   readonly dropId: string;
   readonly canReact: boolean;
-  readonly onReact: (code: string) => void;
+  readonly onReact: (
+    code: string,
+    debugMeta?: EmojiReactionDebugMeta
+  ) => Promise<void>;
   readonly isMobile?: boolean;
 }> = ({ reactionCode, dropId, canReact, onReact, isMobile = false }) => {
   const { emojiMap, findNativeEmoji } = useEmoji();
@@ -119,8 +123,10 @@ const QuickReactButton: React.FC<{
   }, [emojiId, emojiMap, findNativeEmoji, emojiSize, textSize]);
 
   const handleClick = useCallback(() => {
-    onReact(reactionCode);
-  }, [onReact, reactionCode]);
+    void onReact(reactionCode, {
+      source: isMobile ? "quick_mobile" : "quick_desktop",
+    });
+  }, [isMobile, onReact, reactionCode]);
 
   const tooltipId = `quick-react-${dropId}-${emojiId}`;
 

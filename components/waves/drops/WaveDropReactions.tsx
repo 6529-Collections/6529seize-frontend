@@ -8,6 +8,13 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
+import {
+  buildEmojiReactionDebugState,
+  createEmojiReactionAttemptId,
+  getEmojiReactionDebugError,
+  getEmojiReactionDebugValueShape,
+  logEmojiReactionDebug,
+} from "@/helpers/reactions/emojiReactionDebug";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -326,35 +333,117 @@ function WaveDropReaction({
       return;
     }
 
+    const attemptId = createEmojiReactionAttemptId();
+    const source = "existing_chip";
+    const profileId = connectedProfile?.id ?? null;
+    const previousReaction = drop.context_profile_context?.reaction ?? null;
+    const willSelect = !selected;
+
+    logEmojiReactionDebug("click", {
+      attemptId,
+      source,
+      dropId: drop.id,
+      waveId,
+      profileId,
+      reaction: reaction.reaction,
+      previous_reaction: previousReaction,
+      next_reaction: willSelect ? reaction.reaction : null,
+      is_removing: selected,
+    });
+
     setSelected((s) => !s);
     setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
 
-    applyOptimisticReactionChange(!selected);
+    applyOptimisticReactionChange(willSelect);
+
+    logEmojiReactionDebug("optimistic_applied", {
+      attemptId,
+      source,
+      dropId: drop.id,
+      waveId,
+      profileId,
+      previous_reaction: previousReaction,
+      next_reaction: willSelect ? reaction.reaction : null,
+      is_removing: selected,
+      has_rollback: Boolean(rollbackRef.current),
+      before_state: buildEmojiReactionDebugState(drop, profileId),
+    });
 
     if (!selected) {
       recordReaction(reaction.reaction);
     }
 
+    const body = { reaction: reaction.reaction };
+    const endpoint = `drops/${drop.id}/reaction`;
+    const method = selected ? "DELETE" : "POST";
+    const startedAt = performance.now();
+
+    logEmojiReactionDebug("request_start", {
+      attemptId,
+      source,
+      dropId: drop.id,
+      waveId,
+      profileId,
+      method,
+      endpoint,
+      reaction: reaction.reaction,
+    });
+
     try {
-      const body = { reaction: reaction.reaction };
-      const endpoint = `drops/${drop.id}/reaction`;
+      let responseShape = "void";
       if (selected) {
         await commonApiDelete({
           endpoint,
         });
       } else {
-        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+        const response = await commonApiPost<
+          ApiAddReactionToDropRequest,
+          ApiDrop
+        >({
           endpoint,
           body,
         });
+        responseShape = getEmojiReactionDebugValueShape(response);
       }
+      logEmojiReactionDebug("request_success", {
+        attemptId,
+        source,
+        dropId: drop.id,
+        waveId,
+        profileId,
+        method,
+        endpoint,
+        reaction: reaction.reaction,
+        duration_ms: Math.round(performance.now() - startedAt),
+        response_shape: responseShape,
+      });
     } catch (error) {
+      logEmojiReactionDebug("request_error", {
+        attemptId,
+        source,
+        dropId: drop.id,
+        waveId,
+        profileId,
+        method,
+        endpoint,
+        reaction: reaction.reaction,
+        duration_ms: Math.round(performance.now() - startedAt),
+        ...getEmojiReactionDebugError(error),
+      });
       let msg = selected ? "Error removing reaction" : "Error adding reaction";
       if (typeof error === "string") msg = error;
       setToast({ message: msg, type: "error" });
 
       setSelected((s) => !s);
       setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
+      logEmojiReactionDebug("rollback", {
+        attemptId,
+        source,
+        dropId: drop.id,
+        waveId,
+        profileId,
+        reason: "chip_error",
+      });
       rollbackRef.current?.();
       rollbackRef.current = null;
     }
@@ -362,11 +451,15 @@ function WaveDropReaction({
   }, [
     applyOptimisticReactionChange,
     canReact,
+    connectedProfile?.id,
+    drop,
     drop.id,
+    drop.context_profile_context?.reaction,
     longPressTriggered,
     reaction.reaction,
     selected,
     setToast,
+    waveId,
   ]);
 
   const tooltipProfiles = useMemo(() => {

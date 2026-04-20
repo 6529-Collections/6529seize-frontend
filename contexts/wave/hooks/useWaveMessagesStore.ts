@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
 import type { Drop } from "@/helpers/waves/drop.helpers";
+import {
+  buildEmojiReactionDebugState,
+  logEmojiReactionDebug,
+} from "@/helpers/reactions/emojiReactionDebug";
 import type { WaveMessages, WaveMessagesUpdate } from "./types";
 
 type DropChange = {
@@ -62,6 +66,46 @@ const collectDropChanges = (original: Drop, updated: Drop): DropChange[] => {
   }
 
   return changes;
+};
+
+const serializeReactionDebugState = (drop: Drop | null | undefined): string =>
+  JSON.stringify(buildEmojiReactionDebugState(drop));
+
+const logReactionStoreChanges = ({
+  waveId,
+  beforeDrops,
+  afterDrops,
+  incomingDrops,
+}: {
+  readonly waveId: string;
+  readonly beforeDrops: readonly Drop[];
+  readonly afterDrops: readonly Drop[];
+  readonly incomingDrops: readonly Drop[];
+}) => {
+  for (const incomingDrop of incomingDrops) {
+    const beforeDrop = beforeDrops.find((drop) => drop.id === incomingDrop.id);
+    const afterDrop = afterDrops.find((drop) => drop.id === incomingDrop.id);
+
+    if (!afterDrop) {
+      continue;
+    }
+
+    const beforeState = serializeReactionDebugState(beforeDrop);
+    const afterState = serializeReactionDebugState(afterDrop);
+
+    if (beforeState === afterState) {
+      continue;
+    }
+
+    logEmojiReactionDebug("store_reaction_change", {
+      dropId: incomingDrop.id,
+      waveId,
+      before_state: beforeDrop
+        ? buildEmojiReactionDebugState(beforeDrop)
+        : undefined,
+      after_state: buildEmojiReactionDebugState(afterDrop),
+    });
+  }
 };
 
 export type Listener = (data: WaveMessages | undefined) => void;
@@ -152,10 +196,14 @@ function useWaveMessagesStore() {
         updatedWaveMessages.hasNextPage = update.hasNextPage;
       }
       if (update.drops !== undefined) {
-        updatedWaveMessages.drops = mergeDrops(
-          updatedWaveMessages.drops!,
-          update.drops
-        );
+        const beforeDrops = updatedWaveMessages.drops;
+        updatedWaveMessages.drops = mergeDrops(beforeDrops, update.drops);
+        logReactionStoreChanges({
+          waveId: update.key,
+          beforeDrops,
+          afterDrops: updatedWaveMessages.drops,
+          incomingDrops: update.drops,
+        });
       }
 
       if (typeof update.latestFetchedSerialNo === "number") {

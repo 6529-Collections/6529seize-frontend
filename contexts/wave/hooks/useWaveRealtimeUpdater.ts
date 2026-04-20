@@ -6,6 +6,10 @@ import { WsMessageType } from "@/helpers/Types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
+  buildEmojiReactionDebugState,
+  logEmojiReactionDebug,
+} from "@/helpers/reactions/emojiReactionDebug";
+import {
   commonApiFetch,
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
@@ -143,6 +147,13 @@ export function useWaveRealtimeUpdater({
 
       const waveId = drop.wave.id;
 
+      if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+        logEmojiReactionDebug("ws_reaction_update_received", {
+          dropId: drop.id,
+          waveId,
+        });
+      }
+
       if (isWaveMuted(waveId)) {
         return;
       }
@@ -179,22 +190,34 @@ export function useWaveRealtimeUpdater({
           type === ProcessIncomingDropType.DROP_REACTION_UPDATE) &&
         existingDrop
       ) {
+        if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+          logEmojiReactionDebug("drop_refetch_start", {
+            dropId: drop.id,
+            waveId,
+            existing_state: buildEmojiReactionDebugState(existingDrop),
+          });
+        }
         const apiDrop = await commonApiFetch<ApiDrop>({
           endpoint: `drops/${drop.id}`,
         });
-        if (apiDrop) {
-          updateData({
-            key: waveId,
-            drops: [
-              {
-                ...apiDrop,
-                type: DropSize.FULL,
-                stableHash: existingDrop.stableHash,
-                stableKey: existingDrop.stableKey,
-              },
-            ],
+        if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+          logEmojiReactionDebug("drop_refetch_success", {
+            dropId: drop.id,
+            waveId,
+            fetched_state: buildEmojiReactionDebugState(apiDrop),
           });
         }
+        updateData({
+          key: waveId,
+          drops: [
+            {
+              ...apiDrop,
+              type: DropSize.FULL,
+              stableHash: existingDrop.stableHash,
+              stableKey: existingDrop.stableKey,
+            },
+          ],
+        });
         return;
       }
 
