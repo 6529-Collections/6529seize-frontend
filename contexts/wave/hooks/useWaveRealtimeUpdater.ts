@@ -197,9 +197,12 @@ export function useWaveRealtimeUpdater({
             existing_state: buildEmojiReactionDebugState(existingDrop),
           });
         }
-        const apiDrop = await commonApiFetch<ApiDrop>({
+        const apiDrop = await commonApiFetch<ApiDrop | null | undefined>({
           endpoint: `drops/${drop.id}`,
         });
+        if (!apiDrop) {
+          return;
+        }
         if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
           logEmojiReactionDebug("drop_refetch_success", {
             dropId: drop.id,

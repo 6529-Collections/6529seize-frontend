@@ -113,9 +113,9 @@ const readSettings = (): EmojiReactionDebugSettings | null => {
 };
 
 const createDebugId = (prefix: string): string => {
-  const cryptoApi = globalThis.crypto;
+  const cryptoApi = globalThis.crypto as Crypto | undefined;
   const random =
-    typeof cryptoApi.randomUUID === "function"
+    cryptoApi && typeof cryptoApi.randomUUID === "function"
       ? cryptoApi.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 

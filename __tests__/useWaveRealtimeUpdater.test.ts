@@ -11,9 +11,7 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
-  commonApiPostWithoutBodyAndResponse: jest
-    .fn()
-    .mockResolvedValue(undefined),
+  commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
 }));
 
 const {
@@ -61,7 +59,9 @@ describe("useWaveRealtimeUpdater", () => {
 
   it("handles aborted fetch without logging", async () => {
     const consoleLog = jest.spyOn(console, "log").mockImplementation(() => {});
-    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const store: any = { wave1: { drops: [], latestFetchedSerialNo: 1 } };
     const props = baseProps(store);
     props.syncNewestMessages = jest
@@ -132,6 +132,36 @@ describe("useWaveRealtimeUpdater", () => {
     await flushPromises();
     expect(commonApiFetch).toHaveBeenCalledWith({ endpoint: "drops/d4" });
     expect(props.updateData).toHaveBeenCalled();
+  });
+
+  it("skips DROP_REACTION_UPDATE store update when refetch returns null", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4",
+            type: DropSize.FULL,
+            stableKey: "d4",
+            stableHash: "d4",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    commonApiFetch.mockResolvedValue(null);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d4", wave: { id: "wave1" }, author: {} };
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+    expect(commonApiFetch).toHaveBeenCalledWith({ endpoint: "drops/d4" });
+    expect(props.updateData).not.toHaveBeenCalled();
   });
 
   it("does not process when wave is missing", async () => {
