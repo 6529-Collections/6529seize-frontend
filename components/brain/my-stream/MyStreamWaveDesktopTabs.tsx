@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef } from "react";
-import {
-  EllipsisVerticalIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/outline";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 import {
   closestCenter,
   DndContext,
@@ -21,7 +18,6 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { TabToggle } from "@/components/common/TabToggle";
 import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -125,7 +121,6 @@ const getEffectiveProfileCurationId = ({
 };
 
 const AUTO_EXPAND_LIMIT = 5;
-const MOBILE_INLINE_CURATION_LIMIT = 1;
 
 const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.CHAT]: "Chat",
@@ -557,54 +552,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     });
   };
 
-  const mobileVisibleCurationOptions = useMemo(() => {
-    if (curationOptions.length <= MOBILE_INLINE_CURATION_LIMIT) {
-      return curationOptions;
-    }
-
-    const activeCurationOption =
-      curationOptions.find((option) => option.key === activeKey) ?? null;
-    const visibleOptions = activeCurationOption ? [activeCurationOption] : [];
-
-    for (const option of curationOptions) {
-      if (visibleOptions.length >= MOBILE_INLINE_CURATION_LIMIT) {
-        break;
-      }
-
-      if (option.key === activeCurationOption?.key) {
-        continue;
-      }
-
-      visibleOptions.push(option);
-    }
-
-    return visibleOptions;
-  }, [activeKey, curationOptions]);
-
-  const mobileOverflowCurationOptions = useMemo(() => {
-    const visibleKeys = new Set(
-      mobileVisibleCurationOptions.map((option) => option.key)
-    );
-
-    return curationOptions.filter((option) => !visibleKeys.has(option.key));
-  }, [curationOptions, mobileVisibleCurationOptions]);
-
-  const mobileOptions: TabOption[] = useMemo(
-    () => [...standardOptions, ...mobileVisibleCurationOptions],
-    [mobileVisibleCurationOptions, standardOptions]
-  );
-
-  const mobileOverflowItems: CompactMenuItem[] = useMemo(
-    () =>
-      mobileOverflowCurationOptions.map((option) => ({
-        id: option.key,
-        label: option.label,
-        icon: option.leadingIcon,
-        onSelect: () => onSelectCuration(getCurationIdFromTabKey(option.key)),
-      })),
-    [mobileOverflowCurationOptions, onSelectCuration]
-  );
-
   useEffect(() => {
     const frameId = globalThis.window.requestAnimationFrame(() => {
       [desktopTabsScrollerRef.current, mobileTabsScrollerRef.current].forEach(
@@ -642,7 +589,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         >
           <div className="tw-inline-flex tw-items-center tw-gap-1">
             <TabToggle
-              options={mobileOptions}
+              options={options}
               activeKey={activeKey}
               onSelect={(key) => {
                 if (key.startsWith("curation:")) {
@@ -654,15 +601,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                 setActiveTab(key as MyStreamWaveTab);
               }}
             />
-            {mobileOverflowItems.length > 0 && (
-              <CompactMenu
-                triggerClassName="tw-inline-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
-                trigger={<EllipsisVerticalIcon className="tw-h-5 tw-w-5" />}
-                aria-label="More curations"
-                items={mobileOverflowItems}
-                menuWidthClassName="tw-w-52"
-              />
-            )}
           </div>
         </div>
       </div>

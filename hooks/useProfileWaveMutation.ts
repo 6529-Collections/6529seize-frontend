@@ -20,12 +20,50 @@ type ProfileWaveAction =
     }
   | { readonly type: "clear" };
 
-const getProfileIdentityKey = (profile: ApiIdentity | null): string | null =>
+interface ProfileWaveIdentitySource {
+  readonly query?: string | null | undefined;
+  readonly handle?: string | null | undefined;
+  readonly normalised_handle?: string | null | undefined;
+  readonly primary_wallet?: string | null | undefined;
+  readonly primary_address?: string | null | undefined;
+  readonly id?: string | null | undefined;
+}
+
+const getProfileIdentityKey = (
+  profile: ProfileWaveIdentitySource | null
+): string | null =>
   profile?.query ??
   profile?.handle ??
   profile?.primary_wallet ??
+  profile?.primary_address ??
   profile?.id ??
   null;
+
+const getProfileIdentityAliases = (
+  ...profiles: readonly (ProfileWaveIdentitySource | null | undefined)[]
+): string[] => {
+  const aliases = new Set<string>();
+
+  for (const profile of profiles) {
+    const candidates = [
+      profile?.query,
+      profile?.handle,
+      profile?.normalised_handle,
+      profile?.primary_wallet,
+      profile?.primary_address,
+      profile?.id,
+    ];
+
+    for (const candidate of candidates) {
+      const normalizedCandidate = candidate?.trim().toLowerCase() ?? "";
+      if (normalizedCandidate.length > 0) {
+        aliases.add(normalizedCandidate);
+      }
+    }
+  }
+
+  return [...aliases];
+};
 
 export function useProfileWaveMutation(profile: ApiIdentity | null) {
   const queryClient = useQueryClient();
@@ -49,14 +87,14 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
 
       return await clearProfileWave({ identity });
     },
-    onSuccess: async (updatedProfile, action) => {
+    onSuccess: (updatedProfile, action) => {
       onProfileEdit({
         profile: updatedProfile,
         previousProfile: profile,
       });
-      const identity = getProfileIdentityKey(profile);
-      if (identity) {
-        const queryKey = getProfileWaveQueryKey(identity);
+      const aliases = getProfileIdentityAliases(profile, updatedProfile);
+      for (const alias of aliases) {
+        const queryKey = getProfileWaveQueryKey(alias);
         queryClient.setQueryData<ApiProfileWaveResponse>(queryKey, {
           profile_wave_id:
             action.type === "set"
@@ -65,7 +103,6 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
           profile_curation_id:
             action.type === "set" ? (action.profileCurationId ?? null) : null,
         });
-        await queryClient.invalidateQueries({ queryKey });
       }
       setToast({
         message:
