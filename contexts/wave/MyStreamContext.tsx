@@ -232,6 +232,12 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     handleConnectedWebSocket();
   }, [websocketStatus]);
 
+  useEffect(() => {
+    if (activeWaveId) {
+      registerWave(activeWaveId, true);
+    }
+  }, [activeWaveId, registerWave]);
+
   // Detect when app comes to foreground on mobile
   useEffect(() => {
     if (!isCapacitor) {
