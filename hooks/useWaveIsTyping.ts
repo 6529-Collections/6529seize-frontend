@@ -2,12 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useWaveWebSocket } from "./useWaveWebSocket";
-import type {
-  WsDropUpdateMessage,
-  WsTypingMessage} from "@/helpers/Types";
-import {
-  WsMessageType
-} from "@/helpers/Types";
+import type { WsDropUpdateMessage, WsTypingMessage } from "@/helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -85,8 +81,7 @@ export function useWaveIsTyping(
       let msg: WsTypingMessage | WsDropUpdateMessage;
       try {
         msg = JSON.parse(event.data);
-      } catch (err) {
-        console.error("Bad WebSocket JSON", err);
+      } catch {
         return;
       }
       if (msg.type === WsMessageType.DROP_UPDATE) {
