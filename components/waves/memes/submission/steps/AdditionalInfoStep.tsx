@@ -49,6 +49,7 @@ interface AdditionalInfoStepProps {
   readonly onPreview: () => void;
   readonly onSubmit: () => void;
   readonly isSubmitting: boolean;
+  readonly submitLabel?: string | undefined;
 }
 
 const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
@@ -76,6 +77,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   onPreview,
   onSubmit,
   isSubmitting,
+  submitLabel = "Submit Artwork",
 }) => {
   const metadataLengthValidation = useMemo(
     () =>
@@ -296,7 +298,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
               loading={isSubmitting}
               padding="tw-px-6 tw-py-3"
             >
-              Submit Artwork
+              {submitLabel}
             </PrimaryButton>
           </div>
         </div>

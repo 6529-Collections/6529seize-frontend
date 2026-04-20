@@ -34,15 +34,21 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDropsLeaderboard({
-      waveId: wave.id,
-      sort,
-      curatedByGroupId,
-      minPrice,
-      maxPrice,
-      priceCurrency,
-    });
+  const {
+    drops,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    refetch,
+  } = useWaveDropsLeaderboard({
+    waveId: wave.id,
+    sort,
+    curatedByGroupId,
+    minPrice,
+    maxPrice,
+    priceCurrency,
+  });
 
   const intersectionElementRef = useIntersectionObserver(async () => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
@@ -55,6 +61,10 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     params.set("drop", drop.id);
     router.push(`${pathname}?${params.toString()}`);
   };
+
+  const handleSourceDropDeleted = React.useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   if (isFetching && drops.length === 0) {
     return <WaveLeaderboardLoading />;
@@ -74,6 +84,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
           drop={drop}
           wave={wave}
           onDropClick={onDropClick}
+          onSourceDropDeleted={handleSourceDropDeleted}
         />
       ))}
       {isFetchingNextPage && <WaveLeaderboardLoadingBar />}
