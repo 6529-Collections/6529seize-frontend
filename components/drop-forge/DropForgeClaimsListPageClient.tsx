@@ -8,7 +8,6 @@ import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
 import {
-  type ClaimPrimaryStatus,
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
@@ -16,6 +15,10 @@ import {
   CRAFT_CLAIMS_PAGE_SIZE,
   DROP_FORGE_SECTIONS,
 } from "@/components/drop-forge/drop-forge.constants";
+import {
+  findBestMatchingLaunchActionName,
+  getLaunchListStatus,
+} from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
@@ -29,10 +32,6 @@ import {
   getClaimsPage,
   getMemesMintingClaimActions,
 } from "@/services/api/memes-minting-claims-api";
-import {
-  type ManifoldClaim,
-  ManifoldClaimStatus,
-} from "@/hooks/useManifoldClaim";
 
 const CARD_CLASS =
   "tw-flex tw-flex-col tw-min-h-[7rem] tw-overflow-hidden tw-rounded-xl tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-iron-800 hover:tw-ring-iron-600 tw-p-4 sm:tw-p-5 tw-no-underline tw-transition-all tw-duration-300";
@@ -40,159 +39,6 @@ const CARD_STATUS_CONTAINER_CLASS =
   "tw-absolute tw-right-4 tw-top-4 tw-z-10 tw-flex tw-flex-col tw-items-end tw-gap-2";
 
 type MediaKind = "image" | "video" | "glb" | "html" | "unknown";
-
-function normalizeLaunchActionName(actionName: string): string {
-  return actionName
-    .trim()
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, "");
-}
-
-function findLaunchListActionName(
-  actionNames: readonly string[],
-  kind: "research" | "payartist"
-): string | null {
-  let bestMatch: string | null = null;
-  let bestScore = -1;
-
-  for (const actionName of actionNames) {
-    const normalized = normalizeLaunchActionName(actionName);
-
-    if (kind === "research") {
-      if (
-        !normalized.includes("research") ||
-        normalized.includes("artist") ||
-        normalized.includes("team") ||
-        normalized.includes("public") ||
-        normalized.includes("phase0") ||
-        normalized.includes("phase1") ||
-        normalized.includes("phase2")
-      ) {
-        continue;
-      }
-
-      const score =
-        (normalized.includes("airdrop") ? 2 : 0) +
-        (normalized.endsWith("airdrop") ? 1 : 0);
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = actionName;
-      }
-      continue;
-    }
-
-    if (
-      !normalized.includes("pay") ||
-      !normalized.includes("artist") ||
-      normalized.includes("research") ||
-      normalized.includes("team") ||
-      normalized.includes("public") ||
-      normalized.includes("phase0") ||
-      normalized.includes("phase1") ||
-      normalized.includes("phase2")
-    ) {
-      continue;
-    }
-
-    const score =
-      (normalized.includes("payment") ? 2 : 0) +
-      (normalized.endsWith("artist") ? 1 : 0);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = actionName;
-    }
-  }
-
-  return bestMatch;
-}
-
-function getLaunchPhaseLabel(
-  phase: Pick<NonNullable<ManifoldClaim["memePhase"]>, "id" | "name"> | null
-): string {
-  if (phase?.id === "0") return "Phase 0";
-  if (phase?.id === "1") return "Phase 1";
-  if (phase?.id === "2") return "Phase 2";
-  if (phase?.id === "public") return "Public";
-
-  const phaseName = phase?.name?.trim();
-  if (!phaseName) {
-    return "Current Phase";
-  }
-
-  return phaseName
-    .replace(/\s*\(Allowlist\)\s*/gi, "")
-    .replace(/\s*Phase\s*$/i, "")
-    .trim();
-}
-
-function getLaunchListStatus({
-  primaryStatus,
-  manifoldClaim,
-  researchAirdropCompleted,
-  payArtistCompleted,
-}: Readonly<{
-  primaryStatus: ClaimPrimaryStatus;
-  manifoldClaim: ManifoldClaim | null | undefined;
-  researchAirdropCompleted: boolean;
-  payArtistCompleted: boolean;
-}>): ClaimPrimaryStatus {
-  if (primaryStatus.key !== "live" || !manifoldClaim) {
-    return primaryStatus;
-  }
-
-  if (payArtistCompleted) {
-    return {
-      key: "live",
-      label: "Finalized",
-      tone: "success",
-      reason: "All launch phases and post-launch actions are complete",
-    };
-  }
-
-  if (researchAirdropCompleted) {
-    return {
-      key: "live",
-      label: "Live - Pay Artist",
-      tone: "success",
-      reason: "Research airdrop is complete. Artist payment remains",
-    };
-  }
-
-  if (manifoldClaim.status === ManifoldClaimStatus.ACTIVE) {
-    const phaseLabel = getLaunchPhaseLabel(manifoldClaim.memePhase ?? null);
-    return {
-      key: "live",
-      label: `Live - ${phaseLabel}`,
-      tone: "success",
-      reason: `${phaseLabel} is currently active`,
-    };
-  }
-
-  if (manifoldClaim.status === ManifoldClaimStatus.UPCOMING) {
-    return {
-      key: "pending_initialization",
-      label: "Pending Initialization",
-      tone: "pending",
-      reason: "Claim is initialized onchain but not live yet",
-    };
-  }
-
-  if (manifoldClaim.nextMemePhase) {
-    return {
-      key: "pending_initialization",
-      label: "Pending Initialization",
-      tone: "pending",
-      reason: `${getLaunchPhaseLabel(manifoldClaim.nextMemePhase)} is next and still needs the onchain update`,
-    };
-  }
-
-  return {
-    key: "live",
-    label: "Live - Airdrop to Research",
-    tone: "success",
-    reason: "Mint phases are complete. Research airdrop is next",
-  };
-}
 
 function normalizeFormat(format: string | null | undefined): string | null {
   return format ? format.toUpperCase() : null;
@@ -564,14 +410,15 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
 
         const actions = response.actions ?? [];
         const actionNames = actions.map((action) => action.action);
-        const researchActionName = findLaunchListActionName(
+        const researchActionName = findBestMatchingLaunchActionName(
           actionNames,
           "research"
         );
-        const payArtistActionName = findLaunchListActionName(
-          actionNames,
-          "payartist"
-        );
+        const payArtistActionName =
+          findBestMatchingLaunchActionName(
+            actionNames,
+            "payartist"
+          );
 
         setResearchAirdropCompleted(
           researchActionName

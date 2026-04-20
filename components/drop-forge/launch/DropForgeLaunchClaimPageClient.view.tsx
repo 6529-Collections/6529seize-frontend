@@ -26,10 +26,12 @@ import DropForgeStorageLinkCard from "@/components/drop-forge/DropForgeStorageLi
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import {
+  findBestMatchingLaunchActionName,
   formatLocalDateTime,
   formatScheduledLabel,
   getRootAddressesCount,
   getRootTotalSpots,
+  type LaunchPhaseKey,
 } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
@@ -44,13 +46,6 @@ import { formatWeiToEth } from "@/helpers/manifold-display-helpers";
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
-type LaunchPhaseKey =
-  | "phase0"
-  | "phase1"
-  | "phase2"
-  | "publicphase"
-  | "research"
-  | "payartist";
 type LaunchMediaTab = "image" | "animation";
 
 const BTN_SUBSCRIPTIONS_AIRDROP =
@@ -70,7 +65,6 @@ type LaunchClaimPrimaryStatus = ClaimPrimaryStatus | null;
 type LaunchClaimMintTimeline = NonNullable<
   ReturnType<typeof getClaimTimelineDetails>
 >;
-type LaunchMintingClaimActionKind = LaunchPhaseKey | "artist" | "team";
 type LaunchAirdropActionLabel =
   | "Airdrop Artist"
   | "Airdrop Team"
@@ -196,112 +190,223 @@ interface DropForgeLaunchClaimPageViewProps {
   ) => Promise<void>;
 }
 
-function normalizeMintingClaimActionName(actionName: string): string {
-  return actionName
-    .trim()
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, "");
-}
-
-function getMintingClaimActionTerms(kind: LaunchMintingClaimActionKind): {
-  required: string[];
-  preferred: string[];
-  excluded: string[];
-} {
-  switch (kind) {
-    case "artist":
-      return {
-        required: ["artist"],
-        preferred: ["airdrop"],
-        excluded: ["team", "research", "phase0", "phase1", "phase2", "public"],
-      };
-    case "team":
-      return {
-        required: ["team"],
-        preferred: ["airdrop"],
-        excluded: [
-          "artist",
-          "research",
-          "phase0",
-          "phase1",
-          "phase2",
-          "public",
-        ],
-      };
-    case "research":
-      return {
-        required: ["research"],
-        preferred: ["airdrop"],
-        excluded: ["artist", "team", "phase0", "phase1", "phase2", "public"],
-      };
-    case "payartist":
-      return {
-        required: ["pay", "artist"],
-        preferred: ["payment"],
-        excluded: ["team", "research", "phase0", "phase1", "phase2", "public"],
-      };
-    case "phase0":
-      return {
-        required: ["phase0"],
-        preferred: ["airdrop"],
-        excluded: ["artist", "team", "research", "public"],
-      };
-    case "phase1":
-      return {
-        required: ["phase1"],
-        preferred: ["airdrop"],
-        excluded: ["artist", "team", "research", "public"],
-      };
-    case "phase2":
-      return {
-        required: ["phase2"],
-        preferred: ["airdrop"],
-        excluded: ["artist", "team", "research", "public"],
-      };
-    case "publicphase":
-      return {
-        required: ["public"],
-        preferred: ["phase", "airdrop"],
-        excluded: ["artist", "team", "research", "phase0", "phase1", "phase2"],
-      };
-    default:
-      return {
-        required: [],
-        preferred: [],
-        excluded: [],
-      };
-  }
-}
-
-function findBestMatchingMintingClaimActionName(
-  actionNames: readonly string[],
-  kind: LaunchMintingClaimActionKind
-): string | null {
-  const { required, preferred, excluded } = getMintingClaimActionTerms(kind);
-  let bestMatch: string | null = null;
-  let bestScore = -1;
-
-  for (const actionName of actionNames) {
-    const normalized = normalizeMintingClaimActionName(actionName);
-    if (excluded.some((term) => normalized.includes(term))) {
-      continue;
-    }
-    if (!required.every((term) => normalized.includes(term))) {
-      continue;
-    }
-
-    const score =
-      required.length * 10 +
-      preferred.filter((term) => normalized.includes(term)).length * 2 +
-      (normalized.endsWith("airdrop") ? 1 : 0);
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = actionName;
-    }
+function getPayArtistSalesLabel(
+  mintStat: ApiMemesMintStat | null,
+  mintStatLoading: boolean
+): string {
+  if (mintStatLoading) {
+    return "loading...";
   }
 
-  return bestMatch;
+  if (!mintStat) {
+    return "—";
+  }
+
+  return `${mintStat.total_count.toLocaleString()} (${mintStat.subscriptions_count.toLocaleString()} / ${mintStat.mint_count.toLocaleString()})`;
+}
+
+function getPayArtistMetricValue(
+  mintStatLoading: boolean,
+  value: number | null | undefined
+): string {
+  return mintStatLoading ? "loading..." : formatMintStatEth(value);
+}
+
+function renderSelectedPhasePanel({
+  selectedPhase,
+  totalMinted,
+  researchTargetEditionSize,
+  researchTargetEditionSizeMax,
+  onResearchTargetEditionSizeChange,
+  claimWritePending,
+  isInitialized,
+  researchAirdropCount,
+  runResearchAirdropWrite,
+  researchAction,
+  mintingClaimActionPending,
+  onMintingClaimActionToggle,
+  mintStat,
+  mintStatLoading,
+  mintStatError,
+  payArtistAmountEth,
+  onPayArtistAmountChange,
+  payArtistAddressInput,
+  payArtistAddressLoading,
+  payArtistAddressMissing,
+  payArtistAddressError,
+  onPayArtistAddressInputChange,
+  onPayArtistResolvedAddressChange,
+  onPayArtistAddressLoadingChange,
+  onPayArtistAddressEnsErrorChange,
+  payArtistActionDisabled,
+  payArtistWritePending,
+  runPayArtistWrite,
+  payArtistAction,
+  manifoldClaim,
+  selectedPhaseDiffs,
+  changedFieldBoxClassName,
+  changedFieldBoxLabelClassName,
+  selectedPhasePriceValue,
+  onSelectedPhasePriceChange,
+  isPublicPhaseSelected,
+  rootsLoading,
+  selectedPhaseConfig,
+  selectedPhaseWindowStartValue,
+  selectedPhaseWindowEndValue,
+  onSelectedPhaseStartChange,
+  onSelectedPhaseEndChange,
+  selectedPhaseActionDisabled,
+  onSelectedPhaseAction,
+  selectedPhaseActionLabel,
+  showPhase0AirdropSections,
+  phase0AirdropsError,
+  phase0AirdropsLoading,
+  artistAirdropSummary,
+  teamAirdropSummary,
+  artistAirdrops,
+  teamAirdrops,
+  runAirdropWrite,
+  mintingClaimActionsByName,
+  subscriptionAirdropSections,
+}: Readonly<{
+  selectedPhase: "" | LaunchPhaseKey;
+  totalMinted: number;
+  researchTargetEditionSize: number;
+  researchTargetEditionSizeMax: number | null;
+  onResearchTargetEditionSizeChange: (value: string) => void;
+  claimWritePending: boolean;
+  isInitialized: boolean;
+  researchAirdropCount: number;
+  runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
+  researchAction: ApiMintingClaimAction | null;
+  mintingClaimActionPending: string | null;
+  onMintingClaimActionToggle: (
+    action: string,
+    completed: boolean
+  ) => Promise<void>;
+  mintStat: ApiMemesMintStat | null;
+  mintStatLoading: boolean;
+  mintStatError: string | null;
+  payArtistAmountEth: string;
+  onPayArtistAmountChange: (value: string) => void;
+  payArtistAddressInput: string;
+  payArtistAddressLoading: boolean;
+  payArtistAddressMissing: boolean;
+  payArtistAddressError: string | null;
+  onPayArtistAddressInputChange: (value: string) => void;
+  onPayArtistResolvedAddressChange: (value: string) => void;
+  onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
+  onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
+  payArtistActionDisabled: boolean;
+  payArtistWritePending: boolean;
+  runPayArtistWrite: (mintingClaimAction: string | null) => void;
+  payArtistAction: ApiMintingClaimAction | null;
+  manifoldClaim: ManifoldClaim | null;
+  selectedPhaseDiffs: LaunchPhaseDiffsView;
+  changedFieldBoxClassName: string;
+  changedFieldBoxLabelClassName: string;
+  selectedPhasePriceValue: string;
+  onSelectedPhasePriceChange: (value: string) => void;
+  isPublicPhaseSelected: boolean;
+  rootsLoading: boolean;
+  selectedPhaseConfig: LaunchPhaseConfigView | null;
+  selectedPhaseWindowStartValue: string;
+  selectedPhaseWindowEndValue: string;
+  onSelectedPhaseStartChange: (value: string) => void;
+  onSelectedPhaseEndChange: (value: string) => void;
+  selectedPhaseActionDisabled: boolean;
+  onSelectedPhaseAction: () => void;
+  selectedPhaseActionLabel: string;
+  showPhase0AirdropSections: boolean;
+  phase0AirdropsError: string | null;
+  phase0AirdropsLoading: boolean;
+  artistAirdropSummary: LaunchAirdropSummaryView;
+  teamAirdropSummary: LaunchAirdropSummaryView;
+  artistAirdrops: PhaseAirdrop[] | null;
+  teamAirdrops: PhaseAirdrop[] | null;
+  runAirdropWrite: DropForgeLaunchClaimPageViewProps["runAirdropWrite"];
+  mintingClaimActionsByName: Record<string, ApiMintingClaimAction>;
+  subscriptionAirdropSections: LaunchSubscriptionAirdropSectionView[];
+}>) {
+  if (selectedPhase === "research") {
+    return (
+      <DropForgeResearchAirdropSection
+        totalMinted={totalMinted}
+        researchTargetEditionSize={researchTargetEditionSize}
+        researchTargetEditionSizeMax={researchTargetEditionSizeMax}
+        onResearchTargetEditionSizeChange={onResearchTargetEditionSizeChange}
+        claimWritePending={claimWritePending}
+        isInitialized={isInitialized}
+        researchAirdropCount={researchAirdropCount}
+        runResearchAirdropWrite={runResearchAirdropWrite}
+        researchAction={researchAction}
+        mintingClaimActionPending={mintingClaimActionPending}
+        onMintingClaimActionToggle={onMintingClaimActionToggle}
+      />
+    );
+  }
+
+  if (selectedPhase === "payartist") {
+    return (
+      <DropForgePayArtistSection
+        mintStat={mintStat}
+        mintStatLoading={mintStatLoading}
+        mintStatError={mintStatError}
+        payArtistAmountEth={payArtistAmountEth}
+        onPayArtistAmountChange={onPayArtistAmountChange}
+        payArtistAddressInput={payArtistAddressInput}
+        payArtistAddressLoading={payArtistAddressLoading}
+        payArtistAddressMissing={payArtistAddressMissing}
+        payArtistAddressError={payArtistAddressError}
+        onPayArtistAddressInputChange={onPayArtistAddressInputChange}
+        onPayArtistResolvedAddressChange={onPayArtistResolvedAddressChange}
+        onPayArtistAddressLoadingChange={onPayArtistAddressLoadingChange}
+        onPayArtistAddressEnsErrorChange={onPayArtistAddressEnsErrorChange}
+        payArtistActionDisabled={payArtistActionDisabled}
+        payArtistWritePending={payArtistWritePending}
+        runPayArtistWrite={runPayArtistWrite}
+        payArtistAction={payArtistAction}
+        mintingClaimActionPending={mintingClaimActionPending}
+        onMintingClaimActionToggle={onMintingClaimActionToggle}
+      />
+    );
+  }
+
+  return (
+    <DropForgePhaseConfigurationSection
+      manifoldClaim={manifoldClaim}
+      selectedPhaseDiffs={selectedPhaseDiffs}
+      changedFieldBoxClassName={changedFieldBoxClassName}
+      changedFieldBoxLabelClassName={changedFieldBoxLabelClassName}
+      selectedPhasePriceValue={selectedPhasePriceValue}
+      onSelectedPhasePriceChange={onSelectedPhasePriceChange}
+      selectedPhase={selectedPhase}
+      isPublicPhaseSelected={isPublicPhaseSelected}
+      rootsLoading={rootsLoading}
+      selectedPhaseConfig={selectedPhaseConfig}
+      selectedPhaseWindowStartValue={selectedPhaseWindowStartValue}
+      selectedPhaseWindowEndValue={selectedPhaseWindowEndValue}
+      onSelectedPhaseStartChange={onSelectedPhaseStartChange}
+      onSelectedPhaseEndChange={onSelectedPhaseEndChange}
+      selectedPhaseActionDisabled={selectedPhaseActionDisabled}
+      onSelectedPhaseAction={onSelectedPhaseAction}
+      selectedPhaseActionLabel={selectedPhaseActionLabel}
+      claimWritePending={claimWritePending}
+      showPhase0AirdropSections={showPhase0AirdropSections}
+      phase0AirdropsError={phase0AirdropsError}
+      phase0AirdropsLoading={phase0AirdropsLoading}
+      isInitialized={isInitialized}
+      artistAirdropSummary={artistAirdropSummary}
+      teamAirdropSummary={teamAirdropSummary}
+      artistAirdrops={artistAirdrops}
+      teamAirdrops={teamAirdrops}
+      runAirdropWrite={runAirdropWrite}
+      mintingClaimActionsByName={mintingClaimActionsByName}
+      mintingClaimActionPending={mintingClaimActionPending}
+      onMintingClaimActionToggle={onMintingClaimActionToggle}
+      subscriptionAirdropSections={subscriptionAirdropSections}
+    />
+  );
 }
 
 function DropForgeLaunchPageTitleRight() {
@@ -923,11 +1028,11 @@ function DropForgePhase0AirdropsSection({
   }
 
   const availableActionNames = Object.keys(mintingClaimActionsByName);
-  const artistActionName = findBestMatchingMintingClaimActionName(
+  const artistActionName = findBestMatchingLaunchActionName(
     availableActionNames,
     "artist"
   );
-  const teamActionName = findBestMatchingMintingClaimActionName(
+  const teamActionName = findBestMatchingLaunchActionName(
     availableActionNames,
     "team"
   );
@@ -1035,7 +1140,7 @@ function DropForgeSubscriptionAirdropSections({
             </p>
           ) : null}
           {(() => {
-            const actionName = findBestMatchingMintingClaimActionName(
+            const actionName = findBestMatchingLaunchActionName(
               availableActionNames,
               section.phaseKey
             );
@@ -1349,27 +1454,19 @@ function DropForgePayArtistSection({
           label="Total Sales (Subscriptions / Mints)"
           contentClassName={mintStatLoadingClassName}
         >
-          {mintStatLoading
-            ? "loading..."
-            : mintStat
-              ? `${mintStat.total_count.toLocaleString()} (${mintStat.subscriptions_count.toLocaleString()} / ${mintStat.mint_count.toLocaleString()})`
-              : "—"}
+          {getPayArtistSalesLabel(mintStat, mintStatLoading)}
         </DropForgeFieldBox>
         <DropForgeFieldBox
           label="Proceeds (ETH)"
           contentClassName={mintStatLoadingClassName}
         >
-          {mintStatLoading
-            ? "loading..."
-            : formatMintStatEth(mintStat?.proceeds_eth)}
+          {getPayArtistMetricValue(mintStatLoading, mintStat?.proceeds_eth)}
         </DropForgeFieldBox>
         <DropForgeFieldBox
           label="Artist Split (ETH)"
           contentClassName={mintStatLoadingClassName}
         >
-          {mintStatLoading
-            ? "loading..."
-            : formatMintStatEth(mintStat?.artist_split_eth)}
+          {getPayArtistMetricValue(mintStatLoading, mintStat?.artist_split_eth)}
         </DropForgeFieldBox>
       </div>
 
@@ -1794,14 +1891,14 @@ function DropForgePhaseSelectionSection({
   runAirdropWrite: DropForgeLaunchClaimPageViewProps["runAirdropWrite"];
   subscriptionAirdropSections: LaunchSubscriptionAirdropSectionView[];
 }>) {
-  const researchActionName = findBestMatchingMintingClaimActionName(
+  const researchActionName = findBestMatchingLaunchActionName(
     Object.keys(mintingClaimActionsByName),
     "research"
   );
   const researchAction = researchActionName
     ? (mintingClaimActionsByName[researchActionName] ?? null)
     : null;
-  const payArtistActionName = findBestMatchingMintingClaimActionName(
+  const payArtistActionName = findBestMatchingLaunchActionName(
     Object.keys(mintingClaimActionsByName),
     "payartist"
   );
@@ -1911,79 +2008,63 @@ function DropForgePhaseSelectionSection({
         </button>
       </div>
       <div className="tw-min-h-[18rem] lg:tw-min-h-[30rem]">
-        {selectedPhase === "research" ? (
-          <DropForgeResearchAirdropSection
-            totalMinted={totalMinted}
-            researchTargetEditionSize={researchTargetEditionSize}
-            researchTargetEditionSizeMax={researchTargetEditionSizeMax}
-            onResearchTargetEditionSizeChange={
-              onResearchTargetEditionSizeChange
-            }
-            claimWritePending={claimWritePending}
-            isInitialized={isInitialized}
-            researchAirdropCount={researchAirdropCount}
-            runResearchAirdropWrite={runResearchAirdropWrite}
-            researchAction={researchAction}
-            mintingClaimActionPending={mintingClaimActionPending}
-            onMintingClaimActionToggle={onMintingClaimActionToggle}
-          />
-        ) : selectedPhase === "payartist" ? (
-          <DropForgePayArtistSection
-            mintStat={mintStat}
-            mintStatLoading={mintStatLoading}
-            mintStatError={mintStatError}
-            payArtistAmountEth={payArtistAmountEth}
-            onPayArtistAmountChange={onPayArtistAmountChange}
-            payArtistAddressInput={payArtistAddressInput}
-            payArtistAddressLoading={payArtistAddressLoading}
-            payArtistAddressMissing={payArtistAddressMissing}
-            payArtistAddressError={payArtistAddressError}
-            onPayArtistAddressInputChange={onPayArtistAddressInputChange}
-            onPayArtistResolvedAddressChange={onPayArtistResolvedAddressChange}
-            onPayArtistAddressLoadingChange={onPayArtistAddressLoadingChange}
-            onPayArtistAddressEnsErrorChange={onPayArtistAddressEnsErrorChange}
-            payArtistActionDisabled={payArtistActionDisabled}
-            payArtistWritePending={payArtistWritePending}
-            runPayArtistWrite={runPayArtistWrite}
-            payArtistAction={payArtistAction}
-            mintingClaimActionPending={mintingClaimActionPending}
-            onMintingClaimActionToggle={onMintingClaimActionToggle}
-          />
-        ) : (
-          <DropForgePhaseConfigurationSection
-            manifoldClaim={manifoldClaim}
-            selectedPhaseDiffs={selectedPhaseDiffs}
-            changedFieldBoxClassName={changedFieldBoxClassName}
-            changedFieldBoxLabelClassName={changedFieldBoxLabelClassName}
-            selectedPhasePriceValue={selectedPhasePriceValue}
-            onSelectedPhasePriceChange={onSelectedPhasePriceChange}
-            selectedPhase={selectedPhase}
-            isPublicPhaseSelected={isPublicPhaseSelected}
-            rootsLoading={rootsLoading}
-            selectedPhaseConfig={selectedPhaseConfig}
-            selectedPhaseWindowStartValue={selectedPhaseWindowStartValue}
-            selectedPhaseWindowEndValue={selectedPhaseWindowEndValue}
-            onSelectedPhaseStartChange={onSelectedPhaseStartChange}
-            onSelectedPhaseEndChange={onSelectedPhaseEndChange}
-            selectedPhaseActionDisabled={selectedPhaseActionDisabled}
-            onSelectedPhaseAction={onSelectedPhaseAction}
-            selectedPhaseActionLabel={selectedPhaseActionLabel}
-            claimWritePending={claimWritePending}
-            showPhase0AirdropSections={showPhase0AirdropSections}
-            phase0AirdropsError={phase0AirdropsError}
-            phase0AirdropsLoading={phase0AirdropsLoading}
-            isInitialized={isInitialized}
-            artistAirdropSummary={artistAirdropSummary}
-            teamAirdropSummary={teamAirdropSummary}
-            artistAirdrops={artistAirdrops}
-            teamAirdrops={teamAirdrops}
-            runAirdropWrite={runAirdropWrite}
-            mintingClaimActionsByName={mintingClaimActionsByName}
-            mintingClaimActionPending={mintingClaimActionPending}
-            onMintingClaimActionToggle={onMintingClaimActionToggle}
-            subscriptionAirdropSections={subscriptionAirdropSections}
-          />
-        )}
+        {renderSelectedPhasePanel({
+          selectedPhase,
+          totalMinted,
+          researchTargetEditionSize,
+          researchTargetEditionSizeMax,
+          onResearchTargetEditionSizeChange,
+          claimWritePending,
+          isInitialized,
+          researchAirdropCount,
+          runResearchAirdropWrite,
+          researchAction,
+          mintingClaimActionPending,
+          onMintingClaimActionToggle,
+          mintStat,
+          mintStatLoading,
+          mintStatError,
+          payArtistAmountEth,
+          onPayArtistAmountChange,
+          payArtistAddressInput,
+          payArtistAddressLoading,
+          payArtistAddressMissing,
+          payArtistAddressError,
+          onPayArtistAddressInputChange,
+          onPayArtistResolvedAddressChange,
+          onPayArtistAddressLoadingChange,
+          onPayArtistAddressEnsErrorChange,
+          payArtistActionDisabled,
+          payArtistWritePending,
+          runPayArtistWrite,
+          payArtistAction,
+          manifoldClaim,
+          selectedPhaseDiffs,
+          changedFieldBoxClassName,
+          changedFieldBoxLabelClassName,
+          selectedPhasePriceValue,
+          onSelectedPhasePriceChange,
+          isPublicPhaseSelected,
+          rootsLoading,
+          selectedPhaseConfig,
+          selectedPhaseWindowStartValue,
+          selectedPhaseWindowEndValue,
+          onSelectedPhaseStartChange,
+          onSelectedPhaseEndChange,
+          selectedPhaseActionDisabled,
+          onSelectedPhaseAction,
+          selectedPhaseActionLabel,
+          showPhase0AirdropSections,
+          phase0AirdropsError,
+          phase0AirdropsLoading,
+          artistAirdropSummary,
+          teamAirdropSummary,
+          artistAirdrops,
+          teamAirdrops,
+          runAirdropWrite,
+          mintingClaimActionsByName,
+          subscriptionAirdropSections,
+        })}
       </div>
     </>
   );

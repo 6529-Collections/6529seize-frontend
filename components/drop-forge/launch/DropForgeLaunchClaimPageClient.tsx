@@ -15,9 +15,10 @@ import ClaimTransactionModal from "@/components/drop-forge/launch/ClaimTransacti
 import {
   buildSubscriptionAirdropSelection,
   clampResearchTargetEditionSize,
+  findBestMatchingLaunchActionName,
   formatDateTimeLocalInput,
-  getAnimationMimeType,
   getAutoSelectedLaunchPhase,
+  getAnimationMimeType,
   getDefaultResearchTargetEditionSize,
   getErrorMessage,
   getMediaTypeLabel,
@@ -25,17 +26,18 @@ import {
   getRootForPhase,
   getSafeExternalUrl,
   getSubscriptionPhaseName,
+  type LaunchPhaseKey,
   isNotFoundError,
   mergeAirdropsByWallet,
   normalizeHexValue,
   parseLocalDateTimeToUnixSeconds,
   summarizeAirdrops,
 } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
+import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launch/launchClaimHelpers";
 import {
   DropForgeLaunchClaimPageView,
   DropForgeLaunchClaimPermissionFallbackView,
 } from "@/components/drop-forge/launch/DropForgeLaunchClaimPageClient.view";
-import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launch/launchClaimHelpers";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   MANIFOLD_LAZY_CLAIM_CONTRACT,
@@ -71,13 +73,6 @@ import { getAuthJwt } from "@/services/auth/auth.utils";
 interface DropForgeLaunchClaimPageClientProps {
   claimId: number;
 }
-type LaunchPhaseKey =
-  | "phase0"
-  | "phase1"
-  | "phase2"
-  | "publicphase"
-  | "research"
-  | "payartist";
 type ClaimTxModalStatus = "confirm_wallet" | "submitted" | "success" | "error";
 
 interface ClaimTxModalState {
@@ -98,69 +93,431 @@ function formatEditableEthValue(value: number | null | undefined): string {
   return normalized.toString();
 }
 
-function normalizeMintingClaimActionName(actionName: string): string {
-  return actionName
-    .trim()
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, "");
+interface SelectedPhaseComparableConfig {
+  startDate: number | null;
+  endDate: number | null;
+  merkleRoot: string | null;
+  costWei: bigint | null;
 }
 
-function findLaunchActionName(
-  actionNames: readonly string[],
-  kind: "research" | "payartist"
-): string | null {
-  let bestMatch: string | null = null;
-  let bestScore = -1;
+function getClaimPresentationState({
+  claim,
+  manifoldClaim,
+  onChainClaimFetching,
+  activeMediaTab,
+}: Readonly<{
+  claim: MintingClaim | null;
+  manifoldClaim: ReturnType<typeof useDropForgeManifoldClaim>["claim"];
+  onChainClaimFetching: boolean;
+  activeMediaTab: LaunchMediaTab;
+}>) {
+  return {
+    isInitialized: manifoldClaim?.instanceId != null,
+    hasPublishedMetadata: Boolean(claim?.metadata_location != null),
+    missingRequiredInfo: Boolean(claim && isMissingRequiredLaunchInfo(claim)),
+    researchTargetEditionSizeLimit: getResearchTargetEditionSizeLimit(
+      claim?.edition_size,
+      manifoldClaim?.totalMax
+    ),
+    primaryStatus: claim
+      ? getClaimPrimaryStatus({
+          claim,
+          manifoldClaim: manifoldClaim ?? null,
+          isCraftContext: false,
+          isManifoldClaimFetching: onChainClaimFetching,
+        })
+      : null,
+    hasImage: Boolean(claim?.image_url),
+    hasAnimation: Boolean(claim?.animation_url),
+    animationMimeType: claim ? getAnimationMimeType(claim) : null,
+    activeMediaTypeLabel: claim ? getMediaTypeLabel(claim, activeMediaTab) : "—",
+    safeClaimExternalUrl: claim ? getSafeExternalUrl(claim.external_url) : null,
+  };
+}
 
-  for (const actionName of actionNames) {
-    const normalized = normalizeMintingClaimActionName(actionName);
-
-    if (kind === "research") {
-      if (
-        !normalized.includes("research") ||
-        normalized.includes("artist") ||
-        normalized.includes("team") ||
-        normalized.includes("public") ||
-        normalized.includes("phase0") ||
-        normalized.includes("phase1") ||
-        normalized.includes("phase2")
-      ) {
-        continue;
-      }
-
-      const score =
-        (normalized.includes("airdrop") ? 2 : 0) +
-        (normalized.endsWith("airdrop") ? 1 : 0);
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = actionName;
-      }
-      continue;
-    }
-
-    if (
-      !normalized.includes("pay") ||
-      !normalized.includes("artist") ||
-      normalized.includes("research") ||
-      normalized.includes("team") ||
-      normalized.includes("public") ||
-      normalized.includes("phase0") ||
-      normalized.includes("phase1") ||
-      normalized.includes("phase2")
-    ) {
-      continue;
-    }
-
-    const score =
-      (normalized.includes("payment") ? 2 : 0) +
-      (normalized.endsWith("artist") ? 1 : 0);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = actionName;
-    }
+function getSubscriptionAirdropSectionConfigs(
+  selectedPhase: "" | LaunchPhaseKey
+): Array<{ phaseKey: LaunchPhaseKey; title: string }> {
+  if (selectedPhase === "phase0") {
+    return [
+      {
+        phaseKey: "phase0",
+        title: "Phase 0 Subscription Airdrops",
+      },
+    ];
   }
 
-  return bestMatch;
+  if (selectedPhase === "phase1") {
+    return [
+      {
+        phaseKey: "phase1",
+        title: "Phase 1 Subscription Airdrops",
+      },
+    ];
+  }
+
+  if (selectedPhase === "phase2") {
+    return [
+      {
+        phaseKey: "phase2",
+        title: "Phase 2 Subscription Airdrops",
+      },
+      {
+        phaseKey: "publicphase",
+        title: "Public Phase Subscription Airdrops",
+      },
+    ];
+  }
+
+  return [];
+}
+
+function getSubscriptionAirdropFetchState({
+  selectedPhase,
+  subscriptionAirdropsByPhase,
+  subscriptionAirdropsLoadingByPhase,
+}: Readonly<{
+  selectedPhase: "" | LaunchPhaseKey;
+  subscriptionAirdropsByPhase: Partial<Record<LaunchPhaseKey, PhaseAirdrop[]>>;
+  subscriptionAirdropsLoadingByPhase: Partial<Record<LaunchPhaseKey, boolean>>;
+}>) {
+  return {
+    selectedPhaseHasSubscriptionAirdrops: selectedPhase
+      ? subscriptionAirdropsByPhase[selectedPhase] !== undefined
+      : false,
+    selectedPhaseSubscriptionAirdropsLoading: selectedPhase
+      ? Boolean(subscriptionAirdropsLoadingByPhase[selectedPhase])
+      : false,
+    publicPhaseHasSubscriptionAirdrops:
+      subscriptionAirdropsByPhase.publicphase !== undefined,
+    publicPhaseSubscriptionAirdropsLoading: Boolean(
+      subscriptionAirdropsLoadingByPhase.publicphase
+    ),
+  };
+}
+
+function getLaunchActionCompletionState({
+  mintingClaimActionsByName,
+  availableMintingClaimActionNames,
+}: Readonly<{
+  mintingClaimActionsByName: Record<string, ApiMintingClaimAction>;
+  availableMintingClaimActionNames: readonly string[];
+}>) {
+  const researchActionName = findBestMatchingLaunchActionName(
+    availableMintingClaimActionNames,
+    "research"
+  );
+  const payArtistActionName = findBestMatchingLaunchActionName(
+    availableMintingClaimActionNames,
+    "payartist"
+  );
+
+  return {
+    researchAirdropCompleted: researchActionName
+      ? mintingClaimActionsByName[researchActionName]?.completed === true
+      : false,
+    payArtistCompleted: payArtistActionName
+      ? mintingClaimActionsByName[payArtistActionName]?.completed === true
+      : false,
+  };
+}
+
+function getSelectedPhaseActionLabel(
+  selectedPhase: "" | LaunchPhaseKey,
+  isInitialized: boolean
+): string {
+  return selectedPhase === "phase0" && !isInitialized
+    ? "Initialize On-Chain"
+    : "Update On-Chain";
+}
+
+function getSelectedPhaseIsUpdateAction(
+  selectedPhaseConfig: {
+    key: Exclude<LaunchPhaseKey, "research" | "payartist">;
+  } | null,
+  isInitialized: boolean
+): boolean {
+  return Boolean(
+    selectedPhaseConfig &&
+      !(selectedPhaseConfig.key === "phase0" && !isInitialized)
+  );
+}
+
+function getPayArtistAddressError({
+  payArtistAddressHasEnsError,
+  payArtistAddressMissing,
+  payArtistAddressLoading,
+  payArtistAddressValid,
+}: Readonly<{
+  payArtistAddressHasEnsError: boolean;
+  payArtistAddressMissing: boolean;
+  payArtistAddressLoading: boolean;
+  payArtistAddressValid: boolean;
+}>): string | null {
+  if (payArtistAddressHasEnsError) {
+    return "Could not resolve ENS name";
+  }
+
+  if (
+    !payArtistAddressMissing &&
+    !payArtistAddressLoading &&
+    !payArtistAddressValid
+  ) {
+    return "Enter a valid address or ENS";
+  }
+
+  return null;
+}
+
+function getActiveTxModalState({
+  payArtistTxModal,
+  claimTxModal,
+  payArtistTxModalClosable,
+  claimTxModalClosable,
+  closePayArtistTxModal,
+  closeClaimTxModal,
+}: Readonly<{
+  payArtistTxModal: ClaimTxModalState | null;
+  claimTxModal: ClaimTxModalState | null;
+  payArtistTxModalClosable: boolean;
+  claimTxModalClosable: boolean;
+  closePayArtistTxModal: () => void;
+  closeClaimTxModal: () => void;
+}>): {
+  activeTxModal: ClaimTxModalState | null;
+  activeTxModalClosable: boolean;
+  closeActiveTxModal: () => void;
+} {
+  if (payArtistTxModal) {
+    return {
+      activeTxModal: payArtistTxModal,
+      activeTxModalClosable: payArtistTxModalClosable,
+      closeActiveTxModal: closePayArtistTxModal,
+    };
+  }
+
+  return {
+    activeTxModal: claimTxModal,
+    activeTxModalClosable: claimTxModalClosable,
+    closeActiveTxModal: closeClaimTxModal,
+  };
+}
+
+function getMintingClaimActionViewState(
+  isClaimsAdmin: boolean,
+  mintingClaimActionsByName: Record<string, ApiMintingClaimAction>,
+  mintingClaimActionPending: string | null
+): {
+  mintingClaimActionsByName: Record<string, ApiMintingClaimAction>;
+  mintingClaimActionPending: string | null;
+} {
+  if (!isClaimsAdmin) {
+    return {
+      mintingClaimActionsByName: {},
+      mintingClaimActionPending: null,
+    };
+  }
+
+  return {
+    mintingClaimActionsByName,
+    mintingClaimActionPending,
+  };
+}
+
+function getSelectedPhaseComparableConfig({
+  selectedPhaseConfig,
+  phaseAllowlistWindows,
+  phasePricesEth,
+}: Readonly<{
+  selectedPhaseConfig: {
+    key: Exclude<LaunchPhaseKey, "research" | "payartist">;
+    root?: {
+      merkle_root?: string | null;
+    } | null;
+  } | null;
+  phaseAllowlistWindows: Record<string, { start: string; end: string }>;
+  phasePricesEth: Record<string, string>;
+}>): SelectedPhaseComparableConfig | null {
+  if (!selectedPhaseConfig) {
+    return null;
+  }
+
+  const phaseKey = selectedPhaseConfig.key;
+  const startInput = phaseAllowlistWindows[phaseKey]?.start ?? "";
+  const endInput = phaseAllowlistWindows[phaseKey]?.end ?? "";
+  const startDate = parseLocalDateTimeToUnixSeconds(startInput);
+  const endDate = parseLocalDateTimeToUnixSeconds(endInput);
+  const merkleRoot =
+    phaseKey === "publicphase"
+      ? NULL_MERKLE
+      : (selectedPhaseConfig.root?.merkle_root ?? null);
+  const costEth = (phasePricesEth[phaseKey] ?? DEFAULT_PHASE_PRICE_ETH).trim();
+
+  let costWei: bigint | null = null;
+  try {
+    costWei = parseEther(costEth);
+  } catch {
+    costWei = null;
+  }
+
+  return {
+    startDate,
+    endDate,
+    merkleRoot,
+    costWei,
+  };
+}
+
+function getSelectedPhaseMatchesOnChainConfig({
+  selectedPhaseIsUpdateAction,
+  selectedPhaseComparableConfig,
+  claim,
+  manifoldClaim,
+  isInitialized,
+}: Readonly<{
+  selectedPhaseIsUpdateAction: boolean;
+  selectedPhaseComparableConfig: SelectedPhaseComparableConfig | null;
+  claim: MintingClaim | null;
+  manifoldClaim: ReturnType<typeof useDropForgeManifoldClaim>["claim"];
+  isInitialized: boolean;
+}>): boolean {
+  if (
+    !selectedPhaseIsUpdateAction ||
+    !selectedPhaseComparableConfig ||
+    !claim ||
+    !manifoldClaim ||
+    !isInitialized
+  ) {
+    return false;
+  }
+
+  if (
+    claim.edition_size == null ||
+    selectedPhaseComparableConfig.startDate == null ||
+    selectedPhaseComparableConfig.endDate == null ||
+    selectedPhaseComparableConfig.merkleRoot == null ||
+    selectedPhaseComparableConfig.costWei == null ||
+    manifoldClaim.costWei == null ||
+    manifoldClaim.merkleRoot == null
+  ) {
+    return false;
+  }
+
+  return (
+    claim.edition_size === manifoldClaim.totalMax &&
+    selectedPhaseComparableConfig.startDate === manifoldClaim.startDate &&
+    selectedPhaseComparableConfig.endDate === manifoldClaim.endDate &&
+    selectedPhaseComparableConfig.costWei === manifoldClaim.costWei &&
+    normalizeHexValue(selectedPhaseComparableConfig.merkleRoot) ===
+      normalizeHexValue(manifoldClaim.merkleRoot)
+  );
+}
+
+function getSelectedPhaseDiffs({
+  selectedPhaseIsUpdateAction,
+  selectedPhaseComparableConfig,
+  claim,
+  manifoldClaim,
+  isInitialized,
+}: Readonly<{
+  selectedPhaseIsUpdateAction: boolean;
+  selectedPhaseComparableConfig: SelectedPhaseComparableConfig | null;
+  claim: MintingClaim | null;
+  manifoldClaim: ReturnType<typeof useDropForgeManifoldClaim>["claim"];
+  isInitialized: boolean;
+}>): {
+  editionSize: boolean;
+  cost: boolean;
+  merkleRoot: boolean;
+  startDate: boolean;
+  endDate: boolean;
+} {
+  if (
+    !selectedPhaseIsUpdateAction ||
+    !selectedPhaseComparableConfig ||
+    !claim ||
+    !manifoldClaim ||
+    !isInitialized
+  ) {
+    return {
+      editionSize: false,
+      cost: false,
+      merkleRoot: false,
+      startDate: false,
+      endDate: false,
+    };
+  }
+
+  return {
+    editionSize:
+      claim.edition_size != null && manifoldClaim.totalMax != null
+        ? claim.edition_size !== manifoldClaim.totalMax
+        : false,
+    cost:
+      selectedPhaseComparableConfig.costWei != null &&
+      manifoldClaim.costWei != null
+        ? selectedPhaseComparableConfig.costWei !== manifoldClaim.costWei
+        : false,
+    merkleRoot:
+      selectedPhaseComparableConfig.merkleRoot != null &&
+      manifoldClaim.merkleRoot != null
+        ? normalizeHexValue(selectedPhaseComparableConfig.merkleRoot) !==
+          normalizeHexValue(manifoldClaim.merkleRoot)
+        : false,
+    startDate:
+      selectedPhaseComparableConfig.startDate != null &&
+      manifoldClaim.startDate != null
+        ? selectedPhaseComparableConfig.startDate !== manifoldClaim.startDate
+        : false,
+    endDate:
+      selectedPhaseComparableConfig.endDate != null &&
+      manifoldClaim.endDate != null
+        ? selectedPhaseComparableConfig.endDate !== manifoldClaim.endDate
+        : false,
+  };
+}
+
+function getSelectedPhaseActionDisabled({
+  launchActionPending,
+  selectedPhaseConfig,
+  isInitialized,
+  missingRequiredInfo,
+  selectedPhaseIsUpdateAction,
+  selectedPhaseMatchesOnChainConfig,
+}: Readonly<{
+  launchActionPending: boolean;
+  selectedPhaseConfig: {
+    key: Exclude<LaunchPhaseKey, "research" | "payartist">;
+    root?: unknown;
+  } | null;
+  isInitialized: boolean;
+  missingRequiredInfo: boolean;
+  selectedPhaseIsUpdateAction: boolean;
+  selectedPhaseMatchesOnChainConfig: boolean;
+}>): boolean {
+  const missingPhaseConfig = (() => {
+    if (launchActionPending || !selectedPhaseConfig) {
+      return true;
+    }
+
+    if (selectedPhaseConfig.key === "phase0") {
+      if (!isInitialized) {
+        return !selectedPhaseConfig.root || missingRequiredInfo;
+      }
+      return !selectedPhaseConfig.root;
+    }
+
+    if (selectedPhaseConfig.key === "publicphase") {
+      return !isInitialized;
+    }
+
+    return !isInitialized || !selectedPhaseConfig.root;
+  })();
+
+  return (
+    missingPhaseConfig ||
+    (selectedPhaseIsUpdateAction && selectedPhaseMatchesOnChainConfig)
+  );
 }
 
 function getSelectedPhaseFormValues({
@@ -444,29 +801,23 @@ export default function DropForgeLaunchClaimPageClient({
     showErrorToast,
   ]);
 
-  const isInitialized = manifoldClaim?.instanceId != null;
-  const hasPublishedMetadata = Boolean(claim?.metadata_location != null);
-  const missingRequiredInfo = Boolean(
-    claim && isMissingRequiredLaunchInfo(claim)
-  );
-  const researchTargetEditionSizeLimit = getResearchTargetEditionSizeLimit(
-    claim?.edition_size,
-    manifoldClaim?.totalMax
-  );
-  const primaryStatus = claim
-    ? getClaimPrimaryStatus({
-        claim,
-        manifoldClaim: manifoldClaim ?? null,
-        isCraftContext: false,
-        isManifoldClaimFetching: onChainClaimFetching,
-      })
-    : null;
-  const hasImage = Boolean(claim?.image_url);
-  const hasAnimation = Boolean(claim?.animation_url);
-  const animationMimeType = claim ? getAnimationMimeType(claim) : null;
-  const activeMediaTypeLabel = claim
-    ? getMediaTypeLabel(claim, activeMediaTab)
-    : "—";
+  const {
+    isInitialized,
+    hasPublishedMetadata,
+    missingRequiredInfo,
+    researchTargetEditionSizeLimit,
+    primaryStatus,
+    hasImage,
+    hasAnimation,
+    animationMimeType,
+    activeMediaTypeLabel,
+    safeClaimExternalUrl,
+  } = getClaimPresentationState({
+    claim,
+    manifoldClaim,
+    onChainClaimFetching,
+    activeMediaTab,
+  });
 
   useEffect(() => {
     setActiveMediaTab("image");
@@ -670,17 +1021,16 @@ export default function DropForgeLaunchClaimPageClient({
     [claimId]
   );
 
-  const selectedPhaseHasSubscriptionAirdrops = selectedPhase
-    ? subscriptionAirdropsByPhase[selectedPhase] !== undefined
-    : false;
-  const selectedPhaseSubscriptionAirdropsLoading = selectedPhase
-    ? Boolean(subscriptionAirdropsLoadingByPhase[selectedPhase])
-    : false;
-  const publicPhaseHasSubscriptionAirdrops =
-    subscriptionAirdropsByPhase.publicphase !== undefined;
-  const publicPhaseSubscriptionAirdropsLoading = Boolean(
-    subscriptionAirdropsLoadingByPhase.publicphase
-  );
+  const {
+    selectedPhaseHasSubscriptionAirdrops,
+    selectedPhaseSubscriptionAirdropsLoading,
+    publicPhaseHasSubscriptionAirdrops,
+    publicPhaseSubscriptionAirdropsLoading,
+  } = getSubscriptionAirdropFetchState({
+    selectedPhase,
+    subscriptionAirdropsByPhase,
+    subscriptionAirdropsLoadingByPhase,
+  });
 
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage || !selectedPhase) return;
@@ -782,35 +1132,7 @@ export default function DropForgeLaunchClaimPageClient({
     Number(manifoldClaim?.remaining ?? 0)
   );
   const subscriptionAirdropSectionConfigs = useMemo(() => {
-    if (selectedPhase === "phase0") {
-      return [
-        {
-          phaseKey: "phase0" as LaunchPhaseKey,
-          title: "Phase 0 Subscription Airdrops",
-        },
-      ];
-    }
-    if (selectedPhase === "phase1") {
-      return [
-        {
-          phaseKey: "phase1" as LaunchPhaseKey,
-          title: "Phase 1 Subscription Airdrops",
-        },
-      ];
-    }
-    if (selectedPhase === "phase2") {
-      return [
-        {
-          phaseKey: "phase2" as LaunchPhaseKey,
-          title: "Phase 2 Subscription Airdrops",
-        },
-        {
-          phaseKey: "publicphase" as LaunchPhaseKey,
-          title: "Public Phase Subscription Airdrops",
-        },
-      ];
-    }
-    return [];
+    return getSubscriptionAirdropSectionConfigs(selectedPhase);
   }, [selectedPhase]);
   const subscriptionAirdropSections = useMemo(
     () =>
@@ -890,20 +1212,14 @@ export default function DropForgeLaunchClaimPageClient({
     () => Object.keys(mintingClaimActionsByName),
     [mintingClaimActionsByName]
   );
-  const researchActionName = useMemo(
-    () => findLaunchActionName(availableMintingClaimActionNames, "research"),
-    [availableMintingClaimActionNames]
+  const { researchAirdropCompleted, payArtistCompleted } = useMemo(
+    () =>
+      getLaunchActionCompletionState({
+        mintingClaimActionsByName,
+        availableMintingClaimActionNames,
+      }),
+    [mintingClaimActionsByName, availableMintingClaimActionNames]
   );
-  const payArtistActionName = useMemo(
-    () => findLaunchActionName(availableMintingClaimActionNames, "payartist"),
-    [availableMintingClaimActionNames]
-  );
-  const researchAirdropCompleted = researchActionName
-    ? mintingClaimActionsByName[researchActionName]?.completed === true
-    : false;
-  const payArtistCompleted = payArtistActionName
-    ? mintingClaimActionsByName[payArtistActionName]?.completed === true
-    : false;
   const mintTimeline = useMemo(
     () => (claimId > 0 ? getClaimTimelineDetails(claimId) : null),
     [claimId]
@@ -993,9 +1309,6 @@ export default function DropForgeLaunchClaimPageClient({
     [phaseData, selectedPhase]
   );
   const isMetadataOnlyUpdateMode = primaryStatus?.key === "live_needs_update";
-  const safeClaimExternalUrl = claim
-    ? getSafeExternalUrl(claim.external_url)
-    : null;
 
   useEffect(() => {
     setPhaseAllowlistWindows((prev) => {
@@ -1026,78 +1339,33 @@ export default function DropForgeLaunchClaimPageClient({
       return next;
     });
   }, [phaseData]);
-  const selectedPhaseActionLabel =
-    selectedPhase === "phase0" && !isInitialized
-      ? "Initialize On-Chain"
-      : "Update On-Chain";
+  const selectedPhaseActionLabel = getSelectedPhaseActionLabel(
+    selectedPhase,
+    isInitialized
+  );
   const claimWritePending = claimWrite.isPending || waitClaimWrite.isLoading;
   const payArtistWritePending =
     payArtistWrite.isPending || waitPayArtistWrite.isLoading;
   const launchActionPending = claimWritePending || payArtistWritePending;
-  const selectedPhaseIsUpdateAction = Boolean(
-    selectedPhaseConfig &&
-    !(selectedPhaseConfig.key === "phase0" && !isInitialized)
+  const selectedPhaseIsUpdateAction = getSelectedPhaseIsUpdateAction(
+    selectedPhaseConfig,
+    isInitialized
   );
   const selectedPhaseComparableConfig = useMemo(() => {
-    if (!selectedPhaseConfig) return null;
-    const phaseKey = selectedPhaseConfig.key;
-    const startInput = phaseAllowlistWindows[phaseKey]?.start ?? "";
-    const endInput = phaseAllowlistWindows[phaseKey]?.end ?? "";
-    const startDate = parseLocalDateTimeToUnixSeconds(startInput);
-    const endDate = parseLocalDateTimeToUnixSeconds(endInput);
-    const merkleRoot =
-      phaseKey === "publicphase"
-        ? NULL_MERKLE
-        : (selectedPhaseConfig.root?.merkle_root ?? null);
-    const costEth = (
-      phasePricesEth[phaseKey] ?? DEFAULT_PHASE_PRICE_ETH
-    ).trim();
-
-    let costWei: bigint | null = null;
-    try {
-      costWei = parseEther(costEth);
-    } catch {
-      costWei = null;
-    }
-
-    return {
-      startDate,
-      endDate,
-      merkleRoot,
-      costWei,
-    };
+    return getSelectedPhaseComparableConfig({
+      selectedPhaseConfig,
+      phaseAllowlistWindows,
+      phasePricesEth,
+    });
   }, [selectedPhaseConfig, phaseAllowlistWindows, phasePricesEth]);
   const selectedPhaseMatchesOnChainConfig = useMemo(() => {
-    if (
-      !selectedPhaseIsUpdateAction ||
-      !selectedPhaseComparableConfig ||
-      !claim ||
-      !manifoldClaim ||
-      !isInitialized
-    ) {
-      return false;
-    }
-
-    if (
-      claim.edition_size == null ||
-      selectedPhaseComparableConfig.startDate == null ||
-      selectedPhaseComparableConfig.endDate == null ||
-      selectedPhaseComparableConfig.merkleRoot == null ||
-      selectedPhaseComparableConfig.costWei == null ||
-      manifoldClaim.costWei == null ||
-      manifoldClaim.merkleRoot == null
-    ) {
-      return false;
-    }
-
-    return (
-      claim.edition_size === manifoldClaim.totalMax &&
-      selectedPhaseComparableConfig.startDate === manifoldClaim.startDate &&
-      selectedPhaseComparableConfig.endDate === manifoldClaim.endDate &&
-      selectedPhaseComparableConfig.costWei === manifoldClaim.costWei &&
-      normalizeHexValue(selectedPhaseComparableConfig.merkleRoot) ===
-        normalizeHexValue(manifoldClaim.merkleRoot)
-    );
+    return getSelectedPhaseMatchesOnChainConfig({
+      selectedPhaseIsUpdateAction,
+      selectedPhaseComparableConfig,
+      claim,
+      manifoldClaim,
+      isInitialized,
+    });
   }, [
     selectedPhaseIsUpdateAction,
     selectedPhaseComparableConfig,
@@ -1106,51 +1374,13 @@ export default function DropForgeLaunchClaimPageClient({
     isInitialized,
   ]);
   const selectedPhaseDiffs = useMemo(() => {
-    const emptyDiffs = {
-      editionSize: false,
-      cost: false,
-      merkleRoot: false,
-      startDate: false,
-      endDate: false,
-    };
-
-    if (
-      !selectedPhaseIsUpdateAction ||
-      !selectedPhaseComparableConfig ||
-      !claim ||
-      !manifoldClaim ||
-      !isInitialized
-    ) {
-      return emptyDiffs;
-    }
-
-    return {
-      editionSize:
-        claim.edition_size != null && manifoldClaim.totalMax != null
-          ? claim.edition_size !== manifoldClaim.totalMax
-          : false,
-      cost:
-        selectedPhaseComparableConfig.costWei != null &&
-        manifoldClaim.costWei != null
-          ? selectedPhaseComparableConfig.costWei !== manifoldClaim.costWei
-          : false,
-      merkleRoot:
-        selectedPhaseComparableConfig.merkleRoot != null &&
-        manifoldClaim.merkleRoot != null
-          ? normalizeHexValue(selectedPhaseComparableConfig.merkleRoot) !==
-            normalizeHexValue(manifoldClaim.merkleRoot)
-          : false,
-      startDate:
-        selectedPhaseComparableConfig.startDate != null &&
-        manifoldClaim.startDate != null
-          ? selectedPhaseComparableConfig.startDate !== manifoldClaim.startDate
-          : false,
-      endDate:
-        selectedPhaseComparableConfig.endDate != null &&
-        manifoldClaim.endDate != null
-          ? selectedPhaseComparableConfig.endDate !== manifoldClaim.endDate
-          : false,
-    };
+    return getSelectedPhaseDiffs({
+      selectedPhaseIsUpdateAction,
+      selectedPhaseComparableConfig,
+      claim,
+      manifoldClaim,
+      isInitialized,
+    });
   }, [
     selectedPhaseIsUpdateAction,
     selectedPhaseComparableConfig,
@@ -1161,23 +1391,14 @@ export default function DropForgeLaunchClaimPageClient({
   const changedFieldBoxClassName =
     "tw-ring-rose-500/70 hover:tw-ring-rose-400/70";
   const changedFieldBoxLabelClassName = "tw-text-rose-300 tw-ring-rose-500/70";
-  const selectedPhaseActionDisabled =
-    (() => {
-      if (launchActionPending || !selectedPhaseConfig) {
-        return true;
-      }
-      if (selectedPhaseConfig.key === "phase0") {
-        if (!isInitialized) {
-          return !selectedPhaseConfig.root || missingRequiredInfo;
-        }
-        return !selectedPhaseConfig.root;
-      }
-      if (selectedPhaseConfig.key === "publicphase") {
-        return !isInitialized;
-      }
-      return !isInitialized || !selectedPhaseConfig.root;
-    })() ||
-    (selectedPhaseIsUpdateAction && selectedPhaseMatchesOnChainConfig);
+  const selectedPhaseActionDisabled = getSelectedPhaseActionDisabled({
+    launchActionPending,
+    selectedPhaseConfig,
+    isInitialized,
+    missingRequiredInfo,
+    selectedPhaseIsUpdateAction,
+    selectedPhaseMatchesOnChainConfig,
+  });
   const isPublicPhaseSelected = selectedPhaseConfig?.key === "publicphase";
   const showPhase0AirdropSections = selectedPhaseConfig?.key === "phase0";
   const claimTxModalClosable =
@@ -1214,13 +1435,12 @@ export default function DropForgeLaunchClaimPageClient({
   const payArtistAddressValid = isAddress(
     payArtistResolvedAddressTrimmed as `0x${string}`
   );
-  const payArtistAddressError = payArtistAddressHasEnsError
-    ? "Could not resolve ENS name"
-    : !payArtistAddressMissing &&
-        !payArtistAddressLoading &&
-        !payArtistAddressValid
-      ? "Enter a valid address or ENS"
-      : null;
+  const payArtistAddressError = getPayArtistAddressError({
+    payArtistAddressHasEnsError,
+    payArtistAddressMissing,
+    payArtistAddressLoading,
+    payArtistAddressValid,
+  });
 
   const runMetadataLocationOnlyUpdate = useCallback(() => {
     if (!claim) {
@@ -1410,13 +1630,21 @@ export default function DropForgeLaunchClaimPageClient({
     if (!payArtistTxModalClosable) return;
     setPayArtistTxModal(null);
   }, [payArtistTxModalClosable]);
-  const activeTxModal = payArtistTxModal ?? claimTxModal;
-  const activeTxModalClosable = payArtistTxModal
-    ? payArtistTxModalClosable
-    : claimTxModalClosable;
-  const closeActiveTxModal = payArtistTxModal
-    ? closePayArtistTxModal
-    : closeClaimTxModal;
+  const { activeTxModal, activeTxModalClosable, closeActiveTxModal } =
+    getActiveTxModalState({
+      payArtistTxModal,
+      claimTxModal,
+      payArtistTxModalClosable,
+      claimTxModalClosable,
+      closePayArtistTxModal,
+      closeClaimTxModal,
+    });
+
+  const mintingClaimActionViewState = getMintingClaimActionViewState(
+    isClaimsAdmin,
+    mintingClaimActionsByName,
+    mintingClaimActionPending
+  );
 
   useEffect(() => {
     if (!activeTxModal) return;
@@ -2106,10 +2334,10 @@ export default function DropForgeLaunchClaimPageClient({
         runAirdropWrite={runAirdropWrite}
         subscriptionAirdropSections={subscriptionAirdropSections}
         mintingClaimActionsByName={
-          isClaimsAdmin ? mintingClaimActionsByName : {}
+          mintingClaimActionViewState.mintingClaimActionsByName
         }
         mintingClaimActionPending={
-          isClaimsAdmin ? mintingClaimActionPending : null
+          mintingClaimActionViewState.mintingClaimActionPending
         }
         onMintingClaimActionToggle={handleMintingClaimActionToggle}
       />

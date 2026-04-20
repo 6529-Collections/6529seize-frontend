@@ -1,14 +1,23 @@
+import type { ClaimPrimaryStatus } from "@/components/drop-forge/drop-forge-status.helpers";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
 import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
+import {
+  type ManifoldClaim,
+  ManifoldClaimStatus,
+} from "@/hooks/useManifoldClaim";
 
-type LaunchPhaseKey =
+export type LaunchPhaseKey =
   | "phase0"
   | "phase1"
   | "phase2"
   | "publicphase"
   | "research"
   | "payartist";
+
+export type LaunchAirdropActionKey = "artist" | "team";
+
+export type LaunchActionLookupKind = LaunchPhaseKey | LaunchAirdropActionKey;
 
 type ClaimTxModalStatus = "confirm_wallet" | "submitted" | "success" | "error";
 type LaunchMediaTab = "image" | "animation";
@@ -102,8 +111,245 @@ export function isNotFoundError(message: string): boolean {
   );
 }
 
+export function normalizeMintingClaimActionName(actionName: string): string {
+  return actionName
+    .trim()
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/g, "");
+}
+
 function normalizePhaseName(value: string): string {
   return value.replaceAll(/\s+/g, "").toLowerCase();
+}
+
+function getLaunchActionLookupTerms(
+  kind: LaunchActionLookupKind
+): {
+  required: readonly string[];
+  preferred: readonly string[];
+  excluded: readonly string[];
+} {
+  const termsByKind: Record<
+    LaunchActionLookupKind,
+    {
+      required: readonly string[];
+      preferred: readonly string[];
+      excluded: readonly string[];
+    }
+  > = {
+    artist: {
+      required: ["artist"],
+      preferred: ["airdrop"],
+      excluded: ["team", "research", "phase0", "phase1", "phase2", "public"],
+    },
+    team: {
+      required: ["team"],
+      preferred: ["airdrop"],
+      excluded: ["artist", "research", "phase0", "phase1", "phase2", "public"],
+    },
+    research: {
+      required: ["research"],
+      preferred: ["airdrop"],
+      excluded: ["artist", "team", "phase0", "phase1", "phase2", "public"],
+    },
+    payartist: {
+      required: ["pay", "artist"],
+      preferred: ["payment"],
+      excluded: ["team", "research", "phase0", "phase1", "phase2", "public"],
+    },
+    phase0: {
+      required: ["phase0"],
+      preferred: ["airdrop"],
+      excluded: ["artist", "team", "research", "public"],
+    },
+    phase1: {
+      required: ["phase1"],
+      preferred: ["airdrop"],
+      excluded: ["artist", "team", "research", "public"],
+    },
+    phase2: {
+      required: ["phase2"],
+      preferred: ["airdrop"],
+      excluded: ["artist", "team", "research", "public"],
+    },
+    publicphase: {
+      required: ["public"],
+      preferred: ["phase", "airdrop"],
+      excluded: ["artist", "team", "research", "phase0", "phase1", "phase2"],
+    },
+  };
+
+  return termsByKind[kind];
+}
+
+export function findBestMatchingLaunchActionName(
+  actionNames: readonly string[],
+  kind: LaunchActionLookupKind
+): string | null {
+  const { required, preferred, excluded } = getLaunchActionLookupTerms(kind);
+  let bestMatch: string | null = null;
+  let bestScore = -1;
+
+  for (const actionName of actionNames) {
+    const normalized = normalizeMintingClaimActionName(actionName);
+    if (excluded.some((term) => normalized.includes(term))) {
+      continue;
+    }
+    if (!required.every((term) => normalized.includes(term))) {
+      continue;
+    }
+
+    const score =
+      required.length * 10 +
+      preferred.filter((term) => normalized.includes(term)).length * 2 +
+      (normalized.endsWith("airdrop") ? 1 : 0);
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = actionName;
+    }
+  }
+
+  return bestMatch;
+}
+
+function collapseWhitespace(value: string): string {
+  let result = "";
+  let previousWasWhitespace = false;
+
+  for (const char of value) {
+    if (char.trim() === "") {
+      if (!previousWasWhitespace && result.length > 0) {
+        result += " ";
+      }
+      previousWasWhitespace = true;
+      continue;
+    }
+
+    result += char;
+    previousWasWhitespace = false;
+  }
+
+  return result.trim();
+}
+
+function removeCaseInsensitiveSegment(value: string, segment: string): string {
+  const lowerValue = value.toLowerCase();
+  const lowerSegment = segment.toLowerCase();
+  let nextSearchIndex = 0;
+  let result = "";
+
+  while (nextSearchIndex < value.length) {
+    const foundIndex = lowerValue.indexOf(lowerSegment, nextSearchIndex);
+    if (foundIndex === -1) {
+      result += value.slice(nextSearchIndex);
+      break;
+    }
+
+    result += value.slice(nextSearchIndex, foundIndex);
+    result += " ";
+    nextSearchIndex = foundIndex + segment.length;
+  }
+
+  return collapseWhitespace(result);
+}
+
+function trimCaseInsensitiveSuffix(value: string, suffix: string): string {
+  const trimmed = value.trimEnd();
+  if (!trimmed.toLowerCase().endsWith(suffix.toLowerCase())) {
+    return trimmed;
+  }
+
+  return trimmed.slice(0, trimmed.length - suffix.length).trimEnd();
+}
+
+export function getLaunchPhaseLabel(
+  phase: Pick<NonNullable<ManifoldClaim["memePhase"]>, "id" | "name"> | null
+): string {
+  if (phase?.id === "0") return "Phase 0";
+  if (phase?.id === "1") return "Phase 1";
+  if (phase?.id === "2") return "Phase 2";
+  if (phase?.id === "public") return "Public";
+
+  const phaseName = phase?.name?.trim();
+  if (!phaseName) {
+    return "Current Phase";
+  }
+
+  const withoutAllowlist = removeCaseInsensitiveSegment(
+    phaseName,
+    "(Allowlist)"
+  );
+  return collapseWhitespace(trimCaseInsensitiveSuffix(withoutAllowlist, "Phase"));
+}
+
+export function getLaunchListStatus({
+  primaryStatus,
+  manifoldClaim,
+  researchAirdropCompleted,
+  payArtistCompleted,
+}: Readonly<{
+  primaryStatus: ClaimPrimaryStatus;
+  manifoldClaim: ManifoldClaim | null | undefined;
+  researchAirdropCompleted: boolean;
+  payArtistCompleted: boolean;
+}>): ClaimPrimaryStatus {
+  if (primaryStatus.key !== "live" || !manifoldClaim) {
+    return primaryStatus;
+  }
+
+  if (payArtistCompleted) {
+    return {
+      key: "live",
+      label: "Finalized",
+      tone: "success",
+      reason: "All launch phases and post-launch actions are complete",
+    };
+  }
+
+  if (researchAirdropCompleted) {
+    return {
+      key: "live",
+      label: "Live - Pay Artist",
+      tone: "success",
+      reason: "Research airdrop is complete. Artist payment remains",
+    };
+  }
+
+  if (manifoldClaim.status === ManifoldClaimStatus.ACTIVE) {
+    const phaseLabel = getLaunchPhaseLabel(manifoldClaim.memePhase ?? null);
+    return {
+      key: "live",
+      label: `Live - ${phaseLabel}`,
+      tone: "success",
+      reason: `${phaseLabel} is currently active`,
+    };
+  }
+
+  if (manifoldClaim.status === ManifoldClaimStatus.UPCOMING) {
+    return {
+      key: "pending_initialization",
+      label: "Pending Initialization",
+      tone: "pending",
+      reason: "Claim is initialized onchain but not live yet",
+    };
+  }
+
+  if (manifoldClaim.nextMemePhase) {
+    return {
+      key: "pending_initialization",
+      label: "Pending Initialization",
+      tone: "pending",
+      reason: `${getLaunchPhaseLabel(manifoldClaim.nextMemePhase)} is next and still needs the onchain update`,
+    };
+  }
+
+  return {
+    key: "live",
+    label: "Live - Airdrop to Research",
+    tone: "success",
+    reason: "Mint phases are complete. Research airdrop is next",
+  };
 }
 
 export function normalizeHexValue(value: string | null | undefined): string {
