@@ -25,7 +25,12 @@ jest.mock("@/components/waves/drop/SingleWaveDropInfoActions", () => ({
   SingleWaveDropInfoActions: () => <div data-testid="actions" />,
 }));
 jest.mock("@/components/waves/drop/SingleWaveDropPosition", () => ({
-  SingleWaveDropPosition: () => <div data-testid="position" />,
+  SingleWaveDropPosition: ({ rank }: any) => (
+    <div
+      data-testid="position"
+      data-rank={rank === null ? "null" : String(rank)}
+    />
+  ),
 }));
 jest.mock("@/components/waves/drop/SingleWaveDropVotes", () => ({
   SingleWaveDropVotes: () => <div data-testid="votes" />,
@@ -209,6 +214,21 @@ describe("MemesDropFullscreenOverlay", () => {
     fireEvent.keyDown(document, { key: "Escape" });
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes null rank through to the position badge for unranked drops", () => {
+    render(
+      <MemesDropFullscreenOverlay
+        isOpen={true}
+        artworkMedia={artworkMedia}
+        drop={{ ...baseDrop, rank: null }}
+        title="Title"
+        description="Desc"
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("position")).toHaveAttribute("data-rank", "null");
   });
 
   it("prevents Escape from closing the parent drop modal", () => {

@@ -101,10 +101,7 @@ export function MemesDropFullscreenOverlay({
                   <div className="tw-mb-4 tw-flex tw-w-full tw-items-center tw-justify-between">
                     <div className="tw-flex tw-flex-col">
                       <div className="tw-flex tw-items-center tw-gap-x-3">
-                        <SingleWaveDropPosition
-                          rank={drop.rank ?? 1}
-                          drop={drop}
-                        />
+                        <SingleWaveDropPosition rank={drop.rank} drop={drop} />
                         <h3
                           id={titleId}
                           className="tw-text-xl tw-font-semibold tw-text-iron-100"
