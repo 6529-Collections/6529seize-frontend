@@ -70,12 +70,10 @@ export const setProfileWave = async ({
   readonly waveId: string;
   readonly profileCurationId?: string | null | undefined;
 }): Promise<ApiIdentity> => {
-  const body: SetProfileWaveRequestBody = {
-    wave_id: waveId,
-    ...(profileCurationId !== undefined
-      ? { profile_curation_id: profileCurationId }
-      : {}),
-  };
+  const body: SetProfileWaveRequestBody =
+    profileCurationId === undefined
+      ? { wave_id: waveId }
+      : { wave_id: waveId, profile_curation_id: profileCurationId };
 
   return await commonApiPost<SetProfileWaveRequestBody, ApiIdentity>({
     endpoint: `profiles/${encodeURIComponent(identity)}/wave`,

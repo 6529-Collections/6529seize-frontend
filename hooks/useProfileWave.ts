@@ -33,8 +33,8 @@ export function useProfileWave({
       }),
     enabled: enabled && normalizedIdentity.length > 0,
     staleTime: 60 * 1000,
-    ...(initialProfileWave !== undefined
-      ? { initialData: initialProfileWave, initialDataUpdatedAt: 0 }
-      : {}),
+    ...(initialProfileWave === undefined
+      ? {}
+      : { initialData: initialProfileWave, initialDataUpdatedAt: 0 }),
   });
 }

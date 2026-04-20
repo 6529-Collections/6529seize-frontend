@@ -170,11 +170,11 @@ export function OfficialWaveSummary({
   readonly onRemoveWave: () => void;
 }) {
   const changeWaveDropdownId =
-    changeWaveDropdown !== undefined ? "change-wave-dropdown" : undefined;
+    changeWaveDropdown === undefined ? undefined : "change-wave-dropdown";
   const changeCurationDropdownId =
-    changeCurationDropdown !== undefined
-      ? "change-curation-dropdown"
-      : undefined;
+    changeCurationDropdown === undefined
+      ? undefined
+      : "change-curation-dropdown";
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">

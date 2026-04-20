@@ -160,14 +160,12 @@ interface DesktopTabButtonProps {
   readonly option: TabOption;
   readonly activeKey: string;
   readonly onSelect: (key: string) => void;
-  readonly fullWidth?: boolean | undefined;
 }
 
 function DesktopTabButton({
   option,
   activeKey,
   onSelect,
-  fullWidth = false,
 }: DesktopTabButtonProps) {
   return (
     <button
@@ -176,8 +174,6 @@ function DesktopTabButton({
       aria-selected={activeKey === option.key}
       aria-controls={option.panelId}
       className={`tw-relative tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
-        fullWidth ? "tw-flex tw-flex-1 tw-justify-center tw-text-center" : ""
-      } ${
         activeKey === option.key
           ? "tw-border-primary-300 tw-text-white"
           : "tw-border-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
@@ -239,7 +235,7 @@ function DesktopTabOption({
   onSelect,
 }: DesktopTabButtonProps) {
   return (
-    <div role="presentation" className="tw-flex tw-items-center">
+    <div className="tw-flex tw-items-center">
       <DesktopTabButton
         option={option}
         activeKey={activeKey}
@@ -286,12 +282,7 @@ function SortableCurationTabOption({
   const reorderTooltipId = `${option.key}-reorder-tooltip`;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      role="presentation"
-      className="tw-flex tw-items-center"
-    >
+    <div ref={setNodeRef} style={style} className="tw-flex tw-items-center">
       <button
         ref={setActivatorNodeRef}
         type="button"

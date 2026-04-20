@@ -70,7 +70,6 @@ export const TabToggle: React.FC<TabToggleProps> = ({
       {options.map((option) => (
         <div
           key={option.key}
-          role="presentation"
           className={`tw-flex tw-items-center ${fullWidth ? "tw-flex-1" : ""}`}
         >
           <button

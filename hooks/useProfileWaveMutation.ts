@@ -49,7 +49,7 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
 
       return await clearProfileWave({ identity });
     },
-    onSuccess: (updatedProfile, action) => {
+    onSuccess: async (updatedProfile, action) => {
       onProfileEdit({
         profile: updatedProfile,
         previousProfile: profile,
@@ -65,7 +65,7 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
           profile_curation_id:
             action.type === "set" ? (action.profileCurationId ?? null) : null,
         });
-        void queryClient.invalidateQueries({ queryKey });
+        await queryClient.invalidateQueries({ queryKey });
       }
       setToast({
         message:
