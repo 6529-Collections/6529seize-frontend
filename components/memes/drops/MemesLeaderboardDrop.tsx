@@ -23,7 +23,7 @@ import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import Link from "next/link";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import MemeDropTraits from "./MemeDropTraits";
 import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
@@ -53,8 +53,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   const [isVotingModalOpen, setIsVotingModalOpen] = useState<boolean>(false);
   const [isResubmitModalOpen, setIsResubmitModalOpen] =
     useState<boolean>(false);
-  const [openResubmitAfterMenuClose, setOpenResubmitAfterMenuClose] =
-    useState<boolean>(false);
+  const openResubmitAfterMenuCloseRef = useRef<boolean>(false);
 
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
@@ -65,24 +64,36 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     mediaImageScale = ImageScale.AUTOx600;
   }
 
+  const clearDeferredResubmitOpen = useCallback(() => {
+    openResubmitAfterMenuCloseRef.current = false;
+  }, []);
+
+  useEffect(
+    () => () => {
+      clearDeferredResubmitOpen();
+    },
+    [clearDeferredResubmitOpen]
+  );
+
   // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
+    onInteractionStart: clearDeferredResubmitOpen,
   });
 
   const openResubmitAfterMobileMenuCloses = useCallback(() => {
-    setOpenResubmitAfterMenuClose(true);
+    openResubmitAfterMenuCloseRef.current = true;
     setIsActive(false);
   }, [setIsActive]);
 
   const handleMobileMenuAfterLeave = useCallback(() => {
-    if (!openResubmitAfterMenuClose) {
+    if (!openResubmitAfterMenuCloseRef.current) {
       return;
     }
 
-    setOpenResubmitAfterMenuClose(false);
+    clearDeferredResubmitOpen();
     setIsResubmitModalOpen(true);
-  }, [openResubmitAfterMenuClose]);
+  }, [clearDeferredResubmitOpen]);
 
   // Extract metadata
   const title =
