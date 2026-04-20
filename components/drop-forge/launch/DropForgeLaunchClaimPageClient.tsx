@@ -767,13 +767,7 @@ export default function DropForgeLaunchClaimPageClient({
     return () => {
       cancelled = true;
     };
-  }, [
-    hasWallet,
-    canAccessLaunchPage,
-    selectedPhase,
-    claimId,
-    showErrorToast,
-  ]);
+  }, [hasWallet, canAccessLaunchPage, selectedPhase, claimId, showErrorToast]);
 
   const artistAirdropSummary = useMemo(
     () => summarizeAirdrops(artistAirdrops),
