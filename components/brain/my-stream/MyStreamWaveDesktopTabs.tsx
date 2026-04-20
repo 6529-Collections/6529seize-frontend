@@ -1,13 +1,18 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef } from "react";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  EllipsisVerticalIcon,
+} from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { TabToggle } from "@/components/common/TabToggle";
 import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
+import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
 import { useWave } from "@/hooks/useWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
@@ -20,6 +25,7 @@ import {
   type SetActiveContentTab,
 } from "../ContentTabContext";
 import MyStreamWaveCreateCurationAction from "./tabs/MyStreamWaveCreateCurationAction";
+import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -34,6 +40,7 @@ interface TabOption {
   readonly key: string;
   readonly label: string;
   readonly panelId: string;
+  readonly action?: React.ReactNode | undefined;
 }
 
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
@@ -107,6 +114,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const { data: curations = [] } = useWaveCurations({
     waveId: wave.id,
   });
+  const { moveCuration, isPending: isCurationReorderPending } =
+    useWaveCurationReorderMutation({ waveId: wave.id });
   const canManageCurations =
     wave.wave.authenticated_user_eligible_for_admin === true;
 
@@ -212,12 +221,41 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   const curationOptions: TabOption[] = useMemo(
     () =>
-      curations.map((curation) => ({
+      curations.map((curation, index) => ({
         key: `curation:${curation.id}`,
         label: curation.name,
         panelId: getCurationPanelId(curation.id),
+        action: canManageCurations ? (
+          <MyStreamWaveCurationTabMenu
+            wave={wave}
+            curation={curation}
+            canMovePrevious={index > 0}
+            canMoveNext={index < curations.length - 1}
+            isMovePending={isCurationReorderPending}
+            onMove={(direction) =>
+              moveCuration({
+                curation,
+                direction,
+                curations,
+              })
+            }
+            onDeleted={
+              activeCurationId === curation.id
+                ? () => onSelectCuration(null)
+                : undefined
+            }
+          />
+        ) : undefined,
       })),
-    [curations]
+    [
+      activeCurationId,
+      canManageCurations,
+      curations,
+      isCurationReorderPending,
+      moveCuration,
+      onSelectCuration,
+      wave,
+    ]
   );
 
   const options: TabOption[] = useMemo(
@@ -228,6 +266,44 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const activeKey = activeCurationId
     ? `curation:${activeCurationId}`
     : activeTab;
+  const activeCuration = useMemo(
+    () =>
+      activeCurationId
+        ? (curations.find((curation) => curation.id === activeCurationId) ??
+          null)
+        : null,
+    [activeCurationId, curations]
+  );
+  const activeCurationIndex = useMemo(
+    () =>
+      activeCurationId
+        ? curations.findIndex((curation) => curation.id === activeCurationId)
+        : -1,
+    [activeCurationId, curations]
+  );
+  const canMoveActiveCuration =
+    canManageCurations && activeCuration !== null && curations.length > 1;
+  const showCurationActions = canMoveActiveCuration || showCreateCurationAction;
+  const moveLeftDisabled =
+    activeCuration === null ||
+    activeCurationIndex <= 0 ||
+    isCurationReorderPending;
+  const moveRightDisabled =
+    activeCuration === null ||
+    activeCurationIndex < 0 ||
+    activeCurationIndex >= curations.length - 1 ||
+    isCurationReorderPending;
+  const moveActiveCuration = (direction: "previous" | "next") => {
+    if (activeCuration === null) {
+      return;
+    }
+
+    moveCuration({
+      curation: activeCuration,
+      direction,
+      curations,
+    });
+  };
 
   const mobileVisibleCurationOptions = useMemo(() => {
     if (curationOptions.length <= MOBILE_INLINE_CURATION_LIMIT) {
@@ -355,12 +431,41 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           }}
         />
       </div>
-      {showCreateCurationAction && (
-        <div className="sm:tw-ml-auto">
-          <MyStreamWaveCreateCurationAction
-            wave={wave}
-            onCreated={onSelectCuration}
-          />
+      {showCurationActions && (
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 sm:tw-ml-auto">
+          {canMoveActiveCuration && (
+            <div
+              className="tw-flex tw-items-center tw-gap-1"
+              aria-label="Curation tab order controls"
+            >
+              <button
+                type="button"
+                onClick={() => moveActiveCuration("previous")}
+                disabled={moveLeftDisabled}
+                aria-label="Move curation tab left"
+                title="Move tab left"
+                className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
+              >
+                <ArrowLeftIcon className="tw-h-4 tw-w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => moveActiveCuration("next")}
+                disabled={moveRightDisabled}
+                aria-label="Move curation tab right"
+                title="Move tab right"
+                className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
+              >
+                <ArrowRightIcon className="tw-h-4 tw-w-4" />
+              </button>
+            </div>
+          )}
+          {showCreateCurationAction && (
+            <MyStreamWaveCreateCurationAction
+              wave={wave}
+              onCreated={onSelectCuration}
+            />
+          )}
         </div>
       )}
     </div>
