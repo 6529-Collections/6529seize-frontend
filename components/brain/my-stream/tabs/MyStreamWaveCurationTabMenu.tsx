@@ -111,11 +111,11 @@ export default function MyStreamWaveCurationTabMenu({
   return (
     <>
       <CompactMenu
-        triggerClassName="tw-mx-0.5 tw-flex tw-h-8 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-bg-iron-900 hover:tw-text-iron-200"
+        triggerClassName="tw-inline-flex tw-h-8 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
         trigger={
-          <EllipsisVerticalIcon className="tw-block tw-size-4 tw-flex-shrink-0" />
+          <EllipsisVerticalIcon className="tw-mt-0.5 tw-block tw-size-4 tw-flex-shrink-0" />
         }
-        aria-label={`${curation.name} curation options`}
+        aria-label="Curation options"
         items={menuItems}
         menuWidthClassName="tw-w-52"
         disabled={deleteMutation.isPending || isSettingProfileCuration}
