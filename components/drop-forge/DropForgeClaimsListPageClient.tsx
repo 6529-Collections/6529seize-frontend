@@ -378,6 +378,7 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
   const [researchAirdropCompleted, setResearchAirdropCompleted] =
     useState(false);
   const [payArtistCompleted, setPayArtistCompleted] = useState(false);
+  const [actionsLoaded, setActionsLoaded] = useState(false);
   const primaryStatus = getClaimPrimaryStatus({
     claim,
     manifoldClaim: manifoldClaim ?? null,
@@ -389,12 +390,14 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
     manifoldClaim,
     researchAirdropCompleted,
     payArtistCompleted,
+    actionsLoaded,
   });
 
   useEffect(() => {
     let cancelled = false;
     setResearchAirdropCompleted(false);
     setPayArtistCompleted(false);
+    setActionsLoaded(false);
 
     if (!manifoldClaim?.instanceId) {
       return () => {
@@ -437,11 +440,15 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
               )
             : false
         );
+        setActionsLoaded(true);
       })
       .catch(() => {
         if (!cancelled) {
           setResearchAirdropCompleted(false);
           setPayArtistCompleted(false);
+          // Mark as loaded so the pill stops spinning even on failure.
+          // The helper will fall back to "Live - Airdrop to Research".
+          setActionsLoaded(true);
         }
       });
 

@@ -2290,7 +2290,7 @@ export default function DropForgeLaunchClaimPageClient({
         manifoldClaim={manifoldClaim ?? null}
         hasPublishedMetadata={hasPublishedMetadata}
         isMetadataOnlyUpdateMode={isMetadataOnlyUpdateMode}
-        claimWritePending={launchActionPending}
+        claimWritePending={claimWritePending}
         runMetadataLocationOnlyUpdate={runMetadataLocationOnlyUpdate}
         selectedPhase={selectedPhase}
         onSelectedPhaseChange={handleSelectedPhaseChange}
@@ -2323,7 +2323,7 @@ export default function DropForgeLaunchClaimPageClient({
           !payArtistAddressValid ||
           payArtistAmountWei == null
         }
-        payArtistWritePending={launchActionPending}
+        payArtistWritePending={payArtistWritePending}
         runPayArtistWrite={runPayArtistWrite}
         selectedPhaseDiffs={selectedPhaseDiffs}
         changedFieldBoxClassName={changedFieldBoxClassName}

@@ -1349,6 +1349,9 @@ function DropForgeResearchAirdropSection({
 }
 
 function formatMintStatEth(value: number | null | undefined): string {
+  if (value == null) {
+    return "—";
+  }
   const normalized = Number(value);
   if (!Number.isFinite(normalized)) {
     return "—";
@@ -1930,7 +1933,7 @@ function DropForgePhaseSelectionSection({
           }`}
         >
           <span>Phase 0</span>
-          <span className="lg:tw:inline tw-hidden">- Initialize Claim</span>
+          <span className="lg:tw-inline tw-hidden">- Initialize Claim</span>
         </button>
         <button
           type="button"

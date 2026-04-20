@@ -153,7 +153,15 @@ function getLaunchActionLookupTerms(kind: LaunchActionLookupKind): {
     payartist: {
       required: ["pay", "artist"],
       preferred: ["payment"],
-      excluded: ["team", "research", "phase0", "phase1", "phase2", "public"],
+      excluded: [
+        "team",
+        "research",
+        "phase0",
+        "phase1",
+        "phase2",
+        "public",
+        "airdrop",
+      ],
     },
     phase0: {
       required: ["phase0"],
@@ -288,11 +296,13 @@ export function getLaunchListStatus({
   manifoldClaim,
   researchAirdropCompleted,
   payArtistCompleted,
+  actionsLoaded = true,
 }: Readonly<{
   primaryStatus: ClaimPrimaryStatus;
   manifoldClaim: ManifoldClaim | null | undefined;
   researchAirdropCompleted: boolean;
   payArtistCompleted: boolean;
+  actionsLoaded?: boolean;
 }>): ClaimPrimaryStatus {
   if (primaryStatus.key !== "live" || !manifoldClaim) {
     return primaryStatus;
@@ -331,6 +341,19 @@ export function getLaunchListStatus({
     manifoldClaim.nextMemePhase
   ) {
     return primaryStatus;
+  }
+
+  // Post-mint fallback depends on researchAirdropCompleted / payArtistCompleted.
+  // Until the actions fetch resolves, both default to false and we would flash
+  // "Live - Airdrop to Research" before flipping to the real state. Keep the
+  // pill in a loading state until we actually know.
+  if (!actionsLoaded) {
+    return {
+      key: "checking_onchain",
+      label: "Checking Onchain",
+      tone: "pending",
+      reason: "Loading post-launch action state",
+    };
   }
 
   return {

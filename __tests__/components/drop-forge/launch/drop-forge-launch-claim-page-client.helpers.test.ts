@@ -226,4 +226,61 @@ describe("getLaunchListStatus", () => {
       })
     ).toEqual(livePrimaryStatus);
   });
+
+  it("falls back to Live - Airdrop to Research when the drop has ended and actions are loaded", () => {
+    expect(
+      getLaunchListStatus({
+        primaryStatus: livePrimaryStatus,
+        manifoldClaim: {
+          status: ManifoldClaimStatus.ENDED,
+        } as any,
+        researchAirdropCompleted: false,
+        payArtistCompleted: false,
+        actionsLoaded: true,
+      })
+    ).toEqual({
+      key: "live",
+      label: "Live - Airdrop to Research",
+      tone: "success",
+      reason: "Mint phases are complete. Research airdrop is next",
+    });
+  });
+
+  it("shows Checking Onchain for ended drops while action state is still loading", () => {
+    expect(
+      getLaunchListStatus({
+        primaryStatus: livePrimaryStatus,
+        manifoldClaim: {
+          status: ManifoldClaimStatus.ENDED,
+        } as any,
+        researchAirdropCompleted: false,
+        payArtistCompleted: false,
+        actionsLoaded: false,
+      })
+    ).toEqual({
+      key: "checking_onchain",
+      label: "Checking Onchain",
+      tone: "pending",
+      reason: "Loading post-launch action state",
+    });
+  });
+
+  it("prefers Live - Pay Artist over the loading state when research is already marked complete", () => {
+    expect(
+      getLaunchListStatus({
+        primaryStatus: livePrimaryStatus,
+        manifoldClaim: {
+          status: ManifoldClaimStatus.ENDED,
+        } as any,
+        researchAirdropCompleted: true,
+        payArtistCompleted: false,
+        actionsLoaded: false,
+      })
+    ).toEqual({
+      key: "live",
+      label: "Live - Pay Artist",
+      tone: "success",
+      reason: "Research airdrop is complete. Artist payment remains",
+    });
+  });
 });
