@@ -1567,7 +1567,7 @@ paths:
       responses:
         "200":
           description: successful operation
-  /drops/{dropId}/reactions:
+  /drops/{dropId}/reaction:
     post:
       tags:
         - Drops
@@ -3728,6 +3728,26 @@ paths:
         "400":
           description: Invalid request
   /profiles/{identity}/wave:
+    get:
+      tags:
+        - Profiles
+      summary: Get profile wave
+      operationId: getProfileWave
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileWave"
+        "404":
+          description: Profile not found
     post:
       tags:
         - Profiles
@@ -4360,6 +4380,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RedeemedSubscriptionCountsPage"
+  /subscriptions/redeemed-memes-counts/download:
+    get:
+      tags:
+        - Subscriptions
+      summary: Download redeemed meme subscription counts as CSV
+      description: >-
+        Downloads a CSV with meme_id, artist, drop_date, unique_profiles,
+        subscriptions_count, and proceeds for MEMES cards with id >= 220. When
+        `szn` is provided, only cards in that season are included.
+      operationId: downloadRedeemedMemeSubscriptionCounts
+      parameters:
+        - name: szn
+          in: query
+          description: Optional MEMES season filter
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
   /subscriptions/consolidation/logs/{consolidation_key}:
     get:
       tags:
@@ -9555,6 +9602,7 @@ components:
         - proceeds_usd
         - artist_split_eth
         - artist_split_usd
+        - payment_details
       properties:
         id:
           type: integer
@@ -9584,6 +9632,10 @@ components:
         artist_split_usd:
           type: number
           format: double
+        payment_details:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiPaymentDetails"
     ApiMemesMintStatsPage:
       type: object
       required:
@@ -10445,6 +10497,19 @@ components:
           format: int64
         next:
           type: boolean
+    ApiPaymentDetails:
+      type: object
+      required:
+        - payment_address
+        - has_designated_payee
+        - designated_payee_name
+      properties:
+        payment_address:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+        has_designated_payee:
+          type: boolean
+        designated_payee_name:
+          type: string
     ApiProfileClassification:
       type: string
       enum:
@@ -10661,6 +10726,18 @@ components:
         rep:
           type: number
           format: int64
+    ApiProfileWave:
+      type: object
+      required:
+        - profile_wave_id
+        - profile_curation_id
+      properties:
+        profile_wave_id:
+          type: string
+          nullable: true
+        profile_curation_id:
+          type: string
+          nullable: true
     ApiPushNotificationDevice:
       type: object
       required:
@@ -11031,6 +11108,11 @@ components:
           type: string
           minLength: 1
           maxLength: 100
+        profile_curation_id:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 50
     ApiStartMultipartMediaUploadResponse:
       required:
         - upload_id

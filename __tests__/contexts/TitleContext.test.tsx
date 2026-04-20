@@ -137,4 +137,41 @@ describe("TitleContext", () => {
       expect(document.title).toBe("Discovery");
     });
   });
+
+  it("restores the default home title after leaving messages", async () => {
+    mockPathname = "/messages";
+    mockSearchParams = new URLSearchParams("wave=wave-1");
+
+    const view = render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={{ name: "Wave One", newItemsCount: 0 }} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Wave One | Brain")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(document.title).toBe("Wave One | Brain");
+    });
+
+    mockPathname = "/";
+    mockSearchParams = new URLSearchParams();
+    mockActiveWaveId = null;
+
+    view.rerender(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("6529.io")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(document.title).toBe("6529.io");
+    });
+  });
 });

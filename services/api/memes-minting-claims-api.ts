@@ -2,6 +2,7 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { ApiMintingClaimActionTypesResponse } from "@/generated/models/ApiMintingClaimActionTypesResponse";
 import type { ApiMintingClaimActionsResponse } from "@/generated/models/ApiMintingClaimActionsResponse";
 import type { ApiMintingClaimActionUpdateRequest } from "@/generated/models/ApiMintingClaimActionUpdateRequest";
+import type { ApiMemesMintStat } from "@/generated/models/ApiMemesMintStat";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsPageResponse } from "@/generated/models/MintingClaimsPageResponse";
 import type { MintingClaimsProofsResponse } from "@/generated/models/MintingClaimsProofsResponse";
@@ -74,6 +75,14 @@ export async function getClaimsPage(
 export async function getClaim(claimId: number): Promise<MintingClaim> {
   return commonApiFetch<MintingClaim>({
     endpoint: `${MINTING_CLAIMS_BASE_CLAIMS}/${claimId}`,
+  });
+}
+
+export async function getMemesMintStat(
+  claimId: number
+): Promise<ApiMemesMintStat> {
+  return commonApiFetch<ApiMemesMintStat>({
+    endpoint: `memes-mint-stats/${claimId}`,
   });
 }
 

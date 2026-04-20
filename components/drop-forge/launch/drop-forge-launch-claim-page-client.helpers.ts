@@ -7,7 +7,8 @@ type LaunchPhaseKey =
   | "phase1"
   | "phase2"
   | "publicphase"
-  | "research";
+  | "research"
+  | "payartist";
 
 type ClaimTxModalStatus = "confirm_wallet" | "submitted" | "success" | "error";
 type LaunchMediaTab = "image" | "animation";
@@ -173,6 +174,7 @@ export function getSubscriptionPhaseName(phaseKey: LaunchPhaseKey): string {
   if (phaseKey === "phase1") return "Phase 1";
   if (phaseKey === "phase2") return "Phase 2";
   if (phaseKey === "research") return "Airdrop to Research";
+  if (phaseKey === "payartist") return "Pay Artist";
   return "Public Phase";
 }
 
@@ -226,13 +228,17 @@ export function getAutoSelectedLaunchPhase({
   hasPublishedMetadata,
   isInitialized,
   nowMs,
+  researchAirdropCompleted,
+  payArtistCompleted,
   phases,
 }: Readonly<{
   hasPublishedMetadata: boolean;
   isInitialized: boolean;
   nowMs: number;
+  researchAirdropCompleted: boolean;
+  payArtistCompleted: boolean;
   phases: ReadonlyArray<{
-    key: Exclude<LaunchPhaseKey, "research">;
+    key: Exclude<LaunchPhaseKey, "research" | "payartist">;
     schedule:
       | {
           startMs: number;
@@ -248,6 +254,10 @@ export function getAutoSelectedLaunchPhase({
 
   if (!isInitialized) {
     return "phase0";
+  }
+
+  if (researchAirdropCompleted && !payArtistCompleted) {
+    return "payartist";
   }
 
   if (phases.every((phase) => !phase.schedule)) {

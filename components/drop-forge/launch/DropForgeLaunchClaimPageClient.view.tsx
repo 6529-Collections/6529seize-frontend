@@ -33,6 +33,8 @@ import {
 } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
+import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
+import type { ApiMemesMintStat } from "@/generated/models/ApiMemesMintStat";
 import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAction";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
@@ -47,19 +49,23 @@ type LaunchPhaseKey =
   | "phase1"
   | "phase2"
   | "publicphase"
-  | "research";
+  | "research"
+  | "payartist";
 type LaunchMediaTab = "image" | "animation";
 
 const BTN_SUBSCRIPTIONS_AIRDROP =
-  "tw-h-12 tw-w-full sm:tw-w-64 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
+  "tw-h-12 tw-w-full lg:tw-w-64 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
 const BTN_METADATA_UPDATE_ACTION =
-  "tw-h-12 tw-w-full sm:tw-w-64 tw-rounded-lg tw-border-0 tw-bg-orange-600 tw-px-5 tw-text-base tw-font-semibold tw-text-orange-50 tw-ring-1 tw-ring-inset tw-ring-orange-300/60 tw-shadow-[0_8px_18px_rgba(234,88,12,0.25)] tw-transition-colors tw-duration-150 enabled:hover:tw-bg-orange-500 enabled:active:tw-bg-orange-700 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
+  "tw-h-12 tw-w-full lg:tw-w-64 tw-rounded-lg tw-border-0 tw-bg-orange-600 tw-px-5 tw-text-base tw-font-semibold tw-text-orange-50 tw-ring-1 tw-ring-inset tw-ring-orange-300/60 tw-shadow-[0_8px_18px_rgba(234,88,12,0.25)] tw-transition-colors tw-duration-150 enabled:hover:tw-bg-orange-500 enabled:active:tw-bg-orange-700 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
 const ARWEAVE_LINK_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3";
+  "tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3";
 const ARWEAVE_LINK_CARD_CLASS =
   "tw-flex tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
 
-type LaunchConfiguredPhaseKey = Exclude<LaunchPhaseKey, "research">;
+type LaunchConfiguredPhaseKey = Exclude<
+  LaunchPhaseKey,
+  "research" | "payartist"
+>;
 type LaunchClaimPrimaryStatus = ClaimPrimaryStatus | null;
 type LaunchClaimMintTimeline = NonNullable<
   ReturnType<typeof getClaimTimelineDetails>
@@ -138,6 +144,22 @@ interface DropForgeLaunchClaimPageViewProps {
   onResearchTargetEditionSizeChange: (value: string) => void;
   researchAirdropCount: number;
   runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
+  mintStat: ApiMemesMintStat | null;
+  mintStatLoading: boolean;
+  mintStatError: string | null;
+  payArtistAmountEth: string;
+  onPayArtistAmountChange: (value: string) => void;
+  payArtistAddressInput: string;
+  payArtistAddressLoading: boolean;
+  payArtistAddressMissing: boolean;
+  payArtistAddressError: string | null;
+  onPayArtistAddressInputChange: (value: string) => void;
+  onPayArtistResolvedAddressChange: (value: string) => void;
+  onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
+  onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
+  payArtistActionDisabled: boolean;
+  payArtistWritePending: boolean;
+  runPayArtistWrite: (mintingClaimAction: string | null) => void;
   selectedPhaseDiffs: LaunchPhaseDiffsView;
   changedFieldBoxClassName: string;
   changedFieldBoxLabelClassName: string;
@@ -211,6 +233,12 @@ function getMintingClaimActionTerms(kind: LaunchMintingClaimActionKind): {
         required: ["research"],
         preferred: ["airdrop"],
         excluded: ["artist", "team", "phase0", "phase1", "phase2", "public"],
+      };
+    case "payartist":
+      return {
+        required: ["pay", "artist"],
+        preferred: ["payment"],
+        excluded: ["team", "research", "phase0", "phase1", "phase2", "public"],
       };
     case "phase0":
       return {
@@ -837,7 +865,7 @@ function DropForgeAirdropSummaryActionRow({
           onToggle={onActionToggle}
         />
       </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox label="Address Count / Total Airdrops">
           {loading
             ? "loading / loading"
@@ -1032,7 +1060,7 @@ function DropForgeSubscriptionAirdropSections({
                     onToggle={onMintingClaimActionToggle}
                   />
                 </div>
-                <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
+                <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
                   <DropForgeFieldBox label="Address Count / Total Airdrops">
                     {section.loading
                       ? "loading / loading"
@@ -1091,7 +1119,7 @@ function DropForgeMetadataUpdateSection({
       <div className="tw-text-base tw-font-semibold tw-text-white">
         Metadata Changed
       </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox
           label="On-Chain Metadata"
           contentClassName="tw-text-sm"
@@ -1175,7 +1203,7 @@ function DropForgeResearchAirdropSection({
           onToggle={onMintingClaimActionToggle}
         />
       </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox label="Total Minted">
           {totalMinted.toLocaleString()}
         </DropForgeFieldBox>
@@ -1214,6 +1242,202 @@ function DropForgeResearchAirdropSection({
   );
 }
 
+function formatMintStatEth(value: number | null | undefined): string {
+  const normalized = Number(value);
+  if (!Number.isFinite(normalized)) {
+    return "—";
+  }
+  return normalized.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 6,
+  });
+}
+
+function DropForgePayArtistSection({
+  mintStat,
+  mintStatLoading,
+  mintStatError,
+  payArtistAmountEth,
+  onPayArtistAmountChange,
+  payArtistAddressInput,
+  payArtistAddressLoading,
+  payArtistAddressMissing,
+  payArtistAddressError,
+  onPayArtistAddressInputChange,
+  onPayArtistResolvedAddressChange,
+  onPayArtistAddressLoadingChange,
+  onPayArtistAddressEnsErrorChange,
+  payArtistActionDisabled,
+  payArtistWritePending,
+  runPayArtistWrite,
+  payArtistAction,
+  mintingClaimActionPending,
+  onMintingClaimActionToggle,
+}: Readonly<{
+  mintStat: ApiMemesMintStat | null;
+  mintStatLoading: boolean;
+  mintStatError: string | null;
+  payArtistAmountEth: string;
+  onPayArtistAmountChange: (value: string) => void;
+  payArtistAddressInput: string;
+  payArtistAddressLoading: boolean;
+  payArtistAddressMissing: boolean;
+  payArtistAddressError: string | null;
+  onPayArtistAddressInputChange: (value: string) => void;
+  onPayArtistResolvedAddressChange: (value: string) => void;
+  onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
+  onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
+  payArtistActionDisabled: boolean;
+  payArtistWritePending: boolean;
+  runPayArtistWrite: (mintingClaimAction: string | null) => void;
+  payArtistAction?: ApiMintingClaimAction | null;
+  mintingClaimActionPending: string | null;
+  onMintingClaimActionToggle: (
+    action: string,
+    completed: boolean
+  ) => Promise<void>;
+}>) {
+  const isCompleted = payArtistAction?.completed ?? false;
+  const isActionToggleDisabled =
+    payArtistWritePending || mintingClaimActionPending !== null;
+  const payArtistActionName = payArtistAction?.action ?? null;
+  const paymentDetails = mintStat?.payment_details ?? null;
+  const payArtistAmountLabelClassName =
+    payArtistAmountEth.trim() === ""
+      ? "tw-text-rose-300 tw-ring-rose-500/70"
+      : "";
+  const payArtistAmountClassName =
+    payArtistAmountEth.trim() === "" ? "tw-ring-rose-500/70" : "";
+  const paymentAddressClassName = payArtistAddressMissing
+    ? "tw-ring-rose-500/70"
+    : "";
+  const paymentAddressLabelClassName = payArtistAddressMissing
+    ? "tw-text-rose-300 tw-ring-rose-500/70"
+    : "";
+  const mintStatLoadingClassName = mintStatLoading ? "!tw-text-iron-500" : "";
+
+  return (
+    <div className="tw-space-y-5 tw-pt-4">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+        <div className="tw-text-base tw-font-medium tw-text-white">
+          Pay Artist
+        </div>
+        <DropForgeActionCompletionToggle
+          action={payArtistAction}
+          disabled={isActionToggleDisabled}
+          ariaLabel="Pay artist completed"
+          onToggle={onMintingClaimActionToggle}
+        />
+      </div>
+
+      {mintStatError ? (
+        <p className="tw-mb-0 tw-text-sm tw-text-rose-300">{mintStatError}</p>
+      ) : null}
+
+      {paymentDetails?.has_designated_payee &&
+      paymentDetails.designated_payee_name ? (
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+          Designated payee:{" "}
+          <span className="tw-text-iron-200">
+            {paymentDetails.designated_payee_name}
+          </span>
+        </p>
+      ) : null}
+
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-3 lg:tw-gap-x-5">
+        <DropForgeFieldBox
+          label="Total Sales (Subscriptions / Mints)"
+          contentClassName={mintStatLoadingClassName}
+        >
+          {mintStatLoading
+            ? "loading..."
+            : mintStat
+              ? `${mintStat.total_count.toLocaleString()} (${mintStat.subscriptions_count.toLocaleString()} / ${mintStat.mint_count.toLocaleString()})`
+              : "—"}
+        </DropForgeFieldBox>
+        <DropForgeFieldBox
+          label="Proceeds (ETH)"
+          contentClassName={mintStatLoadingClassName}
+        >
+          {mintStatLoading
+            ? "loading..."
+            : formatMintStatEth(mintStat?.proceeds_eth)}
+        </DropForgeFieldBox>
+        <DropForgeFieldBox
+          label="Artist Split (ETH)"
+          contentClassName={mintStatLoadingClassName}
+        >
+          {mintStatLoading
+            ? "loading..."
+            : formatMintStatEth(mintStat?.artist_split_eth)}
+        </DropForgeFieldBox>
+      </div>
+
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,0.6fr)_minmax(0,2.4fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
+        <DropForgeFieldBox
+          label="Pay Artist (ETH)"
+          className={payArtistAmountClassName}
+          labelClassName={payArtistAmountLabelClassName}
+        >
+          <input
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="0.0001"
+            value={payArtistAmountEth}
+            onChange={(e) => onPayArtistAmountChange(e.target.value)}
+            placeholder="Enter ETH Amount"
+            className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
+          />
+        </DropForgeFieldBox>
+        <div className="tw-flex tw-flex-col tw-gap-1.5">
+          <DropForgeFieldBox
+            label="Payment Address"
+            className={paymentAddressClassName}
+            labelClassName={paymentAddressLabelClassName}
+          >
+            <EnsAddressInput
+              value={payArtistAddressInput}
+              placeholder="0x... or ENS"
+              onAddressChange={(value) => {
+                onPayArtistAddressInputChange(value);
+                onPayArtistResolvedAddressChange(value);
+              }}
+              onLoadingChange={onPayArtistAddressLoadingChange}
+              onError={onPayArtistAddressEnsErrorChange}
+              className="tw-h-auto tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white tw-placeholder-iron-500 tw-shadow-none [color-scheme:dark] focus:tw-bg-transparent focus:tw-text-white focus:tw-shadow-none focus:tw-outline-none focus:tw-ring-0"
+            />
+          </DropForgeFieldBox>
+          {payArtistAddressLoading ? (
+            <span className="tw-px-1 tw-text-xs tw-text-iron-400">
+              Resolving ENS…
+            </span>
+          ) : null}
+          {payArtistAddressError ? (
+            <span className="tw-px-1 tw-text-xs tw-text-rose-300">
+              {payArtistAddressError}
+            </span>
+          ) : null}
+        </div>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-end">
+          <button
+            type="button"
+            disabled={
+              payArtistActionDisabled ||
+              isCompleted ||
+              mintingClaimActionPending !== null
+            }
+            onClick={() => runPayArtistWrite(payArtistActionName)}
+            className={BTN_SUBSCRIPTIONS_AIRDROP}
+          >
+            {payArtistWritePending ? "Processing..." : "Pay Artist"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DropForgePhaseRootInfoSection({
   isPublicPhaseSelected,
   selectedPhaseDiffs,
@@ -1234,7 +1458,7 @@ function DropForgePhaseRootInfoSection({
   }
 
   return (
-    <div className="tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 lg:tw-grid-cols-2 lg:tw-gap-x-5">
+    <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-pt-3 lg:tw-grid-cols-2 lg:tw-gap-x-5">
       <DropForgeFieldBox
         label="Merkle Root"
         className={
@@ -1351,7 +1575,7 @@ function DropForgePhaseConfigurationSection({
       <div className="tw-text-base tw-font-medium tw-text-white">
         Phase Configuration
       </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2 lg:tw-gap-x-5">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2 lg:tw-gap-x-5">
         <DropForgeFieldBox label="Remaining Editions">
           {manifoldClaim?.remaining ?? "—"}
         </DropForgeFieldBox>
@@ -1384,7 +1608,7 @@ function DropForgePhaseConfigurationSection({
         selectedPhaseConfig={selectedPhaseConfig}
       />
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-pt-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox
           label="Phase Start"
           className={
@@ -1467,6 +1691,22 @@ function DropForgePhaseSelectionSection({
   claimWritePending,
   researchAirdropCount,
   runResearchAirdropWrite,
+  mintStat,
+  mintStatLoading,
+  mintStatError,
+  payArtistAmountEth,
+  onPayArtistAmountChange,
+  payArtistAddressInput,
+  payArtistAddressLoading,
+  payArtistAddressMissing,
+  payArtistAddressError,
+  onPayArtistAddressInputChange,
+  onPayArtistResolvedAddressChange,
+  onPayArtistAddressLoadingChange,
+  onPayArtistAddressEnsErrorChange,
+  payArtistActionDisabled,
+  payArtistWritePending,
+  runPayArtistWrite,
   mintingClaimActionsByName,
   mintingClaimActionPending,
   onMintingClaimActionToggle,
@@ -1506,6 +1746,22 @@ function DropForgePhaseSelectionSection({
   claimWritePending: boolean;
   researchAirdropCount: number;
   runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
+  mintStat: ApiMemesMintStat | null;
+  mintStatLoading: boolean;
+  mintStatError: string | null;
+  payArtistAmountEth: string;
+  onPayArtistAmountChange: (value: string) => void;
+  payArtistAddressInput: string;
+  payArtistAddressLoading: boolean;
+  payArtistAddressMissing: boolean;
+  payArtistAddressError: string | null;
+  onPayArtistAddressInputChange: (value: string) => void;
+  onPayArtistResolvedAddressChange: (value: string) => void;
+  onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
+  onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
+  payArtistActionDisabled: boolean;
+  payArtistWritePending: boolean;
+  runPayArtistWrite: (mintingClaimAction: string | null) => void;
   mintingClaimActionsByName: Record<string, ApiMintingClaimAction>;
   mintingClaimActionPending: string | null;
   onMintingClaimActionToggle: (
@@ -1545,6 +1801,13 @@ function DropForgePhaseSelectionSection({
   const researchAction = researchActionName
     ? (mintingClaimActionsByName[researchActionName] ?? null)
     : null;
+  const payArtistActionName = findBestMatchingMintingClaimActionName(
+    Object.keys(mintingClaimActionsByName),
+    "payartist"
+  );
+  const payArtistAction = payArtistActionName
+    ? (mintingClaimActionsByName[payArtistActionName] ?? null)
+    : null;
 
   return (
     <>
@@ -1554,7 +1817,7 @@ function DropForgePhaseSelectionSection({
       <div
         role="tablist"
         aria-label="Phase selection"
-        className="tw-grid tw-grid-cols-2 tw-gap-2 tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950/70 tw-p-2 md:tw-grid-cols-3 xl:tw-grid-cols-5"
+        className="tw-grid tw-grid-cols-2 tw-gap-2 tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950/70 tw-p-2 sm:tw-grid-cols-3 lg:tw-grid-cols-6"
       >
         <button
           type="button"
@@ -1569,7 +1832,7 @@ function DropForgePhaseSelectionSection({
           }`}
         >
           <span>Phase 0</span>
-          <span className="tw-hidden sm:tw-inline">- Initialize Claim</span>
+          <span className="lg:tw:inline tw-hidden">- Initialize Claim</span>
         </button>
         <button
           type="button"
@@ -1631,6 +1894,21 @@ function DropForgePhaseSelectionSection({
         >
           Airdrop to Research
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={selectedPhase === "payartist"}
+          aria-controls="phase-panel-payartist"
+          disabled={!isInitialized}
+          onClick={() => onSelectedPhaseChange("payartist")}
+          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
+            selectedPhase === "payartist"
+              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
+              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
+          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
+        >
+          Pay Artist
+        </button>
       </div>
       <div className="tw-min-h-[18rem] lg:tw-min-h-[30rem]">
         {selectedPhase === "research" ? (
@@ -1646,6 +1924,28 @@ function DropForgePhaseSelectionSection({
             researchAirdropCount={researchAirdropCount}
             runResearchAirdropWrite={runResearchAirdropWrite}
             researchAction={researchAction}
+            mintingClaimActionPending={mintingClaimActionPending}
+            onMintingClaimActionToggle={onMintingClaimActionToggle}
+          />
+        ) : selectedPhase === "payartist" ? (
+          <DropForgePayArtistSection
+            mintStat={mintStat}
+            mintStatLoading={mintStatLoading}
+            mintStatError={mintStatError}
+            payArtistAmountEth={payArtistAmountEth}
+            onPayArtistAmountChange={onPayArtistAmountChange}
+            payArtistAddressInput={payArtistAddressInput}
+            payArtistAddressLoading={payArtistAddressLoading}
+            payArtistAddressMissing={payArtistAddressMissing}
+            payArtistAddressError={payArtistAddressError}
+            onPayArtistAddressInputChange={onPayArtistAddressInputChange}
+            onPayArtistResolvedAddressChange={onPayArtistResolvedAddressChange}
+            onPayArtistAddressLoadingChange={onPayArtistAddressLoadingChange}
+            onPayArtistAddressEnsErrorChange={onPayArtistAddressEnsErrorChange}
+            payArtistActionDisabled={payArtistActionDisabled}
+            payArtistWritePending={payArtistWritePending}
+            runPayArtistWrite={runPayArtistWrite}
+            payArtistAction={payArtistAction}
             mintingClaimActionPending={mintingClaimActionPending}
             onMintingClaimActionToggle={onMintingClaimActionToggle}
           />
@@ -1724,6 +2024,22 @@ function DropForgeLaunchClaimActionsSection({
   onResearchTargetEditionSizeChange,
   researchAirdropCount,
   runResearchAirdropWrite,
+  mintStat,
+  mintStatLoading,
+  mintStatError,
+  payArtistAmountEth,
+  onPayArtistAmountChange,
+  payArtistAddressInput,
+  payArtistAddressLoading,
+  payArtistAddressMissing,
+  payArtistAddressError,
+  onPayArtistAddressInputChange,
+  onPayArtistResolvedAddressChange,
+  onPayArtistAddressLoadingChange,
+  onPayArtistAddressEnsErrorChange,
+  payArtistActionDisabled,
+  payArtistWritePending,
+  runPayArtistWrite,
   selectedPhaseDiffs,
   changedFieldBoxClassName,
   changedFieldBoxLabelClassName,
@@ -1769,6 +2085,22 @@ function DropForgeLaunchClaimActionsSection({
   onResearchTargetEditionSizeChange: (value: string) => void;
   researchAirdropCount: number;
   runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
+  mintStat: ApiMemesMintStat | null;
+  mintStatLoading: boolean;
+  mintStatError: string | null;
+  payArtistAmountEth: string;
+  onPayArtistAmountChange: (value: string) => void;
+  payArtistAddressInput: string;
+  payArtistAddressLoading: boolean;
+  payArtistAddressMissing: boolean;
+  payArtistAddressError: string | null;
+  onPayArtistAddressInputChange: (value: string) => void;
+  onPayArtistResolvedAddressChange: (value: string) => void;
+  onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
+  onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
+  payArtistActionDisabled: boolean;
+  payArtistWritePending: boolean;
+  runPayArtistWrite: (mintingClaimAction: string | null) => void;
   selectedPhaseDiffs: LaunchPhaseDiffsView;
   changedFieldBoxClassName: string;
   changedFieldBoxLabelClassName: string;
@@ -1826,6 +2158,22 @@ function DropForgeLaunchClaimActionsSection({
           claimWritePending={claimWritePending}
           researchAirdropCount={researchAirdropCount}
           runResearchAirdropWrite={runResearchAirdropWrite}
+          mintStat={mintStat}
+          mintStatLoading={mintStatLoading}
+          mintStatError={mintStatError}
+          payArtistAmountEth={payArtistAmountEth}
+          onPayArtistAmountChange={onPayArtistAmountChange}
+          payArtistAddressInput={payArtistAddressInput}
+          payArtistAddressLoading={payArtistAddressLoading}
+          payArtistAddressMissing={payArtistAddressMissing}
+          payArtistAddressError={payArtistAddressError}
+          onPayArtistAddressInputChange={onPayArtistAddressInputChange}
+          onPayArtistResolvedAddressChange={onPayArtistResolvedAddressChange}
+          onPayArtistAddressLoadingChange={onPayArtistAddressLoadingChange}
+          onPayArtistAddressEnsErrorChange={onPayArtistAddressEnsErrorChange}
+          payArtistActionDisabled={payArtistActionDisabled}
+          payArtistWritePending={payArtistWritePending}
+          runPayArtistWrite={runPayArtistWrite}
           manifoldClaim={manifoldClaim}
           selectedPhaseDiffs={selectedPhaseDiffs}
           changedFieldBoxClassName={changedFieldBoxClassName}
@@ -1894,6 +2242,22 @@ function DropForgeLaunchClaimContent({
   onResearchTargetEditionSizeChange,
   researchAirdropCount,
   runResearchAirdropWrite,
+  mintStat,
+  mintStatLoading,
+  mintStatError,
+  payArtistAmountEth,
+  onPayArtistAmountChange,
+  payArtistAddressInput,
+  payArtistAddressLoading,
+  payArtistAddressMissing,
+  payArtistAddressError,
+  onPayArtistAddressInputChange,
+  onPayArtistResolvedAddressChange,
+  onPayArtistAddressLoadingChange,
+  onPayArtistAddressEnsErrorChange,
+  payArtistActionDisabled,
+  payArtistWritePending,
+  runPayArtistWrite,
   selectedPhaseDiffs,
   changedFieldBoxClassName,
   changedFieldBoxLabelClassName,
@@ -1975,6 +2339,22 @@ function DropForgeLaunchClaimContent({
         onResearchTargetEditionSizeChange={onResearchTargetEditionSizeChange}
         researchAirdropCount={researchAirdropCount}
         runResearchAirdropWrite={runResearchAirdropWrite}
+        mintStat={mintStat}
+        mintStatLoading={mintStatLoading}
+        mintStatError={mintStatError}
+        payArtistAmountEth={payArtistAmountEth}
+        onPayArtistAmountChange={onPayArtistAmountChange}
+        payArtistAddressInput={payArtistAddressInput}
+        payArtistAddressLoading={payArtistAddressLoading}
+        payArtistAddressMissing={payArtistAddressMissing}
+        payArtistAddressError={payArtistAddressError}
+        onPayArtistAddressInputChange={onPayArtistAddressInputChange}
+        onPayArtistResolvedAddressChange={onPayArtistResolvedAddressChange}
+        onPayArtistAddressLoadingChange={onPayArtistAddressLoadingChange}
+        onPayArtistAddressEnsErrorChange={onPayArtistAddressEnsErrorChange}
+        payArtistActionDisabled={payArtistActionDisabled}
+        payArtistWritePending={payArtistWritePending}
+        runPayArtistWrite={runPayArtistWrite}
         selectedPhaseDiffs={selectedPhaseDiffs}
         changedFieldBoxClassName={changedFieldBoxClassName}
         changedFieldBoxLabelClassName={changedFieldBoxLabelClassName}
