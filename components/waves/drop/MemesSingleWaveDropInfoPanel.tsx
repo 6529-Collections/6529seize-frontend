@@ -99,6 +99,9 @@ export const MemesSingleWaveDropInfoPanel = ({
   const handleCloseFullscreen = useCallback(() => {
     setIsFullscreen(false);
   }, []);
+  const handleOpenFullscreen = useCallback(() => {
+    setIsFullscreen(true);
+  }, []);
   const handleOpenVoting = useCallback(() => {
     setIsVotingOpen(true);
   }, []);
@@ -109,7 +112,10 @@ export const MemesSingleWaveDropInfoPanel = ({
   return (
     <>
       <div className="tw-w-full">
-        <MemesDropArtworkHero artworkMedia={artworkMedia} />
+        <MemesDropArtworkHero
+          artworkMedia={artworkMedia}
+          onOpenFullscreen={handleOpenFullscreen}
+        />
         <MemesDropSummarySection
           drop={drop}
           title={title}
