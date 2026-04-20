@@ -56,6 +56,8 @@ const renderPreviewMessage = (primary: string, secondary: string) => (
 const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   artworkUploaded,
   artworkUrl,
+  uploadError,
+  artworkMimeType,
   setArtworkUploaded,
   handleFileSelect,
   mediaSource,
@@ -88,12 +90,18 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       : false;
 
   // File uploader hook (manages local state, objectUrl, etc.)
-  const { state, processFile, handleRetry, handleRemoveFile, dispatch } =
-    useFileUploader({
-      onFileSelect: handleFileSelect,
-      setUploaded: setArtworkUploaded,
-      showToast: setToast,
-    });
+  const {
+    state,
+    processFile,
+    handleRetry,
+    handleRemoveFile,
+    resetState,
+    dispatch,
+  } = useFileUploader({
+    onFileSelect: handleFileSelect,
+    setUploaded: setArtworkUploaded,
+    showToast: setToast,
+  });
 
   // For drag & drop highlighting
   const setVisualState = useCallback(
@@ -212,6 +220,14 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     videoCompatibility,
     isCheckingCompatibility,
   } = state;
+  const displayUploadError = uploadError ?? error;
+  const uploadVisualState = uploadError ? "invalid" : visualState;
+
+  useEffect(() => {
+    if (uploadError) {
+      resetState();
+    }
+  }, [resetState, uploadError]);
 
   /**
    * The final URL we actually pass to <FilePreview>.
@@ -295,7 +311,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               visualState === "dragging"
                 ? "tw-border-2 tw-border-primary-500/60"
                 : ""
-            } ${visualState === "invalid" ? "tw-border-2 tw-border-red/60" : ""} ${
+            } ${uploadVisualState === "invalid" ? "tw-border-2 tw-border-red/60" : ""} ${
               visualState === "idle" && !artworkUploaded
                 ? "hover:tw-border hover:tw-border-iron-700/80"
                 : ""
@@ -309,7 +325,9 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             tabIndex={artworkUploaded ? -1 : 0}
             aria-label="Upload artwork"
             onKeyDown={handleKeyDown}
-            aria-describedby={error ? "file-upload-error" : undefined}
+            aria-describedby={
+              displayUploadError ? "file-upload-error" : undefined
+            }
             data-testid="artwork-upload-area"
           >
             <input
@@ -327,15 +345,18 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
 
             {!artworkUploaded ? (
               <UploadArea
-                visualState={visualState}
-                error={error}
-                hasRecoveryOption={state.hasRecoveryOption}
+                visualState={uploadVisualState}
+                error={displayUploadError}
+                hasRecoveryOption={
+                  uploadError ? false : state.hasRecoveryOption
+                }
                 onRetry={handleRetry}
               />
             ) : (
               <FilePreview
                 url={previewUrl}
                 file={currentFile}
+                mimeType={artworkMimeType}
                 onRemove={handleRemoveFile}
                 videoCompatibility={videoCompatibility}
                 isCheckingCompatibility={isCheckingCompatibility}

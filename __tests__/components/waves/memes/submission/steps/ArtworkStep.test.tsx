@@ -92,6 +92,7 @@ const createProps = (
   traits: createTraits(),
   artworkUploaded: false,
   artworkUrl: "",
+  uploadError: null,
   setArtworkUploaded: () => {},
   handleFileSelect: () => {},
   mediaSource: "upload" as const,

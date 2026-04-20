@@ -18,7 +18,14 @@ jest.mock("@headlessui/react", () => {
   );
   const Transition = ({ show, children }: any) =>
     show ? <div data-testid="root">{children}</div> : null;
-  const TransitionChild = ({ children }: any) => <div>{children}</div>;
+  const TransitionChild = ({ children, afterLeave }: any) => (
+    <div
+      data-testid={afterLeave ? "transition-after-leave" : undefined}
+      onClick={afterLeave}
+    >
+      {children}
+    </div>
+  );
 
   return {
     Dialog,
@@ -74,5 +81,24 @@ describe("CommonDropdownItemsMobileWrapper", () => {
     expect(screen.getByText("test")).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText("Close panel"));
     expect(setOpen).toHaveBeenCalledWith(false);
+  });
+
+  it("forwards after leave callback to the transition", () => {
+    const setOpen = jest.fn();
+    const onAfterLeave = jest.fn();
+
+    render(
+      <CommonDropdownItemsMobileWrapper
+        isOpen={true}
+        setOpen={setOpen}
+        onAfterLeave={onAfterLeave}
+      >
+        <li>child</li>
+      </CommonDropdownItemsMobileWrapper>
+    );
+
+    fireEvent.click(screen.getByTestId("transition-after-leave"));
+
+    expect(onAfterLeave).toHaveBeenCalled();
   });
 });

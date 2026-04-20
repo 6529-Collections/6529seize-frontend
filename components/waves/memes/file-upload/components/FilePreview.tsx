@@ -12,9 +12,12 @@ const MediaDisplayGLB = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="tw-flex tw-items-center tw-justify-center tw-h-full tw-text-iron-400">
+      <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-iron-400">
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
-          <FontAwesomeIcon icon={faCube} className="tw-w-8 tw-h-8 tw-flex-shrink-0" />
+          <FontAwesomeIcon
+            icon={faCube}
+            className="tw-h-8 tw-w-8 tw-flex-shrink-0"
+          />
           <span>Loading 3D model...</span>
         </div>
       </div>
@@ -34,19 +37,23 @@ const MediaDisplayGLB = dynamic(
 const FilePreview: React.FC<FilePreviewProps> = ({
   url,
   file,
+  mimeType,
   onRemove,
   videoCompatibility,
   isCheckingCompatibility,
 }) => {
+  const effectiveMimeType = file?.type ?? mimeType ?? "";
+
   // Determine file type
   const isVideo =
-    file?.type.startsWith("video/") || url.startsWith("data:video/");
-  
-  const isGLB = 
-    file?.type === "model/gltf-binary" || 
-    file?.type === "model/gltf+json" ||
+    effectiveMimeType.startsWith("video/") || url.startsWith("data:video/");
+
+  const isGLB =
+    effectiveMimeType === "model/gltf-binary" ||
+    effectiveMimeType === "model/gltf+json" ||
     file?.name.toLowerCase().endsWith(".glb") ||
     file?.name.toLowerCase().endsWith(".gltf");
+  const isHtml = effectiveMimeType === "text/html";
 
   // Check if video is compatible for playback
   const canPlayVideo = !isVideo || (videoCompatibility?.canPlay ?? true);
@@ -55,14 +62,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({
     <img
       src={url}
       alt="Artwork preview"
-      className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg tw-absolute"
+      className="tw-absolute tw-max-h-full tw-max-w-full tw-object-contain tw-shadow-lg"
     />
   );
 
   const renderVideoPreview = () => (
     <video
       src={url}
-      className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg"
+      className="tw-max-h-full tw-max-w-full tw-object-contain tw-shadow-lg"
       controls
       onError={(e) => {
         console.error("Video playback error:", e);
@@ -70,7 +77,21 @@ const FilePreview: React.FC<FilePreviewProps> = ({
     />
   );
 
+  const renderHtmlPreview = () => (
+    <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-p-6 tw-text-center">
+      <span className="tw-mb-2 tw-text-sm tw-font-semibold tw-text-iron-200">
+        Interactive artwork ready
+      </span>
+      <span className="tw-max-w-sm tw-text-xs tw-font-medium tw-text-iron-500">
+        The existing interactive media will be reused unless you change it.
+      </span>
+    </div>
+  );
+
   const renderStandardPreview = () => {
+    if (isHtml) {
+      return renderHtmlPreview();
+    }
     if (url.startsWith("data:image/")) {
       return renderImagePreview();
     }
@@ -83,7 +104,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   const renderMediaContent = () => {
     if (isGLB) {
       return (
-        <div className="tw-w-full tw-h-full tw-min-h-[300px]">
+        <div className="tw-h-full tw-min-h-[300px] tw-w-full">
           <MediaDisplayGLB src={url} />
         </div>
       );
@@ -110,11 +131,11 @@ const FilePreview: React.FC<FilePreviewProps> = ({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="tw-relative tw-w-full tw-h-full tw-bg-iron-900 tw-flex tw-items-center tw-justify-center"
+      className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-900"
     >
       {/* Container with checkerboard pattern for transparent media */}
       <div className="tw-absolute tw-inset-0 tw-opacity-5">
-        <div className="tw-grid tw-grid-cols-8 tw-h-full">
+        <div className="tw-grid tw-h-full tw-grid-cols-8">
           {Array(64)
             .fill(0)
             .map((_, i) => (
@@ -130,9 +151,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({
 
       {/* Show compatibility checking indicator */}
       {isCheckingCompatibility && isVideo && (
-        <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-950/70 tw-z-10">
+        <div className="tw-absolute tw-inset-0 tw-z-10 tw-flex tw-items-center tw-justify-center tw-bg-iron-950/70">
           <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
-            <div className="tw-h-10 tw-w-10 tw-border-t-2 tw-border-b-2 tw-border-primary-500 tw-rounded-full tw-animate-spin" />
+            <div className="tw-h-10 tw-w-10 tw-animate-spin tw-rounded-full tw-border-b-2 tw-border-t-2 tw-border-primary-500" />
             <span className="tw-text-iron-300">
               Checking video compatibility...
             </span>
@@ -141,22 +162,22 @@ const FilePreview: React.FC<FilePreviewProps> = ({
       )}
 
       {/* Media container with proper padding and centering */}
-      <div className="tw-relative tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-p-4 tw-overflow-hidden">
+      <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-p-4">
         {renderMediaContent()}
       </div>
 
       {/* Control buttons */}
-      <div className="tw-absolute tw-top-3 tw-right-3 tw-z-30 tw-flex tw-gap-2">
+      <div className="tw-absolute tw-right-3 tw-top-3 tw-z-30 tw-flex tw-gap-2">
         <button
           onClick={onRemove}
-          className="tw-border tw-border-solid tw-border-iron-800 hover:tw-ring-iron-650 hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-ring-1 tw-ring-iron-700 tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700 hover:tw-ring-iron-650 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700"
           aria-label="Change uploaded file"
           tabIndex={0}
           data-testid="artwork-replace-button"
         >
           <FontAwesomeIcon
             icon={faArrowsRotate}
-            className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0"
+            className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
           />
           Change
         </button>

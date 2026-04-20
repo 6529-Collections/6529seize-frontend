@@ -17,6 +17,7 @@ export default function CommonDropdownItemsMobileWrapper({
   label,
   hideOnDesktopHover = true,
   zIndexClassName = "tw-z-[1000]",
+  onAfterLeave,
   children,
 }: {
   readonly isOpen: boolean;
@@ -24,6 +25,7 @@ export default function CommonDropdownItemsMobileWrapper({
   readonly label?: string | undefined;
   readonly hideOnDesktopHover?: boolean | undefined;
   readonly zIndexClassName?: string | undefined;
+  readonly onAfterLeave?: (() => void) | undefined;
   readonly children: ReactNode;
 }) {
   const hasTouchInput = useHasTouchInput();
@@ -44,6 +46,7 @@ export default function CommonDropdownItemsMobileWrapper({
           leave="tw-duration-300 tw-ease-in-out"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
+          {...(onAfterLeave ? { afterLeave: onAfterLeave } : {})}
         >
           <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-transition-opacity" />
         </TransitionChild>
