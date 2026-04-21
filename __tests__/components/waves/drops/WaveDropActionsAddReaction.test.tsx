@@ -47,6 +47,25 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(() => Promise.resolve({})),
 }));
 
+jest.mock("@sentry/nextjs", () => ({
+  __esModule: true,
+  addBreadcrumb: jest.fn(),
+  withScope: jest.fn((callback: (scope: any) => void) => {
+    const scope = {
+      setLevel: jest.fn(),
+      setFingerprint: jest.fn(),
+      setTag: jest.fn(),
+      setExtras: jest.fn(),
+    };
+    callback(scope);
+  }),
+  captureException: jest.fn(),
+}));
+
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
+  useWebsocketStatus: jest.fn(() => "connected"),
+}));
+
 jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
   default: (props: any) => mobileWrapperDialogMock(props),

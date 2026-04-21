@@ -9,6 +9,7 @@ import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import { useCallback, useRef } from "react";
 import {
   cloneReactionEntries,
@@ -16,19 +17,37 @@ import {
   removeUserFromReactions,
   toProfileMin,
 } from "@/components/waves/drops/reaction-utils";
+import {
+  beginReactionMutation,
+  deriveReactionAction,
+  recordReactionOptimisticApplied,
+  recordReactionRequestFailed,
+  recordReactionRequestSent,
+  recordReactionRequestSucceeded,
+  recordReactionRollbackApplied,
+  type ReactionSource,
+} from "@/utils/monitoring/dropReactionMonitoring";
 
 interface UseDropReactionResult {
   readonly react: (reactionCode: string) => Promise<void>;
   readonly canReact: boolean;
 }
 
+interface UseDropReactionOptions {
+  readonly source?: ReactionSource | undefined;
+  readonly onSuccess?: (() => void) | undefined;
+}
+
 export function useDropReaction(
   drop: ExtendedDrop,
-  onSuccess?: () => void
+  options?: UseDropReactionOptions
 ): UseDropReactionResult {
   const { setToast, connectedProfile } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
+  const websocketStatus = useWebsocketStatus();
   const rollbackRef = useRef<(() => void) | null>(null);
+  const source = options?.source ?? "picker";
+  const onSuccess = options?.onSuccess;
 
   const canReact = !drop.id.startsWith("temp-");
 
@@ -120,11 +139,25 @@ export function useDropReaction(
       if (!canReact) return;
 
       const isRemoving = reactionCode === contextProfileContext?.reaction;
+      const intendedReaction = isRemoving ? null : reactionCode;
+      const mutation = beginReactionMutation({
+        dropId,
+        waveId,
+        source,
+        action: deriveReactionAction(
+          contextProfileContext?.reaction ?? null,
+          intendedReaction
+        ),
+        previousReaction: contextProfileContext?.reaction ?? null,
+        intendedReaction,
+        optimisticReaction: intendedReaction,
+        profileId: connectedProfile?.id ?? null,
+        websocketStatus,
+      });
 
       rollbackRef.current?.();
-      rollbackRef.current = applyOptimisticReaction(
-        isRemoving ? null : reactionCode
-      );
+      rollbackRef.current = applyOptimisticReaction(intendedReaction);
+      recordReactionOptimisticApplied(mutation);
 
       if (!isRemoving) {
         recordReaction(reactionCode);
@@ -133,16 +166,30 @@ export function useDropReaction(
       try {
         const endpoint = `drops/${drop.id}/reaction`;
         if (isRemoving) {
-          await commonApiDelete({ endpoint });
+          recordReactionRequestSent(mutation, {
+            endpoint,
+            method: "DELETE",
+          });
+          await commonApiDelete({
+            endpoint,
+            errorMode: "structured",
+          });
         } else {
+          recordReactionRequestSent(mutation, {
+            endpoint,
+            method: "POST",
+          });
           await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
             endpoint,
             body: { reaction: reactionCode },
+            errorMode: "structured",
           });
         }
+        recordReactionRequestSucceeded(mutation);
         rollbackRef.current = null;
         onSuccess?.();
       } catch (error) {
+        recordReactionRequestFailed(mutation, error);
         let errorMessage = isRemoving
           ? "Error removing reaction"
           : "Error adding reaction";
@@ -151,16 +198,22 @@ export function useDropReaction(
         }
         setToast({ message: errorMessage, type: "error" });
         rollbackRef.current?.();
+        recordReactionRollbackApplied(mutation);
         rollbackRef.current = null;
       }
     },
     [
       canReact,
       applyOptimisticReaction,
+      connectedProfile?.id,
       contextProfileContext?.reaction,
       drop.id,
+      dropId,
       setToast,
       onSuccess,
+      source,
+      waveId,
+      websocketStatus,
     ]
   );
 

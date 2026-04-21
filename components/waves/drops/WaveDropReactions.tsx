@@ -14,6 +14,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,6 +32,15 @@ import {
   removeUserFromReactions,
   toProfileMin,
 } from "./reaction-utils";
+import {
+  beginReactionMutation,
+  deriveReactionAction,
+  recordReactionOptimisticApplied,
+  recordReactionRequestFailed,
+  recordReactionRequestSent,
+  recordReactionRequestSucceeded,
+  recordReactionRollbackApplied,
+} from "@/utils/monitoring/dropReactionMonitoring";
 import styles from "./WaveDropReactions.module.scss";
 import WaveDropReactionsDetailDialog from "./WaveDropReactionsDetailDialog";
 
@@ -85,6 +95,7 @@ function WaveDropReaction({
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
+  const websocketStatus = useWebsocketStatus();
   const rollbackRef = useRef<(() => void) | null>(null);
   const canReact = Boolean(connectedProfile?.handle);
 
@@ -326,10 +337,27 @@ function WaveDropReaction({
       return;
     }
 
+    const intendedReaction = selected ? null : reaction.reaction;
+    const mutation = beginReactionMutation({
+      dropId: drop.id,
+      waveId,
+      source: "chip",
+      action: deriveReactionAction(
+        drop.context_profile_context?.reaction ?? null,
+        intendedReaction
+      ),
+      previousReaction: drop.context_profile_context?.reaction ?? null,
+      intendedReaction,
+      optimisticReaction: intendedReaction,
+      profileId: connectedProfile?.id ?? null,
+      websocketStatus,
+    });
+
     setSelected((s) => !s);
     setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
 
     applyOptimisticReactionChange(!selected);
+    recordReactionOptimisticApplied(mutation);
 
     if (!selected) {
       recordReaction(reaction.reaction);
@@ -339,16 +367,28 @@ function WaveDropReaction({
       const body = { reaction: reaction.reaction };
       const endpoint = `drops/${drop.id}/reaction`;
       if (selected) {
+        recordReactionRequestSent(mutation, {
+          endpoint,
+          method: "DELETE",
+        });
         await commonApiDelete({
           endpoint,
+          errorMode: "structured",
         });
       } else {
+        recordReactionRequestSent(mutation, {
+          endpoint,
+          method: "POST",
+        });
         await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
           endpoint,
           body,
+          errorMode: "structured",
         });
       }
+      recordReactionRequestSucceeded(mutation);
     } catch (error) {
+      recordReactionRequestFailed(mutation, error);
       let msg = selected ? "Error removing reaction" : "Error adding reaction";
       if (typeof error === "string") msg = error;
       setToast({ message: msg, type: "error" });
@@ -356,17 +396,22 @@ function WaveDropReaction({
       setSelected((s) => !s);
       setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
       rollbackRef.current?.();
+      recordReactionRollbackApplied(mutation);
       rollbackRef.current = null;
     }
     rollbackRef.current = null;
   }, [
     applyOptimisticReactionChange,
     canReact,
+    connectedProfile?.id,
     drop.id,
+    drop.context_profile_context?.reaction,
     longPressTriggered,
     reaction.reaction,
     selected,
     setToast,
+    waveId,
+    websocketStatus,
   ]);
 
   const tooltipProfiles = useMemo(() => {

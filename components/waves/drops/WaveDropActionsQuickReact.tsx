@@ -21,7 +21,10 @@ const WaveDropActionsQuickReact: React.FC<{
   readonly isMobile?: boolean;
   readonly onReacted?: () => void;
 }> = ({ drop, isMobile = false, onReacted }) => {
-  const { react, canReact } = useDropReaction(drop, onReacted);
+  const { react, canReact } = useDropReaction(drop, {
+    source: "quick-react",
+    onSuccess: onReacted,
+  });
 
   // Subscribe to localStorage changes (hydration-safe)
   const reactionSnapshot = useSyncExternalStore(

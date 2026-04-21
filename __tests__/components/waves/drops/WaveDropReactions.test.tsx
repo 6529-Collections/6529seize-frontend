@@ -28,6 +28,25 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiDelete: jest.fn(),
 }));
 
+jest.mock("@sentry/nextjs", () => ({
+  __esModule: true,
+  addBreadcrumb: jest.fn(),
+  withScope: jest.fn((callback: (scope: any) => void) => {
+    const scope = {
+      setLevel: jest.fn(),
+      setFingerprint: jest.fn(),
+      setTag: jest.fn(),
+      setExtras: jest.fn(),
+    };
+    callback(scope);
+  }),
+  captureException: jest.fn(),
+}));
+
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
+  useWebsocketStatus: jest.fn(() => "connected"),
+}));
+
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
   default: jest.fn(() => false),
