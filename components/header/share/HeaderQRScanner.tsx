@@ -11,7 +11,41 @@ import {
 } from "@capacitor/barcode-scanner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+
+function getQRScannerErrorReason(error: unknown): string | null {
+  if (typeof error === "string" && error.trim()) {
+    return error.trim();
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message.trim();
+  }
+
+  if (error && typeof error === "object") {
+    const maybeMessage = "message" in error ? error.message : null;
+    if (typeof maybeMessage === "string" && maybeMessage.trim()) {
+      return maybeMessage.trim();
+    }
+  }
+
+  return null;
+}
+
+function getQRScannerErrorToastMessage(error: unknown): ReactNode {
+  const reason = getQRScannerErrorReason(error);
+
+  return (
+    <>
+      <p>Scan failed.</p>
+      <p className="tw-font-light">
+        {reason ??
+          "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings."}
+      </p>
+    </>
+  );
+}
 
 export default function HeaderQRScanner({
   onScanSuccess,
@@ -67,14 +101,7 @@ export default function HeaderQRScanner({
       console.error("QR Scan failed:", error);
       setScanning(false);
       setToast({
-        message: (
-          <>
-            <p>Scan failed. Please try again.</p>
-            <p className="tw-font-light">
-              Make sure you have the latest version of the app installed.
-            </p>
-          </>
-        ),
+        message: getQRScannerErrorToastMessage(error),
         type: "error",
       });
     }

@@ -1246,7 +1246,7 @@ export default function DropForgeLaunchClaimPageClient({
   );
   const headerStatus = useMemo(() => {
     if (!primaryStatus) return null;
-    if (mintingClaimActionsLoadFailed || !mintingClaimActionsLoaded) {
+    if (mintingClaimActionsLoadFailed) {
       return primaryStatus;
     }
     return getLaunchListStatus({
