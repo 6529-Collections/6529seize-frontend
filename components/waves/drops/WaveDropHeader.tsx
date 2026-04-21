@@ -40,7 +40,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 }) => {
   const router = useRouter();
   const compact = useCompactMode();
-  const authorLabel = drop.author.handle ?? drop.author.primary_address;
+  const authorIdentity = drop.author.handle ?? drop.author.primary_address;
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleNavigation = useCallback(
@@ -60,23 +60,16 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             <p
               className={`tw-mb-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
             >
-              <UserProfileTooltipWrapper
-                user={drop.author.handle ?? drop.author.id}
-              >
+              <UserProfileTooltipWrapper user={authorIdentity}>
                 <Link
-                  onClick={(e) =>
-                    handleNavigation(
-                      e,
-                      `/${drop.author.handle ?? drop.author.primary_address}`
-                    )
-                  }
-                  href={`/${drop.author.handle ?? drop.author.primary_address}`}
+                  onClick={(e) => handleNavigation(e, `/${authorIdentity}`)}
+                  href={`/${authorIdentity}`}
                   className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
                 >
                   <ProfileNameWithAiMarker
                     classification={drop.author.classification}
                   >
-                    {authorLabel}
+                    {authorIdentity}
                   </ProfileNameWithAiMarker>
                 </Link>
               </UserProfileTooltipWrapper>

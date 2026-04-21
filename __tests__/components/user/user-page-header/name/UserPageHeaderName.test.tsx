@@ -92,7 +92,8 @@ describe("UserPageHeaderName", () => {
     });
 
     expect(screen.getByText("🤖")).toBeInTheDocument();
-    expect(screen.getByTestId("name-wrapper")).toHaveTextContent("🤖Robo");
+    expect(screen.getByText("AI profile")).toHaveClass("tw-sr-only");
+    expect(screen.getByTestId("name-wrapper")).toHaveTextContent("Robo");
   });
 
   it("does not show a robot emoji for non-AI classifications", () => {

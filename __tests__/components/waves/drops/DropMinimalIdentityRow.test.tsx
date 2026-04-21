@@ -56,7 +56,10 @@ describe("DropMinimalIdentityRow", () => {
       />
     );
 
-    expect(screen.getByTestId("tooltip-wrapper")).toHaveTextContent("🤖ai-bot");
+    expect(screen.getByText("🤖")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /ai profile ai-bot/i })
+    ).toBeInTheDocument();
   });
 
   it("does not render a robot emoji for non-AI profiles", () => {
@@ -66,7 +69,42 @@ describe("DropMinimalIdentityRow", () => {
       />
     );
 
-    expect(screen.getByTestId("tooltip-wrapper")).toHaveTextContent("human");
+    expect(screen.getByRole("link", { name: "human" })).toBeInTheDocument();
     expect(screen.getByTestId("tooltip-wrapper")).not.toHaveTextContent("🤖");
+  });
+
+  it("uses the handle for the tooltip lookup when present", () => {
+    render(
+      <DropMinimalIdentityRow
+        drop={createDrop("alice", "0xabc", ApiProfileClassification.Pseudonym)}
+      />
+    );
+
+    expect(screen.getByTestId("tooltip-wrapper")).toHaveAttribute(
+      "data-user",
+      "alice"
+    );
+  });
+
+  it("uses the primary address for the tooltip lookup when the handle is missing", () => {
+    render(
+      <DropMinimalIdentityRow
+        drop={createDrop(
+          null,
+          "0x1111111111111111111111111111111111111111",
+          ApiProfileClassification.Pseudonym
+        )}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "0x1111111111111111111111111111111111111111",
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("tooltip-wrapper")).toHaveAttribute(
+      "data-user",
+      "0x1111111111111111111111111111111111111111"
+    );
   });
 });

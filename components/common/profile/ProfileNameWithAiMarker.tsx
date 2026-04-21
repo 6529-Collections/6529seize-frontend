@@ -23,16 +23,19 @@ export default function ProfileNameWithAiMarker({
   return (
     <span className={className}>
       {isAiProfile && (
-        <span
-          aria-hidden="true"
-          className={
-            markerClassName
-              ? `${MARKER_CLASS_NAME} ${markerClassName}`
-              : MARKER_CLASS_NAME
-          }
-        >
-          🤖
-        </span>
+        <>
+          <span className="tw-sr-only">AI profile </span>
+          <span
+            aria-hidden="true"
+            className={
+              markerClassName
+                ? `${MARKER_CLASS_NAME} ${markerClassName}`
+                : MARKER_CLASS_NAME
+            }
+          >
+            🤖
+          </span>
+        </>
       )}
       {children}
     </span>

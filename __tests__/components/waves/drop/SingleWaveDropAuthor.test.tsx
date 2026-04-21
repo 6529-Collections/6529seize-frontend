@@ -83,6 +83,9 @@ describe("SingleWaveDropAuthor", () => {
       />
     );
 
-    expect(screen.getByTestId("tooltip-wrapper")).toHaveTextContent("🤖ai-bot");
+    expect(screen.getByText("🤖")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /ai profile ai-bot/i })
+    ).toBeInTheDocument();
   });
 });
