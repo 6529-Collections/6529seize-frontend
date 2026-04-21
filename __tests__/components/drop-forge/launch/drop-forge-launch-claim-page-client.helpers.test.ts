@@ -8,6 +8,31 @@ import {
 import type { ClaimPrimaryStatus } from "@/components/drop-forge/drop-forge-status.helpers";
 import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 
+type AutoSelectedLaunchPhaseArgs = Parameters<
+  typeof getAutoSelectedLaunchPhase
+>[0];
+
+// Wrapper that supplies sensible defaults for the booleans each test would
+// otherwise have to pass; individual tests can override via `overrides`.
+function callGetAutoSelectedLaunchPhase(
+  overrides: Omit<
+    AutoSelectedLaunchPhaseArgs,
+    "researchAirdropCompleted" | "payArtistCompleted"
+  > &
+    Partial<
+      Pick<
+        AutoSelectedLaunchPhaseArgs,
+        "researchAirdropCompleted" | "payArtistCompleted"
+      >
+    >
+): ReturnType<typeof getAutoSelectedLaunchPhase> {
+  return getAutoSelectedLaunchPhase({
+    researchAirdropCompleted: false,
+    payArtistCompleted: false,
+    ...overrides,
+  });
+}
+
 describe("getAutoSelectedLaunchPhase", () => {
   const phases = [
     {
@@ -42,7 +67,7 @@ describe("getAutoSelectedLaunchPhase", () => {
 
   it("returns blank when metadata is not published", () => {
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: false,
         isInitialized: true,
         nowMs: 1_500,
@@ -53,7 +78,7 @@ describe("getAutoSelectedLaunchPhase", () => {
 
   it("keeps phase0 selected until the claim is initialized", () => {
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: false,
         nowMs: 7_500,
@@ -64,7 +89,7 @@ describe("getAutoSelectedLaunchPhase", () => {
 
   it("selects phase0 before it starts and while it is active", () => {
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: true,
         nowMs: 500,
@@ -73,7 +98,7 @@ describe("getAutoSelectedLaunchPhase", () => {
     ).toBe("phase0");
 
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: true,
         nowMs: 1_500,
@@ -84,7 +109,7 @@ describe("getAutoSelectedLaunchPhase", () => {
 
   it("moves to the next upcoming phase after a phase ends", () => {
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: true,
         nowMs: 2_500,
@@ -93,7 +118,7 @@ describe("getAutoSelectedLaunchPhase", () => {
     ).toBe("phase1");
 
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: true,
         nowMs: 4_500,
@@ -104,7 +129,7 @@ describe("getAutoSelectedLaunchPhase", () => {
 
   it("selects public phase until it ends, then research", () => {
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: true,
         nowMs: 7_500,
@@ -113,7 +138,7 @@ describe("getAutoSelectedLaunchPhase", () => {
     ).toBe("publicphase");
 
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: true,
         nowMs: 8_001,
@@ -124,7 +149,7 @@ describe("getAutoSelectedLaunchPhase", () => {
 
   it("does not fall back to phase0 when phase0's schedule is null but later phases still exist", () => {
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: true,
         nowMs: 8_001,
@@ -137,7 +162,7 @@ describe("getAutoSelectedLaunchPhase", () => {
 
   it("ignores a null schedule on a later phase when an earlier valid phase still matches", () => {
     expect(
-      getAutoSelectedLaunchPhase({
+      callGetAutoSelectedLaunchPhase({
         hasPublishedMetadata: true,
         isInitialized: true,
         nowMs: 3_500,
@@ -227,7 +252,7 @@ describe("getLaunchListStatus", () => {
     ).toEqual(livePrimaryStatus);
   });
 
-  it("falls back to Live - Airdrop to Research when the drop has ended and actions are loaded", () => {
+  it("falls back to Airdrop Research when the drop has ended and actions are loaded", () => {
     expect(
       getLaunchListStatus({
         primaryStatus: livePrimaryStatus,
@@ -240,8 +265,8 @@ describe("getLaunchListStatus", () => {
       })
     ).toEqual({
       key: "live",
-      label: "Live - Airdrop to Research",
-      tone: "success",
+      label: "Airdrop Research",
+      tone: "post_mint",
       reason: "Mint phases are complete. Research airdrop is next",
     });
   });
@@ -265,7 +290,7 @@ describe("getLaunchListStatus", () => {
     });
   });
 
-  it("prefers Live - Pay Artist over the loading state when research is already marked complete", () => {
+  it("prefers Pay Artist over the loading state when research is already marked complete", () => {
     expect(
       getLaunchListStatus({
         primaryStatus: livePrimaryStatus,
@@ -278,8 +303,8 @@ describe("getLaunchListStatus", () => {
       })
     ).toEqual({
       key: "live",
-      label: "Live - Pay Artist",
-      tone: "success",
+      label: "Pay Artist",
+      tone: "post_mint",
       reason: "Research airdrop is complete. Artist payment remains",
     });
   });

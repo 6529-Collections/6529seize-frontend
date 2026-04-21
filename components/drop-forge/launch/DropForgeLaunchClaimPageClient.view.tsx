@@ -191,14 +191,78 @@ interface DropForgeLaunchClaimPageViewProps {
   ) => Promise<void>;
 }
 
-function getPayArtistSalesLabel(
-  mintStat: ApiMemesMintStat | null,
-  mintStatLoading: boolean
-): string {
-  if (mintStatLoading) {
-    return "loading...";
-  }
+const MINT_STAT_LOADING_LABEL = "loading...";
 
+const LAUNCH_PHASE_TAB_BASE_CLASSES =
+  "tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150";
+const LAUNCH_PHASE_TAB_ACTIVE_CLASSES =
+  "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]";
+const LAUNCH_PHASE_TAB_INACTIVE_CLASSES =
+  "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50";
+const LAUNCH_PHASE_TAB_DISABLED_CLASSES =
+  "disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500";
+
+interface LaunchPhaseTabDefinition {
+  readonly key: LaunchPhaseKey;
+  readonly label: string;
+  readonly subLabel?: string;
+  readonly alwaysEnabled?: boolean;
+}
+
+const LAUNCH_PHASE_TABS: readonly LaunchPhaseTabDefinition[] = [
+  { key: "phase0", label: "Phase 0", subLabel: "- Initialize", alwaysEnabled: true },
+  { key: "phase1", label: "Phase 1" },
+  { key: "phase2", label: "Phase 2" },
+  { key: "publicphase", label: "Public Phase" },
+  { key: "research", label: "Airdrop Research" },
+  { key: "payartist", label: "Pay Artist" },
+];
+
+function LaunchPhaseTabButton({
+  tab,
+  selectedPhase,
+  isInitialized,
+  onSelectedPhaseChange,
+}: Readonly<{
+  tab: LaunchPhaseTabDefinition;
+  selectedPhase: "" | LaunchPhaseKey;
+  isInitialized: boolean;
+  onSelectedPhaseChange: (value: LaunchPhaseKey) => void;
+}>) {
+  const isSelected = selectedPhase === tab.key;
+  const disabled = !tab.alwaysEnabled && !isInitialized;
+  const stateClass = isSelected
+    ? LAUNCH_PHASE_TAB_ACTIVE_CLASSES
+    : LAUNCH_PHASE_TAB_INACTIVE_CLASSES;
+  const gapClass = tab.subLabel ? " tw-gap-1" : "";
+  const disabledClass = tab.alwaysEnabled
+    ? ""
+    : ` ${LAUNCH_PHASE_TAB_DISABLED_CLASSES}`;
+  const className = `${LAUNCH_PHASE_TAB_BASE_CLASSES}${gapClass} ${stateClass}${disabledClass}`;
+
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={isSelected}
+      aria-controls={`phase-panel-${tab.key}`}
+      disabled={disabled}
+      onClick={() => onSelectedPhaseChange(tab.key)}
+      className={className}
+    >
+      {tab.subLabel ? (
+        <>
+          <span>{tab.label}</span>
+          <span className="tw-hidden lg:tw-inline">{tab.subLabel}</span>
+        </>
+      ) : (
+        tab.label
+      )}
+    </button>
+  );
+}
+
+function getPayArtistSalesLabel(mintStat: ApiMemesMintStat | null): string {
   if (!mintStat) {
     return "—";
   }
@@ -206,11 +270,38 @@ function getPayArtistSalesLabel(
   return `${mintStat.total_count.toLocaleString()} (${mintStat.subscriptions_count.toLocaleString()} / ${mintStat.mint_count.toLocaleString()})`;
 }
 
-function getPayArtistMetricValue(
-  mintStatLoading: boolean,
-  value: number | null | undefined
-): string {
-  return mintStatLoading ? "loading..." : formatMintStatEth(value);
+function DropForgePhaseDateTimeField({
+  label,
+  value,
+  onChange,
+  isPhaseSelected,
+  changed,
+  changedFieldBoxClassName,
+  changedFieldBoxLabelClassName,
+}: Readonly<{
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  isPhaseSelected: boolean;
+  changed: boolean;
+  changedFieldBoxClassName: string;
+  changedFieldBoxLabelClassName: string;
+}>) {
+  return (
+    <DropForgeFieldBox
+      label={label}
+      className={changed ? changedFieldBoxClassName : ""}
+      labelClassName={changed ? changedFieldBoxLabelClassName : ""}
+    >
+      <input
+        type="datetime-local"
+        value={isPhaseSelected ? value : ""}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={!isPhaseSelected}
+        className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500"
+      />
+    </DropForgeFieldBox>
+  );
 }
 
 function renderSelectedPhasePanel({
@@ -1411,19 +1502,27 @@ function DropForgePayArtistSection({
     payArtistWritePending || mintingClaimActionPending !== null;
   const payArtistActionName = payArtistAction?.action ?? null;
   const paymentDetails = mintStat?.payment_details ?? null;
+  const isMintStatResolved = mintStat !== null || mintStatError !== null;
+  const isMintStatPending = !isMintStatResolved || mintStatLoading;
   const payArtistAmountLabelClassName =
-    payArtistAmountEth.trim() === ""
+    !isMintStatPending && payArtistAmountEth.trim() === ""
       ? "tw-text-rose-300 tw-ring-rose-500/70"
       : "";
   const payArtistAmountClassName =
-    payArtistAmountEth.trim() === "" ? "tw-ring-rose-500/70" : "";
-  const paymentAddressClassName = payArtistAddressMissing
-    ? "tw-ring-rose-500/70"
+    !isMintStatPending && payArtistAmountEth.trim() === ""
+      ? "tw-ring-rose-500/70"
+      : "";
+  const paymentAddressClassName =
+    !isMintStatPending && payArtistAddressMissing
+      ? "tw-ring-rose-500/70"
+      : "";
+  const paymentAddressLabelClassName =
+    !isMintStatPending && payArtistAddressMissing
+      ? "tw-text-rose-300 tw-ring-rose-500/70"
+      : "";
+  const mintStatLoadingClassName = isMintStatPending
+    ? "!tw-text-iron-500"
     : "";
-  const paymentAddressLabelClassName = payArtistAddressMissing
-    ? "tw-text-rose-300 tw-ring-rose-500/70"
-    : "";
-  const mintStatLoadingClassName = mintStatLoading ? "!tw-text-iron-500" : "";
 
   return (
     <div className="tw-space-y-5 tw-pt-4">
@@ -1458,19 +1557,25 @@ function DropForgePayArtistSection({
           label="Total Sales (Subscriptions / Mints)"
           contentClassName={mintStatLoadingClassName}
         >
-          {getPayArtistSalesLabel(mintStat, mintStatLoading)}
+          {isMintStatPending
+            ? MINT_STAT_LOADING_LABEL
+            : getPayArtistSalesLabel(mintStat)}
         </DropForgeFieldBox>
         <DropForgeFieldBox
           label="Proceeds (ETH)"
           contentClassName={mintStatLoadingClassName}
         >
-          {getPayArtistMetricValue(mintStatLoading, mintStat?.proceeds_eth)}
+          {isMintStatPending
+            ? MINT_STAT_LOADING_LABEL
+            : formatMintStatEth(mintStat?.proceeds_eth)}
         </DropForgeFieldBox>
         <DropForgeFieldBox
           label="Artist Split (ETH)"
           contentClassName={mintStatLoadingClassName}
         >
-          {getPayArtistMetricValue(mintStatLoading, mintStat?.artist_split_eth)}
+          {isMintStatPending
+            ? MINT_STAT_LOADING_LABEL
+            : formatMintStatEth(mintStat?.artist_split_eth)}
         </DropForgeFieldBox>
       </div>
 
@@ -1479,35 +1584,45 @@ function DropForgePayArtistSection({
           label="Pay Artist (ETH)"
           className={payArtistAmountClassName}
           labelClassName={payArtistAmountLabelClassName}
+          contentClassName={mintStatLoadingClassName}
         >
-          <input
-            type="number"
-            inputMode="decimal"
-            min="0"
-            step="0.0001"
-            value={payArtistAmountEth}
-            onChange={(e) => onPayArtistAmountChange(e.target.value)}
-            placeholder="Enter ETH Amount"
-            className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
-          />
+          {isMintStatPending ? (
+            MINT_STAT_LOADING_LABEL
+          ) : (
+            <input
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="0.0001"
+              value={payArtistAmountEth}
+              onChange={(e) => onPayArtistAmountChange(e.target.value)}
+              placeholder="Enter ETH Amount"
+              className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
+            />
+          )}
         </DropForgeFieldBox>
         <div className="tw-flex tw-flex-col tw-gap-1.5">
           <DropForgeFieldBox
             label="Payment Address"
             className={paymentAddressClassName}
             labelClassName={paymentAddressLabelClassName}
+            contentClassName={mintStatLoadingClassName}
           >
-            <EnsAddressInput
-              value={payArtistAddressInput}
-              placeholder="0x... or ENS"
-              onAddressChange={(value) => {
-                onPayArtistAddressInputChange(value);
-                onPayArtistResolvedAddressChange(value);
-              }}
-              onLoadingChange={onPayArtistAddressLoadingChange}
-              onError={onPayArtistAddressEnsErrorChange}
-              className="tw-h-auto tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white tw-placeholder-iron-500 tw-shadow-none [color-scheme:dark] focus:tw-bg-transparent focus:tw-text-white focus:tw-shadow-none focus:tw-outline-none focus:tw-ring-0"
-            />
+            {isMintStatPending ? (
+              MINT_STAT_LOADING_LABEL
+            ) : (
+              <EnsAddressInput
+                value={payArtistAddressInput}
+                placeholder="0x... or ENS"
+                onAddressChange={(value) => {
+                  onPayArtistAddressInputChange(value);
+                  onPayArtistResolvedAddressChange(value);
+                }}
+                onLoadingChange={onPayArtistAddressLoadingChange}
+                onError={onPayArtistAddressEnsErrorChange}
+                className="tw-h-auto tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white tw-placeholder-iron-500 tw-shadow-none [color-scheme:dark] focus:tw-bg-transparent focus:tw-text-white focus:tw-shadow-none focus:tw-outline-none focus:tw-ring-0"
+              />
+            )}
           </DropForgeFieldBox>
           {payArtistAddressLoading ? (
             <span className="tw-px-1 tw-text-xs tw-text-iron-400">
@@ -1710,38 +1825,24 @@ function DropForgePhaseConfigurationSection({
       />
 
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-pt-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
-        <DropForgeFieldBox
+        <DropForgePhaseDateTimeField
           label="Phase Start"
-          className={
-            selectedPhaseDiffs.startDate ? changedFieldBoxClassName : ""
-          }
-          labelClassName={
-            selectedPhaseDiffs.startDate ? changedFieldBoxLabelClassName : ""
-          }
-        >
-          <input
-            type="datetime-local"
-            value={selectedPhase ? selectedPhaseWindowStartValue : ""}
-            onChange={(e) => onSelectedPhaseStartChange(e.target.value)}
-            disabled={!selectedPhase}
-            className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500"
-          />
-        </DropForgeFieldBox>
-        <DropForgeFieldBox
+          value={selectedPhaseWindowStartValue}
+          onChange={onSelectedPhaseStartChange}
+          isPhaseSelected={Boolean(selectedPhase)}
+          changed={selectedPhaseDiffs.startDate}
+          changedFieldBoxClassName={changedFieldBoxClassName}
+          changedFieldBoxLabelClassName={changedFieldBoxLabelClassName}
+        />
+        <DropForgePhaseDateTimeField
           label="Phase End"
-          className={selectedPhaseDiffs.endDate ? changedFieldBoxClassName : ""}
-          labelClassName={
-            selectedPhaseDiffs.endDate ? changedFieldBoxLabelClassName : ""
-          }
-        >
-          <input
-            type="datetime-local"
-            value={selectedPhase ? selectedPhaseWindowEndValue : ""}
-            onChange={(e) => onSelectedPhaseEndChange(e.target.value)}
-            disabled={!selectedPhase}
-            className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500"
-          />
-        </DropForgeFieldBox>
+          value={selectedPhaseWindowEndValue}
+          onChange={onSelectedPhaseEndChange}
+          isPhaseSelected={Boolean(selectedPhase)}
+          changed={selectedPhaseDiffs.endDate}
+          changedFieldBoxClassName={changedFieldBoxClassName}
+          changedFieldBoxLabelClassName={changedFieldBoxLabelClassName}
+        />
         <button
           type="button"
           disabled={selectedPhaseActionDisabled}
@@ -1920,96 +2021,15 @@ function DropForgePhaseSelectionSection({
         aria-label="Phase selection"
         className="tw-grid tw-grid-cols-2 tw-gap-2 tw-rounded-2xl tw-border tw-border-iron-800 tw-bg-iron-950/70 tw-p-2 sm:tw-grid-cols-3 lg:tw-grid-cols-6"
       >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={selectedPhase === "phase0"}
-          aria-controls="phase-panel-phase0"
-          onClick={() => onSelectedPhaseChange("phase0")}
-          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
-            selectedPhase === "phase0"
-              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
-              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
-          }`}
-        >
-          <span>Phase 0</span>
-          <span className="tw-hidden lg:tw-inline">- Initialize Claim</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={selectedPhase === "phase1"}
-          aria-controls="phase-panel-phase1"
-          disabled={!isInitialized}
-          onClick={() => onSelectedPhaseChange("phase1")}
-          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
-            selectedPhase === "phase1"
-              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
-              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
-          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
-        >
-          Phase 1
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={selectedPhase === "phase2"}
-          aria-controls="phase-panel-phase2"
-          disabled={!isInitialized}
-          onClick={() => onSelectedPhaseChange("phase2")}
-          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
-            selectedPhase === "phase2"
-              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
-              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
-          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
-        >
-          Phase 2
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={selectedPhase === "publicphase"}
-          aria-controls="phase-panel-publicphase"
-          disabled={!isInitialized}
-          onClick={() => onSelectedPhaseChange("publicphase")}
-          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
-            selectedPhase === "publicphase"
-              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
-              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
-          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
-        >
-          Public Phase
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={selectedPhase === "research"}
-          aria-controls="phase-panel-research"
-          disabled={!isInitialized}
-          onClick={() => onSelectedPhaseChange("research")}
-          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
-            selectedPhase === "research"
-              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
-              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
-          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
-        >
-          Airdrop to Research
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={selectedPhase === "payartist"}
-          aria-controls="phase-panel-payartist"
-          disabled={!isInitialized}
-          onClick={() => onSelectedPhaseChange("payartist")}
-          className={`tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-transition tw-duration-150 ${
-            selectedPhase === "payartist"
-              ? "tw-bg-primary-500 tw-text-white tw-shadow-[0_12px_28px_rgba(59,130,246,0.28)]"
-              : "tw-bg-iron-900/80 tw-text-iron-200 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-50"
-          } disabled:tw-cursor-not-allowed disabled:tw-bg-iron-900/50 disabled:tw-text-iron-500`}
-        >
-          Pay Artist
-        </button>
+        {LAUNCH_PHASE_TABS.map((tab) => (
+          <LaunchPhaseTabButton
+            key={tab.key}
+            tab={tab}
+            selectedPhase={selectedPhase}
+            isInitialized={isInitialized}
+            onSelectedPhaseChange={onSelectedPhaseChange}
+          />
+        ))}
       </div>
       <div className="tw-min-h-[18rem] lg:tw-min-h-[30rem]">
         {renderSelectedPhasePanel({

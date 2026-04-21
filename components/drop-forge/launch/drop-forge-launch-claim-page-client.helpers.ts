@@ -308,11 +308,11 @@ export function getLaunchListStatus({
     return primaryStatus;
   }
 
-  if (payArtistCompleted) {
+  if (researchAirdropCompleted && payArtistCompleted) {
     return {
       key: "live",
       label: "Finalized",
-      tone: "success",
+      tone: "finalized",
       reason: "All launch phases and post-launch actions are complete",
     };
   }
@@ -320,8 +320,8 @@ export function getLaunchListStatus({
   if (researchAirdropCompleted) {
     return {
       key: "live",
-      label: "Live - Pay Artist",
-      tone: "success",
+      label: "Pay Artist",
+      tone: "post_mint",
       reason: "Research airdrop is complete. Artist payment remains",
     };
   }
@@ -343,10 +343,6 @@ export function getLaunchListStatus({
     return primaryStatus;
   }
 
-  // Post-mint fallback depends on researchAirdropCompleted / payArtistCompleted.
-  // Until the actions fetch resolves, both default to false and we would flash
-  // "Live - Airdrop to Research" before flipping to the real state. Keep the
-  // pill in a loading state until we actually know.
   if (!actionsLoaded) {
     return {
       key: "checking_onchain",
@@ -358,8 +354,8 @@ export function getLaunchListStatus({
 
   return {
     key: "live",
-    label: "Live - Airdrop to Research",
-    tone: "success",
+    label: "Airdrop Research",
+    tone: "post_mint",
     reason: "Mint phases are complete. Research airdrop is next",
   };
 }

@@ -654,6 +654,10 @@ export default function DropForgeLaunchClaimPageClient({
   >(null);
   const [mintingClaimActions, setMintingClaimActions] =
     useState<ApiMintingClaimActionsResponse | null>(null);
+  const [mintingClaimActionsLoaded, setMintingClaimActionsLoaded] =
+    useState(false);
+  const [mintingClaimActionsLoadFailed, setMintingClaimActionsLoadFailed] =
+    useState(false);
   const [mintingClaimActionPending, setMintingClaimActionPending] = useState<
     string | null
   >(null);
@@ -872,6 +876,8 @@ export default function DropForgeLaunchClaimPageClient({
     setSubscriptionAirdropsErrorByPhase({});
     setMintingClaimActionTypes(null);
     setMintingClaimActions(null);
+    setMintingClaimActionsLoaded(false);
+    setMintingClaimActionsLoadFailed(false);
     setMintingClaimActionPending(null);
     setMintStat(null);
     setMintStatLoading(false);
@@ -891,6 +897,8 @@ export default function DropForgeLaunchClaimPageClient({
     if (!hasWallet || !canAccessLaunchPage || !isClaimsAdmin) return;
 
     let cancelled = false;
+    setMintingClaimActionsLoaded(false);
+    setMintingClaimActionsLoadFailed(false);
 
     (async () => {
       try {
@@ -908,6 +916,8 @@ export default function DropForgeLaunchClaimPageClient({
         if (!cancelled) {
           setMintingClaimActionTypes(null);
           setMintingClaimActions(null);
+          setMintingClaimActionsLoadFailed(true);
+          setMintingClaimActionsLoaded(true);
         }
         return;
       }
@@ -916,9 +926,12 @@ export default function DropForgeLaunchClaimPageClient({
         const actionsResponse = await getMemesMintingClaimActions(claimId);
         if (cancelled) return;
         setMintingClaimActions(actionsResponse);
+        setMintingClaimActionsLoaded(true);
       } catch {
         if (!cancelled) {
           setMintingClaimActions(null);
+          setMintingClaimActionsLoadFailed(true);
+          setMintingClaimActionsLoaded(true);
         }
       }
     })().catch(() => undefined);
@@ -932,6 +945,8 @@ export default function DropForgeLaunchClaimPageClient({
     if (permissionsLoading || isClaimsAdmin) return;
     setMintingClaimActionTypes(null);
     setMintingClaimActions(null);
+    setMintingClaimActionsLoaded(true);
+    setMintingClaimActionsLoadFailed(false);
     setMintingClaimActionPending(null);
     pendingMintingClaimActionRef.current = null;
   }, [permissionsLoading, isClaimsAdmin]);
@@ -1081,7 +1096,11 @@ export default function DropForgeLaunchClaimPageClient({
 
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage) return;
-    if (selectedPhase !== "payartist") return;
+    if (selectedPhase !== "payartist") {
+      mintStatRequestedRef.current = false;
+      setMintStatLoading(false);
+      return;
+    }
     if (mintStatRequestedRef.current) return;
     mintStatRequestedRef.current = true;
 
@@ -1105,7 +1124,6 @@ export default function DropForgeLaunchClaimPageClient({
       })
       .catch((e) => {
         if (cancelled) return;
-        // Allow a retry on the next phase selection after a failure.
         mintStatRequestedRef.current = false;
         const msg = getErrorMessage(e, "Failed to load mint stats");
         setMintStatError(msg);
@@ -1223,18 +1241,24 @@ export default function DropForgeLaunchClaimPageClient({
       }),
     [mintingClaimActionsByName, availableMintingClaimActionNames]
   );
-  const headerStatus = useMemo(
-    () =>
-      primaryStatus
-        ? getLaunchListStatus({
-            primaryStatus,
-            manifoldClaim,
-            researchAirdropCompleted,
-            payArtistCompleted,
-          })
-        : null,
-    [primaryStatus, manifoldClaim, researchAirdropCompleted, payArtistCompleted]
-  );
+  const headerStatus = useMemo(() => {
+    if (!primaryStatus) return null;
+    if (mintingClaimActionsLoadFailed) return primaryStatus;
+    return getLaunchListStatus({
+      primaryStatus,
+      manifoldClaim,
+      researchAirdropCompleted,
+      payArtistCompleted,
+      actionsLoaded: mintingClaimActionsLoaded,
+    });
+  }, [
+    primaryStatus,
+    manifoldClaim,
+    researchAirdropCompleted,
+    payArtistCompleted,
+    mintingClaimActionsLoaded,
+    mintingClaimActionsLoadFailed,
+  ]);
   const mintTimeline = useMemo(
     () => (claimId > 0 ? getClaimTimelineDetails(claimId) : null),
     [claimId]
@@ -1596,6 +1620,8 @@ export default function DropForgeLaunchClaimPageClient({
           return;
         }
         setMintingClaimActions(response);
+        setMintingClaimActionsLoaded(true);
+        setMintingClaimActionsLoadFailed(false);
         setMintingClaimActionTypes(
           (prev) =>
             prev ??
