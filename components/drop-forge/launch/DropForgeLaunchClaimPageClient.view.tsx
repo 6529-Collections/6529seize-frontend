@@ -2102,12 +2102,14 @@ function getLaunchPhasePanelProps(
   };
 }
 
-function DropForgeLaunchClaimContent(props: Readonly<
-  Omit<
-    DropForgeLaunchClaimPageViewProps,
-    "pageTitle" | "craftHref" | "loading" | "error" | "rootsError"
+function DropForgeLaunchClaimContent(
+  props: Readonly<
+    Omit<
+      DropForgeLaunchClaimPageViewProps,
+      "pageTitle" | "craftHref" | "loading" | "error" | "rootsError"
+    >
   >
->) {
+) {
   const {
     claim,
     claimId,
