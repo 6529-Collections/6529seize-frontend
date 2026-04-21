@@ -9,6 +9,7 @@ type StructuredApiError = Error & {
   response: {
     status: number;
     headers: Headers;
+    statusText?: string;
     body?: unknown;
   };
 };
@@ -63,11 +64,13 @@ const createStructuredApiError = ({
   message,
   status,
   headers,
+  statusText,
   body,
 }: {
   message: string;
   status: number;
   headers: Headers;
+  statusText?: string;
   body?: unknown;
 }): StructuredApiError => {
   const error = new Error(message) as StructuredApiError;
@@ -77,6 +80,7 @@ const createStructuredApiError = ({
   error.response = {
     status,
     headers,
+    ...(statusText !== undefined ? { statusText } : {}),
     ...(body !== undefined ? { body } : {}),
   };
   return error;
@@ -135,6 +139,7 @@ const handleApiError = async (
       message: errorMessage,
       status: res.status,
       headers: normalizeHeaders((res as { headers?: unknown }).headers),
+      statusText: res.statusText,
       body: errorBody,
     });
   }

@@ -72,19 +72,22 @@ const createStructuredReactionError = ({
   body,
   message = "technical error",
   status,
+  statusText,
 }: {
   body?: unknown;
   message?: string;
   status?: number;
+  statusText?: string;
 }): Error & {
   status?: number;
-  response: { body?: unknown; status?: number };
+  response: { body?: unknown; status?: number; statusText?: string };
 } =>
   Object.assign(new Error(message), {
     ...(status !== undefined ? { status } : {}),
     response: {
       ...(body !== undefined ? { body } : {}),
       ...(status !== undefined ? { status } : {}),
+      ...(statusText !== undefined ? { statusText } : {}),
     },
   });
 
@@ -374,8 +377,9 @@ describe("WaveDropReactions", () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
         body: "   ",
-        message: "Not Found",
+        message: "   ",
         status: 404,
+        statusText: "Not Found",
       })
     );
 

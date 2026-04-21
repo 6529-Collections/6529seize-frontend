@@ -135,6 +135,7 @@ describe("commonApiPost", () => {
       response: {
         status: number;
         headers: Headers;
+        statusText?: string;
         body?: unknown;
       };
     } | null = null;
@@ -153,6 +154,7 @@ describe("commonApiPost", () => {
         response: {
           status: number;
           headers: Headers;
+          statusText?: string;
           body?: unknown;
         };
       };
@@ -165,7 +167,50 @@ describe("commonApiPost", () => {
     expect(error?.headers.get("retry-after")).toBe("2");
     expect(error?.response.status).toBe(429);
     expect(error?.response.headers).toBe(responseHeaders);
+    expect(error?.response.statusText).toBe("Too Many Requests");
     expect(error?.response.body).toBe('{"error":"rate limited"}');
+  });
+
+  it("preserves statusText in structured errors when the response body is whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: "Service Unavailable",
+      text: async () => "   ",
+    });
+
+    let error: {
+      message: string;
+      response: {
+        status: number;
+        headers: Headers;
+        statusText?: string;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        response: {
+          status: number;
+          headers: Headers;
+          statusText?: string;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("   ");
+    expect(error?.response.body).toBe("   ");
+    expect(error?.response.statusText).toBe("Service Unavailable");
   });
 
   it("prefers message when error key is missing", async () => {

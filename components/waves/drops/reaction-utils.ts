@@ -112,6 +112,7 @@ type StructuredReactionError = Error & {
   status?: unknown;
   response?: {
     status?: unknown;
+    statusText?: unknown;
     body?: unknown;
   };
 };
@@ -204,6 +205,23 @@ const getEmptyStructuredReactionStatusMessage = (
   }
 };
 
+const getEmptyStructuredReactionStatusText = (
+  error: StructuredReactionError
+): string | null => {
+  const statusText = error.response?.statusText;
+  if (typeof statusText !== "string") {
+    return null;
+  }
+
+  const trimmedStatusText = statusText.trim();
+
+  if (trimmedStatusText.length === 0) {
+    return null;
+  }
+
+  return trimmedStatusText;
+};
+
 const getEmptyStructuredReactionFallbackMessage = (
   error: StructuredReactionError
 ): string | null => {
@@ -241,6 +259,12 @@ export const getReactionErrorMessage = (
         );
         if (statusMessage) {
           return statusMessage;
+        }
+
+        const statusText =
+          getEmptyStructuredReactionStatusText(structuredError);
+        if (statusText) {
+          return statusText;
         }
 
         const fallbackMessage =
