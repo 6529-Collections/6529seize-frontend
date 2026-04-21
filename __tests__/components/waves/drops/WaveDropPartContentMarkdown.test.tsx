@@ -2,6 +2,10 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
+import {
+  buildQuorumProposalMarkdown,
+  EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+} from "@/components/waves/quorum/quorumProposalMarkdown";
 
 let markdownProps: any;
 let quoteProps: any;
@@ -181,8 +185,12 @@ it("keeps link preview toggle control stable across equivalent drop rerenders", 
 
 it("renders the compact quorum proposal view when parsing succeeds", () => {
   const proposalPart = {
-    content:
-      "# Slow Mode\n\n## Summary\n\nKeep the feed readable.\n\n## Problem Statement\n\nThere are too many drops.\n\n## Risks & Trade-offs\n\n_Not provided_",
+    content: buildQuorumProposalMarkdown({
+      ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+      title: "Slow Mode",
+      summary: "Keep the feed readable.",
+      problemStatement: "There are too many drops.",
+    }),
     quoted_drop: null,
   } as any;
 
@@ -201,6 +209,56 @@ it("renders the compact quorum proposal view when parsing succeeds", () => {
 
   expect(screen.getByTestId("compact")).toHaveTextContent("Slow Mode");
   expect(compactProps.proposal.summaryMarkdown).toBe("Keep the feed readable.");
+  expect(markdownProps).toBeUndefined();
+});
+
+it("keeps embedded level-two headings inside the same compact quorum section", () => {
+  const proposalPart = {
+    content: buildQuorumProposalMarkdown({
+      ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+      title: "Slow Mode",
+      summary: "Keep the feed readable.",
+      problemStatement: "There are too many drops.",
+      proposedSolution: "Add a cooldown setting.",
+      coreFeatures:
+        "- Toggle on/off\n\n## Rollout Notes\n\nStill part of the working spec.",
+      userFlow: "Users see a countdown after dropping.",
+      implementationPath: "Ship as an opt-in setting.",
+    }),
+    quoted_drop: null,
+  } as any;
+
+  render(
+    <WaveDropPartContentMarkdown
+      mentionedUsers={[]}
+      mentionedWaves={[]}
+      referencedNfts={[]}
+      part={proposalPart}
+      wave={wave}
+      drop={{ id: "drop-1", serial_no: 2 } as any}
+      onQuoteClick={jest.fn()}
+      contentPresentation="quorumCompact"
+    />
+  );
+
+  expect(screen.getByTestId("compact")).toHaveTextContent("Slow Mode");
+  expect(
+    compactProps.proposal.sections.map((section: any) => section.heading)
+  ).toEqual([
+    "Problem Statement",
+    "Proposed Solution",
+    "Working Spec (Required)",
+    "Implementation Path",
+    "Impact & Priority",
+    "Success Criteria",
+    "Risks & Trade-offs",
+  ]);
+  expect(compactProps.proposal.sections[2].markdown).toContain(
+    "## Rollout Notes"
+  );
+  expect(compactProps.proposal.sections[2].markdown).toContain(
+    "Still part of the working spec."
+  );
   expect(markdownProps).toBeUndefined();
 });
 

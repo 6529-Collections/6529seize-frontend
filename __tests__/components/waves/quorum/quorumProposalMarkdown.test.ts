@@ -117,11 +117,80 @@ describe("quorumProposalMarkdown", () => {
     });
   });
 
+  it("keeps non-canonical level-two headings inside the current section body", () => {
+    const markdown = buildQuorumProposalMarkdown({
+      ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+      title: "Slow Mode",
+      summary: "Restrict users to one drop every 24 hours.",
+      problemStatement: "Waves can become noisy.",
+      proposedSolution: "Allow creators to enable slow mode.",
+      coreFeatures:
+        "- Toggle on/off\n\n## Rollout Notes\n\nStill part of the working spec.",
+      userFlow: "Users see a countdown after dropping.",
+      scopeBoundaries: "Users cannot disable it.",
+      implementationPath: "Ship as an opt-in setting.",
+      whoBenefits: "Busy art-sharing waves.",
+      whatImproves: "Visibility.",
+      urgency: "Low",
+      observableOutcome: "Fewer duplicate drops.",
+      measurableSignal: "More space between drops.",
+    });
+
+    const parsed = parseQuorumProposalMarkdown(markdown);
+
+    expect(parsed).not.toBeNull();
+    if (!parsed) {
+      throw new Error("Expected quorum markdown to parse");
+    }
+
+    expect(parsed.sections.map((section) => section.heading)).toEqual([
+      "Problem Statement",
+      "Proposed Solution",
+      "Working Spec (Required)",
+      "Implementation Path",
+      "Impact & Priority",
+      "Success Criteria",
+      "Risks & Trade-offs",
+    ]);
+    expect(parsed.sections[2]?.markdown).toContain("## Rollout Notes");
+    expect(parsed.sections[2]?.markdown).toContain(
+      "Still part of the working spec."
+    );
+  });
+
+  it("keeps indented level-two headings inside the current section body", () => {
+    const markdown = buildQuorumProposalMarkdown({
+      ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+      title: "Slow Mode",
+      summary: "Restrict users to one drop every 24 hours.",
+      problemStatement: "Waves can become noisy.",
+      proposedSolution: "Allow creators to enable slow mode.",
+      implementationPath:
+        "1. Add the setting.\n\n    ## Example config\n\n2. Ship it.",
+    });
+
+    const parsed = parseQuorumProposalMarkdown(markdown);
+
+    expect(parsed).not.toBeNull();
+    if (!parsed) {
+      throw new Error("Expected quorum markdown to parse");
+    }
+
+    expect(parsed.sections[3]?.heading).toBe("Implementation Path");
+    expect(parsed.sections[3]?.markdown).toContain("    ## Example config");
+    expect(parsed.sections[3]?.markdown).toContain("2. Ship it.");
+  });
+
   it("returns null for markdown that does not match the quorum proposal shape", () => {
     expect(
       parseQuorumProposalMarkdown("## Summary\n\nMissing title")
     ).toBeNull();
     expect(parseQuorumProposalMarkdown("# Title only")).toBeNull();
+    expect(
+      parseQuorumProposalMarkdown(
+        "# Slow Mode\n\n## Summary\n\nKeep the feed readable.\n\n## Risks & Trade-offs\n\n_Not provided_"
+      )
+    ).toBeNull();
   });
 
   it("allows leading blank lines before the title", () => {

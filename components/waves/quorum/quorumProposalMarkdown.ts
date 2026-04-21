@@ -80,6 +80,31 @@ const normalizeTitle = (title: string): string => {
 const normalizeSectionHeading = (heading: string): string =>
   heading.trim().toLowerCase();
 
+const QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS = [
+  "Summary",
+  "Problem Statement",
+  "Proposed Solution",
+  "Working Spec (Required)",
+  "Implementation Path",
+  "Impact & Priority",
+  "Success Criteria",
+  "Risks & Trade-offs",
+] as const;
+
+const QUORUM_PROPOSAL_TOP_LEVEL_HEADING_SET = new Set<string>(
+  QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS
+);
+
+const parseTopLevelHeading = (line: string): string | null => {
+  const headingMatch = /^##\s+(.+?)\s*$/.exec(line);
+  const heading = headingMatch?.[1]?.trim();
+  return heading && heading.length > 0 ? heading : null;
+};
+
+const formatTopLevelHeading = (
+  heading: (typeof QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS)[number]
+): string => `## ${heading}`;
+
 const normalizeMarkdownBlock = (lines: readonly string[]): string =>
   normalizeMarkdownValue(lines.join("\n"));
 
@@ -102,48 +127,98 @@ const pushParsedSection = (
   });
 };
 
+interface QuorumProposalSectionParseState {
+  currentHeading: string | null;
+  currentLines: string[];
+  nextHeadingIndex: number;
+}
+
+const startNextParsedSection = (
+  parsedSections: ParsedQuorumProposalSection[],
+  parseState: QuorumProposalSectionParseState,
+  parsedHeading: string | null
+): boolean | null => {
+  if (!parsedHeading) {
+    return false;
+  }
+
+  const expectedHeading =
+    QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[parseState.nextHeadingIndex] ?? null;
+
+  if (expectedHeading && parsedHeading === expectedHeading) {
+    if (parseState.currentHeading) {
+      pushParsedSection(
+        parsedSections,
+        parseState.currentHeading,
+        parseState.currentLines
+      );
+    }
+
+    parseState.currentHeading = expectedHeading;
+    parseState.currentLines = [];
+    parseState.nextHeadingIndex++;
+    return true;
+  }
+
+  return QUORUM_PROPOSAL_TOP_LEVEL_HEADING_SET.has(parsedHeading)
+    ? null
+    : false;
+};
+
+const appendSectionLine = (
+  parseState: QuorumProposalSectionParseState,
+  line: string
+): boolean => {
+  if (!parseState.currentHeading) {
+    return line.trim().length === 0;
+  }
+
+  parseState.currentLines.push(line);
+  return true;
+};
+
 const parseQuorumProposalSections = (
   lines: readonly string[],
   startIndex: number
 ): ParsedQuorumProposalSection[] | null => {
   const parsedSections: ParsedQuorumProposalSection[] = [];
-  let currentHeading: string | null = null;
-  let currentLines: string[] = [];
+  const parseState: QuorumProposalSectionParseState = {
+    currentHeading: null,
+    currentLines: [],
+    nextHeadingIndex: 0,
+  };
 
   for (let lineIndex = startIndex; lineIndex < lines.length; lineIndex++) {
     const line = lines[lineIndex] ?? "";
-    const headingMatch = /^##\s+(.+?)\s*$/.exec(line.trim());
+    const parsedHeading = parseTopLevelHeading(line);
+    const sectionStarted = startNextParsedSection(
+      parsedSections,
+      parseState,
+      parsedHeading
+    );
 
-    if (headingMatch) {
-      if (currentHeading) {
-        pushParsedSection(parsedSections, currentHeading, currentLines);
-      }
+    if (sectionStarted === null) {
+      return null;
+    }
 
-      const heading = headingMatch[1];
-      if (!heading) {
-        return null;
-      }
-
-      currentHeading = heading.trim();
-      currentLines = [];
+    if (sectionStarted) {
       continue;
     }
 
-    if (!currentHeading) {
-      if (line.trim().length > 0) {
-        return null;
-      }
-      continue;
+    if (!appendSectionLine(parseState, line)) {
+      return null;
     }
-
-    currentLines.push(line);
   }
 
-  if (!currentHeading) {
+  if (!parseState.currentHeading) {
     return null;
   }
 
-  pushParsedSection(parsedSections, currentHeading, currentLines);
+  pushParsedSection(
+    parsedSections,
+    parseState.currentHeading,
+    parseState.currentLines
+  );
   return parsedSections;
 };
 
@@ -224,19 +299,19 @@ export const buildQuorumProposalMarkdown = (
   return [
     `# ${normalizeTitle(values.title)}`,
     "",
-    "## Summary",
+    formatTopLevelHeading(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[0]),
     "",
     normalizeMarkdownValue(values.summary),
     "",
-    "## Problem Statement",
+    formatTopLevelHeading(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[1]),
     "",
     normalizeMarkdownValue(values.problemStatement),
     "",
-    "## Proposed Solution",
+    formatTopLevelHeading(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[2]),
     "",
     normalizeMarkdownValue(values.proposedSolution),
     "",
-    "## Working Spec (Required)",
+    formatTopLevelHeading(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[3]),
     "",
     "### Core features",
     "",
@@ -254,11 +329,11 @@ export const buildQuorumProposalMarkdown = (
     "",
     normalizeMarkdownValue(values.scopeBoundaries),
     "",
-    "## Implementation Path",
+    formatTopLevelHeading(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[4]),
     "",
     normalizeMarkdownValue(values.implementationPath),
     "",
-    "## Impact & Priority",
+    formatTopLevelHeading(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[5]),
     "",
     "### Who benefits",
     "",
@@ -272,7 +347,7 @@ export const buildQuorumProposalMarkdown = (
     "",
     urgency,
     "",
-    "## Success Criteria",
+    formatTopLevelHeading(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[6]),
     "",
     "### Observable outcome",
     "",
@@ -282,7 +357,7 @@ export const buildQuorumProposalMarkdown = (
     "",
     normalizeMarkdownValue(values.measurableSignal),
     "",
-    "## Risks & Trade-offs",
+    formatTopLevelHeading(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[7]),
     "",
     normalizeMarkdownValue(values.risksTradeoffs),
   ].join("\n");
