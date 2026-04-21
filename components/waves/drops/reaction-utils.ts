@@ -108,23 +108,73 @@ export const toProfileMin = (
   };
 };
 
+type StructuredReactionError = {
+  response?: {
+    body?: unknown;
+  };
+};
+
+const isNonEmptyUnknownArray = (value: unknown): value is readonly unknown[] =>
+  Array.isArray(value) && value.length > 0;
+
+const getDetailsFirstMessage = (details: unknown): string | null => {
+  if (!isNonEmptyUnknownArray(details)) {
+    return null;
+  }
+
+  const [firstDetail] = details;
+  if (firstDetail === null || typeof firstDetail !== "object") {
+    return null;
+  }
+
+  const message = (firstDetail as { message?: unknown }).message;
+  if (typeof message === "string" && message.trim().length > 0) {
+    return message;
+  }
+
+  return null;
+};
+
+// Reaction toasts should only surface messages from known API JSON fields.
+const getStructuredReactionBodyMessage = (body: unknown): string | null => {
+  if (typeof body === "string") {
+    try {
+      return getStructuredReactionBodyMessage(JSON.parse(body) as unknown);
+    } catch {
+      return null;
+    }
+  }
+
+  if (body === null || typeof body !== "object") {
+    return null;
+  }
+
+  const bodyRecord = body as Record<string, unknown>;
+  const errorMessage = bodyRecord["error"];
+  if (typeof errorMessage === "string" && errorMessage.trim().length > 0) {
+    return errorMessage;
+  }
+
+  const message = bodyRecord["message"];
+  if (typeof message === "string" && message.trim().length > 0) {
+    return message;
+  }
+
+  return getDetailsFirstMessage(bodyRecord["details"]);
+};
+
 export const getReactionErrorMessage = (
   error: unknown,
   fallback: string
 ): string => {
-  if (error instanceof Error && error.message.trim().length > 0) {
-    return error.message;
-  }
-
-  if (typeof error === "object" && error !== null) {
-    const message = (error as { message?: unknown }).message;
-    if (typeof message === "string" && message.trim().length > 0) {
-      return message;
+  if (error !== null && typeof error === "object") {
+    const structuredError = error as StructuredReactionError;
+    const safeMessage = getStructuredReactionBodyMessage(
+      structuredError.response?.body
+    );
+    if (safeMessage) {
+      return safeMessage;
     }
-  }
-
-  if (typeof error === "string" && error.trim().length > 0) {
-    return error;
   }
 
   return fallback;

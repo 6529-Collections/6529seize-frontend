@@ -43,6 +43,13 @@ jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
 
 const mockUseAuth = useAuth as jest.Mock;
 const mockUseMyStream = useMyStream as jest.Mock;
+const createStructuredReactionError = (
+  body: unknown,
+  message = "technical error"
+): Error & { response: { body: unknown } } =>
+  Object.assign(new Error(message), {
+    response: { body },
+  });
 
 const mockDrop = {
   id: "drop-1",
@@ -95,7 +102,10 @@ describe("useDropReaction", () => {
 
   it("shows structured API error messages for quick react failures", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
-      new Error("Rate limited")
+      createStructuredReactionError(
+        JSON.stringify({ error: "Rate limited" }),
+        "unexpected raw error"
+      )
     );
 
     const { result } = renderHook(() =>
@@ -113,6 +123,28 @@ describe("useDropReaction", () => {
     });
     expect(setToastMock).toHaveBeenCalledWith({
       message: "Rate limited",
+      type: "error",
+    });
+  });
+
+  it("falls back for unsafe structured quick react failures", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError(
+        "<html><body>Bad Gateway</body></html>",
+        "<html><body>Bad Gateway</body></html>"
+      )
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "Error adding reaction",
       type: "error",
     });
   });

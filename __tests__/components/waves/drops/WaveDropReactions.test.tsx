@@ -68,6 +68,13 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
 const mockUseEmoji = useEmoji as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;
 const setToastMock = jest.fn();
+const createStructuredReactionError = (
+  body: unknown,
+  message = "technical error"
+): Error & { response: { body: unknown } } =>
+  Object.assign(new Error(message), {
+    response: { body },
+  });
 
 type NativeEmojiMock = { skins: Array<{ native: string }> };
 
@@ -280,6 +287,7 @@ describe("WaveDropReactions", () => {
     expect(commonApi.commonApiPost).toHaveBeenCalledWith({
       endpoint: "drops/test-drop/reaction",
       body: { reaction: ":gm:" },
+      errorMode: "structured",
     });
 
     // Click button again to decrement
@@ -289,6 +297,7 @@ describe("WaveDropReactions", () => {
     });
     expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
       endpoint: "drops/test-drop/reaction",
+      errorMode: "structured",
     });
   });
 
@@ -306,7 +315,10 @@ describe("WaveDropReactions", () => {
     );
 
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
-      new Error("Unauthorized")
+      createStructuredReactionError(
+        JSON.stringify({ message: "Unauthorized" }),
+        "unexpected raw error"
+      )
     );
 
     render(
