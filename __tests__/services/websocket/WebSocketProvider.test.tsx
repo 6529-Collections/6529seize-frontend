@@ -320,9 +320,6 @@ describe("WebSocketProvider", () => {
     });
 
     it("handles malformed messages gracefully", () => {
-      const consoleSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
         wrapper,
@@ -346,18 +343,10 @@ describe("WebSocketProvider", () => {
         }
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Failed to parse WebSocket message:",
-        expect.any(SyntaxError)
-      );
-
-      consoleSpy.mockRestore();
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
     });
 
     it("handles subscriber callback errors gracefully", () => {
-      const consoleSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
         wrapper,
@@ -386,13 +375,7 @@ describe("WebSocketProvider", () => {
         ws.triggerMessage({ type: WsMessageType.DROP_UPDATE, data: { id: 1 } });
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Error in subscriber callback:",
-        expect.any(Error)
-      );
       expect(faultyCallback).toHaveBeenCalledWith({ id: 1 });
-
-      consoleSpy.mockRestore();
     });
   });
 
@@ -460,9 +443,6 @@ describe("WebSocketProvider", () => {
     });
 
     it("stops reconnecting after max attempts", () => {
-      const consoleSpy = jest
-        .spyOn(console, "warn")
-        .mockImplementation(() => {});
       mockGetAuthJwt.mockReturnValue("fresh-token");
 
       const wrapper = createWrapper({
@@ -522,11 +502,6 @@ describe("WebSocketProvider", () => {
       });
 
       expect(global.WebSocket).toHaveBeenCalledTimes(3);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "WebSocket reconnect failed after 2 attempts"
-      );
-
-      consoleSpy.mockRestore();
     });
 
     it("does not reconnect when no fresh token is available", () => {
@@ -616,9 +591,6 @@ describe("WebSocketProvider", () => {
   describe("Error Handling - Security & Edge Cases", () => {
     it("handles WebSocket constructor errors", () => {
       jest.useFakeTimers();
-      const consoleSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
 
       // Mock WebSocket constructor to throw
       (global as any).WebSocket = jest.fn(() => {
@@ -635,10 +607,6 @@ describe("WebSocketProvider", () => {
       });
 
       expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Failed to connect to WebSocket:",
-        expect.any(Error)
-      );
 
       // Should attempt reconnect even for constructor errors
       act(() => {
@@ -647,15 +615,10 @@ describe("WebSocketProvider", () => {
 
       expect(global.WebSocket).toHaveBeenCalledTimes(2);
 
-      consoleSpy.mockRestore();
       jest.useRealTimers();
     });
 
     it("handles WebSocket error events", () => {
-      const consoleSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
         wrapper,
@@ -672,12 +635,7 @@ describe("WebSocketProvider", () => {
         ws.triggerError();
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "WebSocket error:",
-        expect.any(Event)
-      );
-
-      consoleSpy.mockRestore();
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
     });
 
     it("closes existing connection before creating new one and ignores stale close events", () => {
@@ -1063,9 +1021,6 @@ describe("WebSocketProvider", () => {
 
     it("respects max reconnect attempts configuration", () => {
       jest.useFakeTimers();
-      const consoleSpy = jest
-        .spyOn(console, "warn")
-        .mockImplementation(() => {});
       mockGetAuthJwt.mockReturnValue("fresh-token");
 
       const maxAttempts = 3;
@@ -1106,24 +1061,19 @@ describe("WebSocketProvider", () => {
         });
       }
 
-      // One final failure to trigger the max attempts warning
+      // One final failure after max attempts should not schedule another reconnect.
       const lastWs = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[maxAttempts]?.value as MockWebSocket;
       act(() => {
         lastWs.triggerClose(1006);
       });
 
-      // Advance time to trigger the check for exceeding max attempts
       act(() => {
         jest.advanceTimersByTime(1000);
       });
 
       expect(global.WebSocket).toHaveBeenCalledTimes(maxAttempts + 1); // Initial + maxAttempts reconnects
-      expect(consoleSpy).toHaveBeenCalledWith(
-        `WebSocket reconnect failed after ${maxAttempts} attempts`
-      );
 
-      consoleSpy.mockRestore();
       jest.useRealTimers();
     });
   });

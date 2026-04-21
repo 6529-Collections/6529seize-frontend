@@ -20,6 +20,7 @@ interface UseWavesOverviewProps {
    */
   readonly directMessage?: boolean | undefined;
   readonly refetchInterval?: number | undefined;
+  readonly refetchIntervalInBackground?: boolean | undefined;
 }
 
 export const useWavesOverview = ({
@@ -29,6 +30,7 @@ export const useWavesOverview = ({
   viewerIdentityKey,
   directMessage,
   refetchInterval = Infinity,
+  refetchIntervalInBackground = false,
 }: UseWavesOverviewProps) => {
   const params: Omit<WavesOverviewParams, "offset"> = {
     limit,
@@ -91,6 +93,7 @@ export const useWavesOverview = ({
       return undefined;
     },
     refetchInterval,
+    refetchIntervalInBackground,
     ...getDefaultQueryRetry(() => setLastErrorTimestamp(Date.now())),
   });
 
@@ -104,21 +107,21 @@ export const useWavesOverview = ({
   const fetchNextPage = useCallback(() => {
     if (lastErrorTimestamp && Date.now() - lastErrorTimestamp < 30000) {
       setTimeout(() => {
-        query.fetchNextPage();
+        void query.fetchNextPage();
       }, 30000);
       return;
     }
-    query.fetchNextPage();
+    void query.fetchNextPage();
   }, [lastErrorTimestamp, query]);
 
   const refetch = useCallback(() => {
     if (lastErrorTimestamp && Date.now() - lastErrorTimestamp < 30000) {
       setTimeout(() => {
-        query.refetch();
+        void query.refetch();
       }, 30000);
       return;
     }
-    query.refetch();
+    void query.refetch();
   }, [lastErrorTimestamp, query]);
 
   const returnValue = useMemo(() => {

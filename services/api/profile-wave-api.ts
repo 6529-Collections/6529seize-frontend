@@ -1,7 +1,17 @@
 import { publicEnv } from "@/config/env";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { commonApiPost } from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
+
+export type ApiProfileWaveResponse = {
+  readonly profile_wave_id: string | null;
+  readonly profile_curation_id: string | null;
+};
+
+type SetProfileWaveRequestBody = {
+  readonly wave_id: string;
+  readonly profile_curation_id?: string | null;
+};
 
 const buildProfileWaveUrl = (identity: string): string =>
   `${publicEnv.API_ENDPOINT}/api/profiles/${encodeURIComponent(identity)}/wave`;
@@ -54,15 +64,33 @@ const parseProfileResponse = async (response: Response): Promise<ApiIdentity> =>
 export const setProfileWave = async ({
   identity,
   waveId,
+  profileCurationId,
 }: {
   readonly identity: string;
   readonly waveId: string;
-}): Promise<ApiIdentity> =>
-  await commonApiPost<{ wave_id: string }, ApiIdentity>({
+  readonly profileCurationId?: string | null | undefined;
+}): Promise<ApiIdentity> => {
+  const body: SetProfileWaveRequestBody =
+    profileCurationId === undefined
+      ? { wave_id: waveId }
+      : { wave_id: waveId, profile_curation_id: profileCurationId };
+
+  return await commonApiPost<SetProfileWaveRequestBody, ApiIdentity>({
     endpoint: `profiles/${encodeURIComponent(identity)}/wave`,
-    body: {
-      wave_id: waveId,
-    },
+    body,
+  });
+};
+
+export const getProfileWave = async ({
+  identity,
+  signal,
+}: {
+  readonly identity: string;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<ApiProfileWaveResponse> =>
+  await commonApiFetch<ApiProfileWaveResponse>({
+    endpoint: `profiles/${encodeURIComponent(identity)}/wave`,
+    signal,
   });
 
 export const clearProfileWave = async ({

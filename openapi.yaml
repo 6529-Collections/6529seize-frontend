@@ -971,7 +971,9 @@ paths:
         - name: older_first
           in: query
           required: false
-          description: By default this endpoint orders things newer first, but if you set it to true then it starts from older drops.
+          description: >-
+            By default this endpoint orders things newer first, but if you set
+            it to true then it starts from older drops.
           schema:
             type: boolean
         - name: wave_id
@@ -1565,7 +1567,7 @@ paths:
       responses:
         "200":
           description: successful operation
-  /drops/{dropId}/reactions:
+  /drops/{dropId}/reaction:
     post:
       tags:
         - Drops
@@ -4117,7 +4119,7 @@ paths:
       tags:
         - Ratings
       summary: >-
-        Change REP rating of multiple targets and categories in one go. Targets
+        Change REP rating of multiple targets and categories in one go. Targets 
         final REP value will be the value you supply here. If you supply
         multiple  addresses for one consolidation group then those amounts will
         be summed together.
@@ -4358,6 +4360,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RedeemedSubscriptionCountsPage"
+  /subscriptions/redeemed-memes-counts/download:
+    get:
+      tags:
+        - Subscriptions
+      summary: Download redeemed meme subscription counts as CSV
+      description: >-
+        Downloads a CSV with meme_id, artist, drop_date, unique_profiles,
+        subscriptions_count, and proceeds for MEMES cards with id >= 220. When
+        `szn` is provided, only cards in that season are included.
+      operationId: downloadRedeemedMemeSubscriptionCounts
+      parameters:
+        - name: szn
+          in: query
+          description: Optional MEMES season filter
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
   /subscriptions/consolidation/logs/{consolidation_key}:
     get:
       tags:
@@ -6032,6 +6061,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveCuration"
+  /waves/{id}/curations/{curation_id}/drops:
+    get:
+      tags:
+        - Waves
+      summary: List drops in a curation for wave
+      operationId: listWaveCurationDrops
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: curation_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCurationDropsPage"
+        "404":
+          description: Wave or curation not found
   /waves/{id}/curations/{curationId}:
     post:
       tags:
@@ -8080,7 +8152,7 @@ components:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
           description: |
-            The metadata that must be provided by the participant.
+            The metadata that must be provided by the participant. 
             Empty array if nothing is required.
           type: array
           items:
@@ -8303,6 +8375,29 @@ components:
         description:
           type: string
           nullable: true
+    ApiCurationDrop:
+      type: object
+      required:
+        - drop_priority_order
+      allOf:
+        - $ref: "#/components/schemas/ApiDropWithoutWave"
+      properties:
+        drop_priority_order:
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+    ApiCurationDropsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCurationDrop"
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -8529,6 +8624,7 @@ components:
       required:
         - drop_included
         - authenticated_user_can_curate
+        - drop_priority_order
       allOf:
         - $ref: "#/components/schemas/ApiWaveCuration"
       properties:
@@ -8536,6 +8632,11 @@ components:
           type: boolean
         authenticated_user_can_curate:
           type: boolean
+        drop_priority_order:
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
     ApiDropCurationRequest:
       type: object
       required:
@@ -8543,6 +8644,10 @@ components:
       properties:
         curation_id:
           type: string
+        priority_order:
+          type: integer
+          format: int64
+          minimum: 1
     ApiDropGroupMention:
       type: string
       enum:
@@ -10906,10 +11011,10 @@ components:
         - all_drops_notifications_subscribers_limit
         - memes_wave_id
         - curation_wave_id
-        - quorum_wave_id
         - distribution_admin_wallets
         - claims_admin_wallets
         - announcements_wave_id
+        - quorum_wave_id
       properties:
         rememes_submission_tdh_threshold:
           type: integer
@@ -10923,9 +11028,6 @@ components:
         curation_wave_id:
           type: string
           nullable: true
-        quorum_wave_id:
-          type: string
-          nullable: true
         distribution_admin_wallets:
           type: array
           items:
@@ -10935,6 +11037,9 @@ components:
           items:
             $ref: "#/components/schemas/ApiEthereumAddress"
         announcements_wave_id:
+          type: string
+          nullable: true
+        quorum_wave_id:
           type: string
           nullable: true
     ApiSetPinnedDropRequest:
@@ -11262,7 +11367,7 @@ components:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
           description: |
-            The metadata that must be provided by the participant.
+            The metadata that must be provided by the participant. 
             Empty array if nothing is required.
           type: array
           items:
@@ -11531,7 +11636,7 @@ components:
           type: string
     ApiWaveCreditScope:
       description: |
-        The scope of the credit.
+        The scope of the credit. 
         * WAVE - Credit is spendable across all drops in wave.
       enum:
         - WAVE
@@ -11553,6 +11658,7 @@ components:
         - group_id
         - created_at
         - updated_at
+        - priority_order
       properties:
         id:
           type: string
@@ -11568,6 +11674,10 @@ components:
         updated_at:
           type: number
           format: int64
+        priority_order:
+          type: integer
+          format: int32
+          minimum: 1
     ApiWaveCurationRequest:
       type: object
       required:
@@ -11580,6 +11690,10 @@ components:
           maxLength: 50
         group_id:
           type: string
+        priority_order:
+          type: integer
+          format: int32
+          minimum: 1
     ApiWaveDecision:
       type: object
       required:
@@ -11976,7 +12090,7 @@ components:
           nullable: true
         required_metadata:
           description: |
-            The metadata that must be provided by the participant.
+            The metadata that must be provided by the participant. 
             Empty array if nothing is required.
           type: array
           items:

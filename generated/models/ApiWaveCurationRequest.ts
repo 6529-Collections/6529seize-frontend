@@ -16,6 +16,7 @@ import { HttpFile } from '../http/http';
 export class ApiWaveCurationRequest {
     'name': string;
     'group_id': string;
+    'priority_order'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -33,6 +34,12 @@ export class ApiWaveCurationRequest {
             "baseName": "group_id",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "priority_order",
+            "baseName": "priority_order",
+            "type": "number",
+            "format": "int32"
         }    ];
 
     static getAttributeTypeMap() {

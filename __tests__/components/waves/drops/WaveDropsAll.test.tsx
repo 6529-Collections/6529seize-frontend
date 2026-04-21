@@ -853,6 +853,114 @@ describe("WaveDropsAll", () => {
     });
   });
 
+  describe("Serial Target Hydration Suspension", () => {
+    it("releases light drop hydration when target fetching rejects", async () => {
+      const consoleWarn = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      mockFetchNextPage.mockRejectedValueOnce(new Error("Network error"));
+
+      renderComponent({ initialDrop: 10 });
+
+      expect(dropsProps.suspendLightDropHydration).toBe(true);
+
+      await waitFor(() => {
+        expect(mockFetchNextPage).toHaveBeenCalledWith(
+          {
+            waveId: "test-wave-1",
+            type: "LIGHT",
+            targetSerialNo: 10,
+          },
+          null
+        );
+      });
+
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
+      expect(mockWaitAndRevealDrop).not.toHaveBeenCalled();
+      consoleWarn.mockRestore();
+    });
+
+    it("releases light drop hydration when target reveal fails", async () => {
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      mockFetchNextPage.mockResolvedValueOnce([]);
+      mockWaitAndRevealDrop.mockResolvedValueOnce(false);
+
+      renderComponent({ initialDrop: 10 });
+
+      expect(dropsProps.suspendLightDropHydration).toBe(true);
+
+      await waitFor(() => {
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+      });
+
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
+    });
+
+    it("keeps light drop hydration suspended until successful target scroll settles", async () => {
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      mockFetchNextPage.mockResolvedValueOnce([]);
+      mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+
+      renderComponent({ initialDrop: 10 });
+
+      const targetElement = document.createElement("div");
+      targetElement.scrollIntoView = jest.fn();
+      Object.defineProperty(targetElement, "getBoundingClientRect", {
+        value: () => ({ top: 0, bottom: 1 }),
+      });
+      dropsProps.targetDropRef.current = targetElement;
+
+      expect(dropsProps.suspendLightDropHydration).toBe(true);
+
+      await waitFor(() => {
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+      });
+
+      await waitFor(() => {
+        expect(targetElement.scrollIntoView).toHaveBeenCalled();
+      });
+      expect(dropsProps.suspendLightDropHydration).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(600);
+      });
+
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
+    });
+  });
+
   describe("Error Handling and Edge Cases", () => {
     it("handles fetchNextPage failures gracefully", async () => {
       const consoleError = jest

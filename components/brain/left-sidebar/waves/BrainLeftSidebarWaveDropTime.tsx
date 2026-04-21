@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useEffectEvent, useReducer } from "react";
+import React, { useEffect, useState } from "react";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 
 interface BrainLeftSidebarWaveDropTimeProps {
@@ -10,15 +10,11 @@ interface BrainLeftSidebarWaveDropTimeProps {
 const BrainLeftSidebarWaveDropTime: React.FC<
   BrainLeftSidebarWaveDropTimeProps
 > = ({ time }) => {
-  const [, forceRefresh] = useReducer((value: number) => value + 1, 0);
-
-  const refreshNow = useEffectEvent(() => {
-    forceRefresh();
-  });
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
-      refreshNow();
+      setNow(Date.now());
     }, 60000);
 
     return () => {
@@ -29,12 +25,12 @@ const BrainLeftSidebarWaveDropTime: React.FC<
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        refreshNow();
+        setNow(Date.now());
       }
     };
 
     const handleFocus = () => {
-      refreshNow();
+      setNow(Date.now());
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -46,7 +42,7 @@ const BrainLeftSidebarWaveDropTime: React.FC<
     };
   }, []);
 
-  const label = getTimeAgoShort(time);
+  const label = getTimeAgoShort(time, now);
 
   return <span className="tw-text-iron-300">{label}</span>;
 };

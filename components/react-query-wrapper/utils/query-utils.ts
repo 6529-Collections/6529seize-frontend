@@ -7,6 +7,8 @@ export const WAVE_FOLLOWING_WAVES_PARAMS = {
   only_waves_followed_by_authenticated_user: true,
 };
 
+export const SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS = 60_000;
+
 export const WAVE_DROPS_PARAMS = {
   limit: 50,
 };

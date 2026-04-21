@@ -13,6 +13,13 @@ import { buildSubmissionMetadata } from "./submissionMetadata";
 interface PreviewMediaSelection {
   readonly mediaSource: "upload" | "url";
   readonly selectedFile: File | null;
+  readonly existingMedia:
+    | {
+        readonly url: string;
+        readonly mimeType: string;
+      }
+    | null
+    | undefined;
   readonly externalUrl: string;
   readonly externalMimeType: string;
   readonly isExternalValid: boolean;
@@ -45,6 +52,13 @@ const buildPreviewMedia = ({
     return {
       url: uploadArtworkUrl,
       mime_type: mediaSelection.selectedFile.type || "image/jpeg",
+    };
+  }
+
+  if (mediaSelection.mediaSource === "upload" && mediaSelection.existingMedia) {
+    return {
+      url: mediaSelection.existingMedia.url,
+      mime_type: mediaSelection.existingMedia.mimeType,
     };
   }
 

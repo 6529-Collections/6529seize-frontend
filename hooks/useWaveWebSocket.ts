@@ -78,8 +78,7 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
         }
       };
 
-      ws.onerror = (error: Event) => {
-        console.error("WebSocket error:", error);
+      ws.onerror = () => {
         ws.close();
       };
     }

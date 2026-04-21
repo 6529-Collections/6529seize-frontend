@@ -26,7 +26,11 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
 
   return (
     <SingleWaveDropWrapper drop={drop} wave={wave} onClose={onClose}>
-      <MemesSingleWaveDropInfoPanel drop={extendedDrop} wave={wave} />
+      <MemesSingleWaveDropInfoPanel
+        drop={extendedDrop}
+        wave={wave}
+        onClose={onClose}
+      />
     </SingleWaveDropWrapper>
   );
 };

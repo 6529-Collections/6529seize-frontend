@@ -142,6 +142,7 @@ const mockDispatch = jest.fn();
 const mockProcessFile = jest.fn();
 const mockHandleRetry = jest.fn();
 const mockHandleRemoveFile = jest.fn();
+const mockResetState = jest.fn();
 
 jest.mock(
   "@/components/waves/memes/file-upload/hooks/useFileUploader",
@@ -161,6 +162,7 @@ jest.mock(
     processFile: mockProcessFile,
     handleRetry: mockHandleRetry,
     handleRemoveFile: mockHandleRemoveFile,
+    resetState: mockResetState,
     dispatch: mockDispatch,
   })
 );
@@ -235,6 +237,7 @@ describe("MemesArtSubmissionFile", () => {
   const baseProps: MemesArtSubmissionFileProps = {
     artworkUploaded: false,
     artworkUrl: "url",
+    uploadError: null,
     setArtworkUploaded: mockSetArtworkUploaded,
     handleFileSelect: mockHandleFileSelect,
     mediaSource: "upload",
@@ -269,6 +272,7 @@ describe("MemesArtSubmissionFile", () => {
     mockProcessFile.mockClear();
     mockHandleRetry.mockClear();
     mockHandleRemoveFile.mockClear();
+    mockResetState.mockClear();
     mockSetMediaSource.mockClear();
     mockOnExternalHashChange.mockClear();
     mockOnExternalProviderChange.mockClear();
@@ -408,6 +412,34 @@ describe("MemesArtSubmissionFile", () => {
       // Now shows preview
       expect(screen.getByTestId("preview")).toHaveTextContent("uploaded-url");
       expect(screen.queryByTestId("upload")).not.toBeInTheDocument();
+    });
+
+    it("surfaces upload read errors and resets local upload state", async () => {
+      render(
+        <AuthContext.Provider value={{ setToast: mockSetToast } as any}>
+          <MemesArtSubmissionFile
+            {...baseProps}
+            uploadError="Unable to read the selected file. Please try again."
+          />
+        </AuthContext.Provider>
+      );
+
+      expect(screen.getByTestId("upload")).toHaveAttribute(
+        "data-visual-state",
+        "invalid"
+      );
+      expect(screen.getByTestId("upload-error")).toHaveTextContent(
+        "Unable to read the selected file. Please try again."
+      );
+      expect(screen.getByTestId("artwork-upload-area")).toHaveAttribute(
+        "aria-describedby",
+        "file-upload-error"
+      );
+      expect(screen.queryByTestId("preview")).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(mockResetState).toHaveBeenCalled();
+      });
     });
 
     it("applies minimum-height classes to upload panel for mobile safety", () => {
