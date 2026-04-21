@@ -617,6 +617,7 @@ function DropForgeLaunchClaimTimelineRow({
               headerStatus.key === "publishing" ||
               headerStatus.key === "checking_onchain"
             }
+            showCheck={headerStatus.tone === "finalized"}
             tooltipText={headerStatus.reason ?? ""}
           />
         )}

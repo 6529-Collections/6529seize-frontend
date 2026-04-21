@@ -473,6 +473,7 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
             launchListStatus.key === "publishing" ||
             launchListStatus.key === "checking_onchain"
           }
+          showCheck={launchListStatus.tone === "finalized"}
           tooltipText={launchListStatus.reason ?? ""}
         />
       </div>
