@@ -212,6 +212,46 @@ it("renders the compact quorum proposal view when parsing succeeds", () => {
   expect(markdownProps).toBeUndefined();
 });
 
+it("renders compact quorum cards when intermediate sections are omitted", () => {
+  const proposalPart = {
+    content: [
+      "# Slow Mode",
+      "",
+      "## Summary",
+      "",
+      "Keep the feed readable.",
+      "",
+      "## Problem Statement",
+      "",
+      "There are too many drops.",
+      "",
+      "## Risks & Trade-offs",
+      "",
+      "More structure for submitters.",
+    ].join("\n"),
+    quoted_drop: null,
+  } as any;
+
+  render(
+    <WaveDropPartContentMarkdown
+      mentionedUsers={[]}
+      mentionedWaves={[]}
+      referencedNfts={[]}
+      part={proposalPart}
+      wave={wave}
+      drop={{ id: "drop-1", serial_no: 2 } as any}
+      onQuoteClick={jest.fn()}
+      contentPresentation="quorumCompact"
+    />
+  );
+
+  expect(screen.getByTestId("compact")).toHaveTextContent("Slow Mode");
+  expect(
+    compactProps.proposal.sections.map((section: any) => section.heading)
+  ).toEqual(["Problem Statement", "Risks & Trade-offs"]);
+  expect(markdownProps).toBeUndefined();
+});
+
 it("keeps embedded level-two headings inside the same compact quorum section", () => {
   const proposalPart = {
     content: buildQuorumProposalMarkdown({
@@ -258,6 +298,49 @@ it("keeps embedded level-two headings inside the same compact quorum section", (
   );
   expect(compactProps.proposal.sections[2].markdown).toContain(
     "Still part of the working spec."
+  );
+  expect(markdownProps).toBeUndefined();
+});
+
+it("keeps canonical embedded headings inside the same compact quorum section", () => {
+  const proposalPart = {
+    content: buildQuorumProposalMarkdown({
+      ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+      title: "Slow Mode",
+      summary: "Keep the feed readable.",
+      problemStatement: "There are too many drops.",
+      proposedSolution: "Add a cooldown setting.",
+      implementationPath:
+        "1. Draft the rollout.\n\n## Risks & Trade-offs\n\nStill part of the implementation notes.",
+      risksTradeoffs: "Actual trade-off goes here.",
+    }),
+    quoted_drop: null,
+  } as any;
+
+  render(
+    <WaveDropPartContentMarkdown
+      mentionedUsers={[]}
+      mentionedWaves={[]}
+      referencedNfts={[]}
+      part={proposalPart}
+      wave={wave}
+      drop={{ id: "drop-1", serial_no: 2 } as any}
+      onQuoteClick={jest.fn()}
+      contentPresentation="quorumCompact"
+    />
+  );
+
+  expect(screen.getByTestId("compact")).toHaveTextContent("Slow Mode");
+  expect(compactProps.proposal.sections[3].heading).toBe("Implementation Path");
+  expect(compactProps.proposal.sections[3].markdown).toContain(
+    "## Risks & Trade-offs"
+  );
+  expect(compactProps.proposal.sections[3].markdown).toContain(
+    "Still part of the implementation notes."
+  );
+  expect(compactProps.proposal.sections[6].heading).toBe("Risks & Trade-offs");
+  expect(compactProps.proposal.sections[6].markdown).toBe(
+    "Actual trade-off goes here."
   );
   expect(markdownProps).toBeUndefined();
 });

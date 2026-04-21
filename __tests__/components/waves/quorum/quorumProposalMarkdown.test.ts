@@ -181,16 +181,110 @@ describe("quorumProposalMarkdown", () => {
     expect(parsed.sections[3]?.markdown).toContain("2. Ship it.");
   });
 
+  it("parses sparse proposals when intermediate sections are omitted", () => {
+    const markdown = [
+      "# Slow Mode",
+      "",
+      "## Summary",
+      "",
+      "Keep the feed readable.",
+      "",
+      "## Problem Statement",
+      "",
+      "There are too many drops.",
+      "",
+      "## Risks & Trade-offs",
+      "",
+      "More structure for submitters.",
+    ].join("\n");
+
+    expect(parseQuorumProposalMarkdown(markdown)).toEqual({
+      title: "Slow Mode",
+      summaryMarkdown: "Keep the feed readable.",
+      sections: [
+        {
+          heading: "Problem Statement",
+          markdown: "There are too many drops.",
+        },
+        {
+          heading: "Risks & Trade-offs",
+          markdown: "More structure for submitters.",
+        },
+      ],
+    });
+  });
+
+  it("keeps canonical level-two headings inside the current section body when a later section matches", () => {
+    const markdown = buildQuorumProposalMarkdown({
+      ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+      title: "Slow Mode",
+      summary: "Restrict users to one drop every 24 hours.",
+      problemStatement: "Waves can become noisy.",
+      proposedSolution: "Allow creators to enable slow mode.",
+      implementationPath:
+        "1. Draft the rollout.\n\n## Risks & Trade-offs\n\nStill part of the implementation notes.",
+      whoBenefits: "Busy art-sharing waves.",
+      whatImproves: "Visibility.",
+      urgency: "Low",
+      observableOutcome: "Fewer duplicate drops.",
+      measurableSignal: "More space between drops.",
+      risksTradeoffs: "Actual trade-off goes here.",
+    });
+
+    const parsed = parseQuorumProposalMarkdown(markdown);
+
+    expect(parsed).not.toBeNull();
+    if (!parsed) {
+      throw new Error("Expected quorum markdown to parse");
+    }
+
+    expect(parsed.sections.map((section) => section.heading)).toEqual([
+      "Problem Statement",
+      "Proposed Solution",
+      "Working Spec (Required)",
+      "Implementation Path",
+      "Impact & Priority",
+      "Success Criteria",
+      "Risks & Trade-offs",
+    ]);
+    expect(parsed.sections[3]?.markdown).toContain("## Risks & Trade-offs");
+    expect(parsed.sections[3]?.markdown).toContain(
+      "Still part of the implementation notes."
+    );
+    expect(parsed.sections[6]?.markdown).toBe("Actual trade-off goes here.");
+  });
+
+  it("keeps canonical headings inside fenced code blocks", () => {
+    const markdown = buildQuorumProposalMarkdown({
+      ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+      title: "Slow Mode",
+      summary: "Restrict users to one drop every 24 hours.",
+      problemStatement:
+        "```md\n## Impact & Priority\n```\n\nStill describing the problem.",
+      proposedSolution: "Allow creators to enable slow mode.",
+      risksTradeoffs: "More structure for submitters.",
+    });
+
+    const parsed = parseQuorumProposalMarkdown(markdown);
+
+    expect(parsed).not.toBeNull();
+    if (!parsed) {
+      throw new Error("Expected quorum markdown to parse");
+    }
+
+    expect(parsed.sections[0]?.heading).toBe("Problem Statement");
+    expect(parsed.sections[0]?.markdown).toContain("## Impact & Priority");
+    expect(parsed.sections[0]?.markdown).toContain(
+      "Still describing the problem."
+    );
+    expect(parsed.sections[1]?.heading).toBe("Proposed Solution");
+  });
+
   it("returns null for markdown that does not match the quorum proposal shape", () => {
     expect(
       parseQuorumProposalMarkdown("## Summary\n\nMissing title")
     ).toBeNull();
     expect(parseQuorumProposalMarkdown("# Title only")).toBeNull();
-    expect(
-      parseQuorumProposalMarkdown(
-        "# Slow Mode\n\n## Summary\n\nKeep the feed readable.\n\n## Risks & Trade-offs\n\n_Not provided_"
-      )
-    ).toBeNull();
   });
 
   it("allows leading blank lines before the title", () => {

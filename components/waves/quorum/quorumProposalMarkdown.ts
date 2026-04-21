@@ -91,8 +91,19 @@ const QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS = [
   "Risks & Trade-offs",
 ] as const;
 
-const QUORUM_PROPOSAL_TOP_LEVEL_HEADING_SET = new Set<string>(
-  QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS
+type QuorumProposalTopLevelHeading =
+  (typeof QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS)[number];
+
+const QUORUM_PROPOSAL_TOP_LEVEL_HEADING_SET =
+  new Set<QuorumProposalTopLevelHeading>(QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS);
+
+const QUORUM_PROPOSAL_TOP_LEVEL_HEADING_INDEX = new Map<
+  QuorumProposalTopLevelHeading,
+  number
+>(
+  QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS.map(
+    (heading, index) => [heading, index] as const
+  )
 );
 
 const parseTopLevelHeading = (line: string): string | null => {
@@ -101,8 +112,25 @@ const parseTopLevelHeading = (line: string): string | null => {
   return heading && heading.length > 0 ? heading : null;
 };
 
+const parseCanonicalTopLevelHeading = (
+  line: string
+): QuorumProposalTopLevelHeading | null => {
+  const heading = parseTopLevelHeading(line);
+
+  if (
+    !heading ||
+    !QUORUM_PROPOSAL_TOP_LEVEL_HEADING_SET.has(
+      heading as QuorumProposalTopLevelHeading
+    )
+  ) {
+    return null;
+  }
+
+  return heading as QuorumProposalTopLevelHeading;
+};
+
 const formatTopLevelHeading = (
-  heading: (typeof QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS)[number]
+  heading: QuorumProposalTopLevelHeading
 ): string => `## ${heading}`;
 
 const normalizeMarkdownBlock = (lines: readonly string[]): string =>
@@ -127,99 +155,265 @@ const pushParsedSection = (
   });
 };
 
-interface QuorumProposalSectionParseState {
-  currentHeading: string | null;
-  currentLines: string[];
-  nextHeadingIndex: number;
+interface MarkdownFenceState {
+  marker: "`" | "~";
+  markerLength: number;
 }
 
-const startNextParsedSection = (
-  parsedSections: ParsedQuorumProposalSection[],
-  parseState: QuorumProposalSectionParseState,
-  parsedHeading: string | null
-): boolean | null => {
-  if (!parsedHeading) {
-    return false;
+interface QuorumProposalSectionBoundaryCandidate {
+  heading: QuorumProposalTopLevelHeading;
+  headingIndex: number;
+  lineIndex: number;
+}
+
+const parseFenceState = (line: string): MarkdownFenceState | null => {
+  const fenceMatch = /^\s*([`~]{3,})/.exec(line);
+  const marker = fenceMatch?.[1];
+  if (!marker) {
+    return null;
   }
 
-  const expectedHeading =
-    QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS[parseState.nextHeadingIndex] ?? null;
-
-  if (expectedHeading && parsedHeading === expectedHeading) {
-    if (parseState.currentHeading) {
-      pushParsedSection(
-        parsedSections,
-        parseState.currentHeading,
-        parseState.currentLines
-      );
-    }
-
-    parseState.currentHeading = expectedHeading;
-    parseState.currentLines = [];
-    parseState.nextHeadingIndex++;
-    return true;
+  const fenceCharacter = marker[0];
+  if (
+    (fenceCharacter !== "`" && fenceCharacter !== "~") ||
+    !marker.split("").every((character) => character === fenceCharacter)
+  ) {
+    return null;
   }
 
-  return QUORUM_PROPOSAL_TOP_LEVEL_HEADING_SET.has(parsedHeading)
-    ? null
-    : false;
+  return {
+    marker: fenceCharacter,
+    markerLength: marker.length,
+  };
 };
 
-const appendSectionLine = (
-  parseState: QuorumProposalSectionParseState,
+const getNextFenceState = (
+  currentFenceState: MarkdownFenceState | null,
   line: string
-): boolean => {
-  if (!parseState.currentHeading) {
-    return line.trim().length === 0;
+): MarkdownFenceState | null => {
+  const parsedFenceState = parseFenceState(line);
+  if (!parsedFenceState) {
+    return currentFenceState;
   }
 
-  parseState.currentLines.push(line);
+  if (!currentFenceState) {
+    return parsedFenceState;
+  }
+
+  return currentFenceState.marker === parsedFenceState.marker &&
+    parsedFenceState.markerLength >= currentFenceState.markerLength
+    ? null
+    : currentFenceState;
+};
+
+const linesAreBlank = (
+  lines: readonly string[],
+  startIndex: number,
+  endIndex: number
+): boolean => {
+  for (let lineIndex = startIndex; lineIndex < endIndex; lineIndex++) {
+    if ((lines[lineIndex] ?? "").trim().length > 0) {
+      return false;
+    }
+  }
+
   return true;
+};
+
+const collectSectionBoundaryCandidates = (
+  lines: readonly string[],
+  startIndex: number
+): QuorumProposalSectionBoundaryCandidate[] => {
+  const candidates: QuorumProposalSectionBoundaryCandidate[] = [];
+  let fenceState: MarkdownFenceState | null = null;
+
+  for (let lineIndex = startIndex; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex] ?? "";
+
+    if (!fenceState) {
+      const heading = parseCanonicalTopLevelHeading(line);
+      const headingIndex = heading
+        ? QUORUM_PROPOSAL_TOP_LEVEL_HEADING_INDEX.get(heading)
+        : undefined;
+
+      if (heading && headingIndex !== undefined) {
+        candidates.push({
+          heading,
+          headingIndex,
+          lineIndex,
+        });
+      }
+    }
+
+    fenceState = getNextFenceState(fenceState, line);
+  }
+
+  return candidates;
+};
+
+const compareCandidatePaths = (
+  left: readonly QuorumProposalSectionBoundaryCandidate[],
+  right: readonly QuorumProposalSectionBoundaryCandidate[]
+): number => {
+  if (left.length !== right.length) {
+    return left.length - right.length;
+  }
+
+  for (let index = 0; index < left.length; index++) {
+    const lineDifference =
+      (left[index]?.lineIndex ?? -1) - (right[index]?.lineIndex ?? -1);
+
+    if (lineDifference !== 0) {
+      return lineDifference;
+    }
+  }
+
+  return 0;
+};
+
+const buildBestCandidatePath = (
+  candidates: readonly QuorumProposalSectionBoundaryCandidate[],
+  startCandidateIndex: number,
+  minimumHeadingIndex: number,
+  memoizedPaths: Map<
+    string,
+    readonly QuorumProposalSectionBoundaryCandidate[] | null
+  >
+): readonly QuorumProposalSectionBoundaryCandidate[] | null => {
+  const memoizationKey = `${startCandidateIndex}:${minimumHeadingIndex}`;
+  const memoizedPath = memoizedPaths.get(memoizationKey);
+  if (memoizedPath !== undefined) {
+    return memoizedPath;
+  }
+
+  let bestPath: readonly QuorumProposalSectionBoundaryCandidate[] | null = null;
+
+  for (
+    let candidateIndex = startCandidateIndex;
+    candidateIndex < candidates.length;
+    candidateIndex++
+  ) {
+    const candidate = candidates[candidateIndex];
+    if (!candidate || candidate.headingIndex < minimumHeadingIndex) {
+      continue;
+    }
+
+    const tailPath = buildBestCandidatePath(
+      candidates,
+      candidateIndex + 1,
+      candidate.headingIndex + 1,
+      memoizedPaths
+    );
+    const candidatePath = tailPath ? [candidate, ...tailPath] : [candidate];
+
+    if (!bestPath || compareCandidatePaths(candidatePath, bestPath) > 0) {
+      bestPath = candidatePath;
+    }
+  }
+
+  memoizedPaths.set(memoizationKey, bestPath);
+  return bestPath;
+};
+
+const selectSectionBoundaryCandidates = (
+  lines: readonly string[],
+  startIndex: number,
+  candidates: readonly QuorumProposalSectionBoundaryCandidate[]
+): readonly QuorumProposalSectionBoundaryCandidate[] | null => {
+  const memoizedPaths = new Map<
+    string,
+    readonly QuorumProposalSectionBoundaryCandidate[] | null
+  >();
+  let bestPath: readonly QuorumProposalSectionBoundaryCandidate[] | null = null;
+
+  for (
+    let candidateIndex = 0;
+    candidateIndex < candidates.length;
+    candidateIndex++
+  ) {
+    const candidate = candidates[candidateIndex];
+    if (
+      candidate?.heading !== "Summary" ||
+      !linesAreBlank(lines, startIndex, candidate.lineIndex)
+    ) {
+      continue;
+    }
+
+    const tailPath = buildBestCandidatePath(
+      candidates,
+      candidateIndex + 1,
+      candidate.headingIndex + 1,
+      memoizedPaths
+    );
+    const candidatePath = tailPath ? [candidate, ...tailPath] : [candidate];
+
+    if (
+      candidatePath.length >= 2 &&
+      (!bestPath || compareCandidatePaths(candidatePath, bestPath) > 0)
+    ) {
+      bestPath = candidatePath;
+    }
+  }
+
+  return bestPath;
+};
+
+const buildParsedSectionsFromCandidates = (
+  lines: readonly string[],
+  startIndex: number,
+  candidates: readonly QuorumProposalSectionBoundaryCandidate[]
+): ParsedQuorumProposalSection[] | null => {
+  if (
+    candidates.length === 0 ||
+    !linesAreBlank(lines, startIndex, candidates[0]?.lineIndex ?? startIndex)
+  ) {
+    return null;
+  }
+
+  const parsedSections: ParsedQuorumProposalSection[] = [];
+
+  for (
+    let candidateIndex = 0;
+    candidateIndex < candidates.length;
+    candidateIndex++
+  ) {
+    const candidate = candidates[candidateIndex];
+    if (!candidate) {
+      continue;
+    }
+
+    const nextLineIndex =
+      candidates[candidateIndex + 1]?.lineIndex ?? lines.length;
+    pushParsedSection(
+      parsedSections,
+      candidate.heading,
+      lines.slice(candidate.lineIndex + 1, nextLineIndex)
+    );
+  }
+
+  return parsedSections;
 };
 
 const parseQuorumProposalSections = (
   lines: readonly string[],
   startIndex: number
 ): ParsedQuorumProposalSection[] | null => {
-  const parsedSections: ParsedQuorumProposalSection[] = [];
-  const parseState: QuorumProposalSectionParseState = {
-    currentHeading: null,
-    currentLines: [],
-    nextHeadingIndex: 0,
-  };
+  const candidates = collectSectionBoundaryCandidates(lines, startIndex);
+  const selectedCandidates = selectSectionBoundaryCandidates(
+    lines,
+    startIndex,
+    candidates
+  );
 
-  for (let lineIndex = startIndex; lineIndex < lines.length; lineIndex++) {
-    const line = lines[lineIndex] ?? "";
-    const parsedHeading = parseTopLevelHeading(line);
-    const sectionStarted = startNextParsedSection(
-      parsedSections,
-      parseState,
-      parsedHeading
-    );
-
-    if (sectionStarted === null) {
-      return null;
-    }
-
-    if (sectionStarted) {
-      continue;
-    }
-
-    if (!appendSectionLine(parseState, line)) {
-      return null;
-    }
-  }
-
-  if (!parseState.currentHeading) {
+  if (!selectedCandidates) {
     return null;
   }
 
-  pushParsedSection(
-    parsedSections,
-    parseState.currentHeading,
-    parseState.currentLines
+  return buildParsedSectionsFromCandidates(
+    lines,
+    startIndex,
+    selectedCandidates
   );
-  return parsedSections;
 };
 
 const splitSummarySection = (
