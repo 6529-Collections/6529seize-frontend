@@ -42,9 +42,7 @@ function getQRScannerErrorToastMessage(error: unknown): ReactNode {
   return (
     <>
       <p>Scan failed.</p>
-      <p className="tw-font-light">
-        {reason ?? SCANNER_FALLBACK_GUIDANCE}
-      </p>
+      <p className="tw-font-light">{reason ?? SCANNER_FALLBACK_GUIDANCE}</p>
     </>
   );
 }
