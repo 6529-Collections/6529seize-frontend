@@ -210,7 +210,12 @@ interface LaunchPhaseTabDefinition {
 }
 
 const LAUNCH_PHASE_TABS: readonly LaunchPhaseTabDefinition[] = [
-  { key: "phase0", label: "Phase 0", subLabel: "- Initialize", alwaysEnabled: true },
+  {
+    key: "phase0",
+    label: "Phase 0",
+    subLabel: "- Initialize",
+    alwaysEnabled: true,
+  },
   { key: "phase1", label: "Phase 1" },
   { key: "phase2", label: "Phase 2" },
   { key: "publicphase", label: "Public Phase" },
@@ -1513,16 +1518,12 @@ function DropForgePayArtistSection({
       ? "tw-ring-rose-500/70"
       : "";
   const paymentAddressClassName =
-    !isMintStatPending && payArtistAddressMissing
-      ? "tw-ring-rose-500/70"
-      : "";
+    !isMintStatPending && payArtistAddressMissing ? "tw-ring-rose-500/70" : "";
   const paymentAddressLabelClassName =
     !isMintStatPending && payArtistAddressMissing
       ? "tw-text-rose-300 tw-ring-rose-500/70"
       : "";
-  const mintStatLoadingClassName = isMintStatPending
-    ? "!tw-text-iron-500"
-    : "";
+  const mintStatLoadingClassName = isMintStatPending ? "!tw-text-iron-500" : "";
 
   return (
     <div className="tw-space-y-5 tw-pt-4">
