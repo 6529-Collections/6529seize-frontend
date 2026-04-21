@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
-export const SCANNER_FALLBACK_GUIDANCE =
+const SCANNER_FALLBACK_GUIDANCE =
   "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.";
 
 function getQRScannerErrorReason(error: unknown): string | null {
