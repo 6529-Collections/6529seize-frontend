@@ -137,4 +137,67 @@ describe("TitleContext", () => {
       expect(document.title).toBe("Discovery");
     });
   });
+
+  it("restores the default home title after leaving messages", async () => {
+    mockPathname = "/messages";
+    mockSearchParams = new URLSearchParams("wave=wave-1");
+
+    const view = render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={{ name: "Wave One", newItemsCount: 0 }} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Wave One | Brain")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(document.title).toBe("Wave One | Brain");
+    });
+
+    mockPathname = "/";
+    mockSearchParams = new URLSearchParams();
+    mockActiveWaveId = null;
+
+    view.rerender(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("6529.io")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(document.title).toBe("6529.io");
+    });
+  });
+
+  it.each([
+    ["/drop-forge", "Drop Forge"],
+    ["/drop-forge/craft", "Craft Claims"],
+    ["/drop-forge/craft/123", "Claim #123 | Craft Claims"],
+    ["/drop-forge/launch", "Launch Claims"],
+    ["/drop-forge/launch/456", "Claim #456 | Launch Claims"],
+  ])(
+    "preserves server metadata for %s when the client title is still default",
+    async (pathname, expectedTitle) => {
+      mockPathname = pathname;
+      mockSearchParams = new URLSearchParams();
+      mockActiveWaveId = null;
+      document.title = expectedTitle;
+
+      render(
+        <TitleProvider>
+          <DynamicHeadTitle />
+        </TitleProvider>
+      );
+
+      await waitFor(() => {
+        expect(document.title).toBe(expectedTitle);
+      });
+    }
+  );
 });

@@ -109,6 +109,37 @@ describe("MemeSubscriptionRow", () => {
     expect(screen.getByText("0.5")).toBeInTheDocument();
   });
 
+  it("disables retries for final subscription lookups", () => {
+    renderWithAuth(
+      <MemeSubscriptionRow
+        profileKey="test-key"
+        title="The Memes"
+        subscription={
+          {
+            token_id: 478,
+            contract: "0x123",
+            subscribed: true,
+            subscribed_count: 2,
+          } as any
+        }
+        eligibilityCount={3}
+        readonly
+        refresh={jest.fn()}
+        minting_today={false}
+        first
+        date={null}
+      />
+    );
+
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ["consolidation-final-subscription", "test-key-0x123-478"],
+        enabled: true,
+        retry: false,
+      })
+    );
+  });
+
   it("omits phase metadata when the final subscription is unavailable", () => {
     useQueryMock.mockImplementation(({ queryKey }) => {
       if (queryKey[0] === "consolidation-final-subscription") {

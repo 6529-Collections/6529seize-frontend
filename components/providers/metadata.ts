@@ -8,7 +8,8 @@ export function getAppMetadata(
   const baseEndpoint = publicEnv.BASE_ENDPOINT;
   const isStaging = baseEndpoint.includes("staging");
 
-  const title = customMetadata?.title ?? (isStaging ? "6529 Staging" : "6529");
+  const title =
+    customMetadata?.title ?? (isStaging ? "6529 Staging" : "6529.io");
   const description = customMetadata?.description ?? "";
   const ogImage = customMetadata?.ogImage ?? `${baseEndpoint}/6529io.png`;
   const twitterCard = customMetadata?.twitterCard ?? "summary";
