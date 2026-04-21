@@ -192,7 +192,7 @@ describe("dropReactionMonitoring", () => {
     );
   });
 
-  it("captures reconciliation mismatch only after apparent success", () => {
+  it("captures reconciliation mismatch after success when failure timestamp is undefined", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-4",
       waveId: "wave-1",
@@ -212,6 +212,7 @@ describe("dropReactionMonitoring", () => {
 
     dateNowSpy.mockReturnValue(1_100);
     recordReactionRequestSucceeded(mutation);
+    expect((mutation as any).apiFailedAt).toBeUndefined();
 
     dateNowSpy.mockReturnValue(1_500);
     recordReactionRealtimeReconciliation({

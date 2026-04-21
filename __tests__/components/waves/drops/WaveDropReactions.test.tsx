@@ -67,6 +67,7 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
 
 const mockUseEmoji = useEmoji as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;
+const setToastMock = jest.fn();
 
 type NativeEmojiMock = { skins: Array<{ native: string }> };
 
@@ -114,7 +115,7 @@ describe("WaveDropReactions", () => {
     jest.clearAllMocks();
     mockUseAuth.mockReturnValue({
       connectedProfile: { id: "profile-1", handle: "alice" },
-      setToast: jest.fn(),
+      setToast: setToastMock,
     });
     getMyStreamMock().mockReturnValue({
       applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
@@ -288,6 +289,48 @@ describe("WaveDropReactions", () => {
     });
     expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
       endpoint: "drops/test-drop/reaction",
+    });
+  });
+
+  it("shows the structured API error message when a chip reaction fails", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      new Error("Unauthorized")
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole("button")[0]);
+
+    await waitFor(() => {
+      expect(setToastMock).toHaveBeenCalledWith({
+        message: "Unauthorized",
+        type: "error",
+      });
     });
   });
 

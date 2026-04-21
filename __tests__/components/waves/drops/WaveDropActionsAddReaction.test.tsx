@@ -4,6 +4,7 @@ import WaveDropActionsAddReaction from "@/components/waves/drops/WaveDropActions
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import * as commonApi from "@/services/api/common-api";
 
 const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));
 const setToastMock = jest.fn();
@@ -189,6 +190,24 @@ describe("WaveDropActionsAddReaction", () => {
 
     await waitFor(() => {
       expect(onAddReactionMock).toHaveBeenCalled();
+    });
+  });
+
+  it("shows the structured API error message when adding a reaction fails", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      new Error("Unauthorized")
+    );
+
+    render(<WaveDropActionsAddReaction drop={mockDrop} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /add reaction/i }));
+    fireEvent.click(await screen.findByText(/select emoji/i));
+
+    await waitFor(() => {
+      expect(setToastMock).toHaveBeenCalledWith({
+        message: "Unauthorized",
+        type: "error",
+      });
     });
   });
 

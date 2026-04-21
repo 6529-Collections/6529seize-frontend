@@ -14,6 +14,7 @@ import { useCallback, useRef } from "react";
 import {
   cloneReactionEntries,
   findReactionIndex,
+  getReactionErrorMessage,
   removeUserFromReactions,
   toProfileMin,
 } from "@/components/waves/drops/reaction-utils";
@@ -190,12 +191,10 @@ export function useDropReaction(
         onSuccess?.();
       } catch (error) {
         recordReactionRequestFailed(mutation, error);
-        let errorMessage = isRemoving
-          ? "Error removing reaction"
-          : "Error adding reaction";
-        if (typeof error === "string") {
-          errorMessage = error;
-        }
+        const errorMessage = getReactionErrorMessage(
+          error,
+          isRemoving ? "Error removing reaction" : "Error adding reaction"
+        );
         setToast({ message: errorMessage, type: "error" });
         rollbackRef.current?.();
         recordReactionRollbackApplied(mutation);

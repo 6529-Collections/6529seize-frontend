@@ -29,6 +29,7 @@ import { Tooltip } from "react-tooltip";
 import {
   cloneReactionEntries,
   findReactionIndex,
+  getReactionErrorMessage,
   removeUserFromReactions,
   toProfileMin,
 } from "./reaction-utils";
@@ -389,8 +390,10 @@ function WaveDropReaction({
       recordReactionRequestSucceeded(mutation);
     } catch (error) {
       recordReactionRequestFailed(mutation, error);
-      let msg = selected ? "Error removing reaction" : "Error adding reaction";
-      if (typeof error === "string") msg = error;
+      const msg = getReactionErrorMessage(
+        error,
+        selected ? "Error removing reaction" : "Error adding reaction"
+      );
       setToast({ message: msg, type: "error" });
 
       setSelected((s) => !s);
