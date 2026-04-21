@@ -230,6 +230,9 @@ export default function UserPageProfileWavePickerReady({
     return (
       <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
         <div className="tw-no-scrollbar tw-flex tw-max-h-96 tw-flex-col tw-gap-1 tw-overflow-y-auto tw-overflow-x-hidden tw-px-1.5">
+          <p className="tw-mb-0 tw-px-3 tw-pb-1 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+            Profile wave
+          </p>
           <div className="tw-flex tw-flex-col tw-gap-1">
             {state.waves.map(renderCandidateWaveRow)}
           </div>
@@ -256,7 +259,7 @@ export default function UserPageProfileWavePickerReady({
             {title}
           </h2>
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-2">
-            Choose the wave you want to use as your official wave.
+            Choose the wave you want to use as your featured wave.
           </p>
         </div>
 

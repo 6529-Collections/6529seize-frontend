@@ -1567,7 +1567,7 @@ paths:
       responses:
         "200":
           description: successful operation
-  /drops/{dropId}/reactions:
+  /drops/{dropId}/reaction:
     post:
       tags:
         - Drops
@@ -4360,6 +4360,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RedeemedSubscriptionCountsPage"
+  /subscriptions/redeemed-memes-counts/download:
+    get:
+      tags:
+        - Subscriptions
+      summary: Download redeemed meme subscription counts as CSV
+      description: >-
+        Downloads a CSV with meme_id, artist, drop_date, unique_profiles,
+        subscriptions_count, and proceeds for MEMES cards with id >= 220. When
+        `szn` is provided, only cards in that season are included.
+      operationId: downloadRedeemedMemeSubscriptionCounts
+      parameters:
+        - name: szn
+          in: query
+          description: Optional MEMES season filter
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
   /subscriptions/consolidation/logs/{consolidation_key}:
     get:
       tags:
