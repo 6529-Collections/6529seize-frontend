@@ -106,7 +106,94 @@ interface DropForgeLaunchClaimPermissionFallbackViewProps {
   canAccessLaunchPage: boolean;
 }
 
-interface DropForgeLaunchClaimPageViewProps {
+interface LaunchResearchPhaseProps {
+  totalMinted: number;
+  researchTargetEditionSize: number;
+  researchTargetEditionSizeMax: number | null;
+  onResearchTargetEditionSizeChange: (value: string) => void;
+  researchAirdropCount: number;
+  runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
+}
+
+interface LaunchPayArtistPhaseProps {
+  mintStat: ApiMemesMintStat | null;
+  mintStatLoading: boolean;
+  mintStatError: string | null;
+  payArtistAmountEth: string;
+  onPayArtistAmountChange: (value: string) => void;
+  payArtistAddressInput: string;
+  payArtistAddressLoading: boolean;
+  payArtistAddressMissing: boolean;
+  payArtistAddressError: string | null;
+  onPayArtistAddressInputChange: (value: string) => void;
+  onPayArtistResolvedAddressChange: (value: string) => void;
+  onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
+  onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
+  payArtistActionDisabled: boolean;
+  payArtistWritePending: boolean;
+  runPayArtistWrite: (mintingClaimAction: string | null) => void;
+}
+
+interface LaunchSelectedPhaseConfigProps {
+  selectedPhaseDiffs: LaunchPhaseDiffsView;
+  changedFieldBoxClassName: string;
+  changedFieldBoxLabelClassName: string;
+  selectedPhasePriceValue: string;
+  onSelectedPhasePriceChange: (value: string) => void;
+  isPublicPhaseSelected: boolean;
+  rootsLoading: boolean;
+  selectedPhaseConfig: LaunchPhaseConfigView | null;
+  selectedPhaseWindowStartValue: string;
+  selectedPhaseWindowEndValue: string;
+  onSelectedPhaseStartChange: (value: string) => void;
+  onSelectedPhaseEndChange: (value: string) => void;
+  selectedPhaseActionDisabled: boolean;
+  onSelectedPhaseAction: () => void;
+  selectedPhaseActionLabel: string;
+}
+
+interface LaunchPhase0AirdropsProps {
+  showPhase0AirdropSections: boolean;
+  phase0AirdropsError: string | null;
+  phase0AirdropsLoading: boolean;
+  artistAirdropSummary: LaunchAirdropSummaryView;
+  teamAirdropSummary: LaunchAirdropSummaryView;
+  artistAirdrops: PhaseAirdrop[] | null;
+  teamAirdrops: PhaseAirdrop[] | null;
+}
+
+interface LaunchMintingClaimActionsProps {
+  mintingClaimActionsByName: Record<string, ApiMintingClaimAction>;
+  mintingClaimActionPending: string | null;
+  onMintingClaimActionToggle: (
+    action: string,
+    completed: boolean
+  ) => Promise<void>;
+}
+
+interface LaunchAirdropWriteProps {
+  runAirdropWrite: (args: {
+    entries: PhaseAirdrop[] | null;
+    actionLabel: LaunchAirdropActionLabel | "Airdrop to Research";
+    mintingClaimAction?: string | null;
+  }) => void;
+  subscriptionAirdropSections: LaunchSubscriptionAirdropSectionView[];
+}
+
+type LaunchPhasePanelSharedProps = LaunchResearchPhaseProps &
+  LaunchPayArtistPhaseProps &
+  LaunchSelectedPhaseConfigProps &
+  LaunchPhase0AirdropsProps &
+  LaunchMintingClaimActionsProps &
+  LaunchAirdropWriteProps;
+
+interface DropForgeLaunchClaimPageViewProps
+  extends LaunchResearchPhaseProps,
+    LaunchPayArtistPhaseProps,
+    LaunchSelectedPhaseConfigProps,
+    LaunchPhase0AirdropsProps,
+    LaunchMintingClaimActionsProps,
+    LaunchAirdropWriteProps {
   pageTitle: string;
   craftHref: string;
   loading: boolean;
@@ -133,62 +220,6 @@ interface DropForgeLaunchClaimPageViewProps {
   runMetadataLocationOnlyUpdate: () => void;
   selectedPhase: "" | LaunchPhaseKey;
   onSelectedPhaseChange: (value: LaunchPhaseKey) => void;
-  totalMinted: number;
-  researchTargetEditionSize: number;
-  researchTargetEditionSizeMax: number | null;
-  onResearchTargetEditionSizeChange: (value: string) => void;
-  researchAirdropCount: number;
-  runResearchAirdropWrite: (mintingClaimAction: string | null) => void;
-  mintStat: ApiMemesMintStat | null;
-  mintStatLoading: boolean;
-  mintStatError: string | null;
-  payArtistAmountEth: string;
-  onPayArtistAmountChange: (value: string) => void;
-  payArtistAddressInput: string;
-  payArtistAddressLoading: boolean;
-  payArtistAddressMissing: boolean;
-  payArtistAddressError: string | null;
-  onPayArtistAddressInputChange: (value: string) => void;
-  onPayArtistResolvedAddressChange: (value: string) => void;
-  onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
-  onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
-  payArtistActionDisabled: boolean;
-  payArtistWritePending: boolean;
-  runPayArtistWrite: (mintingClaimAction: string | null) => void;
-  selectedPhaseDiffs: LaunchPhaseDiffsView;
-  changedFieldBoxClassName: string;
-  changedFieldBoxLabelClassName: string;
-  selectedPhasePriceValue: string;
-  onSelectedPhasePriceChange: (value: string) => void;
-  isPublicPhaseSelected: boolean;
-  rootsLoading: boolean;
-  selectedPhaseConfig: LaunchPhaseConfigView | null;
-  selectedPhaseWindowStartValue: string;
-  selectedPhaseWindowEndValue: string;
-  onSelectedPhaseStartChange: (value: string) => void;
-  onSelectedPhaseEndChange: (value: string) => void;
-  selectedPhaseActionDisabled: boolean;
-  onSelectedPhaseAction: () => void;
-  selectedPhaseActionLabel: string;
-  showPhase0AirdropSections: boolean;
-  phase0AirdropsError: string | null;
-  phase0AirdropsLoading: boolean;
-  artistAirdropSummary: LaunchAirdropSummaryView;
-  teamAirdropSummary: LaunchAirdropSummaryView;
-  artistAirdrops: PhaseAirdrop[] | null;
-  teamAirdrops: PhaseAirdrop[] | null;
-  runAirdropWrite: (args: {
-    entries: PhaseAirdrop[] | null;
-    actionLabel: LaunchAirdropActionLabel | "Airdrop to Research";
-    mintingClaimAction?: string | null;
-  }) => void;
-  subscriptionAirdropSections: LaunchSubscriptionAirdropSectionView[];
-  mintingClaimActionsByName: Record<string, ApiMintingClaimAction>;
-  mintingClaimActionPending: string | null;
-  onMintingClaimActionToggle: (
-    action: string,
-    completed: boolean
-  ) => Promise<void>;
 }
 
 const MINT_STAT_LOADING_LABEL = "loading...";
