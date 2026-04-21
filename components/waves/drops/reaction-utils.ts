@@ -109,8 +109,9 @@ export const toProfileMin = (
 };
 
 type StructuredReactionError = {
-  message?: unknown;
+  status?: unknown;
   response?: {
+    status?: unknown;
     body?: unknown;
   };
 };
@@ -172,6 +173,37 @@ const hasNoStructuredReactionBody = (body: unknown): boolean => {
   return typeof body === "string" && body.trim().length === 0;
 };
 
+const getStructuredReactionStatus = (
+  error: StructuredReactionError
+): number | null => {
+  const directStatus = error.status;
+  if (typeof directStatus === "number") {
+    return directStatus;
+  }
+
+  const responseStatus = error.response?.status;
+  if (typeof responseStatus === "number") {
+    return responseStatus;
+  }
+
+  return null;
+};
+
+const getEmptyStructuredReactionStatusMessage = (
+  status: number | null
+): string | null => {
+  switch (status) {
+    case 401:
+      return "Unauthorized";
+    case 429:
+      return "Too Many Requests";
+    case null:
+      return null;
+    default:
+      return null;
+  }
+};
+
 export const getReactionErrorMessage = (
   error: unknown,
   fallback: string
@@ -187,12 +219,11 @@ export const getReactionErrorMessage = (
       }
 
       if (hasNoStructuredReactionBody(structuredBody)) {
-        const errorMessage = structuredError.message;
-        if (
-          typeof errorMessage === "string" &&
-          errorMessage.trim().length > 0
-        ) {
-          return errorMessage;
+        const statusMessage = getEmptyStructuredReactionStatusMessage(
+          getStructuredReactionStatus(structuredError)
+        );
+        if (statusMessage) {
+          return statusMessage;
         }
       }
     }

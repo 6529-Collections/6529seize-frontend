@@ -43,12 +43,24 @@ jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
 
 const mockUseAuth = useAuth as jest.Mock;
 const mockUseMyStream = useMyStream as jest.Mock;
-const createStructuredReactionError = (
-  body: unknown,
-  message = "technical error"
-): Error & { response: { body: unknown } } =>
+const createStructuredReactionError = ({
+  body,
+  message = "technical error",
+  status,
+}: {
+  body?: unknown;
+  message?: string;
+  status?: number;
+}): Error & {
+  status?: number;
+  response: { body?: unknown; status?: number };
+} =>
   Object.assign(new Error(message), {
-    response: { body },
+    ...(status !== undefined ? { status } : {}),
+    response: {
+      ...(body !== undefined ? { body } : {}),
+      ...(status !== undefined ? { status } : {}),
+    },
   });
 
 const mockDrop = {
@@ -102,10 +114,11 @@ describe("useDropReaction", () => {
 
   it("shows structured API error messages for quick react failures", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
-      createStructuredReactionError(
-        JSON.stringify({ error: "Rate limited" }),
-        "unexpected raw error"
-      )
+      createStructuredReactionError({
+        body: JSON.stringify({ error: "Rate limited" }),
+        message: "unexpected raw error",
+        status: 429,
+      })
     );
 
     const { result } = renderHook(() =>
@@ -129,10 +142,11 @@ describe("useDropReaction", () => {
 
   it("falls back for unsafe structured quick react failures", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
-      createStructuredReactionError(
-        "<html><body>Bad Gateway</body></html>",
-        "<html><body>Bad Gateway</body></html>"
-      )
+      createStructuredReactionError({
+        body: "<html><body>Bad Gateway</body></html>",
+        message: "<html><body>Bad Gateway</body></html>",
+        status: 502,
+      })
     );
 
     const { result } = renderHook(() =>
@@ -149,9 +163,12 @@ describe("useDropReaction", () => {
     });
   });
 
-  it("shows the structured error message when the structured body is empty", async () => {
+  it("maps unauthorized status when the structured body is empty", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
-      createStructuredReactionError(undefined, "Unauthorized")
+      createStructuredReactionError({
+        message: "Something went wrong",
+        status: 401,
+      })
     );
 
     const { result } = renderHook(() =>
@@ -164,6 +181,29 @@ describe("useDropReaction", () => {
 
     expect(setToastMock).toHaveBeenCalledWith({
       message: "Unauthorized",
+      type: "error",
+    });
+  });
+
+  it("maps rate-limit status when the structured body is blank", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: "   ",
+        message: "   ",
+        status: 429,
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "Too Many Requests",
       type: "error",
     });
   });
