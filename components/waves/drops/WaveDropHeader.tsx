@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -39,6 +40,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 }) => {
   const router = useRouter();
   const compact = useCompactMode();
+  const authorLabel = drop.author.handle ?? drop.author.primary_address;
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleNavigation = useCallback(
@@ -71,7 +73,11 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                   href={`/${drop.author.handle ?? drop.author.primary_address}`}
                   className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
                 >
-                  {drop.author.handle}
+                  <ProfileNameWithAiMarker
+                    classification={drop.author.classification}
+                  >
+                    {authorLabel}
+                  </ProfileNameWithAiMarker>
                 </Link>
               </UserProfileTooltipWrapper>
             </p>

@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import Link from "next/link";
@@ -15,6 +16,7 @@ export default function DropMinimalIdentityRow({
   drop,
 }: DropMinimalIdentityRowProps) {
   const router = useRouter();
+  const authorLabel = drop.author.handle ?? drop.author.primary_address;
 
   const handleNavigation = useCallback(
     (event: React.MouseEvent, path: string) => {
@@ -39,7 +41,11 @@ export default function DropMinimalIdentityRow({
             }
             className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
           >
-            {drop.author.handle ?? drop.author.primary_address}
+            <ProfileNameWithAiMarker
+              classification={drop.author.classification}
+            >
+              {authorLabel}
+            </ProfileNameWithAiMarker>
           </Link>
         </UserProfileTooltipWrapper>
       </p>

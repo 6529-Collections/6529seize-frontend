@@ -13,9 +13,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSetProfileWaveRequest {
-    'wave_id': string;
-    'profile_curation_id'?: string | null;
+export class ApiPaymentDetails {
+    'payment_address': string;
+    'has_designated_payee': boolean;
+    'designated_payee_name': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,20 +24,26 @@ export class ApiSetProfileWaveRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "wave_id",
-            "baseName": "wave_id",
+            "name": "payment_address",
+            "baseName": "payment_address",
             "type": "string",
             "format": ""
         },
         {
-            "name": "profile_curation_id",
-            "baseName": "profile_curation_id",
+            "name": "has_designated_payee",
+            "baseName": "has_designated_payee",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "designated_payee_name",
+            "baseName": "designated_payee_name",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSetProfileWaveRequest.attributeTypeMap;
+        return ApiPaymentDetails.attributeTypeMap;
     }
 
     public constructor() {

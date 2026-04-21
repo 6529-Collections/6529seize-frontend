@@ -318,6 +318,8 @@ function ArtistInfoStrip({
       winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids,
       artist_of_prevote_cards: profile.artist_of_prevote_cards,
       is_wave_creator: profile.is_wave_creator,
+      classification: profile.classification,
+      sub_classification: profile.sub_classification,
     };
   }, [profile]);
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { SingleWaveDropAuthor } from "@/components/waves/drop/SingleWaveDropAuthor";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -33,7 +34,11 @@ jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
 }));
 
 describe("SingleWaveDropAuthor", () => {
-  const createDrop = (handle: string | null, primaryAddress: string) =>
+  const createDrop = (
+    handle: string | null,
+    primaryAddress: string,
+    classification: ApiProfileClassification = ApiProfileClassification.Pseudonym
+  ) =>
     ({
       id: "drop-1",
       author: {
@@ -41,6 +46,7 @@ describe("SingleWaveDropAuthor", () => {
         primary_address: primaryAddress,
         pfp: null,
         level: 3,
+        classification,
       },
     }) as any;
 
@@ -68,5 +74,15 @@ describe("SingleWaveDropAuthor", () => {
       "data-user",
       "0x1111111111111111111111111111111111111111"
     );
+  });
+
+  it("renders a robot emoji before the name for AI profiles", () => {
+    render(
+      <SingleWaveDropAuthor
+        drop={createDrop("ai-bot", "0xabc", ApiProfileClassification.Ai)}
+      />
+    );
+
+    expect(screen.getByTestId("tooltip-wrapper")).toHaveTextContent("🤖ai-bot");
   });
 });
