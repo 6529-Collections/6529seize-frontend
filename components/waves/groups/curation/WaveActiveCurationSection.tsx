@@ -4,7 +4,11 @@ import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  EllipsisHorizontalIcon,
+} from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { useAuth } from "@/components/auth/Auth";
 import MyStreamWaveCurationCreateDialog from "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog";
@@ -21,6 +25,7 @@ import {
   getWaveCurationsQueryKey,
   useWaveCurations,
 } from "@/hooks/waves/useWaveCurations";
+import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
 import { commonApiDelete, commonApiFetch } from "@/services/api/common-api";
 
 const toScopeGroup = (group: ApiGroupFull): ApiGroup => ({
@@ -54,6 +59,11 @@ export default function WaveActiveCurationSection({
     waveId: wave.id,
     enabled: shouldLoadCurations,
   });
+  const {
+    moveCuration,
+    isPending: isCurationReorderPending,
+    pendingCurationId,
+  } = useWaveCurationReorderMutation({ waveId: wave.id });
   const resolvedActiveCurationId =
     activeCurationId ?? (isApp ? (curations[0]?.id ?? null) : null);
 
@@ -61,6 +71,15 @@ export default function WaveActiveCurationSection({
     () =>
       curations.find((curation) => curation.id === resolvedActiveCurationId) ??
       null,
+    [curations, resolvedActiveCurationId]
+  );
+  const activeCurationIndex = useMemo(
+    () =>
+      resolvedActiveCurationId
+        ? curations.findIndex(
+            (curation) => curation.id === resolvedActiveCurationId
+          )
+        : -1,
     [curations, resolvedActiveCurationId]
   );
   const activeGroupId = activeCuration?.group_id ?? null;
@@ -148,7 +167,49 @@ export default function WaveActiveCurationSection({
     },
   });
 
+  const canMoveActiveCuration =
+    canManageCurations && activeCuration !== null && curations.length > 1;
+  const activeCurationIsReordering = activeCuration
+    ? pendingCurationId === activeCuration.id
+    : false;
+  const moveActiveCuration = (direction: "previous" | "next") => {
+    if (!activeCuration) {
+      return;
+    }
+
+    if (!activeCurationId) {
+      setSelectedCuration(activeCuration.id);
+    }
+
+    moveCuration({
+      curation: activeCuration,
+      direction,
+      curations,
+    });
+  };
+
   const menuItems: CompactMenuItem[] = [
+    ...(canMoveActiveCuration
+      ? [
+          {
+            id: "move-up",
+            label: "Move up",
+            icon: <ArrowUpIcon className="tw-size-4" />,
+            disabled: activeCurationIndex <= 0 || isCurationReorderPending,
+            onSelect: () => moveActiveCuration("previous"),
+          },
+          {
+            id: "move-down",
+            label: "Move down",
+            icon: <ArrowDownIcon className="tw-size-4" />,
+            disabled:
+              activeCurationIndex < 0 ||
+              activeCurationIndex >= curations.length - 1 ||
+              isCurationReorderPending,
+            onSelect: () => moveActiveCuration("next"),
+          },
+        ]
+      : []),
     {
       id: "edit",
       label: "Edit curation",
@@ -225,6 +286,7 @@ export default function WaveActiveCurationSection({
                           aria-label="Active curation options"
                           items={menuItems}
                           menuWidthClassName="tw-w-44"
+                          disabled={activeCurationIsReordering}
                         />
                       )}
                     </div>
@@ -262,16 +324,6 @@ export default function WaveActiveCurationSection({
                 {desktopActiveCuration?.name}
               </p>
             </div>
-
-            {canManageCurations && (
-              <CompactMenu
-                triggerClassName="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-                trigger={<EllipsisHorizontalIcon className="tw-size-5" />}
-                aria-label="Active curation options"
-                items={menuItems}
-                menuWidthClassName="tw-w-44"
-              />
-            )}
           </div>
 
           <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4">

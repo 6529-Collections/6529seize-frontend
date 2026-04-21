@@ -6,6 +6,10 @@ const ARWEAVE_GATEWAY_HOSTS = [
   "gateway.ar.io",
 ] as const;
 
+// gateway.ar.io redirects interactive content to <txid>.ar.io (not
+// <txid>.gateway.ar.io), so CSP / remote-pattern lists must also allow ar.io.
+const ADDITIONAL_CSP_HOSTS = ["ar.io"] as const;
+
 const dedupe = (values: readonly string[]): string[] =>
   Array.from(new Set(values));
 
@@ -26,7 +30,7 @@ const ARWEAVE_GATEWAY_EXACT_HOSTS = dedupe(ARWEAVE_GATEWAY_HOSTS);
 const ARWEAVE_GATEWAY_WILDCARD_BASE_HOSTS = dedupe(ARWEAVE_GATEWAY_HOSTS);
 
 export const ARWEAVE_GATEWAY_CSP_SOURCES = dedupe(
-  ARWEAVE_GATEWAY_HOSTS.flatMap((hostname) => [
+  [...ARWEAVE_GATEWAY_HOSTS, ...ADDITIONAL_CSP_HOSTS].flatMap((hostname) => [
     `https://${hostname}`,
     `https://*.${hostname}`,
   ])
