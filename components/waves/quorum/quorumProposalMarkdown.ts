@@ -18,6 +18,17 @@ export interface QuorumProposalFormValues {
   readonly risksTradeoffs: string;
 }
 
+export interface ParsedQuorumProposalSection {
+  readonly heading: string;
+  readonly markdown: string;
+}
+
+export interface ParsedQuorumProposalMarkdown {
+  readonly title: string;
+  readonly summaryMarkdown: string;
+  readonly sections: readonly ParsedQuorumProposalSection[];
+}
+
 export const EMPTY_QUORUM_PROPOSAL_FORM_VALUES: QuorumProposalFormValues = {
   title: "",
   summary: "",
@@ -66,12 +77,144 @@ const normalizeTitle = (title: string): string => {
   return normalizedTitle.length ? normalizedTitle : "Untitled QUORUM Proposal";
 };
 
+const normalizeSectionHeading = (heading: string): string =>
+  heading.trim().toLowerCase();
+
+const normalizeMarkdownBlock = (lines: readonly string[]): string =>
+  normalizeMarkdownValue(lines.join("\n"));
+
+const skipLeadingEmptyLines = (lines: readonly string[]): number => {
+  let lineIndex = 0;
+  while (lineIndex < lines.length && lines[lineIndex]?.trim() === "") {
+    lineIndex++;
+  }
+  return lineIndex;
+};
+
+const pushParsedSection = (
+  parsedSections: ParsedQuorumProposalSection[],
+  heading: string,
+  lines: readonly string[]
+): void => {
+  parsedSections.push({
+    heading,
+    markdown: normalizeMarkdownBlock(lines),
+  });
+};
+
+const parseQuorumProposalSections = (
+  lines: readonly string[],
+  startIndex: number
+): ParsedQuorumProposalSection[] | null => {
+  const parsedSections: ParsedQuorumProposalSection[] = [];
+  let currentHeading: string | null = null;
+  let currentLines: string[] = [];
+
+  for (let lineIndex = startIndex; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex] ?? "";
+    const headingMatch = /^##\s+(.+?)\s*$/.exec(line.trim());
+
+    if (headingMatch) {
+      if (currentHeading) {
+        pushParsedSection(parsedSections, currentHeading, currentLines);
+      }
+
+      const heading = headingMatch[1];
+      if (!heading) {
+        return null;
+      }
+
+      currentHeading = heading.trim();
+      currentLines = [];
+      continue;
+    }
+
+    if (!currentHeading) {
+      if (line.trim().length > 0) {
+        return null;
+      }
+      continue;
+    }
+
+    currentLines.push(line);
+  }
+
+  if (!currentHeading) {
+    return null;
+  }
+
+  pushParsedSection(parsedSections, currentHeading, currentLines);
+  return parsedSections;
+};
+
+const splitSummarySection = (
+  parsedSections: readonly ParsedQuorumProposalSection[]
+): Omit<ParsedQuorumProposalMarkdown, "title"> | null => {
+  const summarySection = parsedSections.find(
+    (section) => normalizeSectionHeading(section.heading) === "summary"
+  );
+
+  if (!summarySection) {
+    return null;
+  }
+
+  const sections = parsedSections.filter(
+    (section) => normalizeSectionHeading(section.heading) !== "summary"
+  );
+
+  if (sections.length === 0) {
+    return null;
+  }
+
+  return {
+    summaryMarkdown: summarySection.markdown,
+    sections,
+  };
+};
+
 export const hasQuorumProposalContent = (
   values: QuorumProposalFormValues
 ): boolean =>
   QUORUM_PROPOSAL_FORM_FIELDS.some((field) => {
     return values[field].trim().length > 0;
   });
+
+export const parseQuorumProposalMarkdown = (
+  markdown: string | null | undefined
+): ParsedQuorumProposalMarkdown | null => {
+  if (!markdown?.trim()) {
+    return null;
+  }
+
+  const normalizedMarkdown = markdown.replace(/\r\n?/g, "\n");
+  const lines = normalizedMarkdown.split("\n");
+  const lineIndex = skipLeadingEmptyLines(lines);
+
+  const titleMatch = /^#\s+(.+?)\s*$/.exec(lines[lineIndex]?.trim() ?? "");
+  if (!titleMatch) {
+    return null;
+  }
+
+  const title = titleMatch[1];
+  if (!title) {
+    return null;
+  }
+
+  const parsedSections = parseQuorumProposalSections(lines, lineIndex + 1);
+  if (!parsedSections) {
+    return null;
+  }
+
+  const contentSections = splitSummarySection(parsedSections);
+  if (!contentSections) {
+    return null;
+  }
+
+  return {
+    title: normalizeTitle(title),
+    ...contentSections,
+  };
+};
 
 export const buildQuorumProposalMarkdown = (
   values: QuorumProposalFormValues

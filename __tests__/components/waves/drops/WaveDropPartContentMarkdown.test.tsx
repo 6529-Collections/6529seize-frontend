@@ -5,6 +5,7 @@ import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartCo
 
 let markdownProps: any;
 let quoteProps: any;
+let compactProps: any;
 
 jest.mock(
   "@/components/drops/view/part/DropPartMarkdownWithPropLogger",
@@ -26,6 +27,13 @@ jest.mock(
     );
   }
 );
+jest.mock(
+  "@/components/waves/quorum/QuorumProposalCompactContent",
+  () => (props: any) => {
+    compactProps = props;
+    return <div data-testid="compact">{props.proposal.title}</div>;
+  }
+);
 
 const basePart: any = { content: "hello", quoted_drop: null };
 const wave: any = { id: "w" };
@@ -33,6 +41,7 @@ const wave: any = { id: "w" };
 beforeEach(() => {
   markdownProps = undefined;
   quoteProps = undefined;
+  compactProps = undefined;
 });
 
 it("renders markdown only", () => {
@@ -168,4 +177,46 @@ it("keeps link preview toggle control stable across equivalent drop rerenders", 
   );
 
   expect(markdownProps.linkPreviewToggleControl).toBe(firstControl);
+});
+
+it("renders the compact quorum proposal view when parsing succeeds", () => {
+  const proposalPart = {
+    content:
+      "# Slow Mode\n\n## Summary\n\nKeep the feed readable.\n\n## Problem Statement\n\nThere are too many drops.\n\n## Risks & Trade-offs\n\n_Not provided_",
+    quoted_drop: null,
+  } as any;
+
+  render(
+    <WaveDropPartContentMarkdown
+      mentionedUsers={[]}
+      mentionedWaves={[]}
+      referencedNfts={[]}
+      part={proposalPart}
+      wave={wave}
+      drop={{ id: "drop-1", serial_no: 2 } as any}
+      onQuoteClick={jest.fn()}
+      contentPresentation="quorumCompact"
+    />
+  );
+
+  expect(screen.getByTestId("compact")).toHaveTextContent("Slow Mode");
+  expect(compactProps.proposal.summaryMarkdown).toBe("Keep the feed readable.");
+  expect(markdownProps).toBeUndefined();
+});
+
+it("falls back to regular markdown when compact quorum parsing fails", () => {
+  render(
+    <WaveDropPartContentMarkdown
+      mentionedUsers={[]}
+      mentionedWaves={[]}
+      referencedNfts={[]}
+      part={{ content: "# Not enough structure", quoted_drop: null } as any}
+      wave={wave}
+      onQuoteClick={jest.fn()}
+      contentPresentation="quorumCompact"
+    />
+  );
+
+  expect(screen.getByTestId("md")).toHaveTextContent("# Not enough structure");
+  expect(screen.queryByTestId("compact")).toBeNull();
 });
