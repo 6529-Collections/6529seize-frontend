@@ -378,7 +378,7 @@ export default function UserPageProfileWaveMasonry({
         .join("|"),
     [drops]
   );
-  const masonryKey = `${curationId}-${containerWidth}-${masonryTopItemsKey}`;
+  const masonryKey = `${curationId}-${containerWidth}-${drops.length}-${masonryTopItemsKey}`;
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {

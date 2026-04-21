@@ -198,7 +198,7 @@ export function OfficialWaveSummary({
           {profileCurationLabel && (
             <>
               <span className="tw-text-iron-600">•</span>
-              <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-2 tw-py-0.5 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300">
+              <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300">
                 <span className="tw-flex-shrink-0 tw-text-iron-500">
                   Curation:
                 </span>
@@ -213,7 +213,7 @@ export function OfficialWaveSummary({
 
       {canManageOwnOfficialWave && (
         <div className="tw-flex tw-w-full tw-items-center md:tw-w-auto md:tw-justify-end">
-          <div className="tw-flex tw-w-full tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0.5 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)] md:tw-w-auto">
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0.5 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)] sm:tw-w-auto md:tw-w-auto">
             <div
               ref={changeWaveDropdownRef}
               className="tw-relative tw-min-w-0 tw-flex-1 md:tw-flex-none"
@@ -225,13 +225,13 @@ export function OfficialWaveSummary({
                 aria-expanded={isChangeWaveOpen}
                 aria-haspopup="menu"
                 aria-controls={changeWaveDropdownId}
-                className={`tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
+                className={`tw-inline-flex tw-whitespace-nowrap tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
                   isChangeWaveOpen
                     ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
                     : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
                 }`}
               >
-                <span>Switch wave</span>
+                <span className="tw-text-xs lg:tw-text-sm">Switch wave</span>
                 <ChevronDownIcon
                   aria-hidden="true"
                   className={`-tw-mr-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
@@ -251,7 +251,7 @@ export function OfficialWaveSummary({
             </div>
             {showChangeCuration && onOpenChangeCuration !== undefined && (
               <>
-                <div className="tw-hidden tw-h-3.5 tw-w-px tw-bg-white/10 sm:tw-mx-1 sm:tw-block" />
+                <div className="tw-mx-1 tw-h-3.5 tw-w-px tw-flex-shrink-0 tw-bg-white/10" />
                 <div
                   ref={changeCurationDropdownRef}
                   className="tw-relative tw-min-w-0 tw-flex-1 md:tw-flex-none"
@@ -264,13 +264,15 @@ export function OfficialWaveSummary({
                     aria-expanded={isChangeCurationOpen}
                     aria-haspopup="menu"
                     aria-controls={changeCurationDropdownId}
-                    className={`tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
+                    className={`tw-inline-flex tw-whitespace-nowrap tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
                       isChangeCurationOpen
                         ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
                         : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
                     }`}
                   >
-                    <span>Switch curation</span>
+                    <span className="tw-text-xs lg:tw-text-sm">
+                      Switch curation
+                    </span>
                     <ChevronDownIcon
                       aria-hidden="true"
                       className={`-tw-mr-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
@@ -290,13 +292,13 @@ export function OfficialWaveSummary({
                 </div>
               </>
             )}
-            <div className="tw-hidden tw-h-3.5 tw-w-px tw-bg-white/10 sm:tw-mx-1 sm:tw-block" />
+            <div className="tw-mx-1 tw-h-3.5 tw-w-px tw-flex-shrink-0 tw-bg-white/10" />
             <button
               type="button"
               onClick={onRemoveWave}
               disabled={isRemoving}
-              aria-label="Unset official wave"
-              title="Unset official wave"
+              aria-label="Unset featured wave"
+              title="Unset featured wave"
               className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-[10px] tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-zinc-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400 sm:tw-px-3.5 sm:tw-py-1.5"
             >
               {isRemoving ? (
@@ -304,7 +306,7 @@ export function OfficialWaveSummary({
               ) : (
                 <XMarkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
               )}
-              <span>Unset</span>
+              <span className="tw-text-xs lg:tw-text-sm">Unset</span>
             </button>
           </div>
         </div>

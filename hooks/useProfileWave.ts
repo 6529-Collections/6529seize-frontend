@@ -72,6 +72,16 @@ export const setProfileWaveQueryData = (
       data
     );
   }
+
+  if (data.profile_wave_id === null) {
+    return;
+  }
+
+  queryClient.setQueriesData<ApiProfileWaveResponse>(
+    { queryKey: ["profile-wave"] },
+    (current) =>
+      current?.profile_wave_id === data.profile_wave_id ? data : current
+  );
 };
 
 export const invalidateProfileWaveQueries = async (

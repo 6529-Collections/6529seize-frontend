@@ -372,7 +372,7 @@ export default function UserPageProfileWave({
   if (!profileWaveId) {
     return (
       <UserPageProfileWavePicker
-        title="Choose your official wave"
+        title="Choose your featured wave"
         identity={profileIdentityKey}
         isOwnProfile={isOwnProfile}
         hasActiveProfileProxy={Boolean(activeProfileProxy)}
@@ -386,16 +386,16 @@ export default function UserPageProfileWave({
   if (isUnavailableWaveError(error)) {
     return (
       <InfoPanel
-        title="Official wave unavailable"
-        message="The official wave behind this tab could not be loaded. It may have been removed or is no longer accessible."
+        title="Featured wave unavailable"
+        message="The featured wave behind this tab could not be loaded. It may have been removed or is no longer accessible."
         actions={
           canManageOwnOfficialWave ? (
             <button
               type="button"
               onClick={handleRemoveOfficialWave}
               disabled={isPending}
-              aria-label="Unset official wave"
-              title="Unset official wave"
+              aria-label="Unset featured wave"
+              title="Unset featured wave"
               className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-zinc-500 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400"
             >
               {isPending ? (
@@ -412,13 +412,13 @@ export default function UserPageProfileWave({
   }
 
   if (isLoading) {
-    return <LoadingPanel label="Loading official wave..." />;
+    return <LoadingPanel label="Loading featured wave..." />;
   }
 
   if (isError || !wave) {
     return (
       <InfoPanel
-        title="Unable to load official wave"
+        title="Unable to load featured wave"
         message="There was a temporary problem loading this profile curation."
         actions={
           <RetryButton isLoading={isFetching} onClick={retryOfficialWaveLoad} />
