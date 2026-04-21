@@ -948,8 +948,8 @@ export default function DropForgeLaunchClaimPageClient({
     if (permissionsLoading || isClaimsAdmin) return;
     setMintingClaimActionTypes(null);
     setMintingClaimActions(null);
-    setMintingClaimActionsLoaded(true);
-    setMintingClaimActionsLoadFailed(false);
+    setMintingClaimActionsLoaded(false);
+    setMintingClaimActionsLoadFailed(true);
     setMintingClaimActionPending(null);
     pendingMintingClaimActionRef.current = null;
   }, [permissionsLoading, isClaimsAdmin]);
@@ -1999,6 +1999,13 @@ export default function DropForgeLaunchClaimPageClient({
   );
   const runPayArtistWrite = useCallback(
     (mintingClaimAction: string | null) => {
+      if (payArtistAddressLoading) {
+        setToast({
+          message: "Payment address is still resolving",
+          type: "error",
+        });
+        return;
+      }
       if (!payArtistAmountEth.trim() || payArtistAmountWei == null) {
         setToast({
           message: "Pay Artist (ETH) is missing or invalid",
@@ -2054,6 +2061,7 @@ export default function DropForgeLaunchClaimPageClient({
     [
       payArtistAmountEth,
       payArtistAmountWei,
+      payArtistAddressLoading,
       payArtistAddressHasEnsError,
       payArtistResolvedAddressTrimmed,
       payArtistAddressValid,
@@ -2354,6 +2362,7 @@ export default function DropForgeLaunchClaimPageClient({
           mintingClaimActionPending !== null ||
           mintStatLoading ||
           !!mintStatError ||
+          payArtistAddressLoading ||
           !payArtistAddressValid ||
           payArtistAmountWei == null
         }

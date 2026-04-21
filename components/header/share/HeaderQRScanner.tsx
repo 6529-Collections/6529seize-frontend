@@ -14,6 +14,9 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
+export const SCANNER_FALLBACK_GUIDANCE =
+  "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings.";
+
 function getQRScannerErrorReason(error: unknown): string | null {
   if (typeof error === "string" && error.trim()) {
     return error.trim();
@@ -40,8 +43,7 @@ function getQRScannerErrorToastMessage(error: unknown): ReactNode {
     <>
       <p>Scan failed.</p>
       <p className="tw-font-light">
-        {reason ??
-          "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings."}
+        {reason ?? SCANNER_FALLBACK_GUIDANCE}
       </p>
     </>
   );

@@ -138,7 +138,18 @@ function getLaunchActionLookupTerms(kind: LaunchActionLookupKind): {
     artist: {
       required: ["artist"],
       preferred: ["airdrop"],
-      excluded: ["team", "research", "phase0", "phase1", "phase2", "public"],
+      excluded: [
+        "team",
+        "research",
+        "phase0",
+        "phase1",
+        "phase2",
+        "public",
+        "pay",
+        "payment",
+        "payartist",
+        "payout",
+      ],
     },
     team: {
       required: ["team"],

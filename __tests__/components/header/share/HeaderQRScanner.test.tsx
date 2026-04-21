@@ -1,5 +1,7 @@
 import { useAuth } from "@/components/auth/Auth";
-import HeaderQRScanner from "@/components/header/share/HeaderQRScanner";
+import HeaderQRScanner, {
+  SCANNER_FALLBACK_GUIDANCE,
+} from "@/components/header/share/HeaderQRScanner";
 import useCapacitor from "@/hooks/useCapacitor";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -26,7 +28,7 @@ const mockedRouter = useRouter as jest.Mock;
 const { CapacitorBarcodeScanner } = require("@capacitor/barcode-scanner");
 
 describe("HeaderQRScanner", () => {
-  const renderToastMessage = (toast: jest.Mock) => {
+  const renderErrorToastMessage = (toast: jest.Mock) => {
     const toastArg = toast.mock.calls.at(-1)?.[0];
     expect(toastArg?.type).toBe("error");
     render(<Fragment>{toastArg?.message}</Fragment>);
@@ -121,7 +123,7 @@ describe("HeaderQRScanner", () => {
     await userEvent.click(btn);
 
     await waitFor(() => expect(toast).toHaveBeenCalled());
-    renderToastMessage(toast);
+    renderErrorToastMessage(toast);
     expect(screen.getByText("Scan failed.")).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -146,13 +148,9 @@ describe("HeaderQRScanner", () => {
     await userEvent.click(btn);
 
     await waitFor(() => expect(toast).toHaveBeenCalled());
-    renderToastMessage(toast);
+    renderErrorToastMessage(toast);
     expect(screen.getByText("Scan failed.")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Make sure you're using the latest version of the 6529 Mobile app and that camera access is enabled in your device settings."
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(SCANNER_FALLBACK_GUIDANCE)).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
   });
 });

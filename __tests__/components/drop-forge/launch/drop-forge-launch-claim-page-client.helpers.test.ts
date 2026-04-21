@@ -1,5 +1,6 @@
 import {
   clampResearchTargetEditionSize,
+  findBestMatchingLaunchActionName,
   getAutoSelectedLaunchPhase,
   getDefaultResearchTargetEditionSize,
   getLaunchListStatus,
@@ -207,6 +208,17 @@ describe("research target edition size helpers", () => {
 
   it("keeps the research target uncapped when there is no edition size limit", () => {
     expect(clampResearchTargetEditionSize(310, null)).toBe(310);
+  });
+});
+
+describe("findBestMatchingLaunchActionName", () => {
+  it("does not treat pay artist as an artist airdrop action", () => {
+    expect(
+      findBestMatchingLaunchActionName(
+        ["Pay Artist", "Artist Airdrop", "Team Airdrop"],
+        "artist"
+      )
+    ).toBe("Artist Airdrop");
   });
 });
 

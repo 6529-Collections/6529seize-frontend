@@ -20,6 +20,13 @@ export default function DropForgeStatusPill({
   tooltipText?: string;
 }>) {
   const tooltipId = useId();
+  const statusIndicator = showLoader ? (
+    <CircleLoader size={CircleLoaderSize.SMALL} />
+  ) : showCheck ? (
+    <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+  ) : (
+    <span className="tw-inline-block tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-current" />
+  );
 
   return (
     <>
@@ -36,13 +43,7 @@ export default function DropForgeStatusPill({
           className
         )}
       >
-        {showLoader ? (
-          <CircleLoader size={CircleLoaderSize.SMALL} />
-        ) : showCheck ? (
-          <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        ) : (
-          <span className="tw-inline-block tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-current" />
-        )}
+        {statusIndicator}
         <span>{label}</span>
       </span>
       {tooltipText && (
