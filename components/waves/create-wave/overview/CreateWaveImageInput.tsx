@@ -81,8 +81,8 @@ export default function CreateWaveImageInput({
   };
 
   return (
-    <div className="tw-flex tw-gap-x-5">
-      <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
+    <div className="tw-flex tw-items-center tw-gap-x-5">
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-1.5">
         <div className="tw-flex-shrink-0">
           {imageToShow ? (
             <Image
@@ -92,10 +92,30 @@ export default function CreateWaveImageInput({
               height={80}
               unoptimized
               loader={({ src }) => src}
-              className="w-flex-shrink-0 tw-h-14 tw-w-14 tw-rounded-full tw-bg-iron-700 tw-object-cover tw-ring-2 tw-ring-iron-800 sm:tw-h-20 sm:tw-w-20"
+              className="tw-flex-shrink-0 tw-h-16 tw-w-16 tw-rounded-full tw-bg-iron-700 tw-object-cover tw-ring-1 tw-ring-iron-700 sm:tw-h-20 sm:tw-w-20"
             />
           ) : (
-            <div className="w-flex-shrink-0 tw-h-14 tw-w-14 tw-rounded-full tw-bg-iron-700 tw-object-cover tw-ring-2 tw-ring-iron-900 sm:tw-h-20 sm:tw-w-20" />
+            <div className="tw-flex tw-flex-shrink-0 tw-h-16 tw-w-16 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-object-cover tw-text-iron-500 tw-ring-1 tw-ring-iron-700 sm:tw-h-20 sm:tw-w-20">
+              <svg
+                aria-hidden="true"
+                className="tw-h-7 tw-w-7 sm:tw-h-8 sm:tw-w-8"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 7.75C4 6.7835 4.7835 6 5.75 6H8.5L9.7 4.4C10.0302 3.95973 10.5485 3.7 11.0988 3.7H12.9012C13.4515 3.7 13.9698 3.95973 14.3 4.4L15.5 6H18.25C19.2165 6 20 6.7835 20 7.75V17.25C20 18.2165 19.2165 19 18.25 19H5.75C4.7835 19 4 18.2165 4 17.25V7.75Z"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M12 15.25C13.7949 15.25 15.25 13.7949 15.25 12C15.25 10.2051 13.7949 8.75 12 8.75C10.2051 8.75 8.75 10.2051 8.75 12C8.75 13.7949 10.2051 15.25 12 15.25Z"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                />
+              </svg>
+            </div>
           )}
         </div>
         {imageToShow && allowRemove && (
@@ -121,13 +141,13 @@ export default function CreateWaveImageInput({
             dragging
               ? "tw-border-iron-600 tw-bg-iron-800"
               : "tw-border-iron-700 tw-bg-iron-900"
-          } tw-flex tw-h-40 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-600 hover:tw-bg-iron-800`}
+          } tw-flex tw-min-h-28 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-600 hover:tw-bg-iron-800`}
         >
-          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pb-6 tw-pt-5">
-            <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-800">
-              <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-py-5">
+            <div className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-800">
+              <div className="tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                 <svg
-                  className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50"
+                  className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-50"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden="true"
@@ -143,13 +163,13 @@ export default function CreateWaveImageInput({
                 </svg>
               </div>
             </div>
-            <p className="tw-mb-2 tw-mt-4 tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-text-sm">
+            <p className="tw-mb-1 tw-mt-3 tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-text-sm">
               <span className="tw-font-medium tw-text-white">
                 Click to upload
               </span>{" "}
               or drag and drop
             </p>
-            <p className="tw-mb-0 tw-text-xs tw-font-normal tw-text-iron-400">
+            <p className="tw-mb-0 tw-text-xs tw-font-normal tw-text-iron-500">
               JPEG, JPG, PNG, GIF, WEBP
             </p>
           </div>

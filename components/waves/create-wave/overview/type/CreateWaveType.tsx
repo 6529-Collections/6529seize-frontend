@@ -11,8 +11,8 @@ export default function CreateWaveType({
   readonly onChange: (type: ApiWaveType) => void;
 }) {
   return (
-    <div>
-      <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
+    <div className="tw-space-y-3">
+      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-tracking-wide tw-text-iron-400">
         Wave Type
       </p>
       <CreateWaveTypeInputs onChange={onChange} selected={selected} />

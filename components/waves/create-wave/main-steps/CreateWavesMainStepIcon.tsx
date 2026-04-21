@@ -22,7 +22,7 @@ export default function CreateWavesMainStepIcon({
     [CreateWaveStepStatus.DONE]:
       "tw-ring-primary-500 tw-bg-primary-600 tw-delay-0",
     [CreateWaveStepStatus.ACTIVE]:
-      "tw-ring-primary-500 tw-bg-primary-600 tw-shadow-[0_0_0_6px_rgba(41,112,255,0.24)] tw-delay-500",
+      "tw-ring-primary-500 tw-bg-primary-600 tw-shadow-[0_0_0_5px_rgba(41,112,255,0.22)] tw-delay-500",
     [CreateWaveStepStatus.PENDING]:
       "tw-ring-iron-700 tw-bg-iron-900 tw-delay-0",
   };
@@ -30,8 +30,8 @@ export default function CreateWavesMainStepIcon({
   const components: Record<CreateWaveStepStatus, JSX.Element> = {
     [CreateWaveStepStatus.DONE]: (
       <svg
-        width="13"
-        height="11"
+        width="11"
+        height="9"
         className="tw-text-white"
         viewBox="0 0 13 11"
         fill="none"
@@ -46,23 +46,23 @@ export default function CreateWavesMainStepIcon({
     ),
     [CreateWaveStepStatus.ACTIVE]: (
       <svg
-        width="8"
-        height="8"
-        viewBox="0 0 8 8"
+        width="6"
+        height="6"
+        viewBox="0 0 6 6"
         fill="none"
         xmlns="http://www.w3.org/2000/svg">
-        <circle cx="4" cy="4" r="4" fill="white" />
+        <circle cx="3" cy="3" r="3" fill="white" />
       </svg>
     ),
     [CreateWaveStepStatus.PENDING]: (
       <svg
-        width="8"
-        height="8"
+        width="6"
+        height="6"
         className="tw-text-iron-500"
-        viewBox="0 0 8 8"
+        viewBox="0 0 6 6"
         fill="none"
         xmlns="http://www.w3.org/2000/svg">
-        <circle cx="4" cy="4" r="4" fill="currentColor" />
+        <circle cx="3" cy="3" r="3" fill="currentColor" />
       </svg>
     ),
   };
@@ -70,7 +70,7 @@ export default function CreateWavesMainStepIcon({
   return (
     <span
       data-testid="wave-step-icon"
-      className={`${WRAPPER_CLASSES[stepStatus]} tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-transform tw-transition tw-ease-out tw-duration-300`}>
+      className={`${WRAPPER_CLASSES[stepStatus]} tw-relative tw-z-10 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-transform tw-transition tw-ease-out tw-duration-300`}>
       {components[debounceStepStatus]}
     </span>
   );

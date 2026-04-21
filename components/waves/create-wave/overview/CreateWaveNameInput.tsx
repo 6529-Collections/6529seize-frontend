@@ -22,7 +22,7 @@ export default function CreateWaveNameInput({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-6">
+    <div className="tw-flex tw-flex-col tw-gap-y-3">
       <div>
         <div className="tw-group tw-w-full tw-relative">
           <div className="tw-relative">
@@ -36,7 +36,7 @@ export default function CreateWaveNameInput({
                 isNameError
                   ? "tw-ring-error focus:tw-border-error focus:tw-ring-error tw-caret-error"
                   : "tw-ring-iron-650 tw-border-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400 tw-caret-primary-400"
-              } tw-form-input tw-block tw-px-4 tw-pt-4 tw-pb-3 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none ${
+              } tw-form-input tw-block tw-px-4 tw-py-3 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none ${
                 name
                   ? "focus:tw-text-white tw-text-primary-400"
                   : "tw-text-white"
@@ -49,10 +49,10 @@ export default function CreateWaveNameInput({
                 isNameError
                   ? "peer-focus:tw-text-error"
                   : "peer-focus:tw-text-primary-400"
-              } tw-absolute tw-cursor-text tw-text-base tw-font-normal tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2 peer-placeholder-shown:tw-scale-100 
+              } tw-absolute tw-cursor-text tw-text-sm tw-font-normal tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-px-2 peer-focus:tw-px-2 peer-placeholder-shown:tw-scale-100
       peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
             >
-              Name
+              Wave Name
             </label>
           </div>
         </div>
