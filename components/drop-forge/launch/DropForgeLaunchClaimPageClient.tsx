@@ -112,9 +112,12 @@ function getClaimPresentationState({
   onChainClaimFetching: boolean;
   activeMediaTab: LaunchMediaTab;
 }>) {
+  const metadataLocation = claim?.metadata_location;
+  const hasPublishedMetadata =
+    typeof metadataLocation === "string" && metadataLocation.trim() !== "";
   return {
     isInitialized: manifoldClaim?.instanceId != null,
-    hasPublishedMetadata: Boolean(claim?.metadata_location != null),
+    hasPublishedMetadata,
     missingRequiredInfo: Boolean(claim && isMissingRequiredLaunchInfo(claim)),
     researchTargetEditionSizeLimit: getResearchTargetEditionSizeLimit(
       claim?.edition_size,
@@ -1243,7 +1246,9 @@ export default function DropForgeLaunchClaimPageClient({
   );
   const headerStatus = useMemo(() => {
     if (!primaryStatus) return null;
-    if (mintingClaimActionsLoadFailed) return primaryStatus;
+    if (mintingClaimActionsLoadFailed || !mintingClaimActionsLoaded) {
+      return primaryStatus;
+    }
     return getLaunchListStatus({
       primaryStatus,
       manifoldClaim,

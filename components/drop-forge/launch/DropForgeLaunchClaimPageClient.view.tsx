@@ -1058,15 +1058,13 @@ function DropForgeAirdropSummaryActionRow({
 
   return (
     <div className="tw-space-y-5">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        <div className="tw-text-base tw-font-medium tw-text-white">{title}</div>
-        <DropForgeActionCompletionToggle
-          action={action}
-          disabled={isActionToggleDisabled}
-          ariaLabel={`${title} completed`}
-          onToggle={onActionToggle}
-        />
-      </div>
+      <DropForgeSectionTitleWithToggle
+        title={title}
+        action={action}
+        toggleDisabled={isActionToggleDisabled}
+        toggleAriaLabel={`${title} completed`}
+        onActionToggle={onActionToggle}
+      />
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox label="Address Count / Total Airdrops">
           {loading
@@ -1229,76 +1227,52 @@ function DropForgeSubscriptionAirdropSections({
 
   return (
     <div className="tw-space-y-5 tw-pt-3">
-      {sections.map((section) => (
-        <div key={section.phaseKey} className="tw-space-y-5">
-          {section.error ? (
-            <p className="tw-mb-0 tw-text-sm tw-text-rose-300">
-              {section.error}
-            </p>
-          ) : null}
-          {(() => {
-            const actionName = findBestMatchingLaunchActionName(
-              availableActionNames,
-              section.phaseKey
-            );
-            const action = actionName
-              ? (mintingClaimActionsByName[actionName] ?? null)
-              : null;
-            const isActionToggleDisabled =
-              !isInitialized ||
-              claimWritePending ||
-              mintingClaimActionPending !== null;
-
-            return (
-              <>
-                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                  <div className="tw-text-base tw-font-medium tw-text-white">
-                    {section.title}
-                  </div>
-                  <DropForgeActionCompletionToggle
-                    action={action}
-                    disabled={isActionToggleDisabled}
-                    ariaLabel={`${section.title} completed`}
-                    onToggle={onMintingClaimActionToggle}
-                  />
-                </div>
-                <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
-                  <DropForgeFieldBox label="Address Count / Total Airdrops">
-                    {section.loading
-                      ? "loading / loading"
-                      : `${section.addresses.toLocaleString()} / ${section.totalAirdrops.toLocaleString()}`}
-                  </DropForgeFieldBox>
-                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-end">
-                    <button
-                      type="button"
-                      disabled={
-                        !isInitialized ||
-                        claimWritePending ||
-                        mintingClaimActionPending !== null ||
-                        section.loading ||
-                        section.airdropCount <= 0 ||
-                        (action?.completed ?? false)
-                      }
-                      onClick={() =>
-                        runAirdropWrite({
-                          entries: section.airdropEntries,
-                          actionLabel: "Airdrop Subscriptions",
-                          mintingClaimAction: actionName,
-                        })
-                      }
-                      className={BTN_SUBSCRIPTIONS_AIRDROP}
-                    >
-                      {section.airdropCount > 0
-                        ? `Airdrop Subscriptions x${section.airdropCount.toLocaleString()}`
-                        : "Airdrop Subscriptions"}
-                    </button>
-                  </div>
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      ))}
+      {sections.map((section) => {
+        const actionName = findBestMatchingLaunchActionName(
+          availableActionNames,
+          section.phaseKey
+        );
+        const action = actionName
+          ? (mintingClaimActionsByName[actionName] ?? null)
+          : null;
+        const buttonLabel =
+          section.airdropCount > 0
+            ? `Airdrop Subscriptions x${section.airdropCount.toLocaleString()}`
+            : "Airdrop Subscriptions";
+        return (
+          <div key={section.phaseKey} className="tw-space-y-5">
+            {section.error ? (
+              <p className="tw-mb-0 tw-text-sm tw-text-rose-300">
+                {section.error}
+              </p>
+            ) : null}
+            <DropForgeAirdropSummaryActionRow
+              title={section.title}
+              loading={section.loading}
+              summary={section}
+              isInitialized={isInitialized}
+              disabled={
+                !isInitialized ||
+                claimWritePending ||
+                section.loading ||
+                section.airdropCount <= 0
+              }
+              buttonLabel={buttonLabel}
+              onClick={() =>
+                runAirdropWrite({
+                  entries: section.airdropEntries,
+                  actionLabel: "Airdrop Subscriptions",
+                  mintingClaimAction: actionName,
+                })
+              }
+              action={action}
+              claimWritePending={claimWritePending}
+              actionPending={mintingClaimActionPending}
+              onActionToggle={onMintingClaimActionToggle}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1394,17 +1368,13 @@ function DropForgeResearchAirdropSection({
 
   return (
     <div className="tw-space-y-5 tw-pt-4">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        <div className="tw-text-base tw-font-medium tw-text-white">
-          Research Airdrop
-        </div>
-        <DropForgeActionCompletionToggle
-          action={researchAction}
-          disabled={isActionToggleDisabled}
-          ariaLabel="Research airdrop completed"
-          onToggle={onMintingClaimActionToggle}
-        />
-      </div>
+      <DropForgeSectionTitleWithToggle
+        title="Research Airdrop"
+        action={researchAction}
+        toggleDisabled={isActionToggleDisabled}
+        toggleAriaLabel="Research airdrop completed"
+        onActionToggle={onMintingClaimActionToggle}
+      />
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
         <DropForgeFieldBox label="Total Minted">
           {totalMinted.toLocaleString()}
@@ -1458,6 +1428,266 @@ function formatMintStatEth(value: number | null | undefined): string {
   });
 }
 
+interface PayArtistDisplayState {
+  isMintStatPending: boolean;
+  amountClassName: string;
+  amountLabelClassName: string;
+  addressClassName: string;
+  addressLabelClassName: string;
+  mintStatLoadingClassName: string;
+}
+
+function getPayArtistDisplayState({
+  mintStat,
+  mintStatLoading,
+  mintStatError,
+  payArtistAmountEth,
+  payArtistAddressMissing,
+}: Readonly<{
+  mintStat: ApiMemesMintStat | null;
+  mintStatLoading: boolean;
+  mintStatError: string | null;
+  payArtistAmountEth: string;
+  payArtistAddressMissing: boolean;
+}>): PayArtistDisplayState {
+  const isMintStatResolved = mintStat !== null || mintStatError !== null;
+  const isMintStatPending = !isMintStatResolved || mintStatLoading;
+  const amountInvalid = !isMintStatPending && payArtistAmountEth.trim() === "";
+  const addressInvalid = !isMintStatPending && payArtistAddressMissing;
+  return {
+    isMintStatPending,
+    amountClassName: amountInvalid ? "tw-ring-rose-500/70" : "",
+    amountLabelClassName: amountInvalid
+      ? "tw-text-rose-300 tw-ring-rose-500/70"
+      : "",
+    addressClassName: addressInvalid ? "tw-ring-rose-500/70" : "",
+    addressLabelClassName: addressInvalid
+      ? "tw-text-rose-300 tw-ring-rose-500/70"
+      : "",
+    mintStatLoadingClassName: isMintStatPending ? "!tw-text-iron-500" : "",
+  };
+}
+
+function DropForgeSectionTitleWithToggle({
+  title,
+  action,
+  toggleDisabled,
+  toggleAriaLabel,
+  onActionToggle,
+}: Readonly<{
+  title: string;
+  action: ApiMintingClaimAction | null | undefined;
+  toggleDisabled: boolean;
+  toggleAriaLabel: string;
+  onActionToggle: (action: string, completed: boolean) => Promise<void>;
+}>) {
+  return (
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+      <div className="tw-text-base tw-font-medium tw-text-white">{title}</div>
+      <DropForgeActionCompletionToggle
+        action={action}
+        disabled={toggleDisabled}
+        ariaLabel={toggleAriaLabel}
+        onToggle={onActionToggle}
+      />
+    </div>
+  );
+}
+
+function DropForgePayArtistDesignatedPayeeNote({
+  paymentDetails,
+}: Readonly<{
+  paymentDetails: ApiMemesMintStat["payment_details"] | null;
+}>) {
+  if (
+    !paymentDetails?.has_designated_payee ||
+    !paymentDetails.designated_payee_name
+  ) {
+    return null;
+  }
+  return (
+    <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+      Designated payee:{" "}
+      <span className="tw-text-iron-200">
+        {paymentDetails.designated_payee_name}
+      </span>
+    </p>
+  );
+}
+
+function DropForgePayArtistSalesField({
+  label,
+  isMintStatPending,
+  mintStatLoadingClassName,
+  children,
+}: Readonly<{
+  label: string;
+  isMintStatPending: boolean;
+  mintStatLoadingClassName: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <DropForgeFieldBox
+      label={label}
+      contentClassName={mintStatLoadingClassName}
+    >
+      {isMintStatPending ? MINT_STAT_LOADING_LABEL : children}
+    </DropForgeFieldBox>
+  );
+}
+
+function DropForgePayArtistSalesRow({
+  mintStat,
+  isMintStatPending,
+  mintStatLoadingClassName,
+}: Readonly<{
+  mintStat: ApiMemesMintStat | null;
+  isMintStatPending: boolean;
+  mintStatLoadingClassName: string;
+}>) {
+  return (
+    <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-3 lg:tw-gap-x-5">
+      <DropForgePayArtistSalesField
+        label="Total Sales (Subscriptions / Mints)"
+        isMintStatPending={isMintStatPending}
+        mintStatLoadingClassName={mintStatLoadingClassName}
+      >
+        {getPayArtistSalesLabel(mintStat)}
+      </DropForgePayArtistSalesField>
+      <DropForgePayArtistSalesField
+        label="Proceeds (ETH)"
+        isMintStatPending={isMintStatPending}
+        mintStatLoadingClassName={mintStatLoadingClassName}
+      >
+        {formatMintStatEth(mintStat?.proceeds_eth)}
+      </DropForgePayArtistSalesField>
+      <DropForgePayArtistSalesField
+        label="Artist Split (ETH)"
+        isMintStatPending={isMintStatPending}
+        mintStatLoadingClassName={mintStatLoadingClassName}
+      >
+        {formatMintStatEth(mintStat?.artist_split_eth)}
+      </DropForgePayArtistSalesField>
+    </div>
+  );
+}
+
+function DropForgePayArtistAmountField({
+  payArtistAmountEth,
+  onPayArtistAmountChange,
+  isMintStatPending,
+  displayState,
+}: Readonly<{
+  payArtistAmountEth: string;
+  onPayArtistAmountChange: (value: string) => void;
+  isMintStatPending: boolean;
+  displayState: PayArtistDisplayState;
+}>) {
+  return (
+    <DropForgeFieldBox
+      label="Pay Artist (ETH)"
+      className={displayState.amountClassName}
+      labelClassName={displayState.amountLabelClassName}
+      contentClassName={displayState.mintStatLoadingClassName}
+    >
+      {isMintStatPending ? (
+        MINT_STAT_LOADING_LABEL
+      ) : (
+        <input
+          type="number"
+          inputMode="decimal"
+          min="0"
+          step="0.0001"
+          value={payArtistAmountEth}
+          onChange={(e) => onPayArtistAmountChange(e.target.value)}
+          placeholder="Enter ETH Amount"
+          className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
+        />
+      )}
+    </DropForgeFieldBox>
+  );
+}
+
+function DropForgePayArtistAddressField({
+  payArtistAddressInput,
+  payArtistAddressLoading,
+  payArtistAddressError,
+  onPayArtistAddressInputChange,
+  onPayArtistResolvedAddressChange,
+  onPayArtistAddressLoadingChange,
+  onPayArtistAddressEnsErrorChange,
+  isMintStatPending,
+  displayState,
+}: Readonly<{
+  payArtistAddressInput: string;
+  payArtistAddressLoading: boolean;
+  payArtistAddressError: string | null;
+  onPayArtistAddressInputChange: (value: string) => void;
+  onPayArtistResolvedAddressChange: (value: string) => void;
+  onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
+  onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
+  isMintStatPending: boolean;
+  displayState: PayArtistDisplayState;
+}>) {
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-1.5">
+      <DropForgeFieldBox
+        label="Payment Address"
+        className={displayState.addressClassName}
+        labelClassName={displayState.addressLabelClassName}
+        contentClassName={displayState.mintStatLoadingClassName}
+      >
+        {isMintStatPending ? (
+          MINT_STAT_LOADING_LABEL
+        ) : (
+          <EnsAddressInput
+            value={payArtistAddressInput}
+            placeholder="0x... or ENS"
+            onValueChange={onPayArtistAddressInputChange}
+            onAddressChange={onPayArtistResolvedAddressChange}
+            onLoadingChange={onPayArtistAddressLoadingChange}
+            onError={onPayArtistAddressEnsErrorChange}
+            className="tw-h-auto tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white tw-placeholder-iron-500 tw-shadow-none [color-scheme:dark] focus:tw-bg-transparent focus:tw-text-white focus:tw-shadow-none focus:tw-outline-none focus:tw-ring-0"
+          />
+        )}
+      </DropForgeFieldBox>
+      {payArtistAddressLoading ? (
+        <span className="tw-px-1 tw-text-xs tw-text-iron-400">
+          Resolving ENS…
+        </span>
+      ) : null}
+      {payArtistAddressError ? (
+        <span className="tw-px-1 tw-text-xs tw-text-rose-300">
+          {payArtistAddressError}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function DropForgePayArtistActionButton({
+  disabled,
+  pending,
+  onClick,
+}: Readonly<{
+  disabled: boolean;
+  pending: boolean;
+  onClick: () => void;
+}>) {
+  return (
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-end">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onClick}
+        className={BTN_SUBSCRIPTIONS_AIRDROP}
+      >
+        {pending ? "Processing..." : "Pay Artist"}
+      </button>
+    </div>
+  );
+}
+
 function DropForgePayArtistSection({
   mintStat,
   mintStatLoading,
@@ -1507,149 +1737,64 @@ function DropForgePayArtistSection({
     payArtistWritePending || mintingClaimActionPending !== null;
   const payArtistActionName = payArtistAction?.action ?? null;
   const paymentDetails = mintStat?.payment_details ?? null;
-  const isMintStatResolved = mintStat !== null || mintStatError !== null;
-  const isMintStatPending = !isMintStatResolved || mintStatLoading;
-  const payArtistAmountLabelClassName =
-    !isMintStatPending && payArtistAmountEth.trim() === ""
-      ? "tw-text-rose-300 tw-ring-rose-500/70"
-      : "";
-  const payArtistAmountClassName =
-    !isMintStatPending && payArtistAmountEth.trim() === ""
-      ? "tw-ring-rose-500/70"
-      : "";
-  const paymentAddressClassName =
-    !isMintStatPending && payArtistAddressMissing ? "tw-ring-rose-500/70" : "";
-  const paymentAddressLabelClassName =
-    !isMintStatPending && payArtistAddressMissing
-      ? "tw-text-rose-300 tw-ring-rose-500/70"
-      : "";
-  const mintStatLoadingClassName = isMintStatPending ? "!tw-text-iron-500" : "";
+  const displayState = getPayArtistDisplayState({
+    mintStat,
+    mintStatLoading,
+    mintStatError,
+    payArtistAmountEth,
+    payArtistAddressMissing,
+  });
+  const { isMintStatPending, mintStatLoadingClassName } = displayState;
+  const isButtonDisabled =
+    payArtistActionDisabled ||
+    isCompleted ||
+    mintingClaimActionPending !== null;
 
   return (
     <div className="tw-space-y-5 tw-pt-4">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        <div className="tw-text-base tw-font-medium tw-text-white">
-          Pay Artist
-        </div>
-        <DropForgeActionCompletionToggle
-          action={payArtistAction}
-          disabled={isActionToggleDisabled}
-          ariaLabel="Pay artist completed"
-          onToggle={onMintingClaimActionToggle}
-        />
-      </div>
+      <DropForgeSectionTitleWithToggle
+        title="Pay Artist"
+        action={payArtistAction}
+        toggleDisabled={isActionToggleDisabled}
+        toggleAriaLabel="Pay artist completed"
+        onActionToggle={onMintingClaimActionToggle}
+      />
 
       {mintStatError ? (
         <p className="tw-mb-0 tw-text-sm tw-text-rose-300">{mintStatError}</p>
       ) : null}
 
-      {paymentDetails?.has_designated_payee &&
-      paymentDetails.designated_payee_name ? (
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-          Designated payee:{" "}
-          <span className="tw-text-iron-200">
-            {paymentDetails.designated_payee_name}
-          </span>
-        </p>
-      ) : null}
+      <DropForgePayArtistDesignatedPayeeNote paymentDetails={paymentDetails} />
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-3 lg:tw-gap-x-5">
-        <DropForgeFieldBox
-          label="Total Sales (Subscriptions / Mints)"
-          contentClassName={mintStatLoadingClassName}
-        >
-          {isMintStatPending
-            ? MINT_STAT_LOADING_LABEL
-            : getPayArtistSalesLabel(mintStat)}
-        </DropForgeFieldBox>
-        <DropForgeFieldBox
-          label="Proceeds (ETH)"
-          contentClassName={mintStatLoadingClassName}
-        >
-          {isMintStatPending
-            ? MINT_STAT_LOADING_LABEL
-            : formatMintStatEth(mintStat?.proceeds_eth)}
-        </DropForgeFieldBox>
-        <DropForgeFieldBox
-          label="Artist Split (ETH)"
-          contentClassName={mintStatLoadingClassName}
-        >
-          {isMintStatPending
-            ? MINT_STAT_LOADING_LABEL
-            : formatMintStatEth(mintStat?.artist_split_eth)}
-        </DropForgeFieldBox>
-      </div>
+      <DropForgePayArtistSalesRow
+        mintStat={mintStat}
+        isMintStatPending={isMintStatPending}
+        mintStatLoadingClassName={mintStatLoadingClassName}
+      />
 
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,0.6fr)_minmax(0,2.4fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
-        <DropForgeFieldBox
-          label="Pay Artist (ETH)"
-          className={payArtistAmountClassName}
-          labelClassName={payArtistAmountLabelClassName}
-          contentClassName={mintStatLoadingClassName}
-        >
-          {isMintStatPending ? (
-            MINT_STAT_LOADING_LABEL
-          ) : (
-            <input
-              type="number"
-              inputMode="decimal"
-              min="0"
-              step="0.0001"
-              value={payArtistAmountEth}
-              onChange={(e) => onPayArtistAmountChange(e.target.value)}
-              placeholder="Enter ETH Amount"
-              className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
-            />
-          )}
-        </DropForgeFieldBox>
-        <div className="tw-flex tw-flex-col tw-gap-1.5">
-          <DropForgeFieldBox
-            label="Payment Address"
-            className={paymentAddressClassName}
-            labelClassName={paymentAddressLabelClassName}
-            contentClassName={mintStatLoadingClassName}
-          >
-            {isMintStatPending ? (
-              MINT_STAT_LOADING_LABEL
-            ) : (
-              <EnsAddressInput
-                value={payArtistAddressInput}
-                placeholder="0x... or ENS"
-                onAddressChange={(value) => {
-                  onPayArtistAddressInputChange(value);
-                  onPayArtistResolvedAddressChange(value);
-                }}
-                onLoadingChange={onPayArtistAddressLoadingChange}
-                onError={onPayArtistAddressEnsErrorChange}
-                className="tw-h-auto tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white tw-placeholder-iron-500 tw-shadow-none [color-scheme:dark] focus:tw-bg-transparent focus:tw-text-white focus:tw-shadow-none focus:tw-outline-none focus:tw-ring-0"
-              />
-            )}
-          </DropForgeFieldBox>
-          {payArtistAddressLoading ? (
-            <span className="tw-px-1 tw-text-xs tw-text-iron-400">
-              Resolving ENS…
-            </span>
-          ) : null}
-          {payArtistAddressError ? (
-            <span className="tw-px-1 tw-text-xs tw-text-rose-300">
-              {payArtistAddressError}
-            </span>
-          ) : null}
-        </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-end">
-          <button
-            type="button"
-            disabled={
-              payArtistActionDisabled ||
-              isCompleted ||
-              mintingClaimActionPending !== null
-            }
-            onClick={() => runPayArtistWrite(payArtistActionName)}
-            className={BTN_SUBSCRIPTIONS_AIRDROP}
-          >
-            {payArtistWritePending ? "Processing..." : "Pay Artist"}
-          </button>
-        </div>
+        <DropForgePayArtistAmountField
+          payArtistAmountEth={payArtistAmountEth}
+          onPayArtistAmountChange={onPayArtistAmountChange}
+          isMintStatPending={isMintStatPending}
+          displayState={displayState}
+        />
+        <DropForgePayArtistAddressField
+          payArtistAddressInput={payArtistAddressInput}
+          payArtistAddressLoading={payArtistAddressLoading}
+          payArtistAddressError={payArtistAddressError}
+          onPayArtistAddressInputChange={onPayArtistAddressInputChange}
+          onPayArtistResolvedAddressChange={onPayArtistResolvedAddressChange}
+          onPayArtistAddressLoadingChange={onPayArtistAddressLoadingChange}
+          onPayArtistAddressEnsErrorChange={onPayArtistAddressEnsErrorChange}
+          isMintStatPending={isMintStatPending}
+          displayState={displayState}
+        />
+        <DropForgePayArtistActionButton
+          disabled={isButtonDisabled}
+          pending={payArtistWritePending}
+          onClick={() => runPayArtistWrite(payArtistActionName)}
+        />
       </div>
     </div>
   );
