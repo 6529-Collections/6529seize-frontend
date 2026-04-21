@@ -28,6 +28,7 @@ export const getProfileWaveIdentity = (
 ): string =>
   normalizeProfileWaveIdentity(
     profile?.query ??
+      profile?.normalised_handle ??
       profile?.handle ??
       profile?.primary_wallet ??
       profile?.primary_address ??
