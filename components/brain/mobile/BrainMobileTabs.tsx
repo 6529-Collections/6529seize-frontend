@@ -139,6 +139,14 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
       const nextQuery = params.toString();
       const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+      const currentQuery = searchParams.toString();
+      const currentUrl = currentQuery
+        ? `${pathname}?${currentQuery}`
+        : pathname;
+      if (nextUrl === currentUrl) {
+        return;
+      }
+
       router.replace(nextUrl, { scroll: false });
     },
     [pathname, router, searchParams]
