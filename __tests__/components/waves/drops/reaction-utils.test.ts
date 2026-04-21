@@ -99,16 +99,29 @@ describe("getReactionErrorMessage", () => {
     ).toBe("Too Many Requests");
   });
 
-  it("falls back when the structured body is missing and status is unsupported", () => {
+  it("surfaces the structured error message when the structured body is missing", () => {
     expect(
       getReactionErrorMessage(
         createStructuredReactionError({
-          message: "Unauthorized",
+          message: "Service Unavailable",
           status: 503,
         }),
         "Error adding reaction"
       )
-    ).toBe("Error adding reaction");
+    ).toBe("Service Unavailable");
+  });
+
+  it("surfaces the structured error message when the structured body is blank", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: "   ",
+          message: "Not Found",
+          status: 404,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Not Found");
   });
 
   it("falls back for generic network errors", () => {

@@ -108,7 +108,7 @@ export const toProfileMin = (
   };
 };
 
-type StructuredReactionError = {
+type StructuredReactionError = Error & {
   status?: unknown;
   response?: {
     status?: unknown;
@@ -204,6 +204,23 @@ const getEmptyStructuredReactionStatusMessage = (
   }
 };
 
+const getEmptyStructuredReactionFallbackMessage = (
+  error: StructuredReactionError
+): string | null => {
+  const message = error.message;
+  if (typeof message !== "string") {
+    return null;
+  }
+
+  const trimmedMessage = message.trim();
+
+  if (trimmedMessage.length === 0) {
+    return null;
+  }
+
+  return trimmedMessage;
+};
+
 export const getReactionErrorMessage = (
   error: unknown,
   fallback: string
@@ -224,6 +241,12 @@ export const getReactionErrorMessage = (
         );
         if (statusMessage) {
           return statusMessage;
+        }
+
+        const fallbackMessage =
+          getEmptyStructuredReactionFallbackMessage(structuredError);
+        if (fallbackMessage) {
+          return fallbackMessage;
         }
       }
     }

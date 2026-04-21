@@ -68,12 +68,24 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
 const mockUseEmoji = useEmoji as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;
 const setToastMock = jest.fn();
-const createStructuredReactionError = (
-  body: unknown,
-  message = "technical error"
-): Error & { response: { body: unknown } } =>
+const createStructuredReactionError = ({
+  body,
+  message = "technical error",
+  status,
+}: {
+  body?: unknown;
+  message?: string;
+  status?: number;
+}): Error & {
+  status?: number;
+  response: { body?: unknown; status?: number };
+} =>
   Object.assign(new Error(message), {
-    response: { body },
+    ...(status !== undefined ? { status } : {}),
+    response: {
+      ...(body !== undefined ? { body } : {}),
+      ...(status !== undefined ? { status } : {}),
+    },
   });
 
 type NativeEmojiMock = { skins: Array<{ native: string }> };
@@ -315,10 +327,10 @@ describe("WaveDropReactions", () => {
     );
 
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
-      createStructuredReactionError(
-        JSON.stringify({ message: "Unauthorized" }),
-        "unexpected raw error"
-      )
+      createStructuredReactionError({
+        body: JSON.stringify({ message: "Unauthorized" }),
+        message: "unexpected raw error",
+      })
     );
 
     render(
@@ -341,6 +353,52 @@ describe("WaveDropReactions", () => {
     await waitFor(() => {
       expect(setToastMock).toHaveBeenCalledWith({
         message: "Unauthorized",
+        type: "error",
+      });
+    });
+  });
+
+  it("shows the safe status-text message when a chip reaction gets an empty structured response", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: "   ",
+        message: "Not Found",
+        status: 404,
+      })
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole("button")[0]);
+
+    await waitFor(() => {
+      expect(setToastMock).toHaveBeenCalledWith({
+        message: "Not Found",
         type: "error",
       });
     });

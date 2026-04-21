@@ -207,4 +207,26 @@ describe("useDropReaction", () => {
       type: "error",
     });
   });
+
+  it("surfaces the safe status-text message when the structured body is missing", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        message: "Service Unavailable",
+        status: 503,
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "Service Unavailable",
+      type: "error",
+    });
+  });
 });
