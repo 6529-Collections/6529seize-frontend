@@ -1266,6 +1266,10 @@ function DropForgeResearchAirdropSection({
   const isActionToggleDisabled =
     !isInitialized || claimWritePending || mintingClaimActionPending !== null;
   const researchActionName = researchAction?.action ?? null;
+  const researchButtonCountSuffix =
+    researchAirdropCount > 0
+      ? ` x${researchAirdropCount.toLocaleString()}`
+      : "";
 
   return (
     <div className="tw-space-y-5 tw-pt-4">
@@ -1307,7 +1311,7 @@ function DropForgeResearchAirdropSection({
           >
             {claimWritePending
               ? "Processing..."
-              : `Airdrop to Research x${researchAirdropCount.toLocaleString()}`}
+              : `Airdrop to Research${researchButtonCountSuffix}`}
           </button>
         </div>
       </div>
