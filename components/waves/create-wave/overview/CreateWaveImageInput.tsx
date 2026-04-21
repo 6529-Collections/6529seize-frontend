@@ -1,7 +1,9 @@
 "use client";
 
+import { CameraIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, DragEvent } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 
 const ACCEPTED_FORMATS = [
@@ -45,11 +47,12 @@ export default function CreateWaveImageInput({
     }
   };
 
-  const handleDrop = (e: any) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e?.dataTransfer?.files?.length) {
-      onFileChange(e.dataTransfer.files[0]);
+    const file = e.dataTransfer.files.item(0);
+    if (file !== null) {
+      onFileChange(file);
     }
   };
 
@@ -68,7 +71,7 @@ export default function CreateWaveImageInput({
     };
   }, [previewUrl]);
 
-  const handleDrag = (e: any) => {
+  const handleDrag = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -92,29 +95,14 @@ export default function CreateWaveImageInput({
               height={80}
               unoptimized
               loader={({ src }) => src}
-              className="tw-flex-shrink-0 tw-h-16 tw-w-16 tw-rounded-full tw-bg-iron-700 tw-object-cover tw-ring-1 tw-ring-iron-700 sm:tw-h-20 sm:tw-w-20"
+              className="tw-h-16 tw-w-16 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700 tw-object-cover tw-ring-1 tw-ring-iron-700 sm:tw-h-20 sm:tw-w-20"
             />
           ) : (
-            <div className="tw-flex tw-flex-shrink-0 tw-h-16 tw-w-16 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-object-cover tw-text-iron-500 tw-ring-1 tw-ring-iron-700 sm:tw-h-20 sm:tw-w-20">
-              <svg
+            <div className="tw-flex tw-h-16 tw-w-16 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-object-cover tw-text-iron-600 tw-ring-1 tw-ring-iron-700 sm:tw-h-20 sm:tw-w-20">
+              <CameraIcon
                 aria-hidden="true"
-                className="tw-h-7 tw-w-7 sm:tw-h-8 sm:tw-w-8"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4 7.75C4 6.7835 4.7835 6 5.75 6H8.5L9.7 4.4C10.0302 3.95973 10.5485 3.7 11.0988 3.7H12.9012C13.4515 3.7 13.9698 3.95973 14.3 4.4L15.5 6H18.25C19.2165 6 20 6.7835 20 7.75V17.25C20 18.2165 19.2165 19 18.25 19H5.75C4.7835 19 4 18.2165 4 17.25V7.75Z"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 15.25C13.7949 15.25 15.25 13.7949 15.25 12C15.25 10.2051 13.7949 8.75 12 8.75C10.2051 8.75 8.75 10.2051 8.75 12C8.75 13.7949 10.2051 15.25 12 15.25Z"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                />
-              </svg>
+                className="tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6"
+              />
             </div>
           )}
         </div>
@@ -179,10 +167,13 @@ export default function CreateWaveImageInput({
             type="file"
             className="tw-hidden"
             accept={ACCEPTED_FORMATS_DISPLAY}
-            onChange={(e: any) => {
-              if (e.target.files) {
-                const f = e.target.files[0];
-                onFileChange(f);
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const files = e.target.files;
+              if (files !== null) {
+                const file = files.item(0);
+                if (file !== null) {
+                  onFileChange(file);
+                }
               }
             }}
           />

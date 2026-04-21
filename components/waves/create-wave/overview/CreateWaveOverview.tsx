@@ -26,14 +26,14 @@ export default function CreateWaveOverview({
     });
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-5">
+    <div className="tw-flex tw-flex-col tw-gap-y-6">
       <CreateWaveNameInput
         onChange={onChange}
         name={overview.name}
         errors={errors}
       />
       <div className="tw-space-y-3">
-        <p className="tw-mb-0 tw-text-sm tw-font-medium tw-tracking-wide tw-text-iron-400">
+        <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
           Wave Profile Picture
         </p>
         <CreateWaveImageInput

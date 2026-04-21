@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useClickAway } from "react-use";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -8,7 +10,6 @@ import { validateGroupPayload } from "@/services/groups/groupMutations";
 import {
   createInitialInlineGroupBuilderState,
   dedupeInlineIdentities,
-  getInlineGroupConfiguredRules,
   getInlineGroupDraftSummary,
   getInlineIdentityAddresses,
 } from "./createWaveInlineGroupBuilder";
@@ -53,6 +54,7 @@ export default function CreateWaveGroupInlinePanel({
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
 }) {
+  const panelRef = useRef<HTMLDivElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [builder, setBuilder] = useState<CreateWaveInlineGroupBuilderState>(
     () => createInitialInlineGroupBuilderState()
@@ -73,29 +75,27 @@ export default function CreateWaveGroupInlinePanel({
       }),
     [builder.draft, builder.identities.length]
   );
-  const configuredRules = useMemo(
-    () => getInlineGroupConfiguredRules(builder.draft),
-    [builder.draft]
-  );
   const validation = validateGroupPayload(builder.draft);
   const canCreateDraft = validation.valid && !disabled && !isCreating;
   const canResetDraft = !!draftSummary && !disabled && !isCreating;
-  const currentStateLabel = selectedGroup?.name ?? defaultLabel;
-  const identityCount = displayedBuilder.identities.length;
-  const identityLabel = identityCount === 1 ? "identity" : "identities";
   const isIdentityPanel = displayedBuilder.panel === PANEL_IDENTITY;
   const isRulePanel =
     displayedBuilder.panel === PANEL_RULE_LIST ||
     displayedBuilder.panel === PANEL_RULE_EDITOR;
   const isSearchPanel = displayedBuilder.panel === PANEL_SEARCH;
-  const showModeChips =
-    !!draftSummary || displayedBuilder.panel !== PANEL_ACTIONS;
-  const identityChipLabel =
-    identityCount > 0 ? `${identityCount} ${identityLabel}` : "Add identity";
+  const isCustomDraft = !!draftSummary || isIdentityPanel || isRulePanel;
+  const currentStateLabel =
+    selectedGroup?.name ?? (isCustomDraft ? "Custom" : defaultLabel);
 
   const resetBuilder = () => {
     setBuilder(createInitialInlineGroupBuilderState());
   };
+
+  useClickAway(panelRef, () => {
+    if (builder.panel !== PANEL_ACTIONS) {
+      resetBuilder();
+    }
+  });
 
   const setPanel = (panel: CreateWaveInlineGroupPanel) => {
     setBuilder((current) => ({
@@ -217,12 +217,24 @@ export default function CreateWaveGroupInlinePanel({
     void createAndUse();
   };
 
-  const onStartOver = () => {
+  const onClearAll = () => {
     if (!canResetDraft) {
       return;
     }
 
-    resetBuilder();
+    setBuilder((current) => {
+      const next = createInitialInlineGroupBuilderState();
+
+      return {
+        ...next,
+        panel:
+          current.panel === PANEL_SEARCH || current.panel === PANEL_ACTIONS
+            ? PANEL_ACTIONS
+            : current.panel,
+        activeRule:
+          current.panel === PANEL_RULE_EDITOR ? current.activeRule : null,
+      };
+    });
   };
 
   const onExistingGroupSelect = async (group: ApiGroupFull | null) => {
@@ -236,52 +248,61 @@ export default function CreateWaveGroupInlinePanel({
     }
   };
 
+  const onCancelPanel = () => {
+    resetBuilder();
+  };
+
+  const renderExpandedPanel = (children: ReactNode) => (
+    <div className="tw-relative tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
+      <button
+        type="button"
+        onClick={onCancelPanel}
+        aria-label="Close inline group panel"
+        className="tw-absolute tw-right-0 tw-top-7 tw-z-10 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/70 tw-text-iron-400 tw-transition tw-duration-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+      >
+        <XMarkIcon className="tw-size-4 tw-flex-shrink-0" />
+      </button>
+      <div className="tw-pr-10">{children}</div>
+    </div>
+  );
+
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4">
-      <div className="tw-space-y-3">
-        <CreateWaveInlineGroupHeader
-          currentStateLabel={currentStateLabel}
-          showModeChips={showModeChips}
-          identityChipLabel={identityChipLabel}
+    <div
+      ref={panelRef}
+      className="tw-relative tw-flex tw-flex-col tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/45 tw-p-5 tw-shadow-sm tw-transition-all tw-duration-300 hover:tw-border-white/15 hover:tw-bg-iron-900/35"
+    >
+      <div className="tw-relative tw-flex tw-flex-col tw-gap-5">
+        <CreateWaveInlineGroupHeader currentStateLabel={currentStateLabel} />
+        <CreateWaveInlineGroupActions
           disabled={disabled}
-          isIdentityPanel={isIdentityPanel}
-          isRulePanel={isRulePanel}
-          isSearchPanel={isSearchPanel}
-          configuredRules={configuredRules}
-          onIdentityToggle={() => togglePanel(PANEL_IDENTITY, isIdentityPanel)}
-          onRuleOpen={openRule}
-          onRulesToggle={() => togglePanel(PANEL_RULE_LIST, isRulePanel)}
-          onSearchToggle={() => togglePanel(PANEL_SEARCH, isSearchPanel)}
+          identityActive={isIdentityPanel}
+          ruleActive={isRulePanel}
+          searchActive={isSearchPanel}
+          onAddIdentity={() => togglePanel(PANEL_IDENTITY, isIdentityPanel)}
+          onAddRule={() => togglePanel(PANEL_RULE_LIST, isRulePanel)}
+          onUseExistingGroup={() => togglePanel(PANEL_SEARCH, isSearchPanel)}
         />
 
-        {displayedBuilder.panel === PANEL_ACTIONS && !draftSummary && (
-          <CreateWaveInlineGroupActions
-            disabled={disabled}
-            onAddIdentity={() => openPanel(PANEL_IDENTITY)}
-            onAddRule={() => openPanel(PANEL_RULE_LIST)}
-            onUseExistingGroup={() => openPanel(PANEL_SEARCH)}
-          />
-        )}
-
-        {displayedBuilder.panel === PANEL_IDENTITY && (
-          <div className="tw-space-y-3">
+        {displayedBuilder.panel === PANEL_IDENTITY &&
+          renderExpandedPanel(
             <CreateWaveInlineGroupIdentities
               identities={displayedBuilder.identities}
               onIdentitySelect={addIdentity}
               onRemove={removeIdentity}
             />
-          </div>
-        )}
+          )}
 
-        {displayedBuilder.panel === PANEL_RULE_LIST && (
-          <CreateWaveInlineGroupRuleList
-            disabled={disabled}
-            onRuleOpen={openRule}
-          />
-        )}
+        {displayedBuilder.panel === PANEL_RULE_LIST &&
+          renderExpandedPanel(
+            <CreateWaveInlineGroupRuleList
+              disabled={disabled}
+              onRuleOpen={openRule}
+            />
+          )}
 
         {displayedBuilder.panel === PANEL_RULE_EDITOR &&
-          displayedBuilder.activeRule !== null && (
+          displayedBuilder.activeRule !== null &&
+          renderExpandedPanel(
             <CreateWaveInlineGroupRuleEditorPanel
               activeRule={displayedBuilder.activeRule}
               disabled={disabled}
@@ -295,26 +316,33 @@ export default function CreateWaveGroupInlinePanel({
             </CreateWaveInlineGroupRuleEditorPanel>
           )}
 
-        {displayedBuilder.panel === PANEL_SEARCH && (
-          <CreateWaveInlineGroupSearch
-            defaultLabel={defaultLabel}
-            disabled={disabled}
-            selectedGroup={selectedGroup}
-            allowGroupClear={allowGroupClear}
-            onSelect={(group) => {
-              void onExistingGroupSelect(group);
-            }}
-          />
-        )}
+        {displayedBuilder.panel === PANEL_SEARCH &&
+          renderExpandedPanel(
+            <CreateWaveInlineGroupSearch
+              defaultLabel={defaultLabel}
+              disabled={disabled}
+              selectedGroup={selectedGroup}
+              allowGroupClear={allowGroupClear}
+              onSelect={(group) => {
+                void onExistingGroupSelect(group);
+              }}
+            />
+          )}
 
-        {displayedBuilder.panel !== PANEL_SEARCH && draftSummary && (
+        {displayedBuilder.panel !== PANEL_ACTIONS && (
           <CreateWaveInlineGroupDraftSummary
-            draftSummary={draftSummary}
+            draftSummary={
+              displayedBuilder.panel === PANEL_SEARCH ? null : draftSummary
+            }
             isValid={validation.valid}
-            canResetDraft={canResetDraft}
-            canCreateDraft={canCreateDraft}
+            canResetDraft={
+              displayedBuilder.panel !== PANEL_SEARCH && canResetDraft
+            }
+            canCreateDraft={
+              displayedBuilder.panel !== PANEL_SEARCH && canCreateDraft
+            }
             isCreating={isCreating}
-            onStartOver={onStartOver}
+            onClearAll={onClearAll}
             onCreateAndUse={onCreateAndUse}
           />
         )}
