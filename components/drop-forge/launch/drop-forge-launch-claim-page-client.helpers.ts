@@ -510,6 +510,10 @@ export function getAutoSelectedLaunchPhase({
     return "phase0";
   }
 
+  if (researchAirdropCompleted && payArtistCompleted) {
+    return "payartist";
+  }
+
   if (researchAirdropCompleted && !payArtistCompleted) {
     return "payartist";
   }

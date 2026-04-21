@@ -125,7 +125,6 @@ interface LaunchPayArtistPhaseProps {
   payArtistAddressLoading: boolean;
   payArtistAddressMissing: boolean;
   payArtistAddressError: string | null;
-  onPayArtistAddressInputChange: (value: string) => void;
   onPayArtistResolvedAddressChange: (value: string) => void;
   onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
   onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
@@ -1517,7 +1516,6 @@ function DropForgePayArtistAddressField({
   payArtistAddressInput,
   payArtistAddressLoading,
   payArtistAddressError,
-  onPayArtistAddressInputChange,
   onPayArtistResolvedAddressChange,
   onPayArtistAddressLoadingChange,
   onPayArtistAddressEnsErrorChange,
@@ -1527,7 +1525,6 @@ function DropForgePayArtistAddressField({
   payArtistAddressInput: string;
   payArtistAddressLoading: boolean;
   payArtistAddressError: string | null;
-  onPayArtistAddressInputChange: (value: string) => void;
   onPayArtistResolvedAddressChange: (value: string) => void;
   onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
   onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
@@ -1548,7 +1545,6 @@ function DropForgePayArtistAddressField({
           <EnsAddressInput
             value={payArtistAddressInput}
             placeholder="0x... or ENS"
-            onValueChange={onPayArtistAddressInputChange}
             onAddressChange={onPayArtistResolvedAddressChange}
             onLoadingChange={onPayArtistAddressLoadingChange}
             onError={onPayArtistAddressEnsErrorChange}
@@ -1580,7 +1576,7 @@ function DropForgePayArtistActionButton({
   onClick: () => void;
 }>) {
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-end">
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-start">
       <button
         type="button"
         disabled={disabled}
@@ -1603,7 +1599,6 @@ function DropForgePayArtistSection({
   payArtistAddressLoading,
   payArtistAddressMissing,
   payArtistAddressError,
-  onPayArtistAddressInputChange,
   onPayArtistResolvedAddressChange,
   onPayArtistAddressLoadingChange,
   onPayArtistAddressEnsErrorChange,
@@ -1623,7 +1618,6 @@ function DropForgePayArtistSection({
   payArtistAddressLoading: boolean;
   payArtistAddressMissing: boolean;
   payArtistAddressError: string | null;
-  onPayArtistAddressInputChange: (value: string) => void;
   onPayArtistResolvedAddressChange: (value: string) => void;
   onPayArtistAddressLoadingChange: (isLoading: boolean) => void;
   onPayArtistAddressEnsErrorChange: (hasError: boolean) => void;
@@ -1688,7 +1682,6 @@ function DropForgePayArtistSection({
           payArtistAddressInput={payArtistAddressInput}
           payArtistAddressLoading={payArtistAddressLoading}
           payArtistAddressError={payArtistAddressError}
-          onPayArtistAddressInputChange={onPayArtistAddressInputChange}
           onPayArtistResolvedAddressChange={onPayArtistResolvedAddressChange}
           onPayArtistAddressLoadingChange={onPayArtistAddressLoadingChange}
           onPayArtistAddressEnsErrorChange={onPayArtistAddressEnsErrorChange}
@@ -2069,7 +2062,6 @@ function getLaunchPhasePanelProps(
     payArtistAddressLoading: props.payArtistAddressLoading,
     payArtistAddressMissing: props.payArtistAddressMissing,
     payArtistAddressError: props.payArtistAddressError,
-    onPayArtistAddressInputChange: props.onPayArtistAddressInputChange,
     onPayArtistResolvedAddressChange: props.onPayArtistResolvedAddressChange,
     onPayArtistAddressLoadingChange: props.onPayArtistAddressLoadingChange,
     onPayArtistAddressEnsErrorChange: props.onPayArtistAddressEnsErrorChange,

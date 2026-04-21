@@ -174,4 +174,30 @@ describe("TitleContext", () => {
       expect(document.title).toBe("6529.io");
     });
   });
+
+  it.each([
+    ["/drop-forge", "Drop Forge"],
+    ["/drop-forge/craft", "Craft Claims"],
+    ["/drop-forge/craft/123", "Claim #123 | Craft Claims"],
+    ["/drop-forge/launch", "Launch Claims"],
+    ["/drop-forge/launch/456", "Claim #456 | Launch Claims"],
+  ])(
+    "preserves server metadata for %s when the client title is still default",
+    async (pathname, expectedTitle) => {
+      mockPathname = pathname;
+      mockSearchParams = new URLSearchParams();
+      mockActiveWaveId = null;
+      document.title = expectedTitle;
+
+      render(
+        <TitleProvider>
+          <DynamicHeadTitle />
+        </TitleProvider>
+      );
+
+      await waitFor(() => {
+        expect(document.title).toBe(expectedTitle);
+      });
+    }
+  );
 });

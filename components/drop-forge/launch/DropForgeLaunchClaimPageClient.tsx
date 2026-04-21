@@ -1336,6 +1336,10 @@ export default function DropForgeLaunchClaimPageClient({
       return;
     }
 
+    if (!mintingClaimActionsLoaded && autoSelectedPhase === "research") {
+      return;
+    }
+
     if (
       !selectedPhase ||
       (selectedPhase === "research" && autoSelectedPhase === "payartist")
@@ -1346,6 +1350,7 @@ export default function DropForgeLaunchClaimPageClient({
     autoSelectedPhase,
     hasPublishedMetadata,
     isPhaseSelectionManual,
+    mintingClaimActionsLoaded,
     selectedPhase,
   ]);
   const selectedPhaseConfig = useMemo(
@@ -1474,8 +1479,7 @@ export default function DropForgeLaunchClaimPageClient({
     }
   }, [payArtistAmountEth]);
   const payArtistResolvedAddressTrimmed = payArtistResolvedAddress.trim();
-  const payArtistAddressInputTrimmed = payArtistAddressInput.trim();
-  const payArtistAddressMissing = payArtistAddressInputTrimmed.length === 0;
+  const payArtistAddressMissing = payArtistResolvedAddressTrimmed.length === 0;
   const payArtistAddressValid = isAddress(
     payArtistResolvedAddressTrimmed as `0x${string}`
   );
@@ -2342,7 +2346,6 @@ export default function DropForgeLaunchClaimPageClient({
         payArtistAddressLoading={payArtistAddressLoading}
         payArtistAddressMissing={payArtistAddressMissing}
         payArtistAddressError={payArtistAddressError}
-        onPayArtistAddressInputChange={setPayArtistAddressInput}
         onPayArtistResolvedAddressChange={setPayArtistResolvedAddress}
         onPayArtistAddressLoadingChange={setPayArtistAddressLoading}
         onPayArtistAddressEnsErrorChange={setPayArtistAddressHasEnsError}
