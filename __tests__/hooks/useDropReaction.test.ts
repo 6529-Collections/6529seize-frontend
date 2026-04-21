@@ -148,4 +148,23 @@ describe("useDropReaction", () => {
       type: "error",
     });
   });
+
+  it("shows the structured error message when the structured body is empty", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError(undefined, "Unauthorized")
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "Unauthorized",
+      type: "error",
+    });
+  });
 });

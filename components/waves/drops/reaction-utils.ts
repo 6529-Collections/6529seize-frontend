@@ -109,6 +109,7 @@ export const toProfileMin = (
 };
 
 type StructuredReactionError = {
+  message?: unknown;
   response?: {
     body?: unknown;
   };
@@ -163,17 +164,37 @@ const getStructuredReactionBodyMessage = (body: unknown): string | null => {
   return getDetailsFirstMessage(bodyRecord["details"]);
 };
 
+const hasNoStructuredReactionBody = (body: unknown): boolean => {
+  if (body === null || body === undefined) {
+    return true;
+  }
+
+  return typeof body === "string" && body.trim().length === 0;
+};
+
 export const getReactionErrorMessage = (
   error: unknown,
   fallback: string
 ): string => {
   if (error !== null && typeof error === "object") {
     const structuredError = error as StructuredReactionError;
-    const safeMessage = getStructuredReactionBodyMessage(
-      structuredError.response?.body
-    );
-    if (safeMessage) {
-      return safeMessage;
+    const structuredResponse = structuredError.response;
+    if (structuredResponse !== undefined) {
+      const structuredBody = structuredResponse.body;
+      const safeMessage = getStructuredReactionBodyMessage(structuredBody);
+      if (safeMessage) {
+        return safeMessage;
+      }
+
+      if (hasNoStructuredReactionBody(structuredBody)) {
+        const errorMessage = structuredError.message;
+        if (
+          typeof errorMessage === "string" &&
+          errorMessage.trim().length > 0
+        ) {
+          return errorMessage;
+        }
+      }
     }
   }
 
