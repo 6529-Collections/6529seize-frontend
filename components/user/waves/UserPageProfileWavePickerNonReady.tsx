@@ -29,9 +29,9 @@ function CreateWaveLink() {
 }
 
 function renderNotOwnProfileState(variant: WavePickerVariant) {
-  const title = "No official wave yet";
+  const title = "No featured wave yet";
   const message =
-    "This profile hasn't selected an official wave for Curation yet.";
+    "This profile hasn't selected a featured wave for Curation yet.";
 
   if (variant === "panel") {
     return <CurationEmptyPanel title={title} message={message} />;
@@ -42,7 +42,7 @@ function renderNotOwnProfileState(variant: WavePickerVariant) {
 
 function renderProxyMode(variant: WavePickerVariant) {
   const message =
-    "Switch out of proxy mode to change the official wave shown in Curation.";
+    "Switch out of proxy mode to change the featured wave shown in Curation.";
 
   if (variant === DROPDOWN_VARIANT) {
     return (
@@ -144,10 +144,10 @@ function renderNoPublicWavesState({
   readonly hasCreatedWaves: boolean;
   readonly variant: WavePickerVariant;
 }) {
-  const title = hasCreatedWaves ? "No official wave yet" : "No waves yet";
+  const title = hasCreatedWaves ? "No featured wave yet" : "No waves yet";
   const message = hasCreatedWaves
-    ? "Only public waves can be used here. Create one to set it as your official wave."
-    : "Create your first public wave to set it as your official wave.";
+    ? "Only public waves can be used here. Create one to set it as your featured wave."
+    : "Create your first public wave to set it as your featured wave.";
 
   if (variant === "panel") {
     return (

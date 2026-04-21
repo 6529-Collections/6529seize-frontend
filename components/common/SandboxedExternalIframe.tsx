@@ -20,6 +20,8 @@ interface SandboxedExternalIframeProps {
   readonly onError?:
     | React.IframeHTMLAttributes<HTMLIFrameElement>["onError"]
     | undefined;
+  /** Fires once when the container scrolls into view and the iframe is about to render. */
+  readonly onVisible?: (() => void) | undefined;
 }
 
 /**
@@ -39,6 +41,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   containerClassName,
   onLoad,
   onError,
+  onVisible,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -71,6 +74,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
 
     if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
       setIsVisible(true);
+      onVisible?.();
       return;
     }
 
@@ -79,6 +83,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
         const isIntersecting = entries.some((entry) => entry.isIntersecting);
         if (isIntersecting) {
           setIsVisible(true);
+          onVisible?.();
           observerInstance.disconnect();
         }
       },
