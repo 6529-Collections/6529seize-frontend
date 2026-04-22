@@ -205,7 +205,7 @@ it("keeps winning_threshold for approve waves", () => {
     metadata: [],
   };
   const body = getCreateNewWaveBody({ drop, picture: null, config });
-  expect(body.wave.winning_threshold).toBe(config.approval.thresholdTimeMs);
+  expect(body.wave.winning_threshold).toBe(config.approval.threshold);
 });
 
 it("sets winning_threshold to null for non-approve waves", () => {

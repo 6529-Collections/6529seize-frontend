@@ -405,7 +405,7 @@ export const getCreateNewWaveBody = ({
       type: config.overview.type,
       winning_threshold:
         config.overview.type === ApiWaveType.Approve
-          ? config.approval.thresholdTimeMs
+          ? config.approval.threshold
           : null,
       // TODO - should be in outcomes
       max_winners: null,

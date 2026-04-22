@@ -282,7 +282,7 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
-  it("dedupes repeated identical failure events within 60 seconds", () => {
+  it("resets the per-drop sequence when the last tracked mutation ages out", () => {
     const firstMutation = beginReactionMutation({
       dropId: "drop-6",
       waveId: "wave-1",
@@ -294,13 +294,87 @@ describe("dropReactionMonitoring", () => {
       profileId: "profile-1",
       websocketStatus: WebSocketStatus.CONNECTED,
     });
+
+    dateNowSpy.mockReturnValue(302_000);
+    const nextMutation = beginReactionMutation({
+      dropId: "drop-6",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":smile:",
+      intendedReaction: ":wave:",
+      optimisticReaction: ":wave:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(firstMutation.dropMutationSeq).toBe(1);
+    expect(nextMutation.dropMutationSeq).toBe(1);
+  });
+
+  it("keeps the per-drop sequence while a newer mutation is still tracked", () => {
+    const oldestMutation = beginReactionMutation({
+      dropId: "drop-7",
+      waveId: "wave-1",
+      source: "picker",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(150_000);
+    const newerMutation = beginReactionMutation({
+      dropId: "drop-7",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":smile:",
+      intendedReaction: ":wave:",
+      optimisticReaction: ":wave:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(302_000);
+    const latestMutation = beginReactionMutation({
+      dropId: "drop-7",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":fire:",
+      optimisticReaction: ":fire:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(oldestMutation.dropMutationSeq).toBe(1);
+    expect(newerMutation.dropMutationSeq).toBe(2);
+    expect(latestMutation.dropMutationSeq).toBe(3);
+  });
+
+  it("dedupes repeated identical failure events within 60 seconds", () => {
+    const firstMutation = beginReactionMutation({
+      dropId: "drop-8",
+      waveId: "wave-1",
+      source: "picker",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
     recordReactionRequestSent(firstMutation, {
-      endpoint: "drops/drop-6/reaction",
+      endpoint: "drops/drop-8/reaction",
       method: "POST",
     });
 
     const secondMutation = beginReactionMutation({
-      dropId: "drop-6",
+      dropId: "drop-8",
       waveId: "wave-1",
       source: "picker",
       action: "add",
@@ -311,7 +385,7 @@ describe("dropReactionMonitoring", () => {
       websocketStatus: WebSocketStatus.CONNECTED,
     });
     recordReactionRequestSent(secondMutation, {
-      endpoint: "drops/drop-6/reaction",
+      endpoint: "drops/drop-8/reaction",
       method: "POST",
     });
 

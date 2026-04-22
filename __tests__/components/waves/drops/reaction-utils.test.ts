@@ -130,6 +130,48 @@ describe("getReactionErrorMessage", () => {
     ).toBe("Not Found");
   });
 
+  it("surfaces the structured status text when the parsed json body has no known fields", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({ foo: "bar" }),
+          message: "Bad Request",
+          status: 400,
+          statusText: "Bad Request",
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Bad Request");
+  });
+
+  it("surfaces the structured status text when parsed json known fields are blank", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({ error: "   " }),
+          message: "Bad Request",
+          status: 400,
+          statusText: "Bad Request",
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Bad Request");
+  });
+
+  it("surfaces the structured status text when an object body has no known fields", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: { foo: "bar" },
+          message: "Bad Request",
+          status: 400,
+          statusText: "Bad Request",
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Bad Request");
+  });
+
   it("falls back to the structured error message when status text is unavailable", () => {
     expect(
       getReactionErrorMessage(

@@ -173,7 +173,19 @@ const hasNoStructuredReactionBody = (body: unknown): boolean => {
     return true;
   }
 
-  return typeof body === "string" && body.trim().length === 0;
+  if (typeof body === "string") {
+    if (body.trim().length === 0) {
+      return true;
+    }
+
+    try {
+      return hasNoStructuredReactionBody(JSON.parse(body) as unknown);
+    } catch {
+      return false;
+    }
+  }
+
+  return getStructuredReactionBodyMessage(body) === null;
 };
 
 const getStructuredReactionStatus = (

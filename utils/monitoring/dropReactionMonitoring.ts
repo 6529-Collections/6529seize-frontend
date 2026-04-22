@@ -68,6 +68,7 @@ function pruneState(now: number): void {
     mutationContextById.delete(mutationId);
     if (latestMutationIdByDrop.get(context.dropId) === mutationId) {
       latestMutationIdByDrop.delete(context.dropId);
+      dropMutationSeqByDrop.delete(context.dropId);
     }
   }
 }
