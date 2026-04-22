@@ -12,16 +12,18 @@
  */
 
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
-import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
 import { ApiWaveType } from '../models/ApiWaveType';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateWaveConfig {
     'type': ApiWaveType;
-    'winning_thresholds': ApiIntRange | null;
     /**
-    * This amount of top rated drops will win. Must be set if and only if type is RANK
+    * Single positive threshold a drop must reach to win. Must be set if and only if type is APPROVE
+    */
+    'winning_threshold': number | null;
+    /**
+    * Total number of APPROVE decisions this wave may produce. Null means unlimited. Must be set if and only if type is APPROVE
     */
     'max_winners': number | null;
     /**
@@ -44,10 +46,10 @@ export class ApiCreateWaveConfig {
             "format": ""
         },
         {
-            "name": "winning_thresholds",
-            "baseName": "winning_thresholds",
-            "type": "ApiIntRange",
-            "format": ""
+            "name": "winning_threshold",
+            "baseName": "winning_threshold",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "max_winners",

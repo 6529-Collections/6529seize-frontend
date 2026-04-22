@@ -1,6 +1,5 @@
 import type { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
-import type { ApiIntRange } from "@/generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
@@ -118,27 +117,6 @@ export const getCreateWavePreviousStep = ({
       return CreateWaveStep.OUTCOMES;
     default:
       assertUnreachable(step);
-      return null;
-  }
-};
-
-const getWinningThreshold = ({
-  config,
-}: {
-  readonly config: CreateWaveConfig;
-}): ApiIntRange | null => {
-  const waveType = config.overview.type;
-  switch (waveType) {
-    case ApiWaveType.Approve:
-      return {
-        min: config.approval.threshold,
-        max: config.approval.threshold,
-      };
-    case ApiWaveType.Rank:
-    case ApiWaveType.Chat:
-      return null;
-    default:
-      assertUnreachable(waveType);
       return null;
   }
 };
@@ -423,7 +401,7 @@ export const getCreateNewWaveBody = ({
     wave: {
       admin_drop_deletion_enabled: config.drops.adminCanDeleteDrops,
       type: config.overview.type,
-      winning_thresholds: getWinningThreshold({ config }),
+      winning_threshold: config.approval.threshold,
       // TODO - should be in outcomes
       max_winners: null,
       time_lock_ms:
