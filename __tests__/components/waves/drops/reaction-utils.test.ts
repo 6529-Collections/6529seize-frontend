@@ -136,6 +136,18 @@ describe("getReactionErrorMessage", () => {
     ).toBe("Unauthorized");
   });
 
+  it("maps unauthorized status when response is null", () => {
+    expect(
+      getReactionErrorMessage(
+        Object.assign(new Error("Something went wrong"), {
+          status: 401,
+          response: null,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Unauthorized");
+  });
+
   it("maps rate-limit status when the structured body is blank", () => {
     expect(
       getReactionErrorMessage(
@@ -225,6 +237,17 @@ describe("getReactionErrorMessage", () => {
         createStructuredReactionError({
           body: "   ",
           message: "Service Unavailable",
+          status: 503,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Service Unavailable");
+  });
+
+  it("falls back to the structured error message when response is missing", () => {
+    expect(
+      getReactionErrorMessage(
+        Object.assign(new Error("Service Unavailable"), {
           status: 503,
         }),
         "Error adding reaction"

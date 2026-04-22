@@ -116,7 +116,7 @@ type StructuredReactionError = Error & {
     status?: unknown;
     statusText?: unknown;
     body?: unknown;
-  };
+  } | null;
 };
 
 const isNonEmptyUnknownArray = (value: unknown): value is readonly unknown[] =>
@@ -266,33 +266,34 @@ export const getReactionErrorMessage = (
   if (error !== null && typeof error === "object") {
     const structuredError = error as StructuredReactionError;
     const structuredResponse = structuredError.response;
-    if (structuredResponse !== undefined) {
+    if (structuredResponse !== null && structuredResponse !== undefined) {
       const structuredBody = structuredResponse.body;
       const safeMessage = getStructuredReactionBodyMessage(structuredBody);
       if (safeMessage) {
         return safeMessage;
       }
 
-      if (hasNoStructuredReactionBody(structuredBody)) {
-        const statusMessage = getEmptyStructuredReactionStatusMessage(
-          getStructuredReactionStatus(structuredError)
-        );
-        if (statusMessage) {
-          return statusMessage;
-        }
-
-        const statusText =
-          getEmptyStructuredReactionStatusText(structuredError);
-        if (statusText) {
-          return statusText;
-        }
-
-        const fallbackMessage =
-          getEmptyStructuredReactionFallbackMessage(structuredError);
-        if (fallbackMessage) {
-          return fallbackMessage;
-        }
+      if (!hasNoStructuredReactionBody(structuredBody)) {
+        return fallback;
       }
+    }
+
+    const statusMessage = getEmptyStructuredReactionStatusMessage(
+      getStructuredReactionStatus(structuredError)
+    );
+    if (statusMessage) {
+      return statusMessage;
+    }
+
+    const statusText = getEmptyStructuredReactionStatusText(structuredError);
+    if (statusText) {
+      return statusText;
+    }
+
+    const fallbackMessage =
+      getEmptyStructuredReactionFallbackMessage(structuredError);
+    if (fallbackMessage) {
+      return fallbackMessage;
     }
   }
 
