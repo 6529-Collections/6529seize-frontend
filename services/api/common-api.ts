@@ -65,6 +65,14 @@ const getUsableErrorMessage = (
   fallbackMessage: string
 ): string => (message.trim().length > 0 ? message : fallbackMessage);
 
+const getUsableErrorField = (value: unknown): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  return value.trim().length > 0 ? value : undefined;
+};
+
 const createStructuredApiError = ({
   message,
   status,
@@ -124,13 +132,19 @@ const handleApiError = async (
           typeof (bodyDetails[0] as { message?: unknown }).message === "string"
             ? (bodyDetails[0] as { message: string }).message
             : undefined;
+        const structuredErrorMessage =
+          getUsableErrorField(bodyError) ??
+          getUsableErrorField(bodyMessage) ??
+          getUsableErrorField(detailsFirstMessage);
+        const hasStructuredErrorField =
+          typeof bodyError === "string" ||
+          typeof bodyMessage === "string" ||
+          typeof detailsFirstMessage === "string";
 
-        if (typeof bodyError === "string") {
-          errorMessage = bodyError;
-        } else if (typeof bodyMessage === "string") {
-          errorMessage = bodyMessage;
-        } else if (typeof detailsFirstMessage === "string") {
-          errorMessage = detailsFirstMessage;
+        if (structuredErrorMessage !== undefined) {
+          errorMessage = structuredErrorMessage;
+        } else if (hasStructuredErrorField) {
+          errorMessage = fallbackErrorMessage;
         } else {
           errorMessage = rawContent;
         }

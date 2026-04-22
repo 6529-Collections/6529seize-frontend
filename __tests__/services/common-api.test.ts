@@ -268,6 +268,103 @@ describe("commonApiPost", () => {
     expect(error?.response.statusText).toBe("Bad Request");
   });
 
+  it("prefers message when error field is whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 400,
+      statusText: "Bad Request",
+      text: async () =>
+        JSON.stringify({
+          error: "   ",
+          message: "Name already exists",
+        }),
+    });
+
+    let error: {
+      message: string;
+      response: {
+        status: number;
+        headers: Headers;
+        statusText?: string;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        response: {
+          status: number;
+          headers: Headers;
+          statusText?: string;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("Name already exists");
+    expect(error?.response.body).toBe(
+      '{"error":"   ","message":"Name already exists"}'
+    );
+    expect(error?.response.statusText).toBe("Bad Request");
+  });
+
+  it("prefers details message when higher-priority fields are whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+      text: async () =>
+        JSON.stringify({
+          error: "   ",
+          message: "   ",
+          details: [{ message: "Not allowed to reorder this curation" }],
+        }),
+    });
+
+    let error: {
+      message: string;
+      response: {
+        status: number;
+        headers: Headers;
+        statusText?: string;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        response: {
+          status: number;
+          headers: Headers;
+          statusText?: string;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("Not allowed to reorder this curation");
+    expect(error?.response.body).toBe(
+      '{"error":"   ","message":"   ","details":[{"message":"Not allowed to reorder this curation"}]}'
+    );
+    expect(error?.response.statusText).toBe("Forbidden");
+  });
+
   it("prefers message when error key is missing", async () => {
     fetchMock.mockResolvedValue({
       ok: false,
