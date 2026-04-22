@@ -21,6 +21,7 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { WaveGroupType } from "../WaveGroup.types";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 
 const WAVE_GROUP_TO_CREATE_GROUP_TYPE = {
   [WaveGroupType.VIEW]: CreateWaveGroupConfigType.CAN_VIEW,
@@ -80,6 +81,8 @@ const createUnknownGroupAuthor = (): ApiProfileMin => ({
   artist_of_prevote_cards: [],
   profile_wave_id: null,
   is_wave_creator: false,
+  classification: ApiProfileClassification.Pseudonym,
+  sub_classification: null,
 });
 
 const getSelectedGroup = (group: ApiGroup | null): ApiGroupFull | null => {

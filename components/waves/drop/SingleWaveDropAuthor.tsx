@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import type { ApiDrop } from "@/generated/models/ObjectSerializer";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import Link from "next/link";
@@ -49,7 +50,11 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
           <div className="tw-inline-flex tw-items-center tw-gap-x-1">
             <UserProfileTooltipWrapper user={authorIdentity}>
               <span className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80">
-                {authorIdentity}
+                <ProfileNameWithAiMarker
+                  classification={drop.author.classification}
+                >
+                  {authorIdentity}
+                </ProfileNameWithAiMarker>
               </span>
             </UserProfileTooltipWrapper>
             <UserCICAndLevel

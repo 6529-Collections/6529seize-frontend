@@ -10533,6 +10533,8 @@ components:
         - xtdh_rate
         - level
         - tdh_rate
+        - classification
+        - sub_classification
         - primary_address
         - banner1_color
         - banner2_color
@@ -10580,6 +10582,11 @@ components:
         level:
           type: number
           format: int64
+        classification:
+          $ref: "#/components/schemas/ApiProfileClassification"
+        sub_classification:
+          type: string
+          nullable: true
         primary_address:
           type: string
         subscribed_actions:

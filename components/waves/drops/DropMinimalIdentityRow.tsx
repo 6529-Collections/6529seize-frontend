@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import Link from "next/link";
@@ -15,6 +16,7 @@ export default function DropMinimalIdentityRow({
   drop,
 }: DropMinimalIdentityRowProps) {
   const router = useRouter();
+  const authorIdentity = drop.author.handle ?? drop.author.primary_address;
 
   const handleNavigation = useCallback(
     (event: React.MouseEvent, path: string) => {
@@ -28,18 +30,17 @@ export default function DropMinimalIdentityRow({
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
       <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-leading-none">
-        <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+        <UserProfileTooltipWrapper user={authorIdentity}>
           <Link
-            href={`/${drop.author.handle ?? drop.author.primary_address}`}
-            onClick={(event) =>
-              handleNavigation(
-                event,
-                `/${drop.author.handle ?? drop.author.primary_address}`
-              )
-            }
+            href={`/${authorIdentity}`}
+            onClick={(event) => handleNavigation(event, `/${authorIdentity}`)}
             className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
           >
-            {drop.author.handle ?? drop.author.primary_address}
+            <ProfileNameWithAiMarker
+              classification={drop.author.classification}
+            >
+              {authorIdentity}
+            </ProfileNameWithAiMarker>
           </Link>
         </UserProfileTooltipWrapper>
       </p>
