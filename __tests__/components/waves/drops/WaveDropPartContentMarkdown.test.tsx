@@ -330,6 +330,52 @@ it("falls back to regular markdown when quorum headings go out of order after a 
   expect(screen.queryByTestId("compact")).toBeNull();
 });
 
+it("keeps repeated canonical headings inside the final compact quorum section", () => {
+  const proposalPart = {
+    content: [
+      "# Slow Mode",
+      "",
+      "## Summary",
+      "",
+      "Keep the feed readable.",
+      "",
+      "## Problem Statement",
+      "",
+      "There are too many drops.",
+      "",
+      "## Problem Statement",
+      "",
+      "This repeated heading is still part of the same section.",
+    ].join("\n"),
+    quoted_drop: null,
+  } as any;
+
+  render(
+    <WaveDropPartContentMarkdown
+      mentionedUsers={[]}
+      mentionedWaves={[]}
+      referencedNfts={[]}
+      part={proposalPart}
+      wave={wave}
+      drop={{ id: "drop-1", serial_no: 2 } as any}
+      onQuoteClick={jest.fn()}
+      contentPresentation="quorumCompact"
+    />
+  );
+
+  expect(screen.getByTestId("compact")).toHaveTextContent("Slow Mode");
+  expect(
+    compactProps.proposal.sections.map((section: any) => section.heading)
+  ).toEqual(["Problem Statement"]);
+  expect(compactProps.proposal.sections[0].markdown).toContain(
+    "## Problem Statement"
+  );
+  expect(compactProps.proposal.sections[0].markdown).toContain(
+    "This repeated heading is still part of the same section."
+  );
+  expect(markdownProps).toBeUndefined();
+});
+
 it("keeps embedded level-two headings inside the same compact quorum section", () => {
   const proposalPart = {
     content: buildQuorumProposalMarkdown({

@@ -327,9 +327,29 @@ const isTerminalCandidatePath = (
   candidates: readonly QuorumProposalSectionBoundaryCandidate[],
   lastCandidateIndex: number
 ): boolean => {
-  // Any canonical heading left after the last chosen boundary would be folded
-  // into the final compact section with no later section to disambiguate it.
-  return lastCandidateIndex === candidates.length - 1;
+  const lastCandidate = candidates[lastCandidateIndex];
+  if (!lastCandidate) {
+    return false;
+  }
+
+  // Repeated copies of the last chosen heading can stay in the final section
+  // body, but any different canonical heading still makes the tail ambiguous.
+  for (
+    let candidateIndex = lastCandidateIndex + 1;
+    candidateIndex < candidates.length;
+    candidateIndex++
+  ) {
+    const candidate = candidates[candidateIndex];
+    if (!candidate) {
+      continue;
+    }
+
+    if (candidate.headingIndex !== lastCandidate.headingIndex) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 const shouldPruneCandidatePath = (

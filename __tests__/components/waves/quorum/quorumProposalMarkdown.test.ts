@@ -258,6 +258,41 @@ describe("quorumProposalMarkdown", () => {
     expect(parseQuorumProposalMarkdown(markdown)).toBeNull();
   });
 
+  it("keeps repeated canonical headings inside the final parsed section body", () => {
+    const markdown = [
+      "# Slow Mode",
+      "",
+      "## Summary",
+      "",
+      "Keep the feed readable.",
+      "",
+      "## Problem Statement",
+      "",
+      "There are too many drops.",
+      "",
+      "## Problem Statement",
+      "",
+      "This repeated heading is still part of the same section.",
+    ].join("\n");
+
+    expect(parseQuorumProposalMarkdown(markdown)).toEqual({
+      title: "Slow Mode",
+      summaryMarkdown: "Keep the feed readable.",
+      sections: [
+        {
+          heading: "Problem Statement",
+          markdown: [
+            "There are too many drops.",
+            "",
+            "## Problem Statement",
+            "",
+            "This repeated heading is still part of the same section.",
+          ].join("\n"),
+        },
+      ],
+    });
+  });
+
   it("keeps canonical level-two headings inside the current section body when a later section matches", () => {
     const markdown = buildQuorumProposalMarkdown({
       ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
