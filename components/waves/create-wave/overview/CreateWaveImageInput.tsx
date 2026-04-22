@@ -95,10 +95,10 @@ export default function CreateWaveImageInput({
               height={80}
               unoptimized
               loader={({ src }) => src}
-              className="tw-h-16 tw-w-16 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700 tw-object-cover tw-ring-1 tw-ring-iron-700 sm:tw-h-20 sm:tw-w-20"
+              className="tw-h-14 tw-w-14 tw-flex-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-object-cover sm:tw-h-20 sm:tw-w-20"
             />
           ) : (
-            <div className="tw-flex tw-h-16 tw-w-16 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-object-cover tw-text-iron-600 tw-ring-1 tw-ring-iron-700 sm:tw-h-20 sm:tw-w-20">
+            <div className="tw-flex tw-h-14 tw-w-14 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-object-cover tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-text-iron-300 sm:tw-h-20 sm:tw-w-20">
               <CameraIcon
                 aria-hidden="true"
                 className="tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6"
@@ -127,15 +127,15 @@ export default function CreateWaveImageInput({
         <label
           className={` ${
             dragging
-              ? "tw-border-iron-600 tw-bg-iron-800"
-              : "tw-border-iron-700 tw-bg-iron-900"
-          } tw-flex tw-min-h-28 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-600 hover:tw-bg-iron-800`}
+              ? "tw-border-white/20 tw-bg-iron-900"
+              : "tw-border-white/10 tw-bg-iron-900/60"
+          } tw-flex tw-h-40 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-dashed tw-transition tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-iron-900`}
         >
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-py-5">
-            <div className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-800">
+            <div className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out group-hover:tw-border-white/20">
               <div className="tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                 <svg
-                  className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-50"
+                  className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-white"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden="true"

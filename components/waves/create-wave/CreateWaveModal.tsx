@@ -44,16 +44,16 @@ export default function CreateWaveModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="tw-max-h-[90vh] tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-2xl"
+            className="tw-max-h-[90vh] tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-[24px] tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-p-6">
-              <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-100">
+            <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-8 tw-py-5">
+              <h2 className="tw-mb-0 tw-text-[17px] tw-font-bold tw-tracking-wide tw-text-white">
                 Create Wave
               </h2>
               <button
                 onClick={onClose}
-                className="tw-hidden tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white sm:tw-inline-flex"
+                className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-text-iron-400 tw-transition tw-duration-200 hover:tw-bg-white/10 hover:tw-text-white"
                 aria-label="Close modal"
               >
                 <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
@@ -62,7 +62,7 @@ export default function CreateWaveModal({
 
             {/* Modal Content */}
             <div
-              className="tw-max-h-[calc(90vh-80px)] tw-overflow-y-scroll tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
+              className="tw-max-h-[calc(90vh-80px)] tw-overflow-y-scroll tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
               style={{ scrollbarGutter: "stable" }}
             >
               <CreateWave

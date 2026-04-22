@@ -1,3 +1,8 @@
+import {
+  ShieldExclamationIcon,
+  UserGroupIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 import { ActionButton } from "./CreateWaveInlineGroupButtons";
 
 export default function CreateWaveInlineGroupActions({
@@ -18,8 +23,14 @@ export default function CreateWaveInlineGroupActions({
   readonly onUseExistingGroup: () => void;
 }) {
   return (
-    <div className="tw-flex tw-flex-wrap tw-gap-2 md:tw-absolute md:tw-right-0 md:tw-top-0 md:tw-justify-end">
+    <div className="tw-flex tw-flex-wrap tw-gap-1.5 md:tw-absolute md:tw-right-0 md:tw-top-0 md:tw-justify-end">
       <ActionButton
+        icon={
+          <UserPlusIcon
+            aria-hidden="true"
+            className="tw-size-3.5 tw-flex-shrink-0"
+          />
+        }
         label="Add identity"
         disabled={disabled}
         active={identityActive}
@@ -27,6 +38,12 @@ export default function CreateWaveInlineGroupActions({
         onClick={onAddIdentity}
       />
       <ActionButton
+        icon={
+          <ShieldExclamationIcon
+            aria-hidden="true"
+            className="tw-size-3.5 tw-flex-shrink-0"
+          />
+        }
         label="Add rule"
         disabled={disabled}
         active={ruleActive}
@@ -34,6 +51,12 @@ export default function CreateWaveInlineGroupActions({
         onClick={onAddRule}
       />
       <ActionButton
+        icon={
+          <UserGroupIcon
+            aria-hidden="true"
+            className="tw-size-3.5 tw-flex-shrink-0"
+          />
+        }
         label="Use existing group"
         disabled={disabled}
         active={searchActive}

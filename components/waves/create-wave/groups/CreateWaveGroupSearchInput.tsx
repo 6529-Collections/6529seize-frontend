@@ -34,10 +34,10 @@ export default function CreateWaveGroupSearchInput({
   readonly onClearSelection: () => void;
 }) {
   const inputClasses = [
-    "tw-form-input tw-peer tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950/70 tw-pb-3 tw-pl-10 tw-pr-4 tw-pt-3 tw-text-base tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-300 tw-ease-out",
+    "tw-form-input tw-peer tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-pb-3 tw-pl-10 tw-pr-4 tw-pt-3 tw-text-base sm:tw-text-sm tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-300 tw-ease-out",
     disabled
       ? "tw-bg-iron-900/80 tw-text-iron-500 tw-caret-iron-500 placeholder:tw-text-iron-500"
-      : "tw-caret-primary-400 placeholder:tw-text-iron-500 hover:tw-ring-white/15 focus:tw-border-primary-400 focus:tw-bg-iron-950/80 focus:tw-ring-primary-400",
+      : "tw-caret-primary-400 placeholder:tw-text-iron-500 hover:tw-ring-white/10 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400",
     hasValue || hasSelectedGroup
       ? "focus:tw-text-white tw-text-primary-400"
       : "tw-text-white",

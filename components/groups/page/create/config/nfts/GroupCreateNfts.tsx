@@ -72,14 +72,14 @@ export default function GroupCreateNfts({
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div>
-        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
+        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
           Required NFTs
         </p>
         <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
           Identity must own all of these specific tokens.
         </p>
       </div>
-      <div className="tw-mt-2 sm:tw-mt-3">
+      <div className="tw-mt-2 sm:tw-mt-4">
         <GroupCreateNftsSelect onSelect={onSelect} selected={nfts} />
       </div>
       <GroupCreateNftsSelected selected={nfts} onRemove={onRemove} />

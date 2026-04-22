@@ -1,6 +1,5 @@
 "use client";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useClickAway } from "react-use";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
@@ -84,6 +83,7 @@ export default function CreateWaveGroupInlinePanel({
     displayedBuilder.panel === PANEL_RULE_EDITOR;
   const isSearchPanel = displayedBuilder.panel === PANEL_SEARCH;
   const isCustomDraft = !!draftSummary || isIdentityPanel || isRulePanel;
+  const isExpandedPanel = displayedBuilder.panel !== PANEL_ACTIONS;
   const currentStateLabel =
     selectedGroup?.name ?? (isCustomDraft ? "Custom" : defaultLabel);
 
@@ -252,24 +252,30 @@ export default function CreateWaveGroupInlinePanel({
     resetBuilder();
   };
 
-  const renderExpandedPanel = (children: ReactNode) => (
-    <div className="tw-relative tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
-      <button
-        type="button"
-        onClick={onCancelPanel}
-        aria-label="Close inline group panel"
-        className="tw-absolute tw-right-0 tw-top-7 tw-z-10 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/70 tw-text-iron-400 tw-transition tw-duration-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
-      >
-        <XMarkIcon className="tw-size-4 tw-flex-shrink-0" />
-      </button>
-      <div className="tw-pr-10">{children}</div>
+  const renderExpandedPanel = (children: ReactNode, cancelClassName = "") => (
+    <div className="tw-relative tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-5">
+      <div className="tw-flex tw-items-start tw-gap-3">
+        <div className="tw-min-w-0 tw-flex-1">{children}</div>
+        <button
+          type="button"
+          onClick={onCancelPanel}
+          aria-label="Cancel inline group setup"
+          className={`tw-flex-shrink-0 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-500 tw-transition tw-duration-200 desktop-hover:hover:tw-text-iron-100 ${cancelClassName}`}
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 
   return (
     <div
       ref={panelRef}
-      className="tw-relative tw-flex tw-flex-col tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/45 tw-p-5 tw-shadow-sm tw-transition-all tw-duration-300 hover:tw-border-white/15 hover:tw-bg-iron-900/35"
+      className={`tw-relative tw-flex tw-flex-col tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-p-5 tw-transition-all tw-duration-300 ${
+        isExpandedPanel
+          ? "tw-border-white/10 tw-bg-iron-900 tw-shadow-2xl"
+          : "tw-border-white/5 tw-bg-iron-900/60 tw-shadow-inner"
+      }`}
     >
       <div className="tw-relative tw-flex tw-flex-col tw-gap-5">
         <CreateWaveInlineGroupHeader currentStateLabel={currentStateLabel} />
@@ -289,7 +295,8 @@ export default function CreateWaveGroupInlinePanel({
               identities={displayedBuilder.identities}
               onIdentitySelect={addIdentity}
               onRemove={removeIdentity}
-            />
+            />,
+            "tw-mt-3"
           )}
 
         {displayedBuilder.panel === PANEL_RULE_LIST &&
@@ -326,7 +333,8 @@ export default function CreateWaveGroupInlinePanel({
               onSelect={(group) => {
                 void onExistingGroupSelect(group);
               }}
-            />
+            />,
+            "tw-mt-3"
           )}
 
         {displayedBuilder.panel !== PANEL_ACTIONS && (

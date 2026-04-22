@@ -323,7 +323,7 @@ export default function CreateWave({
       onBack={onBack}
     >
       <div className="tw-h-full tw-w-full lg:tw-flex">
-        <div className="tw-hidden lg:tw-flex lg:tw-w-52 lg:tw-shrink-0 lg:tw-border-r lg:tw-border-solid lg:tw-border-white/10 lg:tw-bg-iron-950 lg:tw-py-8 lg:tw-pl-3 lg:tw-pr-5">
+        <div className="tw-hidden lg:tw-flex lg:tw-w-52 lg:tw-shrink-0 lg:tw-border-r lg:tw-border-solid lg:tw-border-white/[0.06] lg:tw-bg-[#09090B] lg:tw-py-8 lg:tw-pl-3 lg:tw-pr-5">
           <CreateWavesMainSteps
             activeStep={step}
             waveType={config.overview.type}
@@ -333,16 +333,16 @@ export default function CreateWave({
           />
         </div>
         <div
-          className={`tw-min-w-0 tw-flex-1 tw-bg-iron-900/80 ${
+          className={`tw-min-w-0 tw-flex-1 tw-bg-iron-950 tw-shadow-[-10px_0_30px_rgba(0,0,0,0.5)] ${
             isIos && !keyboardVisible ? "tw-mb-10" : ""
           }`}
         >
-          <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10">
+          <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">
             <div className="tw-w-full tw-flex-1 tw-p-4 lg:tw-p-8">
               {stepComponent[step]}
             </div>
             {selectedOutcomeType === null && (
-              <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-p-4 lg:tw-px-8 lg:tw-py-5">
+              <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/95 tw-p-4 lg:tw-px-8 lg:tw-py-5">
                 <CreateWaveActions
                   setStep={(targetStep, direction) =>
                     onStep({ step: targetStep, direction })
