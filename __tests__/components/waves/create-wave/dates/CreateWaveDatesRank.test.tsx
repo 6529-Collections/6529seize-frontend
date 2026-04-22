@@ -63,9 +63,13 @@ jest.mock(
   )
 );
 
-jest.mock(
-  "@/components/waves/create-wave/services/waveDecisionService",
-  () => ({
+jest.mock("@/components/waves/create-wave/services/waveDecisionService", () => {
+  const actual = jest.requireActual(
+    "@/components/waves/create-wave/services/waveDecisionService"
+  );
+
+  return {
+    ...actual,
     adjustDatesAfterSubmissionChange: jest.fn((d, ts) => ({
       ...d,
       submissionStartDate: ts,
@@ -74,8 +78,8 @@ jest.mock(
     })),
     calculateEndDate: jest.fn(() => 123),
     validateDateSequence: jest.fn(() => []),
-  })
-);
+  };
+});
 
 const baseDates: CreateWaveDatesConfig = {
   submissionStartDate: 10,

@@ -34,7 +34,7 @@ describe("CommonCalendar", () => {
     expect(screen.getByText("March")).toBeInTheDocument();
   });
 
-  it("resets the visible month when the selected timestamp changes", () => {
+  it("resets the visible month when the selected date changes", () => {
     const setSelected = jest.fn();
     const marchTimestamp = new Date("2025-03-15T00:00:00Z").getTime();
     const julyTimestamp = new Date("2025-07-10T00:00:00Z").getTime();
@@ -65,6 +65,39 @@ describe("CommonCalendar", () => {
     );
 
     expect(screen.getByText("July")).toBeInTheDocument();
+  });
+
+  it("keeps the visible month when only the selected time changes", () => {
+    const setSelected = jest.fn();
+    const morningTimestamp = new Date(2025, 2, 15, 10, 0, 0).getTime();
+    const eveningTimestamp = new Date(2025, 2, 15, 18, 30, 0).getTime();
+
+    const { rerender } = render(
+      <CommonCalendar
+        initialMonth={0}
+        initialYear={2024}
+        minTimestamp={null}
+        maxTimestamp={null}
+        selectedTimestamp={morningTimestamp}
+        setSelectedTimestamp={setSelected}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText("Next month"));
+    expect(screen.getByText("April")).toBeInTheDocument();
+
+    rerender(
+      <CommonCalendar
+        initialMonth={0}
+        initialYear={2024}
+        minTimestamp={null}
+        maxTimestamp={null}
+        selectedTimestamp={eveningTimestamp}
+        setSelectedTimestamp={setSelected}
+      />
+    );
+
+    expect(screen.getByText("April")).toBeInTheDocument();
   });
 
   it("resets to the initial month when the selection is cleared", () => {

@@ -13,13 +13,17 @@ jest.mock(
     </button>
   )
 );
-jest.mock(
-  "@/components/waves/create-wave/services/waveDecisionService",
-  () => ({
+jest.mock("@/components/waves/create-wave/services/waveDecisionService", () => {
+  const actual = jest.requireActual(
+    "@/components/waves/create-wave/services/waveDecisionService"
+  );
+
+  return {
+    ...actual,
     calculateDecisionTimes: jest.fn(() => [1, 2]),
     calculateEndDateForCycles: jest.fn(() => 3),
-  })
-);
+  };
+});
 jest.mock("@/components/common/DateAccordion", () => (props: any) => (
   <div>{props.children}</div>
 ));

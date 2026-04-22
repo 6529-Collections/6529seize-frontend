@@ -31,14 +31,17 @@ jest.mock("@/helpers/waves/create-wave.helpers", () => ({
   calculateLastDecisionTime: () => 1234,
 }));
 
-jest.mock(
-  "@/components/waves/create-wave/services/waveDecisionService",
-  () => ({
-    calculateDecisionTimes: jest.fn(() => []),
+jest.mock("@/components/waves/create-wave/services/waveDecisionService", () => {
+  const actual = jest.requireActual(
+    "@/components/waves/create-wave/services/waveDecisionService"
+  );
+
+  return {
+    ...actual,
     countTotalDecisions: jest.fn(() => 1),
     formatDate: (n: number) => `date-${n}`,
-  })
-);
+  };
+});
 
 describe("RollingEndDate", () => {
   const baseConfig: Config = {

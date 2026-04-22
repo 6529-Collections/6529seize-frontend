@@ -153,11 +153,29 @@ function CommonCalendarView({
   );
 }
 
+const getResetKey = ({
+  initialMonth,
+  initialYear,
+  selectedTimestamp,
+}: Pick<
+  CommonCalendarProps,
+  "initialMonth" | "initialYear" | "selectedTimestamp"
+>) => {
+  if (selectedTimestamp === null) {
+    return `initial-${initialYear}-${initialMonth}`;
+  }
+
+  const selectedDate = new Date(selectedTimestamp);
+  return [
+    "selected",
+    selectedDate.getFullYear(),
+    selectedDate.getMonth(),
+    selectedDate.getDate(),
+  ].join("-");
+};
+
 export default function CommonCalendar(props: CommonCalendarProps) {
-  const resetKey =
-    props.selectedTimestamp !== null
-      ? `selected-${props.selectedTimestamp}`
-      : `initial-${props.initialYear}-${props.initialMonth}`;
+  const resetKey = getResetKey(props);
 
   return <CommonCalendarView key={resetKey} {...props} />;
 }
