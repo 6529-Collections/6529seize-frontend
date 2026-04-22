@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { ApiWaveType } from '../models/ApiWaveType';
@@ -19,9 +18,12 @@ import { HttpFile } from '../http/http';
 
 export class ApiWaveConfig {
     'type': ApiWaveType;
-    'winning_thresholds': ApiIntRange | null;
     /**
-    * This amount of top rated drops will win. Must be set if and only if type is RANK
+    * Single positive threshold a drop must reach to win. Null for non-APPROVE waves
+    */
+    'winning_threshold': number | null;
+    /**
+    * Total number of APPROVE decisions this wave may produce. Null means unlimited. Null for non-APPROVE waves
     */
     'max_winners': number | null;
     /**
@@ -33,6 +35,9 @@ export class ApiWaveConfig {
     'decisions_strategy': ApiWaveDecisionsStrategy | null;
     'next_decision_time': number | null;
     'admin_drop_deletion_enabled': boolean;
+    'total_no_of_decisions': number | null;
+    'no_of_decisions_done': number | null;
+    'no_of_decisions_left': number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -46,10 +51,10 @@ export class ApiWaveConfig {
             "format": ""
         },
         {
-            "name": "winning_thresholds",
-            "baseName": "winning_thresholds",
-            "type": "ApiIntRange",
-            "format": ""
+            "name": "winning_threshold",
+            "baseName": "winning_threshold",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "max_winners",
@@ -92,6 +97,24 @@ export class ApiWaveConfig {
             "baseName": "admin_drop_deletion_enabled",
             "type": "boolean",
             "format": ""
+        },
+        {
+            "name": "total_no_of_decisions",
+            "baseName": "total_no_of_decisions",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "no_of_decisions_done",
+            "baseName": "no_of_decisions_done",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "no_of_decisions_left",
+            "baseName": "no_of_decisions_left",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {

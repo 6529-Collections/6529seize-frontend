@@ -8274,7 +8274,7 @@ components:
       required:
         - type
         - time_lock_ms
-        - winning_thresholds
+        - winning_threshold
         - max_winners
         - admin_group
         - decisions_strategy
@@ -8282,17 +8282,18 @@ components:
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
-        winning_thresholds:
+        winning_threshold:
           description: >-
-            Drops which rate tally ends up in this range will win. Must be set
-            if and only if type is APPROVE
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiIntRange"
+            Single positive threshold a drop must reach to win. Must be set if
+            and only if type is APPROVE
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
         max_winners:
           description: >-
-            This amount of top rated drops will win. Must be set if and only if
-            type is RANK
+            Total number of APPROVE decisions this wave may produce. Null means
+            unlimited. Must be set if and only if type is APPROVE
           type: integer
           format: int64
           minimum: 1
@@ -11639,27 +11640,31 @@ components:
       required:
         - type
         - time_lock_ms
-        - winning_thresholds
+        - winning_threshold
         - max_winners
         - admin_group
         - authenticated_user_eligible_for_admin
         - decisions_strategy
         - next_decision_time
         - admin_drop_deletion_enabled
+        - total_no_of_decisions
+        - no_of_decisions_done
+        - no_of_decisions_left
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
-        winning_thresholds:
+        winning_threshold:
           description: >-
-            Drops which rate tally ends up in this range will win. Must be set
-            if and only if type is APPROVE
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiIntRange"
+            Single positive threshold a drop must reach to win. Null for
+            non-APPROVE waves
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
         max_winners:
           description: >-
-            This amount of top rated drops will win. Must be set if and only if
-            type is RANK
+            Total number of APPROVE decisions this wave may produce. Null means
+            unlimited. Null for non-APPROVE waves
           type: integer
           format: int64
           minimum: 1
@@ -11687,6 +11692,21 @@ components:
           nullable: true
         admin_drop_deletion_enabled:
           type: boolean
+        total_no_of_decisions:
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        no_of_decisions_done:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
+        no_of_decisions_left:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
     ApiWaveContributorOverview:
       required:
         - contributor_identity

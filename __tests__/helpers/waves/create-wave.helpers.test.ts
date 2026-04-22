@@ -1,14 +1,72 @@
 import {
+  getCreateNewWaveBody,
   getCreateWaveNextStep,
   getCreateWavePreviousStep,
   calculateLastDecisionTime,
 } from "@/helpers/waves/create-wave.helpers";
+import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
+import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
-import { CreateWaveStep } from "@/types/waves.types";
+import {
+  CreateWaveOutcomeConfigWinnersCreditValueType,
+  CreateWaveOutcomeType,
+  CreateWaveStep,
+} from "@/types/waves.types";
+
+const createBaseConfig = (waveType: ApiWaveType) =>
+  ({
+    overview: { type: waveType, name: "W", image: null },
+    groups: {
+      canView: "1",
+      canDrop: "2",
+      canVote: "3",
+      canChat: "4",
+      admin: "5",
+    },
+    dates: {
+      submissionStartDate: 1,
+      votingStartDate: 2,
+      endDate: 10,
+      firstDecisionTime: 2,
+      subsequentDecisions: [],
+      isRolling: false,
+    },
+    drops: {
+      noOfApplicationsAllowedPerParticipant: 1,
+      requiredTypes: [],
+      requiredMetadata: [],
+      submissionStrategy: null,
+      terms: null,
+      signatureRequired: false,
+      adminCanDeleteDrops: false,
+    },
+    chat: { enabled: true },
+    voting: {
+      type: null,
+      category: null,
+      profileId: null,
+      timeWeighted: {
+        enabled: false,
+        averagingInterval: 5,
+        averagingIntervalUnit: "minutes",
+      },
+    },
+    outcomes: [],
+    approval: { threshold: null, thresholdTimeMs: null },
+  }) as any;
+
+const createDrop = () =>
+  ({
+    parts: [],
+    referenced_nfts: [],
+    mentioned_users: [],
+    metadata: [],
+  }) as any;
 
 describe("create-wave.helpers", () => {
   describe("getCreateWaveNextStep", () => {
@@ -78,9 +136,6 @@ describe("create-wave.helpers", () => {
 
   describe("getCreateNewWaveBody", () => {
     it("converts config into request body", () => {
-      const {
-        getCreateNewWaveBody,
-      } = require("@/helpers/waves/create-wave.helpers");
       const config = {
         overview: { type: ApiWaveType.Chat, name: "W", image: null },
         groups: {
@@ -138,9 +193,6 @@ describe("create-wave.helpers", () => {
     });
 
     it("includes identity submission strategy when configured", () => {
-      const {
-        getCreateNewWaveBody,
-      } = require("@/helpers/waves/create-wave.helpers");
       const config = {
         overview: { type: ApiWaveType.Rank, name: "W", image: null },
         groups: {
@@ -199,6 +251,193 @@ describe("create-wave.helpers", () => {
       expect(res.participation.submission_strategy).toEqual(
         config.drops.submissionStrategy
       );
+    });
+
+    it("keeps manual approve outcomes without max winners and filters invalid credit amounts", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.outcomes = [
+        {
+          type: CreateWaveOutcomeType.MANUAL,
+          title: "Manual action",
+          credit: null,
+          category: null,
+          maxWinners: null,
+          winnersConfig: null,
+        },
+        {
+          type: CreateWaveOutcomeType.REP,
+          title: null,
+          credit: 0,
+          category: "gold",
+          maxWinners: null,
+          winnersConfig: null,
+        },
+        {
+          type: CreateWaveOutcomeType.REP,
+          title: null,
+          credit: Number.NaN,
+          category: "gold",
+          maxWinners: null,
+          winnersConfig: null,
+        },
+        {
+          type: CreateWaveOutcomeType.REP,
+          title: null,
+          credit: 15,
+          category: "gold",
+          maxWinners: null,
+          winnersConfig: null,
+        },
+        {
+          type: CreateWaveOutcomeType.NIC,
+          title: null,
+          credit: null,
+          category: null,
+          maxWinners: null,
+          winnersConfig: null,
+        },
+        {
+          type: CreateWaveOutcomeType.NIC,
+          title: null,
+          credit: 0,
+          category: null,
+          maxWinners: null,
+          winnersConfig: null,
+        },
+        {
+          type: CreateWaveOutcomeType.NIC,
+          title: null,
+          credit: 25,
+          category: null,
+          maxWinners: null,
+          winnersConfig: null,
+        },
+      ] as any;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.outcomes).toEqual([
+        {
+          type: ApiWaveOutcomeType.Manual,
+          description: "Manual action",
+        },
+        {
+          type: ApiWaveOutcomeType.Automatic,
+          subtype: ApiWaveOutcomeSubType.CreditDistribution,
+          description: "",
+          credit: ApiWaveOutcomeCredit.Rep,
+          rep_category: "gold",
+          amount: 15,
+        },
+        {
+          type: ApiWaveOutcomeType.Automatic,
+          subtype: ApiWaveOutcomeSubType.CreditDistribution,
+          description: "",
+          credit: ApiWaveOutcomeCredit.Cic,
+          amount: 25,
+        },
+      ]);
+    });
+
+    it("filters rank outcomes with missing or non-positive total amounts", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.outcomes = [
+        {
+          type: CreateWaveOutcomeType.REP,
+          title: null,
+          credit: null,
+          category: "gold",
+          maxWinners: 1,
+          winnersConfig: {
+            creditValueType:
+              CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
+            totalAmount: 0,
+            winners: [{ value: 10 }],
+          },
+        },
+        {
+          type: CreateWaveOutcomeType.REP,
+          title: null,
+          credit: null,
+          category: "gold",
+          maxWinners: 1,
+          winnersConfig: {
+            creditValueType:
+              CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
+            totalAmount: Number.NaN,
+            winners: [{ value: 10 }],
+          },
+        },
+        {
+          type: CreateWaveOutcomeType.REP,
+          title: null,
+          credit: null,
+          category: "gold",
+          maxWinners: 1,
+          winnersConfig: {
+            creditValueType:
+              CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
+            totalAmount: 10,
+            winners: [{ value: 10 }],
+          },
+        },
+        {
+          type: CreateWaveOutcomeType.NIC,
+          title: null,
+          credit: null,
+          category: null,
+          maxWinners: 1,
+          winnersConfig: {
+            creditValueType:
+              CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
+            totalAmount: null,
+            winners: [{ value: 20 }],
+          },
+        },
+        {
+          type: CreateWaveOutcomeType.NIC,
+          title: null,
+          credit: null,
+          category: null,
+          maxWinners: 1,
+          winnersConfig: {
+            creditValueType:
+              CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
+            totalAmount: 20,
+            winners: [{ value: 20 }],
+          },
+        },
+      ] as any;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.outcomes).toEqual([
+        {
+          type: ApiWaveOutcomeType.Automatic,
+          subtype: ApiWaveOutcomeSubType.CreditDistribution,
+          description: "Rep distribution",
+          credit: ApiWaveOutcomeCredit.Rep,
+          rep_category: "gold",
+          amount: 10,
+          distribution: [{ amount: 10, description: null }],
+        },
+        {
+          type: ApiWaveOutcomeType.Automatic,
+          subtype: ApiWaveOutcomeSubType.CreditDistribution,
+          description: "NIC distribution",
+          credit: ApiWaveOutcomeCredit.Cic,
+          amount: 20,
+          distribution: [{ amount: 20, description: null }],
+        },
+      ]);
     });
   });
 });

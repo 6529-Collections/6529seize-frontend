@@ -28,6 +28,25 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiDelete: jest.fn(),
 }));
 
+jest.mock("@sentry/nextjs", () => ({
+  __esModule: true,
+  addBreadcrumb: jest.fn(),
+  withScope: jest.fn((callback: (scope: any) => void) => {
+    const scope = {
+      setLevel: jest.fn(),
+      setFingerprint: jest.fn(),
+      setTag: jest.fn(),
+      setExtras: jest.fn(),
+    };
+    callback(scope);
+  }),
+  captureException: jest.fn(),
+}));
+
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
+  useWebsocketStatus: jest.fn(() => "connected"),
+}));
+
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
   default: jest.fn(() => false),
@@ -48,6 +67,29 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
 
 const mockUseEmoji = useEmoji as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;
+const setToastMock = jest.fn();
+const createStructuredReactionError = ({
+  body,
+  message = "technical error",
+  status,
+  statusText,
+}: {
+  body?: unknown;
+  message?: string;
+  status?: number;
+  statusText?: string;
+}): Error & {
+  status?: number;
+  response: { body?: unknown; status?: number; statusText?: string };
+} =>
+  Object.assign(new Error(message), {
+    ...(status !== undefined ? { status } : {}),
+    response: {
+      ...(body !== undefined ? { body } : {}),
+      ...(status !== undefined ? { status } : {}),
+      ...(statusText !== undefined ? { statusText } : {}),
+    },
+  });
 
 type NativeEmojiMock = { skins: Array<{ native: string }> };
 
@@ -95,7 +137,7 @@ describe("WaveDropReactions", () => {
     jest.clearAllMocks();
     mockUseAuth.mockReturnValue({
       connectedProfile: { id: "profile-1", handle: "alice" },
-      setToast: jest.fn(),
+      setToast: setToastMock,
     });
     getMyStreamMock().mockReturnValue({
       applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
@@ -260,6 +302,7 @@ describe("WaveDropReactions", () => {
     expect(commonApi.commonApiPost).toHaveBeenCalledWith({
       endpoint: "drops/test-drop/reaction",
       body: { reaction: ":gm:" },
+      errorMode: "structured",
     });
 
     // Click button again to decrement
@@ -269,6 +312,99 @@ describe("WaveDropReactions", () => {
     });
     expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
       endpoint: "drops/test-drop/reaction",
+      errorMode: "structured",
+    });
+  });
+
+  it("shows the structured API error message when a chip reaction fails", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: JSON.stringify({ message: "Unauthorized" }),
+        message: "unexpected raw error",
+      })
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole("button")[0]);
+
+    await waitFor(() => {
+      expect(setToastMock).toHaveBeenCalledWith({
+        message: "Unauthorized",
+        type: "error",
+      });
+    });
+  });
+
+  it("shows the safe status-text message when a chip reaction gets an empty structured response", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: "   ",
+        message: "   ",
+        status: 404,
+        statusText: "Not Found",
+      })
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole("button")[0]);
+
+    await waitFor(() => {
+      expect(setToastMock).toHaveBeenCalledWith({
+        message: "Not Found",
+        type: "error",
+      });
     });
   });
 
