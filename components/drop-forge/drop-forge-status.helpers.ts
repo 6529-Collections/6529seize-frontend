@@ -18,7 +18,9 @@ type ClaimPrimaryStatusTone =
   | "pending"
   | "success"
   | "update"
-  | "destructive";
+  | "destructive"
+  | "post_mint"
+  | "finalized";
 
 export interface ClaimPrimaryStatus {
   key: ClaimPrimaryStatusKey;
@@ -48,6 +50,12 @@ export function getPrimaryStatusPillClassName(
   }
   if (tone === "destructive") {
     return "tw-bg-rose-500/15 tw-text-rose-300 tw-ring-rose-400/40";
+  }
+  if (tone === "post_mint") {
+    return "tw-bg-sky-500/15 tw-text-sky-300 tw-ring-sky-400/40";
+  }
+  if (tone === "finalized") {
+    return "tw-bg-indigo-500/15 tw-text-indigo-300 tw-ring-indigo-400/40";
   }
   return "tw-bg-iron-700/30 tw-text-iron-300 tw-ring-iron-500/40";
 }

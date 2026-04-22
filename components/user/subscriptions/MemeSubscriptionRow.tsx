@@ -77,6 +77,7 @@ export default function MemeSubscriptionRow(
         endpoint: `subscriptions/consolidation/final/${props.profileKey}/${props.subscription.contract}/${props.subscription.token_id}`,
       }),
     enabled: props.first,
+    retry: false,
   });
   const final = fetchedFinal;
 

@@ -134,6 +134,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
     const nextQuery = params.toString();
     const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+    const currentQuery = searchParams.toString();
+    const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+    if (nextUrl === currentUrl) {
+      return;
+    }
+
     router.replace(nextUrl, { scroll: false });
   };
 

@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiPaymentDetails } from '../models/ApiPaymentDetails';
 import { HttpFile } from '../http/http';
 
 export class ApiMemesMintStat {
@@ -23,6 +24,7 @@ export class ApiMemesMintStat {
     'proceeds_usd': number;
     'artist_split_eth': number;
     'artist_split_usd': number;
+    'payment_details': ApiPaymentDetails | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -82,6 +84,12 @@ export class ApiMemesMintStat {
             "baseName": "artist_split_usd",
             "type": "number",
             "format": "double"
+        },
+        {
+            "name": "payment_details",
+            "baseName": "payment_details",
+            "type": "ApiPaymentDetails",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

@@ -1,6 +1,7 @@
 import { CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatTimestampToMonthYear } from "@/helpers/Helpers";
+import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -53,9 +54,14 @@ export default function UserPageHeaderName({
       {showTitle && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
           <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
-            <p className="tw-mb-0 tw-break-all tw-text-left tw-text-xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white md:tw-text-2xl">
-              {displayName}
-            </p>
+            <ProfileNameWithAiMarker
+              classification={profile.classification}
+              markerClassName="tw-text-base md:tw-text-lg"
+            >
+              <span className="tw-break-all tw-text-left tw-text-xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white md:tw-text-2xl">
+                {displayName}
+              </span>
+            </ProfileNameWithAiMarker>
           </UserPageHeaderNameWrapper>
           {profile.handle && (
             <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center xl:tw-mt-1">

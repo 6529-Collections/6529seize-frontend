@@ -9,6 +9,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import { buildSubmissionMetadata } from "./submissionMetadata";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 
 interface PreviewMediaSelection {
   readonly mediaSource: "upload" | "url";
@@ -156,6 +157,9 @@ export const buildPreviewDrop = ({
         connectedProfile?.winner_main_stage_drop_ids ?? [],
       is_wave_creator: connectedProfile?.is_wave_creator ?? false,
       artist_of_prevote_cards: connectedProfile?.artist_of_prevote_cards ?? [],
+      classification:
+        connectedProfile?.classification ?? ApiProfileClassification.Pseudonym,
+      sub_classification: connectedProfile?.sub_classification ?? null,
     },
     created_at: now,
     updated_at: null,
