@@ -41,9 +41,9 @@ interface ReactionMutationContext {
   readonly websocketStatus: WebSocketStatus | null;
   endpoint?: string | null;
   method?: string | null;
-  requestSentAt?: number | null;
-  apiSucceededAt?: number | null;
-  apiFailedAt?: number | null;
+  requestSentAt: number | null;
+  apiSucceededAt: number | null;
+  apiFailedAt: number | null;
   failureCaptured?: boolean;
   supersededByMutationId?: string | null;
 }
@@ -422,6 +422,9 @@ export function beginReactionMutation(params: {
     visibilityState: getVisibilityState(),
     online: getOnlineStatus(),
     websocketStatus: toWebsocketStatus(params.websocketStatus),
+    requestSentAt: null,
+    apiSucceededAt: null,
+    apiFailedAt: null,
   };
 
   latestMutationIdByDrop.set(params.dropId, context.mutationId);

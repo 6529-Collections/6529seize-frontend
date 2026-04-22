@@ -164,6 +164,8 @@ export function useDropReaction(
         recordReaction(reactionCode);
       }
 
+      let succeeded = false;
+
       try {
         const endpoint = `drops/${drop.id}/reaction`;
         if (isRemoving) {
@@ -188,7 +190,7 @@ export function useDropReaction(
         }
         recordReactionRequestSucceeded(mutation);
         rollbackRef.current = null;
-        onSuccess?.();
+        succeeded = true;
       } catch (error) {
         recordReactionRequestFailed(mutation, error);
         const errorMessage = getReactionErrorMessage(
@@ -199,6 +201,14 @@ export function useDropReaction(
         rollbackRef.current?.();
         recordReactionRollbackApplied(mutation);
         rollbackRef.current = null;
+      }
+
+      if (succeeded) {
+        try {
+          onSuccess?.();
+        } catch {
+          // Ignore consumer callback errors so a successful request stays successful.
+        }
       }
     },
     [

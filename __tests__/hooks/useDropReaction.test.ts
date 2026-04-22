@@ -5,10 +5,14 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import * as commonApi from "@/services/api/common-api";
+import * as dropReactionMonitoring from "@/utils/monitoring/dropReactionMonitoring";
 import { act, renderHook } from "@testing-library/react";
 
 const setToastMock = jest.fn();
-const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));
+const rollbackMock = jest.fn();
+const applyOptimisticDropUpdateMock = jest.fn(() => ({
+  rollback: rollbackMock,
+}));
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -138,6 +142,37 @@ describe("useDropReaction", () => {
       message: "Rate limited",
       type: "error",
     });
+  });
+
+  it("does not treat a throwing onSuccess callback as a request failure", async () => {
+    const onSuccess = jest.fn(() => {
+      throw new Error("consumer callback failed");
+    });
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, {
+        source: "quick-react",
+        onSuccess,
+      })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(
+      dropReactionMonitoring.recordReactionRequestSucceeded
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      dropReactionMonitoring.recordReactionRequestFailed
+    ).not.toHaveBeenCalled();
+    expect(
+      dropReactionMonitoring.recordReactionRollbackApplied
+    ).not.toHaveBeenCalled();
+    expect(setToastMock).not.toHaveBeenCalled();
+    expect(rollbackMock).not.toHaveBeenCalled();
   });
 
   it("falls back for unsafe structured quick react failures", async () => {
