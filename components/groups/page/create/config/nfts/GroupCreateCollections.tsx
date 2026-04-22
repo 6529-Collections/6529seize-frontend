@@ -1,6 +1,7 @@
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
-import type { ApiGroupOwnsNft} from "@/generated/models/ApiGroupOwnsNft";
+import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import { CheckIcon } from "@heroicons/react/24/outline";
 
 const COLLECTIONS = [
   { name: "Gradients", enum: ApiGroupOwnsNftNameEnum.Gradients },
@@ -18,7 +19,7 @@ export default function GroupCreateCollections({
 }) {
   const toggleCollection = (collection: ApiGroupOwnsNftNameEnum) => {
     const existingCollection = nfts.find((n) => n.name === collection);
-    
+
     if (existingCollection?.tokens.length === 0) {
       setNfts(nfts.filter((n) => n.name !== collection));
     } else {
@@ -32,31 +33,41 @@ export default function GroupCreateCollections({
   };
 
   return (
-    <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-shadow-inner sm:tw-p-5">
       <div>
-        <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
           Collection Access
         </p>
-        <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-500">
           Identity must own any token from these collections.
         </p>
       </div>
-      <div className="tw-mt-2 sm:tw-mt-3">
-        <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+      <div className="tw-mt-2 sm:tw-mt-4">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-3">
           {COLLECTIONS.map((collection) => {
-            const existingCollection = nfts.find((n) => n.name === collection.enum);
+            const existingCollection = nfts.find(
+              (n) => n.name === collection.enum
+            );
             const isSelected = existingCollection?.tokens.length === 0;
             return (
               <button
                 key={collection.enum}
                 onClick={() => toggleCollection(collection.enum)}
-                className={`tw-p-3 tw-rounded-xl tw-border tw-border-solid tw-transition-colors ${
+                className={`tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-left tw-transition-colors ${
                   isSelected
-                    ? "tw-bg-iron-800 tw-border-iron-700 tw-text-iron-50"
-                    : "tw-bg-iron-950 tw-border-iron-800 tw-text-iron-400 hover:tw-border-iron-700 hover:tw-text-iron-50"
+                    ? "tw-border-primary-500/50 tw-bg-primary-500/10 tw-text-primary-400"
+                    : "tw-border-white/5 tw-bg-iron-900 tw-text-iron-300 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-text-iron-100"
                 }`}
               >
-                <span className="tw-text-base tw-font-medium">{collection.name}</span>
+                <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium">
+                  {collection.name}
+                </span>
+                {isSelected && (
+                  <CheckIcon
+                    aria-hidden="true"
+                    className="tw-size-4 tw-flex-shrink-0 tw-text-primary-400"
+                  />
+                )}
               </button>
             );
           })}

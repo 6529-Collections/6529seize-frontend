@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { CreateWaveStep } from "@/types/waves.types";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
@@ -20,16 +19,10 @@ export default function CreateWaveNextStep({
   readonly submitting: boolean;
   readonly onClick: () => void;
 }) {
-  const getStepType = () => {
-    if (step === CreateWaveStep.DESCRIPTION) return CreateWaveNextStepType.SAVE;
-    return CreateWaveNextStepType.NEXT;
-  };
-
-  const [stepType, setStepType] = useState<CreateWaveNextStepType>(
-    getStepType()
-  );
-
-  useEffect(() => setStepType(getStepType()), [step]);
+  const stepType =
+    step === CreateWaveStep.DESCRIPTION
+      ? CreateWaveNextStepType.SAVE
+      : CreateWaveNextStepType.NEXT;
 
   const components: Record<CreateWaveNextStepType, React.ReactNode> = {
     [CreateWaveNextStepType.NEXT]: (
@@ -37,7 +30,8 @@ export default function CreateWaveNextStep({
         onClicked={onClick}
         disabled={disabled}
         loading={false}
-        padding="tw-px-6 tw-py-3">
+        padding="tw-px-4 tw-py-2.5"
+      >
         Next
       </PrimaryButton>
     ),
@@ -46,7 +40,8 @@ export default function CreateWaveNextStep({
         onClicked={onClick}
         disabled={submitting}
         loading={submitting}
-        padding="tw-px-6 tw-py-3">
+        padding="tw-px-4 tw-py-2.5"
+      >
         Complete
       </PrimaryButton>
     ),
