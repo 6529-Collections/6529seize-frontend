@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDatesRank from "@/components/waves/create-wave/dates/CreateWaveDatesRank";
+import { adjustDatesAfterSubmissionChange } from "@/components/waves/create-wave/services/waveDecisionService";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 
@@ -13,7 +13,11 @@ jest.mock(
       data-expanded={props.isExpanded}
       onClick={() => {
         props.setIsExpanded();
-        props.setDates({ ...props.dates, submissionStartDate: 50 });
+        props.setDates({
+          ...props.dates,
+          submissionStartDate: 50,
+          votingStartDate: 50,
+        });
       }}
     >
       start
@@ -65,6 +69,8 @@ jest.mock(
     adjustDatesAfterSubmissionChange: jest.fn((d, ts) => ({
       ...d,
       submissionStartDate: ts,
+      votingStartDate: ts,
+      firstDecisionTime: ts,
     })),
     calculateEndDate: jest.fn(() => 123),
     validateDateSequence: jest.fn(() => []),
@@ -80,25 +86,12 @@ const baseDates: CreateWaveDatesConfig = {
   isRolling: false,
 };
 
-function CreateWaveDatesRankHarness({
-  initialDates,
-}: {
-  readonly initialDates: CreateWaveDatesConfig;
-}) {
-  const [dates, setDates] = useState(initialDates);
-
-  return (
-    <CreateWaveDatesRank
-      waveType={ApiWaveType.Rank}
-      dates={dates}
-      setDates={setDates}
-    />
-  );
-}
-
 describe("CreateWaveDatesRank", () => {
   it("adjusts dates when submission start changes", async () => {
     const setDates = jest.fn();
+    const adjustDatesAfterSubmissionChangeMock = jest.mocked(
+      adjustDatesAfterSubmissionChange
+    );
     const user = userEvent.setup();
     render(
       <CreateWaveDatesRank
@@ -109,9 +102,15 @@ describe("CreateWaveDatesRank", () => {
     );
 
     await user.click(screen.getByTestId("start"));
+    expect(adjustDatesAfterSubmissionChangeMock).toHaveBeenCalledWith(
+      baseDates,
+      50
+    );
     expect(setDates).toHaveBeenCalledWith({
       ...baseDates,
       submissionStartDate: 50,
+      votingStartDate: 50,
+      firstDecisionTime: 50,
       endDate: 123,
     });
   });
@@ -178,9 +177,28 @@ describe("CreateWaveDatesRank", () => {
 
   it("opens the rolling section when rolling mode is enabled", async () => {
     const user = userEvent.setup();
-    render(
-      <CreateWaveDatesRankHarness
-        initialDates={{ ...baseDates, subsequentDecisions: [1] }}
+    let dates: CreateWaveDatesConfig = {
+      ...baseDates,
+      subsequentDecisions: [1],
+    };
+    let view!: ReturnType<typeof render>;
+
+    const setDates = (nextDates: CreateWaveDatesConfig) => {
+      dates = nextDates;
+      view.rerender(
+        <CreateWaveDatesRank
+          waveType={ApiWaveType.Rank}
+          dates={dates}
+          setDates={setDates}
+        />
+      );
+    };
+
+    view = render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={dates}
+        setDates={setDates}
       />
     );
 

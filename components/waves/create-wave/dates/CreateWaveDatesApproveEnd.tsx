@@ -16,6 +16,22 @@ interface CreateWaveDatesApproveEndProps {
   readonly setIsExpanded: (expanded: boolean) => void;
 }
 
+const getEarliestValidEndDate = (submissionStartDate: number) => {
+  const earliestValidEndDate = new Date(submissionStartDate);
+  earliestValidEndDate.setSeconds(0, 0);
+  earliestValidEndDate.setMinutes(earliestValidEndDate.getMinutes() + 1);
+  return earliestValidEndDate;
+};
+
+const clampToEarliestValidEndDate = (
+  candidateDate: Date,
+  submissionStartDate: number
+) => {
+  const earliestValidEndTimestamp =
+    getEarliestValidEndDate(submissionStartDate).getTime();
+  return new Date(Math.max(candidateDate.getTime(), earliestValidEndTimestamp));
+};
+
 const formatDateTime = (timestamp: number) =>
   new Date(timestamp).toLocaleString("en-US", {
     month: "short",
@@ -32,26 +48,30 @@ export default function CreateWaveDatesApproveEnd({
   isExpanded,
   setIsExpanded,
 }: CreateWaveDatesApproveEndProps) {
-  const selectedTimestamp = dates.endDate ?? dates.submissionStartDate;
+  const earliestValidEndTimestamp = useMemo(
+    () => getEarliestValidEndDate(dates.submissionStartDate).getTime(),
+    [dates.submissionStartDate]
+  );
+  const selectedTimestamp = dates.endDate ?? earliestValidEndTimestamp;
 
   const minTime = useMemo(() => {
-    const minDate = new Date(dates.submissionStartDate);
+    const minDate = new Date(earliestValidEndTimestamp);
     return {
       hours: minDate.getHours(),
       minutes: minDate.getMinutes(),
     };
-  }, [dates.submissionStartDate]);
+  }, [earliestValidEndTimestamp]);
 
   const selectedDate = useMemo(
     () => new Date(selectedTimestamp),
     [selectedTimestamp]
   );
-  const startDate = useMemo(
-    () => new Date(dates.submissionStartDate),
-    [dates.submissionStartDate]
+  const earliestValidEndDate = useMemo(
+    () => new Date(earliestValidEndTimestamp),
+    [earliestValidEndTimestamp]
   );
-  const isSameDayAsStart =
-    selectedDate.toDateString() === startDate.toDateString();
+  const isSameDayAsEarliestValidEnd =
+    selectedDate.toDateString() === earliestValidEndDate.toDateString();
 
   const endDate = dates.endDate;
 
@@ -76,19 +96,11 @@ export default function CreateWaveDatesApproveEnd({
     const newDate = new Date(timestamp);
     const currentHours = currentDate.getHours();
     const currentMinutes = currentDate.getMinutes();
-    const isStartDay = newDate.toDateString() === startDate.toDateString();
-
-    if (
-      isStartDay &&
-      (currentHours < minTime.hours ||
-        (currentHours === minTime.hours && currentMinutes < minTime.minutes))
-    ) {
-      newDate.setHours(minTime.hours, minTime.minutes, 0, 0);
-    } else {
-      newDate.setHours(currentHours, currentMinutes, 0, 0);
-    }
-
-    const newTimestamp = newDate.getTime();
+    newDate.setHours(currentHours, currentMinutes, 0, 0);
+    const newTimestamp = clampToEarliestValidEndDate(
+      newDate,
+      dates.submissionStartDate
+    ).getTime();
     setDates({
       ...dates,
       endDate: newTimestamp,
@@ -98,7 +110,10 @@ export default function CreateWaveDatesApproveEnd({
   const handleTimeChange = (hours: number, minutes: number) => {
     const nextDate = new Date(selectedTimestamp);
     nextDate.setHours(hours, minutes, 0, 0);
-    const newTimestamp = nextDate.getTime();
+    const newTimestamp = clampToEarliestValidEndDate(
+      nextDate,
+      dates.submissionStartDate
+    ).getTime();
     setDates({
       ...dates,
       endDate: newTimestamp,
@@ -132,7 +147,7 @@ export default function CreateWaveDatesApproveEnd({
               initialMonth={selectedDate.getMonth()}
               initialYear={selectedDate.getFullYear()}
               selectedTimestamp={selectedTimestamp}
-              minTimestamp={dates.submissionStartDate}
+              minTimestamp={earliestValidEndTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleDateSelection}
             />
@@ -146,7 +161,7 @@ export default function CreateWaveDatesApproveEnd({
               hours={selectedDate.getHours()}
               minutes={selectedDate.getMinutes()}
               onTimeChange={handleTimeChange}
-              minTime={isSameDayAsStart ? minTime : null}
+              minTime={isSameDayAsEarliestValidEnd ? minTime : null}
             />
           </div>
         </div>

@@ -42,10 +42,16 @@ export default function CreateWaveDatesRank({
     let normalizedDates = nextDates;
 
     if (nextDates.submissionStartDate !== dates.submissionStartDate) {
-      normalizedDates = adjustDatesAfterSubmissionChange(
-        nextDates,
+      const normalizedTimeline = adjustDatesAfterSubmissionChange(
+        dates,
         nextDates.submissionStartDate
       );
+      normalizedDates = {
+        ...nextDates,
+        submissionStartDate: normalizedTimeline.submissionStartDate,
+        votingStartDate: normalizedTimeline.votingStartDate,
+        firstDecisionTime: normalizedTimeline.firstDecisionTime,
+      };
     }
 
     if (!normalizedDates.isRolling) {
