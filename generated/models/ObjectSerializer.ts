@@ -526,7 +526,7 @@ import { ApiUploadsPage } from '../models/ApiUploadsPage';
 import { ApiWallet } from '../models/ApiWallet';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
-import { ApiWaveConfig          } from '../models/ApiWaveConfig';
+import { ApiWaveConfig             } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
