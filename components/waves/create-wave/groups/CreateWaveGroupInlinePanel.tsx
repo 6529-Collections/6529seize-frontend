@@ -91,9 +91,17 @@ export default function CreateWaveGroupInlinePanel({
     setBuilder(createInitialInlineGroupBuilderState());
   };
 
+  const collapseBuilderPanel = () => {
+    setBuilder((current) => ({
+      ...current,
+      panel: PANEL_ACTIONS,
+      activeRule: null,
+    }));
+  };
+
   useClickAway(panelRef, () => {
     if (builder.panel !== PANEL_ACTIONS) {
-      resetBuilder();
+      collapseBuilderPanel();
     }
   });
 
@@ -172,7 +180,12 @@ export default function CreateWaveGroupInlinePanel({
     panel: CreateWaveInlineGroupPanel,
     isActive: boolean
   ) => {
-    openPanel(isActive ? PANEL_ACTIONS : panel);
+    if (isActive) {
+      collapseBuilderPanel();
+      return;
+    }
+
+    openPanel(panel);
   };
 
   const openRule = (rule: CreateWaveInlineGroupRuleType) => {
@@ -337,18 +350,12 @@ export default function CreateWaveGroupInlinePanel({
             "tw-mt-3"
           )}
 
-        {displayedBuilder.panel !== PANEL_ACTIONS && (
+        {displayedBuilder.panel !== PANEL_SEARCH && draftSummary && (
           <CreateWaveInlineGroupDraftSummary
-            draftSummary={
-              displayedBuilder.panel === PANEL_SEARCH ? null : draftSummary
-            }
+            draftSummary={draftSummary}
             isValid={validation.valid}
-            canResetDraft={
-              displayedBuilder.panel !== PANEL_SEARCH && canResetDraft
-            }
-            canCreateDraft={
-              displayedBuilder.panel !== PANEL_SEARCH && canCreateDraft
-            }
+            canResetDraft={canResetDraft}
+            canCreateDraft={canCreateDraft}
             isCreating={isCreating}
             onClearAll={onClearAll}
             onCreateAndUse={onCreateAndUse}

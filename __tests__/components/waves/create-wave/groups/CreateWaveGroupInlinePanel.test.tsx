@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CreateWaveGroupInlinePanel from "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel";
@@ -371,6 +371,69 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(onChange).toHaveBeenCalledWith(createdGroup);
   });
 
+  it("keeps the draft when clicking outside an open editor", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel();
+
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+
+    expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
+
+    fireEvent.mouseDown(document.body);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByText("Ready to create this inline group")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
+  });
+
+  it("keeps draft actions visible after collapsing an active panel", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel();
+
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+
+    expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Ready to create this inline group")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
+  });
+
+  it("hides draft actions while searching for an existing group", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel();
+
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+    await user.click(
+      screen.getByRole("button", { name: "Use existing group" })
+    );
+
+    expect(screen.getByTestId("group-search")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Ready to create this inline group")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Clear all" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Create + use" })
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps reset available when the draft is invalid", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
@@ -379,10 +442,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "TDH" }));
     await user.click(screen.getByRole("button", { name: "set invalid tdh" }));
     expect(screen.getByRole("button", { name: "Create + use" })).toBeDisabled();
-    const startOverButton = screen.getByRole("button", { name: "Start over" });
-    expect(startOverButton).toBeEnabled();
+    const clearAllButton = screen.getByRole("button", { name: "Clear all" });
+    expect(clearAllButton).toBeEnabled();
 
-    await user.click(startOverButton);
+    await user.click(clearAllButton);
 
     await waitFor(() => {
       expect(
