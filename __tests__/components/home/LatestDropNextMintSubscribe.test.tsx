@@ -102,6 +102,27 @@ describe("LatestDropNextMintSubscribe", () => {
     );
   });
 
+  it("disables retries for expected subscription lookup errors", () => {
+    renderWithAuth(<LatestDropNextMintSubscribe />);
+
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ["next-mint-subscription-details", expect.any(String)],
+        retry: false,
+      })
+    );
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: [
+          "next-mint-subscription-status",
+          expect.any(String),
+          expect.any(Number),
+        ],
+        retry: false,
+      })
+    );
+  });
+
   it("falls back to status eligibility when details are unavailable", () => {
     useQueryMock.mockImplementation(({ queryKey }) => {
       if (queryKey[0] === "next-mint-subscription-details") {

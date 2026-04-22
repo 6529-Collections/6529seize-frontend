@@ -16,6 +16,7 @@ import { ArtistActivityBadge } from "./ArtistActivityBadge";
 import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { WaveCreatorBadge } from "./WaveCreatorBadge";
 import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
+import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 
 interface DropAuthorBadgesProfile {
   readonly id?: string | null;
@@ -38,6 +39,8 @@ interface DropAuthorBadgesProfile {
   readonly artist_of_prevote_cards?: readonly number[] | null;
   readonly profile_wave_id?: string | null;
   readonly is_wave_creator?: boolean | null;
+  readonly classification: ApiProfileClassification;
+  readonly sub_classification: string | null;
 }
 
 interface DropAuthorBadgesProps {
@@ -96,6 +99,8 @@ const toApiProfileMin = (profile: DropAuthorBadgesProfile): ApiProfileMin => {
         : [],
     profile_wave_id: profile.profile_wave_id ?? null,
     is_wave_creator: profile.is_wave_creator === true,
+    classification: profile.classification,
+    sub_classification: profile.sub_classification,
   };
 };
 

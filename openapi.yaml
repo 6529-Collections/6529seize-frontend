@@ -3728,6 +3728,26 @@ paths:
         "400":
           description: Invalid request
   /profiles/{identity}/wave:
+    get:
+      tags:
+        - Profiles
+      summary: Get profile wave
+      operationId: getProfileWave
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileWave"
+        "404":
+          description: Profile not found
     post:
       tags:
         - Profiles
@@ -9582,6 +9602,7 @@ components:
         - proceeds_usd
         - artist_split_eth
         - artist_split_usd
+        - payment_details
       properties:
         id:
           type: integer
@@ -9611,6 +9632,10 @@ components:
         artist_split_usd:
           type: number
           format: double
+        payment_details:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiPaymentDetails"
     ApiMemesMintStatsPage:
       type: object
       required:
@@ -10472,6 +10497,19 @@ components:
           format: int64
         next:
           type: boolean
+    ApiPaymentDetails:
+      type: object
+      required:
+        - payment_address
+        - has_designated_payee
+        - designated_payee_name
+      properties:
+        payment_address:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+        has_designated_payee:
+          type: boolean
+        designated_payee_name:
+          type: string
     ApiProfileClassification:
       type: string
       enum:
@@ -10495,6 +10533,8 @@ components:
         - xtdh_rate
         - level
         - tdh_rate
+        - classification
+        - sub_classification
         - primary_address
         - banner1_color
         - banner2_color
@@ -10542,6 +10582,11 @@ components:
         level:
           type: number
           format: int64
+        classification:
+          $ref: "#/components/schemas/ApiProfileClassification"
+        sub_classification:
+          type: string
+          nullable: true
         primary_address:
           type: string
         subscribed_actions:
@@ -10688,6 +10733,18 @@ components:
         rep:
           type: number
           format: int64
+    ApiProfileWave:
+      type: object
+      required:
+        - profile_wave_id
+        - profile_curation_id
+      properties:
+        profile_wave_id:
+          type: string
+          nullable: true
+        profile_curation_id:
+          type: string
+          nullable: true
     ApiPushNotificationDevice:
       type: object
       required:
@@ -11058,6 +11115,11 @@ components:
           type: string
           minLength: 1
           maxLength: 100
+        profile_curation_id:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 50
     ApiStartMultipartMediaUploadResponse:
       required:
         - upload_id

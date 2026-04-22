@@ -56,6 +56,7 @@ export default function LatestDropNextMintSubscribe(
         endpoint: `subscriptions/consolidation/details/${profileKey}`,
       }),
     enabled: !hideSubscriptions && !!profileKey,
+    retry: false,
   });
 
   const { data: status, refetch: refetchStatus } =
@@ -66,6 +67,7 @@ export default function LatestDropNextMintSubscribe(
           endpoint: `subscriptions/consolidation/upcoming-memes/${tokenId}/${profileKey}`,
         }),
       enabled: !hideSubscriptions && !!profileKey && hasTokenId,
+      retry: false,
     });
 
   const subscription = useMemo<NFTSubscription | null>(() => {

@@ -255,6 +255,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
       expect.objectContaining({
         queryKey: ["consolidation-final-subscription", "testuser-0x123-1"],
         enabled: true,
+        retry: false,
       })
     );
   });

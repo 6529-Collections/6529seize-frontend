@@ -105,6 +105,8 @@ export const toProfileMin = (
     is_wave_creator: profile.is_wave_creator,
     artist_of_prevote_cards: profile.artist_of_prevote_cards,
     profile_wave_id: profile.profile_wave_id,
+    classification: profile.classification,
+    sub_classification: profile.sub_classification,
   };
 };
 

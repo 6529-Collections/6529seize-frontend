@@ -90,6 +90,8 @@ export const getOptimisticDrop = (
       profile_wave_id: connectedProfile.profile_wave_id,
       is_wave_creator: connectedProfile.is_wave_creator,
       artist_of_prevote_cards: connectedProfile.artist_of_prevote_cards,
+      classification: connectedProfile.classification,
+      sub_classification: connectedProfile.sub_classification,
     },
     created_at: Date.now(),
     updated_at: null,

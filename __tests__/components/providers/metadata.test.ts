@@ -68,6 +68,13 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
       });
     });
 
+    it("uses 6529.io as the default production title", () => {
+      const metadata = getAppMetadata();
+
+      expect(metadata.title).toBe("6529.io");
+      expect(metadata.openGraph?.title).toBe("6529.io");
+    });
+
     it("accepts custom metadata overrides", () => {
       const customMetadata = {
         title: "Custom Title",

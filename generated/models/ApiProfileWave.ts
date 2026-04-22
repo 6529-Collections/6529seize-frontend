@@ -13,9 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSetProfileWaveRequest {
-    'wave_id': string;
-    'profile_curation_id'?: string | null;
+export class ApiProfileWave {
+    'profile_wave_id': string | null;
+    'profile_curation_id': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,8 +23,8 @@ export class ApiSetProfileWaveRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "wave_id",
-            "baseName": "wave_id",
+            "name": "profile_wave_id",
+            "baseName": "profile_wave_id",
             "type": "string",
             "format": ""
         },
@@ -36,7 +36,7 @@ export class ApiSetProfileWaveRequest {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSetProfileWaveRequest.attributeTypeMap;
+        return ApiProfileWave.attributeTypeMap;
     }
 
     public constructor() {
