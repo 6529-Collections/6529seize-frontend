@@ -34,6 +34,10 @@ const WAVE_PARTICIPATION_RENDERERS: Readonly<
     ParticipationDrop: MemeParticipationDrop,
     SingleWaveDrop: MemesSingleWaveDrop,
   },
+  curation: {
+    ParticipationDrop: DefaultParticipationDrop,
+    SingleWaveDrop: DefaultSingleWaveDrop,
+  },
   quorum: {
     ParticipationDrop: QuorumParticipationDrop,
     SingleWaveDrop: QuorumSingleWaveDrop,
@@ -43,13 +47,14 @@ const WAVE_PARTICIPATION_RENDERERS: Readonly<
 export const useWaveParticipationRendererSet = (
   waveId: string | null | undefined
 ): ResolvedWaveParticipationRendererSet => {
-  const { isMemesWave, isQuorumWave } = useSeizeSettings();
+  const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
 
   return useMemo(() => {
     const variant = resolveWaveParticipationVariant({
       waveId,
       overrides: WAVE_PARTICIPATION_VARIANT_OVERRIDES,
       isMemesWave,
+      isCurationWave,
       isQuorumWave,
     });
 
@@ -57,5 +62,5 @@ export const useWaveParticipationRendererSet = (
       variant,
       ...WAVE_PARTICIPATION_RENDERERS[variant],
     };
-  }, [isMemesWave, isQuorumWave, waveId]);
+  }, [isMemesWave, isCurationWave, isQuorumWave, waveId]);
 };

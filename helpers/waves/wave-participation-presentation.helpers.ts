@@ -1,6 +1,10 @@
 import { normalizeOptionalWaveId } from "./wave.helpers";
 
-export type WaveParticipationVariant = "default" | "memes" | "quorum";
+export type WaveParticipationVariant =
+  | "default"
+  | "memes"
+  | "curation"
+  | "quorum";
 
 const DEFAULT_WAVE_PARTICIPATION_VARIANT_OVERRIDES: Readonly<
   Partial<Record<string, WaveParticipationVariant>>
@@ -10,6 +14,7 @@ export const resolveWaveParticipationVariant = ({
   waveId,
   overrides = DEFAULT_WAVE_PARTICIPATION_VARIANT_OVERRIDES,
   isMemesWave,
+  isCurationWave,
   isQuorumWave,
 }: {
   readonly waveId: string | null | undefined;
@@ -17,6 +22,7 @@ export const resolveWaveParticipationVariant = ({
     | Readonly<Partial<Record<string, WaveParticipationVariant>>>
     | undefined;
   readonly isMemesWave: (waveId: string | undefined | null) => boolean;
+  readonly isCurationWave: (waveId: string | undefined | null) => boolean;
   readonly isQuorumWave: (waveId: string | undefined | null) => boolean;
 }): WaveParticipationVariant => {
   const normalizedWaveId = normalizeOptionalWaveId(waveId);
@@ -32,6 +38,10 @@ export const resolveWaveParticipationVariant = ({
 
   if (isMemesWave(normalizedWaveId)) {
     return "memes";
+  }
+
+  if (isCurationWave(normalizedWaveId)) {
+    return "curation";
   }
 
   if (isQuorumWave(normalizedWaveId)) {
