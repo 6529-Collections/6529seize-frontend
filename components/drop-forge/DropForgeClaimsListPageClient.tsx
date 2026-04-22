@@ -15,6 +15,10 @@ import {
   CRAFT_CLAIMS_PAGE_SIZE,
   DROP_FORGE_SECTIONS,
 } from "@/components/drop-forge/drop-forge.constants";
+import {
+  findBestMatchingLaunchActionName,
+  getLaunchListStatus,
+} from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
@@ -24,7 +28,10 @@ import type { MintingClaim } from "@/generated/models/MintingClaim";
 import { isVideoUrl } from "@/helpers/video.helpers";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
-import { getClaimsPage } from "@/services/api/memes-minting-claims-api";
+import {
+  getClaimsPage,
+  getMemesMintingClaimActions,
+} from "@/services/api/memes-minting-claims-api";
 
 const CARD_CLASS =
   "tw-flex tw-flex-col tw-min-h-[7rem] tw-overflow-hidden tw-rounded-xl tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-iron-800 hover:tw-ring-iron-600 tw-p-4 sm:tw-p-5 tw-no-underline tw-transition-all tw-duration-300";
@@ -368,12 +375,90 @@ function CraftClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
 function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
   const { claim: manifoldClaim, isFetching: isManifoldClaimFetching } =
     useDropForgeManifoldClaim(claim.claim_id);
+  const [researchAirdropCompleted, setResearchAirdropCompleted] =
+    useState(false);
+  const [payArtistCompleted, setPayArtistCompleted] = useState(false);
+  const [actionsLoaded, setActionsLoaded] = useState(false);
+  const [actionsLoadFailed, setActionsLoadFailed] = useState(false);
   const primaryStatus = getClaimPrimaryStatus({
     claim,
     manifoldClaim: manifoldClaim ?? null,
     isCraftContext: false,
     isManifoldClaimFetching,
   });
+  const launchListStatus = actionsLoadFailed
+    ? primaryStatus
+    : getLaunchListStatus({
+        primaryStatus,
+        manifoldClaim,
+        researchAirdropCompleted,
+        payArtistCompleted,
+        actionsLoaded,
+      });
+
+  useEffect(() => {
+    let cancelled = false;
+    setResearchAirdropCompleted(false);
+    setPayArtistCompleted(false);
+    setActionsLoaded(false);
+    setActionsLoadFailed(false);
+
+    if (!manifoldClaim?.instanceId) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    getMemesMintingClaimActions(claim.claim_id)
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+
+        const actions = response.actions ?? [];
+        const actionNames = actions.map((action) => action.action);
+        const researchActionName = findBestMatchingLaunchActionName(
+          actionNames,
+          "research"
+        );
+        const payArtistActionName = findBestMatchingLaunchActionName(
+          actionNames,
+          "payartist"
+        );
+
+        setResearchAirdropCompleted(
+          researchActionName
+            ? actions.some(
+                (action) =>
+                  action.action === researchActionName &&
+                  action.completed === true
+              )
+            : false
+        );
+        setPayArtistCompleted(
+          payArtistActionName
+            ? actions.some(
+                (action) =>
+                  action.action === payArtistActionName &&
+                  action.completed === true
+              )
+            : false
+        );
+        setActionsLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setResearchAirdropCompleted(false);
+          setPayArtistCompleted(false);
+          setActionsLoadFailed(true);
+          setActionsLoaded(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [claim.claim_id, manifoldClaim?.instanceId]);
 
   return (
     <Link
@@ -382,13 +467,14 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
     >
       <div className={CARD_STATUS_CONTAINER_CLASS}>
         <DropForgeStatusPill
-          className={getPrimaryStatusPillClassName(primaryStatus.tone)}
-          label={primaryStatus.label}
+          className={getPrimaryStatusPillClassName(launchListStatus.tone)}
+          label={launchListStatus.label}
           showLoader={
-            primaryStatus.key === "publishing" ||
-            primaryStatus.key === "checking_onchain"
+            launchListStatus.key === "publishing" ||
+            launchListStatus.key === "checking_onchain"
           }
-          tooltipText={primaryStatus.reason ?? ""}
+          showCheck={launchListStatus.tone === "finalized"}
+          tooltipText={launchListStatus.reason ?? ""}
         />
       </div>
       <ClaimCardContent claim={claim} showLaunchFields />

@@ -1,22 +1,41 @@
 import clsx from "clsx";
-import { useId } from "react";
+import { CheckIcon } from "@heroicons/react/24/solid";
+import { useId, type ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 
+function getStatusIndicator(
+  showLoader: boolean,
+  showCheck: boolean
+): ReactNode {
+  if (showLoader) {
+    return <CircleLoader size={CircleLoaderSize.SMALL} />;
+  }
+  if (showCheck) {
+    return <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
+  }
+  return (
+    <span className="tw-inline-block tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-current" />
+  );
+}
+
 export default function DropForgeStatusPill({
   className,
   label,
   showLoader = false,
+  showCheck = false,
   tooltipText,
 }: Readonly<{
   className: string;
   label: string;
   showLoader?: boolean;
+  showCheck?: boolean;
   tooltipText?: string;
 }>) {
   const tooltipId = useId();
+  const statusIndicator = getStatusIndicator(showLoader, showCheck);
 
   return (
     <>
@@ -33,11 +52,7 @@ export default function DropForgeStatusPill({
           className
         )}
       >
-        {showLoader ? (
-          <CircleLoader size={CircleLoaderSize.SMALL} />
-        ) : (
-          <span className="tw-inline-block tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-current" />
-        )}
+        {statusIndicator}
         <span>{label}</span>
       </span>
       {tooltipText && (
