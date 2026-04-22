@@ -547,7 +547,7 @@ export default function UserPageProfileWave({
           hasLoadedCurations={hasLoadedCurations}
           onRetryCurations={retryCurationsLoad}
           profileCuration={profileCuration}
-          profileWaveId={profileWaveId}
+          wave={wave}
         />
       </div>
     </div>

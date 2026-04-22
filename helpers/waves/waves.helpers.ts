@@ -63,10 +63,7 @@ export const convertWaveToUpdateWave = (
   wave: {
     admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
     type: wave.wave.type,
-    winning_thresholds:
-      wave.wave.winning_thresholds?.max || wave.wave.winning_thresholds?.min
-        ? wave.wave.winning_thresholds
-        : null,
+    winning_threshold: wave.wave.winning_threshold,
     max_winners: wave.wave.max_winners,
     time_lock_ms: wave.wave.time_lock_ms,
     admin_group: {

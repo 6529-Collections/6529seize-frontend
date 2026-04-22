@@ -109,3 +109,193 @@ export const toProfileMin = (
     sub_classification: profile.sub_classification,
   };
 };
+
+type StructuredReactionError = Error & {
+  status?: unknown;
+  response?: {
+    status?: unknown;
+    statusText?: unknown;
+    body?: unknown;
+  } | null;
+};
+
+const isNonEmptyUnknownArray = (value: unknown): value is readonly unknown[] =>
+  Array.isArray(value) && value.length > 0;
+
+const getDetailsFirstMessage = (details: unknown): string | null => {
+  if (!isNonEmptyUnknownArray(details)) {
+    return null;
+  }
+
+  for (const detail of details) {
+    if (detail === null || typeof detail !== "object") {
+      continue;
+    }
+
+    const message = (detail as { message?: unknown }).message;
+    if (typeof message !== "string") {
+      continue;
+    }
+
+    const trimmedMessage = message.trim();
+    if (trimmedMessage.length > 0) {
+      return trimmedMessage;
+    }
+  }
+
+  return null;
+};
+
+// Reaction toasts should only surface messages from known API JSON fields.
+const getStructuredReactionBodyMessage = (body: unknown): string | null => {
+  if (typeof body === "string") {
+    try {
+      return getStructuredReactionBodyMessage(JSON.parse(body) as unknown);
+    } catch {
+      return null;
+    }
+  }
+
+  if (body === null || typeof body !== "object") {
+    return null;
+  }
+
+  const bodyRecord = body as Record<string, unknown>;
+  const errorMessage = bodyRecord["error"];
+  if (typeof errorMessage === "string" && errorMessage.trim().length > 0) {
+    return errorMessage;
+  }
+
+  const message = bodyRecord["message"];
+  if (typeof message === "string" && message.trim().length > 0) {
+    return message;
+  }
+
+  return getDetailsFirstMessage(bodyRecord["details"]);
+};
+
+const hasNoStructuredReactionBody = (body: unknown): boolean => {
+  if (body === null || body === undefined) {
+    return true;
+  }
+
+  if (typeof body === "string") {
+    if (body.trim().length === 0) {
+      return true;
+    }
+
+    try {
+      return hasNoStructuredReactionBody(JSON.parse(body) as unknown);
+    } catch {
+      return false;
+    }
+  }
+
+  return getStructuredReactionBodyMessage(body) === null;
+};
+
+const getStructuredReactionStatus = (
+  error: StructuredReactionError
+): number | null => {
+  const directStatus = error.status;
+  if (typeof directStatus === "number") {
+    return directStatus;
+  }
+
+  const responseStatus = error.response?.status;
+  if (typeof responseStatus === "number") {
+    return responseStatus;
+  }
+
+  return null;
+};
+
+const getEmptyStructuredReactionStatusMessage = (
+  status: number | null
+): string | null => {
+  switch (status) {
+    case 401:
+      return "Unauthorized";
+    case 429:
+      return "Too Many Requests";
+    case null:
+      return null;
+    default:
+      return null;
+  }
+};
+
+const getEmptyStructuredReactionStatusText = (
+  error: StructuredReactionError
+): string | null => {
+  const statusText = error.response?.statusText;
+  if (typeof statusText !== "string") {
+    return null;
+  }
+
+  const trimmedStatusText = statusText.trim();
+
+  if (trimmedStatusText.length === 0) {
+    return null;
+  }
+
+  return trimmedStatusText;
+};
+
+const getEmptyStructuredReactionFallbackMessage = (
+  error: StructuredReactionError
+): string | null => {
+  const message = error.message;
+  if (typeof message !== "string") {
+    return null;
+  }
+
+  const trimmedMessage = message.trim();
+
+  if (trimmedMessage.length === 0) {
+    return null;
+  }
+
+  return trimmedMessage;
+};
+
+export const getReactionErrorMessage = (
+  error: unknown,
+  fallback: string
+): string => {
+  if (error !== null && typeof error === "object") {
+    const structuredError = error as StructuredReactionError;
+    const structuredResponse = structuredError.response;
+    if (structuredResponse !== null && structuredResponse !== undefined) {
+      const structuredBody = structuredResponse.body;
+      const safeMessage = getStructuredReactionBodyMessage(structuredBody);
+      if (safeMessage) {
+        return safeMessage;
+      }
+
+      if (!hasNoStructuredReactionBody(structuredBody)) {
+        return fallback;
+      }
+    }
+
+    const statusMessage = getEmptyStructuredReactionStatusMessage(
+      getStructuredReactionStatus(structuredError)
+    );
+    if (statusMessage) {
+      return statusMessage;
+    }
+
+    const statusText = getEmptyStructuredReactionStatusText(structuredError);
+    if (statusText) {
+      return statusText;
+    }
+
+    const fallbackMessage =
+      getEmptyStructuredReactionFallbackMessage(structuredError);
+    if (fallbackMessage) {
+      return fallbackMessage;
+    }
+  }
+
+  return fallback;
+};

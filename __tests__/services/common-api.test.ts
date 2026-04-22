@@ -135,6 +135,7 @@ describe("commonApiPost", () => {
       response: {
         status: number;
         headers: Headers;
+        statusText?: string;
         body?: unknown;
       };
     } | null = null;
@@ -153,6 +154,7 @@ describe("commonApiPost", () => {
         response: {
           status: number;
           headers: Headers;
+          statusText?: string;
           body?: unknown;
         };
       };
@@ -165,7 +167,202 @@ describe("commonApiPost", () => {
     expect(error?.headers.get("retry-after")).toBe("2");
     expect(error?.response.status).toBe(429);
     expect(error?.response.headers).toBe(responseHeaders);
+    expect(error?.response.statusText).toBe("Too Many Requests");
     expect(error?.response.body).toBe('{"error":"rate limited"}');
+  });
+
+  it("falls back to statusText in structured errors when the response body is whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: "Service Unavailable",
+      text: async () => "   ",
+    });
+
+    let error: {
+      message: string;
+      response: {
+        status: number;
+        headers: Headers;
+        statusText?: string;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        response: {
+          status: number;
+          headers: Headers;
+          statusText?: string;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("Service Unavailable");
+    expect(error?.response.body).toBe("   ");
+    expect(error?.response.statusText).toBe("Service Unavailable");
+  });
+
+  it("falls back to statusText when response body is whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: "Service Unavailable",
+      text: async () => "   ",
+    });
+
+    await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
+      "Service Unavailable"
+    );
+  });
+
+  it("falls back to statusText when parsed json fields are whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 400,
+      statusText: "Bad Request",
+      text: async () => JSON.stringify({ error: "   " }),
+    });
+
+    let error: {
+      message: string;
+      response: {
+        status: number;
+        headers: Headers;
+        statusText?: string;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        response: {
+          status: number;
+          headers: Headers;
+          statusText?: string;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("Bad Request");
+    expect(error?.response.body).toBe('{"error":"   "}');
+    expect(error?.response.statusText).toBe("Bad Request");
+  });
+
+  it("prefers message when error field is whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 400,
+      statusText: "Bad Request",
+      text: async () =>
+        JSON.stringify({
+          error: "   ",
+          message: "Name already exists",
+        }),
+    });
+
+    let error: {
+      message: string;
+      response: {
+        status: number;
+        headers: Headers;
+        statusText?: string;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        response: {
+          status: number;
+          headers: Headers;
+          statusText?: string;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("Name already exists");
+    expect(error?.response.body).toBe(
+      '{"error":"   ","message":"Name already exists"}'
+    );
+    expect(error?.response.statusText).toBe("Bad Request");
+  });
+
+  it("prefers details message when higher-priority fields are whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+      text: async () =>
+        JSON.stringify({
+          error: "   ",
+          message: "   ",
+          details: [{ message: "Not allowed to reorder this curation" }],
+        }),
+    });
+
+    let error: {
+      message: string;
+      response: {
+        status: number;
+        headers: Headers;
+        statusText?: string;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        response: {
+          status: number;
+          headers: Headers;
+          statusText?: string;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("Not allowed to reorder this curation");
+    expect(error?.response.body).toBe(
+      '{"error":"   ","message":"   ","details":[{"message":"Not allowed to reorder this curation"}]}'
+    );
+    expect(error?.response.statusText).toBe("Forbidden");
   });
 
   it("prefers message when error key is missing", async () => {

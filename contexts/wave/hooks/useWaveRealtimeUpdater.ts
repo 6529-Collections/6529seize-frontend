@@ -14,6 +14,8 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater } from "./types";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -183,6 +185,16 @@ export function useWaveRealtimeUpdater({
           endpoint: `drops/${drop.id}`,
         });
         if (apiDrop) {
+          if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+            recordReactionRealtimeReconciliation({
+              drop: {
+                id: apiDrop.id,
+                wave: { id: apiDrop.wave.id },
+                context_profile_context: apiDrop.context_profile_context,
+              },
+              websocketStatus: WebSocketStatus.CONNECTED,
+            });
+          }
           updateData({
             key: waveId,
             drops: [

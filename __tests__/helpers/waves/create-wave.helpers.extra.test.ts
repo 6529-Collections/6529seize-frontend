@@ -157,7 +157,7 @@ it("calculates rolling end date correctly", () => {
   expect(body.voting.period.max).toBe(60); // last decision before 65
 });
 
-it("sets winning thresholds for approve waves", () => {
+it("keeps winning_threshold for approve waves", () => {
   const config: any = {
     overview: { type: ApiWaveType.Approve, name: "A" },
     groups: {
@@ -196,7 +196,7 @@ it("sets winning thresholds for approve waves", () => {
       },
     },
     outcomes: [],
-    approval: { threshold: 3, thresholdTimeMs: null },
+    approval: { threshold: 3, thresholdTimeMs: 60000 },
   };
   const drop: any = {
     parts: [],
@@ -205,5 +205,56 @@ it("sets winning thresholds for approve waves", () => {
     metadata: [],
   };
   const body = getCreateNewWaveBody({ drop, picture: null, config });
-  expect(body.wave.winning_thresholds).toEqual({ min: 3, max: 3 });
+  expect(body.wave.winning_threshold).toBe(config.approval.threshold);
+});
+
+it("sets winning_threshold to null for non-approve waves", () => {
+  const config: any = {
+    overview: { type: ApiWaveType.Rank, name: "R" },
+    groups: {
+      canView: "1",
+      canDrop: "2",
+      canVote: "3",
+      canChat: "4",
+      admin: "5",
+    },
+    dates: {
+      submissionStartDate: 1,
+      votingStartDate: 2,
+      endDate: null,
+      firstDecisionTime: 2,
+      subsequentDecisions: [],
+      isRolling: false,
+    },
+    drops: {
+      noOfApplicationsAllowedPerParticipant: 1,
+      requiredTypes: [],
+      requiredMetadata: [],
+      submissionStrategy: null,
+      terms: null,
+      signatureRequired: false,
+      adminCanDeleteDrops: false,
+    },
+    chat: { enabled: false },
+    voting: {
+      type: null,
+      category: null,
+      profileId: null,
+      timeWeighted: {
+        enabled: false,
+        averagingInterval: 5,
+        averagingIntervalUnit: "minutes",
+      },
+    },
+    outcomes: [],
+    approval: { threshold: 3, thresholdTimeMs: 60000 },
+  };
+  const drop: any = {
+    parts: [],
+    referenced_nfts: [],
+    mentioned_users: [],
+    metadata: [],
+  };
+  const body = getCreateNewWaveBody({ drop, picture: null, config });
+  expect(body.wave.winning_threshold).toBeNull();
 });
