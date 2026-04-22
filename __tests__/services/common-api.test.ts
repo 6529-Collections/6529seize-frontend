@@ -171,7 +171,7 @@ describe("commonApiPost", () => {
     expect(error?.response.body).toBe('{"error":"rate limited"}');
   });
 
-  it("preserves statusText in structured errors when the response body is whitespace only", async () => {
+  it("falls back to statusText in structured errors when the response body is whitespace only", async () => {
     fetchMock.mockResolvedValue({
       ok: false,
       status: 503,
@@ -208,9 +208,64 @@ describe("commonApiPost", () => {
     }
 
     expect(error).toBeInstanceOf(Error);
-    expect(error?.message).toBe("   ");
+    expect(error?.message).toBe("Service Unavailable");
     expect(error?.response.body).toBe("   ");
     expect(error?.response.statusText).toBe("Service Unavailable");
+  });
+
+  it("falls back to statusText when response body is whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: "Service Unavailable",
+      text: async () => "   ",
+    });
+
+    await expect(commonApiPost({ endpoint: "e", body: {} })).rejects.toBe(
+      "Service Unavailable"
+    );
+  });
+
+  it("falls back to statusText when parsed json fields are whitespace only", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 400,
+      statusText: "Bad Request",
+      text: async () => JSON.stringify({ error: "   " }),
+    });
+
+    let error: {
+      message: string;
+      response: {
+        status: number;
+        headers: Headers;
+        statusText?: string;
+        body?: unknown;
+      };
+    } | null = null;
+
+    try {
+      await commonApiPost({
+        endpoint: "e",
+        body: {},
+        errorMode: "structured",
+      });
+    } catch (caught) {
+      error = caught as {
+        message: string;
+        response: {
+          status: number;
+          headers: Headers;
+          statusText?: string;
+          body?: unknown;
+        };
+      };
+    }
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toBe("Bad Request");
+    expect(error?.response.body).toBe('{"error":"   "}');
+    expect(error?.response.statusText).toBe("Bad Request");
   });
 
   it("prefers message when error key is missing", async () => {

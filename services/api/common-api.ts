@@ -60,6 +60,11 @@ const normalizeHeaders = (value: unknown): Headers => {
   }
 };
 
+const getUsableErrorMessage = (
+  message: string,
+  fallbackMessage: string
+): string => (message.trim().length > 0 ? message : fallbackMessage);
+
 const createStructuredApiError = ({
   message,
   status,
@@ -90,7 +95,10 @@ const handleApiError = async (
   res: Response,
   errorMode: ApiErrorMode
 ): Promise<never> => {
-  const fallbackErrorMessage = res.statusText || "Something went wrong";
+  const fallbackErrorMessage = getUsableErrorMessage(
+    res.statusText,
+    "Something went wrong"
+  );
   let errorMessage = fallbackErrorMessage;
   let errorBody: unknown = undefined;
 
@@ -134,9 +142,14 @@ const handleApiError = async (
     errorMessage = fallbackErrorMessage;
   }
 
+  const normalizedErrorMessage = getUsableErrorMessage(
+    errorMessage,
+    fallbackErrorMessage
+  );
+
   if (errorMode === "structured") {
     throw createStructuredApiError({
-      message: errorMessage,
+      message: normalizedErrorMessage,
       status: res.status,
       headers: normalizeHeaders((res as { headers?: unknown }).headers),
       statusText: res.statusText,
@@ -144,7 +157,7 @@ const handleApiError = async (
     });
   }
 
-  return Promise.reject(errorMessage);
+  return Promise.reject(normalizedErrorMessage);
 };
 
 const executeApiRequest = async <T>(
