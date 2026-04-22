@@ -3,8 +3,9 @@
 import UserPageProfileWaveMasonry, {
   type ProfileIdentitySummary,
 } from "@/components/user/waves/UserPageProfileWaveMasonry";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
-import { useWaveDrops } from "@/hooks/useWaveDrops";
+import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { resolveProfileCurationViewState } from "./userPageProfileWave.helpers";
 import {
@@ -25,7 +26,7 @@ export default function UserPageProfileWaveContent({
   hasLoadedCurations,
   onRetryCurations,
   profileCuration,
-  profileWaveId,
+  wave,
 }: {
   readonly canManageOwnOfficialWave: boolean;
   readonly containerWidth: number;
@@ -37,7 +38,7 @@ export default function UserPageProfileWaveContent({
   readonly hasLoadedCurations: boolean;
   readonly onRetryCurations: () => void;
   readonly profileCuration: ApiWaveCuration | null;
-  readonly profileWaveId: string;
+  readonly wave: ApiWave;
 }) {
   const {
     dataUpdatedAt,
@@ -49,9 +50,9 @@ export default function UserPageProfileWaveContent({
     isFetchingNextPage,
     isPlaceholderData,
     refetch: refetchDrops,
-  } = useWaveDrops({
-    waveId: profileWaveId,
-    curationId: profileCuration?.id ?? undefined,
+  } = useWaveCurationDrops({
+    wave,
+    curationId: profileCuration?.id,
     enabled: profileCuration !== null,
   });
   const state = resolveProfileCurationViewState({
