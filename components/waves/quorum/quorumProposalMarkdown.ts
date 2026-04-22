@@ -323,31 +323,13 @@ const collectRequiredFutureHeadingIndexes = (
   return requiredFutureHeadingIndexes;
 };
 
-const remainingCandidatesAreValid = (
+const isTerminalCandidatePath = (
   candidates: readonly QuorumProposalSectionBoundaryCandidate[],
   lastCandidateIndex: number
 ): boolean => {
-  const lastCandidate = candidates[lastCandidateIndex];
-  if (!lastCandidate) {
-    return false;
-  }
-
-  for (
-    let candidateIndex = lastCandidateIndex + 1;
-    candidateIndex < candidates.length;
-    candidateIndex++
-  ) {
-    const candidate = candidates[candidateIndex];
-    if (!candidate) {
-      continue;
-    }
-
-    if (candidate.headingIndex < lastCandidate.headingIndex) {
-      return false;
-    }
-  }
-
-  return true;
+  // Any canonical heading left after the last chosen boundary would be folded
+  // into the final compact section with no later section to disambiguate it.
+  return lastCandidateIndex === candidates.length - 1;
 };
 
 const shouldPruneCandidatePath = (
@@ -389,7 +371,7 @@ const updateBestCandidatePath = (
   if (
     candidatePathIndexes.length < 2 ||
     requiredFutureHeadingIndexes.size > 0 ||
-    !remainingCandidatesAreValid(candidates, lastCandidateIndex)
+    !isTerminalCandidatePath(candidates, lastCandidateIndex)
   ) {
     return bestPath;
   }

@@ -289,6 +289,47 @@ it("falls back to regular markdown for out-of-order quorum headings", () => {
   expect(screen.queryByTestId("compact")).toBeNull();
 });
 
+it("falls back to regular markdown when quorum headings go out of order after a valid prefix", () => {
+  const proposalPart = {
+    content: [
+      "# Slow Mode",
+      "",
+      "## Summary",
+      "",
+      "Keep the feed readable.",
+      "",
+      "## Problem Statement",
+      "",
+      "There are too many drops.",
+      "",
+      "## Risks & Trade-offs",
+      "",
+      "More structure for submitters.",
+      "",
+      "## Proposed Solution",
+      "",
+      "Add a cooldown setting.",
+    ].join("\n"),
+    quoted_drop: null,
+  } as any;
+
+  render(
+    <WaveDropPartContentMarkdown
+      mentionedUsers={[]}
+      mentionedWaves={[]}
+      referencedNfts={[]}
+      part={proposalPart}
+      wave={wave}
+      drop={{ id: "drop-1", serial_no: 2 } as any}
+      onQuoteClick={jest.fn()}
+      contentPresentation="quorumCompact"
+    />
+  );
+
+  expect(screen.getByTestId("md")).toHaveTextContent("## Risks & Trade-offs");
+  expect(screen.queryByTestId("compact")).toBeNull();
+});
+
 it("keeps embedded level-two headings inside the same compact quorum section", () => {
   const proposalPart = {
     content: buildQuorumProposalMarkdown({
