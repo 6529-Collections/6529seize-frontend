@@ -160,14 +160,18 @@ interface MarkdownFenceState {
   markerLength: number;
 }
 
+interface ParsedMarkdownFenceLine extends MarkdownFenceState {
+  trailingText: string;
+}
+
 interface QuorumProposalSectionBoundaryCandidate {
   heading: QuorumProposalTopLevelHeading;
   headingIndex: number;
   lineIndex: number;
 }
 
-const parseFenceState = (line: string): MarkdownFenceState | null => {
-  const fenceMatch = /^\s*([`~]{3,})/.exec(line);
+const parseFenceLine = (line: string): ParsedMarkdownFenceLine | null => {
+  const fenceMatch = /^\s*([`~]{3,})(.*)$/.exec(line);
   const marker = fenceMatch?.[1];
   if (!marker) {
     return null;
@@ -184,6 +188,7 @@ const parseFenceState = (line: string): MarkdownFenceState | null => {
   return {
     marker: fenceCharacter,
     markerLength: marker.length,
+    trailingText: fenceMatch[2] ?? "",
   };
 };
 
@@ -191,17 +196,21 @@ const getNextFenceState = (
   currentFenceState: MarkdownFenceState | null,
   line: string
 ): MarkdownFenceState | null => {
-  const parsedFenceState = parseFenceState(line);
+  const parsedFenceState = parseFenceLine(line);
   if (!parsedFenceState) {
     return currentFenceState;
   }
 
   if (!currentFenceState) {
-    return parsedFenceState;
+    return {
+      marker: parsedFenceState.marker,
+      markerLength: parsedFenceState.markerLength,
+    };
   }
 
   return currentFenceState.marker === parsedFenceState.marker &&
-    parsedFenceState.markerLength >= currentFenceState.markerLength
+    parsedFenceState.markerLength >= currentFenceState.markerLength &&
+    parsedFenceState.trailingText.trim() === ""
     ? null
     : currentFenceState;
 };
@@ -271,48 +280,158 @@ const compareCandidatePaths = (
   return 0;
 };
 
-const buildBestCandidatePath = (
+const collectRequiredFutureHeadingIndexes = (
   candidates: readonly QuorumProposalSectionBoundaryCandidate[],
-  startCandidateIndex: number,
-  minimumHeadingIndex: number,
-  memoizedPaths: Map<
-    string,
-    readonly QuorumProposalSectionBoundaryCandidate[] | null
-  >
-): readonly QuorumProposalSectionBoundaryCandidate[] | null => {
-  const memoizationKey = `${startCandidateIndex}:${minimumHeadingIndex}`;
-  const memoizedPath = memoizedPaths.get(memoizationKey);
-  if (memoizedPath !== undefined) {
-    return memoizedPath;
+  currentCandidateIndex: number,
+  nextCandidateIndex: number
+): Set<number> | null => {
+  const currentCandidate = candidates[currentCandidateIndex];
+  const nextCandidate = candidates[nextCandidateIndex];
+
+  if (!currentCandidate || !nextCandidate) {
+    return null;
   }
 
-  let bestPath: readonly QuorumProposalSectionBoundaryCandidate[] | null = null;
+  const requiredFutureHeadingIndexes = new Set<number>();
 
   for (
-    let candidateIndex = startCandidateIndex;
+    let candidateIndex = currentCandidateIndex + 1;
+    candidateIndex < nextCandidateIndex;
+    candidateIndex++
+  ) {
+    const candidate = candidates[candidateIndex];
+    if (!candidate) {
+      continue;
+    }
+
+    if (candidate.headingIndex < currentCandidate.headingIndex) {
+      return null;
+    }
+
+    if (
+      candidate.headingIndex > currentCandidate.headingIndex &&
+      candidate.headingIndex < nextCandidate.headingIndex
+    ) {
+      return null;
+    }
+
+    if (candidate.headingIndex > nextCandidate.headingIndex) {
+      requiredFutureHeadingIndexes.add(candidate.headingIndex);
+    }
+  }
+
+  return requiredFutureHeadingIndexes;
+};
+
+const remainingCandidatesAreValid = (
+  candidates: readonly QuorumProposalSectionBoundaryCandidate[],
+  lastCandidateIndex: number
+): boolean => {
+  const lastCandidate = candidates[lastCandidateIndex];
+  if (!lastCandidate) {
+    return false;
+  }
+
+  for (
+    let candidateIndex = lastCandidateIndex + 1;
     candidateIndex < candidates.length;
     candidateIndex++
   ) {
     const candidate = candidates[candidateIndex];
-    if (!candidate || candidate.headingIndex < minimumHeadingIndex) {
+    if (!candidate) {
       continue;
     }
 
-    const tailPath = buildBestCandidatePath(
-      candidates,
-      candidateIndex + 1,
-      candidate.headingIndex + 1,
-      memoizedPaths
-    );
-    const candidatePath = tailPath ? [candidate, ...tailPath] : [candidate];
-
-    if (!bestPath || compareCandidatePaths(candidatePath, bestPath) > 0) {
-      bestPath = candidatePath;
+    if (candidate.headingIndex < lastCandidate.headingIndex) {
+      return false;
     }
   }
 
-  memoizedPaths.set(memoizationKey, bestPath);
-  return bestPath;
+  return true;
+};
+
+const shouldPruneCandidatePath = (
+  candidatePathLength: number,
+  lastCandidate: QuorumProposalSectionBoundaryCandidate,
+  bestPath: readonly QuorumProposalSectionBoundaryCandidate[] | null
+): boolean => {
+  if (!bestPath) {
+    return false;
+  }
+
+  const maximumPossiblePathLength =
+    candidatePathLength +
+    (QUORUM_PROPOSAL_TOP_LEVEL_HEADINGS.length -
+      lastCandidate.headingIndex -
+      1);
+
+  return maximumPossiblePathLength < bestPath.length;
+};
+
+const materializeCandidatePath = (
+  candidates: readonly QuorumProposalSectionBoundaryCandidate[],
+  candidatePathIndexes: readonly number[]
+): readonly QuorumProposalSectionBoundaryCandidate[] =>
+  candidatePathIndexes
+    .map((index) => candidates[index])
+    .filter(
+      (candidate): candidate is QuorumProposalSectionBoundaryCandidate =>
+        !!candidate
+    );
+
+const updateBestCandidatePath = (
+  candidates: readonly QuorumProposalSectionBoundaryCandidate[],
+  candidatePathIndexes: readonly number[],
+  requiredFutureHeadingIndexes: ReadonlySet<number>,
+  lastCandidateIndex: number,
+  bestPath: readonly QuorumProposalSectionBoundaryCandidate[] | null
+): readonly QuorumProposalSectionBoundaryCandidate[] | null => {
+  if (
+    candidatePathIndexes.length < 2 ||
+    requiredFutureHeadingIndexes.size > 0 ||
+    !remainingCandidatesAreValid(candidates, lastCandidateIndex)
+  ) {
+    return bestPath;
+  }
+
+  const candidatePath = materializeCandidatePath(
+    candidates,
+    candidatePathIndexes
+  );
+  return !bestPath || compareCandidatePaths(candidatePath, bestPath) > 0
+    ? candidatePath
+    : bestPath;
+};
+
+const buildNextRequiredFutureHeadingIndexes = (
+  candidates: readonly QuorumProposalSectionBoundaryCandidate[],
+  lastCandidateIndex: number,
+  followingCandidate: QuorumProposalSectionBoundaryCandidate,
+  followingCandidateIndex: number,
+  requiredFutureHeadingIndexes: ReadonlySet<number>
+): Set<number> | null => {
+  const gapRequirements = collectRequiredFutureHeadingIndexes(
+    candidates,
+    lastCandidateIndex,
+    followingCandidateIndex
+  );
+  if (!gapRequirements) {
+    return null;
+  }
+
+  const nextRequiredFutureHeadingIndexes = new Set(
+    requiredFutureHeadingIndexes
+  );
+  for (const headingIndex of gapRequirements) {
+    nextRequiredFutureHeadingIndexes.add(headingIndex);
+  }
+  nextRequiredFutureHeadingIndexes.delete(followingCandidate.headingIndex);
+
+  return Array.from(nextRequiredFutureHeadingIndexes).some(
+    (headingIndex) => headingIndex < followingCandidate.headingIndex
+  )
+    ? null
+    : nextRequiredFutureHeadingIndexes;
 };
 
 const selectSectionBoundaryCandidates = (
@@ -320,11 +439,74 @@ const selectSectionBoundaryCandidates = (
   startIndex: number,
   candidates: readonly QuorumProposalSectionBoundaryCandidate[]
 ): readonly QuorumProposalSectionBoundaryCandidate[] | null => {
-  const memoizedPaths = new Map<
-    string,
-    readonly QuorumProposalSectionBoundaryCandidate[] | null
-  >();
   let bestPath: readonly QuorumProposalSectionBoundaryCandidate[] | null = null;
+
+  const visitCandidatePath = (
+    candidatePathIndexes: readonly number[],
+    nextCandidateIndex: number,
+    requiredFutureHeadingIndexes: ReadonlySet<number>
+  ): void => {
+    const lastCandidateIndex =
+      candidatePathIndexes[candidatePathIndexes.length - 1];
+    if (lastCandidateIndex === undefined) {
+      return;
+    }
+
+    const lastCandidate = candidates[lastCandidateIndex];
+
+    if (
+      !lastCandidate ||
+      shouldPruneCandidatePath(
+        candidatePathIndexes.length,
+        lastCandidate,
+        bestPath
+      )
+    ) {
+      return;
+    }
+
+    // A skipped canonical heading can stay inside the current section body only
+    // if a later chosen section still accounts for that heading in order.
+    bestPath = updateBestCandidatePath(
+      candidates,
+      candidatePathIndexes,
+      requiredFutureHeadingIndexes,
+      lastCandidateIndex,
+      bestPath
+    );
+
+    for (
+      let followingCandidateIndex = nextCandidateIndex;
+      followingCandidateIndex < candidates.length;
+      followingCandidateIndex++
+    ) {
+      const followingCandidate = candidates[followingCandidateIndex];
+      if (
+        !followingCandidate ||
+        followingCandidate.headingIndex <= lastCandidate.headingIndex
+      ) {
+        continue;
+      }
+
+      const nextRequiredFutureHeadingIndexes =
+        buildNextRequiredFutureHeadingIndexes(
+          candidates,
+          lastCandidateIndex,
+          followingCandidate,
+          followingCandidateIndex,
+          requiredFutureHeadingIndexes
+        );
+      if (!nextRequiredFutureHeadingIndexes) {
+        continue;
+      }
+
+      visitCandidatePath(
+        [...candidatePathIndexes, followingCandidateIndex],
+        followingCandidateIndex + 1,
+        nextRequiredFutureHeadingIndexes
+      );
+    }
+  };
 
   for (
     let candidateIndex = 0;
@@ -339,20 +521,7 @@ const selectSectionBoundaryCandidates = (
       continue;
     }
 
-    const tailPath = buildBestCandidatePath(
-      candidates,
-      candidateIndex + 1,
-      candidate.headingIndex + 1,
-      memoizedPaths
-    );
-    const candidatePath = tailPath ? [candidate, ...tailPath] : [candidate];
-
-    if (
-      candidatePath.length >= 2 &&
-      (!bestPath || compareCandidatePaths(candidatePath, bestPath) > 0)
-    ) {
-      bestPath = candidatePath;
-    }
+    visitCandidatePath([candidateIndex], candidateIndex + 1, new Set<number>());
   }
 
   return bestPath;

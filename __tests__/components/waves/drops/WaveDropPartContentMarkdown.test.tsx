@@ -252,6 +252,43 @@ it("renders compact quorum cards when intermediate sections are omitted", () => 
   expect(markdownProps).toBeUndefined();
 });
 
+it("falls back to regular markdown for out-of-order quorum headings", () => {
+  const proposalPart = {
+    content: [
+      "# Slow Mode",
+      "",
+      "## Summary",
+      "",
+      "Keep the feed readable.",
+      "",
+      "## Risks & Trade-offs",
+      "",
+      "More structure for submitters.",
+      "",
+      "## Problem Statement",
+      "",
+      "There are too many drops.",
+    ].join("\n"),
+    quoted_drop: null,
+  } as any;
+
+  render(
+    <WaveDropPartContentMarkdown
+      mentionedUsers={[]}
+      mentionedWaves={[]}
+      referencedNfts={[]}
+      part={proposalPart}
+      wave={wave}
+      drop={{ id: "drop-1", serial_no: 2 } as any}
+      onQuoteClick={jest.fn()}
+      contentPresentation="quorumCompact"
+    />
+  );
+
+  expect(screen.getByTestId("md")).toHaveTextContent("## Risks & Trade-offs");
+  expect(screen.queryByTestId("compact")).toBeNull();
+});
+
 it("keeps embedded level-two headings inside the same compact quorum section", () => {
   const proposalPart = {
     content: buildQuorumProposalMarkdown({

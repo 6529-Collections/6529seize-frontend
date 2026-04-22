@@ -214,6 +214,26 @@ describe("quorumProposalMarkdown", () => {
     });
   });
 
+  it("returns null for out-of-order canonical headings", () => {
+    const markdown = [
+      "# Slow Mode",
+      "",
+      "## Summary",
+      "",
+      "Keep the feed readable.",
+      "",
+      "## Risks & Trade-offs",
+      "",
+      "More structure for submitters.",
+      "",
+      "## Problem Statement",
+      "",
+      "There are too many drops.",
+    ].join("\n");
+
+    expect(parseQuorumProposalMarkdown(markdown)).toBeNull();
+  });
+
   it("keeps canonical level-two headings inside the current section body when a later section matches", () => {
     const markdown = buildQuorumProposalMarkdown({
       ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
@@ -278,6 +298,36 @@ describe("quorumProposalMarkdown", () => {
       "Still describing the problem."
     );
     expect(parsed.sections[1]?.heading).toBe("Proposed Solution");
+  });
+
+  it("keeps fenced code blocks open when matching fence lines have trailing text", () => {
+    const markdown = buildQuorumProposalMarkdown({
+      ...EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
+      title: "Slow Mode",
+      summary: "Restrict users to one drop every 24 hours.",
+      problemStatement:
+        "````md\n## Impact & Priority\n````ts\n## Risks & Trade-offs\n````\n\nStill describing the problem.",
+      proposedSolution: "Allow creators to enable slow mode.",
+      risksTradeoffs: "More structure for submitters.",
+    });
+
+    const parsed = parseQuorumProposalMarkdown(markdown);
+
+    expect(parsed).not.toBeNull();
+    if (!parsed) {
+      throw new Error("Expected quorum markdown to parse");
+    }
+
+    expect(parsed.sections[0]?.heading).toBe("Problem Statement");
+    expect(parsed.sections[0]?.markdown).toContain("## Impact & Priority");
+    expect(parsed.sections[0]?.markdown).toContain("````ts");
+    expect(parsed.sections[0]?.markdown).toContain("## Risks & Trade-offs");
+    expect(parsed.sections[0]?.markdown).toContain(
+      "Still describing the problem."
+    );
+    expect(parsed.sections[1]?.heading).toBe("Proposed Solution");
+    expect(parsed.sections[6]?.heading).toBe("Risks & Trade-offs");
+    expect(parsed.sections[6]?.markdown).toBe("More structure for submitters.");
   });
 
   it("returns null for markdown that does not match the quorum proposal shape", () => {
