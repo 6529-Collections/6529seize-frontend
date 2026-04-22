@@ -12,7 +12,6 @@ const REACTION_REQUEST_OPERATION = "reaction-request";
 const REACTION_ANOMALY_OPERATION = "reaction-anomaly";
 const ANOMALY_OUT_OF_ORDER = "out-of-order";
 const ANOMALY_OPTIMISTIC_REVERTED = "optimistic-reverted";
-const ANOMALY_REVERTED_AFTER_SUCCESS = "reverted-after-success";
 
 export type ReactionSource = "quick-react" | "picker" | "chip";
 type ReactionAction = "add" | "remove" | "replace";
@@ -616,7 +615,7 @@ export function recordReactionRealtimeReconciliation(params: {
       "Reaction optimistic state disagreed with canonical state"
     ),
     level: "warning",
-    fingerprint: [REACTION_FEATURE, ANOMALY_REVERTED_AFTER_SUCCESS],
+    fingerprint: [REACTION_FEATURE, ANOMALY_OPTIMISTIC_REVERTED],
     tags: {
       feature: REACTION_FEATURE,
       operation: REACTION_ANOMALY_OPERATION,
