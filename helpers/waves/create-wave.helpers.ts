@@ -1,6 +1,5 @@
 import type { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
-import type { ApiIntRange } from "@/generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
@@ -43,6 +42,11 @@ const getTimeWeightedLockMs = (
   // Enforce minimum and maximum constraints
   return Math.max(MIN_MS, Math.min(MAX_MS, ms));
 };
+
+const isPositiveFiniteNumber = (
+  value: number | null | undefined
+): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value > 0;
 
 export const getCreateWaveNextStep = ({
   step,
@@ -122,27 +126,6 @@ export const getCreateWavePreviousStep = ({
   }
 };
 
-const getWinningThreshold = ({
-  config,
-}: {
-  readonly config: CreateWaveConfig;
-}): ApiIntRange | null => {
-  const waveType = config.overview.type;
-  switch (waveType) {
-    case ApiWaveType.Approve:
-      return {
-        min: config.approval.threshold,
-        max: config.approval.threshold,
-      };
-    case ApiWaveType.Rank:
-    case ApiWaveType.Chat:
-      return null;
-    default:
-      assertUnreachable(waveType);
-      return null;
-  }
-};
-
 const getRankOutcomes = ({
   config,
 }: {
@@ -150,15 +133,17 @@ const getRankOutcomes = ({
 }): ApiCreateWaveOutcome[] => {
   const outcomes: ApiCreateWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
+    const winnersConfig = outcome.winnersConfig;
+
     if (
       outcome.type === CreateWaveOutcomeType.MANUAL &&
       outcome.title &&
-      outcome.winnersConfig
+      winnersConfig
     ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Manual,
         description: outcome.title,
-        distribution: outcome.winnersConfig.winners.map((winner) => ({
+        distribution: winnersConfig.winners.map((winner) => ({
           amount: winner.value,
           description: outcome.title,
         })),
@@ -166,7 +151,8 @@ const getRankOutcomes = ({
     } else if (
       outcome.type === CreateWaveOutcomeType.REP &&
       outcome.category &&
-      outcome.winnersConfig?.totalAmount
+      winnersConfig &&
+      isPositiveFiniteNumber(winnersConfig.totalAmount)
     ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
@@ -174,23 +160,24 @@ const getRankOutcomes = ({
         description: "Rep distribution",
         credit: ApiWaveOutcomeCredit.Rep,
         rep_category: outcome.category,
-        amount: outcome.winnersConfig.totalAmount,
-        distribution: outcome.winnersConfig.winners.map((winner) => ({
+        amount: winnersConfig.totalAmount,
+        distribution: winnersConfig.winners.map((winner) => ({
           amount: winner.value,
           description: null,
         })),
       });
     } else if (
       outcome.type === CreateWaveOutcomeType.NIC &&
-      outcome.winnersConfig?.totalAmount
+      winnersConfig &&
+      isPositiveFiniteNumber(winnersConfig.totalAmount)
     ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
         subtype: ApiWaveOutcomeSubType.CreditDistribution,
         description: "NIC distribution",
         credit: ApiWaveOutcomeCredit.Cic,
-        amount: outcome.winnersConfig.totalAmount,
-        distribution: outcome.winnersConfig.winners.map((winner) => ({
+        amount: winnersConfig.totalAmount,
+        distribution: winnersConfig.winners.map((winner) => ({
           amount: winner.value,
           description: null,
         })),
@@ -207,11 +194,7 @@ const getApproveOutcomes = ({
 }): ApiCreateWaveOutcome[] => {
   const outcomes: ApiCreateWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
-    if (
-      outcome.type === CreateWaveOutcomeType.MANUAL &&
-      outcome.title &&
-      outcome.maxWinners
-    ) {
+    if (outcome.type === CreateWaveOutcomeType.MANUAL && outcome.title) {
       outcomes.push({
         type: ApiWaveOutcomeType.Manual,
         description: outcome.title,
@@ -219,7 +202,7 @@ const getApproveOutcomes = ({
     } else if (
       outcome.type === CreateWaveOutcomeType.REP &&
       outcome.category &&
-      outcome.credit
+      isPositiveFiniteNumber(outcome.credit)
     ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
@@ -229,7 +212,10 @@ const getApproveOutcomes = ({
         rep_category: outcome.category,
         amount: outcome.credit,
       });
-    } else if (outcome.type === CreateWaveOutcomeType.NIC && outcome.credit) {
+    } else if (
+      outcome.type === CreateWaveOutcomeType.NIC &&
+      isPositiveFiniteNumber(outcome.credit)
+    ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
         subtype: ApiWaveOutcomeSubType.CreditDistribution,
@@ -335,23 +321,17 @@ const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
     );
   }
 
-  // If isRolling is true, we need to calculate the last decision time
-  if (dates.isRolling) {
-    // Need an end date for rolling waves
-    if (typeof dates.endDate !== "number") {
-      throw new Error("End date must be explicitly set when isRolling is true");
-    }
-
-    // Calculate the last decision time that will occur before the user-specified end date
-    return calculateLastDecisionTime(
-      dates.firstDecisionTime,
-      dates.subsequentDecisions,
-      dates.endDate
-    );
+  // If we reach this point, isRolling is true and we need to calculate the last decision time
+  if (typeof dates.endDate !== "number") {
+    throw new Error("End date must be explicitly set when isRolling is true");
   }
 
-  // This should never happen if all cases are covered
-  return dates.endDate ?? dates.firstDecisionTime;
+  // Calculate the last decision time that will occur before the user-specified end date
+  return calculateLastDecisionTime(
+    dates.firstDecisionTime,
+    dates.subsequentDecisions,
+    dates.endDate
+  );
 };
 
 export const getCreateNewWaveBody = ({
@@ -423,7 +403,10 @@ export const getCreateNewWaveBody = ({
     wave: {
       admin_drop_deletion_enabled: config.drops.adminCanDeleteDrops,
       type: config.overview.type,
-      winning_thresholds: getWinningThreshold({ config }),
+      winning_threshold:
+        config.overview.type === ApiWaveType.Approve
+          ? config.approval.threshold
+          : null,
       // TODO - should be in outcomes
       max_winners: null,
       time_lock_ms:

@@ -16,7 +16,10 @@ const WaveDropActionsAddReaction: React.FC<{
   readonly onAddReaction?: (() => void) | undefined;
   readonly dialogZIndexClassName?: string | undefined;
 }> = ({ drop, isMobile = false, onAddReaction, dialogZIndexClassName }) => {
-  const { react, canReact } = useDropReaction(drop, onAddReaction);
+  const { react, canReact } = useDropReaction(drop, {
+    source: "picker",
+    onSuccess: onAddReaction,
+  });
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null);
