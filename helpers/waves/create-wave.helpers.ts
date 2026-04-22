@@ -341,7 +341,10 @@ export const getCreateNewWaveBody = ({
   readonly picture: string | null;
   readonly config: CreateWaveConfig;
 }): ApiCreateNewWave => {
-  const endDate = calculateEndDate(config.dates);
+  const endDate =
+    config.overview.type === ApiWaveType.Approve
+      ? config.dates.endDate
+      : calculateEndDate(config.dates);
 
   return {
     name: config.overview.name,

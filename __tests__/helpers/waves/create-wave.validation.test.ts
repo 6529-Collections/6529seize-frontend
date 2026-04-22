@@ -218,6 +218,48 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("approve waves require an end date", () => {
+    const config = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        submissionStartDate: 1,
+        votingStartDate: 1,
+        endDate: null,
+        firstDecisionTime: 0,
+        subsequentDecisions: [],
+        isRolling: false,
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+  });
+
+  it("approve waves require end date after start", () => {
+    const config = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        submissionStartDate: 1,
+        votingStartDate: 1,
+        endDate: 1,
+        firstDecisionTime: 0,
+        subsequentDecisions: [],
+        isRolling: false,
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
   it("time weighted interval outside range", () => {
     const config = {
       ...baseConfig,

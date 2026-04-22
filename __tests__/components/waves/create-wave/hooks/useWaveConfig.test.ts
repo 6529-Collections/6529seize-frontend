@@ -124,9 +124,14 @@ describe("useWaveConfig", () => {
           ...result.current.config.dates,
           endDate: 2000000,
         });
+        result.current.setEndDateConfig({
+          time: 3600,
+          period: null,
+        });
       });
 
       expect(result.current.config.dates.endDate).toBe(2000000);
+      expect(result.current.endDateConfig.time).toBe(3600);
 
       // Change overview type - should reset everything
       act(() => {
@@ -142,7 +147,11 @@ describe("useWaveConfig", () => {
       expect(result.current.config.overview.image).toEqual(
         new File([""], "test-image.jpg", { type: "image/jpeg" })
       );
-      expect(result.current.config.dates.endDate).toBeNull(); // Reset to initial
+      expect(result.current.config.dates.endDate).toBe(1000000); // Reset to initial rank default
+      expect(result.current.endDateConfig).toEqual({
+        time: null,
+        period: null,
+      });
       expect(result.current.config.drops.adminCanDeleteDrops).toBe(true);
     });
   });

@@ -99,14 +99,27 @@ const getDatesValidationErrors = ({
         CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
       );
     }
-  } else if (
-    dates.submissionStartDate &&
-    dates.votingStartDate &&
-    dates.submissionStartDate !== dates.votingStartDate
-  ) {
-    errors.push(
-      CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
-    );
+  } else {
+    if (
+      dates.submissionStartDate &&
+      dates.votingStartDate &&
+      dates.submissionStartDate !== dates.votingStartDate
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
+      );
+    }
+
+    if (dates.endDate === null || dates.endDate <= 0) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+    } else if (
+      dates.votingStartDate &&
+      dates.endDate <= dates.votingStartDate
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+      );
+    }
   }
 
   return errors;

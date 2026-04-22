@@ -200,5 +200,61 @@ describe("create-wave.helpers", () => {
         config.drops.submissionStrategy
       );
     });
+
+    it("uses the explicit end date for approve waves", () => {
+      const {
+        getCreateNewWaveBody,
+      } = require("@/helpers/waves/create-wave.helpers");
+      const config = {
+        overview: { type: ApiWaveType.Approve, name: "W", image: null },
+        groups: {
+          canView: "1",
+          canDrop: "2",
+          canVote: "3",
+          canChat: "4",
+          admin: "5",
+        },
+        dates: {
+          submissionStartDate: 100,
+          votingStartDate: 100,
+          endDate: 999,
+          firstDecisionTime: 2,
+          subsequentDecisions: [3, 5],
+          isRolling: false,
+        },
+        drops: {
+          noOfApplicationsAllowedPerParticipant: 1,
+          requiredTypes: [],
+          requiredMetadata: [],
+          submissionStrategy: null,
+          terms: null,
+          signatureRequired: false,
+          adminCanDeleteDrops: true,
+        },
+        chat: { enabled: true },
+        voting: {
+          type: null,
+          category: null,
+          profileId: null,
+          timeWeighted: {
+            enabled: false,
+            averagingInterval: 5,
+            averagingIntervalUnit: "minutes",
+          },
+        },
+        outcomes: [],
+        approval: { threshold: 1, thresholdTimeMs: 1 },
+      } as any;
+      const drop = {
+        parts: [],
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      } as any;
+      const res = getCreateNewWaveBody({ drop, picture: "pic", config });
+      expect(res.participation.period.max).toBe(999);
+      expect(res.voting.period.max).toBe(999);
+      expect(res.wave.decisions_strategy).toBeNull();
+    });
   });
 });

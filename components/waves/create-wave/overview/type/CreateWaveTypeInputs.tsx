@@ -16,13 +16,12 @@ export default function CreateWaveTypeInputs({
   ];
 
   return (
-    <div className="tw-mt-3 tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-gap-x-4 tw-gap-y-4">
+    <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-4 sm:tw-flex-nowrap">
       {waveTypes.map((waveType) => (
         <CommonBorderedRadioButton
           key={waveType}
           type={waveType}
           selected={selected}
-          disabled={waveType === ApiWaveType.Approve}
           label={WAVE_LABELS[waveType]}
           onChange={onChange}
         />

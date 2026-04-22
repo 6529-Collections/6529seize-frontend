@@ -51,7 +51,7 @@ export function useWaveConfig() {
       dates: {
         submissionStartDate: now,
         votingStartDate: now,
-        endDate: null,
+        endDate: type === ApiWaveType.Rank ? now : null,
         firstDecisionTime: now,
         subsequentDecisions: [],
         isRolling: false,
@@ -119,6 +119,7 @@ export function useWaveConfig() {
 
   // Section state updates
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
+    setEndDateConfig({ time: null, period: null });
     setConfig(() => ({
       ...getInitialConfig({ type: overview.type }),
       overview,
