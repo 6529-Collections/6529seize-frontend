@@ -5,6 +5,7 @@ interface TimePickerProps {
   readonly minutes: number;
   readonly onTimeChange: (hours: number, minutes: number) => void;
   readonly minTime?: { hours: number; minutes: number } | null | undefined;
+  readonly disabled?: boolean;
 }
 
 interface TimeOption {
@@ -25,6 +26,7 @@ export default function TimePicker({
   minutes,
   onTimeChange,
   minTime = null,
+  disabled = false,
 }: TimePickerProps) {
   const baseId = useId();
   const hoursInputId = `${baseId}-hours`;
@@ -50,6 +52,7 @@ export default function TimePicker({
   ];
 
   const toggleAmPm = () => {
+    if (disabled) return;
     const newHours = hours >= 12 ? hours - 12 : hours + 12;
     if (isTimeDisabled(newHours, minutes)) return;
     onTimeChange(newHours, minutes);
@@ -72,6 +75,7 @@ export default function TimePicker({
   };
 
   const onHoursChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const val = parseInt(e.target.value, 10);
     if (isNaN(val)) return;
     const newHours = isPm ? (val === 12 ? 12 : val + 12) : val === 12 ? 0 : val;
@@ -82,6 +86,7 @@ export default function TimePicker({
   };
 
   const onMinutesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const val = parseInt(e.target.value, 10);
     if (isNaN(val)) return;
 
@@ -91,11 +96,15 @@ export default function TimePicker({
   };
 
   return (
-    <div className="tw-py-4 tw-relative tw-rounded-lg tw-bg-iron-800/60 tw-shadow-md tw-ring-1 tw-ring-iron-700/50">
+    <div
+      className={`tw-relative tw-rounded-lg tw-bg-iron-800/60 tw-py-4 tw-shadow-md tw-ring-1 tw-ring-iron-700/50 ${
+        disabled ? "tw-opacity-60" : ""
+      }`}
+    >
       <div className="tw-px-5">
-        <div className="tw-flex tw-items-center tw-mb-5">
-          <div className="tw-flex tw-items-center tw-space-x-2 tw-flex-1">
-            <div className="tw-w-20 tw-relative">
+        <div className="tw-mb-5 tw-flex tw-items-center">
+          <div className="tw-flex tw-flex-1 tw-items-center tw-space-x-2">
+            <div className="tw-relative tw-w-20">
               <label className="tw-sr-only" htmlFor={hoursInputId}>
                 Hours
               </label>
@@ -105,14 +114,19 @@ export default function TimePicker({
                 max="12"
                 value={displayHours}
                 onChange={onHoursChange}
+                disabled={disabled}
                 id={hoursInputId}
                 aria-describedby={minTimeDescriptionId}
-                className="tw-w-full tw-bg-[#2A2A33] tw-border-0 tw-text-white tw-rounded-lg tw-p-2 tw-ring-1 tw-ring-iron-700/30 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
+                className={`tw-w-full tw-rounded-lg tw-border-0 tw-bg-[#2A2A33] tw-p-2 tw-ring-1 tw-ring-iron-700/30 tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none ${
+                  disabled
+                    ? "tw-cursor-not-allowed tw-text-iron-500"
+                    : "tw-text-white focus:tw-outline-none focus:tw-ring-primary-400"
+                }`}
                 placeholder="HH"
               />
             </div>
-            <span className="tw-text-iron-50 tw-font-bold">:</span>
-            <div className="tw-w-20 tw-relative">
+            <span className="tw-font-bold tw-text-iron-50">:</span>
+            <div className="tw-relative tw-w-20">
               <label className="tw-sr-only" htmlFor={minutesInputId}>
                 Minutes
               </label>
@@ -122,16 +136,27 @@ export default function TimePicker({
                 max="59"
                 value={minutes}
                 onChange={onMinutesChange}
+                disabled={disabled}
                 id={minutesInputId}
                 aria-describedby={minTimeDescriptionId}
-                className="tw-w-full tw-bg-[#2A2A33] tw-border-0 tw-text-white tw-rounded-lg tw-p-2 tw-ring-1 tw-ring-iron-700/30 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
+                className={`tw-w-full tw-rounded-lg tw-border-0 tw-bg-[#2A2A33] tw-p-2 tw-ring-1 tw-ring-iron-700/30 tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none ${
+                  disabled
+                    ? "tw-cursor-not-allowed tw-text-iron-500"
+                    : "tw-text-white focus:tw-outline-none focus:tw-ring-primary-400"
+                }`}
                 placeholder="MM"
               />
             </div>
             <button
               onClick={toggleAmPm}
+              disabled={disabled}
               aria-label="Toggle AM/PM"
-              className="tw-bg-[#2A2A33] hover:tw-bg-[#32323C] tw-text-white tw-rounded-lg tw-px-3 tw-py-2 tw-transition-all tw-duration-200 tw-border-0 tw-shadow-md hover:tw-shadow-lg hover:tw-translate-y-[-1px] tw-ml-1">
+              className={`tw-ml-1 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-transition-all tw-duration-200 ${
+                disabled
+                  ? "tw-cursor-not-allowed tw-bg-[#2A2A33] tw-text-iron-500"
+                  : "tw-bg-[#2A2A33] tw-text-white tw-shadow-md hover:tw-translate-y-[-1px] hover:tw-bg-[#32323C] hover:tw-shadow-lg"
+              }`}
+            >
               {isPm ? "PM" : "AM"}
             </button>
           </div>
@@ -145,21 +170,30 @@ export default function TimePicker({
 
         <div className="tw-grid tw-grid-cols-3 tw-gap-1.5">
           {timeOptions.map((option) => {
-            const disabled = isTimeDisabled(option.hours, option.minutes);
+            const optionDisabled =
+              disabled || isTimeDisabled(option.hours, option.minutes);
+            const isSelected =
+              !disabled && hours === option.hours && minutes === option.minutes;
+            let optionStateClassName =
+              "tw-bg-[#2A2A33] tw-text-iron-50 tw-shadow-sm hover:tw-translate-y-[-1px] hover:tw-bg-[#32323C] hover:tw-shadow-md";
+
+            if (isSelected) {
+              optionStateClassName =
+                "tw-bg-primary-500 tw-text-white tw-ring-2 tw-ring-primary-400/30 hover:tw-bg-primary-600";
+            } else if (optionDisabled) {
+              optionStateClassName =
+                "tw-cursor-not-allowed tw-bg-[#2A2A33] tw-text-iron-600 tw-opacity-50";
+            }
+
             return (
               <button
                 key={option.label}
                 onClick={() =>
-                  !disabled && onTimeChange(option.hours, option.minutes)
+                  !optionDisabled && onTimeChange(option.hours, option.minutes)
                 }
-                disabled={disabled}
-                className={`tw-p-1.5 tw-text-xs sm:tw-text-sm tw-rounded-lg tw-transition-all tw-duration-200 tw-border-0 tw-shadow-sm hover:tw-shadow-md hover:tw-translate-y-[-1px] ${
-                  hours === option.hours && minutes === option.minutes
-                    ? "tw-bg-primary-500 hover:tw-bg-primary-600 tw-text-white tw-ring-2 tw-ring-primary-400/30"
-                    : disabled
-                    ? "tw-bg-[#2A2A33] tw-text-iron-600 tw-opacity-50 tw-cursor-not-allowed"
-                    : "tw-bg-[#2A2A33] tw-text-iron-50 hover:tw-bg-[#32323C]"
-                }`}>
+                disabled={optionDisabled}
+                className={`tw-rounded-lg tw-border-0 tw-p-1.5 tw-text-xs tw-transition-all tw-duration-200 sm:tw-text-sm ${optionStateClassName}`}
+              >
                 {option.label}
               </button>
             );

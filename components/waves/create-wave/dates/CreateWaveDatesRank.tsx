@@ -9,6 +9,7 @@ import RollingEndDate from "./RollingEndDate";
 import {
   adjustDatesAfterSubmissionChange,
   calculateEndDate,
+  clampRollingEndDate,
   validateDateSequence,
 } from "../services/waveDecisionService";
 
@@ -54,7 +55,12 @@ export default function CreateWaveDatesRank({
       };
     }
 
-    if (!normalizedDates.isRolling) {
+    if (normalizedDates.isRolling) {
+      normalizedDates = {
+        ...normalizedDates,
+        endDate: clampRollingEndDate(normalizedDates),
+      };
+    } else {
       normalizedDates = {
         ...normalizedDates,
         endDate: calculateEndDate(normalizedDates),

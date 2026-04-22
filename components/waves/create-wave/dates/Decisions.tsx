@@ -8,6 +8,7 @@ import SubsequentDecisions from "./SubsequentDecisions";
 import {
   calculateDecisionTimes,
   calculateEndDateForCycles,
+  getMinimumRollingEndDate,
 } from "../services/waveDecisionService";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import CommonSwitch from "@/components/utils/switch/CommonSwitch";
@@ -94,13 +95,10 @@ export default function Decisions({
       );
 
       // Use the calculated date or keep existing if already set and valid
-      const minEndDate =
-        dates.subsequentDecisions.length > 0
-          ? calculateDecisionTimes(
-              dates.firstDecisionTime,
-              dates.subsequentDecisions
-            )[dates.subsequentDecisions.length]
-          : dates.firstDecisionTime;
+      const minEndDate = getMinimumRollingEndDate(
+        dates.firstDecisionTime,
+        dates.subsequentDecisions
+      );
 
       const newEndDate =
         dates.endDate && minEndDate && dates.endDate > minEndDate

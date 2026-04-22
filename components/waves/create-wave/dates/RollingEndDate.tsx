@@ -9,9 +9,9 @@ import DateAccordion from "@/components/common/DateAccordion";
 import TimePicker from "@/components/common/TimePicker";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import {
-  calculateDecisionTimes,
   countTotalDecisions,
   formatDate,
+  getMinimumRollingEndDate,
 } from "../services/waveDecisionService";
 import { calculateLastDecisionTime } from "@/helpers/waves/create-wave.helpers";
 
@@ -64,17 +64,10 @@ export default function RollingEndDate({
 
   // Determine minimum allowed end date based on decisions
   const calculateMinEndDate = (): number => {
-    // If no subsequent decisions, minimum is the first decision
-    if (dates.subsequentDecisions.length === 0) {
-      return dates.firstDecisionTime;
-    }
-
-    // Otherwise, minimum is after at least one cycle of decisions
-    const decisionTimes = calculateDecisionTimes(
+    return getMinimumRollingEndDate(
       dates.firstDecisionTime,
       dates.subsequentDecisions
     );
-    return decisionTimes[decisionTimes.length - 1]!;
   };
 
   // Update local state when dates change

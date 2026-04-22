@@ -19,6 +19,34 @@ export const calculateDecisionTimes = (
   return decisions;
 };
 
+export const getMinimumRollingEndDate = (
+  firstDecisionTime: number,
+  subsequentDecisions: number[]
+): number => {
+  if (subsequentDecisions.length === 0) {
+    return firstDecisionTime;
+  }
+
+  const decisions = calculateDecisionTimes(
+    firstDecisionTime,
+    subsequentDecisions
+  );
+  return decisions[decisions.length - 1]!;
+};
+
+export const clampRollingEndDate = (
+  dates: CreateWaveDatesConfig
+): number | null => {
+  if (dates.endDate === null || !Number.isFinite(dates.endDate)) {
+    return dates.endDate;
+  }
+
+  return Math.max(
+    dates.endDate,
+    getMinimumRollingEndDate(dates.firstDecisionTime, dates.subsequentDecisions)
+  );
+};
+
 /**
  * Calculates the end date based on decisions and rolling status
  */
@@ -26,8 +54,7 @@ export const calculateEndDate = (
   dates: CreateWaveDatesConfig
 ): number | null => {
   if (dates.isRolling) {
-    // If rolling, end date is explicitly set by user
-    return dates.endDate;
+    return clampRollingEndDate(dates);
   }
 
   // If not rolling, end date is the last decision

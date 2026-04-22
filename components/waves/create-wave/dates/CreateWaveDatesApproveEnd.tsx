@@ -48,11 +48,13 @@ export default function CreateWaveDatesApproveEnd({
   isExpanded,
   setIsExpanded,
 }: CreateWaveDatesApproveEndProps) {
+  const endDate = dates.endDate;
+  const hasSelectedEndDate = endDate !== null && Number.isFinite(endDate);
   const earliestValidEndTimestamp = useMemo(
     () => getEarliestValidEndDate(dates.submissionStartDate).getTime(),
     [dates.submissionStartDate]
   );
-  const selectedTimestamp = dates.endDate ?? earliestValidEndTimestamp;
+  const displayedTimestamp = endDate ?? earliestValidEndTimestamp;
 
   const minTime = useMemo(() => {
     const minDate = new Date(earliestValidEndTimestamp);
@@ -62,18 +64,17 @@ export default function CreateWaveDatesApproveEnd({
     };
   }, [earliestValidEndTimestamp]);
 
-  const selectedDate = useMemo(
-    () => new Date(selectedTimestamp),
-    [selectedTimestamp]
+  const displayedDate = useMemo(
+    () => new Date(displayedTimestamp),
+    [displayedTimestamp]
   );
   const earliestValidEndDate = useMemo(
     () => new Date(earliestValidEndTimestamp),
     [earliestValidEndTimestamp]
   );
   const isSameDayAsEarliestValidEnd =
-    selectedDate.toDateString() === earliestValidEndDate.toDateString();
-
-  const endDate = dates.endDate;
+    hasSelectedEndDate &&
+    displayedDate.toDateString() === earliestValidEndDate.toDateString();
 
   const collapsedContent =
     endDate !== null && Number.isFinite(endDate) ? (
@@ -92,7 +93,7 @@ export default function CreateWaveDatesApproveEnd({
     ) : undefined;
 
   const handleDateSelection = (timestamp: number) => {
-    const currentDate = new Date(selectedTimestamp);
+    const currentDate = new Date(displayedTimestamp);
     const newDate = new Date(timestamp);
     const currentHours = currentDate.getHours();
     const currentMinutes = currentDate.getMinutes();
@@ -108,7 +109,7 @@ export default function CreateWaveDatesApproveEnd({
   };
 
   const handleTimeChange = (hours: number, minutes: number) => {
-    const nextDate = new Date(selectedTimestamp);
+    const nextDate = new Date(displayedTimestamp);
     nextDate.setHours(hours, minutes, 0, 0);
     const newTimestamp = clampToEarliestValidEndDate(
       nextDate,
@@ -144,9 +145,9 @@ export default function CreateWaveDatesApproveEnd({
               Select End Date:
             </p>
             <CommonCalendar
-              initialMonth={selectedDate.getMonth()}
-              initialYear={selectedDate.getFullYear()}
-              selectedTimestamp={selectedTimestamp}
+              initialMonth={displayedDate.getMonth()}
+              initialYear={displayedDate.getFullYear()}
+              selectedTimestamp={endDate}
               minTimestamp={earliestValidEndTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleDateSelection}
@@ -158,11 +159,18 @@ export default function CreateWaveDatesApproveEnd({
               Select End Time:
             </p>
             <TimePicker
-              hours={selectedDate.getHours()}
-              minutes={selectedDate.getMinutes()}
+              hours={displayedDate.getHours()}
+              minutes={displayedDate.getMinutes()}
               onTimeChange={handleTimeChange}
               minTime={isSameDayAsEarliestValidEnd ? minTime : null}
+              disabled={!hasSelectedEndDate}
             />
+            {!hasSelectedEndDate && (
+              <p className="tw-mt-2 tw-text-xs tw-text-iron-400">
+                Pick an end date first. The earliest allowed end time is{" "}
+                {formatDateTime(earliestValidEndTimestamp)}.
+              </p>
+            )}
           </div>
         </div>
       </div>
