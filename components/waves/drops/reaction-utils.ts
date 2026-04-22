@@ -127,14 +127,20 @@ const getDetailsFirstMessage = (details: unknown): string | null => {
     return null;
   }
 
-  const [firstDetail] = details;
-  if (firstDetail === null || typeof firstDetail !== "object") {
-    return null;
-  }
+  for (const detail of details) {
+    if (detail === null || typeof detail !== "object") {
+      continue;
+    }
 
-  const message = (firstDetail as { message?: unknown }).message;
-  if (typeof message === "string" && message.trim().length > 0) {
-    return message;
+    const message = (detail as { message?: unknown }).message;
+    if (typeof message !== "string") {
+      continue;
+    }
+
+    const trimmedMessage = message.trim();
+    if (trimmedMessage.length > 0) {
+      return trimmedMessage;
+    }
   }
 
   return null;

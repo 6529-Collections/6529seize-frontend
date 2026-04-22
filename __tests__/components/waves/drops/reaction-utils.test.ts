@@ -64,6 +64,53 @@ describe("getReactionErrorMessage", () => {
     ).toBe("Reaction not allowed");
   });
 
+  it("skips blank details messages and uses the first later valid one", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({
+            details: [
+              { message: "   " },
+              { message: "  Reaction not allowed  " },
+            ],
+          }),
+          message: "unexpected raw error",
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Reaction not allowed");
+  });
+
+  it("skips malformed detail entries before finding a valid message", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({
+            details: [null, "bad", {}, { message: "Retry later" }],
+          }),
+          message: "unexpected raw error",
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Retry later");
+  });
+
+  it("falls back when no detail entry contains a usable message", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({
+            details: [null, { message: "   " }, { message: 123 }],
+          }),
+          message: "Bad Request",
+          status: 400,
+          statusText: "Bad Request",
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Bad Request");
+  });
+
   it("falls back for non-JSON structured error bodies", () => {
     expect(
       getReactionErrorMessage(
