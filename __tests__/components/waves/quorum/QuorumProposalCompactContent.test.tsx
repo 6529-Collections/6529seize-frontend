@@ -17,6 +17,14 @@ const proposal = {
   ],
 } as const;
 
+function getSectionSummaryElement(heading: string): HTMLElement {
+  const summary = screen.getByText(heading).closest("summary");
+  if (!summary) {
+    throw new Error(`Expected summary for section heading: ${heading}`);
+  }
+  return summary;
+}
+
 describe("QuorumProposalCompactContent", () => {
   it("shows the title and summary immediately", () => {
     render(
@@ -52,10 +60,55 @@ describe("QuorumProposalCompactContent", () => {
       </div>
     );
 
-    fireEvent.click(screen.getByText("Problem Statement"));
+    fireEvent.click(getSectionSummaryElement("Problem Statement"));
 
     expect(onParentClick).not.toHaveBeenCalled();
     expect(screen.getByText("Too many drops.")).toBeInTheDocument();
     expect(screen.queryByText("Add a countdown.")).toBeNull();
+  });
+
+  it("does not bubble summary keyboard events to the parent drop container", () => {
+    const onParentKeyDown = jest.fn();
+
+    render(
+      <div onKeyDown={onParentKeyDown}>
+        <QuorumProposalCompactContent
+          proposal={proposal}
+          mentionedUsers={[]}
+          mentionedGroups={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          onQuoteClick={jest.fn()}
+        />
+      </div>
+    );
+
+    fireEvent.keyDown(getSectionSummaryElement("Problem Statement"), {
+      key: "Enter",
+    });
+
+    expect(onParentKeyDown).not.toHaveBeenCalled();
+  });
+
+  it("does not bubble clicks from expanded section content to the parent drop container", () => {
+    const onParentClick = jest.fn();
+
+    render(
+      <div onClick={onParentClick}>
+        <QuorumProposalCompactContent
+          proposal={proposal}
+          mentionedUsers={[]}
+          mentionedGroups={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          onQuoteClick={jest.fn()}
+        />
+      </div>
+    );
+
+    fireEvent.click(getSectionSummaryElement("Problem Statement"));
+    fireEvent.click(screen.getByText("Too many drops."));
+
+    expect(onParentClick).not.toHaveBeenCalled();
   });
 });

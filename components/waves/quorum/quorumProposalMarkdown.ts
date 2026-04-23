@@ -448,8 +448,7 @@ const selectSectionBoundaryCandidates = (
     nextCandidateIndex: number,
     requiredFutureHeadingIndexes: ReadonlySet<number>
   ): void => {
-    const lastCandidateIndex =
-      candidatePathIndexes[candidatePathIndexes.length - 1];
+    const lastCandidateIndex = candidatePathIndexes.at(-1);
     if (lastCandidateIndex === undefined) {
       return;
     }
@@ -626,7 +625,7 @@ export const parseQuorumProposalMarkdown = (
     return null;
   }
 
-  const normalizedMarkdown = markdown.replace(/\r\n?/g, "\n");
+  const normalizedMarkdown = markdown.replaceAll(/\r\n?/g, "\n");
   const lines = normalizedMarkdown.split("\n");
   const lineIndex = skipLeadingEmptyLines(lines);
 

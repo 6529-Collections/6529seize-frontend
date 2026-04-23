@@ -28,6 +28,10 @@ interface QuorumProposalCompactContentProps extends CompactMarkdownProps {
   readonly proposal: ParsedQuorumProposalMarkdown;
 }
 
+function stopPropagation(event: { stopPropagation: () => void }): void {
+  event.stopPropagation();
+}
+
 function ProposalMarkdownBlock({
   markdown,
   markdownProps,
@@ -53,11 +57,13 @@ function ProposalSectionCard({
     <details
       open={isOpen}
       onToggle={(event) => setIsOpen(event.currentTarget.open)}
-      onClick={(event) => event.stopPropagation()}
-      onKeyDown={(event) => event.stopPropagation()}
       className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70"
     >
-      <summary className="tw-flex tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-4 tw-py-3 [&::-webkit-details-marker]:tw-hidden">
+      <summary
+        onClick={stopPropagation}
+        onKeyDown={stopPropagation}
+        className="tw-flex tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-4 tw-py-3 [&::-webkit-details-marker]:tw-hidden"
+      >
         <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
           {section.heading}
         </span>
@@ -68,7 +74,12 @@ function ProposalSectionCard({
         />
       </summary>
       {isOpen && (
-        <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-4 tw-pt-3">
+        <div
+          role="presentation"
+          onClick={stopPropagation}
+          onKeyDown={stopPropagation}
+          className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-4 tw-pt-3"
+        >
           <ProposalMarkdownBlock
             markdown={section.markdown}
             markdownProps={markdownProps}
