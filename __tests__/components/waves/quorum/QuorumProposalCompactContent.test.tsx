@@ -25,6 +25,10 @@ function getSectionSummaryElement(heading: string): HTMLElement {
   return summary;
 }
 
+function getDetailsToggle(): HTMLElement {
+  return screen.getByRole("button", { name: /show details/i });
+}
+
 describe("QuorumProposalCompactContent", () => {
   it("shows the title and summary immediately", () => {
     render(
@@ -41,10 +45,15 @@ describe("QuorumProposalCompactContent", () => {
     expect(screen.getByText("Slow Mode")).toBeInTheDocument();
     expect(screen.getByText("Summary")).toBeInTheDocument();
     expect(screen.getByText("Keep the feed readable.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Show details (2)" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Problem Statement")).toBeNull();
+    expect(screen.queryByText("Proposed Solution")).toBeNull();
     expect(screen.queryByText("Too many drops.")).toBeNull();
   });
 
-  it("expands sections without bubbling the click to the parent drop container", () => {
+  it("reveals section headings without bubbling the click to the parent drop container", () => {
     const onParentClick = jest.fn();
 
     render(
@@ -60,14 +69,38 @@ describe("QuorumProposalCompactContent", () => {
       </div>
     );
 
-    fireEvent.click(getSectionSummaryElement("Problem Statement"));
+    fireEvent.click(getDetailsToggle());
 
     expect(onParentClick).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Hide details" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Problem Statement")).toBeInTheDocument();
+    expect(screen.getByText("Proposed Solution")).toBeInTheDocument();
+    expect(screen.queryByText("Too many drops.")).toBeNull();
+    expect(screen.queryByText("Add a countdown.")).toBeNull();
+  });
+
+  it("allows section accordions to expand after details are revealed", () => {
+    render(
+      <QuorumProposalCompactContent
+        proposal={proposal}
+        mentionedUsers={[]}
+        mentionedGroups={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(getDetailsToggle());
+    fireEvent.click(getSectionSummaryElement("Problem Statement"));
+
     expect(screen.getByText("Too many drops.")).toBeInTheDocument();
     expect(screen.queryByText("Add a countdown.")).toBeNull();
   });
 
-  it("does not bubble summary keyboard events to the parent drop container", () => {
+  it("does not bubble toggle keyboard events to the parent drop container", () => {
     const onParentKeyDown = jest.fn();
 
     render(
@@ -83,11 +116,33 @@ describe("QuorumProposalCompactContent", () => {
       </div>
     );
 
-    fireEvent.keyDown(getSectionSummaryElement("Problem Statement"), {
+    fireEvent.keyDown(getDetailsToggle(), {
       key: "Enter",
     });
 
     expect(onParentKeyDown).not.toHaveBeenCalled();
+  });
+
+  it("hides the section list again when details are collapsed", () => {
+    render(
+      <QuorumProposalCompactContent
+        proposal={proposal}
+        mentionedUsers={[]}
+        mentionedGroups={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(getDetailsToggle());
+    fireEvent.click(screen.getByRole("button", { name: "Hide details" }));
+
+    expect(
+      screen.getByRole("button", { name: "Show details (2)" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Problem Statement")).toBeNull();
+    expect(screen.queryByText("Proposed Solution")).toBeNull();
   });
 
   it("does not bubble clicks from expanded section content to the parent drop container", () => {
@@ -106,6 +161,7 @@ describe("QuorumProposalCompactContent", () => {
       </div>
     );
 
+    fireEvent.click(getDetailsToggle());
     fireEvent.click(getSectionSummaryElement("Problem Statement"));
     fireEvent.click(screen.getByText("Too many drops."));
 
