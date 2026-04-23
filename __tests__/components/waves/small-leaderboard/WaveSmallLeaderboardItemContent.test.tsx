@@ -62,7 +62,9 @@ describe("WaveSmallLeaderboardItemContent", () => {
         onDropClick={jest.fn()}
       />
     );
-    expect(screen.getByRole("img", { name: "Preview" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "Preview image" })
+    ).toBeInTheDocument();
     expect(screen.queryByTestId("medias")).not.toBeInTheDocument();
   });
 
@@ -79,7 +81,7 @@ describe("WaveSmallLeaderboardItemContent", () => {
     );
     expect(screen.getByTestId("medias")).toBeInTheDocument();
     expect(
-      screen.queryByRole("img", { name: "Preview" })
+      screen.queryByRole("img", { name: "Preview image" })
     ).not.toBeInTheDocument();
   });
 

@@ -12,23 +12,31 @@ jest.mock("@/components/waves/leaderboard/leaderboardRendererRegistry", () => ({
 describe("WaveLeaderboardDrop", () => {
   const drop = { id: "d1" } as any;
   const wave = { id: "w1" } as any;
+  const onDropClick = jest.fn();
 
   beforeEach(() => {
     useWaveLeaderboardRendererSet.mockReset();
+    onDropClick.mockReset();
   });
 
   it("renders the resolved leaderboard renderer", () => {
+    let rendererProps: any;
+
     useWaveLeaderboardRendererSet.mockReturnValue({
       variant: "quorum",
-      LeaderboardDrop: () => <div data-testid="quorum" />,
+      LeaderboardDrop: (props: any) => {
+        rendererProps = props;
+        return <div data-testid="quorum" />;
+      },
       SmallLeaderboardDrop: () => null,
     });
 
     render(
-      <WaveLeaderboardDrop drop={drop} wave={wave} onDropClick={jest.fn()} />
+      <WaveLeaderboardDrop drop={drop} wave={wave} onDropClick={onDropClick} />
     );
 
     expect(useWaveLeaderboardRendererSet).toHaveBeenCalledWith("w1");
+    expect(rendererProps).toEqual({ drop, wave, onDropClick });
     expect(screen.getByTestId("quorum")).toBeInTheDocument();
   });
 });

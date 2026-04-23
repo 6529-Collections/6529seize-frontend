@@ -16,5 +16,5 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
 }) => {
   const { LeaderboardDrop } = useWaveLeaderboardRendererSet(wave.id);
 
-  return <LeaderboardDrop drop={drop} onDropClick={onDropClick} />;
+  return <LeaderboardDrop drop={drop} wave={wave} onDropClick={onDropClick} />;
 };

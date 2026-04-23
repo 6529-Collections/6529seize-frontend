@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import type { ComponentType } from "react";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   resolveWaveParticipationVariant,
@@ -17,6 +18,7 @@ import { QuorumWaveLeaderboardDrop } from "./drops/QuorumWaveLeaderboardDrop";
 
 interface WaveLeaderboardDropRendererProps {
   readonly drop: ExtendedDrop;
+  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
@@ -50,6 +52,14 @@ const QuorumLeaderboardDropRenderer: React.FC<
   return <QuorumWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />;
 };
 
+const MemesLeaderboardDropRenderer: React.FC<
+  WaveLeaderboardDropRendererProps
+> = ({ drop, wave, onDropClick }) => {
+  return (
+    <MemesLeaderboardDrop drop={drop} wave={wave} onDropClick={onDropClick} />
+  );
+};
+
 const WAVE_LEADERBOARD_RENDERERS: Readonly<
   Record<WaveParticipationVariant, WaveLeaderboardRendererSet>
 > = {
@@ -58,7 +68,7 @@ const WAVE_LEADERBOARD_RENDERERS: Readonly<
     SmallLeaderboardDrop: DefaultWaveSmallLeaderboardDrop,
   },
   memes: {
-    LeaderboardDrop: MemesLeaderboardDrop,
+    LeaderboardDrop: MemesLeaderboardDropRenderer,
     SmallLeaderboardDrop: MemesWaveSmallLeaderboardDrop,
   },
   curation: {
