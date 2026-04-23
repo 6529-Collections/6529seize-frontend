@@ -84,7 +84,7 @@ export default function CreateWaveDatesApproveStart({
           <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
             This is when the approve wave opens for submissions and approvals.
           </p>
-          <div className="tw-mt-4">
+          <div className="tw-mt-4 tw-w-full tw-max-w-md">
             <CommonCalendar
               initialMonth={new Date().getMonth()}
               initialYear={new Date().getFullYear()}

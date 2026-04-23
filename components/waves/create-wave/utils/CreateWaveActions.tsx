@@ -24,7 +24,7 @@ export default function CreateWaveActions({
   ) => void;
   readonly onComplete: () => Promise<void>;
 }) {
-  const onNextStep = async (): Promise<void> => {
+  const onNextStep = (): void => {
     const nextStep = getCreateWaveNextStep({
       step,
       waveType: config.overview.type,
@@ -33,7 +33,7 @@ export default function CreateWaveActions({
       setStep(nextStep, "forward");
       return;
     }
-    await onComplete();
+    void onComplete();
   };
 
   const previousStep = getCreateWavePreviousStep({

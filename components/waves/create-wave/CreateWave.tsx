@@ -1,37 +1,16 @@
 "use client";
 
 /* istanbul ignore file */
-import { useContext, useRef, useState, type JSX } from "react";
-import CreateWaveDrops from "./drops/CreateWaveDrops";
-import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
-import CreateWaveOverview from "./overview/CreateWaveOverview";
-import CreateWaveGroups from "./groups/CreateWaveGroups";
-import CreateWaveDates from "./dates/CreateWaveDates";
-import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
-import { CreateWaveStep } from "@/types/waves.types";
-import CreateWaveVoting from "./voting/CreateWaveVoting";
-import CreateWaveApproval from "./approval/CreateWaveApproval";
-import CreateWaveActions from "./utils/CreateWaveActions";
-import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
-import CreateWaveDescription from "./description/CreateWaveDescription";
-import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
-import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
-import { useRouter } from "next/navigation";
-import { generateDropPart } from "./services/waveMediaService";
-import { getAdminGroupId } from "./services/waveGroupService";
-import { useAddWaveMutation } from "./services/waveApiService";
-import { useWaveConfig } from "./hooks/useWaveConfig";
-import useCapacitor from "@/hooks/useCapacitor";
-import CreateWaveFlow from "./CreateWaveFlow";
-import { multiPartUpload } from "./services/multiPartUpload";
+import { useRef } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
-import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { CreateWaveStep } from "@/types/waves.types";
+import CreateWaveFlow from "./CreateWaveFlow";
+import CreateWaveLayout from "./CreateWaveLayout";
+import CreateWaveStepContent from "./CreateWaveStepContent";
+import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
+import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
+import { useWaveConfig } from "./hooks/useWaveConfig";
+
 export default function CreateWave({
   profile,
   onBack,
@@ -41,278 +20,26 @@ export default function CreateWave({
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
 }) {
-  const router = useRouter();
-  const { isIos, keyboardVisible } = useCapacitor();
-  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { waitAndInvalidateDrops, onWaveCreated, onGroupCreate } = useContext(
-    ReactQueryWrapperContext
-  );
-  const [submitting, setSubmitting] = useState(false);
-  const { submit: submitInlineGroup } = useGroupMutations({
-    requestAuth,
-    onGroupCreate,
-  });
-
-  // Use the hook for configuration state management
+  const waveConfig = useWaveConfig();
+  const { config, step, selectedOutcomeType, onStep } = waveConfig;
+  const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const {
+    submitting,
+    showDropError,
+    onHaveDropToSubmitChange,
+    onInlineGroupCreate,
+    onComplete,
+  } = useCreateWaveSubmission({
     config,
-    step,
-    selectedOutcomeType,
-    errors,
-    groupsCache,
-    // Section updaters
-    setOverview,
-    setDates,
-    setDrops,
-    setOutcomes,
-    setDropsAdminCanDelete,
-    // Navigation
-    onStep,
-    // Outcome management
-    onOutcomeTypeChange,
-    // Group handling
-    onGroupSelect,
-    // Voting
-    onVotingTypeChange,
-    onCategoryChange,
-    onProfileIdChange,
-    onTimeWeightedVotingChange,
-    // Approval
-    onThresholdChange,
-    onThresholdTimeChange,
-    // Chat
-    onChatEnabledChange,
-  } = useWaveConfig();
-  const { isApp } = useDeviceInfo();
-
-  const createWaveDescriptionRef = useRef<CreateWaveDescriptionHandles | null>(
-    null
-  );
-
-  const addWaveMutation = useAddWaveMutation({
-    onSuccess: (response) => {
-      void waitAndInvalidateDrops();
-      onWaveCreated();
-      onSuccess?.();
-      const createdWaveRoute = getWaveRoute({
-        waveId: response.id,
-        isDirectMessage: false,
-        isApp,
-      });
-      if (isApp) {
-        router.replace(createdWaveRoute);
-      } else {
-        router.push(createdWaveRoute);
-      }
-    },
-    onError: (error) => {
-      setToast({
-        message: error as string,
-        type: "error",
-      });
-    },
-    onSettled: () => {
-      setSubmitting(false);
-    },
+    descriptionRef,
+    onSuccess,
   });
 
-  const [showDropError, setShowDropError] = useState(false);
-
-  const onHaveDropToSubmitChange = (haveDrop: boolean) => {
-    if (haveDrop) setShowDropError(false);
-  };
-
-  const onInlineGroupCreate = async (
-    payload: ApiCreateGroup
-  ): Promise<ApiGroupFull | null> => {
-    const result = await submitInlineGroup({
-      payload,
-      currentHandle: connectedProfile?.handle ?? null,
-    });
-
-    if (!result.ok) {
-      if (result.reason !== "auth") {
-        setToast({
-          message: result.error,
-          type: "error",
-        });
-      }
-      return null;
-    }
-
-    setToast({
-      message: "Group created and attached.",
-      type: "success",
-    });
-
-    return result.group;
-  };
-
-  const onComplete = async () => {
-    setSubmitting(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setSubmitting(false);
-      return;
-    }
-    const drop = createWaveDescriptionRef.current?.requestDrop() ?? null;
-    if (drop === null || drop.parts.length === 0) {
-      setSubmitting(false);
-      setShowDropError(true);
-      return;
-    }
-
-    const adminGroupId = await getAdminGroupId({
-      adminGroupId: config.groups.admin,
-      primaryWallet: connectedProfile?.primary_wallet,
-      handle: connectedProfile?.handle ?? undefined,
-      onError: (error) => {
-        setToast({
-          message:
-            typeof error === "string" ? error : "Failed to get admin group",
-          type: "error",
-        });
-      },
-    });
-    if (!adminGroupId) {
-      setSubmitting(false);
-      return;
-    }
-
-    const dropParts = await Promise.all(
-      drop.parts.map((part) => generateDropPart(part))
-    );
-
-    const dropRequest: ApiCreateWaveDropRequest = {
-      title: drop.title ?? null,
-      parts: dropParts.map((part) => ({
-        content: part.content,
-        quoted_drop: part.quoted_drop,
-        media: part.media.map((media) => ({
-          url: media.url,
-          mime_type: media.mime_type,
-        })),
-      })),
-      referenced_nfts: drop.referenced_nfts.map((nft) => ({
-        contract: nft.contract,
-        token: nft.token,
-        name: nft.name,
-      })),
-      mentioned_users: drop.mentioned_users.map((user) => ({
-        mentioned_profile_id: user.mentioned_profile_id,
-        handle_in_content: user.handle_in_content,
-      })),
-      metadata: drop.metadata.map((meta) => ({
-        data_key: meta.data_key,
-        data_value: meta.data_value,
-      })),
-      signature: null,
-    };
-
-    const picture = config.overview.image
-      ? await multiPartUpload({ file: config.overview.image, path: "wave" })
-      : null;
-
-    const waveBody = getCreateNewWaveBody({
-      config: {
-        ...config,
-        groups: {
-          ...config.groups,
-          admin: adminGroupId,
-        },
-      },
-      picture: picture?.url ?? null,
-      drop: dropRequest,
-    });
-
-    await addWaveMutation.mutateAsync(waveBody);
-  };
-
-  const stepComponent: Record<CreateWaveStep, JSX.Element> = {
-    [CreateWaveStep.OVERVIEW]: (
-      <CreateWaveOverview
-        overview={config.overview}
-        errors={errors}
-        setOverview={setOverview}
-      />
-    ),
-    [CreateWaveStep.GROUPS]: (
-      <CreateWaveGroups
-        waveName={config.overview.name}
-        waveType={config.overview.type}
-        groups={config.groups}
-        groupsCache={groupsCache}
-        chatEnabled={config.chat.enabled}
-        adminCanDeleteDrops={config.drops.adminCanDeleteDrops}
-        setChatEnabled={onChatEnabledChange}
-        onGroupSelect={onGroupSelect}
-        onInlineGroupCreate={onInlineGroupCreate}
-        setDropsAdminCanDelete={setDropsAdminCanDelete}
-      />
-    ),
-    [CreateWaveStep.DATES]: (
-      <CreateWaveDates
-        waveType={config.overview.type}
-        dates={config.dates}
-        setDates={setDates}
-      />
-    ),
-    [CreateWaveStep.DROPS]: (
-      <CreateWaveDrops
-        waveType={config.overview.type}
-        drops={config.drops}
-        errors={errors}
-        setDrops={setDrops}
-      />
-    ),
-    [CreateWaveStep.VOTING]: (
-      <CreateWaveVoting
-        waveType={config.overview.type}
-        selectedType={config.voting.type}
-        category={config.voting.category}
-        profileId={config.voting.profileId}
-        errors={errors}
-        onTypeChange={onVotingTypeChange}
-        setCategory={onCategoryChange}
-        setProfileId={onProfileIdChange}
-        timeWeighted={config.voting.timeWeighted}
-        onTimeWeightedChange={onTimeWeightedVotingChange}
-      />
-    ),
-    [CreateWaveStep.APPROVAL]: (
-      <CreateWaveApproval
-        threshold={config.approval.threshold}
-        errors={errors}
-        setThreshold={onThresholdChange}
-        setThresholdTimeMs={onThresholdTimeChange}
-      />
-    ),
-    [CreateWaveStep.OUTCOMES]: (
-      <CreateWaveOutcomes
-        outcomes={config.outcomes}
-        outcomeType={selectedOutcomeType}
-        waveType={config.overview.type}
-        errors={errors}
-        dates={config.dates}
-        setOutcomeType={onOutcomeTypeChange}
-        setOutcomes={setOutcomes}
-      />
-    ),
-    [CreateWaveStep.DESCRIPTION]: (
-      <CreateWaveDescription
-        ref={createWaveDescriptionRef}
-        profile={profile}
-        showDropError={showDropError}
-        wave={{
-          name: config.overview.name,
-          image: config.overview.image
-            ? URL.createObjectURL(config.overview.image)
-            : null,
-          id: null,
-        }}
-        onHaveDropToSubmitChange={onHaveDropToSubmitChange}
-      />
-    ),
+  const setStep = (
+    targetStep: CreateWaveStep,
+    direction: "forward" | "backward"
+  ) => {
+    onStep({ step: targetStep, direction });
   };
 
   return (
@@ -322,41 +49,23 @@ export default function CreateWave({
       }`}
       onBack={onBack}
     >
-      <div className="tw-h-full tw-w-full lg:tw-flex">
-        <div className="tw-hidden lg:tw-flex lg:tw-w-52 lg:tw-shrink-0 lg:tw-border-r lg:tw-border-solid lg:tw-border-white/[0.06] lg:tw-bg-[#09090B] lg:tw-py-8 lg:tw-pl-3 lg:tw-pr-5">
-          <CreateWavesMainSteps
-            activeStep={step}
-            waveType={config.overview.type}
-            onStep={(targetStep) =>
-              onStep({ step: targetStep, direction: "backward" })
-            }
-          />
-        </div>
-        <div
-          className={`tw-min-w-0 tw-flex-1 tw-bg-iron-950 tw-shadow-[-10px_0_30px_rgba(0,0,0,0.5)] ${
-            isIos && !keyboardVisible ? "tw-mb-10" : ""
-          }`}
-        >
-          <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">
-            <div className="tw-w-full tw-flex-1 tw-p-4 lg:tw-p-8">
-              {stepComponent[step]}
-            </div>
-            {selectedOutcomeType === null && (
-              <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/95 tw-p-4 lg:tw-px-8 lg:tw-py-5">
-                <CreateWaveActions
-                  setStep={(targetStep, direction) =>
-                    onStep({ step: targetStep, direction })
-                  }
-                  step={step}
-                  config={config}
-                  submitting={submitting}
-                  onComplete={onComplete}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <CreateWaveLayout
+        config={config}
+        step={step}
+        showActions={selectedOutcomeType === null}
+        submitting={submitting}
+        setStep={setStep}
+        onComplete={onComplete}
+      >
+        <CreateWaveStepContent
+          controller={waveConfig}
+          profile={profile}
+          descriptionRef={descriptionRef}
+          showDropError={showDropError}
+          onHaveDropToSubmitChange={onHaveDropToSubmitChange}
+          onInlineGroupCreate={onInlineGroupCreate}
+        />
+      </CreateWaveLayout>
     </CreateWaveFlow>
   );
 }

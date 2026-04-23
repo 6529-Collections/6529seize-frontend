@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDatesApproveEnd from "@/components/waves/create-wave/dates/CreateWaveDatesApproveEnd";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 const getEarliestValidEndTimestamp = (timestamp: number) => {
   const nextValidMinute = new Date(timestamp);
@@ -77,6 +78,7 @@ describe("CreateWaveDatesApproveEnd", () => {
     render(
       <CreateWaveDatesApproveEnd
         dates={baseDates}
+        errors={[]}
         setDates={setDates}
         isExpanded={true}
         setIsExpanded={() => {}}
@@ -109,6 +111,7 @@ describe("CreateWaveDatesApproveEnd", () => {
     render(
       <CreateWaveDatesApproveEnd
         dates={baseDates}
+        errors={[]}
         setDates={setDates}
         isExpanded={true}
         setIsExpanded={() => {}}
@@ -137,6 +140,7 @@ describe("CreateWaveDatesApproveEnd", () => {
           submissionStartDate: submissionStartDateWithSeconds,
           votingStartDate: submissionStartDateWithSeconds,
         }}
+        errors={[]}
         setDates={setDates}
         isExpanded={true}
         setIsExpanded={() => {}}
@@ -159,6 +163,7 @@ describe("CreateWaveDatesApproveEnd", () => {
     render(
       <CreateWaveDatesApproveEnd
         dates={baseDates}
+        errors={[]}
         setDates={setDates}
         isExpanded={true}
         setIsExpanded={() => {}}
@@ -192,6 +197,7 @@ describe("CreateWaveDatesApproveEnd", () => {
           submissionStartDate: submissionStartDateWithSeconds,
           votingStartDate: submissionStartDateWithSeconds,
         }}
+        errors={[]}
         setDates={setDates}
         isExpanded={true}
         setIsExpanded={() => {}}
@@ -208,13 +214,14 @@ describe("CreateWaveDatesApproveEnd", () => {
     });
   });
 
-  it("derives the selected timestamp from the latest dates props", () => {
+  it("derives the displayed time from the latest dates props", () => {
     const updatedSubmissionStartDate = new Date(
       "2035-05-03T12:45:00.000Z"
     ).getTime();
     const { rerender } = render(
       <CreateWaveDatesApproveEnd
         dates={baseDates}
+        errors={[]}
         setDates={() => {}}
         isExpanded={true}
         setIsExpanded={() => {}}
@@ -223,7 +230,7 @@ describe("CreateWaveDatesApproveEnd", () => {
 
     expect(screen.getByTestId("calendar")).toHaveAttribute(
       "data-selected-timestamp",
-      String(getEarliestValidEndTimestamp(submissionStartDate))
+      "null"
     );
     expect(screen.getByTestId("time")).toHaveAttribute("data-hours", "9");
     expect(screen.getByTestId("time")).toHaveAttribute("data-minutes", "16");
@@ -235,6 +242,7 @@ describe("CreateWaveDatesApproveEnd", () => {
           submissionStartDate: updatedSubmissionStartDate,
           votingStartDate: updatedSubmissionStartDate,
         }}
+        errors={[]}
         setDates={() => {}}
         isExpanded={true}
         setIsExpanded={() => {}}
@@ -243,9 +251,53 @@ describe("CreateWaveDatesApproveEnd", () => {
 
     expect(screen.getByTestId("calendar")).toHaveAttribute(
       "data-selected-timestamp",
-      String(getEarliestValidEndTimestamp(updatedSubmissionStartDate))
+      "null"
     );
     expect(screen.getByTestId("time")).toHaveAttribute("data-hours", "12");
     expect(screen.getByTestId("time")).toHaveAttribute("data-minutes", "46");
+  });
+
+  it("shows a required placeholder when collapsed without an end date", () => {
+    render(
+      <CreateWaveDatesApproveEnd
+        dates={baseDates}
+        errors={[]}
+        setDates={() => {}}
+        isExpanded={false}
+        setIsExpanded={() => {}}
+      />
+    );
+
+    expect(screen.getByText("Select wave end")).toBeInTheDocument();
+  });
+
+  it("shows an end date error after validation fails", () => {
+    render(
+      <CreateWaveDatesApproveEnd
+        dates={baseDates}
+        errors={[CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED]}
+        setDates={() => {}}
+        isExpanded={true}
+        setIsExpanded={() => {}}
+      />
+    );
+
+    expect(
+      screen.getByText("Choose a wave end before continuing.")
+    ).toBeInTheDocument();
+  });
+
+  it("marks the collapsed placeholder as required after validation fails", () => {
+    render(
+      <CreateWaveDatesApproveEnd
+        dates={baseDates}
+        errors={[CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED]}
+        setDates={() => {}}
+        isExpanded={false}
+        setIsExpanded={() => {}}
+      />
+    );
+
+    expect(screen.getByText("Required")).toBeInTheDocument();
   });
 });

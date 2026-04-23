@@ -28,6 +28,7 @@ describe("CreateWaveDates", () => {
       <CreateWaveDates
         waveType={ApiWaveType.Approve}
         dates={baseDates}
+        errors={[]}
         setDates={jest.fn()}
       />
     );
@@ -41,6 +42,7 @@ describe("CreateWaveDates", () => {
       <CreateWaveDates
         waveType={ApiWaveType.Rank}
         dates={baseDates}
+        errors={[]}
         setDates={jest.fn()}
       />
     );
@@ -54,6 +56,7 @@ describe("CreateWaveDates", () => {
       <CreateWaveDates
         waveType={ApiWaveType.Chat}
         dates={baseDates}
+        errors={[]}
         setDates={jest.fn()}
       />
     );
