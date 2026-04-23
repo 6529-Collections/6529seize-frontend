@@ -29,9 +29,11 @@ export default function CreateWaveGroupInlinePanel(
     addIdentity,
     canCreateDraft,
     canResetDraft,
-    currentStateLabel,
     displayedBuilder,
     draftSummary,
+    headerDescription,
+    headerEyebrow,
+    headerTitle,
     isCreating,
     isDraftValid,
     isExpandedPanel,
@@ -61,7 +63,11 @@ export default function CreateWaveGroupInlinePanel(
       }`}
     >
       <div className="tw-relative tw-flex tw-flex-col tw-gap-5">
-        <CreateWaveInlineGroupHeader currentStateLabel={currentStateLabel} />
+        <CreateWaveInlineGroupHeader
+          eyebrow={headerEyebrow}
+          title={headerTitle}
+          description={headerDescription}
+        />
         <CreateWaveInlineGroupActions
           disabled={disabled}
           identityActive={isIdentityPanel}

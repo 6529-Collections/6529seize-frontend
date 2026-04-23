@@ -32,9 +32,14 @@ export default function CreateWaveInlineGroupDraftSummary({
         </p>
       )}
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-500">
-          Ready to create this inline group
-        </p>
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-500">
+            Ready to create this inline group
+          </p>
+          <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
+            {draftSummary}
+          </p>
+        </div>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
           <button
             type="button"

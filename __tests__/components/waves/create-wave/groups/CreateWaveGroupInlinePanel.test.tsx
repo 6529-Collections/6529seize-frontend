@@ -440,6 +440,8 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.getByText("Ready to create this inline group")
     ).toBeInTheDocument();
+    expect(screen.getByText("Draft")).toBeInTheDocument();
+    expect(screen.getByText("Custom draft")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
   });
@@ -457,11 +459,13 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.getByText("Ready to create this inline group")
     ).toBeInTheDocument();
+    expect(screen.getByText("Draft")).toBeInTheDocument();
+    expect(screen.getByText("Custom draft")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
   });
 
-  it("keeps the collapsed draft footer visible when a selected group already exists", async () => {
+  it("shows the collapsed draft as the active state when a selected group already exists", async () => {
     const user = userEvent.setup();
     renderInlinePanel({
       selectedGroup: {
@@ -479,12 +483,17 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.getByText("Ready to create this inline group")
     ).toBeInTheDocument();
+    expect(screen.getByText("Draft")).toBeInTheDocument();
+    expect(screen.getByText("Custom draft")).toBeInTheDocument();
+    expect(screen.getByText("1 rule")).toBeInTheDocument();
+    expect(
+      screen.getByText("Selected group: Existing Group until Create + use.")
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
-    expect(screen.getByText("Existing Group")).toBeInTheDocument();
   });
 
-  it("keeps draft actions visible after clicking outside with a selected group", async () => {
+  it("keeps the collapsed draft label honest after clicking outside with a selected group", async () => {
     const user = userEvent.setup();
     renderInlinePanel({
       selectedGroup: {
@@ -508,9 +517,14 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.getByText("Ready to create this inline group")
     ).toBeInTheDocument();
+    expect(screen.getByText("Draft")).toBeInTheDocument();
+    expect(screen.getByText("Custom draft")).toBeInTheDocument();
+    expect(screen.getByText("1 rule")).toBeInTheDocument();
+    expect(
+      screen.getByText("Selected group: Existing Group until Create + use.")
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
-    expect(screen.getByText("Existing Group")).toBeInTheDocument();
   });
 
   it("hides draft actions while searching for an existing group", async () => {
@@ -557,6 +571,37 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.getByRole("button", { name: "Add identity" })
     ).toBeInTheDocument();
+  });
+
+  it("returns the selected group as the primary state after clearing a draft", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel({
+      selectedGroup: {
+        id: "group-1",
+        name: "Existing Group",
+      } as ApiGroupFull,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+
+    expect(screen.getByText("Custom draft")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear all" }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Ready to create this inline group")
+      ).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Current state")).toBeInTheDocument();
+    expect(screen.getByText("Existing Group")).toBeInTheDocument();
+    expect(screen.queryByText("Custom draft")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Selected group: Existing Group until Create + use.")
+    ).not.toBeInTheDocument();
   });
 
   it("hides the draft footer when the panel becomes disabled", async () => {

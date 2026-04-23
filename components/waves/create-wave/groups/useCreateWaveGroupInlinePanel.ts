@@ -144,6 +144,24 @@ export type CreateWaveGroupInlinePanelProps = {
   ) => Promise<ApiGroupFull | null>;
 };
 
+function buildHeaderDescription({
+  draftSummary,
+  selectedGroup,
+}: {
+  readonly draftSummary: string | null;
+  readonly selectedGroup: ApiGroupFull | null;
+}): string | null {
+  if (!draftSummary) {
+    return null;
+  }
+
+  if (!selectedGroup) {
+    return draftSummary;
+  }
+
+  return `${draftSummary} · Selected group: ${selectedGroup.name} until Create + use.`;
+}
+
 function useCreateWaveGroupInlinePanelViewState({
   builder,
   defaultLabel,
@@ -177,15 +195,23 @@ function useCreateWaveGroupInlinePanelViewState({
     displayedBuilder.panel === PANEL_RULE_LIST ||
     displayedBuilder.panel === PANEL_RULE_EDITOR;
   const isSearchPanel = displayedBuilder.panel === PANEL_SEARCH;
-  const isCustomDraft = !!draftSummary || isIdentityPanel || isRulePanel;
+  const hasActiveDraftState = !!draftSummary && !disabled && !isSearchPanel;
 
   return {
     canCreateDraft,
     canResetDraft,
-    currentStateLabel:
-      selectedGroup?.name ?? (isCustomDraft ? "Custom" : defaultLabel),
     displayedBuilder,
     draftSummary,
+    headerDescription: hasActiveDraftState
+      ? buildHeaderDescription({
+          draftSummary,
+          selectedGroup,
+        })
+      : null,
+    headerEyebrow: hasActiveDraftState ? "Draft" : "Current state",
+    headerTitle: hasActiveDraftState
+      ? "Custom draft"
+      : (selectedGroup?.name ?? defaultLabel),
     isDraftValid: validation.valid,
     isExpandedPanel: displayedBuilder.panel !== PANEL_ACTIONS,
     isIdentityPanel,
@@ -372,9 +398,11 @@ export function useCreateWaveGroupInlinePanel({
   const {
     canCreateDraft,
     canResetDraft,
-    currentStateLabel,
     displayedBuilder,
     draftSummary,
+    headerDescription,
+    headerEyebrow,
+    headerTitle,
     isDraftValid,
     isExpandedPanel,
     isIdentityPanel,
@@ -422,9 +450,11 @@ export function useCreateWaveGroupInlinePanel({
     addIdentity,
     canCreateDraft,
     canResetDraft,
-    currentStateLabel,
     displayedBuilder,
     draftSummary,
+    headerDescription,
+    headerEyebrow,
+    headerTitle,
     isCreating,
     isDraftValid,
     isExpandedPanel,
