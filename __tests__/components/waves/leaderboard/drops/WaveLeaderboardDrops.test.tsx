@@ -28,7 +28,7 @@ jest.mock("@/hooks/useIntersectionObserver", () => ({
 
 jest.mock("@/components/waves/leaderboard/drops/WaveLeaderboardDrop", () => ({
   WaveLeaderboardDrop: (props: any) => (
-    <button data-testid="drop" onClick={props.onSourceDropDeleted}>
+    <button data-testid="drop" onClick={() => props.onDropClick(props.drop)}>
       {props.drop.id}
     </button>
   ),
@@ -49,21 +49,19 @@ jest.mock(
   "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar",
   () => ({ WaveLeaderboardLoadingBar: () => <div data-testid="bar" /> })
 );
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
-  usePathname: () => "/p",
-  useSearchParams: () => ({ toString: () => "", get: () => null }),
-}));
-
 const wave = { id: "w1" } as ApiWave;
 
-const renderComp = (hookReturn: any) => {
+const renderComp = (
+  hookReturn: any,
+  onDropClick: (drop: { id: string }) => void = jest.fn()
+) => {
   hook.mockReturnValue(hookReturn);
   return render(
     <AuthContext.Provider value={{ connectedProfile: null } as any}>
       <WaveLeaderboardDrops
         wave={wave}
         sort={WaveDropsLeaderboardSort.RANK}
+        onDropClick={onDropClick}
         onCreateDrop={jest.fn()}
       />
     </AuthContext.Provider>
@@ -107,17 +105,19 @@ describe("WaveLeaderboardDrops", () => {
     expect(fetchNextPage).toHaveBeenCalled();
   });
 
-  it("refetches when a leaderboard drop reports source deletion", () => {
-    const refetch = jest.fn();
-    renderComp({
-      drops: [{ id: "d1" }],
-      isFetching: false,
-      isFetchingNextPage: false,
-      fetchNextPage: jest.fn(),
-      hasNextPage: false,
-      refetch,
-    });
+  it("passes drop clicks through to the parent handler", () => {
+    const onDropClick = jest.fn();
+    renderComp(
+      {
+        drops: [{ id: "d1" }],
+        isFetching: false,
+        isFetchingNextPage: false,
+        fetchNextPage: jest.fn(),
+        hasNextPage: false,
+      },
+      onDropClick
+    );
     screen.getByTestId("drop").click();
-    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(onDropClick).toHaveBeenCalledWith({ id: "d1" });
   });
 });

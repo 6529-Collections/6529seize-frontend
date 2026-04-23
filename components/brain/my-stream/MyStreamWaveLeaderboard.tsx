@@ -248,6 +248,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardDrops
         wave={wave}
         sort={sort}
+        onDropClick={onDropClick}
         curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}

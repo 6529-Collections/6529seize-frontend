@@ -5,8 +5,10 @@ import {
   ExtendedDrop,
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
+import Image from "next/image";
 import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
 import WaveDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
@@ -14,11 +16,12 @@ import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 interface WaveSmallLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: () => void;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveSmallLeaderboardItemContent: React.FC<
   WaveSmallLeaderboardItemContentProps
-> = ({ drop, onDropClick }) => {
+> = ({ drop, onDropClick, contentPresentation = "default" }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [showGradient, setShowGradient] = useState(false);
 
@@ -46,11 +49,15 @@ export const WaveSmallLeaderboardItemContent: React.FC<
       >
         {previewImageUrl ? (
           <div className="tw-flex tw-w-full tw-justify-center">
-            <img
-              src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
-              alt="Preview"
-              className="tw-max-h-48 tw-max-w-full tw-rounded-lg tw-object-contain"
-            />
+            <div className="tw-relative tw-aspect-[4/3] tw-max-h-48 tw-w-full tw-max-w-[264px] tw-overflow-hidden tw-rounded-lg">
+              <Image
+                src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
+                alt="Preview image"
+                fill
+                sizes="264px"
+                className="tw-object-contain"
+              />
+            </div>
           </div>
         ) : (
           !!drop.parts[0]?.media.length && (
@@ -70,6 +77,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
           wave={drop.wave}
           drop={drop}
           onQuoteClick={() => {}}
+          contentPresentation={contentPresentation}
         />
         {showGradient && (
           <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-[1] tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900 tw-to-transparent" />

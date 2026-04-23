@@ -1,58 +1,34 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import React from "react";
 import { WaveLeaderboardDrop } from "@/components/waves/leaderboard/drops/WaveLeaderboardDrop";
 
-jest.mock(
-  "@/components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop",
-  () => ({
-    DefaultWaveLeaderboardDrop: (p: any) => (
-      <div data-testid="default">{p.drop.id}</div>
-    ),
-  })
-);
-jest.mock("@/components/memes/drops/MemesLeaderboardDrop", () => ({
-  MemesLeaderboardDrop: (p: any) => (
-    <button data-testid="memes" onClick={p.onSourceDropDeleted}>
-      {p.drop.id}
-    </button>
-  ),
-}));
-jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
+const useWaveLeaderboardRendererSet = jest.fn();
 
-const useWave = require("@/hooks/useWave").useWave as jest.Mock;
+jest.mock("@/components/waves/leaderboard/leaderboardRendererRegistry", () => ({
+  useWaveLeaderboardRendererSet: (...args: any[]) =>
+    useWaveLeaderboardRendererSet(...args),
+}));
 
 describe("WaveLeaderboardDrop", () => {
-  const wave = { id: "w" } as any;
-  const drop = { id: "d" } as any;
+  const drop = { id: "d1" } as any;
+  const wave = { id: "w1" } as any;
 
-  it("renders memes drop when wave is memes", () => {
-    useWave.mockReturnValue({ isMemesWave: true });
+  beforeEach(() => {
+    useWaveLeaderboardRendererSet.mockReset();
+  });
+
+  it("renders the resolved leaderboard renderer", () => {
+    useWaveLeaderboardRendererSet.mockReturnValue({
+      variant: "quorum",
+      LeaderboardDrop: () => <div data-testid="quorum" />,
+      SmallLeaderboardDrop: () => null,
+    });
+
     render(
       <WaveLeaderboardDrop drop={drop} wave={wave} onDropClick={jest.fn()} />
     );
-    expect(screen.getByTestId("memes")).toHaveTextContent("d");
-  });
 
-  it("passes source deletion callback to memes drop", () => {
-    const onSourceDropDeleted = jest.fn();
-    useWave.mockReturnValue({ isMemesWave: true });
-    render(
-      <WaveLeaderboardDrop
-        drop={drop}
-        wave={wave}
-        onDropClick={jest.fn()}
-        onSourceDropDeleted={onSourceDropDeleted}
-      />
-    );
-    screen.getByTestId("memes").click();
-    expect(onSourceDropDeleted).toHaveBeenCalledTimes(1);
-  });
-
-  it("renders default drop otherwise", () => {
-    useWave.mockReturnValue({ isMemesWave: false });
-    render(
-      <WaveLeaderboardDrop drop={drop} wave={wave} onDropClick={jest.fn()} />
-    );
-    expect(screen.getByTestId("default")).toHaveTextContent("d");
+    expect(useWaveLeaderboardRendererSet).toHaveBeenCalledWith("w1");
+    expect(screen.getByTestId("quorum")).toBeInTheDocument();
   });
 });
