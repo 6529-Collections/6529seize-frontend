@@ -229,7 +229,7 @@ describe("CreateWaveGroupInlinePanel", () => {
   it("renders the current state and primary actions", () => {
     renderInlinePanel();
 
-    expect(screen.getByText("Current state")).toBeInTheDocument();
+    expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getByText("Anyone")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Add identity" })
@@ -238,7 +238,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       screen.getByRole("button", { name: "Add rule" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Use existing group" })
+      screen.getByRole("button", { name: "Choose group" })
     ).toBeInTheDocument();
   });
 
@@ -266,7 +266,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Use existing group" })
+      screen.getByRole("button", { name: "Choose group" })
     ).toBeInTheDocument();
   });
 
@@ -329,17 +329,13 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(
-      screen.getByRole("button", { name: "Use existing group" })
-    );
+    await user.click(screen.getByRole("button", { name: "Choose group" }));
     expect(screen.getByTestId("group-search")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Use existing group" })
+      screen.getByRole("button", { name: "Choose group" })
     ).toHaveAttribute("aria-pressed", "true");
 
-    await user.click(
-      screen.getByRole("button", { name: "Use existing group" })
-    );
+    await user.click(screen.getByRole("button", { name: "Choose group" }));
 
     expect(screen.queryByTestId("group-search")).not.toBeInTheDocument();
     expect(
@@ -352,9 +348,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     const onChange = jest.fn();
     renderInlinePanel({ onChange });
 
-    await user.click(
-      screen.getByRole("button", { name: "Use existing group" })
-    );
+    await user.click(screen.getByRole("button", { name: "Choose group" }));
     await user.click(screen.getByRole("button", { name: "select group" }));
 
     expect(onChange).toHaveBeenCalledWith(
@@ -373,9 +367,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       selectedGroup: { id: "group-1", name: "Existing Group" } as ApiGroupFull,
     });
 
-    await user.click(
-      screen.getByRole("button", { name: "Use existing group" })
-    );
+    await user.click(screen.getByRole("button", { name: "Choose group" }));
     await user.click(screen.getByRole("button", { name: "clear group" }));
 
     expect(onChange).toHaveBeenCalledWith(null);
@@ -391,9 +383,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       selectedGroup: { id: "group-1", name: "Existing Group" } as ApiGroupFull,
     });
 
-    await user.click(
-      screen.getByRole("button", { name: "Use existing group" })
-    );
+    await user.click(screen.getByRole("button", { name: "Choose group" }));
     await user.click(screen.getByRole("button", { name: "clear group" }));
 
     expect(onChange).not.toHaveBeenCalledWith(null);
@@ -409,7 +399,9 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
-    await user.click(screen.getByRole("button", { name: "Create + use" }));
+    await user.click(
+      screen.getByRole("button", { name: "Create and use new group" })
+    );
 
     await waitFor(() => {
       expect(onCreateGroup).toHaveBeenCalledWith(
@@ -437,13 +429,16 @@ describe("CreateWaveGroupInlinePanel", () => {
       expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     });
 
+    expect(screen.getByText("Current group")).toBeInTheDocument();
+    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.getByText("Unsaved group")).toBeInTheDocument();
+    expect(screen.getByText("1 rule")).toBeInTheDocument();
+    expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
+    expect(screen.getByText("Create this new group")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
     expect(
-      screen.getByText("Ready to create this inline group")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
-    expect(screen.getByText("Custom draft")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeEnabled();
   });
 
   it("keeps draft actions visible after collapsing an active panel", async () => {
@@ -456,13 +451,16 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Add rule" }));
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
+    expect(screen.getByText("Current group")).toBeInTheDocument();
+    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.getByText("Unsaved group")).toBeInTheDocument();
+    expect(screen.getByText("1 rule")).toBeInTheDocument();
+    expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
+    expect(screen.getByText("Create this new group")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
     expect(
-      screen.getByText("Ready to create this inline group")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
-    expect(screen.getByText("Custom draft")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeEnabled();
   });
 
   it("shows the collapsed draft as the active state when a selected group already exists", async () => {
@@ -480,17 +478,18 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Add rule" }));
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
-    expect(
-      screen.getByText("Ready to create this inline group")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
-    expect(screen.getByText("Custom draft")).toBeInTheDocument();
+    expect(screen.getByText("Current group")).toBeInTheDocument();
+    expect(screen.getByText("Existing Group")).toBeInTheDocument();
+    expect(screen.getByText("Unsaved group")).toBeInTheDocument();
     expect(screen.getByText("1 rule")).toBeInTheDocument();
     expect(
-      screen.getByText("Selected group: Existing Group until Create + use.")
+      screen.getByText("Based on Existing Group. Not applied yet.")
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
+    expect(screen.getByText("Create this new group")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeEnabled();
   });
 
   it("keeps the collapsed draft label honest after clicking outside with a selected group", async () => {
@@ -514,39 +513,45 @@ describe("CreateWaveGroupInlinePanel", () => {
       expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     });
 
-    expect(
-      screen.getByText("Ready to create this inline group")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
-    expect(screen.getByText("Custom draft")).toBeInTheDocument();
+    expect(screen.getByText("Current group")).toBeInTheDocument();
+    expect(screen.getByText("Existing Group")).toBeInTheDocument();
+    expect(screen.getByText("Unsaved group")).toBeInTheDocument();
     expect(screen.getByText("1 rule")).toBeInTheDocument();
     expect(
-      screen.getByText("Selected group: Existing Group until Create + use.")
+      screen.getByText("Based on Existing Group. Not applied yet.")
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
+    expect(screen.getByText("Create this new group")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeEnabled();
   });
 
-  it("hides draft actions while searching for an existing group", async () => {
+  it("keeps the two-state summary while hiding footer actions during group search", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
-    await user.click(
-      screen.getByRole("button", { name: "Use existing group" })
-    );
+    await user.click(screen.getByRole("button", { name: "Choose group" }));
 
     expect(screen.getByTestId("group-search")).toBeInTheDocument();
+    expect(screen.getByText("Current group")).toBeInTheDocument();
+    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.getAllByText("Unsaved group")).toHaveLength(2);
+    expect(screen.getByText("1 rule")).toBeInTheDocument();
     expect(
-      screen.queryByText("Ready to create this inline group")
+      screen.getByText(
+        "Choosing another group will discard this unsaved group."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Create this new group")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Discard draft" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Clear all" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Create + use" })
+      screen.queryByRole("button", { name: "Create and use new group" })
     ).not.toBeInTheDocument();
   });
 
@@ -557,15 +562,19 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Add rule" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
     await user.click(screen.getByRole("button", { name: "set invalid tdh" }));
-    expect(screen.getByRole("button", { name: "Create + use" })).toBeDisabled();
-    const clearAllButton = screen.getByRole("button", { name: "Clear all" });
-    expect(clearAllButton).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeDisabled();
+    const discardDraftButton = screen.getByRole("button", {
+      name: "Discard draft",
+    });
+    expect(discardDraftButton).toBeEnabled();
 
-    await user.click(clearAllButton);
+    await user.click(discardDraftButton);
 
     await waitFor(() => {
       expect(
-        screen.queryByText("Ready to create this inline group")
+        screen.queryByText("Create this new group")
       ).not.toBeInTheDocument();
     });
     expect(
@@ -587,20 +596,20 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "set rep min" }));
     await user.click(screen.getByRole("button", { name: "Add rule" }));
 
-    expect(screen.getByText("Custom draft")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Clear all" }));
+    expect(screen.getByText("Unsaved group")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Discard draft" }));
 
     await waitFor(() => {
       expect(
-        screen.queryByText("Ready to create this inline group")
+        screen.queryByText("Create this new group")
       ).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText("Current state")).toBeInTheDocument();
+    expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getByText("Existing Group")).toBeInTheDocument();
-    expect(screen.queryByText("Custom draft")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unsaved group")).not.toBeInTheDocument();
     expect(
-      screen.queryByText("Selected group: Existing Group until Create + use.")
+      screen.queryByText("Based on Existing Group. Not applied yet.")
     ).not.toBeInTheDocument();
   });
 
@@ -612,20 +621,16 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
 
-    expect(
-      screen.getByText("Ready to create this inline group")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Create this new group")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "disable panel" }));
 
+    expect(screen.queryByText("Create this new group")).not.toBeInTheDocument();
     expect(
-      screen.queryByText("Ready to create this inline group")
+      screen.queryByRole("button", { name: "Discard draft" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Clear all" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Create + use" })
+      screen.queryByRole("button", { name: "Create and use new group" })
     ).not.toBeInTheDocument();
   });
 
@@ -639,11 +644,11 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "disable panel" }));
     await user.click(screen.getByRole("button", { name: "enable panel" }));
 
+    expect(screen.getByText("Create this new group")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
     expect(
-      screen.getByText("Ready to create this inline group")
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeEnabled();
   });
 
   it("opens configured rules from the draft chips", async () => {

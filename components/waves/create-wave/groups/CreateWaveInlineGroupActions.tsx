@@ -57,7 +57,7 @@ export default function CreateWaveInlineGroupActions({
             className="tw-size-3.5 tw-flex-shrink-0"
           />
         }
-        label="Use existing group"
+        label="Choose group"
         disabled={disabled}
         active={searchActive}
         isToggle={true}

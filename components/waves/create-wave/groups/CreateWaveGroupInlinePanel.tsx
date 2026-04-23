@@ -29,11 +29,10 @@ export default function CreateWaveGroupInlinePanel(
     addIdentity,
     canCreateDraft,
     canResetDraft,
+    currentGroupLabel,
     displayedBuilder,
     draftSummary,
-    headerDescription,
-    headerEyebrow,
-    headerTitle,
+    hasUnsavedGroup,
     isCreating,
     isDraftValid,
     isExpandedPanel,
@@ -51,6 +50,8 @@ export default function CreateWaveGroupInlinePanel(
     showDraftFooter,
     togglePanel,
     toggleRule,
+    unsavedGroupDescription,
+    unsavedGroupSummary,
   } = useCreateWaveGroupInlinePanel(props);
 
   return (
@@ -64,9 +65,9 @@ export default function CreateWaveGroupInlinePanel(
     >
       <div className="tw-relative tw-flex tw-flex-col tw-gap-5">
         <CreateWaveInlineGroupHeader
-          eyebrow={headerEyebrow}
-          title={headerTitle}
-          description={headerDescription}
+          currentGroupLabel={currentGroupLabel}
+          unsavedGroupDescription={unsavedGroupDescription}
+          unsavedGroupSummary={unsavedGroupSummary}
         />
         <CreateWaveInlineGroupActions
           disabled={disabled}
@@ -125,6 +126,7 @@ export default function CreateWaveGroupInlinePanel(
             <CreateWaveInlineGroupSearch
               defaultLabel={defaultLabel}
               disabled={disabled}
+              hasUnsavedGroup={hasUnsavedGroup}
               selectedGroup={selectedGroup}
               allowGroupClear={allowGroupClear}
               onSelect={onExistingGroupSelect}

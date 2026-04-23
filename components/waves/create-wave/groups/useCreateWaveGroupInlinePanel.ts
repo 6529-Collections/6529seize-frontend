@@ -144,22 +144,16 @@ export type CreateWaveGroupInlinePanelProps = {
   ) => Promise<ApiGroupFull | null>;
 };
 
-function buildHeaderDescription({
-  draftSummary,
+function buildUnsavedGroupDescription({
   selectedGroup,
 }: {
-  readonly draftSummary: string | null;
   readonly selectedGroup: ApiGroupFull | null;
-}): string | null {
-  if (!draftSummary) {
-    return null;
-  }
-
+}): string {
   if (!selectedGroup) {
-    return draftSummary;
+    return "Not applied yet.";
   }
 
-  return `${draftSummary} · Selected group: ${selectedGroup.name} until Create + use.`;
+  return `Based on ${selectedGroup.name}. Not applied yet.`;
 }
 
 function useCreateWaveGroupInlinePanelViewState({
@@ -195,29 +189,28 @@ function useCreateWaveGroupInlinePanelViewState({
     displayedBuilder.panel === PANEL_RULE_LIST ||
     displayedBuilder.panel === PANEL_RULE_EDITOR;
   const isSearchPanel = displayedBuilder.panel === PANEL_SEARCH;
-  const hasActiveDraftState = !!draftSummary && !disabled && !isSearchPanel;
+  const hasUnsavedGroup = !!draftSummary && !disabled;
+  const currentGroupLabel = selectedGroup?.name ?? defaultLabel;
 
   return {
     canCreateDraft,
     canResetDraft,
+    currentGroupLabel,
     displayedBuilder,
     draftSummary,
-    headerDescription: hasActiveDraftState
-      ? buildHeaderDescription({
-          draftSummary,
-          selectedGroup,
-        })
-      : null,
-    headerEyebrow: hasActiveDraftState ? "Draft" : "Current state",
-    headerTitle: hasActiveDraftState
-      ? "Custom draft"
-      : (selectedGroup?.name ?? defaultLabel),
+    hasUnsavedGroup,
     isDraftValid: validation.valid,
     isExpandedPanel: displayedBuilder.panel !== PANEL_ACTIONS,
     isIdentityPanel,
     isRulePanel,
     isSearchPanel,
-    showDraftFooter: !!draftSummary && !disabled && !isSearchPanel,
+    showDraftFooter: hasUnsavedGroup && !isSearchPanel,
+    unsavedGroupDescription: hasUnsavedGroup
+      ? buildUnsavedGroupDescription({
+          selectedGroup,
+        })
+      : null,
+    unsavedGroupSummary: hasUnsavedGroup ? draftSummary : null,
   };
 }
 
@@ -398,17 +391,18 @@ export function useCreateWaveGroupInlinePanel({
   const {
     canCreateDraft,
     canResetDraft,
+    currentGroupLabel,
     displayedBuilder,
     draftSummary,
-    headerDescription,
-    headerEyebrow,
-    headerTitle,
+    hasUnsavedGroup,
     isDraftValid,
     isExpandedPanel,
     isIdentityPanel,
     isRulePanel,
     isSearchPanel,
     showDraftFooter,
+    unsavedGroupDescription,
+    unsavedGroupSummary,
   } = useCreateWaveGroupInlinePanelViewState({
     builder,
     defaultLabel,
@@ -450,11 +444,10 @@ export function useCreateWaveGroupInlinePanel({
     addIdentity,
     canCreateDraft,
     canResetDraft,
+    currentGroupLabel,
     displayedBuilder,
     draftSummary,
-    headerDescription,
-    headerEyebrow,
-    headerTitle,
+    hasUnsavedGroup,
     isCreating,
     isDraftValid,
     isExpandedPanel,
@@ -472,5 +465,7 @@ export function useCreateWaveGroupInlinePanel({
     showDraftFooter,
     togglePanel,
     toggleRule,
+    unsavedGroupDescription,
+    unsavedGroupSummary,
   };
 }

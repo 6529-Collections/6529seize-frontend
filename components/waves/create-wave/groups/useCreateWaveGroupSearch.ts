@@ -327,15 +327,12 @@ export function useCreateWaveGroupSearch({
 
   const handleInputChange = (value: string) => {
     setSearchState({
-      selectedGroupKey: selectedGroup && allowClear ? null : selectedGroupKey,
+      selectedGroupKey,
       inputValue: value,
       searchCriteria: value,
       activeIndex: -1,
     });
     setIsOpen(true);
-    if (selectedGroup && allowClear) {
-      onSelect(null);
-    }
   };
 
   const onOptionSelect = useCallback(
@@ -364,9 +361,7 @@ export function useCreateWaveGroupSearch({
   });
 
   const hasValue = inputValue.trim().length > 0;
-  const helperText = selectedGroup
-    ? `Selected: ${selectedGroup.name}`
-    : `Default: ${defaultLabel}`;
+  const helperText = `Current group: ${selectedGroup?.name ?? defaultLabel}`;
   const showClearButton =
     allowClear && (hasValue || !!selectedGroup) && !disabled;
   const showNoResults = !isFetching && isOpen && suggestions.length === 0;
