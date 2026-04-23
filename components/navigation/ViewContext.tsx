@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import React, {
   createContext,
   useContext,
-  useState,
   useMemo,
   useCallback,
   useEffect,
@@ -13,10 +12,10 @@ import React, {
 import type { ViewKey, NavItem } from "./navTypes";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import {
-  getActiveWaveIdFromUrl,
   getHomeRoute,
   getMessagesBaseRoute,
   getWaveRoute,
@@ -24,7 +23,6 @@ import {
 } from "@/helpers/navigation.helpers";
 
 interface ViewContextType {
-  activeView: ViewKey | null;
   hardBack: (v: ViewKey) => void;
   handleNavClick: (item: NavItem) => void;
   clearLastVisited: (type: "wave" | "dm") => void;
@@ -32,35 +30,52 @@ interface ViewContextType {
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
 
+interface SearchParamsLike {
+  get: (key: string) => string | null;
+}
+
+const normalizeViewParam = (value: string | null): ViewKey | null => {
+  if (value === "waves" || value === "messages") {
+    return value;
+  }
+
+  return null;
+};
+
+export const getActiveViewFromUrl = ({
+  activeWaveId,
+  searchParams,
+}: {
+  readonly activeWaveId: string | null | undefined;
+  readonly searchParams: SearchParamsLike | null | undefined;
+}): ViewKey | null => {
+  if (activeWaveId) {
+    return null;
+  }
+
+  return normalizeViewParam(searchParams?.get("view") ?? null);
+};
+
 export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   children,
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const myStream = useMyStreamOptional();
   const { isApp } = useDeviceInfo();
-  const [lastVisitedWave, setLastVisitedWave] = useState<string | null>(null);
-  const [lastVisitedDm, setLastVisitedDm] = useState<string | null>(null);
-  const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const viewParam = searchParams.get("view");
+  const currentWaveId = myStream?.activeWave.id ?? null;
+  const lastVisitedWaveRef = useRef<string | null>(null);
+  const lastVisitedDmRef = useRef<string | null>(null);
   const lastFetchedWaveIdRef = useRef<string | null>(null);
-
-  const activeView = useMemo<ViewKey | null>(() => {
-    if (waveParam) {
-      return null;
-    }
-    return viewParam ? (viewParam as ViewKey) : null;
-  }, [waveParam, viewParam]);
 
   const fetchWaveDetails = useCallback((targetWaveId: string) => {
     commonApiFetch<ApiWave>({
-      endpoint: `/waves/${targetWaveId}`,
+      endpoint: `waves/${targetWaveId}`,
     })
       .then((res) => {
         if (res.chat.scope.group?.is_direct_message) {
-          setLastVisitedDm(res.id);
+          lastVisitedDmRef.current = res.id;
         } else {
-          setLastVisitedWave(res.id);
+          lastVisitedWaveRef.current = res.id;
         }
       })
       .catch((error: unknown) => {
@@ -73,12 +88,12 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 
   // Effect for fetching wave details - only handles the external API call
   useEffect(() => {
-    if (waveParam && waveParam !== lastFetchedWaveIdRef.current) {
-      fetchWaveDetails(waveParam);
-    } else if (!waveParam) {
+    if (currentWaveId && currentWaveId !== lastFetchedWaveIdRef.current) {
+      fetchWaveDetails(currentWaveId);
+    } else if (!currentWaveId) {
       lastFetchedWaveIdRef.current = null;
     }
-  }, [waveParam, fetchWaveDetails]);
+  }, [currentWaveId, fetchWaveDetails]);
 
   const handleNavClick = useCallback(
     (item: NavItem) => {
@@ -89,18 +104,13 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
           router.push(item.href);
         }
       } else if (item.viewKey === "waves") {
-        const currentWaveId = getActiveWaveIdFromUrl({
-          pathname,
-          searchParams,
-        });
-
         if (currentWaveId) {
-          setLastVisitedWave(null);
+          lastVisitedWaveRef.current = null;
           router.push(getWavesBaseRoute(isApp));
-        } else if (lastVisitedWave) {
+        } else if (lastVisitedWaveRef.current) {
           router.push(
             getWaveRoute({
-              waveId: lastVisitedWave,
+              waveId: lastVisitedWaveRef.current,
               isDirectMessage: false,
               isApp,
             })
@@ -110,18 +120,13 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         }
       } else {
         // item.viewKey === "messages" (only remaining case)
-        const currentWaveId = getActiveWaveIdFromUrl({
-          pathname,
-          searchParams,
-        });
-
         if (currentWaveId) {
-          setLastVisitedDm(null);
+          lastVisitedDmRef.current = null;
           router.push(getMessagesBaseRoute(isApp));
-        } else if (lastVisitedDm) {
+        } else if (lastVisitedDmRef.current) {
           router.push(
             getWaveRoute({
-              waveId: lastVisitedDm,
+              waveId: lastVisitedDmRef.current,
               isDirectMessage: true,
               isApp,
             })
@@ -131,39 +136,38 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         }
       }
     },
-    [router, lastVisitedWave, lastVisitedDm, isApp, pathname, searchParams]
+    [router, currentWaveId, isApp]
   );
 
   const hardBack = useCallback(
     (v: ViewKey) => {
       if (v === "messages") {
-        setLastVisitedDm(null);
+        lastVisitedDmRef.current = null;
         router.push(getMessagesBaseRoute(isApp));
       } else {
         // v === "waves" (only remaining case)
-        setLastVisitedWave(null);
+        lastVisitedWaveRef.current = null;
         router.push(getWavesBaseRoute(isApp));
       }
     },
-    [router, setLastVisitedDm, setLastVisitedWave, isApp]
+    [router, isApp]
   );
 
   const clearLastVisited = useCallback((type: "wave" | "dm") => {
     if (type === "wave") {
-      setLastVisitedWave(null);
+      lastVisitedWaveRef.current = null;
     } else {
-      setLastVisitedDm(null);
+      lastVisitedDmRef.current = null;
     }
   }, []);
 
   const providerValue = useMemo(
     () => ({
-      activeView,
       handleNavClick,
       hardBack,
       clearLastVisited,
     }),
-    [activeView, handleNavClick, hardBack, clearLastVisited]
+    [handleNavClick, hardBack, clearLastVisited]
   );
 
   return (

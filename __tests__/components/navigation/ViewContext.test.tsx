@@ -4,7 +4,7 @@ import {
   ViewProvider,
   useViewContext,
 } from "@/components/navigation/ViewContext";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -17,8 +17,6 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
-  usePathname: jest.fn(),
-  useSearchParams: jest.fn(),
 }));
 
 const push = jest.fn();
@@ -46,12 +44,8 @@ const TestNavComponent: React.FC<{
 
 beforeEach(() => {
   jest.clearAllMocks();
-  usePathname.mockReturnValue("/");
   useRouter.mockReturnValue({
     push,
-  });
-  useSearchParams.mockReturnValue({
-    get: jest.fn(),
   });
 });
 

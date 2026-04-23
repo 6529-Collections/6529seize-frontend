@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { PinnedWaveSnapshot } from "@/hooks/usePinnedWaves";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -12,13 +12,9 @@ jest.mock("next/link", () => ({
 }));
 
 const push = jest.fn();
-const searchParams = new URLSearchParams("wave=2");
-let pathname = "/waves/2";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
-  usePathname: () => pathname,
-  useSearchParams: () => searchParams,
 }));
 
 const prefetch = jest.fn();
@@ -38,19 +34,14 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 
 jest.mock("@/hooks/isMobileDevice", () => jest.fn(() => false));
 
-const waveData: any = {
+const wave: PinnedWaveSnapshot = {
   id: "1",
   name: "Wave 1",
   picture: "pic.png",
-  contributors_overview: [{ contributor_pfp: "pfp1.png" }],
-  wave: { type: ApiWaveType.Rank },
+  contributors: [{ pfp: "pfp1.png", identity: "alice" }],
+  isDirectMessage: false,
+  fetchedAt: 123,
 };
-
-let useWaveDataMock: any;
-
-jest.mock("@/hooks/useWaveData", () => ({
-  useWaveData: (...args: any[]) => useWaveDataMock(...args),
-}));
 
 jest.mock("@/components/waves/WavePicture", () => ({
   __esModule: true,
@@ -67,16 +58,22 @@ describe("BrainContentPinnedWave", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    pathname = "/waves/2";
-    searchParams.set("wave", "2");
     (useIsMobileDevice as jest.Mock).mockReturnValue(false);
-    useWaveDataMock = jest.fn(() => ({ data: waveData }));
   });
 
-  function renderComponent(active = false, id = "1") {
+  function renderComponent({
+    active = false,
+    currentWaveId = "2",
+    pinnedWave = wave,
+  }: {
+    active?: boolean;
+    currentWaveId?: string | null;
+    pinnedWave?: PinnedWaveSnapshot;
+  } = {}) {
     return render(
       <BrainContentPinnedWave
-        waveId={id}
+        wave={pinnedWave}
+        currentWaveId={currentWaveId}
         active={active}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
@@ -106,10 +103,8 @@ describe("BrainContentPinnedWave", () => {
   });
 
   it("uses waves route when viewing active wave and skips prefetch", async () => {
-    pathname = "/waves/1";
-    searchParams.set("wave", "1");
     const user = userEvent.setup();
-    const { container } = renderComponent();
+    const { container } = renderComponent({ currentWaveId: "1" });
 
     expect(screen.getByRole("link")).toHaveAttribute("href", "/waves");
 
@@ -119,12 +114,15 @@ describe("BrainContentPinnedWave", () => {
     expect(prefetch).not.toHaveBeenCalled();
   });
 
-  it("calls onRemove when wave not found", () => {
-    useWaveDataMock = jest.fn(({ onWaveNotFound }) => {
-      onWaveNotFound();
-      return { data: undefined };
+  it("falls back to the wave id when the name is blank", () => {
+    renderComponent({
+      pinnedWave: {
+        ...wave,
+        id: "abcdef123456",
+        name: "   ",
+      },
     });
-    renderComponent();
-    expect(onRemove).toHaveBeenCalledWith("1");
+
+    expect(screen.getAllByText("abcdef12").length).toBeGreaterThan(0);
   });
 });

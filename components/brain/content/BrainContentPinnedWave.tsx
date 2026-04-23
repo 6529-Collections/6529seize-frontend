@@ -2,23 +2,19 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Tooltip } from "react-tooltip";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
-import { useWaveData } from "@/hooks/useWaveData";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { ApiWaveType } from "@/generated/models/ObjectSerializer";
 import WavePicture from "@/components/waves/WavePicture";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import {
-  getActiveWaveIdFromUrl,
-  getWaveHomeRoute,
-  getWaveRoute,
-} from "@/helpers/navigation.helpers";
+import type { PinnedWaveSnapshot } from "@/hooks/usePinnedWaves";
+import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface BrainContentPinnedWaveProps {
-  readonly waveId: string;
+  readonly wave: PinnedWaveSnapshot;
+  readonly currentWaveId: string | null;
   readonly active: boolean;
   readonly onMouseEnter: (waveId: string) => void;
   readonly onMouseLeave: () => void;
@@ -26,36 +22,33 @@ interface BrainContentPinnedWaveProps {
 }
 
 const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
-  waveId,
+  wave,
+  currentWaveId,
   active,
   onMouseEnter,
   onMouseLeave,
   onRemove,
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const { registerWave } = useMyStream();
   const { isApp } = useDeviceInfo();
-  const { data: wave } = useWaveData({
-    waveId,
-    onWaveNotFound: () => onRemove(waveId),
-  });
   const isMobile = useIsMobileDevice();
-  const isDropWave = wave && wave.wave.type !== ApiWaveType.Chat;
-  const getHref = (waveId: string) => {
-    const currentWaveId =
-      getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
-    const isDirectMessage = wave?.chat.scope.group?.is_direct_message ?? false;
+  const trimmedWaveName = wave.name?.trim();
+  const waveLabel =
+    trimmedWaveName && trimmedWaveName.length > 0
+      ? trimmedWaveName
+      : wave.id.slice(0, 8);
+  const isDropWave = !wave.isDirectMessage;
 
+  const getHref = (waveId: string) => {
     if (currentWaveId === waveId) {
-      return getWaveHomeRoute({ isDirectMessage, isApp });
+      return getWaveHomeRoute({ isDirectMessage: wave.isDirectMessage, isApp });
     }
 
     return getWaveRoute({
       waveId,
-      isDirectMessage,
+      isDirectMessage: wave.isDirectMessage,
       isApp,
     });
   };
@@ -64,22 +57,20 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
     e.preventDefault();
     onMouseLeave();
     // Navigate to the new wave
-    router.push(getHref(waveId));
+    router.push(getHref(wave.id));
   };
 
   const onHover = () => {
-    onMouseEnter(waveId);
-    const currentWaveId =
-      getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
-    if (waveId === currentWaveId) return;
-    registerWave(waveId);
-    prefetchWaveData(waveId);
+    onMouseEnter(wave.id);
+    if (wave.id === currentWaveId) return;
+    registerWave(wave.id);
+    prefetchWaveData(wave.id);
   };
 
   const onRemoveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    onRemove(waveId);
+    onRemove(wave.id);
   };
 
   return (
@@ -91,12 +82,13 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
       onMouseLeave={onMouseLeave}
     >
       <Link
-        href={getHref(waveId)}
+        href={getHref(wave.id)}
+        prefetch={false}
         onClick={onLinkClick}
         className="tw-group tw-flex tw-items-center tw-no-underline"
       >
         <div
-          data-tooltip-id={`wave-tooltip-${waveId}`}
+          data-tooltip-id={`wave-tooltip-${wave.id}`}
           className={`tw-relative tw-flex tw-h-6 tw-cursor-pointer tw-items-center tw-gap-1 tw-rounded-lg tw-px-1.5 tw-transition-all tw-duration-300 ${
             active
               ? "tw-bg-primary-500/15 tw-ring-1 tw-ring-inset tw-ring-primary-400/30"
@@ -104,14 +96,11 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
           } `}
         >
           <div className="tw-relative tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900">
-            {wave ? (
+            {wave.name || wave.picture || wave.contributors.length > 0 ? (
               <WavePicture
-                name={wave.name}
+                name={waveLabel}
                 picture={wave.picture}
-                contributors={wave.contributors_overview.map((c) => ({
-                  pfp: c.contributor_pfp,
-                  identity: c.contributor_identity,
-                }))}
+                contributors={wave.contributors}
               />
             ) : (
               <div className="tw-h-full tw-w-full tw-bg-iron-800" />
@@ -122,7 +111,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               active ? "tw-text-primary-400" : "tw-text-iron-200"
             }`}
           >
-            {wave?.name}
+            {waveLabel}
           </span>
           {isDropWave && (
             <svg
@@ -161,7 +150,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
         </div>
         {!isMobile && (
           <Tooltip
-            id={`wave-tooltip-${waveId}`}
+            id={`wave-tooltip-${wave.id}`}
             place="top"
             style={{
               backgroundColor: "#1F2937",
@@ -169,7 +158,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               padding: "4px 8px",
             }}
           >
-            <span className="tw-text-xs">{wave?.name ?? ""}</span>
+            <span className="tw-text-xs">{waveLabel}</span>
           </Tooltip>
         )}
       </Link>

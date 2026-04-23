@@ -1,34 +1,81 @@
 import { renderHook, act } from "@testing-library/react";
-import { usePinnedWaves } from "@/hooks/usePinnedWaves";
+import {
+  type PinnedWaveSnapshot,
+  usePinnedWaves,
+} from "@/hooks/usePinnedWaves";
 
 const MAX_PINNED_WAVES = 20;
 
-it("adds and removes ids and persists to localStorage", () => {
+const baseWave = (
+  overrides: Partial<PinnedWaveSnapshot> = {}
+): PinnedWaveSnapshot => ({
+  id: "1",
+  name: "Wave 1",
+  picture: null,
+  contributors: [],
+  isDirectMessage: false,
+  fetchedAt: 123,
+  ...overrides,
+});
+
+beforeEach(() => {
+  localStorage.clear();
+});
+
+it("upserts and removes snapshots and persists to localStorage", () => {
   const { result } = renderHook(() => usePinnedWaves());
 
   act(() => {
-    result.current.addId("1");
-    result.current.addId("2");
+    result.current.upsertWaveSnapshot(baseWave({ id: "1", name: "Wave 1" }), {
+      moveToFront: true,
+    });
+    result.current.upsertWaveSnapshot(baseWave({ id: "2", name: "Wave 2" }), {
+      moveToFront: true,
+    });
   });
 
   expect(result.current.pinnedIds).toEqual(["2", "1"]);
-  expect(JSON.parse(localStorage.getItem("pinnedWave") || "[]")).toEqual([
-    "2",
-    "1",
-  ]);
+
+  const stored = JSON.parse(
+    localStorage.getItem("pinnedWave") ?? "[]"
+  ) as PinnedWaveSnapshot[];
+  expect(stored.map((wave) => wave.id)).toEqual(["2", "1"]);
+  expect(stored[0]).toMatchObject({ id: "2", name: "Wave 2" });
 
   act(() => {
     result.current.removeId("2");
   });
+
   expect(result.current.pinnedIds).toEqual(["1"]);
 });
 
-it("limits number of pinned ids", () => {
+it("limits number of pinned snapshots", () => {
   const { result } = renderHook(() => usePinnedWaves());
+
   act(() => {
     for (let i = 0; i < MAX_PINNED_WAVES + 2; i++) {
-      result.current.addId(String(i));
+      result.current.upsertWaveSnapshot(baseWave({ id: String(i) }), {
+        moveToFront: true,
+      });
     }
   });
+
   expect(result.current.pinnedIds.length).toBe(MAX_PINNED_WAVES);
+});
+
+it("migrates old string storage to fallback snapshots", () => {
+  localStorage.setItem("pinnedWave", JSON.stringify(["1"]));
+
+  const { result } = renderHook(() => usePinnedWaves());
+
+  expect(result.current.pinnedWaves).toEqual([
+    {
+      id: "1",
+      name: null,
+      picture: null,
+      contributors: [],
+      isDirectMessage: false,
+      fetchedAt: 0,
+    },
+  ]);
 });
