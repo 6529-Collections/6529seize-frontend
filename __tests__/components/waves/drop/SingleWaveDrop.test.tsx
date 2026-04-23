@@ -1,36 +1,35 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { SingleWaveDrop } from '@/components/waves/drop/SingleWaveDrop';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import { SingleWaveDrop } from "@/components/waves/drop/SingleWaveDrop";
 
-jest.mock('@/components/waves/drop/DefaultSingleWaveDrop', () => ({
-  __esModule: true,
-  DefaultSingleWaveDrop: () => <div data-testid="default" />,
-}));
+const useWaveParticipationRendererSet = jest.fn();
 
-jest.mock('@/components/waves/drop/MemesSingleWaveDrop', () => ({
-  __esModule: true,
-  MemesSingleWaveDrop: () => <div data-testid="memes" />,
-}));
+jest.mock(
+  "@/components/waves/drops/participation/participationRendererRegistry",
+  () => ({
+    useWaveParticipationRendererSet: (...args: any[]) =>
+      useWaveParticipationRendererSet(...args),
+  })
+);
 
-const useSettings = jest.fn();
-
-jest.mock('@/contexts/SeizeSettingsContext', () => ({
-  useSeizeSettings: () => ({ isMemesWave: useSettings }),
-}));
-
-describe('SingleWaveDrop', () => {
-  const drop: any = { wave: { id: 'w1' } };
+describe("SingleWaveDrop", () => {
+  const drop: any = { wave: { id: "w1" } };
   const onClose = jest.fn();
 
-  it('renders memes drop when wave is memes', () => {
-    useSettings.mockReturnValue(true);
-    render(<SingleWaveDrop drop={drop} onClose={onClose} />);
-    expect(screen.getByTestId('memes')).toBeInTheDocument();
+  beforeEach(() => {
+    useWaveParticipationRendererSet.mockReset();
   });
 
-  it('renders default drop otherwise', () => {
-    useSettings.mockReturnValue(false);
+  it("renders the resolved single drop renderer", () => {
+    useWaveParticipationRendererSet.mockReturnValue({
+      variant: "quorum",
+      ParticipationDrop: () => null,
+      SingleWaveDrop: () => <div data-testid="quorum" />,
+    });
+
     render(<SingleWaveDrop drop={drop} onClose={onClose} />);
-    expect(screen.getByTestId('default')).toBeInTheDocument();
+
+    expect(useWaveParticipationRendererSet).toHaveBeenCalledWith("w1");
+    expect(screen.getByTestId("quorum")).toBeInTheDocument();
   });
 });

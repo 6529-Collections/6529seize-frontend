@@ -1,43 +1,45 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import ParticipationDrop from '@/components/waves/drops/participation/ParticipationDrop';
-import { DropLocation } from '@/components/waves/drops/Drop';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import ParticipationDrop from "@/components/waves/drops/participation/ParticipationDrop";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 
-jest.mock('@/contexts/SeizeSettingsContext', () => ({
-  useSeizeSettings: jest.fn()
-}));
+const useWaveParticipationRendererSet = jest.fn();
 
-jest.mock('@/components/memes/drops/MemeParticipationDrop', () => (props: any) => (
-  <div data-testid="meme" {...props} />
-));
+jest.mock(
+  "@/components/waves/drops/participation/participationRendererRegistry",
+  () => ({
+    useWaveParticipationRendererSet: (...args: any[]) =>
+      useWaveParticipationRendererSet(...args),
+  })
+);
 
-jest.mock('@/components/waves/drops/participation/DefaultParticipationDrop', () => (props: any) => (
-  <div data-testid="default" {...props} />
-));
-
-const { useSeizeSettings } = require('@/contexts/SeizeSettingsContext');
-
-describe('ParticipationDrop', () => {
-  const baseProps = {
-    drop: { wave: { id: '1' } } as any,
-    showWaveInfo: false,
-    activeDrop: null,
-    showReplyAndQuote: true,
-    location: DropLocation.FEED,
-    onReply: jest.fn(),
-    onQuote: jest.fn(),
-    onQuoteClick: jest.fn()
-  };
-
-  it('renders meme drop when wave is memes', () => {
-    useSeizeSettings.mockReturnValue({ isMemesWave: () => true });
-    render(<ParticipationDrop {...baseProps} />);
-    expect(screen.getByTestId('meme')).toBeInTheDocument();
+describe("ParticipationDrop", () => {
+  beforeEach(() => {
+    useWaveParticipationRendererSet.mockReset();
   });
 
-  it('renders default drop otherwise', () => {
-    useSeizeSettings.mockReturnValue({ isMemesWave: () => false });
-    render(<ParticipationDrop {...baseProps} />);
-    expect(screen.getByTestId('default')).toBeInTheDocument();
+  it("delegates to the resolved renderer", () => {
+    useWaveParticipationRendererSet.mockReturnValue({
+      variant: "quorum",
+      ParticipationDrop: (props: any) => (
+        <div data-testid="resolved-renderer">{props.drop.id}</div>
+      ),
+      SingleWaveDrop: () => null,
+    });
+
+    render(
+      <ParticipationDrop
+        drop={{ id: "drop-1", wave: { id: "quorum-wave" } } as any}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        location={DropLocation.WAVE}
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(useWaveParticipationRendererSet).toHaveBeenCalledWith("quorum-wave");
+    expect(screen.getByTestId("resolved-renderer")).toHaveTextContent("drop-1");
   });
 });

@@ -20,6 +20,28 @@ describe("MemesArtSubmissionModal", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("does not call onClose on Escape when closed", () => {
+    const onClose = jest.fn();
+    render(
+      <MemesArtSubmissionModal isOpen={false} wave={wave} onClose={onClose} />
+    );
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("calls onClose on Escape when open", () => {
+    const onClose = jest.fn();
+    render(
+      <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={onClose} />
+    );
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("calls onClose when backdrop clicked", () => {
     const onClose = jest.fn();
     render(
