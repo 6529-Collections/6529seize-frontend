@@ -45,7 +45,7 @@ export default function AboutFAQ() {
                 <p>Getting started is simple:</p>
                 <ol>
                   <li>
-                    Go to <a href="https://6529.io">6529.io</a>.
+                    Go to <a href="https://6529.io">6529.io.</a>
                   </li>
                   <li>
                     Connect your wallet.{" "}
@@ -319,9 +319,8 @@ export default function AboutFAQ() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Gradients
+                    Gradients.
                   </a>
-                  .
                 </p>
               </li>
 
@@ -353,7 +352,7 @@ export default function AboutFAQ() {
                 </p>
                 <p>
                   Submit and explore them on the{" "}
-                  <Link href="/rememes">ReMemes platform</Link>.
+                  <Link href="/rememes">ReMemes platform.</Link>
                 </p>
               </li>
 
@@ -372,9 +371,8 @@ export default function AboutFAQ() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    6529collections X account
+                    6529collections X account.
                   </a>
-                  .
                 </p>
                 <p>The economics of each drop are determined by the artist.</p>
               </li>
@@ -385,7 +383,7 @@ export default function AboutFAQ() {
             <h2>Bonus track</h2>
             <p>
               If you want to go deeper into 6529 in book form, your path is{" "}
-              <em>Memes Outside: The Book (2nd Edition)</em>. It is a living
+              <em>Memes Outside: The Book (2nd Edition).</em> It is a living
               extension of everything you have read so far. The book is an
               interactive experience that connects the digital world of 6529
               with physical space. It invites you to take art outside, play with
@@ -401,9 +399,8 @@ export default function AboutFAQ() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Memes Outside: The Book (2nd Edition)
+                Memes Outside: The Book (2nd Edition).
               </a>
-              .
             </p>
           </section>
 
@@ -449,18 +446,16 @@ export default function AboutFAQ() {
                 <strong>MetaMask:</strong> The most popular browser extension
                 wallet for Ethereum and NFTs. Available at{" "}
                 <a href="https://metamask.io" target="_blank" rel="noreferrer">
-                  metamask.io
+                  metamask.io.
                 </a>
-                .
               </li>
               <li>
                 <strong>Rabby Wallet:</strong> A browser extension wallet built
                 for DeFi and NFT users, with built-in transaction previews and
                 multi-chain support. Available at{" "}
                 <a href="https://rabby.io" target="_blank" rel="noreferrer">
-                  rabby.io
+                  rabby.io.
                 </a>
-                .
               </li>
               <li>
                 <strong>Coinbase Wallet:</strong> A user-friendly mobile and
@@ -470,17 +465,15 @@ export default function AboutFAQ() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  wallet.coinbase.com
+                  wallet.coinbase.com.
                 </a>
-                .
               </li>
               <li>
                 <strong>Rainbow Wallet:</strong> A mobile-first Ethereum wallet,
                 great for NFT collectors. Available at{" "}
                 <a href="https://rainbow.me" target="_blank" rel="noreferrer">
-                  rainbow.me
+                  rainbow.me.
                 </a>
-                .
               </li>
               <li>
                 <strong>Trust Wallet:</strong> A multi-chain mobile wallet
@@ -490,9 +483,8 @@ export default function AboutFAQ() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  trustwallet.com
+                  trustwallet.com.
                 </a>
-                .
               </li>
             </ul>
 
@@ -511,17 +503,15 @@ export default function AboutFAQ() {
                 <strong>Ledger:</strong> The most widely used hardware wallet
                 brand, supporting thousands of cryptocurrencies. Available at{" "}
                 <a href="https://ledger.com" target="_blank" rel="noreferrer">
-                  ledger.com
+                  ledger.com. (~$79-$249)
                 </a>
-                . (~$79-$249)
               </li>
               <li>
                 <strong>Trezor:</strong> An open-source hardware wallet known
                 for its strong security model. Available at{" "}
                 <a href="https://trezor.io" target="_blank" rel="noreferrer">
-                  trezor.io
+                  trezor.io. (~$69-$219)
                 </a>
-                . (~$69-$219)
               </li>
             </ul>
 
