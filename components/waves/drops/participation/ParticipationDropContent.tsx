@@ -2,6 +2,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropContent from "../WaveDropContent";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import type { DropContentPresentation } from "../dropContentPresentation";
 
 interface ParticipationDropContentProps {
   readonly drop: ExtendedDrop;
@@ -12,6 +13,7 @@ interface ParticipationDropContentProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
   readonly isCompetitionDrop?: boolean | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export default function ParticipationDropContent({
@@ -23,6 +25,7 @@ export default function ParticipationDropContent({
   onQuoteClick,
   setLongPressTriggered,
   isCompetitionDrop = false,
+  contentPresentation = "default",
 }: ParticipationDropContentProps) {
   const hasTouch = useIsTouchDevice();
 
@@ -38,6 +41,7 @@ export default function ParticipationDropContent({
         setLongPressTriggered={setLongPressTriggered}
         isCompetitionDrop={isCompetitionDrop}
         hasTouch={hasTouch}
+        contentPresentation={contentPresentation}
       />
     </div>
   );

@@ -1,9 +1,12 @@
 import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
+import Image from "next/image";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import { CICType } from "@/entities/IProfile";
 import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import WaveDropActionsRate from "../drops/WaveDropActionsRate";
@@ -14,11 +17,14 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: () => void;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveSmallLeaderboardDefaultDrop: React.FC<
   WaveSmallLeaderboardDefaultDropProps
-> = ({ drop, onDropClick }) => {
+> = ({ drop, onDropClick, contentPresentation = "default" }) => {
+  const authorLabel = drop.author.handle ?? drop.author.primary_address;
+
   const getCICColor = (cic: number): string => {
     const cicType = cicToType(cic);
     switch (cicType) {
@@ -75,17 +81,25 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
               <WaveSmallLeaderboardItemContent
                 drop={drop}
                 onDropClick={onDropClick}
+                contentPresentation={contentPresentation}
               />
               <div className="tw-flex tw-items-center tw-justify-between">
                 <Link
-                  href={`/${drop.author.handle ?? drop.author.primary_address}`}
+                  href={`/${authorLabel}`}
                   className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline desktop-hover:hover:tw-underline"
                 >
                   {drop.author.pfp ? (
-                    <img
+                    // Small leaderboard avatars can come from arbitrary remote hosts, so this stays unoptimized.
+                    <Image
                       className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10"
-                      src={drop.author.pfp}
-                      alt=""
+                      src={getScaledImageUri(
+                        drop.author.pfp,
+                        ImageScale.W_AUTO_H_50
+                      )}
+                      alt={`${authorLabel}'s profile picture`}
+                      width={24}
+                      height={24}
+                      unoptimized
                     />
                   ) : (
                     <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />

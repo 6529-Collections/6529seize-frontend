@@ -1,25 +1,13 @@
 import React from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { DefaultSingleWaveDrop } from "./DefaultSingleWaveDrop";
-import { MemesSingleWaveDrop } from "./MemesSingleWaveDrop";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-
-interface SingleWaveDropProps {
-  readonly drop: ExtendedDrop;
-  readonly onClose: () => void;
-}
+import { useWaveParticipationRendererSet } from "../drops/participation/participationRendererRegistry";
+import type { SingleWaveDropProps } from "../drops/participation/participationRenderer.types";
 
 export const SingleWaveDrop: React.FC<SingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  // Check if this is the memes wave
-  const { isMemesWave } = useSeizeSettings();
-  const isMemes = isMemesWave(initialDrop.wave.id);
+  const { SingleWaveDrop: SingleWaveDropRenderer } =
+    useWaveParticipationRendererSet(initialDrop.wave.id);
 
-  if (isMemes) {
-    return <MemesSingleWaveDrop drop={initialDrop} onClose={onClose} />;
-  }
-
-  return <DefaultSingleWaveDrop drop={initialDrop} onClose={onClose} />;
+  return <SingleWaveDropRenderer drop={initialDrop} onClose={onClose} />;
 };

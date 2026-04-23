@@ -11,6 +11,7 @@ import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPartContentMarkdown from "./WaveDropPartContentMarkdown";
 import { ImageScale } from "@/helpers/image.helpers";
+import type { DropContentPresentation } from "./dropContentPresentation";
 
 interface WaveDropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];
@@ -43,6 +44,7 @@ interface WaveDropPartContentProps {
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
@@ -67,6 +69,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   mediaImageScale = ImageScale.AUTOx450,
   fullWidthMedia = false,
   onLinkCardActionsActiveChange,
+  contentPresentation = "default",
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -162,6 +165,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
               onCancel={onCancel}
               drop={drop}
               onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+              contentPresentation={contentPresentation}
             />
           </div>
           {!!activePart.media.length && (
