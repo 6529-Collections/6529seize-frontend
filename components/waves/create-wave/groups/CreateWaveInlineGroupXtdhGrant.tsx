@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useDebounce } from "react-use";
 import IdentitySearch, {
@@ -99,11 +100,6 @@ export default function CreateWaveInlineGroupXtdhGrant({
     setBeneficiaryGrantId(normalized.length ? normalized : null);
   };
 
-  const onClearSelection = () => {
-    setLookupGrantId(null);
-    setBeneficiaryGrantId(null);
-  };
-
   const onResetFilters = () => {
     setSelectedGrantor(null);
     setTargetCollectionInput("");
@@ -114,7 +110,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div>
-        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
+        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
           xTDH Grant Beneficiary
         </p>
         <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
@@ -122,33 +118,37 @@ export default function CreateWaveInlineGroupXtdhGrant({
         </p>
       </div>
 
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_auto_auto]">
-        <label className="tw-block">
-          <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-            Grant ID
-          </span>
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_auto]">
+        <div className="tw-group tw-relative tw-w-full">
           <input
+            id="create-wave-inline-xtdh-grant-id"
             type="text"
             value={normalizedGrantId}
             onChange={(event) => onInputChange(event.target.value)}
-            placeholder="Paste grant id"
-            className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400"
+            placeholder=" "
+            className="tw-peer tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-font-medium tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm"
           />
-        </label>
+          <label
+            htmlFor="create-wave-inline-xtdh-grant-id"
+            className="tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4"
+          >
+            Grant ID
+          </label>
+        </div>
         <button
           type="button"
           onClick={() => setShowGrantFinder((current) => !current)}
-          className="tw-h-[42px] tw-self-end tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+          aria-expanded={showGrantFinder}
+          aria-controls="create-wave-inline-xtdh-grant-finder"
+          className="tw-inline-flex tw-h-[42px] tw-items-center tw-justify-center tw-gap-2 tw-self-end tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
         >
           {showGrantFinder ? "Hide finder" : "Find grant"}
-        </button>
-        <button
-          type="button"
-          onClick={onClearSelection}
-          disabled={!normalizedGrantId.length}
-          className="tw-h-[42px] tw-self-end tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800"
-        >
-          Clear
+          <ChevronDownIcon
+            aria-hidden="true"
+            className={`tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-200 ${
+              showGrantFinder ? "tw-rotate-180" : ""
+            }`}
+          />
         </button>
       </div>
 
@@ -191,7 +191,10 @@ export default function CreateWaveInlineGroupXtdhGrant({
       )}
 
       {showGrantFinder && (
-        <div className="tw-mt-4 tw-space-y-4">
+        <div
+          id="create-wave-inline-xtdh-grant-finder"
+          className="tw-mt-6 tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6"
+        >
           <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2">
             <IdentitySearch
               label="Grantor"
@@ -207,14 +210,14 @@ export default function CreateWaveInlineGroupXtdhGrant({
               onChange={(event) => setTargetCollectionInput(event.target.value)}
               placeholder="Collection name"
               aria-label="Collection name"
-              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400"
+              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400 sm:tw-text-sm"
             />
           </div>
 
           <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-3">
             <div className="tw-min-w-0 tw-flex-1">
-              <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                Status
+              <span className="tw-mb-2 tw-block tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+                Filter by status
               </span>
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                 {STATUS_OPTIONS.map((status) => {
@@ -247,7 +250,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
           </div>
 
           <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40">
-            <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2.5">
+            <div className="tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2.5">
               <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
                 Results
               </p>
@@ -256,7 +259,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
               </p>
             </div>
 
-            <div className="tw-max-h-[320px] tw-overflow-y-auto tw-p-2 sm:tw-p-3">
+            <div className="tw-max-h-80 tw-overflow-y-auto tw-p-2 sm:tw-p-3">
               {isLoading && !grants.length && (
                 <p className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-400">
                   Loading grants...
