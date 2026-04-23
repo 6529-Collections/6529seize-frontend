@@ -1,6 +1,5 @@
 "use client";
 
-import ArtFeedTrigger from "@/components/art-feed/ArtFeedTrigger";
 import MemesWaveQuickVoteTrigger from "@/components/brain/left-sidebar/waves/MemesWaveQuickVoteTrigger";
 import MemesWaveZapIcon from "@/components/brain/left-sidebar/waves/MemesWaveZapIcon";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
@@ -44,7 +43,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           leftThisRoundCount
         )}, ${formatMemesQuickVoteUnratedText(unratedCount)}`
       : "Quick vote";
-  const buttonTitle = isReady ? "Uncast votes" : "Quick vote";
+  const buttonTitle = isReady ? "Uncast Power" : "Quick vote";
   const votingPowerLabel = votingLabel ? ` ${votingLabel}` : " votes";
   const buttonValue =
     isReady && typeof uncastPower === "number"
@@ -82,16 +81,13 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
           }
         >
           {collapsed ? (
-            <>
-              <MemesWaveQuickVoteTrigger
-                isAvailable={isAvailable}
-                leftThisRoundCount={leftThisRoundCount}
-                onOpenQuickVote={handleOpenQuickVote}
-                onPrefetchQuickVote={handlePrefetchQuickVote}
-                unratedCount={unratedCount}
-              />
-              <ArtFeedTrigger />
-            </>
+            <MemesWaveQuickVoteTrigger
+              isAvailable={isAvailable}
+              leftThisRoundCount={leftThisRoundCount}
+              onOpenQuickVote={handleOpenQuickVote}
+              onPrefetchQuickVote={handlePrefetchQuickVote}
+              unratedCount={unratedCount}
+            />
           ) : (
             <div className="tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4">
               <div className="tw-flex tw-items-stretch tw-gap-2">
@@ -109,7 +105,7 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                       className="tw-pointer-events-none tw-absolute tw-inset-0 -tw-translate-x-full tw-bg-gradient-to-r tw-from-white/0 tw-via-white/[0.08] tw-to-white/0 tw-opacity-50 tw-transition-transform tw-duration-1000 tw-ease-out desktop-hover:group-hover:tw-translate-x-full"
                     />
                     <div className="tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
-                      <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-[#6b7c93]">
+                      <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-[#6b7c93]">
                         {buttonTitle}
                       </span>
 
@@ -135,7 +131,6 @@ const MemesWaveFooter: React.FC<MemesWaveFooterProps> = ({
                     )}
                   </div>
                 </button>
-                <ArtFeedTrigger variant="panel" />
               </div>
             </div>
           )}
