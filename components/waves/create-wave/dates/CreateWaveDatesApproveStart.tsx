@@ -6,15 +6,13 @@ import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
-import DateAccordion from "@/components/common/DateAccordion";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { Time } from "@/helpers/time";
+import { getEarliestApproveWaveEndTimestamp } from "./approveWaveDates.helpers";
 
 interface CreateWaveDatesApproveStartProps {
   readonly dates: CreateWaveDatesConfig;
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
-  readonly isExpanded: boolean;
-  readonly setIsExpanded: (expanded: boolean) => void;
 }
 
 const formatShortDate = (timestamp: number) =>
@@ -27,8 +25,6 @@ const formatShortDate = (timestamp: number) =>
 export default function CreateWaveDatesApproveStart({
   dates,
   setDates,
-  isExpanded,
-  setIsExpanded,
 }: CreateWaveDatesApproveStartProps) {
   const startDateFormatted = useMemo(
     () => formatShortDate(dates.submissionStartDate),
@@ -37,18 +33,32 @@ export default function CreateWaveDatesApproveStart({
 
   const handleStartDateChange = (timestamp: number) => {
     const adjustedTimestamp = Math.max(timestamp, Time.currentMillis());
+    const earliestEndTimestamp =
+      getEarliestApproveWaveEndTimestamp(adjustedTimestamp);
+    const selectedEndDate =
+      dates.endDate !== null && Number.isFinite(dates.endDate)
+        ? dates.endDate
+        : null;
+    const nextEndDate =
+      selectedEndDate !== null && selectedEndDate < earliestEndTimestamp
+        ? earliestEndTimestamp
+        : selectedEndDate;
+
     setDates({
       ...dates,
       submissionStartDate: adjustedTimestamp,
       votingStartDate: adjustedTimestamp,
+      endDate: nextEndDate,
     });
   };
 
   return (
-    <DateAccordion
-      title={
+    <section className="tw-rounded-xl tw-bg-iron-900 tw-px-5 tw-pb-5 tw-pt-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+      <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <span>Wave Start</span>
+          <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-300">
+            Wave Start
+          </h3>
           <TooltipIconButton
             icon={faInfoCircle}
             tooltipText="Choose when the approve wave opens. Approvals and submissions start at the same moment."
@@ -56,10 +66,7 @@ export default function CreateWaveDatesApproveStart({
             tooltipWidth="tw-w-80"
           />
         </div>
-      }
-      isExpanded={isExpanded}
-      onToggle={() => setIsExpanded(!isExpanded)}
-      collapsedContent={
+
         <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
           <FontAwesomeIcon
             icon={faCalendarDays}
@@ -74,9 +81,9 @@ export default function CreateWaveDatesApproveStart({
             </p>
           </div>
         </div>
-      }
-    >
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 tw-px-5 tw-pb-5 tw-pt-2">
+      </div>
+
+      <div className="tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8">
         <div className="tw-col-span-1">
           <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
             Wave Starts
@@ -96,6 +103,6 @@ export default function CreateWaveDatesApproveStart({
           </div>
         </div>
       </div>
-    </DateAccordion>
+    </section>
   );
 }

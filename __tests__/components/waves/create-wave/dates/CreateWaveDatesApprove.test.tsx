@@ -1,29 +1,30 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import CreateWaveDatesApprove from "@/components/waves/create-wave/dates/CreateWaveDatesApprove";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 
+const mockStart = jest.fn((props: any) => (
+  <div
+    data-has-expanded-prop={String("isExpanded" in props)}
+    data-testid="start"
+  >
+    start
+  </div>
+));
+const mockEnd = jest.fn((props: any) => (
+  <div data-has-expanded-prop={String("isExpanded" in props)} data-testid="end">
+    end {props.errors.length}
+  </div>
+));
+
 jest.mock(
   "@/components/waves/create-wave/dates/CreateWaveDatesApproveStart",
-  () => {
-    const MockCreateWaveDatesApproveStart = (props: any) => (
-      <div data-expanded={String(props.isExpanded)} data-testid="start" />
-    );
-    MockCreateWaveDatesApproveStart.displayName =
-      "MockCreateWaveDatesApproveStart";
-    return MockCreateWaveDatesApproveStart;
-  }
+  () => (props: any) => mockStart(props)
 );
 
 jest.mock(
   "@/components/waves/create-wave/dates/CreateWaveDatesApproveEnd",
-  () => {
-    const MockCreateWaveDatesApproveEnd = (props: any) => (
-      <div data-expanded={String(props.isExpanded)} data-testid="end" />
-    );
-    MockCreateWaveDatesApproveEnd.displayName = "MockCreateWaveDatesApproveEnd";
-    return MockCreateWaveDatesApproveEnd;
-  }
+  () => (props: any) => mockEnd(props)
 );
 
 const baseDates: CreateWaveDatesConfig = {
@@ -36,34 +37,39 @@ const baseDates: CreateWaveDatesConfig = {
 };
 
 describe("CreateWaveDatesApprove", () => {
-  it("opens wave end when end date validation fails", async () => {
-    const { rerender } = render(
+  beforeEach(() => {
+    mockStart.mockClear();
+    mockEnd.mockClear();
+  });
+
+  it("always renders wave start and wave end without drawer state", () => {
+    const setDates = jest.fn();
+    render(
       <CreateWaveDatesApprove
         dates={baseDates}
         errors={[CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED]}
-        setDates={jest.fn()}
+        setDates={setDates}
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId("start")).toHaveAttribute(
-        "data-expanded",
-        "false"
-      );
-      expect(screen.getByTestId("end")).toHaveAttribute(
-        "data-expanded",
-        "true"
-      );
+    expect(screen.getByTestId("start")).toBeInTheDocument();
+    expect(screen.getByTestId("end")).toBeInTheDocument();
+    expect(screen.getByTestId("start")).toHaveAttribute(
+      "data-has-expanded-prop",
+      "false"
+    );
+    expect(screen.getByTestId("end")).toHaveAttribute(
+      "data-has-expanded-prop",
+      "false"
+    );
+    expect(mockStart).toHaveBeenCalledWith({
+      dates: baseDates,
+      setDates,
     });
-
-    rerender(
-      <CreateWaveDatesApprove
-        dates={{ ...baseDates, endDate: 20 }}
-        errors={[]}
-        setDates={jest.fn()}
-      />
-    );
-
-    expect(screen.getByTestId("end")).toHaveAttribute("data-expanded", "true");
+    expect(mockEnd).toHaveBeenCalledWith({
+      dates: baseDates,
+      errors: [CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED],
+      setDates,
+    });
   });
 });

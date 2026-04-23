@@ -2,27 +2,23 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import CreateWaveDatesApproveStart from "@/components/waves/create-wave/dates/CreateWaveDatesApproveStart";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 
-const mockFutureTimestamp = 2_000_000_000_000;
+let mockSelectedTimestamp = new Date("2035-05-03T09:15:00.000Z").getTime();
+
+const getEarliestValidEndTimestamp = (timestamp: number) => {
+  const nextValidMinute = new Date(timestamp);
+  nextValidMinute.setSeconds(0, 0);
+  nextValidMinute.setMinutes(nextValidMinute.getMinutes() + 1);
+  return nextValidMinute.getTime();
+};
 
 jest.mock("@/components/utils/calendar/CommonCalendar", () => {
   const MockCommonCalendar = (props: any) => (
-    <button onClick={() => props.setSelectedTimestamp(mockFutureTimestamp)}>
+    <button onClick={() => props.setSelectedTimestamp(mockSelectedTimestamp)}>
       calendar
     </button>
   );
   MockCommonCalendar.displayName = "MockCommonCalendar";
   return MockCommonCalendar;
-});
-
-jest.mock("@/components/common/DateAccordion", () => {
-  const MockDateAccordion = (props: any) => (
-    <div>
-      <div onClick={() => props.onToggle()}>{props.title}</div>
-      {props.isExpanded ? props.children : props.collapsedContent}
-    </div>
-  );
-  MockDateAccordion.displayName = "MockDateAccordion";
-  return MockDateAccordion;
 });
 
 jest.mock("@/components/common/TooltipIconButton", () => () => <div />);
@@ -37,22 +33,44 @@ const baseDates: CreateWaveDatesConfig = {
 };
 
 describe("CreateWaveDatesApproveStart", () => {
+  beforeEach(() => {
+    mockSelectedTimestamp = new Date("2035-05-03T09:15:00.000Z").getTime();
+  });
+
   it("updates submission and voting start together", () => {
     const setDates = jest.fn();
     render(
-      <CreateWaveDatesApproveStart
-        dates={baseDates}
-        setDates={setDates}
-        isExpanded={true}
-        setIsExpanded={() => {}}
-      />
+      <CreateWaveDatesApproveStart dates={baseDates} setDates={setDates} />
     );
 
     fireEvent.click(screen.getByText("calendar"));
     expect(setDates).toHaveBeenCalledWith({
       ...baseDates,
-      submissionStartDate: mockFutureTimestamp,
-      votingStartDate: mockFutureTimestamp,
+      submissionStartDate: mockSelectedTimestamp,
+      votingStartDate: mockSelectedTimestamp,
+    });
+  });
+
+  it("moves a selected end date forward when start passes it", () => {
+    const previousEndDate = new Date("2035-05-02T10:00:00.000Z").getTime();
+    const setDates = jest.fn();
+    render(
+      <CreateWaveDatesApproveStart
+        dates={{
+          ...baseDates,
+          endDate: previousEndDate,
+        }}
+        setDates={setDates}
+      />
+    );
+
+    fireEvent.click(screen.getByText("calendar"));
+
+    expect(setDates).toHaveBeenCalledWith({
+      ...baseDates,
+      submissionStartDate: mockSelectedTimestamp,
+      votingStartDate: mockSelectedTimestamp,
+      endDate: getEarliestValidEndTimestamp(mockSelectedTimestamp),
     });
   });
 });

@@ -27,6 +27,7 @@ const mockTimePicker = jest.fn((props: any) => (
     data-testid="time"
     data-hours={String(props.hours)}
     data-minutes={String(props.minutes)}
+    data-disabled={String(props.disabled)}
     onClick={() =>
       props.onTimeChange(mockTimeSelection.hours, mockTimeSelection.minutes)
     }
@@ -39,13 +40,6 @@ jest.mock(
   "@/components/utils/calendar/CommonCalendar",
   () => (props: any) => mockCommonCalendar(props)
 );
-
-jest.mock("@/components/common/DateAccordion", () => (props: any) => (
-  <div>
-    <button onClick={() => props.onToggle()}>toggle</button>
-    {props.isExpanded ? props.children : props.collapsedContent}
-  </div>
-));
 
 jest.mock(
   "@/components/common/TimePicker",
@@ -80,8 +74,6 @@ describe("CreateWaveDatesApproveEnd", () => {
         dates={baseDates}
         errors={[]}
         setDates={setDates}
-        isExpanded={true}
-        setIsExpanded={() => {}}
       />
     );
 
@@ -113,8 +105,6 @@ describe("CreateWaveDatesApproveEnd", () => {
         dates={baseDates}
         errors={[]}
         setDates={setDates}
-        isExpanded={true}
-        setIsExpanded={() => {}}
       />
     );
 
@@ -142,8 +132,6 @@ describe("CreateWaveDatesApproveEnd", () => {
         }}
         errors={[]}
         setDates={setDates}
-        isExpanded={true}
-        setIsExpanded={() => {}}
       />
     );
 
@@ -158,15 +146,17 @@ describe("CreateWaveDatesApproveEnd", () => {
   });
 
   it("updates end date on time selection", async () => {
+    const datesWithEnd = {
+      ...baseDates,
+      endDate: getEarliestValidEndTimestamp(submissionStartDate),
+    };
     const setDates = jest.fn();
     const user = userEvent.setup();
     render(
       <CreateWaveDatesApproveEnd
-        dates={baseDates}
+        dates={datesWithEnd}
         errors={[]}
         setDates={setDates}
-        isExpanded={true}
-        setIsExpanded={() => {}}
       />
     );
 
@@ -178,7 +168,7 @@ describe("CreateWaveDatesApproveEnd", () => {
     expected.setHours(15, 30, 0, 0);
 
     expect(setDates).toHaveBeenCalledWith({
-      ...baseDates,
+      ...datesWithEnd,
       endDate: expected.getTime(),
     });
   });
@@ -188,28 +178,26 @@ describe("CreateWaveDatesApproveEnd", () => {
     const submissionStartDateWithSeconds = new Date(
       "2035-05-01T09:15:45.000Z"
     ).getTime();
+    const datesWithEnd = {
+      ...baseDates,
+      submissionStartDate: submissionStartDateWithSeconds,
+      votingStartDate: submissionStartDateWithSeconds,
+      endDate: getEarliestValidEndTimestamp(submissionStartDateWithSeconds),
+    };
     const setDates = jest.fn();
     const user = userEvent.setup();
     render(
       <CreateWaveDatesApproveEnd
-        dates={{
-          ...baseDates,
-          submissionStartDate: submissionStartDateWithSeconds,
-          votingStartDate: submissionStartDateWithSeconds,
-        }}
+        dates={datesWithEnd}
         errors={[]}
         setDates={setDates}
-        isExpanded={true}
-        setIsExpanded={() => {}}
       />
     );
 
     await user.click(screen.getByText("time"));
 
     expect(setDates).toHaveBeenCalledWith({
-      ...baseDates,
-      submissionStartDate: submissionStartDateWithSeconds,
-      votingStartDate: submissionStartDateWithSeconds,
+      ...datesWithEnd,
       endDate: getEarliestValidEndTimestamp(submissionStartDateWithSeconds),
     });
   });
@@ -223,8 +211,6 @@ describe("CreateWaveDatesApproveEnd", () => {
         dates={baseDates}
         errors={[]}
         setDates={() => {}}
-        isExpanded={true}
-        setIsExpanded={() => {}}
       />
     );
 
@@ -244,8 +230,6 @@ describe("CreateWaveDatesApproveEnd", () => {
         }}
         errors={[]}
         setDates={() => {}}
-        isExpanded={true}
-        setIsExpanded={() => {}}
       />
     );
 
@@ -257,18 +241,19 @@ describe("CreateWaveDatesApproveEnd", () => {
     expect(screen.getByTestId("time")).toHaveAttribute("data-minutes", "46");
   });
 
-  it("shows a required placeholder when collapsed without an end date", () => {
+  it("shows the end date controls without an end date", () => {
     render(
       <CreateWaveDatesApproveEnd
         dates={baseDates}
         errors={[]}
         setDates={() => {}}
-        isExpanded={false}
-        setIsExpanded={() => {}}
       />
     );
 
     expect(screen.getByText("Select wave end")).toBeInTheDocument();
+    expect(screen.getByText("Select End Date:")).toBeInTheDocument();
+    expect(screen.getByText("Select End Time:")).toBeInTheDocument();
+    expect(screen.getByTestId("time")).toHaveAttribute("data-disabled", "true");
   });
 
   it("shows an end date error after validation fails", () => {
@@ -277,8 +262,6 @@ describe("CreateWaveDatesApproveEnd", () => {
         dates={baseDates}
         errors={[CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED]}
         setDates={() => {}}
-        isExpanded={true}
-        setIsExpanded={() => {}}
       />
     );
 
@@ -287,17 +270,22 @@ describe("CreateWaveDatesApproveEnd", () => {
     ).toBeInTheDocument();
   });
 
-  it("marks the collapsed placeholder as required after validation fails", () => {
+  it("shows an error when end is before start", () => {
     render(
       <CreateWaveDatesApproveEnd
-        dates={baseDates}
-        errors={[CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED]}
+        dates={{
+          ...baseDates,
+          endDate: submissionStartDate - 1,
+        }}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE,
+        ]}
         setDates={() => {}}
-        isExpanded={false}
-        setIsExpanded={() => {}}
       />
     );
 
-    expect(screen.getByText("Required")).toBeInTheDocument();
+    expect(
+      screen.getByText("Wave end must be after wave start.")
+    ).toBeInTheDocument();
   });
 });

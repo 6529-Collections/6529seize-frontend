@@ -1,38 +1,22 @@
 "use client";
 
 import { useMemo } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
-import DateAccordion from "@/components/common/DateAccordion";
 import TimePicker from "@/components/common/TimePicker";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import {
+  clampApproveWaveEndDate,
+  getEarliestApproveWaveEndTimestamp,
+} from "./approveWaveDates.helpers";
 
 interface CreateWaveDatesApproveEndProps {
   readonly dates: CreateWaveDatesConfig;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
-  readonly isExpanded: boolean;
-  readonly setIsExpanded: (expanded: boolean) => void;
 }
-
-const getEarliestValidEndDate = (submissionStartDate: number) => {
-  const earliestValidEndDate = new Date(submissionStartDate);
-  earliestValidEndDate.setSeconds(0, 0);
-  earliestValidEndDate.setMinutes(earliestValidEndDate.getMinutes() + 1);
-  return earliestValidEndDate;
-};
-
-const clampToEarliestValidEndDate = (
-  candidateDate: Date,
-  submissionStartDate: number
-) => {
-  const earliestValidEndTimestamp =
-    getEarliestValidEndDate(submissionStartDate).getTime();
-  return new Date(Math.max(candidateDate.getTime(), earliestValidEndTimestamp));
-};
 
 const formatDateTime = (timestamp: number) =>
   new Date(timestamp).toLocaleString("en-US", {
@@ -48,20 +32,23 @@ export default function CreateWaveDatesApproveEnd({
   dates,
   errors,
   setDates,
-  isExpanded,
-  setIsExpanded,
 }: CreateWaveDatesApproveEndProps) {
   const endDate = dates.endDate;
-  const hasSelectedEndDate = endDate !== null && Number.isFinite(endDate);
+  const selectedEndDate =
+    endDate !== null && Number.isFinite(endDate) ? endDate : null;
+  const hasSelectedEndDate = selectedEndDate !== null;
   const hasEndDateError =
     !hasSelectedEndDate &&
     errors.includes(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+  const hasEndBeforeStartError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+  );
   const endDateErrorId = "approve-wave-end-date-error";
   const earliestValidEndTimestamp = useMemo(
-    () => getEarliestValidEndDate(dates.submissionStartDate).getTime(),
+    () => getEarliestApproveWaveEndTimestamp(dates.submissionStartDate),
     [dates.submissionStartDate]
   );
-  const displayedTimestamp = endDate ?? earliestValidEndTimestamp;
+  const displayedTimestamp = selectedEndDate ?? earliestValidEndTimestamp;
 
   const minTime = useMemo(() => {
     const minDate = new Date(earliestValidEndTimestamp);
@@ -83,54 +70,13 @@ export default function CreateWaveDatesApproveEnd({
     hasSelectedEndDate &&
     displayedDate.toDateString() === earliestValidEndDate.toDateString();
 
-  const collapsedContent =
-    endDate !== null && Number.isFinite(endDate) ? (
-      <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
-        <FontAwesomeIcon
-          icon={faCalendarAlt}
-          className="tw-mr-2 tw-size-4 tw-text-primary-400"
-        />
-        <div>
-          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Wave Ends</p>
-          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
-            {formatDateTime(endDate)}
-          </p>
-        </div>
-      </div>
-    ) : (
-      <div
-        className={`tw-flex tw-items-center tw-rounded-lg tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px] ${
-          hasEndDateError
-            ? "tw-bg-iron-700/40 tw-ring-1 tw-ring-error"
-            : "tw-bg-iron-700/40"
-        }`}
-      >
-        <FontAwesomeIcon
-          icon={faCalendarAlt}
-          className={`tw-mr-2 tw-size-4 ${
-            hasEndDateError ? "tw-text-error" : "tw-text-primary-400"
-          }`}
-        />
-        <div>
-          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Wave Ends</p>
-          <p
-            className={`tw-mb-0 tw-text-sm tw-font-medium ${
-              hasEndDateError ? "tw-text-error" : "tw-text-iron-50"
-            }`}
-          >
-            {hasEndDateError ? "Required" : "Select wave end"}
-          </p>
-        </div>
-      </div>
-    );
-
   const handleDateSelection = (timestamp: number) => {
     const currentDate = new Date(displayedTimestamp);
     const newDate = new Date(timestamp);
     const currentHours = currentDate.getHours();
     const currentMinutes = currentDate.getMinutes();
     newDate.setHours(currentHours, currentMinutes, 0, 0);
-    const newTimestamp = clampToEarliestValidEndDate(
+    const newTimestamp = clampApproveWaveEndDate(
       newDate,
       dates.submissionStartDate
     ).getTime();
@@ -143,7 +89,7 @@ export default function CreateWaveDatesApproveEnd({
   const handleTimeChange = (hours: number, minutes: number) => {
     const nextDate = new Date(displayedTimestamp);
     nextDate.setHours(hours, minutes, 0, 0);
-    const newTimestamp = clampToEarliestValidEndDate(
+    const newTimestamp = clampApproveWaveEndDate(
       nextDate,
       dates.submissionStartDate
     ).getTime();
@@ -154,29 +100,46 @@ export default function CreateWaveDatesApproveEnd({
   };
 
   return (
-    <DateAccordion
-      title={
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <span>
-            Wave End{" "}
-            <span className="tw-text-error" aria-hidden="true">
-              *
-            </span>
-          </span>
-          <TooltipIconButton
-            icon={faInfoCircle}
-            tooltipText="Choose when the approve wave closes. This is the actual end timestamp sent to the API."
-            tooltipPosition="bottom"
-            tooltipWidth="tw-w-80"
-          />
+    <section className="tw-rounded-xl tw-bg-iron-900 tw-px-5 tw-pb-5 tw-pt-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+      <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+        <div>
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-300">
+              Wave End{" "}
+              <span className="tw-text-error" aria-hidden="true">
+                *
+              </span>
+            </h3>
+            <TooltipIconButton
+              icon={faInfoCircle}
+              tooltipText="Choose when the approve wave closes. This is the actual end timestamp sent to the API."
+              tooltipPosition="bottom"
+              tooltipWidth="tw-w-80"
+            />
+          </div>
+          <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
+            This must be after the wave start.
+          </p>
         </div>
-      }
-      isExpanded={isExpanded}
-      onToggle={() => setIsExpanded(!isExpanded)}
-      collapsedContent={collapsedContent}
-    >
-      <div className="tw-px-5 tw-pb-5 tw-pt-2">
-        {hasEndDateError && (
+
+        <div className="tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md">
+          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Wave Ends</p>
+          <p
+            className={`tw-mb-0 tw-text-sm tw-font-medium ${
+              hasEndDateError || hasEndBeforeStartError
+                ? "tw-text-error"
+                : "tw-text-iron-50"
+            }`}
+          >
+            {selectedEndDate !== null
+              ? formatDateTime(selectedEndDate)
+              : "Select wave end"}
+          </p>
+        </div>
+      </div>
+
+      <div className="tw-mt-5">
+        {(hasEndDateError || hasEndBeforeStartError) && (
           <div
             id={endDateErrorId}
             role="alert"
@@ -197,7 +160,11 @@ export default function CreateWaveDatesApproveEnd({
                 strokeLinejoin="round"
               />
             </svg>
-            <span>Choose a wave end before continuing.</span>
+            <span>
+              {hasEndBeforeStartError
+                ? "Wave end must be after wave start."
+                : "Choose a wave end before continuing."}
+            </span>
           </div>
         )}
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
@@ -208,7 +175,7 @@ export default function CreateWaveDatesApproveEnd({
             <CommonCalendar
               initialMonth={displayedDate.getMonth()}
               initialYear={displayedDate.getFullYear()}
-              selectedTimestamp={endDate}
+              selectedTimestamp={selectedEndDate}
               minTimestamp={earliestValidEndTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleDateSelection}
@@ -235,6 +202,6 @@ export default function CreateWaveDatesApproveEnd({
           </div>
         </div>
       </div>
-    </DateAccordion>
+    </section>
   );
 }
