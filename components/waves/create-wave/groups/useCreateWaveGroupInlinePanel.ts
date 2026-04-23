@@ -144,16 +144,8 @@ export type CreateWaveGroupInlinePanelProps = {
   ) => Promise<ApiGroupFull | null>;
 };
 
-function buildUnsavedGroupDescription({
-  selectedGroup,
-}: {
-  readonly selectedGroup: ApiGroupFull | null;
-}): string {
-  if (!selectedGroup) {
-    return "Not applied yet.";
-  }
-
-  return `Based on ${selectedGroup.name}. Not applied yet.`;
+function buildUnsavedGroupDescription(): string {
+  return "Not applied yet.";
 }
 
 function useCreateWaveGroupInlinePanelViewState({
@@ -206,9 +198,7 @@ function useCreateWaveGroupInlinePanelViewState({
     isSearchPanel,
     showDraftFooter: hasUnsavedGroup && !isSearchPanel,
     unsavedGroupDescription: hasUnsavedGroup
-      ? buildUnsavedGroupDescription({
-          selectedGroup,
-        })
+      ? buildUnsavedGroupDescription()
       : null,
     unsavedGroupSummary: hasUnsavedGroup ? draftSummary : null,
   };

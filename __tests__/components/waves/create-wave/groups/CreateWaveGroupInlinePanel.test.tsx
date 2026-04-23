@@ -482,9 +482,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Existing Group")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
     expect(screen.getByText("1 rule")).toBeInTheDocument();
+    expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(
-      screen.getByText("Based on Existing Group. Not applied yet.")
-    ).toBeInTheDocument();
+      screen.queryByText("Based on Existing Group. Not applied yet.")
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Create this new group")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
     expect(
@@ -517,9 +518,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Existing Group")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
     expect(screen.getByText("1 rule")).toBeInTheDocument();
+    expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(
-      screen.getByText("Based on Existing Group. Not applied yet.")
-    ).toBeInTheDocument();
+      screen.queryByText("Based on Existing Group. Not applied yet.")
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Create this new group")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
     expect(

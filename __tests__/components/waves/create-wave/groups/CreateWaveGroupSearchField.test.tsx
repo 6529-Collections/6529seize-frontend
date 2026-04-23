@@ -304,6 +304,46 @@ describe("CreateWaveGroupSearchField", () => {
     expect(screen.getByText("Current group: Alpha Group")).toBeInTheDocument();
   });
 
+  it("restores selected group text when Escape dismisses an unselected query", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderStatefulSearchField({
+      selectedGroup: groups[0],
+    });
+
+    const input = screen.getByRole("combobox", { name: "Search groups..." });
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, "Custom query");
+
+    expect(input).toHaveValue("Custom query");
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => expect(input).toHaveValue("Alpha Group"));
+    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("restores selected group text when outside click dismisses an unselected query", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderStatefulSearchField({
+      selectedGroup: groups[0],
+    });
+
+    const input = screen.getByRole("combobox", { name: "Search groups..." });
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, "Custom query");
+
+    expect(input).toHaveValue("Custom query");
+
+    await user.click(document.body);
+
+    await waitFor(() => expect(input).toHaveValue("Alpha Group"));
+    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it("closes the results on Escape and outside click", async () => {
     const user = userEvent.setup();
     renderSearchField();

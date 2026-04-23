@@ -287,6 +287,16 @@ export function useCreateWaveGroupSearch({
     setActiveIndex(-1);
   }, [setActiveIndex]);
 
+  const dismissSearch = useCallback(() => {
+    setIsOpen(false);
+    setSearchState(
+      createSearchState({
+        selectedGroupKey,
+        selectedGroupName,
+      })
+    );
+  }, [selectedGroupKey, selectedGroupName, setSearchState]);
+
   const clearSelection = useCallback(() => {
     if (!allowClear || disabled) {
       return;
@@ -307,14 +317,14 @@ export function useCreateWaveGroupSearch({
     if (!isOpen) {
       return;
     }
-    closeSearch();
+    dismissSearch();
   });
 
   useKeyPressEvent("Escape", () => {
     if (!isOpen) {
       return;
     }
-    closeSearch();
+    dismissSearch();
   });
 
   const onInputFocus = () => {
@@ -352,7 +362,7 @@ export function useCreateWaveGroupSearch({
 
   const handleKeyDown = useCreateWaveGroupKeyboardNavigation({
     activeIndex,
-    closeSearch,
+    closeSearch: dismissSearch,
     isOpen,
     onOptionSelect,
     setActiveIndex,
