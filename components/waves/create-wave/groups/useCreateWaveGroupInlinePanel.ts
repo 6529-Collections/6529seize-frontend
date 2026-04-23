@@ -191,11 +191,7 @@ function useCreateWaveGroupInlinePanelViewState({
     isIdentityPanel,
     isRulePanel,
     isSearchPanel,
-    showDraftFooter:
-      !!draftSummary &&
-      !disabled &&
-      !isSearchPanel &&
-      (displayedBuilder.panel !== PANEL_ACTIONS || !selectedGroup),
+    showDraftFooter: !!draftSummary && !disabled && !isSearchPanel,
   };
 }
 

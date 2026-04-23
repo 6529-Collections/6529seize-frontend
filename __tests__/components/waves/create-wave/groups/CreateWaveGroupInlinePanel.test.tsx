@@ -461,7 +461,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
   });
 
-  it("hides the collapsed draft footer when a selected group already exists", async () => {
+  it("keeps the collapsed draft footer visible when a selected group already exists", async () => {
     const user = userEvent.setup();
     renderInlinePanel({
       selectedGroup: {
@@ -477,14 +477,39 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     expect(
-      screen.queryByText("Ready to create this inline group")
-    ).not.toBeInTheDocument();
+      screen.getByText("Ready to create this inline group")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
+    expect(screen.getByText("Existing Group")).toBeInTheDocument();
+  });
+
+  it("keeps draft actions visible after clicking outside with a selected group", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel({
+      selectedGroup: {
+        id: "group-1",
+        name: "Existing Group",
+      } as ApiGroupFull,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+
+    expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
+
+    fireEvent.mouseDown(document.body);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
+    });
+
     expect(
-      screen.queryByRole("button", { name: "Clear all" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Create + use" })
-    ).not.toBeInTheDocument();
+      screen.getByText("Ready to create this inline group")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear all" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Create + use" })).toBeEnabled();
     expect(screen.getByText("Existing Group")).toBeInTheDocument();
   });
 
