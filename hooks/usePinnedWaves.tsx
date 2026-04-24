@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
 
 const MAX_PINNED_WAVES = 20;
@@ -19,12 +20,36 @@ export interface PinnedWaveSnapshot {
   readonly picture: string | null;
   readonly contributors: readonly PinnedWaveContributor[];
   readonly isDirectMessage: boolean;
+  readonly type: ApiWaveType | null;
   readonly fetchedAt: number;
 }
 
 interface UpsertPinnedWaveOptions {
   readonly moveToFront?: boolean | undefined;
 }
+
+const arePinnedWaveContributorsEqual = (
+  left: readonly PinnedWaveContributor[],
+  right: readonly PinnedWaveContributor[]
+): boolean =>
+  left.length === right.length &&
+  left.every(
+    (contributor, index) =>
+      contributor.pfp === right[index]?.pfp &&
+      (contributor.identity ?? null) === (right[index].identity ?? null)
+  );
+
+const arePinnedWaveSnapshotsEqual = (
+  left: PinnedWaveSnapshot,
+  right: PinnedWaveSnapshot
+): boolean =>
+  left.id === right.id &&
+  left.name === right.name &&
+  left.picture === right.picture &&
+  left.isDirectMessage === right.isDirectMessage &&
+  left.type === right.type &&
+  left.fetchedAt === right.fetchedAt &&
+  arePinnedWaveContributorsEqual(left.contributors, right.contributors);
 
 const isPinnedWaveSnapshot = (
   value: unknown
@@ -46,6 +71,7 @@ const normalizePinnedWaveSnapshot = (
       picture: null,
       contributors: [],
       isDirectMessage: false,
+      type: null,
       fetchedAt: 0,
     };
   }
@@ -79,6 +105,11 @@ const normalizePinnedWaveSnapshot = (
     picture: typeof value.picture === "string" ? value.picture : null,
     contributors,
     isDirectMessage: Boolean(value.isDirectMessage),
+    type: Object.values(ApiWaveType).includes(
+      (value as { type?: unknown }).type as ApiWaveType
+    )
+      ? (value as { type: ApiWaveType }).type
+      : null,
     fetchedAt:
       typeof (value as { fetchedAt?: unknown }).fetchedAt === "number" &&
       Number.isFinite((value as { fetchedAt?: number }).fetchedAt)
@@ -101,6 +132,7 @@ const createPinnedWaveSnapshot = (
       identity: contributor.contributor_identity,
     })),
   isDirectMessage: Boolean(wave.chat.scope.group?.is_direct_message),
+  type: wave.wave.type,
   fetchedAt,
 });
 
@@ -150,9 +182,15 @@ export function usePinnedWaves() {
         const existingIndex = prev.findIndex(
           (pinnedWave) => pinnedWave.id === snapshot.id
         );
+        const existingWave =
+          existingIndex === -1 ? null : (prev[existingIndex] ?? null);
 
         if (moveToFront) {
-          if (existingIndex === 0 && prev[0] === snapshot) {
+          if (
+            existingIndex === 0 &&
+            existingWave &&
+            arePinnedWaveSnapshotsEqual(existingWave, snapshot)
+          ) {
             return prev;
           }
 
@@ -167,7 +205,10 @@ export function usePinnedWaves() {
           return [...prev, snapshot].slice(0, MAX_PINNED_WAVES);
         }
 
-        if (prev[existingIndex] === snapshot) {
+        if (
+          existingWave &&
+          arePinnedWaveSnapshotsEqual(existingWave, snapshot)
+        ) {
           return prev;
         }
 

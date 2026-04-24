@@ -3,6 +3,7 @@ import {
   type PinnedWaveSnapshot,
   usePinnedWaves,
 } from "@/hooks/usePinnedWaves";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 const MAX_PINNED_WAVES = 20;
 
@@ -14,6 +15,7 @@ const baseWave = (
   picture: null,
   contributors: [],
   isDirectMessage: false,
+  type: ApiWaveType.Chat,
   fetchedAt: 123,
   ...overrides,
 });
@@ -75,7 +77,31 @@ it("migrates old string storage to fallback snapshots", () => {
       picture: null,
       contributors: [],
       isDirectMessage: false,
+      type: null,
       fetchedAt: 0,
     },
   ]);
+});
+
+it("migrates old object storage without a wave type", () => {
+  localStorage.setItem(
+    "pinnedWave",
+    JSON.stringify([
+      {
+        id: "1",
+        name: "Wave 1",
+        picture: null,
+        contributors: [],
+        isDirectMessage: false,
+        fetchedAt: 123,
+      },
+    ])
+  );
+
+  const { result } = renderHook(() => usePinnedWaves());
+
+  expect(result.current.pinnedWaves[0]).toMatchObject({
+    id: "1",
+    type: null,
+  });
 });

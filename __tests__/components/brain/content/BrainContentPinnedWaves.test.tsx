@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { PinnedWaveSnapshot } from "@/hooks/usePinnedWaves";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 const upsertWave = jest.fn();
 const upsertWaveSnapshot = jest.fn();
@@ -36,9 +37,21 @@ const baseWave = (
   picture: null,
   contributors: [],
   isDirectMessage: false,
+  type: ApiWaveType.Chat,
   fetchedAt: Date.now(),
   ...overrides,
 });
+
+const baseApiWave = (overrides: Partial<ApiWave> = {}): ApiWave =>
+  ({
+    id: "wave-1",
+    name: "Wave 1",
+    picture: null,
+    contributors_overview: [],
+    chat: { scope: { group: null } },
+    wave: { type: ApiWaveType.Chat },
+    ...overrides,
+  }) as ApiWave;
 
 let mockPinnedWaves: PinnedWaveSnapshot[] = [];
 let mockCurrentWave: ApiWave | undefined;
@@ -127,7 +140,7 @@ describe("BrainContentPinnedWaves", () => {
   });
 
   it("moves the current wave to the front when full data is available", async () => {
-    mockCurrentWave = { id: "wave-1" } as ApiWave;
+    mockCurrentWave = baseApiWave();
     mockUseMyStream.mockReturnValue({
       activeWave: { id: "wave-1" },
       directMessages: { list: [] },
@@ -158,6 +171,7 @@ describe("BrainContentPinnedWaves", () => {
           picture: null,
           contributors: [],
           isDirectMessage: false,
+          type: null,
           fetchedAt: 0,
         },
         { moveToFront: true }
@@ -188,6 +202,101 @@ describe("BrainContentPinnedWaves", () => {
       })
     );
     expect(commonApiFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not resync the current wave when only pinned waves change", async () => {
+    mockCurrentWave = baseApiWave();
+    mockUseMyStream.mockReturnValue({
+      activeWave: { id: "wave-1" },
+      directMessages: { list: [] },
+    });
+
+    const { rerender } = render(<BrainContentPinnedWaves />);
+
+    await waitFor(() => expect(upsertWave).toHaveBeenCalledTimes(1));
+
+    mockPinnedWaves = [baseWave({ id: "wave-1" })];
+    rerender(<BrainContentPinnedWaves />);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(upsertWave).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not resync the current wave when the current wave object is recreated", async () => {
+    mockCurrentWave = baseApiWave();
+    mockPinnedWaves = [baseWave({ id: "wave-1" })];
+    mockUseMyStream.mockReturnValue({
+      activeWave: { id: "wave-1" },
+      directMessages: { list: [] },
+    });
+
+    const { rerender } = render(<BrainContentPinnedWaves />);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(upsertWave).not.toHaveBeenCalled();
+
+    mockCurrentWave = baseApiWave();
+    rerender(<BrainContentPinnedWaves />);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(upsertWave).not.toHaveBeenCalled();
+  });
+
+  it("removes stale pinned waves when refresh returns not found", async () => {
+    mockPinnedWaves = [
+      baseWave({
+        id: "stale-wave",
+        fetchedAt: 0,
+      }),
+    ];
+    commonApiFetch.mockRejectedValue("Wave stale-wave not found");
+
+    render(<BrainContentPinnedWaves />);
+
+    await waitFor(() => expect(removeId).toHaveBeenCalledWith("stale-wave"));
+    expect(upsertWave).not.toHaveBeenCalled();
+  });
+
+  it("removes stale pinned waves when refresh returns a 404 status", async () => {
+    mockPinnedWaves = [
+      baseWave({
+        id: "stale-wave",
+        fetchedAt: 0,
+      }),
+    ];
+    commonApiFetch.mockRejectedValue({ response: { status: 404 } });
+
+    render(<BrainContentPinnedWaves />);
+
+    await waitFor(() => expect(removeId).toHaveBeenCalledWith("stale-wave"));
+    expect(upsertWave).not.toHaveBeenCalled();
+  });
+
+  it("keeps stale pinned waves when refresh fails with a network error", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    mockPinnedWaves = [
+      baseWave({
+        id: "stale-wave",
+        fetchedAt: 0,
+      }),
+    ];
+    commonApiFetch.mockRejectedValue(new Error("Network request failed"));
+
+    render(<BrainContentPinnedWaves />);
+
+    await waitFor(() => expect(warn).toHaveBeenCalled());
+    expect(removeId).not.toHaveBeenCalled();
+
+    warn.mockRestore();
   });
 
   it("removes the active wave and routes back to the waves home", async () => {

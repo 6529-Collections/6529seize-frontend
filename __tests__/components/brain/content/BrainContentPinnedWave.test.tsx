@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { PinnedWaveSnapshot } from "@/hooks/usePinnedWaves";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -40,6 +41,7 @@ const wave: PinnedWaveSnapshot = {
   picture: "pic.png",
   contributors: [{ pfp: "pfp1.png", identity: "alice" }],
   isDirectMessage: false,
+  type: ApiWaveType.Chat,
   fetchedAt: 123,
 };
 
@@ -124,5 +126,48 @@ describe("BrainContentPinnedWave", () => {
     });
 
     expect(screen.getAllByText("abcdef12").length).toBeGreaterThan(0);
+  });
+
+  it("does not show the drop icon for public chat waves", () => {
+    const { container } = renderComponent({
+      pinnedWave: {
+        ...wave,
+        isDirectMessage: false,
+        type: ApiWaveType.Chat,
+      },
+    });
+
+    expect(
+      container.querySelector('svg[viewBox="0 0 576 512"]')
+    ).not.toBeInTheDocument();
+  });
+
+  it.each([ApiWaveType.Rank, ApiWaveType.Approve])(
+    "shows the drop icon for %s waves",
+    (type) => {
+      const { container } = renderComponent({
+        pinnedWave: {
+          ...wave,
+          type,
+        },
+      });
+
+      expect(
+        container.querySelector('svg[viewBox="0 0 576 512"]')
+      ).toBeInTheDocument();
+    }
+  );
+
+  it("does not show the drop icon when old storage has no wave type", () => {
+    const { container } = renderComponent({
+      pinnedWave: {
+        ...wave,
+        type: null,
+      },
+    });
+
+    expect(
+      container.querySelector('svg[viewBox="0 0 576 512"]')
+    ).not.toBeInTheDocument();
   });
 });

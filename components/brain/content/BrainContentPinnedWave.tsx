@@ -11,6 +11,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { PinnedWaveSnapshot } from "@/hooks/usePinnedWaves";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 interface BrainContentPinnedWaveProps {
   readonly wave: PinnedWaveSnapshot;
@@ -39,7 +40,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
     trimmedWaveName && trimmedWaveName.length > 0
       ? trimmedWaveName
       : wave.id.slice(0, 8);
-  const isDropWave = !wave.isDirectMessage;
+  const isDropWave = wave.type !== null && wave.type !== ApiWaveType.Chat;
 
   const getHref = (waveId: string) => {
     if (currentWaveId === waveId) {

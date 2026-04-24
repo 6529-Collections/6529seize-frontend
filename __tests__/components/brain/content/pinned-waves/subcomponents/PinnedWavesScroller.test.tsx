@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import PinnedWavesScroller from "@/components/brain/content/pinned-waves/subcomponents/PinnedWavesScroller";
 import type { PinnedWaveSnapshot } from "@/hooks/usePinnedWaves";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock("@/components/brain/content/BrainContentPinnedWave", () => ({
   __esModule: true,
@@ -34,6 +35,7 @@ const baseWave = (
   picture: null,
   contributors: [],
   isDirectMessage: false,
+  type: ApiWaveType.Chat,
   fetchedAt: Date.now(),
   ...overrides,
 });
