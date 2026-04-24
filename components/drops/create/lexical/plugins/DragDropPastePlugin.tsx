@@ -30,19 +30,21 @@ function isAcceptableAttachment(file: File): boolean {
 }
 
 function withTimeout<T>(
-  promise: Promise<T>,
+  run: (signal: AbortSignal) => Promise<T>,
   timeoutMs: number,
   message: string
 ): Promise<T> {
   let timeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
+  const controller = new AbortController();
 
   const timeoutPromise = new Promise<never>((_resolve, reject) => {
     timeoutId = globalThis.setTimeout(() => {
+      controller.abort();
       reject(new Error(message));
     }, timeoutMs);
   });
 
-  return Promise.race([promise, timeoutPromise]).finally(() => {
+  return Promise.race([run(controller.signal), timeoutPromise]).finally(() => {
     if (timeoutId !== undefined) {
       globalThis.clearTimeout(timeoutId);
     }
@@ -51,7 +53,7 @@ function withTimeout<T>(
 
 async function uploadImage(file: File): Promise<string> {
   const multiPart = await withTimeout(
-    multiPartUpload({ file, path: "drop" }),
+    (signal) => multiPartUpload({ file, path: "drop", signal }),
     INLINE_IMAGE_UPLOAD_TIMEOUT_MS,
     "Image upload timed out. Please try again."
   );
@@ -113,7 +115,7 @@ export default function DragDropPaste({
                       }
                     });
                   })
-                  .catch(() => {
+                  .catch((err: unknown) => {
                     if (!isMounted) return;
                     editor.update(() => {
                       const node = $getNodeByKey(key);
@@ -122,7 +124,10 @@ export default function DragDropPaste({
                       }
                     });
                     setToast({
-                      message: "Error uploading image. Please try again.",
+                      message:
+                        err instanceof Error
+                          ? err.message
+                          : "Error uploading image. Please try again.",
                       type: "error",
                     });
                   });

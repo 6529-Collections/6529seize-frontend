@@ -56,6 +56,8 @@ interface WaveChatLeaveHandlerProps {
   readonly waveId: string;
 }
 
+const MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST = 3;
+
 const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   enabled,
   waveId,
@@ -281,6 +283,21 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     return { supported, unsupported };
   };
 
+  const resetDragDropState = useCallback(() => {
+    dragCounterRef.current = 0;
+    setIsDragDropActive(false);
+  }, []);
+
+  useEffect(() => {
+    globalThis.window.addEventListener("dragend", resetDragDropState);
+    globalThis.window.addEventListener("drop", resetDragDropState);
+
+    return () => {
+      globalThis.window.removeEventListener("dragend", resetDragDropState);
+      globalThis.window.removeEventListener("drop", resetDragDropState);
+    };
+  }, [resetDragDropState]);
+
   const onContainerDragEnter = (event: React.DragEvent<HTMLElement>) => {
     if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
@@ -301,11 +318,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onContainerDragLeave = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
+    if (!isFileDragEvent(event)) {
       return;
     }
-    event.preventDefault();
-    event.stopPropagation();
+    if (shouldHandleContainerFileDrop(event)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
     if (dragCounterRef.current === 0) {
       setIsDragDropActive(false);
@@ -329,6 +348,19 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     handleExternalAttachmentFiles(droppedFiles);
   };
 
+  const formatUnsupportedFileNames = (unsupported: File[]): string => {
+    const displayedNames = unsupported
+      .slice(0, MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST)
+      .map((file) => file.name);
+    const remainingCount = Math.max(
+      0,
+      unsupported.length - displayedNames.length
+    );
+    return remainingCount > 0
+      ? `${displayedNames.join(", ")} and ${remainingCount} more`
+      : displayedNames.join(", ");
+  };
+
   const handleExternalAttachmentFiles = (files: File[]) => {
     if (files.length === 0) {
       return;
@@ -345,7 +377,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     }
 
     if (unsupported.length > 0) {
-      const unsupportedNames = unsupported.map((file) => file.name).join(", ");
+      const unsupportedNames = formatUnsupportedFileNames(unsupported);
       setToast({
         message: `Unsupported file type: ${unsupportedNames}. Accepted Types: ${ACCEPTED_FILE_TYPE_LABELS}`,
         type: "error",

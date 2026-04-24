@@ -160,7 +160,7 @@ describe("DragDropPastePlugin", () => {
 
     expect(remove).toHaveBeenCalled();
     expect(toastMock).toHaveBeenCalledWith({
-      message: "Error uploading image. Please try again.",
+      message: "Image upload timed out. Please try again.",
       type: "error",
     });
   });

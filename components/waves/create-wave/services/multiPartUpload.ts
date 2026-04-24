@@ -10,12 +10,14 @@ interface MultiPartUploadParams {
   file: File;
   path: "drop" | "wave";
   onProgress?: ((progressPercent: number) => void) | undefined;
+  signal?: AbortSignal | undefined;
 }
 
 export async function multiPartUpload({
   file,
   path,
   onProgress,
+  signal,
 }: MultiPartUploadParams): Promise<ApiDropMedia> {
   if (file.size > MAX_FILE_SIZE) {
     throw new Error("File size exceeds maximum allowed size of 500 MB");
@@ -48,6 +50,7 @@ export async function multiPartUpload({
       complete: `${path}-media/multipart-upload/completion`,
     },
     onProgress: handleProgress,
+    signal,
   });
 
   return {

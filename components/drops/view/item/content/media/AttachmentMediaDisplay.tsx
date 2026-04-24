@@ -214,6 +214,11 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
+    let didTimeout = false;
+    const timeoutId = globalThis.window.setTimeout(() => {
+      didTimeout = true;
+      controller.abort();
+    }, ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS);
 
     fetch(url, { signal: controller.signal })
       .then(async (response) => {
@@ -227,12 +232,22 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
         setRows(parseCsvPreview(text.slice(0, CSV_PREVIEW_MAX_CHARS)));
       })
       .catch((err: unknown) => {
-        if (!active || controller.signal.aborted) return;
+        if (!active) return;
+        if (controller.signal.aborted) {
+          if (didTimeout) {
+            setError("CSV preview timed out. Please download the file.");
+          }
+          return;
+        }
         setError(err instanceof Error ? err.message : "Unable to load CSV.");
+      })
+      .finally(() => {
+        globalThis.window.clearTimeout(timeoutId);
       });
 
     return () => {
       active = false;
+      globalThis.window.clearTimeout(timeoutId);
       controller.abort();
     };
   }, [url]);
@@ -368,9 +383,17 @@ export default function AttachmentMediaDisplay({
       anchor.remove();
       URL.revokeObjectURL(objectUrl);
     } catch {
+      if (
+        controller.signal.aborted ||
+        downloadAbortRef.current !== controller
+      ) {
+        return;
+      }
       const anchor = document.createElement("a");
       anchor.href = safeMediaUrl;
       anchor.download = fileName;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
       document.body.append(anchor);
       anchor.click();
       anchor.remove();

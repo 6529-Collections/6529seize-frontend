@@ -29,6 +29,7 @@ interface MultipartUploadCoreParams {
   file: File;
   endpoints: MultipartUploadEndpoints;
   onProgress?: ((bytesUploaded: number) => void) | undefined;
+  signal?: AbortSignal | undefined;
 }
 
 export {
@@ -51,6 +52,7 @@ export async function multipartUploadCore({
   file,
   endpoints,
   onProgress,
+  signal,
 }: MultipartUploadCoreParams): Promise<string> {
   const contentType = getApiMediaUploadMimeType(file);
 
@@ -63,6 +65,7 @@ export async function multipartUploadCore({
       file_name: file.name,
       content_type: contentType,
     },
+    ...(signal ? { signal } : {}),
   });
 
   const { upload_id, key } = startData;
@@ -101,6 +104,7 @@ export async function multipartUploadCore({
           key,
           part_no: partNumber,
         },
+        ...(signal ? { signal } : {}),
       });
 
       const { upload_url } = partResp;
@@ -112,6 +116,7 @@ export async function multipartUploadCore({
         headers: {
           "Content-Type": contentType,
         },
+        ...(signal ? { signal } : {}),
         onUploadProgress: (event) => {
           if (event.loaded !== undefined && onProgress) {
             const chunkDelta = Math.max(event.loaded - lastChunkLoaded, 0);
@@ -156,6 +161,7 @@ export async function multipartUploadCore({
         etag: p.eTag,
       })),
     },
+    ...(signal ? { signal } : {}),
   });
 
   const { media_url } = completionData;

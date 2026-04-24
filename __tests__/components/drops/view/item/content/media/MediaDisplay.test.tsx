@@ -269,10 +269,6 @@ describe("MediaDisplay", () => {
     );
 
     act(() => {
-      mockSandboxedExternalIframe.mock.calls[0]?.[0].onVisible();
-    });
-
-    act(() => {
       jest.advanceTimersByTime(8000);
     });
 

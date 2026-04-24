@@ -10,6 +10,7 @@ import {
   faFileVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getFileExtension } from "./memes/file-upload/utils/formatHelpers";
 
 interface FileItem {
   file: File;
@@ -38,16 +39,6 @@ const ProgressOverlay: React.FC<{ progress: number }> = ({ progress }) => (
   />
 );
 
-const getFileExtension = (file: File): string => {
-  const extension = file.name.split(".").pop();
-  if (extension && extension !== file.name) {
-    return extension.toUpperCase();
-  }
-
-  const mimeSubtype = file.type.split("/")[1];
-  return mimeSubtype?.split(";")[0]?.toUpperCase() || "FILE";
-};
-
 const getFileIcon = (file: File) => {
   if (file.type.startsWith("video/")) {
     return faFileVideo;
@@ -75,10 +66,9 @@ const FileTypePreview: React.FC<{ file: File }> = ({ file }) => (
   <div
     role="img"
     className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-px-3 tw-text-iron-300"
-    aria-label={`${getFileExtension(file)} file`}
+    aria-label={`${getFileExtension(file, "FILE")} file: ${file.name}`}
   >
     <FontAwesomeIcon icon={getFileIcon(file)} className="tw-size-7" />
-    <span className="tw-sr-only">{getFileExtension(file)}</span>
     <div
       title={file.name}
       dir="rtl"

@@ -11,8 +11,17 @@ import { detectBrowser } from "./browserDetection";
  * @param file The file to get extension from
  * @returns Uppercase file extension
  */
-export const getFileExtension = (file: File): string => {
-  return file.name.split(".").pop()?.toUpperCase() ?? "Unknown";
+export const getFileExtension = (
+  file: File,
+  fallback: string = "Unknown"
+): string => {
+  const extension = file.name.split(".").pop();
+  if (extension && extension !== file.name) {
+    return extension.toUpperCase();
+  }
+
+  const mimeSubtype = file.type.split("/")[1];
+  return mimeSubtype?.split(";")[0]?.toUpperCase() || fallback;
 };
 
 /**

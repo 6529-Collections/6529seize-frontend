@@ -382,7 +382,10 @@ const generateParts = async (
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (message.includes("content_type")) {
+    if (
+      message.includes("content_type") ||
+      message.includes("Unsupported file type")
+    ) {
       throw new Error("File type not supported.");
     }
     throw new Error("Error uploading file. Please try again.");
@@ -1261,21 +1264,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [activeDrop, isApp, focusMobileInput]);
 
   const handleFileChange = (newFiles: File[]) => {
-    const mergeResult = { removedCount: 0 };
+    const total = files.length + newFiles.length;
+    const overflow = Math.max(0, total - MAX_DROP_UPLOAD_FILES);
+    const mergedFiles = [...files, ...newFiles];
+    const updatedFiles = overflow
+      ? mergedFiles.slice(-MAX_DROP_UPLOAD_FILES)
+      : mergedFiles;
 
-    setFiles((prevFiles) => {
-      const total = prevFiles.length + newFiles.length;
-      const overflow = Math.max(0, total - MAX_DROP_UPLOAD_FILES);
-      const updated = [...prevFiles, ...newFiles];
-      mergeResult.removedCount = overflow;
-      return overflow ? updated.slice(-MAX_DROP_UPLOAD_FILES) : updated;
-    });
+    setFiles(updatedFiles);
 
-    if (mergeResult.removedCount > 0) {
-      const removedCount = mergeResult.removedCount;
+    if (overflow > 0) {
       setToast({
-        message: `File limit exceeded. The ${removedCount} oldest file${
-          removedCount > 1 ? "s were" : " was"
+        message: `File limit exceeded. The ${overflow} oldest file${
+          overflow > 1 ? "s were" : " was"
         } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
         type: "warning",
       });

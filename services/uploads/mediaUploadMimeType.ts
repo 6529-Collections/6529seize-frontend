@@ -25,11 +25,16 @@ const FILE_TYPE_LABEL_RULES: ReadonlyArray<{
   { label: "CSV", matches: (m) => m === ApiMediaUploadMimeType.TextCsv },
 ];
 
-export const ACCEPTED_FILE_TYPE_LABELS = FILE_TYPE_LABEL_RULES.filter((rule) =>
-  API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some(rule.matches)
-)
-  .map((rule) => rule.label)
-  .join(", ");
+function getUploadMimeTypeLabel(mimeType: ApiMediaUploadMimeType): string {
+  return (
+    FILE_TYPE_LABEL_RULES.find((rule) => rule.matches(mimeType))?.label ??
+    "File"
+  );
+}
+
+export const ACCEPTED_FILE_TYPE_LABELS = Array.from(
+  new Set(API_MEDIA_UPLOAD_MIME_TYPE_VALUES.map(getUploadMimeTypeLabel))
+).join(", ");
 
 const EXTENSION_CONTENT_TYPES = new Map<string, ApiMediaUploadMimeType>([
   [".glb", ApiMediaUploadMimeType.ModelGltfBinary],
