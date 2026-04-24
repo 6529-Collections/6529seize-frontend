@@ -39,11 +39,7 @@ const ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
 
 function getPathnameFileExtension(url: string): string | null {
   try {
-    const base =
-      typeof globalThis.window !== "undefined" &&
-      globalThis.window?.location?.origin
-        ? globalThis.window.location.origin
-        : "https://6529.io";
+    const base = globalThis.window?.location?.origin || "https://6529.io";
     const parsed = new URL(url, base);
     const basename = parsed.pathname.split("/").pop() ?? "";
     const lastDot = basename.lastIndexOf(".");
