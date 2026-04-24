@@ -55,7 +55,7 @@ function parseEnvLine(line) {
     return null;
   }
 
-  const value = right.trim().replace(/^['"]|['"]$/g, "");
+  const value = right.trim().replaceAll(/^['"]|['"]$/g, "");
   return {
     key: left,
     value,

@@ -60,55 +60,119 @@ function getFallbackExtension(renderType: AttachmentRenderType): string {
   return "";
 }
 
+function resolveAttachmentFileName(
+  fileInfo: ReturnType<typeof getFileInfoFromUrl>,
+  fallbackExtension: string
+): string {
+  if (fileInfo) {
+    return `${fileInfo.name}.${fileInfo.extension}`;
+  }
+  if (fallbackExtension) {
+    return `attachment.${fallbackExtension}`;
+  }
+  return "attachment";
+}
+
+interface CsvParserState {
+  rows: string[][];
+  row: string[];
+  field: string;
+  inQuotes: boolean;
+}
+
+function flushField(state: CsvParserState) {
+  state.row.push(state.field);
+  state.field = "";
+}
+
+function flushRow(state: CsvParserState): string[][] | null {
+  flushField(state);
+  state.rows.push(state.row);
+  if (state.rows.length >= CSV_PREVIEW_MAX_ROWS) {
+    return state.rows;
+  }
+  state.row = [];
+  return null;
+}
+
+function processCsvQuote(
+  state: CsvParserState,
+  char: string,
+  nextChar: string | undefined
+): number {
+  if (char !== '"') {
+    return 0;
+  }
+  if (state.inQuotes && nextChar === '"') {
+    state.field += '"';
+    return 2;
+  }
+  state.inQuotes = !state.inQuotes;
+  return 1;
+}
+
+function processCsvDelimiter(state: CsvParserState, char: string): boolean {
+  if (char === "," && !state.inQuotes) {
+    flushField(state);
+    return true;
+  }
+  return false;
+}
+
+function processCsvLineBreak(
+  state: CsvParserState,
+  char: string,
+  nextChar: string | undefined
+): { consumed: number; rows: string[][] | null } {
+  if ((char === "\n" || char === "\r") && !state.inQuotes) {
+    return {
+      consumed: char === "\r" && nextChar === "\n" ? 2 : 1,
+      rows: flushRow(state),
+    };
+  }
+  return { consumed: 0, rows: null };
+}
+
 function parseCsvPreview(text: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let field = "";
-  let inQuotes = false;
+  const state: CsvParserState = {
+    rows: [],
+    row: [],
+    field: "",
+    inQuotes: false,
+  };
 
   for (let index = 0; index < text.length; index++) {
     const char = text[index];
     const nextChar = text[index + 1];
 
-    if (char === '"') {
-      if (inQuotes && nextChar === '"') {
-        field += '"';
-        index++;
-      } else {
-        inQuotes = !inQuotes;
-      }
+    const quoteConsumed = processCsvQuote(state, char, nextChar);
+    if (quoteConsumed > 0) {
+      index += quoteConsumed - 1;
       continue;
     }
 
-    if (char === "," && !inQuotes) {
-      row.push(field);
-      field = "";
+    if (processCsvDelimiter(state, char)) {
       continue;
     }
 
-    if ((char === "\n" || char === "\r") && !inQuotes) {
-      if (char === "\r" && nextChar === "\n") {
-        index++;
+    const lineBreakResult = processCsvLineBreak(state, char, nextChar);
+    if (lineBreakResult.consumed > 0) {
+      if (lineBreakResult.rows) {
+        return lineBreakResult.rows;
       }
-      row.push(field);
-      rows.push(row);
-      if (rows.length >= CSV_PREVIEW_MAX_ROWS) {
-        return rows;
-      }
-      row = [];
-      field = "";
+      index += lineBreakResult.consumed - 1;
       continue;
     }
 
-    field += char;
+    state.field += char;
   }
 
-  if (field.length || row.length) {
-    row.push(field);
-    rows.push(row);
+  if (state.field.length || state.row.length) {
+    flushField(state);
+    state.rows.push(state.row);
   }
 
-  return rows;
+  return state.rows;
 }
 
 function CsvAttachmentPreview({ url }: { readonly url: string }) {
@@ -159,26 +223,44 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
   }
 
   const visibleRows = rows.map((row) => row.slice(0, CSV_PREVIEW_MAX_COLUMNS));
+  const rowKeyCounts = new Map<string, number>();
+  let isFirstRow = true;
 
   return (
     <div className="tw-max-h-[28rem] tw-overflow-auto tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950">
       <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-text-left tw-text-xs tw-text-iron-200">
         <tbody>
-          {visibleRows.map((row, rowIndex) => (
-            <tr key={`csv-row-${rowIndex}`}>
-              {row.map((cell, cellIndex) => (
-                <td
-                  key={`csv-cell-${rowIndex}-${cellIndex}`}
-                  className={clsx(
-                    "tw-max-w-64 tw-border-0 tw-border-b tw-border-r tw-border-solid tw-border-iron-800 tw-px-3 tw-py-2 tw-align-top",
-                    rowIndex === 0 && "tw-bg-iron-900 tw-font-semibold"
-                  )}
-                >
-                  <span className="tw-line-clamp-4 tw-break-words">{cell}</span>
-                </td>
-              ))}
-            </tr>
-          ))}
+          {visibleRows.map((row) => {
+            const rowSignature = row.join("\u0001");
+            const rowCount = rowKeyCounts.get(rowSignature) ?? 0;
+            rowKeyCounts.set(rowSignature, rowCount + 1);
+            const cellKeyCounts = new Map<string, number>();
+            const rowIsHeader = isFirstRow;
+            isFirstRow = false;
+
+            return (
+              <tr key={`csv-row-${rowSignature}-${rowCount}`}>
+                {row.map((cell) => {
+                  const cellCount = cellKeyCounts.get(cell) ?? 0;
+                  cellKeyCounts.set(cell, cellCount + 1);
+
+                  return (
+                    <td
+                      key={`csv-cell-${cell}-${cellCount}`}
+                      className={clsx(
+                        "tw-max-w-64 tw-border-0 tw-border-b tw-border-r tw-border-solid tw-border-iron-800 tw-px-3 tw-py-2 tw-align-top",
+                        rowIsHeader && "tw-bg-iron-900 tw-font-semibold"
+                      )}
+                    >
+                      <span className="tw-line-clamp-4 tw-break-words">
+                        {cell}
+                      </span>
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -197,11 +279,7 @@ export default function AttachmentMediaDisplay({
   const renderType = getAttachmentRenderType(media_mime_type, media_url);
   const fileInfo = getFileInfoFromUrl(media_url);
   const fallbackExtension = getFallbackExtension(renderType);
-  const fileName = fileInfo
-    ? `${fileInfo.name}.${fileInfo.extension}`
-    : fallbackExtension
-      ? `attachment.${fallbackExtension}`
-      : "attachment";
+  const fileName = resolveAttachmentFileName(fileInfo, fallbackExtension);
   const label = getAttachmentLabel(renderType);
   const canRender = renderType === "pdf" || renderType === "csv";
   const canOpenInNewTab = renderType === "pdf";

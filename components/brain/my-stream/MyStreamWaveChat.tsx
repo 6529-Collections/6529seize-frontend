@@ -161,6 +161,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounterRef = useRef(0);
   const externalAttachmentDropTokenRef = useRef(0);
   const { connectedProfile, setToast } = useAuth();
@@ -360,7 +361,15 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       return;
     }
 
-    const { supported, unsupported } = filterSupportedFiles(droppedFiles);
+    handleExternalAttachmentFiles(droppedFiles);
+  };
+
+  const handleExternalAttachmentFiles = (files: File[]) => {
+    if (files.length === 0) {
+      return;
+    }
+
+    const { supported, unsupported } = filterSupportedFiles(files);
 
     if (supported.length > 0) {
       externalAttachmentDropTokenRef.current += 1;
@@ -376,6 +385,25 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         message: `Unsupported file type: ${unsupportedNames}. Accepted Types: ${ACCEPTED_FILE_TYPE_LABELS}`,
         type: "error",
       });
+    }
+  };
+
+  const onFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    handleExternalAttachmentFiles(selectedFiles);
+    event.target.value = "";
+  };
+
+  const onContainerKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      fileInputRef.current?.click();
+    }
+  };
+
+  const onContainerClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.currentTarget === event.target) {
+      fileInputRef.current?.click();
     }
   };
 
@@ -404,11 +432,26 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         ref={containerRef}
         className={`${containerClassName} tw-relative`}
         style={waveViewStyle}
+        role="button"
+        tabIndex={0}
+        aria-label="Wave chat file upload area"
+        onKeyDown={onContainerKeyDown}
+        onClick={onContainerClick}
         onDragEnter={onContainerDragEnter}
         onDragOver={onContainerDragOver}
         onDragLeave={onContainerDragLeave}
         onDrop={onContainerDrop}
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="tw-hidden"
+          accept={API_MEDIA_UPLOAD_MIME_TYPE_VALUES.join(",")}
+          onChange={onFileInputChange}
+          tabIndex={-1}
+          aria-hidden="true"
+        />
         {isDragDropActive && (
           <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-40 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dotted tw-border-primary-400 tw-bg-iron-900/95 tw-p-6">
             <div className="tw-max-w-3xl tw-p-4 tw-text-center">

@@ -35,7 +35,7 @@ describe("AttachmentMediaDisplay", () => {
 
   it("shows a PDF attachment before rendering it on demand", async () => {
     const user = userEvent.setup();
-    jest.spyOn(global, "fetch").mockResolvedValue({
+    jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       blob: async () => new Blob(["pdf"], { type: "application/pdf" }),
     } as Response);
@@ -92,7 +92,7 @@ describe("AttachmentMediaDisplay", () => {
 
   it("renders a CSV preview after the user requests it", async () => {
     const user = userEvent.setup();
-    jest.spyOn(global, "fetch").mockResolvedValue({
+    jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       text: async () => "name,value\nalpha,1",
     } as Response);

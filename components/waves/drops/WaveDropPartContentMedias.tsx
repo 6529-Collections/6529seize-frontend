@@ -38,6 +38,22 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   }
 
   const mediaStackClassName = clsx(topSpacingClassName, "tw-space-y-3");
+  const getMediaContainerClassName = ({
+    useNaturalHeightImage,
+    useAttachmentLayout,
+  }: {
+    readonly useNaturalHeightImage: boolean;
+    readonly useAttachmentLayout: boolean;
+  }) => {
+    if (useNaturalHeightImage || useAttachmentLayout) {
+      return "tw-w-full";
+    }
+
+    return clsx(
+      "tw-flex tw-h-64 tw-items-center tw-justify-center",
+      fullWidthMedia && "tw-w-full"
+    );
+  };
 
   return (
     <div className={mediaStackClassName}>
@@ -48,14 +64,10 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           media.mime_type,
           media.url
         );
-        const mediaContainerClassName = useNaturalHeightImage
-          ? "tw-w-full"
-          : useAttachmentLayout
-            ? "tw-w-full"
-            : clsx(
-                "tw-flex tw-h-64 tw-items-center tw-justify-center",
-                fullWidthMedia && "tw-w-full"
-              );
+        const mediaContainerClassName = getMediaContainerClassName({
+          useNaturalHeightImage,
+          useAttachmentLayout,
+        });
         let mediaContent;
 
         if (disableMediaInteraction) {

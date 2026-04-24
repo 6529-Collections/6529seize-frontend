@@ -4,8 +4,8 @@ import pRetry from "p-retry";
 import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 import { commonApiPost } from "@/services/api/common-api";
 import {
-  getContentType,
-  toApiMediaUploadMimeType,
+  getContentType as resolveContentType,
+  toApiMediaUploadMimeType as resolveApiMediaUploadMimeType,
 } from "@/services/uploads/mediaUploadMimeType";
 import type { ApiCreateMediaUploadUrlRequest } from "@/generated/models/ApiCreateMediaUploadUrlRequest";
 import type { ApiStartMultipartMediaUploadResponse } from "@/generated/models/ApiStartMultipartMediaUploadResponse";
@@ -31,11 +31,14 @@ interface MultipartUploadCoreParams {
   onProgress?: ((bytesUploaded: number) => void) | undefined;
 }
 
-export { getContentType, toApiMediaUploadMimeType };
+export {
+  getContentType,
+  toApiMediaUploadMimeType,
+} from "@/services/uploads/mediaUploadMimeType";
 
 export function getApiMediaUploadMimeType(file: File): ApiMediaUploadMimeType {
-  const contentType = getContentType(file);
-  const apiContentType = toApiMediaUploadMimeType(contentType);
+  const contentType = resolveContentType(file);
+  const apiContentType = resolveApiMediaUploadMimeType(contentType);
 
   if (!apiContentType) {
     throw new Error(`Unsupported file type for upload: ${file.name}`);
