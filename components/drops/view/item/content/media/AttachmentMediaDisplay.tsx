@@ -163,7 +163,8 @@ function parseCsvPreview(text: string): string[][] {
 
   for (let index = 0; index < text.length; index++) {
     const char = text.charAt(index);
-    const nextChar = index + 1 < text.length ? text.charAt(index + 1) : undefined;
+    const nextChar =
+      index + 1 < text.length ? text.charAt(index + 1) : undefined;
 
     const quoteConsumed = processCsvQuote(state, char, nextChar);
     if (quoteConsumed > 0) {
