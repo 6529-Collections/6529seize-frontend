@@ -1,6 +1,7 @@
 import axios from "axios";
 import pLimit from "p-limit";
 import pRetry from "p-retry";
+import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 import { commonApiPost } from "@/services/api/common-api";
 import type { ApiCreateMediaUploadUrlRequest } from "@/generated/models/ApiCreateMediaUploadUrlRequest";
 import type { ApiStartMultipartMediaUploadResponse } from "@/generated/models/ApiStartMultipartMediaUploadResponse";
@@ -13,6 +14,9 @@ const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
 const RETRIES = 3;
 const MIN_TIMEOUT = 1000;
+const API_MEDIA_UPLOAD_MIME_TYPES = new Set<string>(
+  Object.values(ApiMediaUploadMimeType)
+);
 
 interface MultipartUploadEndpoints {
   start: string;
@@ -26,9 +30,14 @@ interface MultipartUploadCoreParams {
   onProgress?: ((bytesUploaded: number) => void) | undefined;
 }
 
+function normalizeMimeType(mimeType: string): string {
+  return mimeType.split(";")[0]?.trim().toLowerCase() ?? "";
+}
+
 export function getContentType(file: File): string {
-  if (file.type) {
-    return file.type;
+  const browserMimeType = normalizeMimeType(file.type);
+  if (browserMimeType) {
+    return browserMimeType;
   }
 
   const fileName = file.name.toLowerCase();
@@ -66,12 +75,35 @@ export function getContentType(file: File): string {
   return "application/octet-stream";
 }
 
+export function toApiMediaUploadMimeType(
+  mimeType: string
+): ApiMediaUploadMimeType | null {
+  const normalizedMimeType = normalizeMimeType(mimeType);
+
+  if (!API_MEDIA_UPLOAD_MIME_TYPES.has(normalizedMimeType)) {
+    return null;
+  }
+
+  return normalizedMimeType as ApiMediaUploadMimeType;
+}
+
+export function getApiMediaUploadMimeType(file: File): ApiMediaUploadMimeType {
+  const contentType = getContentType(file);
+  const apiContentType = toApiMediaUploadMimeType(contentType);
+
+  if (!apiContentType) {
+    throw new Error(`Unsupported file type for upload: ${file.name}`);
+  }
+
+  return apiContentType;
+}
+
 export async function multipartUploadCore({
   file,
   endpoints,
   onProgress,
 }: MultipartUploadCoreParams): Promise<string> {
-  const contentType = getContentType(file);
+  const contentType = getApiMediaUploadMimeType(file);
 
   const startData = await commonApiPost<
     ApiCreateMediaUploadUrlRequest,

@@ -27,6 +27,10 @@ export class ApiCreateWaveConfig {
     */
     'max_winners': number | null;
     /**
+    * Maximum absolute vote one identity can hold on a single drop. Null means unlimited. Supported only for APPROVE and RANK waves
+    */
+    'max_votes_per_identity_to_drop'?: number | null;
+    /**
     * Vote of a voter is considered eligible after this amount of time after casting it. If not set then votes are eligible immediately after casting.
     */
     'time_lock_ms': number | null;
@@ -54,6 +58,12 @@ export class ApiCreateWaveConfig {
         {
             "name": "max_winners",
             "baseName": "max_winners",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "max_votes_per_identity_to_drop",
+            "baseName": "max_votes_per_identity_to_drop",
             "type": "number",
             "format": "int64"
         },

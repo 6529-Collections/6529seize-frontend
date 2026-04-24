@@ -1716,7 +1716,9 @@ paths:
       tags:
         - Drops
       summary: Create S3 URL for drop media upload
-      description: Requires the user to be authenticated
+      description: >-
+        Requires authentication; content_type must be one of the defined MIME
+        types.
       operationId: createDropMediaUrl
       requestBody:
         required: true
@@ -1738,7 +1740,9 @@ paths:
       tags:
         - Drops
       summary: Get upload ID and key for multipart upload
-      description: Requires the user to be authenticated
+      description: >-
+        Requires authentication; content_type must be one of the defined MIME
+        types.
       operationId: createMultipartDropMediaUrl
       requestBody:
         required: true
@@ -7969,8 +7973,7 @@ components:
         - file_size
       properties:
         content_type:
-          type: string
-          example: image/png
+          $ref: "#/components/schemas/ApiMediaUploadMimeType"
         file_name:
           type: string
           example: image.png
@@ -8294,6 +8297,14 @@ components:
           description: >-
             Total number of APPROVE decisions this wave may produce. Null means
             unlimited. Must be set if and only if type is APPROVE
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        max_votes_per_identity_to_drop:
+          description: >-
+            Maximum absolute vote one identity can hold on a single drop. Null
+            means unlimited. Supported only for APPROVE and RANK waves
           type: integer
           format: int64
           minimum: 1
@@ -9591,6 +9602,27 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+    ApiMediaUploadMimeType:
+      type: string
+      enum:
+        - image/png
+        - image/jpeg
+        - image/jpg
+        - image/gif
+        - video/mp4
+        - video/x-msvideo
+        - audio/mpeg
+        - audio/mpeg3
+        - audio/ogg
+        - audio/mp3
+        - audio/wav
+        - audio/aac
+        - audio/x-aac
+        - model/gltf-binary
+        - video/quicktime
+        - image/webp
+        - application/pdf
+        - text/csv
     ApiMemesMintStat:
       type: object
       required:
@@ -11642,6 +11674,7 @@ components:
         - time_lock_ms
         - winning_threshold
         - max_winners
+        - max_votes_per_identity_to_drop
         - admin_group
         - authenticated_user_eligible_for_admin
         - decisions_strategy
@@ -11665,6 +11698,14 @@ components:
           description: >-
             Total number of APPROVE decisions this wave may produce. Null means
             unlimited. Null for non-APPROVE waves
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        max_votes_per_identity_to_drop:
+          description: >-
+            Maximum absolute vote one identity can hold on a single drop. Null
+            means unlimited. Null for CHAT waves
           type: integer
           format: int64
           minimum: 1

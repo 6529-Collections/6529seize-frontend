@@ -121,6 +121,7 @@ export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
+export * from '../models/ApiMediaUploadMimeType';
 export * from '../models/ApiMemesMintStat';
 export * from '../models/ApiMemesMintStatsPage';
 export * from '../models/ApiMemesMintStatsTotals';
@@ -359,7 +360,7 @@ import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropRequest              } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
-import { ApiCreateMediaUploadUrlRequest } from '../models/ApiCreateMediaUploadUrlRequest';
+import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
 import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiCreateNewProfileProxy } from '../models/ApiCreateNewProfileProxy';
@@ -376,7 +377,7 @@ import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
 import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
-import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
+import { ApiCreateWaveConfig         } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
@@ -439,6 +440,7 @@ import { ApiLightDrop             } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
+import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
 import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
 import { ApiMemesMintStatsTotals } from '../models/ApiMemesMintStatsTotals';
@@ -526,7 +528,7 @@ import { ApiUploadsPage } from '../models/ApiUploadsPage';
 import { ApiWallet } from '../models/ApiWallet';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
-import { ApiWaveConfig             } from '../models/ApiWaveConfig';
+import { ApiWaveConfig              } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
@@ -660,6 +662,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiGroupTdhInclusionStrategy",
     "ApiIdentitySubscriptionTargetAction",
     "ApiIdentitySubscriptionTargetType",
+    "ApiMediaUploadMimeType",
     "ApiNftTokenTypeEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
     "ApiNotificationCause",
