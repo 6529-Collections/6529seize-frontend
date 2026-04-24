@@ -4,7 +4,6 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { isReservedIdentitySubmissionMetadataKey } from "./identity-submission-metadata";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 import type {
-  CreateWaveApprovalConfig,
   CreateWaveConfig,
   CreateWaveDatesConfig,
   CreateWaveDropsConfig,
@@ -27,8 +26,6 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   DROPS_REQUIRED_METADATA_NON_UNIQUE = "DROPS_REQUIRED_METADATA_NON_UNIQUE",
   DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY = "DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY",
   APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
-  APPROVAL_THRESHOLD_TIME_REQUIRED = "APPROVAL_THRESHOLD_TIME_REQUIRED",
-  APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION = "APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION",
   OUTCOMES_REQUIRED = "OUTCOMES_REQUIRED",
   CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT = "CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT",
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES",
@@ -41,7 +38,6 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   TDH_VOTING_CANNOT_HAVE_PROFILE_ID = "TDH_VOTING_CANNOT_HAVE_PROFILE_ID",
   VOTING_CATEGORY_CANNOT_BE_EMPTY = "VOTING_CATEGORY_CANNOT_BE_EMPTY",
   VOTING_PROFILE_ID_CANNOT_BE_EMPTY = "VOTING_PROFILE_ID_CANNOT_BE_EMPTY",
-  APPROVAL_THRESHOLD_MUST_BE_NULL = "APPROVAL_THRESHOLD_MUST_BE_NULL",
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL",
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE",
   MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID = "MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID",
@@ -227,7 +223,8 @@ const getVotingValidationErrors = ({
       voting.type !== null ||
       voting.category !== null ||
       voting.profileId !== null ||
-      maxVotesPerIdentityPerDrop !== null
+      maxVotesPerIdentityPerDrop !== null ||
+      voting.winningThreshold !== null
     ) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_VOTING);
     }
@@ -265,6 +262,15 @@ const getVotingValidationErrors = ({
   }
 
   if (
+    waveType === ApiWaveType.Approve &&
+    (voting.winningThreshold === null ||
+      !Number.isInteger(voting.winningThreshold) ||
+      voting.winningThreshold <= 0)
+  ) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
+  }
+
+  if (
     maxVotesPerIdentityPerDrop !== null &&
     (!Number.isInteger(maxVotesPerIdentityPerDrop) ||
       maxVotesPerIdentityPerDrop < 1)
@@ -274,8 +280,8 @@ const getVotingValidationErrors = ({
     );
   }
 
-  // Validate time-weighted voting settings for Rank waves
-  if (waveType === ApiWaveType.Rank && voting.timeWeighted.enabled) {
+  // Validate time-weighted voting settings for Rank and Approve waves
+  if (voting.timeWeighted.enabled) {
     // Constants for validation
     const MIN_MINUTES = 5;
     const MAX_HOURS = 24;
@@ -298,51 +304,6 @@ const getVotingValidationErrors = ({
     if (intervalInMinutes > MAX_MINUTES) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE
-      );
-    }
-  }
-
-  return errors;
-};
-
-const getApprovalValidationErrors = ({
-  waveType,
-  approval,
-  dates,
-}: {
-  readonly waveType: ApiWaveType;
-  readonly approval: CreateWaveApprovalConfig;
-  readonly dates: CreateWaveDatesConfig;
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-
-  if (waveType === ApiWaveType.Chat || waveType === ApiWaveType.Rank) {
-    // Chat and Rank waves cannot have approval settings
-    if (approval.threshold !== null || approval.thresholdTimeMs !== null) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_MUST_BE_NULL);
-    }
-    return errors;
-  }
-
-  // For Approve waves
-  if (approval.threshold === null || approval.threshold <= 0) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
-  }
-
-  if (approval.thresholdTimeMs === null || approval.thresholdTimeMs <= 0) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_REQUIRED);
-  }
-
-  if (
-    typeof approval.thresholdTimeMs === "number" &&
-    approval.thresholdTimeMs > 0 &&
-    typeof dates.endDate === "number" &&
-    dates.endDate > 0
-  ) {
-    const waveDuration = dates.endDate - dates.submissionStartDate;
-    if (approval.thresholdTimeMs >= waveDuration) {
-      errors.push(
-        CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION
       );
     }
   }
@@ -432,15 +393,6 @@ export const getCreateWaveValidationErrors = ({
         ...getVotingValidationErrors({
           waveType: config.overview.type,
           voting: config.voting,
-        })
-      );
-      break;
-    case CreateWaveStep.APPROVAL:
-      errors.push(
-        ...getApprovalValidationErrors({
-          waveType: config.overview.type,
-          approval: config.approval,
-          dates: config.dates,
         })
       );
       break;

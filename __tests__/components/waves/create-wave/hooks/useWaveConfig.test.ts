@@ -64,6 +64,7 @@ describe("useWaveConfig", () => {
       expect(
         result.current.config.voting.maxVotesPerIdentityPerDrop
       ).toBeNull();
+      expect(result.current.config.voting.winningThreshold).toBeNull();
       expect(result.current.config.voting.timeWeighted).toEqual({
         enabled: false,
         averagingInterval: 24,
@@ -99,12 +100,6 @@ describe("useWaveConfig", () => {
 
       // Outcomes
       expect(result.current.config.outcomes).toEqual([]);
-
-      // Approval
-      expect(result.current.config.approval).toEqual({
-        threshold: null,
-        thresholdTimeMs: null,
-      });
     });
 
     it("should initialize endDateConfig with null values", () => {
@@ -370,6 +365,7 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
       expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
+      expect(result.current.config.voting.winningThreshold).toBeNull();
       expect(result.current.config.voting.timeWeighted).toEqual({
         enabled: false,
         averagingInterval: 24,
@@ -434,25 +430,15 @@ describe("useWaveConfig", () => {
     });
   });
 
-  describe("Approval Configuration", () => {
-    it("should update approval threshold", () => {
+  describe("Approve Threshold Configuration", () => {
+    it("should update winning threshold", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
-        result.current.onThresholdChange(75);
+        result.current.onWinningThresholdChange(75);
       });
 
-      expect(result.current.config.approval.threshold).toBe(75);
-    });
-
-    it("should update threshold time", () => {
-      const { result } = renderHook(() => useWaveConfig());
-
-      act(() => {
-        result.current.onThresholdTimeChange(86400000); // 24 hours in ms
-      });
-
-      expect(result.current.config.approval.thresholdTimeMs).toBe(86400000);
+      expect(result.current.config.voting.winningThreshold).toBe(75);
     });
   });
 

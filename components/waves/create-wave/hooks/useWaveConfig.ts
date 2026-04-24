@@ -70,6 +70,7 @@ export function useWaveConfig() {
         category: null,
         profileId: null,
         maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
         timeWeighted: {
           enabled: false,
           averagingInterval: 24,
@@ -77,10 +78,6 @@ export function useWaveConfig() {
         },
       },
       outcomes: [],
-      approval: {
-        threshold: null,
-        thresholdTimeMs: null,
-      },
     };
   };
 
@@ -258,6 +255,7 @@ export function useWaveConfig() {
         category: null,
         profileId: null,
         maxVotesPerIdentityPerDrop: prev.voting.maxVotesPerIdentityPerDrop,
+        winningThreshold: prev.voting.winningThreshold,
         timeWeighted: prev.voting.timeWeighted,
       },
     }));
@@ -316,22 +314,12 @@ export function useWaveConfig() {
     }));
   };
 
-  const onThresholdChange = (threshold: number | null) => {
+  const onWinningThresholdChange = (winningThreshold: number | null) => {
     setConfig((prev) => ({
       ...prev,
-      approval: {
-        ...prev.approval,
-        threshold,
-      },
-    }));
-  };
-
-  const onThresholdTimeChange = (thresholdTimeMs: number | null) => {
-    setConfig((prev) => ({
-      ...prev,
-      approval: {
-        ...prev.approval,
-        thresholdTimeMs,
+      voting: {
+        ...prev.voting,
+        winningThreshold,
       },
     }));
   };
@@ -363,9 +351,7 @@ export function useWaveConfig() {
     onProfileIdChange,
     onMaxVotesPerIdentityPerDropChange,
     onTimeWeightedVotingChange,
-    // Approval
-    onThresholdChange,
-    onThresholdTimeChange,
+    onWinningThresholdChange,
     // Chat
     onChatEnabledChange,
   };

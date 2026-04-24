@@ -3,7 +3,6 @@ import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateWaveStep } from "@/types/waves.types";
-import CreateWaveApproval from "./approval/CreateWaveApproval";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
 import CreateWaveDescription from "./description/CreateWaveDescription";
@@ -51,8 +50,7 @@ export default function CreateWaveStepContent({
     onProfileIdChange,
     onMaxVotesPerIdentityPerDropChange,
     onTimeWeightedVotingChange,
-    onThresholdChange,
-    onThresholdTimeChange,
+    onWinningThresholdChange,
     onChatEnabledChange,
   } = controller;
 
@@ -106,22 +104,15 @@ export default function CreateWaveStepContent({
           category={config.voting.category}
           profileId={config.voting.profileId}
           maxVotesPerIdentityPerDrop={config.voting.maxVotesPerIdentityPerDrop}
+          winningThreshold={config.voting.winningThreshold}
           errors={errors}
           onTypeChange={onVotingTypeChange}
           setCategory={onCategoryChange}
           setProfileId={onProfileIdChange}
           setMaxVotesPerIdentityPerDrop={onMaxVotesPerIdentityPerDropChange}
+          setWinningThreshold={onWinningThresholdChange}
           timeWeighted={config.voting.timeWeighted}
           onTimeWeightedChange={onTimeWeightedVotingChange}
-        />
-      );
-    case CreateWaveStep.APPROVAL:
-      return (
-        <CreateWaveApproval
-          threshold={config.approval.threshold}
-          errors={errors}
-          setThreshold={onThresholdChange}
-          setThresholdTimeMs={onThresholdTimeChange}
         />
       );
     case CreateWaveStep.OUTCOMES:

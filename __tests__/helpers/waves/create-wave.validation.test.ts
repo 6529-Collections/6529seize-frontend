@@ -39,6 +39,7 @@ describe("create-wave.validation", () => {
       category: "cat",
       profileId: "id",
       maxVotesPerIdentityPerDrop: null,
+      winningThreshold: null,
       timeWeighted: {
         enabled: false,
         averagingInterval: 10,
@@ -46,7 +47,6 @@ describe("create-wave.validation", () => {
       },
     },
     outcomes: [{ id: 1 }],
-    approval: { threshold: 1, thresholdTimeMs: 1 },
   };
 
   it("validates overview name required", () => {
@@ -122,14 +122,17 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("approval threshold required for approve waves", () => {
+  it("winning threshold required for approve waves on voting step", () => {
     const approveConfig = {
       ...baseConfig,
       overview: { type: ApiWaveType.Approve, name: "n", image: null },
-      approval: { threshold: null, thresholdTimeMs: null },
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: null,
+      },
     };
     const errors = getCreateWaveValidationErrors({
-      step: CreateWaveStep.APPROVAL,
+      step: CreateWaveStep.VOTING,
       config: approveConfig,
     });
     expect(errors).toContain(
@@ -221,26 +224,26 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("approval threshold time must be smaller than duration", () => {
+  it("validates time weighted interval for approve waves", () => {
     const config = {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
-      approval: { threshold: 1, thresholdTimeMs: 10 },
-      dates: {
-        submissionStartDate: 0,
-        votingStartDate: 0,
-        endDate: 5,
-        firstDecisionTime: 0,
-        subsequentDecisions: [],
-        isRolling: false,
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: 1,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "minutes",
+        },
       },
     };
     const errors = getCreateWaveValidationErrors({
-      step: CreateWaveStep.APPROVAL,
+      step: CreateWaveStep.VOTING,
       config,
     });
     expect(errors).toContain(
-      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL
     );
   });
 

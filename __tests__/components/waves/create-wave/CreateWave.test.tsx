@@ -202,15 +202,12 @@ describe("CreateWave", () => {
         category: null,
         profileId: null,
         maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
         timeWeighted: {
           enabled: false,
           averagingInterval: 24,
           averagingIntervalUnit: "hours",
         },
-      },
-      approval: {
-        threshold: null,
-        thresholdTimeMs: null,
       },
       outcomes: [],
       chat: { enabled: true },
@@ -232,8 +229,7 @@ describe("CreateWave", () => {
     onProfileIdChange: jest.fn(),
     onMaxVotesPerIdentityPerDropChange: jest.fn(),
     onTimeWeightedVotingChange: jest.fn(),
-    onThresholdChange: jest.fn(),
-    onThresholdTimeChange: jest.fn(),
+    onWinningThresholdChange: jest.fn(),
     onChatEnabledChange: jest.fn(),
   };
 

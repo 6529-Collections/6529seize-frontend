@@ -1,9 +1,6 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import {
-  CreateWaveGroupConfigType,
-  CreateWaveStep,
-} from "@/types/waves.types";
+import { CreateWaveGroupConfigType, CreateWaveStep } from "@/types/waves.types";
 
 export const WAVE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Chat]: "Chat",
@@ -44,7 +41,6 @@ export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
     CreateWaveStep.DATES,
     CreateWaveStep.DROPS,
     CreateWaveStep.VOTING,
-    CreateWaveStep.APPROVAL,
     CreateWaveStep.OUTCOMES,
     CreateWaveStep.DESCRIPTION,
   ],
@@ -85,7 +81,6 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DATES]: "Dates",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Rating",
-    [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
   },
@@ -95,7 +90,6 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DATES]: "Dates",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Voting",
-    [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
   },
@@ -105,7 +99,6 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.DATES]: "Dates",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.VOTING]: "Voting",
-    [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
   },

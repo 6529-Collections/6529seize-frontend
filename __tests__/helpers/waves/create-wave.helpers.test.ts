@@ -30,7 +30,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.VOTING,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.APPROVAL);
+      ).toBe(CreateWaveStep.OUTCOMES);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.DESCRIPTION,
@@ -53,7 +53,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.OUTCOMES,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.APPROVAL);
+      ).toBe(CreateWaveStep.VOTING);
     });
   });
 
@@ -112,6 +112,7 @@ describe("create-wave.helpers", () => {
           type: null,
           category: null,
           profileId: null,
+          winningThreshold: null,
           timeWeighted: {
             enabled: false,
             averagingInterval: 5,
@@ -119,7 +120,6 @@ describe("create-wave.helpers", () => {
           },
         },
         outcomes: [],
-        approval: { threshold: null, thresholdTimeMs: null },
       } as any;
       const drop = {
         parts: [],
@@ -181,6 +181,7 @@ describe("create-wave.helpers", () => {
           type: null,
           category: null,
           profileId: null,
+          winningThreshold: null,
           timeWeighted: {
             enabled: false,
             averagingInterval: 5,
@@ -188,7 +189,6 @@ describe("create-wave.helpers", () => {
           },
         },
         outcomes: [],
-        approval: { threshold: null, thresholdTimeMs: null },
       } as any;
       const drop = {
         parts: [],
@@ -237,6 +237,7 @@ describe("create-wave.helpers", () => {
           type: null,
           category: null,
           profileId: null,
+          winningThreshold: 1,
           timeWeighted: {
             enabled: false,
             averagingInterval: 5,
@@ -244,7 +245,6 @@ describe("create-wave.helpers", () => {
           },
         },
         outcomes: [],
-        approval: { threshold: 1, thresholdTimeMs: 1 },
       } as any;
       const drop = {
         parts: [],

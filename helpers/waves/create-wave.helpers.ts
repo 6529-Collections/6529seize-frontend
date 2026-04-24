@@ -63,14 +63,9 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.DROPS:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.VOTING:
-      if (waveType === ApiWaveType.Approve) {
-        return CreateWaveStep.APPROVAL;
-      }
       if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.DESCRIPTION;
       }
-      return CreateWaveStep.OUTCOMES;
-    case CreateWaveStep.APPROVAL:
       return CreateWaveStep.OUTCOMES;
     case CreateWaveStep.OUTCOMES:
       return CreateWaveStep.DESCRIPTION;
@@ -103,12 +98,7 @@ export const getCreateWavePreviousStep = ({
       return CreateWaveStep.DATES;
     case CreateWaveStep.VOTING:
       return CreateWaveStep.DROPS;
-    case CreateWaveStep.APPROVAL:
-      return CreateWaveStep.VOTING;
     case CreateWaveStep.OUTCOMES:
-      if (waveType === ApiWaveType.Approve) {
-        return CreateWaveStep.APPROVAL;
-      }
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {
@@ -404,7 +394,10 @@ export const getCreateNewWaveBody = ({
     wave: {
       admin_drop_deletion_enabled: config.drops.adminCanDeleteDrops,
       type: config.overview.type,
-      winning_threshold: config.approval.threshold,
+      winning_threshold:
+        config.overview.type === ApiWaveType.Approve
+          ? config.voting.winningThreshold
+          : null,
       // TODO - should be in outcomes
       max_winners: null,
       max_votes_per_identity_to_drop:
@@ -412,7 +405,7 @@ export const getCreateNewWaveBody = ({
           ? null
           : (config.voting.maxVotesPerIdentityPerDrop ?? null),
       time_lock_ms:
-        config.overview.type === ApiWaveType.Rank &&
+        config.overview.type !== ApiWaveType.Chat &&
         config.voting.timeWeighted.enabled
           ? getTimeWeightedLockMs(config.voting.timeWeighted)
           : null,
