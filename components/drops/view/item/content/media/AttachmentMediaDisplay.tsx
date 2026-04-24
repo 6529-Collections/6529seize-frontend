@@ -10,7 +10,7 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "blob:"]);
 
@@ -35,17 +35,35 @@ const CSV_PREVIEW_MAX_ROWS = 51;
 const CSV_PREVIEW_MAX_COLUMNS = 12;
 const CSV_PREVIEW_MAX_CHARS = 500_000;
 
+const ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
+
+function getPathnameFileExtension(url: string): string | null {
+  try {
+    const base =
+      typeof globalThis.window !== "undefined" &&
+      globalThis.window?.location?.origin
+        ? globalThis.window.location.origin
+        : "https://6529.io";
+    const parsed = new URL(url, base);
+    const basename = parsed.pathname.split("/").pop() ?? "";
+    const lastDot = basename.lastIndexOf(".");
+    if (lastDot <= 0 || lastDot === basename.length - 1) {
+      return null;
+    }
+    return basename.slice(lastDot + 1).toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 function getAttachmentRenderType(
   mimeType: string,
   url: string
 ): AttachmentRenderType {
   const normalizedMimeType = mimeType.split(";")[0]?.trim().toLowerCase();
-  const normalizedUrl = url.toLowerCase();
+  const pathExtension = getPathnameFileExtension(url);
 
-  if (
-    normalizedMimeType === "application/pdf" ||
-    normalizedUrl.includes(".pdf")
-  ) {
+  if (normalizedMimeType === "application/pdf" || pathExtension === "pdf") {
     return "pdf";
   }
 
@@ -53,7 +71,7 @@ function getAttachmentRenderType(
     normalizedMimeType === "text/csv" ||
     normalizedMimeType === "application/csv" ||
     normalizedMimeType === "application/vnd.ms-excel" ||
-    normalizedUrl.includes(".csv")
+    pathExtension === "csv"
   ) {
     return "csv";
   }
@@ -199,6 +217,7 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
 
   useEffect(() => {
     const controller = new AbortController();
+    let active = true;
 
     fetch(url, { signal: controller.signal })
       .then(async (response) => {
@@ -206,14 +225,20 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
           throw new Error("Unable to load CSV preview.");
         }
         const text = await response.text();
+        if (!active || controller.signal.aborted) {
+          return;
+        }
         setRows(parseCsvPreview(text.slice(0, CSV_PREVIEW_MAX_CHARS)));
       })
       .catch((err: unknown) => {
-        if (controller.signal.aborted) return;
+        if (!active || controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : "Unable to load CSV.");
       });
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [url]);
 
   if (error) {
@@ -296,6 +321,7 @@ export default function AttachmentMediaDisplay({
 }) {
   const [isRendered, setIsRendered] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const downloadAbortRef = useRef<AbortController | null>(null);
   const safeMediaUrl = useMemo(() => getSafeMediaUrl(media_url), [media_url]);
   const renderType = getAttachmentRenderType(media_mime_type, media_url);
   const fileInfo = getFileInfoFromUrl(media_url);
@@ -307,15 +333,31 @@ export default function AttachmentMediaDisplay({
   const canOpenInNewTab = safeMediaUrl !== null && renderType === "pdf";
   const canDownload = safeMediaUrl !== null;
   const Icon = renderType === "csv" ? TableCellsIcon : DocumentIcon;
+
+  useEffect(
+    () => () => {
+      downloadAbortRef.current?.abort();
+      downloadAbortRef.current = null;
+    },
+    []
+  );
+
   const handleDownload = async () => {
     if (isDownloading || !safeMediaUrl) {
       return;
     }
 
     setIsDownloading(true);
+    const controller = new AbortController();
+    downloadAbortRef.current = controller;
+    const timeoutId = globalThis.window.setTimeout(() => {
+      controller.abort();
+    }, ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS);
 
     try {
-      const response = await fetch(safeMediaUrl);
+      const response = await fetch(safeMediaUrl, {
+        signal: controller.signal,
+      });
       if (!response.ok) {
         throw new Error("Unable to download attachment.");
       }
@@ -337,6 +379,10 @@ export default function AttachmentMediaDisplay({
       anchor.click();
       anchor.remove();
     } finally {
+      globalThis.window.clearTimeout(timeoutId);
+      if (downloadAbortRef.current === controller) {
+        downloadAbortRef.current = null;
+      }
       setIsDownloading(false);
     }
   };
@@ -415,7 +461,6 @@ export default function AttachmentMediaDisplay({
         <iframe
           src={safeMediaUrl}
           title={fileName}
-          sandbox="allow-popups allow-downloads"
           referrerPolicy="no-referrer"
           className="tw-h-[32rem] tw-w-full tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950"
         />

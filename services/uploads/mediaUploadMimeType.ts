@@ -2,7 +2,7 @@ import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeTyp
 
 function normalizeMimeType(mimeType: string): string {
   if (!mimeType) return "";
-  return mimeType.split(";")[0].trim().toLowerCase();
+  return (mimeType.split(";")[0]?.trim() ?? "").toLowerCase();
 }
 
 const API_MEDIA_UPLOAD_MIME_TYPES = new Set<string>(
@@ -33,31 +33,36 @@ const EXTENSION_CONTENT_TYPES = new Map<string, ApiMediaUploadMimeType>([
 ]);
 
 function getContentTypeFromExtension(fileName: string): string {
-  const match = Array.from(EXTENSION_CONTENT_TYPES).find(([extension]) =>
-    fileName.endsWith(extension)
-  );
-  return match?.[1] ?? "application/octet-stream";
+  const lower = fileName.toLowerCase();
+  const dot = lower.lastIndexOf(".");
+  if (dot === -1 || dot === lower.length - 1) {
+    return "application/octet-stream";
+  }
+  const extKey = lower.slice(dot);
+  return EXTENSION_CONTENT_TYPES.get(extKey) ?? "application/octet-stream";
 }
 
 export function getContentType(file: File): string {
   const browserMimeType = normalizeMimeType(file.type);
-  const fileName = file.name.toLowerCase();
+  const fileNameLower = file.name.toLowerCase();
 
-  // Browsers sometimes mis-report .csv files as the legacy Excel MIME type.
-  // The backend does not accept application/vnd.ms-excel, so coerce these
-  // back to text/csv when the filename extension makes the intent clear.
   if (
     browserMimeType === "application/vnd.ms-excel" &&
-    fileName.endsWith(".csv")
+    fileNameLower.endsWith(".csv")
   ) {
     return "text/csv";
   }
 
-  if (browserMimeType) {
+  if (browserMimeType && API_MEDIA_UPLOAD_MIME_TYPES.has(browserMimeType)) {
     return browserMimeType;
   }
 
-  return getContentTypeFromExtension(fileName);
+  const fromExtension = getContentTypeFromExtension(file.name);
+  if (fromExtension !== "application/octet-stream") {
+    return fromExtension;
+  }
+
+  return browserMimeType || "application/octet-stream";
 }
 
 export function toApiMediaUploadMimeType(

@@ -22,11 +22,6 @@ const targets = {
 };
 
 const managedKeys = Object.keys(targets.local);
-const managedValues = new Map(
-  Object.values(targets).flatMap((target) =>
-    Object.entries(target).map(([key, value]) => [`${key}:${value}`, true])
-  )
-);
 
 function usage() {
   console.log(`Usage:
@@ -51,7 +46,7 @@ function parseEnvLine(line) {
     left = left.slice(1).trim();
   }
 
-  if (left !== "API_ENDPOINT" && left !== "WS_ENDPOINT") {
+  if (!managedKeys.includes(left)) {
     return null;
   }
 

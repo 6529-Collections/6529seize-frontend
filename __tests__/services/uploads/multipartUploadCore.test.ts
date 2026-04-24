@@ -5,12 +5,20 @@ import {
 } from "@/services/uploads/multipartUploadCore";
 
 describe("multipartUploadCore MIME helpers", () => {
-  it("uses the browser-provided MIME type when present", () => {
+  it("uses the browser MIME when it is API-supported", () => {
+    expect(
+      getContentType(
+        new File(["data"], "report.csv", { type: "text/csv; charset=utf-8" })
+      )
+    ).toBe("text/csv");
+  });
+
+  it("falls back to the filename extension when the browser MIME is not API-supported", () => {
     const file = new File(["data"], "report.csv", {
       type: "application/custom",
     });
 
-    expect(getContentType(file)).toBe("application/custom");
+    expect(getContentType(file)).toBe("text/csv");
   });
 
   it("falls back to PDF, CSV, and WebP extensions", () => {

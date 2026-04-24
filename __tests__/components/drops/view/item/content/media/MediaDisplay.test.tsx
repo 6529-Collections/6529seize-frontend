@@ -31,9 +31,9 @@ jest.mock(
   )
 );
 jest.mock("@/components/common/SandboxedExternalIframe", () => (props: any) => {
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     props.onVisible?.();
-  }, [props]);
+  }, [props.onVisible]);
   mockSandboxedExternalIframe(props);
   return (
     <div

@@ -73,6 +73,7 @@ const getFileIcon = (file: File) => {
 
 const FileTypePreview: React.FC<{ file: File }> = ({ file }) => (
   <div
+    role="img"
     className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-px-3 tw-text-iron-300"
     aria-label={`${getFileExtension(file)} file`}
   >

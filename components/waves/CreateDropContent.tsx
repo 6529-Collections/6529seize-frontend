@@ -1261,20 +1261,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [activeDrop, isApp, focusMobileInput]);
 
   const handleFileChange = (newFiles: File[]) => {
-    let removedCount = 0;
+    const mergeResult = { removedCount: 0 };
 
     setFiles((prevFiles) => {
-      let updatedFiles = [...prevFiles, ...newFiles];
-
-      if (updatedFiles.length > MAX_DROP_UPLOAD_FILES) {
-        removedCount = updatedFiles.length - MAX_DROP_UPLOAD_FILES;
-        updatedFiles = updatedFiles.slice(-MAX_DROP_UPLOAD_FILES);
-      }
-
-      return updatedFiles;
+      const total = prevFiles.length + newFiles.length;
+      const overflow = Math.max(0, total - MAX_DROP_UPLOAD_FILES);
+      const updated = [...prevFiles, ...newFiles];
+      mergeResult.removedCount = overflow;
+      return overflow ? updated.slice(-MAX_DROP_UPLOAD_FILES) : updated;
     });
 
-    if (removedCount > 0) {
+    if (mergeResult.removedCount > 0) {
+      const removedCount = mergeResult.removedCount;
       setToast({
         message: `File limit exceeded. The ${removedCount} oldest file${
           removedCount > 1 ? "s were" : " was"
