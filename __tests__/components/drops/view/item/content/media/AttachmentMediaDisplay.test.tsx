@@ -94,6 +94,8 @@ describe("AttachmentMediaDisplay", () => {
     const user = userEvent.setup();
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
+      headers: { get: () => null },
+      body: null,
       text: async () => "name,value\nalpha,1",
     } as Response);
 

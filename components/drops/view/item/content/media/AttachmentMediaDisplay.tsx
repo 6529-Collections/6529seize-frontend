@@ -1,6 +1,7 @@
 "use client";
 
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
+import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 import {
   ArrowTopRightOnSquareIcon,
   ArrowDownTrayIcon,
@@ -9,6 +10,7 @@ import {
   EyeSlashIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
+import useCapacitor from "@/hooks/useCapacitor";
 import clsx from "clsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -523,6 +525,7 @@ export default function AttachmentMediaDisplay({
   const [isRendered, setIsRendered] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const downloadAbortRef = useRef<AbortController | null>(null);
+  const { isCapacitor } = useCapacitor();
   const safeMediaUrl = useMemo(() => getSafeMediaUrl(media_url), [media_url]);
   const {
     renderType,
@@ -585,14 +588,18 @@ export default function AttachmentMediaDisplay({
       }
 
       const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = fileName;
-      document.body.append(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(objectUrl);
+      if (isCapacitor) {
+        await shareFetchedBlobInNativeApp(blob, fileName);
+      } else {
+        const objectUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = fileName;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(objectUrl);
+      }
     } catch {
       if (
         controller.signal.aborted ||
