@@ -61,6 +61,9 @@ describe("useWaveConfig", () => {
       );
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
+      expect(
+        result.current.config.voting.maxVotesPerIdentityPerDrop
+      ).toBeNull();
       expect(result.current.config.voting.timeWeighted).toEqual({
         enabled: false,
         averagingInterval: 24,
@@ -351,10 +354,12 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.onCategoryChange("test-category");
         result.current.onProfileIdChange("test-profile");
+        result.current.onMaxVotesPerIdentityPerDropChange(1);
       });
 
       expect(result.current.config.voting.category).toBe("test-category");
       expect(result.current.config.voting.profileId).toBe("test-profile");
+      expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
 
       // Change voting type - should reset dependent fields
       act(() => {
@@ -364,6 +369,7 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.type).toBe(ApiWaveCreditType.Rep);
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
+      expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
       expect(result.current.config.voting.timeWeighted).toEqual({
         enabled: false,
         averagingInterval: 24,
@@ -389,6 +395,24 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.voting.profileId).toBe("profile-456");
+    });
+
+    it("should update max votes per identity per drop", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onMaxVotesPerIdentityPerDropChange(1);
+      });
+
+      expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
+
+      act(() => {
+        result.current.onMaxVotesPerIdentityPerDropChange(null);
+      });
+
+      expect(
+        result.current.config.voting.maxVotesPerIdentityPerDrop
+      ).toBeNull();
     });
 
     it("should update time weighted voting settings", () => {

@@ -44,6 +44,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   APPROVAL_THRESHOLD_MUST_BE_NULL = "APPROVAL_THRESHOLD_MUST_BE_NULL",
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL",
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE",
+  MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID = "MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -217,13 +218,16 @@ const getVotingValidationErrors = ({
   readonly voting: CreateWaveVotingConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  const maxVotesPerIdentityPerDrop: number | null | undefined =
+    voting.maxVotesPerIdentityPerDrop;
 
   if (waveType === ApiWaveType.Chat) {
     // Chat waves must have null type and null category/profileId
     if (
       voting.type !== null ||
       voting.category !== null ||
-      voting.profileId !== null
+      voting.profileId !== null ||
+      maxVotesPerIdentityPerDrop !== null
     ) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_VOTING);
     }
@@ -258,6 +262,16 @@ const getVotingValidationErrors = ({
         CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID
       );
     }
+  }
+
+  if (
+    maxVotesPerIdentityPerDrop !== null &&
+    (!Number.isInteger(maxVotesPerIdentityPerDrop) ||
+      maxVotesPerIdentityPerDrop < 1)
+  ) {
+    errors.push(
+      CREATE_WAVE_VALIDATION_ERROR.MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID
+    );
   }
 
   // Validate time-weighted voting settings for Rank waves

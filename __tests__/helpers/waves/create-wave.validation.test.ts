@@ -38,6 +38,7 @@ describe("create-wave.validation", () => {
       type: ApiWaveCreditType.Rep,
       category: "cat",
       profileId: "id",
+      maxVotesPerIdentityPerDrop: null,
       timeWeighted: {
         enabled: false,
         averagingInterval: 10,
@@ -80,6 +81,31 @@ describe("create-wave.validation", () => {
         type: ApiWaveCreditType.Rep,
         category: "c",
         profileId: "p",
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: chatConfig,
+    });
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_VOTING
+    );
+  });
+
+  it("chat waves cannot have a vote cap", () => {
+    const chatConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Chat, name: "n", image: null },
+      voting: {
+        type: null,
+        category: null,
+        profileId: null,
+        maxVotesPerIdentityPerDrop: 1,
         timeWeighted: {
           enabled: false,
           averagingInterval: 5,
@@ -281,6 +307,42 @@ describe("create-wave.validation", () => {
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL
     );
+  });
+
+  it("allows blank max votes per identity per drop", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        ...baseConfig.voting,
+        maxVotesPerIdentityPerDrop: null,
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID
+    );
+  });
+
+  it("rejects invalid max votes per identity per drop", () => {
+    for (const maxVotesPerIdentityPerDrop of [0, -1, 1.5]) {
+      const config = {
+        ...baseConfig,
+        voting: {
+          ...baseConfig.voting,
+          maxVotesPerIdentityPerDrop,
+        },
+      };
+      const errors = getCreateWaveValidationErrors({
+        step: CreateWaveStep.VOTING,
+        config,
+      });
+      expect(errors).toContain(
+        CREATE_WAVE_VALIDATION_ERROR.MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID
+      );
+    }
   });
 
   it("tdh voting cannot have category or profile id", () => {

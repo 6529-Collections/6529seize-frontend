@@ -201,6 +201,7 @@ describe("CreateWave", () => {
         type: "TDH",
         category: null,
         profileId: null,
+        maxVotesPerIdentityPerDrop: null,
         timeWeighted: {
           enabled: false,
           averagingInterval: 24,
@@ -229,6 +230,7 @@ describe("CreateWave", () => {
     onVotingTypeChange: jest.fn(),
     onCategoryChange: jest.fn(),
     onProfileIdChange: jest.fn(),
+    onMaxVotesPerIdentityPerDropChange: jest.fn(),
     onTimeWeightedVotingChange: jest.fn(),
     onThresholdChange: jest.fn(),
     onThresholdTimeChange: jest.fn(),

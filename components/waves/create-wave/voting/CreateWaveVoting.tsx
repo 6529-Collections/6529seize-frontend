@@ -7,6 +7,7 @@ import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.v
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
+import MaxVotesPerIdentityInput from "./MaxVotesPerIdentityInput";
 import NegativeVotingToggle from "./NegativeVotingToggle";
 import TimeWeightedVoting from "./TimeWeightedVoting";
 import type { TimeWeightedVotingConfig } from "./types";
@@ -23,10 +24,12 @@ export default function CreateWaveVoting({
   selectedType,
   category,
   profileId,
+  maxVotesPerIdentityPerDrop,
   errors,
   onTypeChange,
   setCategory,
   setProfileId,
+  setMaxVotesPerIdentityPerDrop,
   timeWeighted,
   onTimeWeightedChange,
 }: {
@@ -34,10 +37,12 @@ export default function CreateWaveVoting({
   readonly selectedType: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
+  readonly maxVotesPerIdentityPerDrop: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onTypeChange: (type: ApiWaveCreditType) => void;
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
+  readonly setMaxVotesPerIdentityPerDrop: (value: number | null) => void;
   readonly timeWeighted: TimeWeightedVotingConfig;
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
@@ -52,28 +57,28 @@ export default function CreateWaveVoting({
     [ApiWaveType.Approve]: "How Drops are Voted",
   };
 
-  if (!selectedType) {
+  if (selectedType === null) {
     return null;
   }
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
         {TITLES[waveType]}
       </p>
-      <div className="tw-mt-3 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
-        {(
-          Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[]
-        ).filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined).map((votingType) => (
-          <CommonBorderedRadioButton
-            key={votingType}
-            type={votingType}
-            selected={selectedType}
-            disabled={false}
-            label={`By ${WAVE_VOTING_LABELS[votingType]}`}
-            onChange={onTypeChange}
-          />
-        ))}
+      <div className="tw-mt-3 tw-grid tw-gap-x-4 tw-gap-y-4 lg:tw-grid-cols-3">
+        {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
+          .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
+          .map((votingType) => (
+            <CommonBorderedRadioButton
+              key={votingType}
+              type={votingType}
+              selected={selectedType}
+              disabled={false}
+              label={`By ${WAVE_VOTING_LABELS[votingType]}`}
+              onChange={onTypeChange}
+            />
+          ))}
         {selectedType === ApiWaveCreditType.Rep && (
           <div className="tw-col-span-full">
             <CreateWaveVotingRep
@@ -86,6 +91,14 @@ export default function CreateWaveVoting({
           </div>
         )}
       </div>
+
+      {waveType !== ApiWaveType.Chat && (
+        <MaxVotesPerIdentityInput
+          value={maxVotesPerIdentityPerDrop}
+          errors={errors}
+          onChange={setMaxVotesPerIdentityPerDrop}
+        />
+      )}
 
       {/* Negative Voting Toggle - show for Rank and Approve waves */}
       {waveType !== ApiWaveType.Chat && (

@@ -157,6 +157,58 @@ it("calculates rolling end date correctly", () => {
   expect(body.voting.period.max).toBe(60); // last decision before 65
 });
 
+it("sets max votes per identity per drop", () => {
+  const config: any = {
+    overview: { type: ApiWaveType.Rank, name: "Wave" },
+    groups: {
+      canView: "1",
+      canDrop: "2",
+      canVote: "3",
+      canChat: "4",
+      admin: "5",
+    },
+    dates: {
+      submissionStartDate: 0,
+      votingStartDate: 0,
+      endDate: 10,
+      firstDecisionTime: 0,
+      subsequentDecisions: [],
+      isRolling: false,
+    },
+    drops: {
+      noOfApplicationsAllowedPerParticipant: 1,
+      requiredTypes: [],
+      requiredMetadata: [],
+      submissionStrategy: null,
+      terms: null,
+      signatureRequired: false,
+      adminCanDeleteDrops: false,
+    },
+    chat: { enabled: false },
+    voting: {
+      type: null,
+      category: null,
+      profileId: null,
+      maxVotesPerIdentityPerDrop: 1,
+      timeWeighted: {
+        enabled: false,
+        averagingInterval: 5,
+        averagingIntervalUnit: "minutes",
+      },
+    },
+    outcomes: [],
+    approval: { threshold: null, thresholdTimeMs: null },
+  };
+  const drop: any = {
+    parts: [],
+    referenced_nfts: [],
+    mentioned_users: [],
+    metadata: [],
+  };
+  const body = getCreateNewWaveBody({ drop, picture: null, config });
+  expect(body.wave.max_votes_per_identity_to_drop).toBe(1);
+});
+
 it("sets winning thresholds for approve waves", () => {
   const config: any = {
     overview: { type: ApiWaveType.Approve, name: "A" },

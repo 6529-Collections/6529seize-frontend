@@ -8298,6 +8298,14 @@ components:
           format: int64
           minimum: 1
           nullable: true
+        max_votes_per_identity_to_drop:
+          description: >-
+            Maximum absolute vote one identity can hold on a single drop. Null
+            means unlimited. Supported only for APPROVE and RANK waves
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
         time_lock_ms:
           nullable: true
           description: >-
@@ -11642,6 +11650,7 @@ components:
         - time_lock_ms
         - winning_threshold
         - max_winners
+        - max_votes_per_identity_to_drop
         - admin_group
         - authenticated_user_eligible_for_admin
         - decisions_strategy
@@ -11665,6 +11674,14 @@ components:
           description: >-
             Total number of APPROVE decisions this wave may produce. Null means
             unlimited. Null for non-APPROVE waves
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        max_votes_per_identity_to_drop:
+          description: >-
+            Maximum absolute vote one identity can hold on a single drop. Null
+            means unlimited. Null for CHAT waves
           type: integer
           format: int64
           minimum: 1

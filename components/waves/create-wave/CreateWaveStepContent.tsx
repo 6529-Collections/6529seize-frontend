@@ -49,6 +49,7 @@ export default function CreateWaveStepContent({
     onVotingTypeChange,
     onCategoryChange,
     onProfileIdChange,
+    onMaxVotesPerIdentityPerDropChange,
     onTimeWeightedVotingChange,
     onThresholdChange,
     onThresholdTimeChange,
@@ -104,10 +105,12 @@ export default function CreateWaveStepContent({
           selectedType={config.voting.type}
           category={config.voting.category}
           profileId={config.voting.profileId}
+          maxVotesPerIdentityPerDrop={config.voting.maxVotesPerIdentityPerDrop}
           errors={errors}
           onTypeChange={onVotingTypeChange}
           setCategory={onCategoryChange}
           setProfileId={onProfileIdChange}
+          setMaxVotesPerIdentityPerDrop={onMaxVotesPerIdentityPerDropChange}
           timeWeighted={config.voting.timeWeighted}
           onTimeWeightedChange={onTimeWeightedVotingChange}
         />

@@ -135,6 +135,7 @@ describe("create-wave.helpers", () => {
       ]);
       expect(res.voting.period.max).toBe(2 + 3 + 5);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
+      expect(res.wave.max_votes_per_identity_to_drop).toBeNull();
     });
 
     it("includes identity submission strategy when configured", () => {

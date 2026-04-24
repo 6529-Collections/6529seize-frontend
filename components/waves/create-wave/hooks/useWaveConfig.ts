@@ -69,6 +69,7 @@ export function useWaveConfig() {
         type: ApiWaveCreditType.TdhPlusXtdh,
         category: null,
         profileId: null,
+        maxVotesPerIdentityPerDrop: null,
         timeWeighted: {
           enabled: false,
           averagingInterval: 24,
@@ -256,6 +257,7 @@ export function useWaveConfig() {
         type,
         category: null,
         profileId: null,
+        maxVotesPerIdentityPerDrop: prev.voting.maxVotesPerIdentityPerDrop,
         timeWeighted: prev.voting.timeWeighted,
       },
     }));
@@ -298,6 +300,18 @@ export function useWaveConfig() {
       voting: {
         ...prev.voting,
         profileId,
+      },
+    }));
+  };
+
+  const onMaxVotesPerIdentityPerDropChange = (
+    maxVotesPerIdentityPerDrop: number | null
+  ) => {
+    setConfig((prev) => ({
+      ...prev,
+      voting: {
+        ...prev.voting,
+        maxVotesPerIdentityPerDrop,
       },
     }));
   };
@@ -347,6 +361,7 @@ export function useWaveConfig() {
     onVotingTypeChange,
     onCategoryChange,
     onProfileIdChange,
+    onMaxVotesPerIdentityPerDropChange,
     onTimeWeightedVotingChange,
     // Approval
     onThresholdChange,

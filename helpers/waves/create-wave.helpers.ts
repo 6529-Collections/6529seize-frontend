@@ -407,6 +407,10 @@ export const getCreateNewWaveBody = ({
       winning_threshold: config.approval.threshold,
       // TODO - should be in outcomes
       max_winners: null,
+      max_votes_per_identity_to_drop:
+        config.overview.type === ApiWaveType.Chat
+          ? null
+          : (config.voting.maxVotesPerIdentityPerDrop ?? null),
       time_lock_ms:
         config.overview.type === ApiWaveType.Rank &&
         config.voting.timeWeighted.enabled
