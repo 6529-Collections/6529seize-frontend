@@ -18,6 +18,13 @@ interface PrivilegedDropCreatorProps {
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
+  readonly externalAttachmentDrop?:
+    | {
+        readonly token: number;
+        readonly files: File[];
+      }
+    | null
+    | undefined;
 }
 
 export default function PrivilegedDropCreator({
@@ -30,6 +37,7 @@ export default function PrivilegedDropCreator({
   onExitFixedDropMode,
   onDropAddedToQueue,
   curationComposerVariant = "default",
+  externalAttachmentDrop,
 }: PrivilegedDropCreatorProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
@@ -86,6 +94,7 @@ export default function PrivilegedDropCreator({
       }}
       onDropAddedToQueue={onDropAddedToQueue}
       curationComposerVariant={curationComposerVariant}
+      externalAttachmentDrop={externalAttachmentDrop}
     />
   );
 }

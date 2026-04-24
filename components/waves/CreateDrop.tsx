@@ -41,6 +41,13 @@ interface CreateDropProps {
   readonly fixedDropMode: DropMode;
   readonly privileges: DropPrivileges;
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
+  readonly externalAttachmentDrop?:
+    | {
+        readonly token: number;
+        readonly files: File[];
+      }
+    | null
+    | undefined;
 }
 
 export interface DropMutationBody {
@@ -63,6 +70,7 @@ export default function CreateDrop({
   fixedDropMode,
   privileges,
   curationComposerVariant = "default",
+  externalAttachmentDrop,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -371,6 +379,7 @@ export default function CreateDrop({
         (fixedDropMode === DropMode.BOTH &&
           privileges.chatRestriction === null) ||
         (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
+      externalAttachmentDrop,
     };
   }, [
     activeDrop,
@@ -387,6 +396,7 @@ export default function CreateDrop({
     privileges,
     fixedDropMode,
     onExitFixedDropMode,
+    externalAttachmentDrop,
   ]);
 
   let dropComposerContent: ReactNode;

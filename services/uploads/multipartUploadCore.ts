@@ -3,6 +3,10 @@ import pLimit from "p-limit";
 import pRetry from "p-retry";
 import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 import { commonApiPost } from "@/services/api/common-api";
+import {
+  getContentType,
+  toApiMediaUploadMimeType,
+} from "@/services/uploads/mediaUploadMimeType";
 import type { ApiCreateMediaUploadUrlRequest } from "@/generated/models/ApiCreateMediaUploadUrlRequest";
 import type { ApiStartMultipartMediaUploadResponse } from "@/generated/models/ApiStartMultipartMediaUploadResponse";
 import type { ApiUploadPartOfMultipartUploadRequest } from "@/generated/models/ApiUploadPartOfMultipartUploadRequest";
@@ -14,9 +18,6 @@ const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
 const RETRIES = 3;
 const MIN_TIMEOUT = 1000;
-const API_MEDIA_UPLOAD_MIME_TYPES = new Set<string>(
-  Object.values(ApiMediaUploadMimeType)
-);
 
 interface MultipartUploadEndpoints {
   start: string;
@@ -30,62 +31,7 @@ interface MultipartUploadCoreParams {
   onProgress?: ((bytesUploaded: number) => void) | undefined;
 }
 
-function normalizeMimeType(mimeType: string): string {
-  return mimeType.split(";")[0]?.trim().toLowerCase() ?? "";
-}
-
-export function getContentType(file: File): string {
-  const browserMimeType = normalizeMimeType(file.type);
-  if (browserMimeType) {
-    return browserMimeType;
-  }
-
-  const fileName = file.name.toLowerCase();
-  if (fileName.endsWith(".glb")) {
-    return "model/gltf-binary";
-  }
-  if (fileName.endsWith(".gltf")) {
-    return "model/gltf+json";
-  }
-  if (fileName.endsWith(".mp4")) {
-    return "video/mp4";
-  }
-  if (fileName.endsWith(".mov")) {
-    return "video/quicktime";
-  }
-  if (fileName.endsWith(".png")) {
-    return "image/png";
-  }
-  if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-    return "image/jpeg";
-  }
-  if (fileName.endsWith(".gif")) {
-    return "image/gif";
-  }
-  if (fileName.endsWith(".webp")) {
-    return "image/webp";
-  }
-  if (fileName.endsWith(".pdf")) {
-    return "application/pdf";
-  }
-  if (fileName.endsWith(".csv")) {
-    return "text/csv";
-  }
-
-  return "application/octet-stream";
-}
-
-export function toApiMediaUploadMimeType(
-  mimeType: string
-): ApiMediaUploadMimeType | null {
-  const normalizedMimeType = normalizeMimeType(mimeType);
-
-  if (!API_MEDIA_UPLOAD_MIME_TYPES.has(normalizedMimeType)) {
-    return null;
-  }
-
-  return normalizedMimeType as ApiMediaUploadMimeType;
-}
+export { getContentType, toApiMediaUploadMimeType };
 
 export function getApiMediaUploadMimeType(file: File): ApiMediaUploadMimeType {
   const contentType = getContentType(file);

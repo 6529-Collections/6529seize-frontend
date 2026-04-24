@@ -254,10 +254,10 @@ export default function AttachmentMediaDisplay({
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
-            {label}
+            {fileName}
           </div>
           <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-            {fileName}
+            {label}
           </div>
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">

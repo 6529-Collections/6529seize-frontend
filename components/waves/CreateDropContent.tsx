@@ -147,6 +147,13 @@ interface CreateDropContentProps {
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
   readonly submissionExperience: WaveSubmissionExperience;
+  readonly externalAttachmentDrop?:
+    | {
+        readonly token: number;
+        readonly files: File[];
+      }
+    | null
+    | undefined;
 }
 
 const CONTAINER_WIDTH_THRESHOLD = 500;
@@ -400,6 +407,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   dropModeToggleExitLabel,
   canExitDropMode,
   submissionExperience,
+  externalAttachmentDrop,
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
@@ -654,6 +662,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isCurationSubmissionExperience;
 
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
+  const lastExternalAttachmentDropTokenRef = useRef<number | null>(null);
 
   const onReferencedNft = (newNft: ReferencedNft) => {
     setReferencedNfts([
@@ -1273,6 +1282,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       closeOnNextInputRef.current = false;
     }
   };
+
+  useEffect(() => {
+    if (!externalAttachmentDrop || externalAttachmentDrop.files.length === 0) {
+      return;
+    }
+
+    if (lastExternalAttachmentDropTokenRef.current === externalAttachmentDrop.token) {
+      return;
+    }
+
+    lastExternalAttachmentDropTokenRef.current = externalAttachmentDrop.token;
+    handleFileChange(externalAttachmentDrop.files);
+  }, [externalAttachmentDrop, handleFileChange]);
 
   const handleSetShowOptions = useCallback(
     (next: boolean) => {

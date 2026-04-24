@@ -71,14 +71,6 @@ const getFileIcon = (file: File) => {
   return faFile;
 };
 
-const getDisplayFileName = (file: File, maxLength: number = 16): string => {
-  if (file.name.length <= maxLength) {
-    return file.name;
-  }
-
-  return `...${file.name.slice(-(maxLength - 3))}`;
-};
-
 const FileTypePreview: React.FC<{ file: File }> = ({ file }) => (
   <div
     className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-px-3 tw-text-iron-300"
@@ -88,9 +80,10 @@ const FileTypePreview: React.FC<{ file: File }> = ({ file }) => (
     <span className="tw-sr-only">{getFileExtension(file)}</span>
     <div
       title={file.name}
-      className="tw-absolute tw-bottom-2 tw-left-3 tw-right-3 tw-overflow-hidden tw-whitespace-nowrap tw-text-center tw-text-[11px] tw-font-medium tw-text-iron-500"
+      dir="rtl"
+      className="tw-absolute tw-bottom-2 tw-left-3 tw-right-3 tw-truncate tw-text-right tw-text-[11px] tw-text-iron-500"
     >
-      {getDisplayFileName(file)}
+      {file.name}
     </div>
   </div>
 );
@@ -111,7 +104,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         const progress = uploadingFile?.progress ?? 0;
         return (
           <div key={file.file.name} className="tw-group tw-relative">
-            <div className="tw-h-32 tw-w-32 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 sm:tw-h-36 sm:tw-w-36">
+            <div className="tw-size-24 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
               {file.file.type.startsWith("image/") ? (
                 <div className="tw-relative tw-h-full tw-w-full">
                   <img

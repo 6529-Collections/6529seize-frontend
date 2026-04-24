@@ -29,10 +29,16 @@ import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import {
+  API_MEDIA_UPLOAD_MIME_TYPE_VALUES,
+  getContentType,
+  toApiMediaUploadMimeType,
+} from "@/services/uploads/mediaUploadMimeType";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
+import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 
 interface InitialDropState {
   readonly waveId: string;
@@ -98,6 +104,53 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   return null;
 };
 
+const ACCEPTED_FILE_TYPE_LABELS = (() => {
+  const labels: string[] = [];
+
+  if (
+    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some((mimeType) =>
+      mimeType.startsWith("image/")
+    )
+  ) {
+    labels.push("Image");
+  }
+  if (
+    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some((mimeType) =>
+      mimeType.startsWith("video/")
+    )
+  ) {
+    labels.push("Video");
+  }
+  if (
+    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some((mimeType) =>
+      mimeType.startsWith("audio/")
+    )
+  ) {
+    labels.push("Audio");
+  }
+  if (
+    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some((mimeType) =>
+      mimeType.startsWith("model/")
+    )
+  ) {
+    labels.push("3D Model");
+  }
+  if (
+    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.includes(
+      ApiMediaUploadMimeType.ApplicationPdf
+    )
+  ) {
+    labels.push("PDF");
+  }
+  if (
+    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.includes(ApiMediaUploadMimeType.TextCsv)
+  ) {
+    labels.push("CSV");
+  }
+
+  return labels.join(", ");
+})();
+
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   wave,
   firstUnreadSerialNo,
@@ -108,7 +161,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
-  const { connectedProfile } = useAuth();
+  const dragCounterRef = useRef(0);
+  const externalAttachmentDropTokenRef = useRef(0);
+  const { connectedProfile, setToast } = useAuth();
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const submissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -118,6 +173,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   });
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
+  const [isDragDropActive, setIsDragDropActive] = useState(false);
+  const [externalAttachmentDrop, setExternalAttachmentDrop] = useState<{
+    readonly token: number;
+    readonly files: File[];
+  } | null>(null);
 
   const [activeDropState, setActiveDropState] = useState<{
     readonly waveId: string;
@@ -235,6 +295,90 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     setActiveDropForWave(null);
   };
 
+  const isFileDragEvent = (event: React.DragEvent<HTMLDivElement>): boolean => {
+    return Array.from(event.dataTransfer.types).includes("Files");
+  };
+
+  const filterSupportedFiles = (files: File[]) => {
+    const supported: File[] = [];
+    const unsupported: File[] = [];
+
+    files.forEach((file) => {
+      const normalizedMimeType = toApiMediaUploadMimeType(getContentType(file));
+      if (normalizedMimeType) {
+        supported.push(file);
+      } else {
+        unsupported.push(file);
+      }
+    });
+
+    return { supported, unsupported };
+  };
+
+  const onContainerDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDragEvent(event)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounterRef.current += 1;
+    setIsDragDropActive(true);
+  };
+
+  const onContainerDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDragEvent(event)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "copy";
+  };
+
+  const onContainerDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDragEvent(event)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
+    if (dragCounterRef.current === 0) {
+      setIsDragDropActive(false);
+    }
+  };
+
+  const onContainerDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isFileDragEvent(event)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragDropActive(false);
+
+    const droppedFiles = Array.from(event.dataTransfer.files ?? []);
+    if (droppedFiles.length === 0) {
+      return;
+    }
+
+    const { supported, unsupported } = filterSupportedFiles(droppedFiles);
+
+    if (supported.length > 0) {
+      externalAttachmentDropTokenRef.current += 1;
+      setExternalAttachmentDrop({
+        token: externalAttachmentDropTokenRef.current,
+        files: supported,
+      });
+    }
+
+    if (unsupported.length > 0) {
+      const unsupportedNames = unsupported.map((file) => file.name).join(", ");
+      setToast({
+        message: `Unsupported file type: ${unsupportedNames}. Accepted Types: ${ACCEPTED_FILE_TYPE_LABELS}`,
+        type: "error",
+      });
+    }
+  };
+
   if (viewMode === "gallery") {
     return (
       <div
@@ -258,9 +402,25 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       />
       <div
         ref={containerRef}
-        className={`${containerClassName}`}
+        className={`${containerClassName} tw-relative`}
         style={waveViewStyle}
+        onDragEnter={onContainerDragEnter}
+        onDragOver={onContainerDragOver}
+        onDragLeave={onContainerDragLeave}
+        onDrop={onContainerDrop}
       >
+        {isDragDropActive && (
+          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-40 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dotted tw-border-primary-400 tw-bg-iron-900/95 tw-p-6">
+            <div className="tw-max-w-3xl tw-p-4 tw-text-center">
+              <p className="tw-text-base tw-font-semibold tw-text-primary-300">
+                Drop files here
+              </p>
+              <p className="tw-mt-2 tw-text-xs tw-text-iron-300">
+                Accepted types: {ACCEPTED_FILE_TYPE_LABELS}
+              </p>
+            </div>
+          </div>
+        )}
         <WaveDropsAllWithoutProvider
           key={wave.id}
           waveId={wave.id}
@@ -282,6 +442,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
                 wave={wave}
                 dropId={null}
                 fixedDropMode={DropMode.BOTH}
+                externalAttachmentDrop={externalAttachmentDrop}
               />
             </CreateDropWaveWrapper>
           </div>
