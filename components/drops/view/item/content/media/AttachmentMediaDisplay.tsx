@@ -12,6 +12,26 @@ import {
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
 
+const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "blob:"]);
+
+function getSafeMediaUrl(rawUrl: string): string | null {
+  if (!rawUrl) {
+    return null;
+  }
+  try {
+    const parsed = new URL(
+      rawUrl,
+      typeof window !== "undefined" ? window.location.origin : undefined
+    );
+    if (SAFE_URL_PROTOCOLS.has(parsed.protocol)) {
+      return parsed.toString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 type AttachmentRenderType = "csv" | "pdf" | "unknown";
 
 const CSV_PREVIEW_MAX_ROWS = 51;
@@ -142,8 +162,8 @@ function parseCsvPreview(text: string): string[][] {
   };
 
   for (let index = 0; index < text.length; index++) {
-    const char = text[index];
-    const nextChar = text[index + 1];
+    const char = text.charAt(index);
+    const nextChar = index + 1 < text.length ? text.charAt(index + 1) : undefined;
 
     const quoteConsumed = processCsvQuote(state, char, nextChar);
     if (quoteConsumed > 0) {
@@ -167,7 +187,7 @@ function parseCsvPreview(text: string): string[][] {
     state.field += char;
   }
 
-  if (state.field.length || state.row.length) {
+  if (!state.inQuotes && (state.field.length || state.row.length)) {
     flushField(state);
     state.rows.push(state.row);
   }
@@ -270,30 +290,34 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
 export default function AttachmentMediaDisplay({
   media_mime_type,
   media_url,
+  disableMediaInteraction = false,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
+  readonly disableMediaInteraction?: boolean | undefined;
 }) {
   const [isRendered, setIsRendered] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const safeMediaUrl = useMemo(() => getSafeMediaUrl(media_url), [media_url]);
   const renderType = getAttachmentRenderType(media_mime_type, media_url);
   const fileInfo = getFileInfoFromUrl(media_url);
   const fallbackExtension = getFallbackExtension(renderType);
   const fileName = resolveAttachmentFileName(fileInfo, fallbackExtension);
   const label = getAttachmentLabel(renderType);
-  const canRender = renderType === "pdf" || renderType === "csv";
-  const canOpenInNewTab = renderType === "pdf";
+  const canRender =
+    safeMediaUrl !== null && (renderType === "pdf" || renderType === "csv");
+  const canOpenInNewTab = safeMediaUrl !== null && renderType === "pdf";
+  const canDownload = safeMediaUrl !== null;
   const Icon = renderType === "csv" ? TableCellsIcon : DocumentIcon;
-  const encodedUrl = useMemo(() => media_url, [media_url]);
   const handleDownload = async () => {
-    if (isDownloading) {
+    if (isDownloading || !safeMediaUrl) {
       return;
     }
 
     setIsDownloading(true);
 
     try {
-      const response = await fetch(encodedUrl);
+      const response = await fetch(safeMediaUrl);
       if (!response.ok) {
         throw new Error("Unable to download attachment.");
       }
@@ -309,7 +333,7 @@ export default function AttachmentMediaDisplay({
       URL.revokeObjectURL(objectUrl);
     } catch {
       const anchor = document.createElement("a");
-      anchor.href = encodedUrl;
+      anchor.href = safeMediaUrl;
       anchor.download = fileName;
       document.body.append(anchor);
       anchor.click();
@@ -338,62 +362,68 @@ export default function AttachmentMediaDisplay({
             {label}
           </div>
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">
-          {canRender && (
-            <button
-              type="button"
-              onClick={() => setIsRendered((current) => !current)}
-              aria-label={
-                isRendered
-                  ? "Hide attachment preview"
-                  : "Render attachment preview"
-              }
-              title={isRendered ? "Hide preview" : "Render preview"}
-              className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
-            >
-              {isRendered ? (
-                <EyeSlashIcon className="tw-size-4" aria-hidden="true" />
-              ) : (
-                <EyeIcon className="tw-size-4" aria-hidden="true" />
-              )}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={handleDownload}
-            aria-label="Download attachment"
-            title={isDownloading ? "Downloading" : "Download"}
-            disabled={isDownloading}
-            className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-no-underline tw-transition desktop-hover:hover:tw-bg-iron-700"
-          >
-            <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
-          </button>
-          {canOpenInNewTab && (
-            <a
-              href={encodedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Open attachment"
-              title="Open"
-              className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
-            >
-              <ArrowTopRightOnSquareIcon
-                className="tw-size-4"
-                aria-hidden="true"
-              />
-            </a>
-          )}
-        </div>
+        {!disableMediaInteraction && (
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">
+            {canRender && (
+              <button
+                type="button"
+                onClick={() => setIsRendered((current) => !current)}
+                aria-label={
+                  isRendered
+                    ? "Hide attachment preview"
+                    : "Render attachment preview"
+                }
+                title={isRendered ? "Hide preview" : "Render preview"}
+                className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
+              >
+                {isRendered ? (
+                  <EyeSlashIcon className="tw-size-4" aria-hidden="true" />
+                ) : (
+                  <EyeIcon className="tw-size-4" aria-hidden="true" />
+                )}
+              </button>
+            )}
+            {canDownload && (
+              <button
+                type="button"
+                onClick={handleDownload}
+                aria-label="Download attachment"
+                title={isDownloading ? "Downloading" : "Download"}
+                disabled={isDownloading}
+                className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-no-underline tw-transition desktop-hover:hover:tw-bg-iron-700"
+              >
+                <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
+              </button>
+            )}
+            {canOpenInNewTab && safeMediaUrl && (
+              <a
+                href={safeMediaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open attachment"
+                title="Open"
+                className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
+              >
+                <ArrowTopRightOnSquareIcon
+                  className="tw-size-4"
+                  aria-hidden="true"
+                />
+              </a>
+            )}
+          </div>
+        )}
       </div>
-      {isRendered && renderType === "pdf" && (
+      {isRendered && renderType === "pdf" && safeMediaUrl && (
         <iframe
-          src={encodedUrl}
+          src={safeMediaUrl}
           title={fileName}
+          sandbox="allow-scripts allow-popups allow-downloads"
+          referrerPolicy="no-referrer"
           className="tw-h-[32rem] tw-w-full tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950"
         />
       )}
-      {isRendered && renderType === "csv" && (
-        <CsvAttachmentPreview url={encodedUrl} />
+      {isRendered && renderType === "csv" && safeMediaUrl && (
+        <CsvAttachmentPreview url={safeMediaUrl} />
       )}
     </div>
   );

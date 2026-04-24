@@ -104,52 +104,23 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   return null;
 };
 
-const ACCEPTED_FILE_TYPE_LABELS = (() => {
-  const labels: string[] = [];
+const FILE_TYPE_LABEL_RULES: ReadonlyArray<{
+  readonly label: string;
+  readonly matches: (mimeType: string) => boolean;
+}> = [
+  { label: "Image", matches: (m) => m.startsWith("image/") },
+  { label: "Video", matches: (m) => m.startsWith("video/") },
+  { label: "Audio", matches: (m) => m.startsWith("audio/") },
+  { label: "3D Model", matches: (m) => m.startsWith("model/") },
+  { label: "PDF", matches: (m) => m === ApiMediaUploadMimeType.ApplicationPdf },
+  { label: "CSV", matches: (m) => m === ApiMediaUploadMimeType.TextCsv },
+];
 
-  if (
-    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some((mimeType) =>
-      mimeType.startsWith("image/")
-    )
-  ) {
-    labels.push("Image");
-  }
-  if (
-    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some((mimeType) =>
-      mimeType.startsWith("video/")
-    )
-  ) {
-    labels.push("Video");
-  }
-  if (
-    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some((mimeType) =>
-      mimeType.startsWith("audio/")
-    )
-  ) {
-    labels.push("Audio");
-  }
-  if (
-    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some((mimeType) =>
-      mimeType.startsWith("model/")
-    )
-  ) {
-    labels.push("3D Model");
-  }
-  if (
-    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.includes(
-      ApiMediaUploadMimeType.ApplicationPdf
-    )
-  ) {
-    labels.push("PDF");
-  }
-  if (
-    API_MEDIA_UPLOAD_MIME_TYPE_VALUES.includes(ApiMediaUploadMimeType.TextCsv)
-  ) {
-    labels.push("CSV");
-  }
-
-  return labels.join(", ");
-})();
+const ACCEPTED_FILE_TYPE_LABELS = FILE_TYPE_LABEL_RULES.filter((rule) =>
+  API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some(rule.matches)
+)
+  .map((rule) => rule.label)
+  .join(", ");
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   wave,

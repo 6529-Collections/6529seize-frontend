@@ -1261,13 +1261,20 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [activeDrop, isApp, focusMobileInput]);
 
   const handleFileChange = (newFiles: File[]) => {
-    let updatedFiles = [...files, ...newFiles];
     let removedCount = 0;
 
-    if (updatedFiles.length > MAX_DROP_UPLOAD_FILES) {
-      removedCount = updatedFiles.length - MAX_DROP_UPLOAD_FILES;
-      updatedFiles = updatedFiles.slice(-MAX_DROP_UPLOAD_FILES);
+    setFiles((prevFiles) => {
+      let updatedFiles = [...prevFiles, ...newFiles];
 
+      if (updatedFiles.length > MAX_DROP_UPLOAD_FILES) {
+        removedCount = updatedFiles.length - MAX_DROP_UPLOAD_FILES;
+        updatedFiles = updatedFiles.slice(-MAX_DROP_UPLOAD_FILES);
+      }
+
+      return updatedFiles;
+    });
+
+    if (removedCount > 0) {
       setToast({
         message: `File limit exceeded. The ${removedCount} oldest file${
           removedCount > 1 ? "s were" : " was"
@@ -1276,12 +1283,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       });
     }
 
-    setFiles(updatedFiles);
     if (!isWideContainer) {
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     }
   };
+
+  const latestHandleFileChangeRef = useRef(handleFileChange);
+  latestHandleFileChangeRef.current = handleFileChange;
 
   useEffect(() => {
     if (!externalAttachmentDrop || externalAttachmentDrop.files.length === 0) {
@@ -1296,8 +1305,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     lastExternalAttachmentDropTokenRef.current = externalAttachmentDrop.token;
-    handleFileChange(externalAttachmentDrop.files);
-  }, [externalAttachmentDrop, handleFileChange]);
+    latestHandleFileChangeRef.current(externalAttachmentDrop.files);
+  }, [externalAttachmentDrop]);
 
   const handleSetShowOptions = useCallback(
     (next: boolean) => {

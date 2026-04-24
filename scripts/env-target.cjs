@@ -65,7 +65,8 @@ function parseEnvLine(line) {
 
 function readEnv() {
   if (!fs.existsSync(envPath)) {
-    throw new Error(`Missing ${envPath}`);
+    console.error(`Missing ${envPath}`);
+    process.exit(1);
   }
 
   return fs.readFileSync(envPath, "utf8");
@@ -98,6 +99,7 @@ function switchTarget(targetName) {
   const target = targets[targetName];
   const contents = readEnv();
   const lines = contents.split(/\r?\n/);
+  const managedKeysSet = new Set(managedKeys);
   const seen = new Set();
 
   const nextLines = lines.map((line) => {
@@ -106,17 +108,20 @@ function switchTarget(targetName) {
       return line;
     }
 
-    if (!managedValues.has(`${parsed.key}:${parsed.value}`)) {
+    if (!managedKeysSet.has(parsed.key)) {
       return line;
     }
 
-    seen.add(`${parsed.key}:${parsed.value}`);
-    return formatLine(parsed.key, parsed.value, target[parsed.key] === parsed.value);
+    seen.add(parsed.key);
+    return formatLine(
+      parsed.key,
+      parsed.value,
+      target[parsed.key] === parsed.value
+    );
   });
 
   for (const [key, value] of Object.entries(target)) {
-    const marker = `${key}:${value}`;
-    if (!seen.has(marker)) {
+    if (!seen.has(key)) {
       nextLines.push(formatLine(key, value, true));
     }
   }

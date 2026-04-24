@@ -22,7 +22,6 @@ const ACCEPTABLE_ATTACHMENT_TYPES = [
   "application/pdf",
   "text/csv",
   "application/csv",
-  "application/vnd.ms-excel",
 ];
 
 const ACCEPTABLE_ATTACHMENT_EXTENSIONS = [".pdf", ".csv"];

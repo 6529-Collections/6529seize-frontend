@@ -4,7 +4,7 @@ import {
   toApiMediaUploadMimeType,
 } from "@/services/uploads/multipartUploadCore";
 
-describe("getContentType", () => {
+describe("multipartUploadCore MIME helpers", () => {
   it("uses the browser-provided MIME type when present", () => {
     const file = new File(["data"], "report.csv", {
       type: "application/custom",

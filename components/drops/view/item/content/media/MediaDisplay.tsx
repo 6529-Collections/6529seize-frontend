@@ -268,6 +268,7 @@ export default function MediaDisplay({
         <AttachmentMediaDisplay
           media_mime_type={media_mime_type}
           media_url={media_url}
+          disableMediaInteraction={disableMediaInteraction}
         />
       );
     default:

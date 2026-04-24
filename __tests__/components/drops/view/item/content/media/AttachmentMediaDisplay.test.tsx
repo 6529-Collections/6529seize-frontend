@@ -39,14 +39,14 @@ describe("AttachmentMediaDisplay", () => {
       ok: true,
       blob: async () => new Blob(["pdf"], { type: "application/pdf" }),
     } as Response);
-    Object.defineProperty(URL, "createObjectURL", {
-      writable: true,
-      value: jest.fn(() => "blob:test"),
-    });
-    Object.defineProperty(URL, "revokeObjectURL", {
-      writable: true,
-      value: jest.fn(),
-    });
+    if (typeof URL.createObjectURL === "undefined") {
+      (URL as { createObjectURL: (blob: Blob) => string }).createObjectURL =
+        () => "";
+    }
+    if (typeof URL.revokeObjectURL === "undefined") {
+      (URL as { revokeObjectURL: (url: string) => void }).revokeObjectURL =
+        () => {};
+    }
     const createObjectURLSpy = jest
       .spyOn(URL, "createObjectURL")
       .mockReturnValue("blob:test");
