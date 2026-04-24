@@ -56,8 +56,16 @@ const { useAuth } = require("@/components/auth/Auth");
 
 describe("DragDropPastePlugin", () => {
   beforeEach(() => {
-    (useLexicalComposerContext as jest.Mock).mockReturnValue([editor]);
     jest.clearAllMocks();
+    (useLexicalComposerContext as jest.Mock).mockReturnValue([editor]);
+    const { mediaFileReader } = require("@lexical/utils");
+    (mediaFileReader as jest.Mock).mockResolvedValue([
+      { file: new File(["a"], "a.png", { type: "image/png" }) },
+    ]);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("uploads image on paste", async () => {
@@ -102,6 +110,59 @@ describe("DragDropPastePlugin", () => {
     expect(multiPartUpload).not.toHaveBeenCalled();
     expect($insertNodes).not.toHaveBeenCalled();
     expect(toastMock).not.toHaveBeenCalled();
+  });
+
+  it("replaces loading image after parent rerenders with a new attachment handler", async () => {
+    let resolveUpload: ((value: { url: string }) => void) | undefined;
+    const replace = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ replace });
+    (multiPartUpload as jest.Mock).mockReturnValue(
+      new Promise((resolve) => {
+        resolveUpload = resolve;
+      })
+    );
+
+    const { rerender } = render(
+      <DragDropPastePlugin onAttachmentFiles={() => {}} />
+    );
+    await act(async () => {
+      commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    rerender(<DragDropPastePlugin onAttachmentFiles={() => {}} />);
+    await act(async () => {
+      resolveUpload?.({ url: "uploaded" });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(replace).toHaveBeenCalled();
+  });
+
+  it("removes loading image and shows an error when inline upload hangs", async () => {
+    jest.useFakeTimers();
+    const remove = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    (multiPartUpload as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+    renderPlugin();
+    await act(async () => {
+      commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(30_000);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(remove).toHaveBeenCalled();
+    expect(toastMock).toHaveBeenCalledWith({
+      message: "Error uploading image. Please try again.",
+      type: "error",
+    });
   });
 });
 
