@@ -8,7 +8,10 @@ import { useEffect, useRef } from "react";
 import { $createImageNode } from "../nodes/ImageNode";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { useAuth } from "@/components/auth/Auth";
-import { isSupportedUploadFile } from "@/services/uploads/mediaUploadMimeType";
+import {
+  ACCEPTED_FILE_TYPE_LABELS,
+  isSupportedUploadFile,
+} from "@/services/uploads/mediaUploadMimeType";
 
 const ACCEPTABLE_IMAGE_TYPES = [
   "image/",
@@ -89,7 +92,7 @@ export default function DragDropPaste({
 
           if (filesResult.length === 0 && attachmentFiles.length === 0) {
             setToast({
-              message: "Unsupported file type for Drag & Drop / Paste.",
+              message: `Unsupported file type. Accepted Types: ${ACCEPTED_FILE_TYPE_LABELS}`,
               type: "error",
             });
             return;

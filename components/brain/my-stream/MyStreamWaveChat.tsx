@@ -30,14 +30,13 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import {
-  API_MEDIA_UPLOAD_MIME_TYPE_VALUES,
+  ACCEPTED_FILE_TYPE_LABELS,
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
-import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 
 interface InitialDropState {
   readonly waveId: string;
@@ -102,24 +101,6 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
 
   return null;
 };
-
-const FILE_TYPE_LABEL_RULES: ReadonlyArray<{
-  readonly label: string;
-  readonly matches: (mimeType: string) => boolean;
-}> = [
-  { label: "Image", matches: (m) => m.startsWith("image/") },
-  { label: "Video", matches: (m) => m.startsWith("video/") },
-  { label: "Audio", matches: (m) => m.startsWith("audio/") },
-  { label: "3D Model", matches: (m) => m.startsWith("model/") },
-  { label: "PDF", matches: (m) => m === ApiMediaUploadMimeType.ApplicationPdf },
-  { label: "CSV", matches: (m) => m === ApiMediaUploadMimeType.TextCsv },
-];
-
-const ACCEPTED_FILE_TYPE_LABELS = FILE_TYPE_LABEL_RULES.filter((rule) =>
-  API_MEDIA_UPLOAD_MIME_TYPE_VALUES.some(rule.matches)
-)
-  .map((rule) => rule.label)
-  .join(", ");
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   wave,
