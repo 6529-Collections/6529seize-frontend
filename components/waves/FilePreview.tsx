@@ -71,13 +71,27 @@ const getFileIcon = (file: File) => {
   return faFile;
 };
 
+const getDisplayFileName = (file: File, maxLength: number = 16): string => {
+  if (file.name.length <= maxLength) {
+    return file.name;
+  }
+
+  return `...${file.name.slice(-(maxLength - 3))}`;
+};
+
 const FileTypePreview: React.FC<{ file: File }> = ({ file }) => (
   <div
-    className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-iron-300"
+    className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-px-3 tw-text-iron-300"
     aria-label={`${getFileExtension(file)} file`}
   >
     <FontAwesomeIcon icon={getFileIcon(file)} className="tw-size-7" />
     <span className="tw-sr-only">{getFileExtension(file)}</span>
+    <div
+      title={file.name}
+      className="tw-absolute tw-bottom-2 tw-left-3 tw-right-3 tw-overflow-hidden tw-whitespace-nowrap tw-text-center tw-text-[11px] tw-font-medium tw-text-iron-500"
+    >
+      {getDisplayFileName(file)}
+    </div>
   </div>
 );
 
@@ -123,7 +137,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
               )}
             </div>
             {file.label && (
-              <div className="tw-absolute tw-bottom-2 tw-left-2 tw-right-2 tw-truncate tw-rounded tw-bg-iron-800/80 tw-px-2 tw-py-1 tw-text-sm tw-text-white">
+              <div className="tw-absolute tw-left-2 tw-right-10 tw-top-2 tw-truncate tw-rounded tw-bg-iron-800/80 tw-px-2 tw-py-1 tw-text-sm tw-text-white">
                 {file.label}
               </div>
             )}

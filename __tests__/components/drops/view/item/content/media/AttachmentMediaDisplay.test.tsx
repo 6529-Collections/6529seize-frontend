@@ -35,6 +35,27 @@ describe("AttachmentMediaDisplay", () => {
 
   it("shows a PDF attachment before rendering it on demand", async () => {
     const user = userEvent.setup();
+    jest.spyOn(global, "fetch").mockResolvedValue({
+      ok: true,
+      blob: async () => new Blob(["pdf"], { type: "application/pdf" }),
+    } as Response);
+    Object.defineProperty(URL, "createObjectURL", {
+      writable: true,
+      value: jest.fn(() => "blob:test"),
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      writable: true,
+      value: jest.fn(),
+    });
+    const createObjectURLSpy = jest
+      .spyOn(URL, "createObjectURL")
+      .mockReturnValue("blob:test");
+    const revokeObjectURLSpy = jest
+      .spyOn(URL, "revokeObjectURL")
+      .mockImplementation(() => {});
+    const clickSpy = jest
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {});
 
     render(
       <AttachmentMediaDisplay
@@ -43,19 +64,30 @@ describe("AttachmentMediaDisplay", () => {
       />
     );
 
+    expect(screen.getByText("PDF")).toBeInTheDocument();
     expect(screen.getByText("paper.pdf")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /download/i })).toHaveAttribute(
-      "href",
-      "https://example.com/files/paper.pdf"
-    );
     expect(screen.queryByTitle("paper.pdf")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Render" }));
+    await user.click(
+      screen.getByRole("button", { name: "Render attachment preview" })
+    );
 
     expect(screen.getByTitle("paper.pdf")).toHaveAttribute(
       "src",
       "https://example.com/files/paper.pdf"
     );
+
+    expect(
+      screen.getByRole("link", { name: "Open attachment" })
+    ).toHaveAttribute("href", "https://example.com/files/paper.pdf");
+
+    await user.click(
+      screen.getByRole("button", { name: "Download attachment" })
+    );
+
+    expect(createObjectURLSpy).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
+    expect(revokeObjectURLSpy).toHaveBeenCalledWith("blob:test");
   });
 
   it("renders a CSV preview after the user requests it", async () => {
@@ -72,11 +104,26 @@ describe("AttachmentMediaDisplay", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Render" }));
+    await user.click(
+      screen.getByRole("button", { name: "Render attachment preview" })
+    );
 
     await waitFor(() => {
       expect(screen.getByText("alpha")).toBeInTheDocument();
     });
     expect(screen.getByText("value")).toBeInTheDocument();
+  });
+
+  it("does not show an open-in-new-tab action for CSV attachments", () => {
+    render(
+      <AttachmentMediaDisplay
+        media_mime_type="text/csv"
+        media_url="https://example.com/files/data.csv"
+      />
+    );
+
+    expect(
+      screen.queryByRole("link", { name: "Open attachment" })
+    ).not.toBeInTheDocument();
   });
 });

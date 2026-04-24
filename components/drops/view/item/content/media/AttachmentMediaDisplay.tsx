@@ -5,6 +5,8 @@ import {
   ArrowTopRightOnSquareIcon,
   ArrowDownTrayIcon,
   DocumentIcon,
+  EyeIcon,
+  EyeSlashIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
@@ -191,6 +193,7 @@ export default function AttachmentMediaDisplay({
   readonly media_url: string;
 }) {
   const [isRendered, setIsRendered] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const renderType = getAttachmentRenderType(media_mime_type, media_url);
   const fileInfo = getFileInfoFromUrl(media_url);
   const fallbackExtension = getFallbackExtension(renderType);
@@ -201,8 +204,42 @@ export default function AttachmentMediaDisplay({
       : "attachment";
   const label = getAttachmentLabel(renderType);
   const canRender = renderType === "pdf" || renderType === "csv";
+  const canOpenInNewTab = renderType === "pdf";
   const Icon = renderType === "csv" ? TableCellsIcon : DocumentIcon;
   const encodedUrl = useMemo(() => media_url, [media_url]);
+  const handleDownload = async () => {
+    if (isDownloading) {
+      return;
+    }
+
+    setIsDownloading(true);
+
+    try {
+      const response = await fetch(encodedUrl);
+      if (!response.ok) {
+        throw new Error("Unable to download attachment.");
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = fileName;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      const anchor = document.createElement("a");
+      anchor.href = encodedUrl;
+      anchor.download = fileName;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="tw-flex tw-w-full tw-flex-col">
@@ -217,10 +254,10 @@ export default function AttachmentMediaDisplay({
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
-            {fileName}
+            {label}
           </div>
           <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-            {label}
+            {fileName}
           </div>
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">
@@ -228,33 +265,46 @@ export default function AttachmentMediaDisplay({
             <button
               type="button"
               onClick={() => setIsRendered((current) => !current)}
-              className="tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
+              aria-label={
+                isRendered
+                  ? "Hide attachment preview"
+                  : "Render attachment preview"
+              }
+              title={isRendered ? "Hide preview" : "Render preview"}
+              className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
             >
-              {isRendered ? "Hide" : "Render"}
+              {isRendered ? (
+                <EyeSlashIcon className="tw-size-4" aria-hidden="true" />
+              ) : (
+                <EyeIcon className="tw-size-4" aria-hidden="true" />
+              )}
             </button>
           )}
-          <a
-            href={encodedUrl}
-            download={fileName}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-100 tw-no-underline tw-transition desktop-hover:hover:tw-bg-iron-700"
+          <button
+            type="button"
+            onClick={handleDownload}
+            aria-label="Download attachment"
+            title={isDownloading ? "Downloading" : "Download"}
+            disabled={isDownloading}
+            className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-no-underline tw-transition desktop-hover:hover:tw-bg-iron-700"
           >
             <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
-            Download
-          </a>
-          <a
-            href={encodedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open attachment"
-            className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
-          >
-            <ArrowTopRightOnSquareIcon
-              className="tw-size-4"
-              aria-hidden="true"
-            />
-          </a>
+          </button>
+          {canOpenInNewTab && (
+            <a
+              href={encodedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open attachment"
+              title="Open"
+              className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
+            >
+              <ArrowTopRightOnSquareIcon
+                className="tw-size-4"
+                aria-hidden="true"
+              />
+            </a>
+          )}
         </div>
       </div>
       {isRendered && renderType === "pdf" && (
