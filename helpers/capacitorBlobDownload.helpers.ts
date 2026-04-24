@@ -22,8 +22,8 @@ async function blobToBase64(blob: Blob): Promise<string> {
 
 function cachePathForAttachmentDownload(fileName: string): string {
   const safe = fileName
-    .replace(/[/\\?%*:|"<>]/g, "_")
-    .replace(/\s+/g, "_")
+    .replaceAll(/[/\\?%*:|"<>]/g, "_")
+    .replaceAll(/\s+/g, "_")
     .slice(0, 180);
   return `${Date.now()}-${safe || "attachment"}`;
 }
