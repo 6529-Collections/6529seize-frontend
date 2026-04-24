@@ -1,9 +1,9 @@
 "use client";
 
-import { LazyMotion, domAnimation, m } from "framer-motion";
+import { LazyMotion, domMax, m } from "framer-motion";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
@@ -24,42 +24,13 @@ const iconSlotClass =
   "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
 
 const ActiveNavIndicator = () => (
-  <LazyMotion features={domAnimation}>
+  <LazyMotion features={domMax}>
     <m.div
       layoutId="nav-indicator"
       className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
     />
   </LazyMotion>
 );
-
-const NavItemFallback = ({ item }: Pick<Props, "item">) => {
-  const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
-
-  return (
-    <button
-      type="button"
-      aria-label={item.name}
-      aria-disabled="true"
-      disabled
-      className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
-    >
-      <div className={iconSlotClass}>
-        {item.iconComponent ? (
-          <item.iconComponent className={`${iconSizeClass} tw-text-iron-500`} />
-        ) : (
-          <Image
-            src={item.icon}
-            alt={item.name}
-            width={24}
-            height={24}
-            unoptimized
-            className={iconSizeClass}
-          />
-        )}
-      </div>
-    </button>
-  );
-};
 
 const NavItemContent = ({ item, isCurrentWaveDm = false }: Props) => {
   const pathname = usePathname();
@@ -105,7 +76,7 @@ const NavItemContent = ({ item, isCurrentWaveDm = false }: Props) => {
       setTitle(`(${unreadNotificationsCount}) Notifications | 6529.io`);
     }
     if (!haveUnreadNotifications) {
-      removeAllDeliveredNotifications();
+      void removeAllDeliveredNotifications();
       setTitle("Notifications | 6529.io");
     }
   }, [
@@ -150,7 +121,7 @@ const NavItemContent = ({ item, isCurrentWaveDm = false }: Props) => {
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
   const isProfileItem = item.kind === "route" && item.name === "Profile";
-  const normalizedPathname = (pathname ?? "").toLowerCase();
+  const normalizedPathname = pathname.toLowerCase();
   const isProfileActive =
     isProfileItem &&
     activeView === null &&
@@ -162,8 +133,8 @@ const NavItemContent = ({ item, isCurrentWaveDm = false }: Props) => {
     ? isProfileActive
     : isNavItemActive(
         item,
-        pathname ?? "",
-        searchParams ?? new URLSearchParams(),
+        pathname,
+        searchParams,
         activeView,
         isCurrentWaveDm
       );
@@ -222,10 +193,6 @@ const NavItemContent = ({ item, isCurrentWaveDm = false }: Props) => {
   );
 };
 
-const NavItem = (props: Props) => (
-  <Suspense fallback={<NavItemFallback item={props.item} />}>
-    <NavItemContent {...props} />
-  </Suspense>
-);
+const NavItem = (props: Props) => <NavItemContent {...props} />;
 
 export default NavItem;

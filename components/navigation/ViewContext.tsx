@@ -67,29 +67,28 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const lastVisitedDmRef = useRef<string | null>(null);
   const lastFetchedWaveIdRef = useRef<string | null>(null);
 
-  const fetchWaveDetails = useCallback((targetWaveId: string) => {
-    commonApiFetch<ApiWave>({
-      endpoint: `waves/${targetWaveId}`,
-    })
-      .then((res) => {
-        if (res.chat.scope.group?.is_direct_message) {
-          lastVisitedDmRef.current = res.id;
-        } else {
-          lastVisitedWaveRef.current = res.id;
-        }
-      })
-      .catch((error: unknown) => {
-        console.warn("Failed to fetch wave metadata", error);
-      })
-      .finally(() => {
-        lastFetchedWaveIdRef.current = targetWaveId;
+  const fetchWaveDetails = useCallback(async (targetWaveId: string) => {
+    try {
+      const res = await commonApiFetch<ApiWave>({
+        endpoint: `waves/${targetWaveId}`,
       });
+
+      if (res.chat.scope.group?.is_direct_message) {
+        lastVisitedDmRef.current = res.id;
+      } else {
+        lastVisitedWaveRef.current = res.id;
+      }
+    } catch (error: unknown) {
+      console.warn("Failed to fetch wave metadata", error);
+    } finally {
+      lastFetchedWaveIdRef.current = targetWaveId;
+    }
   }, []);
 
   // Effect for fetching wave details - only handles the external API call
   useEffect(() => {
     if (currentWaveId && currentWaveId !== lastFetchedWaveIdRef.current) {
-      fetchWaveDetails(currentWaveId);
+      void fetchWaveDetails(currentWaveId);
     } else if (!currentWaveId) {
       lastFetchedWaveIdRef.current = null;
     }
@@ -118,22 +117,20 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         } else {
           router.push(getWavesBaseRoute(isApp));
         }
-      } else {
+      } else if (currentWaveId) {
         // item.viewKey === "messages" (only remaining case)
-        if (currentWaveId) {
-          lastVisitedDmRef.current = null;
-          router.push(getMessagesBaseRoute(isApp));
-        } else if (lastVisitedDmRef.current) {
-          router.push(
-            getWaveRoute({
-              waveId: lastVisitedDmRef.current,
-              isDirectMessage: true,
-              isApp,
-            })
-          );
-        } else {
-          router.push(getMessagesBaseRoute(isApp));
-        }
+        lastVisitedDmRef.current = null;
+        router.push(getMessagesBaseRoute(isApp));
+      } else if (lastVisitedDmRef.current) {
+        router.push(
+          getWaveRoute({
+            waveId: lastVisitedDmRef.current,
+            isDirectMessage: true,
+            isApp,
+          })
+        );
+      } else {
+        router.push(getMessagesBaseRoute(isApp));
       }
     },
     [router, currentWaveId, isApp]
