@@ -9,9 +9,7 @@ const API_MEDIA_UPLOAD_MIME_TYPES = new Set<string>(
   Object.values(ApiMediaUploadMimeType).map((value) => normalizeMimeType(value))
 );
 
-const API_MEDIA_UPLOAD_MIME_TYPE_VALUES = Object.values(
-  ApiMediaUploadMimeType
-);
+const API_MEDIA_UPLOAD_MIME_TYPE_VALUES = Object.values(ApiMediaUploadMimeType);
 
 const FILE_TYPE_LABEL_RULES: ReadonlyArray<{
   readonly label: string;
