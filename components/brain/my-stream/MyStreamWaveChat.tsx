@@ -34,7 +34,14 @@ import {
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
 
