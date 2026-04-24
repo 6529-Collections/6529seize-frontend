@@ -338,10 +338,7 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
           }
           return;
         }
-        if (
-          err instanceof Error &&
-          err.message === CSV_PREVIEW_SIZE_EXCEEDED
-        ) {
+        if (err instanceof Error && err.message === CSV_PREVIEW_SIZE_EXCEEDED) {
           setError(
             "CSV preview exceeds the browser size limit. Please download the file."
           );
@@ -451,16 +448,10 @@ export default function AttachmentMediaDisplay({
     canDownload,
     Icon,
   } = useMemo(() => {
-    const nextRenderType = getAttachmentRenderType(
-      media_mime_type,
-      media_url
-    );
+    const nextRenderType = getAttachmentRenderType(media_mime_type, media_url);
     const fileInfo = getFileInfoFromUrl(media_url);
     const fallbackExtension = getFallbackExtension(nextRenderType);
-    const nextFileName = resolveAttachmentFileName(
-      fileInfo,
-      fallbackExtension
-    );
+    const nextFileName = resolveAttachmentFileName(fileInfo, fallbackExtension);
     const nextLabel = getAttachmentLabel(nextRenderType);
     const nextCanRender =
       safeMediaUrl !== null &&
@@ -468,8 +459,7 @@ export default function AttachmentMediaDisplay({
     const nextCanOpenInNewTab =
       safeMediaUrl !== null && nextRenderType === "pdf";
     const nextCanDownload = safeMediaUrl !== null;
-    const NextIcon =
-      nextRenderType === "csv" ? TableCellsIcon : DocumentIcon;
+    const NextIcon = nextRenderType === "csv" ? TableCellsIcon : DocumentIcon;
     return {
       renderType: nextRenderType,
       fileName: nextFileName,

@@ -324,10 +324,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onContainerDragLeave = (event: React.DragEvent<HTMLElement>) => {
-    if (
-      !isFileDragEvent(event) ||
-      !shouldHandleContainerFileDrop(event)
-    ) {
+    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
     event.preventDefault();
