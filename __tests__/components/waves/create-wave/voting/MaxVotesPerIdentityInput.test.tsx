@@ -24,6 +24,23 @@ describe("MaxVotesPerIdentityInput", () => {
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
+  it.each([
+    ["0", 0],
+    ["-1", -1],
+    ["1.5", 1.5],
+  ])("sends invalid non-blank value %s to validation", (value, expected) => {
+    const onChange = jest.fn();
+    render(
+      <MaxVotesPerIdentityInput value={1} errors={[]} onChange={onChange} />
+    );
+
+    fireEvent.change(screen.getByLabelText("Vote cap per identity"), {
+      target: { value },
+    });
+
+    expect(onChange).toHaveBeenCalledWith(expected);
+  });
+
   it("shows validation error text", () => {
     render(
       <MaxVotesPerIdentityInput

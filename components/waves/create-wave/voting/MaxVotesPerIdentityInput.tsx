@@ -22,8 +22,7 @@ export default function MaxVotesPerIdentityInput({
       return;
     }
 
-    const nextValue = Number(rawValue);
-    onChange(Number.isInteger(nextValue) && nextValue > 0 ? nextValue : null);
+    onChange(Number(rawValue));
   };
 
   return (
