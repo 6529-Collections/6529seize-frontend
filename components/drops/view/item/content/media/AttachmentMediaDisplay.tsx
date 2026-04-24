@@ -200,11 +200,13 @@ function resolveCsvPreviewErrorMessage(
   didExceedSize: boolean
 ): string | undefined {
   if (aborted) {
-    return didTimeout
-      ? CSV_PREVIEW_TIMEOUT_MESSAGE
-      : didExceedSize
-        ? CSV_PREVIEW_SIZE_MESSAGE
-        : undefined;
+    if (didTimeout) {
+      return CSV_PREVIEW_TIMEOUT_MESSAGE;
+    }
+    if (didExceedSize) {
+      return CSV_PREVIEW_SIZE_MESSAGE;
+    }
+    return undefined;
   }
   if (err instanceof Error && err.message === CSV_PREVIEW_SIZE_EXCEEDED) {
     return CSV_PREVIEW_SIZE_MESSAGE;
