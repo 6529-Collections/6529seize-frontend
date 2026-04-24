@@ -103,5 +103,31 @@ it("migrates old object storage without a wave type", () => {
   expect(result.current.pinnedWaves[0]).toMatchObject({
     id: "1",
     type: null,
+    fetchedAt: 0,
+  });
+});
+
+it("forces invalid wave type snapshots to refresh", () => {
+  localStorage.setItem(
+    "pinnedWave",
+    JSON.stringify([
+      {
+        id: "1",
+        name: "Wave 1",
+        picture: null,
+        contributors: [],
+        isDirectMessage: false,
+        type: "BAD_TYPE",
+        fetchedAt: 123,
+      },
+    ])
+  );
+
+  const { result } = renderHook(() => usePinnedWaves());
+
+  expect(result.current.pinnedWaves[0]).toMatchObject({
+    id: "1",
+    type: null,
+    fetchedAt: 0,
   });
 });

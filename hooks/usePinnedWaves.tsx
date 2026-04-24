@@ -99,22 +99,25 @@ const normalizePinnedWaveSnapshot = (
         }))
     : [];
 
+  const normalizedType = Object.values(ApiWaveType).includes(
+    (value as { type?: unknown }).type as ApiWaveType
+  )
+    ? (value as { type: ApiWaveType }).type
+    : null;
+  const sanitizedFetchedAt =
+    typeof (value as { fetchedAt?: unknown }).fetchedAt === "number" &&
+    Number.isFinite((value as { fetchedAt?: number }).fetchedAt)
+      ? Math.max(0, (value as { fetchedAt: number }).fetchedAt)
+      : 0;
+
   return {
     id: value.id,
     name: typeof value.name === "string" ? value.name : null,
     picture: typeof value.picture === "string" ? value.picture : null,
     contributors,
     isDirectMessage: Boolean(value.isDirectMessage),
-    type: Object.values(ApiWaveType).includes(
-      (value as { type?: unknown }).type as ApiWaveType
-    )
-      ? (value as { type: ApiWaveType }).type
-      : null,
-    fetchedAt:
-      typeof (value as { fetchedAt?: unknown }).fetchedAt === "number" &&
-      Number.isFinite((value as { fetchedAt?: number }).fetchedAt)
-        ? Math.max(0, (value as { fetchedAt: number }).fetchedAt)
-        : 0,
+    type: normalizedType,
+    fetchedAt: normalizedType === null ? 0 : sanitizedFetchedAt,
   };
 };
 
