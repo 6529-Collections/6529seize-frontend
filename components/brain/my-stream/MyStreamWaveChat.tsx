@@ -130,8 +130,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryContainerRef = useRef<HTMLDivElement>(null);
+  const chatDropZoneRef = useRef<HTMLElement>(null);
   const dragCounterRef = useRef(0);
   const externalAttachmentDropTokenRef = useRef(0);
   const { connectedProfile, setToast } = useAuth();
@@ -267,7 +267,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const shouldHandleContainerFileDrop = (
-    event: React.DragEvent<HTMLDivElement>
+    event: React.DragEvent<HTMLElement>
   ): boolean => {
     const target = event.target;
     if (!(target instanceof Element)) {
@@ -281,7 +281,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     );
   };
 
-  const isFileDragEvent = (event: React.DragEvent<HTMLDivElement>): boolean => {
+  const isFileDragEvent = (event: React.DragEvent<HTMLElement>): boolean => {
     return Array.from(event.dataTransfer.types).includes("Files");
   };
 
@@ -300,7 +300,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     return { supported, unsupported };
   };
 
-  const onContainerDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+  const onContainerDragEnter = (event: React.DragEvent<HTMLElement>) => {
     if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
@@ -310,7 +310,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     setIsDragDropActive(true);
   };
 
-  const onContainerDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+  const onContainerDragOver = (event: React.DragEvent<HTMLElement>) => {
     if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
@@ -319,7 +319,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     event.dataTransfer.dropEffect = "copy";
   };
 
-  const onContainerDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+  const onContainerDragLeave = (event: React.DragEvent<HTMLElement>) => {
     if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
@@ -331,7 +331,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     }
   };
 
-  const onContainerDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const onContainerDrop = (event: React.DragEvent<HTMLElement>) => {
     if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
@@ -372,33 +372,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     }
   };
 
-  const onFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files ?? []);
-    handleExternalAttachmentFiles(selectedFiles);
-    event.target.value = "";
-  };
-
-  const onContainerKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      fileInputRef.current?.click();
-    }
-  };
-
-  const onContainerClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.currentTarget === event.target) {
-      fileInputRef.current?.click();
-    }
-  };
-
   if (viewMode === "gallery") {
     return (
       <div
-        ref={containerRef}
+        ref={galleryContainerRef}
         className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden"
         style={waveViewStyle}
       >
@@ -416,32 +393,18 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         enabled={Boolean(connectedProfile?.handle)}
         waveId={wave.id}
       />
-      <div
-        ref={containerRef}
+      <section
+        ref={chatDropZoneRef}
         className={`${containerClassName} tw-relative`}
         style={waveViewStyle}
-        role="region"
-        tabIndex={0}
         aria-label="Wave chat file upload area"
-        onKeyDown={onContainerKeyDown}
-        onClick={onContainerClick}
         onDragEnter={onContainerDragEnter}
         onDragOver={onContainerDragOver}
         onDragLeave={onContainerDragLeave}
         onDrop={onContainerDrop}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="tw-hidden"
-          accept={API_MEDIA_UPLOAD_MIME_TYPE_VALUES.join(",")}
-          onChange={onFileInputChange}
-          tabIndex={-1}
-          aria-hidden="true"
-        />
         {isDragDropActive && (
-          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-40 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dotted tw-border-primary-400 tw-bg-iron-900/95 tw-p-6">
+          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-40 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dotted tw-border-primary-400 tw-bg-iron-900/75 tw-p-6">
             <div className="tw-max-w-3xl tw-p-4 tw-text-center">
               <p className="tw-text-base tw-font-semibold tw-text-primary-300">
                 Drop files here
@@ -481,7 +444,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (
           <MobileMemesArtSubmissionBtn wave={wave} />
         )}
-      </div>
+      </section>
     </UnreadDividerProvider>
   );
 };
