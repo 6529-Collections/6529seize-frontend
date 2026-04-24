@@ -312,6 +312,7 @@ function DropListItemContentMediaImage({
             primarySrc={getScaledImageUri(src, imageScale)}
             fallbackSrc={src}
             alt="Drop media"
+            optimize={false}
             fill
             loading={loadStrategy === "eager" ? "eager" : undefined}
             sizes="(max-width: 768px) 100vw, 768px"

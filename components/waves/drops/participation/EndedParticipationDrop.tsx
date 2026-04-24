@@ -27,6 +27,7 @@ import {
   getParticipationIdentityProfile,
   getParticipationVisibleMetadata,
 } from "./participationIdentityProfile.helpers";
+import type { DropContentPresentation } from "../dropContentPresentation";
 import type { DropIdentityMode, DropInteractionParams } from "../drop.types";
 import { DropLocation } from "../drop.types";
 
@@ -41,6 +42,7 @@ interface EndedParticipationDropProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export default function EndedParticipationDrop({
@@ -54,6 +56,7 @@ export default function EndedParticipationDrop({
   onDropContentClick,
   identityMode = "default",
   showInteractions = true,
+  contentPresentation = "default",
 }: EndedParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
@@ -214,6 +217,7 @@ export default function EndedParticipationDrop({
               setLongPressTriggered={setLongPressTriggered}
               isCompetitionDrop={true}
               hasTouch={hasTouch}
+              contentPresentation={contentPresentation}
             />
           </div>
         </div>

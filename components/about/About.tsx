@@ -14,6 +14,7 @@ import AboutContactUs from "./AboutContactUs";
 import AboutCookiePolicy from "./AboutCookiePolicy";
 import AboutCopyright from "./AboutCopyright";
 import AboutDataDecentral from "./AboutDataDecentral";
+import AboutFAQ from "./AboutFAQ";
 import AboutGDRC1 from "./AboutGDRC1";
 import AboutGradients from "./AboutGradients";
 import AboutHTML from "./AboutHTML";
@@ -77,9 +78,11 @@ export default function About({ section }: { readonly section: AboutSection }) {
       case AboutSection.PRIMARY_ADDRESS:
         return <AboutPrimaryAddress />;
       case AboutSection.FAQ:
-        return <AboutHTML path="faq" title="FAQ" />;
+        return <AboutFAQ />;
       case AboutSection.ENS:
         return <AboutHTML path="ens" title="ENS" />;
+      case AboutSection.MISSION:
+        return null;
       default:
         return null;
     }

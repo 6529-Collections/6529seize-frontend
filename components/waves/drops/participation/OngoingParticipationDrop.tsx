@@ -25,6 +25,7 @@ import {
   getParticipationIdentityProfile,
   getParticipationVisibleMetadata,
 } from "./participationIdentityProfile.helpers";
+import type { DropContentPresentation } from "../dropContentPresentation";
 import type {
   DropIdentityMode,
   DropInteractionParams,
@@ -42,6 +43,7 @@ interface OngoingParticipationDropProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export default function OngoingParticipationDrop({
@@ -55,6 +57,7 @@ export default function OngoingParticipationDrop({
   onDropContentClick,
   identityMode = "default",
   showInteractions = true,
+  contentPresentation = "default",
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const { canShowVote } = useDropInteractionRules(drop);
@@ -140,6 +143,7 @@ export default function OngoingParticipationDrop({
             onQuoteClick={onQuoteClick}
             setLongPressTriggered={setLongPressTriggered}
             isCompetitionDrop={true}
+            contentPresentation={contentPresentation}
           />
         </div>
       </div>

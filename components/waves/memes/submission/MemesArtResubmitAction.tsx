@@ -142,7 +142,7 @@ function MemesArtResubmitActionWithWave({
   const title = disabledReason ?? "Resubmit";
   const tooltipId = `resubmit-${drop.id}-${variant}`;
 
-  const modal = (
+  const modal = isModalOpen ? (
     <MemesArtSubmissionModal
       isOpen={isModalOpen}
       wave={wave}
@@ -150,7 +150,7 @@ function MemesArtResubmitActionWithWave({
       onClose={closeModal}
       onSourceDropDeleted={onSourceDropDeleted}
     />
-  );
+  ) : null;
 
   if (variant === "menu") {
     return (
