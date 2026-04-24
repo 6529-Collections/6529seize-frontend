@@ -37,83 +37,179 @@ const CSV_PREVIEW_MAX_CHARS = 500_000;
 
 const CSV_PREVIEW_SIZE_EXCEEDED = "__CSV_PREVIEW_SIZE_EXCEEDED__";
 
+const CSV_PREVIEW_TIMEOUT_MESSAGE =
+  "CSV preview timed out. Please download the file.";
+const CSV_PREVIEW_SIZE_MESSAGE =
+  "CSV preview exceeds the browser size limit. Please download the file.";
+
+function throwCsvPreviewSizeExceeded(onSizeExceeded: () => void): never {
+  onSizeExceeded();
+  throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
+}
+
+function assertCsvContentLengthWithinLimit(
+  response: Response,
+  maxChars: number,
+  onSizeExceeded: () => void
+): void {
+  const lengthHeader = response.headers.get("Content-Length");
+  if (lengthHeader === null) {
+    return;
+  }
+  const parsed = Number.parseInt(lengthHeader, 10);
+  if (Number.isFinite(parsed) && parsed > maxChars) {
+    throwCsvPreviewSizeExceeded(onSizeExceeded);
+  }
+}
+
+async function readCsvPreviewTextFromBodyLessResponse(
+  response: Response,
+  maxChars: number,
+  onSizeExceeded: () => void
+): Promise<string> {
+  const text = await response.text();
+  if (text.length > maxChars) {
+    throwCsvPreviewSizeExceeded(onSizeExceeded);
+  }
+  return text;
+}
+
+function assertCsvPreviewSignalActive(signal: AbortSignal): void {
+  if (signal.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+}
+
+function assertNoCsvDataBeyondCap(
+  peek: ReadableStreamReadResult<Uint8Array>,
+  signal: AbortSignal,
+  decoder: TextDecoder,
+  onSizeExceeded: () => void
+): void {
+  assertCsvPreviewSignalActive(signal);
+  if (peek.done || !peek.value) {
+    return;
+  }
+  if (peek.value.byteLength > 0) {
+    throwCsvPreviewSizeExceeded(onSizeExceeded);
+  }
+  const extra = decoder.decode(peek.value, { stream: true });
+  if (extra.length > 0) {
+    throwCsvPreviewSizeExceeded(onSizeExceeded);
+  }
+}
+
+function finalizeCsvPreviewAtCap(
+  result: string,
+  peek: ReadableStreamReadResult<Uint8Array>,
+  decoder: TextDecoder
+): string {
+  return peek.done ? result + decoder.decode() : result;
+}
+
+async function releaseCsvPreviewReader(
+  reader: ReadableStreamDefaultReader<Uint8Array>
+): Promise<void> {
+  await reader.cancel().catch(() => undefined);
+  try {
+    reader.releaseLock();
+  } catch {}
+}
+
+async function readCsvPreviewFromStreamBody(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  maxChars: number,
+  signal: AbortSignal,
+  onSizeExceeded: () => void
+): Promise<string> {
+  const decoder = new TextDecoder();
+  let result = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) {
+      return result + decoder.decode();
+    }
+    assertCsvPreviewSignalActive(signal);
+    const decodedChunk = decoder.decode(value, { stream: true });
+    const remaining = maxChars - result.length;
+    if (remaining <= 0) {
+      throwCsvPreviewSizeExceeded(onSizeExceeded);
+    }
+    if (decodedChunk.length > remaining) {
+      throwCsvPreviewSizeExceeded(onSizeExceeded);
+    }
+    result += decodedChunk;
+    if (result.length !== maxChars) {
+      continue;
+    }
+    const peek = await reader.read();
+    assertCsvPreviewSignalActive(signal);
+    assertNoCsvDataBeyondCap(peek, signal, decoder, onSizeExceeded);
+    return finalizeCsvPreviewAtCap(result, peek, decoder);
+  }
+}
+
 async function readCsvPreviewText(
   response: Response,
   maxChars: number,
   signal: AbortSignal,
   onSizeExceeded: () => void
 ): Promise<string> {
-  const lengthHeader = response.headers.get("Content-Length");
-  if (lengthHeader !== null) {
-    const parsed = Number.parseInt(lengthHeader, 10);
-    if (Number.isFinite(parsed) && parsed > maxChars) {
-      onSizeExceeded();
-      throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
-    }
-  }
-
+  assertCsvContentLengthWithinLimit(response, maxChars, onSizeExceeded);
   if (!response.body) {
-    const text = await response.text();
-    if (text.length > maxChars) {
-      onSizeExceeded();
-      throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
-    }
-    return text;
+    return readCsvPreviewTextFromBodyLessResponse(
+      response,
+      maxChars,
+      onSizeExceeded
+    );
   }
-
   const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let result = "";
   try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        result += decoder.decode();
-        return result;
-      }
-      if (signal.aborted) {
-        throw new DOMException("Aborted", "AbortError");
-      }
-      const decodedChunk = decoder.decode(value, { stream: true });
-      const remaining = maxChars - result.length;
-      if (remaining <= 0) {
-        onSizeExceeded();
-        throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
-      }
-      if (decodedChunk.length > remaining) {
-        result += decodedChunk.slice(0, remaining);
-        onSizeExceeded();
-        throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
-      }
-      result += decodedChunk;
-      if (result.length === maxChars) {
-        const peek = await reader.read();
-        if (signal.aborted) {
-          throw new DOMException("Aborted", "AbortError");
-        }
-        if (!peek.done && peek.value && peek.value.byteLength > 0) {
-          onSizeExceeded();
-          throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
-        }
-        if (!peek.done && peek.value) {
-          const extra = decoder.decode(peek.value, { stream: true });
-          if (extra.length > 0) {
-            onSizeExceeded();
-            throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
-          }
-        }
-        if (peek.done) {
-          result += decoder.decode();
-        }
-        return result;
-      }
-    }
+    return await readCsvPreviewFromStreamBody(
+      reader,
+      maxChars,
+      signal,
+      onSizeExceeded
+    );
   } finally {
-    await reader.cancel().catch(() => undefined);
-    try {
-      reader.releaseLock();
-    } catch {}
+    await releaseCsvPreviewReader(reader);
   }
+}
+
+async function fetchCsvPreviewText(
+  url: string,
+  signal: AbortSignal,
+  markSizeExceeded: () => void
+): Promise<string> {
+  const response = await fetch(url, { signal });
+  if (!response.ok) {
+    throw new Error("Unable to load CSV preview.");
+  }
+  return readCsvPreviewText(
+    response,
+    CSV_PREVIEW_MAX_CHARS,
+    signal,
+    markSizeExceeded
+  );
+}
+
+function resolveCsvPreviewErrorMessage(
+  err: unknown,
+  aborted: boolean,
+  didTimeout: boolean,
+  didExceedSize: boolean
+): string | undefined {
+  if (aborted) {
+    return didTimeout
+      ? CSV_PREVIEW_TIMEOUT_MESSAGE
+      : didExceedSize
+        ? CSV_PREVIEW_SIZE_MESSAGE
+        : undefined;
+  }
+  if (err instanceof Error && err.message === CSV_PREVIEW_SIZE_EXCEEDED) {
+    return CSV_PREVIEW_SIZE_MESSAGE;
+  }
+  return err instanceof Error ? err.message : "Unable to load CSV.";
 }
 
 const ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
@@ -310,13 +406,8 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
 
     void (async () => {
       try {
-        const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) {
-          throw new Error("Unable to load CSV preview.");
-        }
-        const text = await readCsvPreviewText(
-          response,
-          CSV_PREVIEW_MAX_CHARS,
+        const text = await fetchCsvPreviewText(
+          url,
           controller.signal,
           markSizeExceeded
         );
@@ -328,23 +419,15 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
         if (!active) {
           return;
         }
-        if (controller.signal.aborted) {
-          if (didTimeout) {
-            setError("CSV preview timed out. Please download the file.");
-          } else if (didExceedSize) {
-            setError(
-              "CSV preview exceeds the browser size limit. Please download the file."
-            );
-          }
-          return;
+        const message = resolveCsvPreviewErrorMessage(
+          err,
+          controller.signal.aborted,
+          didTimeout,
+          didExceedSize
+        );
+        if (message) {
+          setError(message);
         }
-        if (err instanceof Error && err.message === CSV_PREVIEW_SIZE_EXCEEDED) {
-          setError(
-            "CSV preview exceeds the browser size limit. Please download the file."
-          );
-          return;
-        }
-        setError(err instanceof Error ? err.message : "Unable to load CSV.");
       } finally {
         globalThis.window.clearTimeout(timeoutId);
       }
