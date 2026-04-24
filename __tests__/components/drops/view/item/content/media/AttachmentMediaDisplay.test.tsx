@@ -1,6 +1,4 @@
-import AttachmentMediaDisplay, {
-  getAttachmentRenderType,
-} from "@/components/drops/view/item/content/media/AttachmentMediaDisplay";
+import AttachmentMediaDisplay from "@/components/drops/view/item/content/media/AttachmentMediaDisplay";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -9,14 +7,30 @@ describe("AttachmentMediaDisplay", () => {
     jest.restoreAllMocks();
   });
 
-  it("detects PDF and CSV attachments by MIME type and URL", () => {
-    expect(getAttachmentRenderType("application/pdf", "https://x/a")).toBe(
-      "pdf"
+  it("renders labels based on attachment type detection", () => {
+    const { rerender } = render(
+      <AttachmentMediaDisplay
+        media_mime_type="application/pdf"
+        media_url="https://x/a"
+      />
     );
-    expect(getAttachmentRenderType("", "https://x/a.csv")).toBe("csv");
-    expect(getAttachmentRenderType("image/webp", "https://x/a.webp")).toBe(
-      "unknown"
+
+    expect(screen.getByText("PDF")).toBeInTheDocument();
+
+    rerender(
+      <AttachmentMediaDisplay media_mime_type="" media_url="https://x/a.csv" />
     );
+
+    expect(screen.getByText("CSV")).toBeInTheDocument();
+
+    rerender(
+      <AttachmentMediaDisplay
+        media_mime_type="image/webp"
+        media_url="https://x/a.webp"
+      />
+    );
+
+    expect(screen.getByText("File")).toBeInTheDocument();
   });
 
   it("shows a PDF attachment before rendering it on demand", async () => {

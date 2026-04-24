@@ -16,7 +16,7 @@ const CSV_PREVIEW_MAX_ROWS = 51;
 const CSV_PREVIEW_MAX_COLUMNS = 12;
 const CSV_PREVIEW_MAX_CHARS = 500_000;
 
-export function getAttachmentRenderType(
+function getAttachmentRenderType(
   mimeType: string,
   url: string
 ): AttachmentRenderType {
