@@ -102,8 +102,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         );
         const isUploading = !!uploadingFile;
         const progress = uploadingFile?.progress ?? 0;
+        const fileKey = `${file.file.name}-${file.file.size}-${file.file.lastModified}-${index}`;
         return (
-          <div key={file.file.name} className="tw-group tw-relative">
+          <div key={fileKey} className="tw-group tw-relative">
             <div className="tw-size-24 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
               {file.file.type.startsWith("image/") ? (
                 <div className="tw-relative tw-h-full tw-w-full">

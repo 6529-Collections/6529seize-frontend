@@ -39,11 +39,11 @@ describe("AttachmentMediaDisplay", () => {
       ok: true,
       blob: async () => new Blob(["pdf"], { type: "application/pdf" }),
     } as Response);
-    if (typeof URL.createObjectURL === "undefined") {
+    if (URL.createObjectURL === undefined) {
       (URL as { createObjectURL: (blob: Blob) => string }).createObjectURL =
         () => "";
     }
-    if (typeof URL.revokeObjectURL === "undefined") {
+    if (URL.revokeObjectURL === undefined) {
       (URL as { revokeObjectURL: (url: string) => void }).revokeObjectURL =
         () => {};
     }

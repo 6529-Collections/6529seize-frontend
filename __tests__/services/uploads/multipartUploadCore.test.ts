@@ -30,9 +30,18 @@ describe("multipartUploadCore MIME helpers", () => {
     expect(toApiMediaUploadMimeType("application/octet-stream")).toBeNull();
   });
 
+  it("maps extension fallbacks to supported backend MIME types", () => {
+    expect(getContentType(new File(["{}"], "scene.gltf"))).toBe(
+      "model/gltf-binary"
+    );
+    expect(getApiMediaUploadMimeType(new File(["{}"], "scene.gltf"))).toBe(
+      "model/gltf-binary"
+    );
+  });
+
   it("rejects uploads that are not supported by the backend enum", () => {
     expect(() =>
-      getApiMediaUploadMimeType(new File(["{}"], "scene.gltf"))
-    ).toThrow("Unsupported file type for upload: scene.gltf");
+      getApiMediaUploadMimeType(new File(["data"], "notes.txt"))
+    ).toThrow("Unsupported file type for upload: notes.txt");
   });
 });

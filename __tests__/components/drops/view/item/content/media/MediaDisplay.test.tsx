@@ -31,6 +31,9 @@ jest.mock(
   )
 );
 jest.mock("@/components/common/SandboxedExternalIframe", () => (props: any) => {
+  React.useLayoutEffect(() => {
+    props.onVisible?.();
+  }, [props]);
   mockSandboxedExternalIframe(props);
   return (
     <div
@@ -202,11 +205,27 @@ describe("MediaDisplay", () => {
     );
   });
 
-  it("renders empty fragment for unknown", () => {
-    const { container } = render(
-      <MediaDisplay media_mime_type="text/plain" media_url="file.txt" />
+  it("renders unknown media as an attachment fallback", () => {
+    render(<MediaDisplay media_mime_type="text/plain" media_url="file.txt" />);
+
+    expect(screen.getByText("File")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Download attachment" })
+    ).toBeInTheDocument();
+  });
+
+  it("forwards disabled interactions to unknown attachment fallback", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="text/plain"
+        media_url="file.txt"
+        disableMediaInteraction
+      />
     );
-    expect(container).toBeEmptyDOMElement();
+
+    expect(
+      screen.queryByRole("button", { name: "Download attachment" })
+    ).not.toBeInTheDocument();
   });
 
   it("does not auto-advance ipfs html if the timeout fallback is disabled", () => {
@@ -248,6 +267,10 @@ describe("MediaDisplay", () => {
         media_url="https://arweave.net/tx"
       />
     );
+
+    act(() => {
+      mockSandboxedExternalIframe.mock.calls[0]?.[0].onVisible();
+    });
 
     act(() => {
       jest.advanceTimersByTime(8000);

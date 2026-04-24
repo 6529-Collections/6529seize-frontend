@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { $createImageNode } from "../nodes/ImageNode";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { useAuth } from "@/components/auth/Auth";
+import { isSupportedUploadFile } from "@/services/uploads/mediaUploadMimeType";
 
 const ACCEPTABLE_IMAGE_TYPES = [
   "image/",
@@ -17,23 +18,9 @@ const ACCEPTABLE_IMAGE_TYPES = [
   "image/webp",
 ];
 
-const ACCEPTABLE_ATTACHMENT_TYPES = [
-  "video/",
-  "application/pdf",
-  "text/csv",
-  "application/csv",
-];
-
-const ACCEPTABLE_ATTACHMENT_EXTENSIONS = [".pdf", ".csv"];
-
 function isAcceptableAttachment(file: File): boolean {
-  if (isMimeType(file, ACCEPTABLE_ATTACHMENT_TYPES)) {
-    return true;
-  }
-
-  const fileName = file.name.toLowerCase();
-  return ACCEPTABLE_ATTACHMENT_EXTENSIONS.some((extension) =>
-    fileName.endsWith(extension)
+  return (
+    isSupportedUploadFile(file) && !isMimeType(file, ACCEPTABLE_IMAGE_TYPES)
   );
 }
 

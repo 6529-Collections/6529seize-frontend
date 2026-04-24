@@ -31,7 +31,10 @@ interface MultipartUploadCoreParams {
   onProgress?: ((bytesUploaded: number) => void) | undefined;
 }
 
-export { getContentType, toApiMediaUploadMimeType };
+export {
+  getContentType,
+  toApiMediaUploadMimeType,
+} from "@/services/uploads/mediaUploadMimeType";
 
 export function getApiMediaUploadMimeType(file: File): ApiMediaUploadMimeType {
   const contentType = getContentType(file);

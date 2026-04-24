@@ -15,21 +15,18 @@ import { useEffect, useMemo, useState } from "react";
 const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "blob:"]);
 
 function getSafeMediaUrl(rawUrl: string): string | null {
-  if (!rawUrl) {
-    return null;
-  }
-  try {
-    const parsed = new URL(
-      rawUrl,
-      typeof window !== "undefined" ? window.location.origin : undefined
-    );
-    if (SAFE_URL_PROTOCOLS.has(parsed.protocol)) {
-      return parsed.toString();
+  if (rawUrl) {
+    try {
+      const parsed = new URL(rawUrl, globalThis.window?.location.origin);
+      if (SAFE_URL_PROTOCOLS.has(parsed.protocol)) {
+        return parsed.toString();
+      }
+    } catch {
+      return null;
     }
-    return null;
-  } catch {
-    return null;
   }
+
+  return null;
 }
 
 type AttachmentRenderType = "csv" | "pdf" | "unknown";
@@ -418,7 +415,7 @@ export default function AttachmentMediaDisplay({
         <iframe
           src={safeMediaUrl}
           title={fileName}
-          sandbox="allow-scripts allow-popups allow-downloads"
+          sandbox="allow-popups allow-downloads"
           referrerPolicy="no-referrer"
           className="tw-h-[32rem] tw-w-full tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950"
         />

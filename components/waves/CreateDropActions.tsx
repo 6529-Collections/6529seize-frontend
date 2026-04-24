@@ -166,7 +166,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       <input
                         type="file"
                         className="tw-hidden"
-                        accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv,.webp"
+                        accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
                         multiple
                         onChange={onFiles}
                       />

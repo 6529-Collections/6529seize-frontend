@@ -31,8 +31,7 @@ import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import {
   API_MEDIA_UPLOAD_MIME_TYPE_VALUES,
-  getContentType,
-  toApiMediaUploadMimeType,
+  isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -267,6 +266,21 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     setActiveDropForWave(null);
   };
 
+  const shouldHandleContainerFileDrop = (
+    event: React.DragEvent<HTMLDivElement>
+  ): boolean => {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return true;
+    }
+
+    return (
+      target.closest(
+        '[contenteditable="true"], input, textarea, [role="textbox"]'
+      ) === null
+    );
+  };
+
   const isFileDragEvent = (event: React.DragEvent<HTMLDivElement>): boolean => {
     return Array.from(event.dataTransfer.types).includes("Files");
   };
@@ -276,8 +290,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     const unsupported: File[] = [];
 
     files.forEach((file) => {
-      const normalizedMimeType = toApiMediaUploadMimeType(getContentType(file));
-      if (normalizedMimeType) {
+      if (isSupportedUploadFile(file)) {
         supported.push(file);
       } else {
         unsupported.push(file);
@@ -288,7 +301,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onContainerDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
-    if (!isFileDragEvent(event)) {
+    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
     event.preventDefault();
@@ -298,7 +311,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onContainerDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    if (!isFileDragEvent(event)) {
+    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
     event.preventDefault();
@@ -307,7 +320,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onContainerDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    if (!isFileDragEvent(event)) {
+    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
     event.preventDefault();
@@ -319,7 +332,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onContainerDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    if (!isFileDragEvent(event)) {
+    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
       return;
     }
     event.preventDefault();
@@ -366,6 +379,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onContainerKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       fileInputRef.current?.click();
@@ -403,7 +420,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         ref={containerRef}
         className={`${containerClassName} tw-relative`}
         style={waveViewStyle}
-        role="button"
+        role="region"
         tabIndex={0}
         aria-label="Wave chat file upload area"
         onKeyDown={onContainerKeyDown}

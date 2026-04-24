@@ -267,7 +267,7 @@ describe("CreateDropActions", () => {
     const fileInput = fileInputs[0]?.querySelector('input[type="file"]');
     expect(fileInput).toHaveAttribute(
       "accept",
-      "image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv,.webp"
+      "image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
     );
     expect(fileInput).toHaveAttribute("multiple");
   });

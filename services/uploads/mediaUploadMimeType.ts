@@ -2,7 +2,7 @@ import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeTyp
 
 function normalizeMimeType(mimeType: string): string {
   if (!mimeType) return "";
-  return (mimeType.split(";")[0] ?? "").trim().toLowerCase();
+  return mimeType.split(";")[0].trim().toLowerCase();
 }
 
 const API_MEDIA_UPLOAD_MIME_TYPES = new Set<string>(
@@ -12,6 +12,32 @@ const API_MEDIA_UPLOAD_MIME_TYPES = new Set<string>(
 export const API_MEDIA_UPLOAD_MIME_TYPE_VALUES = Object.values(
   ApiMediaUploadMimeType
 );
+
+const EXTENSION_CONTENT_TYPES = new Map<string, ApiMediaUploadMimeType>([
+  [".glb", ApiMediaUploadMimeType.ModelGltfBinary],
+  [".gltf", ApiMediaUploadMimeType.ModelGltfBinary],
+  [".mp4", ApiMediaUploadMimeType.VideoMp4],
+  [".mov", ApiMediaUploadMimeType.VideoQuicktime],
+  [".avi", ApiMediaUploadMimeType.VideoXMsvideo],
+  [".png", ApiMediaUploadMimeType.ImagePng],
+  [".jpg", ApiMediaUploadMimeType.ImageJpg],
+  [".jpeg", ApiMediaUploadMimeType.ImageJpeg],
+  [".gif", ApiMediaUploadMimeType.ImageGif],
+  [".webp", ApiMediaUploadMimeType.ImageWebp],
+  [".mp3", ApiMediaUploadMimeType.AudioMpeg],
+  [".wav", ApiMediaUploadMimeType.AudioWav],
+  [".aac", ApiMediaUploadMimeType.AudioAac],
+  [".ogg", ApiMediaUploadMimeType.AudioOgg],
+  [".pdf", ApiMediaUploadMimeType.ApplicationPdf],
+  [".csv", ApiMediaUploadMimeType.TextCsv],
+]);
+
+function getContentTypeFromExtension(fileName: string): string {
+  const match = Array.from(EXTENSION_CONTENT_TYPES).find(([extension]) =>
+    fileName.endsWith(extension)
+  );
+  return match?.[1] ?? "application/octet-stream";
+}
 
 export function getContentType(file: File): string {
   const browserMimeType = normalizeMimeType(file.type);
@@ -30,50 +56,8 @@ export function getContentType(file: File): string {
   if (browserMimeType) {
     return browserMimeType;
   }
-  if (fileName.endsWith(".glb") || fileName.endsWith(".gltf")) {
-    return "model/gltf-binary";
-  }
-  if (fileName.endsWith(".mp4")) {
-    return "video/mp4";
-  }
-  if (fileName.endsWith(".mov")) {
-    return "video/quicktime";
-  }
-  if (fileName.endsWith(".avi")) {
-    return "video/x-msvideo";
-  }
-  if (fileName.endsWith(".png")) {
-    return "image/png";
-  }
-  if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-    return "image/jpeg";
-  }
-  if (fileName.endsWith(".gif")) {
-    return "image/gif";
-  }
-  if (fileName.endsWith(".webp")) {
-    return "image/webp";
-  }
-  if (fileName.endsWith(".mp3")) {
-    return "audio/mpeg";
-  }
-  if (fileName.endsWith(".wav")) {
-    return "audio/wav";
-  }
-  if (fileName.endsWith(".aac")) {
-    return "audio/aac";
-  }
-  if (fileName.endsWith(".ogg")) {
-    return "audio/ogg";
-  }
-  if (fileName.endsWith(".pdf")) {
-    return "application/pdf";
-  }
-  if (fileName.endsWith(".csv")) {
-    return "text/csv";
-  }
 
-  return "application/octet-stream";
+  return getContentTypeFromExtension(fileName);
 }
 
 export function toApiMediaUploadMimeType(
@@ -86,4 +70,8 @@ export function toApiMediaUploadMimeType(
   }
 
   return normalizedMimeType as ApiMediaUploadMimeType;
+}
+
+export function isSupportedUploadFile(file: File): boolean {
+  return toApiMediaUploadMimeType(getContentType(file)) !== null;
 }
