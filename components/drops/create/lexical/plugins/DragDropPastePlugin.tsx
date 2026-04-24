@@ -33,7 +33,7 @@ function withTimeout<T>(
 ): Promise<T> {
   let timeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
 
-  const timeoutPromise = new Promise<never>((_, reject) => {
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
     timeoutId = globalThis.setTimeout(() => {
       reject(new Error(message));
     }, timeoutMs);
