@@ -1,7 +1,8 @@
 "use client";
 
+import { LayoutGroup } from "framer-motion";
 import { usePathname, useSearchParams } from "next/navigation";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { Suspense, useCallback, useMemo, useRef } from "react";
 import {
   getActiveWaveIdFromUrl,
   getNotificationsRoute,
@@ -78,12 +79,37 @@ interface BottomNavigationProps {
   readonly hidden?: boolean | undefined;
 }
 
-const BottomNavigation: React.FC<BottomNavigationProps> = ({
+const getHiddenStyle = (hidden: boolean) =>
+  hidden
+    ? "tw-opacity-0 tw-translate-y-full tw-pointer-events-none"
+    : "tw-opacity-100 tw-translate-y-0";
+
+const getNavClassName = (hidden: boolean) =>
+  `${getHiddenStyle(hidden)} tw-fixed tw-bottom-0 tw-left-0 tw-z-50 tw-h-[85px] tw-w-full tw-bg-black tw-shadow-inner tw-transition-[opacity,transform] tw-duration-75`;
+
+const navInnerClassName =
+  "tw-relative tw-h-full before:tw-absolute before:tw-inset-x-0 before:tw-top-0 before:tw-h-px before:tw-bg-iron-900 before:tw-content-['']";
+
+const navListClassName =
+  "tw-mx-auto tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)] tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl";
+
+const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
+  hidden = false,
+}) => (
+  <nav aria-hidden="true" className={getNavClassName(hidden)}>
+    <div className={navInnerClassName}>
+      <ul className={navListClassName} />
+    </div>
+  </nav>
+);
+
+const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
@@ -115,29 +141,32 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
     [isApp]
   );
 
-  const hiddenStyle = hidden
-    ? "tw-opacity-0 tw-translate-y-full tw-pointer-events-none"
-    : "tw-opacity-100 tw-translate-y-0";
-
   return (
-    <nav
-      ref={setMobileNavRef}
-      className={`${hiddenStyle} tw-fixed tw-bottom-0 tw-left-0 tw-z-50 tw-h-[85px] tw-w-full tw-bg-black tw-shadow-inner tw-transition-[opacity,transform] tw-duration-75`}
-    >
-      <div className="tw-relative tw-h-full before:tw-absolute before:tw-inset-x-0 before:tw-top-0 before:tw-h-px before:tw-bg-iron-900 before:tw-content-['']">
-        <ul className="tw-mx-auto tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)] tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl">
-          {navItems.map((item) => (
-            <li
-              key={item.name}
-              className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
-            >
-              <NavItem item={item} isCurrentWaveDm={isCurrentWaveDm} />
-            </li>
-          ))}
+    <nav ref={setMobileNavRef} className={getNavClassName(hidden)}>
+      <div className={navInnerClassName}>
+        <ul className={navListClassName}>
+          <LayoutGroup id="bottom-navigation">
+            {navItems.map((item) => (
+              <li
+                key={item.name}
+                className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
+              >
+                <NavItem item={item} isCurrentWaveDm={isCurrentWaveDm} />
+              </li>
+            ))}
+          </LayoutGroup>
         </ul>
       </div>
     </nav>
   );
 };
+
+const BottomNavigation: React.FC<BottomNavigationProps> = ({
+  hidden = false,
+}) => (
+  <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
+    <BottomNavigationContent hidden={hidden} />
+  </Suspense>
+);
 
 export default BottomNavigation;

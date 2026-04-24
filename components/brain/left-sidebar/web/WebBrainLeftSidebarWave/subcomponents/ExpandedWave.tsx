@@ -1,4 +1,4 @@
-import type { MutableRefObject } from "react";
+import type { RefObject } from "react";
 import Link from "next/link";
 import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
@@ -15,7 +15,7 @@ interface ExpandedWaveProps {
   readonly isDropWave: boolean;
   readonly isPinned: boolean;
   readonly latestDropTimestamp?: number | null | undefined;
-  readonly nameRef: MutableRefObject<HTMLDivElement | null>;
+  readonly nameRef: RefObject<HTMLDivElement | null>;
   readonly onMouseEnter?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showExpandedTooltip: boolean;
@@ -52,6 +52,13 @@ export const ExpandedWave = ({
         "data-tooltip-content": tooltipContent,
       }
     : {};
+  const presentLatestDropTimestamp =
+    latestDropTimestamp !== null &&
+    latestDropTimestamp !== undefined &&
+    latestDropTimestamp !== 0 &&
+    Number.isFinite(latestDropTimestamp)
+      ? latestDropTimestamp
+      : null;
 
   return (
     <div
@@ -63,6 +70,7 @@ export const ExpandedWave = ({
     >
       <Link
         href={href}
+        prefetch={false}
         {...(onMouseEnter ? { onMouseEnter } : {})}
         onClick={onClick}
         className={`tw-flex tw-min-w-0 tw-flex-1 tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
@@ -87,10 +95,10 @@ export const ExpandedWave = ({
           >
             {formattedWaveName}
           </div>
-          {!!latestDropTimestamp && (
+          {presentLatestDropTimestamp !== null && (
             <div className="tw-text-xs tw-text-iron-500">
               <span className="tw-pr-1">Last drop:</span>
-              <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
+              <BrainLeftSidebarWaveDropTime time={presentLatestDropTimestamp} />
             </div>
           )}
         </div>

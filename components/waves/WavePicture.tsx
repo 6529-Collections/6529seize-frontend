@@ -7,10 +7,10 @@ import { useAuth } from "@/components/auth/Auth";
 interface WavePictureProps {
   readonly name: string;
   readonly picture: string | null;
-  readonly contributors: {
+  readonly contributors: ReadonlyArray<{
     readonly pfp: string;
     readonly identity?: string | null;
-  }[];
+  }>;
 }
 
 interface IdentitySource {
