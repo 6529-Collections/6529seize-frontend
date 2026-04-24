@@ -2,6 +2,14 @@ import React from "react";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../distribution-plan-tool/common/CircleLoader";
+import {
+  faFile,
+  faFileAudio,
+  faFileCsv,
+  faFilePdf,
+  faFileVideo,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface FileItem {
   file: File;
@@ -30,6 +38,49 @@ const ProgressOverlay: React.FC<{ progress: number }> = ({ progress }) => (
   />
 );
 
+const getFileExtension = (file: File): string => {
+  const extension = file.name.split(".").pop();
+  if (extension && extension !== file.name) {
+    return extension.toUpperCase();
+  }
+
+  const mimeSubtype = file.type.split("/")[1];
+  return mimeSubtype?.split(";")[0]?.toUpperCase() || "FILE";
+};
+
+const getFileIcon = (file: File) => {
+  if (file.type.startsWith("video/")) {
+    return faFileVideo;
+  }
+
+  if (file.type.startsWith("audio/")) {
+    return faFileAudio;
+  }
+
+  if (
+    file.type === "application/pdf" ||
+    file.name.toLowerCase().endsWith(".pdf")
+  ) {
+    return faFilePdf;
+  }
+
+  if (file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv")) {
+    return faFileCsv;
+  }
+
+  return faFile;
+};
+
+const FileTypePreview: React.FC<{ file: File }> = ({ file }) => (
+  <div
+    className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-iron-300"
+    aria-label={`${getFileExtension(file)} file`}
+  >
+    <FontAwesomeIcon icon={getFileIcon(file)} className="tw-size-7" />
+    <span className="tw-sr-only">{getFileExtension(file)}</span>
+  </div>
+);
+
 const FilePreview: React.FC<FilePreviewProps> = ({
   files,
   uploadingFiles,
@@ -37,7 +88,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   disabled,
 }) => {
   return (
-    <div className="tw-flex tw-flex-wrap tw-gap-2 tw-mt-2">
+    <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
       {files.map((file, index) => {
         const uploadingFile = uploadingFiles.find(
           (uf) => uf.file === file.file
@@ -45,28 +96,26 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         const isUploading = !!uploadingFile;
         const progress = uploadingFile?.progress ?? 0;
         return (
-          <div key={file.file.name} className="tw-relative tw-group">
-            <div className="tw-h-[16rem] tw-w-[16rem] tw-bg-iron-800 tw-rounded-lg tw-overflow-hidden">
+          <div key={file.file.name} className="tw-group tw-relative">
+            <div className="tw-h-32 tw-w-32 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 sm:tw-h-36 sm:tw-w-36">
               {file.file.type.startsWith("image/") ? (
-                <div className="tw-relative tw-w-full tw-h-full">
+                <div className="tw-relative tw-h-full tw-w-full">
                   <img
                     src={URL.createObjectURL(file.file)}
                     alt={`Preview ${index}`}
-                    className="tw-w-full tw-h-full tw-object-cover"
+                    className="tw-h-full tw-w-full tw-object-cover"
                   />
-                  <div className="tw-absolute tw-inset-0 tw-bg-iron-950 tw-opacity-0 group-hover:tw-opacity-30 tw-transition-opacity tw-duration-300"></div>
+                  <div className="tw-absolute tw-inset-0 tw-bg-iron-950 tw-opacity-0 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-30"></div>
                 </div>
               ) : (
-                <div className="tw-flex tw-items-center tw-justify-center tw-w-full tw-h-full tw-text-iron-400">
-                  {file.file.type.startsWith("video/") ? "🎥" : "📁"}
-                </div>
+                <FileTypePreview file={file.file} />
               )}
               {isUploading && (
                 <>
                   <ProgressOverlay progress={progress} />
                   <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center">
                     <CircleLoader size={CircleLoaderSize.XXLARGE} />
-                    <span className="tw-text-white tw-font-medium tw-text-base tw-mt-1">
+                    <span className="tw-mt-1 tw-text-base tw-font-medium tw-text-white">
                       {Math.round(progress)}%
                     </span>
                   </div>
@@ -74,7 +123,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
               )}
             </div>
             {file.label && (
-              <div className="tw-absolute tw-bottom-2 tw-left-2 tw-right-2 tw-bg-iron-800/80 tw-text-white tw-px-2 tw-py-1 tw-rounded tw-text-sm tw-truncate">
+              <div className="tw-absolute tw-bottom-2 tw-left-2 tw-right-2 tw-truncate tw-rounded tw-bg-iron-800/80 tw-px-2 tw-py-1 tw-text-sm tw-text-white">
                 {file.label}
               </div>
             )}
@@ -82,7 +131,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
               <button
                 onClick={() => removeFile(file.file)}
                 disabled={disabled}
-                className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-absolute tw-top-1 tw-right-1 tw-text-red tw-rounded-full tw-size-7 tw-transition-all tw-duration-300 tw-z-10 tw-cursor-pointer tw-bg-iron-800 hover:tw-bg-iron-700 ${
+                className={`tw-absolute tw-right-1 tw-top-1 tw-z-10 tw-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-red tw-transition-all tw-duration-300 hover:tw-bg-iron-700 ${
                   disabled ? "tw-pointer-events-none" : ""
                 }`}
                 aria-label="Remove file"

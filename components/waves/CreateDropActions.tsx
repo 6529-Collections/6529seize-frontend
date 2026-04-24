@@ -189,7 +189,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     {!isMobile && (
                       <Tooltip
                         id="upload-file-tooltip"
-                        place="top"
+                        place="top-start"
                         offset={8}
                         opacity={1}
                         positionStrategy="fixed"
