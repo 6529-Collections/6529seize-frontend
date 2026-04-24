@@ -7,6 +7,8 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CreateWaveStep } from "@/types/waves.types";
 
 describe("create-wave.validation", () => {
+  const HOUR_IN_MS = 60 * 60 * 1000;
+
   const baseConfig: any = {
     overview: { type: ApiWaveType.Rank, name: "name", image: null },
     groups: {
@@ -244,6 +246,101 @@ describe("create-wave.validation", () => {
     });
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL
+    );
+  });
+
+  it("rejects approve time weighted intervals longer than the wave duration", () => {
+    const startDate = 1_000;
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: 1,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 2,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("allows approve time weighted intervals equal to the wave duration", () => {
+    const startDate = 1_000;
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: 1,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("does not apply approve duration validation to rank waves", () => {
+    const startDate = 1_000;
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Rank },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      voting: {
+        ...baseConfig.voting,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 2,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
     );
   });
 

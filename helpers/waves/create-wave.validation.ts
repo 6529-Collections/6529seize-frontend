@@ -40,10 +40,13 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   VOTING_PROFILE_ID_CANNOT_BE_EMPTY = "VOTING_PROFILE_ID_CANNOT_BE_EMPTY",
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL",
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE",
+  TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION = "TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION",
   MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID = "MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID",
 }
 
 const MAX_NAME_LENGTH = 250;
+const MINUTE_IN_MS = 60 * 1000;
+const HOUR_IN_MS = 60 * MINUTE_IN_MS;
 
 const getOverviewValidationErrors = ({
   overview,
@@ -208,9 +211,11 @@ const getDropsValidationErrors = ({
 
 const getVotingValidationErrors = ({
   waveType,
+  dates,
   voting,
 }: {
   readonly waveType: ApiWaveType;
+  readonly dates: CreateWaveDatesConfig;
   readonly voting: CreateWaveVotingConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
@@ -306,6 +311,20 @@ const getVotingValidationErrors = ({
         CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE
       );
     }
+
+    if (waveType === ApiWaveType.Approve && dates.endDate !== null) {
+      const intervalInMs =
+        voting.timeWeighted.averagingIntervalUnit === "minutes"
+          ? voting.timeWeighted.averagingInterval * MINUTE_IN_MS
+          : voting.timeWeighted.averagingInterval * HOUR_IN_MS;
+      const waveDurationMs = dates.endDate - dates.submissionStartDate;
+
+      if (waveDurationMs >= 0 && intervalInMs > waveDurationMs) {
+        errors.push(
+          CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+        );
+      }
+    }
   }
 
   return errors;
@@ -392,6 +411,7 @@ export const getCreateWaveValidationErrors = ({
       errors.push(
         ...getVotingValidationErrors({
           waveType: config.overview.type,
+          dates: config.dates,
           voting: config.voting,
         })
       );

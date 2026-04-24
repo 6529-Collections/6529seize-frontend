@@ -43,6 +43,34 @@ const getTimeWeightedLockMs = (
   return Math.max(MIN_MS, Math.min(MAX_MS, ms));
 };
 
+const getCreateWaveTimeLockMs = ({
+  config,
+  endDate,
+}: {
+  readonly config: CreateWaveConfig;
+  readonly endDate: number | null;
+}): number | null => {
+  if (
+    config.overview.type === ApiWaveType.Chat ||
+    !config.voting.timeWeighted.enabled
+  ) {
+    return null;
+  }
+
+  const timeLockMs = getTimeWeightedLockMs(config.voting.timeWeighted);
+
+  if (config.overview.type !== ApiWaveType.Approve || endDate === null) {
+    return timeLockMs;
+  }
+
+  const waveDurationMs = Math.max(
+    0,
+    endDate - config.dates.submissionStartDate
+  );
+
+  return Math.min(timeLockMs, waveDurationMs);
+};
+
 export const getCreateWaveNextStep = ({
   step,
   waveType,
@@ -303,23 +331,17 @@ const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
     );
   }
 
-  // If isRolling is true, we need to calculate the last decision time
-  if (dates.isRolling) {
-    // Need an end date for rolling waves
-    if (typeof dates.endDate !== "number") {
-      throw new Error("End date must be explicitly set when isRolling is true");
-    }
-
-    // Calculate the last decision time that will occur before the user-specified end date
-    return calculateLastDecisionTime(
-      dates.firstDecisionTime,
-      dates.subsequentDecisions,
-      dates.endDate
-    );
+  // Need an end date for rolling waves
+  if (typeof dates.endDate !== "number") {
+    throw new Error("End date must be explicitly set when isRolling is true");
   }
 
-  // This should never happen if all cases are covered
-  return dates.endDate ?? dates.firstDecisionTime;
+  // Calculate the last decision time that will occur before the user-specified end date
+  return calculateLastDecisionTime(
+    dates.firstDecisionTime,
+    dates.subsequentDecisions,
+    dates.endDate
+  );
 };
 
 export const getCreateNewWaveBody = ({
@@ -404,11 +426,7 @@ export const getCreateNewWaveBody = ({
         config.overview.type === ApiWaveType.Chat
           ? null
           : (config.voting.maxVotesPerIdentityPerDrop ?? null),
-      time_lock_ms:
-        config.overview.type !== ApiWaveType.Chat &&
-        config.voting.timeWeighted.enabled
-          ? getTimeWeightedLockMs(config.voting.timeWeighted)
-          : null,
+      time_lock_ms: getCreateWaveTimeLockMs({ config, endDate }),
       admin_group: {
         group_id: config.groups.admin,
       },

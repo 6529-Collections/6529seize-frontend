@@ -778,7 +778,7 @@ const seededRandom = (seed: number) => {
 };
 
 export const getRandomColorWithSeed = (seedString: string) => {
-  let seed = hashSeed(seedString);
+  const seed = hashSeed(seedString);
   const random = seededRandom(seed);
   const r = Math.floor(random() * 256)
     .toString(16)

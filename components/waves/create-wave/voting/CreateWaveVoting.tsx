@@ -20,6 +20,9 @@ const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
   [ApiWaveCreditType.Xtdh]: undefined,
 };
 
+const TIME_WEIGHTED_DURATION_ERROR =
+  "Time-weighted voting interval must not exceed the wave duration.";
+
 export default function CreateWaveVoting({
   waveType,
   selectedType,
@@ -69,6 +72,11 @@ export default function CreateWaveVoting({
   const thresholdError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED
   );
+  const timeWeightedErrorMessage = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+  )
+    ? TIME_WEIGHTED_DURATION_ERROR
+    : undefined;
 
   return (
     <div>
@@ -129,6 +137,7 @@ export default function CreateWaveVoting({
       {waveType !== ApiWaveType.Chat && (
         <TimeWeightedVoting
           config={timeWeighted}
+          errorMessage={timeWeightedErrorMessage}
           onChange={onTimeWeightedChange}
         />
       )}

@@ -15,6 +15,8 @@ import { TimeWeightedToggle, AveragingIntervalInput } from "./components";
 interface TimeWeightedVotingProps {
   /** Current configuration for time-weighted voting */
   readonly config: TimeWeightedVotingConfig;
+  /** Validation error from the parent wave flow */
+  readonly errorMessage?: string | undefined;
   /** Handler called when configuration changes */
   readonly onChange: (config: TimeWeightedVotingConfig) => void;
 }
@@ -26,6 +28,7 @@ interface TimeWeightedVotingProps {
  */
 export default function TimeWeightedVoting({
   config,
+  errorMessage,
   onChange,
 }: TimeWeightedVotingProps) {
   // State for validation errors
@@ -35,7 +38,7 @@ export default function TimeWeightedVoting({
   }>({});
 
   // State for tracking input value during editing
-  const [inputValue, setInputValue] = useState<string>(
+  const [inputValue, setInputValue] = useState<string>(() =>
     config.averagingInterval.toString()
   );
 
@@ -52,7 +55,10 @@ export default function TimeWeightedVoting({
       return;
     }
 
-    const errors: { interval?: string | undefined; general?: string | undefined } = {};
+    const errors: {
+      interval?: string | undefined;
+      general?: string | undefined;
+    } = {};
 
     // Use the utility function for conversion
     const valueInMinutes = convertToMinutes(
@@ -163,29 +169,30 @@ export default function TimeWeightedVoting({
     [config, onChange]
   );
 
-  // Determine if there are any validation errors
-  const hasErrors = Object.keys(validationErrors).length > 0;
+  const generalErrorMessage = errorMessage ?? validationErrors.general;
 
   return (
     <section
       className="tw-mt-6 tw-border-t tw-border-iron-700 tw-pt-6"
-      data-testid="time-weighted-voting">
+      data-testid="time-weighted-voting"
+    >
       <TimeWeightedToggle enabled={config.enabled} onToggle={handleToggle} />
 
       {config.enabled && (
         <>
           {/* General error display */}
-          {hasErrors && validationErrors.general && (
+          {generalErrorMessage && (
             <div
-              className="tw-mb-4 tw-text-red-400 tw-text-sm tw-font-medium"
+              className="tw-text-red-400 tw-mb-4 tw-text-sm tw-font-medium"
               role="alert"
-              data-testid="general-error">
-              {validationErrors.general}
+              data-testid="general-error"
+            >
+              {generalErrorMessage}
             </div>
           )}
 
           {/* Configuration form */}
-          <div className="tw-grid md:tw-grid-cols-2 tw-gap-6">
+          <div className="tw-grid tw-gap-6 md:tw-grid-cols-2">
             <AveragingIntervalInput
               value={inputValue}
               unit={config.averagingIntervalUnit}

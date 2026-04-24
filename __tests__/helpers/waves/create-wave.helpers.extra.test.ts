@@ -2,6 +2,8 @@ import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 
+const HOUR_IN_MS = 60 * 60 * 1000;
+
 describe("create-wave.helpers extra", () => {
   it("clamps time weighted lock duration", () => {
     const config: any = {
@@ -273,7 +275,7 @@ it("sets time lock for approve waves when time weighted voting is enabled", () =
     dates: {
       submissionStartDate: 1,
       votingStartDate: 1,
-      endDate: 10,
+      endDate: 1 + 3 * HOUR_IN_MS,
       firstDecisionTime: 2,
       subsequentDecisions: [],
       isRolling: false,
@@ -309,4 +311,55 @@ it("sets time lock for approve waves when time weighted voting is enabled", () =
   };
   const body = getCreateNewWaveBody({ drop, picture: null, config });
   expect(body.wave.time_lock_ms).toBe(2 * 60 * 60 * 1000);
+});
+
+it("caps approve time lock at the wave duration", () => {
+  const config: any = {
+    overview: { type: ApiWaveType.Approve, name: "A" },
+    groups: {
+      canView: "1",
+      canDrop: "2",
+      canVote: "3",
+      canChat: "4",
+      admin: "5",
+    },
+    dates: {
+      submissionStartDate: 1,
+      votingStartDate: 1,
+      endDate: 1 + HOUR_IN_MS,
+      firstDecisionTime: 2,
+      subsequentDecisions: [],
+      isRolling: false,
+    },
+    drops: {
+      noOfApplicationsAllowedPerParticipant: 1,
+      requiredTypes: [],
+      requiredMetadata: [],
+      submissionStrategy: null,
+      terms: null,
+      signatureRequired: false,
+      adminCanDeleteDrops: false,
+    },
+    chat: { enabled: false },
+    voting: {
+      type: null,
+      category: null,
+      profileId: null,
+      winningThreshold: 3,
+      timeWeighted: {
+        enabled: true,
+        averagingInterval: 2,
+        averagingIntervalUnit: "hours",
+      },
+    },
+    outcomes: [],
+  };
+  const drop: any = {
+    parts: [],
+    referenced_nfts: [],
+    mentioned_users: [],
+    metadata: [],
+  };
+  const body = getCreateNewWaveBody({ drop, picture: null, config });
+  expect(body.wave.time_lock_ms).toBe(HOUR_IN_MS);
 });

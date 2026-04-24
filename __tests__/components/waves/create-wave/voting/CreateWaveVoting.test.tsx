@@ -3,6 +3,11 @@ import userEvent from "@testing-library/user-event";
 import CreateWaveVoting from "@/components/waves/create-wave/voting/CreateWaveVoting";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+
+const mockTimeWeightedVoting = jest.fn((props: { errorMessage?: string }) => (
+  <div data-testid="time-weighted">{props.errorMessage}</div>
+));
 
 jest.mock(
   "@/components/utils/radio/CommonBorderedRadioButton",
@@ -26,7 +31,7 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/create-wave/voting/TimeWeightedVoting",
-  () => () => <div data-testid="time-weighted" />
+  () => (props: { errorMessage?: string }) => mockTimeWeightedVoting(props)
 );
 
 describe("CreateWaveVoting", () => {
@@ -91,6 +96,22 @@ describe("CreateWaveVoting", () => {
     );
     expect(screen.getByLabelText("Threshold")).toHaveValue("5");
     expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
+  });
+
+  it("passes approve time lock duration errors to time weighted voting", () => {
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION,
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId("time-weighted")).toHaveTextContent(
+      "Time-weighted voting interval must not exceed the wave duration."
+    );
   });
 
   it("updates max votes per identity per drop", async () => {
