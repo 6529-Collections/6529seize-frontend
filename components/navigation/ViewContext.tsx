@@ -66,14 +66,17 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const lastVisitedWaveRef = useRef<string | null>(null);
   const lastVisitedDmRef = useRef<string | null>(null);
   const lastFetchedWaveIdRef = useRef<string | null>(null);
+  const currentIsDmRef = useRef(false);
 
   const fetchWaveDetails = useCallback(async (targetWaveId: string) => {
     try {
       const res = await commonApiFetch<ApiWave>({
         endpoint: `waves/${targetWaveId}`,
       });
+      const currentIsDm = Boolean(res.chat.scope.group?.is_direct_message);
+      currentIsDmRef.current = currentIsDm;
 
-      if (res.chat.scope.group?.is_direct_message) {
+      if (currentIsDm) {
         lastVisitedDmRef.current = res.id;
       } else {
         lastVisitedWaveRef.current = res.id;
@@ -91,6 +94,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
       void fetchWaveDetails(currentWaveId);
     } else if (!currentWaveId) {
       lastFetchedWaveIdRef.current = null;
+      currentIsDmRef.current = false;
     }
   }, [currentWaveId, fetchWaveDetails]);
 
@@ -103,7 +107,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
           router.push(item.href);
         }
       } else if (item.viewKey === "waves") {
-        if (currentWaveId) {
+        if (currentWaveId && !currentIsDmRef.current) {
           lastVisitedWaveRef.current = null;
           router.push(getWavesBaseRoute(isApp));
         } else if (lastVisitedWaveRef.current) {
@@ -117,7 +121,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         } else {
           router.push(getWavesBaseRoute(isApp));
         }
-      } else if (currentWaveId) {
+      } else if (currentWaveId && currentIsDmRef.current) {
         // item.viewKey === "messages" (only remaining case)
         lastVisitedDmRef.current = null;
         router.push(getMessagesBaseRoute(isApp));
