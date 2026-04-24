@@ -37,16 +37,29 @@ function usage() {
 }
 
 function parseEnvLine(line) {
-  const match = line.match(/^(\s*#?\s*)(API_ENDPOINT|WS_ENDPOINT)\s*=\s*(.*)$/);
-  if (!match) {
+  const equalsIndex = line.indexOf("=");
+  if (equalsIndex === -1) {
     return null;
   }
 
-  const value = match[3].trim().replace(/^['"]|['"]$/g, "");
+  let left = line.slice(0, equalsIndex).trim();
+  const right = line.slice(equalsIndex + 1);
+
+  let active = true;
+  if (left.startsWith("#")) {
+    active = false;
+    left = left.slice(1).trim();
+  }
+
+  if (left !== "API_ENDPOINT" && left !== "WS_ENDPOINT") {
+    return null;
+  }
+
+  const value = right.trim().replace(/^['"]|['"]$/g, "");
   return {
-    key: match[2],
+    key: left,
     value,
-    active: !match[1].includes("#"),
+    active,
   };
 }
 
