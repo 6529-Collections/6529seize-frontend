@@ -64,4 +64,3 @@ export function toApiMediaUploadMimeType(
 
   return normalizedMimeType as ApiMediaUploadMimeType;
 }
-

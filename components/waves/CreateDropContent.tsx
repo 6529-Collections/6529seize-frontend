@@ -1288,7 +1288,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
-    if (lastExternalAttachmentDropTokenRef.current === externalAttachmentDrop.token) {
+    if (
+      lastExternalAttachmentDropTokenRef.current ===
+      externalAttachmentDrop.token
+    ) {
       return;
     }
 
