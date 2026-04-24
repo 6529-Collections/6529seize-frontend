@@ -15,6 +15,7 @@ import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
+import AttachmentMediaDisplay from "./AttachmentMediaDisplay";
 
 enum MediaType {
   IMAGE = "IMAGE",
@@ -263,7 +264,12 @@ export default function MediaDisplay({
         />
       );
     case MediaType.UNKNOWN:
-      return <></>;
+      return (
+        <AttachmentMediaDisplay
+          media_mime_type={media_mime_type}
+          media_url={media_url}
+        />
+      );
     default:
       assertUnreachable(mediaType);
       return;

@@ -376,7 +376,7 @@ const generateParts = async (
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes("content_type")) {
-      throw new Error("File type not supported. Please use MP4 for videos.");
+      throw new Error("File type not supported.");
     }
     throw new Error("Error uploading file. Please try again.");
   }
@@ -1658,6 +1658,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               onReferencedNft={onReferencedNft}
               onMentionedUser={onMentionedUser}
               onMentionedWave={onMentionedWave}
+              onAttachmentFiles={handleFileChange}
               onDrop={onDrop}
             />
             {showCurationDropModeWarning && (

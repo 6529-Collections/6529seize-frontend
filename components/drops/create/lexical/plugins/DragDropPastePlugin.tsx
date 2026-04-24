@@ -17,12 +17,37 @@ const ACCEPTABLE_IMAGE_TYPES = [
   "image/webp",
 ];
 
+const ACCEPTABLE_ATTACHMENT_TYPES = [
+  "video/",
+  "application/pdf",
+  "text/csv",
+  "application/csv",
+  "application/vnd.ms-excel",
+];
+
+const ACCEPTABLE_ATTACHMENT_EXTENSIONS = [".pdf", ".csv"];
+
+function isAcceptableAttachment(file: File): boolean {
+  if (isMimeType(file, ACCEPTABLE_ATTACHMENT_TYPES)) {
+    return true;
+  }
+
+  const fileName = file.name.toLowerCase();
+  return ACCEPTABLE_ATTACHMENT_EXTENSIONS.some((extension) =>
+    fileName.endsWith(extension)
+  );
+}
+
 async function uploadImage(file: File): Promise<string> {
   const multiPart = await multiPartUpload({ file, path: "drop" });
   return multiPart.url;
 }
 
-export default function DragDropPaste(): null {
+export default function DragDropPaste({
+  onAttachmentFiles,
+}: {
+  readonly onAttachmentFiles?: ((files: File[]) => void) | undefined;
+}): null {
   const { setToast } = useAuth();
 
   const [editor] = useLexicalComposerContext();
@@ -36,7 +61,15 @@ export default function DragDropPaste(): null {
             files,
             [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x)
           );
-          if (filesResult.length === 0) {
+          const attachmentFiles = onAttachmentFiles
+            ? files.filter(isAcceptableAttachment)
+            : [];
+
+          if (attachmentFiles.length > 0) {
+            onAttachmentFiles?.(attachmentFiles);
+          }
+
+          if (filesResult.length === 0 && attachmentFiles.length === 0) {
             setToast({
               message: "Unsupported file type for Drag & Drop / Paste.",
               type: "error",
@@ -81,6 +114,6 @@ export default function DragDropPaste(): null {
       unregister();
       isMounted = false;
     };
-  }, [editor, setToast]);
+  }, [editor, onAttachmentFiles, setToast]);
   return null;
 }

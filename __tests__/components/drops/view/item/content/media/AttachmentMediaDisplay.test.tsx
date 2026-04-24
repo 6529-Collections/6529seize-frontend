@@ -1,0 +1,68 @@
+import AttachmentMediaDisplay, {
+  getAttachmentRenderType,
+} from "@/components/drops/view/item/content/media/AttachmentMediaDisplay";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+describe("AttachmentMediaDisplay", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("detects PDF and CSV attachments by MIME type and URL", () => {
+    expect(getAttachmentRenderType("application/pdf", "https://x/a")).toBe(
+      "pdf"
+    );
+    expect(getAttachmentRenderType("", "https://x/a.csv")).toBe("csv");
+    expect(getAttachmentRenderType("image/webp", "https://x/a.webp")).toBe(
+      "unknown"
+    );
+  });
+
+  it("shows a PDF attachment before rendering it on demand", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AttachmentMediaDisplay
+        media_mime_type="application/pdf"
+        media_url="https://example.com/files/paper.pdf"
+      />
+    );
+
+    expect(screen.getByText("paper.pdf")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /download/i })).toHaveAttribute(
+      "href",
+      "https://example.com/files/paper.pdf"
+    );
+    expect(screen.queryByTitle("paper.pdf")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Render" }));
+
+    expect(screen.getByTitle("paper.pdf")).toHaveAttribute(
+      "src",
+      "https://example.com/files/paper.pdf"
+    );
+  });
+
+  it("renders a CSV preview after the user requests it", async () => {
+    const user = userEvent.setup();
+    jest.spyOn(global, "fetch").mockResolvedValue({
+      ok: true,
+      text: async () => "name,value\nalpha,1",
+    } as Response);
+
+    render(
+      <AttachmentMediaDisplay
+        media_mime_type="text/csv"
+        media_url="https://example.com/files/data.csv"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Render" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("alpha")).toBeInTheDocument();
+    });
+    expect(screen.getByText("value")).toBeInTheDocument();
+  });
+});

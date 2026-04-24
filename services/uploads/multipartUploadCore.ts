@@ -56,6 +56,12 @@ export function getContentType(file: File): string {
   if (fileName.endsWith(".webp")) {
     return "image/webp";
   }
+  if (fileName.endsWith(".pdf")) {
+    return "application/pdf";
+  }
+  if (fileName.endsWith(".csv")) {
+    return "text/csv";
+  }
 
   return "application/octet-stream";
 }
