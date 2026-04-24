@@ -35,6 +35,87 @@ const CSV_PREVIEW_MAX_ROWS = 51;
 const CSV_PREVIEW_MAX_COLUMNS = 12;
 const CSV_PREVIEW_MAX_CHARS = 500_000;
 
+const CSV_PREVIEW_SIZE_EXCEEDED = "__CSV_PREVIEW_SIZE_EXCEEDED__";
+
+async function readCsvPreviewText(
+  response: Response,
+  maxChars: number,
+  signal: AbortSignal,
+  onSizeExceeded: () => void
+): Promise<string> {
+  const lengthHeader = response.headers.get("Content-Length");
+  if (lengthHeader !== null) {
+    const parsed = Number.parseInt(lengthHeader, 10);
+    if (Number.isFinite(parsed) && parsed > maxChars) {
+      onSizeExceeded();
+      throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
+    }
+  }
+
+  if (!response.body) {
+    const text = await response.text();
+    if (text.length > maxChars) {
+      onSizeExceeded();
+      throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
+    }
+    return text;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let result = "";
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        result += decoder.decode();
+        return result;
+      }
+      if (signal.aborted) {
+        throw new DOMException("Aborted", "AbortError");
+      }
+      const decodedChunk = decoder.decode(value, { stream: true });
+      const remaining = maxChars - result.length;
+      if (remaining <= 0) {
+        onSizeExceeded();
+        throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
+      }
+      if (decodedChunk.length > remaining) {
+        result += decodedChunk.slice(0, remaining);
+        onSizeExceeded();
+        throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
+      }
+      result += decodedChunk;
+      if (result.length === maxChars) {
+        const peek = await reader.read();
+        if (signal.aborted) {
+          throw new DOMException("Aborted", "AbortError");
+        }
+        if (!peek.done && peek.value && peek.value.byteLength > 0) {
+          onSizeExceeded();
+          throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
+        }
+        if (!peek.done && peek.value) {
+          const extra = decoder.decode(peek.value, { stream: true });
+          if (extra.length > 0) {
+            onSizeExceeded();
+            throw new Error(CSV_PREVIEW_SIZE_EXCEEDED);
+          }
+        }
+        if (peek.done) {
+          result += decoder.decode();
+        }
+        return result;
+      }
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
+    try {
+      reader.releaseLock();
+    } catch {}
+  }
+}
+
 const ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
 
 function getPathnameFileExtension(url: string): string | null {
@@ -212,38 +293,65 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setRows(null);
+    setError(null);
     const controller = new AbortController();
     let active = true;
     let didTimeout = false;
+    let didExceedSize = false;
+    const markSizeExceeded = () => {
+      didExceedSize = true;
+      controller.abort();
+    };
     const timeoutId = globalThis.window.setTimeout(() => {
       didTimeout = true;
       controller.abort();
     }, ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS);
 
-    fetch(url, { signal: controller.signal })
-      .then(async (response) => {
+    void (async () => {
+      try {
+        const response = await fetch(url, { signal: controller.signal });
         if (!response.ok) {
           throw new Error("Unable to load CSV preview.");
         }
-        const text = await response.text();
+        const text = await readCsvPreviewText(
+          response,
+          CSV_PREVIEW_MAX_CHARS,
+          controller.signal,
+          markSizeExceeded
+        );
         if (!active || controller.signal.aborted) {
           return;
         }
-        setRows(parseCsvPreview(text.slice(0, CSV_PREVIEW_MAX_CHARS)));
-      })
-      .catch((err: unknown) => {
-        if (!active) return;
+        setRows(parseCsvPreview(text));
+      } catch (err: unknown) {
+        if (!active) {
+          return;
+        }
         if (controller.signal.aborted) {
           if (didTimeout) {
             setError("CSV preview timed out. Please download the file.");
+          } else if (didExceedSize) {
+            setError(
+              "CSV preview exceeds the browser size limit. Please download the file."
+            );
           }
           return;
         }
+        if (
+          err instanceof Error &&
+          err.message === CSV_PREVIEW_SIZE_EXCEEDED
+        ) {
+          setError(
+            "CSV preview exceeds the browser size limit. Please download the file."
+          );
+          return;
+        }
         setError(err instanceof Error ? err.message : "Unable to load CSV.");
-      })
-      .finally(() => {
+      } finally {
         globalThis.window.clearTimeout(timeoutId);
-      });
+      }
+    })();
 
     return () => {
       active = false;
@@ -334,16 +442,44 @@ export default function AttachmentMediaDisplay({
   const [isDownloading, setIsDownloading] = useState(false);
   const downloadAbortRef = useRef<AbortController | null>(null);
   const safeMediaUrl = useMemo(() => getSafeMediaUrl(media_url), [media_url]);
-  const renderType = getAttachmentRenderType(media_mime_type, media_url);
-  const fileInfo = getFileInfoFromUrl(media_url);
-  const fallbackExtension = getFallbackExtension(renderType);
-  const fileName = resolveAttachmentFileName(fileInfo, fallbackExtension);
-  const label = getAttachmentLabel(renderType);
-  const canRender =
-    safeMediaUrl !== null && (renderType === "pdf" || renderType === "csv");
-  const canOpenInNewTab = safeMediaUrl !== null && renderType === "pdf";
-  const canDownload = safeMediaUrl !== null;
-  const Icon = renderType === "csv" ? TableCellsIcon : DocumentIcon;
+  const {
+    renderType,
+    fileName,
+    label,
+    canRender,
+    canOpenInNewTab,
+    canDownload,
+    Icon,
+  } = useMemo(() => {
+    const nextRenderType = getAttachmentRenderType(
+      media_mime_type,
+      media_url
+    );
+    const fileInfo = getFileInfoFromUrl(media_url);
+    const fallbackExtension = getFallbackExtension(nextRenderType);
+    const nextFileName = resolveAttachmentFileName(
+      fileInfo,
+      fallbackExtension
+    );
+    const nextLabel = getAttachmentLabel(nextRenderType);
+    const nextCanRender =
+      safeMediaUrl !== null &&
+      (nextRenderType === "pdf" || nextRenderType === "csv");
+    const nextCanOpenInNewTab =
+      safeMediaUrl !== null && nextRenderType === "pdf";
+    const nextCanDownload = safeMediaUrl !== null;
+    const NextIcon =
+      nextRenderType === "csv" ? TableCellsIcon : DocumentIcon;
+    return {
+      renderType: nextRenderType,
+      fileName: nextFileName,
+      label: nextLabel,
+      canRender: nextCanRender,
+      canOpenInNewTab: nextCanOpenInNewTab,
+      canDownload: nextCanDownload,
+      Icon: NextIcon,
+    };
+  }, [media_mime_type, media_url, safeMediaUrl]);
 
   useEffect(
     () => () => {

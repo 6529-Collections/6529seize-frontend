@@ -15,9 +15,9 @@ export const getFileExtension = (
   file: File,
   fallback: string = "Unknown"
 ): string => {
-  const extension = file.name.split(".").pop();
-  if (extension && extension !== file.name) {
-    return extension.toUpperCase();
+  const idx = file.name.lastIndexOf(".");
+  if (idx > 0 && idx < file.name.length - 1) {
+    return file.name.slice(idx + 1).toUpperCase();
   }
 
   const mimeSubtype = file.type.split("/")[1];

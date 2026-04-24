@@ -121,7 +121,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const galleryContainerRef = useRef<HTMLDivElement>(null);
-  const chatDropZoneRef = useRef<HTMLElement>(null);
   const dragCounterRef = useRef(0);
   const externalAttachmentDropTokenRef = useRef(0);
   const { connectedProfile, setToast } = useAuth();
@@ -325,13 +324,14 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onContainerDragLeave = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event)) {
+    if (
+      !isFileDragEvent(event) ||
+      !shouldHandleContainerFileDrop(event)
+    ) {
       return;
     }
-    if (shouldHandleContainerFileDrop(event)) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
+    event.preventDefault();
+    event.stopPropagation();
     dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
     if (dragCounterRef.current === 0) {
       setIsDragDropActive(false);
@@ -414,7 +414,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         waveId={wave.id}
       />
       <section
-        ref={chatDropZoneRef}
         className={`${containerClassName} tw-relative`}
         style={waveViewStyle}
         aria-label="Wave chat file upload area"

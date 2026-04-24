@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios, { CanceledError, isCancel } from "axios";
 import pLimit from "p-limit";
-import pRetry from "p-retry";
+import pRetry, { AbortError } from "p-retry";
 import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 import { commonApiPost } from "@/services/api/common-api";
 import {
@@ -85,6 +85,10 @@ export async function multipartUploadCore({
     const blobPart = file.slice(startByte, endByte);
 
     const uploadChunk = async () => {
+      if (signal?.aborted) {
+        throw new AbortError("Upload aborted");
+      }
+
       const previousProgress = partProgress.get(partNumber) ?? 0;
       if (previousProgress > 0 && onProgress) {
         // Remove any bytes counted from a failed prior attempt for this part
@@ -94,46 +98,60 @@ export async function multipartUploadCore({
       let lastChunkLoaded = 0;
       partProgress.set(partNumber, 0);
 
-      const partResp = await commonApiPost<
-        ApiUploadPartOfMultipartUploadRequest,
-        ApiUploadPartOfMultipartUploadResponse
-      >({
-        endpoint: endpoints.part,
-        body: {
-          upload_id,
-          key,
-          part_no: partNumber,
-        },
-        ...(signal ? { signal } : {}),
-      });
+      try {
+        const partResp = await commonApiPost<
+          ApiUploadPartOfMultipartUploadRequest,
+          ApiUploadPartOfMultipartUploadResponse
+        >({
+          endpoint: endpoints.part,
+          body: {
+            upload_id,
+            key,
+            part_no: partNumber,
+          },
+          ...(signal ? { signal } : {}),
+        });
 
-      const { upload_url } = partResp;
-      if (!upload_url) {
-        throw new Error("No upload_url returned for part " + partNumber);
+        const { upload_url } = partResp;
+        if (!upload_url) {
+          throw new Error("No upload_url returned for part " + partNumber);
+        }
+
+        const s3Resp = await axios.put(upload_url, blobPart, {
+          headers: {
+            "Content-Type": contentType,
+          },
+          ...(signal ? { signal } : {}),
+          onUploadProgress: (event) => {
+            if (event.loaded !== undefined && onProgress) {
+              const chunkDelta = Math.max(event.loaded - lastChunkLoaded, 0);
+              lastChunkLoaded = event.loaded;
+              partProgress.set(partNumber, event.loaded);
+              onProgress(chunkDelta);
+            }
+          },
+        });
+
+        const eTagHeader = s3Resp.headers["etag"];
+        const eTag = eTagHeader ? eTagHeader.replaceAll('"', "") : "";
+        if (!eTag) {
+          throw new Error(`No ETag returned for part ${partNumber}`);
+        }
+
+        return { eTag, partNumber };
+      } catch (error: unknown) {
+        if (
+          signal?.aborted ||
+          isCancel(error) ||
+          error instanceof CanceledError ||
+          (error instanceof DOMException && error.name === "AbortError")
+        ) {
+          throw new AbortError(
+            error instanceof Error ? error : new Error(String(error))
+          );
+        }
+        throw error;
       }
-
-      const s3Resp = await axios.put(upload_url, blobPart, {
-        headers: {
-          "Content-Type": contentType,
-        },
-        ...(signal ? { signal } : {}),
-        onUploadProgress: (event) => {
-          if (event.loaded !== undefined && onProgress) {
-            const chunkDelta = Math.max(event.loaded - lastChunkLoaded, 0);
-            lastChunkLoaded = event.loaded;
-            partProgress.set(partNumber, event.loaded);
-            onProgress(chunkDelta);
-          }
-        },
-      });
-
-      const eTagHeader = s3Resp.headers["etag"];
-      const eTag = eTagHeader ? eTagHeader.replaceAll('"', "") : "";
-      if (!eTag) {
-        throw new Error(`No ETag returned for part ${partNumber}`);
-      }
-
-      return { eTag, partNumber };
     };
 
     const chunkPromise = limit(() =>
