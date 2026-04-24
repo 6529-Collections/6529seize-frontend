@@ -9,7 +9,7 @@ const API_MEDIA_UPLOAD_MIME_TYPES = new Set<string>(
   Object.values(ApiMediaUploadMimeType).map((value) => normalizeMimeType(value))
 );
 
-export const API_MEDIA_UPLOAD_MIME_TYPE_VALUES = Object.values(
+const API_MEDIA_UPLOAD_MIME_TYPE_VALUES = Object.values(
   ApiMediaUploadMimeType
 );
 
