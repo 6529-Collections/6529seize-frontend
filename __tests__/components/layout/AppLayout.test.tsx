@@ -4,11 +4,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 
-const useViewContext = jest.fn();
 const registerRef = jest.fn();
 const setHeaderRef = jest.fn();
 const usePathname = jest.fn();
-const useSearchParams = jest.fn();
+const getSearchParams = jest.fn();
 let mockDialogMountCount = 0;
 
 jest.mock("next/dynamic", () => () => {
@@ -16,9 +15,6 @@ jest.mock("next/dynamic", () => () => {
   MockDynamicComponent.displayName = "MockDynamicComponent";
   return MockDynamicComponent;
 });
-jest.mock("@/components/navigation/ViewContext", () => ({
-  useViewContext: () => useViewContext(),
-}));
 jest.mock(
   "@/components/navigation/BottomNavigation",
   () =>
@@ -61,7 +57,7 @@ jest.mock("@/hooks/useDeepLinkNavigation", () => ({
 }));
 jest.mock("next/navigation", () => ({
   usePathname: () => usePathname(),
-  useSearchParams: () => useSearchParams(),
+  useSearchParams: () => getSearchParams(),
 }));
 jest.mock("@/components/providers/PullToRefresh", () => ({
   __esModule: true,
@@ -137,7 +133,7 @@ describe("AppLayout", () => {
       reducer: { edit: editSlice.reducer },
     });
     usePathname.mockReturnValue("/");
-    useSearchParams.mockReturnValue({ get: () => null } as any);
+    getSearchParams.mockReturnValue(new URLSearchParams());
     mockDialogMountCount = 0;
   });
 
@@ -146,19 +142,18 @@ describe("AppLayout", () => {
   };
 
   it("renders main content when no active view", () => {
-    useViewContext.mockReturnValue({ activeView: null });
     renderWithProvider(<AppLayout>child</AppLayout>);
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.getByText("child")).toBeInTheDocument();
     expect(screen.getByTestId("bottom-nav")).toBeInTheDocument();
   });
 
-  it("renders waves or messages view based on activeView", () => {
-    useViewContext.mockReturnValue({ activeView: "waves" });
+  it("renders waves or messages view based on the view query param", () => {
+    getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
     const { rerender } = renderWithProvider(<AppLayout>child</AppLayout>);
     expect(screen.getByTestId("waves")).toBeInTheDocument();
 
-    useViewContext.mockReturnValue({ activeView: "messages" });
+    getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
     rerender(
       <Provider store={store}>
         <AppLayout>child</AppLayout>
@@ -168,7 +163,7 @@ describe("AppLayout", () => {
   });
 
   it("owns a persistent quick-vote dialog for the waves view", () => {
-    useViewContext.mockReturnValue({ activeView: "waves" });
+    getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
 
     renderWithProvider(<AppLayout>child</AppLayout>);
 
@@ -190,7 +185,7 @@ describe("AppLayout", () => {
   });
 
   it("closes the quick-vote dialog when leaving the waves view", () => {
-    useViewContext.mockReturnValue({ activeView: "waves" });
+    getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
 
     const { rerender } = renderWithProvider(<AppLayout>child</AppLayout>);
 
@@ -199,7 +194,7 @@ describe("AppLayout", () => {
     );
     expect(screen.getByText("Session 1")).toBeInTheDocument();
 
-    useViewContext.mockReturnValue({ activeView: "messages" });
+    getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
     rerender(
       <Provider store={store}>
         <AppLayout>child</AppLayout>
@@ -209,7 +204,7 @@ describe("AppLayout", () => {
     expect(screen.getByTestId("messages")).toBeInTheDocument();
     expect(screen.queryByTestId("quick-vote-dialog")).not.toBeInTheDocument();
 
-    useViewContext.mockReturnValue({ activeView: "waves" });
+    getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
     rerender(
       <Provider store={store}>
         <AppLayout>child</AppLayout>

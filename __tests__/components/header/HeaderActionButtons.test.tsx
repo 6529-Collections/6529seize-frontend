@@ -2,9 +2,6 @@ import HeaderActionButtons from "@/components/header/HeaderActionButtons";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-jest.mock("@/components/navigation/ViewContext", () => ({
-  useViewContext: jest.fn(),
-}));
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(() => "/waves"),
@@ -15,9 +12,6 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: jest.fn(() => ({ isApp: false })),
 }));
 
-const {
-  useViewContext: useCtx,
-} = require("@/components/navigation/ViewContext");
 const {
   useRouter: useRt,
   usePathname: usePn,
@@ -34,8 +28,7 @@ describe("HeaderActionButtons", () => {
     (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
   });
 
-  it("creates new wave when active view is waves", async () => {
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "waves" });
+  it("creates new wave on the waves route", async () => {
     const push = jest.fn();
     const replace = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace });
@@ -46,9 +39,8 @@ describe("HeaderActionButtons", () => {
     });
   });
 
-  it("creates new wave on app when active view is waves", async () => {
+  it("creates new wave on app when on waves route", async () => {
     (useDeviceInfo as jest.Mock).mockReturnValueOnce({ isApp: true });
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "waves" });
     const push = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
     render(<HeaderActionButtons />);
@@ -56,9 +48,8 @@ describe("HeaderActionButtons", () => {
     expect(push).toHaveBeenCalledWith("/waves/create");
   });
 
-  it("creates new dm when active view is messages", async () => {
+  it("creates new dm on the messages route", async () => {
     (usePn as jest.Mock).mockReturnValue("/messages");
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "messages" });
     const push = jest.fn();
     const replace = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace });
@@ -69,10 +60,9 @@ describe("HeaderActionButtons", () => {
     });
   });
 
-  it("creates new dm on app when active view is messages", async () => {
+  it("creates new dm on app when on messages route", async () => {
     (useDeviceInfo as jest.Mock).mockReturnValueOnce({ isApp: true });
     (usePn as jest.Mock).mockReturnValue("/messages");
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "messages" });
     const push = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
     render(<HeaderActionButtons />);
@@ -82,7 +72,6 @@ describe("HeaderActionButtons", () => {
 
   it("does not render create wave button on waves create route", () => {
     (usePn as jest.Mock).mockReturnValue("/waves/create");
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "waves" });
     (useRt as jest.Mock).mockReturnValue({
       push: jest.fn(),
       replace: jest.fn(),
@@ -95,7 +84,6 @@ describe("HeaderActionButtons", () => {
 
   it("renders nothing for other views", () => {
     (usePn as jest.Mock).mockReturnValue("/other");
-    (useCtx as jest.Mock).mockReturnValue({ activeView: "other" });
     (useRt as jest.Mock).mockReturnValue({
       push: jest.fn(),
       replace: jest.fn(),
