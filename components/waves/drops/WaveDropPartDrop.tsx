@@ -36,6 +36,10 @@ interface WaveDropPartDropProps {
     | ((href: string, active: boolean) => void)
     | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
@@ -56,6 +60,10 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   fullWidthMedia = false,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
   const showStandaloneTitle = contentPresentation !== "quorumCompact";
 
@@ -87,6 +95,10 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
             fullWidthMedia={fullWidthMedia}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
             contentPresentation={contentPresentation}
+            embedPath={embedPath}
+            quotePath={quotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
           />
         </div>
       </div>

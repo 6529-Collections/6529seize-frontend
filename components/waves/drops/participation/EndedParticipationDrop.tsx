@@ -43,6 +43,10 @@ interface EndedParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 export default function EndedParticipationDrop({
@@ -57,6 +61,10 @@ export default function EndedParticipationDrop({
   identityMode = "default",
   showInteractions = true,
   contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }: EndedParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
@@ -218,6 +226,10 @@ export default function EndedParticipationDrop({
               isCompetitionDrop={true}
               hasTouch={hasTouch}
               contentPresentation={contentPresentation}
+              embedPath={embedPath}
+              quotePath={quotePath}
+              embedDepth={embedDepth}
+              maxEmbedDepth={maxEmbedDepth}
             />
           </div>
         </div>

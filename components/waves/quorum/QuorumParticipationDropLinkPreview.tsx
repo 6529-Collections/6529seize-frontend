@@ -148,6 +148,10 @@ export default function QuorumParticipationDropLinkPreview({
           onQuoteClick={onQuoteClick}
           onDropContentClick={handleDropContentClick}
           showInteractions={false}
+          embedPath={embedPath}
+          quotePath={quotePath}
+          embedDepth={embedDepth}
+          maxEmbedDepth={maxEmbedDepth}
         />
       ) : (
         <WaveDropQuote
