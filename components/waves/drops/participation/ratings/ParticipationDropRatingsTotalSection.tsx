@@ -11,16 +11,26 @@ import {
 
 interface ParticipationDropRatingsTotalSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 export default function ParticipationDropRatingsTotalSection({
   drop,
   ratingsData,
+  winningThreshold,
 }: ParticipationDropRatingsTotalSectionProps) {
   const { currentRating } = ratingsData;
   const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const totalValueClass =
     currentRating < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
+  const displayWinningThreshold =
+    typeof winningThreshold === "number" && winningThreshold > 0
+      ? winningThreshold
+      : null;
+  const hasWinningThreshold = displayWinningThreshold !== null;
+  const hasReachedThreshold =
+    displayWinningThreshold !== null &&
+    currentRating >= displayWinningThreshold;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5">
@@ -29,6 +39,14 @@ export default function ParticipationDropRatingsTotalSection({
           {currentRating < 0 && "-"}
           {formatNumberWithCommas(Math.abs(currentRating))}
         </span>
+        {displayWinningThreshold !== null && (
+          <>
+            <span className="tw-font-medium tw-text-iron-500">/</span>
+            <span className="tw-font-medium tw-text-iron-50">
+              {formatNumberWithCommas(displayWinningThreshold)}
+            </span>
+          </>
+        )}
         <DropVoteProgressing
           current={currentRating}
           projected={drop.rating_prediction}
@@ -39,7 +57,22 @@ export default function ParticipationDropRatingsTotalSection({
         className="tw-cursor-help tw-whitespace-nowrap tw-font-normal tw-text-iron-400"
         data-tooltip-id={`total-rating-${drop.id}`}
       >
-        {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}
+        {hasWinningThreshold ? (
+          <>
+            {votingLabel}{" "}
+            <span
+              className={
+                hasReachedThreshold ? "tw-text-emerald-400" : undefined
+              }
+            >
+              {hasReachedThreshold ? "Approved" : "to approve"}
+            </span>
+          </>
+        ) : (
+          <>
+            {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}
+          </>
+        )}
       </span>
       <Tooltip
         id={`total-rating-${drop.id}`}

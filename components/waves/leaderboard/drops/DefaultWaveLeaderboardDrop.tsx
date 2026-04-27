@@ -25,11 +25,12 @@ import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
-> = ({ drop, onDropClick }) => {
+> = ({ drop, onDropClick, winningThreshold }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { hasTouchScreen } = useDeviceInfo();
@@ -78,7 +79,10 @@ export const DefaultWaveLeaderboardDrop: React.FC<
             <WaveLeaderboardDropContent drop={drop} isCompetitionDrop={true} />
             <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-                <WaveLeaderboardDropRaters drop={drop} />
+                <WaveLeaderboardDropRaters
+                  drop={drop}
+                  winningThreshold={winningThreshold}
+                />
                 <WaveLeaderboardDropFooter drop={drop} />
               </div>
               <div

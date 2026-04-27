@@ -8,11 +8,13 @@ import ParticipationDropRatingsUserSection from "./ParticipationDropRatingsUserS
 interface ParticipationDropRatingsContainerProps {
   readonly drop: ApiDrop;
   readonly rank?: number | null | undefined;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 export default function ParticipationDropRatingsContainer({
   drop,
   rank = null,
+  winningThreshold,
 }: ParticipationDropRatingsContainerProps) {
   const ratingsData: RatingsData = {
     hasRaters: drop.top_raters.length > 0,
@@ -30,6 +32,7 @@ export default function ParticipationDropRatingsContainer({
           rank={rank}
           theme={theme}
           ratingsData={ratingsData}
+          winningThreshold={winningThreshold}
         />
 
         <ParticipationDropRatingsVoterSection

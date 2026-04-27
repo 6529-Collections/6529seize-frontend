@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import MyStreamWaveSubmissions from "@/components/brain/my-stream/MyStreamWaveSubmissions";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
@@ -32,7 +33,11 @@ jest.mock("next/navigation", () => ({
 jest.mock("@/components/waves/drops/participation/ParticipationDrop", () => ({
   __esModule: true,
   default: (props: any) => (
-    <button data-testid="drop" onClick={() => props.onQuoteClick(props.drop)}>
+    <button
+      data-testid="drop"
+      data-winning-threshold={props.winningThreshold ?? ""}
+      onClick={() => props.onQuoteClick(props.drop)}
+    >
       {props.drop.id}
     </button>
   ),
@@ -117,6 +122,31 @@ describe("MyStreamWaveSubmissions", () => {
     expect(push).toHaveBeenCalledWith("/waves?wave=wave-1&drop=drop-1", {
       scroll: false,
     });
+  });
+
+  it("passes approve threshold to participation drops", () => {
+    const approveWave = {
+      id: "1",
+      wave: { type: ApiWaveType.Approve, winning_threshold: 7 },
+    } as any;
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [{ id: "drop-1" }],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      refetch: jest.fn(),
+    });
+
+    render(
+      <MyStreamWaveSubmissions wave={approveWave} onDropClick={jest.fn()} />
+    );
+
+    expect(screen.getByTestId("drop")).toHaveAttribute(
+      "data-winning-threshold",
+      "7"
+    );
   });
 
   it("shows a retryable error state instead of the empty state", () => {

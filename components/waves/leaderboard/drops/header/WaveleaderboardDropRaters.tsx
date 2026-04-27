@@ -14,17 +14,25 @@ import {
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 export const WaveLeaderboardDropRaters: React.FC<
   WaveLeaderboardDropRatersProps
-> = ({ drop }) => {
+> = ({ drop, winningThreshold }) => {
   const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
   const totalVote = drop.rating;
   const userVote = drop.context_profile_context?.rating ?? 0;
   const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const totalVoteClass = totalVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
   const userVoteClass = userVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
+  const displayWinningThreshold =
+    typeof winningThreshold === "number" && winningThreshold > 0
+      ? winningThreshold
+      : null;
+  const hasWinningThreshold = displayWinningThreshold !== null;
+  const hasReachedThreshold =
+    displayWinningThreshold !== null && totalVote >= displayWinningThreshold;
 
   const hasUserVoted = userVote !== 0;
 
@@ -35,6 +43,14 @@ export const WaveLeaderboardDropRaters: React.FC<
           <span className={`tw-font-medium ${totalVoteClass}`}>
             {formatNumberWithCommas(totalVote)}
           </span>
+          {displayWinningThreshold !== null && (
+            <>
+              <span className="tw-font-medium tw-text-iron-500">/</span>
+              <span className="tw-font-medium tw-text-iron-50">
+                {formatNumberWithCommas(displayWinningThreshold)}
+              </span>
+            </>
+          )}
           <DropVoteProgressing
             current={drop.rating}
             projected={drop.rating_prediction}
@@ -42,7 +58,22 @@ export const WaveLeaderboardDropRaters: React.FC<
           />
         </div>
         <span className="tw-whitespace-nowrap tw-font-normal tw-text-iron-400">
-          {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}
+          {hasWinningThreshold ? (
+            <>
+              {votingLabel}{" "}
+              <span
+                className={
+                  hasReachedThreshold ? "tw-text-emerald-400" : undefined
+                }
+              >
+                {hasReachedThreshold ? "Approved" : "to approve"}
+              </span>
+            </>
+          ) : (
+            <>
+              {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}
+            </>
+          )}
         </span>
       </div>
 

@@ -1,6 +1,7 @@
 import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ObjectSerializer";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { MemesLeaderboardDrop } from "@/components/memes/drops/MemesLeaderboardDrop";
 import { useWave } from "@/hooks/useWave";
 import { DefaultWaveLeaderboardDrop } from "./DefaultWaveLeaderboardDrop";
@@ -19,6 +20,9 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   onSourceDropDeleted,
 }) => {
   const { isMemesWave } = useWave(wave);
+  const winningThreshold =
+    wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
+
   if (isMemesWave) {
     return (
       <MemesLeaderboardDrop
@@ -29,5 +33,11 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       />
     );
   }
-  return <DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />;
+  return (
+    <DefaultWaveLeaderboardDrop
+      drop={drop}
+      onDropClick={onDropClick}
+      winningThreshold={winningThreshold}
+    />
+  );
 };

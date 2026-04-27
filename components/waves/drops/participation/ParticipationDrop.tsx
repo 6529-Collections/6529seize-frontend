@@ -23,6 +23,7 @@ interface ParticipationDropProps {
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 export default function ParticipationDrop(props: ParticipationDropProps) {

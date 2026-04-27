@@ -11,22 +11,28 @@ interface ParticipationDropFooterProps {
   readonly drop: ExtendedDrop;
   readonly voteAction?: ReactNode;
   readonly showInteractions?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 export default function ParticipationDropFooter({
   drop,
   voteAction,
   showInteractions = true,
+  winningThreshold,
 }: ParticipationDropFooterProps) {
   const { canShowVote } = useDropInteractionRules(drop);
   const canShowCuration = drop.context_profile_context?.curatable ?? false;
   const hasRatings = drop.raters_count > 0;
+  const hasWinningThreshold =
+    typeof winningThreshold === "number" && winningThreshold > 0;
+  const shouldShowRatings = hasRatings || hasWinningThreshold;
   const hasReactions = drop.reactions.length > 0;
   const normalizedVoteAction = Children.toArray(voteAction);
   const hasVoteAction = normalizedVoteAction.length > 0;
   const hasPrimaryActions = canShowCuration || hasVoteAction;
-  const shouldShowVoteFooter = canShowVote && (hasRatings || hasPrimaryActions);
-  const shouldShowRatingsOnlyFooter = !canShowVote && hasRatings;
+  const shouldShowVoteFooter =
+    canShowVote && (shouldShowRatings || hasPrimaryActions);
+  const shouldShowRatingsOnlyFooter = !canShowVote && shouldShowRatings;
   const shouldShowReactionsFooter =
     hasReactions || (!canShowVote && canShowCuration);
 
@@ -42,9 +48,13 @@ export default function ParticipationDropFooter({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-justify-between">
-            {hasRatings && (
+            {shouldShowRatings && (
               <div className="tw-px-4">
-                <ParticipationDropRatings drop={drop} rank={drop.rank} />
+                <ParticipationDropRatings
+                  drop={drop}
+                  rank={drop.rank}
+                  winningThreshold={winningThreshold}
+                />
               </div>
             )}
 
@@ -66,7 +76,11 @@ export default function ParticipationDropFooter({
       {/* Show ratings if no vote button */}
       {shouldShowRatingsOnlyFooter && (
         <div className="tw-ml-[3.25rem] tw-mt-4 tw-px-4">
-          <ParticipationDropRatings drop={drop} rank={drop.rank} />
+          <ParticipationDropRatings
+            drop={drop}
+            rank={drop.rank}
+            winningThreshold={winningThreshold}
+          />
         </div>
       )}
 

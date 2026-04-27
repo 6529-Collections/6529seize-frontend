@@ -42,6 +42,7 @@ interface OngoingParticipationDropProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 export default function OngoingParticipationDrop({
@@ -55,6 +56,7 @@ export default function OngoingParticipationDrop({
   onDropContentClick,
   identityMode = "default",
   showInteractions = true,
+  winningThreshold,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const { canShowVote } = useDropInteractionRules(drop);
@@ -163,6 +165,7 @@ export default function OngoingParticipationDrop({
           drop={drop}
           voteAction={voteAction}
           showInteractions={showInteractions}
+          winningThreshold={winningThreshold}
         />
       </div>
 

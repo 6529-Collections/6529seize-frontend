@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useLayout } from "./layout/LayoutContext";
 import {
@@ -32,6 +33,8 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
   const { leaderboardViewStyle } = useLayout();
+  const winningThreshold =
+    wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
   const {
     drops,
     fetchNextPage,
@@ -132,6 +135,7 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
             onReply={handleReply}
             onQuoteClick={handleQuoteClick}
             onDropContentClick={onDropClick}
+            winningThreshold={winningThreshold}
           />
         ))}
         {isFetchingNextPage && <WaveLeaderboardLoadingBar />}

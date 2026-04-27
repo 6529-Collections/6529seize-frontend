@@ -1,12 +1,18 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { WaveLeaderboardDrop } from "@/components/waves/leaderboard/drops/WaveLeaderboardDrop";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock(
   "@/components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop",
   () => ({
     DefaultWaveLeaderboardDrop: (p: any) => (
-      <div data-testid="default">{p.drop.id}</div>
+      <div
+        data-testid="default"
+        data-winning-threshold={p.winningThreshold ?? ""}
+      >
+        {p.drop.id}
+      </div>
     ),
   })
 );
@@ -54,5 +60,26 @@ describe("WaveLeaderboardDrop", () => {
       <WaveLeaderboardDrop drop={drop} wave={wave} onDropClick={jest.fn()} />
     );
     expect(screen.getByTestId("default")).toHaveTextContent("d");
+  });
+
+  it("passes approve threshold to default drops", () => {
+    const approveWave = {
+      id: "w",
+      wave: { type: ApiWaveType.Approve, winning_threshold: 7 },
+    } as any;
+    useWave.mockReturnValue({ isMemesWave: false });
+
+    render(
+      <WaveLeaderboardDrop
+        drop={drop}
+        wave={approveWave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("default")).toHaveAttribute(
+      "data-winning-threshold",
+      "7"
+    );
   });
 });
