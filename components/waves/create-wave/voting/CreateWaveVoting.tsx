@@ -92,9 +92,19 @@ export default function CreateWaveVoting({
               type={votingType}
               selected={selectedType}
               disabled={false}
-              label={`By ${WAVE_VOTING_LABELS[votingType]}`}
+              variant="subtle"
               onChange={onTypeChange}
-            />
+            >
+              <span
+                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                  selectedType === votingType
+                    ? "tw-text-white"
+                    : "tw-text-iron-300 group-hover:tw-text-white"
+                }`}
+              >
+                {`By ${WAVE_VOTING_LABELS[votingType]}`}
+              </span>
+            </CommonBorderedRadioButton>
           ))}
         {selectedType === ApiWaveCreditType.Rep && (
           <div className="tw-col-span-full">

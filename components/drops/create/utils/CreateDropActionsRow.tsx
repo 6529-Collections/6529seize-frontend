@@ -102,7 +102,7 @@ export default function CreateDropActionsRow({
               strokeLinejoin="round"
             />
           </svg>
-          <span className="tw-ml-2 tw-text-sm tw-font-medium">
+          <span className="tw-ml-2 tw-whitespace-nowrap tw-text-sm tw-font-medium">
             {isStormMode ? "Continue storm" : "Break into storm"}
           </span>
         </button>
