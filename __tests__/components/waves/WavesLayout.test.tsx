@@ -30,14 +30,19 @@ jest.mock("../../../helpers/navigation.helpers", () => ({
 jest.mock("@/components/waves/WavesDesktop", () => ({
   __esModule: true,
   default: ({
+    allowMainContentWithoutWave,
     children,
     showLeftSidebar,
   }: {
+    readonly allowMainContentWithoutWave?: boolean;
     readonly children: React.ReactNode;
     readonly showLeftSidebar?: boolean;
   }) => (
     <div
       data-testid="waves-desktop"
+      data-allow-main-content-without-wave={String(
+        allowMainContentWithoutWave
+      )}
       data-show-left-sidebar={String(showLeftSidebar)}
     >
       {children}
@@ -57,35 +62,9 @@ jest.mock("@/components/common/ConnectWallet", () => ({
   default: () => <div data-testid="connect-wallet">Connect Wallet</div>,
 }));
 
-jest.mock("@/components/header/user/HeaderUserConnect", () => ({
-  __esModule: true,
-  default: ({ label }: { readonly label?: string }) => (
-    <button type="button">{label ?? "Connect Wallet"}</button>
-  ),
-}));
-
 jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
   __esModule: true,
   default: () => <div data-testid="setup-profile">Set up profile</div>,
-}));
-
-jest.mock("@/components/waves/WaveScreenMessage", () => ({
-  __esModule: true,
-  default: ({
-    action,
-    description,
-    title,
-  }: {
-    readonly action?: React.ReactNode;
-    readonly description?: string;
-    readonly title: string;
-  }) => (
-    <div data-testid="wave-screen-message">
-      <h1>{title}</h1>
-      {description ? <p>{description}</p> : null}
-      {action}
-    </div>
-  ),
 }));
 
 describe("WavesLayout", () => {
@@ -110,32 +89,27 @@ describe("WavesLayout", () => {
 
     expect(screen.getByTestId("wave-content")).toBeInTheDocument();
     expect(screen.getByTestId("waves-desktop")).toHaveAttribute(
-      "data-allow-drop-overlay",
+      "data-allow-main-content-without-wave",
       "false"
     );
     expect(screen.getByTestId("waves-desktop")).toHaveAttribute(
-      "data-allow-right-sidebar",
-      "false"
+      "data-show-left-sidebar",
+      "true"
     );
-    expect(screen.queryByTestId("wave-screen-message")).not.toBeInTheDocument();
   });
 
-  it("keeps the select-wave prompt when no wave is selected", () => {
+  it("renders the default waves content for logged-out web users when no wave is selected", () => {
     render(
       <WavesLayout>
         <div data-testid="wave-content">Real wave content</div>
       </WavesLayout>
     );
 
-    expect(screen.getByText("Select a Wave")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Connect your wallet to access waves and join the conversation."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Connect Wallet" })
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
+    expect(screen.getByTestId("wave-content")).toBeInTheDocument();
+    expect(screen.getByTestId("waves-desktop")).toHaveAttribute(
+      "data-allow-main-content-without-wave",
+      "true"
+    );
+    expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 });

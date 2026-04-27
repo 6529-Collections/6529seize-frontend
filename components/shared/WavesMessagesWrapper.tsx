@@ -30,12 +30,14 @@ interface WavesMessagesWrapperProps {
   readonly children: ReactNode;
   readonly defaultPath?: string | undefined; // "/waves" or "/messages"
   readonly showLeftSidebar?: boolean | undefined;
+  readonly allowMainContentWithoutWave?: boolean | undefined;
 }
 
 const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   children,
   defaultPath = "/waves",
   showLeftSidebar = true,
+  allowMainContentWithoutWave = false,
 }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -110,8 +112,11 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   );
 
   // Clear logic for when to show each part
-  const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
-  const shouldShowMainContent = !isMobile || waveId !== undefined;
+  const hasWave = waveId !== undefined;
+  const canShowMainContent = !isMobile || hasWave || allowMainContentWithoutWave;
+  const shouldShowLeftSidebar =
+    showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
+  const shouldShowMainContent = canShowMainContent;
   const shouldShowDropOverlay =
     isDropOpen && drop !== undefined && shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(

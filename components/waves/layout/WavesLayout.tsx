@@ -6,11 +6,9 @@ import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import ConnectWallet from "../../common/ConnectWallet";
-import HeaderUserConnect from "../../header/user/HeaderUserConnect";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesDesktop from "../WavesDesktop";
 import WavesMobile from "../WavesMobile";
-import WaveScreenMessage from "../WaveScreenMessage";
 
 function getConnectPrompt(
   contentState: ReturnType<typeof useAuthenticatedContent>["contentState"]
@@ -45,32 +43,23 @@ function getNotAuthenticatedContent({
   children,
   containerClassName,
   isApp,
-  isMobileDevice,
 }: {
   readonly activeWaveId: string | null;
   readonly children: ReactNode;
   readonly containerClassName: string;
   readonly isApp: boolean;
-  readonly isMobileDevice: boolean;
 }): ReactNode {
-  if (isApp || (isMobileDevice && activeWaveId === null)) {
+  if (isApp) {
     return <ConnectWallet />;
   }
 
   return (
     <div className="tw-flex-1" id="waves-content">
-      <WavesDesktop showLeftSidebar={true}>
-        <div className={containerClassName}>
-          {activeWaveId === null ? (
-            <WaveScreenMessage
-              title="Select a Wave"
-              description="Connect your wallet to access waves and join the conversation."
-              action={<HeaderUserConnect label="Connect Wallet" />}
-            />
-          ) : (
-            children
-          )}
-        </div>
+      <WavesDesktop
+        showLeftSidebar={true}
+        allowMainContentWithoutWave={activeWaveId === null}
+      >
+        <div className={containerClassName}>{children}</div>
       </WavesDesktop>
     </div>
   );
@@ -79,7 +68,7 @@ function getNotAuthenticatedContent({
 // Main layout content that uses the Layout context
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
-  const { isApp, isMobileDevice } = useDeviceInfo();
+  const { isApp } = useDeviceInfo();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
@@ -105,7 +94,6 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
       children,
       containerClassName,
       isApp,
-      isMobileDevice,
     });
   } else {
     content =
