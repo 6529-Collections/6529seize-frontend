@@ -26,12 +26,14 @@ interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
-> = ({ drop, onDropClick, winningThreshold }) => {
+> = ({ drop, onDropClick, winningThreshold, isVotingClosed = false }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
+  const canShowVotingAction = canShowVote && !isVotingClosed;
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
@@ -66,7 +68,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-              <WaveLeaderboardDropHeader drop={drop} showAvatar={false} />
+              <WaveLeaderboardDropHeader
+                drop={drop}
+                showAvatar={false}
+                winningThreshold={winningThreshold}
+              />
               <div className="tw-flex tw-items-center">
                 <div className="tw-hidden tw-h-8 lg:tw-block">
                   <WaveDropActionsOpen drop={drop} />
@@ -82,6 +88,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 <WaveLeaderboardDropRaters
                   drop={drop}
                   winningThreshold={winningThreshold}
+                  isVotingClosed={isVotingClosed}
                 />
                 <WaveLeaderboardDropFooter drop={drop} />
               </div>
@@ -95,7 +102,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                   isCuratable={drop.context_profile_context?.curatable ?? false}
                   isCurated={drop.context_profile_context?.curated ?? false}
                 />
-                {canShowVote && (
+                {canShowVotingAction && (
                   <VotingModalButton
                     drop={drop}
                     onClick={() => setIsVotingModalOpen(true)}

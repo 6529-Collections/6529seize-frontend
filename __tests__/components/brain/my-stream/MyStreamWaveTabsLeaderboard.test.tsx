@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import MyStreamWaveTabsLeaderboard from "@/components/brain/my-stream/MyStreamWaveTabsLeaderboard";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock("@/hooks/useWaveTimers", () => ({
   useWaveTimers: () => ({
@@ -17,13 +18,14 @@ let mockFirstDecision = false;
 function renderComponent(view: BrainView = BrainView.DEFAULT, props: any = {}) {
   const onViewChange = jest.fn();
   const registerTabRef = jest.fn();
+  const { wave = { wave: { type: ApiWaveType.Rank } }, ...restProps } = props;
   render(
     <MyStreamWaveTabsLeaderboard
-      wave={{} as any}
+      wave={wave as any}
       activeView={view}
       onViewChange={onViewChange}
       registerTabRef={registerTabRef}
-      {...props}
+      {...restProps}
     />
   );
   return { onViewChange, registerTabRef };
@@ -84,5 +86,28 @@ describe("MyStreamWaveTabsLeaderboard", () => {
 
     await userEvent.click(button);
     expect(onViewChange).toHaveBeenCalledWith(BrainView.SUBMISSIONS);
+  });
+
+  it("uses approval labels for approve waves", async () => {
+    mockCompleted = true;
+    const { onViewChange, registerTabRef } = renderComponent(
+      BrainView.DEFAULT,
+      { wave: { wave: { type: ApiWaveType.Approve } } }
+    );
+
+    const approvalsButton = screen.getByText("Approvals");
+    const approvedButton = screen.getByText("Approved");
+
+    expect(registerTabRef).toHaveBeenCalledWith(
+      BrainView.LEADERBOARD,
+      expect.any(HTMLButtonElement)
+    );
+    expect(screen.queryByText("Submissions")).toBeNull();
+
+    await userEvent.click(approvalsButton);
+    expect(onViewChange).toHaveBeenCalledWith(BrainView.LEADERBOARD);
+
+    await userEvent.click(approvedButton);
+    expect(onViewChange).toHaveBeenCalledWith(BrainView.WINNERS);
   });
 });

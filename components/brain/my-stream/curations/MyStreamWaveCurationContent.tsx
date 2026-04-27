@@ -15,6 +15,12 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useWaveDrops } from "@/hooks/useWaveDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { Time } from "@/helpers/time";
+import {
+  getApprovalWaveCloseStatus,
+  getApprovedDropsCount,
+  isApproveWave,
+} from "@/helpers/waves/approve-wave.helpers";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, type ReactNode } from "react";
 import { useLayout } from "../layout/LayoutContext";
@@ -34,6 +40,8 @@ function MyStreamWaveCurationDropItem({
   curationId,
   canManageActiveCuration,
   onDropClick,
+  winningThreshold,
+  isVotingClosed,
 }: {
   readonly drop: ExtendedDrop;
   readonly previousDrop: ExtendedDrop | null;
@@ -41,6 +49,8 @@ function MyStreamWaveCurationDropItem({
   readonly curationId: string;
   readonly canManageActiveCuration: boolean;
   readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }) {
   const { hasTouchScreen, isApp } = useDeviceInfo();
   const isTouchDevice = useIsTouchDevice();
@@ -95,6 +105,8 @@ function MyStreamWaveCurationDropItem({
         onReplyClick={() => {}}
         onQuoteClick={() => {}}
         onDropContentClick={onDropClick}
+        winningThreshold={winningThreshold}
+        isVotingClosed={isVotingClosed}
       />
 
       {canManageActiveCuration && !shouldUseDetachedRemoveButton && (
@@ -148,6 +160,16 @@ export default function MyStreamWaveCurationContent({
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
+  const approveWave = isApproveWave(wave);
+  const winningThreshold = approveWave ? wave.wave.winning_threshold : null;
+  const approvalCloseStatus = approveWave
+    ? getApprovalWaveCloseStatus({
+        approvedCount: getApprovedDropsCount({ wave }),
+        now: Time.currentMillis(),
+        wave,
+      })
+    : null;
+  const isVotingClosed = approvalCloseStatus !== null;
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
@@ -173,9 +195,18 @@ export default function MyStreamWaveCurationContent({
           curationId={curationId}
           canManageActiveCuration={canManageActiveCuration}
           onDropClick={onDropClick}
+          winningThreshold={winningThreshold}
+          isVotingClosed={isVotingClosed}
         />
       )),
-    [canManageActiveCuration, curationId, drops, onDropClick]
+    [
+      canManageActiveCuration,
+      curationId,
+      drops,
+      isVotingClosed,
+      onDropClick,
+      winningThreshold,
+    ]
   );
 
   let content: ReactNode;

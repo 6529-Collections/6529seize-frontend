@@ -94,7 +94,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [registerRef]
   );
 
-  const { isMemesWave, isCurationWave, isRankWave } = useWave(wave);
+  const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =
+    useWave(wave);
+  const isCompetitionWave = isRankWave || isApproveWave;
 
   // Get unread indicator for messages
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
@@ -297,8 +299,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             </span>
           </button>
         )}
-        {!isRankWave && salesTabButton}
-        {waveActive && wave && isRankWave && (
+        {!isCompetitionWave && salesTabButton}
+        {waveActive && wave && isCompetitionWave && (
           <>
             <MyStreamWaveTabsLeaderboard
               wave={wave}

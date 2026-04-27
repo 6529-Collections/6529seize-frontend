@@ -43,6 +43,7 @@ interface OngoingParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export default function OngoingParticipationDrop({
@@ -57,6 +58,7 @@ export default function OngoingParticipationDrop({
   identityMode = "default",
   showInteractions = true,
   winningThreshold,
+  isVotingClosed = false,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const { canShowVote } = useDropInteractionRules(drop);
@@ -100,7 +102,7 @@ export default function OngoingParticipationDrop({
   }, []);
 
   const voteAction =
-    canShowVote && showInteractions ? (
+    canShowVote && showInteractions && !isVotingClosed ? (
       <VotingModalButton
         drop={drop}
         onClick={() => setIsVotingModalOpen(true)}
@@ -112,6 +114,9 @@ export default function OngoingParticipationDrop({
       drop={drop}
       isActiveDrop={isActiveDrop}
       location={location}
+      useRankStyles={
+        !(typeof winningThreshold === "number" && winningThreshold > 0)
+      }
     >
       {!isMobile && showInteractions && showReplyAndQuote && (
         <WaveDropActions
@@ -131,6 +136,7 @@ export default function OngoingParticipationDrop({
               <ParticipationDropHeader
                 drop={drop}
                 showWaveInfo={showWaveInfo}
+                winningThreshold={winningThreshold}
               />
             ))}
           <ParticipationDropContent
@@ -166,6 +172,7 @@ export default function OngoingParticipationDrop({
           voteAction={voteAction}
           showInteractions={showInteractions}
           winningThreshold={winningThreshold}
+          isVotingClosed={isVotingClosed}
         />
       </div>
 

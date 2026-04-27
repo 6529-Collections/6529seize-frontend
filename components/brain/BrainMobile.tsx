@@ -90,7 +90,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const { isMemesWave, isCurationWave, isRankWave } = useWave(wave);
+  const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =
+    useWave(wave);
 
   const {
     voting: { isCompleted },
@@ -104,6 +105,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     isCurationWave,
     isMemesWave,
     isRankWave,
+    isApproveWave,
     pathname,
     searchParams,
     wave,
@@ -222,6 +224,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
             isCurationWave={isCurationWave}
             isMemesWave={isMemesWave}
             isRankWave={isRankWave}
+            isApproveWave={isApproveWave}
             onDropClick={onDropClick}
             onOpenQuickVote={quickVote.openQuickVote}
             onPrefetchQuickVote={quickVote.prefetchQuickVote}

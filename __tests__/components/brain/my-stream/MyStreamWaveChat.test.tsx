@@ -1,4 +1,5 @@
 import MyStreamWaveChat from "@/components/brain/my-stream/MyStreamWaveChat";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { editSlice } from "@/store/editSlice";
@@ -100,7 +101,12 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
 }));
 
-const wave = { id: "10", participation: {}, metrics: { muted: false } } as any;
+const wave = {
+  id: "10",
+  participation: {},
+  metrics: { muted: false, your_unread_drops_count: 0 },
+  wave: { type: ApiWaveType.Rank, winning_threshold: null },
+} as any;
 const mockOnDropClick = jest.fn();
 
 describe("MyStreamWaveChat", () => {
@@ -177,6 +183,35 @@ describe("MyStreamWaveChat", () => {
     expect(replaceMock).not.toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBeNull();
     expect(screen.queryByTestId("memes-btn")).toBeNull();
+  });
+
+  it("passes approve wave state to wave drops", async () => {
+    const approveWave = {
+      ...wave,
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 12,
+        max_winners: 1,
+        no_of_decisions_done: 1,
+      },
+    };
+
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={approveWave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+    });
+
+    expect(capturedPropsHolder.current.winningThreshold).toBe(12);
+    expect(capturedPropsHolder.current.isVotingClosed).toBe(true);
   });
 
   it("keeps serialNo until chat view renders", async () => {

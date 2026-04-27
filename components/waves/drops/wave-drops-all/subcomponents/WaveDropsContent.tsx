@@ -48,6 +48,8 @@ interface WaveDropsContentProps {
   readonly unreadCount?: number | undefined;
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -77,6 +79,8 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   unreadCount,
   autoCollapseSerials,
   suspendLightDropHydration = false,
+  winningThreshold,
+  isVotingClosed = false,
 }) => {
   const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
     useUnreadDivider();
@@ -134,6 +138,8 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onDismissUnread={handleDismissUnread}
         autoCollapseSerials={autoCollapseSerials}
         suspendLightDropHydration={suspendLightDropHydration}
+        winningThreshold={winningThreshold}
+        isVotingClosed={isVotingClosed}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

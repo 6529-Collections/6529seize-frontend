@@ -4,17 +4,20 @@ import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import MyStreamWaveLeaderboard from "@/components/brain/my-stream/MyStreamWaveLeaderboard";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
 const useWave = jest.fn();
 const useLayout = jest.fn();
 const useLocalPreference = jest.fn();
 const useWaveCurations = jest.fn();
+const useWaveDecisions = jest.fn();
 const replace = jest.fn();
 let searchParamsString = "";
 let dropsProps: any;
 let createDropProps: any[] = [];
 let curationModalProps: any;
+let approvalStatusProps: any;
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
@@ -36,6 +39,9 @@ jest.mock(
 jest.mock("@/hooks/waves/useWaveCurations", () => ({
   useWaveCurations: (...args: any[]) => useWaveCurations(...args),
 }));
+jest.mock("@/hooks/waves/useWaveDecisions", () => ({
+  useWaveDecisions: (...args: any[]) => useWaveDecisions(...args),
+}));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
   usePathname: () => "/waves",
@@ -47,6 +53,18 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/components/waves/leaderboard/WaveLeaderboardTime", () => ({
   WaveLeaderboardTime: () => <div data-testid="time" />,
+}));
+jest.mock("@/components/waves/approval/WaveApprovalStatusBar", () => ({
+  __esModule: true,
+  default: (props: any) => {
+    approvalStatusProps = props;
+    return (
+      <div
+        data-testid="approval-status"
+        data-close-status={props.closeStatus ?? ""}
+      />
+    );
+  },
 }));
 let headerProps: any;
 jest.mock(
@@ -105,7 +123,7 @@ jest.mock(
 const wave = {
   id: "1",
   participation: {},
-  wave: { type: "RANK" },
+  wave: { type: ApiWaveType.Rank },
 } as ApiWave;
 
 const renderLeaderboard = () =>
@@ -129,11 +147,16 @@ describe("MyStreamWaveLeaderboard", () => {
     dropsProps = null;
     createDropProps = [];
     curationModalProps = undefined;
+    approvalStatusProps = undefined;
     useLayout.mockReturnValue({ leaderboardViewStyle: {} });
     useWaveCurations.mockReturnValue({
       data: [],
       isLoading: false,
       isError: false,
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
     });
     useLocalPreference.mockImplementation((_: any, def: any) => [
       def,
@@ -494,5 +517,53 @@ describe("MyStreamWaveLeaderboard", () => {
       expect(dropsProps.maxPrice).toBeUndefined();
       expect(dropsProps.priceCurrency).toBeUndefined();
     });
+  });
+
+  it("shows approve status and closes voting when max approvals are reached", () => {
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 1,
+        no_of_decisions_done: 1,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <MyStreamWaveLeaderboard wave={approveWave} onDropClick={jest.fn()} />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByTestId("approval-status")).toHaveAttribute(
+      "data-close-status",
+      "max_reached"
+    );
+    expect(approvalStatusProps.approvedCount).toBe(1);
+    expect(dropsProps.isVotingClosed).toBe(true);
   });
 });

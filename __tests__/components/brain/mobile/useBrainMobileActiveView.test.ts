@@ -47,4 +47,18 @@ describe("useBrainMobileActiveView", () => {
 
     expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
   });
+
+  it("does not switch completed approve waves to submissions", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isApproveWave: true,
+          isRankWave: false,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+  });
 });

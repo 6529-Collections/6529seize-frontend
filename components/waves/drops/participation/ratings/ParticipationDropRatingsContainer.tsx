@@ -9,12 +9,14 @@ interface ParticipationDropRatingsContainerProps {
   readonly drop: ApiDrop;
   readonly rank?: number | null | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export default function ParticipationDropRatingsContainer({
   drop,
   rank = null,
   winningThreshold,
+  isVotingClosed = false,
 }: ParticipationDropRatingsContainerProps) {
   const ratingsData: RatingsData = {
     hasRaters: drop.top_raters.length > 0,
@@ -33,6 +35,7 @@ export default function ParticipationDropRatingsContainer({
           theme={theme}
           ratingsData={ratingsData}
           winningThreshold={winningThreshold}
+          isVotingClosed={isVotingClosed}
         />
 
         <ParticipationDropRatingsVoterSection

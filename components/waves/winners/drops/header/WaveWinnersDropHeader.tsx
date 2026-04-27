@@ -6,15 +6,18 @@ import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWi
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 
 interface WaveWinnersDropHeaderProps {
   readonly winner: ApiWaveDecisionWinner;
   readonly showVotingInfo?: boolean | undefined;
+  readonly isApprovalWave?: boolean | undefined;
 }
 
 export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
   winner,
   showVotingInfo = true,
+  isApprovalWave = false,
 }) => {
   return (
     <div
@@ -27,10 +30,17 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
           profile={winner.drop.author}
           tooltipIdPrefix={`winner-author-badges-${winner.drop.id}`}
         />
-        <WinnerDropBadge
-          rank={winner.place}
-          decisionTime={winner.drop.winning_context?.decision_time ?? null}
-        />
+        {isApprovalWave ? (
+          <ApprovalStatusBadge
+            approvedAt={winner.drop.winning_context?.decision_time ?? null}
+            order={winner.place}
+          />
+        ) : (
+          <WinnerDropBadge
+            rank={winner.place}
+            decisionTime={winner.drop.winning_context?.decision_time ?? null}
+          />
+        )}
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
         <WaveDropTime timestamp={winner.drop.created_at} />
       </div>

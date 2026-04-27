@@ -38,6 +38,8 @@ interface DropProps {
   readonly wrapContentOnly?: (content: React.ReactNode) => React.ReactNode;
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export default function Drop({
@@ -57,6 +59,8 @@ export default function Drop({
   wrapContentOnly,
   identityMode,
   showInteractions = true,
+  winningThreshold,
+  isVotingClosed = false,
 }: DropProps) {
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
@@ -72,6 +76,8 @@ export default function Drop({
         parentContainerRef={parentContainerRef}
         identityMode={identityMode}
         showInteractions={showInteractions}
+        winningThreshold={winningThreshold}
+        isVotingClosed={isVotingClosed}
       />
     ),
     [ApiDropType.Winner]: (

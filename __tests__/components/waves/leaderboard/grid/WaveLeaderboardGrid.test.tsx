@@ -10,8 +10,17 @@ jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
 jest.mock(
   "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem",
   () => ({
-    WaveLeaderboardGridItem: ({ drop, mode, onDropClick }: any) => (
-      <div data-testid="grid-item" onClick={() => onDropClick(drop)}>
+    WaveLeaderboardGridItem: ({
+      drop,
+      isVotingClosed,
+      mode,
+      onDropClick,
+    }: any) => (
+      <div
+        data-testid="grid-item"
+        data-is-voting-closed={String(isVotingClosed)}
+        onClick={() => onDropClick(drop)}
+      >
         {drop.id}:{mode}
       </div>
     ),
@@ -61,12 +70,17 @@ describe("WaveLeaderboardGrid", () => {
         wave={wave}
         sort="RANK"
         mode="content_only"
+        isVotingClosed={true}
         onDropClick={onDropClick}
       />
     );
 
     expect(screen.getByTestId("grid-item")).toHaveTextContent(
       "d1:content_only"
+    );
+    expect(screen.getByTestId("grid-item")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
     );
     fireEvent.click(screen.getByRole("button", { name: "Load more drops" }));
     expect(fetchNextPage).toHaveBeenCalled();

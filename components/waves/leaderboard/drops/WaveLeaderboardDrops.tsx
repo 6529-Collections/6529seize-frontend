@@ -15,6 +15,7 @@ import { WaveLeaderboardLoadingBar } from "./WaveLeaderboardLoadingBar";
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
+  readonly isVotingClosed?: boolean | undefined;
   readonly onCreateDrop?: (() => void) | undefined;
   readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
@@ -25,6 +26,7 @@ interface WaveLeaderboardDropsProps {
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
   sort,
+  isVotingClosed = false,
   onCreateDrop,
   curatedByGroupId,
   minPrice,
@@ -85,6 +87,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
           wave={wave}
           onDropClick={onDropClick}
           onSourceDropDeleted={handleSourceDropDeleted}
+          isVotingClosed={isVotingClosed}
         />
       ))}
       {isFetchingNextPage && <WaveLeaderboardLoadingBar />}

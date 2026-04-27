@@ -36,6 +36,7 @@ jest.mock("@/components/waves/drops/participation/ParticipationDrop", () => ({
     <button
       data-testid="drop"
       data-winning-threshold={props.winningThreshold ?? ""}
+      data-is-voting-closed={String(props.isVotingClosed)}
       onClick={() => props.onQuoteClick(props.drop)}
     >
       {props.drop.id}
@@ -124,10 +125,15 @@ describe("MyStreamWaveSubmissions", () => {
     });
   });
 
-  it("passes approve threshold to participation drops", () => {
+  it("passes approve wave state to participation drops", () => {
     const approveWave = {
       id: "1",
-      wave: { type: ApiWaveType.Approve, winning_threshold: 7 },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 7,
+        max_winners: 1,
+        no_of_decisions_done: 1,
+      },
     } as any;
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [{ id: "drop-1" }],
@@ -146,6 +152,29 @@ describe("MyStreamWaveSubmissions", () => {
     expect(screen.getByTestId("drop")).toHaveAttribute(
       "data-winning-threshold",
       "7"
+    );
+    expect(screen.getByTestId("drop")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
+  });
+
+  it("does not pass threshold to non-approve participation drops", () => {
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [{ id: "drop-1" }],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isError: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      refetch: jest.fn(),
+    });
+
+    render(<MyStreamWaveSubmissions wave={wave} onDropClick={jest.fn()} />);
+
+    expect(screen.getByTestId("drop")).toHaveAttribute(
+      "data-winning-threshold",
+      ""
     );
   });
 

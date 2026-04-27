@@ -6,16 +6,18 @@ interface ParticipationDropRatingsProps {
   readonly drop: ApiDrop;
   readonly rank?: number | null | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export const ParticipationDropRatings: React.FC<
   ParticipationDropRatingsProps
-> = ({ drop, rank = null, winningThreshold }) => {
+> = ({ drop, rank = null, winningThreshold, isVotingClosed = false }) => {
   return (
     <ParticipationDropRatingsContainer
       drop={drop}
       rank={rank}
       winningThreshold={winningThreshold}
+      isVotingClosed={isVotingClosed}
     />
   );
 };

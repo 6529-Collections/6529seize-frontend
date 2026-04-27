@@ -188,6 +188,19 @@ describe("WaveLeaderboardGridItem", () => {
     expect(content).toHaveClass("tw-space-y-3");
   });
 
+  it("hides vote actions when voting is closed", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+  });
+
   it("hides compact footer in content-only mode", () => {
     render(
       <WaveLeaderboardGridItem

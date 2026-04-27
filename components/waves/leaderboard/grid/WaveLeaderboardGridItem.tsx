@@ -34,10 +34,14 @@ import { createPortal } from "react-dom";
 import WaveLeaderboardGalleryItemVotes from "../gallery/WaveLeaderboardGalleryItemVotes";
 import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import type { WaveLeaderboardGridMode } from "./WaveLeaderboardGrid";
+import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
+import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 
 interface WaveLeaderboardGridItemProps {
   readonly drop: ExtendedDrop;
   readonly mode: WaveLeaderboardGridMode;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
@@ -92,7 +96,25 @@ const getCompactTextViewportClassName = (
     ? "tw-relative tw-max-h-56 tw-overflow-hidden [&_p]:tw-whitespace-normal"
     : undefined;
 
-function GridItemRankBadge({ drop }: { readonly drop: ExtendedDrop }) {
+function GridItemRankBadge({
+  drop,
+  winningThreshold,
+}: {
+  readonly drop: ExtendedDrop;
+  readonly winningThreshold?: number | null | undefined;
+}) {
+  const isApproveDrop =
+    typeof winningThreshold === "number" && winningThreshold > 0;
+
+  if (isApproveDrop) {
+    return isOfficiallyApprovedDrop(drop) ? (
+      <ApprovalStatusBadge
+        approvedAt={drop.winning_context?.decision_time ?? null}
+        order={drop.winning_context?.place ?? drop.rank}
+      />
+    ) : null;
+  }
+
   if (drop.rank === null) {
     return (
       <div className="tw-flex tw-h-6 tw-min-w-6 tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-400">
@@ -159,7 +181,7 @@ function useOverflowGradient({
 
 export const WaveLeaderboardGridItem: React.FC<
   WaveLeaderboardGridItemProps
-> = ({ drop, mode, onDropClick }) => {
+> = ({ drop, mode, isVotingClosed = false, winningThreshold, onDropClick }) => {
   const isCompactMode = mode === "compact";
   const isContentOnlyMode = mode === "content_only";
   const activePart = drop.parts[0];
@@ -178,13 +200,15 @@ export const WaveLeaderboardGridItem: React.FC<
   });
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { canShowVote } = useDropInteractionRules(drop);
+  const canShowVotingAction = canShowVote && !isVotingClosed;
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [innerEl, setInnerEl] = useState<HTMLDivElement | null>(null);
   const [compactTextViewportEl, setCompactTextViewportEl] =
     useState<HTMLDivElement | null>(null);
   const [compactTextInnerEl, setCompactTextInnerEl] =
     useState<HTMLDivElement | null>(null);
-  const hasContentOnlyActions = canOpenDrop || isCuratable || canShowVote;
+  const hasContentOnlyActions =
+    canOpenDrop || isCuratable || canShowVotingAction;
   const showDesktopContentOnlyActions =
     isContentOnlyMode && !hasTouchScreen && hasContentOnlyActions;
   const showMobileContentOnlyActions =
@@ -373,7 +397,7 @@ export const WaveLeaderboardGridItem: React.FC<
                   className="tw-bg-iron-950/70"
                 />
               )}
-              {canShowVote && (
+              {canShowVotingAction && (
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
@@ -420,7 +444,10 @@ export const WaveLeaderboardGridItem: React.FC<
                   </UserProfileTooltipWrapper>
                 )}
               </div>
-              <GridItemRankBadge drop={drop} />
+              <GridItemRankBadge
+                drop={drop}
+                winningThreshold={winningThreshold}
+              />
             </div>
           </div>
           <WaveLeaderboardIdentity
@@ -470,7 +497,7 @@ export const WaveLeaderboardGridItem: React.FC<
                 isCuratable={drop.context_profile_context?.curatable ?? false}
                 isCurated={drop.context_profile_context?.curated ?? false}
               />
-              {canShowVote && (
+              {canShowVotingAction && (
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
@@ -543,7 +570,7 @@ export const WaveLeaderboardGridItem: React.FC<
                 </button>
               )}
 
-              {canShowVote && (
+              {canShowVotingAction && (
                 <button
                   type="button"
                   onClick={handleMobileVoteClick}

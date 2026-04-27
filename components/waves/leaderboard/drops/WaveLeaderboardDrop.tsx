@@ -11,6 +11,7 @@ interface WaveLeaderboardDropProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onSourceDropDeleted?: (() => void) | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
@@ -18,6 +19,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   wave,
   onDropClick,
   onSourceDropDeleted,
+  isVotingClosed = false,
 }) => {
   const { isMemesWave } = useWave(wave);
   const winningThreshold =
@@ -38,6 +40,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       drop={drop}
       onDropClick={onDropClick}
       winningThreshold={winningThreshold}
+      isVotingClosed={isVotingClosed}
     />
   );
 };

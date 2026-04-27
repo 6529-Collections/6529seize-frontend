@@ -40,10 +40,15 @@ describe("WaveLeaderboardDropRaters", () => {
   });
 
   it("renders approve threshold progress", () => {
-    render(<WaveLeaderboardDropRaters drop={drop} winningThreshold={12} />);
+    render(
+      <WaveLeaderboardDropRaters
+        drop={{ ...drop, rank: null } as ExtendedDrop}
+        winningThreshold={12}
+      />
+    );
 
     expect(screen.getByText("/")).toBeInTheDocument();
     expect(screen.getByText("12")).toBeInTheDocument();
-    expect(screen.getByText("to approve")).toBeInTheDocument();
+    expect(screen.getByText("Needs 2")).toBeInTheDocument();
   });
 });

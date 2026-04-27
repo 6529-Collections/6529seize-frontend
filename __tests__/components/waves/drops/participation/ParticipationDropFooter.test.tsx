@@ -1,76 +1,90 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import ParticipationDropFooter from '@/components/waves/drops/participation/ParticipationDropFooter';
-import type { ExtendedDrop } from '@/helpers/waves/drop.helpers';
-
-jest.mock('date-fns', () => ({ format: jest.fn(() => 'DATE') }));
+import { render, screen } from "@testing-library/react";
+import ParticipationDropFooter from "@/components/waves/drops/participation/ParticipationDropFooter";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 const useDropInteractionRules = jest.fn();
-jest.mock('@/hooks/drops/useDropInteractionRules', () => ({
+jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: (...args: any[]) => useDropInteractionRules(...args),
 }));
 
-const useIsMobileScreen = jest.fn();
-jest.mock('@/hooks/isMobileScreen', () => ({
+jest.mock("@/components/waves/drops/DropCurationButton", () => ({
   __esModule: true,
-  default: (...args: any[]) => useIsMobileScreen(...args),
+  default: () => <button data-testid="curation-button" type="button" />,
 }));
 
-jest.mock('@/components/voting', () => ({
-  VotingModal: (p: any) => <div data-testid="modal">{p.isOpen ? 'open' : 'closed'}</div>,
-  MobileVotingModal: (p: any) => <div data-testid="mobile-modal">{p.isOpen ? 'open' : 'closed'}</div>,
+jest.mock("@/components/waves/drops/WaveDropReactions", () => ({
+  __esModule: true,
+  default: () => <div data-testid="reactions" />,
 }));
 
-jest.mock('@/components/voting/VotingModalButton', () => (props: any) => (
-  <button data-testid="vote-btn" onClick={props.onClick}>vote</button>
-));
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationDropRatings",
+  () => ({
+    ParticipationDropRatings: (props: any) => (
+      <div
+        data-testid="ratings"
+        data-rank={props.rank ?? ""}
+        data-winning-threshold={props.winningThreshold ?? ""}
+        data-is-voting-closed={String(props.isVotingClosed)}
+      />
+    ),
+  })
+);
 
-jest.mock('@/components/waves/drops/participation/ParticipationDropRatings', () => ({
-  ParticipationDropRatings: (props: any) => (
-    <div data-testid="ratings">{props.rank}</div>
-  )
-}));
+const createDrop = (overrides: Partial<ExtendedDrop> = {}): ExtendedDrop =>
+  ({
+    id: "drop-1",
+    raters_count: 2,
+    rank: 3,
+    reactions: [],
+    context_profile_context: null,
+    ...overrides,
+  }) as ExtendedDrop;
 
-const drop: ExtendedDrop = {
-  created_at: '2023-01-01T00:00:00Z',
-  raters_count: 2,
-  rank: 3,
-} as any;
+describe("ParticipationDropFooter", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useDropInteractionRules.mockReturnValue({ canShowVote: true });
+  });
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
+  it("renders ratings when the drop has raters", () => {
+    render(<ParticipationDropFooter drop={createDrop()} />);
 
-it('renders vote button and modal on click for desktop', async () => {
-  useDropInteractionRules.mockReturnValue({ canShowVote: true });
-  useIsMobileScreen.mockReturnValue(false);
-  render(<ParticipationDropFooter drop={drop} />);
-  expect(screen.getByTestId('ratings')).toBeInTheDocument();
-  expect(screen.getByTestId('modal')).toHaveTextContent('closed');
-  await userEvent.click(screen.getByTestId('vote-btn'));
-  expect(screen.getByTestId('modal')).toHaveTextContent('open');
-});
+    expect(screen.getByTestId("ratings")).toHaveAttribute("data-rank", "3");
+  });
 
-it('renders mobile modal when mobile screen', async () => {
-  useDropInteractionRules.mockReturnValue({ canShowVote: true });
-  useIsMobileScreen.mockReturnValue(true);
-  render(<ParticipationDropFooter drop={drop} />);
-  await userEvent.click(screen.getByTestId('vote-btn'));
-  expect(screen.getByTestId('mobile-modal')).toHaveTextContent('open');
-});
+  it("renders threshold ratings even when raters_count is 0", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop({ raters_count: 0 })}
+        winningThreshold={10}
+      />
+    );
 
-it('shows ratings only when voting not allowed', () => {
-  useDropInteractionRules.mockReturnValue({ canShowVote: false });
-  useIsMobileScreen.mockReturnValue(false);
-  const { container } = render(<ParticipationDropFooter drop={drop} />);
-  expect(screen.getByTestId('ratings')).toBeInTheDocument();
-  expect(container.querySelector('[data-testid="vote-btn"]')).toBeNull();
-});
+    expect(screen.getByTestId("ratings")).toHaveAttribute(
+      "data-winning-threshold",
+      "10"
+    );
+  });
 
-it('displays formatted date', () => {
-  useDropInteractionRules.mockReturnValue({ canShowVote: false });
-  useIsMobileScreen.mockReturnValue(false);
-  render(<ParticipationDropFooter drop={drop} />);
-  expect(screen.getByText('DATE')).toBeInTheDocument();
+  it("passes closed voting state to ratings", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop({ raters_count: 0 })}
+        winningThreshold={10}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("ratings")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
+  });
+
+  it("does not render ratings when there are no raters and no threshold", () => {
+    render(<ParticipationDropFooter drop={createDrop({ raters_count: 0 })} />);
+
+    expect(screen.queryByTestId("ratings")).not.toBeInTheDocument();
+  });
 });

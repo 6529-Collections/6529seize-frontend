@@ -8,16 +8,19 @@ import {
   WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
+import { getApprovalDropStatus } from "@/helpers/waves/approve-wave.helpers";
 
 interface ParticipationDropRatingsTotalSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;
   readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export default function ParticipationDropRatingsTotalSection({
   drop,
   ratingsData,
   winningThreshold,
+  isVotingClosed = false,
 }: ParticipationDropRatingsTotalSectionProps) {
   const { currentRating } = ratingsData;
   const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
@@ -28,9 +31,44 @@ export default function ParticipationDropRatingsTotalSection({
       ? winningThreshold
       : null;
   const hasWinningThreshold = displayWinningThreshold !== null;
-  const hasReachedThreshold =
-    displayWinningThreshold !== null &&
-    currentRating >= displayWinningThreshold;
+  const approvalStatus =
+    displayWinningThreshold !== null
+      ? getApprovalDropStatus({
+          drop,
+          isClosed: isVotingClosed,
+          winningThreshold: displayWinningThreshold,
+        })
+      : null;
+  const approvalStatusKind = approvalStatus?.kind;
+  let approvalStatusClass: string | undefined;
+
+  if (
+    approvalStatusKind === "approved" ||
+    approvalStatusKind === "reached_threshold"
+  ) {
+    approvalStatusClass = "tw-text-emerald-400";
+  } else if (approvalStatusKind === "closed") {
+    approvalStatusClass = "tw-text-amber-300";
+  }
+  const approvalStatusLabel = (() => {
+    if (approvalStatus === null) {
+      return null;
+    }
+
+    if (approvalStatus.kind === "approved") {
+      return "Approved";
+    }
+
+    if (approvalStatus.kind === "reached_threshold") {
+      return "Reached threshold";
+    }
+
+    if (approvalStatus.kind === "closed") {
+      return "Closed";
+    }
+
+    return `Needs ${formatNumberWithCommas(approvalStatus.remaining ?? 0)}`;
+  })();
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5">
@@ -57,17 +95,8 @@ export default function ParticipationDropRatingsTotalSection({
         className="tw-cursor-help tw-whitespace-nowrap tw-font-normal tw-text-iron-400"
         data-tooltip-id={`total-rating-${drop.id}`}
       >
-        {hasWinningThreshold ? (
-          <>
-            {votingLabel}{" "}
-            <span
-              className={
-                hasReachedThreshold ? "tw-text-emerald-400" : undefined
-              }
-            >
-              {hasReachedThreshold ? "Approved" : "to approve"}
-            </span>
-          </>
+        {hasWinningThreshold && approvalStatusLabel !== null ? (
+          <span className={approvalStatusClass}>{approvalStatusLabel}</span>
         ) : (
           <>
             {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}

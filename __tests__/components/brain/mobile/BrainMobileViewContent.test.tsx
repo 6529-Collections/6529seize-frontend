@@ -230,6 +230,35 @@ describe("BrainMobileViewContent", () => {
     );
   });
 
+  it("renders leaderboard for approve waves", () => {
+    const onDropClick = jest.fn();
+    const wave = { id: "wave-1" } as any;
+
+    render(
+      <BrainMobileViewContent
+        activeView={BrainView.LEADERBOARD}
+        activeWaveId="1"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={false}
+        isApproveWave={true}
+        onDropClick={onDropClick}
+        onOpenQuickVote={jest.fn()}
+        wave={wave}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
+    expect(mockMyStreamWaveLeaderboard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onDropClick,
+        wave,
+      })
+    );
+  });
+
   it("renders submissions and forwards wave props when available", () => {
     const onDropClick = jest.fn();
     const wave = { id: "wave-1" } as any;

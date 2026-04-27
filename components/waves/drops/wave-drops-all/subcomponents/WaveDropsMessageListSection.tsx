@@ -45,6 +45,8 @@ interface WaveDropsMessageListSectionProps {
   readonly onDismissUnread: () => void;
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;
@@ -79,6 +81,8 @@ export const WaveDropsMessageListSection: React.FC<
   onDismissUnread,
   autoCollapseSerials,
   suspendLightDropHydration = false,
+  winningThreshold,
+  isVotingClosed = false,
 }) => {
   const hasNextPage =
     !!waveMessages?.hasNextPage &&
@@ -115,6 +119,8 @@ export const WaveDropsMessageListSection: React.FC<
           onBoostedDropClick={onBoostedDropClick}
           autoCollapseSerials={autoCollapseSerials}
           suspendLightDropHydration={suspendLightDropHydration}
+          winningThreshold={winningThreshold}
+          isVotingClosed={isVotingClosed}
           key="drops-list"
         />
         <div ref={anchorRef} style={{ height: "1px" }} />

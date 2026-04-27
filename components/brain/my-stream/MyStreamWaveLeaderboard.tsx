@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
+import WaveApprovalStatusBar from "@/components/waves/approval/WaveApprovalStatusBar";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
@@ -31,11 +32,17 @@ import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
+import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
+import {
+  getApprovalWaveCloseStatus,
+  getApprovedDropsCount,
+} from "@/helpers/waves/approve-wave.helpers";
+import { Time } from "@/helpers/time";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -50,8 +57,13 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { isMemesWave, isCurationWave, isQuorumWave, participation } =
-    useWave(wave);
+  const {
+    isApproveWave,
+    isMemesWave,
+    isCurationWave,
+    isQuorumWave,
+    participation,
+  } = useWave(wave);
   const { leaderboardViewStyle } = useLayout(); // Get pre-calculated style from context
   const submissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -77,6 +89,23 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const [isCurationDropModalOpen, setIsCurationDropModalOpen] = useState(false);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
+  const [currentMillis, setCurrentMillis] = useState(() =>
+    Time.currentMillis()
+  );
+
+  useEffect(() => {
+    if (!isApproveWave) {
+      return;
+    }
+
+    const intervalId = globalThis.setInterval(() => {
+      setCurrentMillis(Time.currentMillis());
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isApproveWave]);
 
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop } = useMemo(
@@ -159,6 +188,32 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
+  const { decisionPoints: approvalDecisionPoints = [] } = useWaveDecisions({
+    waveId: wave.id,
+    enabled: isApproveWave,
+  });
+  const approvedCount = useMemo(
+    () =>
+      isApproveWave
+        ? getApprovedDropsCount({
+            decisionPoints: approvalDecisionPoints,
+            wave,
+          })
+        : 0,
+    [approvalDecisionPoints, isApproveWave, wave]
+  );
+  const approvalCloseStatus = useMemo(
+    () =>
+      isApproveWave
+        ? getApprovalWaveCloseStatus({
+            approvedCount,
+            now: currentMillis,
+            wave,
+          })
+        : null,
+    [approvedCount, currentMillis, isApproveWave, wave]
+  );
+  const isApprovalVotingClosed = approvalCloseStatus !== null;
 
   const rawCuratedByGroupId = searchParams.get("curation_id");
 
@@ -248,6 +303,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardDrops
         wave={wave}
         sort={sort}
+        isVotingClosed={isApprovalVotingClosed}
         curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}
@@ -260,6 +316,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardGrid
         wave={wave}
         sort={sort}
+        isVotingClosed={isApprovalVotingClosed}
         curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}
@@ -273,6 +330,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardGallery
         wave={wave}
         sort={sort}
+        isVotingClosed={isApprovalVotingClosed}
         curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}
@@ -284,7 +342,16 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
-      <WaveLeaderboardTime wave={wave} />
+      {isApproveWave ? (
+        <WaveApprovalStatusBar
+          approvedCount={approvedCount}
+          closeStatus={approvalCloseStatus}
+          currentMillis={currentMillis}
+          wave={wave}
+        />
+      ) : (
+        <WaveLeaderboardTime wave={wave} />
+      )}
 
       {/* Sticky tabs/filters section */}
       <div className="tw-sticky tw-top-0 tw-z-30 tw-bg-black tw-py-4">

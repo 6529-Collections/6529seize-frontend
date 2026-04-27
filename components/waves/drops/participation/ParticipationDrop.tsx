@@ -24,6 +24,7 @@ interface ParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export default function ParticipationDrop(props: ParticipationDropProps) {

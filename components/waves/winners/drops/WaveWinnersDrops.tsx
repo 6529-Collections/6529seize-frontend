@@ -5,12 +5,15 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { publicEnv } from "@/config/env";
 import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 interface WaveWinnersDropsProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly winners: ApiWaveDecisionWinner[];
   readonly isLoading?: boolean | undefined;
+  readonly isApprovalWave?: boolean | undefined;
+  readonly emptyMessage?: string | undefined;
 }
 
 export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
@@ -18,6 +21,8 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
   onDropClick,
   winners,
   isLoading = false,
+  isApprovalWave = false,
+  emptyMessage,
 }) => {
   const renderableWinners = getRenderableWaveDecisionWinners(winners);
   const invalidWinnerCount = winners.length - renderableWinners.length;
@@ -46,6 +51,19 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
       );
     }
 
+    if (emptyMessage) {
+      return (
+        <div className="tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-16">
+          <div className="tw-flex tw-max-w-xs tw-flex-col tw-items-center tw-gap-4 tw-text-center">
+            <CheckCircleIcon className="tw-size-10 tw-text-iron-600" />
+            <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-300">
+              {emptyMessage}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     return <></>;
   }
 
@@ -62,6 +80,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
           winner={winner}
           wave={wave}
           onDropClick={onDropClick}
+          isApprovalWave={isApprovalWave}
         />
       ))}
     </div>

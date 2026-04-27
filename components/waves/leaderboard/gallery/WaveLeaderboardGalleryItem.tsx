@@ -26,6 +26,8 @@ import Link from "next/link";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
+import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
+import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -33,16 +35,69 @@ interface WaveLeaderboardGalleryItemProps {
   readonly artFocused?: boolean | undefined;
   readonly activeSort?: WaveDropsLeaderboardSort | undefined;
   readonly animationKey?: number | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+}
+
+const getVoteStyle = (
+  isNegative: boolean,
+  isZero: boolean,
+  artFocused: boolean
+) => {
+  if (isZero || (artFocused && isNegative)) {
+    return "tw-text-iron-400";
+  }
+
+  if (artFocused) {
+    return "tw-text-iron-300";
+  }
+
+  return isNegative ? "tw-text-rose-500" : "tw-text-emerald-500";
+};
+
+interface LeaderboardResultBadgeProps {
+  readonly drop: ExtendedDrop;
+  readonly isApproveDrop: boolean;
+}
+
+function LeaderboardResultBadge({
+  drop,
+  isApproveDrop,
+}: LeaderboardResultBadgeProps) {
+  if (isApproveDrop) {
+    return isOfficiallyApprovedDrop(drop) ? (
+      <ApprovalStatusBadge
+        approvedAt={drop.winning_context?.decision_time ?? null}
+        order={drop.winning_context?.place ?? drop.rank}
+      />
+    ) : null;
+  }
+
+  return (
+    <WinnerDropBadge
+      rank={drop.rank}
+      decisionTime={drop.winning_context?.decision_time ?? null}
+    />
+  );
 }
 
 export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
-  ({ drop, onDropClick, artFocused = true, activeSort, animationKey = 0 }) => {
+  ({
+    drop,
+    onDropClick,
+    artFocused = true,
+    activeSort,
+    animationKey = 0,
+    isVotingClosed = false,
+    winningThreshold,
+  }) => {
     const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
     const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
     const { hasTouchScreen } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
+    const canShowVotingAction = canShowVote && !isVotingClosed;
     const primaryMedia = drop.parts[0]?.media[0];
     const isPrimaryMediaVideo = primaryMedia?.mime_type.startsWith("video/");
     const mediaImageScale = isTabletOrSmaller
@@ -97,25 +152,14 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const userVote = drop.context_profile_context?.rating ?? 0;
     const isNegativeVote = userVote < 0;
 
-    const getVoteStyle = (
-      isNegative: boolean,
-      isZero: boolean,
-      artFocused: boolean
-    ) => {
-      if (artFocused) {
-        if (isZero) return "tw-text-iron-400";
-        return isNegative ? "tw-text-iron-400" : "tw-text-iron-300";
-      }
-      if (isZero) return "tw-text-iron-400";
-      return isNegative ? "tw-text-rose-500" : "tw-text-emerald-500";
-    };
-
     const isZeroVote = userVote === 0;
     const voteStyle = getVoteStyle(isNegativeVote, isZeroVote, artFocused);
 
     const votingCreditType = drop.wave.voting_credit_type;
     const votingCreditLabel =
       WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
+    const isApproveDrop =
+      typeof winningThreshold === "number" && winningThreshold > 0;
 
     const handleImageClick = () => {
       startDropOpen({
@@ -197,12 +241,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 </UserProfileTooltipWrapper>
               )}
             </div>
-            {drop.rank !== undefined && (
-              <WinnerDropBadge
-                rank={drop.rank}
-                decisionTime={drop.winning_context?.decision_time || null}
-              />
-            )}
+            <LeaderboardResultBadge drop={drop} isApproveDrop={isApproveDrop} />
           </div>
           <WaveLeaderboardIdentity
             drop={drop}
@@ -248,7 +287,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 </span>
               </span>
             )}
-            {canShowVote && (
+            {canShowVotingAction && (
               <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
                 <VotingModalButton
                   drop={drop}

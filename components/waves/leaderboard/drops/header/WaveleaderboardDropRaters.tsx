@@ -11,15 +11,17 @@ import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
 } from "@/helpers/waves/waves.constants";
+import { getApprovalDropStatus } from "@/helpers/waves/approve-wave.helpers";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
   readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 export const WaveLeaderboardDropRaters: React.FC<
   WaveLeaderboardDropRatersProps
-> = ({ drop, winningThreshold }) => {
+> = ({ drop, winningThreshold, isVotingClosed = false }) => {
   const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
   const totalVote = drop.rating;
   const userVote = drop.context_profile_context?.rating ?? 0;
@@ -31,8 +33,42 @@ export const WaveLeaderboardDropRaters: React.FC<
       ? winningThreshold
       : null;
   const hasWinningThreshold = displayWinningThreshold !== null;
-  const hasReachedThreshold =
-    displayWinningThreshold !== null && totalVote >= displayWinningThreshold;
+  const approvalStatus =
+    displayWinningThreshold !== null
+      ? getApprovalDropStatus({
+          drop,
+          isClosed: isVotingClosed,
+          winningThreshold: displayWinningThreshold,
+        })
+      : null;
+  let approvalStatusClass: string | undefined;
+  if (
+    approvalStatus?.kind === "approved" ||
+    approvalStatus?.kind === "reached_threshold"
+  ) {
+    approvalStatusClass = "tw-text-emerald-400";
+  } else if (approvalStatus?.kind === "closed") {
+    approvalStatusClass = "tw-text-amber-300";
+  }
+  const approvalStatusLabel = (() => {
+    if (approvalStatus === null) {
+      return null;
+    }
+
+    if (approvalStatus.kind === "approved") {
+      return "Approved";
+    }
+
+    if (approvalStatus.kind === "reached_threshold") {
+      return "Reached threshold";
+    }
+
+    if (approvalStatus.kind === "closed") {
+      return "Closed";
+    }
+
+    return `Needs ${formatNumberWithCommas(approvalStatus.remaining ?? 0)}`;
+  })();
 
   const hasUserVoted = userVote !== 0;
 
@@ -58,17 +94,8 @@ export const WaveLeaderboardDropRaters: React.FC<
           />
         </div>
         <span className="tw-whitespace-nowrap tw-font-normal tw-text-iron-400">
-          {hasWinningThreshold ? (
-            <>
-              {votingLabel}{" "}
-              <span
-                className={
-                  hasReachedThreshold ? "tw-text-emerald-400" : undefined
-                }
-              >
-                {hasReachedThreshold ? "Approved" : "to approve"}
-              </span>
-            </>
+          {hasWinningThreshold && approvalStatusLabel !== null ? (
+            <span className={approvalStatusClass}>{approvalStatusLabel}</span>
           ) : (
             <>
               {votingLabel} {WAVE_VOTE_STATS_LABELS.TOTAL}

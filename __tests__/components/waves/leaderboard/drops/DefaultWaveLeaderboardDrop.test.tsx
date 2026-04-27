@@ -104,6 +104,18 @@ describe("DefaultWaveLeaderboardDrop", () => {
     expect(screen.getByTestId("modal")).toBeInTheDocument();
   });
 
+  it("hides voting button when voting is closed", () => {
+    render(
+      <DefaultWaveLeaderboardDrop
+        drop={drop}
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote")).toBeNull();
+  });
+
   it("renders curation button", () => {
     render(<DefaultWaveLeaderboardDrop drop={drop} onDropClick={jest.fn()} />);
     expect(screen.getByTestId("curate")).toBeInTheDocument();

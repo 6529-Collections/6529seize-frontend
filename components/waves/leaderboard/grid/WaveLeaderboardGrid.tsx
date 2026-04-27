@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
@@ -13,6 +14,7 @@ interface WaveLeaderboardGridProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
   readonly mode: WaveLeaderboardGridMode;
+  readonly isVotingClosed?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
@@ -24,12 +26,15 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   wave,
   sort,
   mode,
+  isVotingClosed = false,
   onDropClick,
   curatedByGroupId,
   minPrice,
   maxPrice,
   priceCurrency,
 }) => {
+  const winningThreshold =
+    wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
@@ -77,6 +82,8 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
             key={drop.id}
             drop={drop}
             mode={mode}
+            isVotingClosed={isVotingClosed}
+            winningThreshold={winningThreshold}
             onDropClick={onDropClick}
           />
         ))}

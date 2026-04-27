@@ -77,6 +77,18 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
   });
 
+  it("hides voting button when voting is closed", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={drop}
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-btn")).toBeNull();
+  });
+
   it("applies artFocused styles", () => {
     const { container } = render(
       <WaveLeaderboardGalleryItem

@@ -23,6 +23,7 @@ interface BrainMobileViewContentProps {
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
+  readonly isApproveWave?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
@@ -36,12 +37,14 @@ export default function BrainMobileViewContent({
   isCurationWave,
   isMemesWave,
   isRankWave,
+  isApproveWave = false,
   onDropClick,
   onOpenQuickVote,
   onPrefetchQuickVote,
   wave,
 }: BrainMobileViewContentProps) {
-  const rankWave = isRankWave ? (wave ?? null) : null;
+  const isCompetitionWave = isRankWave || isApproveWave;
+  const rankWave = isCompetitionWave ? (wave ?? null) : null;
   const curationWave = isCurationWave ? (wave ?? null) : null;
   const faqWave = isRankWave && isMemesWave ? (wave ?? null) : null;
 

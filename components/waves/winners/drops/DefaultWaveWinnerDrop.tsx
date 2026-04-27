@@ -25,6 +25,7 @@ import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly isApprovalWave?: boolean | undefined;
 }
 
 const getRankHoverClass = (place: number | null): string => {
@@ -34,6 +35,7 @@ const getRankHoverClass = (place: number | null): string => {
 export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   winner,
   onDropClick,
+  isApprovalWave = false,
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
@@ -57,14 +59,22 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   return (
     <div
       onClick={() => onDropClick(extendedDrop)}
-      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${getRankHoverClass(winner.place)}`}
+      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${
+        isApprovalWave
+          ? "desktop-hover:hover:tw-border-iron-700"
+          : getRankHoverClass(winner.place)
+      }`}
     >
       <div className="tw-rounded-xl tw-p-4" {...touchHandlers}>
         <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-justify-between tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
           <div className="tw-flex tw-flex-1 tw-gap-x-3">
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
             <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
-              <WaveWinnersDropHeader winner={winner} showVotingInfo={false} />
+              <WaveWinnersDropHeader
+                winner={winner}
+                showVotingInfo={false}
+                isApprovalWave={isApprovalWave}
+              />
               <WaveWinnersDropContent
                 winner={winner}
                 isCompetitionDrop={true}

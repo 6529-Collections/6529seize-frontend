@@ -26,6 +26,7 @@ interface UseBrainMobileActiveViewParams {
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
+  readonly isApproveWave?: boolean | undefined;
   readonly pathname: string;
   readonly searchParams: ReadonlyURLSearchParams;
   readonly wave: ApiWave | null | undefined;
@@ -88,6 +89,7 @@ function normalizeActiveView({
   isCurationWave,
   isMemesWave,
   isRankWave,
+  isApproveWave = false,
   routeDefaultView,
   wave,
 }: {
@@ -99,12 +101,14 @@ function normalizeActiveView({
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
+  readonly isApproveWave?: boolean | undefined;
   readonly routeDefaultView: BrainView | null;
   readonly wave: ApiWave | null | undefined;
 }): BrainView {
   const hasLoadedWave = wave !== null && wave !== undefined;
+  const isCompetitionWave = isRankWave || isApproveWave;
   const waveDefaultView =
-    hasLoadedWave && isRankWave && isCompleted
+    hasLoadedWave && isRankWave && !isApproveWave && isCompleted
       ? BrainView.SUBMISSIONS
       : BrainView.DEFAULT;
 
@@ -124,16 +128,23 @@ function normalizeActiveView({
     return BrainView.DEFAULT;
   }
 
-  if (activeView === BrainView.LEADERBOARD && isRankWave && isCompleted) {
+  if (
+    activeView === BrainView.LEADERBOARD &&
+    isRankWave &&
+    !isApproveWave &&
+    isCompleted
+  ) {
     return BrainView.SUBMISSIONS;
   }
 
   const shouldResetToDefault =
-    (activeView === BrainView.LEADERBOARD && !isRankWave) ||
-    (activeView === BrainView.SUBMISSIONS && (!isRankWave || !isCompleted)) ||
+    (activeView === BrainView.LEADERBOARD && !isCompetitionWave) ||
+    (activeView === BrainView.SUBMISSIONS &&
+      (!isRankWave || isApproveWave || !isCompleted)) ||
     (activeView === BrainView.SALES && !isCurationWave) ||
-    (activeView === BrainView.WINNERS && (!isRankWave || !firstDecisionDone)) ||
-    (activeView === BrainView.OUTCOME && !isRankWave) ||
+    (activeView === BrainView.WINNERS &&
+      (!isCompetitionWave || (!isApproveWave && !firstDecisionDone))) ||
+    (activeView === BrainView.OUTCOME && !isCompetitionWave) ||
     (activeView === BrainView.MY_VOTES &&
       ((isMemesWave && !hasAuthenticatedProfile) ||
         (!isMemesWave && !isCurationWave))) ||
@@ -155,6 +166,7 @@ export function useBrainMobileActiveView({
   isCurationWave,
   isMemesWave,
   isRankWave,
+  isApproveWave = false,
   pathname,
   searchParams,
   wave,
@@ -179,7 +191,7 @@ export function useBrainMobileActiveView({
   );
   const hasLoadedWave = wave !== null && wave !== undefined;
   const waveDefaultView =
-    hasWave && hasLoadedWave && isRankWave && isCompleted
+    hasWave && hasLoadedWave && isRankWave && !isApproveWave && isCompleted
       ? BrainView.SUBMISSIONS
       : BrainView.DEFAULT;
   const baseView = hasWave
@@ -204,6 +216,7 @@ export function useBrainMobileActiveView({
     isCurationWave,
     isMemesWave,
     isRankWave,
+    isApproveWave,
     routeDefaultView,
     wave,
   });

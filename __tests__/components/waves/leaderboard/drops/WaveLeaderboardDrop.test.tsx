@@ -10,6 +10,7 @@ jest.mock(
       <div
         data-testid="default"
         data-winning-threshold={p.winningThreshold ?? ""}
+        data-is-voting-closed={String(p.isVotingClosed)}
       >
         {p.drop.id}
       </div>
@@ -80,6 +81,24 @@ describe("WaveLeaderboardDrop", () => {
     expect(screen.getByTestId("default")).toHaveAttribute(
       "data-winning-threshold",
       "7"
+    );
+  });
+
+  it("passes closed voting state to default drops", () => {
+    useWave.mockReturnValue({ isMemesWave: false });
+
+    render(
+      <WaveLeaderboardDrop
+        drop={drop}
+        wave={wave}
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("default")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
     );
   });
 });
