@@ -26,6 +26,7 @@ export default function CreateWaveDatesApproveStart({
   dates,
   setDates,
 }: CreateWaveDatesApproveStartProps) {
+  const minStartTimestamp = Time.currentMillis();
   const startDateFormatted = useMemo(
     () => formatShortDate(dates.submissionStartDate),
     [dates.submissionStartDate]
@@ -96,7 +97,7 @@ export default function CreateWaveDatesApproveStart({
               initialMonth={new Date().getMonth()}
               initialYear={new Date().getFullYear()}
               selectedTimestamp={dates.submissionStartDate}
-              minTimestamp={null}
+              minTimestamp={minStartTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleStartDateChange}
             />

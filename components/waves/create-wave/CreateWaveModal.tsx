@@ -44,7 +44,7 @@ export default function CreateWaveModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="tw-max-h-[90vh] tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-[24px] tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)]"
+            className="tw-max-h-[90vh] tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-3xl tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-8 tw-py-5">

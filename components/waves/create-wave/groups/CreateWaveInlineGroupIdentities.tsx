@@ -37,11 +37,11 @@ export default function CreateWaveInlineGroupIdentities({
     selectedWallets.some((wallet) =>
       areEqualAddresses(wallet, currentUserIdentity.wallet)
     );
-  const identityLabel = identities.length === 1 ? "identity" : "identities";
   const identitiesHelperText =
-    identities.length > 0
-      ? `${identities.length} ${identityLabel} selected`
-      : "Add identities one by one to create a group.";
+    identities.length === 0
+      ? "Add identities one by one to create a group."
+      : null;
+  const showHelperRow = !!identitiesHelperText || !!currentUserIdentity;
 
   const onCurrentUserToggle = (checked: boolean) => {
     if (!currentUserIdentity) {
@@ -71,51 +71,59 @@ export default function CreateWaveInlineGroupIdentities({
           inputClassName="tw-border-white/5 tw-bg-iron-950 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
           iconClassName="tw-top-3.5 tw-text-iron-500"
         />
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-px-1">
-          <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
-            {identitiesHelperText}
-          </p>
-          {currentUserIdentity && (
-            <label className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
-              <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
-                Include me
-              </span>
-              <span
-                className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] ${
-                  isCurrentUserSelected
-                    ? "tw-from-primary-300"
-                    : "tw-from-iron-600"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={isCurrentUserSelected}
-                  onChange={(event) =>
-                    onCurrentUserToggle(event.target.checked)
-                  }
-                  className="tw-peer tw-sr-only"
-                />
+        {showHelperRow && (
+          <div
+            className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-px-1 ${
+              identitiesHelperText ? "tw-justify-between" : "tw-justify-end"
+            }`}
+          >
+            {identitiesHelperText && (
+              <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+                {identitiesHelperText}
+              </p>
+            )}
+            {currentUserIdentity && (
+              <label className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
+                <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
+                  Include me
+                </span>
                 <span
-                  aria-hidden="true"
-                  className={`tw-relative tw-flex tw-h-5 tw-w-9 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border-2 tw-border-transparent tw-p-0 tw-transition-colors tw-duration-200 tw-ease-in-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 ${
+                  className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] ${
                     isCurrentUserSelected
-                      ? "tw-bg-primary-500"
-                      : "tw-bg-iron-700"
+                      ? "tw-from-primary-300"
+                      : "tw-from-iron-600"
                   }`}
                 >
-                  <span
-                    className={`tw-pointer-events-none tw-inline-block tw-size-4 tw-transform tw-rounded-full tw-bg-iron-50 tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out ${
-                      isCurrentUserSelected
-                        ? "tw-translate-x-[18px]"
-                        : "tw-translate-x-0"
-                    }`}
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={isCurrentUserSelected}
+                    onChange={(event) =>
+                      onCurrentUserToggle(event.target.checked)
+                    }
+                    className="tw-peer tw-sr-only"
                   />
+                  <span
+                    aria-hidden="true"
+                    className={`tw-relative tw-flex tw-h-5 tw-w-9 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border-2 tw-border-transparent tw-p-0 tw-transition-colors tw-duration-200 tw-ease-in-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 ${
+                      isCurrentUserSelected
+                        ? "tw-bg-primary-500"
+                        : "tw-bg-iron-700"
+                    }`}
+                  >
+                    <span
+                      className={`tw-pointer-events-none tw-inline-block tw-size-4 tw-transform tw-rounded-full tw-bg-iron-50 tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out ${
+                        isCurrentUserSelected
+                          ? "tw-translate-x-[18px]"
+                          : "tw-translate-x-0"
+                      }`}
+                    />
+                  </span>
                 </span>
-              </span>
-            </label>
-          )}
-        </div>
+              </label>
+            )}
+          </div>
+        )}
       </div>
       {identities.length > 0 && (
         <GroupCreateIdentitySelectedItems

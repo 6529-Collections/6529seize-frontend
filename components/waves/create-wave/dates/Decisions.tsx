@@ -76,9 +76,6 @@ export default function Decisions({
   const handleToggleSwitch = (value: boolean) => {
     // Can't enable rolling mode without subsequent decisions
     if (value && dates.subsequentDecisions.length === 0) {
-      alert(
-        "You need to add at least one decision interval before enabling recurring mode"
-      );
       return;
     }
 
@@ -101,7 +98,7 @@ export default function Decisions({
       );
 
       const newEndDate =
-        dates.endDate && minEndDate && dates.endDate > minEndDate
+        dates.endDate !== null && dates.endDate > minEndDate
           ? dates.endDate
           : twoCompleteRoundsEndDate;
 
@@ -122,7 +119,7 @@ export default function Decisions({
           dates.subsequentDecisions
         );
         const potentialNewEndDate = decisionTimes[decisionTimes.length - 1];
-        if (potentialNewEndDate) {
+        if (potentialNewEndDate !== undefined) {
           newEndDate = potentialNewEndDate;
         }
       }
@@ -146,7 +143,6 @@ export default function Decisions({
             tooltipPosition="bottom"
             tooltipWidth="tw-w-80"
           />
-          {/* Badge moved to collapsed content for more compact display */}
         </div>
       }
       isExpanded={isExpanded}
@@ -166,8 +162,8 @@ export default function Decisions({
             {dates.subsequentDecisions.length === 0 && (
               <span className="tw-text-primary-300">
                 {" "}
-                With a fixed schedule, the last announcement marks your wave's
-                end date.
+                With a fixed schedule, the last announcement marks your
+                wave&apos;s end date.
               </span>
             )}
           </p>
@@ -224,7 +220,7 @@ export default function Decisions({
                 <div className="tw-mt-3 tw-rounded-lg tw-border tw-border-primary-500/30 tw-bg-primary-500/20 tw-p-3 tw-shadow-inner">
                   <p className="tw-text-primary-100 tw-mb-0 tw-text-xs">
                     <strong>Recurring cycles enabled.</strong> Announcements
-                    will repeat until your wave's end date.
+                    will repeat until your wave&apos;s end date.
                   </p>
                 </div>
               )}
