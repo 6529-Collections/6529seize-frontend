@@ -84,9 +84,11 @@ const drop: ExtendedDrop = {
 const renderComp = ({
   mobile = false,
   dropOverride = drop,
+  isVotingClosed = false,
 }: {
   readonly mobile?: boolean;
   readonly dropOverride?: ExtendedDrop;
+  readonly isVotingClosed?: boolean;
 } = {}) => {
   const onReply = jest.fn();
   const onQuote = jest.fn();
@@ -101,6 +103,7 @@ const renderComp = ({
       onReply={onReply}
       onQuote={onQuote}
       onQuoteClick={jest.fn()}
+      isVotingClosed={isVotingClosed}
     />
   );
   return { onReply, onQuote };
@@ -126,6 +129,14 @@ describe("OngoingParticipationDrop", () => {
     mobileMenuProps.onReply();
     expect(onReply).toHaveBeenCalledWith({ drop, partId: "p1" });
     expect(mobileMenuProps.setOpen).toBeDefined();
+  });
+
+  it("hides voting in the mobile menu when voting is closed", () => {
+    renderComp({ mobile: true, isVotingClosed: true });
+
+    expect(
+      (mobileMenuProps as { readonly showVoting?: boolean }).showVoting
+    ).toBe(false);
   });
 
   it("renders the identity profile card and filters identity metadata", () => {

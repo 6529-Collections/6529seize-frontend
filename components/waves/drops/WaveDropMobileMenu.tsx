@@ -38,6 +38,7 @@ interface WaveDropMobileMenuProps {
   readonly onBoostAnimation?: (() => void) | undefined;
   readonly showOpenOption?: boolean | undefined;
   readonly showCopyOption?: boolean | undefined;
+  readonly showVoting?: boolean | undefined;
 }
 
 type TimeoutRef = {
@@ -187,6 +188,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   canSetPinnedDrop,
   canDelete,
   closeMenu,
+  showVoting,
 }: {
   readonly extendedDrop: ExtendedDrop;
   readonly drop: ApiDrop;
@@ -208,6 +210,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly canSetPinnedDrop: boolean;
   readonly canDelete: boolean;
   readonly closeMenu: () => void;
+  readonly showVoting: boolean;
 }) {
   return (
     <>
@@ -300,7 +303,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         isMobile={true}
         onMarkUnread={closeMenu}
       />
-      {!isAuthor && (
+      {showVoting && !isAuthor && (
         <WaveDropActionsRate drop={drop} isMobile={true} onRated={closeMenu} />
       )}
       {showOptions &&
@@ -337,6 +340,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   onBoostAnimation,
   showOpenOption = true,
   showCopyOption = true,
+  showVoting = true,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { isMemesWave } = useSeizeSettings();
@@ -452,6 +456,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                 canSetPinnedDrop={canSetPinnedDrop}
                 canDelete={canDelete}
                 closeMenu={closeMenu}
+                showVoting={showVoting}
               />
             )}
           </div>

@@ -88,10 +88,43 @@ describe("ParticipationDropRatingsTotalSection", () => {
     expect(screen.queryByText("Approved")).not.toBeInTheDocument();
   });
 
+  it("does not show Approved for rank-only approve drops", () => {
+    const { rerender } = render(
+      <ParticipationDropRatingsTotalSection
+        drop={{ ...drop, rating: 6, rank: 1 }}
+        theme={theme}
+        ratingsData={{ ...ratingsData, currentRating: 6 }}
+        rank={1}
+        winningThreshold={8}
+      />
+    );
+
+    expect(screen.getByText("Needs 2")).toBeInTheDocument();
+    expect(screen.queryByText("Approved")).not.toBeInTheDocument();
+
+    rerender(
+      <ParticipationDropRatingsTotalSection
+        drop={{ ...drop, rating: 8, rank: 1 }}
+        theme={theme}
+        ratingsData={{ ...ratingsData, currentRating: 8 }}
+        rank={1}
+        winningThreshold={8}
+      />
+    );
+
+    expect(screen.getByText("Reached threshold")).toBeInTheDocument();
+    expect(screen.queryByText("Approved")).not.toBeInTheDocument();
+  });
+
   it("shows Approved for official approved drops", () => {
     render(
       <ParticipationDropRatingsTotalSection
-        drop={{ ...drop, rating: 8, rank: 1 }}
+        drop={{
+          ...drop,
+          rating: 8,
+          rank: 1,
+          winning_context: { place: 1, awards: [], decision_time: 123 },
+        }}
         theme={theme}
         ratingsData={{ ...ratingsData, currentRating: 8 }}
         rank={1}

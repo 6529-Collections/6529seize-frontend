@@ -111,4 +111,22 @@ describe("ParticipationDropHeader", () => {
     );
     expect(screen.queryByTestId("badge")).toBeNull();
   });
+
+  it("does not show approval badge for rank-only approve drops", () => {
+    const drop = {
+      ...baseDrop,
+      rank: 1,
+    };
+
+    render(
+      <ParticipationDropHeader
+        drop={drop}
+        showWaveInfo={false}
+        winningThreshold={10}
+      />
+    );
+
+    expect(screen.queryByTestId("approval-badge")).toBeNull();
+    expect(screen.queryByTestId("badge")).toBeNull();
+  });
 });

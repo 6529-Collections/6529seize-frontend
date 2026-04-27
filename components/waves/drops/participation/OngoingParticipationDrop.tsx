@@ -200,6 +200,7 @@ export default function OngoingParticipationDrop({
           setOpen={setIsSlideUp}
           onReply={handleOnReply}
           onAddReaction={handleOnAddReaction}
+          showVoting={!isVotingClosed}
         />
       )}
     </ParticipationDropContainer>

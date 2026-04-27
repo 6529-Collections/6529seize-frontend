@@ -31,7 +31,7 @@ export const isOfficiallyApprovedDrop = (
     return false;
   }
 
-  return drop.winning_context !== undefined || typeof drop.rank === "number";
+  return Boolean(drop.winning_context);
 };
 
 export const getApprovalDropStatus = ({
