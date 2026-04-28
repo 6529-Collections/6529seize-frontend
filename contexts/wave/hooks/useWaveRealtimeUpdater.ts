@@ -22,7 +22,10 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 import { useQueryClient } from "@tanstack/react-query";
-import { updateAttachmentInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import {
+  updateAttachmentInCachedDrops,
+  updateDropInCachedDrops,
+} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -197,6 +200,8 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
+      updateDropInCachedDrops(queryClient, drop);
+
       const waveId = drop.wave.id;
 
       if (isWaveMuted(waveId)) {
@@ -327,6 +332,7 @@ export function useWaveRealtimeUpdater({
       refreshEligibility,
       isWaveMuted,
       invalidateNotifications,
+      queryClient,
     ]
   );
 

@@ -1,6 +1,11 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  updateAttachmentInCachedDrops,
+  updateDropInCachedDrops,
+} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiCurationDropsPage } from "@/generated/models/ApiCurationDropsPage";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -14,7 +19,11 @@ import {
 } from "@/helpers/waves/wave-drops.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 
@@ -33,6 +42,7 @@ export function useWaveCurationDrops({
 }) {
   const normalizedCurationId = curationId?.trim() ?? "";
   const waveId = wave?.id ?? null;
+  const queryClient = useQueryClient();
   const waveMin = useMemo(() => (wave ? toApiWaveMin(wave) : null), [wave]);
   const queryKey = useMemo(
     () =>
@@ -121,9 +131,20 @@ export function useWaveCurationDrops({
           return;
         }
 
+        updateDropInCachedDrops(queryClient, message);
         requestRefetch();
       },
-      [requestRefetch, waveId]
+      [queryClient, requestRefetch, waveId]
+    )
+  );
+
+  useWebSocketMessage<ApiAttachment>(
+    WsMessageType.ATTACHMENT_STATUS_UPDATE,
+    useCallback(
+      (attachment) => {
+        updateAttachmentInCachedDrops(queryClient, attachment);
+      },
+      [queryClient]
     )
   );
 

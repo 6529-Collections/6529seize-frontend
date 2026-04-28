@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey } from "../ReactQueryWrapper";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -53,21 +54,80 @@ function replaceAttachment(value: unknown, attachment: ApiAttachment): unknown {
   return changed ? next : value;
 }
 
+function isMatchingDrop(
+  value: Record<string, unknown>,
+  dropId: string
+): boolean {
+  return value["id"] === dropId;
+}
+
+function replaceDrop(value: unknown, drop: ApiDrop): unknown {
+  if (Array.isArray(value)) {
+    let changed = false;
+    const next = value.map((item) => {
+      const updated = replaceDrop(item, drop);
+      if (updated !== item) {
+        changed = true;
+      }
+      return updated;
+    });
+    return changed ? next : value;
+  }
+
+  if (!isRecord(value)) {
+    return value;
+  }
+
+  if (isMatchingDrop(value, drop.id)) {
+    return {
+      ...drop,
+      ...(value["type"] !== undefined && { type: value["type"] }),
+      ...(value["stableKey"] !== undefined && { stableKey: value["stableKey"] }),
+      ...(value["stableHash"] !== undefined && {
+        stableHash: value["stableHash"],
+      }),
+    };
+  }
+
+  let changed = false;
+  const next: Record<string, unknown> = {};
+  for (const [key, item] of Object.entries(value)) {
+    const updated = replaceDrop(item, drop);
+    next[key] = updated;
+    if (updated !== item) {
+      changed = true;
+    }
+  }
+
+  return changed ? next : value;
+}
+
+const CACHED_DROP_QUERY_KEYS = [
+  QueryKey.DROPS,
+  QueryKey.DROPS_LEADERBOARD,
+  QueryKey.DROP,
+  QueryKey.PROFILE_DROPS,
+  QueryKey.FEED_ITEMS,
+] as const;
+
 export function updateAttachmentInCachedDrops(
   queryClient: QueryClient,
   attachment: ApiAttachment
 ): void {
-  const queryKeys = [
-    QueryKey.DROPS,
-    QueryKey.DROPS_LEADERBOARD,
-    QueryKey.DROP,
-    QueryKey.PROFILE_DROPS,
-    QueryKey.FEED_ITEMS,
-  ];
-
-  queryKeys.forEach((queryKey) => {
+  CACHED_DROP_QUERY_KEYS.forEach((queryKey) => {
     queryClient.setQueriesData({ queryKey: [queryKey] }, (oldData) =>
       replaceAttachment(oldData, attachment)
+    );
+  });
+}
+
+export function updateDropInCachedDrops(
+  queryClient: QueryClient,
+  drop: ApiDrop
+): void {
+  CACHED_DROP_QUERY_KEYS.forEach((queryKey) => {
+    queryClient.setQueriesData({ queryKey: [queryKey] }, (oldData) =>
+      replaceDrop(oldData, drop)
     );
   });
 }

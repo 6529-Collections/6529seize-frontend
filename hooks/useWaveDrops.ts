@@ -7,7 +7,10 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { updateAttachmentInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import {
+  updateAttachmentInCachedDrops,
+  updateDropInCachedDrops,
+} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropType } from "@/generated/models/ApiDropType";
@@ -151,9 +154,10 @@ export function useWaveDrops({
           return;
         }
 
+        updateDropInCachedDrops(queryClient, message);
         requestRefetch();
       },
-      [requestRefetch, waveId]
+      [queryClient, requestRefetch, waveId]
     )
   );
 
