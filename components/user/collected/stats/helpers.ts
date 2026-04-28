@@ -5,7 +5,7 @@ import {
 import { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
 import type { ApiCollectedStatsSeason } from "@/generated/models/ApiCollectedStatsSeason";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import type {
   CollectedHeaderMetric,

@@ -4,7 +4,7 @@ import type { CollectedCollectionType } from "@/entities/IProfile";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export type CollectedHeaderMetric = {
   readonly id: string;

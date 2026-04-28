@@ -64,7 +64,7 @@ export const WaveLeaderboardRightSidebarBoostedDrops =
       return (
         <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
+            <div className="tw-flex tw-items-center tw-gap-x-1.5">
               <BoostIcon className="tw-size-4 tw-text-amber-500" />
               <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
                 Trending
