@@ -17,6 +17,7 @@ export function getClaimSeason(claim: MintingClaim): string {
   const attr = (claim.attributes ?? []).find(
     (a) => a.trait_type?.trim().toLowerCase() === "type - season"
   );
+
   if (attr?.value != null) return String(attr.value).trim();
   return "";
 }

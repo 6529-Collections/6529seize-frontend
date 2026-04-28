@@ -19,8 +19,6 @@ export class ApiIdentityActivity {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
-
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "last_date",
@@ -42,3 +40,4 @@ export class ApiIdentityActivity {
     public constructor() {
     }
 }
+

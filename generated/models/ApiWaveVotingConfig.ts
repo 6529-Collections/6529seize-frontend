@@ -13,6 +13,7 @@
 
 import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
@@ -24,6 +25,7 @@ export class ApiWaveVotingConfig {
     * Only relevant when credit_type=REP. The REP category which is usable as credit. If not set then all categories will be usable as voting credits.
     */
     'credit_category': string | null;
+    'credit_nfts': Array<ApiWaveCreditNft> | null;
     'creditor': ApiProfileMin | null;
     /**
     * If true then the votes must be signed by voters.
@@ -34,8 +36,6 @@ export class ApiWaveVotingConfig {
     'forbid_negative_votes': boolean;
 
     static readonly discriminator: string | undefined = undefined;
-
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
@@ -54,6 +54,12 @@ export class ApiWaveVotingConfig {
             "name": "credit_category",
             "baseName": "credit_category",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "credit_nfts",
+            "baseName": "credit_nfts",
+            "type": "Array<ApiWaveCreditNft>",
             "format": ""
         },
         {
@@ -94,5 +100,6 @@ export class ApiWaveVotingConfig {
     public constructor() {
     }
 }
+
 
 

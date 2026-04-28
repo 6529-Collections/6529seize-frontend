@@ -67,6 +67,7 @@ export const getOptimisticDrop = (
       forbid_negative_votes: wave.voting.forbid_negative_votes,
       submission_type: wave.participation.submission_strategy?.type ?? null,
       identity_wave: wave.identity_wave,
+      voting_credit_nfts: wave.voting.credit_nfts,
     },
     author: {
       id: connectedProfile.id,

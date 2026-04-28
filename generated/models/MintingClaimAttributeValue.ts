@@ -13,20 +13,18 @@
 
 import { HttpFile } from '../http/http';
 
-/**
- * @type MintingClaimAttributeValue
- * Type
- * @export
- */
-export type MintingClaimAttributeValue = number | string;
+export class MintingClaimAttributeValue {
 
-/**
-* @type MintingClaimAttributeValueClass
-* @export
-*/
-export class MintingClaimAttributeValueClass {
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
+    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+    ];
+
+    static getAttributeTypeMap() {
+        return MintingClaimAttributeValue.attributeTypeMap;
+    }
+
+    public constructor() {
+    }
 }
 

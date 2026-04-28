@@ -20,5 +20,6 @@ export enum ApiWaveCreditType {
     Tdh = 'TDH',
     Rep = 'REP',
     Xtdh = 'XTDH',
-    TdhPlusXtdh = 'TDH_PLUS_XTDH'
+    TdhPlusXtdh = 'TDH_PLUS_XTDH',
+    CardSetTdh = 'CARD_SET_TDH'
 }
