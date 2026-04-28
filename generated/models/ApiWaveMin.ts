@@ -11,14 +11,10 @@
  * Do not edit the class manually.
  */
 
+import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
 import { HttpFile } from '../http/http';
-
-interface ApiWaveCreditNft {
-    'contract': string;
-    'token_id': number;
-}
 
 export class ApiWaveMin {
     'id': string;
@@ -197,5 +193,6 @@ export class ApiWaveMin {
     public constructor() {
     }
 }
+
 
 

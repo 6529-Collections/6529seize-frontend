@@ -13,32 +13,12 @@
 
 import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
 import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
-import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
+import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiCreateWaveOutcome } from '../models/ApiCreateWaveOutcome';
-import { ApiIntRange } from '../models/ApiIntRange';
-import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
-import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { HttpFile } from '../http/http';
-
-interface ApiWaveCreditNft {
-    'contract': string;
-    'token_id': number;
-}
-
-interface ApiCreateNewWaveVotingConfig {
-    'scope': ApiCreateNewWaveScope;
-    'credit_type': ApiWaveCreditType;
-    'credit_scope'?: ApiWaveCreditScope;
-    'credit_category': string | null;
-    'credit_nfts'?: Array<ApiWaveCreditNft> | null;
-    'creditor_id': string | null;
-    'signature_required': boolean;
-    'period'?: ApiIntRange;
-    'forbid_negative_votes': boolean;
-}
 
 export class ApiCreateNewWave {
     /**
@@ -122,3 +102,4 @@ export class ApiCreateNewWave {
     public constructor() {
     }
 }
+
