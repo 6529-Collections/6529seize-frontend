@@ -395,6 +395,29 @@ describe("create-wave.helpers", () => {
           amount: 25,
         },
       ]);
+      expect(res.wave.max_winners).toBeNull();
+    });
+
+    it("maps approve outcome max winners to the wave config", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.outcomes = [
+        {
+          type: CreateWaveOutcomeType.MANUAL,
+          title: "Manual action",
+          credit: null,
+          category: null,
+          maxWinners: 3,
+          winnersConfig: null,
+        },
+      ] as any;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.max_winners).toBe(3);
     });
 
     it("filters rank outcomes with missing or non-positive total amounts", () => {

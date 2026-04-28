@@ -275,6 +275,22 @@ const getOutcomes = ({
   }
 };
 
+const getApproveMaxWinners = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): number | null => {
+  if (config.overview.type !== ApiWaveType.Approve) {
+    return null;
+  }
+
+  return (
+    config.outcomes.find((outcome) =>
+      isPositiveFiniteNumber(outcome.maxWinners)
+    )?.maxWinners ?? null
+  );
+};
+
 /**
  * Calculates the last decision time that will occur in a rolling wave before the given end date
  * @param firstDecisionTime The timestamp of the first decision
@@ -439,7 +455,7 @@ export const getCreateNewWaveBody = ({
           ? config.approval.threshold
           : null,
       // TODO - should be in outcomes
-      max_winners: null,
+      max_winners: getApproveMaxWinners({ config }),
       max_votes_per_identity_to_drop:
         config.overview.type === ApiWaveType.Chat
           ? null
