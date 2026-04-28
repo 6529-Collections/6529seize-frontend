@@ -2,18 +2,24 @@
 
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  ArrowTopRightOnSquareIcon,
   ArrowDownTrayIcon,
+  ArrowTopRightOnSquareIcon,
   DocumentIcon,
   EyeIcon,
   EyeSlashIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import useCapacitor from "@/hooks/useCapacitor";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 import clsx from "clsx";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Tooltip } from "react-tooltip";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "blob:"]);
 
@@ -40,11 +46,71 @@ const CSV_PREVIEW_MAX_COLUMNS = 12;
 const CSV_PREVIEW_MAX_CHARS = 500_000;
 
 const CSV_PREVIEW_SIZE_EXCEEDED = "__CSV_PREVIEW_SIZE_EXCEEDED__";
+const TRUSTED_BADGE_BUTTON_CLASS =
+  "tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-500/10 tw-text-emerald-400 tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-emerald-500/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-emerald-400/30 desktop-hover:hover:tw-bg-emerald-500/15 desktop-hover:hover:tw-text-emerald-300";
+const TRUSTED_BADGE_ICON_CLASS = "tw-flex-shrink-0 tw-text-current";
+const TRUSTED_BADGE_BUTTON_SIZE_CLASS_BY_SIZE = {
+  default: "tw-h-5 tw-w-5",
+  compact: "tw-h-[18px] tw-w-[18px]",
+} as const;
+const TRUSTED_BADGE_ICON_SIZE_CLASS_BY_SIZE = {
+  default: "tw-h-2.5 tw-w-2.5",
+  compact: "tw-h-[9px] tw-w-[9px]",
+} as const;
 
 const CSV_PREVIEW_TIMEOUT_MESSAGE =
   "CSV preview timed out. Please download the file.";
 const CSV_PREVIEW_SIZE_MESSAGE =
   "CSV preview exceeds the browser size limit. Please download the file.";
+
+function TrustedAttachmentBadge({
+  size = "default",
+}: {
+  readonly size?: "default" | "compact";
+}) {
+  const isMobile = useIsMobileDevice();
+  const { hasTouchScreen } = useDeviceInfo();
+  const id = useId();
+  const tooltipId = `trusted-attachment-badge-${id}`;
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const showTooltip = !isMobile && !hasTouchScreen;
+  const dataTooltipId = showTooltip ? tooltipId : undefined;
+  const describedById = showTooltip && isTooltipOpen ? tooltipId : undefined;
+  const buttonSizeClassName = TRUSTED_BADGE_BUTTON_SIZE_CLASS_BY_SIZE[size];
+  const iconSizeClassName = TRUSTED_BADGE_ICON_SIZE_CLASS_BY_SIZE[size];
+
+  return (
+    <>
+      <button
+        type="button"
+        onMouseEnter={() => setIsTooltipOpen(true)}
+        onMouseLeave={() => setIsTooltipOpen(false)}
+        className={`${TRUSTED_BADGE_BUTTON_CLASS} ${buttonSizeClassName}`}
+        aria-label="Trusted attachment"
+        aria-describedby={describedById}
+        {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
+      >
+        <FontAwesomeIcon
+          icon={faShieldHalved}
+          className={`${TRUSTED_BADGE_ICON_CLASS} ${iconSizeClassName}`}
+        />
+      </button>
+      {showTooltip && (
+        <Tooltip
+          id={tooltipId}
+          place="top"
+          positionStrategy="fixed"
+          offset={8}
+          opacity={1}
+          style={TOOLTIP_STYLES}
+          isOpen={isTooltipOpen}
+        >
+          <span className="tw-text-xs">Trusted — still use caution</span>
+        </Tooltip>
+      )}
+    </>
+  );
+}
 
 function throwCsvPreviewSizeExceeded(onSizeExceeded: () => void): never {
   onSizeExceeded();
@@ -665,12 +731,15 @@ export default function AttachmentMediaDisplay({
         <div className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800 tw-text-iron-300">
           <Icon className="tw-size-6" aria-hidden="true" />
         </div>
-        <div className="tw-min-w-0 tw-flex-1">
+        <div className="tw-min-w-0 tw-flex-1 tw-space-y-1">
           <div className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
             {fileName}
           </div>
-          <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-            {label}
+          <div className="tw-flex tw-items-center tw-gap-x-1.5">
+            <TrustedAttachmentBadge size="compact" />
+            <div className="tw-text-xs tw-font-medium tw-text-iron-500">
+              {label}
+            </div>
           </div>
         </div>
         {!disableMediaInteraction && (

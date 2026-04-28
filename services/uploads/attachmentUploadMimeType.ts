@@ -1,8 +1,8 @@
 import { ApiAttachmentUploadMimeType } from "@/generated/models/ApiAttachmentUploadMimeType";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 
-const PDF_MAX_SIZE = 25 * 1024 * 1024;
-const CSV_MAX_SIZE = 10 * 1024 * 1024;
+const MAX_PDF_BYTES = 25 * 1024 * 1024;
+const MAX_CSV_BYTES = 50 * 1024 * 1024;
 
 function normalizeMimeType(mimeType: string): string {
   if (!mimeType) return "";
@@ -89,7 +89,7 @@ export function validateAttachmentUploadFile(file: File): void {
 
   if (
     contentType === ApiAttachmentUploadMimeType.ApplicationPdf &&
-    file.size > PDF_MAX_SIZE
+    file.size > MAX_PDF_BYTES
   ) {
     throw new Error(
       "PDF uploads must be 25 MB or smaller and no more than 100 pages."
@@ -98,8 +98,8 @@ export function validateAttachmentUploadFile(file: File): void {
 
   if (
     contentType === ApiAttachmentUploadMimeType.TextCsv &&
-    file.size > CSV_MAX_SIZE
+    file.size > MAX_CSV_BYTES
   ) {
-    throw new Error("CSV uploads must be 10 MB or smaller.");
+    throw new Error("CSV uploads must be 50 MB or smaller.");
   }
 }

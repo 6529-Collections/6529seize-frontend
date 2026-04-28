@@ -1,9 +1,14 @@
 "use client";
 
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react";
 
 const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "ipfs:", "ar:"]);
+const CONFIRM_RESET_MS = 2500;
 
 function getSafeUrl(rawUrl: string): string | null {
   try {
@@ -36,22 +41,73 @@ export default function UnsupportedMediaLink({
 }) {
   const safeUrl = getSafeUrl(media_url);
   const label = getLinkLabel(media_url);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const confirmResetTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (confirmResetTimeoutRef.current !== null) {
+        globalThis.window.clearTimeout(confirmResetTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const scheduleConfirmReset = () => {
+    if (confirmResetTimeoutRef.current !== null) {
+      globalThis.window.clearTimeout(confirmResetTimeoutRef.current);
+    }
+
+    confirmResetTimeoutRef.current = globalThis.window.setTimeout(() => {
+      setConfirmOpen(false);
+      confirmResetTimeoutRef.current = null;
+    }, CONFIRM_RESET_MS);
+  };
+
+  const handleOpen = () => {
+    if (!safeUrl) {
+      return;
+    }
+
+    if (!confirmOpen) {
+      setConfirmOpen(true);
+      scheduleConfirmReset();
+      return;
+    }
+
+    if (confirmResetTimeoutRef.current !== null) {
+      globalThis.window.clearTimeout(confirmResetTimeoutRef.current);
+      confirmResetTimeoutRef.current = null;
+    }
+
+    setConfirmOpen(false);
+    globalThis.window.open(safeUrl, "_blank", "noopener,noreferrer");
+  };
 
   if (!safeUrl || disableMediaInteraction) {
     return (
-      <span className="tw-break-all tw-text-sm tw-text-iron-400">{label}</span>
+      <span className="tw-inline-flex tw-w-full tw-items-center tw-gap-x-4 tw-rounded-md tw-border tw-border-solid tw-border-amber-700/60 tw-bg-amber-950/25 tw-px-4 tw-py-3 tw-text-amber-200">
+        <ExclamationTriangleIcon className="tw-size-5 tw-flex-shrink-0" />
+        <span className="tw-min-w-0 tw-break-all tw-text-sm">{label}</span>
+      </span>
     );
   }
 
   return (
-    <a
-      href={safeUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-x-2 tw-break-all tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline desktop-hover:hover:tw-text-primary-300"
+    <button
+      type="button"
+      onClick={handleOpen}
+      className="tw-inline-flex tw-w-full tw-items-center tw-gap-x-4 tw-rounded-md tw-border tw-border-solid tw-border-amber-700/60 tw-bg-amber-950/25 tw-px-4 tw-py-3 tw-text-left tw-transition desktop-hover:hover:tw-border-amber-500/80 desktop-hover:hover:tw-bg-amber-950/40"
     >
-      <span className="tw-min-w-0 tw-break-all">{label}</span>
-      <ArrowTopRightOnSquareIcon className="tw-size-4 tw-flex-shrink-0" />
-    </a>
+      <ExclamationTriangleIcon className="tw-size-5 tw-flex-shrink-0 tw-text-amber-300" />
+      <span className="tw-min-w-0 tw-flex-1">
+        <span className="tw-block tw-text-[9px] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-amber-400">
+          {confirmOpen ? "Open anyway — may be unsafe" : "Unknown file"}
+        </span>
+        <span className="tw-block tw-break-all tw-text-[13px] tw-font-medium tw-text-amber-100">
+          {label}
+        </span>
+      </span>
+      <ArrowTopRightOnSquareIcon className="tw-size-5 tw-flex-shrink-0 tw-text-amber-300" />
+    </button>
   );
 }
