@@ -13,12 +13,24 @@ const ATTRIBUTE_TRAIT_KEYS = (
   Object.keys(getInitialTraitsValues()) as (keyof TraitsData)[]
 ).filter((k) => k !== "title" && k !== "description");
 
+export function stringifyClaimAttributeValue(value: unknown): string {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value);
+  }
+  return "";
+}
+
 export function getClaimSeason(claim: MintingClaim): string {
   const attr = (claim.attributes ?? []).find(
     (a) => a.trait_type?.trim().toLowerCase() === "type - season"
   );
 
-  if (attr?.value != null) return String(attr.value).trim();
+  if (attr?.value != null)
+    return stringifyClaimAttributeValue(attr.value).trim();
   return "";
 }
 
