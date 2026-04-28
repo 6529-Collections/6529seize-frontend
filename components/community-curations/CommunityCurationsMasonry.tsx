@@ -24,6 +24,7 @@ import {
 
 const MASONRY_COLUMN_WIDTH = 300;
 const MASONRY_GUTTER = 16;
+const INFINITE_SCROLL_ROOT_MARGIN = "1200px 0px";
 const SCROLL_IDLE_DELAY_MS = 120;
 
 type PanelViewport = {
@@ -185,7 +186,11 @@ function CommunityCurationsInfiniteScrollTrigger({
 
   useIntersectionObserver(
     triggerRef,
-    { root: scrollContainer, rootMargin: "160px 0px", threshold: 0 },
+    {
+      root: scrollContainer,
+      rootMargin: INFINITE_SCROLL_ROOT_MARGIN,
+      threshold: 0,
+    },
     handleIntersection,
     Boolean(scrollContainer)
   );

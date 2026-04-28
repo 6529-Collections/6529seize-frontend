@@ -16,14 +16,33 @@ const MEDIA_FILTER_OPTIONS: CommonSelectItem<CommunityCurationsMediaFilter>[] =
     { key: "all", label: "All", value: "all" },
     { key: "image", label: "Images", value: "image" },
     { key: "video", label: "Video", value: "video" },
-    { key: "audio", label: "Audio", value: "audio" },
   ];
 
-function CommunityCurationsSkeletonCard() {
+const COMMUNITY_CURATIONS_SKELETON_CARDS = [
+  { mediaHeight: 210, lines: 2 },
+  { mediaHeight: 320, lines: 4 },
+  { mediaHeight: 250, lines: 3 },
+  { mediaHeight: 390, lines: 2 },
+  { mediaHeight: 280, lines: 4 },
+  { mediaHeight: 220, lines: 3 },
+  { mediaHeight: 350, lines: 3 },
+  { mediaHeight: 260, lines: 2 },
+] as const;
+
+function CommunityCurationsSkeletonCard({
+  lines,
+  mediaHeight,
+}: {
+  readonly lines: number;
+  readonly mediaHeight: number;
+}) {
   return (
-    <div className="tw-grid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/75 md:tw-grid-cols-[minmax(0,0.92fr)_minmax(0,1fr)]">
-      <div className="tw-aspect-[16/11] tw-animate-pulse tw-bg-iron-900 md:tw-aspect-auto" />
-      <div className="tw-p-5">
+    <div className="tw-mb-4 tw-break-inside-avoid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/75">
+      <div
+        className="tw-animate-pulse tw-bg-iron-900"
+        style={{ height: mediaHeight }}
+      />
+      <div className="tw-p-4">
         <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-size-8 tw-animate-pulse tw-rounded-full tw-bg-iron-800" />
           <div className="tw-flex-1 tw-space-y-2">
@@ -33,10 +52,30 @@ function CommunityCurationsSkeletonCard() {
         </div>
         <div className="tw-mt-5 tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800" />
         <div className="tw-mt-3 tw-space-y-2">
-          <div className="tw-h-3 tw-animate-pulse tw-rounded tw-bg-iron-900" />
-          <div className="tw-h-3 tw-w-5/6 tw-animate-pulse tw-rounded tw-bg-iron-900" />
+          {Array.from({ length: lines }).map((_, index) => (
+            <div
+              key={`community-curations-skeleton-line-${index}`}
+              className={`tw-h-3 tw-animate-pulse tw-rounded tw-bg-iron-900 ${
+                index === lines - 1 ? "tw-w-2/3" : "tw-w-full"
+              }`}
+            />
+          ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function CommunityCurationsSkeletonGrid() {
+  return (
+    <div className="tw-[column-gap:1rem] tw-[column-width:300px]">
+      {COMMUNITY_CURATIONS_SKELETON_CARDS.map((card, index) => (
+        <CommunityCurationsSkeletonCard
+          key={`community-curations-skeleton-${index}`}
+          lines={card.lines}
+          mediaHeight={card.mediaHeight}
+        />
+      ))}
     </div>
   );
 }
@@ -115,15 +154,7 @@ export default function CommunityCurations() {
         </div>
 
         <div className="tw-mt-6">
-          {isInitialLoading && (
-            <div className="tw-flex tw-flex-col tw-gap-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <CommunityCurationsSkeletonCard
-                  key={`community-curations-skeleton-${index}`}
-                />
-              ))}
-            </div>
-          )}
+          {isInitialLoading && <CommunityCurationsSkeletonGrid />}
 
           {!isInitialLoading && isError && (
             <CommunityCurationsEmptyState

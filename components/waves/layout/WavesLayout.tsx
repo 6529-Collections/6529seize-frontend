@@ -1,8 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import ConnectWallet from "../../common/ConnectWallet";
@@ -39,12 +37,10 @@ function getConnectPrompt(
 }
 
 function getNotAuthenticatedContent({
-  activeWaveId,
   children,
   containerClassName,
   isApp,
 }: {
-  readonly activeWaveId: string | null;
   readonly children: ReactNode;
   readonly containerClassName: string;
   readonly isApp: boolean;
@@ -55,10 +51,7 @@ function getNotAuthenticatedContent({
 
   return (
     <div className="tw-flex-1" id="waves-content">
-      <WavesDesktop
-        showLeftSidebar={true}
-        allowMainContentWithoutWave={activeWaveId === null}
-      >
+      <WavesDesktop showLeftSidebar={true}>
         <div className={containerClassName}>{children}</div>
       </WavesDesktop>
     </div>
@@ -69,9 +62,6 @@ function getNotAuthenticatedContent({
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
 
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
@@ -90,7 +80,6 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     );
   } else if (contentState === "not-authenticated") {
     content = getNotAuthenticatedContent({
-      activeWaveId,
       children,
       containerClassName,
       isApp,

@@ -4,7 +4,7 @@ import {
   getCommunityCurationsMediaType,
   type CommunityCurationsMediaType,
 } from "@/components/community-curations/communityCurations.helpers";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiCuratedProfileWaveDropsPage } from "@/generated/models/ApiCuratedProfileWaveDropsPage";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -15,7 +15,6 @@ export type CommunityCurationsMediaFilter =
   | Exclude<CommunityCurationsMediaType, "other">;
 
 const COMMUNITY_CURATIONS_DROPS_QUERY_KEY = "COMMUNITY_CURATIONS_DROPS";
-const TEMPORARY_COMMUNITY_CURATIONS_SOURCE_CURATION_NAME = "ART";
 
 interface UseCommunityCurationsDropsProps {
   readonly mediaFilter?: CommunityCurationsMediaFilter | undefined;
@@ -23,7 +22,9 @@ interface UseCommunityCurationsDropsProps {
   readonly enabled?: boolean | undefined;
 }
 
-const getUniqueDrops = (pages: ApiDrop[][] | undefined): ExtendedDrop[] => {
+const getUniqueDrops = (
+  pages: ApiCuratedProfileWaveDropsPage[] | undefined
+): ExtendedDrop[] => {
   if (!pages) {
     return [];
   }
@@ -31,17 +32,19 @@ const getUniqueDrops = (pages: ApiDrop[][] | undefined): ExtendedDrop[] => {
   const seen = new Set<string>();
   const drops: ExtendedDrop[] = [];
 
-  for (const drop of pages.flat()) {
-    if (seen.has(drop.id)) {
-      continue;
+  for (const page of pages) {
+    for (const drop of page.data) {
+      if (seen.has(drop.id)) {
+        continue;
+      }
+      seen.add(drop.id);
+      drops.push({
+        ...drop,
+        type: DropSize.FULL,
+        stableKey: drop.id,
+        stableHash: drop.id,
+      });
     }
-    seen.add(drop.id);
-    drops.push({
-      ...drop,
-      type: DropSize.FULL,
-      stableKey: drop.id,
-      stableHash: drop.id,
-    });
   }
 
   return drops;
@@ -53,25 +56,19 @@ const matchesMediaFilter = (
 ): boolean =>
   mediaFilter === "all" || getCommunityCurationsMediaType(drop) === mediaFilter;
 
-const fetchTemporaryCommunityCurationsDrops = ({
-  cursor,
+const fetchCommunityCurationsDrops = ({
   limit,
+  page,
 }: {
-  readonly cursor: number | null;
   readonly limit: number;
-}): Promise<ApiDrop[]> => {
-  const params: Record<string, string> = {
-    curation_name: TEMPORARY_COMMUNITY_CURATIONS_SOURCE_CURATION_NAME,
-    limit: `${limit}`,
-  };
-
-  if (typeof cursor === "number") {
-    params["serial_no_less_than"] = `${cursor}`;
-  }
-
-  return commonApiFetch<ApiDrop[]>({
-    endpoint: "drops",
-    params,
+  readonly page: number;
+}): Promise<ApiCuratedProfileWaveDropsPage> => {
+  return commonApiFetch<ApiCuratedProfileWaveDropsPage>({
+    endpoint: "curated-profile-wave-drops",
+    params: {
+      page: `${page}`,
+      page_size: `${limit}`,
+    },
   });
 };
 
@@ -82,15 +79,15 @@ export function useCommunityCurationsDrops({
 }: UseCommunityCurationsDropsProps) {
   const query = useInfiniteQuery({
     queryKey: [COMMUNITY_CURATIONS_DROPS_QUERY_KEY, { limit }],
-    queryFn: ({ pageParam }: { pageParam: number | null }) =>
-      fetchTemporaryCommunityCurationsDrops({
-        cursor: pageParam,
+    queryFn: ({ pageParam }: { pageParam: number }) =>
+      fetchCommunityCurationsDrops({
         limit,
+        page: pageParam,
       }),
     enabled,
-    initialPageParam: null,
+    initialPageParam: 1,
     getNextPageParam: (lastPage) =>
-      lastPage.length === limit ? lastPage.at(-1)?.serial_no : undefined,
+      lastPage.next ? lastPage.page + 1 : undefined,
     staleTime: 60_000,
   });
 

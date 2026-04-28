@@ -4,9 +4,6 @@ import React from "react";
 
 const mockUseAuthenticatedContent = jest.fn();
 const mockUseDeviceInfo = jest.fn();
-const mockGetActiveWaveIdFromUrl = jest.fn();
-const mockUsePathname = jest.fn();
-const mockUseSearchParams = jest.fn();
 
 jest.mock("../../../hooks/useAuthenticatedContent", () => ({
   useAuthenticatedContent: () => mockUseAuthenticatedContent(),
@@ -17,32 +14,17 @@ jest.mock("../../../hooks/useDeviceInfo", () => ({
   default: () => mockUseDeviceInfo(),
 }));
 
-jest.mock("next/navigation", () => ({
-  usePathname: () => mockUsePathname(),
-  useSearchParams: () => mockUseSearchParams(),
-}));
-
-jest.mock("../../../helpers/navigation.helpers", () => ({
-  getActiveWaveIdFromUrl: (...args: unknown[]) =>
-    mockGetActiveWaveIdFromUrl(...args),
-}));
-
 jest.mock("@/components/waves/WavesDesktop", () => ({
   __esModule: true,
   default: ({
-    allowMainContentWithoutWave,
     children,
     showLeftSidebar,
   }: {
-    readonly allowMainContentWithoutWave?: boolean;
     readonly children: React.ReactNode;
     readonly showLeftSidebar?: boolean;
   }) => (
     <div
       data-testid="waves-desktop"
-      data-allow-main-content-without-wave={String(
-        allowMainContentWithoutWave
-      )}
       data-show-left-sidebar={String(showLeftSidebar)}
     >
       {children}
@@ -73,14 +55,9 @@ describe("WavesLayout", () => {
       contentState: "not-authenticated",
     });
     mockUseDeviceInfo.mockReturnValue({ isApp: false, isMobileDevice: false });
-    mockUsePathname.mockReturnValue("/waves/test-wave");
-    mockUseSearchParams.mockReturnValue(new URLSearchParams("wave=test-wave"));
-    mockGetActiveWaveIdFromUrl.mockReturnValue(null);
   });
 
   it("renders the selected wave content for logged-out users", () => {
-    mockGetActiveWaveIdFromUrl.mockReturnValue("test-wave");
-
     render(
       <WavesLayout>
         <div data-testid="wave-content">Real wave content</div>
@@ -88,10 +65,6 @@ describe("WavesLayout", () => {
     );
 
     expect(screen.getByTestId("wave-content")).toBeInTheDocument();
-    expect(screen.getByTestId("waves-desktop")).toHaveAttribute(
-      "data-allow-main-content-without-wave",
-      "false"
-    );
     expect(screen.getByTestId("waves-desktop")).toHaveAttribute(
       "data-show-left-sidebar",
       "true"
@@ -106,10 +79,6 @@ describe("WavesLayout", () => {
     );
 
     expect(screen.getByTestId("wave-content")).toBeInTheDocument();
-    expect(screen.getByTestId("waves-desktop")).toHaveAttribute(
-      "data-allow-main-content-without-wave",
-      "true"
-    );
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 });
