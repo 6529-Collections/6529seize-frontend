@@ -82,7 +82,9 @@ function replaceDrop(value: unknown, drop: ApiDrop): unknown {
     return {
       ...drop,
       ...(value["type"] !== undefined && { type: value["type"] }),
-      ...(value["stableKey"] !== undefined && { stableKey: value["stableKey"] }),
+      ...(value["stableKey"] !== undefined && {
+        stableKey: value["stableKey"],
+      }),
       ...(value["stableHash"] !== undefined && {
         stableHash: value["stableHash"],
       }),
