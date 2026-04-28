@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
+import { parsePositiveWholeNumberInput } from "../utils/positiveWholeNumberInput";
 
 export default function CreateWaveApprovalMaxWinners({
   maxWinners,
@@ -10,13 +11,11 @@ export default function CreateWaveApprovalMaxWinners({
   readonly setMaxWinners: (maxWinners: number | null) => void;
 }) {
   const onMaxWinnersChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newMaxWinners = parseInt(e.target.value);
-    const isValid = !isNaN(newMaxWinners) && newMaxWinners > 0;
-    setMaxWinners(isValid ? newMaxWinners : null);
+    setMaxWinners(parsePositiveWholeNumberInput(e.target.value));
   };
 
   const hasMaxWinners =
-    maxWinners !== null && Number.isFinite(maxWinners) && maxWinners > 0;
+    maxWinners !== null && Number.isInteger(maxWinners) && maxWinners > 0;
 
   return (
     <div className="tw-group tw-relative tw-w-full">
@@ -38,8 +37,11 @@ export default function CreateWaveApprovalMaxWinners({
         htmlFor="approval-max-winners"
         className="tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-base tw-font-normal tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4"
       >
-        Max Winners
+        Max Winners (optional)
       </label>
+      <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+        Leave blank for unlimited winners.
+      </p>
     </div>
   );
 }

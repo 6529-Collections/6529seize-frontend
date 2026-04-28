@@ -76,6 +76,11 @@ const isPositiveFiniteNumber = (
 ): value is number =>
   typeof value === "number" && Number.isFinite(value) && value > 0;
 
+const isPositiveWholeNumber = (
+  value: number | null | undefined
+): value is number =>
+  typeof value === "number" && Number.isInteger(value) && value > 0;
+
 export const getCreateWaveNextStep = ({
   step,
   waveType,
@@ -284,7 +289,7 @@ const getApproveMaxWinners = ({
     return null;
   }
 
-  return isPositiveFiniteNumber(config.approval.maxWinners)
+  return isPositiveWholeNumber(config.approval.maxWinners)
     ? config.approval.maxWinners
     : null;
 };

@@ -80,16 +80,37 @@ describe("CreateWaveOutcomes", () => {
     const setMaxWinners = jest.fn();
     render(<CreateWaveOutcomes {...baseProps} setMaxWinners={setMaxWinners} />);
 
-    fireEvent.change(screen.getByLabelText("Max Winners"), {
+    fireEvent.change(screen.getByLabelText(/Max Winners/), {
       target: { value: "7" },
     });
 
     expect(setMaxWinners).toHaveBeenCalledWith(7);
   });
 
+  it("explains that max winners is optional", () => {
+    render(<CreateWaveOutcomes {...baseProps} />);
+
+    expect(screen.getByLabelText("Max Winners (optional)")).toBeInTheDocument();
+    expect(
+      screen.getByText("Leave blank for unlimited winners.")
+    ).toBeInTheDocument();
+  });
+
+  it("rejects decimal max winners instead of truncating", () => {
+    const setMaxWinners = jest.fn();
+    render(<CreateWaveOutcomes {...baseProps} setMaxWinners={setMaxWinners} />);
+
+    fireEvent.change(screen.getByLabelText(/Max Winners/), {
+      target: { value: "7.5" },
+    });
+
+    expect(setMaxWinners).toHaveBeenCalledWith(null);
+    expect(setMaxWinners).not.toHaveBeenCalledWith(7);
+  });
+
   it("hides global max winners input for rank waves", () => {
     render(<CreateWaveOutcomes {...baseProps} waveType={ApiWaveType.Rank} />);
 
-    expect(screen.queryByLabelText("Max Winners")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Max Winners/)).not.toBeInTheDocument();
   });
 });

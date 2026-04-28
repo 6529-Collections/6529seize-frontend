@@ -111,9 +111,8 @@ const getDatesValidationErrors = ({
       );
     }
 
-    if (dates.endDate === null || dates.endDate <= 0) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
-    } else if (
+    if (
+      dates.endDate !== null &&
       dates.votingStartDate &&
       dates.endDate <= dates.votingStartDate
     ) {

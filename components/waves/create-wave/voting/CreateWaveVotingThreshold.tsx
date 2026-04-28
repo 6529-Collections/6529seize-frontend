@@ -1,3 +1,6 @@
+import type { ChangeEvent } from "react";
+import { parsePositiveWholeNumberInput } from "../utils/positiveWholeNumberInput";
+
 export default function CreateWaveVotingThreshold({
   threshold,
   error,
@@ -7,12 +10,11 @@ export default function CreateWaveVotingThreshold({
   readonly error: boolean;
   readonly setThreshold: (threshold: number | null) => void;
 }) {
-  const onThresholdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newThreshold = parseInt(e.target.value);
-    const isValid = !isNaN(newThreshold);
-    setThreshold(isValid ? newThreshold : null);
+  const onThresholdChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setThreshold(parsePositiveWholeNumberInput(e.target.value));
   };
-  const hasThreshold = threshold !== null && !Number.isNaN(threshold);
+  const hasThreshold =
+    threshold !== null && Number.isInteger(threshold) && threshold > 0;
 
   return (
     <div className="tw-mt-6 tw-w-full">
@@ -20,6 +22,7 @@ export default function CreateWaveVotingThreshold({
         <div className="tw-relative">
           <input
             type="text"
+            inputMode="numeric"
             autoComplete="off"
             value={hasThreshold ? threshold.toString() : ""}
             onChange={onThresholdChange}

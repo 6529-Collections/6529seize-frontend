@@ -50,6 +50,23 @@ describe("CreateWaveVotingThreshold", () => {
     expect(setThreshold).toHaveBeenCalledWith(null);
   });
 
+  it("rejects decimal threshold instead of truncating", () => {
+    const setThreshold = jest.fn();
+    render(
+      <CreateWaveVotingThreshold
+        {...defaultProps}
+        setThreshold={setThreshold}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Threshold"), {
+      target: { value: "75.5" },
+    });
+
+    expect(setThreshold).toHaveBeenCalledWith(null);
+    expect(setThreshold).not.toHaveBeenCalledWith(75);
+  });
+
   it("shows error message when error prop is true", () => {
     render(<CreateWaveVotingThreshold {...defaultProps} error={true} />);
 

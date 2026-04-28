@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDatesApproveEnd from "@/components/waves/create-wave/dates/CreateWaveDatesApproveEnd";
@@ -250,13 +251,19 @@ describe("CreateWaveDatesApproveEnd", () => {
       />
     );
 
-    expect(screen.getByText("Select wave end")).toBeInTheDocument();
+    expect(screen.getByText("No end date")).toBeInTheDocument();
+    expect(
+      screen.getByText("Optional. Leave blank for no end date.")
+    ).toBeInTheDocument();
     expect(screen.getByText("Select End Date:")).toBeInTheDocument();
     expect(screen.getByText("Select End Time:")).toBeInTheDocument();
     expect(screen.getByTestId("time")).toHaveAttribute("data-disabled", "true");
+    expect(
+      screen.queryByText("This must be after the wave start.")
+    ).not.toBeInTheDocument();
   });
 
-  it("shows an end date error after validation fails", () => {
+  it("does not show required end date copy", () => {
     render(
       <CreateWaveDatesApproveEnd
         dates={baseDates}
@@ -266,8 +273,36 @@ describe("CreateWaveDatesApproveEnd", () => {
     );
 
     expect(
-      screen.getByText("Choose a wave end before continuing.")
-    ).toBeInTheDocument();
+      screen.queryByText("Choose a wave end before continuing.")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("*")).not.toBeInTheDocument();
+  });
+
+  it("clears a selected end date and returns to the blank state", async () => {
+    const user = userEvent.setup();
+    const selectedEndDate = new Date("2035-05-02T10:00:00.000Z").getTime();
+
+    function Harness() {
+      const [dates, setDates] = useState<CreateWaveDatesConfig>({
+        ...baseDates,
+        endDate: selectedEndDate,
+      });
+
+      return (
+        <CreateWaveDatesApproveEnd
+          dates={dates}
+          errors={[]}
+          setDates={setDates}
+        />
+      );
+    }
+
+    render(<Harness />);
+
+    await user.click(screen.getByRole("button", { name: "Clear end date" }));
+
+    expect(screen.getByText("No end date")).toBeInTheDocument();
+    expect(screen.getByTestId("time")).toHaveAttribute("data-disabled", "true");
   });
 
   it("shows an error when end is before start", () => {

@@ -342,7 +342,7 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("approve waves require an end date", () => {
+  it("allows approve waves without an end date", () => {
     const config = {
       ...baseConfig,
       overview: { type: ApiWaveType.Approve, name: "n", image: null },
@@ -359,7 +359,12 @@ describe("create-wave.validation", () => {
       step: CreateWaveStep.DATES,
       config,
     });
-    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
   });
 
   it("approve waves require end date after start", () => {

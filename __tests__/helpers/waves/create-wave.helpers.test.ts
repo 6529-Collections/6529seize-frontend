@@ -307,6 +307,34 @@ describe("create-wave.helpers", () => {
       expect(res.wave.decisions_strategy).toBeNull();
     });
 
+    it("sends null periods and max winners for approve waves without limits", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.dates.endDate = null;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.period.max).toBeNull();
+      expect(res.voting.period.max).toBeNull();
+      expect(res.wave.max_winners).toBeNull();
+    });
+
+    it("does not send fractional approve max winners", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.maxWinners = 1.5;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.max_winners).toBeNull();
+    });
+
     it("keeps manual approve outcomes without max winners and filters invalid credit amounts", () => {
       const config = createBaseConfig(ApiWaveType.Approve);
       config.outcomes = [

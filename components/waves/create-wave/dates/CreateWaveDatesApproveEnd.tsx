@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfoCircle, faXmark } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import TimePicker from "@/components/common/TimePicker";
@@ -28,6 +29,10 @@ const formatDateTime = (timestamp: number) =>
     hour12: true,
   });
 
+const END_DATE_TOOLTIP_TEXT =
+  "Choose when the approve wave closes. Leave it blank to keep the wave open " +
+  "until max winners is reached, or indefinitely if max winners is blank.";
+
 export default function CreateWaveDatesApproveEnd({
   dates,
   errors,
@@ -37,9 +42,6 @@ export default function CreateWaveDatesApproveEnd({
   const selectedEndDate =
     endDate !== null && Number.isFinite(endDate) ? endDate : null;
   const hasSelectedEndDate = selectedEndDate !== null;
-  const hasEndDateError =
-    !hasSelectedEndDate &&
-    errors.includes(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
   const hasEndBeforeStartError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
   );
@@ -99,47 +101,61 @@ export default function CreateWaveDatesApproveEnd({
     });
   };
 
+  const handleClearEndDate = () => {
+    setDates({
+      ...dates,
+      endDate: null,
+    });
+  };
+
   return (
     <section className="tw-rounded-xl tw-bg-iron-900 tw-px-5 tw-pb-5 tw-pt-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div>
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-300">
-              Wave End{" "}
-              <span className="tw-text-error" aria-hidden="true">
-                *
-              </span>
+              Wave End
             </h3>
             <TooltipIconButton
               icon={faInfoCircle}
-              tooltipText="Choose when the approve wave closes. This is the actual end timestamp sent to the API."
+              tooltipText={END_DATE_TOOLTIP_TEXT}
               tooltipPosition="bottom"
               tooltipWidth="tw-w-80"
             />
           </div>
           <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
-            This must be after the wave start.
+            Optional. Leave blank for no end date.
           </p>
         </div>
 
         <div className="tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md">
           <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Wave Ends</p>
-          <p
-            className={`tw-mb-0 tw-text-sm tw-font-medium ${
-              hasEndDateError || hasEndBeforeStartError
-                ? "tw-text-error"
-                : "tw-text-iron-50"
-            }`}
-          >
-            {selectedEndDate !== null
-              ? formatDateTime(selectedEndDate)
-              : "Select wave end"}
-          </p>
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <p
+              className={`tw-mb-0 tw-text-sm tw-font-medium ${
+                hasEndBeforeStartError ? "tw-text-error" : "tw-text-iron-50"
+              }`}
+            >
+              {selectedEndDate !== null
+                ? formatDateTime(selectedEndDate)
+                : "No end date"}
+            </p>
+            {hasSelectedEndDate && (
+              <button
+                type="button"
+                aria-label="Clear end date"
+                onClick={handleClearEndDate}
+                className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 hover:tw-border-primary-400 hover:tw-text-primary-300"
+              >
+                <FontAwesomeIcon icon={faXmark} className="tw-size-3" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="tw-mt-5">
-        {(hasEndDateError || hasEndBeforeStartError) && (
+        {hasEndBeforeStartError && (
           <div
             id={endDateErrorId}
             role="alert"
@@ -160,11 +176,7 @@ export default function CreateWaveDatesApproveEnd({
                 strokeLinejoin="round"
               />
             </svg>
-            <span>
-              {hasEndBeforeStartError
-                ? "Wave end must be after wave start."
-                : "Choose a wave end before continuing."}
-            </span>
+            <span>Wave end must be after wave start.</span>
           </div>
         )}
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
