@@ -26,8 +26,8 @@ import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly winningThreshold?: number | null;
-  readonly isVotingClosed?: boolean;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation;
 }
 

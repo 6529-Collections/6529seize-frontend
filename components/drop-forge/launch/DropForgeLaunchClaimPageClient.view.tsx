@@ -10,7 +10,10 @@ import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
+import {
+  getClaimSeason,
+  stringifyClaimAttributeValue,
+} from "@/components/drop-forge/claimTraitsData";
 import {
   type ClaimPrimaryStatus,
   getClaimArweaveSectionStatus,
@@ -801,18 +804,19 @@ function DropForgeLaunchClaimTraitsSection({
     >
       {claim.attributes?.length ? (
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-grid-cols-4">
-          {claim.attributes.map((attribute, index) => (
-            <DropForgeFieldBox
-              key={`${attribute.trait_type ?? "trait"}-${index}`}
-              label={attribute.trait_type || "Trait"}
-            >
-              {attribute.value !== null &&
-              attribute.value !== undefined &&
-              String(attribute.value).trim()
-                ? String(attribute.value)
-                : "—"}
-            </DropForgeFieldBox>
-          ))}
+          {claim.attributes.map((attribute, index) => {
+            const attributeValue = stringifyClaimAttributeValue(
+              attribute.value
+            ).trim();
+            return (
+              <DropForgeFieldBox
+                key={`${attribute.trait_type ?? "trait"}-${index}`}
+                label={attribute.trait_type || "Trait"}
+              >
+                {attributeValue || "—"}
+              </DropForgeFieldBox>
+            );
+          })}
         </div>
       ) : (
         <p className="tw-mb-0 tw-text-sm tw-text-iron-400">No traits found.</p>
