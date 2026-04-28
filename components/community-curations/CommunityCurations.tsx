@@ -19,14 +19,21 @@ const MEDIA_FILTER_OPTIONS: CommonSelectItem<CommunityCurationsMediaFilter>[] =
   ];
 
 const COMMUNITY_CURATIONS_SKELETON_CARDS = [
-  { mediaHeight: 210, lines: 2 },
-  { mediaHeight: 320, lines: 4 },
-  { mediaHeight: 250, lines: 3 },
-  { mediaHeight: 390, lines: 2 },
-  { mediaHeight: 280, lines: 4 },
-  { mediaHeight: 220, lines: 3 },
-  { mediaHeight: 350, lines: 3 },
-  { mediaHeight: 260, lines: 2 },
+  { id: "compact", mediaHeight: 210, lines: 2 },
+  { id: "tall", mediaHeight: 320, lines: 4 },
+  { id: "mid", mediaHeight: 250, lines: 3 },
+  { id: "feature", mediaHeight: 390, lines: 2 },
+  { id: "balanced", mediaHeight: 280, lines: 4 },
+  { id: "short", mediaHeight: 220, lines: 3 },
+  { id: "portrait", mediaHeight: 350, lines: 3 },
+  { id: "wide", mediaHeight: 260, lines: 2 },
+] as const;
+
+const COMMUNITY_CURATIONS_SKELETON_LINE_IDS = [
+  "headline",
+  "summary",
+  "detail",
+  "caption",
 ] as const;
 
 function CommunityCurationsSkeletonCard({
@@ -52,14 +59,16 @@ function CommunityCurationsSkeletonCard({
         </div>
         <div className="tw-mt-5 tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800" />
         <div className="tw-mt-3 tw-space-y-2">
-          {Array.from({ length: lines }).map((_, index) => (
-            <div
-              key={`community-curations-skeleton-line-${index}`}
-              className={`tw-h-3 tw-animate-pulse tw-rounded tw-bg-iron-900 ${
-                index === lines - 1 ? "tw-w-2/3" : "tw-w-full"
-              }`}
-            />
-          ))}
+          {COMMUNITY_CURATIONS_SKELETON_LINE_IDS.slice(0, lines).map(
+            (lineId, index) => (
+              <div
+                key={`community-curations-skeleton-line-${lineId}`}
+                className={`tw-h-3 tw-animate-pulse tw-rounded tw-bg-iron-900 ${
+                  index === lines - 1 ? "tw-w-2/3" : "tw-w-full"
+                }`}
+              />
+            )
+          )}
         </div>
       </div>
     </div>
@@ -69,9 +78,9 @@ function CommunityCurationsSkeletonCard({
 function CommunityCurationsSkeletonGrid() {
   return (
     <div className="tw-[column-gap:1rem] tw-[column-width:300px]">
-      {COMMUNITY_CURATIONS_SKELETON_CARDS.map((card, index) => (
+      {COMMUNITY_CURATIONS_SKELETON_CARDS.map((card) => (
         <CommunityCurationsSkeletonCard
-          key={`community-curations-skeleton-${index}`}
+          key={`community-curations-skeleton-${card.id}`}
           lines={card.lines}
           mediaHeight={card.mediaHeight}
         />
@@ -118,6 +127,19 @@ export default function CommunityCurations() {
   });
 
   const isInitialLoading = isLoading && allDrops.length === 0;
+  const hasMorePages = Boolean(hasNextPage) || isFetchingNextPage;
+  const shouldShowEmptyState =
+    !isInitialLoading && !isError && drops.length === 0 && !hasMorePages;
+  const shouldShowMasonry =
+    !isInitialLoading && !isError && (drops.length > 0 || hasMorePages);
+  const emptyStateTitle =
+    mediaFilter === "all"
+      ? "No curated drops yet"
+      : `No ${mediaFilter} drops found`;
+  const emptyStateDescription =
+    mediaFilter === "all"
+      ? "Community-curated drops will appear here when visible curations have activity."
+      : "Try All to see every community-curated drop.";
   const handleFetchNextPage = useCallback(async () => {
     await fetchNextPage();
   }, [fetchNextPage]);
@@ -163,14 +185,14 @@ export default function CommunityCurations() {
             />
           )}
 
-          {!isInitialLoading && !isError && drops.length === 0 && (
+          {shouldShowEmptyState && (
             <CommunityCurationsEmptyState
-              title="No curated drops yet"
-              description="Community-curated drops will appear here when visible curations have activity."
+              title={emptyStateTitle}
+              description={emptyStateDescription}
             />
           )}
 
-          {!isInitialLoading && !isError && drops.length > 0 && (
+          {shouldShowMasonry && (
             <CommunityCurationsMasonry
               drops={drops}
               fetchNextPage={handleFetchNextPage}

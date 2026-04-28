@@ -13,10 +13,14 @@
 
 import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiProfileMin } from '../models/ApiProfileMin';
-import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
+
+interface ApiWaveCreditNft {
+    'contract': string;
+    'token_id': number;
+}
 
 export class ApiWaveVotingConfig {
     'scope': ApiWaveScope;
@@ -100,6 +104,5 @@ export class ApiWaveVotingConfig {
     public constructor() {
     }
 }
-
 
 

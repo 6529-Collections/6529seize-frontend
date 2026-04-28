@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import type { ApiWave } from "@/generated/models/ObjectSerializer";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import MemesArtSubmissionModal from "../MemesArtSubmissionModal";
 import { SubmissionStatus, useWave } from "@/hooks/useWave";
 
@@ -71,20 +71,22 @@ const MobileMemesArtSubmissionBtn: React.FC<
       <button
         onClick={() => setIsOpen(true)}
         disabled={!canSubmit}
-        className={`tw-absolute tw-top-4 tw-right-4 tw-z-40 tw-text-white tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-full tw-size-10 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-absolute tw-right-4 tw-top-4 tw-z-40 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 ${
           !canSubmit
-            ? "tw-bg-gray-400 tw-border-gray-400 tw-cursor-not-allowed"
+            ? "tw-cursor-not-allowed tw-border-gray-400 tw-bg-gray-400"
             : isUrgent
-            ? "tw-bg-primary-600 tw-border-primary-600 tw-animate-pulse"
-            : "tw-bg-primary-500 tw-border-primary-500 desktop-hover:hover:tw-bg-primary-600 desktop-hover:hover:tw-border-primary-600"
+              ? "tw-animate-pulse tw-border-primary-600 tw-bg-primary-600"
+              : "tw-border-primary-500 tw-bg-primary-500 desktop-hover:hover:tw-border-primary-600 desktop-hover:hover:tw-bg-primary-600"
         }`}
-        aria-label={getAriaLabel()}>
+        aria-label={getAriaLabel()}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="tw-size-6 tw-flex-shrink-0"
           fill="none"
           viewBox="0 0 24 24"
-          stroke="currentColor">
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

@@ -4,7 +4,7 @@ import {
   getCommunityCurationsMediaType,
   type CommunityCurationsMediaType,
 } from "@/components/community-curations/communityCurations.helpers";
-import type { ApiCuratedProfileWaveDropsPage } from "@/generated/models/ApiCuratedProfileWaveDropsPage";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -22,8 +22,14 @@ interface UseCommunityCurationsDropsProps {
   readonly enabled?: boolean | undefined;
 }
 
+interface CommunityCurationsDropsPage {
+  readonly data: ApiDrop[];
+  readonly page: number;
+  readonly next: boolean;
+}
+
 const getUniqueDrops = (
-  pages: ApiCuratedProfileWaveDropsPage[] | undefined
+  pages: CommunityCurationsDropsPage[] | undefined
 ): ExtendedDrop[] => {
   if (!pages) {
     return [];
@@ -62,8 +68,8 @@ const fetchCommunityCurationsDrops = ({
 }: {
   readonly limit: number;
   readonly page: number;
-}): Promise<ApiCuratedProfileWaveDropsPage> => {
-  return commonApiFetch<ApiCuratedProfileWaveDropsPage>({
+}): Promise<CommunityCurationsDropsPage> => {
+  return commonApiFetch<CommunityCurationsDropsPage>({
     endpoint: "curated-profile-wave-drops",
     params: {
       page: `${page}`,

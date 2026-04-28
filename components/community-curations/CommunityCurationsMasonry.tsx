@@ -19,7 +19,9 @@ import {
   useMemo,
   useRef,
   useState,
+  type Dispatch,
   type ReactElement,
+  type SetStateAction,
 } from "react";
 
 const MASONRY_COLUMN_WIDTH = 300;
@@ -72,6 +74,54 @@ const areViewportsEqual = (left: PanelViewport, right: PanelViewport) =>
   left.isScrolling === right.isScrolling &&
   left.scrollTop === right.scrollTop;
 
+const readPanelViewport = (
+  scrollContainer: HTMLElement,
+  gridElement: HTMLElement | null,
+  isScrolling: boolean
+): PanelViewport => ({
+  height: scrollContainer.clientHeight,
+  isScrolling,
+  scrollTop: getGridScrollTop(scrollContainer, gridElement),
+});
+
+const setPanelViewport = (
+  setViewport: Dispatch<SetStateAction<PanelViewport>>,
+  nextViewport: PanelViewport
+) => {
+  setViewport((currentViewport) =>
+    areViewportsEqual(currentViewport, nextViewport)
+      ? currentViewport
+      : nextViewport
+  );
+};
+
+const schedulePanelViewportUpdate = ({
+  frameId,
+  gridElement,
+  isScrolling,
+  scrollContainer,
+  setViewport,
+}: {
+  readonly frameId: number | null;
+  readonly gridElement: HTMLElement | null;
+  readonly isScrolling: boolean;
+  readonly scrollContainer: HTMLElement;
+  readonly setViewport: Dispatch<SetStateAction<PanelViewport>>;
+}): number => {
+  if (frameId !== null) {
+    cancelAnimationFrame(frameId);
+  }
+
+  return requestAnimationFrame(() => {
+    const nextViewport = readPanelViewport(
+      scrollContainer,
+      gridElement,
+      isScrolling
+    );
+    setPanelViewport(setViewport, nextViewport);
+  });
+};
+
 function useElementWidth(element: HTMLElement | null) {
   const [width, setWidth] = useState(0);
 
@@ -108,25 +158,13 @@ function usePanelViewport(
     let idleTimeout: ReturnType<typeof setTimeout> | null = null;
     let frameId: number | null = null;
 
-    const readViewport = (isScrolling: boolean): PanelViewport => ({
-      height: scrollContainer.clientHeight,
-      isScrolling,
-      scrollTop: getGridScrollTop(scrollContainer, gridElement),
-    });
-
     const scheduleViewportUpdate = (isScrolling: boolean) => {
-      if (frameId !== null) {
-        cancelAnimationFrame(frameId);
-      }
-
-      frameId = requestAnimationFrame(() => {
-        frameId = null;
-        const nextViewport = readViewport(isScrolling);
-        setViewport((currentViewport) =>
-          areViewportsEqual(currentViewport, nextViewport)
-            ? currentViewport
-            : nextViewport
-        );
+      frameId = schedulePanelViewportUpdate({
+        frameId,
+        gridElement,
+        isScrolling,
+        scrollContainer,
+        setViewport,
       });
     };
 
@@ -277,6 +315,8 @@ export default function CommunityCurationsMasonry({
   isFetchingNextPage,
   scrollContainer,
 }: CommunityCurationsMasonryProps) {
+  const shouldShowPaginationFooter = Boolean(hasNextPage) || isFetchingNextPage;
+  const shouldShowLoader = isFetchingNextPage || drops.length === 0;
   const handleIntersection = useCallback(
     (isIntersecting: boolean) => {
       if (!isIntersecting || !hasNextPage || isFetchingNextPage) {
@@ -296,15 +336,16 @@ export default function CommunityCurationsMasonry({
           scrollContainer={scrollContainer}
         />
 
-        {((hasNextPage ?? false) || isFetchingNextPage) && (
+        {shouldShowPaginationFooter && (
           <div className="tw-flex tw-justify-center tw-py-6">
-            {isFetchingNextPage ? (
-              <CircleLoader size={CircleLoaderSize.MEDIUM} />
-            ) : (
+            {!isFetchingNextPage && (
               <CommunityCurationsInfiniteScrollTrigger
                 onIntersection={handleIntersection}
                 scrollContainer={scrollContainer}
               />
+            )}
+            {shouldShowLoader && (
+              <CircleLoader size={CircleLoaderSize.MEDIUM} />
             )}
           </div>
         )}

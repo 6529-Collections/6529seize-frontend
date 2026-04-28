@@ -2,7 +2,7 @@
 
 import React from "react";
 import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
-import type { ApiDrop } from "@/generated/models/ObjectSerializer";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import Link from "next/link";
 import Image from "next/image";

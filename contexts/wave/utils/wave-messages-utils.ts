@@ -2,7 +2,7 @@ import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
-import { ApiDropSearchStrategy } from "@/generated/models/ObjectSerializer";
+import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import { DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
 import {
