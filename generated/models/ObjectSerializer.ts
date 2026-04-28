@@ -59,16 +59,14 @@ export * from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropActi
 export * from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
 export * from '../models/ApiCreateNewProfileProxyReadWaveAction';
 export * from '../models/ApiCreateNewWave';
+export * from '../models/ApiCreateNewWaveCardSetTdhVotingConfig';
 export * from '../models/ApiCreateNewWaveChatConfig';
 export * from '../models/ApiCreateNewWaveParticipationConfig';
 export * from '../models/ApiCreateNewWaveScope';
+export * from '../models/ApiCreateNewWaveStandardVotingConfig';
 export * from '../models/ApiCreateNewWaveVisibilityConfig';
 export * from '../models/ApiCreateNewWaveVotingConfig';
-export * from '../models/ApiCreateNewWaveVotingConfigOneOf';
-export * from '../models/ApiCreateNewWaveVotingConfigOneOf1';
-export * from '../models/ApiCreateNewWaveVotingConfigOneOf2';
-export * from '../models/ApiCreateNewWaveVotingConfigOneOf3';
-export * from '../models/ApiCreateNewWaveVotingConfigOneOf4';
+export * from '../models/ApiCreateNewWaveVotingConfigBase';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
@@ -393,16 +391,14 @@ import { ApiCreateNewProfileProxyCreateWaveParticipationDropAction   } from '../
 import { ApiCreateNewProfileProxyRateWaveDropAction   } from '../models/ApiCreateNewProfileProxyRateWaveDropAction';
 import { ApiCreateNewProfileProxyReadWaveAction   } from '../models/ApiCreateNewProfileProxyReadWaveAction';
 import { ApiCreateNewWave } from '../models/ApiCreateNewWave';
+import { ApiCreateNewWaveCardSetTdhVotingConfig          } from '../models/ApiCreateNewWaveCardSetTdhVotingConfig';
 import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
 import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
+import { ApiCreateNewWaveStandardVotingConfig          } from '../models/ApiCreateNewWaveStandardVotingConfig';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
-import { ApiCreateNewWaveVotingConfig          } from '../models/ApiCreateNewWaveVotingConfig';
-import { ApiCreateNewWaveVotingConfigOneOf, ApiCreateNewWaveVotingConfigOneOfCreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf';
-import { ApiCreateNewWaveVotingConfigOneOf1, ApiCreateNewWaveVotingConfigOneOf1CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf1';
-import { ApiCreateNewWaveVotingConfigOneOf2, ApiCreateNewWaveVotingConfigOneOf2CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf2';
-import { ApiCreateNewWaveVotingConfigOneOf3, ApiCreateNewWaveVotingConfigOneOf3CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf3';
-import { ApiCreateNewWaveVotingConfigOneOf4, ApiCreateNewWaveVotingConfigOneOf4CreditTypeEnum    } from '../models/ApiCreateNewWaveVotingConfigOneOf4';
+import { ApiCreateNewWaveVotingConfigClass } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateNewWaveVotingConfigBase          } from '../models/ApiCreateNewWaveVotingConfigBase';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
 import { ApiCreateWaveConfig         } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
@@ -630,12 +626,12 @@ import { DistributionPhotoCompleteRequestPhoto } from '../models/DistributionPho
 import { DistributionPhotoCompleteResponse } from '../models/DistributionPhotoCompleteResponse';
 import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
 import { MintingClaim } from '../models/MintingClaim';
-import { MintingClaimAnimationDetails , MintingClaimAnimationDetailsFormatEnum        } from '../models/MintingClaimAnimationDetails';
+import { MintingClaimAnimationDetailsClass } from '../models/MintingClaimAnimationDetails';
 import { MintingClaimAnimationDetailsGlb , MintingClaimAnimationDetailsGlbFormatEnum    } from '../models/MintingClaimAnimationDetailsGlb';
 import { MintingClaimAnimationDetailsHtml, MintingClaimAnimationDetailsHtmlFormatEnum   } from '../models/MintingClaimAnimationDetailsHtml';
 import { MintingClaimAnimationDetailsVideo } from '../models/MintingClaimAnimationDetailsVideo';
 import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
-import { MintingClaimAttributeValue } from '../models/MintingClaimAttributeValue';
+import { MintingClaimAttributeValueClass } from '../models/MintingClaimAttributeValue';
 import { MintingClaimImageDetails } from '../models/MintingClaimImageDetails';
 import { MintingClaimUpdateRequest } from '../models/MintingClaimUpdateRequest';
 import { MintingClaimsPageResponse } from '../models/MintingClaimsPageResponse';
@@ -685,11 +681,6 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiAttachmentStatus",
     "ApiAttachmentUploadMimeType",
     "ApiCommunityMembersSortOption",
-    "ApiCreateNewWaveVotingConfigOneOfCreditTypeEnum",
-    "ApiCreateNewWaveVotingConfigOneOf1CreditTypeEnum",
-    "ApiCreateNewWaveVotingConfigOneOf2CreditTypeEnum",
-    "ApiCreateNewWaveVotingConfigOneOf3CreditTypeEnum",
-    "ApiCreateNewWaveVotingConfigOneOf4CreditTypeEnum",
     "ApiDropGroupMention",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
@@ -788,16 +779,14 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewProfileProxyRateWaveDropAction": ApiCreateNewProfileProxyRateWaveDropAction,
     "ApiCreateNewProfileProxyReadWaveAction": ApiCreateNewProfileProxyReadWaveAction,
     "ApiCreateNewWave": ApiCreateNewWave,
+    "ApiCreateNewWaveCardSetTdhVotingConfig": ApiCreateNewWaveCardSetTdhVotingConfig,
     "ApiCreateNewWaveChatConfig": ApiCreateNewWaveChatConfig,
     "ApiCreateNewWaveParticipationConfig": ApiCreateNewWaveParticipationConfig,
     "ApiCreateNewWaveScope": ApiCreateNewWaveScope,
+    "ApiCreateNewWaveStandardVotingConfig": ApiCreateNewWaveStandardVotingConfig,
     "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
-    "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfig,
-    "ApiCreateNewWaveVotingConfigOneOf": ApiCreateNewWaveVotingConfigOneOf,
-    "ApiCreateNewWaveVotingConfigOneOf1": ApiCreateNewWaveVotingConfigOneOf1,
-    "ApiCreateNewWaveVotingConfigOneOf2": ApiCreateNewWaveVotingConfigOneOf2,
-    "ApiCreateNewWaveVotingConfigOneOf3": ApiCreateNewWaveVotingConfigOneOf3,
-    "ApiCreateNewWaveVotingConfigOneOf4": ApiCreateNewWaveVotingConfigOneOf4,
+    "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfigClass,
+    "ApiCreateNewWaveVotingConfigBase": ApiCreateNewWaveVotingConfigBase,
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
@@ -993,12 +982,12 @@ let typeMap: {[index: string]: any} = {
     "DistributionPhotoCompleteResponse": DistributionPhotoCompleteResponse,
     "DistributionPhotosPage": DistributionPhotosPage,
     "MintingClaim": MintingClaim,
-    "MintingClaimAnimationDetails": MintingClaimAnimationDetails,
+    "MintingClaimAnimationDetails": MintingClaimAnimationDetailsClass,
     "MintingClaimAnimationDetailsGlb": MintingClaimAnimationDetailsGlb,
     "MintingClaimAnimationDetailsHtml": MintingClaimAnimationDetailsHtml,
     "MintingClaimAnimationDetailsVideo": MintingClaimAnimationDetailsVideo,
     "MintingClaimAttribute": MintingClaimAttribute,
-    "MintingClaimAttributeValue": MintingClaimAttributeValue,
+    "MintingClaimAttributeValue": MintingClaimAttributeValueClass,
     "MintingClaimImageDetails": MintingClaimImageDetails,
     "MintingClaimUpdateRequest": MintingClaimUpdateRequest,
     "MintingClaimsPageResponse": MintingClaimsPageResponse,
@@ -1047,7 +1036,7 @@ type MimeTypeDescriptor = {
  * the payload.
  */
 const parseMimeType = (mimeType: string): MimeTypeDescriptor => {
-    const [type, subtype] = mimeType.split('/');
+    const [type = '', subtype = ''] = mimeType.split('/');
     return {
         type,
         subtype,
@@ -1083,6 +1072,13 @@ const supportedMimeTypePredicatesWithPriority: MimeTypePredicate[] = [
     isFormUrlencodedMimeType,
 ];
 
+const nullableSuffix = " | null";
+const optionalSuffix = " | undefined";
+const arrayPrefix = "Array<";
+const arraySuffix = ">";
+const mapPrefix = "{ [key: string]: ";
+const mapSuffix = "; }";
+
 export class ObjectSerializer {
     public static findCorrectType(data: any, expectedType: string) {
         if (data == undefined) {
@@ -1107,8 +1103,11 @@ export class ObjectSerializer {
             } else {
                 if (data[discriminatorProperty]) {
                     var discriminatorType = data[discriminatorProperty];
-                    if(typeMap[discriminatorType]){
-                        return discriminatorType; // use the type given in the discriminator
+                    let mapping = typeMap[expectedType].mapping;
+                    if (mapping != undefined && mapping[discriminatorType]) {
+                        return mapping[discriminatorType]; // use the type given in the discriminator
+                    } else if(typeMap[discriminatorType]) {
+                        return discriminatorType;
                     } else {
                         return expectedType; // discriminator did not map to a type
                     }
@@ -1119,17 +1118,33 @@ export class ObjectSerializer {
         }
     }
 
-    public static serialize(data: any, type: string, format: string) {
+    public static serialize(data: any, type: string, format: string): any {
         if (data == undefined) {
             return data;
         } else if (primitives.indexOf(type.toLowerCase()) !== -1) {
             return data;
-        } else if (type.lastIndexOf("Array<", 0) === 0) { // string.startsWith pre es6
-            let subType: string = type.replace("Array<", ""); // Array<Type> => Type>
-            subType = subType.substring(0, subType.length - 1); // Type> => Type
+        } else if (type.endsWith(nullableSuffix)) {
+            let subType: string = type.slice(0, -nullableSuffix.length); // Type | null => Type
+            return ObjectSerializer.serialize(data, subType, format);
+        } else if (type.endsWith(optionalSuffix)) {
+            let subType: string = type.slice(0, -optionalSuffix.length); // Type | undefined => Type
+            return ObjectSerializer.serialize(data, subType, format);
+        } else if (type.startsWith(arrayPrefix)) {
+            let subType: string = type.slice(arrayPrefix.length, -arraySuffix.length); // Array<Type> => Type
             let transformedData: any[] = [];
             for (let date of data) {
                 transformedData.push(ObjectSerializer.serialize(date, subType, format));
+            }
+            return transformedData;
+        } else if (type.startsWith(mapPrefix)) {
+            let subType: string = type.slice(mapPrefix.length, -mapSuffix.length); // { [key: string]: Type; } => Type
+            let transformedData: { [key: string]: any } = {};
+            for (let key in data) {
+                transformedData[key] = ObjectSerializer.serialize(
+                    data[key],
+                    subType,
+                    format,
+                );
             }
             return transformedData;
         } else if (type === "Date") {
@@ -1164,19 +1179,35 @@ export class ObjectSerializer {
         }
     }
 
-    public static deserialize(data: any, type: string, format: string) {
+    public static deserialize(data: any, type: string, format: string): any {
         // polymorphism may change the actual type.
         type = ObjectSerializer.findCorrectType(data, type);
         if (data == undefined) {
             return data;
         } else if (primitives.indexOf(type.toLowerCase()) !== -1) {
             return data;
-        } else if (type.lastIndexOf("Array<", 0) === 0) { // string.startsWith pre es6
-            let subType: string = type.replace("Array<", ""); // Array<Type> => Type>
-            subType = subType.substring(0, subType.length - 1); // Type> => Type
+        } else if (type.endsWith(nullableSuffix)) {
+            let subType: string = type.slice(0, -nullableSuffix.length); // Type | null => Type
+            return ObjectSerializer.deserialize(data, subType, format);
+        } else if (type.endsWith(optionalSuffix)) {
+            let subType: string = type.slice(0, -optionalSuffix.length); // Type | undefined => Type
+            return ObjectSerializer.deserialize(data, subType, format);
+        } else if (type.startsWith(arrayPrefix)) {
+            let subType: string = type.slice(arrayPrefix.length, -arraySuffix.length); // Array<Type> => Type
             let transformedData: any[] = [];
             for (let date of data) {
                 transformedData.push(ObjectSerializer.deserialize(date, subType, format));
+            }
+            return transformedData;
+        } else if (type.startsWith(mapPrefix)) {
+            let subType: string = type.slice(mapPrefix.length, -mapSuffix.length); // { [key: string]: Type; } => Type
+            let transformedData: { [key: string]: any } = {};
+            for (let key in data) {
+                transformedData[key] = ObjectSerializer.deserialize(
+                    data[key],
+                    subType,
+                    format,
+                );
             }
             return transformedData;
         } else if (type === "Date") {
@@ -1212,7 +1243,7 @@ export class ObjectSerializer {
         if (mediaType === undefined) {
             return undefined;
         }
-        return mediaType.split(";")[0].trim().toLowerCase();
+        return (mediaType.split(";")[0] ?? '').trim().toLowerCase();
     }
 
     /**

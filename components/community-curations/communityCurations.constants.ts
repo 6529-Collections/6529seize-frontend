@@ -1,0 +1,1 @@
+export const COMMUNITY_CURATIONS_LIMIT = 12;

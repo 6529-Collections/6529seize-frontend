@@ -10,7 +10,7 @@ import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderDescription from "./WaveHeaderDescription";
 import WaveHeaderPinButton from "./WaveHeaderPinButton";
-import { ApiWaveType } from "@/generated/models/ObjectSerializer";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "../WavePicture";
 import { Time } from "@/helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";

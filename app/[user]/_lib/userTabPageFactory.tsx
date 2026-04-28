@@ -1,7 +1,7 @@
 import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import { getAppMetadata } from "@/components/providers/metadata";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getMetadataForUserPage } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import {

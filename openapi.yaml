@@ -8354,6 +8354,18 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiCreateWaveOutcome"
+    ApiCreateNewWaveCardSetTdhVotingConfig:
+      allOf:
+        - $ref: "#/components/schemas/ApiCreateNewWaveVotingConfigBase"
+        - type: object
+          required:
+            - credit_nfts
+          properties:
+            credit_nfts:
+              type: array
+              items:
+                $ref: "#/components/schemas/ApiWaveCreditNft"
+              minItems: 1
     ApiCreateNewWaveChatConfig:
       type: object
       required:
@@ -8419,6 +8431,9 @@ components:
           description: If null, everyone is included
           type: string
           nullable: true
+    ApiCreateNewWaveStandardVotingConfig:
+      allOf:
+        - $ref: "#/components/schemas/ApiCreateNewWaveVotingConfigBase"
     ApiCreateNewWaveVisibilityConfig:
       type: object
       required:
@@ -8427,6 +8442,18 @@ components:
         scope:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
     ApiCreateNewWaveVotingConfig:
+      oneOf:
+        - $ref: "#/components/schemas/ApiCreateNewWaveStandardVotingConfig"
+        - $ref: "#/components/schemas/ApiCreateNewWaveCardSetTdhVotingConfig"
+      discriminator:
+        propertyName: credit_type
+        mapping:
+          TDH: "#/components/schemas/ApiCreateNewWaveStandardVotingConfig"
+          REP: "#/components/schemas/ApiCreateNewWaveStandardVotingConfig"
+          XTDH: "#/components/schemas/ApiCreateNewWaveStandardVotingConfig"
+          TDH_PLUS_XTDH: "#/components/schemas/ApiCreateNewWaveStandardVotingConfig"
+          CARD_SET_TDH: "#/components/schemas/ApiCreateNewWaveCardSetTdhVotingConfig"
+    ApiCreateNewWaveVotingConfigBase:
       type: object
       required:
         - scope
@@ -8468,53 +8495,6 @@ components:
           $ref: "#/components/schemas/ApiIntRange"
         forbid_negative_votes:
           type: boolean
-      oneOf:
-        - type: object
-          required:
-            - credit_type
-          properties:
-            credit_type:
-              type: string
-              enum:
-                - TDH
-        - type: object
-          required:
-            - credit_type
-          properties:
-            credit_type:
-              type: string
-              enum:
-                - REP
-        - type: object
-          required:
-            - credit_type
-          properties:
-            credit_type:
-              type: string
-              enum:
-                - XTDH
-        - type: object
-          required:
-            - credit_type
-          properties:
-            credit_type:
-              type: string
-              enum:
-                - TDH_PLUS_XTDH
-        - type: object
-          required:
-            - credit_type
-            - credit_nfts
-          properties:
-            credit_type:
-              type: string
-              enum:
-                - CARD_SET_TDH
-            credit_nfts:
-              type: array
-              items:
-                $ref: "#/components/schemas/ApiWaveCreditNft"
-              minItems: 1
     ApiCreateOrUpdateProfileRequest:
       type: object
       required:

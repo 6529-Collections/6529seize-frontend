@@ -17,7 +17,7 @@ import {
 } from "@/entities/IProfile";
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -290,7 +290,9 @@ const applyQueryUpdateItemsToState = ({
       }
       case "subcollection":
         nextState.subcollection =
-          nextState.collection === CollectedCollectionType.NETWORK ? value : null;
+          nextState.collection === CollectedCollectionType.NETWORK
+            ? value
+            : null;
         break;
       case "seized":
         nextState.seized = convertSeized({
@@ -375,9 +377,7 @@ export default function UserPageCollected({
         szn: sznParam ?? null,
         collection: convertedCollection,
       }),
-      page: normalizePageNumber(
-        pageParam ? Number.parseInt(pageParam, 10) : 1
-      ),
+      page: normalizePageNumber(pageParam ? Number.parseInt(pageParam, 10) : 1),
       pageSize: PAGE_SIZE,
       sortBy: convertSortedBy({
         sortBy: sortByParam ?? null,

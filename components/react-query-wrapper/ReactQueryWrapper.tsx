@@ -10,7 +10,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { wait } from "@/helpers/Helpers";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { Time } from "@/helpers/time";

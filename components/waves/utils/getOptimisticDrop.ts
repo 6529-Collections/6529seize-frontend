@@ -3,7 +3,7 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
