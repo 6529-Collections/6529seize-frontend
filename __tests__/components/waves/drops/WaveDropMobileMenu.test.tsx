@@ -9,6 +9,7 @@ import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 
 const mockIsMemesWave = jest.fn();
+const mockIsQuorumWave = jest.fn();
 const writeText = jest.fn().mockResolvedValue(undefined);
 const addReactionMock = jest.fn((props: any) => (
   <div
@@ -26,6 +27,9 @@ const mobileWrapperMock = jest.fn((props: any) =>
 
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
+}));
+jest.mock("@/hooks/drops/useCanShowDropCurationsAction", () => ({
+  useCanShowDropCurationsAction: jest.fn(() => false),
 }));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuDelete", () => () => (
   <div data-testid="delete" />
@@ -62,7 +66,10 @@ jest.mock(
 );
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
-  useSeizeSettings: () => ({ isMemesWave: mockIsMemesWave }),
+  useSeizeSettings: () => ({
+    isMemesWave: mockIsMemesWave,
+    isQuorumWave: mockIsQuorumWave,
+  }),
 }));
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: () => ({
@@ -93,6 +100,7 @@ beforeEach(() => {
   addReactionMock.mockClear();
   mobileWrapperMock.mockClear();
   mockIsMemesWave.mockReturnValue(false);
+  mockIsQuorumWave.mockReturnValue(false);
   mockedUseDropInteractionRules.mockReturnValue({
     canShowVote: true,
     canVote: true,
@@ -139,6 +147,40 @@ test("copies serial jump links for non-memes drops", async () => {
 
 test("copies canonical drop links for memes submissions", async () => {
   mockIsMemesWave.mockReturnValue(true);
+
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Participatory,
+    author: { handle: "alice" },
+  } as any;
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "alice" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+  await userEvent.click(screen.getByText("Copy link"));
+  expect(writeText).toHaveBeenCalledWith("https://base/waves/w?drop=1");
+});
+
+test("copies canonical drop links for quorum participation drops", async () => {
+  mockIsQuorumWave.mockReturnValue(true);
 
   const drop = {
     id: "1",

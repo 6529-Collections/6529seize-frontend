@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 
 jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
+const waveDropContentMock = jest.fn((props: any) => (
+  <div
+    data-testid="content"
+    onClick={() => props.onDropContentClick(props.drop)}
+  />
+));
 jest.mock("@/components/waves/drops/WaveDropContent", () => ({
   __esModule: true,
-  default: ({ onDropContentClick, drop }: any) => (
-    <div data-testid="content" onClick={() => onDropContentClick(drop)} />
-  ),
+  default: (props: any) => waveDropContentMock(props),
 }));
 jest.mock("@/components/waves/drops/WaveDropMetadata", () => ({
   __esModule: true,
@@ -31,6 +35,10 @@ jest.mock(
 const routerMock = useRouter as jest.Mock;
 
 describe("WaveLeaderboardDropContent", () => {
+  beforeEach(() => {
+    waveDropContentMock.mockClear();
+  });
+
   it("navigates on drop click, renders identity, and filters reserved metadata", () => {
     const push = jest.fn();
     routerMock.mockReturnValue({ push });
@@ -50,5 +58,27 @@ describe("WaveLeaderboardDropContent", () => {
     expect(push).toHaveBeenCalledWith("/waves/w?serialNo=5");
     expect(screen.getByTestId("identity")).toBeInTheDocument();
     expect(screen.getByTestId("meta")).toHaveTextContent("1");
+  });
+
+  it("forwards custom content presentation to the shared drop content", () => {
+    routerMock.mockReturnValue({ push: jest.fn() });
+    const drop = {
+      wave: { id: "w" },
+      serial_no: 5,
+      metadata: [],
+    } as any;
+
+    render(
+      <WaveLeaderboardDropContent
+        drop={drop}
+        contentPresentation="quorumCompact"
+      />
+    );
+
+    expect(waveDropContentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+      })
+    );
   });
 });

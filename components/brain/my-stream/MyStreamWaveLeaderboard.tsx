@@ -272,6 +272,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     },
     [pathname, router, searchParams]
   );
+
   const updatePriceRange = useCallback(
     ({
       minPrice: nextMinPrice,
@@ -305,6 +306,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         sort={sort}
         isVotingClosed={isApprovalVotingClosed}
         curatedByGroupId={curatedByGroupId}
+        onDropClick={onDropClick}
         minPrice={minPrice}
         maxPrice={maxPrice}
         priceCurrency={priceCurrency}

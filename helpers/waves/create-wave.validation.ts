@@ -4,6 +4,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { isReservedIdentitySubmissionMetadataKey } from "./identity-submission-metadata";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 import type {
+  CreateWaveApprovalConfig,
   CreateWaveConfig,
   CreateWaveDatesConfig,
   CreateWaveDropsConfig,
@@ -267,15 +268,6 @@ const getVotingValidationErrors = ({
   }
 
   if (
-    waveType === ApiWaveType.Approve &&
-    (voting.winningThreshold === null ||
-      !Number.isInteger(voting.winningThreshold) ||
-      voting.winningThreshold <= 0)
-  ) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
-  }
-
-  if (
     maxVotesPerIdentityPerDrop !== null &&
     (!Number.isInteger(maxVotesPerIdentityPerDrop) ||
       maxVotesPerIdentityPerDrop < 1)
@@ -325,6 +317,30 @@ const getVotingValidationErrors = ({
         );
       }
     }
+  }
+
+  return errors;
+};
+
+const getApprovalValidationErrors = ({
+  waveType,
+  approval,
+}: {
+  readonly waveType: ApiWaveType;
+  readonly approval: CreateWaveApprovalConfig;
+}): CREATE_WAVE_VALIDATION_ERROR[] => {
+  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+
+  if (waveType !== ApiWaveType.Approve) {
+    return errors;
+  }
+
+  if (
+    approval.threshold === null ||
+    !Number.isInteger(approval.threshold) ||
+    approval.threshold <= 0
+  ) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
   }
 
   return errors;
@@ -413,6 +429,14 @@ export const getCreateWaveValidationErrors = ({
           waveType: config.overview.type,
           dates: config.dates,
           voting: config.voting,
+        })
+      );
+      break;
+    case CreateWaveStep.APPROVAL:
+      errors.push(
+        ...getApprovalValidationErrors({
+          waveType: config.overview.type,
+          approval: config.approval,
         })
       );
       break;

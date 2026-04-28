@@ -1,9 +1,12 @@
 import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
+import Image from "next/image";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
 import { CICType } from "@/entities/IProfile";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
@@ -13,11 +16,14 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 interface WaveSmallLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: () => void;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveSmallLeaderboardTopThreeDrop: React.FC<
   WaveSmallLeaderboardTopThreeDropProps
-> = ({ drop, onDropClick }) => {
+> = ({ drop, onDropClick, contentPresentation = "default" }) => {
+  const authorLabel = drop.author.handle ?? drop.author.primary_address;
+
   const getRankTextColor = (rank: number | null): string | null => {
     if (rank === 1) return "tw-text-[#E8D48A]";
     if (rank === 2) return "tw-text-[#DDDDDD]";
@@ -100,18 +106,26 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                 <WaveSmallLeaderboardItemContent
                   drop={drop}
                   onDropClick={onDropClick}
+                  contentPresentation={contentPresentation}
                 />
                 <div className="tw-flex tw-items-center tw-justify-between">
                   <Link
-                    href={`/${drop.author.handle ?? drop.author.primary_address}`}
+                    href={`/${authorLabel}`}
                     onClick={(e) => e.stopPropagation()}
                     className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
                   >
                     {drop.author.pfp ? (
-                      <img
+                      // Small leaderboard avatars can come from arbitrary remote hosts, so this stays unoptimized.
+                      <Image
                         className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-object-contain tw-p-px tw-ring-1 tw-ring-inset tw-ring-iron-700"
-                        src={drop.author.pfp}
-                        alt={drop.author.handle ?? ""}
+                        src={getScaledImageUri(
+                          drop.author.pfp,
+                          ImageScale.W_AUTO_H_50
+                        )}
+                        alt={`${authorLabel}'s profile picture`}
+                        width={24}
+                        height={24}
+                        unoptimized
                       />
                     ) : (
                       <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700" />

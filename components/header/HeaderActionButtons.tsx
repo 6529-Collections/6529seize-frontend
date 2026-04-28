@@ -4,13 +4,14 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useViewContext } from "../navigation/ViewContext";
+import { Suspense } from "react";
+import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
-export default function HeaderViewActionButtons() {
-  const { activeView } = useViewContext();
+function HeaderActionButtonsContent() {
   const pathname = usePathname();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
   const { openWave, openDirectMessage } = useCreateModalState();
 
@@ -18,11 +19,12 @@ export default function HeaderViewActionButtons() {
     "tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
 
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const viewParam = searchParams.get("view");
-  const isWaveContext =
-    activeView === "waves" || (viewParam === "waves" && !waveParam);
-  const isMessagesContext =
-    activeView === "messages" || (viewParam === "messages" && !waveParam);
+  const activeView = getActiveViewFromUrl({
+    activeWaveId: waveParam,
+    searchParams,
+  });
+  const isWaveContext = activeView === "waves";
+  const isMessagesContext = activeView === "messages";
   const isOnWaveCreateRoute = pathname === "/waves/create";
   const isOnWavesRoute = pathname === "/waves" && !waveParam;
   const isOnMessagesRoute = pathname === "/messages" && !waveParam;
@@ -66,4 +68,12 @@ export default function HeaderViewActionButtons() {
   }
 
   return null;
+}
+
+export default function HeaderViewActionButtons() {
+  return (
+    <Suspense fallback={null}>
+      <HeaderActionButtonsContent />
+    </Suspense>
+  );
 }

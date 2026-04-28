@@ -49,6 +49,7 @@ describe("create-wave.validation", () => {
       },
     },
     outcomes: [{ id: 1 }],
+    approval: { threshold: null, thresholdTimeMs: null },
   };
 
   it("validates overview name required", () => {
@@ -124,17 +125,14 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("winning threshold required for approve waves on voting step", () => {
+  it("approval threshold required for approve waves on approval step", () => {
     const approveConfig = {
       ...baseConfig,
       overview: { type: ApiWaveType.Approve, name: "n", image: null },
-      voting: {
-        ...baseConfig.voting,
-        winningThreshold: null,
-      },
+      approval: { threshold: null, thresholdTimeMs: null },
     };
     const errors = getCreateWaveValidationErrors({
-      step: CreateWaveStep.VOTING,
+      step: CreateWaveStep.APPROVAL,
       config: approveConfig,
     });
     expect(errors).toContain(

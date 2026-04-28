@@ -75,6 +75,7 @@ export enum CreateWaveStep {
   DATES = "DATES",
   DROPS = "DROPS",
   VOTING = "VOTING",
+  APPROVAL = "APPROVAL",
   OUTCOMES = "OUTCOMES",
   DESCRIPTION = "DESCRIPTION",
 }
@@ -86,6 +87,11 @@ export interface CreateWaveDatesConfig {
   readonly firstDecisionTime: number;
   readonly subsequentDecisions: number[];
   readonly isRolling: boolean;
+}
+
+export interface CreateWaveApprovalConfig {
+  readonly threshold: number | null;
+  readonly thresholdTimeMs: number | null;
 }
 
 export enum CreateWaveOutcomeType {
@@ -138,6 +144,7 @@ export interface CreateWaveConfig {
   };
   readonly voting: CreateWaveVotingConfig;
   readonly outcomes: CreateWaveOutcomeConfig[];
+  readonly approval: CreateWaveApprovalConfig;
 }
 
 export enum CreateWaveStepStatus {

@@ -287,7 +287,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             </CommonDropdownItemsMobileWrapper>,
             document.body
           )}
-        {wave && (
+        {wave && isResubmitModalOpen && (
           <MemesArtSubmissionModal
             isOpen={isResubmitModalOpen}
             wave={wave}

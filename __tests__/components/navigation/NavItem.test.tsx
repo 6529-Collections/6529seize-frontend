@@ -13,6 +13,18 @@ import { useWave } from "@/hooks/useWave";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 jest.mock("@/components/navigation/ViewContext", () => ({
+  getActiveViewFromUrl: ({
+    activeWaveId,
+    searchParams,
+  }: {
+    readonly activeWaveId: string | null | undefined;
+    readonly searchParams: URLSearchParams | null | undefined;
+  }) => {
+    const view = searchParams?.get("view");
+    return activeWaveId || (view !== "waves" && view !== "messages")
+      ? null
+      : view;
+  },
   useViewContext: jest.fn(),
 }));
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
@@ -49,7 +61,6 @@ describe("NavItem notifications", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useViewContext as jest.Mock).mockReturnValue({
-      activeView: "home",
       handleNavClick,
     });
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
@@ -154,10 +165,6 @@ describe("NavItem notifications", () => {
   });
 
   it("marks profile active only on own profile routes", () => {
-    (useViewContext as jest.Mock).mockReturnValue({
-      activeView: null,
-      handleNavClick,
-    });
     (usePathname as jest.Mock).mockReturnValue("/my-handle/proxy");
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "User", normalised_handle: "my-handle" },

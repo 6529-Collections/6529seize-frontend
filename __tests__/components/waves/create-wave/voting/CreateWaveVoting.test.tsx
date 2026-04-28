@@ -41,13 +41,11 @@ describe("CreateWaveVoting", () => {
     category: null,
     profileId: null,
     maxVotesPerIdentityPerDrop: null,
-    winningThreshold: null,
     errors: [],
     onTypeChange: jest.fn(),
     setCategory: jest.fn(),
     setProfileId: jest.fn(),
     setMaxVotesPerIdentityPerDrop: jest.fn(),
-    setWinningThreshold: jest.fn(),
     timeWeighted: {
       enabled: false,
       averagingInterval: 0,
@@ -86,15 +84,9 @@ describe("CreateWaveVoting", () => {
     expect(screen.queryByLabelText("Threshold")).toBeNull();
   });
 
-  it("renders threshold and time weighted voting for approve waves", () => {
-    render(
-      <CreateWaveVoting
-        {...baseProps}
-        waveType={ApiWaveType.Approve}
-        winningThreshold={5}
-      />
-    );
-    expect(screen.getByLabelText("Threshold")).toHaveValue("5");
+  it("renders time weighted voting for approve waves", () => {
+    render(<CreateWaveVoting {...baseProps} waveType={ApiWaveType.Approve} />);
+    expect(screen.queryByLabelText("Threshold")).toBeNull();
     expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
   });
 

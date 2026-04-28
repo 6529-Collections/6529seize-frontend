@@ -211,7 +211,7 @@ it("sets max votes per identity per drop", () => {
   expect(body.wave.max_votes_per_identity_to_drop).toBe(1);
 });
 
-it("sets winning thresholds for approve waves", () => {
+it("keeps winning_threshold for approve waves", () => {
   const config: any = {
     overview: { type: ApiWaveType.Approve, name: "A" },
     groups: {
@@ -243,7 +243,7 @@ it("sets winning thresholds for approve waves", () => {
       type: null,
       category: null,
       profileId: null,
-      winningThreshold: 3,
+      winningThreshold: 99,
       timeWeighted: {
         enabled: false,
         averagingInterval: 5,
@@ -251,6 +251,7 @@ it("sets winning thresholds for approve waves", () => {
       },
     },
     outcomes: [],
+    approval: { threshold: 3, thresholdTimeMs: 60000 },
   };
   const drop: any = {
     parts: [],
@@ -259,7 +260,58 @@ it("sets winning thresholds for approve waves", () => {
     metadata: [],
   };
   const body = getCreateNewWaveBody({ drop, picture: null, config });
-  expect(body.wave.winning_threshold).toBe(3);
+  expect(body.wave.winning_threshold).toBe(config.approval.threshold);
+});
+
+it("sets winning_threshold to null for non-approve waves", () => {
+  const config: any = {
+    overview: { type: ApiWaveType.Rank, name: "R" },
+    groups: {
+      canView: "1",
+      canDrop: "2",
+      canVote: "3",
+      canChat: "4",
+      admin: "5",
+    },
+    dates: {
+      submissionStartDate: 1,
+      votingStartDate: 2,
+      endDate: null,
+      firstDecisionTime: 2,
+      subsequentDecisions: [],
+      isRolling: false,
+    },
+    drops: {
+      noOfApplicationsAllowedPerParticipant: 1,
+      requiredTypes: [],
+      requiredMetadata: [],
+      submissionStrategy: null,
+      terms: null,
+      signatureRequired: false,
+      adminCanDeleteDrops: false,
+    },
+    chat: { enabled: false },
+    voting: {
+      type: null,
+      category: null,
+      profileId: null,
+      timeWeighted: {
+        enabled: false,
+        averagingInterval: 5,
+        averagingIntervalUnit: "minutes",
+      },
+    },
+    outcomes: [],
+    approval: { threshold: 3, thresholdTimeMs: 60000 },
+  };
+  const drop: any = {
+    parts: [],
+    referenced_nfts: [],
+    mentioned_users: [],
+    metadata: [],
+  };
+  const body = getCreateNewWaveBody({ drop, picture: null, config });
+  expect(body.wave.winning_threshold).toBeNull();
 });
 
 it("sets time lock for approve waves when time weighted voting is enabled", () => {
@@ -294,7 +346,6 @@ it("sets time lock for approve waves when time weighted voting is enabled", () =
       type: null,
       category: null,
       profileId: null,
-      winningThreshold: 3,
       timeWeighted: {
         enabled: true,
         averagingInterval: 2,
@@ -302,6 +353,7 @@ it("sets time lock for approve waves when time weighted voting is enabled", () =
       },
     },
     outcomes: [],
+    approval: { threshold: 3, thresholdTimeMs: 60000 },
   };
   const drop: any = {
     parts: [],
@@ -345,7 +397,6 @@ it("caps approve time lock at the wave duration", () => {
       type: null,
       category: null,
       profileId: null,
-      winningThreshold: 3,
       timeWeighted: {
         enabled: true,
         averagingInterval: 2,
@@ -353,6 +404,7 @@ it("caps approve time lock at the wave duration", () => {
       },
     },
     outcomes: [],
+    approval: { threshold: 3, thresholdTimeMs: 60000 },
   };
   const drop: any = {
     parts: [],

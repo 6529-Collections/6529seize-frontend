@@ -12,6 +12,7 @@ import {
 import GroupCardChat from "@/components/groups/page/list/card/GroupCardChat";
 import DropItemChat from "@/components/waves/drops/DropItemChat";
 import WaveItemChat from "@/components/waves/list/WaveItemChat";
+import QuorumParticipationDropLinkPreview from "@/components/waves/quorum/QuorumParticipationDropLinkPreview";
 import type { LinkHandler } from "../linkTypes";
 import { renderSeizeQuote } from "../renderers";
 
@@ -23,6 +24,9 @@ interface CreateSeizeHandlersConfig {
   readonly embedDepth: number;
   readonly maxEmbedDepth: number;
   readonly isMemesWaveById?:
+    | ((waveId: string | undefined | null) => boolean)
+    | undefined;
+  readonly isQuorumWaveById?:
     | ((waveId: string | undefined | null) => boolean)
     | undefined;
 }
@@ -73,6 +77,22 @@ const createSeizeQuoteHandler = (
     const nextQuotePath = quoteCycleKey
       ? [...config.quotePath, quoteCycleKey]
       : config.quotePath;
+
+    if (config.isQuorumWaveById?.(quoteInfo.waveId)) {
+      return (
+        <QuorumParticipationDropLinkPreview
+          href={href}
+          waveId={quoteInfo.waveId}
+          serialNo={quoteInfo.serialNo}
+          onQuoteClick={onQuoteClick}
+          embedPath={config.embedPath}
+          quotePath={nextQuotePath}
+          embedDepth={config.embedDepth + 1}
+          maxEmbedDepth={config.maxEmbedDepth}
+          hideLink
+        />
+      );
+    }
 
     const content = renderSeizeQuote(quoteInfo, onQuoteClick, href, {
       embedPath: config.embedPath,
@@ -153,6 +173,22 @@ const createSeizeDropHandler = (
         throw new Error("Seize drop link matches current drop");
       }
       const isMemesWave = config.isMemesWaveById?.(waveId) ?? false;
+      const isQuorumWave = config.isQuorumWaveById?.(waveId) ?? false;
+
+      if (!isMemesWave && isQuorumWave && waveId) {
+        return (
+          <QuorumParticipationDropLinkPreview
+            href={href}
+            waveId={waveId}
+            dropId={dropId}
+            onQuoteClick={onQuoteClick}
+            embedPath={config.embedPath}
+            quotePath={config.quotePath}
+            embedDepth={config.embedDepth + 1}
+            maxEmbedDepth={config.maxEmbedDepth}
+          />
+        );
+      }
 
       if (!isMemesWave && waveId) {
         const content = renderSeizeQuote(

@@ -71,6 +71,11 @@ const getCreateWaveTimeLockMs = ({
   return Math.min(timeLockMs, waveDurationMs);
 };
 
+const isPositiveFiniteNumber = (
+  value: number | null | undefined
+): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value > 0;
+
 export const getCreateWaveNextStep = ({
   step,
   waveType,
@@ -91,9 +96,14 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.DROPS:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.VOTING:
+      if (waveType === ApiWaveType.Approve) {
+        return CreateWaveStep.APPROVAL;
+      }
       if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.DESCRIPTION;
       }
+      return CreateWaveStep.OUTCOMES;
+    case CreateWaveStep.APPROVAL:
       return CreateWaveStep.OUTCOMES;
     case CreateWaveStep.OUTCOMES:
       return CreateWaveStep.DESCRIPTION;
@@ -126,7 +136,12 @@ export const getCreateWavePreviousStep = ({
       return CreateWaveStep.DATES;
     case CreateWaveStep.VOTING:
       return CreateWaveStep.DROPS;
+    case CreateWaveStep.APPROVAL:
+      return CreateWaveStep.VOTING;
     case CreateWaveStep.OUTCOMES:
+      if (waveType === ApiWaveType.Approve) {
+        return CreateWaveStep.APPROVAL;
+      }
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {
@@ -146,15 +161,17 @@ const getRankOutcomes = ({
 }): ApiCreateWaveOutcome[] => {
   const outcomes: ApiCreateWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
+    const winnersConfig = outcome.winnersConfig;
+
     if (
       outcome.type === CreateWaveOutcomeType.MANUAL &&
       outcome.title &&
-      outcome.winnersConfig
+      winnersConfig
     ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Manual,
         description: outcome.title,
-        distribution: outcome.winnersConfig.winners.map((winner) => ({
+        distribution: winnersConfig.winners.map((winner) => ({
           amount: winner.value,
           description: outcome.title,
         })),
@@ -162,7 +179,8 @@ const getRankOutcomes = ({
     } else if (
       outcome.type === CreateWaveOutcomeType.REP &&
       outcome.category &&
-      outcome.winnersConfig?.totalAmount
+      winnersConfig &&
+      isPositiveFiniteNumber(winnersConfig.totalAmount)
     ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
@@ -170,23 +188,24 @@ const getRankOutcomes = ({
         description: "Rep distribution",
         credit: ApiWaveOutcomeCredit.Rep,
         rep_category: outcome.category,
-        amount: outcome.winnersConfig.totalAmount,
-        distribution: outcome.winnersConfig.winners.map((winner) => ({
+        amount: winnersConfig.totalAmount,
+        distribution: winnersConfig.winners.map((winner) => ({
           amount: winner.value,
           description: null,
         })),
       });
     } else if (
       outcome.type === CreateWaveOutcomeType.NIC &&
-      outcome.winnersConfig?.totalAmount
+      winnersConfig &&
+      isPositiveFiniteNumber(winnersConfig.totalAmount)
     ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
         subtype: ApiWaveOutcomeSubType.CreditDistribution,
         description: "NIC distribution",
         credit: ApiWaveOutcomeCredit.Cic,
-        amount: outcome.winnersConfig.totalAmount,
-        distribution: outcome.winnersConfig.winners.map((winner) => ({
+        amount: winnersConfig.totalAmount,
+        distribution: winnersConfig.winners.map((winner) => ({
           amount: winner.value,
           description: null,
         })),
@@ -203,11 +222,7 @@ const getApproveOutcomes = ({
 }): ApiCreateWaveOutcome[] => {
   const outcomes: ApiCreateWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
-    if (
-      outcome.type === CreateWaveOutcomeType.MANUAL &&
-      outcome.title &&
-      outcome.maxWinners
-    ) {
+    if (outcome.type === CreateWaveOutcomeType.MANUAL && outcome.title) {
       outcomes.push({
         type: ApiWaveOutcomeType.Manual,
         description: outcome.title,
@@ -215,7 +230,7 @@ const getApproveOutcomes = ({
     } else if (
       outcome.type === CreateWaveOutcomeType.REP &&
       outcome.category &&
-      outcome.credit
+      isPositiveFiniteNumber(outcome.credit)
     ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
@@ -225,7 +240,10 @@ const getApproveOutcomes = ({
         rep_category: outcome.category,
         amount: outcome.credit,
       });
-    } else if (outcome.type === CreateWaveOutcomeType.NIC && outcome.credit) {
+    } else if (
+      outcome.type === CreateWaveOutcomeType.NIC &&
+      isPositiveFiniteNumber(outcome.credit)
+    ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Automatic,
         subtype: ApiWaveOutcomeSubType.CreditDistribution,
@@ -331,7 +349,7 @@ const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
     );
   }
 
-  // Need an end date for rolling waves
+  // If we reach this point, isRolling is true and we need to calculate the last decision time
   if (typeof dates.endDate !== "number") {
     throw new Error("End date must be explicitly set when isRolling is true");
   }
@@ -418,7 +436,7 @@ export const getCreateNewWaveBody = ({
       type: config.overview.type,
       winning_threshold:
         config.overview.type === ApiWaveType.Approve
-          ? config.voting.winningThreshold
+          ? config.approval.threshold
           : null,
       // TODO - should be in outcomes
       max_winners: null,

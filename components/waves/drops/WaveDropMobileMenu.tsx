@@ -71,12 +71,14 @@ const getIsDirectMessage = (drop: ApiDrop): boolean => {
 const copyDropLinkToClipboard = ({
   drop,
   isMemesWave,
+  isQuorumWave,
   isTemporaryDrop,
   closeMenu,
   setCopied,
 }: {
   readonly drop: ApiDrop;
   readonly isMemesWave: (waveId: string | null | undefined) => boolean;
+  readonly isQuorumWave: (waveId: string | null | undefined) => boolean;
   readonly isTemporaryDrop: boolean;
   readonly closeMenu: () => void;
   readonly setCopied: (copied: boolean) => void;
@@ -89,6 +91,7 @@ const copyDropLinkToClipboard = ({
     drop,
     isDirectMessage: getIsDirectMessage(drop),
     isMemesWave,
+    isQuorumWave,
   });
 
   if (typeof navigator.clipboard.writeText !== "function") {
@@ -343,7 +346,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showVoting = true,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { isMemesWave } = useSeizeSettings();
+  const { isMemesWave, isQuorumWave } = useSeizeSettings();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
   const { mobileMenuZIndexClassName, mobileDialogZIndexClassName } =
@@ -375,6 +378,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     copyDropLinkToClipboard({
       drop,
       isMemesWave,
+      isQuorumWave,
       isTemporaryDrop,
       closeMenu,
       setCopied,

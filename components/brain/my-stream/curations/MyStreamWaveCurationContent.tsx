@@ -13,7 +13,7 @@ import { useCurationManagementPermission } from "@/hooks/useCurationManagementPe
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { useWaveDrops } from "@/hooks/useWaveDrops";
+import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { Time } from "@/helpers/time";
 import {
@@ -149,8 +149,8 @@ export default function MyStreamWaveCurationContent({
 }: MyStreamWaveCurationContentProps) {
   const { leaderboardViewStyle } = useLayout();
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDrops({
-      waveId: wave.id,
+    useWaveCurationDrops({
+      wave,
       curationId,
     });
   const permissionProbeDropId = drops[0]?.id ?? "";

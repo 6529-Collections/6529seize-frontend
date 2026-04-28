@@ -991,6 +991,42 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiLightDrop"
+  /curated-profile-wave-drops:
+    get:
+      tags:
+        - Drops
+      summary: Get curated profile wave drops
+      description: >-
+        Returns drops from effective profile-wave curations across all public
+        profile waves, newest drops first. If a profile wave has an explicit
+        profile curation it is used; otherwise the oldest curation in the
+        profile wave is used. Reply drops are included when curated.
+      operationId: getCuratedProfileWaveDrops
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCuratedProfileWaveDropsPage"
   /drops:
     get:
       tags:
@@ -1716,7 +1752,9 @@ paths:
       tags:
         - Drops
       summary: Create S3 URL for drop media upload
-      description: Requires the user to be authenticated
+      description: >-
+        Requires authentication; content_type must be one of the defined MIME
+        types.
       operationId: createDropMediaUrl
       requestBody:
         required: true
@@ -1738,7 +1776,9 @@ paths:
       tags:
         - Drops
       summary: Get upload ID and key for multipart upload
-      description: Requires the user to be authenticated
+      description: >-
+        Requires authentication; content_type must be one of the defined MIME
+        types.
       operationId: createMultipartDropMediaUrl
       requestBody:
         required: true
@@ -7969,8 +8009,7 @@ components:
         - file_size
       properties:
         content_type:
-          type: string
-          example: image/png
+          $ref: "#/components/schemas/ApiMediaUploadMimeType"
         file_name:
           type: string
           example: image.png
@@ -8231,6 +8270,14 @@ components:
             credits.
           type: string
           nullable: true
+        credit_nfts:
+          description: Only relevant when credit_type=CARD_SET_TDH
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                $ref: "#/components/schemas/ApiWaveCreditNft"
+              minItems: 1
         creditor_id:
           description: Only relevant when credit_type=REP
           type: string
@@ -8242,6 +8289,53 @@ components:
           $ref: "#/components/schemas/ApiIntRange"
         forbid_negative_votes:
           type: boolean
+      oneOf:
+        - type: object
+          required:
+            - credit_type
+          properties:
+            credit_type:
+              type: string
+              enum:
+                - TDH
+        - type: object
+          required:
+            - credit_type
+          properties:
+            credit_type:
+              type: string
+              enum:
+                - REP
+        - type: object
+          required:
+            - credit_type
+          properties:
+            credit_type:
+              type: string
+              enum:
+                - XTDH
+        - type: object
+          required:
+            - credit_type
+          properties:
+            credit_type:
+              type: string
+              enum:
+                - TDH_PLUS_XTDH
+        - type: object
+          required:
+            - credit_type
+            - credit_nfts
+          properties:
+            credit_type:
+              type: string
+              enum:
+                - CARD_SET_TDH
+            credit_nfts:
+              type: array
+              items:
+                $ref: "#/components/schemas/ApiWaveCreditNft"
+              minItems: 1
     ApiCreateOrUpdateProfileRequest:
       type: object
       required:
@@ -8404,6 +8498,17 @@ components:
         description:
           type: string
           nullable: true
+    ApiCuratedProfileWaveDropsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDrop"
     ApiCurationDrop:
       type: object
       required:
@@ -9599,6 +9704,27 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+    ApiMediaUploadMimeType:
+      type: string
+      enum:
+        - image/png
+        - image/jpeg
+        - image/jpg
+        - image/gif
+        - video/mp4
+        - video/x-msvideo
+        - audio/mpeg
+        - audio/mpeg3
+        - audio/ogg
+        - audio/mp3
+        - audio/wav
+        - audio/aac
+        - audio/x-aac
+        - model/gltf-binary
+        - video/quicktime
+        - image/webp
+        - application/pdf
+        - text/csv
     ApiMemesMintStat:
       type: object
       required:
@@ -11733,6 +11859,18 @@ components:
           type: string
         contributor_pfp:
           type: string
+    ApiWaveCreditNft:
+      type: object
+      required:
+        - contract
+        - token_id
+      properties:
+        contract:
+          $ref: "#/components/schemas/ApiEthereumAddress"
+        token_id:
+          type: integer
+          format: int64
+          minimum: 0
     ApiWaveCreditScope:
       description: |
         The scope of the credit. 
@@ -11748,6 +11886,7 @@ components:
         - REP
         - XTDH
         - TDH_PLUS_XTDH
+        - CARD_SET_TDH
     ApiWaveCuration:
       type: object
       required:
@@ -12012,6 +12151,7 @@ components:
         - voting_period_start
         - voting_period_end
         - voting_credit_type
+        - voting_credit_nfts
         - visibility_group_id
         - participation_group_id
         - chat_group_id
@@ -12072,6 +12212,13 @@ components:
           nullable: true
         voting_credit_type:
           $ref: "#/components/schemas/ApiWaveCreditType"
+        voting_credit_nfts:
+          anyOf:
+            - type: "null"
+            - type: array
+              minItems: 1
+              items:
+                $ref: "#/components/schemas/ApiWaveCreditNft"
         admin_drop_deletion_enabled:
           type: boolean
         forbid_negative_votes:
@@ -12371,6 +12518,7 @@ components:
         - scope
         - credit_type
         - credit_category
+        - credit_nfts
         - signature_required
         - creditor
         - authenticated_user_eligible
@@ -12387,6 +12535,13 @@ components:
             credits.
           type: string
           nullable: true
+        credit_nfts:
+          description: Only relevant when credit_type=CARD_SET_TDH
+          anyOf:
+            - type: "null"
+            - type: array
+              items:
+                $ref: "#/components/schemas/ApiWaveCreditNft"
         creditor:
           description: Only relevant when credit_type=REP
           anyOf:

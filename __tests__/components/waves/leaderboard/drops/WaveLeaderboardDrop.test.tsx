@@ -1,104 +1,97 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import React from "react";
 import { WaveLeaderboardDrop } from "@/components/waves/leaderboard/drops/WaveLeaderboardDrop";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-jest.mock(
-  "@/components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop",
-  () => ({
-    DefaultWaveLeaderboardDrop: (p: any) => (
-      <div
-        data-testid="default"
-        data-winning-threshold={p.winningThreshold ?? ""}
-        data-is-voting-closed={String(p.isVotingClosed)}
-      >
-        {p.drop.id}
-      </div>
-    ),
-  })
-);
-jest.mock("@/components/memes/drops/MemesLeaderboardDrop", () => ({
-  MemesLeaderboardDrop: (p: any) => (
-    <button data-testid="memes" onClick={p.onSourceDropDeleted}>
-      {p.drop.id}
-    </button>
-  ),
-}));
-jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
+const useWaveLeaderboardRendererSet = jest.fn();
 
-const useWave = require("@/hooks/useWave").useWave as jest.Mock;
+jest.mock("@/components/waves/leaderboard/leaderboardRendererRegistry", () => ({
+  useWaveLeaderboardRendererSet: (...args: any[]) =>
+    useWaveLeaderboardRendererSet(...args),
+}));
 
 describe("WaveLeaderboardDrop", () => {
-  const wave = { id: "w" } as any;
-  const drop = { id: "d" } as any;
+  const drop = { id: "d1" } as any;
+  const wave = {
+    id: "w1",
+    wave: { type: ApiWaveType.Rank, winning_threshold: null },
+  } as any;
+  const onDropClick = jest.fn();
+  let rendererProps: any;
 
-  it("renders memes drop when wave is memes", () => {
-    useWave.mockReturnValue({ isMemesWave: true });
-    render(
-      <WaveLeaderboardDrop drop={drop} wave={wave} onDropClick={jest.fn()} />
-    );
-    expect(screen.getByTestId("memes")).toHaveTextContent("d");
+  beforeEach(() => {
+    rendererProps = undefined;
+    useWaveLeaderboardRendererSet.mockReset();
+    useWaveLeaderboardRendererSet.mockReturnValue({
+      variant: "quorum",
+      LeaderboardDrop: (props: any) => {
+        rendererProps = props;
+        return <div data-testid="resolved-renderer">{props.drop.id}</div>;
+      },
+      SmallLeaderboardDrop: () => null,
+    });
+    onDropClick.mockReset();
   });
 
-  it("passes source deletion callback to memes drop", () => {
+  it("renders the resolved leaderboard renderer", () => {
+    render(
+      <WaveLeaderboardDrop drop={drop} wave={wave} onDropClick={onDropClick} />
+    );
+
+    expect(useWaveLeaderboardRendererSet).toHaveBeenCalledWith("w1");
+    expect(rendererProps).toEqual({
+      drop,
+      wave,
+      onDropClick,
+      onSourceDropDeleted: undefined,
+      isVotingClosed: false,
+      winningThreshold: null,
+    });
+    expect(screen.getByTestId("resolved-renderer")).toHaveTextContent("d1");
+  });
+
+  it("passes source deletion callback to the resolved renderer", () => {
     const onSourceDropDeleted = jest.fn();
-    useWave.mockReturnValue({ isMemesWave: true });
+
     render(
       <WaveLeaderboardDrop
         drop={drop}
         wave={wave}
-        onDropClick={jest.fn()}
+        onDropClick={onDropClick}
         onSourceDropDeleted={onSourceDropDeleted}
       />
     );
-    screen.getByTestId("memes").click();
-    expect(onSourceDropDeleted).toHaveBeenCalledTimes(1);
+
+    expect(rendererProps.onSourceDropDeleted).toBe(onSourceDropDeleted);
   });
 
-  it("renders default drop otherwise", () => {
-    useWave.mockReturnValue({ isMemesWave: false });
-    render(
-      <WaveLeaderboardDrop drop={drop} wave={wave} onDropClick={jest.fn()} />
-    );
-    expect(screen.getByTestId("default")).toHaveTextContent("d");
-  });
-
-  it("passes approve threshold to default drops", () => {
+  it("passes approve threshold to the resolved renderer", () => {
     const approveWave = {
-      id: "w",
+      id: "w2",
       wave: { type: ApiWaveType.Approve, winning_threshold: 7 },
     } as any;
-    useWave.mockReturnValue({ isMemesWave: false });
 
     render(
       <WaveLeaderboardDrop
         drop={drop}
         wave={approveWave}
-        onDropClick={jest.fn()}
+        onDropClick={onDropClick}
       />
     );
 
-    expect(screen.getByTestId("default")).toHaveAttribute(
-      "data-winning-threshold",
-      "7"
-    );
+    expect(rendererProps.winningThreshold).toBe(7);
   });
 
-  it("passes closed voting state to default drops", () => {
-    useWave.mockReturnValue({ isMemesWave: false });
-
+  it("passes closed voting state to the resolved renderer", () => {
     render(
       <WaveLeaderboardDrop
         drop={drop}
         wave={wave}
-        onDropClick={jest.fn()}
+        onDropClick={onDropClick}
         isVotingClosed={true}
       />
     );
 
-    expect(screen.getByTestId("default")).toHaveAttribute(
-      "data-is-voting-closed",
-      "true"
-    );
+    expect(rendererProps.isVotingClosed).toBe(true);
   });
 });

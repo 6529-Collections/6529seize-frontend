@@ -40,6 +40,7 @@ export const CollapsedWave = ({
   >
     <Link
       href={href}
+      prefetch={false}
       {...(onMouseEnter ? { onMouseEnter } : {})}
       onClick={onClick}
       className="tw-flex tw-items-center tw-justify-center tw-no-underline"

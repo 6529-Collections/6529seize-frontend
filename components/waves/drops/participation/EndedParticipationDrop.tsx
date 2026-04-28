@@ -27,6 +27,7 @@ import {
   getParticipationIdentityProfile,
   getParticipationVisibleMetadata,
 } from "./participationIdentityProfile.helpers";
+import type { DropContentPresentation } from "../dropContentPresentation";
 import type { DropIdentityMode, DropInteractionParams } from "../drop.types";
 import { DropLocation } from "../drop.types";
 
@@ -42,6 +43,11 @@ interface EndedParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 export default function EndedParticipationDrop({
@@ -55,6 +61,11 @@ export default function EndedParticipationDrop({
   onDropContentClick,
   identityMode = "default",
   showInteractions = true,
+  contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }: EndedParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
@@ -215,6 +226,11 @@ export default function EndedParticipationDrop({
               setLongPressTriggered={setLongPressTriggered}
               isCompetitionDrop={true}
               hasTouch={hasTouch}
+              contentPresentation={contentPresentation}
+              embedPath={embedPath}
+              quotePath={quotePath}
+              embedDepth={embedDepth}
+              maxEmbedDepth={maxEmbedDepth}
             />
           </div>
         </div>

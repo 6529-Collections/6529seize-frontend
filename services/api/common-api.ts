@@ -9,6 +9,7 @@ type StructuredApiError = Error & {
   response: {
     status: number;
     headers: Headers;
+    statusText?: string;
     body?: unknown;
   };
 };
@@ -59,15 +60,30 @@ const normalizeHeaders = (value: unknown): Headers => {
   }
 };
 
+const getUsableErrorMessage = (
+  message: string,
+  fallbackMessage: string
+): string => (message.trim().length > 0 ? message : fallbackMessage);
+
+const getUsableErrorField = (value: unknown): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  return value.trim().length > 0 ? value : undefined;
+};
+
 const createStructuredApiError = ({
   message,
   status,
   headers,
+  statusText,
   body,
 }: {
   message: string;
   status: number;
   headers: Headers;
+  statusText?: string;
   body?: unknown;
 }): StructuredApiError => {
   const error = new Error(message) as StructuredApiError;
@@ -77,6 +93,7 @@ const createStructuredApiError = ({
   error.response = {
     status,
     headers,
+    ...(statusText !== undefined ? { statusText } : {}),
     ...(body !== undefined ? { body } : {}),
   };
   return error;
@@ -86,7 +103,10 @@ const handleApiError = async (
   res: Response,
   errorMode: ApiErrorMode
 ): Promise<never> => {
-  const fallbackErrorMessage = res.statusText || "Something went wrong";
+  const fallbackErrorMessage = getUsableErrorMessage(
+    res.statusText,
+    "Something went wrong"
+  );
   let errorMessage = fallbackErrorMessage;
   let errorBody: unknown = undefined;
 
@@ -112,13 +132,19 @@ const handleApiError = async (
           typeof (bodyDetails[0] as { message?: unknown }).message === "string"
             ? (bodyDetails[0] as { message: string }).message
             : undefined;
+        const structuredErrorMessage =
+          getUsableErrorField(bodyError) ??
+          getUsableErrorField(bodyMessage) ??
+          getUsableErrorField(detailsFirstMessage);
+        const hasStructuredErrorField =
+          typeof bodyError === "string" ||
+          typeof bodyMessage === "string" ||
+          typeof detailsFirstMessage === "string";
 
-        if (typeof bodyError === "string") {
-          errorMessage = bodyError;
-        } else if (typeof bodyMessage === "string") {
-          errorMessage = bodyMessage;
-        } else if (typeof detailsFirstMessage === "string") {
-          errorMessage = detailsFirstMessage;
+        if (structuredErrorMessage !== undefined) {
+          errorMessage = structuredErrorMessage;
+        } else if (hasStructuredErrorField) {
+          errorMessage = fallbackErrorMessage;
         } else {
           errorMessage = rawContent;
         }
@@ -130,16 +156,22 @@ const handleApiError = async (
     errorMessage = fallbackErrorMessage;
   }
 
+  const normalizedErrorMessage = getUsableErrorMessage(
+    errorMessage,
+    fallbackErrorMessage
+  );
+
   if (errorMode === "structured") {
     throw createStructuredApiError({
-      message: errorMessage,
+      message: normalizedErrorMessage,
       status: res.status,
       headers: normalizeHeaders((res as { headers?: unknown }).headers),
+      statusText: res.statusText,
       body: errorBody,
     });
   }
 
-  return Promise.reject(errorMessage);
+  return Promise.reject(normalizedErrorMessage);
 };
 
 const executeApiRequest = async <T>(
@@ -388,6 +420,7 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
 export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string> | undefined;
+  errorMode?: ApiErrorMode | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
@@ -397,7 +430,8 @@ export const commonApiDelete = async (param: {
     getHeaders(param.headers),
     undefined,
     undefined,
-    false
+    false,
+    param.errorMode ?? "legacy-string"
   );
 };
 

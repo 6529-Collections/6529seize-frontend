@@ -78,6 +78,10 @@ export function useWaveConfig() {
         },
       },
       outcomes: [],
+      approval: {
+        threshold: null,
+        thresholdTimeMs: null,
+      },
     };
   };
 
@@ -324,6 +328,26 @@ export function useWaveConfig() {
     }));
   };
 
+  const onThresholdChange = (threshold: number | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      approval: {
+        ...prev.approval,
+        threshold,
+      },
+    }));
+  };
+
+  const onThresholdTimeChange = (thresholdTimeMs: number | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      approval: {
+        ...prev.approval,
+        thresholdTimeMs,
+      },
+    }));
+  };
+
   return {
     config,
     setConfig,
@@ -352,6 +376,8 @@ export function useWaveConfig() {
     onMaxVotesPerIdentityPerDropChange,
     onTimeWeightedVotingChange,
     onWinningThresholdChange,
+    onThresholdChange,
+    onThresholdTimeChange,
     // Chat
     onChatEnabledChange,
   };

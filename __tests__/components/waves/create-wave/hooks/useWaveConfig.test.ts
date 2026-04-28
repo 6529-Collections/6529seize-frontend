@@ -70,6 +70,10 @@ describe("useWaveConfig", () => {
         averagingInterval: 24,
         averagingIntervalUnit: "hours",
       });
+      expect(result.current.config.approval).toEqual({
+        threshold: null,
+        thresholdTimeMs: null,
+      });
     });
 
     it("should initialize with default groups, drops, and other settings", () => {
@@ -431,14 +435,24 @@ describe("useWaveConfig", () => {
   });
 
   describe("Approve Threshold Configuration", () => {
-    it("should update winning threshold", () => {
+    it("should update approval threshold", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
-        result.current.onWinningThresholdChange(75);
+        result.current.onThresholdChange(75);
       });
 
-      expect(result.current.config.voting.winningThreshold).toBe(75);
+      expect(result.current.config.approval.threshold).toBe(75);
+    });
+
+    it("should update approval threshold time", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onThresholdTimeChange(60000);
+      });
+
+      expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
     });
   });
 

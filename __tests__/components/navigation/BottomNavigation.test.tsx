@@ -76,4 +76,22 @@ describe("BottomNavigation", () => {
     );
     expect(notificationsItem?.href).toBe(getNotificationsRoute(false));
   });
+
+  it("renders a stable nav fallback when search params suspend", () => {
+    const pendingSearchParams = new Promise<URLSearchParams>(() => {
+      // Keep the promise pending so Suspense stays on the fallback.
+    });
+    (useSearchParams as jest.Mock).mockImplementation(() => {
+      throw pendingSearchParams;
+    });
+
+    const { container } = render(<BottomNavigation />);
+
+    expect(container.querySelector("nav")).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
+    expect(container.querySelector("ul")).toBeInTheDocument();
+    expect(NavItem).not.toHaveBeenCalled();
+  });
 });

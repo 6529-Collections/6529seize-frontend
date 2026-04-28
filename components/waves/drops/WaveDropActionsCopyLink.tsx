@@ -20,7 +20,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   onCopy,
 }) => {
   const [copied, setCopied] = useState(false);
-  const { isMemesWave } = useSeizeSettings();
+  const { isMemesWave, isQuorumWave } = useSeizeSettings();
   const myStream = useMyStreamOptional();
   const directMessageWaves = myStream?.directMessages.list ?? [];
 
@@ -54,6 +54,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
       drop,
       isDirectMessage,
       isMemesWave,
+      isQuorumWave,
     });
     navigator.clipboard.writeText(dropLink).then(() => {
       setCopied(true);

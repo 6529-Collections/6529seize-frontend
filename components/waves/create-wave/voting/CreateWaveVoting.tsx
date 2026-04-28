@@ -7,7 +7,6 @@ import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.valida
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
-import CreateWaveVotingThreshold from "./CreateWaveVotingThreshold";
 import MaxVotesPerIdentityInput from "./MaxVotesPerIdentityInput";
 import NegativeVotingToggle from "./NegativeVotingToggle";
 import TimeWeightedVoting from "./TimeWeightedVoting";
@@ -29,13 +28,11 @@ export default function CreateWaveVoting({
   category,
   profileId,
   maxVotesPerIdentityPerDrop,
-  winningThreshold,
   errors,
   onTypeChange,
   setCategory,
   setProfileId,
   setMaxVotesPerIdentityPerDrop,
-  setWinningThreshold,
   timeWeighted,
   onTimeWeightedChange,
 }: {
@@ -44,13 +41,11 @@ export default function CreateWaveVoting({
   readonly category: string | null;
   readonly profileId: string | null;
   readonly maxVotesPerIdentityPerDrop: number | null;
-  readonly winningThreshold: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onTypeChange: (type: ApiWaveCreditType) => void;
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
   readonly setMaxVotesPerIdentityPerDrop: (value: number | null) => void;
-  readonly setWinningThreshold: (value: number | null) => void;
   readonly timeWeighted: TimeWeightedVotingConfig;
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
@@ -69,9 +64,6 @@ export default function CreateWaveVoting({
     return null;
   }
 
-  const thresholdError = errors.includes(
-    CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED
-  );
   const timeWeightedErrorMessage = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
   )
@@ -118,14 +110,6 @@ export default function CreateWaveVoting({
           </div>
         )}
       </div>
-
-      {waveType === ApiWaveType.Approve && (
-        <CreateWaveVotingThreshold
-          threshold={winningThreshold}
-          error={thresholdError}
-          setThreshold={setWinningThreshold}
-        />
-      )}
 
       {waveType !== ApiWaveType.Chat && (
         <MaxVotesPerIdentityInput

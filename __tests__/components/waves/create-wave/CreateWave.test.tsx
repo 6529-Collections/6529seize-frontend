@@ -210,6 +210,10 @@ describe("CreateWave", () => {
         },
       },
       outcomes: [],
+      approval: {
+        threshold: null,
+        thresholdTimeMs: null,
+      },
       chat: { enabled: true },
     },
     step: CreateWaveStep.OVERVIEW,
@@ -230,6 +234,8 @@ describe("CreateWave", () => {
     onMaxVotesPerIdentityPerDropChange: jest.fn(),
     onTimeWeightedVotingChange: jest.fn(),
     onWinningThresholdChange: jest.fn(),
+    onThresholdChange: jest.fn(),
+    onThresholdTimeChange: jest.fn(),
     onChatEnabledChange: jest.fn(),
   };
 
