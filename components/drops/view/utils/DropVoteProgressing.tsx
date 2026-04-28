@@ -40,21 +40,21 @@ export default function DropVoteProgressing({
       : "tw-text-iron-600 tw-font-mono";
     arrowColor = "tw-text-iron-600";
     wrapperClasses = "tw-flex tw-items-center tw-gap-2";
-    valueClasses = "tw-text-sm tw-font-medium tw-tracking-tight";
+    valueClasses = "tw-text-sm tw-font-bold tw-tracking-tight";
   } else if (compact) {
     color = isPositiveProgressing
       ? "tw-text-emerald-400 tw-bg-emerald-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-emerald-500/15"
       : "tw-text-rose-400 tw-bg-rose-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-rose-500/15";
     arrowColor = "tw-text-iron-500";
     wrapperClasses = "tw-ml-0.5 tw-flex tw-items-center tw-gap-1.5";
-    valueClasses = "tw-text-sm tw-font-medium tw-leading-5 tw-tabular-nums";
+    valueClasses = "tw-text-sm tw-font-bold tw-leading-5 tw-tabular-nums";
   } else {
     color = isPositiveProgressing
       ? "tw-text-emerald-500 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20 tw-font-mono"
       : "tw-text-rose-500 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20 tw-font-mono";
     arrowColor = "tw-text-iron-600";
     wrapperClasses = "tw-ml-0.5 tw-flex tw-items-center tw-gap-2";
-    valueClasses = "tw-text-sm tw-font-medium tw-tracking-tight";
+    valueClasses = "tw-text-sm tw-font-bold tw-tracking-tight";
   }
 
   return (

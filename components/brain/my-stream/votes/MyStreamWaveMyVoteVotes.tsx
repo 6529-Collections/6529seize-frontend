@@ -10,13 +10,13 @@ interface MyStreamWaveMyVoteVotesProps {
 const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
   drop,
 }) => {
-  const isPositive = drop.rating >= 0;
+  const voteClass =
+    drop.rating >= 0 ? "tw-text-emerald-500" : "tw-text-rose-500";
+
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1.5">
       <span
-        className={`tw-text-sm tw-font-bold tw-font-mono tw-tracking-tight ${
-          isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-        }`}
+        className={`tw-font-mono tw-text-sm tw-font-bold tw-tracking-tight ${voteClass}`}
       >
         {formatNumberWithCommas(drop.rating)}
       </span>
