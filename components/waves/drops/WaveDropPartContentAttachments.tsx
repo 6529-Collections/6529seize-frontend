@@ -60,6 +60,15 @@ export default function WaveDropPartContentAttachments({
         const ready = isAttachmentReady(attachment);
         const inFlight = IN_FLIGHT_STATUSES.has(attachment.status);
         const bad = attachment.status === ApiAttachmentStatus.Bad;
+        let statusIcon = <Icon className="tw-size-5" />;
+        if (inFlight) {
+          statusIcon = <CircleLoader size={CircleLoaderSize.MEDIUM} />;
+        } else if (bad) {
+          statusIcon = (
+            <ExclamationTriangleIcon className="tw-size-5 tw-text-error" />
+          );
+        }
+
         if (ready && attachment.url) {
           return (
             <AttachmentMediaDisplay
@@ -80,13 +89,7 @@ export default function WaveDropPartContentAttachments({
             )}
           >
             <div className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-text-iron-200">
-              {inFlight ? (
-                <CircleLoader size={CircleLoaderSize.MEDIUM} />
-              ) : bad ? (
-                <ExclamationTriangleIcon className="tw-size-5 tw-text-error" />
-              ) : (
-                <Icon className="tw-size-5" />
-              )}
+              {statusIcon}
             </div>
             <div className="tw-min-w-0 tw-flex-1">
               <div className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">

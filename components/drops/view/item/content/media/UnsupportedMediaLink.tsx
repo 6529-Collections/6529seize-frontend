@@ -7,9 +7,9 @@ const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "ipfs:", "ar:"]);
 
 function getSafeUrl(rawUrl: string): string | null {
   try {
-    const parsed = new URL(rawUrl, globalThis.window?.location.origin);
+    const parsed = new URL(rawUrl);
     if (SAFE_URL_PROTOCOLS.has(parsed.protocol)) {
-      return rawUrl;
+      return parsed.toString();
     }
   } catch {
     return null;

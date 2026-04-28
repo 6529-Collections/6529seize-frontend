@@ -2,12 +2,13 @@
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type {
   WsAttachmentStatusUpdateMessage,
   WsDropUpdateMessage,
 } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
   commonApiFetch,
@@ -45,6 +46,50 @@ type ProcessIncomingDropFn = (
   dropData: ApiDrop,
   type: ProcessIncomingDropType
 ) => void;
+
+function replaceAttachmentInPart(
+  part: ApiDropPart,
+  attachment: ApiAttachment
+): ApiDropPart {
+  const attachments = part.attachments ?? [];
+  const hasAttachment = attachments.some((item) => item.id === attachment.id);
+
+  if (!hasAttachment) {
+    return part;
+  }
+
+  return {
+    ...part,
+    attachments: attachments.map((item) =>
+      item.id === attachment.id ? attachment : item
+    ),
+  };
+}
+
+function replaceAttachmentInDrop(drop: Drop, attachment: ApiAttachment): Drop {
+  if (drop.type !== DropSize.FULL) {
+    return drop;
+  }
+
+  const parts = drop.parts.map((part) =>
+    replaceAttachmentInPart(part, attachment)
+  );
+  const changed = parts.some((part, index) => part !== drop.parts[index]);
+
+  return changed ? { ...drop, parts } : drop;
+}
+
+function replaceAttachmentInDrops(
+  drops: Drop[],
+  attachment: ApiAttachment
+): { drops: Drop[]; changed: boolean } {
+  const updatedDrops = drops.map((drop) =>
+    replaceAttachmentInDrop(drop, attachment)
+  );
+  const changed = updatedDrops.some((drop, index) => drop !== drops[index]);
+
+  return { drops: updatedDrops, changed };
+}
 
 export function useWaveRealtimeUpdater({
   activeWaveId,
@@ -303,30 +348,10 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
-      let changed = false;
-      const drops = currentData.drops.map((drop) => {
-        if (drop.type !== DropSize.FULL) {
-          return drop;
-        }
-
-        let dropChanged = false;
-        const parts = drop.parts.map((part) => {
-          const attachments = part.attachments ?? [];
-          if (!attachments.some((item) => item.id === attachment.id)) {
-            return part;
-          }
-          changed = true;
-          dropChanged = true;
-          return {
-            ...part,
-            attachments: attachments.map((item) =>
-              item.id === attachment.id ? attachment : item
-            ),
-          };
-        });
-
-        return dropChanged ? { ...drop, parts } : drop;
-      });
+      const { drops, changed } = replaceAttachmentInDrops(
+        currentData.drops,
+        attachment
+      );
 
       if (changed) {
         updateData({
