@@ -92,6 +92,7 @@ export interface CreateWaveDatesConfig {
 export interface CreateWaveApprovalConfig {
   readonly threshold: number | null;
   readonly thresholdTimeMs: number | null;
+  readonly maxWinners: number | null;
 }
 
 export enum CreateWaveOutcomeType {
@@ -119,7 +120,6 @@ export interface CreateWaveOutcomeConfig {
   readonly title: string | null;
   readonly credit: number | null;
   readonly category: string | null;
-  readonly maxWinners: number | null;
   readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig | null;
 }
 

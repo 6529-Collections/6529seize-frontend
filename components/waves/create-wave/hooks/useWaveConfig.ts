@@ -81,6 +81,7 @@ export function useWaveConfig() {
       approval: {
         threshold: null,
         thresholdTimeMs: null,
+        maxWinners: null,
       },
     };
   };
@@ -348,6 +349,16 @@ export function useWaveConfig() {
     }));
   };
 
+  const onApprovalMaxWinnersChange = (maxWinners: number | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      approval: {
+        ...prev.approval,
+        maxWinners,
+      },
+    }));
+  };
+
   return {
     config,
     setConfig,
@@ -378,6 +389,7 @@ export function useWaveConfig() {
     onWinningThresholdChange,
     onThresholdChange,
     onThresholdTimeChange,
+    onApprovalMaxWinnersChange,
     // Chat
     onChatEnabledChange,
   };

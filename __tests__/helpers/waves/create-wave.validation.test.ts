@@ -49,7 +49,7 @@ describe("create-wave.validation", () => {
       },
     },
     outcomes: [{ id: 1 }],
-    approval: { threshold: null, thresholdTimeMs: null },
+    approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
   };
 
   it("validates overview name required", () => {
@@ -129,7 +129,7 @@ describe("create-wave.validation", () => {
     const approveConfig = {
       ...baseConfig,
       overview: { type: ApiWaveType.Approve, name: "n", image: null },
-      approval: { threshold: null, thresholdTimeMs: null },
+      approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
     };
     const errors = getCreateWaveValidationErrors({
       step: CreateWaveStep.APPROVAL,

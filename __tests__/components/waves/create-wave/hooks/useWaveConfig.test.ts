@@ -73,6 +73,7 @@ describe("useWaveConfig", () => {
       expect(result.current.config.approval).toEqual({
         threshold: null,
         thresholdTimeMs: null,
+        maxWinners: null,
       });
     });
 
@@ -126,6 +127,7 @@ describe("useWaveConfig", () => {
           ...result.current.config.dates,
           endDate: 2000000,
         });
+        result.current.onApprovalMaxWinnersChange(4);
         result.current.setEndDateConfig({
           time: 3600,
           period: null,
@@ -133,6 +135,7 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.dates.endDate).toBe(2000000);
+      expect(result.current.config.approval.maxWinners).toBe(4);
       expect(result.current.endDateConfig.time).toBe(3600);
 
       // Change overview type - should reset everything
@@ -155,6 +158,7 @@ describe("useWaveConfig", () => {
         period: null,
       });
       expect(result.current.config.drops.adminCanDeleteDrops).toBe(true);
+      expect(result.current.config.approval.maxWinners).toBeNull();
     });
   });
 
@@ -219,7 +223,6 @@ describe("useWaveConfig", () => {
           title: "Outcome 1",
           credit: 100,
           category: null,
-          maxWinners: 5,
           winnersConfig: null,
         },
         {
@@ -228,7 +231,6 @@ describe("useWaveConfig", () => {
           title: "Outcome 2",
           credit: 200,
           category: null,
-          maxWinners: 3,
           winnersConfig: null,
         },
       ];
@@ -453,6 +455,22 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
+    });
+
+    it("should update approval max winners", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onApprovalMaxWinnersChange(5);
+      });
+
+      expect(result.current.config.approval.maxWinners).toBe(5);
+
+      act(() => {
+        result.current.onApprovalMaxWinnersChange(null);
+      });
+
+      expect(result.current.config.approval.maxWinners).toBeNull();
     });
   });
 

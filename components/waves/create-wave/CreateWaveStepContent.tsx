@@ -53,6 +53,7 @@ export default function CreateWaveStepContent({
     onMaxVotesPerIdentityPerDropChange,
     onTimeWeightedVotingChange,
     onThresholdChange,
+    onApprovalMaxWinnersChange,
     onChatEnabledChange,
   } = controller;
 
@@ -140,8 +141,10 @@ export default function CreateWaveStepContent({
           waveType={config.overview.type}
           errors={errors}
           dates={config.dates}
+          maxWinners={config.approval.maxWinners}
           setOutcomeType={onOutcomeTypeChange}
           setOutcomes={setOutcomes}
+          setMaxWinners={onApprovalMaxWinnersChange}
         />
       );
     case CreateWaveStep.DESCRIPTION:

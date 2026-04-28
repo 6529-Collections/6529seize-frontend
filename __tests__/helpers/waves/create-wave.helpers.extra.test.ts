@@ -251,7 +251,7 @@ it("keeps winning_threshold for approve waves", () => {
       },
     },
     outcomes: [],
-    approval: { threshold: 3, thresholdTimeMs: 60000 },
+    approval: { threshold: 3, thresholdTimeMs: 60000, maxWinners: null },
   };
   const drop: any = {
     parts: [],
@@ -302,7 +302,7 @@ it("sets winning_threshold to null for non-approve waves", () => {
       },
     },
     outcomes: [],
-    approval: { threshold: 3, thresholdTimeMs: 60000 },
+    approval: { threshold: 3, thresholdTimeMs: 60000, maxWinners: null },
   };
   const drop: any = {
     parts: [],
@@ -353,7 +353,7 @@ it("sets time lock for approve waves when time weighted voting is enabled", () =
       },
     },
     outcomes: [],
-    approval: { threshold: 3, thresholdTimeMs: 60000 },
+    approval: { threshold: 3, thresholdTimeMs: 60000, maxWinners: null },
   };
   const drop: any = {
     parts: [],
@@ -404,7 +404,7 @@ it("caps approve time lock at the wave duration", () => {
       },
     },
     outcomes: [],
-    approval: { threshold: 3, thresholdTimeMs: 60000 },
+    approval: { threshold: 3, thresholdTimeMs: 60000, maxWinners: null },
   };
   const drop: any = {
     parts: [],

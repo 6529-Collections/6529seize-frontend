@@ -213,6 +213,7 @@ describe("CreateWave", () => {
       approval: {
         threshold: null,
         thresholdTimeMs: null,
+        maxWinners: null,
       },
       chat: { enabled: true },
     },
@@ -236,6 +237,7 @@ describe("CreateWave", () => {
     onWinningThresholdChange: jest.fn(),
     onThresholdChange: jest.fn(),
     onThresholdTimeChange: jest.fn(),
+    onApprovalMaxWinnersChange: jest.fn(),
     onChatEnabledChange: jest.fn(),
   };
 

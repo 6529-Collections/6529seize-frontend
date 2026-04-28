@@ -284,11 +284,9 @@ const getApproveMaxWinners = ({
     return null;
   }
 
-  return (
-    config.outcomes.find((outcome) =>
-      isPositiveFiniteNumber(outcome.maxWinners)
-    )?.maxWinners ?? null
-  );
+  return isPositiveFiniteNumber(config.approval.maxWinners)
+    ? config.approval.maxWinners
+    : null;
 };
 
 /**

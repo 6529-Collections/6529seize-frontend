@@ -57,7 +57,7 @@ const createBaseConfig = (waveType: ApiWaveType) =>
       },
     },
     outcomes: [],
-    approval: { threshold: null, thresholdTimeMs: null },
+    approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
   }) as any;
 
 const createDrop = () =>
@@ -293,7 +293,7 @@ describe("create-wave.helpers", () => {
           },
         },
         outcomes: [],
-        approval: { threshold: 1, thresholdTimeMs: null },
+        approval: { threshold: 1, thresholdTimeMs: null, maxWinners: null },
       } as any;
       const drop = {
         parts: [],
@@ -315,7 +315,6 @@ describe("create-wave.helpers", () => {
           title: "Manual action",
           credit: null,
           category: null,
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -323,7 +322,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: 0,
           category: "gold",
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -331,7 +329,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: Number.NaN,
           category: "gold",
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -339,7 +336,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: 15,
           category: "gold",
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -347,7 +343,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: null,
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -355,7 +350,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: 0,
           category: null,
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -363,7 +357,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: 25,
           category: null,
-          maxWinners: null,
           winnersConfig: null,
         },
       ] as any;
@@ -398,15 +391,15 @@ describe("create-wave.helpers", () => {
       expect(res.wave.max_winners).toBeNull();
     });
 
-    it("maps approve outcome max winners to the wave config", () => {
+    it("maps approve max winners to the wave config", () => {
       const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.maxWinners = 3;
       config.outcomes = [
         {
           type: CreateWaveOutcomeType.MANUAL,
           title: "Manual action",
           credit: null,
           category: null,
-          maxWinners: 3,
           winnersConfig: null,
         },
       ] as any;
@@ -422,13 +415,13 @@ describe("create-wave.helpers", () => {
 
     it("filters rank outcomes with missing or non-positive total amounts", () => {
       const config = createBaseConfig(ApiWaveType.Rank);
+      config.approval.maxWinners = 4;
       config.outcomes = [
         {
           type: CreateWaveOutcomeType.REP,
           title: null,
           credit: null,
           category: "gold",
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -441,7 +434,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: "gold",
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -454,7 +446,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: "gold",
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -467,7 +458,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: null,
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -480,7 +470,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: null,
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -515,6 +504,7 @@ describe("create-wave.helpers", () => {
           distribution: [{ amount: 20, description: null }],
         },
       ]);
+      expect(res.wave.max_winners).toBeNull();
     });
   });
 });
