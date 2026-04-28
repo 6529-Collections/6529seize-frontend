@@ -7,6 +7,7 @@ const CREDIT_TYPE_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.Xtdh]: "XTDH",
   [ApiWaveCreditType.TdhPlusXtdh]: "TDH + XTDH",
   [ApiWaveCreditType.Rep]: "REP",
+  [ApiWaveCreditType.CardSetTdh]: "Card Set TDH"
 };
 
 interface WaveRatingProps {

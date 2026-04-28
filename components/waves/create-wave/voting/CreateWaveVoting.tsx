@@ -17,6 +17,7 @@ const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
   [ApiWaveCreditType.Tdh]: 1,
   [ApiWaveCreditType.Rep]: 2,
   [ApiWaveCreditType.Xtdh]: undefined,
+  [ApiWaveCreditType.CardSetTdh]: undefined,
 };
 
 const TIME_WEIGHTED_DURATION_ERROR =
