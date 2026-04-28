@@ -20,7 +20,7 @@ export class ApiCreateDropPart {
     'content'?: string | null;
     'quoted_drop'?: ApiQuotedDrop | null;
     'media': Array<ApiDropMedia>;
-    'attachments'?: Array<ApiDropAttachmentReference>;
+    'attachments'?: Set<ApiDropAttachmentReference>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -46,7 +46,7 @@ export class ApiCreateDropPart {
         {
             "name": "attachments",
             "baseName": "attachments",
-            "type": "Array<ApiDropAttachmentReference>",
+            "type": "Set<ApiDropAttachmentReference>",
             "format": ""
         }    ];
 
@@ -57,3 +57,4 @@ export class ApiCreateDropPart {
     public constructor() {
     }
 }
+
