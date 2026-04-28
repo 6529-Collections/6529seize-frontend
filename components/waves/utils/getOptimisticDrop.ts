@@ -104,6 +104,7 @@ export const getOptimisticDrop = (
         url: media.url,
         mime_type: media.mime_type,
       })),
+      attachments: [],
       quoted_drop: part.quoted_drop
         ? {
             ...part.quoted_drop,
