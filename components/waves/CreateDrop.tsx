@@ -48,9 +48,7 @@ interface CreateDropProps {
       }
     | null
     | undefined;
-  readonly onExternalAttachmentDropConsumed?:
-    | (() => void)
-    | undefined;
+  readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
 }
 
 export interface DropMutationBody {

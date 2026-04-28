@@ -163,9 +163,7 @@ interface CreateDropContentProps {
       }
     | null
     | undefined;
-  readonly onExternalAttachmentDropConsumed?:
-    | (() => void)
-    | undefined;
+  readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
 }
 
 const CONTAINER_WIDTH_THRESHOLD = 500;

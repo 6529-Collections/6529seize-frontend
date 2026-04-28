@@ -25,9 +25,7 @@ interface PrivilegedDropCreatorProps {
       }
     | null
     | undefined;
-  readonly onExternalAttachmentDropConsumed?:
-    | (() => void)
-    | undefined;
+  readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
 }
 
 export default function PrivilegedDropCreator({
