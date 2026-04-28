@@ -38,6 +38,10 @@ interface WaveDropPartContentMarkdownProps {
     | ((href: string, active: boolean) => void)
     | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropPartContentMarkdown: React.FC<
@@ -57,10 +61,36 @@ const WaveDropPartContentMarkdown: React.FC<
   drop,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
   const linkPreviewToggleControl = useDropLinkPreviewToggleControl(drop);
-  const currentQuotePath =
-    drop?.serial_no === undefined ? [] : [`${wave.id}:${drop.serial_no}`];
+  const dropId = drop?.id;
+  const dropSerialNo = drop?.serial_no;
+  const waveId = wave.id;
+  const currentDropEmbedPath = React.useMemo(() => {
+    const path = embedPath ? [...embedPath] : [];
+    if (!dropId || path.includes(dropId)) {
+      return path;
+    }
+
+    return [...path, dropId];
+  }, [dropId, embedPath]);
+  const currentQuotePath = React.useMemo(() => {
+    const path = quotePath ? [...quotePath] : [];
+    if (dropSerialNo === undefined) {
+      return path;
+    }
+
+    const currentQuoteKey = `${waveId}:${dropSerialNo}`;
+    if (!path.includes(currentQuoteKey)) {
+      path.push(currentQuoteKey);
+    }
+
+    return path;
+  }, [dropSerialNo, quotePath, waveId]);
   const compactProposal =
     contentPresentation === "quorumCompact"
       ? parseQuorumProposalMarkdown(part.content)
@@ -109,7 +139,10 @@ const WaveDropPartContentMarkdown: React.FC<
             onQuoteClick={onQuoteClick}
             currentDropId={drop?.id}
             hideLinkPreviews={drop?.hide_link_preview}
+            embedPath={currentDropEmbedPath}
             quotePath={currentQuotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
             linkPreviewToggleControl={linkPreviewToggleControl}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />
@@ -124,7 +157,10 @@ const WaveDropPartContentMarkdown: React.FC<
             onQuoteClick={onQuoteClick}
             currentDropId={drop?.id}
             hideLinkPreviews={drop?.hide_link_preview}
+            embedPath={currentDropEmbedPath}
             quotePath={currentQuotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
             linkPreviewToggleControl={linkPreviewToggleControl}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />
@@ -147,9 +183,10 @@ const WaveDropPartContentMarkdown: React.FC<
                 : null
             }
             onQuoteClick={onQuoteClick}
-            embedPath={drop?.id ? [drop.id] : []}
+            embedPath={currentDropEmbedPath}
             quotePath={currentQuotePath}
-            embedDepth={1}
+            embedDepth={(embedDepth ?? 0) + 1}
+            maxEmbedDepth={maxEmbedDepth}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />
         </div>

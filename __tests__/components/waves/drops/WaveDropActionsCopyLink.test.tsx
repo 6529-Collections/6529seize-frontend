@@ -4,6 +4,7 @@ import "@testing-library/jest-dom";
 import { fireEvent, render } from "@testing-library/react";
 
 const mockIsMemesWave = jest.fn();
+const mockIsQuorumWave = jest.fn();
 
 jest.mock("@/config/env", () => ({
   publicEnv: {
@@ -11,7 +12,10 @@ jest.mock("@/config/env", () => ({
   },
 }));
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
-  useSeizeSettings: () => ({ isMemesWave: mockIsMemesWave }),
+  useSeizeSettings: () => ({
+    isMemesWave: mockIsMemesWave,
+    isQuorumWave: mockIsQuorumWave,
+  }),
 }));
 
 const writeText = jest.fn().mockResolvedValue(undefined);
@@ -21,6 +25,7 @@ describe("WaveDropActionsCopyLink", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsMemesWave.mockReturnValue(false);
+    mockIsQuorumWave.mockReturnValue(false);
   });
 
   it("copies serial jump links for non-memes drops", () => {
@@ -37,6 +42,20 @@ describe("WaveDropActionsCopyLink", () => {
 
   it("copies canonical drop links for memes submissions", () => {
     mockIsMemesWave.mockReturnValue(true);
+
+    const drop: any = {
+      id: "d1",
+      wave: { id: "w1" },
+      serial_no: 5,
+      drop_type: ApiDropType.Participatory,
+    };
+    const { getByRole } = render(<WaveDropActionsCopyLink drop={drop} />);
+    fireEvent.click(getByRole("button"));
+    expect(writeText).toHaveBeenCalledWith("https://base/waves/w1?drop=d1");
+  });
+
+  it("copies canonical drop links for quorum participation drops", () => {
+    mockIsQuorumWave.mockReturnValue(true);
 
     const drop: any = {
       id: "d1",

@@ -21,6 +21,10 @@ export interface ParticipationDropProps {
   readonly parentContainerRef?: RefObject<HTMLElement | null> | undefined;
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 export interface SingleWaveDropProps {

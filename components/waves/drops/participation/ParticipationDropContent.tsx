@@ -14,6 +14,10 @@ interface ParticipationDropContentProps {
   readonly setLongPressTriggered: (triggered: boolean) => void;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 export default function ParticipationDropContent({
@@ -26,6 +30,10 @@ export default function ParticipationDropContent({
   setLongPressTriggered,
   isCompetitionDrop = false,
   contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }: ParticipationDropContentProps) {
   const hasTouch = useIsTouchDevice();
 
@@ -42,6 +50,10 @@ export default function ParticipationDropContent({
         isCompetitionDrop={isCompetitionDrop}
         hasTouch={hasTouch}
         contentPresentation={contentPresentation}
+        embedPath={embedPath}
+        quotePath={quotePath}
+        embedDepth={embedDepth}
+        maxEmbedDepth={maxEmbedDepth}
       />
     </div>
   );

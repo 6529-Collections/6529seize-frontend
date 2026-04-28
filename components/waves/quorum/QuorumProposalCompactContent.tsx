@@ -19,7 +19,10 @@ type CompactMarkdownProps = Pick<
   | "onQuoteClick"
   | "currentDropId"
   | "hideLinkPreviews"
+  | "embedPath"
   | "quotePath"
+  | "embedDepth"
+  | "maxEmbedDepth"
   | "linkPreviewToggleControl"
   | "onLinkCardActionsActiveChange"
 >;
