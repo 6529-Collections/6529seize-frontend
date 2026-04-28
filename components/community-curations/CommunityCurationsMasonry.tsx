@@ -6,6 +6,7 @@ import CircleLoader, {
 import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 import {
   type RenderComponentProps,
@@ -239,6 +240,8 @@ function CommunityCurationsInfiniteScrollTrigger({
 function CommunityCurationsMasonryItem({
   data: drop,
 }: RenderComponentProps<ExtendedDrop>) {
+  const navigateToDropWave = useNavigateToDropWave();
+
   return (
     <article className="tw-group tw-relative tw-isolate">
       <Drop
@@ -252,7 +255,8 @@ function CommunityCurationsMasonryItem({
         dropViewDropId={null}
         onReply={noop}
         onReplyClick={noop}
-        onQuoteClick={noop}
+        onQuoteClick={navigateToDropWave}
+        onDropContentClick={navigateToDropWave}
         identityMode="default"
         showInteractions={false}
       />

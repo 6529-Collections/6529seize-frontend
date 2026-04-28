@@ -3,20 +3,8 @@
 import { COMMUNITY_CURATIONS_LIMIT } from "@/components/community-curations/communityCurations.constants";
 import CommunityCurationsMasonry from "@/components/community-curations/CommunityCurationsMasonry";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
-import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
-import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
-import {
-  useCommunityCurationsDrops,
-  type CommunityCurationsMediaFilter,
-} from "@/hooks/useCommunityCurationsDrops";
+import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
 import { useCallback, useState } from "react";
-
-const MEDIA_FILTER_OPTIONS: CommonSelectItem<CommunityCurationsMediaFilter>[] =
-  [
-    { key: "all", label: "All", value: "all" },
-    { key: "image", label: "Images", value: "image" },
-    { key: "video", label: "Video", value: "video" },
-  ];
 
 const COMMUNITY_CURATIONS_SKELETON_CARDS = [
   { id: "compact", mediaHeight: 210, lines: 2 },
@@ -111,8 +99,6 @@ export default function CommunityCurations() {
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
     null
   );
-  const [mediaFilter, setMediaFilter] =
-    useState<CommunityCurationsMediaFilter>("all");
   const {
     allDrops,
     drops,
@@ -122,7 +108,6 @@ export default function CommunityCurations() {
     isFetchingNextPage,
     isLoading,
   } = useCommunityCurationsDrops({
-    mediaFilter,
     limit: COMMUNITY_CURATIONS_LIMIT,
   });
 
@@ -132,14 +117,6 @@ export default function CommunityCurations() {
     !isInitialLoading && !isError && drops.length === 0 && !hasMorePages;
   const shouldShowMasonry =
     !isInitialLoading && !isError && (drops.length > 0 || hasMorePages);
-  const emptyStateTitle =
-    mediaFilter === "all"
-      ? "No curated drops yet"
-      : `No ${mediaFilter} drops found`;
-  const emptyStateDescription =
-    mediaFilter === "all"
-      ? "Community-curated drops will appear here when visible curations have activity."
-      : "Try All to see every community-curated drop.";
   const handleFetchNextPage = useCallback(async () => {
     await fetchNextPage();
   }, [fetchNextPage]);
@@ -151,7 +128,7 @@ export default function CommunityCurations() {
       style={waveViewStyle}
     >
       <div className="tw-mx-auto tw-w-full tw-max-w-6xl">
-        <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-end md:tw-justify-between">
+        <div className="tw-flex tw-flex-col tw-gap-4">
           <div className="tw-max-w-2xl">
             <h1 className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-white">
               Community Curations
@@ -159,19 +136,6 @@ export default function CommunityCurations() {
             <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
               Community-curated drops from across 6529 Waves.
             </p>
-          </div>
-
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <div className="tw-flex-shrink-0">
-              <CommonTabs
-                items={MEDIA_FILTER_OPTIONS}
-                activeItem={mediaFilter}
-                filterLabel="Community curation media filter"
-                setSelected={setMediaFilter}
-                size="sm"
-                fill={false}
-              />
-            </div>
           </div>
         </div>
 
@@ -187,8 +151,8 @@ export default function CommunityCurations() {
 
           {shouldShowEmptyState && (
             <CommunityCurationsEmptyState
-              title={emptyStateTitle}
-              description={emptyStateDescription}
+              title="No curated drops yet"
+              description="Community-curated drops will appear here when visible curations have activity."
             />
           )}
 
