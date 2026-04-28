@@ -57,8 +57,6 @@ export class ApiPushNotificationSettings {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
-
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "identity_subscribed",
@@ -128,3 +126,4 @@ export class ApiPushNotificationSettings {
     public constructor() {
     }
 }
+

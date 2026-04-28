@@ -20,8 +20,6 @@ export class ApiDropMentionedUser {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
-
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "mentioned_profile_id",
@@ -49,3 +47,4 @@ export class ApiDropMentionedUser {
     public constructor() {
     }
 }
+

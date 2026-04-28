@@ -397,7 +397,7 @@ import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig
 import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
-import { ApiCreateNewWaveVotingConfigClass } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateNewWaveVotingConfig          } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateNewWaveVotingConfigOneOf, ApiCreateNewWaveVotingConfigOneOfCreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf';
 import { ApiCreateNewWaveVotingConfigOneOf1, ApiCreateNewWaveVotingConfigOneOf1CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf1';
 import { ApiCreateNewWaveVotingConfigOneOf2, ApiCreateNewWaveVotingConfigOneOf2CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf2';
@@ -630,12 +630,12 @@ import { DistributionPhotoCompleteRequestPhoto } from '../models/DistributionPho
 import { DistributionPhotoCompleteResponse } from '../models/DistributionPhotoCompleteResponse';
 import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
 import { MintingClaim } from '../models/MintingClaim';
-import { MintingClaimAnimationDetailsClass } from '../models/MintingClaimAnimationDetails';
+import { MintingClaimAnimationDetails , MintingClaimAnimationDetailsFormatEnum        } from '../models/MintingClaimAnimationDetails';
 import { MintingClaimAnimationDetailsGlb , MintingClaimAnimationDetailsGlbFormatEnum    } from '../models/MintingClaimAnimationDetailsGlb';
 import { MintingClaimAnimationDetailsHtml, MintingClaimAnimationDetailsHtmlFormatEnum   } from '../models/MintingClaimAnimationDetailsHtml';
 import { MintingClaimAnimationDetailsVideo } from '../models/MintingClaimAnimationDetailsVideo';
 import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
-import { MintingClaimAttributeValueClass } from '../models/MintingClaimAttributeValue';
+import { MintingClaimAttributeValue } from '../models/MintingClaimAttributeValue';
 import { MintingClaimImageDetails } from '../models/MintingClaimImageDetails';
 import { MintingClaimUpdateRequest } from '../models/MintingClaimUpdateRequest';
 import { MintingClaimsPageResponse } from '../models/MintingClaimsPageResponse';
@@ -792,7 +792,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveParticipationConfig": ApiCreateNewWaveParticipationConfig,
     "ApiCreateNewWaveScope": ApiCreateNewWaveScope,
     "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
-    "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfigClass,
+    "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfig,
     "ApiCreateNewWaveVotingConfigOneOf": ApiCreateNewWaveVotingConfigOneOf,
     "ApiCreateNewWaveVotingConfigOneOf1": ApiCreateNewWaveVotingConfigOneOf1,
     "ApiCreateNewWaveVotingConfigOneOf2": ApiCreateNewWaveVotingConfigOneOf2,
@@ -993,12 +993,12 @@ let typeMap: {[index: string]: any} = {
     "DistributionPhotoCompleteResponse": DistributionPhotoCompleteResponse,
     "DistributionPhotosPage": DistributionPhotosPage,
     "MintingClaim": MintingClaim,
-    "MintingClaimAnimationDetails": MintingClaimAnimationDetailsClass,
+    "MintingClaimAnimationDetails": MintingClaimAnimationDetails,
     "MintingClaimAnimationDetailsGlb": MintingClaimAnimationDetailsGlb,
     "MintingClaimAnimationDetailsHtml": MintingClaimAnimationDetailsHtml,
     "MintingClaimAnimationDetailsVideo": MintingClaimAnimationDetailsVideo,
     "MintingClaimAttribute": MintingClaimAttribute,
-    "MintingClaimAttributeValue": MintingClaimAttributeValueClass,
+    "MintingClaimAttributeValue": MintingClaimAttributeValue,
     "MintingClaimImageDetails": MintingClaimImageDetails,
     "MintingClaimUpdateRequest": MintingClaimUpdateRequest,
     "MintingClaimsPageResponse": MintingClaimsPageResponse,
@@ -1047,7 +1047,7 @@ type MimeTypeDescriptor = {
  * the payload.
  */
 const parseMimeType = (mimeType: string): MimeTypeDescriptor => {
-    const [type = '', subtype = ''] = mimeType.split('/');
+    const [type, subtype] = mimeType.split('/');
     return {
         type,
         subtype,
@@ -1083,13 +1083,6 @@ const supportedMimeTypePredicatesWithPriority: MimeTypePredicate[] = [
     isFormUrlencodedMimeType,
 ];
 
-const nullableSuffix = " | null";
-const optionalSuffix = " | undefined";
-const arrayPrefix = "Array<";
-const arraySuffix = ">";
-const mapPrefix = "{ [key: string]: ";
-const mapSuffix = "; }";
-
 export class ObjectSerializer {
     public static findCorrectType(data: any, expectedType: string) {
         if (data == undefined) {
@@ -1114,11 +1107,8 @@ export class ObjectSerializer {
             } else {
                 if (data[discriminatorProperty]) {
                     var discriminatorType = data[discriminatorProperty];
-                    let mapping = typeMap[expectedType].mapping;
-                    if (mapping != undefined && mapping[discriminatorType]) {
-                        return mapping[discriminatorType]; // use the type given in the discriminator
-                    } else if(typeMap[discriminatorType]) {
-                        return discriminatorType;
+                    if(typeMap[discriminatorType]){
+                        return discriminatorType; // use the type given in the discriminator
                     } else {
                         return expectedType; // discriminator did not map to a type
                     }
@@ -1129,33 +1119,17 @@ export class ObjectSerializer {
         }
     }
 
-    public static serialize(data: any, type: string, format: string): any {
+    public static serialize(data: any, type: string, format: string) {
         if (data == undefined) {
             return data;
         } else if (primitives.indexOf(type.toLowerCase()) !== -1) {
             return data;
-        } else if (type.endsWith(nullableSuffix)) {
-            let subType: string = type.slice(0, -nullableSuffix.length); // Type | null => Type
-            return ObjectSerializer.serialize(data, subType, format);
-        } else if (type.endsWith(optionalSuffix)) {
-            let subType: string = type.slice(0, -optionalSuffix.length); // Type | undefined => Type
-            return ObjectSerializer.serialize(data, subType, format);
-        } else if (type.startsWith(arrayPrefix)) {
-            let subType: string = type.slice(arrayPrefix.length, -arraySuffix.length); // Array<Type> => Type
+        } else if (type.lastIndexOf("Array<", 0) === 0) { // string.startsWith pre es6
+            let subType: string = type.replace("Array<", ""); // Array<Type> => Type>
+            subType = subType.substring(0, subType.length - 1); // Type> => Type
             let transformedData: any[] = [];
             for (let date of data) {
                 transformedData.push(ObjectSerializer.serialize(date, subType, format));
-            }
-            return transformedData;
-        } else if (type.startsWith(mapPrefix)) {
-            let subType: string = type.slice(mapPrefix.length, -mapSuffix.length); // { [key: string]: Type; } => Type
-            let transformedData: { [key: string]: any } = {};
-            for (let key in data) {
-                transformedData[key] = ObjectSerializer.serialize(
-                    data[key],
-                    subType,
-                    format,
-                );
             }
             return transformedData;
         } else if (type === "Date") {
@@ -1190,35 +1164,19 @@ export class ObjectSerializer {
         }
     }
 
-    public static deserialize(data: any, type: string, format: string): any {
+    public static deserialize(data: any, type: string, format: string) {
         // polymorphism may change the actual type.
         type = ObjectSerializer.findCorrectType(data, type);
         if (data == undefined) {
             return data;
         } else if (primitives.indexOf(type.toLowerCase()) !== -1) {
             return data;
-        } else if (type.endsWith(nullableSuffix)) {
-            let subType: string = type.slice(0, -nullableSuffix.length); // Type | null => Type
-            return ObjectSerializer.deserialize(data, subType, format);
-        } else if (type.endsWith(optionalSuffix)) {
-            let subType: string = type.slice(0, -optionalSuffix.length); // Type | undefined => Type
-            return ObjectSerializer.deserialize(data, subType, format);
-        } else if (type.startsWith(arrayPrefix)) {
-            let subType: string = type.slice(arrayPrefix.length, -arraySuffix.length); // Array<Type> => Type
+        } else if (type.lastIndexOf("Array<", 0) === 0) { // string.startsWith pre es6
+            let subType: string = type.replace("Array<", ""); // Array<Type> => Type>
+            subType = subType.substring(0, subType.length - 1); // Type> => Type
             let transformedData: any[] = [];
             for (let date of data) {
                 transformedData.push(ObjectSerializer.deserialize(date, subType, format));
-            }
-            return transformedData;
-        } else if (type.startsWith(mapPrefix)) {
-            let subType: string = type.slice(mapPrefix.length, -mapSuffix.length); // { [key: string]: Type; } => Type
-            let transformedData: { [key: string]: any } = {};
-            for (let key in data) {
-                transformedData[key] = ObjectSerializer.deserialize(
-                    data[key],
-                    subType,
-                    format,
-                );
             }
             return transformedData;
         } else if (type === "Date") {
@@ -1254,7 +1212,7 @@ export class ObjectSerializer {
         if (mediaType === undefined) {
             return undefined;
         }
-        return (mediaType.split(";")[0] ?? '').trim().toLowerCase();
+        return mediaType.split(";")[0].trim().toLowerCase();
     }
 
     /**

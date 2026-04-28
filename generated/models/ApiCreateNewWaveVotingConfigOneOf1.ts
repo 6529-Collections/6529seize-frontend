@@ -18,8 +18,6 @@ export class ApiCreateNewWaveVotingConfigOneOf1 {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
-
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "credit_type",
@@ -35,6 +33,7 @@ export class ApiCreateNewWaveVotingConfigOneOf1 {
     public constructor() {
     }
 }
+
 
 export enum ApiCreateNewWaveVotingConfigOneOf1CreditTypeEnum {
     Rep = 'REP'

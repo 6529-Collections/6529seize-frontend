@@ -90,6 +90,28 @@ describe("multiPartUpload", () => {
         mime_type: "image/png",
       });
     });
+
+    it("uses the file name when the browser does not provide a MIME type", async () => {
+      const fileWithoutType = new File(["small content"], "small.png");
+
+      const result = await multiPartUpload({
+        file: fileWithoutType,
+        path: "drop",
+      });
+
+      expect(mockCommonApiPost).toHaveBeenNthCalledWith(1, {
+        endpoint: "drop-media/multipart-upload",
+        body: {
+          file_name: "small.png",
+          content_type: "image/png",
+        },
+      });
+
+      expect(result).toEqual({
+        url: "https://cdn.example.com/final-url",
+        mime_type: "image/png",
+      });
+    });
   });
 
   describe("Multi-part Upload Process", () => {
@@ -203,6 +225,22 @@ describe("multiPartUpload", () => {
   });
 
   describe("Error Handling", () => {
+    it("throws before starting upload when the MIME type is unsupported", async () => {
+      const unsupportedFile = new File(["plain text"], "notes.txt", {
+        type: "text/plain",
+      });
+
+      await expect(
+        multiPartUpload({
+          file: unsupportedFile,
+          path: "drop",
+        })
+      ).rejects.toThrow("Unsupported file type for upload: notes.txt");
+
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+      expect(mockAxios.put).not.toHaveBeenCalled();
+    });
+
     it("throws error when start upload fails to return upload_id", async () => {
       mockCommonApiPost.mockReset();
       mockCommonApiPost.mockResolvedValueOnce({ key: "test-key" }); // Missing upload_id
