@@ -11,7 +11,7 @@ import {
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import AttachmentMediaDisplay from "@/components/drops/view/item/content/media/AttachmentMediaDisplay";
+import DropAttachmentDisplay from "@/components/drops/view/item/content/attachments/DropAttachmentDisplay";
 import clsx from "clsx";
 
 const IN_FLIGHT_STATUSES = new Set<ApiAttachmentStatus>([
@@ -71,11 +71,11 @@ export default function WaveDropPartContentAttachments({
 
         if (ready && attachment.url) {
           return (
-            <AttachmentMediaDisplay
+            <DropAttachmentDisplay
               key={attachment.attachment_id}
-              media_mime_type={attachment.mime_type}
-              media_url={attachment.url}
-              file_name={attachment.file_name}
+              mimeType={attachment.mime_type}
+              attachmentUrl={attachment.url}
+              fileName={attachment.file_name}
             />
           );
         }

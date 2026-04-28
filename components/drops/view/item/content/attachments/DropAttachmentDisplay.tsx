@@ -23,7 +23,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "blob:"]);
 
-function getSafeMediaUrl(rawUrl: string): string | null {
+function getSafeAttachmentUrl(rawUrl: string): string | null {
   if (rawUrl) {
     try {
       const resolvedUrl = resolveIpfsUrlSync(rawUrl);
@@ -577,15 +577,15 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
   );
 }
 
-export default function AttachmentMediaDisplay({
-  media_mime_type,
-  media_url,
-  file_name,
+export default function DropAttachmentDisplay({
+  mimeType,
+  attachmentUrl,
+  fileName: providedFileName,
   disableMediaInteraction = false,
 }: {
-  readonly media_mime_type: string;
-  readonly media_url: string;
-  readonly file_name?: string | undefined;
+  readonly mimeType: string;
+  readonly attachmentUrl: string;
+  readonly fileName?: string | undefined;
   readonly disableMediaInteraction?: boolean | undefined;
 }) {
   const [isRendered, setIsRendered] = useState(false);
@@ -593,7 +593,10 @@ export default function AttachmentMediaDisplay({
   const [copiedLink, setCopiedLink] = useState(false);
   const downloadAbortRef = useRef<AbortController | null>(null);
   const { isCapacitor } = useCapacitor();
-  const safeMediaUrl = useMemo(() => getSafeMediaUrl(media_url), [media_url]);
+  const safeAttachmentUrl = useMemo(
+    () => getSafeAttachmentUrl(attachmentUrl),
+    [attachmentUrl]
+  );
   const {
     renderType,
     fileName,
@@ -604,19 +607,21 @@ export default function AttachmentMediaDisplay({
     canDownload,
     Icon,
   } = useMemo(() => {
-    const nextRenderType = getAttachmentRenderType(media_mime_type, media_url);
-    const fileInfo = getFileInfoFromUrl(media_url);
+    const nextRenderType = getAttachmentRenderType(mimeType, attachmentUrl);
+    const fileInfo = getFileInfoFromUrl(attachmentUrl);
     const fallbackExtension = getFallbackExtension(nextRenderType);
     const nextFileName =
-      file_name ?? resolveAttachmentFileName(fileInfo, fallbackExtension);
+      providedFileName ??
+      resolveAttachmentFileName(fileInfo, fallbackExtension);
     const nextLabel = getAttachmentLabel(nextRenderType);
     const nextCanRender =
-      safeMediaUrl !== null &&
+      safeAttachmentUrl !== null &&
       (nextRenderType === "pdf" || nextRenderType === "csv");
     const nextCanOpenInNewTab =
-      safeMediaUrl !== null && nextRenderType === "pdf";
-    const nextCanCopyLink = safeMediaUrl !== null && nextRenderType === "csv";
-    const nextCanDownload = safeMediaUrl !== null;
+      safeAttachmentUrl !== null && nextRenderType === "pdf";
+    const nextCanCopyLink =
+      safeAttachmentUrl !== null && nextRenderType === "csv";
+    const nextCanDownload = safeAttachmentUrl !== null;
     const NextIcon = nextRenderType === "csv" ? TableCellsIcon : DocumentIcon;
     return {
       renderType: nextRenderType,
@@ -628,7 +633,7 @@ export default function AttachmentMediaDisplay({
       canDownload: nextCanDownload,
       Icon: NextIcon,
     };
-  }, [file_name, media_mime_type, media_url, safeMediaUrl]);
+  }, [attachmentUrl, mimeType, providedFileName, safeAttachmentUrl]);
 
   useEffect(
     () => () => {
@@ -651,7 +656,7 @@ export default function AttachmentMediaDisplay({
   }, [copiedLink]);
 
   const handleDownload = async () => {
-    if (isDownloading || !safeMediaUrl) {
+    if (isDownloading || !safeAttachmentUrl) {
       return;
     }
 
@@ -663,7 +668,7 @@ export default function AttachmentMediaDisplay({
     }, ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS);
 
     try {
-      const response = await fetch(safeMediaUrl, {
+      const response = await fetch(safeAttachmentUrl, {
         signal: controller.signal,
       });
       if (!response.ok) {
@@ -691,7 +696,7 @@ export default function AttachmentMediaDisplay({
         return;
       }
       const anchor = document.createElement("a");
-      anchor.href = safeMediaUrl;
+      anchor.href = safeAttachmentUrl;
       anchor.download = fileName;
       anchor.target = "_blank";
       anchor.rel = "noopener noreferrer";
@@ -708,12 +713,12 @@ export default function AttachmentMediaDisplay({
   };
 
   const handleCopyLink = async () => {
-    if (!safeMediaUrl) {
+    if (!safeAttachmentUrl) {
       return;
     }
 
     try {
-      await navigator.clipboard.writeText(safeMediaUrl);
+      await navigator.clipboard.writeText(safeAttachmentUrl);
       setCopiedLink(true);
     } catch (error) {
       console.error("Failed to copy attachment link", error);
@@ -807,9 +812,9 @@ export default function AttachmentMediaDisplay({
                 <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
               </button>
             )}
-            {canOpenInNewTab && safeMediaUrl && (
+            {canOpenInNewTab && safeAttachmentUrl && (
               <a
-                href={safeMediaUrl}
+                href={safeAttachmentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Open attachment"
@@ -825,16 +830,16 @@ export default function AttachmentMediaDisplay({
           </div>
         )}
       </div>
-      {isRendered && renderType === "pdf" && safeMediaUrl && (
+      {isRendered && renderType === "pdf" && safeAttachmentUrl && (
         <iframe
-          src={safeMediaUrl}
+          src={safeAttachmentUrl}
           title={fileName}
           referrerPolicy="no-referrer"
           className="tw-h-[32rem] tw-w-full tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950"
         />
       )}
-      {isRendered && renderType === "csv" && safeMediaUrl && (
-        <CsvAttachmentPreview url={safeMediaUrl} />
+      {isRendered && renderType === "csv" && safeAttachmentUrl && (
+        <CsvAttachmentPreview url={safeAttachmentUrl} />
       )}
     </div>
   );

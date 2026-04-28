@@ -1,4 +1,4 @@
-import AttachmentMediaDisplay from "@/components/drops/view/item/content/media/AttachmentMediaDisplay";
+import DropAttachmentDisplay from "@/components/drops/view/item/content/attachments/DropAttachmentDisplay";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -18,7 +18,7 @@ const originalRevokeObjectURL = URL.revokeObjectURL;
 const hadCreateObjectURL = "createObjectURL" in URL;
 const hadRevokeObjectURL = "revokeObjectURL" in URL;
 
-describe("AttachmentMediaDisplay", () => {
+describe("DropAttachmentDisplay", () => {
   afterEach(() => {
     jest.restoreAllMocks();
 
@@ -47,24 +47,24 @@ describe("AttachmentMediaDisplay", () => {
 
   it("renders labels based on attachment type detection", () => {
     const { rerender } = render(
-      <AttachmentMediaDisplay
-        media_mime_type="application/pdf"
-        media_url="https://x/a"
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="https://x/a"
       />
     );
 
     expect(screen.getByText("PDF")).toBeInTheDocument();
 
     rerender(
-      <AttachmentMediaDisplay media_mime_type="" media_url="https://x/a.csv" />
+      <DropAttachmentDisplay mimeType="" attachmentUrl="https://x/a.csv" />
     );
 
     expect(screen.getByText("CSV")).toBeInTheDocument();
 
     rerender(
-      <AttachmentMediaDisplay
-        media_mime_type="image/webp"
-        media_url="https://x/a.webp"
+      <DropAttachmentDisplay
+        mimeType="image/webp"
+        attachmentUrl="https://x/a.webp"
       />
     );
 
@@ -96,9 +96,9 @@ describe("AttachmentMediaDisplay", () => {
       .mockImplementation(() => {});
 
     render(
-      <AttachmentMediaDisplay
-        media_mime_type="application/pdf"
-        media_url="https://example.com/files/paper.pdf"
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="https://example.com/files/paper.pdf"
       />
     );
 
@@ -130,10 +130,10 @@ describe("AttachmentMediaDisplay", () => {
 
   it("uses the provided attachment file name instead of deriving it from the URL", () => {
     render(
-      <AttachmentMediaDisplay
-        media_mime_type="application/pdf"
-        media_url="https://example.com/ipfs/QmHash/original.pdf"
-        file_name="sample.pdf"
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="https://example.com/ipfs/QmHash/original.pdf"
+        fileName="sample.pdf"
       />
     );
 
@@ -151,9 +151,9 @@ describe("AttachmentMediaDisplay", () => {
     } as Response);
 
     render(
-      <AttachmentMediaDisplay
-        media_mime_type="text/csv"
-        media_url="https://example.com/files/data.csv"
+      <DropAttachmentDisplay
+        mimeType="text/csv"
+        attachmentUrl="https://example.com/files/data.csv"
       />
     );
 
@@ -172,9 +172,9 @@ describe("AttachmentMediaDisplay", () => {
 
   it("does not show an open-in-new-tab action for CSV attachments", () => {
     render(
-      <AttachmentMediaDisplay
-        media_mime_type="text/csv"
-        media_url="https://example.com/files/data.csv"
+      <DropAttachmentDisplay
+        mimeType="text/csv"
+        attachmentUrl="https://example.com/files/data.csv"
       />
     );
 
@@ -192,9 +192,9 @@ describe("AttachmentMediaDisplay", () => {
     });
 
     render(
-      <AttachmentMediaDisplay
-        media_mime_type="text/csv"
-        media_url="https://example.com/files/data.csv"
+      <DropAttachmentDisplay
+        mimeType="text/csv"
+        attachmentUrl="https://example.com/files/data.csv"
       />
     );
 
@@ -222,10 +222,10 @@ describe("AttachmentMediaDisplay", () => {
     });
 
     render(
-      <AttachmentMediaDisplay
-        media_mime_type="text/csv"
-        media_url="ipfs://bafybeigateway/sample.csv"
-        file_name="sample.csv"
+      <DropAttachmentDisplay
+        mimeType="text/csv"
+        attachmentUrl="ipfs://bafybeigateway/sample.csv"
+        fileName="sample.csv"
       />
     );
 
