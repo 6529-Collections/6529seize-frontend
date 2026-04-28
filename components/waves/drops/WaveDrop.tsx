@@ -1,7 +1,9 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropAttachmentReference } from "@/generated/models/ApiDropAttachmentReference";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
@@ -594,14 +596,25 @@ const WaveDrop = ({
           wave_name_in_content: wave.wave_name_in_content,
         })
       );
-      const updatedParts = drop.parts.map((part, index) => ({
-        content: index === activePartIndex ? newContent : part.content,
-        quoted_drop: part.quoted_drop ?? null,
-        media: part.media,
-        attachments: (part.attachments ?? []).map((attachment) => ({
-          attachment_id: attachment.id,
-        })),
-      }));
+      const updatedParts: ApiCreateDropPart[] = drop.parts.map(
+        (part, index) => {
+          const attachments = (part.attachments ?? []).map((attachment) => ({
+            attachment_id: attachment.attachment_id,
+          }));
+          const requestPart: ApiCreateDropPart = {
+            content: index === activePartIndex ? newContent : part.content,
+            quoted_drop: part.quoted_drop ?? null,
+            media: part.media,
+          };
+
+          if (attachments.length) {
+            requestPart.attachments =
+              attachments as unknown as Set<ApiDropAttachmentReference>;
+          }
+
+          return requestPart;
+        }
+      );
 
       const updateRequest: ApiUpdateDropRequest = {
         parts: updatedParts,

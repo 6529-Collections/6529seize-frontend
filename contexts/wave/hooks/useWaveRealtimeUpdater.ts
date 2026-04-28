@@ -52,7 +52,9 @@ function replaceAttachmentInPart(
   attachment: ApiAttachment
 ): ApiDropPart {
   const attachments = part.attachments ?? [];
-  const hasAttachment = attachments.some((item) => item.id === attachment.id);
+  const hasAttachment = attachments.some(
+    (item) => item.attachment_id === attachment.attachment_id
+  );
 
   if (!hasAttachment) {
     return part;
@@ -61,7 +63,7 @@ function replaceAttachmentInPart(
   return {
     ...part,
     attachments: attachments.map((item) =>
-      item.id === attachment.id ? attachment : item
+      item.attachment_id === attachment.attachment_id ? attachment : item
     ),
   };
 }

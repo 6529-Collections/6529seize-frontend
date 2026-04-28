@@ -11,6 +11,8 @@ import type {
 } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
+import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
+import type { ApiDropAttachmentReference } from "@/generated/models/ApiDropAttachmentReference";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -413,7 +415,7 @@ const generatePart = async (
     quoted_drop: part.quoted_drop,
     media,
     attachments: uploadedAttachments.map((attachment) => ({
-      attachment_id: attachment.id,
+      attachment_id: attachment.attachment_id,
     })),
     uploaded_attachments: uploadedAttachments,
   };
@@ -441,8 +443,15 @@ const generateParts = async (
 
 const stripUploadedAttachments = (
   parts: CreateDropRequestPart[]
-): CreateDropRequestPart[] =>
-  parts.map(({ uploaded_attachments, ...part }) => part);
+): ApiCreateDropPart[] =>
+  parts.map(({ uploaded_attachments, attachments, ...part }) => {
+    const requestPart: ApiCreateDropPart = { ...part };
+    if (attachments?.length) {
+      requestPart.attachments =
+        attachments as unknown as Set<ApiDropAttachmentReference>;
+    }
+    return requestPart;
+  });
 
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,

@@ -72,7 +72,7 @@ export default function WaveDropPartContentAttachments({
         if (ready && attachment.url) {
           return (
             <AttachmentMediaDisplay
-              key={attachment.id}
+              key={attachment.attachment_id}
               media_mime_type={attachment.mime_type}
               media_url={attachment.url}
               file_name={attachment.file_name}
@@ -107,7 +107,7 @@ export default function WaveDropPartContentAttachments({
           </div>
         );
 
-        return <div key={attachment.id}>{content}</div>;
+        return <div key={attachment.attachment_id}>{content}</div>;
       })}
     </div>
   );

@@ -11,7 +11,7 @@ function isMatchingAttachment(
   attachmentId: string
 ): boolean {
   return (
-    value["id"] === attachmentId &&
+    (value["attachment_id"] === attachmentId || value["id"] === attachmentId) &&
     typeof value["file_name"] === "string" &&
     typeof value["mime_type"] === "string" &&
     typeof value["kind"] === "string" &&
@@ -36,7 +36,7 @@ function replaceAttachment(value: unknown, attachment: ApiAttachment): unknown {
     return value;
   }
 
-  if (isMatchingAttachment(value, attachment.id)) {
+  if (isMatchingAttachment(value, attachment.attachment_id)) {
     return attachment;
   }
 

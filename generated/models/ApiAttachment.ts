@@ -13,12 +13,13 @@
 
 import { ApiAttachmentKind } from '../models/ApiAttachmentKind';
 import { ApiAttachmentStatus } from '../models/ApiAttachmentStatus';
+import { ApiAttachmentUploadMimeType } from '../models/ApiAttachmentUploadMimeType';
 import { HttpFile } from '../http/http';
 
 export class ApiAttachment {
-    'id': string;
+    'attachment_id': string;
     'file_name': string;
-    'mime_type': string;
+    'mime_type': ApiAttachmentUploadMimeType;
     'kind': ApiAttachmentKind;
     'status': ApiAttachmentStatus;
     'url'?: string | null;
@@ -30,8 +31,8 @@ export class ApiAttachment {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "id",
-            "baseName": "id",
+            "name": "attachment_id",
+            "baseName": "attachment_id",
             "type": "string",
             "format": ""
         },
@@ -44,7 +45,7 @@ export class ApiAttachment {
         {
             "name": "mime_type",
             "baseName": "mime_type",
-            "type": "string",
+            "type": "ApiAttachmentUploadMimeType",
             "format": ""
         },
         {

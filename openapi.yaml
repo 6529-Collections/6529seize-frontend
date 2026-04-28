@@ -991,6 +991,42 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiLightDrop"
+  /curated-profile-wave-drops:
+    get:
+      tags:
+        - Drops
+      summary: Get curated profile wave drops
+      description: >-
+        Returns drops from effective profile-wave curations across all public
+        profile waves, newest drops first. If a profile wave has an explicit
+        profile curation it is used; otherwise the oldest curation in the
+        profile wave is used. Reply drops are included when curated.
+      operationId: getCuratedProfileWaveDrops
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCuratedProfileWaveDropsPage"
   /drops:
     get:
       tags:
@@ -7303,18 +7339,18 @@ components:
     ApiAttachment:
       type: object
       required:
-        - id
+        - attachment_id
         - file_name
         - mime_type
         - kind
         - status
       properties:
-        id:
+        attachment_id:
           type: string
         file_name:
           type: string
         mime_type:
-          type: string
+          $ref: "#/components/schemas/ApiAttachmentUploadMimeType"
         kind:
           $ref: "#/components/schemas/ApiAttachmentKind"
         status:
@@ -8069,6 +8105,8 @@ components:
             $ref: "#/components/schemas/ApiDropMedia"
         attachments:
           type: array
+          default: []
+          uniqueItems: true
           items:
             $ref: "#/components/schemas/ApiDropAttachmentReference"
     ApiCreateDropRequest:
@@ -8639,6 +8677,17 @@ components:
         description:
           type: string
           nullable: true
+    ApiCuratedProfileWaveDropsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDrop"
     ApiCurationDrop:
       type: object
       required:
@@ -8830,6 +8879,7 @@ components:
           $ref: "#/components/schemas/ApiDropVote"
     ApiDropAttachmentReference:
       type: object
+      additionalProperties: false
       required:
         - attachment_id
       properties:

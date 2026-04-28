@@ -19,6 +19,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
+import type { ApiDropAttachmentReference } from "@/generated/models/ApiDropAttachmentReference";
 import { useRouter } from "next/navigation";
 import { generateDropPart } from "./services/waveMediaService";
 import { getAdminGroupId } from "./services/waveGroupService";
@@ -197,7 +198,8 @@ export default function CreateWave({
         };
 
         if (part.attachments?.length) {
-          requestPart.attachments = part.attachments;
+          requestPart.attachments =
+            part.attachments as unknown as Set<ApiDropAttachmentReference>;
         }
 
         return requestPart;

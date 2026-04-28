@@ -34,7 +34,7 @@ export const generateDropPart = async (
     ...part,
     media,
     attachments: attachments.map((attachment) => ({
-      attachment_id: attachment.id,
+      attachment_id: attachment.attachment_id,
     })),
     uploaded_attachments: attachments,
   };
