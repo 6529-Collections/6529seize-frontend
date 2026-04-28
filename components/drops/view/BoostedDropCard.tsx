@@ -44,8 +44,8 @@ const BoostedDropCard = memo(
     const rankClasses =
       {
         1: "tw-text-yellow-400",
-        2: "tw-text-iron-300",
-        3: "tw-text-amber-500",
+        2: "tw-text-iron-400",
+        3: "tw-text-iron-400",
       }[rank] ?? "tw-text-iron-400";
 
     const isBoosted = drop.context_profile_context?.boosted ?? false;
@@ -64,8 +64,8 @@ const BoostedDropCard = memo(
     const isTopRank = rank === 1;
     const cardThemeClasses =
       highlightTopOnly && !isTopRank
-        ? "tw-bg-iron-900/40 tw-ring-iron-800/60 hover:tw-ring-iron-700/70"
-        : "tw-bg-gradient-to-r tw-from-amber-950/30 tw-to-iron-900/50 tw-ring-amber-700/30 hover:tw-ring-amber-600/50";
+        ? "tw-bg-iron-900/65 tw-ring-iron-800/80 hover:tw-bg-iron-900/85 hover:tw-ring-iron-700/90"
+        : "tw-bg-amber-950/10 tw-ring-amber-700/30 hover:tw-bg-amber-950/15 hover:tw-ring-amber-600/40";
 
     return (
       <div
@@ -92,7 +92,7 @@ const BoostedDropCard = memo(
               <span className="tw-leading-none">#{rank}</span>
             </div>
 
-            <div className="tw-relative tw-size-8 @[360px]:tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900">
+            <div className="tw-relative tw-size-8 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 @[360px]:tw-size-10">
               {resolvedPfp ? (
                 <Image
                   src={resolvedPfp}
@@ -109,13 +109,13 @@ const BoostedDropCard = memo(
 
           <div className="tw-min-w-0 tw-flex-1">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-2">
-              <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-x-1.5">
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5">
                 <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-200">
                   {drop.author.handle}
                 </span>
                 <UserCICAndLevel
                   level={drop.author.level}
-                  size={UserCICAndLevelSize.SMALL}
+                  size={UserCICAndLevelSize.COMPACT}
                 />
               </div>
 
@@ -128,31 +128,32 @@ const BoostedDropCard = memo(
                   }
                 }}
                 disabled={!canBoost || isPending}
-                className={`tw-flex tw-h-6 tw-flex-shrink-0 tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-px-2.5 tw-transition-colors tw-duration-200 ${
+                className={`tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-full tw-border-0 tw-px-2 tw-leading-none tw-transition-colors tw-duration-200 ${
                   canBoost
                     ? "tw-cursor-pointer tw-ring-1 tw-ring-amber-500/20 hover:tw-bg-amber-600/20"
                     : "tw-cursor-default"
                 } ${isBoosted ? "tw-bg-amber-600/20" : "tw-bg-amber-600/10"}`}
                 aria-label={isBoosted ? "Remove boost" : "Boost"}
               >
-                <span className="tw-font-mono tw-text-xs tw-font-bold tw-text-amber-400">
+                <span className="tw-font-mono tw-text-[11px] tw-font-bold tw-leading-none tw-text-amber-400">
                   {drop.boosts}
                 </span>
                 <BoostIcon
-                  className="tw-size-3 tw-text-amber-500"
+                  className="tw-size-2.5 tw-flex-shrink-0 tw-text-amber-500"
                   variant={isBoosted ? "filled" : "outlined"}
                 />
               </button>
             </div>
             <ContentDisplay
               content={previewContent}
-              className="tw-mt-1.5 @[360px]:tw-pr-12 tw-pr-0 tw-w-full tw-text-xs tw-text-white/70"
+              className="tw-mt-1.5 tw-w-full tw-pr-0 tw-text-xs tw-text-white/60 @[360px]:tw-pr-12"
+              linkClassName="tw-text-white/60 tw-underline tw-decoration-white/15 tw-underline-offset-2 tw-transition-colors tw-duration-300 hover:tw-text-white/75 hover:tw-decoration-white/30"
               shouldClamp={false}
               textClassName="tw-line-clamp-2 @[360px]:tw-line-clamp-1"
             />
           </div>
 
-          <ChevronRightIcon className="tw-size-3 tw-mt-1 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors group-hover:tw-text-white" />
+          <ChevronRightIcon className="tw-mt-1 tw-size-3 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors group-hover:tw-text-white" />
         </div>
       </div>
     );
