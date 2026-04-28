@@ -305,6 +305,10 @@ export function useWaveRealtimeUpdater({
 
       let changed = false;
       const drops = currentData.drops.map((drop) => {
+        if (drop.type !== DropSize.FULL) {
+          return drop;
+        }
+
         let dropChanged = false;
         const parts = drop.parts.map((part) => {
           const attachments = part.attachments ?? [];

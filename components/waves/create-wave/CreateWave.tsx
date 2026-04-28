@@ -17,6 +17,7 @@ import CreateWaveDescription from "./description/CreateWaveDescription";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
 import { useRouter } from "next/navigation";
 import { generateDropPart } from "./services/waveMediaService";
@@ -185,15 +186,22 @@ export default function CreateWave({
 
     const dropRequest: ApiCreateWaveDropRequest = {
       title: drop.title ?? null,
-      parts: dropParts.map((part) => ({
-        content: part.content,
-        quoted_drop: part.quoted_drop,
-        media: part.media.map((media) => ({
-          url: media.url,
-          mime_type: media.mime_type,
-        })),
-        attachments: part.attachments,
-      })),
+      parts: dropParts.map((part): ApiCreateDropPart => {
+        const requestPart: ApiCreateDropPart = {
+          content: part.content,
+          quoted_drop: part.quoted_drop,
+          media: part.media.map((media) => ({
+            url: media.url,
+            mime_type: media.mime_type,
+          })),
+        };
+
+        if (part.attachments?.length) {
+          requestPart.attachments = part.attachments;
+        }
+
+        return requestPart;
+      }),
       referenced_nfts: drop.referenced_nfts.map((nft) => ({
         contract: nft.contract,
         token: nft.token,
