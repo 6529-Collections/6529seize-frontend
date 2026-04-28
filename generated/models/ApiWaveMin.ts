@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWaveParticipationSubmissionStrategyType';
 import { HttpFile } from '../http/http';
@@ -37,14 +38,13 @@ export class ApiWaveMin {
     'voting_period_start': number | null;
     'voting_period_end': number | null;
     'voting_credit_type': ApiWaveCreditType;
+    'voting_credit_nfts': Array<ApiWaveCreditNft> | null;
     'admin_drop_deletion_enabled': boolean;
     'forbid_negative_votes': boolean;
     'pinned': boolean;
     'identity_wave': boolean;
 
     static readonly discriminator: string | undefined = undefined;
-
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
@@ -156,6 +156,12 @@ export class ApiWaveMin {
             "format": ""
         },
         {
+            "name": "voting_credit_nfts",
+            "baseName": "voting_credit_nfts",
+            "type": "Array<ApiWaveCreditNft>",
+            "format": ""
+        },
+        {
             "name": "admin_drop_deletion_enabled",
             "baseName": "admin_drop_deletion_enabled",
             "type": "boolean",
@@ -187,5 +193,6 @@ export class ApiWaveMin {
     public constructor() {
     }
 }
+
 
 

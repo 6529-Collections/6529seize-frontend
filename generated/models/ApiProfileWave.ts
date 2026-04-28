@@ -19,8 +19,6 @@ export class ApiProfileWave {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
-
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "profile_wave_id",
@@ -42,3 +40,4 @@ export class ApiProfileWave {
     public constructor() {
     }
 }
+

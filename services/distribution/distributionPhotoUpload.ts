@@ -3,7 +3,10 @@ import { ApiCreateMediaUrlResponse } from "@/generated/models/ApiCreateMediaUrlR
 import { DistributionPhotoCompleteRequest } from "@/generated/models/DistributionPhotoCompleteRequest";
 import { DistributionPhotoCompleteResponse } from "@/generated/models/DistributionPhotoCompleteResponse";
 import { commonApiPost } from "@/services/api/common-api";
-import { multipartUploadCore } from "@/services/uploads/multipartUploadCore";
+import {
+  getContentType,
+  multipartUploadCore,
+} from "@/services/uploads/multipartUploadCore";
 import axios from "axios";
 
 const SIMPLE_UPLOAD_THRESHOLD = 5 * 1024 * 1024;
@@ -29,6 +32,7 @@ async function uploadSingleFile({
   onProgress,
 }: SingleFileUploadParams): Promise<string> {
   const endpoint = `distribution_photos/${contract}/${tokenId}/prep`;
+  const contentType = getContentType(file);
 
   const prepData = await commonApiPost<
     ApiCreateMediaUploadUrlRequest,
@@ -36,7 +40,7 @@ async function uploadSingleFile({
   >({
     endpoint,
     body: {
-      content_type: file.type,
+      content_type: contentType,
       file_name: file.name,
     },
   });
@@ -49,7 +53,7 @@ async function uploadSingleFile({
   let lastLoaded = 0;
   await axios.put(upload_url, file, {
     headers: {
-      "Content-Type": file.type,
+      "Content-Type": contentType,
     },
     onUploadProgress: (event) => {
       if (event.loaded && onProgress) {

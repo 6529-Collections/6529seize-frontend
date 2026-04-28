@@ -19,8 +19,6 @@ export class ApiMarkDropUnreadResponse {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
-
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "your_unread_drops_count",
@@ -42,3 +40,4 @@ export class ApiMarkDropUnreadResponse {
     public constructor() {
     }
 }
+
