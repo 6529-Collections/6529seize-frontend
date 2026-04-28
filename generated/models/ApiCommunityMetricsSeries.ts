@@ -29,6 +29,8 @@ export class ApiCommunityMetricsSeries {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "steps_start_times",
@@ -110,4 +112,3 @@ export class ApiCommunityMetricsSeries {
     public constructor() {
     }
 }
-

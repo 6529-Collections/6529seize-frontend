@@ -11,28 +11,31 @@
  * Do not edit the class manually.
  */
 
+import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiIntRange } from '../models/ApiIntRange';
-import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
+import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
-import { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
 
-export class ApiWaveVotingConfig {
-    'scope': ApiWaveScope;
+export class ApiCreateNewWaveCardSetTdhVotingConfig {
+    'scope': ApiCreateNewWaveScope;
     'credit_type': ApiWaveCreditType;
+    'credit_scope'?: ApiWaveCreditScope;
     /**
     * Only relevant when credit_type=REP. The REP category which is usable as credit. If not set then all categories will be usable as voting credits.
     */
     'credit_category': string | null;
-    'credit_nfts': Array<ApiWaveCreditNft> | null;
-    'creditor': ApiProfileMin | null;
+    'credit_nfts': Array<ApiWaveCreditNft>;
+    /**
+    * Only relevant when credit_type=REP
+    */
+    'creditor_id': string | null;
     /**
     * If true then the votes must be signed by voters.
     */
     'signature_required': boolean;
     'period'?: ApiIntRange;
-    'authenticated_user_eligible': boolean;
     'forbid_negative_votes': boolean;
 
     static readonly discriminator: string | undefined = undefined;
@@ -43,13 +46,19 @@ export class ApiWaveVotingConfig {
         {
             "name": "scope",
             "baseName": "scope",
-            "type": "ApiWaveScope",
+            "type": "ApiCreateNewWaveScope",
             "format": ""
         },
         {
             "name": "credit_type",
             "baseName": "credit_type",
             "type": "ApiWaveCreditType",
+            "format": ""
+        },
+        {
+            "name": "credit_scope",
+            "baseName": "credit_scope",
+            "type": "ApiWaveCreditScope",
             "format": ""
         },
         {
@@ -65,9 +74,9 @@ export class ApiWaveVotingConfig {
             "format": ""
         },
         {
-            "name": "creditor",
-            "baseName": "creditor",
-            "type": "ApiProfileMin",
+            "name": "creditor_id",
+            "baseName": "creditor_id",
+            "type": "string",
             "format": ""
         },
         {
@@ -83,12 +92,6 @@ export class ApiWaveVotingConfig {
             "format": ""
         },
         {
-            "name": "authenticated_user_eligible",
-            "baseName": "authenticated_user_eligible",
-            "type": "boolean",
-            "format": ""
-        },
-        {
             "name": "forbid_negative_votes",
             "baseName": "forbid_negative_votes",
             "type": "boolean",
@@ -96,7 +99,7 @@ export class ApiWaveVotingConfig {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveVotingConfig.attributeTypeMap;
+        return ApiCreateNewWaveCardSetTdhVotingConfig.attributeTypeMap;
     }
 
     public constructor() {

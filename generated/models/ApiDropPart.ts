@@ -26,6 +26,8 @@ export class ApiDropPart {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "part_id",
@@ -59,4 +61,3 @@ export class ApiDropPart {
     public constructor() {
     }
 }
-

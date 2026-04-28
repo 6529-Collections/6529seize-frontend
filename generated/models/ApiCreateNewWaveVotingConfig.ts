@@ -11,103 +11,30 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
-import { ApiCreateNewWaveVotingConfigOneOf } from '../models/ApiCreateNewWaveVotingConfigOneOf';
-import { ApiCreateNewWaveVotingConfigOneOf1 } from '../models/ApiCreateNewWaveVotingConfigOneOf1';
-import { ApiCreateNewWaveVotingConfigOneOf2 } from '../models/ApiCreateNewWaveVotingConfigOneOf2';
-import { ApiCreateNewWaveVotingConfigOneOf3 } from '../models/ApiCreateNewWaveVotingConfigOneOf3';
-import { ApiCreateNewWaveVotingConfigOneOf4 } from '../models/ApiCreateNewWaveVotingConfigOneOf4';
-import { ApiIntRange } from '../models/ApiIntRange';
-import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
-import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
-import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
+import { ApiCreateNewWaveCardSetTdhVotingConfig } from '../models/ApiCreateNewWaveCardSetTdhVotingConfig';
+import { ApiCreateNewWaveStandardVotingConfig } from '../models/ApiCreateNewWaveStandardVotingConfig';
 import { HttpFile } from '../http/http';
 
-export class ApiCreateNewWaveVotingConfig {
-    'scope': ApiCreateNewWaveScope;
-    'credit_type': ApiWaveCreditType;
-    'credit_scope'?: ApiWaveCreditScope;
-    /**
-    * Only relevant when credit_type=REP. The REP category which is usable as credit. If not set then all categories will be usable as voting credits.
-    */
-    'credit_category': string | null;
-    'credit_nfts'?: Array<ApiWaveCreditNft> | null;
-    /**
-    * Only relevant when credit_type=REP
-    */
-    'creditor_id': string | null;
-    /**
-    * If true then the votes must be signed by voters.
-    */
-    'signature_required': boolean;
-    'period'?: ApiIntRange;
-    'forbid_negative_votes': boolean;
+/**
+ * @type ApiCreateNewWaveVotingConfig
+ * Type
+ * @export
+ */
+export type ApiCreateNewWaveVotingConfig = ApiCreateNewWaveCardSetTdhVotingConfig | ApiCreateNewWaveStandardVotingConfig;
 
-    static readonly discriminator: string | undefined = undefined;
+/**
+* @type ApiCreateNewWaveVotingConfigClass
+* @export
+*/
+export class ApiCreateNewWaveVotingConfigClass {
+    static readonly discriminator: string | undefined = "credit_type";
 
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "scope",
-            "baseName": "scope",
-            "type": "ApiCreateNewWaveScope",
-            "format": ""
-        },
-        {
-            "name": "credit_type",
-            "baseName": "credit_type",
-            "type": "ApiWaveCreditType",
-            "format": ""
-        },
-        {
-            "name": "credit_scope",
-            "baseName": "credit_scope",
-            "type": "ApiWaveCreditScope",
-            "format": ""
-        },
-        {
-            "name": "credit_category",
-            "baseName": "credit_category",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "credit_nfts",
-            "baseName": "credit_nfts",
-            "type": "Array<ApiWaveCreditNft>",
-            "format": ""
-        },
-        {
-            "name": "creditor_id",
-            "baseName": "creditor_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "signature_required",
-            "baseName": "signature_required",
-            "type": "boolean",
-            "format": ""
-        },
-        {
-            "name": "period",
-            "baseName": "period",
-            "type": "ApiIntRange",
-            "format": ""
-        },
-        {
-            "name": "forbid_negative_votes",
-            "baseName": "forbid_negative_votes",
-            "type": "boolean",
-            "format": ""
-        }    ];
-
-    static getAttributeTypeMap() {
-        return ApiCreateNewWaveVotingConfig.attributeTypeMap;
-    }
-
-    public constructor() {
-    }
+    static readonly mapping: {[index: string]: string} | undefined = {
+        "CARD_SET_TDH": "ApiCreateNewWaveCardSetTdhVotingConfig",
+        "REP": "ApiCreateNewWaveStandardVotingConfig",
+        "TDH": "ApiCreateNewWaveStandardVotingConfig",
+        "TDH_PLUS_XTDH": "ApiCreateNewWaveStandardVotingConfig",
+        "XTDH": "ApiCreateNewWaveStandardVotingConfig",
+    };
 }
-
-
 
