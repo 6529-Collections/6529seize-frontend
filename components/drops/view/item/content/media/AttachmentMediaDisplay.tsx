@@ -732,14 +732,16 @@ export default function AttachmentMediaDisplay({
           <Icon className="tw-size-6" aria-hidden="true" />
         </div>
         <div className="tw-min-w-0 tw-flex-1 tw-space-y-1">
-          <div className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
-            {fileName}
-          </div>
-          <div className="tw-flex tw-items-center tw-gap-x-1.5">
-            <TrustedAttachmentBadge size="compact" />
-            <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-              {label}
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5">
+            <div className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
+              {fileName}
             </div>
+            <div className="tw-flex-shrink-0">
+              <TrustedAttachmentBadge />
+            </div>
+          </div>
+          <div className="tw-text-xs tw-font-medium tw-text-iron-500">
+            {label}
           </div>
         </div>
         {!disableMediaInteraction && (
