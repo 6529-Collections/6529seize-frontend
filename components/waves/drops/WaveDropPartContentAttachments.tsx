@@ -33,8 +33,16 @@ function isAttachmentReady(attachment: ApiAttachment): boolean {
 }
 
 function getStatusLabel(attachment: ApiAttachment): string {
-  if (IN_FLIGHT_STATUSES.has(attachment.status)) {
+  if (attachment.status === ApiAttachmentStatus.Uploading) {
+    return "Uploading...";
+  }
+
+  if (attachment.status === ApiAttachmentStatus.Verifying) {
     return "Scanning...";
+  }
+
+  if (attachment.status === ApiAttachmentStatus.Processing) {
+    return "Finalizing...";
   }
 
   if (attachment.status === ApiAttachmentStatus.Bad) {
