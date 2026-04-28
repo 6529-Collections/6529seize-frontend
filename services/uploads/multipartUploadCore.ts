@@ -3,6 +3,7 @@ import pLimit from "p-limit";
 import pRetry from "p-retry";
 import { commonApiPost } from "@/services/api/common-api";
 import type { ApiCreateMediaUploadUrlRequest } from "@/generated/models/ApiCreateMediaUploadUrlRequest";
+import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 import type { ApiStartMultipartMediaUploadResponse } from "@/generated/models/ApiStartMultipartMediaUploadResponse";
 import type { ApiUploadPartOfMultipartUploadRequest } from "@/generated/models/ApiUploadPartOfMultipartUploadRequest";
 import type { ApiUploadPartOfMultipartUploadResponse } from "@/generated/models/ApiUploadPartOfMultipartUploadResponse";
@@ -26,38 +27,76 @@ interface MultipartUploadCoreParams {
   onProgress?: ((bytesUploaded: number) => void) | undefined;
 }
 
-export function getContentType(file: File): string {
+const SUPPORTED_MIME_TYPES = new Set<string>(
+  Object.values(ApiMediaUploadMimeType)
+);
+
+const EXTENSION_MIME_TYPES: Record<string, ApiMediaUploadMimeType> = {
+  ".aac": ApiMediaUploadMimeType.AudioAac,
+  ".avi": ApiMediaUploadMimeType.VideoXMsvideo,
+  ".csv": ApiMediaUploadMimeType.TextCsv,
+  ".gif": ApiMediaUploadMimeType.ImageGif,
+  ".glb": ApiMediaUploadMimeType.ModelGltfBinary,
+  ".jpeg": ApiMediaUploadMimeType.ImageJpeg,
+  ".jpg": ApiMediaUploadMimeType.ImageJpeg,
+  ".mov": ApiMediaUploadMimeType.VideoQuicktime,
+  ".mp3": ApiMediaUploadMimeType.AudioMpeg,
+  ".mp4": ApiMediaUploadMimeType.VideoMp4,
+  ".ogg": ApiMediaUploadMimeType.AudioOgg,
+  ".pdf": ApiMediaUploadMimeType.ApplicationPdf,
+  ".png": ApiMediaUploadMimeType.ImagePng,
+  ".wav": ApiMediaUploadMimeType.AudioWav,
+  ".webp": ApiMediaUploadMimeType.ImageWebp,
+};
+
+function getSupportedMimeType(
+  contentType: string
+): ApiMediaUploadMimeType | null {
+  const normalizedContentType = contentType.trim().toLowerCase();
+  if (!normalizedContentType) {
+    return null;
+  }
+
+  if (SUPPORTED_MIME_TYPES.has(normalizedContentType)) {
+    return normalizedContentType as ApiMediaUploadMimeType;
+  }
+
+  return null;
+}
+
+function getContentTypeFromFileName(
+  fileName: string
+): ApiMediaUploadMimeType | null {
+  const normalizedFileName = fileName.toLowerCase();
+  const extensionIndex = normalizedFileName.lastIndexOf(".");
+  if (extensionIndex === -1) {
+    return null;
+  }
+
+  const extension = normalizedFileName.slice(extensionIndex);
+  return EXTENSION_MIME_TYPES[extension] ?? null;
+}
+
+export function getContentType(file: File): ApiMediaUploadMimeType {
   if (file.type) {
-    return file.type;
+    const contentType = getSupportedMimeType(file.type);
+    if (contentType !== null) {
+      return contentType;
+    }
+
+    throw new Error(
+      `Unsupported media upload MIME type: ${file.type} for file "${file.name}"`
+    );
   }
 
-  const fileName = file.name.toLowerCase();
-  if (fileName.endsWith(".glb")) {
-    return "model/gltf-binary";
-  }
-  if (fileName.endsWith(".gltf")) {
-    return "model/gltf+json";
-  }
-  if (fileName.endsWith(".mp4")) {
-    return "video/mp4";
-  }
-  if (fileName.endsWith(".mov")) {
-    return "video/quicktime";
-  }
-  if (fileName.endsWith(".png")) {
-    return "image/png";
-  }
-  if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-    return "image/jpeg";
-  }
-  if (fileName.endsWith(".gif")) {
-    return "image/gif";
-  }
-  if (fileName.endsWith(".webp")) {
-    return "image/webp";
+  const contentTypeFromFileName = getContentTypeFromFileName(file.name);
+  if (contentTypeFromFileName !== null) {
+    return contentTypeFromFileName;
   }
 
-  return "application/octet-stream";
+  throw new Error(
+    `Unsupported media upload MIME type: unknown for file "${file.name}"`
+  );
 }
 
 export async function multipartUploadCore({

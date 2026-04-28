@@ -7,6 +7,7 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import WaveDropPartTitle from "./WaveDropPartTitle";
 import WaveDropPartContent from "./WaveDropPartContent";
 import { ImageScale } from "@/helpers/image.helpers";
+import type { DropContentPresentation } from "./dropContentPresentation";
 
 interface WaveDropPartDropProps {
   drop: ApiDrop;
@@ -34,6 +35,11 @@ interface WaveDropPartDropProps {
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
@@ -53,12 +59,19 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   mediaImageScale = ImageScale.AUTOx450,
   fullWidthMedia = false,
   onLinkCardActionsActiveChange,
+  contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
+  const showStandaloneTitle = contentPresentation !== "quorumCompact";
+
   return (
     <div className="tw-relative tw-flex tw-h-full tw-gap-x-3">
       <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-self-center sm:tw-self-start">
         <div>
-          <WaveDropPartTitle title={drop.title} />
+          {showStandaloneTitle && <WaveDropPartTitle title={drop.title} />}
           <WaveDropPartContent
             mentionedUsers={drop.mentioned_users}
             mentionedGroups={drop.mentioned_groups}
@@ -81,6 +94,11 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
             mediaImageScale={mediaImageScale}
             fullWidthMedia={fullWidthMedia}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+            contentPresentation={contentPresentation}
+            embedPath={embedPath}
+            quotePath={quotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
           />
         </div>
       </div>

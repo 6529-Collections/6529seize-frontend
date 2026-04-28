@@ -47,6 +47,8 @@ import {
 
 const BreakComponent = () => <br />;
 
+const EMPTY_MENTIONED_GROUPS: ApiDropGroupMention[] = [];
+
 const mergeClassNames = (...classes: Array<string | undefined>): string =>
   classes.filter(Boolean).join(" ");
 
@@ -268,7 +270,7 @@ export interface DropPartMarkdownProps {
 
 function DropPartMarkdown({
   mentionedUsers,
-  mentionedGroups = [],
+  mentionedGroups = EMPTY_MENTIONED_GROUPS,
   mentionedWaves,
   referencedNfts,
   nftLinks,
@@ -330,6 +332,7 @@ function DropPartMarkdown({
         hideLinkPreviews,
         tweetPreviewMode,
         isMemesWaveById: seizeSettings?.isMemesWave,
+        isQuorumWaveById: seizeSettings?.isQuorumWave,
         embedPath: normalizedEmbedPath,
         quotePath: normalizedQuotePath,
         embedDepth,
@@ -341,6 +344,7 @@ function DropPartMarkdown({
       hideLinkPreviews,
       tweetPreviewMode,
       seizeSettings?.isMemesWave,
+      seizeSettings?.isQuorumWave,
       normalizedEmbedPath,
       normalizedQuotePath,
       embedDepth,

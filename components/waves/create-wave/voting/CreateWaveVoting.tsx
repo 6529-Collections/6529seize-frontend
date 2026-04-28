@@ -16,6 +16,7 @@ const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
   [ApiWaveCreditType.Tdh]: 1,
   [ApiWaveCreditType.Rep]: 2,
   [ApiWaveCreditType.Xtdh]: undefined,
+  [ApiWaveCreditType.CardSetTdh]: undefined,
 };
 
 export default function CreateWaveVoting({
@@ -58,22 +59,22 @@ export default function CreateWaveVoting({
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
         {TITLES[waveType]}
       </p>
-      <div className="tw-mt-3 tw-grid lg:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-4">
-        {(
-          Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[]
-        ).filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined).map((votingType) => (
-          <CommonBorderedRadioButton
-            key={votingType}
-            type={votingType}
-            selected={selectedType}
-            disabled={false}
-            label={`By ${WAVE_VOTING_LABELS[votingType]}`}
-            onChange={onTypeChange}
-          />
-        ))}
+      <div className="tw-mt-3 tw-grid tw-gap-x-4 tw-gap-y-4 lg:tw-grid-cols-3">
+        {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
+          .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
+          .map((votingType) => (
+            <CommonBorderedRadioButton
+              key={votingType}
+              type={votingType}
+              selected={selectedType}
+              disabled={false}
+              label={`By ${WAVE_VOTING_LABELS[votingType]}`}
+              onChange={onTypeChange}
+            />
+          ))}
         {selectedType === ApiWaveCreditType.Rep && (
           <div className="tw-col-span-full">
             <CreateWaveVotingRep

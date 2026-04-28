@@ -8,6 +8,7 @@ import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOpti
 import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -25,11 +26,12 @@ import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
-> = ({ drop, onDropClick }) => {
+> = ({ drop, onDropClick, contentPresentation = "default" }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { hasTouchScreen } = useDeviceInfo();
@@ -75,7 +77,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 </div>
               </div>
             </div>
-            <WaveLeaderboardDropContent drop={drop} isCompetitionDrop={true} />
+            <WaveLeaderboardDropContent
+              drop={drop}
+              isCompetitionDrop={true}
+              contentPresentation={contentPresentation}
+            />
             <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
                 <WaveLeaderboardDropRaters drop={drop} />

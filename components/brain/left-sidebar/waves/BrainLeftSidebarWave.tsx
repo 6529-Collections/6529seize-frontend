@@ -25,6 +25,14 @@ interface BrainLeftSidebarWaveProps {
   readonly isDirectMessage?: boolean | undefined;
 }
 
+const getPresentNumber = (value: number | null): number | null => {
+  if (value === null || value === 0 || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return value;
+};
+
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
   onHover,
@@ -36,6 +44,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const prefetchWaveData = usePrefetchWaveData();
   const { isApp, hasTouchScreen } = useDeviceInfo();
   const isDropWave = wave.type !== ApiWaveType.Chat;
+  const firstUnreadDropSerialNo = getPresentNumber(
+    wave.firstUnreadDropSerialNo
+  );
+  const latestDropTimestamp = getPresentNumber(
+    wave.newDropsCount.latestDropTimestamp
+  );
 
   const formattedWaveName = useMemo(() => {
     if (wave.type === ApiWaveType.Chat) {
@@ -68,19 +82,14 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     }
     return getWaveRoute({
       waveId: wave.id,
-      extraParams: wave.firstUnreadDropSerialNo
-        ? { divider: String(wave.firstUnreadDropSerialNo) }
-        : undefined,
+      extraParams:
+        firstUnreadDropSerialNo !== null
+          ? { divider: String(firstUnreadDropSerialNo) }
+          : undefined,
       isDirectMessage,
       isApp,
     });
-  }, [
-    activeWaveId,
-    isApp,
-    isDirectMessage,
-    wave.id,
-    wave.firstUnreadDropSerialNo,
-  ]);
+  }, [activeWaveId, isApp, isDirectMessage, wave.id, firstUnreadDropSerialNo]);
 
   const unreadCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
   const haveNewDrops = unreadCount > 0;
@@ -111,7 +120,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
       setActiveWave(nextWaveId, {
         isDirectMessage,
-        divider: nextWaveId ? wave.firstUnreadDropSerialNo : null,
+        divider: nextWaveId !== null ? firstUnreadDropSerialNo : null,
       });
     },
     [
@@ -120,7 +129,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       isDirectMessage,
       onWaveHover,
       wave.id,
-      wave.firstUnreadDropSerialNo,
+      firstUnreadDropSerialNo,
     ]
   );
 
@@ -140,6 +149,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     >
       <Link
         href={href}
+        prefetch={false}
         {...(!hasTouchScreen && { onMouseEnter: onWaveHover })}
         onClick={handleWaveClick}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
@@ -193,12 +203,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         </div>
         <div className="tw-flex-1">
           <div className="tw-text-sm tw-font-medium">{formattedWaveName}</div>
-          {!!wave.newDropsCount.latestDropTimestamp && (
+          {latestDropTimestamp !== null && (
             <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
               <span className="tw-pr-1">Last drop:</span>
-              <BrainLeftSidebarWaveDropTime
-                time={wave.newDropsCount.latestDropTimestamp}
-              />
+              <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
             </div>
           )}
         </div>

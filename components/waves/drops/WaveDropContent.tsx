@@ -7,6 +7,7 @@ import WaveDropPart from "./WaveDropPart";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import type { DropContentPresentation } from "./dropContentPresentation";
 
 interface WaveDropContentProps {
   readonly drop: ExtendedDrop;
@@ -34,6 +35,11 @@ interface WaveDropContentProps {
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropContent: React.FC<WaveDropContentProps> = ({
@@ -53,6 +59,11 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   fullWidthMedia = false,
   hasTouch,
   onLinkCardActionsActiveChange,
+  contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
   const isTouchDevice = useIsTouchDevice();
   const effectiveHasTouch = hasTouch ?? isTouchDevice;
@@ -75,6 +86,11 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
       fullWidthMedia={fullWidthMedia}
       hasTouch={effectiveHasTouch}
       onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+      contentPresentation={contentPresentation}
+      embedPath={embedPath}
+      quotePath={quotePath}
+      embedDepth={embedDepth}
+      maxEmbedDepth={maxEmbedDepth}
     />
   );
 };

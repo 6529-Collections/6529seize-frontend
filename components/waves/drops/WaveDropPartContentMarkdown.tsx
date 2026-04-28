@@ -8,6 +8,9 @@ import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedN
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import React from "react";
+import QuorumProposalCompactContent from "@/components/waves/quorum/QuorumProposalCompactContent";
+import { parseQuorumProposalMarkdown } from "@/components/waves/quorum/quorumProposalMarkdown";
+import type { DropContentPresentation } from "./dropContentPresentation";
 import EditDropLexical from "./EditDropLexical";
 import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
 
@@ -34,6 +37,11 @@ interface WaveDropPartContentMarkdownProps {
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropPartContentMarkdown: React.FC<
@@ -52,10 +60,41 @@ const WaveDropPartContentMarkdown: React.FC<
   onCancel,
   drop,
   onLinkCardActionsActiveChange,
+  contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
   const linkPreviewToggleControl = useDropLinkPreviewToggleControl(drop);
-  const currentQuotePath =
-    drop?.serial_no === undefined ? [] : [`${wave.id}:${drop.serial_no}`];
+  const dropId = drop?.id;
+  const dropSerialNo = drop?.serial_no;
+  const waveId = wave.id;
+  const currentDropEmbedPath = React.useMemo(() => {
+    const path = embedPath ? [...embedPath] : [];
+    if (!dropId || path.includes(dropId)) {
+      return path;
+    }
+
+    return [...path, dropId];
+  }, [dropId, embedPath]);
+  const currentQuotePath = React.useMemo(() => {
+    const path = quotePath ? [...quotePath] : [];
+    if (dropSerialNo === undefined) {
+      return path;
+    }
+
+    const currentQuoteKey = `${waveId}:${dropSerialNo}`;
+    if (!path.includes(currentQuoteKey)) {
+      path.push(currentQuoteKey);
+    }
+
+    return path;
+  }, [dropSerialNo, quotePath, waveId]);
+  const compactProposal =
+    contentPresentation === "quorumCompact"
+      ? parseQuorumProposalMarkdown(part.content)
+      : null;
 
   if (isEditing) {
     return (
@@ -89,20 +128,43 @@ const WaveDropPartContentMarkdown: React.FC<
   return (
     <>
       <div>
-        <DropPartMarkdownWithPropLogger
-          mentionedUsers={mentionedUsers}
-          mentionedGroups={mentionedGroups}
-          mentionedWaves={mentionedWaves}
-          referencedNfts={referencedNfts}
-          nftLinks={drop?.nft_links}
-          partContent={part.content}
-          onQuoteClick={onQuoteClick}
-          currentDropId={drop?.id}
-          hideLinkPreviews={drop?.hide_link_preview}
-          quotePath={currentQuotePath}
-          linkPreviewToggleControl={linkPreviewToggleControl}
-          onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
-        />
+        {compactProposal ? (
+          <QuorumProposalCompactContent
+            proposal={compactProposal}
+            mentionedUsers={mentionedUsers}
+            mentionedGroups={mentionedGroups}
+            mentionedWaves={mentionedWaves}
+            referencedNfts={referencedNfts}
+            nftLinks={drop?.nft_links}
+            onQuoteClick={onQuoteClick}
+            currentDropId={drop?.id}
+            hideLinkPreviews={drop?.hide_link_preview}
+            embedPath={currentDropEmbedPath}
+            quotePath={currentQuotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
+            linkPreviewToggleControl={linkPreviewToggleControl}
+            onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+          />
+        ) : (
+          <DropPartMarkdownWithPropLogger
+            mentionedUsers={mentionedUsers}
+            mentionedGroups={mentionedGroups}
+            mentionedWaves={mentionedWaves}
+            referencedNfts={referencedNfts}
+            nftLinks={drop?.nft_links}
+            partContent={part.content}
+            onQuoteClick={onQuoteClick}
+            currentDropId={drop?.id}
+            hideLinkPreviews={drop?.hide_link_preview}
+            embedPath={currentDropEmbedPath}
+            quotePath={currentQuotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
+            linkPreviewToggleControl={linkPreviewToggleControl}
+            onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+          />
+        )}
         {typeof drop?.updated_at === "number" &&
           drop.updated_at !== drop.created_at && (
             <div className="tw-mt-0.5 tw-text-[10px] tw-font-normal tw-leading-none tw-text-iron-500">
@@ -121,9 +183,10 @@ const WaveDropPartContentMarkdown: React.FC<
                 : null
             }
             onQuoteClick={onQuoteClick}
-            embedPath={drop?.id ? [drop.id] : []}
+            embedPath={currentDropEmbedPath}
             quotePath={currentQuotePath}
-            embedDepth={1}
+            embedDepth={(embedDepth ?? 0) + 1}
+            maxEmbedDepth={maxEmbedDepth}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />
         </div>

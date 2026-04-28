@@ -9,6 +9,212 @@ import {
 } from "@heroicons/react/24/outline";
 import { useMemo, type ComponentType } from "react";
 
+function getNetworkSection(): SidebarSection {
+  return {
+    key: "network",
+    name: "Network",
+    icon: UsersIcon,
+    items: [
+      { name: "Identities", href: "/network" },
+      { name: "Activity", href: "/network/activity" },
+      { name: "Groups", href: "/network/groups" },
+      { name: "NFT Activity", href: "/nft-activity" },
+      { name: "Memes Calendar", href: "/meme-calendar" },
+      { name: "TDH", href: "/network/tdh" },
+      { name: "xTDH", href: "/xtdh" },
+    ],
+    subsections: [
+      {
+        name: "Metrics",
+        items: [
+          { name: "Health", href: "/network/health" },
+          { name: "Definitions", href: "/network/definitions" },
+          { name: "Levels", href: "/network/levels" },
+          { name: "Network Stats", href: "/network/health/network-tdh" },
+        ],
+      },
+    ],
+  };
+}
+
+function getCollectionsSection(): SidebarSection {
+  return {
+    key: "collections",
+    name: "Collections",
+    icon: CollectionsMenuIcon,
+    items: [
+      { name: "The Memes", href: "/the-memes" },
+      { name: "6529 Gradient", href: "/6529-gradient" },
+      { name: "NextGen", href: "/nextgen" },
+      { name: "Meme Lab", href: "/meme-lab" },
+      { name: "ReMemes", href: "/rememes" },
+    ],
+    subsections: [],
+  };
+}
+
+function getToolsSection(
+  appWalletsSupported: boolean,
+  hideSubscriptions: boolean
+): SidebarSection {
+  return {
+    key: "tools",
+    name: "Tools",
+    icon: WrenchIcon,
+    items: [],
+    subsections: [
+      {
+        name: "NFT Delegation",
+        items: [
+          { name: "Delegation Center", href: "/delegation/delegation-center" },
+          {
+            name: "Wallet Architecture",
+            href: "/delegation/wallet-architecture",
+          },
+          { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
+          {
+            name: "Consolidation Use Cases",
+            href: "/delegation/consolidation-use-cases",
+          },
+          { name: "Wallet Checker", href: "/delegation/wallet-checker" },
+        ],
+      },
+      {
+        name: "The Memes Tools",
+        items: [
+          ...(hideSubscriptions
+            ? []
+            : [
+                {
+                  name: "Subscriptions Report",
+                  href: "/tools/subscriptions-report",
+                },
+              ]),
+          { name: "Memes Accounting", href: "/meme-accounting" },
+          { name: "Memes Gas", href: "/meme-gas" },
+        ],
+      },
+      {
+        name: "Other Tools",
+        items: [
+          ...(appWalletsSupported
+            ? [{ name: "App Wallets", href: "/tools/app-wallets" }]
+            : []),
+          { name: "API", href: "/tools/api" },
+          { name: "EMMA", href: "/emma" },
+          { name: "Block Finder", href: "/tools/block-finder" },
+        ],
+      },
+      {
+        name: "Open Data",
+        items: [
+          { name: "Open Data", href: "/open-data" },
+          { name: "Network Metrics", href: "/open-data/network-metrics" },
+          ...(hideSubscriptions
+            ? []
+            : [
+                {
+                  name: "Meme Subscriptions",
+                  href: "/open-data/meme-subscriptions",
+                },
+              ]),
+          { name: "Rememes", href: "/open-data/rememes" },
+          { name: "Team", href: "/open-data/team" },
+          { name: "Royalties", href: "/open-data/royalties" },
+        ],
+      },
+    ],
+  };
+}
+
+function getAboutSection(hideSubscriptions: boolean): SidebarSection {
+  return {
+    key: "about",
+    name: "About",
+    icon: DocumentTextIcon,
+    items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
+    subsections: [
+      {
+        name: "Support",
+        items: [
+          { name: "FAQ", href: `/about/${AboutSection.FAQ}` },
+          { name: "Apply", href: `/about/${AboutSection.APPLY}` },
+          { name: "Contact Us", href: `/about/${AboutSection.CONTACT_US}` },
+        ],
+      },
+      {
+        name: "NFTs",
+        items: [
+          { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
+          ...(hideSubscriptions
+            ? []
+            : [
+                {
+                  name: "Subscriptions",
+                  href: `/about/${AboutSection.SUBSCRIPTIONS}`,
+                },
+              ]),
+          { name: "Minting", href: `/about/${AboutSection.MINTING}` },
+          {
+            name: "Nakamoto Threshold",
+            href: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
+          },
+          { name: "Meme Lab", href: `/about/${AboutSection.MEME_LAB}` },
+          { name: "Gradients", href: `/about/${AboutSection.GRADIENTS}` },
+        ],
+      },
+      {
+        name: "NFT Delegation",
+        items: [
+          {
+            name: "About NFTD",
+            href: `/about/${AboutSection.NFT_DELEGATION}`,
+          },
+          {
+            name: "Primary Address",
+            href: `/about/${AboutSection.PRIMARY_ADDRESS}`,
+          },
+        ],
+      },
+      {
+        name: "6529 Capital",
+        items: [
+          { name: "About 6529 Capital", href: `/capital` },
+          { name: "Company Portfolio", href: `/capital/company-portfolio` },
+          { name: "NFT Fund", href: `/capital/fund` },
+        ],
+      },
+      {
+        name: "Resources",
+        items: [
+          {
+            name: "Data Decentralization",
+            href: `/about/${AboutSection.DATA_DECENTR}`,
+          },
+          { name: "ENS", href: `/about/${AboutSection.ENS}` },
+          { name: "License", href: `/about/${AboutSection.LICENSE}` },
+          {
+            name: "Release Notes",
+            href: `/about/${AboutSection.RELEASE_NOTES}`,
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function buildSidebarSections(
+  appWalletsSupported: boolean,
+  hideSubscriptions: boolean
+): SidebarSection[] {
+  return [
+    getNetworkSection(),
+    getCollectionsSection(),
+    getToolsSection(appWalletsSupported, hideSubscriptions),
+    getAboutSection(hideSubscriptions),
+  ];
+}
+
 export function useSidebarSections(
   appWalletsSupported: boolean,
   isIos: boolean,
@@ -19,191 +225,8 @@ export function useSidebarSections(
     country,
   });
 
-  return useMemo<SidebarSection[]>(
-    () => [
-      {
-        key: "network",
-        name: "Network",
-        icon: UsersIcon,
-        items: [
-          { name: "Identities", href: "/network" },
-          { name: "Activity", href: "/network/activity" },
-          { name: "Groups", href: "/network/groups" },
-          { name: "NFT Activity", href: "/nft-activity" },
-          { name: "Memes Calendar", href: "/meme-calendar" },
-          { name: "TDH", href: "/network/tdh" },
-          { name: "xTDH", href: "/xtdh" },
-        ],
-        subsections: [
-          {
-            name: "Metrics",
-            items: [
-              { name: "Health", href: "/network/health" },
-              { name: "Definitions", href: "/network/definitions" },
-              { name: "Levels", href: "/network/levels" },
-              { name: "Network Stats", href: "/network/health/network-tdh" },
-            ],
-          },
-        ],
-      },
-      {
-        key: "collections",
-        name: "Collections",
-        icon: CollectionsMenuIcon,
-        items: [
-          { name: "The Memes", href: "/the-memes" },
-          { name: "6529 Gradient", href: "/6529-gradient" },
-          { name: "NextGen", href: "/nextgen" },
-          { name: "Meme Lab", href: "/meme-lab" },
-          { name: "ReMemes", href: "/rememes" },
-        ],
-        subsections: [],
-      },
-      {
-        key: "tools",
-        name: "Tools",
-        icon: WrenchIcon,
-        items: [],
-        subsections: [
-          {
-            name: "NFT Delegation",
-            items: [
-              {
-                name: "Delegation Center",
-                href: "/delegation/delegation-center",
-              },
-              {
-                name: "Wallet Architecture",
-                href: "/delegation/wallet-architecture",
-              },
-              { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
-              {
-                name: "Consolidation Use Cases",
-                href: "/delegation/consolidation-use-cases",
-              },
-              { name: "Wallet Checker", href: "/delegation/wallet-checker" },
-            ],
-          },
-          {
-            name: "The Memes Tools",
-            items: [
-              ...(hideSubscriptions
-                ? []
-                : [
-                    {
-                      name: "Subscriptions Report",
-                      href: "/tools/subscriptions-report",
-                    },
-                  ]),
-              { name: "Memes Accounting", href: "/meme-accounting" },
-              { name: "Memes Gas", href: "/meme-gas" },
-            ],
-          },
-          {
-            name: "Other Tools",
-            items: [
-              ...(appWalletsSupported
-                ? [{ name: "App Wallets", href: "/tools/app-wallets" }]
-                : []),
-              { name: "API", href: "/tools/api" },
-              { name: "EMMA", href: "/emma" },
-              { name: "Block Finder", href: "/tools/block-finder" },
-            ],
-          },
-          {
-            name: "Open Data",
-            items: [
-              { name: "Open Data", href: "/open-data" },
-              { name: "Network Metrics", href: "/open-data/network-metrics" },
-              ...(hideSubscriptions
-                ? []
-                : [
-                    {
-                      name: "Meme Subscriptions",
-                      href: "/open-data/meme-subscriptions",
-                    },
-                  ]),
-              { name: "Rememes", href: "/open-data/rememes" },
-              { name: "Team", href: "/open-data/team" },
-              { name: "Royalties", href: "/open-data/royalties" },
-            ],
-          },
-        ],
-      },
-      {
-        key: "about",
-        name: "About",
-        icon: DocumentTextIcon,
-        items: [{ name: "GDRC1", href: `/about/${AboutSection.GDRC1}` }],
-        subsections: [
-          {
-            name: "NFTs",
-            items: [
-              { name: "The Memes", href: `/about/${AboutSection.MEMES}` },
-              ...(hideSubscriptions
-                ? []
-                : [
-                    {
-                      name: "Subscriptions",
-                      href: `/about/${AboutSection.SUBSCRIPTIONS}`,
-                    },
-                  ]),
-              { name: "Minting", href: `/about/${AboutSection.MINTING}` },
-              {
-                name: "Nakamoto Threshold",
-                href: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-              },
-              { name: "Meme Lab", href: `/about/${AboutSection.MEME_LAB}` },
-              { name: "Gradients", href: `/about/${AboutSection.GRADIENTS}` },
-            ],
-          },
-          {
-            name: "NFT Delegation",
-            items: [
-              {
-                name: "About NFTD",
-                href: `/about/${AboutSection.NFT_DELEGATION}`,
-              },
-              {
-                name: "Primary Address",
-                href: `/about/${AboutSection.PRIMARY_ADDRESS}`,
-              },
-            ],
-          },
-          {
-            name: "6529 Capital",
-            items: [
-              { name: "About 6529 Capital", href: `/capital` },
-              { name: "Company Portfolio", href: `/capital/company-portfolio` },
-              { name: "NFT Fund", href: `/capital/fund` },
-            ],
-          },
-          {
-            name: "Support",
-            items: [
-              { name: "FAQ", href: `/about/${AboutSection.FAQ}` },
-              { name: "Apply", href: `/about/${AboutSection.APPLY}` },
-              { name: "Contact Us", href: `/about/${AboutSection.CONTACT_US}` },
-            ],
-          },
-          {
-            name: "Resources",
-            items: [
-              {
-                name: "Data Decentralization",
-                href: `/about/${AboutSection.DATA_DECENTR}`,
-              },
-              { name: "ENS", href: `/about/${AboutSection.ENS}` },
-              { name: "License", href: `/about/${AboutSection.LICENSE}` },
-              {
-                name: "Release Notes",
-                href: `/about/${AboutSection.RELEASE_NOTES}`,
-              },
-            ],
-          },
-        ],
-      },
-    ],
+  return useMemo(
+    () => buildSidebarSections(appWalletsSupported, hideSubscriptions),
     [appWalletsSupported, hideSubscriptions]
   );
 }

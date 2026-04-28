@@ -10,19 +10,23 @@ jest.mock("@/hooks/useWave");
 jest.mock("react-tooltip", () => ({
   Tooltip: ({ children }: any) => children,
 }));
+
+const mockMemesArtSubmissionModal = jest.fn((props: any) =>
+  props.isOpen ? (
+    <div data-testid="resubmit-modal">
+      <button type="button" onClick={props.onClose}>
+        close
+      </button>
+      <button type="button" onClick={props.onSourceDropDeleted}>
+        source deleted
+      </button>
+    </div>
+  ) : null
+);
+
 jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
   __esModule: true,
-  default: (props: any) =>
-    props.isOpen ? (
-      <div data-testid="resubmit-modal">
-        <button type="button" onClick={props.onClose}>
-          close
-        </button>
-        <button type="button" onClick={props.onSourceDropDeleted}>
-          source deleted
-        </button>
-      </div>
-    ) : null,
+  default: (props: any) => mockMemesArtSubmissionModal(props),
 }));
 
 const mockUseDropInteractionRules =
@@ -78,6 +82,7 @@ describe("MemesArtResubmitAction", () => {
     await userEvent.click(screen.getByRole("button", { name: /resubmit/i }));
 
     expect(onOpenModal).toHaveBeenCalledTimes(1);
+    expect(mockMemesArtSubmissionModal).not.toHaveBeenCalled();
     expect(screen.queryByTestId("resubmit-modal")).not.toBeInTheDocument();
   });
 
@@ -111,9 +116,16 @@ describe("MemesArtResubmitAction", () => {
       />
     );
 
+    expect(mockMemesArtSubmissionModal).not.toHaveBeenCalled();
+
     await userEvent.click(
       screen.getByRole("button", { name: /resubmit drop/i })
     );
+
+    expect(mockMemesArtSubmissionModal).toHaveBeenCalledWith(
+      expect.objectContaining({ isOpen: true })
+    );
+
     await userEvent.click(
       screen.getByRole("button", { name: /source deleted/i })
     );

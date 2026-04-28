@@ -12,7 +12,13 @@
  */
 
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
+import { ApiCreateNewWaveVotingConfigOneOf } from '../models/ApiCreateNewWaveVotingConfigOneOf';
+import { ApiCreateNewWaveVotingConfigOneOf1 } from '../models/ApiCreateNewWaveVotingConfigOneOf1';
+import { ApiCreateNewWaveVotingConfigOneOf2 } from '../models/ApiCreateNewWaveVotingConfigOneOf2';
+import { ApiCreateNewWaveVotingConfigOneOf3 } from '../models/ApiCreateNewWaveVotingConfigOneOf3';
+import { ApiCreateNewWaveVotingConfigOneOf4 } from '../models/ApiCreateNewWaveVotingConfigOneOf4';
 import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { HttpFile } from '../http/http';
@@ -25,6 +31,7 @@ export class ApiCreateNewWaveVotingConfig {
     * Only relevant when credit_type=REP. The REP category which is usable as credit. If not set then all categories will be usable as voting credits.
     */
     'credit_category': string | null;
+    'credit_nfts'?: Array<ApiWaveCreditNft> | null;
     /**
     * Only relevant when credit_type=REP
     */
@@ -37,8 +44,6 @@ export class ApiCreateNewWaveVotingConfig {
     'forbid_negative_votes': boolean;
 
     static readonly discriminator: string | undefined = undefined;
-
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
@@ -63,6 +68,12 @@ export class ApiCreateNewWaveVotingConfig {
             "name": "credit_category",
             "baseName": "credit_category",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "credit_nfts",
+            "baseName": "credit_nfts",
+            "type": "Array<ApiWaveCreditNft>",
             "format": ""
         },
         {
@@ -97,5 +108,6 @@ export class ApiCreateNewWaveVotingConfig {
     public constructor() {
     }
 }
+
 
 

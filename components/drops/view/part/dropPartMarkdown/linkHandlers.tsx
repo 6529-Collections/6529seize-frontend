@@ -32,6 +32,9 @@ interface LinkRendererConfig {
   readonly isMemesWaveById?:
     | ((waveId: string | undefined | null) => boolean)
     | undefined;
+  readonly isQuorumWaveById?:
+    | ((waveId: string | undefined | null) => boolean)
+    | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -74,6 +77,7 @@ export const createLinkRenderer = ({
   hideLinkPreviews = false,
   tweetPreviewMode = "auto",
   isMemesWaveById,
+  isQuorumWaveById,
   embedPath,
   quotePath,
   embedDepth = 0,
@@ -88,6 +92,7 @@ export const createLinkRenderer = ({
     embedDepth,
     maxEmbedDepth,
     isMemesWaveById,
+    isQuorumWaveById,
   });
   const handlers = createLinkHandlers({
     tweetPreviewMode,

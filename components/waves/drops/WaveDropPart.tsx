@@ -8,6 +8,7 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import WaveDropPartDrop from "./WaveDropPartDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
+import type { DropContentPresentation } from "./dropContentPresentation";
 
 interface WaveDropPartProps {
   readonly drop: ExtendedDrop;
@@ -35,6 +36,11 @@ interface WaveDropPartProps {
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds
@@ -58,6 +64,11 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     fullWidthMedia = false,
     hasTouch = false,
     onLinkCardActionsActiveChange,
+    contentPresentation = "default",
+    embedPath,
+    quotePath,
+    embedDepth,
+    maxEmbedDepth,
   }) => {
     const activePart = drop.parts[activePartIndex];
 
@@ -156,6 +167,11 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
             mediaImageScale={mediaImageScale}
             fullWidthMedia={fullWidthMedia}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+            contentPresentation={contentPresentation}
+            embedPath={embedPath}
+            quotePath={quotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
           />
         </div>
       </div>
