@@ -1,9 +1,6 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import {
-  CreateWaveGroupConfigType,
-  CreateWaveStep,
-} from "@/types/waves.types";
+import { CreateWaveGroupConfigType, CreateWaveStep } from "@/types/waves.types";
 
 export const WAVE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Chat]: "Chat",
@@ -21,6 +18,7 @@ export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.Xtdh]: "XTDH",
   [ApiWaveCreditType.TdhPlusXtdh]: "TDH + XTDH",
   [ApiWaveCreditType.Rep]: "Rep",
+  [ApiWaveCreditType.CardSetTdh]: "Card Set TDH",
 };
 
 export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
