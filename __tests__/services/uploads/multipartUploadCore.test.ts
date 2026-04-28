@@ -3,6 +3,7 @@ import {
   getContentType,
   toApiMediaUploadMimeType,
 } from "@/services/uploads/multipartUploadCore";
+import { toApiAttachmentUploadMimeType } from "@/services/uploads/attachmentUploadMimeType";
 
 describe("multipartUploadCore MIME helpers", () => {
   it("uses the browser MIME when it is API-supported", () => {
@@ -31,7 +32,8 @@ describe("multipartUploadCore MIME helpers", () => {
 
   it("maps supported MIME types through the backend enum", () => {
     expect(toApiMediaUploadMimeType("image/jpg")).toBe("image/jpg");
-    expect(toApiMediaUploadMimeType("text/csv; charset=utf-8")).toBe(
+    expect(toApiMediaUploadMimeType("text/csv; charset=utf-8")).toBeNull();
+    expect(toApiAttachmentUploadMimeType("text/csv; charset=utf-8")).toBe(
       "text/csv"
     );
     expect(toApiMediaUploadMimeType("model/gltf+json")).toBeNull();

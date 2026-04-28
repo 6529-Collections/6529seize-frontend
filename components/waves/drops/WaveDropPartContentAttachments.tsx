@@ -1,0 +1,111 @@
+"use client";
+
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { ApiAttachmentKind } from "@/generated/models/ApiAttachmentKind";
+import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
+import {
+  DocumentIcon,
+  ExclamationTriangleIcon,
+  TableCellsIcon,
+} from "@heroicons/react/24/outline";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import AttachmentMediaDisplay from "@/components/drops/view/item/content/media/AttachmentMediaDisplay";
+import clsx from "clsx";
+
+const IN_FLIGHT_STATUSES = new Set<ApiAttachmentStatus>([
+  ApiAttachmentStatus.Uploading,
+  ApiAttachmentStatus.Verifying,
+  ApiAttachmentStatus.Processing,
+]);
+
+function getAttachmentIcon(kind: ApiAttachmentKind) {
+  if (kind === ApiAttachmentKind.Csv) {
+    return TableCellsIcon;
+  }
+
+  return DocumentIcon;
+}
+
+function isAttachmentReady(attachment: ApiAttachment): boolean {
+  return attachment.status === ApiAttachmentStatus.Ready && !!attachment.url;
+}
+
+function getStatusLabel(attachment: ApiAttachment): string {
+  if (IN_FLIGHT_STATUSES.has(attachment.status)) {
+    return "Scanning...";
+  }
+
+  if (attachment.status === ApiAttachmentStatus.Bad) {
+    return attachment.error_reason ?? "Attachment failed validation.";
+  }
+
+  return attachment.mime_type;
+}
+
+export default function WaveDropPartContentAttachments({
+  attachments,
+}: {
+  readonly attachments: ApiAttachment[];
+}) {
+  if (!attachments.length) {
+    return null;
+  }
+
+  return (
+    <div className="tw-mt-3 tw-space-y-2">
+      {attachments.map((attachment) => {
+        const Icon = getAttachmentIcon(attachment.kind);
+        const ready = isAttachmentReady(attachment);
+        const inFlight = IN_FLIGHT_STATUSES.has(attachment.status);
+        const bad = attachment.status === ApiAttachmentStatus.Bad;
+        if (ready && attachment.url) {
+          return (
+            <AttachmentMediaDisplay
+              key={attachment.id}
+              media_mime_type={attachment.mime_type}
+              media_url={attachment.url}
+              file_name={attachment.file_name}
+            />
+          );
+        }
+
+        const content = (
+          <div
+            className={clsx(
+              "tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border tw-border-solid tw-bg-iron-950 tw-p-3 tw-text-left",
+              inFlight && "tw-border-iron-700",
+              bad && "tw-border-error tw-bg-error/10"
+            )}
+          >
+            <div className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-text-iron-200">
+              {inFlight ? (
+                <CircleLoader size={CircleLoaderSize.MEDIUM} />
+              ) : bad ? (
+                <ExclamationTriangleIcon className="tw-size-5 tw-text-error" />
+              ) : (
+                <Icon className="tw-size-5" />
+              )}
+            </div>
+            <div className="tw-min-w-0 tw-flex-1">
+              <div className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
+                {attachment.file_name}
+              </div>
+              <div
+                className={clsx(
+                  "tw-mt-0.5 tw-text-xs",
+                  bad ? "tw-text-error" : "tw-text-iron-400"
+                )}
+              >
+                {getStatusLabel(attachment)}
+              </div>
+            </div>
+          </div>
+        );
+
+        return <div key={attachment.id}>{content}</div>;
+      })}
+    </div>
+  );
+}

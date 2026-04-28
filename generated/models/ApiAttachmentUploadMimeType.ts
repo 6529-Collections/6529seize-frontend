@@ -13,13 +13,7 @@
 
 import { HttpFile } from '../http/http';
 
-/**
-* What will be counted as a credit. 
-*/
-export enum ApiWaveCreditType {
-    Tdh = 'TDH',
-    Rep = 'REP',
-    Xtdh = 'XTDH',
-    TdhPlusXtdh = 'TDH_PLUS_XTDH',
-    CardSetTdh = 'CARD_SET_TDH'
+export enum ApiAttachmentUploadMimeType {
+    ApplicationPdf = 'application/pdf',
+    TextCsv = 'text/csv'
 }

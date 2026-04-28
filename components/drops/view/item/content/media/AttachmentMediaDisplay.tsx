@@ -2,6 +2,7 @@
 
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import {
   ArrowTopRightOnSquareIcon,
   ArrowDownTrayIcon,
@@ -19,7 +20,8 @@ const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "blob:"]);
 function getSafeMediaUrl(rawUrl: string): string | null {
   if (rawUrl) {
     try {
-      const parsed = new URL(rawUrl, globalThis.window?.location.origin);
+      const resolvedUrl = resolveIpfsUrlSync(rawUrl);
+      const parsed = new URL(resolvedUrl, globalThis.window?.location.origin);
       if (SAFE_URL_PROTOCOLS.has(parsed.protocol)) {
         return parsed.toString();
       }
@@ -254,10 +256,6 @@ function getAttachmentRenderType(
   }
 
   return "unknown";
-}
-
-export function isAttachmentMimeType(mimeType: string, url: string): boolean {
-  return getAttachmentRenderType(mimeType, url) !== "unknown";
 }
 
 function getAttachmentLabel(renderType: AttachmentRenderType): string {
@@ -516,14 +514,17 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
 export default function AttachmentMediaDisplay({
   media_mime_type,
   media_url,
+  file_name,
   disableMediaInteraction = false,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
+  readonly file_name?: string | undefined;
   readonly disableMediaInteraction?: boolean | undefined;
 }) {
   const [isRendered, setIsRendered] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const downloadAbortRef = useRef<AbortController | null>(null);
   const { isCapacitor } = useCapacitor();
   const safeMediaUrl = useMemo(() => getSafeMediaUrl(media_url), [media_url]);
@@ -533,19 +534,22 @@ export default function AttachmentMediaDisplay({
     label,
     canRender,
     canOpenInNewTab,
+    canCopyLink,
     canDownload,
     Icon,
   } = useMemo(() => {
     const nextRenderType = getAttachmentRenderType(media_mime_type, media_url);
     const fileInfo = getFileInfoFromUrl(media_url);
     const fallbackExtension = getFallbackExtension(nextRenderType);
-    const nextFileName = resolveAttachmentFileName(fileInfo, fallbackExtension);
+    const nextFileName =
+      file_name ?? resolveAttachmentFileName(fileInfo, fallbackExtension);
     const nextLabel = getAttachmentLabel(nextRenderType);
     const nextCanRender =
       safeMediaUrl !== null &&
       (nextRenderType === "pdf" || nextRenderType === "csv");
     const nextCanOpenInNewTab =
       safeMediaUrl !== null && nextRenderType === "pdf";
+    const nextCanCopyLink = safeMediaUrl !== null && nextRenderType === "csv";
     const nextCanDownload = safeMediaUrl !== null;
     const NextIcon = nextRenderType === "csv" ? TableCellsIcon : DocumentIcon;
     return {
@@ -554,10 +558,11 @@ export default function AttachmentMediaDisplay({
       label: nextLabel,
       canRender: nextCanRender,
       canOpenInNewTab: nextCanOpenInNewTab,
+      canCopyLink: nextCanCopyLink,
       canDownload: nextCanDownload,
       Icon: NextIcon,
     };
-  }, [media_mime_type, media_url, safeMediaUrl]);
+  }, [file_name, media_mime_type, media_url, safeMediaUrl]);
 
   useEffect(
     () => () => {
@@ -566,6 +571,18 @@ export default function AttachmentMediaDisplay({
     },
     []
   );
+
+  useEffect(() => {
+    if (!copiedLink) {
+      return;
+    }
+
+    const timeoutId = globalThis.window.setTimeout(
+      () => setCopiedLink(false),
+      1500
+    );
+    return () => globalThis.window.clearTimeout(timeoutId);
+  }, [copiedLink]);
 
   const handleDownload = async () => {
     if (isDownloading || !safeMediaUrl) {
@@ -624,6 +641,15 @@ export default function AttachmentMediaDisplay({
     }
   };
 
+  const handleCopyLink = async () => {
+    if (!safeMediaUrl) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(safeMediaUrl);
+    setCopiedLink(true);
+  };
+
   return (
     <div className="tw-flex tw-w-full tw-flex-col">
       <div
@@ -662,6 +688,36 @@ export default function AttachmentMediaDisplay({
                 ) : (
                   <EyeIcon className="tw-size-4" aria-hidden="true" />
                 )}
+              </button>
+            )}
+            {canCopyLink && (
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                aria-label="Copy attachment link"
+                title={copiedLink ? "Copied" : "Copy link"}
+                className={clsx(
+                  "tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-bg-iron-800 tw-no-underline tw-transition desktop-hover:hover:tw-bg-iron-700",
+                  copiedLink
+                    ? "tw-border-primary-400 tw-text-primary-300"
+                    : "tw-border-iron-700 tw-text-iron-100"
+                )}
+              >
+                <svg
+                  className="tw-size-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+                  />
+                </svg>
               </button>
             )}
             {canDownload && (

@@ -9,6 +9,10 @@ export * from '../models/ApiAggregatedActivity';
 export * from '../models/ApiAggregatedActivityMemes';
 export * from '../models/ApiAggregatedActivityPage';
 export * from '../models/ApiArtistNameItem';
+export * from '../models/ApiAttachment';
+export * from '../models/ApiAttachmentKind';
+export * from '../models/ApiAttachmentStatus';
+export * from '../models/ApiAttachmentUploadMimeType';
 export * from '../models/ApiAvailableRatingCredit';
 export * from '../models/ApiBlockItem';
 export * from '../models/ApiBlocksPage';
@@ -33,10 +37,13 @@ export * from '../models/ApiCommunityMetric';
 export * from '../models/ApiCommunityMetricSample';
 export * from '../models/ApiCommunityMetrics';
 export * from '../models/ApiCommunityMetricsSeries';
+export * from '../models/ApiCompleteAttachmentMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequestPart';
 export * from '../models/ApiCompleteMultipartUploadResponse';
 export * from '../models/ApiConsolidatedTdh';
+export * from '../models/ApiCreateAttachmentMultipartUploadRequest';
+export * from '../models/ApiCreateAttachmentMultipartUploadResponse';
 export * from '../models/ApiCreateDropPart';
 export * from '../models/ApiCreateDropRequest';
 export * from '../models/ApiCreateGroup';
@@ -57,6 +64,11 @@ export * from '../models/ApiCreateNewWaveParticipationConfig';
 export * from '../models/ApiCreateNewWaveScope';
 export * from '../models/ApiCreateNewWaveVisibilityConfig';
 export * from '../models/ApiCreateNewWaveVotingConfig';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf1';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf2';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf3';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf4';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
@@ -68,6 +80,7 @@ export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
 export * from '../models/ApiDistributionAirdropsUploadResponse';
 export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
+export * from '../models/ApiDropAttachmentReference';
 export * from '../models/ApiDropBoost';
 export * from '../models/ApiDropBoostsPage';
 export * from '../models/ApiDropContextProfileContext';
@@ -211,6 +224,7 @@ export * from '../models/ApiWave';
 export * from '../models/ApiWaveChatConfig';
 export * from '../models/ApiWaveConfig';
 export * from '../models/ApiWaveContributorOverview';
+export * from '../models/ApiWaveCreditNft';
 export * from '../models/ApiWaveCreditScope';
 export * from '../models/ApiWaveCreditType';
 export * from '../models/ApiWaveCuration';
@@ -328,6 +342,10 @@ import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
 import { ApiAggregatedActivityPage } from '../models/ApiAggregatedActivityPage';
 import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
+import { ApiAttachment        } from '../models/ApiAttachment';
+import { ApiAttachmentKind } from '../models/ApiAttachmentKind';
+import { ApiAttachmentStatus } from '../models/ApiAttachmentStatus';
+import { ApiAttachmentUploadMimeType } from '../models/ApiAttachmentUploadMimeType';
 import { ApiAvailableRatingCredit } from '../models/ApiAvailableRatingCredit';
 import { ApiBlockItem } from '../models/ApiBlockItem';
 import { ApiBlocksPage } from '../models/ApiBlocksPage';
@@ -352,10 +370,13 @@ import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
 import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
 import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
 import { ApiCommunityMetricsSeries } from '../models/ApiCommunityMetricsSeries';
+import { ApiCompleteAttachmentMultipartUploadRequest } from '../models/ApiCompleteAttachmentMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { ApiCompleteMultipartUploadResponse } from '../models/ApiCompleteMultipartUploadResponse';
 import { ApiConsolidatedTdh } from '../models/ApiConsolidatedTdh';
+import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
+import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropRequest              } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
@@ -375,7 +396,12 @@ import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig
 import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
-import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateNewWaveVotingConfigClass } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateNewWaveVotingConfigOneOf, ApiCreateNewWaveVotingConfigOneOfCreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf';
+import { ApiCreateNewWaveVotingConfigOneOf1, ApiCreateNewWaveVotingConfigOneOf1CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf1';
+import { ApiCreateNewWaveVotingConfigOneOf2, ApiCreateNewWaveVotingConfigOneOf2CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf2';
+import { ApiCreateNewWaveVotingConfigOneOf3, ApiCreateNewWaveVotingConfigOneOf3CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf3';
+import { ApiCreateNewWaveVotingConfigOneOf4, ApiCreateNewWaveVotingConfigOneOf4CreditTypeEnum    } from '../models/ApiCreateNewWaveVotingConfigOneOf4';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
 import { ApiCreateWaveConfig         } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
@@ -387,6 +413,7 @@ import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributi
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
 import { ApiDrop                               } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
+import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference';
 import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
@@ -530,6 +557,7 @@ import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
 import { ApiWaveConfig              } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
+import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveCuration } from '../models/ApiWaveCuration';
@@ -544,7 +572,7 @@ import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
 import { ApiWaveLog } from '../models/ApiWaveLog';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin                       } from '../models/ApiWaveMin';
+import { ApiWaveMin                        } from '../models/ApiWaveMin';
 import { ApiWaveNotificationPreferences } from '../models/ApiWaveNotificationPreferences';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
@@ -568,7 +596,7 @@ import { ApiWaveType } from '../models/ApiWaveType';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
 import { ApiWaveVoter } from '../models/ApiWaveVoter';
 import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
-import { ApiWaveVotingConfig         } from '../models/ApiWaveVotingConfig';
+import { ApiWaveVotingConfig          } from '../models/ApiWaveVotingConfig';
 import { ApiWavesOverviewType } from '../models/ApiWavesOverviewType';
 import { ApiWavesPinFilter } from '../models/ApiWavesPinFilter';
 import { ApiXTdhCollection } from '../models/ApiXTdhCollection';
@@ -651,7 +679,15 @@ let primitives = [
 
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
+    "ApiAttachmentKind",
+    "ApiAttachmentStatus",
+    "ApiAttachmentUploadMimeType",
     "ApiCommunityMembersSortOption",
+    "ApiCreateNewWaveVotingConfigOneOfCreditTypeEnum",
+    "ApiCreateNewWaveVotingConfigOneOf1CreditTypeEnum",
+    "ApiCreateNewWaveVotingConfigOneOf2CreditTypeEnum",
+    "ApiCreateNewWaveVotingConfigOneOf3CreditTypeEnum",
+    "ApiCreateNewWaveVotingConfigOneOf4CreditTypeEnum",
     "ApiDropGroupMention",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
@@ -704,6 +740,7 @@ let typeMap: {[index: string]: any} = {
     "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
     "ApiAggregatedActivityPage": ApiAggregatedActivityPage,
     "ApiArtistNameItem": ApiArtistNameItem,
+    "ApiAttachment": ApiAttachment,
     "ApiAvailableRatingCredit": ApiAvailableRatingCredit,
     "ApiBlockItem": ApiBlockItem,
     "ApiBlocksPage": ApiBlocksPage,
@@ -727,10 +764,13 @@ let typeMap: {[index: string]: any} = {
     "ApiCommunityMetricSample": ApiCommunityMetricSample,
     "ApiCommunityMetrics": ApiCommunityMetrics,
     "ApiCommunityMetricsSeries": ApiCommunityMetricsSeries,
+    "ApiCompleteAttachmentMultipartUploadRequest": ApiCompleteAttachmentMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequest": ApiCompleteMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequestPart": ApiCompleteMultipartUploadRequestPart,
     "ApiCompleteMultipartUploadResponse": ApiCompleteMultipartUploadResponse,
     "ApiConsolidatedTdh": ApiConsolidatedTdh,
+    "ApiCreateAttachmentMultipartUploadRequest": ApiCreateAttachmentMultipartUploadRequest,
+    "ApiCreateAttachmentMultipartUploadResponse": ApiCreateAttachmentMultipartUploadResponse,
     "ApiCreateDropPart": ApiCreateDropPart,
     "ApiCreateDropRequest": ApiCreateDropRequest,
     "ApiCreateGroup": ApiCreateGroup,
@@ -750,7 +790,12 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveParticipationConfig": ApiCreateNewWaveParticipationConfig,
     "ApiCreateNewWaveScope": ApiCreateNewWaveScope,
     "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
-    "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfig,
+    "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfigClass,
+    "ApiCreateNewWaveVotingConfigOneOf": ApiCreateNewWaveVotingConfigOneOf,
+    "ApiCreateNewWaveVotingConfigOneOf1": ApiCreateNewWaveVotingConfigOneOf1,
+    "ApiCreateNewWaveVotingConfigOneOf2": ApiCreateNewWaveVotingConfigOneOf2,
+    "ApiCreateNewWaveVotingConfigOneOf3": ApiCreateNewWaveVotingConfigOneOf3,
+    "ApiCreateNewWaveVotingConfigOneOf4": ApiCreateNewWaveVotingConfigOneOf4,
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
@@ -762,6 +807,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
     "ApiDrop": ApiDrop,
     "ApiDropAndDropVote": ApiDropAndDropVote,
+    "ApiDropAttachmentReference": ApiDropAttachmentReference,
     "ApiDropBoost": ApiDropBoost,
     "ApiDropBoostsPage": ApiDropBoostsPage,
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
@@ -889,6 +935,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveChatConfig": ApiWaveChatConfig,
     "ApiWaveConfig": ApiWaveConfig,
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
+    "ApiWaveCreditNft": ApiWaveCreditNft,
     "ApiWaveCuration": ApiWaveCuration,
     "ApiWaveCurationRequest": ApiWaveCurationRequest,
     "ApiWaveDecision": ApiWaveDecision,

@@ -2,6 +2,13 @@ import AttachmentMediaDisplay from "@/components/drops/view/item/content/media/A
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (url: string) =>
+    url.startsWith("ipfs://")
+      ? `https://ipfs.example.com/ipfs/${url.slice(7)}`
+      : url,
+}));
+
 describe("AttachmentMediaDisplay", () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -90,6 +97,19 @@ describe("AttachmentMediaDisplay", () => {
     expect(revokeObjectURLSpy).toHaveBeenCalledWith("blob:test");
   });
 
+  it("uses the provided attachment file name instead of deriving it from the URL", () => {
+    render(
+      <AttachmentMediaDisplay
+        media_mime_type="application/pdf"
+        media_url="https://example.com/ipfs/QmHash/original.pdf"
+        file_name="sample.pdf"
+      />
+    );
+
+    expect(screen.getByText("sample.pdf")).toBeInTheDocument();
+    expect(screen.queryByText("original.pdf")).not.toBeInTheDocument();
+  });
+
   it("renders a CSV preview after the user requests it", async () => {
     const user = userEvent.setup();
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
@@ -127,5 +147,60 @@ describe("AttachmentMediaDisplay", () => {
     expect(
       screen.queryByRole("link", { name: "Open attachment" })
     ).not.toBeInTheDocument();
+  });
+
+  it("copies CSV attachment links without showing the PDF open action", async () => {
+    const user = userEvent.setup();
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(
+      <AttachmentMediaDisplay
+        media_mime_type="text/csv"
+        media_url="https://example.com/files/data.csv"
+      />
+    );
+
+    const copyButton = screen.getByRole("button", {
+      name: "Copy attachment link",
+    });
+    await user.click(copyButton);
+
+    expect(writeText).toHaveBeenCalledWith(
+      "https://example.com/files/data.csv"
+    );
+    expect(copyButton).toHaveAttribute("title", "Copied");
+    expect(copyButton).toHaveClass("tw-border-primary-400");
+    expect(
+      screen.queryByRole("link", { name: "Open attachment" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("resolves ipfs attachment URLs through the configured gateway", async () => {
+    const user = userEvent.setup();
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(
+      <AttachmentMediaDisplay
+        media_mime_type="text/csv"
+        media_url="ipfs://bafybeigateway/sample.csv"
+        file_name="sample.csv"
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Copy attachment link" })
+    );
+
+    expect(writeText).toHaveBeenCalledWith(
+      "https://ipfs.example.com/ipfs/bafybeigateway/sample.csv"
+    );
   });
 });

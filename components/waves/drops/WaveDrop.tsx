@@ -598,6 +598,9 @@ const WaveDrop = ({
         content: index === activePartIndex ? newContent : part.content,
         quoted_drop: part.quoted_drop ?? null,
         media: part.media,
+        attachments: (part.attachments ?? []).map((attachment) => ({
+          attachment_id: attachment.id,
+        })),
       }));
 
       const updateRequest: ApiUpdateDropRequest = {

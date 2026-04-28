@@ -1,4 +1,5 @@
 import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
+import { ApiAttachmentUploadMimeType } from "@/generated/models/ApiAttachmentUploadMimeType";
 
 function normalizeMimeType(mimeType: string): string {
   if (!mimeType) return "";
@@ -19,11 +20,16 @@ const FILE_TYPE_LABEL_RULES: ReadonlyArray<{
   { label: "Video", matches: (m) => m.startsWith("video/") },
   { label: "Audio", matches: (m) => m.startsWith("audio/") },
   { label: "3D Model", matches: (m) => m.startsWith("model/") },
-  { label: "PDF", matches: (m) => m === ApiMediaUploadMimeType.ApplicationPdf },
-  { label: "CSV", matches: (m) => m === ApiMediaUploadMimeType.TextCsv },
+  {
+    label: "PDF",
+    matches: (m) => m === ApiAttachmentUploadMimeType.ApplicationPdf,
+  },
+  { label: "CSV", matches: (m) => m === ApiAttachmentUploadMimeType.TextCsv },
 ];
 
-function getUploadMimeTypeLabel(mimeType: ApiMediaUploadMimeType): string {
+function getUploadMimeTypeLabel(
+  mimeType: ApiMediaUploadMimeType | ApiAttachmentUploadMimeType
+): string {
   return (
     FILE_TYPE_LABEL_RULES.find((rule) => rule.matches(mimeType))?.label ??
     "File"
@@ -31,10 +37,18 @@ function getUploadMimeTypeLabel(mimeType: ApiMediaUploadMimeType): string {
 }
 
 export const ACCEPTED_FILE_TYPE_LABELS = Array.from(
-  new Set(API_MEDIA_UPLOAD_MIME_TYPE_VALUES.map(getUploadMimeTypeLabel))
+  new Set(
+    [
+      ...API_MEDIA_UPLOAD_MIME_TYPE_VALUES,
+      ...Object.values(ApiAttachmentUploadMimeType),
+    ].map(getUploadMimeTypeLabel)
+  )
 ).join(", ");
 
-const EXTENSION_CONTENT_TYPES = new Map<string, ApiMediaUploadMimeType>([
+const EXTENSION_CONTENT_TYPES = new Map<
+  string,
+  ApiMediaUploadMimeType | ApiAttachmentUploadMimeType
+>([
   [".glb", ApiMediaUploadMimeType.ModelGltfBinary],
   [".gltf", ApiMediaUploadMimeType.ModelGltfBinary],
   [".mp4", ApiMediaUploadMimeType.VideoMp4],
@@ -49,8 +63,8 @@ const EXTENSION_CONTENT_TYPES = new Map<string, ApiMediaUploadMimeType>([
   [".wav", ApiMediaUploadMimeType.AudioWav],
   [".aac", ApiMediaUploadMimeType.AudioAac],
   [".ogg", ApiMediaUploadMimeType.AudioOgg],
-  [".pdf", ApiMediaUploadMimeType.ApplicationPdf],
-  [".csv", ApiMediaUploadMimeType.TextCsv],
+  [".pdf", ApiAttachmentUploadMimeType.ApplicationPdf],
+  [".csv", ApiAttachmentUploadMimeType.TextCsv],
 ]);
 
 function getContentTypeFromExtension(fileName: string): string {
@@ -99,5 +113,11 @@ export function toApiMediaUploadMimeType(
 }
 
 export function isSupportedUploadFile(file: File): boolean {
-  return toApiMediaUploadMimeType(getContentType(file)) !== null;
+  const contentType = getContentType(file);
+  const normalizedContentType = normalizeMimeType(contentType);
+  return (
+    toApiMediaUploadMimeType(contentType) !== null ||
+    normalizedContentType === ApiAttachmentUploadMimeType.ApplicationPdf ||
+    normalizedContentType === ApiAttachmentUploadMimeType.TextCsv
+  );
 }

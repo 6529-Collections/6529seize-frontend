@@ -11,16 +11,14 @@
  * Do not edit the class manually.
  */
 
-import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference';
-import { ApiDropMedia } from '../models/ApiDropMedia';
-import { ApiQuotedDrop } from '../models/ApiQuotedDrop';
+import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { HttpFile } from '../http/http';
 
-export class ApiCreateDropPart {
-    'content'?: string | null;
-    'quoted_drop'?: ApiQuotedDrop | null;
-    'media': Array<ApiDropMedia>;
-    'attachments'?: Array<ApiDropAttachmentReference>;
+export class ApiCompleteAttachmentMultipartUploadRequest {
+    'attachment_id': string;
+    'upload_id': string;
+    'key': string;
+    'parts': Array<ApiCompleteMultipartUploadRequestPart>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -28,32 +26,32 @@ export class ApiCreateDropPart {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "content",
-            "baseName": "content",
+            "name": "attachment_id",
+            "baseName": "attachment_id",
             "type": "string",
             "format": ""
         },
         {
-            "name": "quoted_drop",
-            "baseName": "quoted_drop",
-            "type": "ApiQuotedDrop",
+            "name": "upload_id",
+            "baseName": "upload_id",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "media",
-            "baseName": "media",
-            "type": "Array<ApiDropMedia>",
+            "name": "key",
+            "baseName": "key",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "attachments",
-            "baseName": "attachments",
-            "type": "Array<ApiDropAttachmentReference>",
+            "name": "parts",
+            "baseName": "parts",
+            "type": "Array<ApiCompleteMultipartUploadRequestPart>",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiCreateDropPart.attributeTypeMap;
+        return ApiCompleteAttachmentMultipartUploadRequest.attributeTypeMap;
     }
 
     public constructor() {

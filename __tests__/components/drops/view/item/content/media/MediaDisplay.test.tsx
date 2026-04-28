@@ -53,6 +53,10 @@ jest.mock(
     </button>
   )
 );
+jest.mock(
+  "@/components/drops/view/item/content/media/UnsupportedMediaLink",
+  () => ({ __esModule: true, default: () => <a href="file.txt">file.txt</a> })
+);
 
 jest.mock(
   "next/dynamic",
@@ -205,16 +209,13 @@ describe("MediaDisplay", () => {
     );
   });
 
-  it("renders unknown media as an attachment fallback", () => {
+  it("renders unknown media as a compact link", () => {
     render(<MediaDisplay media_mime_type="text/plain" media_url="file.txt" />);
 
-    expect(screen.getByText("File")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Download attachment" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "file.txt" })).toBeInTheDocument();
   });
 
-  it("forwards disabled interactions to unknown attachment fallback", () => {
+  it("does not render unsupported media preview controls", () => {
     render(
       <MediaDisplay
         media_mime_type="text/plain"
@@ -226,6 +227,7 @@ describe("MediaDisplay", () => {
     expect(
       screen.queryByRole("button", { name: "Download attachment" })
     ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "file.txt" })).toBeInTheDocument();
   });
 
   it("does not auto-advance ipfs html if the timeout fallback is disabled", () => {

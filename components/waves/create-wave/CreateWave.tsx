@@ -192,6 +192,7 @@ export default function CreateWave({
           url: media.url,
           mime_type: media.mime_type,
         })),
+        attachments: part.attachments,
       })),
       referenced_nfts: drop.referenced_nfts.map((nft) => ({
         contract: nft.contract,

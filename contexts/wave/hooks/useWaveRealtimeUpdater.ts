@@ -1,7 +1,11 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { WsDropUpdateMessage } from "@/helpers/Types";
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import type {
+  WsAttachmentStatusUpdateMessage,
+  WsDropUpdateMessage,
+} from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -16,6 +20,8 @@ import type { WaveDataStoreUpdater } from "./types";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
+import { useQueryClient } from "@tanstack/react-query";
+import { updateAttachmentInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -58,6 +64,7 @@ export function useWaveRealtimeUpdater({
   const abortControllersRef = useRef<Record<string, AbortController>>({});
   const { refreshEligibility } = useWaveEligibility();
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const queryClient = useQueryClient();
   const tabJustBecameVisibleRef = useRef<boolean>(false);
 
   // Function to cleanup abort controllers
@@ -283,6 +290,50 @@ export function useWaveRealtimeUpdater({
     [removeDrop]
   );
 
+  const processAttachmentStatusUpdate = useCallback(
+    (attachment: ApiAttachment) => {
+      updateAttachmentInCachedDrops(queryClient, attachment);
+
+      if (!activeWaveId) {
+        return;
+      }
+
+      const currentData = getData(activeWaveId);
+      if (!currentData) {
+        return;
+      }
+
+      let changed = false;
+      const drops = currentData.drops.map((drop) => {
+        let dropChanged = false;
+        const parts = drop.parts.map((part) => {
+          const attachments = part.attachments ?? [];
+          if (!attachments.some((item) => item.id === attachment.id)) {
+            return part;
+          }
+          changed = true;
+          dropChanged = true;
+          return {
+            ...part,
+            attachments: attachments.map((item) =>
+              item.id === attachment.id ? attachment : item
+            ),
+          };
+        });
+
+        return dropChanged ? { ...drop, parts } : drop;
+      });
+
+      if (changed) {
+        updateData({
+          key: activeWaveId,
+          drops,
+        });
+      }
+    },
+    [activeWaveId, getData, queryClient, updateData]
+  );
+
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
     (messageData) => {
@@ -308,6 +359,11 @@ export function useWaveRealtimeUpdater({
         ProcessIncomingDropType.DROP_REACTION_UPDATE
       );
     }
+  );
+
+  useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(
+    WsMessageType.ATTACHMENT_STATUS_UPDATE,
+    processAttachmentStatusUpdate
   );
 
   // Handle tab visibility changes - refresh eligibility when tab becomes visible

@@ -3,9 +3,21 @@ import clsx from "clsx";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
-import { isAttachmentMimeType } from "@/components/drops/view/item/content/media/AttachmentMediaDisplay";
 import { ImageScale } from "@/helpers/image.helpers";
 import WaveDropPartContentFullWidthImage from "./WaveDropPartContentFullWidthImage";
+
+function isRenderableMedia(mimeType: string, url: string): boolean {
+  return (
+    mimeType.includes("image") ||
+    mimeType.includes("video") ||
+    mimeType.includes("audio") ||
+    mimeType === "model/gltf-binary" ||
+    mimeType === "model/gltf+json" ||
+    mimeType === "text/html" ||
+    url.endsWith(".glb") ||
+    url.endsWith(".gltf")
+  );
+}
 
 interface WaveDropPartContentMediasProps {
   readonly activePart: ApiDropPart;
@@ -40,12 +52,12 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   const mediaStackClassName = clsx(topSpacingClassName, "tw-space-y-3");
   const getMediaContainerClassName = ({
     useNaturalHeightImage,
-    useAttachmentLayout,
+    useCompactLink,
   }: {
     readonly useNaturalHeightImage: boolean;
-    readonly useAttachmentLayout: boolean;
+    readonly useCompactLink: boolean;
   }) => {
-    if (useNaturalHeightImage || useAttachmentLayout) {
+    if (useNaturalHeightImage || useCompactLink) {
       return "tw-w-full";
     }
 
@@ -60,13 +72,10 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       {activePart.media.map((media, i) => {
         const useNaturalHeightImage =
           fullWidthMedia && media.mime_type.includes("image");
-        const useAttachmentLayout = isAttachmentMimeType(
-          media.mime_type,
-          media.url
-        );
+        const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
         const mediaContainerClassName = getMediaContainerClassName({
           useNaturalHeightImage,
-          useAttachmentLayout,
+          useCompactLink,
         });
         let mediaContent;
 

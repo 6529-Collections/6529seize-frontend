@@ -9,7 +9,7 @@ import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
 import MediaDisplay from "./MediaDisplay";
-import AttachmentMediaDisplay from "./AttachmentMediaDisplay";
+import UnsupportedMediaLink from "./UnsupportedMediaLink";
 
 enum MediaType {
   IMAGE = "IMAGE",
@@ -115,12 +115,7 @@ export default function DropListItemContentMedia({
         />
       );
     case MediaType.UNKNOWN:
-      return (
-        <AttachmentMediaDisplay
-          media_mime_type={media_mime_type}
-          media_url={media_url}
-        />
-      );
+      return <UnsupportedMediaLink media_url={media_url} />;
     default:
       return assertUnreachable(mediaType);
   }
