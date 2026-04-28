@@ -8106,7 +8106,6 @@ components:
         attachments:
           type: array
           default: []
-          uniqueItems: true
           items:
             $ref: "#/components/schemas/ApiDropAttachmentReference"
     ApiCreateDropRequest:

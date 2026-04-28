@@ -20,7 +20,7 @@ export class ApiCreateDropPart {
     'content'?: string | null;
     'quoted_drop'?: ApiQuotedDrop | null;
     'media': Array<ApiDropMedia>;
-    'attachments'?: Set<ApiDropAttachmentReference>;
+    'attachments'?: Array<ApiDropAttachmentReference>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -48,7 +48,7 @@ export class ApiCreateDropPart {
         {
             "name": "attachments",
             "baseName": "attachments",
-            "type": "Set<ApiDropAttachmentReference>",
+            "type": "Array<ApiDropAttachmentReference>",
             "format": ""
         }    ];
 
