@@ -7,7 +7,6 @@ import CircleLoader, {
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import DropMinimalIdentityRow from "@/components/waves/drops/DropMinimalIdentityRow";
@@ -20,6 +19,7 @@ import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
+import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -221,6 +221,7 @@ function UserPageProfileWaveMasonryCard({
   const [activePartIndex, setActivePartIndex] = useState(0);
   const replyTo = drop.reply_to;
   const activePart = drop.parts[activePartIndex] ?? drop.parts[0];
+  const navigateToDropWave = useNavigateToDropWave();
   const layout = getProfileMasonryCardLayout({
     activePart,
     drop,
@@ -237,10 +238,10 @@ function UserPageProfileWaveMasonryCard({
       drop={drop}
       activePartIndex={activePartIndex}
       setActivePartIndex={setActivePartIndex}
-      onQuoteClick={(_quotedDrop: ApiDrop) => {}}
+      onQuoteClick={navigateToDropWave}
       onLongPress={() => {}}
       setLongPressTriggered={(_triggered: boolean) => {}}
-      onDropContentClick={undefined}
+      onDropContentClick={navigateToDropWave}
       mediaImageScale={ImageScale.AUTOx1080}
       fullWidthMedia={true}
     />
@@ -262,7 +263,8 @@ function UserPageProfileWaveMasonryCard({
           dropViewDropId={null}
           onReply={() => {}}
           onReplyClick={() => {}}
-          onQuoteClick={() => {}}
+          onQuoteClick={navigateToDropWave}
+          onDropContentClick={navigateToDropWave}
           identityMode={layout.identityMode}
           showInteractions={false}
         />

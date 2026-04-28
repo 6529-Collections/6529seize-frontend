@@ -1,23 +1,14 @@
 "use client";
 
-import {
-  getCommunityCurationsMediaType,
-  type CommunityCurationsMediaType,
-} from "@/components/community-curations/communityCurations.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-export type CommunityCurationsMediaFilter =
-  | "all"
-  | Exclude<CommunityCurationsMediaType, "other">;
-
 const COMMUNITY_CURATIONS_DROPS_QUERY_KEY = "COMMUNITY_CURATIONS_DROPS";
 
 interface UseCommunityCurationsDropsProps {
-  readonly mediaFilter?: CommunityCurationsMediaFilter | undefined;
   readonly limit: number;
   readonly enabled?: boolean | undefined;
 }
@@ -56,12 +47,6 @@ const getUniqueDrops = (
   return drops;
 };
 
-const matchesMediaFilter = (
-  drop: ExtendedDrop,
-  mediaFilter: CommunityCurationsMediaFilter
-): boolean =>
-  mediaFilter === "all" || getCommunityCurationsMediaType(drop) === mediaFilter;
-
 const fetchCommunityCurationsDrops = ({
   limit,
   page,
@@ -79,7 +64,6 @@ const fetchCommunityCurationsDrops = ({
 };
 
 export function useCommunityCurationsDrops({
-  mediaFilter = "all",
   limit,
   enabled = true,
 }: UseCommunityCurationsDropsProps) {
@@ -102,14 +86,9 @@ export function useCommunityCurationsDrops({
     [query.data?.pages]
   );
 
-  const drops = useMemo(
-    () => allDrops.filter((drop) => matchesMediaFilter(drop, mediaFilter)),
-    [allDrops, mediaFilter]
-  );
-
   return {
     ...query,
     allDrops,
-    drops,
+    drops: allDrops,
   };
 }
