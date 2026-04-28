@@ -36,6 +36,10 @@ interface WaveDropContentProps {
     | ((href: string, active: boolean) => void)
     | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropContent: React.FC<WaveDropContentProps> = ({
@@ -56,6 +60,10 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   hasTouch,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
   const isTouchDevice = useIsTouchDevice();
   const effectiveHasTouch = hasTouch ?? isTouchDevice;
@@ -79,6 +87,10 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
       hasTouch={effectiveHasTouch}
       onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
       contentPresentation={contentPresentation}
+      embedPath={embedPath}
+      quotePath={quotePath}
+      embedDepth={embedDepth}
+      maxEmbedDepth={maxEmbedDepth}
     />
   );
 };

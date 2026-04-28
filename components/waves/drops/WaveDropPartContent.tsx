@@ -46,6 +46,10 @@ interface WaveDropPartContentProps {
     | ((href: string, active: boolean) => void)
     | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
@@ -71,6 +75,10 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   fullWidthMedia = false,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -167,6 +175,10 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
               drop={drop}
               onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
               contentPresentation={contentPresentation}
+              embedPath={embedPath}
+              quotePath={quotePath}
+              embedDepth={embedDepth}
+              maxEmbedDepth={maxEmbedDepth}
             />
           </div>
           {!!activePart.media.length && (

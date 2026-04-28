@@ -44,6 +44,10 @@ interface OngoingParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 export default function OngoingParticipationDrop({
@@ -58,6 +62,10 @@ export default function OngoingParticipationDrop({
   identityMode = "default",
   showInteractions = true,
   contentPresentation = "default",
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const { canShowVote } = useDropInteractionRules(drop);
@@ -144,6 +152,10 @@ export default function OngoingParticipationDrop({
             setLongPressTriggered={setLongPressTriggered}
             isCompetitionDrop={true}
             contentPresentation={contentPresentation}
+            embedPath={embedPath}
+            quotePath={quotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
           />
         </div>
       </div>
