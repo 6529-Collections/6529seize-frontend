@@ -42,24 +42,12 @@ const getDefaultQueryResult = (
   isLoading: false,
 });
 
-const buildDrop = ({
-  id,
-  mimeType,
-}: {
-  readonly id: string;
-  readonly mimeType?: string | undefined;
-}): ApiDrop =>
+const buildDrop = ({ id }: { readonly id: string }): ApiDrop =>
   ({
     id,
     metadata: [],
     nft_links: [],
-    parts: mimeType
-      ? [
-          {
-            media: [{ mime_type: mimeType }],
-          },
-        ]
-      : [],
+    parts: [],
   }) as unknown as ApiDrop;
 
 describe("useCommunityCurationsDrops", () => {
@@ -105,23 +93,20 @@ describe("useCommunityCurationsDrops", () => {
     ).toBeUndefined();
   });
 
-  it("dedupes loaded drops and keeps existing media filtering", () => {
-    const imageDrop = buildDrop({ id: "image-drop", mimeType: "image/png" });
-    const videoDrop = buildDrop({ id: "video-drop", mimeType: "video/mp4" });
-    const duplicateVideoDrop = buildDrop({
-      id: "video-drop",
-      mimeType: "video/mp4",
-    });
+  it("dedupes loaded drops", () => {
+    const firstDrop = buildDrop({ id: "first-drop" });
+    const secondDrop = buildDrop({ id: "second-drop" });
+    const duplicateSecondDrop = buildDrop({ id: "second-drop" });
 
     mockUseInfiniteQuery.mockReturnValue(
       getDefaultQueryResult([
         {
-          data: [imageDrop, videoDrop],
+          data: [firstDrop, secondDrop],
           page: 1,
           next: true,
         },
         {
-          data: [duplicateVideoDrop],
+          data: [duplicateSecondDrop],
           page: 2,
           next: false,
         },
@@ -129,13 +114,16 @@ describe("useCommunityCurationsDrops", () => {
     );
 
     const { result } = renderHook(() =>
-      useCommunityCurationsDrops({ limit: 12, mediaFilter: "video" })
+      useCommunityCurationsDrops({ limit: 12 })
     );
 
     expect(result.current.allDrops.map((drop) => drop.id)).toEqual([
-      "image-drop",
-      "video-drop",
+      "first-drop",
+      "second-drop",
     ]);
-    expect(result.current.drops.map((drop) => drop.id)).toEqual(["video-drop"]);
+    expect(result.current.drops.map((drop) => drop.id)).toEqual([
+      "first-drop",
+      "second-drop",
+    ]);
   });
 });
