@@ -102,7 +102,7 @@ describe("CreateWaveVoting", () => {
     );
 
     expect(screen.getByTestId("time-weighted")).toHaveTextContent(
-      "Time-weighted voting interval must not exceed the wave duration."
+      "This interval is longer than the wave duration. Choose a shorter interval, extend the wave end date, or clear the end date."
     );
   });
 

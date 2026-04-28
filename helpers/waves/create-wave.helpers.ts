@@ -6,6 +6,7 @@ import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import type {
   CreateWaveConfig,
   CreateWaveDatesConfig,
@@ -68,7 +69,13 @@ const getCreateWaveTimeLockMs = ({
     endDate - config.dates.submissionStartDate
   );
 
-  return Math.min(timeLockMs, waveDurationMs);
+  if (timeLockMs > waveDurationMs) {
+    throw new Error(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+    );
+  }
+
+  return timeLockMs;
 };
 
 const isPositiveFiniteNumber = (

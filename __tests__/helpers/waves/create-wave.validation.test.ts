@@ -342,6 +342,35 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("allows approve time weighted voting without an end date", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 1_000,
+        votingStartDate: 1_000,
+        endDate: null,
+      },
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: 1,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 2,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toEqual([]);
+  });
+
   it("allows approve waves without an end date", () => {
     const config = {
       ...baseConfig,

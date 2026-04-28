@@ -1,6 +1,7 @@
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 
@@ -365,7 +366,58 @@ it("sets time lock for approve waves when time weighted voting is enabled", () =
   expect(body.wave.time_lock_ms).toBe(2 * 60 * 60 * 1000);
 });
 
-it("caps approve time lock at the wave duration", () => {
+it("allows approve time lock equal to the wave duration", () => {
+  const config: any = {
+    overview: { type: ApiWaveType.Approve, name: "A" },
+    groups: {
+      canView: "1",
+      canDrop: "2",
+      canVote: "3",
+      canChat: "4",
+      admin: "5",
+    },
+    dates: {
+      submissionStartDate: 1,
+      votingStartDate: 1,
+      endDate: 1 + HOUR_IN_MS,
+      firstDecisionTime: 2,
+      subsequentDecisions: [],
+      isRolling: false,
+    },
+    drops: {
+      noOfApplicationsAllowedPerParticipant: 1,
+      requiredTypes: [],
+      requiredMetadata: [],
+      submissionStrategy: null,
+      terms: null,
+      signatureRequired: false,
+      adminCanDeleteDrops: false,
+    },
+    chat: { enabled: false },
+    voting: {
+      type: null,
+      category: null,
+      profileId: null,
+      timeWeighted: {
+        enabled: true,
+        averagingInterval: 1,
+        averagingIntervalUnit: "hours",
+      },
+    },
+    outcomes: [],
+    approval: { threshold: 3, thresholdTimeMs: 60000, maxWinners: null },
+  };
+  const drop: any = {
+    parts: [],
+    referenced_nfts: [],
+    mentioned_users: [],
+    metadata: [],
+  };
+  const body = getCreateNewWaveBody({ drop, picture: null, config });
+  expect(body.wave.time_lock_ms).toBe(HOUR_IN_MS);
+});
+
+it("throws when approve time lock exceeds approve wave duration", () => {
   const config: any = {
     overview: { type: ApiWaveType.Approve, name: "A" },
     groups: {
@@ -412,6 +464,7 @@ it("caps approve time lock at the wave duration", () => {
     mentioned_users: [],
     metadata: [],
   };
-  const body = getCreateNewWaveBody({ drop, picture: null, config });
-  expect(body.wave.time_lock_ms).toBe(HOUR_IN_MS);
+  expect(() => getCreateNewWaveBody({ drop, picture: null, config })).toThrow(
+    CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+  );
 });

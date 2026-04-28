@@ -101,14 +101,17 @@ describe("TimeWeightedVoting", () => {
     expect(input).toHaveAttribute("aria-invalid", "true");
   });
 
-  it("shows external validation error", () => {
-    renderComponent(
-      baseConfig,
-      jest.fn(),
-      "Time-weighted voting interval must not exceed the wave duration."
+  it("shows external validation error beside the interval input", () => {
+    const durationError =
+      "This interval is longer than the wave duration. Choose a shorter interval, extend the wave end date, or clear the end date.";
+    renderComponent(baseConfig, jest.fn(), durationError);
+    expect(screen.getByTestId("validation-error")).toHaveTextContent(
+      durationError
     );
-    expect(screen.getByTestId("general-error")).toHaveTextContent(
-      "Time-weighted voting interval must not exceed the wave duration."
+    expect(screen.getByTestId("averaging-interval-input")).toHaveAttribute(
+      "aria-invalid",
+      "true"
     );
+    expect(screen.queryByTestId("general-error")).toBeNull();
   });
 });

@@ -21,7 +21,7 @@ const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
 };
 
 const TIME_WEIGHTED_DURATION_ERROR =
-  "Time-weighted voting interval must not exceed the wave duration.";
+  "This interval is longer than the wave duration. Choose a shorter interval, extend the wave end date, or clear the end date.";
 
 export default function CreateWaveVoting({
   waveType,

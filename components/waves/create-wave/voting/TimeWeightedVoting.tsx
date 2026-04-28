@@ -34,7 +34,6 @@ export default function TimeWeightedVoting({
   // State for validation errors
   const [validationErrors, setValidationErrors] = useState<{
     interval?: string | undefined;
-    general?: string | undefined;
   }>({});
 
   // State for tracking input value during editing
@@ -57,7 +56,6 @@ export default function TimeWeightedVoting({
 
     const errors: {
       interval?: string | undefined;
-      general?: string | undefined;
     } = {};
 
     // Use the utility function for conversion
@@ -169,7 +167,7 @@ export default function TimeWeightedVoting({
     [config, onChange]
   );
 
-  const generalErrorMessage = errorMessage ?? validationErrors.general;
+  const intervalErrorMessage = errorMessage ?? validationErrors.interval;
 
   return (
     <section
@@ -179,29 +177,15 @@ export default function TimeWeightedVoting({
       <TimeWeightedToggle enabled={config.enabled} onToggle={handleToggle} />
 
       {config.enabled && (
-        <>
-          {/* General error display */}
-          {generalErrorMessage && (
-            <div
-              className="tw-text-red-400 tw-mb-4 tw-text-sm tw-font-medium"
-              role="alert"
-              data-testid="general-error"
-            >
-              {generalErrorMessage}
-            </div>
-          )}
-
-          {/* Configuration form */}
-          <div className="tw-grid tw-gap-6 md:tw-grid-cols-2">
-            <AveragingIntervalInput
-              value={inputValue}
-              unit={config.averagingIntervalUnit}
-              onIntervalChange={handleIntervalChange}
-              onUnitChange={handleUnitChange}
-              validationError={validationErrors.interval}
-            />
-          </div>
-        </>
+        <div className="tw-grid tw-gap-6 md:tw-grid-cols-2">
+          <AveragingIntervalInput
+            value={inputValue}
+            unit={config.averagingIntervalUnit}
+            onIntervalChange={handleIntervalChange}
+            onUnitChange={handleUnitChange}
+            validationError={intervalErrorMessage}
+          />
+        </div>
       )}
     </section>
   );
