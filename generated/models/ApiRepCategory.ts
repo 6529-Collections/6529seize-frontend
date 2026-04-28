@@ -23,8 +23,6 @@ export class ApiRepCategory {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
-
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "category",
@@ -64,3 +62,4 @@ export class ApiRepCategory {
     public constructor() {
     }
 }
+

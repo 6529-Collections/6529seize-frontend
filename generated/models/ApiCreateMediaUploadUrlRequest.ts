@@ -11,21 +11,20 @@
  * Do not edit the class manually.
  */
 
+import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateMediaUploadUrlRequest {
-    'content_type': string;
+    'content_type': ApiMediaUploadMimeType;
     'file_name': string;
 
     static readonly discriminator: string | undefined = undefined;
-
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "content_type",
             "baseName": "content_type",
-            "type": "string",
+            "type": "ApiMediaUploadMimeType",
             "format": ""
         },
         {
@@ -42,3 +41,6 @@ export class ApiCreateMediaUploadUrlRequest {
     public constructor() {
     }
 }
+
+
+

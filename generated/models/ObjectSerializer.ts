@@ -57,11 +57,17 @@ export * from '../models/ApiCreateNewWaveParticipationConfig';
 export * from '../models/ApiCreateNewWaveScope';
 export * from '../models/ApiCreateNewWaveVisibilityConfig';
 export * from '../models/ApiCreateNewWaveVotingConfig';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf1';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf2';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf3';
+export * from '../models/ApiCreateNewWaveVotingConfigOneOf4';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
 export * from '../models/ApiCreateWaveOutcome';
 export * from '../models/ApiCreateWaveOutcomeDistributionItem';
+export * from '../models/ApiCuratedProfileWaveDropsPage';
 export * from '../models/ApiCurationDrop';
 export * from '../models/ApiCurationDropsPage';
 export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
@@ -121,6 +127,7 @@ export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
+export * from '../models/ApiMediaUploadMimeType';
 export * from '../models/ApiMemesMintStat';
 export * from '../models/ApiMemesMintStatsPage';
 export * from '../models/ApiMemesMintStatsTotals';
@@ -210,6 +217,7 @@ export * from '../models/ApiWave';
 export * from '../models/ApiWaveChatConfig';
 export * from '../models/ApiWaveConfig';
 export * from '../models/ApiWaveContributorOverview';
+export * from '../models/ApiWaveCreditNft';
 export * from '../models/ApiWaveCreditScope';
 export * from '../models/ApiWaveCreditType';
 export * from '../models/ApiWaveCuration';
@@ -359,7 +367,7 @@ import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropRequest              } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
-import { ApiCreateMediaUploadUrlRequest } from '../models/ApiCreateMediaUploadUrlRequest';
+import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
 import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiCreateNewProfileProxy } from '../models/ApiCreateNewProfileProxy';
@@ -374,12 +382,18 @@ import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig
 import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
-import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateNewWaveVotingConfig          } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateNewWaveVotingConfigOneOf, ApiCreateNewWaveVotingConfigOneOfCreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf';
+import { ApiCreateNewWaveVotingConfigOneOf1, ApiCreateNewWaveVotingConfigOneOf1CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf1';
+import { ApiCreateNewWaveVotingConfigOneOf2, ApiCreateNewWaveVotingConfigOneOf2CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf2';
+import { ApiCreateNewWaveVotingConfigOneOf3, ApiCreateNewWaveVotingConfigOneOf3CreditTypeEnum   } from '../models/ApiCreateNewWaveVotingConfigOneOf3';
+import { ApiCreateNewWaveVotingConfigOneOf4, ApiCreateNewWaveVotingConfigOneOf4CreditTypeEnum    } from '../models/ApiCreateNewWaveVotingConfigOneOf4';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
-import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
+import { ApiCreateWaveConfig         } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
+import { ApiCuratedProfileWaveDropsPage } from '../models/ApiCuratedProfileWaveDropsPage';
 import { ApiCurationDrop                               } from '../models/ApiCurationDrop';
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
@@ -439,6 +453,7 @@ import { ApiLightDrop             } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
+import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
 import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
 import { ApiMemesMintStatsTotals } from '../models/ApiMemesMintStatsTotals';
@@ -526,8 +541,9 @@ import { ApiUploadsPage } from '../models/ApiUploadsPage';
 import { ApiWallet } from '../models/ApiWallet';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
-import { ApiWaveConfig             } from '../models/ApiWaveConfig';
+import { ApiWaveConfig              } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
+import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveCuration } from '../models/ApiWaveCuration';
@@ -542,7 +558,7 @@ import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
 import { ApiWaveLog } from '../models/ApiWaveLog';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin                       } from '../models/ApiWaveMin';
+import { ApiWaveMin                        } from '../models/ApiWaveMin';
 import { ApiWaveNotificationPreferences } from '../models/ApiWaveNotificationPreferences';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
@@ -566,7 +582,7 @@ import { ApiWaveType } from '../models/ApiWaveType';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
 import { ApiWaveVoter } from '../models/ApiWaveVoter';
 import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
-import { ApiWaveVotingConfig         } from '../models/ApiWaveVotingConfig';
+import { ApiWaveVotingConfig          } from '../models/ApiWaveVotingConfig';
 import { ApiWavesOverviewType } from '../models/ApiWavesOverviewType';
 import { ApiWavesPinFilter } from '../models/ApiWavesPinFilter';
 import { ApiXTdhCollection } from '../models/ApiXTdhCollection';
@@ -598,12 +614,12 @@ import { DistributionPhotoCompleteRequestPhoto } from '../models/DistributionPho
 import { DistributionPhotoCompleteResponse } from '../models/DistributionPhotoCompleteResponse';
 import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
 import { MintingClaim } from '../models/MintingClaim';
-import { MintingClaimAnimationDetailsClass } from '../models/MintingClaimAnimationDetails';
+import { MintingClaimAnimationDetails , MintingClaimAnimationDetailsFormatEnum        } from '../models/MintingClaimAnimationDetails';
 import { MintingClaimAnimationDetailsGlb , MintingClaimAnimationDetailsGlbFormatEnum    } from '../models/MintingClaimAnimationDetailsGlb';
 import { MintingClaimAnimationDetailsHtml, MintingClaimAnimationDetailsHtmlFormatEnum   } from '../models/MintingClaimAnimationDetailsHtml';
 import { MintingClaimAnimationDetailsVideo } from '../models/MintingClaimAnimationDetailsVideo';
 import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
-import { MintingClaimAttributeValueClass } from '../models/MintingClaimAttributeValue';
+import { MintingClaimAttributeValue } from '../models/MintingClaimAttributeValue';
 import { MintingClaimImageDetails } from '../models/MintingClaimImageDetails';
 import { MintingClaimUpdateRequest } from '../models/MintingClaimUpdateRequest';
 import { MintingClaimsPageResponse } from '../models/MintingClaimsPageResponse';
@@ -650,6 +666,11 @@ let primitives = [
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
     "ApiCommunityMembersSortOption",
+    "ApiCreateNewWaveVotingConfigOneOfCreditTypeEnum",
+    "ApiCreateNewWaveVotingConfigOneOf1CreditTypeEnum",
+    "ApiCreateNewWaveVotingConfigOneOf2CreditTypeEnum",
+    "ApiCreateNewWaveVotingConfigOneOf3CreditTypeEnum",
+    "ApiCreateNewWaveVotingConfigOneOf4CreditTypeEnum",
     "ApiDropGroupMention",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
@@ -660,6 +681,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiGroupTdhInclusionStrategy",
     "ApiIdentitySubscriptionTargetAction",
     "ApiIdentitySubscriptionTargetType",
+    "ApiMediaUploadMimeType",
     "ApiNftTokenTypeEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
     "ApiNotificationCause",
@@ -748,11 +770,17 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveScope": ApiCreateNewWaveScope,
     "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
     "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfig,
+    "ApiCreateNewWaveVotingConfigOneOf": ApiCreateNewWaveVotingConfigOneOf,
+    "ApiCreateNewWaveVotingConfigOneOf1": ApiCreateNewWaveVotingConfigOneOf1,
+    "ApiCreateNewWaveVotingConfigOneOf2": ApiCreateNewWaveVotingConfigOneOf2,
+    "ApiCreateNewWaveVotingConfigOneOf3": ApiCreateNewWaveVotingConfigOneOf3,
+    "ApiCreateNewWaveVotingConfigOneOf4": ApiCreateNewWaveVotingConfigOneOf4,
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
     "ApiCreateWaveOutcome": ApiCreateWaveOutcome,
     "ApiCreateWaveOutcomeDistributionItem": ApiCreateWaveOutcomeDistributionItem,
+    "ApiCuratedProfileWaveDropsPage": ApiCuratedProfileWaveDropsPage,
     "ApiCurationDrop": ApiCurationDrop,
     "ApiCurationDropsPage": ApiCurationDropsPage,
     "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
@@ -886,6 +914,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveChatConfig": ApiWaveChatConfig,
     "ApiWaveConfig": ApiWaveConfig,
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
+    "ApiWaveCreditNft": ApiWaveCreditNft,
     "ApiWaveCuration": ApiWaveCuration,
     "ApiWaveCurationRequest": ApiWaveCurationRequest,
     "ApiWaveDecision": ApiWaveDecision,
@@ -940,12 +969,12 @@ let typeMap: {[index: string]: any} = {
     "DistributionPhotoCompleteResponse": DistributionPhotoCompleteResponse,
     "DistributionPhotosPage": DistributionPhotosPage,
     "MintingClaim": MintingClaim,
-    "MintingClaimAnimationDetails": MintingClaimAnimationDetailsClass,
+    "MintingClaimAnimationDetails": MintingClaimAnimationDetails,
     "MintingClaimAnimationDetailsGlb": MintingClaimAnimationDetailsGlb,
     "MintingClaimAnimationDetailsHtml": MintingClaimAnimationDetailsHtml,
     "MintingClaimAnimationDetailsVideo": MintingClaimAnimationDetailsVideo,
     "MintingClaimAttribute": MintingClaimAttribute,
-    "MintingClaimAttributeValue": MintingClaimAttributeValueClass,
+    "MintingClaimAttributeValue": MintingClaimAttributeValue,
     "MintingClaimImageDetails": MintingClaimImageDetails,
     "MintingClaimUpdateRequest": MintingClaimUpdateRequest,
     "MintingClaimsPageResponse": MintingClaimsPageResponse,
@@ -994,7 +1023,7 @@ type MimeTypeDescriptor = {
  * the payload.
  */
 const parseMimeType = (mimeType: string): MimeTypeDescriptor => {
-    const [type = '', subtype = ''] = mimeType.split('/');
+    const [type, subtype] = mimeType.split('/');
     return {
         type,
         subtype,
@@ -1030,13 +1059,6 @@ const supportedMimeTypePredicatesWithPriority: MimeTypePredicate[] = [
     isFormUrlencodedMimeType,
 ];
 
-const nullableSuffix = " | null";
-const optionalSuffix = " | undefined";
-const arrayPrefix = "Array<";
-const arraySuffix = ">";
-const mapPrefix = "{ [key: string]: ";
-const mapSuffix = "; }";
-
 export class ObjectSerializer {
     public static findCorrectType(data: any, expectedType: string) {
         if (data == undefined) {
@@ -1061,11 +1083,8 @@ export class ObjectSerializer {
             } else {
                 if (data[discriminatorProperty]) {
                     var discriminatorType = data[discriminatorProperty];
-                    let mapping = typeMap[expectedType].mapping;
-                    if (mapping != undefined && mapping[discriminatorType]) {
-                        return mapping[discriminatorType]; // use the type given in the discriminator
-                    } else if(typeMap[discriminatorType]) {
-                        return discriminatorType;
+                    if(typeMap[discriminatorType]){
+                        return discriminatorType; // use the type given in the discriminator
                     } else {
                         return expectedType; // discriminator did not map to a type
                     }
@@ -1076,33 +1095,17 @@ export class ObjectSerializer {
         }
     }
 
-    public static serialize(data: any, type: string, format: string): any {
+    public static serialize(data: any, type: string, format: string) {
         if (data == undefined) {
             return data;
         } else if (primitives.indexOf(type.toLowerCase()) !== -1) {
             return data;
-        } else if (type.endsWith(nullableSuffix)) {
-            let subType: string = type.slice(0, -nullableSuffix.length); // Type | null => Type
-            return ObjectSerializer.serialize(data, subType, format);
-        } else if (type.endsWith(optionalSuffix)) {
-            let subType: string = type.slice(0, -optionalSuffix.length); // Type | undefined => Type
-            return ObjectSerializer.serialize(data, subType, format);
-        } else if (type.startsWith(arrayPrefix)) {
-            let subType: string = type.slice(arrayPrefix.length, -arraySuffix.length); // Array<Type> => Type
+        } else if (type.lastIndexOf("Array<", 0) === 0) { // string.startsWith pre es6
+            let subType: string = type.replace("Array<", ""); // Array<Type> => Type>
+            subType = subType.substring(0, subType.length - 1); // Type> => Type
             let transformedData: any[] = [];
             for (let date of data) {
                 transformedData.push(ObjectSerializer.serialize(date, subType, format));
-            }
-            return transformedData;
-        } else if (type.startsWith(mapPrefix)) {
-            let subType: string = type.slice(mapPrefix.length, -mapSuffix.length); // { [key: string]: Type; } => Type
-            let transformedData: { [key: string]: any } = {};
-            for (let key in data) {
-                transformedData[key] = ObjectSerializer.serialize(
-                    data[key],
-                    subType,
-                    format,
-                );
             }
             return transformedData;
         } else if (type === "Date") {
@@ -1137,35 +1140,19 @@ export class ObjectSerializer {
         }
     }
 
-    public static deserialize(data: any, type: string, format: string): any {
+    public static deserialize(data: any, type: string, format: string) {
         // polymorphism may change the actual type.
         type = ObjectSerializer.findCorrectType(data, type);
         if (data == undefined) {
             return data;
         } else if (primitives.indexOf(type.toLowerCase()) !== -1) {
             return data;
-        } else if (type.endsWith(nullableSuffix)) {
-            let subType: string = type.slice(0, -nullableSuffix.length); // Type | null => Type
-            return ObjectSerializer.deserialize(data, subType, format);
-        } else if (type.endsWith(optionalSuffix)) {
-            let subType: string = type.slice(0, -optionalSuffix.length); // Type | undefined => Type
-            return ObjectSerializer.deserialize(data, subType, format);
-        } else if (type.startsWith(arrayPrefix)) {
-            let subType: string = type.slice(arrayPrefix.length, -arraySuffix.length); // Array<Type> => Type
+        } else if (type.lastIndexOf("Array<", 0) === 0) { // string.startsWith pre es6
+            let subType: string = type.replace("Array<", ""); // Array<Type> => Type>
+            subType = subType.substring(0, subType.length - 1); // Type> => Type
             let transformedData: any[] = [];
             for (let date of data) {
                 transformedData.push(ObjectSerializer.deserialize(date, subType, format));
-            }
-            return transformedData;
-        } else if (type.startsWith(mapPrefix)) {
-            let subType: string = type.slice(mapPrefix.length, -mapSuffix.length); // { [key: string]: Type; } => Type
-            let transformedData: { [key: string]: any } = {};
-            for (let key in data) {
-                transformedData[key] = ObjectSerializer.deserialize(
-                    data[key],
-                    subType,
-                    format,
-                );
             }
             return transformedData;
         } else if (type === "Date") {
@@ -1201,7 +1188,7 @@ export class ObjectSerializer {
         if (mediaType === undefined) {
             return undefined;
         }
-        return (mediaType.split(";")[0] ?? '').trim().toLowerCase();
+        return mediaType.split(";")[0].trim().toLowerCase();
     }
 
     /**
