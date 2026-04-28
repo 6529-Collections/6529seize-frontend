@@ -6,32 +6,17 @@ import { useCallback } from "react";
 import useDeviceInfo from "./useDeviceInfo";
 
 type DropWaveNavigationTarget = {
-  readonly wave?:
-    | {
-        readonly id?: string | null | undefined;
-        readonly chat?:
-          | {
-              readonly scope?:
-                | {
-                    readonly group?:
-                      | {
-                          readonly is_direct_message?:
-                            | boolean
-                            | null
-                            | undefined;
-                        }
-                      | null
-                      | undefined;
-                  }
-                | null
-                | undefined;
-            }
-          | null
-          | undefined;
-      }
-    | null
-    | undefined;
-  readonly serial_no: number | string;
+  readonly serial_no?: number | string | null;
+  readonly wave?: {
+    readonly id?: string | null;
+    readonly chat?: {
+      readonly scope?: {
+        readonly group?: {
+          readonly is_direct_message?: boolean | null;
+        } | null;
+      } | null;
+    } | null;
+  } | null;
 };
 
 export function useNavigateToDropWave(): (
@@ -42,16 +27,18 @@ export function useNavigateToDropWave(): (
 
   return useCallback(
     (drop: DropWaveNavigationTarget) => {
-      const waveId = drop.wave?.id;
-      if (!waveId) {
+      const wave = drop.wave;
+      const waveId = wave?.id?.trim();
+      const serialNo = `${drop.serial_no ?? ""}`.trim();
+
+      if (!wave || !waveId || !serialNo) {
         return;
       }
 
       const href = getWaveRoute({
         waveId,
-        serialNo: drop.serial_no,
-        isDirectMessage:
-          drop.wave.chat?.scope?.group?.is_direct_message ?? false,
+        serialNo,
+        isDirectMessage: wave.chat?.scope?.group?.is_direct_message === true,
         isApp,
       });
 
