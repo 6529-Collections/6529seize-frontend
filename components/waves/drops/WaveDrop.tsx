@@ -1,9 +1,8 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
-import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropAttachmentReference } from "@/generated/models/ApiDropAttachmentReference";
+import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
@@ -608,8 +607,7 @@ const WaveDrop = ({
           };
 
           if (attachments.length) {
-            requestPart.attachments =
-              attachments as unknown as Set<ApiDropAttachmentReference>;
+            requestPart.attachments = attachments;
           }
 
           return requestPart;

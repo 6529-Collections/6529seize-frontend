@@ -12,7 +12,6 @@ import type {
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
 import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
-import type { ApiDropAttachmentReference } from "@/generated/models/ApiDropAttachmentReference";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -163,6 +162,9 @@ interface CreateDropContentProps {
         readonly files: File[];
       }
     | null
+    | undefined;
+  readonly onExternalAttachmentDropConsumed?:
+    | (() => void)
     | undefined;
 }
 
@@ -447,8 +449,7 @@ const stripUploadedAttachments = (
   parts.map(({ uploaded_attachments, attachments, ...part }) => {
     const requestPart: ApiCreateDropPart = { ...part };
     if (attachments?.length) {
-      requestPart.attachments =
-        attachments as unknown as Set<ApiDropAttachmentReference>;
+      requestPart.attachments = attachments;
     }
     return requestPart;
   });
@@ -472,6 +473,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   canExitDropMode,
   submissionExperience,
   externalAttachmentDrop,
+  onExternalAttachmentDropConsumed,
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
@@ -1337,7 +1339,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const handleFileChange = (newFiles: File[]) => {
     try {
-      newFiles.forEach(validateAttachmentUploadFile);
+      newFiles.forEach((file) => {
+        if (isAttachmentUploadFile(file)) {
+          validateAttachmentUploadFile(file);
+        }
+      });
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),
@@ -1346,7 +1352,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
-    const total = files.length + newFiles.length;
+    const existingCount =
+      drop?.parts.reduce((sum, part) => sum + part.media.length, 0) ?? 0;
+    const total = existingCount + files.length + newFiles.length;
     const overflow = Math.max(0, total - MAX_DROP_UPLOAD_FILES);
     const mergedFiles = [...files, ...newFiles];
     const updatedFiles = overflow
@@ -1387,7 +1395,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     lastExternalAttachmentDropTokenRef.current = externalAttachmentDrop.token;
     latestHandleFileChangeRef.current(externalAttachmentDrop.files);
-  }, [externalAttachmentDrop]);
+    onExternalAttachmentDropConsumed?.();
+  }, [externalAttachmentDrop, onExternalAttachmentDropConsumed]);
 
   const handleSetShowOptions = useCallback(
     (next: boolean) => {

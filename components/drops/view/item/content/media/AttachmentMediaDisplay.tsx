@@ -646,8 +646,12 @@ export default function AttachmentMediaDisplay({
       return;
     }
 
-    await navigator.clipboard.writeText(safeMediaUrl);
-    setCopiedLink(true);
+    try {
+      await navigator.clipboard.writeText(safeMediaUrl);
+      setCopiedLink(true);
+    } catch (error) {
+      console.error("Failed to copy attachment link", error);
+    }
   };
 
   return (

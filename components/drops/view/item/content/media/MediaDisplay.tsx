@@ -264,7 +264,12 @@ export default function MediaDisplay({
         />
       );
     case MediaType.UNKNOWN:
-      return <UnsupportedMediaLink media_url={media_url} />;
+      return (
+        <UnsupportedMediaLink
+          media_url={media_url}
+          disableMediaInteraction={disableMediaInteraction}
+        />
+      );
     default:
       assertUnreachable(mediaType);
       return;

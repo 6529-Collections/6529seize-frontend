@@ -29,13 +29,15 @@ function getLinkLabel(mediaUrl: string): string {
 
 export default function UnsupportedMediaLink({
   media_url,
+  disableMediaInteraction = false,
 }: {
   readonly media_url: string;
+  readonly disableMediaInteraction?: boolean;
 }) {
   const safeUrl = getSafeUrl(media_url);
   const label = getLinkLabel(media_url);
 
-  if (!safeUrl) {
+  if (!safeUrl || disableMediaInteraction) {
     return (
       <span className="tw-break-all tw-text-sm tw-text-iron-400">{label}</span>
     );

@@ -9,9 +9,40 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
       : url,
 }));
 
+const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(
+  navigator,
+  "clipboard"
+);
+const originalCreateObjectURL = URL.createObjectURL;
+const originalRevokeObjectURL = URL.revokeObjectURL;
+const hadCreateObjectURL = "createObjectURL" in URL;
+const hadRevokeObjectURL = "revokeObjectURL" in URL;
+
 describe("AttachmentMediaDisplay", () => {
   afterEach(() => {
     jest.restoreAllMocks();
+
+    if (originalClipboardDescriptor) {
+      Object.defineProperty(
+        navigator,
+        "clipboard",
+        originalClipboardDescriptor
+      );
+    } else {
+      Reflect.deleteProperty(navigator, "clipboard");
+    }
+
+    if (hadCreateObjectURL) {
+      URL.createObjectURL = originalCreateObjectURL;
+    } else {
+      Reflect.deleteProperty(URL, "createObjectURL");
+    }
+
+    if (hadRevokeObjectURL) {
+      URL.revokeObjectURL = originalRevokeObjectURL;
+    } else {
+      Reflect.deleteProperty(URL, "revokeObjectURL");
+    }
   });
 
   it("renders labels based on attachment type detection", () => {
@@ -125,6 +156,9 @@ describe("AttachmentMediaDisplay", () => {
         media_url="https://example.com/files/data.csv"
       />
     );
+
+    expect(screen.queryByText("alpha")).not.toBeInTheDocument();
+    expect(screen.queryByText("value")).not.toBeInTheDocument();
 
     await user.click(
       screen.getByRole("button", { name: "Render attachment preview" })

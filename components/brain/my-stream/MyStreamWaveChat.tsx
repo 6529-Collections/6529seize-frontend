@@ -453,6 +453,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
                 dropId={null}
                 fixedDropMode={DropMode.BOTH}
                 externalAttachmentDrop={externalAttachmentDrop}
+                onExternalAttachmentDropConsumed={() =>
+                  setExternalAttachmentDrop(null)
+                }
               />
             </CreateDropWaveWrapper>
           </div>

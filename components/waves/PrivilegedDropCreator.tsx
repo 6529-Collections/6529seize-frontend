@@ -25,6 +25,9 @@ interface PrivilegedDropCreatorProps {
       }
     | null
     | undefined;
+  readonly onExternalAttachmentDropConsumed?:
+    | (() => void)
+    | undefined;
 }
 
 export default function PrivilegedDropCreator({
@@ -38,6 +41,7 @@ export default function PrivilegedDropCreator({
   onDropAddedToQueue,
   curationComposerVariant = "default",
   externalAttachmentDrop,
+  onExternalAttachmentDropConsumed,
 }: PrivilegedDropCreatorProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
@@ -95,6 +99,7 @@ export default function PrivilegedDropCreator({
       onDropAddedToQueue={onDropAddedToQueue}
       curationComposerVariant={curationComposerVariant}
       externalAttachmentDrop={externalAttachmentDrop}
+      onExternalAttachmentDropConsumed={onExternalAttachmentDropConsumed}
     />
   );
 }
