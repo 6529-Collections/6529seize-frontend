@@ -16,7 +16,6 @@ export default function CreateWaveInlineGroupExpandedPanel({
         <button
           type="button"
           onClick={onCancel}
-          aria-label="Close inline group panel"
           className={`tw-flex-shrink-0 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-500 tw-transition tw-duration-200 desktop-hover:hover:tw-text-iron-100 ${cancelClassName}`}
         >
           Cancel
