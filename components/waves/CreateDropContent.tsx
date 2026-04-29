@@ -169,6 +169,9 @@ interface CreateDropContentProps {
 const CONTAINER_WIDTH_THRESHOLD = 500;
 const SELECT_OTHER_IDENTITY_ERROR = "Select someone else to nominate.";
 
+const getFileIdentity = (file: File): string =>
+  [file.name, file.size, file.type, file.lastModified].join(":");
+
 const getInactiveDropActionLabel = (
   submissionExperience: WaveSubmissionExperience
 ): "drop" | "nominate" | "proposal" => {
@@ -1350,11 +1353,23 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
-    const existingCount =
-      drop?.parts.reduce((sum, part) => sum + part.media.length, 0) ?? 0;
-    const total = existingCount + files.length + newFiles.length;
+    const existingPartFiles = drop?.parts.flatMap((part) => part.media) ?? [];
+    const existingFileIds = new Set(
+      [...existingPartFiles, ...files].map(getFileIdentity)
+    );
+    const uniqueNewFiles = newFiles.filter((file) => {
+      const fileId = getFileIdentity(file);
+      if (existingFileIds.has(fileId)) {
+        return false;
+      }
+      existingFileIds.add(fileId);
+      return true;
+    });
+    const duplicateCount = newFiles.length - uniqueNewFiles.length;
+    const existingCount = existingPartFiles.length;
+    const total = existingCount + files.length + uniqueNewFiles.length;
     const overflow = Math.max(0, total - MAX_DROP_UPLOAD_FILES);
-    const mergedFiles = [...files, ...newFiles];
+    const mergedFiles = [...files, ...uniqueNewFiles];
     const updatedFiles = overflow
       ? mergedFiles.slice(-MAX_DROP_UPLOAD_FILES)
       : mergedFiles;
@@ -1366,6 +1381,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         message: `File limit exceeded. The ${overflow} oldest file${
           overflow > 1 ? "s were" : " was"
         } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
+        type: "warning",
+      });
+    }
+
+    if (duplicateCount > 0) {
+      setToast({
+        message: `${duplicateCount} duplicate file${
+          duplicateCount > 1 ? "s were" : " was"
+        } skipped.`,
         type: "warning",
       });
     }

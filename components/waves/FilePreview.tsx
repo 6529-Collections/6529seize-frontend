@@ -71,8 +71,7 @@ const FileTypePreview: React.FC<{ file: File }> = ({ file }) => (
     <FontAwesomeIcon icon={getFileIcon(file)} className="tw-size-7" />
     <div
       title={file.name}
-      dir="rtl"
-      className="tw-absolute tw-bottom-2 tw-left-3 tw-right-3 tw-truncate tw-text-right tw-text-[11px] tw-text-iron-500"
+      className="tw-absolute tw-bottom-2 tw-left-3 tw-right-3 tw-truncate tw-text-center tw-text-[11px] tw-text-iron-500"
     >
       {file.name}
     </div>

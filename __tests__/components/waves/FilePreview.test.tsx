@@ -54,8 +54,10 @@ describe("FilePreview", () => {
       />
     );
 
-    expect(screen.getByText("PDF")).toBeInTheDocument();
-    expect(screen.getByText("CSV")).toBeInTheDocument();
+    expect(screen.getByLabelText("PDF file: deck.pdf")).toBeInTheDocument();
+    expect(screen.getByLabelText("CSV file: data.csv")).toBeInTheDocument();
+    expect(screen.getByTitle("deck.pdf")).toHaveClass("tw-text-center");
+    expect(screen.getByTitle("deck.pdf")).not.toHaveAttribute("dir");
   });
 
   it("hides remove button when uploading", () => {
