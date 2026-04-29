@@ -3,6 +3,7 @@ import { waitFor } from "@testing-library/react";
 import QuorumParticipationDropLinkPreview from "@/components/waves/quorum/QuorumParticipationDropLinkPreview";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { commonApiFetch } from "@/services/api/common-api";
+import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 
 const mockQuorumParticipationDrop = jest.fn(() => (
@@ -16,6 +17,20 @@ const mockLinkHandlerFrame = jest.fn(({ children }: any) => (
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
+
+jest.mock("@/services/api/drop-api", () => {
+  const { QueryKey } = jest.requireActual(
+    "@/components/react-query-wrapper/ReactQueryWrapper"
+  );
+  return {
+    DROP_DETAIL_STALE_TIME_MS: 60 * 1000,
+    fetchDropByIdBatched: jest.fn(),
+    getDropQueryKey: (dropId: string | null | undefined) => [
+      QueryKey.DROP,
+      { drop_id: dropId ?? null },
+    ],
+  };
+});
 
 jest.mock("@/components/waves/quorum/QuorumParticipationDrop", () => ({
   __esModule: true,
@@ -34,6 +49,9 @@ jest.mock("@/components/waves/LinkHandlerFrame", () => ({
 
 const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
   typeof commonApiFetch
+>;
+const fetchDropByIdBatchedMock = fetchDropByIdBatched as jest.MockedFunction<
+  typeof fetchDropByIdBatched
 >;
 
 const buildDrop = (overrides: Record<string, unknown> = {}) =>
@@ -59,7 +77,7 @@ describe("QuorumParticipationDropLinkPreview", () => {
 
   it("loads a drop id and renders the quorum participation design", async () => {
     const drop = buildDrop();
-    commonApiFetchMock.mockResolvedValue(drop);
+    fetchDropByIdBatchedMock.mockResolvedValue(drop);
 
     renderWithQueryClient(
       <QuorumParticipationDropLinkPreview
@@ -79,9 +97,7 @@ describe("QuorumParticipationDropLinkPreview", () => {
         })
       );
     });
-    expect(commonApiFetchMock).toHaveBeenCalledWith({
-      endpoint: "drops/drop-1",
-    });
+    expect(fetchDropByIdBatchedMock).toHaveBeenCalledWith("drop-1");
   });
 
   it("loads a serial number and renders the quorum participation design", async () => {
@@ -120,7 +136,7 @@ describe("QuorumParticipationDropLinkPreview", () => {
 
   it("falls back to the normal quote preview for non-participatory drops", async () => {
     const drop = buildDrop({ drop_type: ApiDropType.Chat });
-    commonApiFetchMock.mockResolvedValue(drop);
+    fetchDropByIdBatchedMock.mockResolvedValue(drop);
 
     renderWithQueryClient(
       <QuorumParticipationDropLinkPreview

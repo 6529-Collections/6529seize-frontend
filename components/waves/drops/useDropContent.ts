@@ -3,11 +3,15 @@
 import { useMemo } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import type { ProcessedContent } from "./media-utils";
 import { buildProcessedContent } from "./media-utils";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
+
 interface UseDropContentResult {
   drop: ApiDrop | null;
   content: ProcessedContent;
@@ -29,14 +33,12 @@ export const useDropContent = (
     isFetching,
     error,
   } = useQuery<ApiDrop | undefined>({
-    queryKey: [QueryKey.DROP, { drop_id: dropId }],
-    queryFn: async () =>
-      await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${dropId}`,
-      }),
+    queryKey: getDropQueryKey(dropId),
+    queryFn: () => fetchDropByIdBatched(dropId),
     placeholderData: keepPreviousData,
     initialData: maybeDrop ?? undefined,
     enabled: !maybeDrop,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   const content = useMemo<ProcessedContent>(() => {

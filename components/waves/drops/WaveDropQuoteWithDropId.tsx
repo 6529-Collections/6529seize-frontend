@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useContext } from "react";
-import { commonApiFetch } from "@/services/api/common-api";
-import { AuthContext } from "@/components/auth/Auth";
+import React from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
 import WaveDropQuote from "./WaveDropQuote";
 
 interface WaveDropQuoteWithDropIdProps {
@@ -33,24 +35,13 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   maxEmbedDepth,
   onLinkCardActionsActiveChange,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
   const { data: drop } = useQuery<ApiDrop | undefined>({
-    queryKey: [
-      QueryKey.DROP,
-      {
-        drop_id: dropId,
-        context_profile: connectedProfile?.handle,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${dropId}`,
-        params: connectedProfile?.handle
-          ? { context_profile: connectedProfile.handle }
-          : {},
-      }),
+    queryKey: getDropQueryKey(dropId),
+    queryFn: () => fetchDropByIdBatched(dropId),
     placeholderData: keepPreviousData,
     initialData: maybeDrop ?? undefined,
+    enabled: !maybeDrop,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   return (

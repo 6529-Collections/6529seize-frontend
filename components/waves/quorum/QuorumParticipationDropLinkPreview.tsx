@@ -16,6 +16,11 @@ import {
   convertApiDropToExtendedDrop,
   type ExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
 import { commonApiFetch } from "@/services/api/common-api";
 import QuorumParticipationDrop from "./QuorumParticipationDrop";
 
@@ -89,20 +94,21 @@ export default function QuorumParticipationDropLinkPreview({
   const normalizedDropId =
     dropId === undefined || dropId.length === 0 ? null : dropId;
   const { data: drop } = useQuery<ApiDrop | null>({
-    queryKey: [
-      QueryKey.DROP,
-      "quorum-participation-link-preview",
-      {
-        dropId: normalizedDropId,
-        waveId,
-        serialNo: parsedSerialNo,
-      },
-    ],
+    queryKey:
+      normalizedDropId !== null
+        ? getDropQueryKey(normalizedDropId)
+        : [
+            QueryKey.DROP,
+            "quorum-participation-link-preview",
+            {
+              dropId: normalizedDropId,
+              waveId,
+              serialNo: parsedSerialNo,
+            },
+          ],
     queryFn: async () => {
       if (normalizedDropId !== null) {
-        return await commonApiFetch<ApiDrop>({
-          endpoint: `drops/${normalizedDropId}`,
-        });
+        return await fetchDropByIdBatched(normalizedDropId);
       }
 
       if (parsedSerialNo !== null) {
@@ -116,6 +122,7 @@ export default function QuorumParticipationDropLinkPreview({
     },
     enabled: normalizedDropId !== null || parsedSerialNo !== null,
     placeholderData: keepPreviousData,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   const extendedDrop = useMemo<ExtendedDrop | null>(() => {

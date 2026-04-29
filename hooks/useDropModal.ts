@@ -2,10 +2,13 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
 
 export function useDropModal() {
   const searchParams = useSearchParams();
@@ -16,18 +19,17 @@ export function useDropModal() {
   const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
 
   const { data: drop, isLoading } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: effectiveDropId }],
-    queryFn: async () => {
+    queryKey: getDropQueryKey(effectiveDropId),
+    queryFn: () => {
       if (!effectiveDropId) {
         throw new Error("Cannot fetch drop without a drop id");
       }
 
-      return await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${effectiveDropId}`,
-      });
+      return fetchDropByIdBatched(effectiveDropId);
     },
     placeholderData: keepPreviousData,
     enabled: !!effectiveDropId,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   const onDropClose = useCallback(() => {
@@ -44,8 +46,7 @@ export function useDropModal() {
   }, [dropId, beginClosingDrop, searchParams, pathname, router]);
 
   const isDropMatch = Boolean(
-    effectiveDropId &&
-      drop?.id.toLowerCase() === effectiveDropId.toLowerCase()
+    effectiveDropId && drop?.id.toLowerCase() === effectiveDropId.toLowerCase()
   );
   const activeDrop = isDropMatch ? drop : undefined;
   const isDropOpen = isDropMatch;

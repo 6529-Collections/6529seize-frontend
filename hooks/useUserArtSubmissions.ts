@@ -1,11 +1,16 @@
-"use client"
+"use client";
 
 import { useMemo } from "react";
-import { useQuery, useQueries } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  DROP_BATCH_STALE_TIME_MS,
+  fetchDropsByIds,
+  orderDropsByIds,
+  seedDropCache,
+} from "@/services/api/drop-api";
 
 interface ArtistSubmission {
   id: string;
@@ -39,103 +44,139 @@ interface UseSubmissionDropsReturn {
   error: string | null;
 }
 
-const fetchDrop = (dropId: string) =>
-  commonApiFetch<ApiDrop>({
-    endpoint: `drops/${dropId}`,
-  });
+const toArtistSubmission = (drop: ApiDrop): ArtistSubmission | null => {
+  const firstMedia = drop.parts.at(0)?.media.at(0);
+  if (!firstMedia?.url) {
+    return null;
+  }
 
-export const useSubmissionDrops = (submissions: ArtistSubmission[]): UseSubmissionDropsReturn => {
-  const dropQueries = useQueries({
-    queries: submissions.map(submission => ({
-      queryKey: [QueryKey.DROP, { drop_id: submission.id }],
-      queryFn: () => fetchDrop(submission.id),
-      enabled: !!submission.id,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    }))
-  });
-
-  const submissionsWithDrops = useMemo(() => {
-    return submissions.map((submission, index) => {
-      const dropQuery = dropQueries[index];
-      return {
-        ...submission,
-        drop: dropQuery?.data
-      };
-    }).filter(submission => submission.drop);
-  }, [submissions, dropQueries]);
-
-  const isLoading = dropQueries.some(query => query.isLoading);
-  const hasError = dropQueries.some(query => query.error);
-  const error = hasError ? "Failed to load drop data" : null;
-  
   return {
-    submissionsWithDrops,
-    isLoading,
-    error
+    id: drop.id,
+    imageUrl: firstMedia.url,
+    mediaMimeType: firstMedia.mime_type,
+    title: drop.title ?? undefined,
+    createdAt: drop.created_at,
+    drop,
   };
 };
 
-export const useUserArtSubmissions = (user?: User): UseUserArtSubmissionsReturn => {
-  // Stable query key to prevent unnecessary re-renders
-  const authorKey = useMemo(() => user?.handle ?? user?.id, [user?.handle, user?.id]);
-  const queryKey = useMemo(() => [QueryKey.PROFILE_DROPS, authorKey, 'art-submissions'] as const, [authorKey]);
+export const useSubmissionDrops = (
+  submissions: ArtistSubmission[]
+): UseSubmissionDropsReturn => {
+  const queryClient = useQueryClient();
+  const existingDropsById = useMemo(() => {
+    const map = new Map<string, ApiDrop>();
+    for (const submission of submissions) {
+      if (submission.drop) {
+        map.set(submission.id, submission.drop);
+      }
+    }
+    return map;
+  }, [submissions]);
 
-  // Query to fetch user's participatory drops (art submissions)
-  const { data: drops, isLoading, error } = useQuery({
-    queryKey,
+  const missingDropIds = useMemo(
+    () =>
+      submissions
+        .filter((submission) => !existingDropsById.has(submission.id))
+        .map((submission) => submission.id),
+    [existingDropsById, submissions]
+  );
+  const missingDropIdsKey = missingDropIds.join(",");
+
+  const {
+    data: fetchedDrops = [],
+    isLoading,
+    error,
+  } = useQuery<ApiDrop[]>({
+    queryKey: [
+      QueryKey.DROP,
+      {
+        ids: missingDropIdsKey,
+        scope: "submission-drops",
+      },
+    ],
     queryFn: async () => {
-      if (!user?.handle && !user?.id) return [];
-      
-      const params: Record<string, string> = {
-        limit: '50',
-        author: user.handle ?? user.id,
-        drop_type: ApiDropType.Participatory,
-      };
-      
-      
-      const result = await commonApiFetch<ApiDrop[]>({
-        endpoint: '/drops',
-        params,
-      });
-      
-      return result;
+      const drops = await fetchDropsByIds(missingDropIds);
+      seedDropCache(queryClient, drops);
+      return drops;
     },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
+    enabled: missingDropIds.length > 0,
+    staleTime: DROP_BATCH_STALE_TIME_MS,
   });
 
-  // Transform API drops to ArtistSubmission format  
+  const submissionsWithDrops = useMemo(() => {
+    const fetchedDropsById = new Map(
+      fetchedDrops.map((drop) => [drop.id, drop])
+    );
+    return submissions
+      .map((submission) => ({
+        ...submission,
+        drop:
+          existingDropsById.get(submission.id) ??
+          fetchedDropsById.get(submission.id),
+      }))
+      .filter((submission) => submission.drop);
+  }, [existingDropsById, fetchedDrops, submissions]);
+
+  return {
+    submissionsWithDrops,
+    isLoading,
+    error: error ? "Failed to load drop data" : null,
+  };
+};
+
+export const useUserArtSubmissions = (
+  user?: User
+): UseUserArtSubmissionsReturn => {
+  const queryClient = useQueryClient();
+  const authorKey = useMemo(
+    () => user?.handle ?? user?.id,
+    [user?.handle, user?.id]
+  );
+  const activeSubmissionIds = useMemo(
+    () => user?.active_main_stage_submission_ids ?? [],
+    [user?.active_main_stage_submission_ids]
+  );
+  const activeSubmissionIdsKey = activeSubmissionIds.join(",");
+  const queryKey = useMemo(
+    () =>
+      [
+        QueryKey.PROFILE_DROPS,
+        authorKey,
+        "art-submissions",
+        { ids: activeSubmissionIdsKey },
+      ] as const,
+    [activeSubmissionIdsKey, authorKey]
+  );
+
+  const {
+    data: drops,
+    isLoading,
+    error,
+  } = useQuery<ApiDrop[]>({
+    queryKey,
+    queryFn: async () => {
+      const result = await fetchDropsByIds(activeSubmissionIds);
+      seedDropCache(queryClient, result);
+      return orderDropsByIds(activeSubmissionIds, result);
+    },
+    enabled: !!user && activeSubmissionIds.length > 0,
+    staleTime: DROP_BATCH_STALE_TIME_MS,
+  });
+
   const submissions = useMemo(() => {
     if (!drops || !user) return [];
-    
-    // Get the active main stage submission IDs from the user profile
-    const activeSubmissionIds = user.active_main_stage_submission_ids || [];
-    
-    const realSubmissions = drops
-      .filter(drop => drop.drop_type === ApiDropType.Participatory)
-      .filter(drop => activeSubmissionIds.includes(drop.id)) // Only show ongoing main stage submissions
-      .map(drop => {
-        const firstMedia = drop.parts?.[0]?.media?.[0];
-        const imageUrl = firstMedia?.url || '';
-        const mediaMimeType = firstMedia?.mime_type || 'image/jpeg';
-        
-        return {
-          id: drop.id,
-          imageUrl,
-          mediaMimeType,
-          title: drop.title || undefined,
-          createdAt: drop.created_at,
-        };
-      })
-      .filter(submission => submission.imageUrl);
-    
-    return realSubmissions;
+
+    return drops
+      .filter((drop) => drop.drop_type === ApiDropType.Participatory)
+      .map(toArtistSubmission)
+      .filter((submission): submission is ArtistSubmission => !!submission);
   }, [drops, user]);
 
   return {
     submissions,
     submissionCount: submissions.length,
     isLoading,
-    error: error?.message || null,
+    error: error?.message ?? null,
   };
 };
