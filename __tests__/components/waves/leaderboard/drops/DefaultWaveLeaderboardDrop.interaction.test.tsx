@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DefaultWaveLeaderboardDrop } from "@/components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop";
 
@@ -14,6 +14,9 @@ jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
 jest.mock("@/hooks/useDeviceInfo", () => jest.fn());
 jest.mock("@/hooks/isMobileScreen", () => jest.fn());
 jest.mock("@/hooks/useLongPressInteraction", () => jest.fn());
+jest.mock("@/utils/monitoring/dropOpenTiming", () => ({
+  startDropOpen: jest.fn(),
+}));
 jest.mock("@/components/voting", () => ({
   VotingModal: (p: any) => <div data-testid="modal">{String(p.isOpen)}</div>,
   MobileVotingModal: (p: any) => (
@@ -64,9 +67,14 @@ const useDeviceInfo = require("@/hooks/useDeviceInfo") as jest.Mock;
 const useIsMobileScreen = require("@/hooks/isMobileScreen") as jest.Mock;
 const useLongPressInteraction =
   require("@/hooks/useLongPressInteraction") as jest.Mock;
+const { startDropOpen } = require("@/utils/monitoring/dropOpenTiming") as {
+  startDropOpen: jest.Mock;
+};
 
+const wave = { id: "w1" } as any;
 const drop = {
   id: "d1",
+  wave,
   rank: 1,
   author: {
     handle: "testuser",
@@ -76,9 +84,9 @@ const drop = {
   },
   created_at: new Date().toISOString(),
 } as any;
-const wave = { id: "w1" } as any;
 
 beforeEach(() => {
+  jest.clearAllMocks();
   useLongPressInteraction.mockReturnValue({
     isActive: false,
     setIsActive: jest.fn(),
@@ -137,8 +145,49 @@ test("keeps native touch scrolling enabled for long-press handlers", () => {
     />
   );
 
-  expect(useLongPressInteraction).toHaveBeenCalledWith({
-    hasTouchScreen: true,
-    preventDefault: false,
+  expect(useLongPressInteraction).toHaveBeenCalledWith(
+    expect.objectContaining({
+      hasTouchScreen: true,
+      preventDefault: false,
+    })
+  );
+});
+
+test("opens drop on normal card click", () => {
+  useRules.mockReturnValue({ canShowVote: true, canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useIsMobileScreen.mockReturnValue(true);
+  const onDropClick = jest.fn();
+
+  const { container } = render(
+    <DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />
+  );
+
+  fireEvent.click(container.firstElementChild as HTMLElement);
+
+  expect(startDropOpen).toHaveBeenCalledWith({
+    dropId: "d1",
+    waveId: "w1",
+    source: "leaderboard_list",
+    isMobile: true,
   });
+  expect(onDropClick).toHaveBeenCalledWith(drop);
+});
+
+test("does not open drop from synthetic click after long press", () => {
+  useRules.mockReturnValue({ canShowVote: true, canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useIsMobileScreen.mockReturnValue(true);
+  const onDropClick = jest.fn();
+
+  const { container } = render(
+    <DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />
+  );
+  const hookOptions = useLongPressInteraction.mock.calls[0][0];
+
+  hookOptions.onInteractionStart();
+  fireEvent.click(container.firstElementChild as HTMLElement);
+
+  expect(startDropOpen).not.toHaveBeenCalled();
+  expect(onDropClick).not.toHaveBeenCalled();
 });

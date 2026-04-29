@@ -32,6 +32,12 @@ interface DefaultWaveLeaderboardDropProps {
   readonly contentPresentation?: DropContentPresentation;
 }
 
+const isClickFromCardDom = (
+  event: React.MouseEvent<HTMLDivElement>
+): boolean => {
+  return event.currentTarget.contains(event.target as Node);
+};
+
 export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
 > = ({
@@ -50,12 +56,54 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   } = useVotingModalState(isVotingClosed);
   const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
+  const suppressNextClickRef = React.useRef(false);
+
+  const handleInteractionStart = React.useCallback(() => {
+    suppressNextClickRef.current = true;
+  }, []);
+
+  const handleClickCapture = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!isClickFromCardDom(event)) {
+        return;
+      }
+
+      if (!suppressNextClickRef.current) {
+        return;
+      }
+
+      suppressNextClickRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    []
+  );
+
+  const handleMenuClickCapture = React.useCallback(() => {
+    suppressNextClickRef.current = false;
+  }, []);
 
   // Use the hook for long press interactions
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
+    onInteractionStart: handleInteractionStart,
     preventDefault: false,
   });
+
+  const handleMobileMenuOpenChange = React.useCallback(
+    (nextIsActive: boolean) => {
+      if (!nextIsActive) {
+        suppressNextClickRef.current = false;
+      }
+
+      setIsActive(nextIsActive);
+    },
+    [setIsActive]
+  );
+
+  const handleMobileMenuClose = React.useCallback(() => {
+    handleMobileMenuOpenChange(false);
+  }, [handleMobileMenuOpenChange]);
 
   const getBorderClasses = () => {
     return "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden desktop-hover:hover:tw-border-iron-700";
@@ -65,17 +113,27 @@ export const DefaultWaveLeaderboardDrop: React.FC<
     openVoteModal();
   };
 
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!isClickFromCardDom(event)) {
+        return;
+      }
+
+      startDropOpen({
+        dropId: drop.id,
+        waveId: drop.wave.id,
+        source: "leaderboard_list",
+        isMobile: isMobileScreen,
+      });
+      onDropClick(drop);
+    },
+    [drop, isMobileScreen, onDropClick]
+  );
+
   return (
     <div
-      onClick={() => {
-        startDropOpen({
-          dropId: drop.id,
-          waveId: drop.wave.id,
-          source: "leaderboard_list",
-          isMobile: isMobileScreen,
-        });
-        onDropClick(drop);
-      }}
+      onClickCapture={handleClickCapture}
+      onClick={handleClick}
       className="tw-group tw-relative tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-@container"
     >
       <div className={getBorderClasses()} {...touchHandlers}>
@@ -156,20 +214,23 @@ export const DefaultWaveLeaderboardDrop: React.FC<
         createPortal(
           <CommonDropdownItemsMobileWrapper
             isOpen={isActive}
-            setOpen={setIsActive}
+            setOpen={handleMobileMenuOpenChange}
           >
-            <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
+            <div
+              onClickCapture={handleMenuClickCapture}
+              className="tw-grid tw-grid-cols-1 tw-gap-y-2"
+            >
               {/* Open drop option */}
               <WaveDropMobileMenuOpen
                 drop={drop}
-                onOpenChange={() => setIsActive(false)}
+                onOpenChange={handleMobileMenuClose}
               />
 
               {/* Delete option - only if user can delete */}
               {canDelete && (
                 <WaveDropMobileMenuDelete
                   drop={drop}
-                  onDropDeleted={() => setIsActive(false)}
+                  onDropDeleted={handleMobileMenuClose}
                 />
               )}
             </div>
