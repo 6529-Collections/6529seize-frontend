@@ -10,16 +10,17 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 }));
 
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
-  commonApiPostWithoutBodyAndResponse: jest
-    .fn()
-    .mockResolvedValue(undefined),
+  commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("@/services/api/drop-api", () => ({
+  fetchDropByIdBatched: jest.fn(),
 }));
 
 const {
-  commonApiFetch,
   commonApiPostWithoutBodyAndResponse,
 } = require("@/services/api/common-api");
+const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -61,7 +62,9 @@ describe("useWaveRealtimeUpdater", () => {
 
   it("handles aborted fetch without logging", async () => {
     const consoleLog = jest.spyOn(console, "log").mockImplementation(() => {});
-    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const store: any = { wave1: { drops: [], latestFetchedSerialNo: 1 } };
     const props = baseProps(store);
     props.syncNewestMessages = jest
@@ -120,7 +123,12 @@ describe("useWaveRealtimeUpdater", () => {
       },
     };
     const props = baseProps(store);
-    commonApiFetch.mockResolvedValue({ id: "d4", author: {} });
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: null,
+    });
     const { result } = renderHook(() => useWaveRealtimeUpdater(props));
     const drop: any = { id: "d4", wave: { id: "wave1" }, author: {} };
     await act(async () =>
@@ -130,7 +138,7 @@ describe("useWaveRealtimeUpdater", () => {
       )
     );
     await flushPromises();
-    expect(commonApiFetch).toHaveBeenCalledWith({ endpoint: "drops/d4" });
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4");
     expect(props.updateData).toHaveBeenCalled();
   });
 

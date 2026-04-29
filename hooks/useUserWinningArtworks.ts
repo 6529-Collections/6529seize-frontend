@@ -1,40 +1,45 @@
-import { useQueries } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  DROP_BATCH_STALE_TIME_MS,
+  fetchDropsByIds,
+  orderDropsByIds,
+  seedDropCache,
+} from "@/services/api/drop-api";
 
 interface UseUserWinningArtworksProps {
   readonly user: ApiProfileMin;
   readonly enabled?: boolean | undefined;
 }
 
-const fetchDrop = async (dropId: string): Promise<ApiDrop> => {
-  return commonApiFetch<ApiDrop>({
-    endpoint: `drops/${dropId}`,
-  });
-};
-
 export const useUserWinningArtworks = ({
   user,
   enabled = true,
 }: UseUserWinningArtworksProps) => {
-  const winnerDropIds = user.winner_main_stage_drop_ids || [];
+  const queryClient = useQueryClient();
+  const winnerDropIds = user.winner_main_stage_drop_ids;
+  const winnerDropIdsKey = winnerDropIds.join(",");
 
-  const queries = useQueries({
-    queries: winnerDropIds.map((dropId) => ({
-      queryKey: [QueryKey.DROP, { drop_id: dropId }],
-      queryFn: () => fetchDrop(dropId),
-      enabled: enabled && winnerDropIds.length > 0,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    })),
+  const { data, isLoading, isError } = useQuery<ApiDrop[]>({
+    queryKey: [
+      QueryKey.DROP,
+      {
+        ids: winnerDropIdsKey,
+        scope: "user-winning-artworks",
+      },
+    ],
+    queryFn: async () => {
+      const drops = await fetchDropsByIds(winnerDropIds);
+      seedDropCache(queryClient, drops);
+      return orderDropsByIds(winnerDropIds, drops);
+    },
+    enabled: enabled && winnerDropIds.length > 0,
+    staleTime: DROP_BATCH_STALE_TIME_MS,
   });
 
-  const isLoading = queries.some((query) => query.isLoading);
-  const isError = queries.some((query) => query.isError);
-  const winningDrops = queries
-    .filter((query) => query.data)
-    .map((query) => query.data as ApiDrop);
+  const winningDrops = data ?? [];
 
   return {
     winningDrops,

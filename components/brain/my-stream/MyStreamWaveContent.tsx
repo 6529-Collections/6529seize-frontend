@@ -24,8 +24,8 @@ import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getDropQueryKey } from "@/services/api/drop-api";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -116,7 +116,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
     queryClient.setQueryData<ApiDrop>(
-      [QueryKey.DROP, { drop_id: drop.id }],
+      getDropQueryKey(drop.id),
       drop as ApiDrop
     );
     const params = new URLSearchParams(searchParams.toString() || "");
@@ -182,7 +182,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   return (
     <div
-      className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-w-0 tw-flex-col"
+      className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
       key={stableWaveKey}
     >
       {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
@@ -196,7 +196,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       />
 
       <div
-        className="tw-relative tw-min-w-0 tw-flex-grow tw-overflow-hidden"
+        className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
         role="tabpanel"
         id={
           activeCurationId

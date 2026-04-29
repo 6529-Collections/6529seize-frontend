@@ -20,6 +20,8 @@ export class ApiDropNftLink {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "url_in_text",
@@ -41,4 +43,3 @@ export class ApiDropNftLink {
     public constructor() {
     }
 }
-

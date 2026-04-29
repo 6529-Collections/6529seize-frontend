@@ -16,71 +16,21 @@ import { MintingClaimAnimationDetailsHtml } from '../models/MintingClaimAnimatio
 import { MintingClaimAnimationDetailsVideo } from '../models/MintingClaimAnimationDetailsVideo';
 import { HttpFile } from '../http/http';
 
-export class MintingClaimAnimationDetails {
-    'bytes': number;
-    'format': MintingClaimAnimationDetailsFormatEnum;
-    'duration': number;
-    'sha256': string;
-    'width': number;
-    'height': number;
-    'codecs': Array<string>;
+/**
+ * @type MintingClaimAnimationDetails
+ * Type
+ * @export
+ */
+export type MintingClaimAnimationDetails = MintingClaimAnimationDetailsGlb | MintingClaimAnimationDetailsHtml | MintingClaimAnimationDetailsVideo;
 
+/**
+* @type MintingClaimAnimationDetailsClass
+* @export
+*/
+export class MintingClaimAnimationDetailsClass {
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "bytes",
-            "baseName": "bytes",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "format",
-            "baseName": "format",
-            "type": "MintingClaimAnimationDetailsFormatEnum",
-            "format": ""
-        },
-        {
-            "name": "duration",
-            "baseName": "duration",
-            "type": "number",
-            "format": ""
-        },
-        {
-            "name": "sha256",
-            "baseName": "sha256",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "width",
-            "baseName": "width",
-            "type": "number",
-            "format": "int32"
-        },
-        {
-            "name": "height",
-            "baseName": "height",
-            "type": "number",
-            "format": "int32"
-        },
-        {
-            "name": "codecs",
-            "baseName": "codecs",
-            "type": "Array<string>",
-            "format": ""
-        }    ];
-
-    static getAttributeTypeMap() {
-        return MintingClaimAnimationDetails.attributeTypeMap;
-    }
-
-    public constructor() {
-    }
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
 }
 
-
-export enum MintingClaimAnimationDetailsFormatEnum {
-    Glb = 'GLB'
-}
 

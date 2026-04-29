@@ -1,4 +1,4 @@
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";

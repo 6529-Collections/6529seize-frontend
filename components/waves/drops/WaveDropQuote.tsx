@@ -13,11 +13,13 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { useLinkPreviewContext } from "@/components/waves/LinkPreviewContext";
+import DropNotFound from "./DropNotFound";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
   readonly partId: number;
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly isNotFound?: boolean;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -27,10 +29,47 @@ interface WaveDropQuoteProps {
     | undefined;
 }
 
+interface WaveDropQuoteProfilePictureProps {
+  readonly drop: ApiDrop | null;
+}
+
+const WaveDropQuoteProfilePicture: React.FC<
+  WaveDropQuoteProfilePictureProps
+> = ({ drop }) => {
+  if (!drop) {
+    return (
+      <div className="tw-h-full tw-w-full tw-max-w-full tw-animate-pulse tw-overflow-hidden tw-rounded-md tw-bg-iron-900" />
+    );
+  }
+
+  const resolvedPfp = drop.author.pfp
+    ? resolveIpfsUrlSync(drop.author.pfp)
+    : null;
+
+  if (resolvedPfp) {
+    return (
+      <div className="tw-relative tw-h-full tw-w-full">
+        <Image
+          src={resolvedPfp}
+          alt={`${drop.author.handle ?? drop.author.primary_address}'s profile picture`}
+          fill
+          sizes="24px"
+          className="tw-rounded-md tw-bg-transparent tw-object-cover"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-900" />
+  );
+};
+
 const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   drop,
   partId,
   onQuoteClick,
+  isNotFound = false,
   embedPath,
   quotePath,
   embedDepth,
@@ -45,36 +84,6 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
 
     return drop.parts.find((part) => part.part_id === partId) ?? null;
   }, [drop, partId]);
-
-  const renderProfilePicture = () => {
-    if (!drop) {
-      return (
-        <div className="tw-h-full tw-w-full tw-max-w-full tw-animate-pulse tw-overflow-hidden tw-rounded-md tw-bg-iron-900" />
-      );
-    }
-
-    const resolvedPfp = drop.author.pfp
-      ? resolveIpfsUrlSync(drop.author.pfp)
-      : null;
-
-    if (resolvedPfp) {
-      return (
-        <div className="tw-relative tw-h-full tw-w-full">
-          <Image
-            src={resolvedPfp}
-            alt={`${drop.author.handle ?? drop.author.primary_address}'s profile picture`}
-            fill
-            sizes="24px"
-            className="tw-rounded-md tw-bg-transparent tw-object-cover"
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-900" />
-    );
-  };
 
   const goToQuoteDrop = () => {
     if (drop?.wave.id && drop.id) {
@@ -123,29 +132,54 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
 
   const resolvedOnLinkCardActionsActiveChange =
     onLinkCardActionsActiveChange ?? onCardActionsActiveChange;
+  const isInteractive = drop !== null && !isNotFound;
+  const handleQuoteContainerClick = (
+    event: React.MouseEvent<HTMLDivElement>
+  ) => {
+    event.stopPropagation();
+
+    if (isInteractive) {
+      goToQuoteDrop();
+    }
+  };
+  const quoteContainerClassName = `tw-mt-1 ${
+    isInteractive ? "tw-cursor-pointer" : ""
+  } tw-rounded-xl tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800`;
+
+  if (isNotFound) {
+    return (
+      <div
+        className={quoteContainerClassName}
+        onClick={handleQuoteContainerClick}
+      >
+        <DropNotFound />
+      </div>
+    );
+  }
 
   return (
     <div
-      className="tw-mt-1 tw-cursor-pointer tw-rounded-xl tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800"
-      onClick={(e) => {
-        e.stopPropagation();
-        goToQuoteDrop();
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          e.stopPropagation();
-          goToQuoteDrop();
-        }
-      }}
-      role="button"
-      tabIndex={0}
+      className={quoteContainerClassName}
+      onClick={handleQuoteContainerClick}
+      onKeyDown={
+        isInteractive
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                goToQuoteDrop();
+              }
+            }
+          : undefined
+      }
+      role={isInteractive ? "button" : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
     >
       <div className="tw-group tw-relative tw-flex tw-w-full tw-flex-col">
         <div className="tw-flex tw-gap-x-2">
           <div className="tw-relative tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-900">
             <div className="tw-h-full tw-w-full tw-rounded-md">
-              {renderProfilePicture()}
+              <WaveDropQuoteProfilePicture drop={drop} />
             </div>
           </div>
           <div className="tw-flex tw-w-full tw-flex-col">

@@ -59,18 +59,17 @@ const BrainContent: React.FC<BrainContentProps> = ({
   const shouldShowPinnedWaves = showPinnedWaves && breakpoint === "S" && isApp;
 
   return (
-    <div className="tw-relative tw-flex tw-flex-col tw-h-full">
+    <div className="tw-relative tw-flex tw-h-full tw-min-h-0 tw-flex-col">
       {showPinnedWaves && (
         <div
           ref={setPinnedRef}
-          className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-hidden">
+          className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-950 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-hidden lg:tw-px-0"
+        >
           {shouldShowPinnedWaves && <BrainContentPinnedWaves />}
         </div>
       )}
-      <div className="tw-flex-1 tw-overflow-hidden">
-        <div className="tw-h-full">
-          {children}
-        </div>
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
+        <div className="tw-h-full tw-min-h-0">{children}</div>
       </div>
       {activeDrop && (
         <div className="tw-sticky tw-bottom-0 tw-z-[80] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">

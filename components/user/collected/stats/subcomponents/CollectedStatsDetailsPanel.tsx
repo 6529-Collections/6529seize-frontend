@@ -3,7 +3,7 @@ import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationH
 import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 interface CollectedStatsDetailsPanelProps {
   readonly isOpen: boolean;

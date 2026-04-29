@@ -4,25 +4,17 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
+
 interface UseDropProps {
   readonly dropId: string;
   readonly initialDrop?: ApiDrop | undefined;
   readonly enabled?: boolean | undefined;
 }
-
-const getDropQueryKey = (dropId: string) => [
-  QueryKey.DROP,
-  {
-    drop_id: dropId,
-  },
-];
-
-const fetchDrop = (dropId: string) =>
-  commonApiFetch<ApiDrop>({
-    endpoint: `drops/${dropId}`,
-  });
 
 export const useDrop = ({
   dropId,
@@ -37,17 +29,18 @@ export const useDrop = ({
     refetch,
   } = useQuery<ApiDrop | undefined>({
     queryKey: getDropQueryKey(dropId),
-    queryFn: () => fetchDrop(dropId),
+    queryFn: () => fetchDropByIdBatched(dropId),
     initialData: initialDrop,
     placeholderData: keepPreviousData,
     enabled,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   const prefetchDrop = () => {
-    queryClient.prefetchQuery({
+    void queryClient.prefetchQuery({
       queryKey: getDropQueryKey(dropId),
-      queryFn: () => fetchDrop(dropId),
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      queryFn: () => fetchDropByIdBatched(dropId),
+      staleTime: DROP_DETAIL_STALE_TIME_MS,
     });
   };
 

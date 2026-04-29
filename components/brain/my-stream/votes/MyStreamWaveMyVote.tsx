@@ -177,14 +177,14 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   return (
     <div
       key={drop.id}
-      className={`tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-px-5 tw-py-4 tw-shadow-md tw-transition-all tw-duration-300 tw-@container desktop-hover:hover:tw-shadow-lg ${
+      className={`tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-px-5 tw-py-4 tw-shadow-md tw-transition-all tw-duration-300 desktop-hover:hover:tw-shadow-lg ${
         isSelected
           ? "tw-border-primary-400"
           : "tw-border-iron-800 desktop-hover:hover:tw-border-iron-700"
       }`}
       onClick={handleClick}
     >
-      <div className="tw-flex tw-gap-4 @xs:tw-flex-col @sm:tw-flex-col @md:tw-flex-row">
+      <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
         {!isVotingClosed && (
           <div
             className="tw-mr-1 tw-flex-shrink-0 tw-self-start"
@@ -216,7 +216,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
         )}
 
-        <div className="tw-relative tw-min-h-[106px] tw-min-w-[106px] tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 @xs:tw-h-56 @xs:tw-w-full @sm:tw-mb-2 @sm:tw-h-56 @sm:tw-w-full @md:tw-size-[106px]">
+        <div className="tw-relative tw-h-56 tw-w-full tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 md:tw-size-[106px] md:tw-min-h-[106px] md:tw-min-w-[106px]">
           <div className="tw-relative tw-flex tw-h-full tw-w-full tw-transform tw-items-center tw-justify-center tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-105">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
               {resolvedMediaUrl && (
@@ -283,13 +283,13 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               size={UserCICAndLevelSize.SMALL}
             />
           </div>
-          <div className="tw-mt-3.5 tw-flex tw-flex-col tw-justify-between tw-gap-4 @lg:tw-flex-col @[42rem]:tw-flex-row xl:tw-mt-3">
-            <div className="tw-flex tw-items-center tw-gap-x-6">
+          <div className="tw-mt-3.5 tw-flex tw-flex-col tw-justify-between tw-gap-4 xl:tw-mt-3 xl:tw-flex-row">
+            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-6 sm:tw-justify-start">
               <div onClick={(e) => e.stopPropagation()}>
                 <MyStreamWaveMyVoteVotes drop={drop} />
               </div>
               <div className="tw-flex tw-items-center tw-gap-2">
-                <div className="tw-flex tw-items-center -tw-space-x-2">
+                <div className="tw-hidden tw-items-center -tw-space-x-2 sm:tw-flex">
                   {drop.top_raters.slice(0, 3).map((voter) => (
                     <React.Fragment
                       key={voter.profile.id || voter.profile.primary_address}

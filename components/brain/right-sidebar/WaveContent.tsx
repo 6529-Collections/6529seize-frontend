@@ -3,7 +3,7 @@
 import React, { useMemo, useEffect, useCallback, type JSX } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ObjectSerializer";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import WaveHeader, {
   WaveHeaderPinnedSide,

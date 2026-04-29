@@ -11,7 +11,6 @@ import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers
 import type { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
-import { commonApiFetch } from "../../services/api/common-api";
 import { useAuth } from "../auth/Auth";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
@@ -19,10 +18,14 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
@@ -73,18 +76,17 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
   const { data: drop, error: dropError } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: effectiveDropId }],
-    queryFn: async () => {
+    queryKey: getDropQueryKey(effectiveDropId),
+    queryFn: () => {
       if (!effectiveDropId) {
         throw new Error("Cannot fetch drop without a drop id");
       }
 
-      return await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${effectiveDropId}`,
-      });
+      return fetchDropByIdBatched(effectiveDropId);
     },
     placeholderData: keepPreviousData,
     enabled: !!effectiveDropId,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   const onDropClose = useCallback(() => {
@@ -110,8 +112,11 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   );
 
   // Clear logic for when to show each part
-  const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
-  const shouldShowMainContent = !isMobile || waveId !== undefined;
+  const hasWave = waveId !== undefined;
+  const canShowMainContent = !isMobile || hasWave;
+  const shouldShowLeftSidebar =
+    showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
+  const shouldShowMainContent = canShowMainContent;
   const shouldShowDropOverlay =
     isDropOpen && drop !== undefined && shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(
@@ -130,18 +135,18 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 
   return (
     <WaveChatScrollProvider>
-      <div className="tw-relative tw-flex tw-flex-col">
-        <div className="tw-relative tw-flex tw-flex-grow">
-          <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-full tw-flex-grow">
+      <div className="tw-relative tw-flex tw-min-h-0 tw-flex-col">
+        <div className="tw-relative tw-flex tw-min-h-0 tw-flex-grow">
+          <div className="tw-relative tw-mx-auto tw-flex tw-min-h-0 tw-w-full tw-max-w-full tw-flex-grow">
             <div
-              className="tw-relative tw-flex tw-w-full tw-overflow-hidden"
+              className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-overflow-hidden"
               style={contentContainerStyle}
             >
               {shouldShowLeftSidebar && (
                 <WebBrainLeftSidebar isCollapsed={rightVariant === "inline"} />
               )}
               {shouldShowMainContent && (
-                <div className="tw-flex tw-h-full tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
+                <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
                   {children}
                   {shouldShowDropOverlay && (
                     <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
