@@ -199,6 +199,7 @@ export const WaveLeaderboardGridItem: React.FC<
     preventDefault: false,
   });
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const isVoteModalOpen = isVotingModalOpen && !isVotingClosed;
   const { canShowVote } = useDropInteractionRules(drop);
   const canShowVotingAction = canShowVote && !isVotingClosed;
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
@@ -242,6 +243,10 @@ export const WaveLeaderboardGridItem: React.FC<
     votingCreditLabels[votingCreditType] ?? votingCreditType;
 
   const handleVoteButtonClick = () => {
+    if (isVotingClosed) {
+      return;
+    }
+
     setIsVotingModalOpen(true);
   };
 
@@ -268,8 +273,12 @@ export const WaveLeaderboardGridItem: React.FC<
 
   const handleMobileVoteClick = useCallback(() => {
     setIsActive(false);
+    if (isVotingClosed) {
+      return;
+    }
+
     setIsVotingModalOpen(true);
-  }, [setIsActive]);
+  }, [isVotingClosed, setIsActive]);
 
   const openDrop = () => {
     startDropOpen({
@@ -518,13 +527,13 @@ export const WaveLeaderboardGridItem: React.FC<
         (isMobileScreen ? (
           <MobileVotingModal
             drop={drop}
-            isOpen={isVotingModalOpen}
+            isOpen={isVoteModalOpen}
             onClose={() => setIsVotingModalOpen(false)}
           />
         ) : (
           <VotingModal
             drop={drop}
-            isOpen={isVotingModalOpen}
+            isOpen={isVoteModalOpen}
             onClose={() => setIsVotingModalOpen(false)}
           />
         ))}

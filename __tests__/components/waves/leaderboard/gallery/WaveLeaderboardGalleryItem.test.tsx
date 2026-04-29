@@ -84,6 +84,26 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
   });
 
+  it("closes voting modal when voting closes", async () => {
+    const { rerender } = render(
+      <WaveLeaderboardGalleryItem drop={drop} onDropClick={jest.fn()} />
+    );
+
+    await userEvent.click(screen.getByTestId("vote-btn"));
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
+
+    rerender(
+      <WaveLeaderboardGalleryItem
+        drop={drop}
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");
+    expect(screen.queryByTestId("vote-btn")).toBeNull();
+  });
+
   it("hides voting button when voting is closed", () => {
     render(
       <WaveLeaderboardGalleryItem

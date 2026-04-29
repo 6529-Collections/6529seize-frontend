@@ -205,6 +205,32 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.queryByTestId("vote-button")).toBeNull();
+    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
+  });
+
+  it("closes voting modal when voting closes", () => {
+    const { rerender } = render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("vote-button"));
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
+
+    rerender(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("modal")).toBeNull();
+    expect(screen.queryByTestId("vote-button")).toBeNull();
   });
 
   it("passes approve status props to the compact vote display", () => {

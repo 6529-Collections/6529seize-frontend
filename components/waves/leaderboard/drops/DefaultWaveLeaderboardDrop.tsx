@@ -43,6 +43,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
   const canShowVotingAction = canShowVote && !isVotingClosed;
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const isVoteModalOpen = isVotingModalOpen && !isVotingClosed;
   const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
 
@@ -54,6 +55,14 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 
   const getBorderClasses = () => {
     return "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden desktop-hover:hover:tw-border-iron-700";
+  };
+
+  const handleVoteButtonClick = () => {
+    if (isVotingClosed) {
+      return;
+    }
+
+    setIsVotingModalOpen(true);
   };
 
   return (
@@ -117,7 +126,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 {canShowVotingAction && (
                   <VotingModalButton
                     drop={drop}
-                    onClick={() => setIsVotingModalOpen(true)}
+                    onClick={handleVoteButtonClick}
                     className="tw-font-semibold"
                   />
                 )}
@@ -131,13 +140,13 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       {isMobileScreen ? (
         <MobileVotingModal
           drop={drop}
-          isOpen={isVotingModalOpen}
+          isOpen={isVoteModalOpen}
           onClose={() => setIsVotingModalOpen(false)}
         />
       ) : (
         <VotingModal
           drop={drop}
-          isOpen={isVotingModalOpen}
+          isOpen={isVoteModalOpen}
           onClose={() => setIsVotingModalOpen(false)}
         />
       )}

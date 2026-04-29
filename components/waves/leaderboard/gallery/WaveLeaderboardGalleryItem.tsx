@@ -172,8 +172,14 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     };
 
     const handleVoteButtonClick = () => {
+      if (isVotingClosed) {
+        return;
+      }
+
       setIsVotingModalOpen(true);
     };
+
+    const isVoteModalOpen = isVotingModalOpen && !isVotingClosed;
 
     const transitionClasses = hasTouchScreen
       ? ""
@@ -304,13 +310,13 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
         {isMobileScreen ? (
           <MobileVotingModal
             drop={drop}
-            isOpen={isVotingModalOpen}
+            isOpen={isVoteModalOpen}
             onClose={() => setIsVotingModalOpen(false)}
           />
         ) : (
           <VotingModal
             drop={drop}
-            isOpen={isVotingModalOpen}
+            isOpen={isVoteModalOpen}
             onClose={() => setIsVotingModalOpen(false)}
           />
         )}

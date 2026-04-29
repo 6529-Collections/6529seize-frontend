@@ -96,6 +96,7 @@ export default function OngoingParticipationDrop({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const isVoteModalOpen = isVotingModalOpen && !isVotingClosed;
 
   const handleLongPress = useCallback(() => {
     if (!showInteractions || !hasTouch) return;
@@ -112,12 +113,17 @@ export default function OngoingParticipationDrop({
     setIsSlideUp(false);
   }, []);
 
+  const handleVoteButtonClick = useCallback(() => {
+    if (isVotingClosed) {
+      return;
+    }
+
+    setIsVotingModalOpen(true);
+  }, [isVotingClosed]);
+
   const voteAction =
     canShowVote && showInteractions && !isVotingClosed ? (
-      <VotingModalButton
-        drop={drop}
-        onClick={() => setIsVotingModalOpen(true)}
-      />
+      <VotingModalButton drop={drop} onClick={handleVoteButtonClick} />
     ) : null;
 
   return (
@@ -196,13 +202,13 @@ export default function OngoingParticipationDrop({
         (isMobileScreen ? (
           <MobileVotingModal
             drop={drop}
-            isOpen={isVotingModalOpen}
+            isOpen={isVoteModalOpen}
             onClose={() => setIsVotingModalOpen(false)}
           />
         ) : (
           <VotingModal
             drop={drop}
-            isOpen={isVotingModalOpen}
+            isOpen={isVoteModalOpen}
             onClose={() => setIsVotingModalOpen(false)}
           />
         ))}

@@ -34,6 +34,7 @@ jest.mock(
 const createDrop = (overrides: Partial<ExtendedDrop> = {}): ExtendedDrop =>
   ({
     id: "drop-1",
+    wave: { id: "wave-1" },
     raters_count: 2,
     rank: 3,
     reactions: [],
@@ -86,5 +87,33 @@ describe("ParticipationDropFooter", () => {
     render(<ParticipationDropFooter drop={createDrop({ raters_count: 0 })} />);
 
     expect(screen.queryByTestId("ratings")).not.toBeInTheDocument();
+  });
+
+  it("keeps curation available when voting is closed", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop({
+          raters_count: 0,
+          context_profile_context: { curatable: true, curated: false } as any,
+        })}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("curation-button")).toBeInTheDocument();
+  });
+
+  it("keeps reactions visible when voting is closed", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop({
+          raters_count: 0,
+          reactions: [{ reaction: "like", profiles: [] }] as any,
+        })}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("reactions")).toBeInTheDocument();
   });
 });
