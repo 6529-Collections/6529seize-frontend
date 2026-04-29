@@ -1,7 +1,7 @@
-import { ApiCreateMediaUploadUrlRequest } from "@/generated/models/ApiCreateMediaUploadUrlRequest";
-import { ApiCreateMediaUrlResponse } from "@/generated/models/ApiCreateMediaUrlResponse";
-import { DistributionPhotoCompleteRequest } from "@/generated/models/DistributionPhotoCompleteRequest";
-import { DistributionPhotoCompleteResponse } from "@/generated/models/DistributionPhotoCompleteResponse";
+import type { ApiCreateMediaUrlResponse } from "@/generated/models/ApiCreateMediaUrlResponse";
+import type { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
+import type { DistributionPhotoCompleteRequest } from "@/generated/models/DistributionPhotoCompleteRequest";
+import type { DistributionPhotoCompleteResponse } from "@/generated/models/DistributionPhotoCompleteResponse";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   getContentType,
@@ -25,6 +25,11 @@ interface SingleFileUploadParams {
   onProgress?: (bytesUploaded: number) => void;
 }
 
+interface MediaUploadUrlRequest {
+  content_type: ApiMediaUploadMimeType;
+  file_name: string;
+}
+
 async function uploadSingleFile({
   contract,
   tokenId,
@@ -35,7 +40,7 @@ async function uploadSingleFile({
   const contentType = getContentType(file);
 
   const prepData = await commonApiPost<
-    ApiCreateMediaUploadUrlRequest,
+    MediaUploadUrlRequest,
     ApiCreateMediaUrlResponse
   >({
     endpoint,

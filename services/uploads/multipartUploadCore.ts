@@ -2,7 +2,6 @@ import axios from "axios";
 import pLimit from "p-limit";
 import pRetry from "p-retry";
 import { commonApiPost } from "@/services/api/common-api";
-import type { ApiCreateMediaUploadUrlRequest } from "@/generated/models/ApiCreateMediaUploadUrlRequest";
 import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 import type { ApiStartMultipartMediaUploadResponse } from "@/generated/models/ApiStartMultipartMediaUploadResponse";
 import type { ApiUploadPartOfMultipartUploadRequest } from "@/generated/models/ApiUploadPartOfMultipartUploadRequest";
@@ -25,6 +24,11 @@ interface MultipartUploadCoreParams {
   file: File;
   endpoints: MultipartUploadEndpoints;
   onProgress?: ((bytesUploaded: number) => void) | undefined;
+}
+
+interface MediaUploadUrlRequest {
+  content_type: ApiMediaUploadMimeType;
+  file_name: string;
 }
 
 const SUPPORTED_MIME_TYPES = new Set<string>(
@@ -107,7 +111,7 @@ export async function multipartUploadCore({
   const contentType = getContentType(file);
 
   const startData = await commonApiPost<
-    ApiCreateMediaUploadUrlRequest,
+    MediaUploadUrlRequest,
     ApiStartMultipartMediaUploadResponse
   >({
     endpoint: endpoints.start,

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import type { ApiDrop, ApiWave } from "@/generated/models/ObjectSerializer";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import WaveDropsAll from "../drops/wave-drops-all";
 import {

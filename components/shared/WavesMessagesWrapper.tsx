@@ -112,8 +112,11 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   );
 
   // Clear logic for when to show each part
-  const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
-  const shouldShowMainContent = !isMobile || waveId !== undefined;
+  const hasWave = waveId !== undefined;
+  const canShowMainContent = !isMobile || hasWave;
+  const shouldShowLeftSidebar =
+    showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
+  const shouldShowMainContent = canShowMainContent;
   const shouldShowDropOverlay =
     isDropOpen && drop !== undefined && shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(
@@ -132,18 +135,18 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 
   return (
     <WaveChatScrollProvider>
-      <div className="tw-relative tw-flex tw-flex-col">
-        <div className="tw-relative tw-flex tw-flex-grow">
-          <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-full tw-flex-grow">
+      <div className="tw-relative tw-flex tw-min-h-0 tw-flex-col">
+        <div className="tw-relative tw-flex tw-min-h-0 tw-flex-grow">
+          <div className="tw-relative tw-mx-auto tw-flex tw-min-h-0 tw-w-full tw-max-w-full tw-flex-grow">
             <div
-              className="tw-relative tw-flex tw-w-full tw-overflow-hidden"
+              className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-overflow-hidden"
               style={contentContainerStyle}
             >
               {shouldShowLeftSidebar && (
                 <WebBrainLeftSidebar isCollapsed={rightVariant === "inline"} />
               )}
               {shouldShowMainContent && (
-                <div className="tw-flex tw-h-full tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
+                <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
                   {children}
                   {shouldShowDropOverlay && (
                     <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">

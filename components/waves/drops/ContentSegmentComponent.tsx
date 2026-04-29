@@ -5,17 +5,29 @@ interface ContentSegmentComponentProps {
   readonly segment: ContentSegment;
   readonly index: number;
   readonly linkify?: boolean;
+  readonly linkClassName?: string | undefined;
 }
 
 const URL_REGEX = /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]"'])/g;
-function linkifyText(text: string, segmentIndex: number): React.ReactNode[] {
+const DEFAULT_LINK_CLASSES =
+  "tw-text-iron-200/90 tw-underline tw-decoration-white/20 tw-underline-offset-2 tw-transition-colors tw-duration-300 hover:tw-text-iron-50 hover:tw-decoration-white/45";
+
+function linkifyText({
+  linkClassName,
+  segmentIndex,
+  text,
+}: {
+  readonly linkClassName?: string | undefined;
+  readonly segmentIndex: number;
+  readonly text: string;
+}): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;
   let partIndex = 0;
 
-  const regex = new RegExp(URL_REGEX.source, "g");
-  while ((match = regex.exec(text)) !== null) {
+  URL_REGEX.lastIndex = 0;
+  while ((match = URL_REGEX.exec(text)) !== null) {
     if (match.index > lastIndex) {
       parts.push(
         <span key={`${segmentIndex}-text-${partIndex++}`}>
@@ -30,12 +42,12 @@ function linkifyText(text: string, segmentIndex: number): React.ReactNode[] {
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className="tw-text-iron-200/90 tw-underline tw-decoration-white/20 tw-underline-offset-2 tw-transition-colors tw-duration-300 hover:tw-text-iron-50 hover:tw-decoration-white/45"
+        className={linkClassName ?? DEFAULT_LINK_CLASSES}
       >
         {match[0]}
       </a>
     );
-    lastIndex = regex.lastIndex;
+    lastIndex = URL_REGEX.lastIndex;
   }
 
   if (lastIndex < text.length) {
@@ -56,11 +68,18 @@ export default function ContentSegmentComponent({
   segment,
   index,
   linkify = true,
+  linkClassName,
 }: ContentSegmentComponentProps) {
   if (segment.type === "text") {
     return (
       <span key={`segment-${index}`}>
-        {linkify ? linkifyText(segment.content, index) : segment.content}
+        {linkify
+          ? linkifyText({
+              linkClassName,
+              segmentIndex: index,
+              text: segment.content,
+            })
+          : segment.content}
       </span>
     );
   }

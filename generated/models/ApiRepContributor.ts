@@ -20,6 +20,8 @@ export class ApiRepContributor {
 
     static readonly discriminator: string | undefined = undefined;
 
+    static readonly mapping: {[index: string]: string} | undefined = undefined;
+
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
             "name": "contribution",
@@ -41,4 +43,3 @@ export class ApiRepContributor {
     public constructor() {
     }
 }
-

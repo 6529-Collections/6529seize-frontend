@@ -3,7 +3,7 @@
 import type { UserPageStatsInitialData } from "@/components/user/stats/userPageStats.types";
 import { SEARCH_PARAM_ACTIVITY } from "@/components/user/stats/activity/activity.helpers";
 import type { CollectedCollectionType } from "@/entities/IProfile";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useSearchParams } from "next/navigation";
 import { useId, useMemo, useState } from "react";
