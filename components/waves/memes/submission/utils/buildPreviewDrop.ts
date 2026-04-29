@@ -170,6 +170,7 @@ export const buildPreviewDrop = ({
         part_id: 1,
         content: traits.description || null,
         media: [media],
+        attachments: [],
         quoted_drop: null,
       },
     ],

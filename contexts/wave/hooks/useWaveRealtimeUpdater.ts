@@ -1,9 +1,14 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { WsDropUpdateMessage } from "@/helpers/Types";
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type {
+  WsAttachmentStatusUpdateMessage,
+  WsDropUpdateMessage,
+} from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
@@ -14,6 +19,11 @@ import type { WaveDataStoreUpdater } from "./types";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  updateAttachmentInCachedDrops,
+  updateDropInCachedDrops,
+} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -38,6 +48,52 @@ type ProcessIncomingDropFn = (
   type: ProcessIncomingDropType
 ) => void;
 
+function replaceAttachmentInPart(
+  part: ApiDropPart,
+  attachment: ApiAttachment
+): ApiDropPart {
+  const attachments = part.attachments ?? [];
+  const hasAttachment = attachments.some(
+    (item) => item.attachment_id === attachment.attachment_id
+  );
+
+  if (!hasAttachment) {
+    return part;
+  }
+
+  return {
+    ...part,
+    attachments: attachments.map((item) =>
+      item.attachment_id === attachment.attachment_id ? attachment : item
+    ),
+  };
+}
+
+function replaceAttachmentInDrop(drop: Drop, attachment: ApiAttachment): Drop {
+  if (drop.type !== DropSize.FULL) {
+    return drop;
+  }
+
+  const parts = drop.parts.map((part) =>
+    replaceAttachmentInPart(part, attachment)
+  );
+  const changed = parts.some((part, index) => part !== drop.parts[index]);
+
+  return changed ? { ...drop, parts } : drop;
+}
+
+function replaceAttachmentInDrops(
+  drops: Drop[],
+  attachment: ApiAttachment
+): { drops: Drop[]; changed: boolean } {
+  const updatedDrops = drops.map((drop) =>
+    replaceAttachmentInDrop(drop, attachment)
+  );
+  const changed = updatedDrops.some((drop, index) => drop !== drops[index]);
+
+  return { drops: updatedDrops, changed };
+}
+
 export function useWaveRealtimeUpdater({
   activeWaveId,
   getData,
@@ -56,6 +112,7 @@ export function useWaveRealtimeUpdater({
   const abortControllersRef = useRef<Record<string, AbortController>>({});
   const { refreshEligibility } = useWaveEligibility();
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const queryClient = useQueryClient();
   const tabJustBecameVisibleRef = useRef<boolean>(false);
 
   // Function to cleanup abort controllers
@@ -140,6 +197,8 @@ export function useWaveRealtimeUpdater({
       if (!drop?.wave?.id) {
         return;
       }
+
+      updateDropInCachedDrops(queryClient, drop);
 
       const waveId = drop.wave.id;
 
@@ -269,6 +328,7 @@ export function useWaveRealtimeUpdater({
       refreshEligibility,
       isWaveMuted,
       invalidateNotifications,
+      queryClient,
     ]
   );
 
@@ -277,6 +337,34 @@ export function useWaveRealtimeUpdater({
       removeDrop(waveId, dropId);
     },
     [removeDrop]
+  );
+
+  const processAttachmentStatusUpdate = useCallback(
+    (attachment: ApiAttachment) => {
+      updateAttachmentInCachedDrops(queryClient, attachment);
+
+      if (!activeWaveId) {
+        return;
+      }
+
+      const currentData = getData(activeWaveId);
+      if (!currentData) {
+        return;
+      }
+
+      const { drops, changed } = replaceAttachmentInDrops(
+        currentData.drops,
+        attachment
+      );
+
+      if (changed) {
+        updateData({
+          key: activeWaveId,
+          drops,
+        });
+      }
+    },
+    [activeWaveId, getData, queryClient, updateData]
   );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
@@ -304,6 +392,11 @@ export function useWaveRealtimeUpdater({
         ProcessIncomingDropType.DROP_REACTION_UPDATE
       );
     }
+  );
+
+  useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(
+    WsMessageType.ATTACHMENT_STATUS_UPDATE,
+    processAttachmentStatusUpdate
   );
 
   // Handle tab visibility changes - refresh eligibility when tab becomes visible

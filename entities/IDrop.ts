@@ -1,4 +1,6 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import type { ApiDropAttachmentReference } from "@/generated/models/ApiDropAttachmentReference";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 export interface ReferencedNft {
@@ -42,6 +44,8 @@ export interface CreateDropRequestPart {
   readonly content: string | null;
   readonly quoted_drop: QuotedDrop | null;
   readonly media: Array<DropMedia>;
+  readonly attachments?: Array<ApiDropAttachmentReference>;
+  readonly uploaded_attachments?: Array<ApiAttachment>;
 }
 
 export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
