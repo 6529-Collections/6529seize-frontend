@@ -66,6 +66,7 @@ export const fetchDropsByIds = async (
         params: {
           ids: chunk.join(","),
           limit: `${chunk.length}`,
+          include_replies: "true",
         },
       })
     )
