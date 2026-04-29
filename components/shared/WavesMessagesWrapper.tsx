@@ -11,7 +11,6 @@ import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers
 import type { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
-import { commonApiFetch } from "../../services/api/common-api";
 import { useAuth } from "../auth/Auth";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
@@ -19,10 +18,14 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
@@ -73,18 +76,17 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
   const { data: drop, error: dropError } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: effectiveDropId }],
-    queryFn: async () => {
+    queryKey: getDropQueryKey(effectiveDropId),
+    queryFn: () => {
       if (!effectiveDropId) {
         throw new Error("Cannot fetch drop without a drop id");
       }
 
-      return await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${effectiveDropId}`,
-      });
+      return fetchDropByIdBatched(effectiveDropId);
     },
     placeholderData: keepPreviousData,
     enabled: !!effectiveDropId,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   const onDropClose = useCallback(() => {

@@ -24,8 +24,8 @@ import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getDropQueryKey } from "@/services/api/drop-api";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -115,7 +115,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
     queryClient.setQueryData<ApiDrop>(
-      [QueryKey.DROP, { drop_id: drop.id }],
+      getDropQueryKey(drop.id),
       drop as ApiDrop
     );
     const params = new URLSearchParams(searchParams.toString() || "");

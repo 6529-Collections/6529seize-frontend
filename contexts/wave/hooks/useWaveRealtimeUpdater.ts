@@ -5,10 +5,8 @@ import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import {
-  commonApiFetch,
-  commonApiPostWithoutBodyAndResponse,
-} from "@/services/api/common-api";
+import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
@@ -181,9 +179,7 @@ export function useWaveRealtimeUpdater({
           type === ProcessIncomingDropType.DROP_REACTION_UPDATE) &&
         existingDrop
       ) {
-        const apiDrop = await commonApiFetch<ApiDrop>({
-          endpoint: `drops/${drop.id}`,
-        });
+        const apiDrop = await fetchDropByIdBatched(drop.id);
         if (apiDrop) {
           if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
             recordReactionRealtimeReconciliation({

@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useContext } from "react";
-import { commonApiFetch } from "@/services/api/common-api";
-import { AuthContext } from "@/components/auth/Auth";
+import React from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
 import WaveDropQuote from "./WaveDropQuote";
 
 interface WaveDropQuoteWithDropIdProps {
@@ -22,6 +24,41 @@ interface WaveDropQuoteWithDropIdProps {
     | undefined;
 }
 
+const getErrorStatus = (error: unknown): number | undefined => {
+  if (error === null || error === undefined || typeof error !== "object") {
+    return undefined;
+  }
+
+  const maybeError = error as {
+    readonly status?: unknown;
+    readonly response?: { readonly status?: unknown };
+  };
+  const status = maybeError.response?.status ?? maybeError.status;
+
+  return typeof status === "number" ? status : undefined;
+};
+
+const isDropNotFoundError = (
+  error: unknown,
+  normalizedDropId: string
+): boolean => {
+  if (error === null || error === undefined) {
+    return false;
+  }
+
+  if (getErrorStatus(error) === 404) {
+    return true;
+  }
+
+  const expectedMessage = `Drop ${normalizedDropId} not found`;
+
+  if (error instanceof Error) {
+    return error.message === expectedMessage;
+  }
+
+  return error === expectedMessage;
+};
+
 const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   dropId,
   partId,
@@ -33,31 +70,28 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   maxEmbedDepth,
   onLinkCardActionsActiveChange,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
-  const { data: drop } = useQuery<ApiDrop | undefined>({
-    queryKey: [
-      QueryKey.DROP,
-      {
-        drop_id: dropId,
-        context_profile: connectedProfile?.handle,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${dropId}`,
-        params: connectedProfile?.handle
-          ? { context_profile: connectedProfile.handle }
-          : {},
-      }),
+  const normalizedDropId = dropId.trim();
+
+  const { data: drop, error } = useQuery<ApiDrop | undefined>({
+    queryKey: getDropQueryKey(normalizedDropId),
+    queryFn: () => fetchDropByIdBatched(normalizedDropId),
     placeholderData: keepPreviousData,
-    initialData: maybeDrop ?? undefined,
+    enabled: normalizedDropId.length > 0,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
+    ...(maybeDrop === null
+      ? {}
+      : { initialData: maybeDrop, initialDataUpdatedAt: 0 }),
   });
+
+  const isNotFound = isDropNotFoundError(error, normalizedDropId);
+  const resolvedDrop = isNotFound ? null : (drop ?? null);
 
   return (
     <WaveDropQuote
-      drop={drop ?? null}
+      drop={resolvedDrop}
       partId={partId}
       onQuoteClick={onQuoteClick}
+      isNotFound={isNotFound}
       embedPath={embedPath}
       quotePath={quotePath}
       embedDepth={embedDepth}
