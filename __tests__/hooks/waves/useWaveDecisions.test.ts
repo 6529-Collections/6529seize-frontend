@@ -25,6 +25,7 @@ describe("useWaveDecisions", () => {
       error: null,
       refetch: jest.fn(),
       isFetching: false,
+      isLoading: false,
     });
   });
 
@@ -46,6 +47,7 @@ describe("useWaveDecisions", () => {
       error: null,
       refetch: jest.fn(),
       isFetching: false,
+      isLoading: false,
     });
 
     const { result } = renderHook(() => useWaveDecisions({ waveId: "w1" }));
@@ -80,6 +82,7 @@ describe("useWaveDecisions", () => {
       error: null,
       refetch: jest.fn(),
       isFetching: false,
+      isLoading: false,
     });
 
     const { result } = renderHook(() => useWaveDecisions({ waveId: "w1" }));
@@ -92,6 +95,21 @@ describe("useWaveDecisions", () => {
     );
 
     warnSpy.mockRestore();
+  });
+
+  it("returns the query loading state", () => {
+    useQueryMock.mockReturnValue({
+      data: { data: [] },
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+      isFetching: true,
+      isLoading: true,
+    });
+
+    const { result } = renderHook(() => useWaveDecisions({ waveId: "w1" }));
+
+    expect(result.current.isLoading).toBe(true);
   });
 
   it("requests the first page of decisions", async () => {

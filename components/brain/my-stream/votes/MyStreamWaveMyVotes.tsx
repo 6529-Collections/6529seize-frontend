@@ -45,7 +45,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
     isApprovalWave && !hasApprovalDecisionCounts;
   const {
     decisionPoints: approvalDecisionPoints,
-    isFetching: isFetchingApprovalDecisionPoints,
+    isLoading: isLoadingApprovalDecisionPoints,
   } = useWaveDecisions({
     waveId: wave.id,
     enabled: shouldLoadApprovalDecisionPoints,
@@ -56,7 +56,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   });
   const isVotingControlsLocked =
     isVotingClosed ||
-    (shouldLoadApprovalDecisionPoints && isFetchingApprovalDecisionPoints);
+    (shouldLoadApprovalDecisionPoints && isLoadingApprovalDecisionPoints);
 
   const { myVotesViewStyle } = useLayout();
 

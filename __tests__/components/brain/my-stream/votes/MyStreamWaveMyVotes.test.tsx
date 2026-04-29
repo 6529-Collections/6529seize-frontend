@@ -72,6 +72,7 @@ describe("MyStreamWaveMyVotes", () => {
     useWaveDecisionsMock.mockReturnValue({
       decisionPoints: [],
       isFetching: false,
+      isLoading: false,
     });
     mockApprovalStatus.mockReturnValue({ isVotingClosed: false });
     resetProps = null;
@@ -161,6 +162,7 @@ describe("MyStreamWaveMyVotes", () => {
     useWaveDecisionsMock.mockReturnValue({
       decisionPoints,
       isFetching: false,
+      isLoading: false,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
@@ -203,6 +205,7 @@ describe("MyStreamWaveMyVotes", () => {
     useWaveDecisionsMock.mockReturnValue({
       decisionPoints: [],
       isFetching: true,
+      isLoading: true,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
@@ -230,6 +233,53 @@ describe("MyStreamWaveMyVotes", () => {
     fireEvent.click(vote);
 
     expect(vote).toHaveAttribute("data-is-checked", "false");
+  });
+
+  it("keeps voting controls unlocked during approve decision point refetches", () => {
+    const approveWave = {
+      id: "approve-1",
+      wave: {
+        type: ApiWaveType.Approve,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as any;
+    useWaveDecisionsMock.mockReturnValue({
+      decisionPoints: [
+        {
+          decision_time: 1,
+          winners: [{ place: 1, awards: [], drop: { id: "winner-1" } }],
+        },
+      ],
+      isFetching: true,
+      isLoading: false,
+    });
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 1, max_rating: 5 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes wave={approveWave} onDropClick={onDropClick} />
+      </AuthContext.Provider>
+    );
+
+    const vote = screen.getByTestId("vote");
+    expect(screen.getByTestId("reset")).toBeInTheDocument();
+    expect(vote).toHaveAttribute("data-is-voting-closed", "false");
+
+    fireEvent.click(vote);
+
+    expect(vote).toHaveAttribute("data-is-checked", "true");
   });
 
   it("renders closed approval votes as read-only", () => {

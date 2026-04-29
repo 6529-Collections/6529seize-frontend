@@ -17,7 +17,7 @@ export function useWaveDecisions({
   waveId,
   enabled = true,
 }: UseWaveDecisionsProps) {
-  const { data, isError, error, refetch, isFetching } = useQuery({
+  const { data, isError, error, refetch, isFetching, isLoading } = useQuery({
     queryKey: [QueryKey.WAVE_DECISIONS, { waveId }],
     queryFn: async () => {
       return await commonApiFetch<{ data: ApiWaveDecision[] }>({
@@ -48,5 +48,6 @@ export function useWaveDecisions({
     error,
     refetch,
     isFetching,
+    isLoading,
   };
 }
