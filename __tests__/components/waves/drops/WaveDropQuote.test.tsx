@@ -64,6 +64,40 @@ test("does not call onQuoteClick from not-found state", async () => {
   expect(onQuoteClick).not.toHaveBeenCalled();
 });
 
+test("does not bubble loading quote clicks to parent", async () => {
+  const onParentClick = jest.fn();
+  const { container } = render(
+    <div onClick={onParentClick}>
+      <WaveDropQuote drop={null} partId={1} onQuoteClick={jest.fn()} />
+    </div>
+  );
+  const loadingPlaceholder = container.querySelector(".tw-animate-pulse");
+
+  expect(loadingPlaceholder).toBeInTheDocument();
+
+  await userEvent.click(loadingPlaceholder as Element);
+
+  expect(onParentClick).not.toHaveBeenCalled();
+});
+
+test("does not bubble not-found quote clicks to parent", async () => {
+  const onParentClick = jest.fn();
+  render(
+    <div onClick={onParentClick}>
+      <WaveDropQuote
+        drop={null}
+        partId={1}
+        onQuoteClick={jest.fn()}
+        isNotFound={true}
+      />
+    </div>
+  );
+
+  await userEvent.click(screen.getByText("Drop not found"));
+
+  expect(onParentClick).not.toHaveBeenCalled();
+});
+
 test("calls onQuoteClick on interaction", async () => {
   const drop = {
     id: "d1",
@@ -75,9 +109,15 @@ test("calls onQuoteClick on interaction", async () => {
     referenced_nfts: [],
   } as any;
   const onQuoteClick = jest.fn();
-  render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />);
+  const onParentClick = jest.fn();
+  render(
+    <div onClick={onParentClick}>
+      <WaveDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />
+    </div>
+  );
   await userEvent.click(screen.getByRole("button"));
   expect(onQuoteClick).toHaveBeenCalledWith(drop);
+  expect(onParentClick).not.toHaveBeenCalled();
 });
 
 test("displays quoted part content", () => {

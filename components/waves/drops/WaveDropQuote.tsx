@@ -133,13 +133,25 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   const resolvedOnLinkCardActionsActiveChange =
     onLinkCardActionsActiveChange ?? onCardActionsActiveChange;
   const isInteractive = drop !== null && !isNotFound;
+  const handleQuoteContainerClick = (
+    event: React.MouseEvent<HTMLDivElement>
+  ) => {
+    event.stopPropagation();
+
+    if (isInteractive) {
+      goToQuoteDrop();
+    }
+  };
   const quoteContainerClassName = `tw-mt-1 ${
     isInteractive ? "tw-cursor-pointer" : ""
   } tw-rounded-xl tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800`;
 
   if (isNotFound) {
     return (
-      <div className={quoteContainerClassName}>
+      <div
+        className={quoteContainerClassName}
+        onClick={handleQuoteContainerClick}
+      >
         <DropNotFound />
       </div>
     );
@@ -148,14 +160,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   return (
     <div
       className={quoteContainerClassName}
-      onClick={
-        isInteractive
-          ? (e) => {
-              e.stopPropagation();
-              goToQuoteDrop();
-            }
-          : undefined
-      }
+      onClick={handleQuoteContainerClick}
       onKeyDown={
         isInteractive
           ? (e) => {
