@@ -253,6 +253,8 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               <WaveLeaderboardGalleryItemVotes
                 drop={drop}
                 variant={artFocused ? "subtle" : "default"}
+                winningThreshold={winningThreshold}
+                isVotingClosed={isVotingClosed}
               />
             </div>
             <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-iron-500">

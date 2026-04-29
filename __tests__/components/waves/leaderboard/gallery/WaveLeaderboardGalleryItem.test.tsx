@@ -10,7 +10,14 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes",
-  () => (props: any) => <div data-testid="votes" data-variant={props.variant} />
+  () => (props: any) => (
+    <div
+      data-testid="votes"
+      data-variant={props.variant}
+      data-winning-threshold={props.winningThreshold ?? ""}
+      data-is-voting-closed={String(props.isVotingClosed)}
+    />
+  )
 );
 jest.mock(
   "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity",
@@ -87,6 +94,26 @@ describe("WaveLeaderboardGalleryItem", () => {
     );
 
     expect(screen.queryByTestId("vote-btn")).toBeNull();
+  });
+
+  it("passes approve status props to the vote display", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={drop}
+        onDropClick={jest.fn()}
+        winningThreshold={10}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold",
+      "10"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
   });
 
   it("applies artFocused styles", () => {

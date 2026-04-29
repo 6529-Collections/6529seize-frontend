@@ -457,7 +457,12 @@ export const WaveLeaderboardGridItem: React.FC<
             supplementFullWidth
           />
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-text-xs">
-            <WaveLeaderboardGalleryItemVotes drop={drop} variant="subtle" />
+            <WaveLeaderboardGalleryItemVotes
+              drop={drop}
+              variant="subtle"
+              winningThreshold={winningThreshold}
+              isVotingClosed={isVotingClosed}
+            />
             <div className="tw-ml-4 tw-flex tw-items-center tw-gap-1 tw-text-iron-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

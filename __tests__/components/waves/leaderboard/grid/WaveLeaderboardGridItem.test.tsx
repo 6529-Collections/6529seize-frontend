@@ -32,7 +32,13 @@ jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => () => (
 
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes",
-  () => () => <div data-testid="votes" />
+  () => (props: any) => (
+    <div
+      data-testid="votes"
+      data-winning-threshold={props.winningThreshold ?? ""}
+      data-is-voting-closed={String(props.isVotingClosed)}
+    />
+  )
 );
 jest.mock(
   "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity",
@@ -199,6 +205,27 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.queryByTestId("vote-button")).toBeNull();
+  });
+
+  it("passes approve status props to the compact vote display", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        winningThreshold={12}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold",
+      "12"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
   });
 
   it("hides compact footer in content-only mode", () => {

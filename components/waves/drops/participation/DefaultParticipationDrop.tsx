@@ -30,11 +30,19 @@ interface DefaultParticipationDropProps {
 export default function ParticipationDrop(
   props: DefaultParticipationDropProps
 ) {
-  const { drop } = props;
+  const { drop, winningThreshold } = props;
   const { isVotingEnded } = useDropInteractionRules(drop);
+  const hasWinningThreshold =
+    typeof winningThreshold === "number" &&
+    Number.isFinite(winningThreshold) &&
+    winningThreshold > 0;
 
   // Render either the ongoing or ended drop component based on the voting state
   if (isVotingEnded) {
+    if (hasWinningThreshold) {
+      return <OngoingParticipationDrop {...props} isVotingClosed={true} />;
+    }
+
     return <EndedParticipationDrop {...props} />;
   }
 
