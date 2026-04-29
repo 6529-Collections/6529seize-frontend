@@ -46,36 +46,52 @@ jest.mock(
 );
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({ hasTouchScreen: false }),
+  default: jest.fn(),
 }));
 jest.mock("@/hooks/useLongPressInteraction", () => ({
   __esModule: true,
-  default: () => ({
-    isActive: false,
-    setIsActive: jest.fn(),
-    touchHandlers: {},
-  }),
+  default: jest.fn(),
 }));
 
+const useDeviceInfo = require("@/hooks/useDeviceInfo").default as jest.Mock;
+const useLongPressInteraction = require("@/hooks/useLongPressInteraction")
+  .default as jest.Mock;
+
+const winner = {
+  place: 1,
+  drop: {
+    id: "drop-1",
+    wave: { voting_credit_type: "REP" },
+    context_profile_context: null,
+    author: {},
+  },
+} as any;
+
 describe("DefaultWaveWinnerDrop", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+    useLongPressInteraction.mockReturnValue({
+      isActive: false,
+      setIsActive: jest.fn(),
+      touchHandlers: {},
+    });
+  });
+
   it("renders the winner identity section", () => {
-    render(
-      <DefaultWaveWinnersDrop
-        winner={
-          {
-            place: 1,
-            drop: {
-              id: "drop-1",
-              wave: { voting_credit_type: "REP" },
-              context_profile_context: null,
-              author: {},
-            },
-          } as any
-        }
-        onDropClick={jest.fn()}
-      />
-    );
+    render(<DefaultWaveWinnersDrop winner={winner} onDropClick={jest.fn()} />);
 
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+  });
+
+  it("keeps native tap behavior for touch long-press handlers", () => {
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+
+    render(<DefaultWaveWinnersDrop winner={winner} onDropClick={jest.fn()} />);
+
+    expect(useLongPressInteraction).toHaveBeenCalledWith({
+      hasTouchScreen: true,
+      preventDefault: false,
+    });
   });
 });

@@ -48,15 +48,11 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({ hasTouchScreen: false }),
+  default: jest.fn(),
 }));
 jest.mock("@/hooks/useLongPressInteraction", () => ({
   __esModule: true,
-  default: () => ({
-    isActive: false,
-    setIsActive: jest.fn(),
-    touchHandlers: {},
-  }),
+  default: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
   <div data-testid="actions" />
@@ -98,7 +94,21 @@ const winner: ApiWaveDecisionWinner = {
 } as any;
 const wave: ApiWave = { voting: { credit_type: "votes" } } as any;
 
+const useDeviceInfo = require("@/hooks/useDeviceInfo").default as jest.Mock;
+const useLongPressInteraction = require("@/hooks/useLongPressInteraction")
+  .default as jest.Mock;
+
 describe("MemesWaveWinnersDrop", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+    useLongPressInteraction.mockReturnValue({
+      isActive: false,
+      setIsActive: jest.fn(),
+      touchHandlers: {},
+    });
+  });
+
   it("calls convert helper and onDropClick", async () => {
     const user = userEvent.setup();
     const onClick = jest.fn();
@@ -114,5 +124,22 @@ describe("MemesWaveWinnersDrop", () => {
     expect(screen.getByTestId("author-badges")).toBeInTheDocument();
     expect(screen.getByTestId("identity")).toBeInTheDocument();
     expect(screen.getByAltText("alice's profile picture")).toBeInTheDocument();
+  });
+
+  it("keeps native tap behavior for touch long-press handlers", () => {
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(useLongPressInteraction).toHaveBeenCalledWith({
+      hasTouchScreen: true,
+      preventDefault: false,
+    });
   });
 });
