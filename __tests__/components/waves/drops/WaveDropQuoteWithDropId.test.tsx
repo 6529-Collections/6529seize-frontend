@@ -38,7 +38,7 @@ describe("WaveDropQuoteWithDropId", () => {
     jest.clearAllMocks();
   });
 
-  it("fetches drop and renders quote", async () => {
+  it("fetches drop by drop ID and renders quote when no maybeDrop exists", async () => {
     useQuery.mockImplementation((opts: any) => {
       return { data: { id: "d1", wave: { id: "w1" } } };
     });
@@ -55,7 +55,57 @@ describe("WaveDropQuoteWithDropId", () => {
     expect(call.queryKey).toEqual([QueryKey.DROP, { drop_id: "d1" }]);
     expect(call.enabled).toBe(true);
     expect(call.staleTime).toBe(60000);
+    expect(call).not.toHaveProperty("initialData");
+    expect(call).not.toHaveProperty("initialDataUpdatedAt");
     await call.queryFn();
     expect(fetchDropByIdBatchedMock).toHaveBeenCalledWith("d1");
+  });
+
+  it("treats maybeDrop as stale initial data and fetches fresh data", async () => {
+    const maybeDrop = { id: "d1", wave: { id: "old-wave" } };
+    useQuery.mockImplementation((opts: any) => {
+      return { data: opts.initialData };
+    });
+
+    render(
+      <WaveDropQuoteWithDropId
+        dropId=" d1 "
+        partId={2}
+        maybeDrop={maybeDrop as any}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(capturedProps.drop).toBe(maybeDrop);
+    const call = useQuery.mock.calls[0][0];
+    expect(call.queryKey).toEqual([QueryKey.DROP, { drop_id: "d1" }]);
+    expect(call.enabled).toBe(true);
+    expect(call.initialData).toBe(maybeDrop);
+    expect(call.initialDataUpdatedAt).toBe(0);
+    await call.queryFn();
+    expect(fetchDropByIdBatchedMock).toHaveBeenCalledWith("d1");
+  });
+
+  it("does not render stale maybeDrop when the refresh reports not found", () => {
+    const maybeDrop = { id: "d1", wave: { id: "old-wave" } };
+    useQuery.mockImplementation((opts: any) => {
+      return {
+        data: opts.initialData,
+        error: new Error("Drop d1 not found"),
+      };
+    });
+
+    render(
+      <WaveDropQuoteWithDropId
+        dropId="d1"
+        partId={2}
+        maybeDrop={maybeDrop as any}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(capturedProps.drop).toBeNull();
+    const call = useQuery.mock.calls[0][0];
+    expect(call.enabled).toBe(true);
   });
 });
