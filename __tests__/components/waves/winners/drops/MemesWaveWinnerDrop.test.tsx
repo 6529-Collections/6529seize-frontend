@@ -5,6 +5,8 @@ import { MemesWaveWinnersDrop } from "@/components/waves/winners/drops/MemesWave
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 
+const mockMobileMenuOpenClick = jest.fn();
+
 jest.mock("@/helpers/waves/drop.helpers", () => ({
   convertApiDropToExtendedDrop: jest.fn(() => ({ id: "ext" })),
 }));
@@ -59,11 +61,24 @@ jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
 ));
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
-  () => (p: any) => <div>{p.children}</div>
+  () => (p: any) =>
+    p.isOpen ? <div data-testid="mobile-wrapper">{p.children}</div> : null
 );
-jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => () => (
-  <div data-testid="mobile" />
-));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
+  __esModule: true,
+  default: (props: { onOpenChange: () => void }) => (
+    <button
+      type="button"
+      data-testid="mobile"
+      onClick={() => {
+        mockMobileMenuOpenClick();
+        props.onOpenChange();
+      }}
+    >
+      Open drop
+    </button>
+  ),
+}));
 jest.mock("@/components/waves/drops/time/WaveDropTime", () => () => (
   <span data-testid="time" />
 ));
@@ -101,6 +116,7 @@ const useLongPressInteraction = require("@/hooks/useLongPressInteraction")
 describe("MemesWaveWinnersDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockMobileMenuOpenClick.mockClear();
     useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
     useLongPressInteraction.mockReturnValue({
       isActive: false,
@@ -161,6 +177,37 @@ describe("MemesWaveWinnersDrop", () => {
     longPressOptions.onInteractionStart();
 
     await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).not.toHaveBeenCalled();
+
+    await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets the first portal menu tap run after a long press", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+    const setIsActive = jest.fn();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+    useLongPressInteraction.mockReturnValue({
+      isActive: true,
+      setIsActive,
+      touchHandlers: {},
+    });
+
+    const { container } = render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    const longPressOptions = useLongPressInteraction.mock.calls[0][0];
+    longPressOptions.onInteractionStart();
+
+    await user.click(screen.getByTestId("mobile"));
+    expect(mockMobileMenuOpenClick).toHaveBeenCalledTimes(1);
+    expect(setIsActive).toHaveBeenCalledWith(false);
     expect(onDropClick).not.toHaveBeenCalled();
 
     await user.click(container.firstElementChild as HTMLElement);

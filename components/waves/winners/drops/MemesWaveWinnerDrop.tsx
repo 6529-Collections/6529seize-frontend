@@ -44,6 +44,12 @@ const getRankHoverClass = (place: number | null): string => {
   return getRankHoverBorderClass(place);
 };
 
+const isClickFromCardDom = (
+  event: React.MouseEvent<HTMLDivElement>
+): boolean => {
+  return event.currentTarget.contains(event.target as Node);
+};
+
 export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   winner,
   wave,
@@ -59,6 +65,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
 
   const handleClickCapture = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!isClickFromCardDom(event)) {
+        return;
+      }
+
       if (!suppressNextClickRef.current) {
         return;
       }
@@ -70,12 +80,31 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     []
   );
 
+  const handleMenuClickCapture = React.useCallback(() => {
+    suppressNextClickRef.current = false;
+  }, []);
+
   // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
     onInteractionStart: handleInteractionStart,
     preventDefault: false,
   });
+
+  const handleMobileMenuOpenChange = React.useCallback(
+    (nextIsActive: boolean) => {
+      if (!nextIsActive) {
+        suppressNextClickRef.current = false;
+      }
+
+      setIsActive(nextIsActive);
+    },
+    [setIsActive]
+  );
+
+  const handleMobileMenuClose = React.useCallback(() => {
+    handleMobileMenuOpenChange(false);
+  }, [handleMobileMenuOpenChange]);
 
   const title =
     winner.drop.metadata.find((m) => m.data_key === "title")?.data_value ??
@@ -105,10 +134,21 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   // Convert the drop to ExtendedDrop using the helper function
   const extendedDrop = convertApiDropToExtendedDrop(winner.drop);
 
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!isClickFromCardDom(event)) {
+        return;
+      }
+
+      onDropClick(extendedDrop);
+    },
+    [extendedDrop, onDropClick]
+  );
+
   return (
     <div
       onClickCapture={handleClickCapture}
-      onClick={() => onDropClick(extendedDrop)}
+      onClick={handleClick}
       className="touch-select-none tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out"
     >
       <div
@@ -299,13 +339,16 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             createPortal(
               <CommonDropdownItemsMobileWrapper
                 isOpen={isActive}
-                setOpen={setIsActive}
+                setOpen={handleMobileMenuOpenChange}
               >
-                <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
+                <div
+                  onClickCapture={handleMenuClickCapture}
+                  className="tw-grid tw-grid-cols-1 tw-gap-y-2"
+                >
                   {/* Open drop option */}
                   <WaveDropMobileMenuOpen
                     drop={extendedDrop}
-                    onOpenChange={() => setIsActive(false)}
+                    onOpenChange={handleMobileMenuClose}
                   />
                 </div>
               </CommonDropdownItemsMobileWrapper>,
