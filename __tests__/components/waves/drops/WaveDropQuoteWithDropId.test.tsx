@@ -51,6 +51,7 @@ describe("WaveDropQuoteWithDropId", () => {
       />
     );
     expect(capturedProps.drop).toEqual({ id: "d1", wave: { id: "w1" } });
+    expect(capturedProps.isNotFound).toBe(false);
     const call = useQuery.mock.calls[0][0];
     expect(call.queryKey).toEqual([QueryKey.DROP, { drop_id: "d1" }]);
     expect(call.enabled).toBe(true);
@@ -77,6 +78,7 @@ describe("WaveDropQuoteWithDropId", () => {
     );
 
     expect(capturedProps.drop).toBe(maybeDrop);
+    expect(capturedProps.isNotFound).toBe(false);
     const call = useQuery.mock.calls[0][0];
     expect(call.queryKey).toEqual([QueryKey.DROP, { drop_id: "d1" }]);
     expect(call.enabled).toBe(true);
@@ -84,6 +86,27 @@ describe("WaveDropQuoteWithDropId", () => {
     expect(call.initialDataUpdatedAt).toBe(0);
     await call.queryFn();
     expect(fetchDropByIdBatchedMock).toHaveBeenCalledWith("d1");
+  });
+
+  it("passes not-found state when the refresh returns the not-found message", () => {
+    useQuery.mockImplementation(() => {
+      return {
+        data: undefined,
+        error: new Error("Drop d1 not found"),
+      };
+    });
+
+    render(
+      <WaveDropQuoteWithDropId
+        dropId="d1"
+        partId={2}
+        maybeDrop={null}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(capturedProps.drop).toBeNull();
+    expect(capturedProps.isNotFound).toBe(true);
   });
 
   it("does not render stale maybeDrop when the refresh reports not found", () => {
@@ -105,7 +128,30 @@ describe("WaveDropQuoteWithDropId", () => {
     );
 
     expect(capturedProps.drop).toBeNull();
+    expect(capturedProps.isNotFound).toBe(true);
     const call = useQuery.mock.calls[0][0];
     expect(call.enabled).toBe(true);
+  });
+
+  it("passes not-found state when the refresh returns a 404", () => {
+    const maybeDrop = { id: "d1", wave: { id: "old-wave" } };
+    useQuery.mockImplementation((opts: any) => {
+      return {
+        data: opts.initialData,
+        error: { response: { status: 404 } },
+      };
+    });
+
+    render(
+      <WaveDropQuoteWithDropId
+        dropId="d1"
+        partId={2}
+        maybeDrop={maybeDrop as any}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(capturedProps.drop).toBeNull();
+    expect(capturedProps.isNotFound).toBe(true);
   });
 });

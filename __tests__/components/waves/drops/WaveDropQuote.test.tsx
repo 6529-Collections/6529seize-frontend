@@ -25,11 +25,43 @@ beforeEach(() => {
   markdownProps = undefined;
 });
 
-test("renders placeholder when drop missing", () => {
+test("renders loading placeholder when drop missing", () => {
   const { container } = render(
     <WaveDropQuote drop={null} partId={1} onQuoteClick={jest.fn()} />
   );
   expect(container.querySelector(".tw-animate-pulse")).toBeInTheDocument();
+  expect(screen.queryByText("Drop not found")).not.toBeInTheDocument();
+});
+
+test("renders not-found state without loading placeholder", () => {
+  const { container } = render(
+    <WaveDropQuote
+      drop={null}
+      partId={1}
+      onQuoteClick={jest.fn()}
+      isNotFound={true}
+    />
+  );
+
+  expect(screen.getByText("Drop not found")).toBeInTheDocument();
+  expect(container.querySelector(".tw-animate-pulse")).not.toBeInTheDocument();
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
+});
+
+test("does not call onQuoteClick from not-found state", async () => {
+  const onQuoteClick = jest.fn();
+  render(
+    <WaveDropQuote
+      drop={null}
+      partId={1}
+      onQuoteClick={onQuoteClick}
+      isNotFound={true}
+    />
+  );
+
+  await userEvent.click(screen.getByText("Drop not found"));
+
+  expect(onQuoteClick).not.toHaveBeenCalled();
 });
 
 test("calls onQuoteClick on interaction", async () => {

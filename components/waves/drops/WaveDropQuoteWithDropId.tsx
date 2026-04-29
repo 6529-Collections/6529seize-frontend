@@ -83,15 +83,15 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
       : { initialData: maybeDrop, initialDataUpdatedAt: 0 }),
   });
 
-  const resolvedDrop = isDropNotFoundError(error, normalizedDropId)
-    ? null
-    : (drop ?? null);
+  const isNotFound = isDropNotFoundError(error, normalizedDropId);
+  const resolvedDrop = isNotFound ? null : (drop ?? null);
 
   return (
     <WaveDropQuote
       drop={resolvedDrop}
       partId={partId}
       onQuoteClick={onQuoteClick}
+      isNotFound={isNotFound}
       embedPath={embedPath}
       quotePath={quotePath}
       embedDepth={embedDepth}
