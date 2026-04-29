@@ -16,8 +16,12 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createBreakpoint } from "react-use";
-import type { DropIdentityMode, DropInteractionParams } from "./drop.types";
-import { DropLocation } from "./drop.types";
+import type {
+  DropIdentityMode,
+  DropInteractionParams,
+  DropTimestampLayout,
+} from "./drop.types";
+import { DropLocation, hasDropFooter } from "./drop.types";
 import { getRankHoverRingClass } from "./dropRankStyles";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
@@ -122,6 +126,14 @@ const getDropClasses = (
       : chatDropClasses;
 
   return `${baseClasses} ${groupingClass} ${locationClasses} ${rankClasses}`.trim();
+};
+
+const getContentOffsetClass = (compact: boolean): string => {
+  if (compact) {
+    return "tw-ml-11 tw-w-[calc(100%-2.5rem)]";
+  }
+
+  return "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]";
 };
 
 const shouldShowAuthorInfo = ({
@@ -239,6 +251,7 @@ const getAuthorHeader = ({
   activePartIndex,
   showActionsButton,
   handleOpenTouchActions,
+  timestampLayout,
 }: {
   readonly showAuthorInfo: boolean;
   readonly identityMode: DropIdentityMode;
@@ -250,6 +263,7 @@ const getAuthorHeader = ({
   readonly handleOpenTouchActions: (
     e: React.MouseEvent<HTMLButtonElement>
   ) => void;
+  readonly timestampLayout: DropTimestampLayout;
 }): React.ReactNode => {
   if (!showAuthorInfo) {
     return null;
@@ -265,11 +279,14 @@ const getAuthorHeader = ({
         partsCount={drop.parts.length}
         showActionsButton={showActionsButton}
         onOpenActions={handleOpenTouchActions}
+        timestampLayout={timestampLayout}
       />
     );
   }
 
-  return <DropMinimalIdentityRow drop={drop} />;
+  return (
+    <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
+  );
 };
 
 const getContentBlock = ({
@@ -406,7 +423,9 @@ interface WaveDropProps {
   readonly wrapContentOnly?:
     | ((content: React.ReactNode) => React.ReactNode)
     | undefined;
+  readonly footer?: React.ReactNode;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
 }
 
@@ -424,7 +443,9 @@ const WaveDrop = ({
   onDropContentClick,
   showReplyAndQuote,
   wrapContentOnly,
+  footer,
   identityMode = "default",
+  timestampLayout = "inline",
   showInteractions = true,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
@@ -566,6 +587,7 @@ const WaveDrop = ({
     activePartIndex,
     showActionsButton,
     handleOpenTouchActions,
+    timestampLayout,
   });
 
   const handleOnEdit = useCallback(() => {
@@ -713,11 +735,7 @@ const WaveDrop = ({
 
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
     <div
-      className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${
-        compact
-          ? "tw-ml-11 tw-w-[calc(100%-2.5rem)]"
-          : "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
-      }`}
+      className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${getContentOffsetClass(compact)}`}
     >
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
@@ -727,6 +745,14 @@ const WaveDrop = ({
       )}
       {showInteractions && <WaveDropReactions drop={drop} />}
     </div>
+  );
+  const shouldOffsetFooter =
+    showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView);
+  const footerOffsetClass = shouldOffsetFooter
+    ? getContentOffsetClass(compact)
+    : "";
+  const footerRow = hasDropFooter(footer) && (
+    <div className={`tw-mx-2 tw-mt-2 ${footerOffsetClass}`}>{footer}</div>
   );
 
   return (
@@ -746,6 +772,7 @@ const WaveDrop = ({
       >
         {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
         {reactionsRow}
+        {footerRow}
         {showInteractions && (
           <WaveDropMobileMenu
             drop={drop}
