@@ -7,7 +7,10 @@ import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandle
 import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
-import { DropLocation } from "@/components/waves/drops/drop.types";
+import {
+  DropLocation,
+  hasDropFooter,
+} from "@/components/waves/drops/drop.types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -175,7 +178,7 @@ export default function MemeParticipationDrop({
               <WaveDropReactions drop={drop} />
             </div>
           )}
-          {footer !== undefined && footer !== null && (
+          {hasDropFooter(footer) && (
             <div className="tw-px-4 tw-pb-4 tw-pt-2">{footer}</div>
           )}
 

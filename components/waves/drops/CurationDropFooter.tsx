@@ -2,7 +2,6 @@
 
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import clsx from "clsx";
-import type { SyntheticEvent } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropReactions from "./WaveDropReactions";
@@ -11,10 +10,6 @@ interface CurationDropFooterProps {
   readonly drop: ExtendedDrop;
   readonly className?: string | undefined;
 }
-
-const stopFooterPropagation = (event: SyntheticEvent) => {
-  event.stopPropagation();
-};
 
 export default function CurationDropFooter({
   drop,
@@ -30,8 +25,6 @@ export default function CurationDropFooter({
         "tw-relative tw-z-20 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-2",
         className
       )}
-      onClick={stopFooterPropagation}
-      onMouseDown={stopFooterPropagation}
       data-text-selection-exclude="true"
     >
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">

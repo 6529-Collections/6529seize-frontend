@@ -21,7 +21,7 @@ import type {
   DropInteractionParams,
   DropTimestampLayout,
 } from "./drop.types";
-import { DropLocation } from "./drop.types";
+import { DropLocation, hasDropFooter } from "./drop.types";
 import { getRankHoverRingClass } from "./dropRankStyles";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
@@ -746,10 +746,12 @@ const WaveDrop = ({
       {showInteractions && <WaveDropReactions drop={drop} />}
     </div>
   );
-  const footerOffsetClass = showAuthorInfo
+  const shouldOffsetFooter =
+    showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView);
+  const footerOffsetClass = shouldOffsetFooter
     ? getContentOffsetClass(compact)
     : "";
-  const footerRow = footer !== undefined && footer !== null && (
+  const footerRow = hasDropFooter(footer) && (
     <div className={`tw-mx-2 tw-mt-2 ${footerOffsetClass}`}>{footer}</div>
   );
 

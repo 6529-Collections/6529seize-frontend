@@ -7,7 +7,10 @@ import {
   getRankStaticBorderClass,
 } from "@/components/waves/drops/dropRankStyles";
 import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
-import { DropLocation } from "@/components/waves/drops/drop.types";
+import {
+  DropLocation,
+  hasDropFooter,
+} from "@/components/waves/drops/drop.types";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
@@ -119,7 +122,7 @@ export default function MemeWinnerDrop({
           ) : (
             content
           )}
-          {footer !== undefined && footer !== null && (
+          {hasDropFooter(footer) && (
             <div className="tw-px-4 tw-pb-4 tw-pt-2">{footer}</div>
           )}
           {!isMobile && showInteractions && showReplyAndQuote && (

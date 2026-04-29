@@ -13,7 +13,7 @@ import type {
   DropInteractionParams,
   DropTimestampLayout,
 } from "../drop.types";
-import { DropLocation } from "../drop.types";
+import { DropLocation, hasDropFooter } from "../drop.types";
 import {
   getRankHoverBorderClass,
   getRankStaticBorderClass,
@@ -249,7 +249,7 @@ const DefaultWinnerDrop = ({
             </div>
           )}
         </div>
-        {footer !== undefined && footer !== null && (
+        {hasDropFooter(footer) && (
           <div
             className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
           >

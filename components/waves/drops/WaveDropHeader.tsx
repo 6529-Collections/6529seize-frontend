@@ -102,9 +102,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             </div>
             {isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
           </div>
-          {badge !== undefined && badge !== null && (
-            <div className="tw-ml-2">{badge}</div>
-          )}
+          {Boolean(badge) && <div className="tw-ml-2">{badge}</div>}
         </div>
         {showActionsButton && onOpenActions !== undefined && (
           <button

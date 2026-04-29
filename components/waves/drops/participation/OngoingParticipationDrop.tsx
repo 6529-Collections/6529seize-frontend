@@ -32,6 +32,7 @@ import type {
   DropLocation,
   DropTimestampLayout,
 } from "../drop.types";
+import { hasDropFooter } from "../drop.types";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -184,14 +185,14 @@ export default function OngoingParticipationDrop({
           metadata={visibleMetadata}
           contextId={drop.id}
         />
-        {(showInteractions || footer === undefined || footer === null) && (
+        {(showInteractions || !hasDropFooter(footer)) && (
           <ParticipationDropFooter
             drop={drop}
             voteAction={voteAction}
             showInteractions={showInteractions}
           />
         )}
-        {footer !== undefined && footer !== null && (
+        {hasDropFooter(footer) && (
           <div
             className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-px-4 tw-pb-4 tw-pt-2`}
           >
