@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 
@@ -75,6 +76,33 @@ describe("useApprovalWaveStatus", () => {
     });
 
     const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+    expect(result.current.approvedCount).toBe(2);
+    expect(result.current.closeStatus).toBe("max_reached");
+    expect(result.current.isVotingClosed).toBe(true);
+  });
+
+  it("closes when decision points reach max winners and wave counts are missing", () => {
+    const wave = createWave({
+      maxWinners: 2,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: null,
+      votingEnd: 2000,
+    });
+    const decisionPoints = [
+      {
+        decision_time: 1100,
+        winners: [{ place: 1, awards: [], drop: { id: "drop-1" } }],
+      },
+      {
+        decision_time: 1200,
+        winners: [{ place: 1, awards: [], drop: { id: "drop-2" } }],
+      },
+    ] as ApiWaveDecision[];
+
+    const { result } = renderHook(() =>
+      useApprovalWaveStatus({ wave, decisionPoints })
+    );
 
     expect(result.current.approvedCount).toBe(2);
     expect(result.current.closeStatus).toBe("max_reached");

@@ -13,11 +13,18 @@ import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import MyStreamWaveMyVotesReset from "./MyStreamWaveMyVotesReset";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { isApproveWave } from "@/helpers/waves/approve-wave.helpers";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
+
+const isValidDecisionCount = (
+  value: number | null | undefined
+): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0;
 
 const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   wave,
@@ -30,7 +37,26 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
       enabled: !isResettingVotes,
     });
-  const { isVotingClosed } = useApprovalWaveStatus({ wave });
+  const isApprovalWave = isApproveWave(wave);
+  const hasApprovalDecisionCounts =
+    isValidDecisionCount(wave.wave.no_of_decisions_done) ||
+    isValidDecisionCount(wave.wave.no_of_decisions_left);
+  const shouldLoadApprovalDecisionPoints =
+    isApprovalWave && !hasApprovalDecisionCounts;
+  const {
+    decisionPoints: approvalDecisionPoints,
+    isFetching: isFetchingApprovalDecisionPoints,
+  } = useWaveDecisions({
+    waveId: wave.id,
+    enabled: shouldLoadApprovalDecisionPoints,
+  });
+  const { isVotingClosed } = useApprovalWaveStatus({
+    wave,
+    decisionPoints: approvalDecisionPoints,
+  });
+  const isVotingControlsLocked =
+    isVotingClosed ||
+    (shouldLoadApprovalDecisionPoints && isFetchingApprovalDecisionPoints);
 
   const { myVotesViewStyle } = useLayout();
 
@@ -57,15 +83,15 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
 
   // Check if all items are selected
   const allItemsSelected = useMemo(() => {
-    if (isVotingClosed) {
+    if (isVotingControlsLocked) {
       return false;
     }
 
     return !!drops.length && drops.every((drop) => checkedDrops.has(drop.id));
-  }, [drops, checkedDrops, isVotingClosed]);
+  }, [drops, checkedDrops, isVotingControlsLocked]);
 
   const handleToggleCheck = (dropId: string) => {
-    if (isVotingClosed) {
+    if (isVotingControlsLocked) {
       return;
     }
 
@@ -81,7 +107,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   };
 
   const handleToggleSelectAll = () => {
-    if (isVotingClosed) {
+    if (isVotingControlsLocked) {
       return;
     }
 
@@ -119,13 +145,13 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
         </div>
       ) : (
         <div className="tw-mt-4 tw-space-y-4">
-          {!isVotingClosed && (
+          {!isVotingControlsLocked && (
             <MyStreamWaveMyVotesReset
               haveDrops={!!drops.length}
               availableVotes={sharedAvailableVotes}
               selected={checkedDrops}
               allItemsSelected={allItemsSelected}
-              isVotingClosed={isVotingClosed}
+              isVotingClosed={isVotingControlsLocked}
               onToggleSelectAll={handleToggleSelectAll}
               removeSelected={removeSelected}
               onResettingChange={setIsResettingVotes}
@@ -137,9 +163,9 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                 key={drop.id}
                 drop={drop}
                 onDropClick={onDropClick}
-                isChecked={!isVotingClosed && checkedDrops.has(drop.id)}
+                isChecked={!isVotingControlsLocked && checkedDrops.has(drop.id)}
                 isResetting={isResettingVotes}
-                isVotingClosed={isVotingClosed}
+                isVotingClosed={isVotingControlsLocked}
                 onToggleCheck={handleToggleCheck}
               />
             ))}
