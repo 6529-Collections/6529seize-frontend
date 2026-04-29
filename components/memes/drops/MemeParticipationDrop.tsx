@@ -13,7 +13,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
@@ -27,6 +27,7 @@ interface MemeParticipationDropProps {
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
+  readonly footer?: ReactNode;
   readonly showInteractions?: boolean | undefined;
 }
 
@@ -63,6 +64,7 @@ export default function MemeParticipationDrop({
   showReplyAndQuote,
   location,
   onReply,
+  footer,
   showInteractions = true,
 }: MemeParticipationDropProps) {
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
@@ -172,6 +174,9 @@ export default function MemeParticipationDrop({
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
               <WaveDropReactions drop={drop} />
             </div>
+          )}
+          {footer !== undefined && footer !== null && (
+            <div className="tw-px-4 tw-pb-4 tw-pt-2">{footer}</div>
           )}
 
           {showInteractions && (

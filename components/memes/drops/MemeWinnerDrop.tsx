@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, type ReactNode } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   getRankHoverBorderClass,
@@ -23,6 +23,7 @@ interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
   readonly showReplyAndQuote: boolean;
   readonly onReply: (param: DropInteractionParams) => void;
+  readonly footer?: ReactNode;
   readonly showInteractions?: boolean | undefined;
 }
 
@@ -34,6 +35,7 @@ export default function MemeWinnerDrop({
   drop,
   showReplyAndQuote,
   onReply,
+  footer,
   showInteractions = true,
 }: MemeWinnerDropProps) {
   const isMobile = useIsMobileDevice();
@@ -116,6 +118,9 @@ export default function MemeWinnerDrop({
             </DropMobileMenuHandler>
           ) : (
             content
+          )}
+          {footer !== undefined && footer !== null && (
+            <div className="tw-px-4 tw-pb-4 tw-pt-2">{footer}</div>
           )}
           {!isMobile && showInteractions && showReplyAndQuote && (
             <div className="tw-absolute tw-right-4 tw-top-2">

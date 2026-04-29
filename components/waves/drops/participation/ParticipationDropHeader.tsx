@@ -6,61 +6,93 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import WinnerDropBadge from "../winner/WinnerDropBadge";
 import WaveDropTime from "../time/WaveDropTime";
+import type { DropTimestampLayout } from "../drop.types";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;
   readonly showWaveInfo: boolean;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
 }
 
 export default function ParticipationDropHeader({
   drop,
   showWaveInfo,
+  timestampLayout = "inline",
 }: ParticipationDropHeaderProps) {
+  const isStackedTimestamp = timestampLayout === "stacked";
+  const authorIdentity = drop.author.handle ?? drop.author.primary_address;
+  const hasRank = drop.rank !== null;
+
   return (
     <>
-      <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap">
-        <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-          <Link
-            onClick={(e) => e.stopPropagation()}
-            href={`/${drop.author.handle}`}
-            className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-          >
-            {drop.author.handle}
-          </Link>
-        </p>
-        <UserCICAndLevel
-          level={drop.author.level}
-          size={UserCICAndLevelSize.SMALL}
-        />
-        {drop.rank && (
-          <WinnerDropBadge
-            rank={drop.rank}
-            decisionTime={drop.winning_context?.decision_time ?? null}
+      <div
+        className={
+          isStackedTimestamp
+            ? "tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-y-1"
+            : "tw-flex tw-flex-wrap tw-items-center tw-gap-x-2"
+        }
+      >
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+          <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
+            <Link
+              onClick={(e) => e.stopPropagation()}
+              href={`/${authorIdentity}`}
+              className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+            >
+              {authorIdentity}
+            </Link>
+          </p>
+          <UserCICAndLevel
+            level={drop.author.level}
+            size={UserCICAndLevelSize.SMALL}
           />
-        )}
-        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-        <WaveDropTime timestamp={drop.created_at} />
+          {hasRank && (
+            <WinnerDropBadge
+              rank={drop.rank}
+              decisionTime={drop.winning_context?.decision_time ?? null}
+            />
+          )}
+          {!isStackedTimestamp && (
+            <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+          )}
+          {!isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
+        </div>
+        {isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
       </div>
-      {showWaveInfo && drop.wave && (() => {
-        const waveMeta = (drop.wave as unknown as {
-          chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
-        })?.chat;
-        const isDirectMessage = waveMeta?.scope?.group?.is_direct_message ?? false;
-        const waveHref = getWaveRoute({
-          waveId: drop.wave.id,
-          isDirectMessage,
-          isApp: false,
-        });
-        return (
-          <Link
-            onClick={(e) => e.stopPropagation()}
-            href={waveHref}
-            className="tw-mb-0 tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-          >
-            {drop.wave.name}
-          </Link>
-        );
-      })()}
+      {showWaveInfo &&
+        (() => {
+          const waveMeta = (
+            drop.wave as unknown as {
+              chat?:
+                | {
+                    scope?:
+                      | {
+                          group?:
+                            | { is_direct_message?: boolean | undefined }
+                            | undefined;
+                        }
+                      | undefined;
+                  }
+                | undefined;
+            }
+          ).chat;
+          const isDirectMessage =
+            waveMeta?.scope?.group?.is_direct_message ?? false;
+          const waveHref = getWaveRoute({
+            waveId: drop.wave.id,
+            isDirectMessage,
+            isApp: false,
+          });
+          return (
+            <Link
+              onClick={(e) => e.stopPropagation()}
+              href={waveHref}
+              className="tw-leading-0 tw-mb-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+            >
+              {drop.wave.name}
+            </Link>
+          );
+        })()}
     </>
   );
 }

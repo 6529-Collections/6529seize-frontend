@@ -28,7 +28,11 @@ import {
   getParticipationVisibleMetadata,
 } from "./participationIdentityProfile.helpers";
 import type { DropContentPresentation } from "../dropContentPresentation";
-import type { DropIdentityMode, DropInteractionParams } from "../drop.types";
+import type {
+  DropIdentityMode,
+  DropInteractionParams,
+  DropTimestampLayout,
+} from "../drop.types";
 import { DropLocation } from "../drop.types";
 
 interface EndedParticipationDropProps {
@@ -40,7 +44,9 @@ interface EndedParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly footer?: React.ReactNode;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly embedPath?: readonly string[] | undefined;
@@ -58,7 +64,9 @@ export default function EndedParticipationDrop({
   onReply,
   onQuoteClick,
   onDropContentClick,
+  footer,
   identityMode = "default",
+  timestampLayout = "inline",
   showInteractions = true,
   contentPresentation = "default",
   embedPath,
@@ -89,6 +97,7 @@ export default function EndedParticipationDrop({
   const isMobile = useIsMobileDevice();
   const hasTouch = useIsTouchDevice() || isMobile;
   const showIdentity = identityMode !== "hidden";
+  const isStackedTimestamp = timestampLayout === "stacked";
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
@@ -143,35 +152,55 @@ export default function EndedParticipationDrop({
           <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
             {showIdentity &&
               (identityMode === "minimal" ? (
-                <DropMinimalIdentityRow drop={drop} />
+                <DropMinimalIdentityRow
+                  drop={drop}
+                  timestampLayout={timestampLayout}
+                />
               ) : (
                 <div className="tw-flex tw-flex-col tw-gap-y-2">
-                  <div className="tw-flex tw-items-center tw-gap-x-2">
-                    <UserCICAndLevel
-                      level={drop.author.level}
-                      size={UserCICAndLevelSize.SMALL}
-                    />
+                  <div
+                    className={
+                      isStackedTimestamp
+                        ? "tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-y-1"
+                        : "tw-flex tw-items-center tw-gap-x-2"
+                    }
+                  >
+                    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                      <UserCICAndLevel
+                        level={drop.author.level}
+                        size={UserCICAndLevelSize.SMALL}
+                      />
 
-                    <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
-                      <Link
-                        onClick={(e) =>
-                          handleNavigation(
-                            e,
-                            `/${drop.author.handle ?? drop.author.primary_address}`
-                          )
-                        }
-                        href={`/${drop.author.handle ?? drop.author.primary_address}`}
-                        className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-                      >
-                        {drop.author.handle ?? drop.author.primary_address}
-                      </Link>
-                    </p>
+                      <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
+                        <Link
+                          onClick={(e) =>
+                            handleNavigation(
+                              e,
+                              `/${drop.author.handle ?? drop.author.primary_address}`
+                            )
+                          }
+                          href={`/${drop.author.handle ?? drop.author.primary_address}`}
+                          className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                        >
+                          {drop.author.handle ?? drop.author.primary_address}
+                        </Link>
+                      </p>
 
-                    <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+                      {!isStackedTimestamp && (
+                        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+                      )}
 
-                    <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
-                      {getTimeAgoShort(drop.created_at)}
-                    </p>
+                      {!isStackedTimestamp && (
+                        <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
+                          {getTimeAgoShort(drop.created_at)}
+                        </p>
+                      )}
+                    </div>
+                    {isStackedTimestamp && (
+                      <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
+                        {getTimeAgoShort(drop.created_at)}
+                      </p>
+                    )}
                   </div>
                   <div className="tw-flex tw-w-fit tw-items-center tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-border-iron-500/25 tw-bg-iron-600/10 tw-px-2 tw-py-0.5 tw-font-medium tw-text-iron-500">
                     <span className="tw-text-xs">Participant</span>
@@ -259,6 +288,13 @@ export default function EndedParticipationDrop({
               isCurated={drop.context_profile_context?.curated ?? false}
             />
             <WaveDropReactions drop={drop} />
+          </div>
+        )}
+        {footer !== undefined && footer !== null && (
+          <div
+            className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
+          >
+            {footer}
           </div>
         )}
 

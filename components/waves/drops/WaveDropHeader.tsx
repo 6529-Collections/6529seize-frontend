@@ -14,6 +14,7 @@ import { DropAuthorBadges } from "./DropAuthorBadges";
 import { useCallback } from "react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import type { DropTimestampLayout } from "./drop.types";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -26,6 +27,7 @@ interface WaveDropHeaderProps {
   readonly onOpenActions?:
     | ((e: React.MouseEvent<HTMLButtonElement>) => void)
     | undefined;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
 }
 
 const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
@@ -37,10 +39,12 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   badge,
   showActionsButton = false,
   onOpenActions,
+  timestampLayout = "inline",
 }) => {
   const router = useRouter();
   const compact = useCompactMode();
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
+  const isStackedTimestamp = timestampLayout === "stacked";
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleNavigation = useCallback(
@@ -56,38 +60,53 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
-            <p
-              className={`tw-mb-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
-            >
-              <UserProfileTooltipWrapper user={authorIdentity}>
-                <Link
-                  onClick={(e) => handleNavigation(e, `/${authorIdentity}`)}
-                  href={`/${authorIdentity}`}
-                  className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
-                >
-                  <ProfileNameWithAiMarker
-                    classification={drop.author.classification}
+          <div
+            className={
+              isStackedTimestamp
+                ? "tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-y-1.5"
+                : "tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1"
+            }
+          >
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+              <p
+                className={`tw-mb-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
+              >
+                <UserProfileTooltipWrapper user={authorIdentity}>
+                  <Link
+                    onClick={(e) => handleNavigation(e, `/${authorIdentity}`)}
+                    href={`/${authorIdentity}`}
+                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
                   >
-                    {authorIdentity}
-                  </ProfileNameWithAiMarker>
-                </Link>
-              </UserProfileTooltipWrapper>
-            </p>
-            <UserCICAndLevel
-              level={drop.author.level}
-              size={UserCICAndLevelSize.SMALL}
-            />
-            <DropAuthorBadges
-              profile={drop.author}
-              tooltipIdPrefix={`header-author-badges-${drop.id}`}
-            />
-            <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
-            <WaveDropTime timestamp={drop.created_at} />
+                    <ProfileNameWithAiMarker
+                      classification={drop.author.classification}
+                    >
+                      {authorIdentity}
+                    </ProfileNameWithAiMarker>
+                  </Link>
+                </UserProfileTooltipWrapper>
+              </p>
+              <UserCICAndLevel
+                level={drop.author.level}
+                size={UserCICAndLevelSize.SMALL}
+              />
+              <DropAuthorBadges
+                profile={drop.author}
+                tooltipIdPrefix={`header-author-badges-${drop.id}`}
+              />
+              {!isStackedTimestamp && (
+                <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+              )}
+              {!isStackedTimestamp && (
+                <WaveDropTime timestamp={drop.created_at} />
+              )}
+            </div>
+            {isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
           </div>
-          {!!badge && <div className="tw-ml-2">{badge}</div>}
+          {badge !== undefined && badge !== null && (
+            <div className="tw-ml-2">{badge}</div>
+          )}
         </div>
-        {showActionsButton && onOpenActions && (
+        {showActionsButton && onOpenActions !== undefined && (
           <button
             type="button"
             aria-label="Open drop actions"

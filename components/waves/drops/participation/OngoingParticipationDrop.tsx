@@ -30,6 +30,7 @@ import type {
   DropIdentityMode,
   DropInteractionParams,
   DropLocation,
+  DropTimestampLayout,
 } from "../drop.types";
 
 interface OngoingParticipationDropProps {
@@ -41,7 +42,9 @@ interface OngoingParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly footer?: React.ReactNode;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly embedPath?: readonly string[] | undefined;
@@ -59,7 +62,9 @@ export default function OngoingParticipationDrop({
   onReply,
   onQuoteClick,
   onDropContentClick,
+  footer,
   identityMode = "default",
+  timestampLayout = "inline",
   showInteractions = true,
   contentPresentation = "default",
   embedPath,
@@ -135,11 +140,15 @@ export default function OngoingParticipationDrop({
         <div className="tw-flex tw-w-full tw-flex-col">
           {showIdentity &&
             (identityMode === "minimal" ? (
-              <DropMinimalIdentityRow drop={drop} />
+              <DropMinimalIdentityRow
+                drop={drop}
+                timestampLayout={timestampLayout}
+              />
             ) : (
               <ParticipationDropHeader
                 drop={drop}
                 showWaveInfo={showWaveInfo}
+                timestampLayout={timestampLayout}
               />
             ))}
           <ParticipationDropContent
@@ -175,11 +184,20 @@ export default function OngoingParticipationDrop({
           metadata={visibleMetadata}
           contextId={drop.id}
         />
-        <ParticipationDropFooter
-          drop={drop}
-          voteAction={voteAction}
-          showInteractions={showInteractions}
-        />
+        {(showInteractions || footer === undefined || footer === null) && (
+          <ParticipationDropFooter
+            drop={drop}
+            voteAction={voteAction}
+            showInteractions={showInteractions}
+          />
+        )}
+        {footer !== undefined && footer !== null && (
+          <div
+            className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-px-4 tw-pb-4 tw-pt-2`}
+          >
+            {footer}
+          </div>
+        )}
       </div>
 
       {showInteractions &&

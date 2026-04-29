@@ -8,7 +8,11 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { memo, useCallback, useState } from "react";
-import type { DropIdentityMode, DropInteractionParams } from "../drop.types";
+import type {
+  DropIdentityMode,
+  DropInteractionParams,
+  DropTimestampLayout,
+} from "../drop.types";
 import { DropLocation } from "../drop.types";
 import {
   getRankHoverBorderClass,
@@ -55,7 +59,9 @@ interface DefautWinnerDropProps {
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly footer?: React.ReactNode;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
 }
 
@@ -69,8 +75,10 @@ const DefaultWinnerDrop = ({
   onReplyClick,
   onQuoteClick,
   onDropContentClick,
+  footer,
   showReplyAndQuote,
   identityMode = "default",
+  timestampLayout = "inline",
   showInteractions = true,
 }: DefautWinnerDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
@@ -147,7 +155,10 @@ const DefaultWinnerDrop = ({
             <div className="tw-flex tw-flex-col tw-items-start">
               {showIdentity &&
                 (identityMode === "minimal" ? (
-                  <DropMinimalIdentityRow drop={drop} />
+                  <DropMinimalIdentityRow
+                    drop={drop}
+                    timestampLayout={timestampLayout}
+                  />
                 ) : (
                   <WaveDropHeader
                     drop={drop}
@@ -161,6 +172,7 @@ const DefaultWinnerDrop = ({
                         decisionTime={decisionTime ?? null}
                       />
                     }
+                    timestampLayout={timestampLayout}
                   />
                 ))}
               {identityMode === "default" &&
@@ -237,6 +249,13 @@ const DefaultWinnerDrop = ({
             </div>
           )}
         </div>
+        {footer !== undefined && footer !== null && (
+          <div
+            className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
+          >
+            {footer}
+          </div>
+        )}
       </div>
       {showInteractions && (
         <WaveDropMobileMenu
