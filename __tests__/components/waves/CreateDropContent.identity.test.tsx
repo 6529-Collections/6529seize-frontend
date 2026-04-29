@@ -75,7 +75,10 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
     <button type="button" onClick={props.onAddMetadataClick}>
       open metadata
     </button>
-    <button type="button" onClick={() => props.handleFileChange([mockUploadFile])}>
+    <button
+      type="button"
+      onClick={() => props.handleFileChange([mockUploadFile])}
+    >
       add upload file
     </button>
   </div>
