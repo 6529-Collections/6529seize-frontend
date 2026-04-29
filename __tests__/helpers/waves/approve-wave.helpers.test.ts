@@ -57,5 +57,49 @@ describe("approve-wave.helpers", () => {
         remaining: null,
       });
     });
+
+    it("shows reached threshold before closed when threshold is met", () => {
+      expect(
+        getApprovalDropStatus({
+          drop: { rating: 8, rank: null },
+          isClosed: true,
+          winningThreshold: 8,
+        })
+      ).toMatchObject({
+        kind: "reached_threshold",
+        current: 8,
+        threshold: 8,
+        remaining: 0,
+      });
+    });
+
+    it("shows closed when voting ended before threshold was met", () => {
+      expect(
+        getApprovalDropStatus({
+          drop: { rating: 7, rank: null },
+          isClosed: true,
+          winningThreshold: 8,
+        })
+      ).toMatchObject({
+        kind: "closed",
+        current: 7,
+        threshold: 8,
+        remaining: null,
+      });
+    });
+
+    it("shows needs while open before threshold is met", () => {
+      expect(
+        getApprovalDropStatus({
+          drop: { rating: 5, rank: null },
+          winningThreshold: 8,
+        })
+      ).toMatchObject({
+        kind: "needs",
+        current: 5,
+        threshold: 8,
+        remaining: 3,
+      });
+    });
   });
 });

@@ -16,20 +16,15 @@ import {
 } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { Time } from "@/helpers/time";
 import { getHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import {
-  getApprovalWaveCloseStatus,
-  getApprovedDropsCount,
-  isApproveWave,
-} from "@/helpers/waves/approve-wave.helpers";
 import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -240,16 +235,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = () => {
     setActiveDropForWave(null);
   };
-  const approveWave = isApproveWave(wave);
-  const winningThreshold = approveWave ? wave.wave.winning_threshold : null;
-  const approvalCloseStatus = approveWave
-    ? getApprovalWaveCloseStatus({
-        approvedCount: getApprovedDropsCount({ wave }),
-        now: Time.currentMillis(),
-        wave,
-      })
-    : null;
-  const isVotingClosed = approvalCloseStatus !== null;
+  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
 
   if (viewMode === "gallery") {
     return (

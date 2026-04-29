@@ -2,13 +2,8 @@
 
 import React, { useMemo, useState } from "react";
 import type { ApiDrop, ApiWave } from "@/generated/models/ObjectSerializer";
-import { Time } from "@/helpers/time";
-import {
-  getApprovalWaveCloseStatus,
-  getApprovedDropsCount,
-  isApproveWave,
-} from "@/helpers/waves/approve-wave.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import WaveDropsAll from "../drops/wave-drops-all";
 import {
   CreateDropWaveWrapper,
@@ -47,16 +42,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     drop: drop,
     partId: 1,
   });
-  const approveWave = isApproveWave(wave);
-  const winningThreshold = approveWave ? wave.wave.winning_threshold : null;
-  const approvalCloseStatus = approveWave
-    ? getApprovalWaveCloseStatus({
-        approvedCount: getApprovedDropsCount({ wave }),
-        now: Time.currentMillis(),
-        wave,
-      })
-    : null;
-  const isVotingClosed = approvalCloseStatus !== null;
+  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
 
   const handleDropAction = ({
     targetDrop,

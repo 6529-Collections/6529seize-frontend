@@ -60,21 +60,21 @@ export const getApprovalDropStatus = ({
     };
   }
 
-  if (isClosed) {
-    return {
-      kind: "closed",
-      current,
-      threshold,
-      remaining: null,
-    };
-  }
-
   if (threshold !== null && current >= threshold) {
     return {
       kind: "reached_threshold",
       current,
       threshold,
       remaining: 0,
+    };
+  }
+
+  if (isClosed) {
+    return {
+      kind: "closed",
+      current,
+      threshold,
+      remaining: null,
     };
   }
 

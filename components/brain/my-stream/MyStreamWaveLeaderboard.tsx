@@ -38,11 +38,7 @@ import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
-import {
-  getApprovalWaveCloseStatus,
-  getApprovedDropsCount,
-} from "@/helpers/waves/approve-wave.helpers";
-import { Time } from "@/helpers/time";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -89,23 +85,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const [isCurationDropModalOpen, setIsCurationDropModalOpen] = useState(false);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
-  const [currentMillis, setCurrentMillis] = useState(() =>
-    Time.currentMillis()
-  );
-
-  useEffect(() => {
-    if (!isApproveWave) {
-      return;
-    }
-
-    const intervalId = globalThis.setInterval(() => {
-      setCurrentMillis(Time.currentMillis());
-    }, 1000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [isApproveWave]);
 
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop } = useMemo(
@@ -192,28 +171,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     waveId: wave.id,
     enabled: isApproveWave,
   });
-  const approvedCount = useMemo(
-    () =>
-      isApproveWave
-        ? getApprovedDropsCount({
-            decisionPoints: approvalDecisionPoints,
-            wave,
-          })
-        : 0,
-    [approvalDecisionPoints, isApproveWave, wave]
-  );
-  const approvalCloseStatus = useMemo(
-    () =>
-      isApproveWave
-        ? getApprovalWaveCloseStatus({
-            approvedCount,
-            now: currentMillis,
-            wave,
-          })
-        : null,
-    [approvedCount, currentMillis, isApproveWave, wave]
-  );
-  const isApprovalVotingClosed = approvalCloseStatus !== null;
+  const {
+    approvedCount,
+    closeStatus: approvalCloseStatus,
+    isVotingClosed: isApprovalVotingClosed,
+  } = useApprovalWaveStatus({
+    wave,
+    decisionPoints: approvalDecisionPoints,
+  });
 
   const rawCuratedByGroupId = searchParams.get("curation_id");
 
@@ -348,7 +313,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         <WaveApprovalStatusBar
           approvedCount={approvedCount}
           closeStatus={approvalCloseStatus}
-          currentMillis={currentMillis}
           wave={wave}
         />
       ) : (

@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useLayout } from "./layout/LayoutContext";
 import {
@@ -16,11 +15,7 @@ import ParticipationDrop from "@/components/waves/drops/participation/Participat
 import { DropLocation } from "@/components/waves/drops/drop.types";
 import { WaveLeaderboardLoading } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoading";
 import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
-import {
-  getApprovalWaveCloseStatus,
-  getApprovedDropsCount,
-} from "@/helpers/waves/approve-wave.helpers";
-import { Time } from "@/helpers/time";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 
 const CURATION_FILTER_PARAM = "curation_id";
 
@@ -38,20 +33,7 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
   const { leaderboardViewStyle } = useLayout();
-  const winningThreshold =
-    wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
-  const approvedCount =
-    wave.wave.type === ApiWaveType.Approve
-      ? getApprovedDropsCount({ wave })
-      : 0;
-  const approvalCloseStatus =
-    wave.wave.type === ApiWaveType.Approve
-      ? getApprovalWaveCloseStatus({
-          approvedCount,
-          now: Time.currentMillis(),
-          wave,
-        })
-      : null;
+  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
   const {
     drops,
     fetchNextPage,
@@ -153,7 +135,7 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
             onQuoteClick={handleQuoteClick}
             onDropContentClick={onDropClick}
             winningThreshold={winningThreshold}
-            isVotingClosed={approvalCloseStatus !== null}
+            isVotingClosed={isVotingClosed}
           />
         ))}
         {isFetchingNextPage && <WaveLeaderboardLoadingBar />}

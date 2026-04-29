@@ -34,12 +34,7 @@ import {
   getWaveHomeRoute,
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
-import { Time } from "@/helpers/time";
-import {
-  getApprovalWaveCloseStatus,
-  getApprovedDropsCount,
-  isApproveWave,
-} from "@/helpers/waves/approve-wave.helpers";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
@@ -873,18 +868,7 @@ export default function HeaderSearchModal({
     wave !== null &&
     searchMode === SEARCH_MODE.WAVE &&
     trimmedWaveSearchValue.length >= WAVE_SEARCH_MIN_LENGTH;
-  const approveWave = isApproveWave(wave);
-  const winningThreshold =
-    approveWave && wave ? wave.wave.winning_threshold : null;
-  const approvalCloseStatus =
-    approveWave && wave
-      ? getApprovalWaveCloseStatus({
-          approvedCount: getApprovedDropsCount({ wave }),
-          now: Time.currentMillis(),
-          wave,
-        })
-      : null;
-  const isVotingClosed = approvalCloseStatus !== null;
+  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
 
   const {
     drops: waveDropResults,

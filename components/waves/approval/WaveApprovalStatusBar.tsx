@@ -1,6 +1,9 @@
 "use client";
+
+import { useEffect, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
 import { calculateTimeLeft } from "@/helpers/waves/time.utils";
 import type { ApprovalWaveCloseStatus } from "@/helpers/waves/approve-wave.helpers";
 import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
@@ -8,7 +11,6 @@ import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
 interface WaveApprovalStatusBarProps {
   readonly approvedCount: number;
   readonly closeStatus: ApprovalWaveCloseStatus;
-  readonly currentMillis: number;
   readonly wave: ApiWave;
 }
 
@@ -26,15 +28,40 @@ const formatTimeLeft = (targetTime: number, currentMillis: number): string => {
   return `${timeLeft.minutes}m left`;
 };
 
+const getCurrentMillisForStatusRender = (
+  _clockTick: number,
+  _endTime: number | null,
+  _closeStatus: ApprovalWaveCloseStatus
+): number => Time.currentMillis();
+
 export default function WaveApprovalStatusBar({
   approvedCount,
   closeStatus,
-  currentMillis,
   wave,
 }: WaveApprovalStatusBarProps) {
   const winningThreshold = wave.wave.winning_threshold;
   const maxWinners = wave.wave.max_winners;
   const endTime = getApprovalWindowEndTime(wave);
+  const [clockTick, setClockTick] = useState(0);
+  const currentMillis = useMemo(
+    () => getCurrentMillisForStatusRender(clockTick, endTime, closeStatus),
+    [clockTick, endTime, closeStatus]
+  );
+
+  useEffect(() => {
+    if (closeStatus !== null || endTime === null) {
+      return;
+    }
+
+    const intervalId = globalThis.setInterval(() => {
+      setClockTick((tick) => tick + 1);
+    }, 1000);
+
+    return () => {
+      globalThis.clearInterval(intervalId);
+    };
+  }, [closeStatus, endTime]);
+
   const thresholdLabel =
     typeof winningThreshold === "number" && Number.isFinite(winningThreshold)
       ? formatNumberWithCommas(winningThreshold)

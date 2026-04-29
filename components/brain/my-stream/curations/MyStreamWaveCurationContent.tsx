@@ -15,12 +15,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { Time } from "@/helpers/time";
-import {
-  getApprovalWaveCloseStatus,
-  getApprovedDropsCount,
-  isApproveWave,
-} from "@/helpers/waves/approve-wave.helpers";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, type ReactNode } from "react";
 import { useLayout } from "../layout/LayoutContext";
@@ -160,16 +155,7 @@ export default function MyStreamWaveCurationContent({
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
-  const approveWave = isApproveWave(wave);
-  const winningThreshold = approveWave ? wave.wave.winning_threshold : null;
-  const approvalCloseStatus = approveWave
-    ? getApprovalWaveCloseStatus({
-        approvedCount: getApprovedDropsCount({ wave }),
-        now: Time.currentMillis(),
-        wave,
-      })
-    : null;
-  const isVotingClosed = approvalCloseStatus !== null;
+  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
