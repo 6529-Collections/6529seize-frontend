@@ -3,6 +3,7 @@
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
 import DropCurationButton from "@/components/waves/drops/DropCurationButton";
@@ -15,7 +16,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
-import React, { useState } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
 import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
@@ -42,8 +43,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
   const canShowVotingAction = canShowVote && !isVotingClosed;
-  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const isVoteModalOpen = isVotingModalOpen && !isVotingClosed;
+  const {
+    isOpen: isVoteModalOpen,
+    open: openVoteModal,
+    close: closeVoteModal,
+  } = useVotingModalState(isVotingClosed);
   const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
 
@@ -58,11 +62,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   };
 
   const handleVoteButtonClick = () => {
-    if (isVotingClosed) {
-      return;
-    }
-
-    setIsVotingModalOpen(true);
+    openVoteModal();
   };
 
   return (
@@ -141,13 +141,13 @@ export const DefaultWaveLeaderboardDrop: React.FC<
         <MobileVotingModal
           drop={drop}
           isOpen={isVoteModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
+          onClose={closeVoteModal}
         />
       ) : (
         <VotingModal
           drop={drop}
           isOpen={isVoteModalOpen}
-          onClose={() => setIsVotingModalOpen(false)}
+          onClose={closeVoteModal}
         />
       )}
 

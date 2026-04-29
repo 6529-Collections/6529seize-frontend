@@ -5,6 +5,7 @@ import MediaDisplay from "@/components/drops/view/item/content/media/MediaDispla
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -91,7 +92,11 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     isVotingClosed = false,
     winningThreshold,
   }) => {
-    const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+    const {
+      isOpen: isVoteModalOpen,
+      open: openVoteModal,
+      close: closeVoteModal,
+    } = useVotingModalState(isVotingClosed);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
     const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
@@ -172,14 +177,8 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     };
 
     const handleVoteButtonClick = () => {
-      if (isVotingClosed) {
-        return;
-      }
-
-      setIsVotingModalOpen(true);
+      openVoteModal();
     };
-
-    const isVoteModalOpen = isVotingModalOpen && !isVotingClosed;
 
     const transitionClasses = hasTouchScreen
       ? ""
@@ -311,13 +310,13 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           <MobileVotingModal
             drop={drop}
             isOpen={isVoteModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
+            onClose={closeVoteModal}
           />
         ) : (
           <VotingModal
             drop={drop}
             isOpen={isVoteModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
+            onClose={closeVoteModal}
           />
         )}
       </div>

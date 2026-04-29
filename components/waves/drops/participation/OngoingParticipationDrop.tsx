@@ -2,6 +2,7 @@
 
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -95,8 +96,11 @@ export default function OngoingParticipationDrop({
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
-  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const isVoteModalOpen = isVotingModalOpen && !isVotingClosed;
+  const {
+    isOpen: isVoteModalOpen,
+    open: openVoteModal,
+    close: closeVoteModal,
+  } = useVotingModalState(isVotingClosed);
 
   const handleLongPress = useCallback(() => {
     if (!showInteractions || !hasTouch) return;
@@ -114,12 +118,8 @@ export default function OngoingParticipationDrop({
   }, []);
 
   const handleVoteButtonClick = useCallback(() => {
-    if (isVotingClosed) {
-      return;
-    }
-
-    setIsVotingModalOpen(true);
-  }, [isVotingClosed]);
+    openVoteModal();
+  }, [openVoteModal]);
 
   const voteAction =
     canShowVote && showInteractions && !isVotingClosed ? (
@@ -203,13 +203,13 @@ export default function OngoingParticipationDrop({
           <MobileVotingModal
             drop={drop}
             isOpen={isVoteModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
+            onClose={closeVoteModal}
           />
         ) : (
           <VotingModal
             drop={drop}
             isOpen={isVoteModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
+            onClose={closeVoteModal}
           />
         ))}
 
