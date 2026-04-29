@@ -139,7 +139,31 @@ describe("MemesWaveWinnersDrop", () => {
 
     expect(useLongPressInteraction).toHaveBeenCalledWith({
       hasTouchScreen: true,
+      onInteractionStart: expect.any(Function),
       preventDefault: false,
     });
+  });
+
+  it("suppresses the click that follows a long press", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+
+    const { container } = render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    const longPressOptions = useLongPressInteraction.mock.calls[0][0];
+    longPressOptions.onInteractionStart();
+
+    await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).not.toHaveBeenCalled();
+
+    await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).toHaveBeenCalledTimes(1);
   });
 });

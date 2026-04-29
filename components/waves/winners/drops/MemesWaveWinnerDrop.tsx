@@ -51,10 +51,29 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  const suppressNextClickRef = React.useRef(false);
+
+  const handleInteractionStart = React.useCallback(() => {
+    suppressNextClickRef.current = true;
+  }, []);
+
+  const handleClickCapture = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!suppressNextClickRef.current) {
+        return;
+      }
+
+      suppressNextClickRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    []
+  );
 
   // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
+    onInteractionStart: handleInteractionStart,
     preventDefault: false,
   });
 
@@ -88,6 +107,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
 
   return (
     <div
+      onClickCapture={handleClickCapture}
       onClick={() => onDropClick(extendedDrop)}
       className="touch-select-none tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out"
     >

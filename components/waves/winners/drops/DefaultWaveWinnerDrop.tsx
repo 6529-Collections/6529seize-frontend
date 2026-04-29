@@ -39,10 +39,29 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  const suppressNextClickRef = React.useRef(false);
+
+  const handleInteractionStart = React.useCallback(() => {
+    suppressNextClickRef.current = true;
+  }, []);
+
+  const handleClickCapture = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!suppressNextClickRef.current) {
+        return;
+      }
+
+      suppressNextClickRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    []
+  );
 
   // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
+    onInteractionStart: handleInteractionStart,
     preventDefault: false,
   });
 
@@ -59,6 +78,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
 
   return (
     <div
+      onClickCapture={handleClickCapture}
       onClick={() => onDropClick(extendedDrop)}
       className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${
         isApprovalWave

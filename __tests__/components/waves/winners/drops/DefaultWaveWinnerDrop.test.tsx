@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { DefaultWaveWinnersDrop } from "@/components/waves/winners/drops/DefaultWaveWinnerDrop";
 
 jest.mock("@/helpers/waves/drop.helpers", () => ({
@@ -91,7 +92,27 @@ describe("DefaultWaveWinnerDrop", () => {
 
     expect(useLongPressInteraction).toHaveBeenCalledWith({
       hasTouchScreen: true,
+      onInteractionStart: expect.any(Function),
       preventDefault: false,
     });
+  });
+
+  it("suppresses the click that follows a long press", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+
+    const { container } = render(
+      <DefaultWaveWinnersDrop winner={winner} onDropClick={onDropClick} />
+    );
+
+    const longPressOptions = useLongPressInteraction.mock.calls[0][0];
+    longPressOptions.onInteractionStart();
+
+    await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).not.toHaveBeenCalled();
+
+    await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).toHaveBeenCalledTimes(1);
   });
 });
