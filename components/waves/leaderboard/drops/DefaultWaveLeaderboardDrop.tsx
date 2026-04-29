@@ -64,10 +64,6 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 
   const handleClickCapture = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
-      if (!isClickFromCardDom(event)) {
-        return;
-      }
-
       if (!suppressNextClickRef.current) {
         return;
       }
@@ -79,7 +75,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
     []
   );
 
-  const handleMenuClickCapture = React.useCallback(() => {
+  const clearPendingLongPressClick = React.useCallback(() => {
     suppressNextClickRef.current = false;
   }, []);
 
@@ -212,29 +208,31 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       {/* Mobile menu slide-up */}
       {hasTouchScreen &&
         createPortal(
-          <CommonDropdownItemsMobileWrapper
-            isOpen={isActive}
-            setOpen={handleMobileMenuOpenChange}
+          <div
+            onPointerDownCapture={clearPendingLongPressClick}
+            onTouchStartCapture={clearPendingLongPressClick}
           >
-            <div
-              onClickCapture={handleMenuClickCapture}
-              className="tw-grid tw-grid-cols-1 tw-gap-y-2"
+            <CommonDropdownItemsMobileWrapper
+              isOpen={isActive}
+              setOpen={handleMobileMenuOpenChange}
             >
-              {/* Open drop option */}
-              <WaveDropMobileMenuOpen
-                drop={drop}
-                onOpenChange={handleMobileMenuClose}
-              />
-
-              {/* Delete option - only if user can delete */}
-              {canDelete && (
-                <WaveDropMobileMenuDelete
+              <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
+                {/* Open drop option */}
+                <WaveDropMobileMenuOpen
                   drop={drop}
-                  onDropDeleted={handleMobileMenuClose}
+                  onOpenChange={handleMobileMenuClose}
                 />
-              )}
-            </div>
-          </CommonDropdownItemsMobileWrapper>,
+
+                {/* Delete option - only if user can delete */}
+                {canDelete && (
+                  <WaveDropMobileMenuDelete
+                    drop={drop}
+                    onDropDeleted={handleMobileMenuClose}
+                  />
+                )}
+              </div>
+            </CommonDropdownItemsMobileWrapper>
+          </div>,
           document.body
         )}
     </div>

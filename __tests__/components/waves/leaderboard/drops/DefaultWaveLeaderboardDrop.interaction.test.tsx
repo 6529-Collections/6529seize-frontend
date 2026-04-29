@@ -34,15 +34,36 @@ jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
   __esModule: true,
   default: () => <div />,
 }));
-jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => () => (
-  <div />
-));
-jest.mock("@/components/waves/drops/WaveDropMobileMenuDelete", () => () => (
-  <div />
+jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => (p: any) => (
+  <button
+    type="button"
+    data-testid="mobile-open"
+    onClick={() => p.onOpenChange(false)}
+  />
 ));
 jest.mock(
+  "@/components/waves/drops/WaveDropMobileMenuDelete",
+  () => (p: any) => (
+    <button
+      type="button"
+      data-testid="mobile-delete"
+      onClick={() => p.onDropDeleted()}
+    />
+  )
+);
+jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
-  () => (p: any) => <div>{p.children}</div>
+  () => (p: any) =>
+    p.isOpen ? (
+      <div data-testid="mobile-wrapper">
+        <button
+          type="button"
+          data-testid="mobile-backdrop"
+          onClick={() => p.setOpen(false)}
+        />
+        {p.children}
+      </div>
+    ) : null
 );
 jest.mock(
   "@/components/waves/leaderboard/drops/header/WaveLeaderboardDropHeader",
@@ -190,4 +211,49 @@ test("does not open drop from synthetic click after long press", () => {
 
   expect(startDropOpen).not.toHaveBeenCalled();
   expect(onDropClick).not.toHaveBeenCalled();
+});
+
+test("consumes synthetic click from portaled mobile menu after long press", () => {
+  const setIsActive = jest.fn();
+  useRules.mockReturnValue({ canShowVote: true, canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useIsMobileScreen.mockReturnValue(true);
+  useLongPressInteraction.mockReturnValue({
+    isActive: true,
+    setIsActive,
+    touchHandlers: {},
+  });
+  const onDropClick = jest.fn();
+
+  render(<DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />);
+  const hookOptions = useLongPressInteraction.mock.calls[0][0];
+
+  hookOptions.onInteractionStart();
+  fireEvent.click(screen.getByTestId("mobile-backdrop"));
+
+  expect(setIsActive).not.toHaveBeenCalled();
+  expect(startDropOpen).not.toHaveBeenCalled();
+  expect(onDropClick).not.toHaveBeenCalled();
+});
+
+test("allows real mobile menu tap after pending long-press click is cleared", () => {
+  const setIsActive = jest.fn();
+  useRules.mockReturnValue({ canShowVote: true, canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useIsMobileScreen.mockReturnValue(true);
+  useLongPressInteraction.mockReturnValue({
+    isActive: true,
+    setIsActive,
+    touchHandlers: {},
+  });
+
+  render(<DefaultWaveLeaderboardDrop drop={drop} onDropClick={jest.fn()} />);
+  const hookOptions = useLongPressInteraction.mock.calls[0][0];
+  const mobileOpen = screen.getByTestId("mobile-open");
+
+  hookOptions.onInteractionStart();
+  fireEvent.touchStart(mobileOpen);
+  fireEvent.click(mobileOpen);
+
+  expect(setIsActive).toHaveBeenCalledWith(false);
 });
