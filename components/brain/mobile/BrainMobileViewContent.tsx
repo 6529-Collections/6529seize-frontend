@@ -46,7 +46,7 @@ export default function BrainMobileViewContent({
   const isCompetitionWave = isRankWave || isApproveWave;
   const rankWave = isCompetitionWave ? (wave ?? null) : null;
   const curationWave = isCurationWave ? (wave ?? null) : null;
-  const faqWave = isRankWave && isMemesWave ? (wave ?? null) : null;
+  const faqWave = isMemesWave ? (wave ?? null) : null;
 
   const leaderboardContent = rankWave ? (
     <MyStreamWaveLeaderboard

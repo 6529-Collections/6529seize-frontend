@@ -440,6 +440,31 @@ describe("BrainMobileViewContent", () => {
     );
   });
 
+  it("renders faq for approve memes waves", () => {
+    const wave = { id: "wave-1" } as any;
+
+    render(
+      <BrainMobileViewContent
+        activeView={BrainView.FAQ}
+        activeWaveId="1"
+        isCurationWave={false}
+        isMemesWave={true}
+        isRankWave={false}
+        isApproveWave={true}
+        onDropClick={jest.fn()}
+        onOpenQuickVote={jest.fn()}
+        wave={wave}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("faq")).toBeInTheDocument();
+    expect(mockMyStreamWaveFAQ).toHaveBeenCalledWith(
+      expect.objectContaining({ wave })
+    );
+  });
+
   it.each([
     {
       activeView: BrainView.LEADERBOARD,
