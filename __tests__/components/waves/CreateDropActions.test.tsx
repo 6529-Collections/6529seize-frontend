@@ -89,6 +89,16 @@ jest.mock("@/hooks/isMobileScreen", () => ({
 }));
 
 describe("CreateDropActions", () => {
+  const getFileInput = (): HTMLInputElement => {
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement | null;
+    if (!fileInput) {
+      throw new Error("File input not found");
+    }
+    return fileInput;
+  };
+
   const defaultProps = {
     isStormMode: false,
     isDropMode: true,
@@ -154,10 +164,7 @@ describe("CreateDropActions", () => {
   it("handles file upload", async () => {
     render(<CreateDropActions {...defaultProps} />);
 
-    const fileInputs = screen.getAllByLabelText("Upload a file");
-    const fileInput = fileInputs[0]?.querySelector(
-      'input[type="file"]'
-    ) as HTMLInputElement;
+    const fileInput = getFileInput();
     const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
 
     await userEvent.upload(fileInput, file);
@@ -263,8 +270,7 @@ describe("CreateDropActions", () => {
   it("accepts multiple file types", () => {
     render(<CreateDropActions {...defaultProps} />);
 
-    const fileInputs = screen.getAllByLabelText("Upload a file");
-    const fileInput = fileInputs[0]?.querySelector('input[type="file"]');
+    const fileInput = getFileInput();
     expect(fileInput).toHaveAttribute(
       "accept",
       "image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
@@ -299,10 +305,7 @@ describe("CreateDropActions", () => {
   it("handles multiple file selection", async () => {
     render(<CreateDropActions {...defaultProps} />);
 
-    const fileInputs = screen.getAllByLabelText("Upload a file");
-    const fileInput = fileInputs[0]?.querySelector(
-      'input[type="file"]'
-    ) as HTMLInputElement;
+    const fileInput = getFileInput();
     const files = [
       new File(["test1"], "test1.jpg", { type: "image/jpeg" }),
       new File(["test2"], "test2.png", { type: "image/png" }),
