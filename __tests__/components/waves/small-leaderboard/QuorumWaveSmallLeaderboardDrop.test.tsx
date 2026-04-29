@@ -30,6 +30,26 @@ describe("QuorumWaveSmallLeaderboardDrop", () => {
         drop,
         onDropClick,
         contentPresentation: "quorumCompact",
+        isVotingClosed: false,
+      })
+    );
+  });
+
+  it("forwards closed voting state", () => {
+    const drop = { id: "d1" } as any;
+    const onDropClick = jest.fn();
+
+    render(
+      <QuorumWaveSmallLeaderboardDrop
+        drop={drop}
+        isVotingClosed={true}
+        onDropClick={onDropClick}
+      />
+    );
+
+    expect(defaultWaveSmallLeaderboardDrop).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isVotingClosed: true,
       })
     );
   });

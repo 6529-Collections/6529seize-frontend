@@ -56,6 +56,25 @@ test("returns null when no drops", () => {
   expect(container.firstChild).toBeNull();
 });
 
+test("returns null when voting is closed", () => {
+  const { container } = render(
+    <AuthContext.Provider value={auth}>
+      <ReactQueryWrapperContext.Provider value={rqContext}>
+        <MyStreamWaveMyVotesReset
+          haveDrops
+          isVotingClosed={true}
+          selected={new Set(["a"])}
+          allItemsSelected={false}
+          onToggleSelectAll={jest.fn()}
+          removeSelected={jest.fn()}
+          onResettingChange={jest.fn()}
+        />
+      </ReactQueryWrapperContext.Provider>
+    </AuthContext.Provider>
+  );
+  expect(container.firstChild).toBeNull();
+});
+
 test("shows available votes when provided", () => {
   render(
     <AuthContext.Provider value={auth}>

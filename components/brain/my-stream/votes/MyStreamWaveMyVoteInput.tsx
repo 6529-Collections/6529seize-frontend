@@ -13,6 +13,7 @@ import { commonApiPost } from "@/services/api/common-api";
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
   readonly isResetting?: boolean | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 interface OptimisticVoteState {
@@ -32,6 +33,7 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   drop,
   isResetting = false,
+  isVotingClosed = false,
 }) => {
   const { requestAuth, setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
@@ -74,6 +76,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isVotingClosed) {
+      return;
+    }
+
     const inputValue = e.target.value;
     if (inputValue === "") {
       setVoteDraftValue("");
@@ -92,6 +98,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   };
 
   const handleBlur = () => {
+    if (isVotingClosed) {
+      return;
+    }
+
     if (!hasValidVoteValue || voteValue === "" || voteValue === "-") {
       setVoteDraftState(null);
       return;
@@ -149,7 +159,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   });
 
   const handleSubmit = async () => {
-    if (isProcessing || isResetting) return;
+    if (isProcessing || isResetting || isVotingClosed) return;
 
     if (!hasValidVoteValue) {
       setVoteDraftState(null);
@@ -220,7 +230,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             onChange={handleInputChange}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            disabled={isResetting}
+            disabled={isResetting || isVotingClosed}
             pattern="-?[0-9]*"
             inputMode="numeric"
             className="tw-h-8 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all focus:tw-bg-iron-950/80 focus:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-950/60 desktop-hover:hover:tw-ring-primary-400"
@@ -236,7 +246,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
               e.stopPropagation();
               void handleSubmit();
             }}
-            disabled={!isEditing || isProcessing || isResetting}
+            disabled={
+              !isEditing || isProcessing || isResetting || isVotingClosed
+            }
             className="tw-relative tw-flex tw-h-8 tw-min-w-[60px] tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-300 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-ring-iron-600"
             aria-label="Submit vote"
           >

@@ -6,6 +6,7 @@ import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 
 let intersectionCb: () => void = () => {};
 let resetProps: any = null;
+const mockApprovalStatus = jest.fn(() => ({ isVotingClosed: false }));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard");
 jest.mock("@/hooks/useIntersectionObserver", () => ({
@@ -14,12 +15,19 @@ jest.mock("@/hooks/useIntersectionObserver", () => ({
     return { current: null };
   },
 }));
+jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
+  useApprovalWaveStatus: (...args: any) => mockApprovalStatus(...args),
+}));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ myVotesViewStyle: {} }),
 }));
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVote",
-  () => (p: any) => <div data-testid="vote">{p.drop.id}</div>
+  () => (p: any) => (
+    <div data-testid="vote" data-is-voting-closed={String(p.isVotingClosed)}>
+      {p.drop.id}
+    </div>
+  )
 );
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset",
@@ -42,6 +50,8 @@ describe("MyStreamWaveMyVotes", () => {
 
   beforeEach(() => {
     useWaveDropsLeaderboardMock.mockReset();
+    mockApprovalStatus.mockReset();
+    mockApprovalStatus.mockReturnValue({ isVotingClosed: false });
     resetProps = null;
   });
 
@@ -109,5 +119,33 @@ describe("MyStreamWaveMyVotes", () => {
     );
     expect(screen.getByTestId("loading")).toBeInTheDocument();
     expect(resetProps?.availableVotes).toBe(4);
+  });
+
+  it("renders closed approval votes as read-only", () => {
+    mockApprovalStatus.mockReturnValue({ isVotingClosed: true });
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 1, max_rating: 5 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.queryByTestId("reset")).not.toBeInTheDocument();
+    expect(resetProps).toBeNull();
+    expect(screen.getByTestId("vote")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
   });
 });

@@ -5,12 +5,13 @@ import { WaveSmallLeaderboardDefaultDrop } from "./WaveSmallLeaderboardDefaultDr
 
 interface MemesWaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
+  readonly isVotingClosed?: boolean | undefined;
   readonly onDropClick: () => void;
 }
 
 export const MemesWaveSmallLeaderboardDrop: React.FC<
   MemesWaveSmallLeaderboardDropProps
-> = ({ drop, onDropClick }) => {
+> = ({ drop, isVotingClosed = false, onDropClick }) => {
   return (
     <div className="tw-cursor-pointer" onClick={onDropClick}>
       {typeof drop.rank === "number" && drop.rank <= 3 ? (
@@ -21,6 +22,7 @@ export const MemesWaveSmallLeaderboardDrop: React.FC<
       ) : (
         <WaveSmallLeaderboardDefaultDrop
           drop={drop}
+          isVotingClosed={isVotingClosed}
           onDropClick={onDropClick}
         />
       )}

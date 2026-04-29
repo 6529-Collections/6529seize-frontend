@@ -13,6 +13,10 @@ jest.mock(
 );
 
 describe("ParticipationDropRatings", () => {
+  beforeEach(() => {
+    mockContainer.mockClear();
+  });
+
   it("forwards props to container", () => {
     const drop = { id: "d1" } as any;
     render(
@@ -23,6 +27,19 @@ describe("ParticipationDropRatings", () => {
       drop,
       rank: 5,
       winningThreshold: 12,
+      isVotingClosed: false,
+    });
+  });
+
+  it("forwards closed voting state to container", () => {
+    const drop = { id: "d1" } as any;
+    render(<ParticipationDropRatings drop={drop} isVotingClosed={true} />);
+    expect(screen.getByTestId("container")).toBeInTheDocument();
+    expect(mockContainer).toHaveBeenCalledWith({
+      drop,
+      rank: null,
+      winningThreshold: undefined,
+      isVotingClosed: true,
     });
   });
 });

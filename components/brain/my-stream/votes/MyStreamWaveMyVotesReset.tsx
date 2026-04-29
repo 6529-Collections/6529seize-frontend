@@ -15,6 +15,7 @@ interface MyStreamWaveMyVotesResetProps {
   readonly availableVotes?: number | null;
   readonly selected: Set<string>;
   readonly allItemsSelected: boolean;
+  readonly isVotingClosed?: boolean | undefined;
   readonly onToggleSelectAll: () => void;
   readonly removeSelected: (dropId: string) => void;
   readonly onResettingChange: (isResetting: boolean) => void;
@@ -27,6 +28,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   availableVotes = null,
   selected,
   allItemsSelected,
+  isVotingClosed = false,
   onToggleSelectAll,
   removeSelected,
   onResettingChange,
@@ -65,7 +67,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   const [totalCount, setTotalCount] = useState(0);
 
   const handleReset = async () => {
-    if (!selectedCount || isResetting) return;
+    if (!selectedCount || isResetting || isVotingClosed) return;
     setTotalCount(selectedCount);
     onResettingChange(true);
     setIsResetting(true);
@@ -85,7 +87,11 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     setTotalCount(0);
   };
 
-  if (!haveDrops) return null;
+  const handleResetClick = () => {
+    void handleReset();
+  };
+
+  if (!haveDrops || isVotingClosed) return null;
   return (
     <div className="tw-pl-1">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
@@ -98,7 +104,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
             {allItemsSelected ? "Deselect All" : "Select All"}
           </SecondaryButton>
           <SecondaryButton
-            onClicked={handleReset}
+            onClicked={handleResetClick}
             size="sm"
             disabled={!selectedCount || isResetting}
           >

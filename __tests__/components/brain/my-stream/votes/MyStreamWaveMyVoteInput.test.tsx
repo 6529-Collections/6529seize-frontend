@@ -87,6 +87,22 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10 });
   });
 
+  it("does not submit when voting is closed", () => {
+    render(<MyStreamWaveMyVoteInput drop={drop} isVotingClosed={true} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox");
+    expect(input).toBeDisabled();
+
+    fireEvent.change(input, { target: { value: "5" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
   it("updates input value immediately after successful vote", async () => {
     const dropWithRating = {
       ...drop,
