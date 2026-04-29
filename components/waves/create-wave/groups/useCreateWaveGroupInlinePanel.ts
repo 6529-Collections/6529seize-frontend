@@ -352,7 +352,7 @@ function useCreateWaveGroupInlinePanelController({
   return {
     addIdentity,
     collapseBuilderPanel,
-    onCancelPanel: resetBuilder,
+    onCancelPanel: collapseBuilderPanel,
     onClearAll,
     onCreateAndUse,
     onExistingGroupSelect,

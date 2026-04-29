@@ -441,6 +441,51 @@ describe("CreateWaveGroupInlinePanel", () => {
     ).toBeEnabled();
   });
 
+  it("keeps the rule draft when cancelling an open editor", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel();
+
+    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+
+    expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Close inline group panel" })
+    );
+
+    expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
+    expect(screen.getByText("Unsaved group")).toBeInTheDocument();
+    expect(screen.getAllByText("1 rule").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeEnabled();
+  });
+
+  it("keeps the identity draft when cancelling the identity panel", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel();
+
+    await user.click(screen.getByRole("button", { name: "Add identity" }));
+    await user.click(screen.getByRole("button", { name: "add identity" }));
+
+    expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Close inline group panel" })
+    );
+
+    expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
+    expect(screen.getByText("Unsaved group")).toBeInTheDocument();
+    expect(screen.getAllByText("1 identity").length).toBeGreaterThan(0);
+    expect(screen.getByText("Create this new group")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeEnabled();
+  });
+
   it("keeps draft actions visible after collapsing an active panel", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
