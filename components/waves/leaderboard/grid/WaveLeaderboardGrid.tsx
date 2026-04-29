@@ -47,7 +47,12 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
 
   if (isFetching && drops.length === 0) {
     return (
-      <div className="tw-@container">
+      <div
+        className="tw-@container"
+        role="status"
+        aria-label="Loading drops"
+        aria-busy="true"
+      >
         <div className="tw-grid tw-gap-4 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div

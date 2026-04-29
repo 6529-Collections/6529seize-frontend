@@ -1,6 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { WaveLeaderboardGrid } from "@/components/waves/leaderboard/grid/WaveLeaderboardGrid";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   useWaveDropsLeaderboard: jest.fn(),
@@ -29,7 +30,10 @@ jest.mock(
 
 const { useWaveDropsLeaderboard } = require("@/hooks/useWaveDropsLeaderboard");
 
-const wave = { id: "1" } as any;
+const wave = {
+  id: "1",
+  wave: { type: ApiWaveType.Rank, winning_threshold: null },
+} as any;
 
 describe("WaveLeaderboardGrid", () => {
   it("shows loading state", () => {
@@ -50,7 +54,9 @@ describe("WaveLeaderboardGrid", () => {
       />
     );
 
-    expect(screen.getByText("Loading drops...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading drops" })
+    ).toBeInTheDocument();
   });
 
   it("renders drops and load more action", () => {
