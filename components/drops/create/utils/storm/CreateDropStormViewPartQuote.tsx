@@ -3,7 +3,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiQuotedDrop } from "@/generated/models/ApiQuotedDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useState } from "react";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import DropPart from "@/components/drops/view/part/DropPart";
@@ -13,7 +12,11 @@ import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
 
 interface PartConfigWave {
   readonly name: string;
@@ -40,14 +43,13 @@ export default function CreateDropStormViewPartQuote({
   readonly profile: ProfileMinWithoutSubs;
   readonly quotedDrop: ApiQuotedDrop;
 }) {
+  const quotedDropId = quotedDrop.drop_id;
   const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, quotedDrop.drop_id],
-    queryFn: async () =>
-      await commonApiFetch<ApiDrop>({
-        endpoint: `/drops/${quotedDrop.drop_id}`,
-      }),
-    enabled: typeof quotedDrop.drop_id === "string",
+    queryKey: getDropQueryKey(quotedDropId),
+    queryFn: () => fetchDropByIdBatched(quotedDropId),
+    enabled: quotedDropId.trim().length > 0,
     placeholderData: keepPreviousData,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   const getPartConfig = (): PartConfig | null => {
@@ -77,7 +79,7 @@ export default function CreateDropStormViewPartQuote({
     };
   };
 
-  const [partConfig, setPartConfig] = useState<PartConfig | null>(
+  const [partConfig, setPartConfig] = useState<PartConfig | null>(() =>
     getPartConfig()
   );
   useEffect(() => setPartConfig(getPartConfig()), [drop]);

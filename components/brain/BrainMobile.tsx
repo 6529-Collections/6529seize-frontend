@@ -2,17 +2,15 @@
 
 import type { ReactNode } from "react";
 import React, { useCallback, useMemo, useSyncExternalStore } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -32,6 +30,11 @@ import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDial
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
 import { BrainView } from "./mobile/brainMobileViews";
 import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
+import {
+  DROP_DETAIL_STALE_TIME_MS,
+  fetchDropByIdBatched,
+  getDropQueryKey,
+} from "@/services/api/drop-api";
 
 interface Props {
   readonly children: ReactNode;
@@ -55,18 +58,17 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const dropId = searchParams.get("drop") ?? undefined;
   const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
   const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: effectiveDropId }],
-    queryFn: async () => {
+    queryKey: getDropQueryKey(effectiveDropId),
+    queryFn: () => {
       if (!effectiveDropId) {
         throw new Error("Cannot fetch drop without a drop id");
       }
 
-      return await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${effectiveDropId}`,
-      });
+      return fetchDropByIdBatched(effectiveDropId);
     },
     placeholderData: keepPreviousData,
     enabled: !!effectiveDropId,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
   // Use MyStreamContext for waveId to support client-side navigation via pushState
@@ -207,30 +209,32 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           isApp={isApp}
         />
       )}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeView}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="tw-relative tw-min-w-0 tw-flex-1"
-        >
-          <BrainMobileViewContent
-            activeView={activeView}
-            activeWaveId={waveId}
-            isCurationWave={isCurationWave}
-            isMemesWave={isMemesWave}
-            isRankWave={isRankWave}
-            onDropClick={onDropClick}
-            onOpenQuickVote={quickVote.openQuickVote}
-            onPrefetchQuickVote={quickVote.prefetchQuickVote}
-            wave={wave}
+      <LazyMotion features={domAnimation}>
+        <AnimatePresence mode="wait">
+          <m.div
+            key={activeView}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="tw-relative tw-min-w-0 tw-flex-1"
           >
-            {children}
-          </BrainMobileViewContent>
-        </motion.div>
-      </AnimatePresence>
+            <BrainMobileViewContent
+              activeView={activeView}
+              activeWaveId={waveId}
+              isCurationWave={isCurationWave}
+              isMemesWave={isMemesWave}
+              isRankWave={isRankWave}
+              onDropClick={onDropClick}
+              onOpenQuickVote={quickVote.openQuickVote}
+              onPrefetchQuickVote={quickVote.prefetchQuickVote}
+              wave={wave}
+            >
+              {children}
+            </BrainMobileViewContent>
+          </m.div>
+        </AnimatePresence>
+      </LazyMotion>
       {shouldMountQuickVoteDialog && (
         <MemesQuickVoteDialog {...quickVote.dialogState} />
       )}
