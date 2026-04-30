@@ -403,7 +403,9 @@ export default function JsonPreview({
         if (!active || controller.signal.aborted) {
           return;
         }
-        setError(error instanceof Error ? error.message : "Metadata not found.");
+        setError(
+          error instanceof Error ? error.message : "Metadata not found."
+        );
       } finally {
         globalThis.window.clearTimeout(timeoutId);
       }
