@@ -30,7 +30,7 @@ const getRankLabelClass = (rank: number) => {
 };
 
 export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
-  const { hasTouchScreen, isApp } = useDeviceInfo();
+  const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
   const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
   const mediaImageScale = isTabletOrSmaller
@@ -46,8 +46,9 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
   const author = drop.author;
   const rankLabelClass = getRankLabelClass(rank);
 
-  const htmlPreviewImageUrl =
-    isApp && isHtml ? getDropPreviewImageUrl(drop.metadata) : undefined;
+  const htmlPreviewImageUrl = shouldGate
+    ? (getDropPreviewImageUrl(drop.metadata) ?? undefined)
+    : undefined;
   const mediaContent = (() => {
     if (!media) {
       return (
