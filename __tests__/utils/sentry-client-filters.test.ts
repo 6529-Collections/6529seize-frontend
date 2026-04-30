@@ -9,6 +9,9 @@ import {
 } from "@/utils/sentry-client-filters";
 
 describe("sentry-client-filters", () => {
+  const wrappedNetworkMessage =
+    "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+
   const buildSpan = (overrides: Record<string, unknown> = {}) =>
     ({
       op: "http.client",
@@ -96,8 +99,7 @@ describe("sentry-client-filters", () => {
         values: [
           {
             type: "TypeError",
-            value:
-              "Network request failed. Please check your connection and try again. (/api/waves-overview)",
+            value: wrappedNetworkMessage,
           },
         ],
       },
@@ -366,6 +368,22 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe("not_applicable");
+  });
+
+  it("samples tagged plain Error network events the same way as tagged TypeError events", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: wrappedNetworkMessage,
+          },
+        ],
+      },
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
   });
 
   it("keeps network errors when no failed status is known", () => {

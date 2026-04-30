@@ -39,6 +39,10 @@ const noisyPatterns = [
 const referenceErrors = ["__firefox__"];
 
 const URL_REGEX = /\(([^)]+?)\)/;
+const APP_WRAPPED_NETWORK_ERROR_PREFIXES = [
+  "Network request failed.",
+  "Network error:",
+];
 type SentryTransactionEvent = Sentry.Event & {
   spans?: SentryTransactionSpan[] | undefined;
   tags?: Record<string, unknown> | undefined;
@@ -164,7 +168,7 @@ function handleIndexedDBError(event: Sentry.Event): void {
   event.fingerprint = ["indexeddb-connection-lost"];
 }
 
-function extractUrlFromError(error: TypeError, event: Sentry.Event): string {
+function extractUrlFromError(error: Error, event: Sentry.Event): string {
   const urlMatch = URL_REGEX.exec(error.message.slice(0, 2048));
   if (urlMatch?.[1]) {
     return String(sanitizeUrlString(urlMatch[1]));
@@ -194,20 +198,50 @@ function isNetworkError(errorMessage: string): boolean {
   );
 }
 
+function hasUrlInParentheses(message: string): boolean {
+  const urlMatch = URL_REGEX.exec(message.slice(0, 2048));
+  const candidate = urlMatch?.[1]?.trim();
+  return (
+    !!candidate &&
+    (candidate.startsWith("/") || /^https?:\/\//i.test(candidate))
+  );
+}
+
+function isAppWrappedApiNetworkError(errorMessage: string): boolean {
+  return (
+    APP_WRAPPED_NETWORK_ERROR_PREFIXES.some((prefix) =>
+      errorMessage.startsWith(prefix)
+    ) && hasUrlInParentheses(errorMessage)
+  );
+}
+
+function getRawBrowserNetworkErrorMessage(
+  event: Sentry.Event,
+  error: Error
+): string {
+  const url = extractUrlFromError(error, event);
+  const normalized = error.message.toLowerCase();
+  return normalized.includes("network")
+    ? `Network error: ${error.message} (${url})`
+    : `Network request failed. Please check your connection and try again. (${url})`;
+}
+
 function handleNetworkError(
   event: Sentry.Event,
-  error: TypeError,
+  error: Error,
   value: Sentry.Exception | undefined
 ): void {
-  if (!isNetworkError(error.message)) {
+  const isAppWrappedError = isAppWrappedApiNetworkError(error.message);
+  const isRawBrowserNetworkError =
+    error instanceof TypeError && isNetworkError(error.message);
+
+  if (!isAppWrappedError && !isRawBrowserNetworkError) {
     return;
   }
 
-  const url = extractUrlFromError(error, event);
-  const normalized = error.message.toLowerCase();
-  const transformedMessage = normalized.includes("network")
-    ? `Network error: ${error.message} (${url})`
-    : `Network request failed. Please check your connection and try again. (${url})`;
+  const transformedMessage = isAppWrappedError
+    ? error.message
+    : getRawBrowserNetworkErrorMessage(event, error);
 
   if (value) {
     value.value = transformedMessage;
@@ -270,7 +304,7 @@ Sentry.init({
       handleIndexedDBError(event);
     }
 
-    if (error instanceof TypeError) {
+    if (error instanceof Error) {
       handleNetworkError(event, error, value);
     }
 

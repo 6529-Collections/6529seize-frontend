@@ -10,6 +10,19 @@ jest.mock("@sentry/nextjs", () => ({
 }));
 
 describe("instrumentation-client", () => {
+  const wrappedNetworkMessage =
+    "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+
+  type BeforeSendResult = {
+    tags?: Record<string, unknown> | undefined;
+    exception?:
+      | {
+          values?: Array<{ value?: string | undefined } | undefined>;
+        }
+      | undefined;
+    message?: string | undefined;
+  } | null;
+
   const loadSentryConfig = () => {
     jest.isolateModules(() => {
       require("@/instrumentation-client");
@@ -28,7 +41,7 @@ describe("instrumentation-client", () => {
     return config.beforeSend as (
       event: Record<string, unknown>,
       hint?: Record<string, unknown>
-    ) => { tags?: Record<string, unknown> | undefined } | null;
+    ) => BeforeSendResult;
   };
 
   const loadBeforeSendTransaction = () => {
@@ -121,6 +134,111 @@ describe("instrumentation-client", () => {
         network_noise_sampled: "true",
       })
     );
+  });
+
+  it("drops sampled-out app-wrapped first-party browser transport network errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: wrappedNetworkMessage,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new Error(wrappedNetworkMessage),
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps and tags sampled-in app-wrapped first-party browser transport network errors without rewriting the message", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "event-200",
+      message: wrappedNetworkMessage,
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: wrappedNetworkMessage,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new Error(wrappedNetworkMessage),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        errorType: "network",
+        handled: true,
+        network_failure_kind: "browser_transport",
+        network_noise_sampled: "true",
+      })
+    );
+    expect(result?.exception?.values?.[0]?.value).toBe(wrappedNetworkMessage);
+    expect(result?.message).toBe(wrappedNetworkMessage);
+  });
+
+  it("does not tag unrelated plain errors that mention network", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "event-200",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "network switch failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new Error("network switch failed"),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags?.["errorType"]).toBeUndefined();
   });
 
   it("keeps browser network errors with a real HTTP status", () => {
