@@ -31,7 +31,7 @@ jest.mock("@/helpers/capacitorBlobDownload.helpers", () => ({
 }));
 
 describe("WaveDropActionsDownload", () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
   const originalCreateObjectUrl = URL.createObjectURL;
   const originalRevokeObjectUrl = URL.revokeObjectURL;
   const anchorClickSpy = jest.spyOn(HTMLAnchorElement.prototype, "click");
@@ -51,13 +51,13 @@ describe("WaveDropActionsDownload", () => {
       error: null,
       isInProgress: false,
     });
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn();
     URL.createObjectURL = jest.fn(() => "blob:media");
     URL.revokeObjectURL = jest.fn();
   });
 
   afterAll(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
     URL.createObjectURL = originalCreateObjectUrl;
     URL.revokeObjectURL = originalRevokeObjectUrl;
     anchorClickSpy.mockRestore();
@@ -106,7 +106,7 @@ describe("WaveDropActionsDownload", () => {
     const user = userEvent.setup();
     const onDownload = jest.fn();
     const blob = new Blob(["media"]);
-    jest.mocked(global.fetch).mockResolvedValueOnce({
+    jest.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       blob: jest.fn().mockResolvedValue(blob),
     } as any);
@@ -125,7 +125,7 @@ describe("WaveDropActionsDownload", () => {
     await user.click(screen.getByRole("button", { name: /download media/i }));
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         "https://example.com/media.png",
         expect.objectContaining({ signal: expect.any(AbortSignal) })
       );

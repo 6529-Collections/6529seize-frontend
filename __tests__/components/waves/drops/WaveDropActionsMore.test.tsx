@@ -173,7 +173,7 @@ describe("WaveDropActionsMore", () => {
           attachments: [],
         },
       ],
-    } as any;
+    };
 
     render(<WaveDropActionsMore drop={dropWithMedia} />);
 
