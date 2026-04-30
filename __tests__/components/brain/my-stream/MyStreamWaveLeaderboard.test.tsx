@@ -126,7 +126,7 @@ const wave = {
   wave: { type: ApiWaveType.Rank },
 } as ApiWave;
 
-const renderLeaderboard = () =>
+const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
   render(
     <AuthContext.Provider
       value={
@@ -136,7 +136,7 @@ const renderLeaderboard = () =>
         } as any
       }
     >
-      <MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />
+      <MyStreamWaveLeaderboard wave={leaderboardWave} onDropClick={jest.fn()} />
     </AuthContext.Provider>
   );
 
@@ -519,7 +519,8 @@ describe("MyStreamWaveLeaderboard", () => {
     });
   });
 
-  it("shows approve status and closes voting when max approvals are reached", () => {
+  it("shows approve status and blocks create drop when max approvals are reached", async () => {
+    const user = userEvent.setup();
     const approveWave = {
       ...wave,
       voting: { period: { max: Date.now() + 60_000 } },
@@ -546,7 +547,63 @@ describe("MyStreamWaveLeaderboard", () => {
       jest.fn(),
     ]);
 
-    render(
+    renderLeaderboard(approveWave);
+
+    expect(screen.getByTestId("approval-status")).toHaveAttribute(
+      "data-close-status",
+      "max_reached"
+    );
+    expect(approvalStatusProps.approvedCount).toBe(1);
+    expect(dropsProps.isVotingClosed).toBe(true);
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("removes open create drop UI when an approve wave closes", async () => {
+    const user = userEvent.setup();
+    const openApproveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 1,
+        no_of_decisions_done: 0,
+      },
+    } as ApiWave;
+    const closedApproveWave = {
+      ...openApproveWave,
+      wave: {
+        ...openApproveWave.wave,
+        no_of_decisions_done: 1,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    const { rerender } = renderLeaderboard(openApproveWave);
+
+    await user.click(screen.getByTestId("header"));
+    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+
+    rerender(
       <AuthContext.Provider
         value={
           {
@@ -555,15 +612,17 @@ describe("MyStreamWaveLeaderboard", () => {
           } as any
         }
       >
-        <MyStreamWaveLeaderboard wave={approveWave} onDropClick={jest.fn()} />
+        <MyStreamWaveLeaderboard
+          wave={closedApproveWave}
+          onDropClick={jest.fn()}
+        />
       </AuthContext.Provider>
     );
 
-    expect(screen.getByTestId("approval-status")).toHaveAttribute(
-      "data-close-status",
-      "max_reached"
-    );
-    expect(approvalStatusProps.approvedCount).toBe(1);
-    expect(dropsProps.isVotingClosed).toBe(true);
+    await waitFor(() => {
+      expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+    });
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
   });
 });

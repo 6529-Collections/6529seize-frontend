@@ -45,6 +45,12 @@ interface MyStreamWaveLeaderboardProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
+interface CreateDropUiState {
+  readonly waveId: string;
+  readonly submissionExperience: WaveSubmissionExperience | null;
+  readonly isApprovalVotingClosed: boolean;
+}
+
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
@@ -80,9 +86,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     return `tw-w-full tw-min-w-0 tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow tw-px-2 sm:tw-px-4`;
   }, []);
 
-  const [isCreateDropOpen, setIsCreateDropOpen] = useState(false);
-  const [isMemesCreateOpen, setIsMemesCreateOpen] = useState(false);
-  const [isCurationDropModalOpen, setIsCurationDropModalOpen] = useState(false);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
 
@@ -97,40 +100,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       }),
     [activeProfileProxy, isCurationWave, isLoggedIn, participation]
   );
-  const showToggleableDropInput =
-    submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
-    submissionExperience !== WaveSubmissionExperience.CURATION_LEGACY &&
-    submissionExperience !== WaveSubmissionExperience.QUORUM_PROPOSAL &&
-    isCreateDropOpen;
-
-  const onCreateDrop = useCallback(() => {
-    if (!mountedRef.current) {
-      return;
-    }
-
-    if (submissionExperience === WaveSubmissionExperience.MEMES_LEGACY) {
-      setIsMemesCreateOpen(true);
-      return;
-    }
-
-    if (submissionExperience === WaveSubmissionExperience.CURATION_LEGACY) {
-      if (!canCreateDrop) {
-        return;
-      }
-      setIsCurationDropModalOpen(true);
-      return;
-    }
-
-    if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
-      if (!canCreateDrop) {
-        return;
-      }
-      setIsCreateDropOpen(true);
-      return;
-    }
-
-    setIsCreateDropOpen(true);
-  }, [canCreateDrop, submissionExperience]);
 
   // Generate a unique preference key for this wave
   const viewPreferenceKey = `waveViewMode_${wave.id}`;
@@ -179,6 +148,64 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     wave,
     decisionPoints: approvalDecisionPoints,
   });
+  const canOpenCreateDrop = canCreateDrop && !isApprovalVotingClosed;
+  const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(
+    () => ({
+      waveId: wave.id,
+      submissionExperience: null,
+      isApprovalVotingClosed,
+    })
+  );
+  const activeCreateDropExperience =
+    canOpenCreateDrop &&
+    createDropUiState.waveId === wave.id &&
+    createDropUiState.submissionExperience === submissionExperience &&
+    createDropUiState.isApprovalVotingClosed === isApprovalVotingClosed
+      ? createDropUiState.submissionExperience
+      : null;
+  const showToggleableDropInput =
+    activeCreateDropExperience !== null &&
+    activeCreateDropExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
+    activeCreateDropExperience !== WaveSubmissionExperience.CURATION_LEGACY &&
+    activeCreateDropExperience !== WaveSubmissionExperience.QUORUM_PROPOSAL;
+
+  const closeCreateDrop = useCallback(() => {
+    if (!mountedRef.current) {
+      return;
+    }
+
+    setCreateDropUiState((current) => {
+      if (current.submissionExperience === null) {
+        return current;
+      }
+
+      return {
+        ...current,
+        submissionExperience: null,
+      };
+    });
+  }, []);
+
+  const onCreateDrop = useCallback(() => {
+    if (!mountedRef.current) {
+      return;
+    }
+
+    if (!canOpenCreateDrop) {
+      return;
+    }
+
+    setCreateDropUiState({
+      waveId: wave.id,
+      submissionExperience,
+      isApprovalVotingClosed,
+    });
+  }, [
+    canOpenCreateDrop,
+    isApprovalVotingClosed,
+    submissionExperience,
+    wave.id,
+  ]);
 
   const rawCuratedByGroupId = searchParams.get("curation_id");
 
@@ -275,7 +302,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         minPrice={minPrice}
         maxPrice={maxPrice}
         priceCurrency={priceCurrency}
-        onCreateDrop={onCreateDrop}
+        onCreateDrop={canOpenCreateDrop ? onCreateDrop : undefined}
       />
     );
   } else if (!isMemesWave) {
@@ -326,7 +353,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           viewMode={effectiveViewMode}
           sort={sort}
           onViewModeChange={(mode) => setViewMode(mode)}
-          onCreateDrop={onCreateDrop}
+          onCreateDrop={canOpenCreateDrop ? onCreateDrop : undefined}
           onSortChange={(s) => setSort(s)}
           curationGroups={curationGroups}
           curatedByGroupId={curatedByGroupId ?? null}
@@ -351,45 +378,37 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             >
               <WaveDropCreate
                 wave={wave}
-                onCancel={() => {
-                  if (mountedRef.current) {
-                    setIsCreateDropOpen(false);
-                  }
-                }}
-                onSuccess={() => {
-                  if (mountedRef.current) {
-                    setIsCreateDropOpen(false);
-                  }
-                }}
+                onCancel={closeCreateDrop}
+                onSuccess={closeCreateDrop}
               />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY &&
-          isMemesCreateOpen && (
-            <MemesArtSubmissionModal
-              isOpen={isMemesCreateOpen}
-              wave={wave}
-              onClose={() => setIsMemesCreateOpen(false)}
-            />
-          )}
-        {submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
-          isCurationDropModalOpen && (
-            <WaveLeaderboardCurationDropModal
-              isOpen={isCurationDropModalOpen}
-              wave={wave}
-              onClose={() => setIsCurationDropModalOpen(false)}
-            />
-          )}
-        {submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL &&
-          isCreateDropOpen && (
-            <WaveDropCreate
-              wave={wave}
-              onCancel={() => setIsCreateDropOpen(false)}
-              onSuccess={() => setIsCreateDropOpen(false)}
-            />
-          )}
+        {activeCreateDropExperience ===
+          WaveSubmissionExperience.MEMES_LEGACY && (
+          <MemesArtSubmissionModal
+            isOpen
+            wave={wave}
+            onClose={closeCreateDrop}
+          />
+        )}
+        {activeCreateDropExperience ===
+          WaveSubmissionExperience.CURATION_LEGACY && (
+          <WaveLeaderboardCurationDropModal
+            isOpen
+            wave={wave}
+            onClose={closeCreateDrop}
+          />
+        )}
+        {activeCreateDropExperience ===
+          WaveSubmissionExperience.QUORUM_PROPOSAL && (
+          <WaveDropCreate
+            wave={wave}
+            onCancel={closeCreateDrop}
+            onSuccess={closeCreateDrop}
+          />
+        )}
 
         {leaderboardContent}
       </div>
