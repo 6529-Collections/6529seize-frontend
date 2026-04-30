@@ -242,6 +242,51 @@ describe("dropReactionMonitoring", () => {
     );
   });
 
+  it("ignores reconciliation mismatch after the reconciliation window", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-late-mismatch",
+      waveId: "wave-1",
+      source: "chip",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-late-mismatch/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    dateNowSpy.mockReturnValue(16_001);
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-late-mismatch",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":wave:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(addBreadcrumbMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.optimistic_reverted",
+      })
+    );
+    expect(captureExceptionMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Reaction optimistic state disagreed with canonical state",
+      })
+    );
+  });
+
   it("adds a breadcrumb only when realtime reconciliation matches intent", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-5",
@@ -303,6 +348,7 @@ describe("dropReactionMonitoring", () => {
         mutationId: mutation.mutationId,
         dropMutationSeq: 1,
         reaction: ":joy:",
+        profileId: "profile-1",
         apiSucceededAt: null,
       })
     );
@@ -330,6 +376,7 @@ describe("dropReactionMonitoring", () => {
       expect.objectContaining({
         mutationId: mutation.mutationId,
         reaction: ":joy:",
+        profileId: "profile-1",
         apiSucceededAt: 1_100,
       })
     );
@@ -410,6 +457,7 @@ describe("dropReactionMonitoring", () => {
         mutationId: newerMutation.mutationId,
         dropMutationSeq: 2,
         reaction: null,
+        profileId: "profile-1",
       })
     );
   });

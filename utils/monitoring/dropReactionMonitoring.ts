@@ -48,10 +48,11 @@ interface ReactionMutationContext {
   supersededByMutationId?: string | null;
 }
 
-interface ProtectedReactionIntent {
+export interface ProtectedReactionIntent {
   readonly mutationId: string;
   readonly dropMutationSeq: number;
   readonly reaction: string | null;
+  readonly profileId: string | null;
   readonly startedAt: number;
   readonly apiSucceededAt: number | null;
 }
@@ -599,6 +600,7 @@ export function getProtectedReactionIntent(
     mutationId: context.mutationId,
     dropMutationSeq: context.dropMutationSeq,
     reaction: context.intendedReaction,
+    profileId: context.profileId,
     startedAt: context.startedAt,
     apiSucceededAt: context.apiSucceededAt,
   };
@@ -655,6 +657,10 @@ export function recordReactionRealtimeReconciliation(params: {
   }
 
   if (context.apiFailedAt !== null || context.apiSucceededAt === null) {
+    return;
+  }
+
+  if (now - context.startedAt > RECONCILIATION_WINDOW_MS) {
     return;
   }
 

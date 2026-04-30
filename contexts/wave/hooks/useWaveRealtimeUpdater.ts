@@ -1,6 +1,8 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -16,6 +18,7 @@ import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import {
   getProtectedReactionIntent,
   recordReactionRealtimeReconciliation,
+  type ProtectedReactionIntent,
 } from "@/utils/monitoring/dropReactionMonitoring";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
@@ -41,24 +44,116 @@ type ProcessIncomingDropFn = (
   type: ProcessIncomingDropType
 ) => void;
 
-function preserveLocalReactionFields(
+function preserveProtectedReactionFields(
   serverDrop: ApiDrop,
-  localDrop: ExtendedDrop
+  localDrop: ExtendedDrop,
+  protectedIntent: ProtectedReactionIntent
 ): ApiDrop {
   const serverContext = serverDrop.context_profile_context;
   const localContext = localDrop.context_profile_context;
-  const contextSource = serverContext ?? localContext;
+  const contextSource =
+    serverContext ??
+    localContext ??
+    (protectedIntent.reaction !== null
+      ? {
+          rating: 0,
+          min_rating: 0,
+          max_rating: 0,
+          reaction: null,
+          boosted: false,
+          bookmarked: false,
+          curatable: false,
+          curated: false,
+        }
+      : null);
 
   return {
     ...serverDrop,
     context_profile_context: contextSource
       ? {
           ...contextSource,
-          reaction: localContext?.reaction ?? null,
+          reaction: protectedIntent.reaction,
         }
       : null,
-    reactions: localDrop.reactions,
+    reactions: mergeProtectedReactionProfiles(
+      serverDrop.reactions,
+      localDrop.reactions,
+      protectedIntent
+    ),
   };
+}
+
+function mergeProtectedReactionProfiles(
+  serverReactions: ApiDropReaction[],
+  localReactions: ApiDropReaction[],
+  protectedIntent: ProtectedReactionIntent
+): ApiDropReaction[] {
+  const profileId = protectedIntent.profileId;
+  if (!profileId) {
+    return serverReactions;
+  }
+
+  const mergedReactions = serverReactions.reduce<ApiDropReaction[]>(
+    (entries, entry) => {
+      const profiles = entry.profiles.filter(
+        (profile) => profile.id !== profileId
+      );
+
+      if (profiles.length > 0) {
+        entries.push({
+          ...entry,
+          profiles,
+        });
+      }
+
+      return entries;
+    },
+    []
+  );
+
+  if (protectedIntent.reaction === null) {
+    return mergedReactions;
+  }
+
+  const localProfile = findReactionProfile(localReactions, profileId);
+  if (!localProfile) {
+    return mergedReactions;
+  }
+
+  const targetIndex = mergedReactions.findIndex(
+    (entry) => entry.reaction === protectedIntent.reaction
+  );
+
+  if (targetIndex >= 0) {
+    const target = mergedReactions[targetIndex]!;
+    mergedReactions[targetIndex] = {
+      ...target,
+      profiles: [...target.profiles, localProfile],
+    };
+    return mergedReactions;
+  }
+
+  return [
+    ...mergedReactions,
+    {
+      reaction: protectedIntent.reaction,
+      profiles: [localProfile],
+    },
+  ];
+}
+
+function findReactionProfile(
+  reactions: ApiDropReaction[],
+  profileId: string
+): ApiProfileMin | null {
+  for (const reaction of reactions) {
+    const profile = reaction.profiles.find((item) => item.id === profileId);
+    if (profile) {
+      return profile;
+    }
+  }
+
+  return null;
 }
 
 export function useWaveRealtimeUpdater({
@@ -118,8 +213,7 @@ export function useWaveRealtimeUpdater({
               key: waveId,
               drops: newDrops,
               // Update latestFetchedSerialNo only if the fetch returned drops
-              latestFetchedSerialNo:
-                fetchedHighestSerial !== null ? fetchedHighestSerial : null,
+              latestFetchedSerialNo: fetchedHighestSerial ?? null,
               // Optionally reset hasNextPage if needed, though fetchNewest shouldn't affect it
             });
           }
@@ -160,7 +254,7 @@ export function useWaveRealtimeUpdater({
         invalidateNotifications();
       };
 
-      if (!drop?.wave?.id) {
+      if (drop.wave.id.length === 0) {
         return;
       }
 
@@ -203,43 +297,51 @@ export function useWaveRealtimeUpdater({
         existingDrop
       ) {
         const apiDrop = await fetchDropByIdBatched(drop.id);
-        if (apiDrop) {
-          let nextDrop = apiDrop;
 
-          if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-            const protectedIntent = getProtectedReactionIntent(apiDrop.id);
-            const serverReaction =
-              apiDrop.context_profile_context?.reaction ?? null;
+        const latestExistingDrop = getData(waveId)?.drops.find(
+          (cachedDrop) => cachedDrop.id === drop.id
+        );
 
-            recordReactionRealtimeReconciliation({
-              drop: {
-                id: apiDrop.id,
-                wave: { id: apiDrop.wave.id },
-                context_profile_context: apiDrop.context_profile_context,
-              },
-              websocketStatus: WebSocketStatus.CONNECTED,
-              protectedIntent,
-            });
-
-            if (
-              protectedIntent &&
-              serverReaction !== protectedIntent.reaction
-            ) {
-              nextDrop = preserveLocalReactionFields(apiDrop, existingDrop);
-            }
-          }
-          updateData({
-            key: waveId,
-            drops: [
-              {
-                ...nextDrop,
-                type: DropSize.FULL,
-                stableHash: existingDrop.stableHash,
-                stableKey: existingDrop.stableKey,
-              },
-            ],
-          });
+        if (latestExistingDrop?.type !== DropSize.FULL) {
+          return;
         }
+
+        let nextDrop = apiDrop;
+
+        if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+          const protectedIntent = getProtectedReactionIntent(apiDrop.id);
+          const serverReaction =
+            apiDrop.context_profile_context?.reaction ?? null;
+
+          recordReactionRealtimeReconciliation({
+            drop: {
+              id: apiDrop.id,
+              wave: { id: apiDrop.wave.id },
+              context_profile_context: apiDrop.context_profile_context,
+            },
+            websocketStatus: WebSocketStatus.CONNECTED,
+            protectedIntent,
+          });
+
+          if (protectedIntent && serverReaction !== protectedIntent.reaction) {
+            nextDrop = preserveProtectedReactionFields(
+              apiDrop,
+              latestExistingDrop,
+              protectedIntent
+            );
+          }
+        }
+        updateData({
+          key: waveId,
+          drops: [
+            {
+              ...nextDrop,
+              type: DropSize.FULL,
+              stableHash: latestExistingDrop.stableHash,
+              stableKey: latestExistingDrop.stableKey,
+            },
+          ],
+        });
         return;
       }
 
@@ -250,22 +352,22 @@ export function useWaveRealtimeUpdater({
           ...drop.author,
           subscribed_actions: existingDrop
             ? existingDrop.author.subscribed_actions
-            : (drop.author.subscribed_actions ?? []),
+            : drop.author.subscribed_actions,
         },
         wave: {
           ...drop.wave,
           authenticated_user_eligible_to_participate: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_participate
-            : (drop.wave.authenticated_user_eligible_to_participate ?? false),
+            : drop.wave.authenticated_user_eligible_to_participate,
           authenticated_user_eligible_to_vote: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_vote
-            : (drop.wave.authenticated_user_eligible_to_vote ?? false),
+            : drop.wave.authenticated_user_eligible_to_vote,
           authenticated_user_eligible_to_chat: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_chat
-            : (drop.wave.authenticated_user_eligible_to_chat ?? false),
+            : drop.wave.authenticated_user_eligible_to_chat,
           authenticated_user_admin: existingDrop
             ? existingDrop.wave.authenticated_user_admin
-            : (drop.wave.authenticated_user_admin ?? false),
+            : drop.wave.authenticated_user_admin,
         }, // Assuming message structure matches ApiDrop + ApiWaveMin
         stableKey: drop.id,
         stableHash: drop.id, // Use ID for hash temporarily
