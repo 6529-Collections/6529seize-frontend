@@ -66,7 +66,9 @@ jest.mock("@/app/api/open-graph/ens", () => ({
 }));
 
 type GetHandler = typeof import("../../../app/api/open-graph/route").GET;
+type PostHandler = typeof import("../../../app/api/open-graph/route").POST;
 let GET: GetHandler;
+let POST: PostHandler;
 
 let utils: {
   buildResponse: jest.Mock;
@@ -106,7 +108,7 @@ const mockFetch = jest.fn();
 
 async function loadRoute(): Promise<void> {
   jest.resetModules();
-  ({ GET } = await import("../../../app/api/open-graph/route"));
+  ({ GET, POST } = await import("../../../app/api/open-graph/route"));
   ({ UrlGuardError } = jest.requireActual("@/lib/security/urlGuard"));
   utils = jest.requireMock("../../../app/api/open-graph/utils") as {
     buildResponse: jest.Mock;
@@ -649,6 +651,164 @@ describe("open-graph API route", () => {
       { error: "boom" },
       { status: 502 }
     );
+  });
+
+  it("returns batch preview data for valid POST urls", async () => {
+    compound.createCompoundPlan.mockImplementation((url: URL) => ({
+      cacheKey: `compound:${url.toString()}`,
+      execute: jest.fn(async () => ({
+        data: {
+          requestUrl: url.toString(),
+          title: `Preview ${url.hostname}`,
+        },
+        ttl: 45_000,
+      })),
+    }));
+
+    const request = {
+      json: async () => ({
+        urls: [" https://one.example/article ", "https://two.example/article"],
+      }),
+    } as any;
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      results: {
+        "https://one.example/article": {
+          requestUrl: "https://one.example/article",
+          title: "Preview one.example",
+        },
+        "https://two.example/article": {
+          requestUrl: "https://two.example/article",
+          title: "Preview two.example",
+        },
+      },
+      errors: {},
+    });
+  });
+
+  it("dedupes duplicate POST urls before resolving previews", async () => {
+    const execute = jest.fn(async () => ({
+      data: {
+        requestUrl: "https://one.example/article",
+        title: "Preview one.example",
+      },
+      ttl: 45_000,
+    }));
+    compound.createCompoundPlan.mockReturnValue({
+      cacheKey: "compound:deduped",
+      execute,
+    });
+
+    const request = {
+      json: async () => ({
+        urls: ["https://one.example/article", " https://one.example/article "],
+      }),
+    } as any;
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      results: {
+        "https://one.example/article": {
+          requestUrl: "https://one.example/article",
+          title: "Preview one.example",
+        },
+      },
+      errors: {},
+    });
+    expect(compound.createCompoundPlan).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns per-url POST errors without failing the whole batch", async () => {
+    guard.parsePublicUrl.mockImplementation((value: string | null) => {
+      if (value === "bad-url") {
+        throw new UrlGuardError("Invalid or forbidden URL", "invalid-url", 400);
+      }
+      if (!value) {
+        throw new UrlGuardError("missing", "missing-url", 400);
+      }
+      return new URL(value);
+    });
+    compound.createCompoundPlan.mockImplementation((url: URL) => ({
+      cacheKey: `compound:${url.toString()}`,
+      execute: jest.fn(async () => ({
+        data: {
+          requestUrl: url.toString(),
+          title: "Good preview",
+        },
+        ttl: 45_000,
+      })),
+    }));
+
+    const request = {
+      json: async () => ({
+        urls: ["https://good.example/article", "bad-url"],
+      }),
+    } as any;
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      results: {
+        "https://good.example/article": {
+          requestUrl: "https://good.example/article",
+          title: "Good preview",
+        },
+      },
+      errors: {
+        "bad-url": "Invalid or forbidden URL",
+      },
+    });
+  });
+
+  it("returns 400 for invalid POST batch bodies", async () => {
+    const request = {
+      json: async () => ({ urls: "https://one.example/article" }),
+    } as any;
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "A urls array is required." },
+      { status: 400 }
+    );
+  });
+
+  it("handles ENS previews in POST batches", async () => {
+    const previewPayload = { type: "ens.name", name: "vitalik.eth" };
+    const ensTarget = {
+      kind: "name",
+      input: "vitalik.eth",
+    };
+    ensRouteModule.detectEnsTarget.mockImplementation((input: string) =>
+      input === "vitalik.eth" ? ensTarget : null
+    );
+    ensRouteModule.fetchEnsPreview.mockResolvedValue(previewPayload);
+
+    const request = {
+      json: async () => ({
+        urls: ["vitalik.eth"],
+      }),
+    } as any;
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      results: {
+        "vitalik.eth": previewPayload,
+      },
+      errors: {},
+    });
+    expect(ensRouteModule.fetchEnsPreview).toHaveBeenCalledWith(ensTarget);
+    expect(guard.parsePublicUrl).not.toHaveBeenCalled();
   });
 
   it("handles ENS previews when detected", async () => {
