@@ -7,6 +7,7 @@ import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
@@ -510,6 +511,10 @@ export const WaveLeaderboardGridItem: React.FC<
                   onOpenChange={() => setIsActive(false)}
                 />
               )}
+              <WaveDropMobileMenuCopyLink
+                drop={drop}
+                onCopy={() => setIsActive(false)}
+              />
 
               {isCuratable && (
                 <button

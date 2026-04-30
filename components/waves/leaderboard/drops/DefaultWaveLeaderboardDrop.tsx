@@ -7,6 +7,7 @@ import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
 import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
+import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -137,6 +138,10 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               <WaveDropMobileMenuOpen
                 drop={drop}
                 onOpenChange={() => setIsActive(false)}
+              />
+              <WaveDropMobileMenuCopyLink
+                drop={drop}
+                onCopy={() => setIsActive(false)}
               />
 
               {/* Delete option - only if user can delete */}

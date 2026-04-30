@@ -34,6 +34,9 @@ jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => () => (
   <div />
 ));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuCopyLink", () => () => (
+  <div data-testid="mobile-copy" />
+));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuDelete", () => () => (
   <div />
 ));
@@ -141,4 +144,25 @@ test("keeps native touch scrolling enabled for long-press handlers", () => {
     hasTouchScreen: true,
     preventDefault: false,
   });
+});
+
+test("shows copy link in the touch action sheet", () => {
+  useRules.mockReturnValue({ canShowVote: true, canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useIsMobileScreen.mockReturnValue(true);
+  useLongPressInteraction.mockReturnValue({
+    isActive: true,
+    setIsActive: jest.fn(),
+    touchHandlers: {},
+  });
+
+  render(
+    <DefaultWaveLeaderboardDrop
+      drop={drop}
+      wave={wave}
+      onDropClick={jest.fn()}
+    />
+  );
+
+  expect(screen.getByTestId("mobile-copy")).toBeInTheDocument();
 });

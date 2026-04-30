@@ -2,10 +2,8 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
@@ -25,6 +23,7 @@ import WaveDropMobileMenuSetPinnedDrop from "./WaveDropMobileMenuSetPinnedDrop";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
+import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
 
 interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -51,63 +50,6 @@ const clearCurationsDialogTimeout = (timeoutRef: TimeoutRef) => {
   }
 };
 
-const getIsDirectMessage = (drop: ApiDrop): boolean => {
-  const waveDetails = drop.wave as unknown as {
-    chat?:
-      | {
-          scope?:
-            | {
-                group?: { is_direct_message?: boolean | undefined } | undefined;
-              }
-            | undefined;
-        }
-      | undefined;
-  };
-
-  return waveDetails.chat?.scope?.group?.is_direct_message ?? false;
-};
-
-const copyDropLinkToClipboard = ({
-  drop,
-  isMemesWave,
-  isQuorumWave,
-  isTemporaryDrop,
-  closeMenu,
-  setCopied,
-}: {
-  readonly drop: ApiDrop;
-  readonly isMemesWave: (waveId: string | null | undefined) => boolean;
-  readonly isQuorumWave: (waveId: string | null | undefined) => boolean;
-  readonly isTemporaryDrop: boolean;
-  readonly closeMenu: () => void;
-  readonly setCopied: (copied: boolean) => void;
-}) => {
-  if (isTemporaryDrop) {
-    return;
-  }
-
-  const dropLink = getCopiedDropLink({
-    drop,
-    isDirectMessage: getIsDirectMessage(drop),
-    isMemesWave,
-    isQuorumWave,
-  });
-
-  if (typeof navigator.clipboard.writeText !== "function") {
-    closeMenu();
-    return;
-  }
-
-  navigator.clipboard
-    .writeText(dropLink)
-    .then(() => {
-      setCopied(true);
-      globalThis.setTimeout(() => setCopied(false), 2000);
-    })
-    .catch(() => undefined);
-  closeMenu();
-};
-
 const openCurationsDialogAfterMenuClose = ({
   timeoutRef,
   closeMenu,
@@ -125,50 +67,6 @@ const openCurationsDialogAfterMenuClose = ({
   }, 250);
 };
 
-function WaveDropMobileCopyButton({
-  copied,
-  isTemporaryDrop,
-  onClick,
-}: {
-  readonly copied: boolean;
-  readonly isTemporaryDrop: boolean;
-  readonly onClick: () => void;
-}) {
-  return (
-    <button
-      className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
-        isTemporaryDrop
-          ? "tw-cursor-default tw-opacity-50"
-          : "active:tw-bg-iron-800"
-      } tw-transition-colors tw-duration-200`}
-      onClick={onClick}
-      disabled={isTemporaryDrop}
-    >
-      <svg
-        className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth="1.5"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
-        />
-      </svg>
-      <span
-        className={`tw-text-base tw-font-semibold ${
-          copied ? "tw-text-primary-400" : "tw-text-iron-300"
-        }`}
-      >
-        {copied ? "Copied!" : "Copy link"}
-      </span>
-    </button>
-  );
-}
-
 function WaveDropMobileMenuAuthenticatedActions({
   extendedDrop,
   drop,
@@ -180,8 +78,6 @@ function WaveDropMobileMenuAuthenticatedActions({
   onBoostAnimation,
   showOpenOption,
   showCopyOption,
-  copied,
-  onCopyToClipboard,
   showCurationsAction,
   onCurationsClick,
   isAuthor,
@@ -201,8 +97,6 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly onBoostAnimation?: (() => void) | undefined;
   readonly showOpenOption: boolean;
   readonly showCopyOption: boolean;
-  readonly copied: boolean;
-  readonly onCopyToClipboard: () => void;
   readonly showCurationsAction: boolean;
   readonly onCurationsClick: () => void;
   readonly isAuthor: boolean;
@@ -278,11 +172,7 @@ function WaveDropMobileMenuAuthenticatedActions({
       )}
 
       {showCopyOption && (
-        <WaveDropMobileCopyButton
-          copied={copied}
-          isTemporaryDrop={isTemporaryDrop}
-          onClick={onCopyToClipboard}
-        />
+        <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
       )}
 
       {showCurationsAction && (
@@ -342,7 +232,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showCopyOption = true,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { isMemesWave, isQuorumWave } = useSeizeSettings();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
   const { mobileMenuZIndexClassName, mobileDialogZIndexClassName } =
@@ -358,7 +247,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     [drop]
   );
 
-  const [copied, setCopied] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
   const curationsDialogTimeoutRef = useRef<ReturnType<
     typeof setTimeout
@@ -369,16 +257,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       clearCurationsDialogTimeout(curationsDialogTimeoutRef);
     };
   }, []);
-
-  const copyToClipboard = () =>
-    copyDropLinkToClipboard({
-      drop,
-      isMemesWave,
-      isQuorumWave,
-      isTemporaryDrop,
-      closeMenu,
-      setCopied,
-    });
 
   const isAuthor = useMemo(
     () =>
@@ -428,11 +306,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           >
             {showGuestCopyOnly ? (
               showCopyOption && (
-                <WaveDropMobileCopyButton
-                  copied={copied}
-                  isTemporaryDrop={isTemporaryDrop}
-                  onClick={copyToClipboard}
-                />
+                <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
               )
             ) : (
               <WaveDropMobileMenuAuthenticatedActions
@@ -446,8 +320,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                 onBoostAnimation={onBoostAnimation}
                 showOpenOption={showOpenOption}
                 showCopyOption={showCopyOption}
-                copied={copied}
-                onCopyToClipboard={copyToClipboard}
                 showCurationsAction={showCurationsAction}
                 onCurationsClick={handleCurationsClick}
                 isAuthor={isAuthor}

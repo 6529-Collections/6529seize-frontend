@@ -94,6 +94,10 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
   __esModule: true,
   default: () => <button data-testid="mobile-open-action">Open drop</button>,
 }));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuCopyLink", () => ({
+  __esModule: true,
+  default: () => <button data-testid="mobile-copy-action">Copy link</button>,
+}));
 
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
@@ -364,6 +368,7 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(screen.getByTestId("mobile-wrapper")).toBeInTheDocument();
     expect(screen.getByTestId("mobile-open-action")).toBeInTheDocument();
+    expect(screen.getByTestId("mobile-copy-action")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Curate drop" })
     ).toBeInTheDocument();
