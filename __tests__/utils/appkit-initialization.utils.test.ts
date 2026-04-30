@@ -49,6 +49,11 @@ describe("initializeAppKit", () => {
       chains: [mainnet],
     });
 
+    expect(adapterManager.createAdapterWithCache).toHaveBeenCalledWith(
+      [],
+      true,
+      [mainnet]
+    );
     expect(createAppKit).toHaveBeenCalledWith(
       expect.objectContaining({
         enableCoinbase: false,
@@ -64,6 +69,11 @@ describe("initializeAppKit", () => {
       chains: [mainnet],
     });
 
+    expect(adapterManager.createAdapterWithCache).toHaveBeenCalledWith(
+      [],
+      false,
+      [mainnet]
+    );
     expect(createAppKit).toHaveBeenCalledWith(
       expect.objectContaining({
         enableCoinbase: true,
