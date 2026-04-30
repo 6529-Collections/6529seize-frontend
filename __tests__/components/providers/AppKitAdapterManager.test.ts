@@ -18,7 +18,7 @@ jest.mock("@reown/appkit-adapter-wagmi");
 jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
   createAppWalletConnector: jest.fn(() => ({ id: "mock-connector" })),
 }));
-jest.mock("@/constants", () => ({
+jest.mock("@/constants/constants", () => ({
   CW_PROJECT_ID: "12345678-1234-1234-1234-123456789abc", // Valid UUID format
 }));
 
