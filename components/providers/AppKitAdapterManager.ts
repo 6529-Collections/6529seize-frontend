@@ -18,7 +18,6 @@ import type { Chain } from "viem";
 import type { CreateConnectorFn } from "wagmi";
 
 type ConnectionState = "connecting" | "connected" | "disconnected";
-const MOBILE_COINBASE_WALLET_CONNECTOR_ID = "6529MobileCoinbaseWallet";
 
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null;
@@ -316,17 +315,12 @@ export class AppKitAdapterManager {
   }
 
   private buildCoinbaseV3MobileWallet(): CreateConnectorFn {
-    const createCoinbaseConnector = coinbaseWallet({
+    return coinbaseWallet({
       appName: "6529.io",
       appLogoUrl:
         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
       enableMobileWalletLink: true,
       version: "3",
-    });
-
-    return (config) => ({
-      ...createCoinbaseConnector(config),
-      id: MOBILE_COINBASE_WALLET_CONNECTOR_ID,
     });
   }
 
