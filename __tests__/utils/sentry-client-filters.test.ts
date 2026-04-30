@@ -114,6 +114,7 @@ describe("sentry-client-filters", () => {
           data: {
             status_code: 0,
             url: "/api/waves-overview",
+            "url.is_first_party": true,
           },
         },
       ],
@@ -323,6 +324,66 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("keeps third-party API paths after URL sanitization", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/third-party)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/third-party",
+              "url.is_first_party": false,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("drops first-party relative API paths when sampled out", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/first-party)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/first-party",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
   it("keeps sampled-in first-party status 0 network errors", () => {
     const event = createLowValueNetworkEvent();
     const result = getLowValueNetworkErrorDecision(event, 1);
@@ -349,6 +410,7 @@ describe("sentry-client-filters", () => {
             data: {
               status_code: 500,
               url: "/api/waves-overview",
+              "url.is_first_party": true,
             },
           },
         ],
@@ -395,6 +457,7 @@ describe("sentry-client-filters", () => {
             category: "fetch",
             data: {
               url: "/api/waves-overview",
+              "url.is_first_party": true,
             },
           },
         ],
@@ -416,6 +479,7 @@ describe("sentry-client-filters", () => {
               data: {
                 status_code: 0,
                 url: "/api/waves-overview",
+                "url.is_first_party": true,
               },
             },
           ],
@@ -504,6 +568,7 @@ describe("sentry-client-filters", () => {
             data: {
               status_code: 0,
               url: "/notifications",
+              "url.is_first_party": true,
             },
           },
         ],

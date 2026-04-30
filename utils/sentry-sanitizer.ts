@@ -1,6 +1,7 @@
 import type { Breadcrumb, Event } from "@sentry/nextjs";
 
 const REDACTED = "[Filtered]";
+const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 
 const JWT_PATTERN = /eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g;
 const STRIPE_KEY_PATTERN = /\b(sk|pk)_[a-zA-Z0-9]{16,}\b/g;
@@ -12,6 +13,37 @@ const SENSITIVE_KEY_FRAGMENT_PATTERN =
 
 const SENSITIVE_HEADER_NAME_PATTERN =
   /^(authorization|cookie|set-cookie|x-api-key|x-auth-token|x-csrf-token|x-xsrf-token|proxy-authorization|x-forwarded-for|x-real-ip|cf-connecting-ip)$/i;
+
+function isFirstPartyHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return normalized === "6529.io" || normalized.endsWith(".6529.io");
+}
+
+function isAbsoluteUrlLike(value: string): boolean {
+  return /^[a-z][a-z\d+\-.]*:/i.test(value) || value.startsWith("//");
+}
+
+function getBreadcrumbUrlIsFirstParty(value: unknown): boolean | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  if (!isAbsoluteUrlLike(trimmed)) {
+    return true;
+  }
+
+  try {
+    const parsed = new URL(trimmed, "https://6529.io");
+    return isFirstPartyHost(parsed.hostname);
+  } catch {
+    return undefined;
+  }
+}
 
 function sanitizeString(value: string): string {
   if (!value) return value;
@@ -90,7 +122,6 @@ function sanitizeUnknown(
 function sanitizeHeaders(
   headers: unknown
 ): Record<string, unknown> | undefined {
-  if (!headers) return undefined;
   if (!isPlainObject(headers)) return undefined;
 
   const result: Record<string, unknown> = {};
@@ -132,6 +163,19 @@ export function sanitizeSentryBreadcrumb(
   }
 
   if (crumb.data) {
+    if (
+      isPlainObject(crumb.data) &&
+      !Object.prototype.hasOwnProperty.call(crumb.data, URL_IS_FIRST_PARTY_KEY)
+    ) {
+      const urlIsFirstParty = getBreadcrumbUrlIsFirstParty(crumb.data["url"]);
+      if (typeof urlIsFirstParty === "boolean") {
+        crumb.data = {
+          ...crumb.data,
+          [URL_IS_FIRST_PARTY_KEY]: urlIsFirstParty,
+        };
+      }
+    }
+
     const seen = new WeakSet<object>();
     crumb.data = sanitizeUnknown(crumb.data, 0, seen) as NonNullable<
       Breadcrumb["data"]

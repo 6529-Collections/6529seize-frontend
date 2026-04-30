@@ -23,6 +23,7 @@ import {
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
+import type { Breadcrumb } from "@sentry/nextjs";
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
 const isProduction = publicEnv.NODE_ENV === "production";
@@ -106,6 +107,72 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function getNumericValue(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function isHttpBreadcrumb(breadcrumb: Breadcrumb): boolean {
+  return (
+    breadcrumb.type === "http" ||
+    breadcrumb.category === "fetch" ||
+    breadcrumb.category === "xhr"
+  );
+}
+
+function getBreadcrumbStatusCode(breadcrumb: Breadcrumb): number | null {
+  const data = breadcrumb.data;
+  return (
+    getNumericValue(data?.["status_code"]) ??
+    getNumericValue(data?.["http.response.status_code"])
+  );
+}
+
+function getLatestHttpBreadcrumbUrl(
+  event: Sentry.Event,
+  statusCode?: number
+): unknown {
+  const breadcrumbs = event.breadcrumbs;
+  if (!Array.isArray(breadcrumbs)) {
+    return undefined;
+  }
+
+  for (let index = breadcrumbs.length - 1; index >= 0; index -= 1) {
+    const breadcrumb = breadcrumbs[index];
+    if (!breadcrumb || !isHttpBreadcrumb(breadcrumb)) {
+      continue;
+    }
+
+    if (
+      statusCode !== undefined &&
+      getBreadcrumbStatusCode(breadcrumb) !== statusCode
+    ) {
+      continue;
+    }
+
+    const url = breadcrumb.data?.["url"];
+    if (url) {
+      return url;
+    }
+  }
+
+  return undefined;
+}
+
+function getLatestNetworkBreadcrumbUrl(event: Sentry.Event): unknown {
+  return (
+    getLatestHttpBreadcrumbUrl(event, 0) ?? getLatestHttpBreadcrumbUrl(event)
+  );
+}
+
 function filterNoisyThirdPartyTransactionSpans(
   event: Sentry.Event
 ): Sentry.Event {
@@ -174,11 +241,9 @@ function extractUrlFromError(error: Error, event: Sentry.Event): string {
     return String(sanitizeUrlString(urlMatch[1]));
   }
 
-  const fetchBreadcrumb = event.breadcrumbs?.find(
-    (crumb) => crumb.category === "fetch" || crumb.type === "http"
-  );
-  if (fetchBreadcrumb?.data?.["url"]) {
-    return String(sanitizeUrlString(fetchBreadcrumb.data["url"]));
+  const breadcrumbUrl = getLatestNetworkBreadcrumbUrl(event);
+  if (breadcrumbUrl) {
+    return String(sanitizeUrlString(breadcrumbUrl));
   }
   if (event.request?.url) {
     return String(sanitizeUrlString(event.request.url));

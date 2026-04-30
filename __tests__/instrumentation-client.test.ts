@@ -85,6 +85,7 @@ describe("instrumentation-client", () => {
           data: {
             status_code: 0,
             url: "/api/waves-overview",
+            "url.is_first_party": true,
           },
         },
       ],
@@ -95,6 +96,50 @@ describe("instrumentation-client", () => {
     });
 
     expect(result).toBeNull();
+  });
+
+  it("uses the latest failed fetch breadcrumb for raw browser network errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/a",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/b",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).toBeNull();
+    expect(event.exception.values[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/b)"
+    );
   });
 
   it("keeps and tags sampled-in first-party browser transport network errors", () => {
@@ -116,6 +161,7 @@ describe("instrumentation-client", () => {
           data: {
             status_code: 0,
             url: "/api/waves-overview",
+            "url.is_first_party": true,
           },
         },
       ],
@@ -155,6 +201,7 @@ describe("instrumentation-client", () => {
           data: {
             status_code: 0,
             url: "/api/waves-overview",
+            "url.is_first_party": true,
           },
         },
       ],
@@ -187,6 +234,7 @@ describe("instrumentation-client", () => {
           data: {
             status_code: 0,
             url: "/api/waves-overview",
+            "url.is_first_party": true,
           },
         },
       ],
@@ -228,6 +276,7 @@ describe("instrumentation-client", () => {
           data: {
             status_code: 0,
             url: "/api/waves-overview",
+            "url.is_first_party": true,
           },
         },
       ],
@@ -260,6 +309,7 @@ describe("instrumentation-client", () => {
           data: {
             status_code: 500,
             url: "/api/waves-overview",
+            "url.is_first_party": true,
           },
         },
       ],

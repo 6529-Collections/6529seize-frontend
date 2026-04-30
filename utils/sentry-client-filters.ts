@@ -18,6 +18,11 @@ type SentryBreadcrumb = {
   data?: Record<string, unknown> | undefined;
 };
 
+type NetworkTargetCandidate = {
+  url: string;
+  isFirstParty?: boolean | undefined;
+};
+
 type SentryExceptionValue = {
   type?: string | undefined;
   value?: string | undefined;
@@ -81,12 +86,17 @@ const noisyThirdPartyTelemetryTargets = new Set([
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
 const URL_IN_PARENS_PATTERN = /\(([^)]+)\)/g;
+const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const FNV_OFFSET_BASIS = 2166136261;
 const FNV_PRIME = 16777619;
 const UINT_32_SIZE = 4294967296;
 
 function getStringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+function getBooleanValue(value: unknown): boolean | undefined {
+  return typeof value === "boolean" ? value : undefined;
 }
 
 function getNumericValue(value: unknown): number | null {
@@ -150,16 +160,45 @@ function isFilteredUrl(value: string | undefined): boolean {
   );
 }
 
-function parseRequestUrl(value: string | undefined): URL | null {
+function isRelativePath(value: string): boolean {
+  const normalized = value.trim();
+  return normalized.startsWith("/") && !normalized.startsWith("//");
+}
+
+function parseAbsoluteRequestUrl(value: string | undefined): URL | null {
   if (!value || isFilteredUrl(value)) {
     return null;
   }
 
+  const normalized = value.trim();
   try {
-    return new URL(value, "https://6529.io");
+    if (normalized.startsWith("//")) {
+      return new URL(`https:${normalized}`);
+    }
+    if (/^https?:\/\//i.test(normalized)) {
+      return new URL(normalized);
+    }
+    return null;
   } catch {
     return null;
   }
+}
+
+function getRequestPathname(value: string | undefined): string | null {
+  if (!value || isFilteredUrl(value)) {
+    return null;
+  }
+
+  const normalized = value.trim();
+  if (isRelativePath(normalized)) {
+    try {
+      return new URL(normalized, "https://6529.io").pathname;
+    } catch {
+      return null;
+    }
+  }
+
+  return parseAbsoluteRequestUrl(normalized)?.pathname ?? null;
 }
 
 function isFirstPartyApiUrl(url: URL): boolean {
@@ -171,42 +210,59 @@ function isFirstPartyApiUrl(url: URL): boolean {
   return isFirstPartyHost(hostname) && url.pathname.startsWith("/api/");
 }
 
-function isFirstPartyApiTarget(value: string): boolean {
-  const url = parseRequestUrl(value);
-  return !!url && isFirstPartyApiUrl(url);
-}
+function isFirstPartyApiTarget(candidate: NetworkTargetCandidate): boolean {
+  const url = parseAbsoluteRequestUrl(candidate.url);
+  if (url) {
+    return isFirstPartyApiUrl(url);
+  }
 
-function isSanitizedRelativePath(value: string, parsedUrl: URL): boolean {
-  const normalized = value.trim();
+  const pathname = getRequestPathname(candidate.url);
   return (
-    normalized.startsWith("/") &&
-    !normalized.startsWith("//") &&
-    normalized === parsedUrl.pathname
+    candidate.isFirstParty === true &&
+    !!pathname &&
+    pathname.startsWith("/api/")
   );
 }
 
-function isSameFirstPartyApiTarget(left: string, right: string): boolean {
-  const leftUrl = parseRequestUrl(left);
-  const rightUrl = parseRequestUrl(right);
+function canUseAsSanitizedRelativePath(
+  candidate: NetworkTargetCandidate
+): boolean {
+  return isRelativePath(candidate.url) && candidate.isFirstParty !== false;
+}
 
-  if (!leftUrl || !rightUrl) {
+function hasExplicitThirdPartyRelativeOrigin(
+  candidate: NetworkTargetCandidate
+): boolean {
+  return isRelativePath(candidate.url) && candidate.isFirstParty === false;
+}
+
+function isSameFirstPartyApiTarget(
+  left: NetworkTargetCandidate,
+  right: NetworkTargetCandidate
+): boolean {
+  if (
+    hasExplicitThirdPartyRelativeOrigin(left) ||
+    hasExplicitThirdPartyRelativeOrigin(right)
+  ) {
     return false;
   }
 
-  if (leftUrl.pathname !== rightUrl.pathname) {
+  const leftPathname = getRequestPathname(left.url);
+  const rightPathname = getRequestPathname(right.url);
+  if (!leftPathname || !rightPathname || leftPathname !== rightPathname) {
     return false;
   }
 
-  const leftIsFirstPartyApi = isFirstPartyApiUrl(leftUrl);
-  const rightIsFirstPartyApi = isFirstPartyApiUrl(rightUrl);
+  const leftIsFirstPartyApi = isFirstPartyApiTarget(left);
+  const rightIsFirstPartyApi = isFirstPartyApiTarget(right);
 
   if (leftIsFirstPartyApi && rightIsFirstPartyApi) {
     return true;
   }
 
   return (
-    (leftIsFirstPartyApi && isSanitizedRelativePath(right, rightUrl)) ||
-    (rightIsFirstPartyApi && isSanitizedRelativePath(left, leftUrl))
+    (leftIsFirstPartyApi && canUseAsSanitizedRelativePath(right)) ||
+    (rightIsFirstPartyApi && canUseAsSanitizedRelativePath(left))
   );
 }
 
@@ -231,9 +287,29 @@ function getBreadcrumbUrl(breadcrumb: SentryBreadcrumb): string | undefined {
   return getStringValue(breadcrumb.data?.["url"]);
 }
 
+function getBreadcrumbUrlIsFirstParty(
+  breadcrumb: SentryBreadcrumb
+): boolean | undefined {
+  return getBooleanValue(breadcrumb.data?.[URL_IS_FIRST_PARTY_KEY]);
+}
+
+function getBreadcrumbTargetCandidate(
+  breadcrumb: SentryBreadcrumb
+): NetworkTargetCandidate | null {
+  const url = getBreadcrumbUrl(breadcrumb);
+  if (!url || isFilteredUrl(url)) {
+    return null;
+  }
+
+  return {
+    url,
+    isFirstParty: getBreadcrumbUrlIsFirstParty(breadcrumb),
+  };
+}
+
 function getLatestHttpBreadcrumbWithStatus(
   event: SentryClientEvent
-): { url?: string | undefined; statusCode: number } | null {
+): (NetworkTargetCandidate & { statusCode: number }) | null {
   const breadcrumbs = getHttpBreadcrumbs(event);
   for (let index = breadcrumbs.length - 1; index >= 0; index -= 1) {
     const breadcrumb = breadcrumbs[index];
@@ -247,7 +323,8 @@ function getLatestHttpBreadcrumbWithStatus(
     }
 
     return {
-      url: getBreadcrumbUrl(breadcrumb),
+      url: getBreadcrumbUrl(breadcrumb) ?? "",
+      isFirstParty: getBreadcrumbUrlIsFirstParty(breadcrumb),
       statusCode,
     };
   }
@@ -255,29 +332,48 @@ function getLatestHttpBreadcrumbWithStatus(
   return null;
 }
 
-function getNetworkTargetUrlCandidates(event: SentryClientEvent): string[] {
-  const message = getEventMessage(event);
-  const messageUrls = getUrlCandidatesFromText(message);
-  const breadcrumbUrls = getHttpBreadcrumbs(event)
-    .map(getBreadcrumbUrl)
-    .filter((value): value is string => !!value && !isFilteredUrl(value));
-
-  return uniqueStrings([...messageUrls, ...breadcrumbUrls]);
+function getMessageTargetCandidates(
+  event: SentryClientEvent
+): NetworkTargetCandidate[] {
+  return getUrlCandidatesFromText(getEventMessage(event)).map((url) => ({
+    url,
+  }));
 }
 
-function getPrimaryNetworkTargetUrlCandidates(
+function getBreadcrumbTargetCandidates(
   event: SentryClientEvent
-): string[] {
-  const messageUrls = getUrlCandidatesFromText(getEventMessage(event));
-  return messageUrls.length > 0
-    ? uniqueStrings(messageUrls)
-    : getNetworkTargetUrlCandidates(event);
+): NetworkTargetCandidate[] {
+  return getHttpBreadcrumbs(event)
+    .map(getBreadcrumbTargetCandidate)
+    .filter((value): value is NetworkTargetCandidate => value !== null);
+}
+
+function getNetworkTargetCandidates(
+  event: SentryClientEvent
+): NetworkTargetCandidate[] {
+  return [
+    ...getMessageTargetCandidates(event),
+    ...getBreadcrumbTargetCandidates(event),
+  ];
+}
+
+function getNetworkTargetUrlCandidates(event: SentryClientEvent): string[] {
+  return uniqueStrings(
+    getNetworkTargetCandidates(event).map((candidate) => candidate.url)
+  );
+}
+
+function getPrimaryNetworkTargetCandidates(
+  event: SentryClientEvent
+): NetworkTargetCandidate[] {
+  const messageCandidates = getMessageTargetCandidates(event);
+  return messageCandidates.length > 0
+    ? messageCandidates
+    : getNetworkTargetCandidates(event);
 }
 
 function hasFirstPartyApiTarget(event: SentryClientEvent): boolean {
-  return getPrimaryNetworkTargetUrlCandidates(event).some(
-    isFirstPartyApiTarget
-  );
+  return getPrimaryNetworkTargetCandidates(event).some(isFirstPartyApiTarget);
 }
 
 function hasMatchingFailedTransportBreadcrumb(
@@ -289,11 +385,14 @@ function hasMatchingFailedTransportBreadcrumb(
   }
 
   if (isFilteredUrl(latestBreadcrumb.url)) {
-    return true;
+    return hasFirstPartyApiTarget(event);
   }
 
-  return getPrimaryNetworkTargetUrlCandidates(event).some((targetUrl) =>
-    isSameFirstPartyApiTarget(targetUrl, latestBreadcrumb.url as string)
+  return getPrimaryNetworkTargetCandidates(event).some((target) =>
+    isSameFirstPartyApiTarget(
+      target,
+      latestBreadcrumb as NetworkTargetCandidate
+    )
   );
 }
 
@@ -307,9 +406,7 @@ function isLowValueFirstPartyNetworkError(event: SentryClientEvent): boolean {
     return false;
   }
 
-  return (
-    hasFirstPartyApiTarget(event) && hasMatchingFailedTransportBreadcrumb(event)
-  );
+  return hasMatchingFailedTransportBreadcrumb(event);
 }
 
 function normalizeSampleRate(sampleRate: number): number {
