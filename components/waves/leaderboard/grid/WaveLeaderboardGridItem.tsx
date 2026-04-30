@@ -185,11 +185,15 @@ export const WaveLeaderboardGridItem: React.FC<
     useState<HTMLDivElement | null>(null);
   const [compactTextInnerEl, setCompactTextInnerEl] =
     useState<HTMLDivElement | null>(null);
-  const hasContentOnlyActions = canOpenDrop || isCuratable || canShowVote;
+  const canCopyLink = !drop.id.startsWith("temp-");
+  const hasDesktopContentOnlyActions =
+    canOpenDrop || isCuratable || canShowVote;
+  const hasMobileContentOnlyActions =
+    hasDesktopContentOnlyActions || canCopyLink;
   const showDesktopContentOnlyActions =
-    isContentOnlyMode && !hasTouchScreen && hasContentOnlyActions;
+    isContentOnlyMode && !hasTouchScreen && hasDesktopContentOnlyActions;
   const showMobileContentOnlyActions =
-    isContentOnlyMode && hasTouchScreen && hasContentOnlyActions;
+    isContentOnlyMode && hasTouchScreen && hasMobileContentOnlyActions;
 
   const previewImageUrl = useMemo(
     () => getDropPreviewImageUrl(drop.metadata),
