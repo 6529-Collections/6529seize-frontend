@@ -188,6 +188,10 @@ export function useWaveRealtimeUpdater({
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
       const markWaveAsRead = async (waveId: string) => {
+        if (document.visibilityState !== "visible") {
+          return;
+        }
+
         await commonApiPostWithoutBodyAndResponse({
           endpoint: `notifications/wave/${waveId}/read`,
         });

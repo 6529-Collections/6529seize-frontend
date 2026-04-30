@@ -102,11 +102,18 @@ jest.mock("@/services/api/common-api", () => ({
 
 const wave = { id: "10", participation: {}, metrics: { muted: false } } as any;
 const mockOnDropClick = jest.fn();
+const setDocumentVisibility = (visibilityState: DocumentVisibilityState) => {
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    value: visibilityState,
+  });
+};
 
 describe("MyStreamWaveChat", () => {
   let store: any;
 
   beforeEach(() => {
+    setDocumentVisibility("visible");
     capturedPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
@@ -242,6 +249,26 @@ describe("MyStreamWaveChat", () => {
       });
       expect(invalidateNotificationsMock).toHaveBeenCalled();
     });
+  });
+
+  it("does not call the read endpoint on unmount when the tab is hidden", async () => {
+    setDocumentVisibility("hidden");
+
+    const { unmount } = renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    await act(async () => {
+      unmount();
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotificationsMock).not.toHaveBeenCalled();
   });
 
   it("skips notification cleanup on unmount for anonymous viewers", async () => {

@@ -23,6 +23,10 @@ export const useWaveDropsNotificationRead = ({
     }
 
     const syncReadState = async () => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
       try {
         await Promise.resolve(removeWaveDeliveredNotifications(waveId));
       } catch (error) {

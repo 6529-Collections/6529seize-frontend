@@ -33,8 +33,15 @@ describe("useWaveDropsNotificationRead", () => {
   const removeWaveDeliveredNotifications = jest
     .fn()
     .mockResolvedValue(undefined);
+  const setDocumentVisibility = (visibilityState: DocumentVisibilityState) => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: visibilityState,
+    });
+  };
 
   beforeEach(() => {
+    setDocumentVisibility("visible");
     invalidateNotifications.mockClear();
     removeWaveDeliveredNotifications.mockClear();
     (
@@ -81,5 +88,23 @@ describe("useWaveDropsNotificationRead", () => {
       });
       expect(invalidateNotifications).toHaveBeenCalled();
     });
+  });
+
+  it("does not call the read endpoint when the tab is hidden", () => {
+    setDocumentVisibility("hidden");
+
+    render(
+      <ReactQueryWrapperContext.Provider
+        value={{ invalidateNotifications } as any}
+      >
+        <TestComponent
+          waveId="wave-1"
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 });

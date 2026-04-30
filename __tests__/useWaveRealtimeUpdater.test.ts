@@ -17,6 +17,12 @@ jest.mock("@/services/api/drop-api", () => ({
   fetchDropByIdBatched: jest.fn(),
 }));
 
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: jest.fn(() => ({
+    setQueriesData: jest.fn(),
+  })),
+}));
+
 const {
   commonApiPostWithoutBodyAndResponse,
 } = require("@/services/api/common-api");
@@ -25,6 +31,17 @@ const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("useWaveRealtimeUpdater", () => {
+  const setDocumentVisibility = (visibilityState: DocumentVisibilityState) => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: visibilityState,
+    });
+  };
+
+  beforeEach(() => {
+    setDocumentVisibility("visible");
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -217,6 +234,27 @@ describe("useWaveRealtimeUpdater", () => {
     expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
       endpoint: "notifications/wave/wave1/read",
     });
+  });
+
+  it("does not call the read endpoint for an active hidden wave", async () => {
+    setDocumentVisibility("hidden");
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d9-hidden", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 
   it("does not mark non-active wave as read", async () => {
