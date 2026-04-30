@@ -5,6 +5,7 @@ import { useId } from "react";
 
 interface DateAccordionProps {
   readonly title: React.ReactNode;
+  readonly titleActions?: React.ReactNode | undefined;
   readonly isExpanded: boolean;
   readonly onToggle: () => void;
   readonly collapsedContent?: React.ReactNode | undefined;
@@ -14,6 +15,7 @@ interface DateAccordionProps {
 
 export default function DateAccordion({
   title,
+  titleActions,
   isExpanded,
   onToggle,
   collapsedContent,
@@ -32,20 +34,20 @@ export default function DateAccordion({
         transition={{ duration: 0.4 }}
       >
         <div className="tw-flex tw-h-16 tw-w-full tw-items-center tw-justify-between tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-5 tw-text-left tw-transition-colors tw-duration-200">
-          <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
-            <div className="tw-flex tw-items-center tw-gap-x-3">
+          <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-4">
+            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
               <button
                 type="button"
                 onClick={onToggle}
                 aria-expanded={isExpanded}
                 aria-controls={contentId}
                 aria-labelledby={titleId}
-                className="tw-cursor-pointer tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                className="tw-flex tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
-                <m.div
+                <m.span
                   animate={isExpanded ? { rotate: 0 } : { rotate: 180 }}
                   transition={{ duration: 0.3 }}
-                  className="tw-rounded-full tw-p-1.5 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-700/30"
+                  className="tw-shrink-0 tw-rounded-full tw-p-1.5 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-700/30"
                 >
                   <FontAwesomeIcon
                     icon={faChevronDown}
@@ -53,14 +55,19 @@ export default function DateAccordion({
                       showChevron ? "tw-text-primary-400" : "tw-text-iron-700"
                     } tw-transition-all tw-duration-200`}
                   />
-                </m.div>
+                </m.span>
+                <span
+                  id={titleId}
+                  className="tw-min-w-0 tw-text-base tw-font-semibold tw-text-iron-300"
+                >
+                  {title}
+                </span>
               </button>
-              <div
-                id={titleId}
-                className="tw-text-base tw-font-semibold tw-text-iron-300"
-              >
-                {title}
-              </div>
+              {titleActions !== undefined && titleActions !== null && (
+                <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-x-2">
+                  {titleActions}
+                </div>
+              )}
             </div>
             {!isExpanded &&
               collapsedContent !== undefined &&

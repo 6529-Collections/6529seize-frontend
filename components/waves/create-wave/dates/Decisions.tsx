@@ -134,16 +134,14 @@ export default function Decisions({
 
   return (
     <DateAccordion
-      title={
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <span>Winners Announcements</span>
-          <TooltipIconButton
-            icon={faInfoCircle}
-            tooltipText="Schedule when winners will be announced during your wave. With recurring cycles, announcements repeat until your end date."
-            tooltipPosition="bottom"
-            tooltipWidth="tw-w-80"
-          />
-        </div>
+      title="Winners Announcements"
+      titleActions={
+        <TooltipIconButton
+          icon={faInfoCircle}
+          tooltipText="Schedule when winners will be announced during your wave. With recurring cycles, announcements repeat until your end date."
+          tooltipPosition="bottom"
+          tooltipWidth="tw-w-80"
+        />
       }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}

@@ -122,16 +122,14 @@ export default function RollingEndDate({
   return (
     <div className="tw-relative">
       <DateAccordion
-        title={
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            <span>Wave End Date</span>
-            <TooltipIconButton
-              icon={faInfoCircle}
-              tooltipText="Set when your wave will officially end. With recurring winners, the last announcement may happen before this date."
-              tooltipPosition="bottom"
-              tooltipWidth="tw-w-80"
-            />
-          </div>
+        title="Wave End Date"
+        titleActions={
+          <TooltipIconButton
+            icon={faInfoCircle}
+            tooltipText="Set when your wave will officially end. With recurring winners, the last announcement may happen before this date."
+            tooltipPosition="bottom"
+            tooltipWidth="tw-w-80"
+          />
         }
         isExpanded={isExpanded}
         onToggle={() => setIsExpanded(!isExpanded)}

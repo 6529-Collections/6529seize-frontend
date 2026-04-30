@@ -63,16 +63,14 @@ export default function StartDates({
 
   return (
     <DateAccordion
-      title={
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <span>Wave Timeline</span>
-          <TooltipIconButton
-            icon={faInfoCircle}
-            tooltipText="Set when your wave begins accepting submissions and when voting starts. These dates create the foundational timeline for your wave."
-            tooltipPosition="bottom"
-            tooltipWidth="tw-w-80"
-          />
-        </div>
+      title="Wave Timeline"
+      titleActions={
+        <TooltipIconButton
+          icon={faInfoCircle}
+          tooltipText="Set when your wave begins accepting submissions and when voting starts. These dates create the foundational timeline for your wave."
+          tooltipPosition="bottom"
+          tooltipWidth="tw-w-80"
+        />
       }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
