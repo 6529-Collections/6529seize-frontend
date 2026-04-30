@@ -22,6 +22,7 @@ import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
  */
 interface WebLeftSidebarProps {
   readonly isCollapsed?: boolean | undefined;
+  readonly showProfileFeedShortcut?: boolean | undefined;
 }
 
 const WebLeftSidebarQuickVoteOwner: React.FC<{
@@ -45,6 +46,7 @@ const WebLeftSidebarQuickVoteOwner: React.FC<{
 
 const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
   isCollapsed = false,
+  showProfileFeedShortcut = true,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -93,6 +95,7 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
             <WebBrainLeftSidebarWaves
               scrollContainerRef={scrollContainerRef}
               isCollapsed={isCollapsed}
+              showProfileFeedShortcut={showProfileFeedShortcut}
             />
           )}
           {isMessagesView && (
