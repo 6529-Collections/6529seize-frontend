@@ -64,6 +64,29 @@ describe("WaveDropMobileMenuCopyLink", () => {
     expect(onCopy).toHaveBeenCalledTimes(1);
   });
 
+  it("does not bubble copy clicks to parent cards", async () => {
+    const onCopy = jest.fn();
+    const parentClick = jest.fn();
+    const drop: any = {
+      id: "d1",
+      wave: { id: "w1" },
+      serial_no: 5,
+      drop_type: ApiDropType.Chat,
+    };
+
+    render(
+      <div onClick={parentClick}>
+        <WaveDropMobileMenuCopyLink drop={drop} onCopy={onCopy} />
+      </div>
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Copy link" }));
+
+    expect(writeText).toHaveBeenCalledWith("https://base/waves/w1?serialNo=5");
+    expect(onCopy).toHaveBeenCalledTimes(1);
+    expect(parentClick).not.toHaveBeenCalled();
+  });
+
   it("disables copy for temporary drops", async () => {
     const onCopy = jest.fn();
     const drop: any = {

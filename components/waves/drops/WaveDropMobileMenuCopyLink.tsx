@@ -6,6 +6,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 
 interface WaveDropMobileMenuCopyLinkProps {
   readonly drop: ApiDrop;
@@ -37,7 +38,9 @@ export default function WaveDropMobileMenuCopyLink({
     };
   }, []);
 
-  const copyToClipboard = () => {
+  const copyToClipboard = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+
     if (isTemporaryDrop) {
       return;
     }
