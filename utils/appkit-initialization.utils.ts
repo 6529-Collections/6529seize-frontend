@@ -101,7 +101,11 @@ export function initializeAppKit(
     isCapacitor,
     config.chains
   );
-  const appKitConfig = buildAppKitConfig(newAdapter, config.chains);
+  const appKitConfig = buildAppKitConfig(
+    newAdapter,
+    config.chains,
+    isCapacitor
+  );
   const appKit = createAppKit(appKitConfig);
   const ready = appKit.ready();
   // Prevent unhandled rejections if a caller chooses not to await `ready`.
@@ -120,7 +124,8 @@ export function initializeAppKit(
  */
 function buildAppKitConfig(
   adapter: WagmiAdapter,
-  chains: Chain[]
+  chains: Chain[],
+  isCapacitor: boolean
 ): CreateAppKit {
   if (chains.length === 0) {
     throw new Error(
@@ -146,6 +151,7 @@ function buildAppKitConfig(
       "--w3m-font-family": "'Montserrat', sans-serif",
     },
     enableWalletGuide: false,
+    enableCoinbase: !isCapacitor,
     featuredWalletIds: ["metamask", "walletConnect"],
     allWallets: "SHOW" as const,
     features: {

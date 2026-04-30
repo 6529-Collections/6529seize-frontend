@@ -10,6 +10,7 @@ import type { ReferencedNft } from "@/entities/IDrop";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPartContentMarkdown from "./WaveDropPartContentMarkdown";
+import WaveDropPartContentAttachments from "./WaveDropPartContentAttachments";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { DropContentPresentation } from "./dropContentPresentation";
 
@@ -188,6 +189,9 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
               fullWidthMedia={fullWidthMedia}
             />
           )}
+          <WaveDropPartContentAttachments
+            attachments={activePart.attachments ?? []}
+          />
         </div>
 
         {isStorm && (
