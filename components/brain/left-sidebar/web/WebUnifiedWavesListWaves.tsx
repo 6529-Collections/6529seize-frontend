@@ -86,22 +86,20 @@ interface WebUnifiedWavesListWavesProps {
 function ProfileFeedAvatar({ isActive }: { readonly isActive: boolean }) {
   return (
     <div
-      className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
+      className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-200 desktop-hover:group-hover:tw-brightness-110 ${
         isActive
-          ? "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-2 tw-ring-offset-iron-950"
-          : "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100"
+          ? "tw-opacity-100 tw-ring-1 tw-ring-primary-300/35"
+          : "tw-opacity-90 tw-ring-1 tw-ring-iron-700/80 desktop-hover:group-hover:tw-opacity-100 desktop-hover:group-hover:tw-ring-iron-500/80"
       }`}
     >
       <div
         className={`tw-h-full tw-w-full tw-rounded-full ${
-          isActive
-            ? "tw-bg-primary-500"
-            : "tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700"
+          isActive ? "tw-bg-primary-500/90" : "tw-bg-iron-900"
         }`}
       />
       <div
         className={`tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center ${
-          isActive ? "tw-text-white" : "tw-text-iron-300"
+          isActive ? "tw-text-primary-50" : "tw-text-iron-400"
         }`}
       >
         <MasonryGridIcon />
