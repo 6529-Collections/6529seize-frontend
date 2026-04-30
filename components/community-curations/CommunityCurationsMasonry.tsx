@@ -32,9 +32,9 @@ const MASONRY_GUTTER = 16;
 const INFINITE_SCROLL_ROOT_MARGIN = "1200px 0px";
 const SCROLL_IDLE_DELAY_MS = 120;
 const CURATION_CARD_CLASS_NAME =
-  "tw-group tw-relative tw-isolate tw-rounded-xl";
+  "tw-group tw-relative tw-isolate tw-z-0 tw-rounded-xl desktop-hover:hover:tw-z-30 focus-within:tw-z-30";
 const CURATION_CARD_HOVER_FRAME_CLASS_NAME =
-  "tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-border-white/10 motion-reduce:tw-transition-none";
+  "tw-pointer-events-none tw-absolute tw-inset-0 -tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-border-white/10 motion-reduce:tw-transition-none";
 
 type PanelViewport = {
   readonly height: number;
