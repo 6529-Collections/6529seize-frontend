@@ -42,7 +42,6 @@ export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
     CreateWaveStep.DATES,
     CreateWaveStep.DROPS,
     CreateWaveStep.VOTING,
-    CreateWaveStep.APPROVAL,
     CreateWaveStep.OUTCOMES,
     CreateWaveStep.DESCRIPTION,
   ],

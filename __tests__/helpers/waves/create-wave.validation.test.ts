@@ -125,14 +125,14 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("approval threshold required for approve waves on approval step", () => {
+  it("approval threshold required for approve waves on voting step", () => {
     const approveConfig = {
       ...baseConfig,
       overview: { type: ApiWaveType.Approve, name: "n", image: null },
       approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
     };
     const errors = getCreateWaveValidationErrors({
-      step: CreateWaveStep.APPROVAL,
+      step: CreateWaveStep.VOTING,
       config: approveConfig,
     });
     expect(errors).toContain(
@@ -228,6 +228,7 @@ describe("create-wave.validation", () => {
     const config = {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      approval: { ...baseConfig.approval, threshold: 1 },
       voting: {
         ...baseConfig.voting,
         winningThreshold: 1,
@@ -252,6 +253,7 @@ describe("create-wave.validation", () => {
     const config = {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      approval: { ...baseConfig.approval, threshold: 1 },
       dates: {
         ...baseConfig.dates,
         submissionStartDate: startDate,
@@ -284,6 +286,7 @@ describe("create-wave.validation", () => {
     const config = {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      approval: { ...baseConfig.approval, threshold: 1 },
       dates: {
         ...baseConfig.dates,
         submissionStartDate: startDate,
@@ -346,6 +349,7 @@ describe("create-wave.validation", () => {
     const config = {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      approval: { ...baseConfig.approval, threshold: 1 },
       dates: {
         ...baseConfig.dates,
         submissionStartDate: 1_000,

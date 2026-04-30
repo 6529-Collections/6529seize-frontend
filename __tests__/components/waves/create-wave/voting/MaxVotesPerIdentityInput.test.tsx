@@ -9,6 +9,11 @@ describe("MaxVotesPerIdentityInput", () => {
     );
 
     expect(screen.getByLabelText("Vote cap per identity")).toHaveValue(1);
+    expect(
+      screen.getByText(
+        "Optional. Leave blank to use each identity's full voting power. Set 1 for one identity = one vote."
+      )
+    ).toBeInTheDocument();
   });
 
   it("sends null when blank", () => {
@@ -51,9 +56,15 @@ describe("MaxVotesPerIdentityInput", () => {
         onChange={jest.fn()}
       />
     );
+    const input = screen.getByLabelText("Vote cap per identity");
 
     expect(
       screen.getByText("Enter a whole number greater than 0.")
     ).toBeInTheDocument();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute(
+      "aria-describedby",
+      "max-votes-per-identity-per-drop-error max-votes-per-identity-per-drop-help"
+    );
   });
 });

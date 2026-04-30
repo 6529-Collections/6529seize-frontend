@@ -108,9 +108,6 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.DROPS:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.VOTING:
-      if (waveType === ApiWaveType.Approve) {
-        return CreateWaveStep.APPROVAL;
-      }
       if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.DESCRIPTION;
       }
@@ -151,9 +148,6 @@ export const getCreateWavePreviousStep = ({
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.OUTCOMES:
-      if (waveType === ApiWaveType.Approve) {
-        return CreateWaveStep.APPROVAL;
-      }
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {

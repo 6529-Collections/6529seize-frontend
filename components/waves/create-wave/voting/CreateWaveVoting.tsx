@@ -7,6 +7,7 @@ import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.valida
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
+import CreateWaveVotingThreshold from "./CreateWaveVotingThreshold";
 import MaxVotesPerIdentityInput from "./MaxVotesPerIdentityInput";
 import NegativeVotingToggle from "./NegativeVotingToggle";
 import TimeWeightedVoting from "./TimeWeightedVoting";
@@ -23,17 +24,22 @@ const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
 const TIME_WEIGHTED_DURATION_ERROR =
   "This interval is longer than the wave duration. Choose a shorter interval, extend the wave end date, or clear the end date.";
 
+const VOTING_SETTINGS_GRID_CLASSES =
+  "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-t tw-border-iron-700 tw-pt-6";
+
 export default function CreateWaveVoting({
   waveType,
   selectedType,
   category,
   profileId,
   maxVotesPerIdentityPerDrop,
+  approvalThreshold,
   errors,
   onTypeChange,
   setCategory,
   setProfileId,
   setMaxVotesPerIdentityPerDrop,
+  setApprovalThreshold,
   timeWeighted,
   onTimeWeightedChange,
 }: {
@@ -42,16 +48,16 @@ export default function CreateWaveVoting({
   readonly category: string | null;
   readonly profileId: string | null;
   readonly maxVotesPerIdentityPerDrop: number | null;
+  readonly approvalThreshold: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onTypeChange: (type: ApiWaveCreditType) => void;
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
   readonly setMaxVotesPerIdentityPerDrop: (value: number | null) => void;
+  readonly setApprovalThreshold: (value: number | null) => void;
   readonly timeWeighted: TimeWeightedVotingConfig;
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
-  // We now use the props from the parent instead of local state
-
   // Still using local state for negative voting toggle for now
   const [allowNegativeVotes, setAllowNegativeVotes] = useState(true);
 
@@ -70,6 +76,10 @@ export default function CreateWaveVoting({
   )
     ? TIME_WEIGHTED_DURATION_ERROR
     : undefined;
+  const approvalThresholdError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED
+  );
+  const showVotingSettings = waveType !== ApiWaveType.Chat;
 
   return (
     <div>
@@ -112,12 +122,25 @@ export default function CreateWaveVoting({
         )}
       </div>
 
-      {waveType !== ApiWaveType.Chat && (
-        <MaxVotesPerIdentityInput
-          value={maxVotesPerIdentityPerDrop}
-          errors={errors}
-          onChange={setMaxVotesPerIdentityPerDrop}
-        />
+      {showVotingSettings && (
+        <div
+          data-testid="create-wave-voting-settings-grid"
+          className={VOTING_SETTINGS_GRID_CLASSES}
+        >
+          <MaxVotesPerIdentityInput
+            value={maxVotesPerIdentityPerDrop}
+            errors={errors}
+            onChange={setMaxVotesPerIdentityPerDrop}
+          />
+
+          {waveType === ApiWaveType.Approve && (
+            <CreateWaveVotingThreshold
+              threshold={approvalThreshold}
+              error={approvalThresholdError}
+              setThreshold={setApprovalThreshold}
+            />
+          )}
+        </div>
       )}
 
       {/* Negative Voting Toggle - show for Rank and Approve waves */}

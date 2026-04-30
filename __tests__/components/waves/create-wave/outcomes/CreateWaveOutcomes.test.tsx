@@ -80,6 +80,7 @@ describe("CreateWaveOutcomes", () => {
     const setMaxWinners = jest.fn();
     render(<CreateWaveOutcomes {...baseProps} setMaxWinners={setMaxWinners} />);
 
+    expect(screen.queryByLabelText("Approval threshold")).toBeNull();
     fireEvent.change(screen.getByLabelText(/Max Winners/), {
       target: { value: "7" },
     });
@@ -89,11 +90,14 @@ describe("CreateWaveOutcomes", () => {
 
   it("explains that max winners is optional", () => {
     render(<CreateWaveOutcomes {...baseProps} />);
+    const input = screen.getByLabelText("Max Winners (optional)");
+    const label = screen.getByText("Max Winners (optional)");
+    const helpText = screen.getByText("Leave blank for unlimited winners.");
 
-    expect(screen.getByLabelText("Max Winners (optional)")).toBeInTheDocument();
-    expect(
-      screen.getByText("Leave blank for unlimited winners.")
-    ).toBeInTheDocument();
+    expect(input).toBeInTheDocument();
+    expect(helpText).toBeInTheDocument();
+    expect(input.parentElement).toContainElement(label);
+    expect(input.parentElement).not.toContainElement(helpText);
   });
 
   it("rejects decimal max winners instead of truncating", () => {

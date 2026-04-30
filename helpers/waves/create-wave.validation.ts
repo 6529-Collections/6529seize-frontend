@@ -213,10 +213,12 @@ const getVotingValidationErrors = ({
   waveType,
   dates,
   voting,
+  approval,
 }: {
   readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
   readonly voting: CreateWaveVotingConfig;
+  readonly approval: CreateWaveApprovalConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   const maxVotesPerIdentityPerDrop: number | null | undefined =
@@ -234,6 +236,15 @@ const getVotingValidationErrors = ({
       errors.push(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_VOTING);
     }
     return errors;
+  }
+
+  if (
+    waveType === ApiWaveType.Approve &&
+    (approval.threshold === null ||
+      !Number.isInteger(approval.threshold) ||
+      approval.threshold <= 0)
+  ) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
   }
 
   // For Rank and Approve waves
@@ -428,6 +439,7 @@ export const getCreateWaveValidationErrors = ({
           waveType: config.overview.type,
           dates: config.dates,
           voting: config.voting,
+          approval: config.approval,
         })
       );
       break;

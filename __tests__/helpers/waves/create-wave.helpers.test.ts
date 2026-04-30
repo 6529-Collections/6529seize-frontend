@@ -88,7 +88,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.VOTING,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.APPROVAL);
+      ).toBe(CreateWaveStep.OUTCOMES);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.DESCRIPTION,
@@ -111,7 +111,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.OUTCOMES,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.APPROVAL);
+      ).toBe(CreateWaveStep.VOTING);
     });
   });
 

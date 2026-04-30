@@ -16,8 +16,13 @@ describe("CreateWaveVotingThreshold", () => {
   it("renders threshold input with current value", () => {
     render(<CreateWaveVotingThreshold {...defaultProps} threshold={50} />);
 
-    expect(screen.getByLabelText("Threshold")).toBeInTheDocument();
+    expect(screen.getByLabelText("Approval threshold")).toBeInTheDocument();
     expect(screen.getByDisplayValue("50")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "A drop is approved when its vote score reaches this number. Example: 50 means the drop needs a score of 50 to win."
+      )
+    ).toBeInTheDocument();
   });
 
   it("calls setThreshold with valid number on input change", () => {
@@ -29,7 +34,7 @@ describe("CreateWaveVotingThreshold", () => {
       />
     );
 
-    fireEvent.change(screen.getByLabelText("Threshold"), {
+    fireEvent.change(screen.getByLabelText("Approval threshold"), {
       target: { value: "75" },
     });
 
@@ -45,7 +50,7 @@ describe("CreateWaveVotingThreshold", () => {
       />
     );
 
-    await userEvent.type(screen.getByLabelText("Threshold"), "abc");
+    await userEvent.type(screen.getByLabelText("Approval threshold"), "abc");
 
     expect(setThreshold).toHaveBeenCalledWith(null);
   });
@@ -59,7 +64,7 @@ describe("CreateWaveVotingThreshold", () => {
       />
     );
 
-    fireEvent.change(screen.getByLabelText("Threshold"), {
+    fireEvent.change(screen.getByLabelText("Approval threshold"), {
       target: { value: "75.5" },
     });
 
@@ -70,7 +75,16 @@ describe("CreateWaveVotingThreshold", () => {
   it("shows error message when error prop is true", () => {
     render(<CreateWaveVotingThreshold {...defaultProps} error={true} />);
 
-    expect(screen.getByText("Please set threshold")).toBeInTheDocument();
-    expect(screen.getByLabelText("Threshold")).toHaveClass("tw-ring-error");
+    const input = screen.getByLabelText("Approval threshold");
+
+    expect(
+      screen.getByText("Enter an approval threshold greater than 0.")
+    ).toBeInTheDocument();
+    expect(input).toHaveClass("tw-ring-error");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAttribute(
+      "aria-describedby",
+      "approval-threshold-error approval-threshold-help"
+    );
   });
 });

@@ -2,7 +2,6 @@ import type { RefObject } from "react";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
@@ -13,7 +12,6 @@ import type { useWaveConfig } from "./hooks/useWaveConfig";
 import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
-import CreateWaveVotingThreshold from "./voting/CreateWaveVotingThreshold";
 
 type WaveConfigController = ReturnType<typeof useWaveConfig>;
 
@@ -107,32 +105,19 @@ export default function CreateWaveStepContent({
           category={config.voting.category}
           profileId={config.voting.profileId}
           maxVotesPerIdentityPerDrop={config.voting.maxVotesPerIdentityPerDrop}
+          approvalThreshold={config.approval.threshold}
           errors={errors}
           onTypeChange={onVotingTypeChange}
           setCategory={onCategoryChange}
           setProfileId={onProfileIdChange}
           setMaxVotesPerIdentityPerDrop={onMaxVotesPerIdentityPerDropChange}
+          setApprovalThreshold={onThresholdChange}
           timeWeighted={config.voting.timeWeighted}
           onTimeWeightedChange={onTimeWeightedVotingChange}
         />
       );
     case CreateWaveStep.APPROVAL:
-      return (
-        <div>
-          <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
-            Approval
-          </p>
-          <div className="tw-mt-3">
-            <CreateWaveVotingThreshold
-              threshold={config.approval.threshold}
-              error={errors.includes(
-                CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED
-              )}
-              setThreshold={onThresholdChange}
-            />
-          </div>
-        </div>
-      );
+      return null;
     case CreateWaveStep.OUTCOMES:
       return (
         <CreateWaveOutcomes
