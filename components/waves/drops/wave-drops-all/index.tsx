@@ -98,6 +98,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   useWaveDropsNotificationRead({
     waveId,
     enabled: Boolean(connectedProfile?.handle),
+    unreadCount,
     removeWaveDeliveredNotifications,
   });
 

@@ -10,10 +10,12 @@ jest.mock("@/services/api/common-api", () => ({
 
 function TestComponent({
   enabled,
+  unreadCount,
   removeWaveDeliveredNotifications,
   waveId,
 }: {
   readonly enabled?: boolean;
+  readonly unreadCount?: number;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -22,6 +24,7 @@ function TestComponent({
   useWaveDropsNotificationRead({
     waveId,
     enabled,
+    unreadCount,
     removeWaveDeliveredNotifications,
   });
 
@@ -69,6 +72,7 @@ describe("useWaveDropsNotificationRead", () => {
       >
         <TestComponent
           waveId="wave-1"
+          unreadCount={2}
           removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
         />
       </ReactQueryWrapperContext.Provider>
@@ -81,5 +85,23 @@ describe("useWaveDropsNotificationRead", () => {
       });
       expect(invalidateNotifications).toHaveBeenCalled();
     });
+  });
+
+  it("skips read-sync when there are no unread drops", () => {
+    render(
+      <ReactQueryWrapperContext.Provider
+        value={{ invalidateNotifications } as any}
+      >
+        <TestComponent
+          waveId="wave-1"
+          unreadCount={0}
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    expect(removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 });

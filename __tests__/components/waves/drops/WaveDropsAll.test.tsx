@@ -315,6 +315,7 @@ interface RenderOptions {
   onQuote?: jest.Mock | undefined;
   activeDrop?: ActiveDropState | null | undefined;
   initialDrop?: number | null | undefined;
+  unreadCount?: number | undefined;
   onDropContentClick?: jest.Mock | undefined;
 }
 
@@ -326,6 +327,7 @@ function renderComponent(options: RenderOptions = {}) {
     onQuote: jest.fn(),
     activeDrop: null,
     initialDrop: null,
+    unreadCount: 1,
     onDropContentClick: jest.fn(),
     ...options,
   };
@@ -1066,7 +1068,9 @@ describe("WaveDropsAll", () => {
         .mockImplementation(() => {});
       mockCommonApiPost.mockRejectedValueOnce(new Error("API error"));
 
-      setupMocks();
+      setupMocks({
+        auth: { connectedProfile: { handle: "testuser" } },
+      });
 
       renderComponent({ waveId: "test-wave" });
 
@@ -1126,7 +1130,9 @@ describe("WaveDropsAll", () => {
 
   describe("Component Lifecycle", () => {
     it("removes notifications and marks wave as read on mount", async () => {
-      setupMocks();
+      setupMocks({
+        auth: { connectedProfile: { handle: "testuser" } },
+      });
 
       // Don't pass initialDrop to avoid triggering AbortController code path
       renderComponent({ waveId: "test-wave", initialDrop: null });

@@ -9,7 +9,6 @@ import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -23,14 +22,14 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useWave } from "@/hooks/useWave";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
-import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
 
@@ -58,7 +57,7 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
 }) => {
   const { setUnreadDividerSerialNo } = useUnreadDivider();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
-  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
 
   useEffect(() => {
     if (!enabled) {
@@ -78,10 +77,7 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
         }
 
         try {
-          await commonApiPostWithoutBodyAndResponse({
-            endpoint: `notifications/wave/${waveId}/read`,
-          });
-          invalidateNotifications();
+          await markWaveNotificationsRead(waveId);
         } catch (error: unknown) {
           console.error("Failed to mark feed as read:", error);
         }
@@ -92,7 +88,7 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
     waveId,
     setUnreadDividerSerialNo,
     removeWaveDeliveredNotifications,
-    invalidateNotifications,
+    markWaveNotificationsRead,
   ]);
 
   return null;
@@ -105,6 +101,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   onDropClick,
 }) => {
   const router = useRouter();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);

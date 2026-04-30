@@ -1,10 +1,10 @@
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useContext, useEffect } from "react";
-import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
+import { useEffect } from "react";
 
 interface UseWaveDropsNotificationReadParams {
   readonly waveId: string;
   readonly enabled?: boolean | undefined;
+  readonly unreadCount?: number | undefined;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -13,12 +13,13 @@ interface UseWaveDropsNotificationReadParams {
 export const useWaveDropsNotificationRead = ({
   waveId,
   enabled = true,
+  unreadCount,
   removeWaveDeliveredNotifications,
 }: UseWaveDropsNotificationReadParams) => {
-  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || (unreadCount ?? 0) <= 0) {
       return;
     }
 
@@ -29,20 +30,19 @@ export const useWaveDropsNotificationRead = ({
         console.error("Failed to remove wave delivered notifications:", error);
       }
 
-      commonApiPostWithoutBodyAndResponse({
-        endpoint: `notifications/wave/${waveId}/read`,
-      })
-        .then(() => {
-          invalidateNotifications();
-        })
-        .catch((error) => console.error("Failed to mark feed as read:", error));
+      try {
+        await markWaveNotificationsRead(waveId);
+      } catch (error) {
+        console.error("Failed to mark feed as read:", error);
+      }
     };
 
-    syncReadState();
+    void syncReadState();
   }, [
     enabled,
+    unreadCount,
     waveId,
     removeWaveDeliveredNotifications,
-    invalidateNotifications,
+    markWaveNotificationsRead,
   ]);
 };

@@ -44,7 +44,7 @@ export function useConnectedAccountsUnreadNotifications(
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
   const queryKey = [
-    QueryKey.IDENTITY_NOTIFICATIONS,
+    QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
     "connected-account-unread-counts",
     accounts.map((account) => toAddressKey(account.address)),
   ] as const;

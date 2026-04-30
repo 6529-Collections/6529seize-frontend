@@ -43,6 +43,17 @@ jest.mock("viem", () => ({
   getAddress: jest.fn((address: string) => address.toLowerCase()),
 }));
 
+jest.mock("@/hooks/useConnectedAccountsUnreadNotifications", () => ({
+  useConnectedAccountsUnreadNotifications: jest.fn(() => ({})),
+}));
+
+jest.mock("@/hooks/useUnreadNotifications", () => ({
+  useUnreadNotifications: jest.fn(() => ({
+    notifications: { unread_count: 0 },
+    haveUnreadNotifications: false,
+  })),
+}));
+
 // Mock auth utils
 jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
