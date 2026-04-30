@@ -4,14 +4,18 @@ import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
+import JsonPreview from "@/components/drops/view/item/content/attachments/JsonPreview";
 import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowDownTrayIcon,
-  ArrowTopRightOnSquareIcon,
+  CodeBracketSquareIcon,
   DocumentIcon,
+  EllipsisHorizontalIcon,
   EyeIcon,
   EyeSlashIcon,
+  LinkIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -19,6 +23,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import clsx from "clsx";
 import { Tooltip } from "react-tooltip";
+import type { ReactNode, RefObject } from "react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "blob:"]);
@@ -41,6 +46,40 @@ function getSafeAttachmentUrl(rawUrl: string): string | null {
 
 type AttachmentRenderType = "csv" | "pdf" | "unknown";
 
+function getAttachmentMetadataUrl(rawUrl: string): string | null {
+  const trimmedUrl = rawUrl.trim();
+  if (!trimmedUrl) {
+    return null;
+  }
+
+  if (trimmedUrl.toLowerCase().startsWith("ipfs://")) {
+    const withoutProtocol = trimmedUrl.slice("ipfs://".length);
+    const rootCid = withoutProtocol.split(/[/?#]/)[0];
+    return rootCid ? `ipfs://${rootCid}/metadata.json` : null;
+  }
+
+  try {
+    const base = globalThis.window?.location?.origin || "https://6529.io";
+    const parsed = new URL(trimmedUrl, base);
+    const pathSegments = parsed.pathname.split("/");
+    const ipfsIndex = pathSegments.indexOf("ipfs");
+
+    if (ipfsIndex >= 0 && pathSegments[ipfsIndex + 1]) {
+      parsed.pathname = [
+        ...pathSegments.slice(0, ipfsIndex + 2),
+        "metadata.json",
+      ].join("/");
+      parsed.search = "";
+      parsed.hash = "";
+      return parsed.toString();
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 const CSV_PREVIEW_MAX_ROWS = 51;
 const CSV_PREVIEW_MAX_COLUMNS = 12;
 const CSV_PREVIEW_MAX_CHARS = 500_000;
@@ -57,7 +96,6 @@ const TRUSTED_BADGE_ICON_SIZE_CLASS_BY_SIZE = {
   default: "tw-h-2.5 tw-w-2.5",
   compact: "tw-h-[9px] tw-w-[9px]",
 } as const;
-
 const CSV_PREVIEW_TIMEOUT_MESSAGE =
   "CSV preview timed out. Please download the file.";
 const CSV_PREVIEW_SIZE_MESSAGE =
@@ -183,7 +221,9 @@ async function releaseCsvPreviewReader(
   await reader.cancel().catch(() => undefined);
   try {
     reader.releaseLock();
-  } catch {}
+  } catch {
+    // Reader may already be released after cancellation or stream completion.
+  }
 }
 
 async function readCsvPreviewFromStreamBody(
@@ -537,7 +577,7 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
   let isFirstRow = true;
 
   return (
-    <div className="tw-max-h-[28rem] tw-overflow-auto tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950">
+    <div className="tw-overflow-x-auto tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950">
       <table className="tw-w-full tw-border-separate tw-border-spacing-0 tw-text-left tw-text-xs tw-text-iron-200">
         <tbody>
           {visibleRows.map((row) => {
@@ -577,6 +617,157 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
   );
 }
 
+function AnimatedAttachmentPanel({
+  isOpen,
+  children,
+}: {
+  readonly isOpen: boolean;
+  readonly children: ReactNode;
+}) {
+  const [shouldRender, setShouldRender] = useState(isOpen);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      return;
+    }
+
+    const timeoutId = globalThis.window.setTimeout(
+      () => setShouldRender(false),
+      220
+    );
+    return () => globalThis.window.clearTimeout(timeoutId);
+  }, [isOpen]);
+
+  if (!shouldRender && !isOpen) {
+    return null;
+  }
+
+  return (
+    <div
+      className={clsx(
+        "tw-grid tw-transition-all tw-duration-200 tw-ease-out",
+        isOpen ? "tw-opacity-100" : "tw-opacity-0"
+      )}
+      style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+    >
+      <div className="tw-min-h-0 tw-overflow-hidden">
+        <div
+          className={clsx(
+            "tw-transform-gpu tw-transition-transform tw-duration-200 tw-ease-out",
+            isOpen ? "tw-translate-y-0" : "-tw-translate-y-2"
+          )}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AttachmentMoreMenu({
+  isOpen,
+  hasMetadata,
+  isDetailsOpen,
+  copiedLink,
+  isDownloading,
+  buttonRef,
+  onToggle,
+  onToggleDetails,
+  onCopyLink,
+  onDownload,
+}: {
+  readonly isOpen: boolean;
+  readonly hasMetadata: boolean;
+  readonly isDetailsOpen: boolean;
+  readonly copiedLink: boolean;
+  readonly isDownloading: boolean;
+  readonly buttonRef: RefObject<HTMLButtonElement | null>;
+  readonly onToggle: () => void;
+  readonly onToggleDetails: () => void;
+  readonly onCopyLink: () => void;
+  readonly onDownload: () => void;
+}) {
+  const getMenuItemClassName = (active = false) =>
+    clsx(
+      "tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800",
+      active
+        ? "tw-text-primary-300 desktop-hover:hover:tw-text-primary-300"
+        : "tw-text-iron-300 desktop-hover:hover:tw-text-iron-300"
+    );
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={onToggle}
+        aria-label="Attachment options"
+        title="More"
+        className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
+      >
+        <EllipsisHorizontalIcon className="tw-size-4" aria-hidden="true" />
+      </button>
+      <CommonDropdownItemsDefaultWrapper
+        isOpen={isOpen}
+        setOpen={(open) => {
+          if (!open && isOpen) {
+            onToggle();
+          }
+        }}
+        buttonRef={buttonRef}
+      >
+        <li className="tw-list-none">
+          <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-1">
+            {hasMetadata && (
+              <button
+                type="button"
+                onClick={onToggleDetails}
+                className={getMenuItemClassName()}
+              >
+                <CodeBracketSquareIcon
+                  className="tw-size-4 tw-flex-shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="tw-text-sm tw-font-medium">
+                  {isDetailsOpen ? "Hide metadata" : "View metadata"}
+                </span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onCopyLink}
+              className={getMenuItemClassName(copiedLink)}
+            >
+              <LinkIcon
+                className="tw-size-4 tw-flex-shrink-0"
+                aria-hidden="true"
+              />
+              <span className="tw-text-sm tw-font-medium">
+                {copiedLink ? "Copied" : "Copy link"}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={onDownload}
+              disabled={isDownloading}
+              className={getMenuItemClassName()}
+            >
+              <ArrowDownTrayIcon
+                className="tw-size-4 tw-flex-shrink-0"
+                aria-hidden="true"
+              />
+              <span className="tw-text-sm tw-font-medium">
+                {isDownloading ? "Downloading" : "Download"}
+              </span>
+            </button>
+          </div>
+        </li>
+      </CommonDropdownItemsDefaultWrapper>
+    </>
+  );
+}
+
 export default function DropAttachmentDisplay({
   mimeType,
   attachmentUrl,
@@ -588,25 +779,24 @@ export default function DropAttachmentDisplay({
   readonly fileName?: string | undefined;
   readonly disableMediaInteraction?: boolean | undefined;
 }) {
-  const [isRendered, setIsRendered] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const downloadAbortRef = useRef<AbortController | null>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
   const { isCapacitor } = useCapacitor();
   const safeAttachmentUrl = useMemo(
     () => getSafeAttachmentUrl(attachmentUrl),
     [attachmentUrl]
   );
-  const {
-    renderType,
-    fileName,
-    label,
-    canRender,
-    canOpenInNewTab,
-    canCopyLink,
-    canDownload,
-    Icon,
-  } = useMemo(() => {
+  const safeMetadataUrl = useMemo(() => {
+    const metadataUrl = getAttachmentMetadataUrl(attachmentUrl);
+    return metadataUrl ? getSafeAttachmentUrl(metadataUrl) : null;
+  }, [attachmentUrl]);
+  const isRendered = isPreviewOpen;
+  const { renderType, fileName, label, canRender, Icon } = useMemo(() => {
     const nextRenderType = getAttachmentRenderType(mimeType, attachmentUrl);
     const fileInfo = getFileInfoFromUrl(attachmentUrl);
     const fallbackExtension = getFallbackExtension(nextRenderType);
@@ -617,20 +807,12 @@ export default function DropAttachmentDisplay({
     const nextCanRender =
       safeAttachmentUrl !== null &&
       (nextRenderType === "pdf" || nextRenderType === "csv");
-    const nextCanOpenInNewTab =
-      safeAttachmentUrl !== null && nextRenderType === "pdf";
-    const nextCanCopyLink =
-      safeAttachmentUrl !== null && nextRenderType === "csv";
-    const nextCanDownload = safeAttachmentUrl !== null;
     const NextIcon = nextRenderType === "csv" ? TableCellsIcon : DocumentIcon;
     return {
       renderType: nextRenderType,
       fileName: nextFileName,
       label: nextLabel,
       canRender: nextCanRender,
-      canOpenInNewTab: nextCanOpenInNewTab,
-      canCopyLink: nextCanCopyLink,
-      canDownload: nextCanDownload,
       Icon: NextIcon,
     };
   }, [attachmentUrl, mimeType, providedFileName, safeAttachmentUrl]);
@@ -725,6 +907,30 @@ export default function DropAttachmentDisplay({
     }
   };
 
+  const handleToggleDetails = () => {
+    setIsDetailsOpen((current) => !current);
+    setIsMoreMenuOpen(false);
+  };
+
+  const handleToggleMoreMenu = () => {
+    if (!isMoreMenuOpen) {
+      setCopiedLink(false);
+    }
+    setIsMoreMenuOpen((current) => !current);
+  };
+
+  const handleMenuCopyLink = async () => {
+    await handleCopyLink();
+    globalThis.window.setTimeout(() => {
+      setIsMoreMenuOpen(false);
+    }, 300);
+  };
+
+  const handleMenuDownload = () => {
+    void handleDownload();
+    setIsMoreMenuOpen(false);
+  };
+
   return (
     <div className="tw-flex tw-w-full tw-flex-col">
       <div
@@ -754,93 +960,62 @@ export default function DropAttachmentDisplay({
             {canRender && (
               <button
                 type="button"
-                onClick={() => setIsRendered((current) => !current)}
+                onClick={() => setIsPreviewOpen((current) => !current)}
                 aria-label={
-                  isRendered
+                  isPreviewOpen
                     ? "Hide attachment preview"
                     : "Render attachment preview"
                 }
-                title={isRendered ? "Hide preview" : "Render preview"}
+                title={isPreviewOpen ? "Hide preview" : "Render preview"}
                 className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
               >
-                {isRendered ? (
+                {isPreviewOpen ? (
                   <EyeSlashIcon className="tw-size-4" aria-hidden="true" />
                 ) : (
                   <EyeIcon className="tw-size-4" aria-hidden="true" />
                 )}
               </button>
             )}
-            {canCopyLink && (
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                aria-label="Copy attachment link"
-                title={copiedLink ? "Copied" : "Copy link"}
-                className={clsx(
-                  "tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-bg-iron-800 tw-no-underline tw-transition desktop-hover:hover:tw-bg-iron-700",
-                  copiedLink
-                    ? "tw-border-primary-400 tw-text-primary-300"
-                    : "tw-border-iron-700 tw-text-iron-100"
-                )}
-              >
-                <svg
-                  className="tw-size-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
-                  />
-                </svg>
-              </button>
-            )}
-            {canDownload && (
-              <button
-                type="button"
-                onClick={handleDownload}
-                aria-label="Download attachment"
-                title={isDownloading ? "Downloading" : "Download"}
-                disabled={isDownloading}
-                className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-no-underline tw-transition desktop-hover:hover:tw-bg-iron-700"
-              >
-                <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
-              </button>
-            )}
-            {canOpenInNewTab && safeAttachmentUrl && (
-              <a
-                href={safeAttachmentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Open attachment"
-                title="Open"
-                className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-transition desktop-hover:hover:tw-bg-iron-700"
-              >
-                <ArrowTopRightOnSquareIcon
-                  className="tw-size-4"
-                  aria-hidden="true"
-                />
-              </a>
+            {safeAttachmentUrl && (
+              <AttachmentMoreMenu
+                isOpen={isMoreMenuOpen}
+                hasMetadata={safeMetadataUrl !== null}
+                isDetailsOpen={isDetailsOpen}
+                copiedLink={copiedLink}
+                isDownloading={isDownloading}
+                buttonRef={moreButtonRef}
+                onToggle={handleToggleMoreMenu}
+                onToggleDetails={handleToggleDetails}
+                onCopyLink={handleMenuCopyLink}
+                onDownload={handleMenuDownload}
+              />
             )}
           </div>
         )}
       </div>
-      {isRendered && renderType === "pdf" && safeAttachmentUrl && (
-        <iframe
-          src={safeAttachmentUrl}
-          title={fileName}
-          referrerPolicy="no-referrer"
-          className="tw-h-[32rem] tw-w-full tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950"
-        />
-      )}
-      {isRendered && renderType === "csv" && safeAttachmentUrl && (
-        <CsvAttachmentPreview url={safeAttachmentUrl} />
-      )}
+      <AnimatedAttachmentPanel isOpen={isDetailsOpen && !!safeMetadataUrl}>
+        {safeMetadataUrl && (
+          <div className="tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950">
+            <JsonPreview
+              link={safeMetadataUrl}
+              onClose={() => setIsDetailsOpen(false)}
+            />
+          </div>
+        )}
+      </AnimatedAttachmentPanel>
+      <AnimatedAttachmentPanel isOpen={isPreviewOpen && !!safeAttachmentUrl}>
+        {renderType === "pdf" && safeAttachmentUrl && (
+          <iframe
+            src={safeAttachmentUrl}
+            title={fileName}
+            referrerPolicy="no-referrer"
+            className="tw-h-[32rem] tw-w-full tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950"
+          />
+        )}
+        {renderType === "csv" && safeAttachmentUrl && (
+          <CsvAttachmentPreview url={safeAttachmentUrl} />
+        )}
+      </AnimatedAttachmentPanel>
     </div>
   );
 }
