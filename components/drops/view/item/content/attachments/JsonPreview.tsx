@@ -326,7 +326,7 @@ function getMetadataLineKey(line: string, countsByLine: Map<string, number>) {
   let hash = 0;
 
   for (const char of line) {
-    hash = (hash * 31 + char.charCodeAt(0)) | 0;
+    hash = Math.trunc(hash * 31 + (char.codePointAt(0) ?? 0));
   }
 
   return `metadata-line-${hash.toString(36)}-${count}`;
