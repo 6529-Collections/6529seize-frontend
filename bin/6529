@@ -23,6 +23,7 @@ Common commands:
   6529 install:frozen  -> pnpm run install:secure:frozen
   6529 ci              -> pnpm run install:secure:frozen
   6529 install:prod    -> pnpm run install:secure:prod
+  6529 update          -> sfw pnpm update
   6529 run dev         -> pnpm run dev
   6529 run build       -> pnpm run build
   6529 approve-builds  -> pnpm approve-builds
@@ -122,6 +123,10 @@ case "$command_name" in
     fi
     node "$REPO_ROOT/scripts/assert-no-package-lock.cjs"
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" add "$@"
+    ;;
+  update)
+    node "$REPO_ROOT/scripts/assert-no-package-lock.cjs"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" update "$@"
     ;;
   prune:prod)
     exec "$REAL_PNPM" run prune:prod "$@"

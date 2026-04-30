@@ -16,6 +16,7 @@ The supported entrypoint is the repo-local `6529` command:
 6529 install
 6529 install:frozen
 6529 install:prod
+6529 update
 6529 run dev
 6529 run build
 6529 approve-builds
@@ -52,6 +53,12 @@ Then install dependencies:
 
 ```bash
 6529 install
+```
+
+To update dependencies, use the same secure wrapper path:
+
+```bash
+6529 update
 ```
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you
