@@ -81,6 +81,10 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
     return () => {
       setUnreadDividerSerialNo(null);
       void (async () => {
+        if (document.visibilityState !== "visible") {
+          return;
+        }
+
         try {
           await Promise.resolve(removeWaveDeliveredNotifications(waveId));
         } catch (error: unknown) {

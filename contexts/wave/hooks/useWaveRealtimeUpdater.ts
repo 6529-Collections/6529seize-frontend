@@ -188,6 +188,10 @@ export function useWaveRealtimeUpdater({
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
       const markWaveAsRead = async (waveId: string) => {
+        if (document.visibilityState !== "visible") {
+          return;
+        }
+
         await commonApiPostWithoutBodyAndResponse({
           endpoint: `notifications/wave/${waveId}/read`,
         });
@@ -309,7 +313,7 @@ export function useWaveRealtimeUpdater({
         initiateFetchNewestCycle(waveId, serialNoForFetch);
       }
 
-      if (activeWaveId === waveId) {
+      if (activeWaveId === waveId && document.visibilityState === "visible") {
         removeWaveDeliveredNotifications(waveId).catch((error) =>
           console.error("Failed to remove wave delivered notifications:", error)
         );

@@ -116,12 +116,13 @@ describe("DropAttachmentDisplay", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "Open attachment" })
-    ).toHaveAttribute("href", "https://example.com/files/paper.pdf");
+      screen.queryByRole("link", { name: "Open attachment" })
+    ).not.toBeInTheDocument();
 
     await user.click(
-      screen.getByRole("button", { name: "Download attachment" })
+      screen.getByRole("button", { name: "Attachment options" })
     );
+    await user.click(screen.getByRole("button", { name: "Download" }));
 
     expect(createObjectURLSpy).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
@@ -183,7 +184,7 @@ describe("DropAttachmentDisplay", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("copies CSV attachment links without showing the PDF open action", async () => {
+  it("copies CSV attachment links without showing the open action", async () => {
     const user = userEvent.setup();
     const writeText = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
@@ -198,16 +199,46 @@ describe("DropAttachmentDisplay", () => {
       />
     );
 
-    const copyButton = screen.getByRole("button", {
-      name: "Copy attachment link",
-    });
+    await user.click(
+      screen.getByRole("button", { name: "Attachment options" })
+    );
+    const copyButton = screen.getByRole("button", { name: "Copy link" });
     await user.click(copyButton);
 
     expect(writeText).toHaveBeenCalledWith(
       "https://example.com/files/data.csv"
     );
-    expect(copyButton).toHaveAttribute("title", "Copied");
-    expect(copyButton).toHaveClass("tw-border-primary-400");
+    expect(screen.getByRole("button", { name: "Copied" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Open attachment" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("copies PDF attachment links without showing the open action", async () => {
+    const user = userEvent.setup();
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="https://example.com/files/paper.pdf"
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Attachment options" })
+    );
+    const copyButton = screen.getByRole("button", { name: "Copy link" });
+    await user.click(copyButton);
+
+    expect(writeText).toHaveBeenCalledWith(
+      "https://example.com/files/paper.pdf"
+    );
+    expect(screen.getByRole("button", { name: "Copied" })).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Open attachment" })
     ).not.toBeInTheDocument();
@@ -230,11 +261,134 @@ describe("DropAttachmentDisplay", () => {
     );
 
     await user.click(
-      screen.getByRole("button", { name: "Copy attachment link" })
+      screen.getByRole("button", { name: "Attachment options" })
     );
+    await user.click(screen.getByRole("button", { name: "Copy link" }));
 
     expect(writeText).toHaveBeenCalledWith(
       "https://ipfs.example.com/ipfs/bafybeigateway/sample.csv"
     );
+  });
+
+  it("opens attachment preview without loading metadata", async () => {
+    const user = userEvent.setup();
+    const fetchSpy = jest.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify({ name: "Sample", edition: 1 }),
+    } as Response);
+
+    render(
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="ipfs://bafybeigateway/sample.pdf"
+        fileName="sample.pdf"
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Render attachment preview" })
+    );
+
+    expect(screen.getByTitle("sample.pdf")).toBeInTheDocument();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(screen.queryByText(/"name": "Sample"/)).not.toBeInTheDocument();
+  });
+
+  it("renders IPFS attachment metadata from the root CID", async () => {
+    const user = userEvent.setup();
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    jest.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify({ name: "Sample", edition: 1 }),
+    } as Response);
+
+    render(
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="ipfs://bafybeigateway/sample.pdf"
+        fileName="sample.pdf"
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Attachment options" })
+    );
+    await user.click(screen.getByRole("button", { name: "View metadata" }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/"name": "Sample"/)).toBeInTheDocument();
+    });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json",
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+
+    const copyMetadataButton = screen.getByRole("button", {
+      name: "Copy metadata link",
+    });
+    await user.click(copyMetadataButton);
+
+    expect(writeText).toHaveBeenCalledWith(
+      "https://ipfs.example.com/ipfs/bafybeigateway/metadata.json"
+    );
+    expect(copyMetadataButton).toHaveAttribute("title", "Copied");
+    await user.click(
+      screen.getByRole("button", { name: "Close attachment details" })
+    );
+    expect(screen.queryByText(/"name": "Sample"/)).not.toBeInTheDocument();
+  });
+
+  it("shows a metadata not found message when metadata cannot load", async () => {
+    const user = userEvent.setup();
+    jest.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      text: async () => "",
+    } as Response);
+
+    render(
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="ipfs://bafybeigateway/sample.pdf"
+        fileName="sample.pdf"
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Attachment options" })
+    );
+    await user.click(screen.getByRole("button", { name: "View metadata" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Metadata not found.")).toBeInTheDocument();
+    });
+  });
+
+  it("copies attachment links from the options menu", async () => {
+    const user = userEvent.setup();
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    render(
+      <DropAttachmentDisplay
+        mimeType="text/csv"
+        attachmentUrl="ipfs://bafybeigateway/sample.csv"
+        fileName="sample.csv"
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Attachment options" })
+    );
+    await user.click(screen.getByRole("button", { name: "Copy link" }));
+    expect(writeText).toHaveBeenCalledWith(
+      "https://ipfs.example.com/ipfs/bafybeigateway/sample.csv"
+    );
+    expect(screen.getByRole("button", { name: "Copied" })).toBeInTheDocument();
   });
 });
