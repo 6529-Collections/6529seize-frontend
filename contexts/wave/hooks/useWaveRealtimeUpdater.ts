@@ -13,7 +13,10 @@ import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater } from "./types";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
-import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
+import {
+  getProtectedReactionIntent,
+  recordReactionRealtimeReconciliation,
+} from "@/utils/monitoring/dropReactionMonitoring";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -37,6 +40,26 @@ type ProcessIncomingDropFn = (
   dropData: ApiDrop,
   type: ProcessIncomingDropType
 ) => void;
+
+function preserveLocalReactionFields(
+  serverDrop: ApiDrop,
+  localDrop: ExtendedDrop
+): ApiDrop {
+  const serverContext = serverDrop.context_profile_context;
+  const localContext = localDrop.context_profile_context;
+  const contextSource = serverContext ?? localContext;
+
+  return {
+    ...serverDrop,
+    context_profile_context: contextSource
+      ? {
+          ...contextSource,
+          reaction: localContext?.reaction ?? null,
+        }
+      : null,
+    reactions: localDrop.reactions,
+  };
+}
 
 export function useWaveRealtimeUpdater({
   activeWaveId,
@@ -181,7 +204,13 @@ export function useWaveRealtimeUpdater({
       ) {
         const apiDrop = await fetchDropByIdBatched(drop.id);
         if (apiDrop) {
+          let nextDrop = apiDrop;
+
           if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+            const protectedIntent = getProtectedReactionIntent(apiDrop.id);
+            const serverReaction =
+              apiDrop.context_profile_context?.reaction ?? null;
+
             recordReactionRealtimeReconciliation({
               drop: {
                 id: apiDrop.id,
@@ -189,13 +218,21 @@ export function useWaveRealtimeUpdater({
                 context_profile_context: apiDrop.context_profile_context,
               },
               websocketStatus: WebSocketStatus.CONNECTED,
+              protectedIntent,
             });
+
+            if (
+              protectedIntent &&
+              serverReaction !== protectedIntent.reaction
+            ) {
+              nextDrop = preserveLocalReactionFields(apiDrop, existingDrop);
+            }
           }
           updateData({
             key: waveId,
             drops: [
               {
-                ...apiDrop,
+                ...nextDrop,
                 type: DropSize.FULL,
                 stableHash: existingDrop.stableHash,
                 stableKey: existingDrop.stableKey,

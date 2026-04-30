@@ -4,6 +4,28 @@ import {
   ProcessIncomingDropType,
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import * as Sentry from "@sentry/nextjs";
+import {
+  __resetDropReactionMonitoringForTests,
+  beginReactionMutation,
+  recordReactionRequestSucceeded,
+} from "@/utils/monitoring/dropReactionMonitoring";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+
+jest.mock("@sentry/nextjs", () => ({
+  __esModule: true,
+  addBreadcrumb: jest.fn(),
+  withScope: jest.fn((callback: (scope: any) => void) => {
+    const scope = {
+      setLevel: jest.fn(),
+      setFingerprint: jest.fn(),
+      setTag: jest.fn(),
+      setExtras: jest.fn(),
+    };
+    callback(scope);
+  }),
+  captureException: jest.fn(),
+}));
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: () => ({ isConnected: true }),
@@ -26,8 +48,28 @@ const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("useWaveRealtimeUpdater", () => {
   afterEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
+    __resetDropReactionMonitoringForTests();
   });
+
+  const contextProfileContext = (reaction: string | null) => ({
+    rating: 0,
+    min_rating: 0,
+    max_rating: 0,
+    reaction,
+    boosted: false,
+    bookmarked: false,
+    curatable: false,
+    curated: false,
+  });
+
+  const reactionEntries = (reaction: string) => [
+    {
+      reaction,
+      profiles: [{ id: "profile-1" }],
+    },
+  ];
 
   const baseProps = (store: any) => ({
     activeWaveId: null as string | null,
@@ -140,6 +182,225 @@ describe("useWaveRealtimeUpdater", () => {
     await flushPromises();
     expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4");
     expect(props.updateData).toHaveBeenCalled();
+  });
+
+  it("keeps local reaction fields when protected local remove sees stale server reaction", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    beginReactionMutation({
+      dropId: "d-stale-remove",
+      waveId: "wave1",
+      source: "quick-react",
+      action: "remove",
+      previousReaction: ":joy:",
+      intendedReaction: null,
+      optimisticReaction: null,
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const localReactions: any[] = [];
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d-stale-remove",
+            type: DropSize.FULL,
+            stableKey: "stable-key",
+            stableHash: "stable-hash",
+            title: "local-title",
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(null),
+            reactions: localReactions,
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-stale-remove",
+      title: "server-title",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: contextProfileContext(":joy:"),
+      reactions: reactionEntries(":joy:"),
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-stale-remove",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.title).toBe("server-title");
+    expect(updatedDrop.context_profile_context.reaction).toBeNull();
+    expect(updatedDrop.reactions).toBe(localReactions);
+    expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.realtime_stale_ignored",
+      })
+    );
+  });
+
+  it("updates normally when protected intent matches server reaction", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    beginReactionMutation({
+      dropId: "d-matching-reaction",
+      waveId: "wave1",
+      source: "picker",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const localReactions = reactionEntries(":wave:");
+    const serverReactions = reactionEntries(":joy:");
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d-matching-reaction",
+            type: DropSize.FULL,
+            stableKey: "stable-key",
+            stableHash: "stable-hash",
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":wave:"),
+            reactions: localReactions,
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-matching-reaction",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: contextProfileContext(":joy:"),
+      reactions: serverReactions,
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-matching-reaction",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.context_profile_context.reaction).toBe(":joy:");
+    expect(updatedDrop.reactions).toBe(serverReactions);
+    expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.realtime_reconciled",
+      })
+    );
+  });
+
+  it("uses server reaction and can warn when mismatch is outside protection window", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const mutation = beginReactionMutation({
+      dropId: "d-expired-reaction",
+      waveId: "wave1",
+      source: "chip",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    const localReactions = reactionEntries(":joy:");
+    const serverReactions = reactionEntries(":wave:");
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d-expired-reaction",
+            type: DropSize.FULL,
+            stableKey: "stable-key",
+            stableHash: "stable-hash",
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: localReactions,
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-expired-reaction",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: contextProfileContext(":wave:"),
+      reactions: serverReactions,
+    });
+
+    dateNowSpy.mockReturnValue(6_101);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-expired-reaction",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.context_profile_context.reaction).toBe(":wave:");
+    expect(updatedDrop.reactions).toBe(serverReactions);
+    expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.optimistic_reverted",
+      })
+    );
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Reaction optimistic state disagreed with canonical state",
+      })
+    );
   });
 
   it("does not process when wave is missing", async () => {

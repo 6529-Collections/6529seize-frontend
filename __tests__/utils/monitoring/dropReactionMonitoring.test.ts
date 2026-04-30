@@ -3,6 +3,7 @@ import {
   __resetDropReactionMonitoringForTests,
   beginReactionMutation,
   deriveReactionAction,
+  getProtectedReactionIntent,
   recordReactionOptimisticApplied,
   recordReactionRealtimeReconciliation,
   recordReactionRequestFailed,
@@ -214,7 +215,7 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestSucceeded(mutation);
     expect(mutation.apiFailedAt).toBeNull();
 
-    dateNowSpy.mockReturnValue(1_500);
+    dateNowSpy.mockReturnValue(6_101);
     recordReactionRealtimeReconciliation({
       drop: {
         id: "drop-4",
@@ -280,6 +281,137 @@ describe("dropReactionMonitoring", () => {
       })
     );
     expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("returns protected intent for the latest in-flight mutation", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-protected-1",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+
+    expect(getProtectedReactionIntent("drop-protected-1")).toEqual(
+      expect.objectContaining({
+        mutationId: mutation.mutationId,
+        dropMutationSeq: 1,
+        reaction: ":joy:",
+        apiSucceededAt: null,
+      })
+    );
+  });
+
+  it("returns protected intent for five seconds after success", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-protected-2",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    dateNowSpy.mockReturnValue(6_100);
+
+    expect(getProtectedReactionIntent("drop-protected-2")).toEqual(
+      expect.objectContaining({
+        mutationId: mutation.mutationId,
+        reaction: ":joy:",
+        apiSucceededAt: 1_100,
+      })
+    );
+  });
+
+  it("returns null after the five second success protection window", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-protected-3",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    dateNowSpy.mockReturnValue(6_101);
+
+    expect(getProtectedReactionIntent("drop-protected-3")).toBeNull();
+  });
+
+  it("returns null for a failed mutation", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-protected-4",
+      waveId: "wave-1",
+      source: "picker",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestFailed(mutation, new TypeError("Failed to fetch"));
+
+    dateNowSpy.mockReturnValue(1_200);
+
+    expect(getProtectedReactionIntent("drop-protected-4")).toBeNull();
+  });
+
+  it("uses the newest mutation as the protected intent for a drop", () => {
+    beginReactionMutation({
+      dropId: "drop-protected-5",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":wave:",
+      optimisticReaction: ":wave:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_050);
+    const newerMutation = beginReactionMutation({
+      dropId: "drop-protected-5",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "remove",
+      previousReaction: ":wave:",
+      intendedReaction: null,
+      optimisticReaction: null,
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+
+    expect(getProtectedReactionIntent("drop-protected-5")).toEqual(
+      expect.objectContaining({
+        mutationId: newerMutation.mutationId,
+        dropMutationSeq: 2,
+        reaction: null,
+      })
+    );
   });
 
   it("resets the per-drop sequence when the last tracked mutation ages out", () => {

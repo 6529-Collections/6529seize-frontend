@@ -5,6 +5,7 @@ import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import * as Sentry from "@sentry/nextjs";
 
 const RECONCILIATION_WINDOW_MS = 15_000;
+const SUCCEEDED_REACTION_PROTECTION_MS = 5_000;
 const DEDUPE_WINDOW_MS = 60_000;
 const MUTATION_RETENTION_MS = 5 * 60_000;
 const REACTION_FEATURE = "drop-reaction";
@@ -47,6 +48,14 @@ interface ReactionMutationContext {
   supersededByMutationId?: string | null;
 }
 
+interface ProtectedReactionIntent {
+  readonly mutationId: string;
+  readonly dropMutationSeq: number;
+  readonly reaction: string | null;
+  readonly startedAt: number;
+  readonly apiSucceededAt: number | null;
+}
+
 const latestMutationIdByDrop = new Map<string, string>();
 const dropMutationSeqByDrop = new Map<string, number>();
 const mutationContextById = new Map<string, ReactionMutationContext>();
@@ -83,6 +92,32 @@ function shouldCaptureEvent(key: string, now: number): boolean {
 
   dedupeEventAtByKey.set(key, now);
   return true;
+}
+
+function getLatestMutationContext(
+  dropId: string
+): ReactionMutationContext | null {
+  const latestMutationId = latestMutationIdByDrop.get(dropId);
+  if (!latestMutationId) {
+    return null;
+  }
+
+  return mutationContextById.get(latestMutationId) ?? null;
+}
+
+function isProtectedReactionContext(
+  context: ReactionMutationContext,
+  now: number
+): boolean {
+  if (context.apiFailedAt !== null) {
+    return false;
+  }
+
+  if (context.apiSucceededAt !== null) {
+    return now - context.apiSucceededAt <= SUCCEEDED_REACTION_PROTECTION_MS;
+  }
+
+  return now - context.startedAt <= RECONCILIATION_WINDOW_MS;
 }
 
 function createMutationId(): string {
@@ -549,23 +584,39 @@ export function recordReactionRollbackApplied(
   addReactionBreadcrumb("reaction.rollback_applied", context);
 }
 
+export function getProtectedReactionIntent(
+  dropId: string
+): ProtectedReactionIntent | null {
+  const now = Date.now();
+  pruneState(now);
+
+  const context = getLatestMutationContext(dropId);
+  if (!context || !isProtectedReactionContext(context, now)) {
+    return null;
+  }
+
+  return {
+    mutationId: context.mutationId,
+    dropMutationSeq: context.dropMutationSeq,
+    reaction: context.intendedReaction,
+    startedAt: context.startedAt,
+    apiSucceededAt: context.apiSucceededAt,
+  };
+}
+
 export function recordReactionRealtimeReconciliation(params: {
   drop: Pick<ApiDrop, "id"> & {
     readonly wave: Pick<ApiDrop["wave"], "id">;
     readonly context_profile_context: ApiDrop["context_profile_context"];
   };
   websocketStatus?: WebSocketStatus | string | null;
+  protectedIntent?: ProtectedReactionIntent | null;
 }): void {
   const now = Date.now();
   pruneState(now);
 
-  const latestMutationId = latestMutationIdByDrop.get(params.drop.id);
-  if (!latestMutationId) {
-    return;
-  }
-
-  const context = mutationContextById.get(latestMutationId);
-  if (!context || now - context.startedAt > RECONCILIATION_WINDOW_MS) {
+  const context = getLatestMutationContext(params.drop.id);
+  if (!context) {
     return;
   }
 
@@ -576,6 +627,28 @@ export function recordReactionRealtimeReconciliation(params: {
       reconciled_from: "ws_refetch",
       server_reaction: serverReaction ?? undefined,
       time_since_mutation_ms: now - context.startedAt,
+      websocket_status: toWebsocketStatus(params.websocketStatus) ?? undefined,
+    });
+    return;
+  }
+
+  const callerProtectedStale =
+    params.protectedIntent?.mutationId === context.mutationId &&
+    serverReaction !== params.protectedIntent.reaction;
+  const protectedReaction = params.protectedIntent
+    ? params.protectedIntent.reaction
+    : context.intendedReaction;
+
+  if (callerProtectedStale || isProtectedReactionContext(context, now)) {
+    addReactionBreadcrumb("reaction.realtime_stale_ignored", context, {
+      reconciled_from: "ws_refetch",
+      server_reaction: serverReaction ?? undefined,
+      protected_reaction: protectedReaction ?? undefined,
+      time_since_mutation_ms: now - context.startedAt,
+      time_since_success_ms:
+        context.apiSucceededAt !== null
+          ? now - context.apiSucceededAt
+          : undefined,
       websocket_status: toWebsocketStatus(params.websocketStatus) ?? undefined,
     });
     return;
