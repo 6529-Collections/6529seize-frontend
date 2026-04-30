@@ -162,18 +162,27 @@ function parseRequestUrl(value: string | undefined): URL | null {
   }
 }
 
-function isFirstPartyApiTarget(value: string): boolean {
-  const url = parseRequestUrl(value);
-  if (!url) {
-    return false;
-  }
-
+function isFirstPartyApiUrl(url: URL): boolean {
   const hostname = url.hostname.toLowerCase();
   if (hostname === "api.6529.io") {
     return true;
   }
 
   return isFirstPartyHost(hostname) && url.pathname.startsWith("/api/");
+}
+
+function isFirstPartyApiTarget(value: string): boolean {
+  const url = parseRequestUrl(value);
+  return !!url && isFirstPartyApiUrl(url);
+}
+
+function isSanitizedRelativePath(value: string, parsedUrl: URL): boolean {
+  const normalized = value.trim();
+  return (
+    normalized.startsWith("/") &&
+    !normalized.startsWith("//") &&
+    normalized === parsedUrl.pathname
+  );
 }
 
 function isSameFirstPartyApiTarget(left: string, right: string): boolean {
@@ -184,10 +193,20 @@ function isSameFirstPartyApiTarget(left: string, right: string): boolean {
     return false;
   }
 
+  if (leftUrl.pathname !== rightUrl.pathname) {
+    return false;
+  }
+
+  const leftIsFirstPartyApi = isFirstPartyApiUrl(leftUrl);
+  const rightIsFirstPartyApi = isFirstPartyApiUrl(rightUrl);
+
+  if (leftIsFirstPartyApi && rightIsFirstPartyApi) {
+    return true;
+  }
+
   return (
-    isFirstPartyApiTarget(left) &&
-    isFirstPartyApiTarget(right) &&
-    leftUrl.pathname === rightUrl.pathname
+    (leftIsFirstPartyApi && isSanitizedRelativePath(right, rightUrl)) ||
+    (rightIsFirstPartyApi && isSanitizedRelativePath(left, leftUrl))
   );
 }
 

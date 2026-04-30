@@ -456,6 +456,35 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("matches api.6529.io errors to sanitized breadcrumb paths", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (https://api.6529.io/waves-overview)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/waves-overview",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
   it("keeps first-party page navigation failures", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({
