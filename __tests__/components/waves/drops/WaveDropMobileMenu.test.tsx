@@ -15,6 +15,9 @@ const addReactionMock = jest.fn((props: any) => (
     data-dialog-z-index={props.dialogZIndexClassName}
   />
 ));
+const downloadMock = jest.fn((props: any) => (
+  <div data-testid="download" data-href={props.href} />
+));
 const mobileWrapperMock = jest.fn((props: any) =>
   props.isOpen ? (
     <div data-testid="wrapper" data-z-index={props.zIndexClassName}>
@@ -51,6 +54,10 @@ jest.mock("@/components/waves/drops/WaveDropActionsRate", () => () => (
 jest.mock("@/components/waves/drops/WaveDropActionsAddReaction", () => ({
   __esModule: true,
   default: (props: any) => addReactionMock(props),
+}));
+jest.mock("@/components/waves/drops/WaveDropActionsDownload", () => ({
+  __esModule: true,
+  default: (props: any) => downloadMock(props),
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsQuickReact", () => () => (
   <div data-testid="quick-react" />
@@ -95,6 +102,7 @@ const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
 beforeEach(() => {
   writeText.mockClear();
   addReactionMock.mockClear();
+  downloadMock.mockClear();
   mobileWrapperMock.mockClear();
   mockIsMemesWave.mockReturnValue(false);
   mockIsQuorumWave.mockReturnValue(false);
@@ -371,6 +379,67 @@ test("shows full menu when a profile handle is present", () => {
   expect(screen.getByTestId("boost")).toBeInTheDocument();
   expect(screen.getByTestId("open")).toBeInTheDocument();
   expect(screen.getByTestId("delete")).toBeInTheDocument();
+});
+
+test("shows mobile download actions for all media and ignores attachments", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+    parts: [
+      {
+        media: [{ url: "https://example.com/first.png" }],
+        attachments: [{ url: "https://example.com/attachment.pdf" }],
+      },
+      {
+        media: [{ url: "https://example.com/second.mp4" }],
+        attachments: [],
+      },
+    ],
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "alice" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getAllByTestId("download")).toHaveLength(2);
+  expect(downloadMock).toHaveBeenNthCalledWith(
+    1,
+    expect.objectContaining({
+      href: "https://example.com/first.png",
+      name: "first",
+      extension: "png",
+      isMobile: true,
+    })
+  );
+  expect(downloadMock).toHaveBeenNthCalledWith(
+    2,
+    expect.objectContaining({
+      href: "https://example.com/second.mp4",
+      name: "second",
+      extension: "mp4",
+      isMobile: true,
+    })
+  );
 });
 
 test("shows only copy link in the mobile menu for guests", () => {

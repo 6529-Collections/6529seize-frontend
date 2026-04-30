@@ -1,5 +1,7 @@
 "use client";
 
+import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import {
   ArrowDownTrayIcon,
   CheckCircleIcon,
@@ -16,22 +18,103 @@ interface Props {
   className?: string | undefined;
   tooltipId?: string | undefined;
   isDropdownItem?: boolean | undefined;
+  isMobile?: boolean | undefined;
   onDownload?: (() => void) | undefined;
 }
 
 export default function WaveDropActionsDownload(props: Readonly<Props>) {
   const { percentage, download, cancel, isInProgress } = useDownloader();
+  const { isCapacitor } = useCapacitor();
   const showProgress = props.showProgress ?? true;
   const isDropdownItem = props.isDropdownItem ?? false;
+  const isMobile = props.isMobile ?? false;
 
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isMobileDownloading, setIsMobileDownloading] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const mobileDownloadAbortRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
 
-  function startDownload() {
-    const filename = props.extension
+  const getFilename = () =>
+    props.extension
       ? `${props.name}.${props.extension}`
       : props.name;
-    download(props.href, filename);
+
+  function startDownload() {
+    download(props.href, getFilename());
+  }
+
+  async function startMobileDownload() {
+    if (isMobileDownloading) {
+      return;
+    }
+
+    setIsMobileDownloading(true);
+    const controller = new AbortController();
+    mobileDownloadAbortRef.current = controller;
+    const filename = getFilename();
+
+    try {
+      const response = await fetch(props.href, {
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        throw new Error("Unable to download media.");
+      }
+
+      const blob = await response.blob();
+      if (isCapacitor) {
+        await shareFetchedBlobInNativeApp(blob, filename, {
+          dialogTitle: "Save media",
+        });
+      } else {
+        const objectUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = filename;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(objectUrl);
+      }
+    } catch {
+      if (
+        controller.signal.aborted ||
+        mobileDownloadAbortRef.current !== controller
+      ) {
+        return;
+      }
+      const anchor = document.createElement("a");
+      anchor.href = props.href;
+      anchor.download = filename;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+    } finally {
+      if (mobileDownloadAbortRef.current === controller) {
+        mobileDownloadAbortRef.current = null;
+      }
+      if (isMountedRef.current) {
+        setIsMobileDownloading(false);
+      }
+    }
+  }
+
+  function handleDownloadClick() {
+    if (isMobile) {
+      props.onDownload?.();
+      void startMobileDownload();
+      return;
+    }
+
+    if (isInProgress) {
+      cancel();
+    } else {
+      startDownload();
+      props.onDownload?.();
+    }
   }
 
   useEffect(() => {
@@ -49,6 +132,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       if (completionTimeoutRef.current) {
         clearTimeout(completionTimeoutRef.current);
       }
@@ -57,6 +141,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
 
   const getTooltipText = () => {
     if (isCompleted) return "Downloaded!";
+    if (isMobileDownloading) return "Downloading";
     if (isInProgress && showProgress) return `Downloading ${percentage}%`;
     return "Download media";
   };
@@ -70,7 +155,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
         />
       );
     }
-    if (isInProgress && showProgress) {
+    if ((isInProgress && showProgress) || isMobileDownloading) {
       return (
         <svg
           className={`${iconClass} tw-flex-shrink-0 tw-animate-spin tw-text-iron-500`}
@@ -97,17 +182,31 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
     return <ArrowDownTrayIcon className={`tw-flex-shrink-0 ${iconClass}`} />;
   };
 
+  if (isMobile) {
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDownloadClick();
+        }}
+        disabled={isMobileDownloading || isCompleted}
+        className="tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-default disabled:tw-opacity-70"
+        type="button"
+      >
+        {renderIcon()}
+        <span className="tw-text-base tw-font-semibold tw-text-iron-300">
+          {getTooltipText()}
+        </span>
+      </button>
+    );
+  }
+
   if (isDropdownItem) {
     return (
       <button
         onClick={(e) => {
           e.stopPropagation();
-          if (isInProgress) {
-            cancel();
-          } else {
-            startDownload();
-            props.onDownload?.();
-          }
+          handleDownloadClick();
         }}
         disabled={isCompleted}
         className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"

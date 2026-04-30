@@ -5,7 +5,7 @@ import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimation
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { useAuth } from "@/components/auth/Auth";
-import { getFileInfoFromUrl } from "@/helpers/file.helpers";
+import { getDropDownloadMedia } from "@/helpers/waves/drop-media.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -57,12 +57,7 @@ export default function WaveDropActionsMore({
     setIsDeleteModalOpen(true);
   };
 
-  const mediaInfo = useMemo(() => {
-    const media = drop.parts.at(0)?.media.at(0);
-    const url = media?.url;
-    if (!url) return null;
-    return getFileInfoFromUrl(url);
-  }, [drop.parts]);
+  const downloadMedia = useMemo(() => getDropDownloadMedia(drop), [drop]);
 
   return (
     <>
@@ -138,16 +133,17 @@ export default function WaveDropActionsMore({
               isDropdownItem={true}
               onOpen={closeDropdown}
             />
-            {mediaInfo && (
+            {downloadMedia.map((media, index) => (
               <WaveDropActionsDownload
-                href={drop.parts.at(0)?.media.at(0)?.url ?? ""}
-                name={mediaInfo.name}
-                extension={mediaInfo.extension}
-                tooltipId={`download-media-${drop.id}`}
+                key={`${media.partIndex}-${media.mediaIndex}-${media.url}`}
+                href={media.url}
+                name={media.name}
+                extension={media.extension}
+                tooltipId={`download-media-${drop.id}-${index}`}
                 isDropdownItem={true}
                 onDownload={closeDropdown}
               />
-            )}
+            ))}
             {canSetPinnedDrop && (
               <WaveDropActionsSetPinnedDrop
                 drop={drop}

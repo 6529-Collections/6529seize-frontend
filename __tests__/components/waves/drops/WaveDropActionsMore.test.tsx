@@ -4,6 +4,8 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+const downloadMock = jest.fn(() => <div data-testid="download" />);
+
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
 }));
@@ -26,9 +28,10 @@ jest.mock("@/components/waves/drops/WaveDropActionsCopyLink", () => () => (
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
   <div data-testid="open" />
 ));
-jest.mock("@/components/waves/drops/WaveDropActionsDownload", () => () => (
-  <div data-testid="download" />
-));
+jest.mock("@/components/waves/drops/WaveDropActionsDownload", () => ({
+  __esModule: true,
+  default: (props: any) => downloadMock(props),
+}));
 jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
   <div data-testid="delete" />
 ));
@@ -58,11 +61,13 @@ const mockedUseDropLinkPreviewToggleControl = jest.mocked(
 
 const drop = {
   id: "drop-1",
+  wave: { authenticated_user_admin: false },
   parts: [],
 } as any;
 
 describe("WaveDropActionsMore", () => {
   beforeEach(() => {
+    downloadMock.mockClear();
     mockedUseDropInteractionRules.mockReturnValue({
       canShowVote: true,
       canVote: true,
@@ -139,5 +144,57 @@ describe("WaveDropActionsMore", () => {
     );
 
     expect(onToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows desktop download actions for all media and ignores attachments", async () => {
+    const dropWithMedia = {
+      ...drop,
+      parts: [
+        {
+          media: [
+            {
+              url: "https://example.com/first.png",
+              mime_type: "image/png",
+            },
+          ],
+          attachments: [
+            {
+              url: "https://example.com/attachment.pdf",
+            },
+          ],
+        },
+        {
+          media: [
+            {
+              url: "https://example.com/second.mp4",
+              mime_type: "video/mp4",
+            },
+          ],
+          attachments: [],
+        },
+      ],
+    } as any;
+
+    render(<WaveDropActionsMore drop={dropWithMedia} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    expect(screen.getAllByTestId("download")).toHaveLength(2);
+    expect(downloadMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        href: "https://example.com/first.png",
+        name: "first",
+        extension: "png",
+      })
+    );
+    expect(downloadMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        href: "https://example.com/second.mp4",
+        name: "second",
+        extension: "mp4",
+      })
+    );
   });
 });

@@ -6,6 +6,10 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
+import {
+  getDropDownloadMedia,
+  type DropDownloadMedia,
+} from "@/helpers/waves/drop-media.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
@@ -14,6 +18,7 @@ import type { FC } from "react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
+import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
 import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
@@ -180,6 +185,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   onBoostAnimation,
   showOpenOption,
   showCopyOption,
+  downloadMedia,
   copied,
   onCopyToClipboard,
   showCurationsAction,
@@ -201,6 +207,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly onBoostAnimation?: (() => void) | undefined;
   readonly showOpenOption: boolean;
   readonly showCopyOption: boolean;
+  readonly downloadMedia: readonly DropDownloadMedia[];
   readonly copied: boolean;
   readonly onCopyToClipboard: () => void;
   readonly showCurationsAction: boolean;
@@ -285,6 +292,18 @@ function WaveDropMobileMenuAuthenticatedActions({
         />
       )}
 
+      {downloadMedia.map((media) => (
+        <WaveDropActionsDownload
+          key={`${media.partIndex}-${media.mediaIndex}-${media.url}`}
+          href={media.url}
+          name={media.name}
+          extension={media.extension}
+          isMobile={true}
+          showProgress={false}
+          onDownload={closeMenu}
+        />
+      ))}
+
       {showCurationsAction && (
         <button
           type="button"
@@ -357,6 +376,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     }),
     [drop]
   );
+  const downloadMedia = useMemo(() => getDropDownloadMedia(drop), [drop]);
 
   const [copied, setCopied] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
@@ -446,6 +466,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                 onBoostAnimation={onBoostAnimation}
                 showOpenOption={showOpenOption}
                 showCopyOption={showCopyOption}
+                downloadMedia={downloadMedia}
                 copied={copied}
                 onCopyToClipboard={copyToClipboard}
                 showCurationsAction={showCurationsAction}

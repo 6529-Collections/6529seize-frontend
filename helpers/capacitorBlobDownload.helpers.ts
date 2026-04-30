@@ -20,20 +20,21 @@ async function blobToBase64(blob: Blob): Promise<string> {
   return commaIndex === -1 ? dataUrl : dataUrl.slice(commaIndex + 1);
 }
 
-function cachePathForAttachmentDownload(fileName: string): string {
+function cachePathForBlobDownload(fileName: string): string {
   const safe = fileName
     .replaceAll(/[/\\?%*:|"<>]/g, "_")
     .replaceAll(/\s+/g, "_")
     .slice(0, 180);
-  return `${Date.now()}-${safe || "attachment"}`;
+  return `${Date.now()}-${safe || "download"}`;
 }
 
 export async function shareFetchedBlobInNativeApp(
   blob: Blob,
-  fileName: string
+  fileName: string,
+  options?: { readonly dialogTitle?: string | undefined }
 ): Promise<void> {
   const base64 = await blobToBase64(blob);
-  const path = cachePathForAttachmentDownload(fileName);
+  const path = cachePathForBlobDownload(fileName);
   await Filesystem.writeFile({
     path,
     data: base64,
@@ -47,6 +48,6 @@ export async function shareFetchedBlobInNativeApp(
     title: fileName,
     text: fileName,
     url: uri,
-    dialogTitle: "Save attachment",
+    dialogTitle: options?.dialogTitle ?? "Save file",
   });
 }
