@@ -163,11 +163,11 @@ export default function CommunityCurations() {
       <div className="tw-mx-auto tw-w-full tw-max-w-6xl">
         <div className="tw-flex tw-flex-col tw-gap-4">
           <div className="tw-max-w-2xl">
-            <h1 className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-white">
-              Community Curations
+            <h1 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">
+              Latest From Profile Waves
             </h1>
             <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-              Community-curated drops from across 6529 Waves.
+              Drops 6529 users are featuring from their own profile waves.
             </p>
           </div>
         </div>
@@ -184,8 +184,8 @@ export default function CommunityCurations() {
 
           {shouldShowEmptyState && (
             <CommunityCurationsEmptyState
-              title="No curated drops yet"
-              description="Community-curated drops will appear here when visible curations have activity."
+              title="No profile wave drops yet"
+              description="Drops will appear here when users feature them from their profile waves."
             />
           )}
 

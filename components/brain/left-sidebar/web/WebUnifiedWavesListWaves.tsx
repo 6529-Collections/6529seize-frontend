@@ -1,11 +1,13 @@
 "use client";
 
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
+import Link from "next/link";
+import React, { useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
@@ -34,9 +36,38 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
 const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
+const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
+const PROFILE_FEED_LABEL = "Profile Waves Feed";
+const TOOLTIP_STYLE = {
+  padding: "6px 10px",
+  background: "#37373E",
+  color: "white",
+  fontSize: "12px",
+  fontWeight: 500,
+  borderRadius: "6px",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+  zIndex: 10000,
+} as const satisfies React.CSSProperties;
 
-export interface WebUnifiedWavesListWavesHandle {
-  sentinelRef: React.RefObject<HTMLElement | null>;
+function MasonryGridIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="tw-size-4 tw-flex-shrink-0"
+    >
+      <rect width="7" height="9" x="3" y="3" rx="1" />
+      <rect width="7" height="5" x="14" y="3" rx="1" />
+      <rect width="7" height="9" x="14" y="12" rx="1" />
+      <rect width="7" height="5" x="3" y="16" rx="1" />
+    </svg>
+  );
 }
 
 interface WebUnifiedWavesListWavesProps {
@@ -48,80 +79,205 @@ interface WebUnifiedWavesListWavesProps {
   readonly scrollContainerRef?: React.RefObject<HTMLElement | null> | undefined;
   readonly basePath?: string | undefined;
   readonly isCollapsed?: boolean | undefined;
+  readonly showProfileFeedShortcut?: boolean | undefined;
+  readonly sentinelRef: React.RefObject<HTMLDivElement | null>;
 }
 
-const WebUnifiedWavesListWaves = forwardRef<
-  WebUnifiedWavesListWavesHandle,
-  WebUnifiedWavesListWavesProps
->(
-  (
-    {
-      waves,
-      onHover,
-      hideHeaders = false,
-      hideToggle = false,
-      hidePin = false,
-      scrollContainerRef,
-      basePath = "/waves",
-      isCollapsed = false,
-    },
-    ref
-  ) => {
-    const listContainerRef = useRef<HTMLDivElement>(null);
-    const sentinelRef = useRef<HTMLDivElement>(null);
-    const { connectedProfile } = useAuth();
-    const { openWave, isApp } = useCreateModalState();
-    const isTouchDevice = useIsTouchDevice();
-    const seizeSettings = useSeizeSettingsOptional();
+function ProfileFeedAvatar({ isActive }: { readonly isActive: boolean }) {
+  return (
+    <div
+      className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
+        isActive
+          ? "tw-opacity-100 tw-ring-1 tw-ring-white/30 tw-ring-offset-2 tw-ring-offset-iron-950"
+          : "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100"
+      }`}
+    >
+      <div
+        className={`tw-h-full tw-w-full tw-rounded-full ${
+          isActive
+            ? "tw-bg-primary-500"
+            : "tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700"
+        }`}
+      />
+      <div
+        className={`tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center ${
+          isActive ? "tw-text-white" : "tw-text-iron-300"
+        }`}
+      >
+        <MasonryGridIcon />
+      </div>
+    </div>
+  );
+}
 
-    useImperativeHandle(ref, () => ({
-      sentinelRef,
-    }));
+function isModifiedClick(event: React.MouseEvent<HTMLAnchorElement>) {
+  return (
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey ||
+    event.button === 1 ||
+    event.button === 2
+  );
+}
 
-    const showCreateWaveButton = !isApp && !!connectedProfile;
+function WebProfileFeedShortcut({
+  basePath,
+  isCollapsed,
+}: {
+  readonly basePath: string;
+  readonly isCollapsed: boolean;
+}) {
+  const { activeWave } = useMyStream();
+  const isActive = activeWave.id === null;
 
-    const { announcementWaves, pinnedWaves, regularWaves } = useMemo(() => {
-      const announcements: MinimalWave[] = [];
-      const pinned: MinimalWave[] = [];
-      const regular: MinimalWave[] = [];
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (event.defaultPrevented || isModifiedClick(event)) {
+      return;
+    }
 
-      for (const wave of waves) {
-        if (seizeSettings?.isAnnouncementsWave(wave.id)) {
-          announcements.push(wave);
-        } else if (wave.isPinned) {
-          pinned.push(wave);
-        } else {
-          regular.push(wave);
-        }
-      }
+    event.preventDefault();
+    activeWave.set(null, { isDirectMessage: false });
+  };
 
-      return {
-        announcementWaves: announcements,
-        pinnedWaves: pinned,
-        regularWaves: regular,
-      };
-    }, [waves, seizeSettings]);
-
-    const rowHeight = isCollapsed
-      ? WAVE_ROW_HEIGHT_COLLAPSED
-      : WAVE_ROW_HEIGHT_DEFAULT;
-
-    const virtual = useVirtualizedWaves<MinimalWave>(
-      regularWaves,
-      "web-unified-waves-regular",
-      scrollContainerRef ?? listContainerRef,
-      listContainerRef,
-      rowHeight,
-      5
-    );
-
+  if (isCollapsed) {
     return (
-      <>
-        <div className="tw-flex tw-flex-col">
-          {!hideHeaders &&
-            (isCollapsed ? (
-              showCreateWaveButton && (
-                <div className="tw-mb-3.5 tw-flex tw-justify-center tw-px-2">
+      <div
+        className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+          isActive
+            ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
+            : "desktop-hover:hover:tw-bg-iron-800/70"
+        }`}
+      >
+        <Link
+          href={basePath}
+          prefetch={false}
+          onClick={handleClick}
+          aria-label={PROFILE_FEED_LABEL}
+          className="tw-flex tw-items-center tw-justify-center tw-no-underline"
+          data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
+          data-tooltip-content={PROFILE_FEED_LABEL}
+        >
+          <ProfileFeedAvatar isActive={isActive} />
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`tw-group tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+        isActive
+          ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
+          : "desktop-hover:hover:tw-bg-iron-800/80"
+      }`}
+    >
+      <Link
+        href={basePath}
+        prefetch={false}
+        onClick={handleClick}
+        aria-current={isActive ? "page" : undefined}
+        className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+          isActive
+            ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
+            : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+        }`}
+      >
+        <ProfileFeedAvatar isActive={isActive} />
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-truncate tw-text-sm">{PROFILE_FEED_LABEL}</div>
+        </div>
+      </Link>
+    </div>
+  );
+}
+
+const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
+  waves,
+  onHover,
+  hideHeaders = false,
+  hideToggle = false,
+  hidePin = false,
+  scrollContainerRef,
+  basePath = "/waves",
+  isCollapsed = false,
+  showProfileFeedShortcut = true,
+  sentinelRef,
+}) => {
+  const listContainerRef = useRef<HTMLDivElement>(null);
+  const { connectedProfile } = useAuth();
+  const { openWave, isApp } = useCreateModalState();
+  const isTouchDevice = useIsTouchDevice();
+  const seizeSettings = useSeizeSettingsOptional();
+
+  const showCreateWaveButton = !isApp && !!connectedProfile;
+  const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;
+
+  const { announcementWaves, pinnedWaves, regularWaves } = useMemo(() => {
+    const announcements: MinimalWave[] = [];
+    const pinned: MinimalWave[] = [];
+    const regular: MinimalWave[] = [];
+
+    for (const wave of waves) {
+      if (seizeSettings?.isAnnouncementsWave(wave.id)) {
+        announcements.push(wave);
+      } else if (wave.isPinned) {
+        pinned.push(wave);
+      } else {
+        regular.push(wave);
+      }
+    }
+
+    return {
+      announcementWaves: announcements,
+      pinnedWaves: pinned,
+      regularWaves: regular,
+    };
+  }, [waves, seizeSettings]);
+
+  const rowHeight = isCollapsed
+    ? WAVE_ROW_HEIGHT_COLLAPSED
+    : WAVE_ROW_HEIGHT_DEFAULT;
+
+  const virtual = useVirtualizedWaves<MinimalWave>(
+    regularWaves,
+    "web-unified-waves-regular",
+    scrollContainerRef ?? listContainerRef,
+    listContainerRef,
+    rowHeight,
+    5
+  );
+
+  return (
+    <>
+      <div className="tw-flex tw-flex-col">
+        {!hideHeaders &&
+          (isCollapsed ? (
+            showCreateWaveButton && (
+              <div className="tw-mb-3.5 tw-flex tw-justify-center tw-px-2">
+                <div
+                  data-tooltip-id="create-wave-tooltip"
+                  data-tooltip-content="Create wave"
+                >
+                  <PrimaryButton
+                    onClicked={openWave}
+                    loading={false}
+                    disabled={false}
+                    padding="tw-p-2.5"
+                  >
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      className="tw-size-4 tw-flex-shrink-0"
+                    />
+                  </PrimaryButton>
+                </div>
+              </div>
+            )
+          ) : (
+            <SectionHeader
+              label="Waves"
+              rightContent={
+                showCreateWaveButton ? (
                   <div
                     data-tooltip-id="create-wave-tooltip"
                     data-tooltip-content="Create wave"
@@ -138,188 +294,173 @@ const WebUnifiedWavesListWaves = forwardRef<
                       />
                     </PrimaryButton>
                   </div>
-                </div>
-              )
-            ) : (
-              <SectionHeader
-                label="Waves"
-                rightContent={
-                  showCreateWaveButton ? (
-                    <div
-                      data-tooltip-id="create-wave-tooltip"
-                      data-tooltip-content="Create wave"
-                    >
-                      <PrimaryButton
-                        onClicked={openWave}
-                        loading={false}
-                        disabled={false}
-                        padding="tw-p-2.5"
-                      >
-                        <FontAwesomeIcon
-                          icon={faPlus}
-                          className="tw-size-4 tw-flex-shrink-0"
-                        />
-                      </PrimaryButton>
-                    </div>
-                  ) : undefined
-                }
-              />
-            ))}
-          {!hideHeaders && !hideToggle && !isCollapsed && (
-            <div className="tw-mt-4 tw-flex tw-px-4 tw-pb-3">
-              <WavesFilterToggle />
-            </div>
-          )}
+                ) : undefined
+              }
+            />
+          ))}
+        {!hideHeaders && !hideToggle && !isCollapsed && (
+          <div className="tw-mt-4 tw-flex tw-px-4 tw-pb-3">
+            <WavesFilterToggle />
+          </div>
+        )}
+        {shouldShowProfileFeedShortcut && (
+          <WebProfileFeedShortcut
+            basePath={basePath}
+            isCollapsed={isCollapsed}
+          />
+        )}
 
-          <div>
-            {announcementWaves.length > 0 && (
-              <section
-                className={`tw-flex tw-flex-col ${
-                  isCollapsed ? "tw-items-center tw-gap-y-2" : ""
-                }`}
-                aria-label="Announcement waves"
-              >
-                {announcementWaves
-                  .filter((wave): wave is MinimalWave => {
-                    if (!isValidWave(wave)) {
-                      console.warn("Invalid announcement wave object", wave);
-                      return false;
-                    }
-                    return true;
-                  })
-                  .map((wave) => (
-                    <div key={wave.id} className="tw-w-full">
-                      <WebBrainLeftSidebarWave
-                        wave={wave}
-                        onHover={onHover}
-                        showPin={!hidePin && !isCollapsed && wave.isPinned}
-                        basePath={basePath}
-                        collapsed={isCollapsed}
-                      />
-                    </div>
-                  ))}
-              </section>
-            )}
-            {announcementWaves.length > 0 &&
-              !hideHeaders &&
-              (pinnedWaves.length > 0 || regularWaves.length > 0) && (
-                <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-              )}
-            {!hideHeaders && pinnedWaves.length > 0 && (
-              <section
-                className={`tw-flex tw-flex-col ${
-                  isCollapsed ? "tw-items-center tw-gap-y-2" : ""
-                }`}
-                aria-label="Pinned waves"
-              >
-                {pinnedWaves
-                  .filter((wave): wave is MinimalWave => {
-                    if (!isValidWave(wave)) {
-                      console.warn("Invalid pinned wave object", wave);
-                      return false;
-                    }
-                    return true;
-                  })
-                  .map((wave) => (
-                    <div key={wave.id} className="tw-w-full">
-                      <WebBrainLeftSidebarWave
-                        wave={wave}
-                        onHover={onHover}
-                        showPin={!hidePin && !isCollapsed}
-                        basePath={basePath}
-                        collapsed={isCollapsed}
-                      />
-                    </div>
-                  ))}
-              </section>
-            )}
-            {!hideHeaders &&
-              pinnedWaves.length > 0 &&
-              regularWaves.length > 0 && (
-                <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-              )}
-            {regularWaves.length > 0 ? (
-              <section
-                ref={listContainerRef}
-                style={{
-                  height: virtual.totalHeight,
-                  position: "relative",
-                }}
-                aria-label="Regular waves list"
-              >
-                {virtual.virtualItems.map((v: VirtualItem) => {
-                  if (v.index === regularWaves.length) {
-                    return (
-                      <div
-                        key="sentinel"
-                        ref={sentinelRef}
-                        style={{
-                          position: "absolute",
-                          width: "100%",
-                          top: v.start,
-                          height: v.size,
-                        }}
-                      />
-                    );
-                  }
-                  const wave = regularWaves[v.index];
+        <div>
+          {announcementWaves.length > 0 && (
+            <section
+              className={`tw-flex tw-flex-col ${
+                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
+              }`}
+              aria-label="Announcement waves"
+            >
+              {announcementWaves
+                .filter((wave): wave is MinimalWave => {
                   if (!isValidWave(wave)) {
-                    console.warn("Invalid wave object at index", v.index, wave);
-                    return null;
+                    console.warn("Invalid announcement wave object", wave);
+                    return false;
                   }
+                  return true;
+                })
+                .map((wave) => (
+                  <div key={wave.id} className="tw-w-full">
+                    <WebBrainLeftSidebarWave
+                      wave={wave}
+                      onHover={onHover}
+                      showPin={!hidePin && !isCollapsed && wave.isPinned}
+                      basePath={basePath}
+                      collapsed={isCollapsed}
+                    />
+                  </div>
+                ))}
+            </section>
+          )}
+          {announcementWaves.length > 0 &&
+            !hideHeaders &&
+            (pinnedWaves.length > 0 || regularWaves.length > 0) && (
+              <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            )}
+          {!hideHeaders && pinnedWaves.length > 0 && (
+            <section
+              className={`tw-flex tw-flex-col ${
+                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
+              }`}
+              aria-label="Pinned waves"
+            >
+              {pinnedWaves
+                .filter((wave): wave is MinimalWave => {
+                  if (!isValidWave(wave)) {
+                    console.warn("Invalid pinned wave object", wave);
+                    return false;
+                  }
+                  return true;
+                })
+                .map((wave) => (
+                  <div key={wave.id} className="tw-w-full">
+                    <WebBrainLeftSidebarWave
+                      wave={wave}
+                      onHover={onHover}
+                      showPin={!hidePin && !isCollapsed}
+                      basePath={basePath}
+                      collapsed={isCollapsed}
+                    />
+                  </div>
+                ))}
+            </section>
+          )}
+          {!hideHeaders &&
+            pinnedWaves.length > 0 &&
+            regularWaves.length > 0 && (
+              <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            )}
+          {regularWaves.length > 0 ? (
+            <section
+              ref={listContainerRef}
+              style={{
+                height: virtual.totalHeight,
+                position: "relative",
+              }}
+              aria-label="Regular waves list"
+            >
+              {virtual.virtualItems.map((v: VirtualItem) => {
+                if (v.index === regularWaves.length) {
                   return (
                     <div
-                      key={wave.id}
+                      key="sentinel"
+                      ref={sentinelRef}
                       style={{
                         position: "absolute",
                         width: "100%",
                         top: v.start,
                         height: v.size,
                       }}
-                    >
-                      <WebBrainLeftSidebarWave
-                        wave={wave}
-                        onHover={onHover}
-                        showPin={!hidePin && !isCollapsed}
-                        basePath={basePath}
-                        collapsed={isCollapsed}
-                      />
-                    </div>
+                    />
                   );
-                })}
-              </section>
-            ) : (
-              <div
-                ref={listContainerRef}
-                style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
-              />
-            )}
-          </div>
+                }
+                const wave = regularWaves[v.index];
+                if (!isValidWave(wave)) {
+                  console.warn("Invalid wave object at index", v.index, wave);
+                  return null;
+                }
+                return (
+                  <div
+                    key={wave.id}
+                    style={{
+                      position: "absolute",
+                      width: "100%",
+                      top: v.start,
+                      height: v.size,
+                    }}
+                  >
+                    <WebBrainLeftSidebarWave
+                      wave={wave}
+                      onHover={onHover}
+                      showPin={!hidePin && !isCollapsed}
+                      basePath={basePath}
+                      collapsed={isCollapsed}
+                    />
+                  </div>
+                );
+              })}
+            </section>
+          ) : (
+            <div
+              ref={listContainerRef}
+              style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
+            />
+          )}
         </div>
+      </div>
 
-        {!isTouchDevice && (
+      {!isTouchDevice && (
+        <>
           <ReactTooltip
             id="create-wave-tooltip"
             place="bottom"
             offset={8}
             opacity={1}
-            style={{
-              padding: "6px 10px",
-              background: "#37373E",
-              color: "white",
-              fontSize: "12px",
-              fontWeight: 500,
-              borderRadius: "6px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              zIndex: 10000,
-            }}
+            style={TOOLTIP_STYLE}
             border="1px solid #4C4C55"
           />
-        )}
-      </>
-    );
-  }
-);
+          {shouldShowProfileFeedShortcut && (
+            <ReactTooltip
+              id={PROFILE_FEED_TOOLTIP_ID}
+              place="right"
+              offset={8}
+              opacity={1}
+              style={TOOLTIP_STYLE}
+              border="1px solid #4C4C55"
+            />
+          )}
+        </>
+      )}
+    </>
+  );
+};
 
 WebUnifiedWavesListWaves.displayName = "WebUnifiedWavesListWaves";
 export default WebUnifiedWavesListWaves;

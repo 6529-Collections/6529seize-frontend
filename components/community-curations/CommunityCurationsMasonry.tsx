@@ -6,6 +6,7 @@ import CircleLoader, {
 import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import CurationDropFooter from "@/components/waves/drops/CurationDropFooter";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
+import { WaveDropQuoteDisplayProvider } from "@/components/waves/drops/WaveDropQuoteDisplayContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
@@ -249,24 +250,25 @@ function CommunityCurationsMasonryItem({
 
   return (
     <article className={CURATION_CARD_CLASS_NAME}>
-      <Drop
-        drop={drop}
-        previousDrop={null}
-        nextDrop={null}
-        showWaveInfo={false}
-        activeDrop={null}
-        showReplyAndQuote={false}
-        location={DropLocation.MY_STREAM}
-        dropViewDropId={null}
-        onReply={noop}
-        onReplyClick={noop}
-        onQuoteClick={navigateToDropWave}
-        onDropContentClick={navigateToDropWave}
-        footer={<CurationDropFooter drop={drop} />}
-        identityMode="default"
-        timestampLayout="stacked"
-        showInteractions={false}
-      />
+      <WaveDropQuoteDisplayProvider flattenWhenAuthorSameAs={drop.author}>
+        <Drop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.MY_STREAM}
+          dropViewDropId={null}
+          onReply={noop}
+          onReplyClick={noop}
+          onQuoteClick={navigateToDropWave}
+          onDropContentClick={navigateToDropWave}
+          footer={<CurationDropFooter drop={drop} />}
+          timestampLayout="stacked"
+          showInteractions={false}
+        />
+      </WaveDropQuoteDisplayProvider>
       <div
         aria-hidden="true"
         className={CURATION_CARD_HOVER_FRAME_CLASS_NAME}
