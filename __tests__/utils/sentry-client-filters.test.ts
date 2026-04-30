@@ -1,9 +1,11 @@
 import {
   __testing,
+  getLowValueNetworkErrorDecision,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  tagSampledLowValueNetworkError,
 } from "@/utils/sentry-client-filters";
 
 describe("sentry-client-filters", () => {
@@ -82,6 +84,37 @@ describe("sentry-client-filters", () => {
           },
         ],
       },
+      ...overrides,
+    }) as any;
+
+  const createLowValueNetworkEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    ({
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (/api/waves-overview)",
+          },
+        ],
+      },
+      tags: {
+        errorType: "network",
+        handled: true,
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
       ...overrides,
     }) as any;
 
@@ -277,6 +310,161 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe(false);
+  });
+
+  it("drops sampled-out first-party status 0 network errors", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent(),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("keeps sampled-in first-party status 0 network errors", () => {
+    const event = createLowValueNetworkEvent();
+    const result = getLowValueNetworkErrorDecision(event, 1);
+
+    expect(result).toBe("keep_sampled");
+
+    tagSampledLowValueNetworkError(event);
+
+    expect(event.tags).toEqual(
+      expect.objectContaining({
+        network_failure_kind: "browser_transport",
+        network_noise_sampled: "true",
+      })
+    );
+  });
+
+  it("keeps network errors when the browser received a real HTTP status", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 500,
+              url: "/api/waves-overview",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps TypeErrors that are not tagged as network errors", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        tags: {},
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps network errors when no failed status is known", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              url: "/api/waves-overview",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("handles Sentry breadcrumb values form for first-party status 0 errors", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: {
+          values: [
+            {
+              type: "http",
+              category: "xhr",
+              data: {
+                status_code: 0,
+                url: "/api/waves-overview",
+              },
+            },
+          ],
+        },
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("treats api.6529.io as a first-party API target", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (https://api.6529.io/waves-overview)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "https://api.6529.io/waves-overview",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("keeps first-party page navigation failures", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/notifications)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/notifications",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
   });
 
   it("filters Twitter CONFIG reference errors with app URI frames", () => {

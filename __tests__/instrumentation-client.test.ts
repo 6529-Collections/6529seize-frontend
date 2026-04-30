@@ -9,14 +9,30 @@ jest.mock("@sentry/nextjs", () => ({
   captureRouterTransitionStart: mockCaptureRouterTransitionStart,
 }));
 
-describe("instrumentation-client beforeSendTransaction", () => {
-  const loadBeforeSendTransaction = () => {
+describe("instrumentation-client", () => {
+  const loadSentryConfig = () => {
     jest.isolateModules(() => {
       require("@/instrumentation-client");
     });
 
     const config = mockInit.mock.calls[0]?.[0];
     expect(config).toBeDefined();
+
+    return config;
+  };
+
+  const loadBeforeSend = () => {
+    const config = loadSentryConfig();
+    expect(typeof config.beforeSend).toBe("function");
+
+    return config.beforeSend as (
+      event: Record<string, unknown>,
+      hint?: Record<string, unknown>
+    ) => { tags?: Record<string, unknown> | undefined } | null;
+  };
+
+  const loadBeforeSendTransaction = () => {
+    const config = loadSentryConfig();
     expect(typeof config.beforeSendTransaction).toBe("function");
 
     return config.beforeSendTransaction as (event: Record<string, unknown>) => {
@@ -35,6 +51,114 @@ describe("instrumentation-client beforeSendTransaction", () => {
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it("drops sampled-out first-party browser transport network errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps and tags sampled-in first-party browser transport network errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "event-200",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        errorType: "network",
+        handled: true,
+        network_failure_kind: "browser_transport",
+        network_noise_sampled: "true",
+      })
+    );
+  });
+
+  it("keeps browser network errors with a real HTTP status", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        errorType: "network",
+        handled: true,
+      })
+    );
+    expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
   });
 
   it("removes only the known noisy third-party telemetry spans", () => {

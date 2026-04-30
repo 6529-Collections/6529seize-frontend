@@ -12,6 +12,7 @@ export type SentryTransactionSpan = {
 type SentryContext = Record<string, unknown>;
 
 type SentryBreadcrumb = {
+  type?: string | undefined;
   category?: string | undefined;
   message?: string | undefined;
   data?: Record<string, unknown> | undefined;
@@ -30,6 +31,8 @@ type SentryExceptionValue = {
 type SentryTags = Record<string, unknown>;
 
 export type SentryClientEvent = {
+  event_id?: string | undefined;
+  message?: string | undefined;
   exception?:
     | {
         values?: SentryExceptionValue[] | undefined;
@@ -49,6 +52,11 @@ export type SentryEventHint = {
   originalException?: unknown;
   syntheticException?: unknown;
 };
+
+export type LowValueNetworkErrorDecision =
+  | "not_applicable"
+  | "drop"
+  | "keep_sampled";
 
 const filenameExceptions = [
   "inpage.js",
@@ -70,6 +78,12 @@ const noisyThirdPartyTelemetryTargets = new Set([
   "cca-lite.coinbase.com/metrics",
   "region1.google-analytics.com/g/collect",
 ]);
+export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
+
+const URL_IN_PARENS_PATTERN = /\(([^)]+)\)/g;
+const FNV_OFFSET_BASIS = 2166136261;
+const FNV_PRIME = 16777619;
+const UINT_32_SIZE = 4294967296;
 
 function getStringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
@@ -88,6 +102,257 @@ function getNumericValue(value: unknown): number | null {
   return null;
 }
 
+function uniqueStrings(values: string[]): string[] {
+  return Array.from(new Set(values));
+}
+
+function isNetworkErrorMessage(value: string): boolean {
+  const normalized = value.toLowerCase();
+  return (
+    normalized.includes("failed to fetch") ||
+    normalized.includes("load failed") ||
+    normalized.includes("networkerror") ||
+    normalized.includes("network error") ||
+    normalized.includes("network request failed")
+  );
+}
+
+function getEventMessage(event: SentryClientEvent): string {
+  const exceptionValue = event.exception?.values?.[0]?.value;
+  if (typeof exceptionValue === "string" && exceptionValue) {
+    return exceptionValue;
+  }
+
+  return typeof event.message === "string" ? event.message : "";
+}
+
+function getUrlCandidatesFromText(value: string): string[] {
+  const urls: string[] = [];
+  for (const match of value.matchAll(URL_IN_PARENS_PATTERN)) {
+    const candidate = match[1]?.trim();
+    if (candidate) {
+      urls.push(candidate);
+    }
+  }
+  return urls;
+}
+
+function isFilteredUrl(value: string | undefined): boolean {
+  if (!value) {
+    return true;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return (
+    normalized === "[filtered]" ||
+    normalized === "[redacted]" ||
+    normalized === "filtered"
+  );
+}
+
+function parseRequestUrl(value: string | undefined): URL | null {
+  if (!value || isFilteredUrl(value)) {
+    return null;
+  }
+
+  try {
+    return new URL(value, "https://6529.io");
+  } catch {
+    return null;
+  }
+}
+
+function isFirstPartyApiTarget(value: string): boolean {
+  const url = parseRequestUrl(value);
+  if (!url) {
+    return false;
+  }
+
+  const hostname = url.hostname.toLowerCase();
+  if (hostname === "api.6529.io") {
+    return true;
+  }
+
+  return isFirstPartyHost(hostname) && url.pathname.startsWith("/api/");
+}
+
+function isSameFirstPartyApiTarget(left: string, right: string): boolean {
+  const leftUrl = parseRequestUrl(left);
+  const rightUrl = parseRequestUrl(right);
+
+  if (!leftUrl || !rightUrl) {
+    return false;
+  }
+
+  return (
+    isFirstPartyApiTarget(left) &&
+    isFirstPartyApiTarget(right) &&
+    leftUrl.pathname === rightUrl.pathname
+  );
+}
+
+function getHttpBreadcrumbs(event: SentryClientEvent): SentryBreadcrumb[] {
+  return getBreadcrumbValues(event).filter(
+    (breadcrumb) =>
+      breadcrumb.type === "http" ||
+      breadcrumb.category === "fetch" ||
+      breadcrumb.category === "xhr"
+  );
+}
+
+function getBreadcrumbStatusCode(breadcrumb: SentryBreadcrumb): number | null {
+  const data = breadcrumb.data;
+  return (
+    getNumericValue(data?.["status_code"]) ??
+    getNumericValue(data?.["http.response.status_code"])
+  );
+}
+
+function getBreadcrumbUrl(breadcrumb: SentryBreadcrumb): string | undefined {
+  return getStringValue(breadcrumb.data?.["url"]);
+}
+
+function getLatestHttpBreadcrumbWithStatus(
+  event: SentryClientEvent
+): { url?: string | undefined; statusCode: number } | null {
+  const breadcrumbs = getHttpBreadcrumbs(event);
+  for (let index = breadcrumbs.length - 1; index >= 0; index -= 1) {
+    const breadcrumb = breadcrumbs[index];
+    if (!breadcrumb) {
+      continue;
+    }
+
+    const statusCode = getBreadcrumbStatusCode(breadcrumb);
+    if (statusCode === null) {
+      continue;
+    }
+
+    return {
+      url: getBreadcrumbUrl(breadcrumb),
+      statusCode,
+    };
+  }
+
+  return null;
+}
+
+function getNetworkTargetUrlCandidates(event: SentryClientEvent): string[] {
+  const message = getEventMessage(event);
+  const messageUrls = getUrlCandidatesFromText(message);
+  const breadcrumbUrls = getHttpBreadcrumbs(event)
+    .map(getBreadcrumbUrl)
+    .filter((value): value is string => !!value && !isFilteredUrl(value));
+
+  return uniqueStrings([...messageUrls, ...breadcrumbUrls]);
+}
+
+function getPrimaryNetworkTargetUrlCandidates(
+  event: SentryClientEvent
+): string[] {
+  const messageUrls = getUrlCandidatesFromText(getEventMessage(event));
+  return messageUrls.length > 0
+    ? uniqueStrings(messageUrls)
+    : getNetworkTargetUrlCandidates(event);
+}
+
+function hasFirstPartyApiTarget(event: SentryClientEvent): boolean {
+  return getPrimaryNetworkTargetUrlCandidates(event).some(
+    isFirstPartyApiTarget
+  );
+}
+
+function hasMatchingFailedTransportBreadcrumb(
+  event: SentryClientEvent
+): boolean {
+  const latestBreadcrumb = getLatestHttpBreadcrumbWithStatus(event);
+  if (latestBreadcrumb?.statusCode !== 0) {
+    return false;
+  }
+
+  if (isFilteredUrl(latestBreadcrumb.url)) {
+    return true;
+  }
+
+  return getPrimaryNetworkTargetUrlCandidates(event).some((targetUrl) =>
+    isSameFirstPartyApiTarget(targetUrl, latestBreadcrumb.url as string)
+  );
+}
+
+function isLowValueFirstPartyNetworkError(event: SentryClientEvent): boolean {
+  if (event.tags?.["errorType"] !== "network") {
+    return false;
+  }
+
+  const message = getEventMessage(event);
+  if (!isNetworkErrorMessage(message)) {
+    return false;
+  }
+
+  return (
+    hasFirstPartyApiTarget(event) && hasMatchingFailedTransportBreadcrumb(event)
+  );
+}
+
+function normalizeSampleRate(sampleRate: number): number {
+  if (!Number.isFinite(sampleRate) || sampleRate <= 0) {
+    return 0;
+  }
+
+  return sampleRate >= 1 ? 1 : sampleRate;
+}
+
+function stableHashToUnitInterval(value: string): number {
+  let hash = FNV_OFFSET_BASIS;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, FNV_PRIME);
+  }
+
+  return (hash >>> 0) / UINT_32_SIZE;
+}
+
+function getLowValueNetworkSamplingKey(event: SentryClientEvent): string {
+  const eventId = getStringValue(event.event_id);
+  if (eventId) {
+    return eventId;
+  }
+
+  return `${getEventMessage(event)}|${getNetworkTargetUrlCandidates(event).join(
+    "|"
+  )}`;
+}
+
+export function getLowValueNetworkErrorDecision(
+  event: SentryClientEvent,
+  sampleRate: number = LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE
+): LowValueNetworkErrorDecision {
+  if (!isLowValueFirstPartyNetworkError(event)) {
+    return "not_applicable";
+  }
+
+  const normalizedSampleRate = normalizeSampleRate(sampleRate);
+  if (normalizedSampleRate <= 0) {
+    return "drop";
+  }
+
+  if (normalizedSampleRate >= 1) {
+    return "keep_sampled";
+  }
+
+  return stableHashToUnitInterval(getLowValueNetworkSamplingKey(event)) <
+    normalizedSampleRate
+    ? "keep_sampled"
+    : "drop";
+}
+
+export function tagSampledLowValueNetworkError(event: SentryClientEvent): void {
+  event.tags = {
+    ...event.tags,
+    network_failure_kind: "browser_transport",
+    network_noise_sampled: "true",
+  };
+}
+
 function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined
 ): boolean {
@@ -97,7 +362,8 @@ function shouldFilterFilenameExceptions(
   return frames.some((frame) =>
     filenameExceptions.some(
       (pattern) =>
-        frame.filename?.includes(pattern) || frame.abs_path?.includes(pattern)
+        (frame.filename?.includes(pattern) ?? false) ||
+        (frame.abs_path?.includes(pattern) ?? false)
     )
   );
 }

@@ -13,11 +13,13 @@ import {
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 import {
+  getLowValueNetworkErrorDecision,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  tagSampledLowValueNetworkError,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
@@ -270,6 +272,14 @@ Sentry.init({
 
     if (error instanceof TypeError) {
       handleNetworkError(event, error, value);
+    }
+
+    const networkNoiseDecision = getLowValueNetworkErrorDecision(event);
+    if (networkNoiseDecision === "drop") {
+      return null;
+    }
+    if (networkNoiseDecision === "keep_sampled") {
+      tagSampledLowValueNetworkError(event);
     }
 
     return sanitizeSentryEvent(event);
