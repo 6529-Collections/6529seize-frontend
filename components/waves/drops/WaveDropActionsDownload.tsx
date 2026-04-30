@@ -36,9 +36,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
   const isMountedRef = useRef(true);
 
   const getFilename = () =>
-    props.extension
-      ? `${props.name}.${props.extension}`
-      : props.name;
+    props.extension ? `${props.name}.${props.extension}` : props.name;
 
   function startDownload() {
     download(props.href, getFilename());

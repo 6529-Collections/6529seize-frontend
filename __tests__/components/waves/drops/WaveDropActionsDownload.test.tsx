@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import WaveDropActionsDownload from '@/components/waves/drops/WaveDropActionsDownload';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import WaveDropActionsDownload from "@/components/waves/drops/WaveDropActionsDownload";
 
 const mockDownload = jest.fn();
 const mockCancel = jest.fn();
@@ -15,7 +15,7 @@ const mockUseDownloader = jest.fn(() => ({
   isInProgress: false,
 }));
 
-jest.mock('react-use-downloader', () => ({
+jest.mock("react-use-downloader", () => ({
   __esModule: true,
   default: () => mockUseDownloader(),
 }));
@@ -30,7 +30,7 @@ jest.mock("@/helpers/capacitorBlobDownload.helpers", () => ({
     mockShareFetchedBlobInNativeApp(...args),
 }));
 
-describe('WaveDropActionsDownload', () => {
+describe("WaveDropActionsDownload", () => {
   const originalFetch = global.fetch;
   const originalCreateObjectUrl = URL.createObjectURL;
   const originalRevokeObjectUrl = URL.revokeObjectURL;
@@ -63,7 +63,7 @@ describe('WaveDropActionsDownload', () => {
     anchorClickSpy.mockRestore();
   });
 
-  it('starts download on button click when not in progress', async () => {
+  it("starts download on button click when not in progress", async () => {
     const user = userEvent.setup();
     render(
       <WaveDropActionsDownload
@@ -73,12 +73,12 @@ describe('WaveDropActionsDownload', () => {
         tooltipId="download-media-1"
       />
     );
-    const button = screen.getByRole('button', { name: /download file/i });
+    const button = screen.getByRole("button", { name: /download file/i });
     await user.click(button);
-    expect(mockDownload).toHaveBeenCalledWith('/file', 'test.txt');
+    expect(mockDownload).toHaveBeenCalledWith("/file", "test.txt");
   });
 
-  it('cancels download when in progress on button click', async () => {
+  it("cancels download when in progress on button click", async () => {
     const user = userEvent.setup();
     mockUseDownloader.mockReturnValueOnce({
       size: 0,
@@ -97,7 +97,7 @@ describe('WaveDropActionsDownload', () => {
         tooltipId="download-media-1"
       />
     );
-    const button = screen.getByRole('button', { name: /download file/i });
+    const button = screen.getByRole("button", { name: /download file/i });
     await user.click(button);
     expect(mockCancel).toHaveBeenCalled();
   });
