@@ -86,10 +86,10 @@ interface WebUnifiedWavesListWavesProps {
 function ProfileFeedAvatar({ isActive }: { readonly isActive: boolean }) {
   return (
     <div
-      className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-200 desktop-hover:group-hover:tw-brightness-110 ${
+      className={`tw-relative tw-size-8 tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-200 desktop-hover:group-hover:tw-brightness-110 ${
         isActive
-          ? "tw-opacity-100 tw-ring-1 tw-ring-primary-300/35"
-          : "tw-opacity-90 tw-ring-1 tw-ring-iron-700/80 desktop-hover:group-hover:tw-opacity-100 desktop-hover:group-hover:tw-ring-iron-500/80"
+          ? "tw-border-primary-300/75 tw-opacity-100"
+          : "tw-border-iron-700/80 tw-opacity-90 desktop-hover:group-hover:tw-border-iron-500/80 desktop-hover:group-hover:tw-opacity-100"
       }`}
     >
       <div
