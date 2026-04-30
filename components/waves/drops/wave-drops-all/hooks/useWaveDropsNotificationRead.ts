@@ -42,7 +42,19 @@ export const useWaveDropsNotificationRead = ({
         .catch((error) => console.error("Failed to mark feed as read:", error));
     };
 
-    syncReadState();
+    const syncReadStateWhenVisible = () => {
+      if (document.visibilityState === "visible") {
+        void syncReadState();
+      }
+    };
+
+    void syncReadState();
+    document.addEventListener("visibilitychange", syncReadStateWhenVisible);
+    return () =>
+      document.removeEventListener(
+        "visibilitychange",
+        syncReadStateWhenVisible
+      );
   }, [
     enabled,
     waveId,

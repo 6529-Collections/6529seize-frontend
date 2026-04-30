@@ -5,6 +5,7 @@ import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.hel
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
+import JsonPreview from "@/components/drops/view/item/content/attachments/JsonPreview";
 import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,7 +17,6 @@ import {
   EyeSlashIcon,
   LinkIcon,
   TableCellsIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -45,10 +45,6 @@ function getSafeAttachmentUrl(rawUrl: string): string | null {
 }
 
 type AttachmentRenderType = "csv" | "pdf" | "unknown";
-type MetadataDetails = {
-  readonly text: string;
-  readonly isJson: boolean;
-};
 
 function getAttachmentMetadataUrl(rawUrl: string): string | null {
   const trimmedUrl = rawUrl.trim();
@@ -66,7 +62,7 @@ function getAttachmentMetadataUrl(rawUrl: string): string | null {
     const base = globalThis.window?.location?.origin || "https://6529.io";
     const parsed = new URL(trimmedUrl, base);
     const pathSegments = parsed.pathname.split("/");
-    const ipfsIndex = pathSegments.findIndex((segment) => segment === "ipfs");
+    const ipfsIndex = pathSegments.indexOf("ipfs");
 
     if (ipfsIndex >= 0 && pathSegments[ipfsIndex + 1]) {
       parsed.pathname = [
@@ -225,7 +221,9 @@ async function releaseCsvPreviewReader(
   await reader.cancel().catch(() => undefined);
   try {
     reader.releaseLock();
-  } catch {}
+  } catch {
+    // Reader may already be released after cancellation or stream completion.
+  }
 }
 
 async function readCsvPreviewFromStreamBody(
@@ -303,27 +301,6 @@ async function fetchCsvPreviewText(
     signal,
     markSizeExceeded
   );
-}
-
-async function fetchMetadataPreviewText(
-  url: string,
-  signal: AbortSignal
-): Promise<MetadataDetails> {
-  const response = await fetch(url, { signal });
-  if (!response.ok) {
-    throw new Error("Metadata not found.");
-  }
-
-  const text = await response.text();
-  try {
-    const json = JSON.parse(text);
-    return {
-      text: JSON.stringify(json, null, 2),
-      isJson: true,
-    };
-  } catch {
-    return { text, isJson: false };
-  }
 }
 
 function resolveCsvPreviewErrorMessage(
@@ -640,97 +617,6 @@ function CsvAttachmentPreview({ url }: { readonly url: string }) {
   );
 }
 
-const JSON_TOKEN_PATTERN =
-  /("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
-
-function JsonPreviewLine({ line }: { readonly line: string }) {
-  const parts: ReactNode[] = [];
-  let lastIndex = 0;
-
-  for (const match of line.matchAll(JSON_TOKEN_PATTERN)) {
-    const index = match.index ?? 0;
-    if (index > lastIndex) {
-      parts.push(line.slice(lastIndex, index));
-    }
-
-    const token = match[0];
-    const quoted = match[1];
-    const keySuffix = match[2];
-    const literal = match[3];
-    const key = `json-token-${index}-${token}`;
-
-    if (quoted && keySuffix !== undefined) {
-      parts.push(
-        <span key={key} className="tw-text-rose-300">
-          {quoted}
-        </span>
-      );
-      parts.push(keySuffix);
-    } else if (quoted) {
-      parts.push(
-        <span key={key} className="tw-text-lime-300">
-          {quoted}
-        </span>
-      );
-    } else if (literal === "true" || literal === "false") {
-      parts.push(
-        <span key={key} className="tw-text-sky-300">
-          {token}
-        </span>
-      );
-    } else if (literal === "null") {
-      parts.push(
-        <span key={key} className="tw-text-iron-500">
-          {token}
-        </span>
-      );
-    } else {
-      parts.push(
-        <span key={key} className="tw-text-violet-300">
-          {token}
-        </span>
-      );
-    }
-
-    lastIndex = index + token.length;
-  }
-
-  if (lastIndex < line.length) {
-    parts.push(line.slice(lastIndex));
-  }
-
-  return <>{parts}</>;
-}
-
-function MetadataPreviewContent({
-  metadata,
-  isJson,
-}: {
-  readonly metadata: string;
-  readonly isJson: boolean;
-}) {
-  const lines = metadata.split("\n");
-
-  if (!isJson) {
-    return (
-      <pre className="tw-m-0 tw-max-h-[28rem] tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-p-4 tw-pr-28 tw-text-xs tw-text-iron-200">
-        {metadata}
-      </pre>
-    );
-  }
-
-  return (
-    <pre className="tw-m-0 tw-max-h-[28rem] tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-p-4 tw-pr-28 tw-font-mono tw-text-xs tw-leading-relaxed tw-text-iron-200">
-      {lines.map((line, index) => (
-        <span key={`metadata-line-${index}`}>
-          <JsonPreviewLine line={line} />
-          {index < lines.length - 1 ? "\n" : null}
-        </span>
-      ))}
-    </pre>
-  );
-}
-
 function AnimatedAttachmentPanel({
   isOpen,
   children,
@@ -775,102 +661,6 @@ function AnimatedAttachmentPanel({
           {children}
         </div>
       </div>
-    </div>
-  );
-}
-
-function MetadataAttachmentPreview({
-  url,
-  onCopyMetadataLink,
-  copiedMetadataLink,
-  onClose,
-}: {
-  readonly url: string;
-  readonly onCopyMetadataLink: () => void;
-  readonly copiedMetadataLink: boolean;
-  readonly onClose: () => void;
-}) {
-  const [metadata, setMetadata] = useState<string | null>(null);
-  const [isJsonMetadata, setIsJsonMetadata] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setMetadata(null);
-    setIsJsonMetadata(false);
-    setError(null);
-    const controller = new AbortController();
-    let active = true;
-    const timeoutId = globalThis.window.setTimeout(() => {
-      controller.abort();
-    }, ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS);
-
-    void (async () => {
-      try {
-        const result = await fetchMetadataPreviewText(url, controller.signal);
-        if (!active || controller.signal.aborted) {
-          return;
-        }
-        setMetadata(result.text);
-        setIsJsonMetadata(result.isJson);
-      } catch {
-        if (!active || controller.signal.aborted) {
-          return;
-        }
-        setError("Metadata not found.");
-      } finally {
-        globalThis.window.clearTimeout(timeoutId);
-      }
-    })();
-
-    return () => {
-      active = false;
-      globalThis.window.clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [url]);
-
-  return (
-    <div className="tw-relative tw-min-h-32 tw-bg-primary-400/[0.035]">
-      <div className="tw-absolute tw-right-3 tw-top-3 tw-z-10">
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <button
-            type="button"
-            onClick={onCopyMetadataLink}
-            aria-label="Copy metadata link"
-            title={copiedMetadataLink ? "Copied" : "Copy metadata link"}
-            className={clsx(
-              "tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-bg-iron-900/80 tw-no-underline tw-transition desktop-hover:hover:tw-bg-primary-400/[0.12]",
-              copiedMetadataLink
-                ? "tw-border-primary-400 tw-text-primary-300"
-                : "tw-border-iron-700 tw-text-iron-200"
-            )}
-          >
-            <LinkIcon className="tw-size-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close attachment details"
-            title="Close"
-            className="tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/80 tw-text-iron-200 tw-transition desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
-          >
-            <XMarkIcon className="tw-size-4" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-      {error && (
-        <div className="tw-p-4 tw-pr-28 tw-text-sm tw-text-iron-300">
-          {error}
-        </div>
-      )}
-      {!error && !metadata && (
-        <div className="tw-p-4 tw-pr-28 tw-text-sm tw-text-iron-400">
-          Loading metadata...
-        </div>
-      )}
-      {metadata && (
-        <MetadataPreviewContent metadata={metadata} isJson={isJsonMetadata} />
-      )}
     </div>
   );
 }
@@ -994,7 +784,6 @@ export default function DropAttachmentDisplay({
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [copiedMetadataLink, setCopiedMetadataLink] = useState(false);
   const downloadAbortRef = useRef<AbortController | null>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const { isCapacitor } = useCapacitor();
@@ -1047,18 +836,6 @@ export default function DropAttachmentDisplay({
     );
     return () => globalThis.window.clearTimeout(timeoutId);
   }, [copiedLink]);
-
-  useEffect(() => {
-    if (!copiedMetadataLink) {
-      return;
-    }
-
-    const timeoutId = globalThis.window.setTimeout(
-      () => setCopiedMetadataLink(false),
-      1500
-    );
-    return () => globalThis.window.clearTimeout(timeoutId);
-  }, [copiedMetadataLink]);
 
   const handleDownload = async () => {
     if (isDownloading || !safeAttachmentUrl) {
@@ -1130,29 +907,22 @@ export default function DropAttachmentDisplay({
     }
   };
 
-  const handleCopyMetadataLink = async () => {
-    if (!safeMetadataUrl) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(safeMetadataUrl);
-      setCopiedMetadataLink(true);
-    } catch (error) {
-      console.error("Failed to copy attachment metadata link", error);
-    }
-  };
-
   const handleToggleDetails = () => {
     setIsDetailsOpen((current) => !current);
     setIsMoreMenuOpen(false);
+  };
+
+  const handleToggleMoreMenu = () => {
+    if (!isMoreMenuOpen) {
+      setCopiedLink(false);
+    }
+    setIsMoreMenuOpen((current) => !current);
   };
 
   const handleMenuCopyLink = async () => {
     await handleCopyLink();
     globalThis.window.setTimeout(() => {
       setIsMoreMenuOpen(false);
-      globalThis.window.setTimeout(() => setCopiedLink(false), 0);
     }, 300);
   };
 
@@ -1214,7 +984,7 @@ export default function DropAttachmentDisplay({
                 copiedLink={copiedLink}
                 isDownloading={isDownloading}
                 buttonRef={moreButtonRef}
-                onToggle={() => setIsMoreMenuOpen((current) => !current)}
+                onToggle={handleToggleMoreMenu}
                 onToggleDetails={handleToggleDetails}
                 onCopyLink={handleMenuCopyLink}
                 onDownload={handleMenuDownload}
@@ -1226,10 +996,8 @@ export default function DropAttachmentDisplay({
       <AnimatedAttachmentPanel isOpen={isDetailsOpen && !!safeMetadataUrl}>
         {safeMetadataUrl && (
           <div className="tw-rounded-b-lg tw-border tw-border-t-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950">
-            <MetadataAttachmentPreview
-              url={safeMetadataUrl}
-              onCopyMetadataLink={handleCopyMetadataLink}
-              copiedMetadataLink={copiedMetadataLink}
+            <JsonPreview
+              link={safeMetadataUrl}
               onClose={() => setIsDetailsOpen(false)}
             />
           </div>

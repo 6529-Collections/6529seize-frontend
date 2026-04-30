@@ -255,6 +255,7 @@ describe("useWaveRealtimeUpdater", () => {
     await flushPromises();
 
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
   });
 
   it("does not mark non-active wave as read", async () => {

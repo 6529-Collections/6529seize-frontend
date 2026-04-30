@@ -269,6 +269,7 @@ describe("MyStreamWaveChat", () => {
 
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
     expect(invalidateNotificationsMock).not.toHaveBeenCalled();
+    expect(mockRemoveWaveDeliveredNotifications).not.toHaveBeenCalled();
   });
 
   it("skips notification cleanup on unmount for anonymous viewers", async () => {

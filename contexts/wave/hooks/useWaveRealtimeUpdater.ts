@@ -313,7 +313,7 @@ export function useWaveRealtimeUpdater({
         initiateFetchNewestCycle(waveId, serialNoForFetch);
       }
 
-      if (activeWaveId === waveId) {
+      if (activeWaveId === waveId && document.visibilityState === "visible") {
         removeWaveDeliveredNotifications(waveId).catch((error) =>
           console.error("Failed to remove wave delivered notifications:", error)
         );
