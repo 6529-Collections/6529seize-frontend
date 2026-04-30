@@ -154,6 +154,7 @@ function WebProfileFeedShortcut({
           prefetch={false}
           onClick={handleClick}
           aria-label={PROFILE_FEED_LABEL}
+          aria-current={isActive ? "page" : undefined}
           className="tw-flex tw-items-center tw-justify-center tw-no-underline"
           data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
           data-tooltip-content={PROFILE_FEED_LABEL}
