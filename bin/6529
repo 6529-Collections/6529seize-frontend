@@ -23,7 +23,8 @@ Common commands:
   6529 install:frozen  -> pnpm run install:secure:frozen
   6529 ci              -> pnpm run install:secure:frozen
   6529 install:prod    -> pnpm run install:secure:prod
-  6529 update          -> sfw pnpm update
+  6529 update          -> sfw pnpm audit --fix
+  6529 update:all      -> sfw pnpm update
   6529 run dev         -> pnpm run dev
   6529 run build       -> pnpm run build
   6529 approve-builds  -> pnpm approve-builds
@@ -125,6 +126,15 @@ case "$command_name" in
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" add "$@"
     ;;
   update)
+    if [[ "$#" -gt 0 ]]; then
+      echo "\`6529 update\` runs audit fixes and does not accept package arguments." >&2
+      echo "Use \`6529 update:all [package...]\` for intentional pnpm updates." >&2
+      exit 1
+    fi
+    node "$REPO_ROOT/scripts/assert-no-package-lock.cjs"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" audit --fix
+    ;;
+  update:all)
     node "$REPO_ROOT/scripts/assert-no-package-lock.cjs"
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" update "$@"
     ;;
