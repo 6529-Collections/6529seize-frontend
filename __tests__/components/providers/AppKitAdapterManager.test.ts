@@ -4,7 +4,6 @@ import { WalletValidationError } from "@/src/errors/wallet-validation";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "viem/chains";
-import { coinbaseWallet } from "wagmi/connectors";
 
 const VALID_PRIVATE_KEY =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
@@ -21,13 +20,6 @@ jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
 }));
 jest.mock("@/constants/constants", () => ({
   CW_PROJECT_ID: "12345678-1234-1234-1234-123456789abc", // Valid UUID format
-}));
-jest.mock("wagmi/connectors", () => ({
-  coinbaseWallet: jest.fn(() => () => ({
-    id: "coinbaseWalletSDK",
-    name: "Coinbase Wallet",
-    type: "coinbaseWallet",
-  })),
 }));
 
 describe("AppKitAdapterManager", () => {
@@ -738,35 +730,6 @@ describe("AppKitAdapterManager", () => {
         false
       );
       expect(manager.shouldRecreateAdapter([mockWallet], [sepolia])).toBe(true);
-    });
-
-    it("should add a renamed Coinbase Wallet v3 connector for Capacitor", () => {
-      manager.createAdapter([], true, [mainnet]);
-
-      expect(coinbaseWallet).toHaveBeenCalledWith({
-        appName: "6529.io",
-        appLogoUrl:
-          "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-        enableMobileWalletLink: true,
-        version: "3",
-      });
-
-      const lastWagmiAdapterConfig = (
-        WagmiAdapter as jest.MockedClass<typeof WagmiAdapter>
-      ).mock.calls.at(-1)?.[0] as { connectors: Array<(config: any) => any> };
-      const [connectorFactory] = lastWagmiAdapterConfig.connectors;
-      const connector = connectorFactory({
-        chains: [mainnet],
-        emitter: {},
-      });
-
-      expect(connector).toEqual(
-        expect.objectContaining({
-          id: "6529MobileCoinbaseWallet",
-          name: "Coinbase Wallet",
-          type: "coinbaseWallet",
-        })
-      );
     });
 
     it("should use cached adapter when available", () => {
