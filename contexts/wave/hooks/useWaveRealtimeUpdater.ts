@@ -254,11 +254,11 @@ export function useWaveRealtimeUpdater({
         invalidateNotifications();
       };
 
-      if (drop.wave.id.length === 0) {
+      const waveId = drop.wave.id;
+
+      if (!waveId) {
         return;
       }
-
-      const waveId = drop.wave.id;
 
       if (isWaveMuted(waveId)) {
         return;
