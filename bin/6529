@@ -28,6 +28,8 @@ Common commands:
   6529 approve-builds  -> pnpm approve-builds
   6529 prune:prod      -> pnpm run prune:prod
   6529 staging         -> bash repo-rooted scripts/staging.sh
+  6529 env status      -> show selected .env API/WS target
+  6529 env <env>       -> switch .env API/WS target to local, staging, or prod
   6529 run start       -> pnpm run start
   6529 run test        -> pnpm run test
   6529 run lint        -> pnpm run lint
@@ -45,6 +47,9 @@ case "$command_name" in
     ;;
   staging)
     exec bash "$REPO_ROOT/scripts/staging.sh" "$@"
+    ;;
+  env)
+    exec node "$REPO_ROOT/scripts/env-target.cjs" "$@"
     ;;
 esac
 

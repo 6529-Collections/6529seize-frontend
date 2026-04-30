@@ -15,6 +15,7 @@ import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
+import UnsupportedMediaLink from "./UnsupportedMediaLink";
 
 enum MediaType {
   IMAGE = "IMAGE",
@@ -263,7 +264,12 @@ export default function MediaDisplay({
         />
       );
     case MediaType.UNKNOWN:
-      return <></>;
+      return (
+        <UnsupportedMediaLink
+          media_url={media_url}
+          disableMediaInteraction={disableMediaInteraction}
+        />
+      );
     default:
       assertUnreachable(mediaType);
       return;

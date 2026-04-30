@@ -9,6 +9,7 @@ import type {
   DropIdentityMode,
   DropInteractionParams,
   DropLocation,
+  DropTimestampLayout,
 } from "../drop.types";
 
 interface WinnerDropProps {
@@ -25,7 +26,9 @@ interface WinnerDropProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
+  readonly footer?: React.ReactNode;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
 }
 
