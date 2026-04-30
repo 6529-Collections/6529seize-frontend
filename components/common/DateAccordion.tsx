@@ -1,6 +1,6 @@
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import { useId } from "react";
 
 interface DateAccordionProps {
@@ -24,67 +24,68 @@ export default function DateAccordion({
   const titleId = `${contentId}-title`;
 
   return (
-    <motion.div
-      className="tw-rounded-xl tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <div className="tw-flex tw-h-16 tw-w-full tw-items-center tw-justify-between tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-5 tw-text-left tw-transition-colors tw-duration-200">
-        <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
-          <div className="tw-flex tw-items-center tw-gap-x-3">
-            <button
-              type="button"
-              onClick={onToggle}
-              aria-expanded={isExpanded}
-              aria-controls={contentId}
-              aria-labelledby={titleId}
-              className="tw-cursor-pointer tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            >
-              <motion.div
-                animate={isExpanded ? { rotate: 0 } : { rotate: 180 }}
-                transition={{ duration: 0.3 }}
-                className="tw-rounded-full tw-p-1.5 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-700/30"
+    <LazyMotion features={domAnimation}>
+      <m.div
+        className="tw-rounded-xl tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <div className="tw-flex tw-h-16 tw-w-full tw-items-center tw-justify-between tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-5 tw-text-left tw-transition-colors tw-duration-200">
+          <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
+            <div className="tw-flex tw-items-center tw-gap-x-3">
+              <button
+                type="button"
+                onClick={onToggle}
+                aria-expanded={isExpanded}
+                aria-controls={contentId}
+                aria-labelledby={titleId}
+                className="tw-cursor-pointer tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
-                <FontAwesomeIcon
-                  icon={faChevronDown}
-                  className={`tw-size-4 ${
-                    showChevron ? "tw-text-primary-400" : "tw-text-iron-700"
-                  } tw-transition-all tw-duration-200`}
-                />
-              </motion.div>
-            </button>
-            <div
-              id={titleId}
-              onClick={onToggle}
-              className="tw-cursor-pointer tw-text-base tw-font-semibold tw-text-iron-300"
-            >
-              {title}
-            </div>
-          </div>
-          {!isExpanded &&
-            collapsedContent !== undefined &&
-            collapsedContent !== null && (
-              <div className="tw-opacity-80 tw-transition-opacity tw-duration-200 hover:tw-opacity-100">
-                {collapsedContent}
+                <m.div
+                  animate={isExpanded ? { rotate: 0 } : { rotate: 180 }}
+                  transition={{ duration: 0.3 }}
+                  className="tw-rounded-full tw-p-1.5 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-700/30"
+                >
+                  <FontAwesomeIcon
+                    icon={faChevronDown}
+                    className={`tw-size-4 ${
+                      showChevron ? "tw-text-primary-400" : "tw-text-iron-700"
+                    } tw-transition-all tw-duration-200`}
+                  />
+                </m.div>
+              </button>
+              <div
+                id={titleId}
+                className="tw-text-base tw-font-semibold tw-text-iron-300"
+              >
+                {title}
               </div>
-            )}
+            </div>
+            {!isExpanded &&
+              collapsedContent !== undefined &&
+              collapsedContent !== null && (
+                <div className="tw-opacity-80 tw-transition-opacity tw-duration-200 hover:tw-opacity-100">
+                  {collapsedContent}
+                </div>
+              )}
+          </div>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-            id={contentId}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+        <AnimatePresence>
+          {isExpanded && (
+            <m.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+              id={contentId}
+            >
+              {children}
+            </m.div>
+          )}
+        </AnimatePresence>
+      </m.div>
+    </LazyMotion>
   );
 }
