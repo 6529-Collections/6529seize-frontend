@@ -258,7 +258,7 @@ describe("useWaveDecisions", () => {
     );
   });
 
-  it("stops auto-fetching and loading all pages after a next-page error", () => {
+  it("keeps loading all pages after a next-page error without retrying", () => {
     const fetchNextPage = jest.fn();
     useInfiniteQueryMock.mockReturnValue({
       data: {
@@ -285,7 +285,8 @@ describe("useWaveDecisions", () => {
     );
 
     expect(fetchNextPage).not.toHaveBeenCalled();
-    expect(result.current.isLoadingAllPages).toBe(false);
+    expect(result.current.isLoadingAllPages).toBe(true);
+    expect(result.current.hasLoadedAllPages).toBe(false);
     expect(result.current.fetchNextPage).toBe(fetchNextPage);
   });
 });
