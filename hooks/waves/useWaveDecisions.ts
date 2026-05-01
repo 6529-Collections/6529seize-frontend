@@ -121,7 +121,9 @@ export function useWaveDecisions({
   const isLoadingAllPages = Boolean(
     enabled &&
     (isLoading ||
-      (loadAllPages && (Boolean(hasNextPage) || isFetchingNextPage)))
+      (loadAllPages &&
+        !isFetchNextPageError &&
+        (Boolean(hasNextPage) || isFetchingNextPage)))
   );
 
   return {
