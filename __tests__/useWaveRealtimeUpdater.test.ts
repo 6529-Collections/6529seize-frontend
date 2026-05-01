@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import {
   useWaveRealtimeUpdater,
   ProcessIncomingDropType,
@@ -494,12 +494,11 @@ describe("useWaveRealtimeUpdater", () => {
       author: {},
     };
 
-    let processPromise: Promise<void> = Promise.resolve();
     act(() => {
-      processPromise = result.current.processIncomingDrop(
+      result.current.processIncomingDrop(
         drop,
         ProcessIncomingDropType.DROP_REACTION_UPDATE
-      ) as unknown as Promise<void>;
+      );
     });
 
     expect(fetchDropByIdBatched).toHaveBeenCalledWith("d-race-reaction");
@@ -541,9 +540,11 @@ describe("useWaveRealtimeUpdater", () => {
           reactionEntry(":wave:", [profile("profile-3", "fresh-wave")]),
         ],
       });
-      await processPromise;
+      await flushPromises();
     });
-    await flushPromises();
+    await waitFor(() => {
+      expect(props.updateData).toHaveBeenCalled();
+    });
 
     const lastUpdate =
       props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];

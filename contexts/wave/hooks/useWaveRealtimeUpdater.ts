@@ -5,7 +5,7 @@ import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
@@ -167,6 +167,121 @@ function findReactionProfile(
   return null;
 }
 
+function getIncomingWave(drop: IncomingDrop): IncomingDropWave | null {
+  const wave = drop.wave;
+  if (wave === undefined || wave.id.length === 0) {
+    return null;
+  }
+
+  return wave;
+}
+
+function isFetchedDropUpdate(type: ProcessIncomingDropType): boolean {
+  return (
+    type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
+    type === ProcessIncomingDropType.DROP_REACTION_UPDATE
+  );
+}
+
+function shouldSkipIncomingDrop(
+  type: ProcessIncomingDropType,
+  existingDrop: Drop | undefined
+): boolean {
+  if (existingDrop?.type === DropSize.LIGHT) {
+    return true;
+  }
+
+  return isFetchedDropUpdate(type) && existingDrop === undefined;
+}
+
+function getFullDrop(drop: Drop | undefined): ExtendedDrop | null {
+  if (drop === undefined) {
+    return null;
+  }
+
+  if (drop.type !== DropSize.FULL) {
+    return null;
+  }
+
+  return drop;
+}
+
+function reconcileReactionUpdate(
+  apiDrop: ApiDrop,
+  latestExistingDrop: ExtendedDrop,
+  type: ProcessIncomingDropType
+): ApiDrop {
+  if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+    return apiDrop;
+  }
+
+  const protectedIntent = getProtectedReactionIntent(apiDrop.id);
+  const serverReaction = apiDrop.context_profile_context?.reaction ?? null;
+
+  recordReactionRealtimeReconciliation({
+    drop: {
+      id: apiDrop.id,
+      wave: { id: apiDrop.wave.id },
+      context_profile_context: apiDrop.context_profile_context,
+    },
+    websocketStatus: WebSocketStatus.CONNECTED,
+    protectedIntent,
+  });
+
+  if (protectedIntent && serverReaction !== protectedIntent.reaction) {
+    return preserveProtectedReactionFields(
+      apiDrop,
+      latestExistingDrop,
+      protectedIntent
+    );
+  }
+
+  return apiDrop;
+}
+
+function buildOptimisticDrop(
+  drop: IncomingDrop,
+  wave: IncomingDropWave,
+  existingDrop: ExtendedDrop | null
+): ExtendedDrop {
+  const authorSubscribedActions =
+    existingDrop === null
+      ? drop.author.subscribed_actions
+      : existingDrop.author.subscribed_actions;
+  const contextProfileContext =
+    existingDrop === null
+      ? (drop.context_profile_context ?? null)
+      : existingDrop.context_profile_context;
+
+  return {
+    ...drop,
+    type: DropSize.FULL,
+    author: {
+      ...drop.author,
+      subscribed_actions: authorSubscribedActions,
+    },
+    wave: {
+      ...wave,
+      authenticated_user_eligible_to_participate:
+        existingDrop?.wave.authenticated_user_eligible_to_participate ??
+        wave.authenticated_user_eligible_to_participate,
+      authenticated_user_eligible_to_vote:
+        existingDrop?.wave.authenticated_user_eligible_to_vote ??
+        wave.authenticated_user_eligible_to_vote,
+      authenticated_user_eligible_to_chat:
+        existingDrop?.wave.authenticated_user_eligible_to_chat ??
+        wave.authenticated_user_eligible_to_chat ??
+        false,
+      authenticated_user_admin:
+        existingDrop?.wave.authenticated_user_admin ??
+        wave.authenticated_user_admin,
+    },
+    stableKey: drop.id,
+    stableHash: drop.id,
+    context_profile_context: contextProfileContext,
+  };
+}
+
 export function useWaveRealtimeUpdater({
   activeWaveId,
   getData,
@@ -186,6 +301,52 @@ export function useWaveRealtimeUpdater({
   const { refreshEligibility } = useWaveEligibility();
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const tabJustBecameVisibleRef = useRef<boolean>(false);
+
+  const markWaveAsRead = useCallback(
+    async (waveId: string): Promise<void> => {
+      await commonApiPostWithoutBodyAndResponse({
+        endpoint: `notifications/wave/${waveId}/read`,
+      });
+      invalidateNotifications();
+    },
+    [invalidateNotifications]
+  );
+
+  const refreshEligibilityAfterVisibilityChange = useCallback(
+    (waveId: string): void => {
+      if (!tabJustBecameVisibleRef.current) {
+        return;
+      }
+
+      tabJustBecameVisibleRef.current = false;
+      void refreshEligibility(waveId);
+    },
+    [refreshEligibility]
+  );
+
+  const clearActiveWaveNotifications = useCallback(
+    (waveId: string): void => {
+      void (async () => {
+        try {
+          await removeWaveDeliveredNotifications(waveId);
+        } catch (error: unknown) {
+          console.error(
+            "Failed to remove wave delivered notifications:",
+            error
+          );
+        }
+      })();
+
+      void (async () => {
+        try {
+          await markWaveAsRead(waveId);
+        } catch (error: unknown) {
+          console.error("Failed to mark wave as read:", error);
+        }
+      })();
+    },
+    [markWaveAsRead, removeWaveDeliveredNotifications]
+  );
 
   // Function to cleanup abort controllers
   const cleanupController = useCallback((waveId: string) => {
@@ -255,37 +416,67 @@ export function useWaveRealtimeUpdater({
     [getData, updateData, syncNewestMessages, cleanupController]
   );
 
-  // WebSocket message handler
-  const processIncomingDrop: ProcessIncomingDropFn = useCallback(
-    async (drop: ApiDrop, type: ProcessIncomingDropType) => {
-      const markWaveAsRead = async (waveId: string) => {
-        await commonApiPostWithoutBodyAndResponse({
-          endpoint: `notifications/wave/${waveId}/read`,
-        });
-        invalidateNotifications();
-      };
+  const handleFetchedDropUpdate = useCallback(
+    async (
+      drop: IncomingDrop,
+      type: ProcessIncomingDropType,
+      waveId: string
+    ): Promise<void> => {
+      const apiDrop = await fetchDropByIdBatched(drop.id);
+      const latestData = getData(waveId);
 
-      const wave = drop.wave;
+      if (latestData === undefined) {
+        return;
+      }
 
-      if (!wave?.id) {
+      const latestExistingDrop = getFullDrop(
+        latestData.drops.find((cachedDrop) => cachedDrop.id === drop.id)
+      );
+
+      if (latestExistingDrop === null) {
+        return;
+      }
+
+      const nextDrop = reconcileReactionUpdate(
+        apiDrop,
+        latestExistingDrop,
+        type
+      );
+
+      updateData({
+        key: waveId,
+        drops: [
+          {
+            ...nextDrop,
+            type: DropSize.FULL,
+            stableHash: latestExistingDrop.stableHash,
+            stableKey: latestExistingDrop.stableKey,
+          },
+        ],
+      });
+    },
+    [getData, updateData]
+  );
+
+  const processIncomingDropAsync = useCallback(
+    async (
+      drop: IncomingDrop,
+      type: ProcessIncomingDropType
+    ): Promise<void> => {
+      const wave = getIncomingWave(drop);
+      if (wave === null) {
         return;
       }
 
       const waveId = wave.id;
-
       if (isWaveMuted(waveId)) {
         return;
       }
 
-      // Check if tab just became visible and refresh eligibility
-      if (tabJustBecameVisibleRef.current) {
-        tabJustBecameVisibleRef.current = false;
-        refreshEligibility(waveId);
-      }
-
+      refreshEligibilityAfterVisibilityChange(waveId);
       const currentData = getData(waveId);
 
-      if (!currentData) {
+      if (currentData === undefined) {
         // Wave not registered or data not loaded yet.
         // Registering will trigger initial fetch which should get this message.
         registerWave(waveId);
@@ -294,102 +485,20 @@ export function useWaveRealtimeUpdater({
 
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
 
-      if (
-        (type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
-          !existingDrop) ||
-        (type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
-          !existingDrop) ||
-        existingDrop?.type === DropSize.LIGHT
-      ) {
+      if (shouldSkipIncomingDrop(type, existingDrop)) {
         return;
       }
 
-      if (
-        (type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
-          type === ProcessIncomingDropType.DROP_REACTION_UPDATE) &&
-        existingDrop
-      ) {
-        const apiDrop = await fetchDropByIdBatched(drop.id);
-
-        const latestExistingDrop = getData(waveId)?.drops.find(
-          (cachedDrop) => cachedDrop.id === drop.id
-        );
-
-        if (latestExistingDrop?.type !== DropSize.FULL) {
-          return;
-        }
-
-        let nextDrop = apiDrop;
-
-        if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-          const protectedIntent = getProtectedReactionIntent(apiDrop.id);
-          const serverReaction =
-            apiDrop.context_profile_context?.reaction ?? null;
-
-          recordReactionRealtimeReconciliation({
-            drop: {
-              id: apiDrop.id,
-              wave: { id: apiDrop.wave.id },
-              context_profile_context: apiDrop.context_profile_context,
-            },
-            websocketStatus: WebSocketStatus.CONNECTED,
-            protectedIntent,
-          });
-
-          if (protectedIntent && serverReaction !== protectedIntent.reaction) {
-            nextDrop = preserveProtectedReactionFields(
-              apiDrop,
-              latestExistingDrop,
-              protectedIntent
-            );
-          }
-        }
-        updateData({
-          key: waveId,
-          drops: [
-            {
-              ...nextDrop,
-              type: DropSize.FULL,
-              stableHash: latestExistingDrop.stableHash,
-              stableKey: latestExistingDrop.stableKey,
-            },
-          ],
-        });
+      if (isFetchedDropUpdate(type)) {
+        await handleFetchedDropUpdate(drop, type, waveId);
         return;
       }
 
-      const optimisticDrop: ExtendedDrop = {
-        ...drop,
-        type: DropSize.FULL,
-        author: {
-          ...drop.author,
-          subscribed_actions: existingDrop
-            ? existingDrop.author.subscribed_actions
-            : drop.author.subscribed_actions,
-        },
-        wave: {
-          ...wave,
-          authenticated_user_eligible_to_participate: existingDrop
-            ? existingDrop.wave.authenticated_user_eligible_to_participate
-            : wave.authenticated_user_eligible_to_participate,
-          authenticated_user_eligible_to_vote: existingDrop
-            ? existingDrop.wave.authenticated_user_eligible_to_vote
-            : wave.authenticated_user_eligible_to_vote,
-          authenticated_user_eligible_to_chat: existingDrop
-            ? existingDrop.wave.authenticated_user_eligible_to_chat
-            : (wave.authenticated_user_eligible_to_chat ?? false),
-          authenticated_user_admin: existingDrop
-            ? existingDrop.wave.authenticated_user_admin
-            : wave.authenticated_user_admin,
-        }, // Assuming message structure matches ApiDrop + ApiWaveMin
-        stableKey: drop.id,
-        stableHash: drop.id, // Use ID for hash temporarily
-        context_profile_context: existingDrop
-          ? existingDrop.context_profile_context
-          : (drop.context_profile_context ?? null),
-      };
-
-      // Important: Identify the serial number *before* adding the optimistic drop
+      const optimisticDrop = buildOptimisticDrop(
+        drop,
+        wave,
+        getFullDrop(existingDrop)
+      );
       const serialNoForFetch = currentData.latestFetchedSerialNo;
 
       updateData({
@@ -397,31 +506,40 @@ export function useWaveRealtimeUpdater({
         drops: [optimisticDrop],
       });
 
-      if (serialNoForFetch && !optimisticDrop.id.startsWith("temp-")) {
+      if (serialNoForFetch !== null && !optimisticDrop.id.startsWith("temp-")) {
         // Initiate the background fetch for reconciliation
-        initiateFetchNewestCycle(waveId, serialNoForFetch);
+        void initiateFetchNewestCycle(waveId, serialNoForFetch);
       }
 
       if (activeWaveId === waveId) {
-        removeWaveDeliveredNotifications(waveId).catch((error) =>
-          console.error("Failed to remove wave delivered notifications:", error)
-        );
-        markWaveAsRead(waveId).catch((error) =>
-          console.error("Failed to mark wave as read:", error)
-        );
+        clearActiveWaveNotifications(waveId);
       }
     },
     [
       activeWaveId,
+      clearActiveWaveNotifications,
       getData,
-      updateData,
-      registerWave,
+      handleFetchedDropUpdate,
       initiateFetchNewestCycle,
-      removeWaveDeliveredNotifications,
-      refreshEligibility,
       isWaveMuted,
-      invalidateNotifications,
+      refreshEligibilityAfterVisibilityChange,
+      registerWave,
+      updateData,
     ]
+  );
+
+  // WebSocket message handler
+  const processIncomingDrop = useCallback<ProcessIncomingDropFn>(
+    (drop, type) => {
+      void (async () => {
+        try {
+          await processIncomingDropAsync(drop, type);
+        } catch (error: unknown) {
+          console.error("Failed to process incoming drop:", error);
+        }
+      })();
+    },
+    [processIncomingDropAsync]
   );
 
   const processDropRemoved = useCallback(
