@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { WaveDropAdditionalInfo } from "@/components/waves/drop/WaveDropAdditionalInfo";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
+import { FallbackImage } from "@/components/common/FallbackImage";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -8,13 +9,9 @@ jest.mock("next/image", () => ({
 }));
 
 jest.mock("@/components/common/FallbackImage", () => ({
-  FallbackImage: (props: any) => (
-    <img
-      src={props.primarySrc}
-      alt={props.alt ?? ""}
-      data-fallback-src={props.fallbackSrc}
-    />
-  ),
+  FallbackImage: jest.fn((props: any) => (
+    <img src={props.primarySrc} alt={props.alt ?? ""} />
+  )),
 }));
 
 jest.mock("@/components/ipfs/IPFSContext", () => ({
@@ -27,7 +24,13 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
 const buildDrop = (metadata: { data_key: string; data_value: string }[]) =>
   ({ metadata }) as any;
 
+const fallbackImageMock = FallbackImage as jest.Mock;
+
 describe("WaveDropAdditionalInfo", () => {
+  beforeEach(() => {
+    fallbackImageMock.mockClear();
+  });
+
   it("does not render when there is no commentary or media", () => {
     const { container } = render(
       <WaveDropAdditionalInfo drop={buildDrop([])} />
@@ -142,9 +145,14 @@ describe("WaveDropAdditionalInfo", () => {
       />
     );
 
-    expect(screen.getByRole("img", { name: "Preview image" })).toHaveAttribute(
-      "data-fallback-src",
-      resolvedPreviewImage
+    const previewImageCall = fallbackImageMock.mock.calls.find(
+      ([props]) => props.alt === "Preview image"
+    );
+
+    expect(previewImageCall?.[0]).toEqual(
+      expect.objectContaining({
+        fallbackSrc: resolvedPreviewImage,
+      })
     );
   });
 });
