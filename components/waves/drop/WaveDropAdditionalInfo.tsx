@@ -5,8 +5,8 @@ import {
   MemesSubmissionAdditionalInfoKey,
 } from "@/components/waves/memes/submission/types/OperationalData";
 import { FallbackImage } from "@/components/common/FallbackImage";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
-import { parseIpfsUrl } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useMemo } from "react";
@@ -87,11 +87,11 @@ export const WaveDropAdditionalInfo = ({
       );
 
       const previewImageValue = additionalMedia.preview_image
-        ? parseIpfsUrl(additionalMedia.preview_image)
+        ? resolveIpfsUrlSync(additionalMedia.preview_image)
         : "";
 
       const promoVideoValue = additionalMedia.promo_video
-        ? parseIpfsUrl(additionalMedia.promo_video)
+        ? resolveIpfsUrlSync(additionalMedia.promo_video)
         : "";
 
       const mediaItemsValue = additionalMedia.artwork_commentary_media
@@ -99,7 +99,7 @@ export const WaveDropAdditionalInfo = ({
           (url): url is string =>
             typeof url === "string" && url.trim().length > 0
         )
-        .map((url) => parseIpfsUrl(url))
+        .map((url) => resolveIpfsUrlSync(url))
         .filter((url): url is string => url.length > 0)
         .map((url) => {
           const isVideo = isVideoUrl(url);

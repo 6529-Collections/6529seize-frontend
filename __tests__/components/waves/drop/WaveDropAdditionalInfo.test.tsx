@@ -17,6 +17,13 @@ jest.mock("@/components/common/FallbackImage", () => ({
   ),
 }));
 
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (url: string) =>
+    url.startsWith("ipfs://")
+      ? `https://ipfs-gateway.test/ipfs/${url.slice(7)}`
+      : url,
+}));
+
 const buildDrop = (metadata: { data_key: string; data_value: string }[]) =>
   ({ metadata }) as any;
 
@@ -116,8 +123,8 @@ describe("WaveDropAdditionalInfo", () => {
   });
 
   it("uses original preview image as fallback", () => {
-    const previewImage =
-      "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/image.gif";
+    const previewImage = "ipfs://preview-image";
+    const resolvedPreviewImage = "https://ipfs-gateway.test/ipfs/preview-image";
     const additionalMedia = JSON.stringify({
       artist_profile_media: [],
       artwork_commentary_media: [],
@@ -137,7 +144,7 @@ describe("WaveDropAdditionalInfo", () => {
 
     expect(screen.getByRole("img", { name: "Preview image" })).toHaveAttribute(
       "data-fallback-src",
-      previewImage
+      resolvedPreviewImage
     );
   });
 });
