@@ -5,13 +5,21 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
-import { useCallback, useContext, useMemo } from "react";
+import {
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
+
+type AuthHeaders = Record<string, string> | undefined;
 
 interface WaveReadRequestState {
   promise: Promise<void>;
   pending: boolean;
   readonly requestKey: string;
-  readonly authHeaders?: Record<string, string> | undefined;
+  authHeaders: AuthHeaders;
 }
 
 const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
@@ -29,27 +37,25 @@ const getWaveReadRequestKey = ({
   readonly waveId: string;
 }): string => JSON.stringify([addressKey, activeProfileProxyId, waveId]);
 
-const getAuthHeaders = (
-  walletAuth: string | null
-): Record<string, string> | undefined =>
+const getAuthHeaders = (walletAuth: string | null): AuthHeaders =>
   walletAuth ? { Authorization: `Bearer ${walletAuth}` } : undefined;
 
 const sendWaveReadRequest = async (
   waveId: string,
-  authHeaders: Record<string, string> | undefined,
-  invalidateNotifications: () => void
+  authHeaders: AuthHeaders,
+  invalidateNotificationsRef: Readonly<{ current: () => void }>
 ): Promise<void> => {
   await commonApiPostWithoutBodyAndResponse({
     endpoint: `notifications/wave/${waveId}/read`,
     ...(authHeaders ? { headers: authHeaders } : {}),
   });
-  invalidateNotifications();
+  invalidateNotificationsRef.current();
 };
 
 const startWaveReadRequest = async (
   waveId: string,
   state: WaveReadRequestState,
-  invalidateNotifications: () => void
+  invalidateNotificationsRef: Readonly<{ current: () => void }>
 ): Promise<void> => {
   let requestError: unknown;
   let hasRequestError = false;
@@ -58,7 +64,7 @@ const startWaveReadRequest = async (
     await sendWaveReadRequest(
       waveId,
       state.authHeaders,
-      invalidateNotifications
+      invalidateNotificationsRef
     );
   } catch (error) {
     requestError = error;
@@ -71,7 +77,7 @@ const startWaveReadRequest = async (
       state.promise = startWaveReadRequest(
         waveId,
         state,
-        invalidateNotifications
+        invalidateNotificationsRef
       );
       await state.promise;
       return;
@@ -95,8 +101,18 @@ export function useMarkWaveNotificationsRead(): (
   const { activeProfileProxy } = useAuth();
   const walletAuth = getAuthJwt();
   const authHeaders = useMemo(() => getAuthHeaders(walletAuth), [walletAuth]);
+  const authHeadersRef = useRef<AuthHeaders>(authHeaders);
+  const invalidateNotificationsRef = useRef(invalidateNotifications);
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
   const addressKey = getAddressKey(address);
+
+  useLayoutEffect(() => {
+    authHeadersRef.current = authHeaders;
+  }, [authHeaders]);
+
+  useLayoutEffect(() => {
+    invalidateNotificationsRef.current = invalidateNotifications;
+  }, [invalidateNotifications]);
 
   return useCallback(
     (waveId: string): Promise<void> => {
@@ -108,6 +124,7 @@ export function useMarkWaveNotificationsRead(): (
       const existingState = inFlightWaveReadRequests.get(requestKey);
       if (existingState) {
         existingState.pending = true;
+        existingState.authHeaders = authHeadersRef.current;
         return existingState.promise;
       }
 
@@ -115,16 +132,16 @@ export function useMarkWaveNotificationsRead(): (
         promise: Promise.resolve(),
         pending: false,
         requestKey,
-        ...(authHeaders ? { authHeaders } : {}),
+        authHeaders: authHeadersRef.current,
       };
       inFlightWaveReadRequests.set(requestKey, state);
       state.promise = startWaveReadRequest(
         waveId,
         state,
-        invalidateNotifications
+        invalidateNotificationsRef
       );
       return state.promise;
     },
-    [activeProfileProxyId, addressKey, authHeaders, invalidateNotifications]
+    [activeProfileProxyId, addressKey]
   );
 }
