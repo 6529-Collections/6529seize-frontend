@@ -374,6 +374,28 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("drops sampled-out relative API network errors when the filtered breadcrumb URL was sanitized", () => {
+    for (const url of ["/[Filtered]", "/%5BFiltered%5D"]) {
+      const result = getLowValueNetworkErrorDecision(
+        createLowValueNetworkEvent({
+          breadcrumbs: [
+            {
+              type: "http",
+              category: "fetch",
+              data: {
+                status_code: 0,
+                url,
+              },
+            },
+          ],
+        }),
+        0
+      );
+
+      expect(result).toBe("drop");
+    }
+  });
+
   it("drops sampled-out relative API network errors when the breadcrumb URL is missing", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({

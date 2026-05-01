@@ -90,6 +90,7 @@ const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const FNV_OFFSET_BASIS = 2166136261;
 const FNV_PRIME = 16777619;
 const UINT_32_SIZE = 4294967296;
+const FILTERED_URL_TOKENS = new Set(["[filtered]", "[redacted]", "filtered"]);
 
 function getStringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
@@ -153,11 +154,23 @@ function isFilteredUrl(value: string | undefined): boolean {
   }
 
   const normalized = value.trim().toLowerCase();
-  return (
-    normalized === "[filtered]" ||
-    normalized === "[redacted]" ||
-    normalized === "filtered"
-  );
+  if (FILTERED_URL_TOKENS.has(normalized)) {
+    return true;
+  }
+
+  const sanitizedPathToken =
+    normalized.startsWith("/") && !normalized.startsWith("//")
+      ? normalized.slice(1)
+      : normalized;
+  if (FILTERED_URL_TOKENS.has(sanitizedPathToken)) {
+    return true;
+  }
+
+  try {
+    return FILTERED_URL_TOKENS.has(decodeURIComponent(sanitizedPathToken));
+  } catch {
+    return false;
+  }
 }
 
 function isRelativePath(value: string): boolean {
