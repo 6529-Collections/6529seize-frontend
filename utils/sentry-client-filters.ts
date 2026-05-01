@@ -14,6 +14,7 @@ type SentryContext = Record<string, unknown>;
 type SentryBreadcrumb = {
   type?: string | undefined;
   category?: string | undefined;
+  level?: string | undefined;
   message?: string | undefined;
   data?: Record<string, unknown> | undefined;
 };
@@ -325,6 +326,21 @@ function getBreadcrumbStatusCode(breadcrumb: SentryBreadcrumb): number | null {
   );
 }
 
+function getBreadcrumbTransportStatusCode(
+  breadcrumb: SentryBreadcrumb
+): number | null {
+  const statusCode = getBreadcrumbStatusCode(breadcrumb);
+  if (statusCode !== null) {
+    return statusCode;
+  }
+
+  if (breadcrumb.category === "fetch" && breadcrumb.level === "error") {
+    return 0;
+  }
+
+  return null;
+}
+
 function getBreadcrumbUrl(breadcrumb: SentryBreadcrumb): string | undefined {
   return getStringValue(breadcrumb.data?.["url"]);
 }
@@ -366,7 +382,7 @@ function getLatestHttpBreadcrumbWithStatus(
       continue;
     }
 
-    const statusCode = getBreadcrumbStatusCode(breadcrumb);
+    const statusCode = getBreadcrumbTransportStatusCode(breadcrumb);
     if (statusCode === null) {
       continue;
     }

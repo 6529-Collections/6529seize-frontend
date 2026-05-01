@@ -557,6 +557,7 @@ describe("sentry-client-filters", () => {
           {
             type: "http",
             category: "fetch",
+            level: "info",
             data: {
               url: "/api/waves-overview",
               "url.is_first_party": true,
@@ -568,6 +569,26 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe("not_applicable");
+  });
+
+  it("drops Sentry fetch error breadcrumbs without a status", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            category: "fetch",
+            level: "error",
+            data: {
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
   });
 
   it("handles Sentry breadcrumb values form for first-party status 0 errors", () => {
