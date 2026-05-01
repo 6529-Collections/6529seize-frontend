@@ -8,7 +8,7 @@ import { FallbackImage } from "@/components/common/FallbackImage";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useMemo } from "react";
 
 const MAX_MEDIA = 4;
