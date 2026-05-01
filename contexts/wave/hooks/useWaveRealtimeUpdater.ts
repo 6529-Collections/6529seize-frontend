@@ -39,8 +39,19 @@ export enum ProcessIncomingDropType {
   DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
 }
 
+type IncomingDropWave = Omit<
+  ApiDrop["wave"],
+  "authenticated_user_eligible_to_chat"
+> & {
+  readonly authenticated_user_eligible_to_chat?: ApiDrop["wave"]["authenticated_user_eligible_to_chat"];
+};
+
+type IncomingDrop = Omit<ApiDrop, "wave"> & {
+  readonly wave?: IncomingDropWave;
+};
+
 type ProcessIncomingDropFn = (
-  dropData: ApiDrop,
+  dropData: IncomingDrop,
   type: ProcessIncomingDropType
 ) => void;
 
@@ -254,11 +265,13 @@ export function useWaveRealtimeUpdater({
         invalidateNotifications();
       };
 
-      const waveId = drop.wave.id;
+      const wave = drop.wave;
 
-      if (!waveId) {
+      if (!wave?.id) {
         return;
       }
+
+      const waveId = wave.id;
 
       if (isWaveMuted(waveId)) {
         return;
@@ -355,19 +368,19 @@ export function useWaveRealtimeUpdater({
             : drop.author.subscribed_actions,
         },
         wave: {
-          ...drop.wave,
+          ...wave,
           authenticated_user_eligible_to_participate: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_participate
-            : drop.wave.authenticated_user_eligible_to_participate,
+            : wave.authenticated_user_eligible_to_participate,
           authenticated_user_eligible_to_vote: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_vote
-            : drop.wave.authenticated_user_eligible_to_vote,
+            : wave.authenticated_user_eligible_to_vote,
           authenticated_user_eligible_to_chat: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_chat
-            : drop.wave.authenticated_user_eligible_to_chat,
+            : (wave.authenticated_user_eligible_to_chat ?? false),
           authenticated_user_admin: existingDrop
             ? existingDrop.wave.authenticated_user_admin
-            : drop.wave.authenticated_user_admin,
+            : wave.authenticated_user_admin,
         }, // Assuming message structure matches ApiDrop + ApiWaveMin
         stableKey: drop.id,
         stableHash: drop.id, // Use ID for hash temporarily
