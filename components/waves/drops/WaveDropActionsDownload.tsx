@@ -11,9 +11,16 @@ import { Tooltip } from "react-tooltip";
 import useDownloader from "react-use-downloader";
 
 interface Props {
-  href: string;
-  name: string;
-  extension: string;
+  href?: string | undefined;
+  name?: string | undefined;
+  extension?: string | undefined;
+  downloads?:
+    | readonly {
+        readonly href: string;
+        readonly name: string;
+        readonly extension: string;
+      }[]
+    | undefined;
   showProgress?: boolean | undefined;
   className?: string | undefined;
   tooltipId?: string | undefined;
@@ -35,11 +42,56 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
   const mobileDownloadAbortRef = useRef<AbortController | null>(null);
   const isMountedRef = useRef(true);
 
-  const getFilename = () =>
-    props.extension ? `${props.name}.${props.extension}` : props.name;
+  const downloads =
+    props.downloads ??
+    (props.href && props.name !== undefined && props.extension !== undefined
+      ? [
+          {
+            href: props.href,
+            name: props.name,
+            extension: props.extension,
+          },
+        ]
+      : []);
+
+  const getFilename = ({
+    name,
+    extension,
+  }: {
+    readonly name: string;
+    readonly extension: string;
+  }) => (extension ? `${name}.${extension}` : name);
+
+  function startBrowserDownload({
+    href,
+    filename,
+  }: {
+    readonly href: string;
+    readonly filename: string;
+  }) {
+    const anchor = document.createElement("a");
+    anchor.href = href;
+    anchor.download = filename;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+  }
 
   function startDownload() {
-    download(props.href, getFilename());
+    if (downloads.length === 1) {
+      const file = downloads[0]!;
+      download(file.href, getFilename(file));
+      return;
+    }
+
+    downloads.forEach((file) =>
+      startBrowserDownload({
+        href: file.href,
+        filename: getFilename(file),
+      })
+    );
   }
 
   async function startMobileDownload() {
@@ -50,46 +102,38 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
     setIsMobileDownloading(true);
     const controller = new AbortController();
     mobileDownloadAbortRef.current = controller;
-    const filename = getFilename();
 
     try {
-      const response = await fetch(props.href, {
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        throw new Error("Unable to download media.");
-      }
+      for (const file of downloads) {
+        const filename = getFilename(file);
+        try {
+          const response = await fetch(file.href, {
+            signal: controller.signal,
+          });
+          if (!response.ok) {
+            throw new Error("Unable to download media.");
+          }
 
-      const blob = await response.blob();
-      if (isCapacitor) {
-        await shareFetchedBlobInNativeApp(blob, filename, {
-          dialogTitle: "Save media",
-        });
-      } else {
-        const objectUrl = URL.createObjectURL(blob);
-        const anchor = document.createElement("a");
-        anchor.href = objectUrl;
-        anchor.download = filename;
-        document.body.append(anchor);
-        anchor.click();
-        anchor.remove();
-        URL.revokeObjectURL(objectUrl);
+          const blob = await response.blob();
+          if (isCapacitor) {
+            await shareFetchedBlobInNativeApp(blob, filename, {
+              dialogTitle: "Save media",
+            });
+          } else {
+            const objectUrl = URL.createObjectURL(blob);
+            startBrowserDownload({ href: objectUrl, filename });
+            URL.revokeObjectURL(objectUrl);
+          }
+        } catch {
+          if (
+            controller.signal.aborted ||
+            mobileDownloadAbortRef.current !== controller
+          ) {
+            return;
+          }
+          startBrowserDownload({ href: file.href, filename });
+        }
       }
-    } catch {
-      if (
-        controller.signal.aborted ||
-        mobileDownloadAbortRef.current !== controller
-      ) {
-        return;
-      }
-      const anchor = document.createElement("a");
-      anchor.href = props.href;
-      anchor.download = filename;
-      anchor.target = "_blank";
-      anchor.rel = "noopener noreferrer";
-      document.body.append(anchor);
-      anchor.click();
-      anchor.remove();
     } finally {
       if (mobileDownloadAbortRef.current === controller) {
         mobileDownloadAbortRef.current = null;
@@ -101,6 +145,10 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
   }
 
   function handleDownloadClick() {
+    if (downloads.length === 0) {
+      return;
+    }
+
     if (isMobile) {
       props.onDownload?.();
       void startMobileDownload();

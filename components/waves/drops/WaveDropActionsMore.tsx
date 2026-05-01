@@ -133,17 +133,18 @@ export default function WaveDropActionsMore({
               isDropdownItem={true}
               onOpen={closeDropdown}
             />
-            {downloadMedia.map((media, index) => (
+            {downloadMedia.length > 0 && (
               <WaveDropActionsDownload
-                key={`${media.partIndex}-${media.mediaIndex}-${media.url}`}
-                href={media.url}
-                name={media.name}
-                extension={media.extension}
-                tooltipId={`download-media-${drop.id}-${index}`}
+                downloads={downloadMedia.map((media) => ({
+                  href: media.url,
+                  name: media.name,
+                  extension: media.extension,
+                }))}
+                tooltipId={`download-media-${drop.id}`}
                 isDropdownItem={true}
                 onDownload={closeDropdown}
               />
-            ))}
+            )}
             {canSetPinnedDrop && (
               <WaveDropActionsSetPinnedDrop
                 drop={drop}

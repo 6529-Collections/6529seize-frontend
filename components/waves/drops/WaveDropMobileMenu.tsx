@@ -292,17 +292,18 @@ function WaveDropMobileMenuAuthenticatedActions({
         />
       )}
 
-      {downloadMedia.map((media) => (
+      {downloadMedia.length > 0 && (
         <WaveDropActionsDownload
-          key={`${media.partIndex}-${media.mediaIndex}-${media.url}`}
-          href={media.url}
-          name={media.name}
-          extension={media.extension}
+          downloads={downloadMedia.map((media) => ({
+            href: media.url,
+            name: media.name,
+            extension: media.extension,
+          }))}
           isMobile={true}
           showProgress={false}
           onDownload={closeMenu}
         />
-      ))}
+      )}
 
       {showCurationsAction && (
         <button

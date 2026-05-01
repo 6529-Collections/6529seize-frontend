@@ -134,4 +134,48 @@ describe("WaveDropActionsDownload", () => {
       expect(onDownload).toHaveBeenCalled();
     });
   });
+
+  it("downloads every media item from a single mobile action", async () => {
+    const user = userEvent.setup();
+    const blob = new Blob(["media"]);
+    jest.mocked(globalThis.fetch).mockResolvedValue({
+      ok: true,
+      blob: jest.fn().mockResolvedValue(blob),
+    } as any);
+
+    render(
+      <WaveDropActionsDownload
+        downloads={[
+          {
+            href: "https://example.com/first.png",
+            name: "first",
+            extension: "png",
+          },
+          {
+            href: "https://example.com/second.mp4",
+            name: "second",
+            extension: "mp4",
+          },
+        ]}
+        isMobile
+        showProgress={false}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /download media/i }));
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+      expect(globalThis.fetch).toHaveBeenNthCalledWith(
+        1,
+        "https://example.com/first.png",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+      expect(globalThis.fetch).toHaveBeenNthCalledWith(
+        2,
+        "https://example.com/second.mp4",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+  });
 });

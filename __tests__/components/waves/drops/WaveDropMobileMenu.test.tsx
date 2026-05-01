@@ -421,22 +421,21 @@ test("shows mobile download actions for all media and ignores attachments", () =
     </AuthContext.Provider>
   );
 
-  expect(screen.getAllByTestId("download")).toHaveLength(2);
-  expect(downloadMock).toHaveBeenNthCalledWith(
-    1,
+  expect(screen.getAllByTestId("download")).toHaveLength(1);
+  expect(downloadMock).toHaveBeenCalledWith(
     expect.objectContaining({
-      href: "https://example.com/first.png",
-      name: "first",
-      extension: "png",
-      isMobile: true,
-    })
-  );
-  expect(downloadMock).toHaveBeenNthCalledWith(
-    2,
-    expect.objectContaining({
-      href: "https://example.com/second.mp4",
-      name: "second",
-      extension: "mp4",
+      downloads: [
+        {
+          href: "https://example.com/first.png",
+          name: "first",
+          extension: "png",
+        },
+        {
+          href: "https://example.com/second.mp4",
+          name: "second",
+          extension: "mp4",
+        },
+      ],
       isMobile: true,
     })
   );
