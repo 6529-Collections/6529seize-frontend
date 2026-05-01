@@ -325,6 +325,42 @@ describe("useWaveDecisions", () => {
     expect(result.current.fetchNextPage).toBe(fetchNextPage);
   });
 
+  it("shows loading state while retrying a failed next-page request", () => {
+    useInfiniteQueryMock.mockReturnValue({
+      data: {
+        pages: [
+          {
+            page: 1,
+            next: true,
+            data: [{ decision_time: 1, winners: [makeWinner(1)] }],
+          },
+        ],
+        pageParams: [1],
+      },
+      isError: true,
+      error: new Error("next page failed"),
+      refetch: jest.fn(),
+      isFetching: false,
+      isLoading: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: true,
+      isFetchNextPageError: true,
+      isFetchingNextPage: true,
+    });
+
+    const { result } = renderHook(() =>
+      useWaveDecisions({
+        waveId: "w1",
+        loadAllPages: true,
+        pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+      })
+    );
+
+    expect(result.current.isLoadingAllPages).toBe(true);
+    expect(result.current.isLoadingAllPagesError).toBe(false);
+    expect(result.current.hasLoadedAllPages).toBe(false);
+  });
+
   it("marks full-load as failed after a first-page error", () => {
     useInfiniteQueryMock.mockReturnValue({
       data: { pages: [], pageParams: [] },
