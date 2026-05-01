@@ -4,7 +4,10 @@ import { useState, memo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import {
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  useWaveDecisions,
+} from "@/hooks/waves/useWaveDecisions";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 
@@ -39,11 +42,17 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     // Fetch data using decisions endpoint for all waves - same approach as WaveWinners
     const {
       decisionPoints: rawDecisionPoints,
-      isFetching: isDecisionsLoading,
+      isFetching,
+      isLoadingAllPages,
     } = useWaveDecisions({
       waveId: wave.id,
       enabled: true, // Always enabled now that we use it for both types
+      loadAllPages: isApproveWave,
+      pageSize: isApproveWave
+        ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
+        : undefined,
     });
+    const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
 
     // Process decision points to include UI-friendly fields
     const decisionPoints: EnhancedDecisionPoint[] = rawDecisionPoints.map(

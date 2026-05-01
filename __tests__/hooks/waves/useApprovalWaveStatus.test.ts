@@ -3,6 +3,17 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import {
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  useWaveDecisions,
+} from "@/hooks/waves/useWaveDecisions";
+
+jest.mock("@/hooks/waves/useWaveDecisions", () => ({
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
+  useWaveDecisions: jest.fn(),
+}));
+
+const useWaveDecisionsMock = useWaveDecisions as jest.Mock;
 
 const createWave = ({
   maxWinners = null,
@@ -32,13 +43,30 @@ const createWave = ({
     },
   }) as ApiWave;
 
+const decisionPoints = [
+  {
+    decision_time: 1100,
+    winners: [{ place: 1, awards: [], drop: { id: "drop-1" } }],
+  },
+  {
+    decision_time: 1200,
+    winners: [{ place: 1, awards: [], drop: { id: "drop-2" } }],
+  },
+] as ApiWaveDecision[];
+
 describe("useApprovalWaveStatus", () => {
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date(1000));
+    useWaveDecisionsMock.mockReturnValue({
+      decisionPoints: [],
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+    });
   });
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
   it("starts open for a future end time and closes after the timeout", () => {
@@ -48,6 +76,7 @@ describe("useApprovalWaveStatus", () => {
 
     expect(result.current.closeStatus).toBeNull();
     expect(result.current.isVotingClosed).toBe(false);
+    expect(result.current.isApprovalStatusLoading).toBe(false);
     expect(result.current.winningThreshold).toBe(8);
 
     act(() => {
@@ -82,27 +111,85 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.isVotingClosed).toBe(true);
   });
 
-  it("closes when decision points reach max winners and wave counts are missing", () => {
+  it("keeps capped approval status unknown until complete decisions load", () => {
     const wave = createWave({
       maxWinners: 2,
       noOfDecisionsDone: null,
       noOfDecisionsLeft: null,
       votingEnd: 2000,
     });
-    const decisionPoints = [
-      {
-        decision_time: 1100,
-        winners: [{ place: 1, awards: [], drop: { id: "drop-1" } }],
-      },
-      {
-        decision_time: 1200,
-        winners: [{ place: 1, awards: [], drop: { id: "drop-2" } }],
-      },
-    ] as ApiWaveDecision[];
+
+    const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      enabled: true,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
+    expect(result.current.approvedCount).toBeNull();
+    expect(result.current.closeStatus).toBeNull();
+    expect(result.current.isApprovalStatusLoading).toBe(true);
+    expect(result.current.isVotingClosed).toBe(true);
+  });
+
+  it("closes when complete decision points reach max winners", () => {
+    const wave = createWave({
+      maxWinners: 2,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: null,
+      votingEnd: 2000,
+    });
 
     const { result } = renderHook(() =>
-      useApprovalWaveStatus({ wave, decisionPoints })
+      useApprovalWaveStatus({
+        wave,
+        decisionPoints,
+        areDecisionPointsComplete: true,
+      })
     );
+
+    expect(result.current.approvedCount).toBe(2);
+    expect(result.current.closeStatus).toBe("max_reached");
+    expect(result.current.isVotingClosed).toBe(true);
+    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      enabled: false,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
+  });
+
+  it("closes immediately when no decisions are left", () => {
+    const wave = createWave({
+      maxWinners: 2,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: 0,
+      votingEnd: 2000,
+    });
+
+    const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+    expect(result.current.approvedCount).toBeNull();
+    expect(result.current.closeStatus).toBe("max_reached");
+    expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isApprovalStatusLoading).toBe(false);
+  });
+
+  it("uses internally loaded complete decisions for capped approval status", () => {
+    const wave = createWave({
+      maxWinners: 2,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: null,
+      votingEnd: 2000,
+    });
+    useWaveDecisionsMock.mockReturnValue({
+      decisionPoints,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
+    });
+
+    const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
 
     expect(result.current.approvedCount).toBe(2);
     expect(result.current.closeStatus).toBe("max_reached");
@@ -121,6 +208,7 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.winningThreshold).toBeNull();
     expect(result.current.approvedCount).toBe(0);
     expect(result.current.closeStatus).toBeNull();
+    expect(result.current.isApprovalStatusLoading).toBe(false);
     expect(result.current.isVotingClosed).toBe(false);
   });
 });

@@ -40,6 +40,7 @@ jest.mock("@/hooks/waves/useWaveCurations", () => ({
   useWaveCurations: (...args: any[]) => useWaveCurations(...args),
 }));
 jest.mock("@/hooks/waves/useWaveDecisions", () => ({
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
   useWaveDecisions: (...args: any[]) => useWaveDecisions(...args),
 }));
 jest.mock("next/navigation", () => ({
@@ -157,6 +158,8 @@ describe("MyStreamWaveLeaderboard", () => {
     useWaveDecisions.mockReturnValue({
       decisionPoints: [],
       isFetching: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
     });
     useLocalPreference.mockImplementation((_: any, def: any) => [
       def,
@@ -554,6 +557,53 @@ describe("MyStreamWaveLeaderboard", () => {
       "max_reached"
     );
     expect(approvalStatusProps.approvedCount).toBe(1);
+    expect(useWaveDecisions).toHaveBeenCalledWith({
+      waveId: "1",
+      enabled: true,
+      loadAllPages: true,
+      pageSize: 2000,
+    });
+    expect(dropsProps.isVotingClosed).toBe(true);
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("blocks create drop while capped approval status is loading", async () => {
+    const user = userEvent.setup();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 2,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(approvalStatusProps.approvedCount).toBeNull();
     expect(dropsProps.isVotingClosed).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();
     expect(dropsProps.onCreateDrop).toBeUndefined();

@@ -4,8 +4,12 @@ import { WaveWinners } from "@/components/waves/winners/WaveWinners";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import { useWave } from "@/hooks/useWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE } from "@/hooks/waves/useWaveDecisions";
 
-jest.mock("@/hooks/waves/useWaveDecisions");
+jest.mock("@/hooks/waves/useWaveDecisions", () => ({
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
+  useWaveDecisions: jest.fn(),
+}));
 jest.mock("@/hooks/useWave");
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ winnersViewStyle: {} }),
@@ -25,7 +29,7 @@ jest.mock("@/components/waves/winners/drops/WaveWinnersDrops", () => ({
   WaveWinnersDrops: (p: any) => Drops(p),
 }));
 
-const wave = { id: "w1" } as any;
+const wave = { id: "w1", wave: { type: ApiWaveType.Rank } } as any;
 
 describe("WaveWinners", () => {
   beforeEach(() => {
@@ -39,6 +43,7 @@ describe("WaveWinners", () => {
     (useWaveDecisions as jest.Mock).mockReturnValue({
       decisionPoints: [],
       isFetching: false,
+      isLoadingAllPages: false,
     });
     render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
     expect(Timeline).toHaveBeenCalled();
@@ -51,6 +56,7 @@ describe("WaveWinners", () => {
     (useWaveDecisions as jest.Mock).mockReturnValue({
       decisionPoints: [{ winners: [] }],
       isFetching: false,
+      isLoadingAllPages: false,
     });
     render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
     expect(Podium).toHaveBeenCalled();
@@ -64,6 +70,7 @@ describe("WaveWinners", () => {
     (useWaveDecisions as jest.Mock).mockReturnValue({
       decisionPoints: [{ winners: [{ drop: { id: "d1" } }] }],
       isFetching: false,
+      isLoadingAllPages: false,
     });
     render(
       <WaveWinners
@@ -81,5 +88,11 @@ describe("WaveWinners", () => {
         winners: [{ drop: { id: "d1" } }],
       })
     );
+    expect(useWaveDecisions).toHaveBeenCalledWith({
+      waveId: "w1",
+      enabled: true,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
   });
 });

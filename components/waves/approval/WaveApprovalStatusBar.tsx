@@ -9,7 +9,7 @@ import type { ApprovalWaveCloseStatus } from "@/helpers/waves/approve-wave.helpe
 import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
 
 interface WaveApprovalStatusBarProps {
-  readonly approvedCount: number;
+  readonly approvedCount: number | null;
   readonly closeStatus: ApprovalWaveCloseStatus;
   readonly wave: ApiWave;
 }
@@ -66,17 +66,26 @@ export default function WaveApprovalStatusBar({
     typeof winningThreshold === "number" && Number.isFinite(winningThreshold)
       ? formatNumberWithCommas(winningThreshold)
       : "Not set";
-  const approvedLabel =
-    typeof maxWinners === "number" && Number.isFinite(maxWinners)
-      ? `${formatNumberWithCommas(approvedCount)} / ${formatNumberWithCommas(
-          maxWinners
-        )}`
-      : formatNumberWithCommas(approvedCount);
+  const approvedLabel = (() => {
+    if (approvedCount === null) {
+      return "Checking";
+    }
+
+    if (typeof maxWinners === "number" && Number.isFinite(maxWinners)) {
+      const approved = formatNumberWithCommas(approvedCount);
+      const max = formatNumberWithCommas(maxWinners);
+      return `${approved} / ${max}`;
+    }
+
+    return formatNumberWithCommas(approvedCount);
+  })();
   let statusLabel: string;
   if (closeStatus === "max_reached") {
     statusLabel = "Max approvals reached";
   } else if (closeStatus === "ended") {
     statusLabel = "Approval window ended";
+  } else if (approvedCount === null) {
+    statusLabel = "Checking";
   } else if (endTime !== null) {
     statusLabel = formatTimeLeft(endTime, currentMillis);
   } else {

@@ -3,8 +3,12 @@ import React from "react";
 import { WaveWinnersSmall } from "@/components/waves/winners/WaveWinnersSmall";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import { useWave } from "@/hooks/useWave";
+import { FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE } from "@/hooks/waves/useWaveDecisions";
 
-jest.mock("@/hooks/waves/useWaveDecisions");
+jest.mock("@/hooks/waves/useWaveDecisions", () => ({
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
+  useWaveDecisions: jest.fn(),
+}));
 jest.mock("@/hooks/useWave");
 
 const ItemMock = jest.fn(() => <div data-testid="item" />);
@@ -45,6 +49,7 @@ describe("WaveWinnersSmall", () => {
     (useWaveDecisions as jest.Mock).mockReturnValue({
       decisionPoints: [],
       isFetching: true,
+      isLoadingAllPages: false,
     });
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: false },
@@ -57,6 +62,7 @@ describe("WaveWinnersSmall", () => {
     (useWaveDecisions as jest.Mock).mockReturnValue({
       decisionPoints: [],
       isFetching: false,
+      isLoadingAllPages: false,
     });
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: true },
@@ -71,6 +77,7 @@ describe("WaveWinnersSmall", () => {
         { decision_time: 1, winners: [{ drop: { id: "d" }, place: 1 }] },
       ],
       isFetching: false,
+      isLoadingAllPages: false,
     });
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: false },
@@ -85,6 +92,7 @@ describe("WaveWinnersSmall", () => {
         { decision_time: 1, winners: [{ drop: { id: "d" }, place: 1 }] },
       ],
       isFetching: false,
+      isLoadingAllPages: false,
     });
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: true },
@@ -99,6 +107,7 @@ describe("WaveWinnersSmall", () => {
         { decision_time: 1, winners: [{ drop: { id: "d" }, place: 1 }] },
       ],
       isFetching: false,
+      isLoadingAllPages: false,
     });
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: true },
@@ -107,12 +116,19 @@ describe("WaveWinnersSmall", () => {
     render(<WaveWinnersSmall wave={mockWave} onDropClick={jest.fn()} />);
     expect(ItemMock).toHaveBeenCalled();
     expect(SelectorMock).not.toHaveBeenCalled();
+    expect(useWaveDecisions).toHaveBeenCalledWith({
+      waveId: "w",
+      enabled: true,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
   });
 
   it("shows approval empty state for approve waves", () => {
     (useWaveDecisions as jest.Mock).mockReturnValue({
       decisionPoints: [],
       isFetching: false,
+      isLoadingAllPages: false,
     });
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: true },

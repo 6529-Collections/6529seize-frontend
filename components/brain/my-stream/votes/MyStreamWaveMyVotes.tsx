@@ -13,7 +13,10 @@ import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import MyStreamWaveMyVotesReset from "./MyStreamWaveMyVotesReset";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import {
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  useWaveDecisions,
+} from "@/hooks/waves/useWaveDecisions";
 import { isApproveWave } from "@/helpers/waves/approve-wave.helpers";
 
 interface MyStreamWaveMyVotesProps {
@@ -45,17 +48,25 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
     isApprovalWave && !hasApprovalDecisionCounts;
   const {
     decisionPoints: approvalDecisionPoints,
-    isLoading: isLoadingApprovalDecisionPoints,
+    hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
+    isLoadingAllPages: isLoadingApprovalDecisionPoints,
   } = useWaveDecisions({
     waveId: wave.id,
     enabled: shouldLoadApprovalDecisionPoints,
+    loadAllPages: shouldLoadApprovalDecisionPoints,
+    pageSize: shouldLoadApprovalDecisionPoints
+      ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
+      : undefined,
   });
-  const { isVotingClosed } = useApprovalWaveStatus({
+  const { isApprovalStatusLoading, isVotingClosed } = useApprovalWaveStatus({
     wave,
     decisionPoints: approvalDecisionPoints,
+    areDecisionPointsComplete:
+      !shouldLoadApprovalDecisionPoints || hasLoadedApprovalDecisionPoints,
   });
   const isVotingControlsLocked =
     isVotingClosed ||
+    isApprovalStatusLoading ||
     (shouldLoadApprovalDecisionPoints && isLoadingApprovalDecisionPoints);
 
   const { myVotesViewStyle } = useLayout();

@@ -32,7 +32,10 @@ import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import {
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  useWaveDecisions,
+} from "@/hooks/waves/useWaveDecisions";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
@@ -136,9 +139,16 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
-  const { decisionPoints: approvalDecisionPoints = [] } = useWaveDecisions({
+  const {
+    decisionPoints: approvalDecisionPoints = [],
+    hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
+  } = useWaveDecisions({
     waveId: wave.id,
     enabled: isApproveWave,
+    loadAllPages: isApproveWave,
+    pageSize: isApproveWave
+      ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
+      : undefined,
   });
   const {
     approvedCount,
@@ -147,6 +157,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   } = useApprovalWaveStatus({
     wave,
     decisionPoints: approvalDecisionPoints,
+    areDecisionPointsComplete:
+      !isApproveWave || hasLoadedApprovalDecisionPoints,
   });
   const canOpenCreateDrop = canCreateDrop && !isApprovalVotingClosed;
   const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(

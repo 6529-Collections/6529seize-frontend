@@ -8,10 +8,16 @@ import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 
 let intersectionCb: () => void = () => {};
 let resetProps: any = null;
-const mockApprovalStatus = jest.fn(() => ({ isVotingClosed: false }));
+const mockApprovalStatus = jest.fn(() => ({
+  isApprovalStatusLoading: false,
+  isVotingClosed: false,
+}));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard");
-jest.mock("@/hooks/waves/useWaveDecisions");
+jest.mock("@/hooks/waves/useWaveDecisions", () => ({
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
+  useWaveDecisions: jest.fn(),
+}));
 jest.mock("@/hooks/useIntersectionObserver", () => ({
   useIntersectionObserver: (cb: any) => {
     intersectionCb = cb;
@@ -73,8 +79,13 @@ describe("MyStreamWaveMyVotes", () => {
       decisionPoints: [],
       isFetching: false,
       isLoading: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
     });
-    mockApprovalStatus.mockReturnValue({ isVotingClosed: false });
+    mockApprovalStatus.mockReturnValue({
+      isApprovalStatusLoading: false,
+      isVotingClosed: false,
+    });
     resetProps = null;
   });
 
@@ -163,6 +174,8 @@ describe("MyStreamWaveMyVotes", () => {
       decisionPoints,
       isFetching: false,
       isLoading: false,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
@@ -186,10 +199,13 @@ describe("MyStreamWaveMyVotes", () => {
     expect(useWaveDecisionsMock).toHaveBeenCalledWith({
       waveId: "approve-1",
       enabled: true,
+      loadAllPages: true,
+      pageSize: 2000,
     });
     expect(mockApprovalStatus).toHaveBeenCalledWith({
       wave: approveWave,
       decisionPoints,
+      areDecisionPointsComplete: true,
     });
   });
 
@@ -206,6 +222,8 @@ describe("MyStreamWaveMyVotes", () => {
       decisionPoints: [],
       isFetching: true,
       isLoading: true,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: true,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
@@ -253,6 +271,8 @@ describe("MyStreamWaveMyVotes", () => {
       ],
       isFetching: true,
       isLoading: false,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
@@ -283,7 +303,10 @@ describe("MyStreamWaveMyVotes", () => {
   });
 
   it("renders closed approval votes as read-only", () => {
-    mockApprovalStatus.mockReturnValue({ isVotingClosed: true });
+    mockApprovalStatus.mockReturnValue({
+      isApprovalStatusLoading: false,
+      isVotingClosed: true,
+    });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
         {

@@ -87,28 +87,31 @@ export const getApprovalDropStatus = ({
 };
 
 export const getApprovedDropsCount = ({
+  areDecisionPointsComplete = false,
   decisionPoints,
   wave,
 }: {
+  readonly areDecisionPointsComplete?: boolean | undefined;
   readonly decisionPoints?: readonly ApiWaveDecision[] | undefined;
   readonly wave: ApiWave;
-}): number => {
+}): number | null => {
   const decisionsDone = wave.wave.no_of_decisions_done;
   if (isValidCount(decisionsDone)) {
     return decisionsDone;
   }
 
-  if (!decisionPoints) {
-    return 0;
+  if (!areDecisionPointsComplete) {
+    return null;
   }
 
   const approvedDropIds = new Set<string>();
   let winnersWithoutDropId = 0;
 
-  decisionPoints.forEach((decisionPoint) => {
+  (decisionPoints ?? []).forEach((decisionPoint) => {
     decisionPoint.winners.forEach((winner) => {
-      if (winner.drop.id) {
-        approvedDropIds.add(winner.drop.id);
+      const dropId = winner.drop.id;
+      if (dropId) {
+        approvedDropIds.add(dropId);
       } else {
         winnersWithoutDropId += 1;
       }
@@ -140,7 +143,7 @@ export const getApprovalWaveCloseStatus = ({
   now,
   wave,
 }: {
-  readonly approvedCount: number;
+  readonly approvedCount: number | null;
   readonly now: number;
   readonly wave: ApiWave;
 }): ApprovalWaveCloseStatus => {
@@ -152,7 +155,7 @@ export const getApprovalWaveCloseStatus = ({
     return "max_reached";
   }
 
-  if (hasMaxWinners && approvedCount >= maxWinners) {
+  if (hasMaxWinners && approvedCount !== null && approvedCount >= maxWinners) {
     return "max_reached";
   }
 

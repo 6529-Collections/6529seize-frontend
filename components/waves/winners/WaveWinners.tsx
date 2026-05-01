@@ -4,7 +4,10 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
 import { WaveWinnersTimeline } from "./WaveWinnersTimeline";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import {
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  useWaveDecisions,
+} from "@/hooks/waves/useWaveDecisions";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useWave } from "@/hooks/useWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -27,10 +30,15 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   const { winnersViewStyle } = useLayout();
 
   // Fetch data using decisions endpoint for all waves
-  const { decisionPoints, isFetching: isDecisionsLoading } = useWaveDecisions({
+  const { decisionPoints, isFetching, isLoadingAllPages } = useWaveDecisions({
     waveId: wave.id,
     enabled: true, // Always enabled now that we use it for both types
+    loadAllPages: isApproveWave,
+    pageSize: isApproveWave
+      ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
+      : undefined,
   });
+  const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
   const approvedWinners = decisionPoints.flatMap((point) => point.winners);
 
   let winnersContent: React.ReactNode;
