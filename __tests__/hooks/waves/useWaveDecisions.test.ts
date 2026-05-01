@@ -84,6 +84,7 @@ describe("useWaveDecisions", () => {
       result.current.decisionPoints[1]?.winners.map((winner) => winner.place)
     ).toEqual([1, 2]);
     expect(result.current.hasLoadedAllPages).toBe(true);
+    expect(result.current.isLoadingAllPagesError).toBe(false);
   });
 
   it("merges multiple pages and dedupes duplicate decision times", () => {
@@ -248,6 +249,7 @@ describe("useWaveDecisions", () => {
       expect(fetchNextPage).toHaveBeenCalled();
     });
     expect(result.current.isLoadingAllPages).toBe(true);
+    expect(result.current.isLoadingAllPagesError).toBe(false);
     expect(useInfiniteQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
         queryKey: [
@@ -256,6 +258,38 @@ describe("useWaveDecisions", () => {
         ],
       })
     );
+  });
+
+  it("marks successful full-load as complete without error", () => {
+    const fetchNextPage = jest.fn();
+    useInfiniteQueryMock.mockReturnValue({
+      data: {
+        pages: [{ page: 1, next: false, data: [] }],
+        pageParams: [1],
+      },
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+      isLoading: false,
+      fetchNextPage,
+      hasNextPage: false,
+      isFetchNextPageError: false,
+      isFetchingNextPage: false,
+    });
+
+    const { result } = renderHook(() =>
+      useWaveDecisions({
+        waveId: "w1",
+        loadAllPages: true,
+        pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+      })
+    );
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+    expect(result.current.hasLoadedAllPages).toBe(true);
+    expect(result.current.isLoadingAllPages).toBe(false);
+    expect(result.current.isLoadingAllPagesError).toBe(false);
   });
 
   it("stops loading all pages after a next-page error without retrying", () => {
@@ -287,6 +321,34 @@ describe("useWaveDecisions", () => {
     expect(fetchNextPage).not.toHaveBeenCalled();
     expect(result.current.isLoadingAllPages).toBe(false);
     expect(result.current.hasLoadedAllPages).toBe(false);
+    expect(result.current.isLoadingAllPagesError).toBe(true);
     expect(result.current.fetchNextPage).toBe(fetchNextPage);
+  });
+
+  it("marks full-load as failed after a first-page error", () => {
+    useInfiniteQueryMock.mockReturnValue({
+      data: { pages: [], pageParams: [] },
+      isError: true,
+      error: new Error("first page failed"),
+      refetch: jest.fn(),
+      isFetching: false,
+      isLoading: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetchNextPageError: false,
+      isFetchingNextPage: false,
+    });
+
+    const { result } = renderHook(() =>
+      useWaveDecisions({
+        waveId: "w1",
+        loadAllPages: true,
+        pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+      })
+    );
+
+    expect(result.current.isLoadingAllPages).toBe(false);
+    expect(result.current.hasLoadedAllPages).toBe(false);
+    expect(result.current.isLoadingAllPagesError).toBe(true);
   });
 });

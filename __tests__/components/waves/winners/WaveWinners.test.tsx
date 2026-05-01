@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { WaveWinners } from "@/components/waves/winners/WaveWinners";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
@@ -94,5 +94,68 @@ describe("WaveWinners", () => {
       loadAllPages: true,
       pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
     });
+  });
+
+  it("shows approve-wave full-load error instead of partial drops", () => {
+    const fetchNextPage = jest.fn();
+    const refetch = jest.fn();
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: true },
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [{ winners: [{ drop: { id: "partial" } }] }],
+      isFetching: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      fetchNextPage,
+      refetch,
+      hasNextPage: true,
+    });
+
+    render(
+      <WaveWinners
+        wave={{ ...wave, wave: { type: ApiWaveType.Approve } }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText("Unable to load approved drops.")
+    ).toBeInTheDocument();
+    expect(Drops).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("refetches approve winners when full-load error has no next page", () => {
+    const fetchNextPage = jest.fn();
+    const refetch = jest.fn();
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: true },
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [{ winners: [{ drop: { id: "partial" } }] }],
+      isFetching: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      fetchNextPage,
+      refetch,
+      hasNextPage: false,
+    });
+
+    render(
+      <WaveWinners
+        wave={{ ...wave, wave: { type: ApiWaveType.Approve } }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(fetchNextPage).not.toHaveBeenCalled();
   });
 });

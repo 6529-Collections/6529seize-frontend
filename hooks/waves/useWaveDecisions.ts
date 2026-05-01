@@ -125,6 +125,15 @@ export function useWaveDecisions({
         !isFetchNextPageError &&
         (Boolean(hasNextPage) || isFetchingNextPage)))
   );
+  const isLoadingAllPagesError = Boolean(
+    enabled &&
+    loadAllPages &&
+    !hasLoadedAllPages &&
+    !isLoading &&
+    !isFetching &&
+    !isFetchingNextPage &&
+    (isError || isFetchNextPageError)
+  );
 
   return {
     decisionPoints,
@@ -135,6 +144,7 @@ export function useWaveDecisions({
     isLoading,
     hasLoadedAllPages,
     isLoadingAllPages,
+    isLoadingAllPagesError,
     fetchNextPage,
     hasNextPage: Boolean(hasNextPage),
     isFetchingNextPage,

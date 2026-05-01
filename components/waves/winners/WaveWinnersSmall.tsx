@@ -17,6 +17,7 @@ import { WaveWinnersSmallLoading } from "./WaveWinnersSmallLoading";
 import { WaveWinnersSmallEmpty } from "./WaveWinnersSmallEmpty";
 import { WaveWinnersSmallDecisionSelector } from "./WaveWinnersSmallDecisionSelector";
 import { useWave } from "@/hooks/useWave";
+import { WaveWinnersApprovalError } from "./WaveWinnersApprovalError";
 
 interface WaveWinnersSmallProps {
   readonly wave: ApiWave;
@@ -44,6 +45,10 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
       decisionPoints: rawDecisionPoints,
       isFetching,
       isLoadingAllPages,
+      isLoadingAllPagesError,
+      refetch,
+      fetchNextPage,
+      hasNextPage,
     } = useWaveDecisions({
       waveId: wave.id,
       enabled: true, // Always enabled now that we use it for both types
@@ -53,6 +58,14 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
         : undefined,
     });
     const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
+    const handleApprovalWinnersRetry = () => {
+      if (hasNextPage) {
+        void fetchNextPage();
+        return;
+      }
+
+      void refetch();
+    };
 
     // Process decision points to include UI-friendly fields
     const decisionPoints: EnhancedDecisionPoint[] = rawDecisionPoints.map(
@@ -79,6 +92,10 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     // Loading state
     if (isDecisionsLoading) {
       return <WaveWinnersSmallLoading />;
+    }
+
+    if (isApproveWave && isLoadingAllPagesError) {
+      return <WaveWinnersApprovalError onRetry={handleApprovalWinnersRetry} />;
     }
 
     if (isApproveWave) {

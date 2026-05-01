@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { WaveWinnersSmall } from "@/components/waves/winners/WaveWinnersSmall";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
@@ -139,5 +139,63 @@ describe("WaveWinnersSmall", () => {
       title: "No approvals yet",
       message: "No drops approved yet",
     });
+  });
+
+  it("shows approve-wave full-load error instead of partial drops", () => {
+    const fetchNextPage = jest.fn();
+    const refetch = jest.fn();
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [
+        { decision_time: 1, winners: [{ drop: { id: "partial" }, place: 1 }] },
+      ],
+      isFetching: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      fetchNextPage,
+      refetch,
+      hasNextPage: true,
+    });
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: true },
+      isApproveWave: true,
+    });
+
+    render(<WaveWinnersSmall wave={mockWave} onDropClick={jest.fn()} />);
+
+    expect(
+      screen.getByText("Unable to load approved drops.")
+    ).toBeInTheDocument();
+    expect(ItemMock).not.toHaveBeenCalled();
+    expect(EmptyMock).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("refetches approve winners when full-load error has no next page", () => {
+    const fetchNextPage = jest.fn();
+    const refetch = jest.fn();
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      fetchNextPage,
+      refetch,
+      hasNextPage: false,
+    });
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: true },
+      isApproveWave: true,
+    });
+
+    render(<WaveWinnersSmall wave={mockWave} onDropClick={jest.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(fetchNextPage).not.toHaveBeenCalled();
   });
 });

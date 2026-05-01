@@ -11,6 +11,7 @@ import {
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useWave } from "@/hooks/useWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WaveWinnersApprovalError } from "./WaveWinnersApprovalError";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;
@@ -30,7 +31,15 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   const { winnersViewStyle } = useLayout();
 
   // Fetch data using decisions endpoint for all waves
-  const { decisionPoints, isFetching, isLoadingAllPages } = useWaveDecisions({
+  const {
+    decisionPoints,
+    isFetching,
+    isLoadingAllPages,
+    isLoadingAllPagesError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+  } = useWaveDecisions({
     waveId: wave.id,
     enabled: true, // Always enabled now that we use it for both types
     loadAllPages: isApproveWave,
@@ -40,10 +49,24 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   });
   const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
   const approvedWinners = decisionPoints.flatMap((point) => point.winners);
+  const handleApprovalWinnersRetry = () => {
+    if (hasNextPage) {
+      void fetchNextPage();
+      return;
+    }
+
+    void refetch();
+  };
 
   let winnersContent: React.ReactNode;
 
-  if (isApproveWave) {
+  if (isApproveWave && isLoadingAllPagesError) {
+    winnersContent = (
+      <div className="tw-mt-2 tw-flex-grow tw-pb-6 lg:tw-pr-2">
+        <WaveWinnersApprovalError onRetry={handleApprovalWinnersRetry} />
+      </div>
+    );
+  } else if (isApproveWave) {
     winnersContent = (
       <div className="tw-mt-2 tw-flex-grow tw-space-y-2 tw-pb-6 lg:tw-pr-2">
         <WaveWinnersDrops
