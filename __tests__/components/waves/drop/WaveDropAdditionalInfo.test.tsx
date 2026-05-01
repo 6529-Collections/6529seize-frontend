@@ -7,8 +7,18 @@ jest.mock("next/image", () => ({
   default: (props: any) => <img {...props} alt={props.alt ?? ""} />,
 }));
 
+jest.mock("@/components/common/FallbackImage", () => ({
+  FallbackImage: (props: any) => (
+    <img
+      src={props.primarySrc}
+      alt={props.alt ?? ""}
+      data-fallback-src={props.fallbackSrc}
+    />
+  ),
+}));
+
 const buildDrop = (metadata: { data_key: string; data_value: string }[]) =>
-  ({ metadata } as any);
+  ({ metadata }) as any;
 
 describe("WaveDropAdditionalInfo", () => {
   it("does not render when there is no commentary or media", () => {
@@ -103,5 +113,31 @@ describe("WaveDropAdditionalInfo", () => {
     );
 
     expect(screen.queryByText("Promo Video")).not.toBeInTheDocument();
+  });
+
+  it("uses original preview image as fallback", () => {
+    const previewImage =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/image.gif";
+    const additionalMedia = JSON.stringify({
+      artist_profile_media: [],
+      artwork_commentary_media: [],
+      preview_image: previewImage,
+    });
+
+    render(
+      <WaveDropAdditionalInfo
+        drop={buildDrop([
+          {
+            data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+            data_value: additionalMedia,
+          },
+        ])}
+      />
+    );
+
+    expect(screen.getByRole("img", { name: "Preview image" })).toHaveAttribute(
+      "data-fallback-src",
+      previewImage
+    );
   });
 });
