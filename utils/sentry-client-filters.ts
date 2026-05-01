@@ -21,6 +21,7 @@ type SentryBreadcrumb = {
 type NetworkTargetCandidate = {
   url: string;
   isFirstParty?: boolean | undefined;
+  isFirstPartyApi?: boolean | undefined;
 };
 
 type SentryExceptionValue = {
@@ -87,6 +88,7 @@ export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 
 const URL_IN_PARENS_PATTERN = /\(([^)]+)\)/g;
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
+const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 const FNV_OFFSET_BASIS = 2166136261;
 const FNV_PRIME = 16777619;
 const UINT_32_SIZE = 4294967296;
@@ -224,6 +226,10 @@ function isFirstPartyApiUrl(url: URL): boolean {
 }
 
 function isFirstPartyApiTarget(candidate: NetworkTargetCandidate): boolean {
+  if (candidate.isFirstPartyApi === true) {
+    return true;
+  }
+
   const url = parseAbsoluteRequestUrl(candidate.url);
   if (url) {
     return isFirstPartyApiUrl(url);
@@ -329,6 +335,12 @@ function getBreadcrumbUrlIsFirstParty(
   return getBooleanValue(breadcrumb.data?.[URL_IS_FIRST_PARTY_KEY]);
 }
 
+function getBreadcrumbUrlIsFirstPartyApi(
+  breadcrumb: SentryBreadcrumb
+): boolean | undefined {
+  return getBooleanValue(breadcrumb.data?.[URL_IS_FIRST_PARTY_API_KEY]);
+}
+
 function getBreadcrumbTargetCandidate(
   breadcrumb: SentryBreadcrumb
 ): NetworkTargetCandidate | null {
@@ -340,6 +352,7 @@ function getBreadcrumbTargetCandidate(
   return {
     url,
     isFirstParty: getBreadcrumbUrlIsFirstParty(breadcrumb),
+    isFirstPartyApi: getBreadcrumbUrlIsFirstPartyApi(breadcrumb),
   };
 }
 
@@ -361,6 +374,7 @@ function getLatestHttpBreadcrumbWithStatus(
     return {
       url: getBreadcrumbUrl(breadcrumb) ?? "",
       isFirstParty: getBreadcrumbUrlIsFirstParty(breadcrumb),
+      isFirstPartyApi: getBreadcrumbUrlIsFirstPartyApi(breadcrumb),
       statusCode,
     };
   }

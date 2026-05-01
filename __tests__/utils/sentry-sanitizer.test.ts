@@ -31,6 +31,25 @@ describe("sentry-sanitizer", () => {
       expect.objectContaining({
         url: "/api/waves-overview",
         "url.is_first_party": true,
+        "url.is_first_party_api": true,
+      })
+    );
+  });
+
+  it("marks api.6529.io breadcrumb URLs as first-party API before stripping the host", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        url: "https://api.6529.io/oracle/prenodes?page=1",
+      },
+    });
+
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "/oracle/prenodes",
+        "url.is_first_party": true,
+        "url.is_first_party_api": true,
       })
     );
   });
@@ -48,6 +67,7 @@ describe("sentry-sanitizer", () => {
       expect.objectContaining({
         url: "/api/waves-overview",
         "url.is_first_party": true,
+        "url.is_first_party_api": true,
       })
     );
   });
@@ -66,6 +86,27 @@ describe("sentry-sanitizer", () => {
       expect.objectContaining({
         url: "/api/waves-overview",
         "url.is_first_party": false,
+        "url.is_first_party_api": false,
+      })
+    );
+  });
+
+  it("keeps existing breadcrumb first-party API metadata on later sanitize passes", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        url: "/oracle/prenodes",
+        "url.is_first_party": true,
+        "url.is_first_party_api": true,
+      },
+    });
+
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "/oracle/prenodes",
+        "url.is_first_party": true,
+        "url.is_first_party_api": true,
       })
     );
   });

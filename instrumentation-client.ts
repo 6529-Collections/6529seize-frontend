@@ -321,7 +321,9 @@ function handleNetworkError(
     errorType: "network",
     handled: true,
   };
-  event.fingerprint = ["network-error"];
+  if (!event.fingerprint || event.fingerprint.length === 0) {
+    event.fingerprint = ["network-error"];
+  }
 }
 
 Sentry.init({

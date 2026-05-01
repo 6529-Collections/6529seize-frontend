@@ -15,6 +15,7 @@ describe("instrumentation-client", () => {
 
   type BeforeSendResult = {
     tags?: Record<string, unknown> | undefined;
+    fingerprint?: string[] | undefined;
     exception?:
       | {
           values?: Array<{ value?: string | undefined } | undefined>;
@@ -180,6 +181,7 @@ describe("instrumentation-client", () => {
         network_noise_sampled: "true",
       })
     );
+    expect(result?.fingerprint).toEqual(["network-error"]);
   });
 
   it("drops sampled-out app-wrapped first-party browser transport network errors", () => {
@@ -219,6 +221,7 @@ describe("instrumentation-client", () => {
     const event = {
       event_id: "event-200",
       message: wrappedNetworkMessage,
+      fingerprint: ["drop-reaction", "network"],
       exception: {
         values: [
           {
@@ -255,6 +258,7 @@ describe("instrumentation-client", () => {
     );
     expect(result?.exception?.values?.[0]?.value).toBe(wrappedNetworkMessage);
     expect(result?.message).toBe(wrappedNetworkMessage);
+    expect(result?.fingerprint).toEqual(["drop-reaction", "network"]);
   });
 
   it("does not tag unrelated plain errors that mention network", () => {

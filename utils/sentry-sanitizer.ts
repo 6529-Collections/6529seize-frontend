@@ -2,6 +2,7 @@ import type { Breadcrumb, Event } from "@sentry/nextjs";
 
 const REDACTED = "[Filtered]";
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
+const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 
 const JWT_PATTERN = /eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g;
 const STRIPE_KEY_PATTERN = /\b(sk|pk)_[a-zA-Z0-9]{16,}\b/g;
@@ -40,6 +41,36 @@ function getBreadcrumbUrlIsFirstParty(value: unknown): boolean | undefined {
   try {
     const parsed = new URL(trimmed, "https://6529.io");
     return isFirstPartyHost(parsed.hostname);
+  } catch {
+    return undefined;
+  }
+}
+
+function getBreadcrumbUrlIsFirstPartyApi(
+  value: unknown,
+  urlIsFirstParty: unknown
+): boolean | undefined {
+  if (urlIsFirstParty === false) {
+    return false;
+  }
+
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    const parsed = new URL(trimmed, "https://6529.io");
+    const hostname = parsed.hostname.toLowerCase();
+    if (hostname === "api.6529.io") {
+      return true;
+    }
+
+    return isFirstPartyHost(hostname) && parsed.pathname.startsWith("/api/");
   } catch {
     return undefined;
   }
@@ -163,15 +194,39 @@ export function sanitizeSentryBreadcrumb(
   }
 
   if (crumb.data) {
-    if (
-      isPlainObject(crumb.data) &&
-      !Object.prototype.hasOwnProperty.call(crumb.data, URL_IS_FIRST_PARTY_KEY)
-    ) {
-      const urlIsFirstParty = getBreadcrumbUrlIsFirstParty(crumb.data["url"]);
-      if (typeof urlIsFirstParty === "boolean") {
+    if (isPlainObject(crumb.data)) {
+      const nextData = { ...crumb.data };
+      let didAddUrlMetadata = false;
+
+      if (
+        !Object.prototype.hasOwnProperty.call(nextData, URL_IS_FIRST_PARTY_KEY)
+      ) {
+        const urlIsFirstParty = getBreadcrumbUrlIsFirstParty(nextData["url"]);
+        if (typeof urlIsFirstParty === "boolean") {
+          nextData[URL_IS_FIRST_PARTY_KEY] = urlIsFirstParty;
+          didAddUrlMetadata = true;
+        }
+      }
+
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          nextData,
+          URL_IS_FIRST_PARTY_API_KEY
+        )
+      ) {
+        const urlIsFirstPartyApi = getBreadcrumbUrlIsFirstPartyApi(
+          nextData["url"],
+          nextData[URL_IS_FIRST_PARTY_KEY]
+        );
+        if (typeof urlIsFirstPartyApi === "boolean") {
+          nextData[URL_IS_FIRST_PARTY_API_KEY] = urlIsFirstPartyApi;
+          didAddUrlMetadata = true;
+        }
+      }
+
+      if (didAddUrlMetadata) {
         crumb.data = {
-          ...crumb.data,
-          [URL_IS_FIRST_PARTY_KEY]: urlIsFirstParty,
+          ...nextData,
         };
       }
     }
