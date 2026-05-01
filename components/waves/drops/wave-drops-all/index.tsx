@@ -98,7 +98,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   useWaveDropsNotificationRead({
     waveId,
     enabled: Boolean(connectedProfile?.handle),
-    unreadCount,
     removeWaveDeliveredNotifications,
   });
 
@@ -192,7 +191,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   }, [waveChatScroll, waveId, queueSerialTarget]);
 
   const revealPendingDrops = useCallback(() => {
-    if (!waveMessages?.drops?.length) {
+    if ((waveMessages?.drops.length ?? 0) === 0) {
       return;
     }
 
@@ -200,48 +199,44 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     forcePinToBottom();
   }, [waveMessages, revealDeferredPendingDrops, forcePinToBottom]);
 
-  const handleTopIntersection = useCallback(async () => {
-    if (
-      waveMessages?.hasNextPage &&
-      !waveMessages?.isLoading &&
-      !waveMessages?.isLoadingNextPage
-    ) {
-      await fetchNextPage(
-        {
-          waveId,
-          type: DropSize.FULL,
-        },
-        dropId
-      );
+  const canFetchMoreDrops =
+    !!waveMessages &&
+    waveMessages.hasNextPage &&
+    !waveMessages.isLoading &&
+    !waveMessages.isLoadingNextPage;
+
+  const handleTopIntersection = useCallback(() => {
+    if (!canFetchMoreDrops) {
+      return;
     }
-  }, [
-    waveMessages?.hasNextPage,
-    waveMessages?.isLoading,
-    waveMessages?.isLoadingNextPage,
-    fetchNextPage,
-    waveId,
-    dropId,
-  ]);
+
+    void fetchNextPage(
+      {
+        waveId,
+        type: DropSize.FULL,
+      },
+      dropId
+    );
+  }, [canFetchMoreDrops, fetchNextPage, waveId, dropId]);
 
   const handleQuoteClick = useCallback(
     (drop: ApiDrop) => {
       if (drop.wave.id === waveId) {
         queueSerialTarget(drop.serial_no);
       } else {
-        const waveDetails =
-          (drop.wave as unknown as {
-            chat?:
-              | {
-                  scope?:
-                    | {
-                        group?:
-                          | { is_direct_message?: boolean | undefined }
-                          | undefined;
-                      }
-                    | undefined;
-                }
-              | undefined;
-          }) ?? undefined;
+        const waveDetails = drop.wave as unknown as {
+          chat?:
+            | {
+                scope?:
+                  | {
+                      group?:
+                        | { is_direct_message?: boolean | undefined }
+                        | undefined;
+                    }
+                  | undefined;
+              }
+            | undefined;
+        };
         const isDirectMessage = isWaveDirectMessage(drop.wave.id, waveDetails);
         const href = getWaveRoute({
           waveId: drop.wave.id,

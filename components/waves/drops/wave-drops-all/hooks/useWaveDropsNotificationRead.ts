@@ -4,7 +4,6 @@ import { useEffect } from "react";
 interface UseWaveDropsNotificationReadParams {
   readonly waveId: string;
   readonly enabled?: boolean | undefined;
-  readonly unreadCount?: number | undefined;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -13,13 +12,12 @@ interface UseWaveDropsNotificationReadParams {
 export const useWaveDropsNotificationRead = ({
   waveId,
   enabled = true,
-  unreadCount,
   removeWaveDeliveredNotifications,
 }: UseWaveDropsNotificationReadParams) => {
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
 
   useEffect(() => {
-    if (!enabled || (unreadCount ?? 0) <= 0) {
+    if (!enabled) {
       return;
     }
 
@@ -40,7 +38,6 @@ export const useWaveDropsNotificationRead = ({
     void syncReadState();
   }, [
     enabled,
-    unreadCount,
     waveId,
     removeWaveDeliveredNotifications,
     markWaveNotificationsRead,

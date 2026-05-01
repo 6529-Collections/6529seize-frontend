@@ -1129,13 +1129,17 @@ describe("WaveDropsAll", () => {
   });
 
   describe("Component Lifecycle", () => {
-    it("removes notifications and marks wave as read on mount", async () => {
+    it("removes notifications and marks wave as read on mount with no unread drops", async () => {
       setupMocks({
         auth: { connectedProfile: { handle: "testuser" } },
       });
 
       // Don't pass initialDrop to avoid triggering AbortController code path
-      renderComponent({ waveId: "test-wave", initialDrop: null });
+      renderComponent({
+        waveId: "test-wave",
+        initialDrop: null,
+        unreadCount: 0,
+      });
 
       expect(mockRemoveNotifications).toHaveBeenCalledWith("test-wave");
       await waitFor(() => {
