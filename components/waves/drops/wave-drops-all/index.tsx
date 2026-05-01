@@ -216,7 +216,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         type: DropSize.FULL,
       },
       dropId
-    );
+    ).catch(() => undefined);
   }, [canFetchMoreDrops, fetchNextPage, waveId, dropId]);
 
   const handleQuoteClick = useCallback(

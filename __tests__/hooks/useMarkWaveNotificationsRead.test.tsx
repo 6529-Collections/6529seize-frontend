@@ -11,15 +11,19 @@ jest.mock("@/services/api/common-api", () => ({
 interface Deferred {
   promise: Promise<void>;
   resolve: () => void;
+  reject: (error: unknown) => void;
 }
 
 const createDeferred = (): Deferred => {
   let resolve: () => void = () => {};
-  const promise = new Promise<void>((promiseResolve) => {
+  let reject: (error: unknown) => void = () => {};
+
+  const promise = new Promise<void>((promiseResolve, promiseReject) => {
     resolve = promiseResolve;
+    reject = promiseReject;
   });
 
-  return { promise, resolve };
+  return { promise, resolve, reject };
 };
 
 const apiPostMock = commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
@@ -113,6 +117,51 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(apiPostMock).toHaveBeenCalledTimes(2);
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
+  });
+
+  it("resolves queued same-wave calls when a failed first read is replayed successfully", async () => {
+    const firstRequest = createDeferred();
+    const trailingRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+
+    apiPostMock
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(trailingRequest.promise);
+
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    const firstPromise = result.current("wave-1");
+    const secondPromise = result.current("wave-1");
+
+    firstRequest.reject(new Error("first read failed"));
+
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledTimes(2);
+    });
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+
+    trailingRequest.resolve();
+
+    await expect(firstPromise).resolves.toBeUndefined();
+    await expect(secondPromise).resolves.toBeUndefined();
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects a failed read when no replay is queued", async () => {
+    const readError = new Error("read failed");
+    const invalidateNotifications = jest.fn();
+
+    apiPostMock.mockRejectedValueOnce(readError);
+
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(result.current("wave-1")).rejects.toBe(readError);
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
   it("reads different waves independently", async () => {

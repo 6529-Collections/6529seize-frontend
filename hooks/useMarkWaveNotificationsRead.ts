@@ -11,17 +11,32 @@ interface WaveReadRequestState {
 
 const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
 
+const sendWaveReadRequest = async (
+  waveId: string,
+  invalidateNotifications: () => void
+): Promise<void> => {
+  await commonApiPostWithoutBodyAndResponse({
+    endpoint: `notifications/wave/${waveId}/read`,
+  });
+  invalidateNotifications();
+};
+
 const startWaveReadRequest = async (
   waveId: string,
   state: WaveReadRequestState,
   invalidateNotifications: () => void
 ): Promise<void> => {
+  let requestError: unknown;
+  let hasRequestError = false;
+
   try {
-    await commonApiPostWithoutBodyAndResponse({
-      endpoint: `notifications/wave/${waveId}/read`,
-    });
-    invalidateNotifications();
-  } finally {
+    await sendWaveReadRequest(waveId, invalidateNotifications);
+  } catch (error) {
+    requestError = error;
+    hasRequestError = true;
+  }
+
+  try {
     if (state.pending) {
       state.pending = false;
       state.promise = startWaveReadRequest(
@@ -30,8 +45,13 @@ const startWaveReadRequest = async (
         invalidateNotifications
       );
       await state.promise;
+      return;
     }
 
+    if (hasRequestError) {
+      throw requestError;
+    }
+  } finally {
     if (inFlightWaveReadRequests.get(waveId) === state) {
       inFlightWaveReadRequests.delete(waveId);
     }

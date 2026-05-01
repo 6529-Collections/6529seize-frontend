@@ -208,6 +208,8 @@ function setupMocks(options: MockSetupOptions = {}) {
   containerProps = undefined;
   dropsProps = undefined;
   scrollButtonProps = undefined;
+  mockFetchNextPage.mockReset();
+  mockFetchNextPage.mockResolvedValue(undefined);
 
   // Setup useVirtualizedWaveDrops mock
   const defaultWaveMessages: WaveMessagesMock = {
@@ -983,14 +985,10 @@ describe("WaveDropsAll", () => {
 
       renderComponent();
 
-      // Trigger the error scenario
-      try {
-        await act(async () => {
-          await containerProps.onTopIntersection();
-        });
-      } catch (error) {
-        // Expected to throw, but component should still render
-      }
+      await act(async () => {
+        containerProps.onTopIntersection();
+        await Promise.resolve();
+      });
 
       // Component should not crash on fetch failure
       expect(screen.getByTestId("drops-list")).toBeInTheDocument();
@@ -1050,13 +1048,10 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       // Trigger error scenario and ensure component stays stable
-      try {
-        await act(async () => {
-          await containerProps.onTopIntersection();
-        });
-      } catch (error) {
-        // Expected to handle errors gracefully
-      }
+      await act(async () => {
+        containerProps.onTopIntersection();
+        await Promise.resolve();
+      });
 
       expect(screen.getByTestId("drops-list")).toBeInTheDocument();
       consoleError.mockRestore();
