@@ -34,7 +34,13 @@ jest.mock("@/hooks/useWaveIsTyping");
 jest.mock("@/hooks/useWaveBoostedDrops");
 jest.mock("@/components/notifications/NotificationsContext");
 jest.mock("@/components/auth/Auth");
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
 jest.mock("@/services/api/common-api");
+jest.mock("@/services/auth/auth.utils", () => ({
+  getAuthJwt: jest.fn(),
+}));
 jest.mock("next/navigation");
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -279,7 +285,16 @@ function setupMocks(options: MockSetupOptions = {}) {
   // Setup auth mock
   require("@/components/auth/Auth").useAuth.mockReturnValue({
     connectedProfile: options.auth?.connectedProfile ?? null,
+    activeProfileProxy: null,
   });
+
+  require("@/components/auth/SeizeConnectContext").useSeizeConnectContext.mockReturnValue(
+    {
+      address: undefined,
+    }
+  );
+
+  require("@/services/auth/auth.utils").getAuthJwt.mockReturnValue(null);
 
   // Setup typing mock
   require("@/hooks/useWaveIsTyping").useWaveIsTyping.mockReturnValue(

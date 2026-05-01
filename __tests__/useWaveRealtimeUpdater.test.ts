@@ -9,8 +9,20 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: () => ({ isConnected: true }),
 }));
 
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({ activeProfileProxy: null }),
+}));
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ address: undefined }),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("@/services/auth/auth.utils", () => ({
+  getAuthJwt: () => null,
 }));
 
 jest.mock("@/services/api/drop-api", () => ({
