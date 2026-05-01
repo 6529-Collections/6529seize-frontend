@@ -96,6 +96,7 @@ export type LinkPreviewResponse =
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;
 const LINK_PREVIEW_BATCH_MAX_URLS = 5;
+const LINK_PREVIEW_BATCH_MAX_ACTIVE_CHUNKS = 2;
 const LINK_PREVIEW_METADATA_ERROR_MESSAGE =
   "Failed to fetch link preview metadata.";
 const OPENSEA_CACHE_KEY_SUFFIX = "|opensea-v3-token-uri-fallback";
@@ -144,7 +145,9 @@ type PendingLinkPreviewRequest = {
 };
 
 const pendingLinkPreviewBatch = new Map<string, PendingLinkPreviewRequest>();
+const queuedLinkPreviewBatchChunks: PendingLinkPreviewRequest[][] = [];
 let batchFlushTimer: ReturnType<typeof setTimeout> | undefined;
+let activeLinkPreviewBatchChunks = 0;
 
 const hasErrorMessage = (value: unknown): value is OpenGraphErrorBody => {
   if (typeof value !== "object" || value === null) {
@@ -319,13 +322,44 @@ const resolveBatchChunkSafely = async (
   }
 };
 
+const processQueuedBatchChunks = (): void => {
+  while (
+    activeLinkPreviewBatchChunks < LINK_PREVIEW_BATCH_MAX_ACTIVE_CHUNKS &&
+    queuedLinkPreviewBatchChunks.length > 0
+  ) {
+    const chunk = queuedLinkPreviewBatchChunks.shift();
+    if (chunk === undefined) {
+      return;
+    }
+
+    activeLinkPreviewBatchChunks += 1;
+
+    const handleChunkCompletion = (): void => {
+      activeLinkPreviewBatchChunks -= 1;
+      processQueuedBatchChunks();
+    };
+
+    void resolveBatchChunkSafely(chunk).then(
+      handleChunkCompletion,
+      handleChunkCompletion
+    );
+  }
+};
+
+const enqueueBatchChunk = (
+  requests: readonly PendingLinkPreviewRequest[]
+): void => {
+  queuedLinkPreviewBatchChunks.push([...requests]);
+  processQueuedBatchChunks();
+};
+
 const flushPendingLinkPreviewBatch = (): void => {
   batchFlushTimer = undefined;
   const requests = Array.from(pendingLinkPreviewBatch.values());
   pendingLinkPreviewBatch.clear();
 
   for (const chunk of chunkRequests(requests)) {
-    void resolveBatchChunkSafely(chunk);
+    enqueueBatchChunk(chunk);
   }
 };
 

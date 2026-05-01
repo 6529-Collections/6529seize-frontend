@@ -15,6 +15,28 @@ describe("fetchLinkPreview", () => {
       json: async () => body,
     }) as Response;
 
+  type Deferred<T> = {
+    readonly promise: Promise<T>;
+    readonly resolve: (value: T) => void;
+  };
+
+  const createDeferred = <T>(): Deferred<T> => {
+    let resolveDeferred!: (value: T) => void;
+    const promise = new Promise<T>((resolve) => {
+      resolveDeferred = resolve;
+    });
+
+    return {
+      promise,
+      resolve: resolveDeferred,
+    };
+  };
+
+  const flushMicrotasks = async (): Promise<void> => {
+    await Promise.resolve();
+    await Promise.resolve();
+  };
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.resetModules();
@@ -120,6 +142,94 @@ describe("fetchLinkPreview", () => {
         body: JSON.stringify({ urls: [urls[5]] }),
       })
     );
+  });
+
+  it("limits active POST chunks to 2 and keeps chunk promises independent", async () => {
+    const urls = Array.from(
+      { length: 11 },
+      (_value, index) => `https://example.com/article-${index}`
+    );
+    const previews = urls.map(
+      (url, index): LinkPreviewResponse => ({
+        requestUrl: url,
+        title: `Preview ${index}`,
+      })
+    );
+    const chunkResponses = [
+      createDeferred<Response>(),
+      createDeferred<Response>(),
+      createDeferred<Response>(),
+    ];
+    let fetchCallIndex = 0;
+    fetchMock.mockImplementation(() => {
+      const response = chunkResponses[fetchCallIndex];
+      fetchCallIndex += 1;
+
+      if (response === undefined) {
+        return Promise.reject(new Error("Unexpected fetch call"));
+      }
+
+      return response.promise;
+    });
+
+    const { fetchLinkPreview } = await loadApi();
+    const requests = urls.map((url) => fetchLinkPreview(url));
+    const firstChunk = Promise.all(requests.slice(0, 5));
+    const secondChunk = Promise.all(requests.slice(5, 10));
+    const firstChunkResolved = jest.fn();
+    void firstChunk.then(firstChunkResolved, () => undefined);
+
+    jest.runOnlyPendingTimers();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: urls.slice(0, 5) }),
+      })
+    );
+    expect(fetchMock.mock.calls[1]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: urls.slice(5, 10) }),
+      })
+    );
+
+    chunkResponses[1]?.resolve(
+      createResponse({
+        results: Object.fromEntries(
+          urls.slice(5, 10).map((url, index) => [url, previews[index + 5]])
+        ),
+        errors: {},
+      })
+    );
+
+    await expect(secondChunk).resolves.toEqual(previews.slice(5, 10));
+    expect(firstChunkResolved).not.toHaveBeenCalled();
+    await flushMicrotasks();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[2]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: urls.slice(10) }),
+      })
+    );
+
+    chunkResponses[2]?.resolve(
+      createResponse({
+        results: {
+          [urls[10]!]: previews[10],
+        },
+        errors: {},
+      })
+    );
+    chunkResponses[0]?.resolve(
+      createResponse({
+        results: Object.fromEntries(
+          urls.slice(0, 5).map((url, index) => [url, previews[index]])
+        ),
+        errors: {},
+      })
+    );
+
+    await expect(Promise.all(requests)).resolves.toEqual(previews);
   });
 
   it("shares one pending promise for duplicate urls", async () => {
