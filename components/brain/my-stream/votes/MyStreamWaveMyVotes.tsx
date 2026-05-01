@@ -17,17 +17,15 @@ import {
   FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
   useWaveDecisions,
 } from "@/hooks/waves/useWaveDecisions";
-import { isApproveWave } from "@/helpers/waves/approve-wave.helpers";
+import {
+  hasApprovalDecisionCounts,
+  isApproveWave,
+} from "@/helpers/waves/approve-wave.helpers";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
-
-const isValidDecisionCount = (
-  value: number | null | undefined
-): value is number =>
-  typeof value === "number" && Number.isFinite(value) && value >= 0;
 
 const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   wave,
@@ -41,11 +39,8 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
       enabled: !isResettingVotes,
     });
   const isApprovalWave = isApproveWave(wave);
-  const hasApprovalDecisionCounts =
-    isValidDecisionCount(wave.wave.no_of_decisions_done) ||
-    isValidDecisionCount(wave.wave.no_of_decisions_left);
   const shouldLoadApprovalDecisionPoints =
-    isApprovalWave && !hasApprovalDecisionCounts;
+    isApprovalWave && !hasApprovalDecisionCounts(wave);
   const {
     decisionPoints: approvalDecisionPoints,
     hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
@@ -60,9 +55,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   });
   const { isApprovalStatusLoading, isVotingClosed } = useApprovalWaveStatus({
     wave,
-    decisionPoints: approvalDecisionPoints,
-    areDecisionPointsComplete:
-      !shouldLoadApprovalDecisionPoints || hasLoadedApprovalDecisionPoints,
+    ...(shouldLoadApprovalDecisionPoints
+      ? {
+          decisionPoints: approvalDecisionPoints,
+          areDecisionPointsComplete: hasLoadedApprovalDecisionPoints,
+        }
+      : {}),
   });
   const isVotingControlsLocked =
     isVotingClosed ||

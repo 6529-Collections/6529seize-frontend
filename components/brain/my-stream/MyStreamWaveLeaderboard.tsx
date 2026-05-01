@@ -42,6 +42,7 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import { hasApprovalDecisionCounts } from "@/helpers/waves/approve-wave.helpers";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -139,14 +140,16 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
+  const shouldLoadApprovalDecisionPoints =
+    isApproveWave && !hasApprovalDecisionCounts(wave);
   const {
     decisionPoints: approvalDecisionPoints = [],
     hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
   } = useWaveDecisions({
     waveId: wave.id,
-    enabled: isApproveWave,
-    loadAllPages: isApproveWave,
-    pageSize: isApproveWave
+    enabled: shouldLoadApprovalDecisionPoints,
+    loadAllPages: shouldLoadApprovalDecisionPoints,
+    pageSize: shouldLoadApprovalDecisionPoints
       ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
       : undefined,
   });
@@ -156,9 +159,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     isVotingClosed: isApprovalVotingClosed,
   } = useApprovalWaveStatus({
     wave,
-    decisionPoints: approvalDecisionPoints,
-    areDecisionPointsComplete:
-      !isApproveWave || hasLoadedApprovalDecisionPoints,
+    ...(shouldLoadApprovalDecisionPoints
+      ? {
+          decisionPoints: approvalDecisionPoints,
+          areDecisionPointsComplete: hasLoadedApprovalDecisionPoints,
+        }
+      : {}),
   });
   const canOpenCreateDrop = canCreateDrop && !isApprovalVotingClosed;
   const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(

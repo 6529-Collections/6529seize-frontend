@@ -133,6 +133,34 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.isVotingClosed).toBe(true);
   });
 
+  it("does not start an internal load when incomplete decision points are caller-owned", () => {
+    const wave = createWave({
+      maxWinners: 2,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: null,
+      votingEnd: 2000,
+    });
+
+    const { result } = renderHook(() =>
+      useApprovalWaveStatus({
+        wave,
+        decisionPoints: decisionPoints.slice(0, 1),
+        areDecisionPointsComplete: false,
+      })
+    );
+
+    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      enabled: false,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
+    expect(result.current.approvedCount).toBeNull();
+    expect(result.current.closeStatus).toBeNull();
+    expect(result.current.isApprovalStatusLoading).toBe(true);
+    expect(result.current.isVotingClosed).toBe(true);
+  });
+
   it("closes when complete decision points reach max winners", () => {
     const wave = createWave({
       maxWinners: 2,

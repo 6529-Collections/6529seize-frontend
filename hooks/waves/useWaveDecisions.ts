@@ -49,6 +49,7 @@ export function useWaveDecisions({
     isLoading,
     fetchNextPage,
     hasNextPage,
+    isFetchNextPageError,
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: [QueryKey.WAVE_DECISIONS, { waveId, pageSize: resolvedPageSize }],
@@ -73,12 +74,25 @@ export function useWaveDecisions({
   });
 
   useEffect(() => {
-    if (!enabled || !loadAllPages || !hasNextPage || isFetchingNextPage) {
+    if (
+      !enabled ||
+      !loadAllPages ||
+      !hasNextPage ||
+      isFetchNextPageError ||
+      isFetchingNextPage
+    ) {
       return;
     }
 
     void fetchNextPage();
-  }, [enabled, fetchNextPage, hasNextPage, isFetchingNextPage, loadAllPages]);
+  }, [
+    enabled,
+    fetchNextPage,
+    hasNextPage,
+    isFetchNextPageError,
+    isFetchingNextPage,
+    loadAllPages,
+  ]);
 
   const decisionPoints = useMemo(() => {
     const mergedDecisionPoints: ApiWaveDecision[] = [];
@@ -106,6 +120,7 @@ export function useWaveDecisions({
     Boolean(data?.pages.length) && hasNextPage === false && !isFetchingNextPage;
   const isLoadingAllPages = Boolean(
     enabled &&
+    !isFetchNextPageError &&
     (isLoading ||
       (loadAllPages && (Boolean(hasNextPage) || isFetchingNextPage)))
   );

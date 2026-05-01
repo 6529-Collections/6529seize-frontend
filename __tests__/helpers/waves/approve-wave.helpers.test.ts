@@ -1,5 +1,6 @@
 import {
   getApprovalDropStatus,
+  hasApprovalDecisionCounts,
   isOfficiallyApprovedDrop,
 } from "@/helpers/waves/approve-wave.helpers";
 
@@ -9,6 +10,36 @@ describe("approve-wave.helpers", () => {
     awards: [],
     decision_time: 123,
   };
+  const wave = {
+    wave: {
+      no_of_decisions_done: null,
+      no_of_decisions_left: null,
+    },
+  } as any;
+
+  describe("hasApprovalDecisionCounts", () => {
+    it("returns true when decisions done is a valid count", () => {
+      expect(
+        hasApprovalDecisionCounts({
+          ...wave,
+          wave: { ...wave.wave, no_of_decisions_done: 0 },
+        })
+      ).toBe(true);
+    });
+
+    it("returns true when decisions left is a valid count", () => {
+      expect(
+        hasApprovalDecisionCounts({
+          ...wave,
+          wave: { ...wave.wave, no_of_decisions_left: 3 },
+        })
+      ).toBe(true);
+    });
+
+    it("returns false when both decision counters are missing", () => {
+      expect(hasApprovalDecisionCounts(wave)).toBe(false);
+    });
+  });
 
   describe("isOfficiallyApprovedDrop", () => {
     it("returns false for rank-only drops", () => {

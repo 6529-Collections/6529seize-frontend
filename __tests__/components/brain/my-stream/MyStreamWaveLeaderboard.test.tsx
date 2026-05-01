@@ -522,7 +522,7 @@ describe("MyStreamWaveLeaderboard", () => {
     });
   });
 
-  it("shows approve status and blocks create drop when max approvals are reached", async () => {
+  it("shows approve status without loading decisions when counters close the wave", async () => {
     const user = userEvent.setup();
     const approveWave = {
       ...wave,
@@ -557,11 +557,14 @@ describe("MyStreamWaveLeaderboard", () => {
       "max_reached"
     );
     expect(approvalStatusProps.approvedCount).toBe(1);
+    expect(
+      useWaveDecisions.mock.calls.some(([args]) => args.enabled === true)
+    ).toBe(false);
     expect(useWaveDecisions).toHaveBeenCalledWith({
       waveId: "1",
-      enabled: true,
-      loadAllPages: true,
-      pageSize: 2000,
+      enabled: false,
+      loadAllPages: false,
+      pageSize: undefined,
     });
     expect(dropsProps.isVotingClosed).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();
@@ -603,6 +606,14 @@ describe("MyStreamWaveLeaderboard", () => {
 
     renderLeaderboard(approveWave);
 
+    expect(
+      useWaveDecisions.mock.calls.some(
+        ([args]) =>
+          args.enabled === true &&
+          args.loadAllPages === true &&
+          args.pageSize === 2000
+      )
+    ).toBe(true);
     expect(approvalStatusProps.approvedCount).toBeNull();
     expect(dropsProps.isVotingClosed).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();

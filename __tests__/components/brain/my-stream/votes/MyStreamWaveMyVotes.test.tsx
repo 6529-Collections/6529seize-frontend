@@ -209,6 +209,43 @@ describe("MyStreamWaveMyVotes", () => {
     });
   });
 
+  it("does not pass decision points when approve decision counts exist", () => {
+    const approveWave = {
+      id: "approve-1",
+      wave: {
+        type: ApiWaveType.Approve,
+        no_of_decisions_done: 1,
+        no_of_decisions_left: null,
+      },
+    } as any;
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 1, max_rating: 5 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes wave={approveWave} onDropClick={onDropClick} />
+      </AuthContext.Provider>
+    );
+
+    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+      waveId: "approve-1",
+      enabled: false,
+      loadAllPages: false,
+      pageSize: undefined,
+    });
+    expect(mockApprovalStatus).toHaveBeenCalledWith({ wave: approveWave });
+  });
+
   it("locks voting controls while approve decision points are loading", () => {
     const approveWave = {
       id: "approve-1",

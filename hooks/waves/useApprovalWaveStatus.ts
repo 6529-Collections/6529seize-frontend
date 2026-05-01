@@ -12,6 +12,7 @@ import {
   getApprovalWaveCloseStatus,
   getApprovalWindowEndTime,
   getApprovedDropsCount,
+  hasApprovalDecisionCounts,
   isApproveWave,
   type ApprovalWaveCloseStatus,
 } from "@/helpers/waves/approve-wave.helpers";
@@ -19,6 +20,10 @@ import {
 interface UseApprovalWaveStatusParams {
   readonly wave: ApiWave | null | undefined;
   readonly areDecisionPointsComplete?: boolean | undefined;
+  /**
+   * When defined, decision points are owned by the caller and this hook will
+   * not start a second full decision-page load for status checks.
+   */
   readonly decisionPoints?: readonly ApiWaveDecision[] | undefined;
 }
 
@@ -50,6 +55,7 @@ export function useApprovalWaveStatus({
   const approveWave = isApproveWave(wave);
   const [, setStatusClockTick] = useState(0);
   const currentMillis = Time.currentMillis();
+  const hasCallerOwnedDecisionPoints = decisionPoints !== undefined;
 
   const winningThreshold = useMemo(
     () =>
@@ -72,7 +78,12 @@ export function useApprovalWaveStatus({
   );
 
   const shouldLoadCompleteDecisionPoints = useMemo(() => {
-    if (!approveWave || !wave || areDecisionPointsComplete) {
+    if (
+      !approveWave ||
+      !wave ||
+      areDecisionPointsComplete ||
+      hasCallerOwnedDecisionPoints
+    ) {
       return false;
     }
 
@@ -80,7 +91,7 @@ export function useApprovalWaveStatus({
       return false;
     }
 
-    if (isValidApprovalCount(wave.wave.no_of_decisions_left)) {
+    if (hasApprovalDecisionCounts(wave)) {
       return false;
     }
 
@@ -94,6 +105,7 @@ export function useApprovalWaveStatus({
     areDecisionPointsComplete,
     approveWave,
     currentMillis,
+    hasCallerOwnedDecisionPoints,
     providedApprovedCount,
     wave,
   ]);

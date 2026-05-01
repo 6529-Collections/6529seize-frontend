@@ -31,6 +31,7 @@ describe("useWaveDecisions", () => {
       isLoading: false,
       fetchNextPage: jest.fn(),
       hasNextPage: false,
+      isFetchNextPageError: false,
       isFetchingNextPage: false,
     });
   });
@@ -63,6 +64,7 @@ describe("useWaveDecisions", () => {
       isLoading: false,
       fetchNextPage: jest.fn(),
       hasNextPage: false,
+      isFetchNextPageError: false,
       isFetchingNextPage: false,
     });
 
@@ -114,6 +116,7 @@ describe("useWaveDecisions", () => {
       isLoading: false,
       fetchNextPage: jest.fn(),
       hasNextPage: false,
+      isFetchNextPageError: false,
       isFetchingNextPage: false,
     });
 
@@ -153,6 +156,7 @@ describe("useWaveDecisions", () => {
       isLoading: false,
       fetchNextPage: jest.fn(),
       hasNextPage: false,
+      isFetchNextPageError: false,
       isFetchingNextPage: false,
     });
 
@@ -178,6 +182,7 @@ describe("useWaveDecisions", () => {
       isLoading: true,
       fetchNextPage: jest.fn(),
       hasNextPage: false,
+      isFetchNextPageError: false,
       isFetchingNextPage: false,
     });
 
@@ -227,6 +232,7 @@ describe("useWaveDecisions", () => {
       isLoading: false,
       fetchNextPage,
       hasNextPage: true,
+      isFetchNextPageError: false,
       isFetchingNextPage: false,
     });
 
@@ -250,5 +256,36 @@ describe("useWaveDecisions", () => {
         ],
       })
     );
+  });
+
+  it("stops auto-fetching and loading all pages after a next-page error", () => {
+    const fetchNextPage = jest.fn();
+    useInfiniteQueryMock.mockReturnValue({
+      data: {
+        pages: [{ page: 1, next: true, data: [] }],
+        pageParams: [1],
+      },
+      isError: true,
+      error: new Error("next page failed"),
+      refetch: jest.fn(),
+      isFetching: false,
+      isLoading: false,
+      fetchNextPage,
+      hasNextPage: true,
+      isFetchNextPageError: true,
+      isFetchingNextPage: false,
+    });
+
+    const { result } = renderHook(() =>
+      useWaveDecisions({
+        waveId: "w1",
+        loadAllPages: true,
+        pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+      })
+    );
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+    expect(result.current.isLoadingAllPages).toBe(false);
+    expect(result.current.fetchNextPage).toBe(fetchNextPage);
   });
 });

@@ -24,6 +24,12 @@ const isValidCount = (value: number | null | undefined): value is number =>
 export const isApproveWave = (wave: ApiWave | null | undefined): boolean =>
   wave?.wave.type === ApiWaveType.Approve;
 
+export const hasApprovalDecisionCounts = (
+  wave: ApiWave | null | undefined
+): boolean =>
+  isValidCount(wave?.wave.no_of_decisions_done) ||
+  isValidCount(wave?.wave.no_of_decisions_left);
+
 export const isOfficiallyApprovedDrop = (
   drop: Pick<ApiDrop, "rank" | "winning_context"> | null | undefined
 ): boolean => {
