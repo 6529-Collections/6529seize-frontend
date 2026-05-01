@@ -69,6 +69,59 @@ describe("fetchLinkPreview", () => {
     );
   });
 
+  it("splits same-tick calls into POST chunks of 5 urls", async () => {
+    const urls = [
+      "https://one.example/article",
+      "https://two.example/article",
+      "https://three.example/article",
+      "https://four.example/article",
+      "https://five.example/article",
+      "https://six.example/article",
+    ];
+    const previews = urls.map(
+      (url, index): LinkPreviewResponse => ({
+        requestUrl: url,
+        title: `Preview ${index + 1}`,
+      })
+    );
+
+    fetchMock
+      .mockResolvedValueOnce(
+        createResponse({
+          results: Object.fromEntries(
+            urls.slice(0, 5).map((url, index) => [url, previews[index]])
+          ),
+          errors: {},
+        })
+      )
+      .mockResolvedValueOnce(
+        createResponse({
+          results: {
+            [urls[5]!]: previews[5],
+          },
+          errors: {},
+        })
+      );
+
+    const { fetchLinkPreview } = await loadApi();
+    const requests = urls.map((url) => fetchLinkPreview(url));
+
+    jest.runOnlyPendingTimers();
+
+    await expect(Promise.all(requests)).resolves.toEqual(previews);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: urls.slice(0, 5) }),
+      })
+    );
+    expect(fetchMock.mock.calls[1]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: [urls[5]] }),
+      })
+    );
+  });
+
   it("shares one pending promise for duplicate urls", async () => {
     const preview: LinkPreviewResponse = {
       requestUrl: "https://one.example/article",
@@ -169,6 +222,30 @@ describe("fetchLinkPreview", () => {
 
     await expect(retry).resolves.toEqual(retryPreview);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("ignores inherited batch result and error keys", async () => {
+    fetchMock.mockResolvedValueOnce(
+      createResponse({
+        results: {},
+        errors: {},
+      })
+    );
+
+    const { fetchLinkPreview } = await loadApi();
+    const request = fetchLinkPreview("constructor");
+
+    jest.runOnlyPendingTimers();
+
+    await expect(request).rejects.toThrow(
+      "Failed to fetch link preview metadata."
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[1]).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ urls: ["constructor"] }),
+      })
+    );
   });
 
   it("falls back to single GET requests when the batch request fails", async () => {

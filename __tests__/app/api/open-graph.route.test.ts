@@ -781,6 +781,30 @@ describe("open-graph API route", () => {
     );
   });
 
+  it("returns 400 when POST includes more than 5 unique urls", async () => {
+    const request = {
+      json: async () => ({
+        urls: [
+          "https://one.example/article",
+          "https://two.example/article",
+          "https://three.example/article",
+          "https://four.example/article",
+          "https://five.example/article",
+          "https://six.example/article",
+        ],
+      }),
+    } as any;
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "A maximum of 5 urls can be requested." },
+      { status: 400 }
+    );
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+  });
+
   it("handles ENS previews in POST batches", async () => {
     const previewPayload = { type: "ens.name", name: "vitalik.eth" };
     const ensTarget = {

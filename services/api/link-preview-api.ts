@@ -95,7 +95,7 @@ export type LinkPreviewResponse =
 
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;
-const LINK_PREVIEW_BATCH_MAX_URLS = 50;
+const LINK_PREVIEW_BATCH_MAX_URLS = 5;
 const LINK_PREVIEW_METADATA_ERROR_MESSAGE =
   "Failed to fetch link preview metadata.";
 const OPENSEA_CACHE_KEY_SUFFIX = "|opensea-v3-token-uri-fallback";
@@ -128,6 +128,12 @@ interface OpenGraphBatchResponse {
   readonly results?: Record<string, LinkPreviewResponse | undefined>;
   readonly errors?: Record<string, string | undefined>;
 }
+
+const hasOwnRecordKey = <T>(
+  record: Record<string, T | undefined> | undefined,
+  key: string
+): record is Record<string, T | undefined> =>
+  record !== undefined && Object.hasOwn(record, key);
 
 type PendingLinkPreviewRequest = {
   readonly url: string;
@@ -281,13 +287,17 @@ const resolveBatchChunk = async (
   }
 
   for (const request of requests) {
-    const result = batchResponse.results?.[request.url];
+    const result = hasOwnRecordKey(batchResponse.results, request.url)
+      ? batchResponse.results[request.url]
+      : undefined;
     if (result !== undefined) {
       request.resolve(result);
       continue;
     }
 
-    const errorMessage = batchResponse.errors?.[request.url];
+    const errorMessage = hasOwnRecordKey(batchResponse.errors, request.url)
+      ? batchResponse.errors[request.url]
+      : undefined;
     rejectPendingRequest(
       request,
       new Error(
