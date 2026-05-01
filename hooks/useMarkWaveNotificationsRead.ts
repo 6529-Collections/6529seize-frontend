@@ -5,6 +5,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
+import { jwtDecode } from "jwt-decode";
 import {
   useCallback,
   useContext,
@@ -14,6 +15,11 @@ import {
 } from "react";
 
 type AuthHeaders = Record<string, string> | undefined;
+
+interface WaveReadJwtPayload {
+  readonly sub?: string | undefined;
+  readonly role?: string | null | undefined;
+}
 
 interface WaveReadRequestState {
   promise: Promise<void>;
@@ -47,6 +53,40 @@ const getWaveReadRequestKey = ({
 
 const getAuthHeaders = (walletAuth: string | null): AuthHeaders =>
   walletAuth ? { Authorization: `Bearer ${walletAuth}` } : undefined;
+
+const getVerifiedAuthHeaders = ({
+  walletAuth,
+  addressKey,
+  activeProfileProxyCreatorId,
+}: {
+  readonly walletAuth: string | null;
+  readonly addressKey: string | null;
+  readonly activeProfileProxyCreatorId: string | null;
+}): AuthHeaders => {
+  if (!walletAuth || !addressKey) {
+    return undefined;
+  }
+
+  try {
+    const decodedJwt = jwtDecode<WaveReadJwtPayload>(walletAuth);
+    const jwtAddressKey = decodedJwt.sub?.toLowerCase() ?? null;
+    if (jwtAddressKey !== addressKey) {
+      return undefined;
+    }
+
+    const jwtRole =
+      typeof decodedJwt.role === "string" && decodedJwt.role.length > 0
+        ? decodedJwt.role
+        : null;
+    if (jwtRole !== activeProfileProxyCreatorId) {
+      return undefined;
+    }
+
+    return getAuthHeaders(walletAuth);
+  } catch {
+    return undefined;
+  }
+};
 
 const sendWaveReadRequest = async (
   waveId: string,
@@ -110,19 +150,33 @@ export function useMarkWaveNotificationsRead(): (
   const walletAuth = getAuthJwt();
   const invalidateNotificationsRef = useRef(invalidateNotifications);
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
+  const activeProfileProxyCreatorId =
+    activeProfileProxy !== null ? activeProfileProxy.created_by.id : null;
   const addressKey = getAddressKey(address);
   const identityKey = getWaveReadIdentityKey({
     addressKey,
     activeProfileProxyId,
   });
-  const authHeaders = useMemo(() => getAuthHeaders(walletAuth), [walletAuth]);
+  const verifiedAuthHeaders = useMemo(
+    () =>
+      getVerifiedAuthHeaders({
+        walletAuth,
+        addressKey,
+        activeProfileProxyCreatorId,
+      }),
+    [walletAuth, addressKey, activeProfileProxyCreatorId]
+  );
   const authHeadersByIdentityRef = useRef<Map<string, AuthHeaders>>(
-    new Map([[identityKey, authHeaders]])
+    new Map<string, AuthHeaders>(
+      verifiedAuthHeaders ? [[identityKey, verifiedAuthHeaders]] : []
+    )
   );
 
   useLayoutEffect(() => {
-    authHeadersByIdentityRef.current.set(identityKey, authHeaders);
-  }, [authHeaders, identityKey]);
+    if (verifiedAuthHeaders) {
+      authHeadersByIdentityRef.current.set(identityKey, verifiedAuthHeaders);
+    }
+  }, [identityKey, verifiedAuthHeaders]);
 
   useLayoutEffect(() => {
     invalidateNotificationsRef.current = invalidateNotifications;

@@ -5,6 +5,7 @@ import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRe
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { renderHook, waitFor } from "@testing-library/react";
+import { jwtDecode } from "jwt-decode";
 import type { ReactNode } from "react";
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -23,10 +24,19 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
 }));
 
+jest.mock("jwt-decode", () => ({
+  jwtDecode: jest.fn(),
+}));
+
 interface Deferred {
   promise: Promise<void>;
   resolve: () => void;
   reject: (error: unknown) => void;
+}
+
+interface JwtPayload {
+  readonly sub: string;
+  readonly role: string | null;
 }
 
 const createDeferred = (): Deferred => {
@@ -48,6 +58,8 @@ const useAuthMock = useAuth as jest.MockedFunction<typeof useAuth>;
 const useSeizeConnectContextMock =
   useSeizeConnectContext as jest.MockedFunction<typeof useSeizeConnectContext>;
 const getAuthJwtMock = getAuthJwt as jest.MockedFunction<typeof getAuthJwt>;
+const jwtDecodeMock = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
+const jwtPayloadsByToken = new Map<string, JwtPayload>();
 
 const createWrapper =
   (invalidateNotifications: jest.Mock) =>
@@ -63,15 +75,33 @@ const setActiveIdentity = ({
   address,
   jwt,
   activeProfileProxyId,
+  activeProfileProxyCreatorId,
+  jwtAddress,
+  jwtRole,
 }: {
   readonly address?: string | undefined;
   readonly jwt?: string | null | undefined;
   readonly activeProfileProxyId?: string | null | undefined;
+  readonly activeProfileProxyCreatorId?: string | null | undefined;
+  readonly jwtAddress?: string | undefined;
+  readonly jwtRole?: string | null | undefined;
 }) => {
+  const proxyCreatorId =
+    activeProfileProxyId != null
+      ? (activeProfileProxyCreatorId ?? activeProfileProxyId)
+      : null;
+
+  if (jwt && address) {
+    jwtPayloadsByToken.set(jwt, {
+      sub: jwtAddress ?? address,
+      role: jwtRole !== undefined ? jwtRole : proxyCreatorId,
+    });
+  }
+
   useSeizeConnectContextMock.mockReturnValue({ address } as any);
   useAuthMock.mockReturnValue({
     activeProfileProxy: activeProfileProxyId
-      ? { id: activeProfileProxyId }
+      ? { id: activeProfileProxyId, created_by: { id: proxyCreatorId } }
       : null,
   } as any);
   getAuthJwtMock.mockReturnValue(jwt ?? null);
@@ -80,6 +110,15 @@ const setActiveIdentity = ({
 describe("useMarkWaveNotificationsRead", () => {
   beforeEach(() => {
     apiPostMock.mockReset();
+    jwtPayloadsByToken.clear();
+    jwtDecodeMock.mockReset();
+    jwtDecodeMock.mockImplementation((token) => {
+      const payload = jwtPayloadsByToken.get(token);
+      if (!payload) {
+        throw new Error(`Unexpected JWT decode for ${token}`);
+      }
+      return payload as any;
+    });
     setActiveIdentity({});
   });
 
@@ -455,6 +494,154 @@ describe("useMarkWaveNotificationsRead", () => {
     await expect(firstProxyPromise).resolves.toBeUndefined();
     await expect(queuedProxyPromise).resolves.toBeUndefined();
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the old proxy JWT for a trailing read after a transient JWT clear", async () => {
+    const firstRequest = createDeferred();
+    const trailingRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+
+    apiPostMock
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(trailingRequest.promise);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-1",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+    const firstProxyCallback = result.current;
+
+    const firstProxyPromise = firstProxyCallback("wave-1");
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: null,
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    rerender();
+
+    expect(result.current).toBe(firstProxyCallback);
+
+    const queuedProxyPromise = firstProxyCallback("wave-1");
+
+    firstRequest.resolve();
+
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledTimes(2);
+    });
+    expect(apiPostMock).toHaveBeenNthCalledWith(2, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-proxy-1" },
+    });
+
+    trailingRequest.resolve();
+
+    await expect(firstProxyPromise).resolves.toBeUndefined();
+    await expect(queuedProxyPromise).resolves.toBeUndefined();
+  });
+
+  it("does not replace a cached account header with another account token", async () => {
+    const firstRequest = createDeferred();
+    const trailingRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+
+    apiPostMock
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(trailingRequest.promise);
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const firstPromise = result.current("wave-1");
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-b",
+      jwtAddress: "0xBBB",
+    });
+    rerender();
+
+    const secondPromise = result.current("wave-1");
+
+    firstRequest.resolve();
+
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledTimes(2);
+    });
+    expect(apiPostMock).toHaveBeenNthCalledWith(2, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-a" },
+    });
+
+    trailingRequest.resolve();
+
+    await expect(firstPromise).resolves.toBeUndefined();
+    await expect(secondPromise).resolves.toBeUndefined();
+  });
+
+  it("does not replace a cached proxy header with another proxy token", async () => {
+    const firstRequest = createDeferred();
+    const trailingRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+
+    apiPostMock
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(trailingRequest.promise);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-1",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const firstPromise = result.current("wave-1");
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-2",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+      jwtRole: "creator-2",
+    });
+    rerender();
+
+    const secondPromise = result.current("wave-1");
+
+    firstRequest.resolve();
+
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledTimes(2);
+    });
+    expect(apiPostMock).toHaveBeenNthCalledWith(2, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-proxy-1" },
+    });
+
+    trailingRequest.resolve();
+
+    await expect(firstPromise).resolves.toBeUndefined();
+    await expect(secondPromise).resolves.toBeUndefined();
   });
 
   it("uses the original active account auth header for a trailing read after switching accounts", async () => {

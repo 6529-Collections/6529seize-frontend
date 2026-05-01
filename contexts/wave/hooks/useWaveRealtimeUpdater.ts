@@ -242,7 +242,7 @@ export function useWaveRealtimeUpdater({
         initiateFetchNewestCycle(waveId, serialNoForFetch);
       }
 
-      if (activeWaveId === waveId) {
+      if (activeWaveId === waveId && document.visibilityState === "visible") {
         void (async () => {
           try {
             await removeWaveDeliveredNotifications(waveId);

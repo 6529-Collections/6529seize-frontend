@@ -19,6 +19,16 @@ const mockRemoveAllDeliveredNotifications = jest
 const invalidateNotificationsMock = jest.fn();
 const mockUseAuth = jest.fn();
 
+let documentVisibilityState: DocumentVisibilityState = "visible";
+
+const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
+  documentVisibilityState = state;
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    get: () => documentVisibilityState,
+  });
+};
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
   useSearchParams: () => searchParamsMock,
@@ -115,6 +125,7 @@ describe("MyStreamWaveChat", () => {
   let store: any;
 
   beforeEach(() => {
+    setDocumentVisibilityState("visible");
     capturedPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
@@ -250,6 +261,31 @@ describe("MyStreamWaveChat", () => {
       });
       expect(invalidateNotificationsMock).toHaveBeenCalled();
     });
+  });
+
+  it("does not mark notifications read on hidden unmount", async () => {
+    setDocumentVisibilityState("hidden");
+    searchParamsMock.get.mockReturnValueOnce("5").mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
+
+    const { unmount } = renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    await act(async () => {
+      unmount();
+      await Promise.resolve();
+    });
+
+    expect(mockSetUnreadDividerSerialNo).toHaveBeenCalledWith(null);
+    expect(mockRemoveWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotificationsMock).not.toHaveBeenCalled();
   });
 
   it("skips notification cleanup on unmount for anonymous viewers", async () => {
