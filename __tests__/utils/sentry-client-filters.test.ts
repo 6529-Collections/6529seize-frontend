@@ -354,6 +354,86 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("not_applicable");
   });
 
+  it("drops sampled-out relative API network errors when the breadcrumb URL is filtered", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "[Filtered]",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops sampled-out relative API network errors when the breadcrumb URL is missing", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("keeps events with filtered breadcrumb URLs marked third-party", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "[Filtered]",
+              "url.is_first_party": false,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps events with missing breadcrumb URLs marked third-party", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              "url.is_first_party": false,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
   it("drops first-party relative API paths when sampled out", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({
