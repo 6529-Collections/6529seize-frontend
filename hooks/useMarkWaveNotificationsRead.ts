@@ -27,6 +27,14 @@ const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
 const getAddressKey = (address: string | undefined): string | null =>
   address?.toLowerCase() ?? null;
 
+const getWaveReadIdentityKey = ({
+  addressKey,
+  activeProfileProxyId,
+}: {
+  readonly addressKey: string | null;
+  readonly activeProfileProxyId: string | null;
+}): string => JSON.stringify([addressKey, activeProfileProxyId]);
+
 const getWaveReadRequestKey = ({
   addressKey,
   activeProfileProxyId,
@@ -100,15 +108,21 @@ export function useMarkWaveNotificationsRead(): (
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
   const walletAuth = getAuthJwt();
-  const authHeaders = useMemo(() => getAuthHeaders(walletAuth), [walletAuth]);
-  const authHeadersRef = useRef<AuthHeaders>(authHeaders);
   const invalidateNotificationsRef = useRef(invalidateNotifications);
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
   const addressKey = getAddressKey(address);
+  const identityKey = getWaveReadIdentityKey({
+    addressKey,
+    activeProfileProxyId,
+  });
+  const authHeaders = useMemo(() => getAuthHeaders(walletAuth), [walletAuth]);
+  const authHeadersByIdentityRef = useRef<Map<string, AuthHeaders>>(
+    new Map([[identityKey, authHeaders]])
+  );
 
   useLayoutEffect(() => {
-    authHeadersRef.current = authHeaders;
-  }, [authHeaders]);
+    authHeadersByIdentityRef.current.set(identityKey, authHeaders);
+  }, [authHeaders, identityKey]);
 
   useLayoutEffect(() => {
     invalidateNotificationsRef.current = invalidateNotifications;
@@ -121,10 +135,12 @@ export function useMarkWaveNotificationsRead(): (
         activeProfileProxyId,
         waveId,
       });
+      const identityAuthHeaders =
+        authHeadersByIdentityRef.current.get(identityKey);
       const existingState = inFlightWaveReadRequests.get(requestKey);
       if (existingState) {
         existingState.pending = true;
-        existingState.authHeaders = authHeadersRef.current;
+        existingState.authHeaders = identityAuthHeaders;
         return existingState.promise;
       }
 
@@ -132,7 +148,7 @@ export function useMarkWaveNotificationsRead(): (
         promise: Promise.resolve(),
         pending: false,
         requestKey,
-        authHeaders: authHeadersRef.current,
+        authHeaders: identityAuthHeaders,
       };
       inFlightWaveReadRequests.set(requestKey, state);
       state.promise = startWaveReadRequest(
@@ -142,6 +158,6 @@ export function useMarkWaveNotificationsRead(): (
       );
       return state.promise;
     },
-    [activeProfileProxyId, addressKey]
+    [activeProfileProxyId, addressKey, identityKey]
   );
 }
