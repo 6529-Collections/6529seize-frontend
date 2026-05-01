@@ -4,11 +4,11 @@ import {
   AdditionalMedia,
   MemesSubmissionAdditionalInfoKey,
 } from "@/components/waves/memes/submission/types/OperationalData";
+import { FallbackImage } from "@/components/common/FallbackImage";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
-import { parseIpfsUrl } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import Image from "next/image";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useMemo } from "react";
 
 const MAX_MEDIA = 4;
@@ -87,11 +87,11 @@ export const WaveDropAdditionalInfo = ({
       );
 
       const previewImageValue = additionalMedia.preview_image
-        ? parseIpfsUrl(additionalMedia.preview_image)
+        ? resolveIpfsUrlSync(additionalMedia.preview_image)
         : "";
 
       const promoVideoValue = additionalMedia.promo_video
-        ? parseIpfsUrl(additionalMedia.promo_video)
+        ? resolveIpfsUrlSync(additionalMedia.promo_video)
         : "";
 
       const mediaItemsValue = additionalMedia.artwork_commentary_media
@@ -99,7 +99,7 @@ export const WaveDropAdditionalInfo = ({
           (url): url is string =>
             typeof url === "string" && url.trim().length > 0
         )
-        .map((url) => parseIpfsUrl(url))
+        .map((url) => resolveIpfsUrlSync(url))
         .filter((url): url is string => url.length > 0)
         .map((url) => {
           const isVideo = isVideoUrl(url);
@@ -139,8 +139,12 @@ export const WaveDropAdditionalInfo = ({
           </h3>
           <div className="tw-flex tw-justify-center">
             <div className="tw-relative tw-aspect-[4/3] tw-w-full tw-max-w-2xl tw-overflow-hidden tw-bg-white/[0.02]">
-              <Image
-                src={getScaledImageUri(previewImage, ImageScale.AUTOx600)}
+              <FallbackImage
+                primarySrc={getScaledImageUri(
+                  previewImage,
+                  ImageScale.AUTOx600
+                )}
+                fallbackSrc={previewImage}
                 alt="Preview image"
                 fill
                 sizes="(min-width: 768px) 400px, 100vw"
@@ -206,8 +210,9 @@ export const WaveDropAdditionalInfo = ({
                     />
                   </video>
                 ) : (
-                  <Image
-                    src={item.displayUrl}
+                  <FallbackImage
+                    primarySrc={item.displayUrl}
+                    fallbackSrc={item.url}
                     alt={`Additional media ${index + 1}`}
                     fill
                     sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
