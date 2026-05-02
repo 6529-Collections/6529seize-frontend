@@ -550,7 +550,7 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps the old proxy JWT for a trailing read after a transient JWT clear", async () => {
+  it("queues a trailing read after auth is cleared and uses the next verified JWT", async () => {
     const firstRequest = createDeferred();
     const trailingRequest = createDeferred();
     const invalidateNotifications = jest.fn();
@@ -561,7 +561,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     setActiveIdentity({
       address: "0xAAA",
-      jwt: "jwt-proxy-1",
+      jwt: "jwt-proxy-old",
       activeProfileProxyId: "proxy-1",
       activeProfileProxyCreatorId: "creator-1",
     });
@@ -575,6 +575,12 @@ describe("useMarkWaveNotificationsRead", () => {
 
     const firstProxyPromise = firstProxyCallback("wave-1");
 
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenNthCalledWith(1, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-proxy-old" },
+    });
+
     setActiveIdentity({
       address: "0xAAA",
       jwt: null,
@@ -587,6 +593,18 @@ describe("useMarkWaveNotificationsRead", () => {
 
     const queuedProxyPromise = firstProxyCallback("wave-1");
 
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-new",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    rerender();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+
     firstRequest.resolve();
 
     await waitFor(() => {
@@ -594,13 +612,63 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     expect(apiPostMock).toHaveBeenNthCalledWith(2, {
       endpoint: "notifications/wave/wave-1/read",
-      headers: { Authorization: "Bearer jwt-proxy-1" },
+      headers: { Authorization: "Bearer jwt-proxy-new" },
     });
 
     trailingRequest.resolve();
 
     await expect(firstProxyPromise).resolves.toBeUndefined();
     await expect(queuedProxyPromise).resolves.toBeUndefined();
+    expect(invalidateNotifications).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not use cached headers after auth is cleared", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-old",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+    const firstCallback = result.current;
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: null,
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    rerender();
+
+    expect(result.current).toBe(firstCallback);
+
+    const queuedPromise = result.current("wave-1");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-new",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    rerender();
+
+    await expect(queuedPromise).resolves.toBeUndefined();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-new" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
   it("queues a read while the JWT is missing and sends it when the JWT is verified", async () => {

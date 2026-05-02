@@ -981,8 +981,11 @@ const createReactQueryContextValue = (
   };
 
   const invalidateNotifications = () => {
-    queryClient.invalidateQueries({
+    void queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
     });
   };
 

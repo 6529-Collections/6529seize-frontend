@@ -293,6 +293,11 @@ export function useMarkWaveNotificationsRead(): (
   }, [invalidateNotifications]);
 
   useLayoutEffect(() => {
+    if (walletAuth === null) {
+      authHeadersByIdentityRef.current.clear();
+      return;
+    }
+
     if (verifiedAuthHeaders) {
       authHeadersByIdentityRef.current.set(identityKey, verifiedAuthHeaders);
       flushPendingWaveReadRequests({
@@ -301,7 +306,7 @@ export function useMarkWaveNotificationsRead(): (
         invalidateNotificationsRef,
       });
     }
-  }, [identityKey, verifiedAuthHeaders]);
+  }, [identityKey, verifiedAuthHeaders, walletAuth]);
 
   return useCallback(
     (waveId: string): Promise<void> => {
