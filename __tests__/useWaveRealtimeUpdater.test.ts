@@ -14,7 +14,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: undefined }),
+  useSeizeConnectContext: () => ({ address: "0xAAA" }),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -22,7 +22,17 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
-  getAuthJwt: () => null,
+  getAuthJwt: () => "test-jwt",
+}));
+
+jest.mock("jwt-decode", () => ({
+  jwtDecode: (token: string) => {
+    if (token !== "test-jwt") {
+      throw new Error(`Unexpected JWT decode for ${token}`);
+    }
+
+    return { sub: "0xAAA", role: null };
+  },
 }));
 
 jest.mock("@/services/api/drop-api", () => ({
@@ -242,6 +252,7 @@ describe("useWaveRealtimeUpdater", () => {
     );
     expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
       endpoint: "notifications/wave/wave1/read",
+      headers: { Authorization: "Bearer test-jwt" },
     });
   });
 

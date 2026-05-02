@@ -41,6 +41,9 @@ jest.mock("@/services/api/common-api");
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
 }));
+jest.mock("jwt-decode", () => ({
+  jwtDecode: jest.fn(),
+}));
 jest.mock("next/navigation");
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -136,6 +139,8 @@ const mockFetchNextPage = jest.fn();
 const mockWaitAndRevealDrop = jest.fn();
 const mockRemoveNotifications = jest.fn();
 const mockCommonApiPost = jest.fn();
+const mockAddress = "0xAAA";
+const mockJwt = "test-jwt";
 
 const useVirtualizedWaveDropsMock =
   useVirtualizedWaveDrops as jest.MockedFunction<
@@ -290,11 +295,18 @@ function setupMocks(options: MockSetupOptions = {}) {
 
   require("@/components/auth/SeizeConnectContext").useSeizeConnectContext.mockReturnValue(
     {
-      address: undefined,
+      address: mockAddress,
     }
   );
 
-  require("@/services/auth/auth.utils").getAuthJwt.mockReturnValue(null);
+  require("@/services/auth/auth.utils").getAuthJwt.mockReturnValue(mockJwt);
+  require("jwt-decode").jwtDecode.mockImplementation((token: string) => {
+    if (token !== mockJwt) {
+      throw new Error(`Unexpected JWT decode for ${token}`);
+    }
+
+    return { sub: mockAddress, role: null };
+  });
 
   // Setup typing mock
   require("@/hooks/useWaveIsTyping").useWaveIsTyping.mockReturnValue(
@@ -1087,6 +1099,7 @@ describe("WaveDropsAll", () => {
       await waitFor(() => {
         expect(mockCommonApiPost).toHaveBeenCalledWith({
           endpoint: "notifications/wave/test-wave/read",
+          headers: { Authorization: `Bearer ${mockJwt}` },
         });
       });
 
@@ -1155,6 +1168,7 @@ describe("WaveDropsAll", () => {
       await waitFor(() => {
         expect(mockCommonApiPost).toHaveBeenCalledWith({
           endpoint: "notifications/wave/test-wave/read",
+          headers: { Authorization: `Bearer ${mockJwt}` },
         });
       });
     });
