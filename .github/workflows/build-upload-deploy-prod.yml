@@ -90,9 +90,9 @@ jobs:
             cp -r .platform .deploy-bundle/
           fi
 
-          # Next standalone includes a dangling pnpm symlink for semver that
-          # Elastic Beanstalk trips over during StageApplication ownership fixes.
-          rm -f .deploy-bundle/node_modules/.pnpm/node_modules/semver
+          # Next standalone can include dangling pnpm symlinks that Elastic
+          # Beanstalk trips over during StageApplication ownership fixes.
+          find .deploy-bundle -xtype l -delete
 
           for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
             if [ -f ".next/$file" ]; then

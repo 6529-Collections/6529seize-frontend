@@ -108,6 +108,9 @@ const CreateDropInput = forwardRef<
       mentionedUser: Omit<MentionedUser, "current_handle">
     ) => void;
     readonly onMentionedWave: (mentionedWave: MentionedWave) => void;
+    readonly onAttachmentFiles?: ((files: File[]) => void) | undefined;
+    readonly hasValidationError?: boolean | undefined;
+    readonly validationHelperText?: string | null | undefined;
   }
 >(
   (
@@ -125,6 +128,9 @@ const CreateDropInput = forwardRef<
       onReferencedNft,
       onMentionedUser,
       onMentionedWave,
+      onAttachmentFiles,
+      hasValidationError = false,
+      validationHelperText = null,
       onDrop,
     },
     ref
@@ -311,7 +317,7 @@ const CreateDropInput = forwardRef<
                 ref={hashtagPluginRef}
               />
               <MaxLengthPlugin maxLength={25000} />
-              <DragDropPastePlugin />
+              <DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />
               <ListPlugin />
               <PlainTextPastePlugin />
               <MarkdownShortcutPlugin
@@ -330,6 +336,14 @@ const CreateDropInput = forwardRef<
             </div>
           </div>
         </LexicalComposer>
+        {hasValidationError && validationHelperText && (
+          <div
+            role="alert"
+            className="tw-mt-2 tw-text-xs tw-font-medium tw-text-error"
+          >
+            {validationHelperText}
+          </div>
+        )}
       </div>
     );
   }
