@@ -305,6 +305,10 @@ export function useMarkWaveNotificationsRead(): (
 
   return useCallback(
     (waveId: string): Promise<void> => {
+      if (addressKey === null) {
+        return Promise.resolve();
+      }
+
       const requestKey = getWaveReadRequestKey({
         addressKey,
         activeProfileProxyId,

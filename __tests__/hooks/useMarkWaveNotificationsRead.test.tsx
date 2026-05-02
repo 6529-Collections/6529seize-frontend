@@ -141,6 +141,37 @@ describe("useMarkWaveNotificationsRead", () => {
     });
   });
 
+  it("does not queue a read before the wallet address is known", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({ address: undefined, jwt: null });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const noAddressPromise = result.current("wave-1");
+
+    await expect(noAddressPromise).resolves.toBeUndefined();
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    rerender();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    await expect(result.current("wave-1")).resolves.toBeUndefined();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-a" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
   it("sends one trailing read after two calls for the same wave", async () => {
     const firstRequest = createDeferred();
     const trailingRequest = createDeferred();
