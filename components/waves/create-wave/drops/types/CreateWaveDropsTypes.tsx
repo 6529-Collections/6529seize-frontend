@@ -3,8 +3,6 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import CreateWaveDropsType from "./CreateWaveDropsType";
 import { ExtendedWaveParticipationRequirement } from "./CreateWaveDropsTypes.constants";
 
-export { ExtendedWaveParticipationRequirement };
-
 export default function CreateWaveDropsTypes({
   requiredTypes,
   onRequiredTypeChange,

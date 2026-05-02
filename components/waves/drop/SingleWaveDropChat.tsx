@@ -43,8 +43,10 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     drop: drop,
     partId: 1,
   });
-  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
-    useApprovalWaveStatus({ wave });
+  const { winningThreshold, isVotingControlsLocked } = useApprovalWaveStatus({
+    wave,
+  });
+  const fixedDropMode = isVotingControlsLocked ? DropMode.CHAT : DropMode.BOTH;
 
   const handleDropAction = ({
     targetDrop,
@@ -100,7 +102,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                     dropId={drop.id}
                     isMuted={wave.metrics.muted}
                     winningThreshold={winningThreshold}
-                    isVotingClosed={isVotingClosed}
+                    isVotingClosed={isVotingControlsLocked}
                   />
                 </div>
                 <div
@@ -122,7 +124,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                       onDropAddedToQueue={resetActiveDrop}
                       wave={wave}
                       dropId={drop.id}
-                      fixedDropMode={DropMode.BOTH}
+                      fixedDropMode={fixedDropMode}
                     />
                   </CreateDropWaveWrapper>
                 </div>

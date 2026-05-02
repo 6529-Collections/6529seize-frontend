@@ -19,6 +19,7 @@ const mockRemoveAllDeliveredNotifications = jest
   .mockResolvedValue(undefined);
 const invalidateNotificationsMock = jest.fn();
 const mockUseAuth = jest.fn();
+const mockApprovalStatus = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
@@ -35,11 +36,17 @@ jest.mock("@/hooks/useWave", () => ({
   }),
 }));
 
+jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
+  useApprovalWaveStatus: (args: any) => mockApprovalStatus(args),
+}));
+
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ waveViewStyle: { height: "1px" } }),
 }));
 
 const capturedPropsHolder = { current: {} as any };
+const capturedCreatorPropsHolder = { current: {} as any };
+const capturedMemesButtonPropsHolder = { current: {} as any };
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
   __esModule: true,
   default: (props: any) => {
@@ -58,15 +65,26 @@ jest.mock("@/components/waves/CreateDropWaveWrapper", () => ({
 
 jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   __esModule: true,
-  default: () => <div data-testid="creator" />,
-  DropMode: { BOTH: "BOTH" },
+  default: (props: any) => {
+    capturedCreatorPropsHolder.current = props;
+    return <div data-testid="creator" data-mode={props.fixedDropMode} />;
+  },
+  DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
 }));
 
 jest.mock(
   "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="memes-btn" />,
+    default: (props: any) => {
+      capturedMemesButtonPropsHolder.current = props;
+      return (
+        <div
+          data-testid="memes-btn"
+          data-locked={String(props.isSubmissionLocked)}
+        />
+      );
+    },
   })
 );
 
@@ -114,6 +132,8 @@ describe("MyStreamWaveChat", () => {
 
   beforeEach(() => {
     capturedPropsHolder.current = {};
+    capturedCreatorPropsHolder.current = {};
+    capturedMemesButtonPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
     searchParamsMock.toString.mockReset();
@@ -125,6 +145,11 @@ describe("MyStreamWaveChat", () => {
     mockRemoveWaveDeliveredNotifications.mockClear();
     mockRemoveAllDeliveredNotifications.mockClear();
     invalidateNotificationsMock.mockClear();
+    mockApprovalStatus.mockReset();
+    mockApprovalStatus.mockReturnValue({
+      winningThreshold: null,
+      isVotingControlsLocked: false,
+    });
     mockUseAuth.mockReturnValue({
       connectedProfile: { handle: "tester" },
     });
@@ -182,10 +207,11 @@ describe("MyStreamWaveChat", () => {
     });
     expect(replaceMock).not.toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBeNull();
+    expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("BOTH");
     expect(screen.queryByTestId("memes-btn")).toBeNull();
   });
 
-  it("passes approve wave state to wave drops", async () => {
+  it("locks approve submissions from chat while keeping drop voting state", async () => {
     const approveWave = {
       ...wave,
       wave: {
@@ -198,6 +224,11 @@ describe("MyStreamWaveChat", () => {
 
     searchParamsMock.get.mockReturnValue(null);
     searchParamsMock.toString.mockReturnValue("");
+    mockIsMemesWave = true;
+    mockApprovalStatus.mockReturnValue({
+      winningThreshold: 12,
+      isVotingControlsLocked: true,
+    });
 
     await act(async () => {
       renderWithProvider(
@@ -212,6 +243,10 @@ describe("MyStreamWaveChat", () => {
 
     expect(capturedPropsHolder.current.winningThreshold).toBe(12);
     expect(capturedPropsHolder.current.isVotingClosed).toBe(true);
+    expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
+    expect(capturedMemesButtonPropsHolder.current.isSubmissionLocked).toBe(
+      true
+    );
   });
 
   it("keeps serialNo until chat view renders", async () => {

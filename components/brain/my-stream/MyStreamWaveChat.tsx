@@ -235,8 +235,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = () => {
     setActiveDropForWave(null);
   };
-  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
-    useApprovalWaveStatus({ wave });
+  const { winningThreshold, isVotingControlsLocked } = useApprovalWaveStatus({
+    wave,
+  });
+  const fixedDropMode = isVotingControlsLocked ? DropMode.CHAT : DropMode.BOTH;
 
   if (viewMode === "gallery") {
     return (
@@ -275,7 +277,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           dropId={null}
           isMuted={wave.metrics.muted}
           winningThreshold={winningThreshold}
-          isVotingClosed={isVotingClosed}
+          isVotingClosed={isVotingControlsLocked}
         />
         {!(isApp && editingDropId) && (
           <div className="tw-mt-auto">
@@ -286,13 +288,16 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
                 onDropAddedToQueue={onCancelReplyQuote}
                 wave={wave}
                 dropId={null}
-                fixedDropMode={DropMode.BOTH}
+                fixedDropMode={fixedDropMode}
               />
             </CreateDropWaveWrapper>
           </div>
         )}
         {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (
-          <MobileMemesArtSubmissionBtn wave={wave} />
+          <MobileMemesArtSubmissionBtn
+            wave={wave}
+            isSubmissionLocked={isVotingControlsLocked}
+          />
         )}
       </div>
     </UnreadDividerProvider>
