@@ -14,7 +14,7 @@ import {
   useRef,
 } from "react";
 
-type AuthHeaders = Record<string, string> | undefined;
+type AuthHeaders = Record<string, string>;
 
 interface WaveReadJwtPayload {
   readonly sub?: string | undefined;
@@ -51,8 +51,9 @@ const getWaveReadRequestKey = ({
   readonly waveId: string;
 }): string => JSON.stringify([addressKey, activeProfileProxyId, waveId]);
 
-const getAuthHeaders = (walletAuth: string | null): AuthHeaders =>
-  walletAuth ? { Authorization: `Bearer ${walletAuth}` } : undefined;
+const getAuthHeaders = (walletAuth: string): AuthHeaders => ({
+  Authorization: `Bearer ${walletAuth}`,
+});
 
 const getVerifiedAuthHeaders = ({
   walletAuth,
@@ -62,7 +63,7 @@ const getVerifiedAuthHeaders = ({
   readonly walletAuth: string | null;
   readonly addressKey: string | null;
   readonly activeProfileProxyCreatorId: string | null;
-}): AuthHeaders => {
+}): AuthHeaders | undefined => {
   if (!walletAuth || !addressKey) {
     return undefined;
   }
@@ -95,7 +96,7 @@ const sendWaveReadRequest = async (
 ): Promise<void> => {
   await commonApiPostWithoutBodyAndResponse({
     endpoint: `notifications/wave/${waveId}/read`,
-    ...(authHeaders ? { headers: authHeaders } : {}),
+    headers: authHeaders,
   });
   invalidateNotificationsRef.current();
 };
@@ -192,6 +193,10 @@ export function useMarkWaveNotificationsRead(): (
       });
       const identityAuthHeaders =
         authHeadersByIdentityRef.current.get(identityKey);
+      if (!identityAuthHeaders) {
+        return Promise.resolve();
+      }
+
       const existingState = inFlightWaveReadRequests.get(requestKey);
       if (existingState) {
         existingState.pending = true;
