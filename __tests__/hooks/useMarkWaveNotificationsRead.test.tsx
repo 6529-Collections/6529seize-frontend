@@ -122,6 +122,23 @@ describe("useMarkWaveNotificationsRead", () => {
     setActiveIdentity({});
   });
 
+  it("treats a missing active profile proxy as no proxy", async () => {
+    const invalidateNotifications = jest.fn();
+
+    useAuthMock.mockReturnValue({} as any);
+
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(result.current("wave-1")).resolves.toBeUndefined();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+    });
+  });
+
   it("sends one trailing read after two calls for the same wave", async () => {
     const firstRequest = createDeferred();
     const trailingRequest = createDeferred();

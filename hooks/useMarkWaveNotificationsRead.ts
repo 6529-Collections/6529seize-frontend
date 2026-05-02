@@ -150,8 +150,9 @@ export function useMarkWaveNotificationsRead(): (
   const walletAuth = getAuthJwt();
   const invalidateNotificationsRef = useRef(invalidateNotifications);
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
-  const activeProfileProxyCreatorId =
-    activeProfileProxy !== null ? activeProfileProxy.created_by.id : null;
+  const activeProfileProxyCreatorId = activeProfileProxy
+    ? activeProfileProxy.created_by.id
+    : null;
   const addressKey = getAddressKey(address);
   const identityKey = getWaveReadIdentityKey({
     addressKey,
