@@ -10,6 +10,7 @@ interface WaveLeaderboardDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onSourceDropDeleted?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
@@ -18,6 +19,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   onDropClick,
   onSourceDropDeleted,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   const { LeaderboardDrop } = useWaveLeaderboardRendererSet(wave.id);
   const winningThreshold =
@@ -30,6 +32,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       onDropClick={onDropClick}
       onSourceDropDeleted={onSourceDropDeleted}
       isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
     />
   );

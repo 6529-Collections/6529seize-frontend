@@ -15,6 +15,7 @@ interface WaveLeaderboardGridProps {
   readonly sort: WaveDropsLeaderboardSort;
   readonly mode: WaveLeaderboardGridMode;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
@@ -27,6 +28,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   sort,
   mode,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
   onDropClick,
   curatedByGroupId,
   minPrice,
@@ -88,6 +90,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
             drop={drop}
             mode={mode}
             isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
             winningThreshold={winningThreshold}
             onDropClick={onDropClick}
           />

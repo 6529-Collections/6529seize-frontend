@@ -37,6 +37,7 @@ interface WaveLeaderboardGalleryItemProps {
   readonly activeSort?: WaveDropsLeaderboardSort | undefined;
   readonly animationKey?: number | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
 }
 
@@ -90,19 +91,21 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     activeSort,
     animationKey = 0,
     isVotingClosed = false,
+    isVotingControlsLocked = false,
     winningThreshold,
   }) => {
+    const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
     const {
       isOpen: isVoteModalOpen,
       open: openVoteModal,
       close: closeVoteModal,
-    } = useVotingModalState(isVotingClosed);
+    } = useVotingModalState(isVotingActionLocked);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
     const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
     const { hasTouchScreen } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
-    const canShowVotingAction = canShowVote && !isVotingClosed;
+    const canShowVotingAction = canShowVote && !isVotingActionLocked;
     const primaryMedia = drop.parts[0]?.media[0];
     const isPrimaryMediaVideo = primaryMedia?.mime_type.startsWith("video/");
     const mediaImageScale = isTabletOrSmaller

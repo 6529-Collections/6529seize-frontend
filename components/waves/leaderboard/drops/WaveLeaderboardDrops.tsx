@@ -15,6 +15,7 @@ interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onCreateDrop?: (() => void) | undefined;
   readonly curatedByGroupId?: string | undefined;
@@ -27,6 +28,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
   sort,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
   onDropClick,
   onCreateDrop,
   curatedByGroupId,
@@ -80,6 +82,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
           onDropClick={onDropClick}
           onSourceDropDeleted={handleSourceDropDeleted}
           isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
       ))}
       {isFetchingNextPage && <WaveLeaderboardLoadingBar />}

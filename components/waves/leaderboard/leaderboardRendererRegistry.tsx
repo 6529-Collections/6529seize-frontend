@@ -22,6 +22,7 @@ interface WaveLeaderboardDropRendererProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onSourceDropDeleted?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
 }
 
@@ -46,12 +47,19 @@ const WAVE_LEADERBOARD_VARIANT_OVERRIDES: Readonly<
 
 const DefaultLeaderboardDropRenderer: React.FC<
   WaveLeaderboardDropRendererProps
-> = ({ drop, onDropClick, isVotingClosed, winningThreshold }) => {
+> = ({
+  drop,
+  onDropClick,
+  isVotingClosed,
+  isVotingControlsLocked,
+  winningThreshold,
+}) => {
   return (
     <DefaultWaveLeaderboardDrop
       drop={drop}
       onDropClick={onDropClick}
       isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
     />
   );
@@ -59,12 +67,19 @@ const DefaultLeaderboardDropRenderer: React.FC<
 
 const QuorumLeaderboardDropRenderer: React.FC<
   WaveLeaderboardDropRendererProps
-> = ({ drop, onDropClick, isVotingClosed, winningThreshold }) => {
+> = ({
+  drop,
+  onDropClick,
+  isVotingClosed,
+  isVotingControlsLocked,
+  winningThreshold,
+}) => {
   return (
     <QuorumWaveLeaderboardDrop
       drop={drop}
       onDropClick={onDropClick}
       isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
     />
   );

@@ -45,6 +45,7 @@ describe("WaveLeaderboardDrop", () => {
       onDropClick,
       onSourceDropDeleted: undefined,
       isVotingClosed: false,
+      isVotingControlsLocked: false,
       winningThreshold: null,
     });
     expect(screen.getByTestId("resolved-renderer")).toHaveTextContent("d1");
@@ -93,5 +94,18 @@ describe("WaveLeaderboardDrop", () => {
     );
 
     expect(rendererProps.isVotingClosed).toBe(true);
+  });
+
+  it("passes locked voting controls state to the resolved renderer", () => {
+    render(
+      <WaveLeaderboardDrop
+        drop={drop}
+        wave={wave}
+        onDropClick={onDropClick}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(rendererProps.isVotingControlsLocked).toBe(true);
   });
 });

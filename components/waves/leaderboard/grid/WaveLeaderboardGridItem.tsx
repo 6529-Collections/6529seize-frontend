@@ -42,6 +42,7 @@ interface WaveLeaderboardGridItemProps {
   readonly drop: ExtendedDrop;
   readonly mode: WaveLeaderboardGridMode;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
@@ -182,7 +183,14 @@ function useOverflowGradient({
 
 export const WaveLeaderboardGridItem: React.FC<
   WaveLeaderboardGridItemProps
-> = ({ drop, mode, isVotingClosed = false, winningThreshold, onDropClick }) => {
+> = ({
+  drop,
+  mode,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
+  winningThreshold,
+  onDropClick,
+}) => {
   const isCompactMode = mode === "compact";
   const isContentOnlyMode = mode === "content_only";
   const activePart = drop.parts[0];
@@ -199,13 +207,14 @@ export const WaveLeaderboardGridItem: React.FC<
     hasTouchScreen,
     preventDefault: false,
   });
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
   const {
     isOpen: isVoteModalOpen,
     open: openVoteModal,
     close: closeVoteModal,
-  } = useVotingModalState(isVotingClosed);
+  } = useVotingModalState(isVotingActionLocked);
   const { canShowVote } = useDropInteractionRules(drop);
-  const canShowVotingAction = canShowVote && !isVotingClosed;
+  const canShowVotingAction = canShowVote && !isVotingActionLocked;
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [innerEl, setInnerEl] = useState<HTMLDivElement | null>(null);
   const [compactTextViewportEl, setCompactTextViewportEl] =

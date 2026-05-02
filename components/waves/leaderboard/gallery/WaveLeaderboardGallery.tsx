@@ -12,6 +12,7 @@ interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
@@ -23,6 +24,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   wave,
   sort,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
   onDropClick,
   curatedByGroupId,
   minPrice,
@@ -86,6 +88,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
             activeSort={sort}
             animationKey={animationKey}
             isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
             winningThreshold={winningThreshold}
           />
         ))}

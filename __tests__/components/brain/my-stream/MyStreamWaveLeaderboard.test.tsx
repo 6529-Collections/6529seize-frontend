@@ -15,6 +15,8 @@ const useWaveDecisions = jest.fn();
 const replace = jest.fn();
 let searchParamsString = "";
 let dropsProps: any;
+let galleryProps: any;
+let gridProps: any;
 let createDropProps: any[] = [];
 let curationModalProps: any;
 let approvalStatusProps: any;
@@ -98,12 +100,18 @@ jest.mock("@/components/waves/leaderboard/drops/WaveLeaderboardDrops", () => ({
 }));
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGallery",
-  () => ({ WaveLeaderboardGallery: () => <div data-testid="gallery" /> })
+  () => ({
+    WaveLeaderboardGallery: (props: any) => {
+      galleryProps = props;
+      return <div data-testid="gallery" />;
+    },
+  })
 );
 jest.mock("@/components/waves/leaderboard/grid/WaveLeaderboardGrid", () => ({
-  WaveLeaderboardGrid: (props: any) => (
-    <div data-testid="grid" data-mode={props.mode} />
-  ),
+  WaveLeaderboardGrid: (props: any) => {
+    gridProps = props;
+    return <div data-testid="grid" data-mode={props.mode} />;
+  },
 }));
 jest.mock(
   "@/components/waves/memes/MemesArtSubmissionModal",
@@ -146,6 +154,8 @@ describe("MyStreamWaveLeaderboard", () => {
     jest.clearAllMocks();
     searchParamsString = "";
     dropsProps = null;
+    galleryProps = null;
+    gridProps = null;
     createDropProps = [];
     curationModalProps = undefined;
     approvalStatusProps = undefined;
@@ -223,6 +233,8 @@ describe("MyStreamWaveLeaderboard", () => {
     renderLeaderboard();
 
     expect(headerProps.viewMode).toBe("grid");
+    expect(galleryProps.isVotingClosed).toBe(false);
+    expect(galleryProps.isVotingControlsLocked).toBe(false);
     await user.click(screen.getByTestId("header"));
     expect(screen.getByTestId("memes")).toBeInTheDocument();
   });
@@ -327,6 +339,8 @@ describe("MyStreamWaveLeaderboard", () => {
       "data-mode",
       "content_only"
     );
+    expect(gridProps.isVotingClosed).toBe(false);
+    expect(gridProps.isVotingControlsLocked).toBe(false);
   });
 
   it("reads curation group from URL and keeps price filters local", () => {
@@ -571,6 +585,7 @@ describe("MyStreamWaveLeaderboard", () => {
       pageSize: undefined,
     });
     expect(dropsProps.isVotingClosed).toBe(true);
+    expect(dropsProps.isVotingControlsLocked).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();
     expect(dropsProps.onCreateDrop).toBeUndefined();
 
@@ -619,7 +634,8 @@ describe("MyStreamWaveLeaderboard", () => {
       )
     ).toBe(true);
     expect(approvalStatusProps.approvedCount).toBeNull();
-    expect(dropsProps.isVotingClosed).toBe(true);
+    expect(dropsProps.isVotingClosed).toBe(false);
+    expect(dropsProps.isVotingControlsLocked).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();
     expect(dropsProps.onCreateDrop).toBeUndefined();
 
@@ -675,7 +691,8 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(approvalStatusProps.retryApprovalStatus).toEqual(
       expect.any(Function)
     );
-    expect(dropsProps.isVotingClosed).toBe(true);
+    expect(dropsProps.isVotingClosed).toBe(false);
+    expect(dropsProps.isVotingControlsLocked).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();
     expect(dropsProps.onCreateDrop).toBeUndefined();
 

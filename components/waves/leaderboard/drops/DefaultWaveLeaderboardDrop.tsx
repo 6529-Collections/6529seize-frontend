@@ -29,6 +29,7 @@ interface DefaultWaveLeaderboardDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation;
 }
 
@@ -45,15 +46,17 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   onDropClick,
   winningThreshold,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
   contentPresentation = "default",
 }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
-  const canShowVotingAction = canShowVote && !isVotingClosed;
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
+  const canShowVotingAction = canShowVote && !isVotingActionLocked;
   const {
     isOpen: isVoteModalOpen,
     open: openVoteModal,
     close: closeVoteModal,
-  } = useVotingModalState(isVotingClosed);
+  } = useVotingModalState(isVotingActionLocked);
   const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
   const suppressNextClickRef = React.useRef(false);

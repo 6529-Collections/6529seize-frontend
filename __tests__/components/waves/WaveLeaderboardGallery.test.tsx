@@ -11,8 +11,18 @@ jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem",
   () => ({
-    WaveLeaderboardGalleryItem: ({ drop, onDropClick }: any) => (
-      <div data-testid="item" onClick={() => onDropClick(drop)}>
+    WaveLeaderboardGalleryItem: ({
+      drop,
+      isVotingClosed,
+      isVotingControlsLocked,
+      onDropClick,
+    }: any) => (
+      <div
+        data-testid="item"
+        data-is-voting-closed={String(isVotingClosed)}
+        data-is-voting-controls-locked={String(isVotingControlsLocked)}
+        onClick={() => onDropClick(drop)}
+      >
         {drop.id}
       </div>
     ),
@@ -40,6 +50,8 @@ function renderGallery(overrides: any) {
       <WaveLeaderboardGallery
         wave={wave}
         sort="RANK"
+        isVotingClosed={overrides.isVotingClosed}
+        isVotingControlsLocked={overrides.isVotingControlsLocked}
         onDropClick={overrides.onDropClick || jest.fn()}
       />
     </AuthContext.Provider>
@@ -64,8 +76,23 @@ it("renders drops with load more button", () => {
   const drops = [
     { id: "d1", parts: [{ media: [{ url: "a", mime_type: "image/jpeg" }] }] },
   ];
-  renderGallery({ drops, hasNextPage: true, fetchNextPage, onDropClick });
+  renderGallery({
+    drops,
+    hasNextPage: true,
+    fetchNextPage,
+    isVotingClosed: true,
+    isVotingControlsLocked: true,
+    onDropClick,
+  });
   expect(screen.getByTestId("item")).toHaveTextContent("d1");
+  expect(screen.getByTestId("item")).toHaveAttribute(
+    "data-is-voting-closed",
+    "true"
+  );
+  expect(screen.getByTestId("item")).toHaveAttribute(
+    "data-is-voting-controls-locked",
+    "true"
+  );
   const button = screen.getByRole("button", { name: "Load more drops" });
   fireEvent.click(button);
   expect(fetchNextPage).toHaveBeenCalled();

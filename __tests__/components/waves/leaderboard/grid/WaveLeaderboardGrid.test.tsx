@@ -14,12 +14,14 @@ jest.mock(
     WaveLeaderboardGridItem: ({
       drop,
       isVotingClosed,
+      isVotingControlsLocked,
       mode,
       onDropClick,
     }: any) => (
       <div
         data-testid="grid-item"
         data-is-voting-closed={String(isVotingClosed)}
+        data-is-voting-controls-locked={String(isVotingControlsLocked)}
         onClick={() => onDropClick(drop)}
       >
         {drop.id}:{mode}
@@ -77,6 +79,7 @@ describe("WaveLeaderboardGrid", () => {
         sort="RANK"
         mode="content_only"
         isVotingClosed={true}
+        isVotingControlsLocked={true}
         onDropClick={onDropClick}
       />
     );
@@ -86,6 +89,10 @@ describe("WaveLeaderboardGrid", () => {
     );
     expect(screen.getByTestId("grid-item")).toHaveAttribute(
       "data-is-voting-closed",
+      "true"
+    );
+    expect(screen.getByTestId("grid-item")).toHaveAttribute(
+      "data-is-voting-controls-locked",
       "true"
     );
     fireEvent.click(screen.getByRole("button", { name: "Load more drops" }));
