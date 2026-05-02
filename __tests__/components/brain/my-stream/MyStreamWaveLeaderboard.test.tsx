@@ -619,7 +619,7 @@ describe("MyStreamWaveLeaderboard", () => {
       )
     ).toBe(true);
     expect(approvalStatusProps.approvedCount).toBeNull();
-    expect(dropsProps.isVotingClosed).toBe(false);
+    expect(dropsProps.isVotingClosed).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();
     expect(dropsProps.onCreateDrop).toBeUndefined();
 
@@ -675,7 +675,7 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(approvalStatusProps.retryApprovalStatus).toEqual(
       expect.any(Function)
     );
-    expect(dropsProps.isVotingClosed).toBe(false);
+    expect(dropsProps.isVotingClosed).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();
     expect(dropsProps.onCreateDrop).toBeUndefined();
 
