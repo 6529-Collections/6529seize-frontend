@@ -28,7 +28,17 @@ interface WaveReadRequestState {
   authHeaders: AuthHeaders;
 }
 
+interface PendingWaveReadRequestState {
+  readonly identityKey: string;
+  readonly requestKey: string;
+  readonly waveId: string;
+  readonly promise: Promise<void>;
+  readonly resolve: () => void;
+  readonly reject: (error: unknown) => void;
+}
+
 const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
+const pendingWaveReadRequests = new Map<string, PendingWaveReadRequestState>();
 
 const getAddressKey = (address: string | undefined): string | null =>
   address?.toLowerCase() ?? null;
@@ -142,6 +152,110 @@ const startWaveReadRequest = async (
   }
 };
 
+const markWaveReadWithAuthHeaders = ({
+  waveId,
+  requestKey,
+  authHeaders,
+  invalidateNotificationsRef,
+}: {
+  readonly waveId: string;
+  readonly requestKey: string;
+  readonly authHeaders: AuthHeaders;
+  readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
+}): Promise<void> => {
+  const existingState = inFlightWaveReadRequests.get(requestKey);
+  if (existingState) {
+    existingState.pending = true;
+    existingState.authHeaders = authHeaders;
+    return existingState.promise;
+  }
+
+  const state: WaveReadRequestState = {
+    promise: Promise.resolve(),
+    pending: false,
+    requestKey,
+    authHeaders,
+  };
+  inFlightWaveReadRequests.set(requestKey, state);
+  state.promise = startWaveReadRequest(
+    waveId,
+    state,
+    invalidateNotificationsRef
+  );
+  return state.promise;
+};
+
+const enqueuePendingWaveReadRequest = ({
+  identityKey,
+  requestKey,
+  waveId,
+}: {
+  readonly identityKey: string;
+  readonly requestKey: string;
+  readonly waveId: string;
+}): Promise<void> => {
+  const existingState = pendingWaveReadRequests.get(requestKey);
+  if (existingState) {
+    return existingState.promise;
+  }
+
+  let resolveQueuedRequest: () => void = () => {};
+  let rejectQueuedRequest: (error: unknown) => void = () => {};
+  const promise = new Promise<void>((resolve, reject) => {
+    resolveQueuedRequest = resolve;
+    rejectQueuedRequest = reject;
+  });
+
+  const state: PendingWaveReadRequestState = {
+    identityKey,
+    requestKey,
+    waveId,
+    promise,
+    resolve: resolveQueuedRequest,
+    reject: rejectQueuedRequest,
+  };
+  pendingWaveReadRequests.set(requestKey, state);
+
+  return promise;
+};
+
+const flushPendingWaveReadRequests = ({
+  identityKey,
+  authHeaders,
+  invalidateNotificationsRef,
+}: {
+  readonly identityKey: string;
+  readonly authHeaders: AuthHeaders;
+  readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
+}): void => {
+  const queuedRequests = Array.from(pendingWaveReadRequests.values()).filter(
+    (state) => state.identityKey === identityKey
+  );
+
+  for (const queuedRequest of queuedRequests) {
+    if (
+      pendingWaveReadRequests.get(queuedRequest.requestKey) !== queuedRequest
+    ) {
+      continue;
+    }
+
+    pendingWaveReadRequests.delete(queuedRequest.requestKey);
+    void (async () => {
+      try {
+        await markWaveReadWithAuthHeaders({
+          waveId: queuedRequest.waveId,
+          requestKey: queuedRequest.requestKey,
+          authHeaders,
+          invalidateNotificationsRef,
+        });
+        queuedRequest.resolve();
+      } catch (error) {
+        queuedRequest.reject(error);
+      }
+    })();
+  }
+};
+
 export function useMarkWaveNotificationsRead(): (
   waveId: string
 ) => Promise<void> {
@@ -175,14 +289,19 @@ export function useMarkWaveNotificationsRead(): (
   );
 
   useLayoutEffect(() => {
-    if (verifiedAuthHeaders) {
-      authHeadersByIdentityRef.current.set(identityKey, verifiedAuthHeaders);
-    }
-  }, [identityKey, verifiedAuthHeaders]);
-
-  useLayoutEffect(() => {
     invalidateNotificationsRef.current = invalidateNotifications;
   }, [invalidateNotifications]);
+
+  useLayoutEffect(() => {
+    if (verifiedAuthHeaders) {
+      authHeadersByIdentityRef.current.set(identityKey, verifiedAuthHeaders);
+      flushPendingWaveReadRequests({
+        identityKey,
+        authHeaders: verifiedAuthHeaders,
+        invalidateNotificationsRef,
+      });
+    }
+  }, [identityKey, verifiedAuthHeaders]);
 
   return useCallback(
     (waveId: string): Promise<void> => {
@@ -194,29 +313,19 @@ export function useMarkWaveNotificationsRead(): (
       const identityAuthHeaders =
         authHeadersByIdentityRef.current.get(identityKey);
       if (!identityAuthHeaders) {
-        return Promise.resolve();
+        return enqueuePendingWaveReadRequest({
+          identityKey,
+          requestKey,
+          waveId,
+        });
       }
 
-      const existingState = inFlightWaveReadRequests.get(requestKey);
-      if (existingState) {
-        existingState.pending = true;
-        existingState.authHeaders = identityAuthHeaders;
-        return existingState.promise;
-      }
-
-      const state: WaveReadRequestState = {
-        promise: Promise.resolve(),
-        pending: false,
+      return markWaveReadWithAuthHeaders({
+        waveId,
         requestKey,
         authHeaders: identityAuthHeaders,
-      };
-      inFlightWaveReadRequests.set(requestKey, state);
-      state.promise = startWaveReadRequest(
-        waveId,
-        state,
-        invalidateNotificationsRef
-      );
-      return state.promise;
+        invalidateNotificationsRef,
+      });
     },
     [activeProfileProxyId, addressKey, identityKey]
   );
