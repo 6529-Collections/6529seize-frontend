@@ -12,7 +12,7 @@ describe("CreateWaveDropsType", () => {
         onRequiredTypeChange={onChange}
       />
     );
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("radio"));
     expect(onChange).toHaveBeenCalledWith(
       ExtendedWaveParticipationRequirement.IMAGE
     );
@@ -26,8 +26,8 @@ describe("CreateWaveDropsType", () => {
         onRequiredTypeChange={() => {}}
       />
     );
-    const checkbox = container.querySelector('input[type="checkbox"]');
-    expect(checkbox).toBeChecked();
+    const radio = container.querySelector('input[type="radio"]');
+    expect(radio).toBeChecked();
     expect(screen.getByText("Audio")).toBeInTheDocument();
   });
 });

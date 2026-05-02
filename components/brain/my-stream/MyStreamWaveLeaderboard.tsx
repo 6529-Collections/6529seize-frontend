@@ -173,6 +173,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     approvedCount,
     closeStatus: approvalCloseStatus,
     isApprovalStatusError,
+    isVotingClosed: isApprovalVotingClosed,
     isVotingControlsLocked: isApprovalVotingControlsLocked,
     retryApprovalStatus,
   } = useApprovalWaveStatus({
@@ -335,7 +336,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardDrops
         wave={wave}
         sort={sort}
-        isVotingClosed={isApprovalVotingControlsLocked}
+        isVotingClosed={isApprovalVotingClosed}
         curatedByGroupId={curatedByGroupId}
         onDropClick={onDropClick}
         minPrice={minPrice}
@@ -349,7 +350,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardGrid
         wave={wave}
         sort={sort}
-        isVotingClosed={isApprovalVotingControlsLocked}
+        isVotingClosed={isApprovalVotingClosed}
         curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}
@@ -363,7 +364,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardGallery
         wave={wave}
         sort={sort}
-        isVotingClosed={isApprovalVotingControlsLocked}
+        isVotingClosed={isApprovalVotingClosed}
         curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}
