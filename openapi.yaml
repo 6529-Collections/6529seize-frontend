@@ -1771,6 +1771,97 @@ paths:
                 $ref: "#/components/schemas/ApiCreateMediaUrlResponse"
         "400":
           description: Invalid request
+  /attachments/multipart-upload:
+    post:
+      tags:
+        - Drops
+      summary: Initialize multipart upload for a document attachment
+      description: >-
+        Requires authentication; content_type must be one of the defined
+        attachment MIME types.
+      operationId: createAttachmentMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateAttachmentMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/ApiCreateAttachmentMultipartUploadResponse
+        "400":
+          description: Invalid request
+  /attachments/multipart-upload/part:
+    post:
+      tags:
+        - Drops
+      summary: Upload a part of an attachment multipart upload
+      description: Requires the user to be authenticated
+      operationId: uploadPartOfAttachmentMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadResponse"
+        "400":
+          description: Invalid request
+  /attachments/multipart-upload/completion:
+    post:
+      tags:
+        - Drops
+      summary: Complete an attachment multipart upload
+      description: Requires the user to be authenticated
+      operationId: completeAttachmentMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCompleteAttachmentMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAttachment"
+        "400":
+          description: Invalid request
+  /attachments/{attachment_id}:
+    get:
+      tags:
+        - Drops
+      summary: Get attachment status and final URL
+      description: Requires the user to be authenticated
+      operationId: getAttachment
+      parameters:
+        - name: attachment_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAttachment"
+        "404":
+          description: Attachment not found
   /drop-media/multipart-upload:
     post:
       tags:
@@ -7245,6 +7336,49 @@ components:
           items:
             type: integer
             format: int64
+    ApiAttachment:
+      type: object
+      required:
+        - attachment_id
+        - file_name
+        - mime_type
+        - kind
+        - status
+      properties:
+        attachment_id:
+          type: string
+        file_name:
+          type: string
+        mime_type:
+          $ref: "#/components/schemas/ApiAttachmentUploadMimeType"
+        kind:
+          $ref: "#/components/schemas/ApiAttachmentKind"
+        status:
+          $ref: "#/components/schemas/ApiAttachmentStatus"
+        url:
+          type: string
+          nullable: true
+        error_reason:
+          type: string
+          nullable: true
+    ApiAttachmentKind:
+      type: string
+      enum:
+        - pdf
+        - csv
+    ApiAttachmentStatus:
+      type: string
+      enum:
+        - uploading
+        - verifying
+        - processing
+        - ready
+        - bad
+    ApiAttachmentUploadMimeType:
+      type: string
+      enum:
+        - application/pdf
+        - text/csv
     ApiAvailableRatingCredit:
       type: object
       required:
@@ -7762,6 +7896,18 @@ components:
           items:
             type: number
             format: int64
+    ApiCompleteAttachmentMultipartUploadRequest:
+      type: object
+      required:
+        - attachment_id
+        - upload_id
+        - key
+        - parts
+      allOf:
+        - $ref: "#/components/schemas/ApiCompleteMultipartUploadRequest"
+      properties:
+        attachment_id:
+          type: string
     ApiCompleteMultipartUploadRequest:
       required:
         - upload_id
@@ -7913,6 +8059,33 @@ components:
             $ref: "#/components/schemas/ApiTokenTdhRank"
         boost_breakdown:
           type: object
+    ApiCreateAttachmentMultipartUploadRequest:
+      type: object
+      required:
+        - content_type
+        - file_name
+      properties:
+        content_type:
+          $ref: "#/components/schemas/ApiAttachmentUploadMimeType"
+        file_name:
+          type: string
+          example: report.pdf
+    ApiCreateAttachmentMultipartUploadResponse:
+      type: object
+      required:
+        - attachment_id
+        - upload_id
+        - key
+        - status
+      properties:
+        attachment_id:
+          type: string
+        upload_id:
+          type: string
+        key:
+          type: string
+        status:
+          $ref: "#/components/schemas/ApiAttachmentStatus"
     ApiCreateDropPart:
       type: object
       required:
@@ -7930,6 +8103,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMedia"
+        attachments:
+          type: array
+          default: []
+          items:
+            $ref: "#/components/schemas/ApiDropAttachmentReference"
     ApiCreateDropRequest:
       type: object
       required:
@@ -8678,6 +8856,14 @@ components:
           $ref: "#/components/schemas/ApiDrop"
         vote:
           $ref: "#/components/schemas/ApiDropVote"
+    ApiDropAttachmentReference:
+      type: object
+      additionalProperties: false
+      required:
+        - attachment_id
+      properties:
+        attachment_id:
+          type: string
     ApiDropBoost:
       type: object
       required:
@@ -8851,6 +9037,7 @@ components:
       required:
         - part_id
         - media
+        - attachments
         - quoted_drop
         - content
       properties:
@@ -8866,6 +9053,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMedia"
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiAttachment"
         quoted_drop:
           anyOf:
             - $ref: "#/components/schemas/ApiQuotedDropResponse"
@@ -9703,8 +9894,6 @@ components:
         - model/gltf-binary
         - video/quicktime
         - image/webp
-        - application/pdf
-        - text/csv
     ApiMemesMintStat:
       type: object
       required:

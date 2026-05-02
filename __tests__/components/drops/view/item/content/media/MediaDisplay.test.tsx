@@ -31,6 +31,9 @@ jest.mock(
   )
 );
 jest.mock("@/components/common/SandboxedExternalIframe", () => (props: any) => {
+  React.useEffect(() => {
+    props.onVisible?.();
+  }, [props.onVisible]);
   mockSandboxedExternalIframe(props);
   return (
     <div
@@ -49,6 +52,10 @@ jest.mock(
       {props.children}
     </button>
   )
+);
+jest.mock(
+  "@/components/drops/view/item/content/media/UnsupportedMediaLink",
+  () => ({ __esModule: true, default: () => <a href="file.txt">file.txt</a> })
 );
 
 jest.mock(
@@ -202,11 +209,25 @@ describe("MediaDisplay", () => {
     );
   });
 
-  it("renders empty fragment for unknown", () => {
-    const { container } = render(
-      <MediaDisplay media_mime_type="text/plain" media_url="file.txt" />
+  it("renders unknown media as a compact link", () => {
+    render(<MediaDisplay media_mime_type="text/plain" media_url="file.txt" />);
+
+    expect(screen.getByRole("link", { name: "file.txt" })).toBeInTheDocument();
+  });
+
+  it("does not render unsupported media preview controls", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="text/plain"
+        media_url="file.txt"
+        disableMediaInteraction
+      />
     );
-    expect(container).toBeEmptyDOMElement();
+
+    expect(
+      screen.queryByRole("button", { name: "Download attachment" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "file.txt" })).toBeInTheDocument();
   });
 
   it("does not auto-advance ipfs html if the timeout fallback is disabled", () => {

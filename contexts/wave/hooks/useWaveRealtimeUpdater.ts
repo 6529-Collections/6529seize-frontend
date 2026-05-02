@@ -1,25 +1,35 @@
 "use client";
 
+import {
+  updateAttachmentInCachedDrops,
+  updateDropInCachedDrops,
+} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import type { WsDropUpdateMessage } from "@/helpers/Types";
+import type {
+  WsAttachmentStatusUpdateMessage,
+  WsDropUpdateMessage,
+} from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
-import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useContext, useEffect, useRef } from "react";
-import { useWaveEligibility } from "../WaveEligibilityContext";
-import type { WaveDataStoreUpdater } from "./types";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   getProtectedReactionIntent,
   recordReactionRealtimeReconciliation,
   type ProtectedReactionIntent,
 } from "@/utils/monitoring/dropReactionMonitoring";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useContext, useEffect, useRef } from "react";
+import { useWaveEligibility } from "../WaveEligibilityContext";
+import type { WaveDataStoreUpdater } from "./types";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -54,6 +64,16 @@ type ProcessIncomingDropFn = (
   dropData: IncomingDrop,
   type: ProcessIncomingDropType
 ) => void;
+
+function getDocument(): Document | null {
+  return typeof globalThis.document === "undefined"
+    ? null
+    : globalThis.document;
+}
+
+function isDocumentVisible(): boolean {
+  return getDocument()?.visibilityState === "visible";
+}
 
 function preserveProtectedReactionFields(
   serverDrop: ApiDrop,
@@ -282,6 +302,62 @@ function buildOptimisticDrop(
   };
 }
 
+function toApiDrop(drop: ExtendedDrop): ApiDrop {
+  const {
+    type: _type,
+    stableKey: _stableKey,
+    stableHash: _stableHash,
+    ...apiDrop
+  } = drop;
+  return apiDrop;
+}
+
+function replaceAttachmentInPart(
+  part: ApiDropPart,
+  attachment: ApiAttachment
+): ApiDropPart {
+  const attachments = part.attachments ?? [];
+  const hasAttachment = attachments.some(
+    (item) => item.attachment_id === attachment.attachment_id
+  );
+
+  if (!hasAttachment) {
+    return part;
+  }
+
+  return {
+    ...part,
+    attachments: attachments.map((item) =>
+      item.attachment_id === attachment.attachment_id ? attachment : item
+    ),
+  };
+}
+
+function replaceAttachmentInDrop(drop: Drop, attachment: ApiAttachment): Drop {
+  if (drop.type !== DropSize.FULL) {
+    return drop;
+  }
+
+  const parts = drop.parts.map((part) =>
+    replaceAttachmentInPart(part, attachment)
+  );
+  const changed = parts.some((part, index) => part !== drop.parts[index]);
+
+  return changed ? { ...drop, parts } : drop;
+}
+
+function replaceAttachmentInDrops(
+  drops: Drop[],
+  attachment: ApiAttachment
+): { drops: Drop[]; changed: boolean } {
+  const updatedDrops = drops.map((drop) =>
+    replaceAttachmentInDrop(drop, attachment)
+  );
+  const changed = updatedDrops.some((drop, index) => drop !== drops[index]);
+
+  return { drops: updatedDrops, changed };
+}
+
 export function useWaveRealtimeUpdater({
   activeWaveId,
   getData,
@@ -300,10 +376,15 @@ export function useWaveRealtimeUpdater({
   const abortControllersRef = useRef<Record<string, AbortController>>({});
   const { refreshEligibility } = useWaveEligibility();
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const queryClient = useQueryClient();
   const tabJustBecameVisibleRef = useRef<boolean>(false);
 
   const markWaveAsRead = useCallback(
     async (waveId: string): Promise<void> => {
+      if (!isDocumentVisible()) {
+        return;
+      }
+
       await commonApiPostWithoutBodyAndResponse({
         endpoint: `notifications/wave/${waveId}/read`,
       });
@@ -326,6 +407,10 @@ export function useWaveRealtimeUpdater({
 
   const clearActiveWaveNotifications = useCallback(
     (waveId: string): void => {
+      if (!isDocumentVisible()) {
+        return;
+      }
+
       void (async () => {
         try {
           await removeWaveDeliveredNotifications(waveId);
@@ -454,8 +539,9 @@ export function useWaveRealtimeUpdater({
           },
         ],
       });
+      updateDropInCachedDrops(queryClient, nextDrop);
     },
-    [getData, updateData]
+    [getData, queryClient, updateData]
   );
 
   const processIncomingDropAsync = useCallback(
@@ -505,13 +591,14 @@ export function useWaveRealtimeUpdater({
         key: waveId,
         drops: [optimisticDrop],
       });
+      updateDropInCachedDrops(queryClient, toApiDrop(optimisticDrop));
 
       if (serialNoForFetch !== null && !optimisticDrop.id.startsWith("temp-")) {
         // Initiate the background fetch for reconciliation
         void initiateFetchNewestCycle(waveId, serialNoForFetch);
       }
 
-      if (activeWaveId === waveId) {
+      if (activeWaveId === waveId && isDocumentVisible()) {
         clearActiveWaveNotifications(waveId);
       }
     },
@@ -522,6 +609,7 @@ export function useWaveRealtimeUpdater({
       handleFetchedDropUpdate,
       initiateFetchNewestCycle,
       isWaveMuted,
+      queryClient,
       refreshEligibilityAfterVisibilityChange,
       registerWave,
       updateData,
@@ -547,6 +635,34 @@ export function useWaveRealtimeUpdater({
       removeDrop(waveId, dropId);
     },
     [removeDrop]
+  );
+
+  const processAttachmentStatusUpdate = useCallback(
+    (attachment: ApiAttachment) => {
+      updateAttachmentInCachedDrops(queryClient, attachment);
+
+      if (!activeWaveId) {
+        return;
+      }
+
+      const currentData = getData(activeWaveId);
+      if (!currentData) {
+        return;
+      }
+
+      const { drops, changed } = replaceAttachmentInDrops(
+        currentData.drops,
+        attachment
+      );
+
+      if (changed) {
+        updateData({
+          key: activeWaveId,
+          drops,
+        });
+      }
+    },
+    [activeWaveId, getData, queryClient, updateData]
   );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
@@ -576,19 +692,32 @@ export function useWaveRealtimeUpdater({
     }
   );
 
+  useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(
+    WsMessageType.ATTACHMENT_STATUS_UPDATE,
+    processAttachmentStatusUpdate
+  );
+
   // Handle tab visibility changes - refresh eligibility when tab becomes visible
   useEffect(() => {
+    const documentRef = getDocument();
+    if (documentRef === null) {
+      return;
+    }
+
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
+      if (isDocumentVisible()) {
         // Mark that tab just became visible, eligibility will be refreshed
         // on the next WebSocket message for any wave
         tabJustBecameVisibleRef.current = true;
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    documentRef.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      documentRef.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
   }, []);
 
   // Cleanup: Cancel all ongoing fetches on unmount

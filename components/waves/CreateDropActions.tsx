@@ -2,8 +2,10 @@
 
 import { publicEnv } from "@/config/env";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import CreateDropGifPicker from "./CreateDropGifPicker";
@@ -45,12 +47,25 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const gifPickerKey = publicEnv.TENOR_API_KEY;
     const gifPickerEnabled = !!gifPickerKey;
     const [showGifPicker, setShowGifPicker] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [isUploadPickerOpen, setIsUploadPickerOpen] = useState(false);
 
     const onSetShowIconsClick = () => {
       setShowOptions(true);
     };
 
+    const onUploadClick = () => {
+      if (isUploadPickerOpen) {
+        setIsUploadPickerOpen(false);
+        return;
+      }
+
+      setIsUploadPickerOpen(true);
+      fileInputRef.current?.click();
+    };
+
     const onFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsUploadPickerOpen(false);
       if (e.target.files) {
         const files: File[] = Array.from(e.target.files);
         handleFileChange(files);
@@ -70,6 +85,17 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [showGifPicker, gifPickerEnabled]);
+
+    useEffect(() => {
+      if (!isUploadPickerOpen) {
+        return;
+      }
+
+      const resetUploadPicker = () => setIsUploadPickerOpen(false);
+      window.addEventListener("focus", resetUploadPicker, { once: true });
+
+      return () => window.removeEventListener("focus", resetUploadPicker);
+    }, [isUploadPickerOpen]);
 
     const expandMotionProps = animateOptions
       ? {
@@ -154,8 +180,14 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   className="tw-flex tw-items-center tw-gap-x-2"
                 >
                   <>
-                    <label
-                      aria-label="Upload a file"
+                    <button
+                      type="button"
+                      aria-label={
+                        isUploadPickerOpen
+                          ? "Close upload picker"
+                          : "Upload a file"
+                      }
+                      onClick={onUploadClick}
                       className={`tw-flex-shrink-0 ${
                         isRequiredMediaMissing
                           ? "tw-text-[#FEDF89]"
@@ -163,33 +195,26 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
                       data-tooltip-id="upload-file-tooltip"
                     >
-                      <input
-                        type="file"
-                        className="tw-hidden"
-                        accept="image/*,video/*,audio/*"
-                        multiple
-                        onChange={onFiles}
-                      />
-                      <svg
-                        className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
+                      <FontAwesomeIcon
+                        icon={faPlus}
                         aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                        />
-                      </svg>
-                    </label>
+                        className={`tw-size-5 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out lg:tw-size-4 ${
+                          isUploadPickerOpen ? "tw-rotate-45" : "tw-rotate-0"
+                        }`}
+                      />
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="tw-hidden"
+                      accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
+                      multiple
+                      onChange={onFiles}
+                    />
                     {!isMobile && (
                       <Tooltip
                         id="upload-file-tooltip"
-                        place="top"
+                        place="top-start"
                         offset={8}
                         opacity={1}
                         positionStrategy="fixed"

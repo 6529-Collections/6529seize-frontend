@@ -39,6 +39,14 @@ jest.mock("@/services/api/drop-api", () => ({
   fetchDropByIdBatched: jest.fn(),
 }));
 
+const mockSetQueriesData = jest.fn();
+
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: jest.fn(() => ({
+    setQueriesData: mockSetQueriesData,
+  })),
+}));
+
 const {
   commonApiPostWithoutBodyAndResponse,
 } = require("@/services/api/common-api");
@@ -47,6 +55,17 @@ const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("useWaveRealtimeUpdater", () => {
+  const setDocumentVisibility = (visibilityState: DocumentVisibilityState) => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: visibilityState,
+    });
+  };
+
+  beforeEach(() => {
+    setDocumentVisibility("visible");
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
@@ -447,6 +466,89 @@ describe("useWaveRealtimeUpdater", () => {
     ]);
   });
 
+  it("updates React Query caches with reconciled protected reactions", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    beginReactionMutation({
+      dropId: "d-cache-stale",
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const currentUser = profile("profile-1", "current-user");
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d-cache-stale",
+            type: DropSize.FULL,
+            stableKey: "stable-key",
+            stableHash: "stable-hash",
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [reactionEntry(":joy:", [currentUser])],
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-cache-stale",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: contextProfileContext(":wave:"),
+      reactions: [
+        reactionEntry(":wave:", [
+          profile("profile-1", "server-current-user"),
+          profile("profile-2", "fresh-wave"),
+        ]),
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-cache-stale",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(mockSetQueriesData).toHaveBeenCalled();
+
+    const cachedDrop = {
+      id: "d-cache-stale",
+      type: DropSize.FULL,
+      stableKey: "cached-stable-key",
+      stableHash: "cached-stable-hash",
+      context_profile_context: contextProfileContext(":wave:"),
+      reactions: [],
+    };
+
+    for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
+      const updatedCacheDrop = updateCachedData(cachedDrop);
+      expect(updatedCacheDrop.context_profile_context.reaction).toBe(":joy:");
+      expect(updatedCacheDrop.reactions).toEqual([
+        reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+        reactionEntry(":joy:", [currentUser]),
+      ]);
+    }
+  });
+
   it("uses the newest local reaction when it changes while refetch is in flight", async () => {
     const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
     beginReactionMutation({
@@ -781,6 +883,28 @@ describe("useWaveRealtimeUpdater", () => {
     expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
       endpoint: "notifications/wave/wave1/read",
     });
+  });
+
+  it("does not call the read endpoint for an active hidden wave", async () => {
+    setDocumentVisibility("hidden");
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d9-hidden", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
   });
 
   it("does not mark non-active wave as read", async () => {
