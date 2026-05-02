@@ -107,7 +107,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: undefined }),
+  useSeizeConnectContext: () => ({ address: "0xAAA" }),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -115,7 +115,17 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
-  getAuthJwt: () => null,
+  getAuthJwt: () => "test-jwt",
+}));
+
+jest.mock("jwt-decode", () => ({
+  jwtDecode: (token: string) => {
+    if (token !== "test-jwt") {
+      throw new Error(`Unexpected JWT decode for ${token}`);
+    }
+
+    return { sub: "0xAAA", role: null };
+  },
 }));
 
 const wave = { id: "10", participation: {}, metrics: { muted: false } } as any;
@@ -140,6 +150,7 @@ describe("MyStreamWaveChat", () => {
     invalidateNotificationsMock.mockClear();
     mockUseAuth.mockReturnValue({
       connectedProfile: { handle: "tester" },
+      activeProfileProxy: null,
     });
     (
       commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
@@ -258,6 +269,7 @@ describe("MyStreamWaveChat", () => {
       expect(mockRemoveWaveDeliveredNotifications).toHaveBeenCalledWith("10");
       expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
         endpoint: "notifications/wave/10/read",
+        headers: { Authorization: "Bearer test-jwt" },
       });
       expect(invalidateNotificationsMock).toHaveBeenCalled();
     });
@@ -291,6 +303,7 @@ describe("MyStreamWaveChat", () => {
   it("skips notification cleanup on unmount for anonymous viewers", async () => {
     mockUseAuth.mockReturnValue({
       connectedProfile: null,
+      activeProfileProxy: null,
     });
 
     const { unmount } = renderWithProvider(
