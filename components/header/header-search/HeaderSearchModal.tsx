@@ -868,7 +868,8 @@ export default function HeaderSearchModal({
     wave !== null &&
     searchMode === SEARCH_MODE.WAVE &&
     trimmedWaveSearchValue.length >= WAVE_SEARCH_MIN_LENGTH;
-  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
+  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
+    useApprovalWaveStatus({ wave });
 
   const {
     drops: waveDropResults,

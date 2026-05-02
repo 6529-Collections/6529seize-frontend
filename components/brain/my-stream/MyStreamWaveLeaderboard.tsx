@@ -52,7 +52,7 @@ interface MyStreamWaveLeaderboardProps {
 interface CreateDropUiState {
   readonly waveId: string;
   readonly submissionExperience: WaveSubmissionExperience | null;
-  readonly isApprovalVotingClosed: boolean;
+  readonly isApprovalVotingControlsLocked: boolean;
 }
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
@@ -145,6 +145,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const {
     decisionPoints: approvalDecisionPoints = [],
     hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
+    isLoadingAllPagesError: isApprovalDecisionPointsLoadError,
+    refetch: retryApprovalDecisionPointsLoad,
+    fetchNextPage: retryApprovalDecisionPointsNextPage,
+    hasNextPage: hasApprovalDecisionPointsNextPage,
   } = useWaveDecisions({
     waveId: wave.id,
     enabled: shouldLoadApprovalDecisionPoints,
@@ -153,32 +157,49 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
       : undefined,
   });
+  const retryApprovalDecisionPoints = useCallback(() => {
+    if (hasApprovalDecisionPointsNextPage) {
+      void retryApprovalDecisionPointsNextPage();
+      return;
+    }
+
+    void retryApprovalDecisionPointsLoad();
+  }, [
+    hasApprovalDecisionPointsNextPage,
+    retryApprovalDecisionPointsLoad,
+    retryApprovalDecisionPointsNextPage,
+  ]);
   const {
     approvedCount,
     closeStatus: approvalCloseStatus,
-    isVotingClosed: isApprovalVotingClosed,
+    isApprovalStatusError,
+    isVotingControlsLocked: isApprovalVotingControlsLocked,
+    retryApprovalStatus,
   } = useApprovalWaveStatus({
     wave,
     ...(shouldLoadApprovalDecisionPoints
       ? {
           decisionPoints: approvalDecisionPoints,
           areDecisionPointsComplete: hasLoadedApprovalDecisionPoints,
+          isDecisionPointsLoadError: isApprovalDecisionPointsLoadError,
+          onRetryDecisionPointsLoad: retryApprovalDecisionPoints,
         }
       : {}),
   });
-  const canOpenCreateDrop = canCreateDrop && !isApprovalVotingClosed;
+  const canOpenCreateDrop = canCreateDrop && !isApprovalVotingControlsLocked;
   const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(
     () => ({
       waveId: wave.id,
       submissionExperience: null,
-      isApprovalVotingClosed,
+      isApprovalVotingControlsLocked,
     })
   );
   const activeCreateDropExperience =
     canOpenCreateDrop &&
     createDropUiState.waveId === wave.id &&
     createDropUiState.submissionExperience === submissionExperience &&
-    createDropUiState.isApprovalVotingClosed === isApprovalVotingClosed
+    createDropUiState.isApprovalVotingControlsLocked ===
+      isApprovalVotingControlsLocked
       ? createDropUiState.submissionExperience
       : null;
   const showToggleableDropInput =
@@ -216,11 +237,11 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     setCreateDropUiState({
       waveId: wave.id,
       submissionExperience,
-      isApprovalVotingClosed,
+      isApprovalVotingControlsLocked,
     });
   }, [
     canOpenCreateDrop,
-    isApprovalVotingClosed,
+    isApprovalVotingControlsLocked,
     submissionExperience,
     wave.id,
   ]);
@@ -314,7 +335,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardDrops
         wave={wave}
         sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
+        isVotingClosed={isApprovalVotingControlsLocked}
         curatedByGroupId={curatedByGroupId}
         onDropClick={onDropClick}
         minPrice={minPrice}
@@ -328,7 +349,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardGrid
         wave={wave}
         sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
+        isVotingClosed={isApprovalVotingControlsLocked}
         curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}
@@ -342,7 +363,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardGallery
         wave={wave}
         sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
+        isVotingClosed={isApprovalVotingControlsLocked}
         curatedByGroupId={curatedByGroupId}
         minPrice={minPrice}
         maxPrice={maxPrice}
@@ -358,6 +379,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         <WaveApprovalStatusBar
           approvedCount={approvedCount}
           closeStatus={approvalCloseStatus}
+          isApprovalStatusError={isApprovalStatusError}
+          retryApprovalStatus={retryApprovalStatus}
           wave={wave}
         />
       ) : (

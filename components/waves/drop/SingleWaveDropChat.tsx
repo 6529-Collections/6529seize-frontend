@@ -43,7 +43,8 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     drop: drop,
     partId: 1,
   });
-  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
+  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
+    useApprovalWaveStatus({ wave });
 
   const handleDropAction = ({
     targetDrop,

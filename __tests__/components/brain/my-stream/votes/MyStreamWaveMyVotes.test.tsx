@@ -11,6 +11,7 @@ let resetProps: any = null;
 const mockApprovalStatus = jest.fn(() => ({
   isApprovalStatusLoading: false,
   isVotingClosed: false,
+  isVotingControlsLocked: false,
 }));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard");
@@ -81,10 +82,15 @@ describe("MyStreamWaveMyVotes", () => {
       isLoading: false,
       hasLoadedAllPages: false,
       isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
     });
     mockApprovalStatus.mockReturnValue({
       isApprovalStatusLoading: false,
       isVotingClosed: false,
+      isVotingControlsLocked: false,
     });
     resetProps = null;
   });
@@ -176,6 +182,10 @@ describe("MyStreamWaveMyVotes", () => {
       isLoading: false,
       hasLoadedAllPages: true,
       isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
@@ -206,6 +216,8 @@ describe("MyStreamWaveMyVotes", () => {
       wave: approveWave,
       decisionPoints,
       areDecisionPointsComplete: true,
+      isDecisionPointsLoadError: false,
+      onRetryDecisionPointsLoad: expect.any(Function),
     });
   });
 
@@ -261,6 +273,15 @@ describe("MyStreamWaveMyVotes", () => {
       isLoading: true,
       hasLoadedAllPages: false,
       isLoadingAllPages: true,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    mockApprovalStatus.mockReturnValue({
+      isApprovalStatusLoading: true,
+      isVotingClosed: false,
+      isVotingControlsLocked: true,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
@@ -310,6 +331,10 @@ describe("MyStreamWaveMyVotes", () => {
       isLoading: false,
       hasLoadedAllPages: true,
       isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
@@ -343,6 +368,7 @@ describe("MyStreamWaveMyVotes", () => {
     mockApprovalStatus.mockReturnValue({
       isApprovalStatusLoading: false,
       isVotingClosed: true,
+      isVotingControlsLocked: true,
     });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [

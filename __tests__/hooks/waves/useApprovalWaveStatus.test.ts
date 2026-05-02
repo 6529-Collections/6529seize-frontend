@@ -61,6 +61,10 @@ describe("useApprovalWaveStatus", () => {
       decisionPoints: [],
       hasLoadedAllPages: false,
       isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
     });
   });
 
@@ -76,7 +80,9 @@ describe("useApprovalWaveStatus", () => {
 
     expect(result.current.closeStatus).toBeNull();
     expect(result.current.isVotingClosed).toBe(false);
+    expect(result.current.isVotingControlsLocked).toBe(false);
     expect(result.current.isApprovalStatusLoading).toBe(false);
+    expect(result.current.isApprovalStatusError).toBe(false);
     expect(result.current.winningThreshold).toBe(8);
 
     act(() => {
@@ -86,6 +92,7 @@ describe("useApprovalWaveStatus", () => {
 
     expect(result.current.closeStatus).toBe("ended");
     expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isVotingControlsLocked).toBe(true);
   });
 
   it("closes on first render when the approval voting end time has passed", () => {
@@ -95,6 +102,7 @@ describe("useApprovalWaveStatus", () => {
 
     expect(result.current.closeStatus).toBe("ended");
     expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isVotingControlsLocked).toBe(true);
   });
 
   it("closes immediately when max approvals are reached", () => {
@@ -109,6 +117,7 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.approvedCount).toBe(2);
     expect(result.current.closeStatus).toBe("max_reached");
     expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isVotingControlsLocked).toBe(true);
   });
 
   it("keeps capped approval status unknown until complete decisions load", () => {
@@ -130,7 +139,9 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.approvedCount).toBeNull();
     expect(result.current.closeStatus).toBeNull();
     expect(result.current.isApprovalStatusLoading).toBe(true);
-    expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isApprovalStatusError).toBe(false);
+    expect(result.current.isVotingClosed).toBe(false);
+    expect(result.current.isVotingControlsLocked).toBe(true);
   });
 
   it("does not start an internal load when incomplete decision points are caller-owned", () => {
@@ -158,7 +169,78 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.approvedCount).toBeNull();
     expect(result.current.closeStatus).toBeNull();
     expect(result.current.isApprovalStatusLoading).toBe(true);
-    expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isApprovalStatusError).toBe(false);
+    expect(result.current.isVotingClosed).toBe(false);
+    expect(result.current.isVotingControlsLocked).toBe(true);
+  });
+
+  it("reports an error when the internal full-decision load fails", () => {
+    const refetch = jest.fn();
+    const wave = createWave({
+      maxWinners: 2,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: null,
+      votingEnd: 2000,
+    });
+    useWaveDecisionsMock.mockReturnValue({
+      decisionPoints: [],
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      refetch,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+
+    const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+    expect(result.current.approvedCount).toBeNull();
+    expect(result.current.closeStatus).toBeNull();
+    expect(result.current.isApprovalStatusLoading).toBe(false);
+    expect(result.current.isApprovalStatusError).toBe(true);
+    expect(result.current.isVotingClosed).toBe(false);
+    expect(result.current.isVotingControlsLocked).toBe(true);
+
+    result.current.retryApprovalStatus?.();
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports an error when caller-owned decision loading fails", () => {
+    const retry = jest.fn();
+    const wave = createWave({
+      maxWinners: 2,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: null,
+      votingEnd: 2000,
+    });
+
+    const { result } = renderHook(() =>
+      useApprovalWaveStatus({
+        wave,
+        decisionPoints: decisionPoints.slice(0, 1),
+        areDecisionPointsComplete: false,
+        isDecisionPointsLoadError: true,
+        onRetryDecisionPointsLoad: retry,
+      })
+    );
+
+    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      enabled: false,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
+    expect(result.current.approvedCount).toBeNull();
+    expect(result.current.closeStatus).toBeNull();
+    expect(result.current.isApprovalStatusLoading).toBe(false);
+    expect(result.current.isApprovalStatusError).toBe(true);
+    expect(result.current.isVotingClosed).toBe(false);
+    expect(result.current.isVotingControlsLocked).toBe(true);
+
+    result.current.retryApprovalStatus?.();
+
+    expect(retry).toHaveBeenCalledTimes(1);
   });
 
   it("closes when complete decision points reach max winners", () => {
@@ -180,6 +262,7 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.approvedCount).toBe(2);
     expect(result.current.closeStatus).toBe("max_reached");
     expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isVotingControlsLocked).toBe(true);
     expect(useWaveDecisionsMock).toHaveBeenCalledWith({
       waveId: "wave-1",
       enabled: false,
@@ -201,6 +284,7 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.approvedCount).toBeNull();
     expect(result.current.closeStatus).toBe("max_reached");
     expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isVotingControlsLocked).toBe(true);
     expect(result.current.isApprovalStatusLoading).toBe(false);
   });
 
@@ -215,6 +299,10 @@ describe("useApprovalWaveStatus", () => {
       decisionPoints,
       hasLoadedAllPages: true,
       isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
     });
 
     const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
@@ -222,6 +310,7 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.approvedCount).toBe(2);
     expect(result.current.closeStatus).toBe("max_reached");
     expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isVotingControlsLocked).toBe(true);
   });
 
   it("returns no approval threshold for non-approve waves", () => {
@@ -237,6 +326,8 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.approvedCount).toBe(0);
     expect(result.current.closeStatus).toBeNull();
     expect(result.current.isApprovalStatusLoading).toBe(false);
+    expect(result.current.isApprovalStatusError).toBe(false);
     expect(result.current.isVotingClosed).toBe(false);
+    expect(result.current.isVotingControlsLocked).toBe(false);
   });
 });

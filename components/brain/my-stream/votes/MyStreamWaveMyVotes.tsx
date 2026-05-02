@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
@@ -44,7 +44,10 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   const {
     decisionPoints: approvalDecisionPoints,
     hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
-    isLoadingAllPages: isLoadingApprovalDecisionPoints,
+    isLoadingAllPagesError: isApprovalDecisionPointsLoadError,
+    refetch: retryApprovalDecisionPointsLoad,
+    fetchNextPage: retryApprovalDecisionPointsNextPage,
+    hasNextPage: hasApprovalDecisionPointsNextPage,
   } = useWaveDecisions({
     waveId: wave.id,
     enabled: shouldLoadApprovalDecisionPoints,
@@ -53,19 +56,29 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
       ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
       : undefined,
   });
-  const { isApprovalStatusLoading, isVotingClosed } = useApprovalWaveStatus({
+  const retryApprovalDecisionPoints = useCallback(() => {
+    if (hasApprovalDecisionPointsNextPage) {
+      void retryApprovalDecisionPointsNextPage();
+      return;
+    }
+
+    void retryApprovalDecisionPointsLoad();
+  }, [
+    hasApprovalDecisionPointsNextPage,
+    retryApprovalDecisionPointsLoad,
+    retryApprovalDecisionPointsNextPage,
+  ]);
+  const { isVotingControlsLocked } = useApprovalWaveStatus({
     wave,
     ...(shouldLoadApprovalDecisionPoints
       ? {
           decisionPoints: approvalDecisionPoints,
           areDecisionPointsComplete: hasLoadedApprovalDecisionPoints,
+          isDecisionPointsLoadError: isApprovalDecisionPointsLoadError,
+          onRetryDecisionPointsLoad: retryApprovalDecisionPoints,
         }
       : {}),
   });
-  const isVotingControlsLocked =
-    isVotingClosed ||
-    isApprovalStatusLoading ||
-    (shouldLoadApprovalDecisionPoints && isLoadingApprovalDecisionPoints);
 
   const { myVotesViewStyle } = useLayout();
 

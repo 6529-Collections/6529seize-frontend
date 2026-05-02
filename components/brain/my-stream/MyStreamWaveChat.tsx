@@ -235,7 +235,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = () => {
     setActiveDropForWave(null);
   };
-  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
+  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
+    useApprovalWaveStatus({ wave });
 
   if (viewMode === "gallery") {
     return (

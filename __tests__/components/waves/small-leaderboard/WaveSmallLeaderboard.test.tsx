@@ -5,7 +5,10 @@ import { AuthContext } from "@/components/auth/Auth";
 const mockHook = jest.fn();
 const mockDrop = jest.fn(() => <div data-testid="drop" />);
 const mockIntersection = jest.fn(() => ({ current: null }));
-const mockApprovalStatus = jest.fn(() => ({ isVotingClosed: false }));
+const mockApprovalStatus = jest.fn(() => ({
+  isVotingClosed: false,
+  isVotingControlsLocked: false,
+}));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   useWaveDropsLeaderboard: (...args: any) => mockHook(...args),
@@ -43,7 +46,10 @@ describe("WaveSmallLeaderboard", () => {
     mockDrop.mockClear();
     mockIntersection.mockClear();
     mockApprovalStatus.mockReset();
-    mockApprovalStatus.mockReturnValue({ isVotingClosed: false });
+    mockApprovalStatus.mockReturnValue({
+      isVotingClosed: false,
+      isVotingControlsLocked: false,
+    });
   });
 
   it("shows placeholder when no drops", () => {
@@ -75,7 +81,10 @@ describe("WaveSmallLeaderboard", () => {
   });
 
   it("passes closed voting state to drops", () => {
-    mockApprovalStatus.mockReturnValue({ isVotingClosed: true });
+    mockApprovalStatus.mockReturnValue({
+      isVotingClosed: true,
+      isVotingControlsLocked: true,
+    });
     renderComp({
       drops: [{ id: 1 }],
       fetchNextPage: jest.fn(),

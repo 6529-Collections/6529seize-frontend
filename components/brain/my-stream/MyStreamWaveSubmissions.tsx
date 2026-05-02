@@ -33,7 +33,8 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
   const { leaderboardViewStyle } = useLayout();
-  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
+  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
+    useApprovalWaveStatus({ wave });
   const {
     drops,
     fetchNextPage,

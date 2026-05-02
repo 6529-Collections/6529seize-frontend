@@ -160,6 +160,10 @@ describe("MyStreamWaveLeaderboard", () => {
       isFetching: false,
       hasLoadedAllPages: false,
       isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
     });
     useLocalPreference.mockImplementation((_: any, def: any) => [
       def,
@@ -618,6 +622,66 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(dropsProps.isVotingClosed).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();
     expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("blocks create drop and passes retry when approval status loading fails", async () => {
+    const user = userEvent.setup();
+    const retryApprovalDecisions = jest.fn();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 2,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      refetch: retryApprovalDecisions,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(approvalStatusProps.approvedCount).toBeNull();
+    expect(approvalStatusProps.isApprovalStatusError).toBe(true);
+    expect(approvalStatusProps.retryApprovalStatus).toEqual(
+      expect.any(Function)
+    );
+    expect(dropsProps.isVotingClosed).toBe(true);
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    approvalStatusProps.retryApprovalStatus();
+
+    expect(retryApprovalDecisions).toHaveBeenCalledTimes(1);
 
     await user.click(screen.getByTestId("header"));
 

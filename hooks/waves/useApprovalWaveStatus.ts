@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { Time } from "@/helpers/time";
@@ -20,6 +20,8 @@ import {
 interface UseApprovalWaveStatusParams {
   readonly wave: ApiWave | null | undefined;
   readonly areDecisionPointsComplete?: boolean | undefined;
+  readonly isDecisionPointsLoadError?: boolean | undefined;
+  readonly onRetryDecisionPointsLoad?: (() => void) | undefined;
   /**
    * When defined, decision points are owned by the caller and this hook will
    * not start a second full decision-page load for status checks.
@@ -32,7 +34,10 @@ interface ApprovalWaveStatus {
   readonly approvedCount: number | null;
   readonly closeStatus: ApprovalWaveCloseStatus;
   readonly isApprovalStatusLoading: boolean;
+  readonly isApprovalStatusError: boolean;
   readonly isVotingClosed: boolean;
+  readonly isVotingControlsLocked: boolean;
+  readonly retryApprovalStatus: (() => void) | null;
 }
 
 const getValidThreshold = (threshold: number | null | undefined) =>
@@ -49,6 +54,8 @@ const MAX_TIMEOUT_MS = 2_147_483_647;
 
 export function useApprovalWaveStatus({
   areDecisionPointsComplete = false,
+  isDecisionPointsLoadError = false,
+  onRetryDecisionPointsLoad,
   wave,
   decisionPoints,
 }: UseApprovalWaveStatusParams): ApprovalWaveStatus {
@@ -113,6 +120,10 @@ export function useApprovalWaveStatus({
   const {
     decisionPoints: loadedDecisionPoints,
     hasLoadedAllPages: hasLoadedCompleteDecisionPoints,
+    isLoadingAllPagesError: isInternalDecisionPointsLoadError,
+    refetch: retryInternalDecisionPointsLoad,
+    fetchNextPage: retryInternalNextDecisionPointsPage,
+    hasNextPage: hasInternalNextDecisionPointsPage,
   } = useWaveDecisions({
     waveId: wave?.id ?? "",
     enabled: shouldLoadCompleteDecisionPoints,
@@ -154,7 +165,7 @@ export function useApprovalWaveStatus({
     [approvedCount, approveWave, currentMillis, wave]
   );
 
-  const isApprovalStatusLoading = Boolean(
+  const isApprovalStatusUnknown = Boolean(
     approveWave &&
     wave &&
     isValidApprovalCount(wave.wave.max_winners) &&
@@ -162,6 +173,45 @@ export function useApprovalWaveStatus({
     approvedCount === null &&
     closeStatus === null
   );
+  const isApprovalStatusError = Boolean(
+    isApprovalStatusUnknown &&
+    ((hasCallerOwnedDecisionPoints && isDecisionPointsLoadError) ||
+      (!hasCallerOwnedDecisionPoints && isInternalDecisionPointsLoadError))
+  );
+  const isApprovalStatusLoading =
+    isApprovalStatusUnknown && !isApprovalStatusError;
+  const isVotingClosed = closeStatus !== null;
+  const isVotingControlsLocked =
+    isVotingClosed || isApprovalStatusLoading || isApprovalStatusError;
+
+  const retryInternalApprovalStatus = useCallback(() => {
+    if (hasInternalNextDecisionPointsPage) {
+      void retryInternalNextDecisionPointsPage();
+      return;
+    }
+
+    void retryInternalDecisionPointsLoad();
+  }, [
+    hasInternalNextDecisionPointsPage,
+    retryInternalDecisionPointsLoad,
+    retryInternalNextDecisionPointsPage,
+  ]);
+  const retryApprovalStatus = useMemo<(() => void) | null>(() => {
+    if (!isApprovalStatusError) {
+      return null;
+    }
+
+    if (hasCallerOwnedDecisionPoints) {
+      return onRetryDecisionPointsLoad ?? null;
+    }
+
+    return retryInternalApprovalStatus;
+  }, [
+    hasCallerOwnedDecisionPoints,
+    isApprovalStatusError,
+    onRetryDecisionPointsLoad,
+    retryInternalApprovalStatus,
+  ]);
 
   useEffect(() => {
     if (!approveWave || !wave || closeStatus !== null) {
@@ -192,6 +242,9 @@ export function useApprovalWaveStatus({
     approvedCount,
     closeStatus,
     isApprovalStatusLoading,
-    isVotingClosed: closeStatus !== null || isApprovalStatusLoading,
+    isApprovalStatusError,
+    isVotingClosed,
+    isVotingControlsLocked,
+    retryApprovalStatus,
   };
 }

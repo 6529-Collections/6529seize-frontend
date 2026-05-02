@@ -11,6 +11,8 @@ import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
 interface WaveApprovalStatusBarProps {
   readonly approvedCount: number | null;
   readonly closeStatus: ApprovalWaveCloseStatus;
+  readonly isApprovalStatusError?: boolean | undefined;
+  readonly retryApprovalStatus?: (() => void) | null | undefined;
   readonly wave: ApiWave;
 }
 
@@ -37,6 +39,8 @@ const getCurrentMillisForStatusRender = (
 export default function WaveApprovalStatusBar({
   approvedCount,
   closeStatus,
+  isApprovalStatusError = false,
+  retryApprovalStatus = null,
   wave,
 }: WaveApprovalStatusBarProps) {
   const winningThreshold = wave.wave.winning_threshold;
@@ -67,6 +71,10 @@ export default function WaveApprovalStatusBar({
       ? formatNumberWithCommas(winningThreshold)
       : "Not set";
   const approvedLabel = (() => {
+    if (isApprovalStatusError) {
+      return "Unavailable";
+    }
+
     if (approvedCount === null) {
       return "Checking";
     }
@@ -84,12 +92,20 @@ export default function WaveApprovalStatusBar({
     statusLabel = "Max approvals reached";
   } else if (closeStatus === "ended") {
     statusLabel = "Approval window ended";
+  } else if (isApprovalStatusError) {
+    statusLabel = "Unable to check approvals";
   } else if (approvedCount === null) {
     statusLabel = "Checking";
   } else if (endTime !== null) {
     statusLabel = formatTimeLeft(endTime, currentMillis);
   } else {
     statusLabel = "Open";
+  }
+  let statusTextClassName = "tw-text-amber-200";
+  if (isApprovalStatusError) {
+    statusTextClassName = "tw-text-rose-200";
+  } else if (closeStatus === null) {
+    statusTextClassName = "tw-text-iron-100";
   }
 
   return (
@@ -116,14 +132,29 @@ export default function WaveApprovalStatusBar({
             Status
           </p>
           <p
-            className={`tw-mb-0 tw-text-sm tw-font-semibold ${
-              closeStatus === null ? "tw-text-iron-100" : "tw-text-amber-200"
-            }`}
+            className={`tw-mb-0 tw-text-sm tw-font-semibold ${statusTextClassName}`}
           >
             {statusLabel}
           </p>
         </div>
       </div>
+      {isApprovalStatusError && (
+        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
+            Unable to check approval status. Voting and create controls are
+            paused until the check succeeds.
+          </p>
+          {retryApprovalStatus && (
+            <button
+              type="button"
+              onClick={retryApprovalStatus}
+              className="tw-inline-flex tw-w-fit tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-border-iron-400 desktop-hover:hover:tw-bg-iron-800"
+            >
+              Try again
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

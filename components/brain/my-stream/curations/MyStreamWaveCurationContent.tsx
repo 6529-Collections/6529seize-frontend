@@ -155,7 +155,8 @@ export default function MyStreamWaveCurationContent({
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
-  const { winningThreshold, isVotingClosed } = useApprovalWaveStatus({ wave });
+  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
+    useApprovalWaveStatus({ wave });
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
