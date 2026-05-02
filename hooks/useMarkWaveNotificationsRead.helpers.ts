@@ -1,0 +1,667 @@
+import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import {
+  getWaveReadIdentityKey,
+  getWaveReadProxyRoleIdentityKey,
+  getWaveReadProxyRoleRequestKey,
+  getWaveReadRequestKey,
+  useWaveReadIdentityState,
+} from "@/hooks/useMarkWaveNotificationsRead.identity";
+import type {
+  AuthHeaders,
+  WaveReadIdentityConfig,
+  WaveReadTemporaryProxyRoleIdentity,
+  WaveReadVerifiedIdentity,
+} from "@/hooks/useMarkWaveNotificationsRead.identity";
+import type { RefObject } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+
+interface WaveReadRequestState {
+  promise: Promise<void>;
+  pending: boolean;
+  readonly requestKey: string;
+  authHeaders: AuthHeaders;
+}
+
+interface PendingWaveReadRequestState {
+  readonly addressKey: string;
+  readonly activeProfileProxyId: string | null;
+  readonly proxyCreatorId: string | null;
+  readonly identityKey: string;
+  readonly requestKey: string;
+  readonly waveId: string;
+  readonly promise: Promise<void>;
+  readonly resolve: () => void;
+  readonly reject: (error: unknown) => void;
+}
+
+interface WaveReadCacheRefs {
+  readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
+  readonly authByIdentityRef: RefObject<Map<string, WaveReadVerifiedIdentity>>;
+  readonly temporaryProxyRoleIdentityByIdentityRef: RefObject<
+    Map<string, WaveReadTemporaryProxyRoleIdentity>
+  >;
+  readonly latestVerifiedIdentityByAddressRef: RefObject<
+    Map<string, WaveReadVerifiedIdentity>
+  >;
+  readonly latestVerifiedIdentityByProxyRoleRef: RefObject<
+    Map<string, WaveReadVerifiedIdentity>
+  >;
+  readonly clearedIdentityKeysRef: RefObject<Set<string>>;
+}
+
+interface WaveNotificationsReadMarkerConfig extends WaveReadIdentityConfig {
+  readonly invalidateNotifications: () => void;
+}
+
+const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
+const pendingWaveReadRequests = new Map<string, PendingWaveReadRequestState>();
+const clearedWaveReadIdentityKeysByAddress = new Map<string, Set<string>>();
+const latestVerifiedWaveReadIdentityByAddress = new Map<
+  string,
+  WaveReadVerifiedIdentity
+>();
+
+const hasConsistentPendingWaveReadIdentity = (
+  state: PendingWaveReadRequestState
+): boolean => {
+  if (state.proxyCreatorId !== null) {
+    return (
+      state.identityKey ===
+      getWaveReadProxyRoleIdentityKey({
+        addressKey: state.addressKey,
+        proxyCreatorId: state.proxyCreatorId,
+      })
+    );
+  }
+
+  return (
+    state.identityKey ===
+    getWaveReadIdentityKey({
+      addressKey: state.addressKey,
+      activeProfileProxyId: state.activeProfileProxyId,
+    })
+  );
+};
+
+const sendWaveReadRequest = async (
+  waveId: string,
+  authHeaders: AuthHeaders,
+  invalidateNotificationsRef: Readonly<{ current: () => void }>
+): Promise<void> => {
+  await commonApiPostWithoutBodyAndResponse({
+    endpoint: `notifications/wave/${waveId}/read`,
+    headers: authHeaders,
+  });
+  invalidateNotificationsRef.current();
+};
+
+const startWaveReadRequest = async (
+  waveId: string,
+  state: WaveReadRequestState,
+  invalidateNotificationsRef: Readonly<{ current: () => void }>
+): Promise<void> => {
+  let requestError: unknown;
+  let hasRequestError = false;
+
+  try {
+    await sendWaveReadRequest(
+      waveId,
+      state.authHeaders,
+      invalidateNotificationsRef
+    );
+  } catch (error) {
+    requestError = error;
+    hasRequestError = true;
+  }
+
+  try {
+    if (state.pending) {
+      state.pending = false;
+      state.promise = startWaveReadRequest(
+        waveId,
+        state,
+        invalidateNotificationsRef
+      );
+      await state.promise;
+      return;
+    }
+
+    if (hasRequestError) {
+      throw requestError;
+    }
+  } finally {
+    if (inFlightWaveReadRequests.get(state.requestKey) === state) {
+      inFlightWaveReadRequests.delete(state.requestKey);
+    }
+  }
+};
+
+const markWaveReadWithAuthHeaders = ({
+  waveId,
+  requestKey,
+  authHeaders,
+  invalidateNotificationsRef,
+}: {
+  readonly waveId: string;
+  readonly requestKey: string;
+  readonly authHeaders: AuthHeaders;
+  readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
+}): Promise<void> => {
+  const existingState = inFlightWaveReadRequests.get(requestKey);
+  if (existingState) {
+    existingState.pending = true;
+    existingState.authHeaders = authHeaders;
+    return existingState.promise;
+  }
+
+  const state: WaveReadRequestState = {
+    promise: Promise.resolve(),
+    pending: false,
+    requestKey,
+    authHeaders,
+  };
+  inFlightWaveReadRequests.set(requestKey, state);
+  state.promise = startWaveReadRequest(
+    waveId,
+    state,
+    invalidateNotificationsRef
+  );
+  return state.promise;
+};
+
+const markWaveReadIdentityCleared = (
+  identity: WaveReadVerifiedIdentity
+): void => {
+  const clearedIdentityKeys =
+    clearedWaveReadIdentityKeysByAddress.get(identity.addressKey) ??
+    new Set<string>();
+  clearedIdentityKeys.add(identity.identityKey);
+  clearedWaveReadIdentityKeysByAddress.set(
+    identity.addressKey,
+    clearedIdentityKeys
+  );
+};
+
+const getVerifiedProxyRoleIdentityKey = (
+  identity: WaveReadVerifiedIdentity
+): string | null =>
+  identity.activeProfileProxyCreatorId !== null
+    ? getWaveReadProxyRoleIdentityKey({
+        addressKey: identity.addressKey,
+        proxyCreatorId: identity.activeProfileProxyCreatorId,
+      })
+    : null;
+
+const enqueuePendingWaveReadRequest = ({
+  addressKey,
+  activeProfileProxyId,
+  proxyCreatorId,
+  identityKey,
+  requestKey,
+  waveId,
+}: {
+  readonly addressKey: string;
+  readonly activeProfileProxyId: string | null;
+  readonly proxyCreatorId: string | null;
+  readonly identityKey: string;
+  readonly requestKey: string;
+  readonly waveId: string;
+}): Promise<void> => {
+  const existingState = pendingWaveReadRequests.get(requestKey);
+  if (existingState) {
+    return existingState.promise;
+  }
+
+  let resolveQueuedRequest: () => void = () => {};
+  let rejectQueuedRequest: (error: unknown) => void = () => {};
+  const promise = new Promise<void>((resolve, reject) => {
+    resolveQueuedRequest = resolve;
+    rejectQueuedRequest = reject;
+  });
+
+  const state: PendingWaveReadRequestState = {
+    addressKey,
+    activeProfileProxyId,
+    proxyCreatorId,
+    identityKey,
+    requestKey,
+    waveId,
+    promise,
+    resolve: resolveQueuedRequest,
+    reject: rejectQueuedRequest,
+  };
+  pendingWaveReadRequests.set(requestKey, state);
+
+  return promise;
+};
+
+const flushQueuedWaveReadRequests = ({
+  queuedRequests,
+  getRequestKey,
+  authHeaders,
+  invalidateNotificationsRef,
+}: {
+  readonly queuedRequests: readonly PendingWaveReadRequestState[];
+  readonly getRequestKey: (
+    queuedRequest: PendingWaveReadRequestState
+  ) => string;
+  readonly authHeaders: AuthHeaders;
+  readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
+}): void => {
+  for (const queuedRequest of queuedRequests) {
+    if (
+      pendingWaveReadRequests.get(queuedRequest.requestKey) !== queuedRequest
+    ) {
+      continue;
+    }
+
+    pendingWaveReadRequests.delete(queuedRequest.requestKey);
+    void (async () => {
+      try {
+        await markWaveReadWithAuthHeaders({
+          waveId: queuedRequest.waveId,
+          requestKey: getRequestKey(queuedRequest),
+          authHeaders,
+          invalidateNotificationsRef,
+        });
+        queuedRequest.resolve();
+      } catch (error) {
+        queuedRequest.reject(error);
+      }
+    })();
+  }
+};
+
+const flushPendingWaveReadRequests = ({
+  verifiedIdentity,
+  invalidateNotificationsRef,
+}: {
+  readonly verifiedIdentity: WaveReadVerifiedIdentity;
+  readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
+}): void => {
+  const proxyRoleIdentityKey =
+    getVerifiedProxyRoleIdentityKey(verifiedIdentity);
+  const queuedRequests = Array.from(pendingWaveReadRequests.values()).filter(
+    (state) =>
+      (state.identityKey === verifiedIdentity.identityKey ||
+        state.identityKey === proxyRoleIdentityKey) &&
+      state.addressKey === verifiedIdentity.addressKey &&
+      hasConsistentPendingWaveReadIdentity(state)
+  );
+
+  flushQueuedWaveReadRequests({
+    queuedRequests,
+    getRequestKey: (queuedRequest) => {
+      if (queuedRequest.identityKey !== proxyRoleIdentityKey) {
+        return queuedRequest.requestKey;
+      }
+
+      return getWaveReadRequestKey({
+        addressKey: verifiedIdentity.addressKey,
+        activeProfileProxyId: verifiedIdentity.activeProfileProxyId,
+        waveId: queuedRequest.waveId,
+      });
+    },
+    authHeaders: verifiedIdentity.authHeaders,
+    invalidateNotificationsRef,
+  });
+};
+
+const flushPendingClearedWaveReadRequests = ({
+  verifiedIdentity,
+  invalidateNotificationsRef,
+}: {
+  readonly verifiedIdentity: WaveReadVerifiedIdentity;
+  readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
+}): void => {
+  const clearedIdentityKeys = clearedWaveReadIdentityKeysByAddress.get(
+    verifiedIdentity.addressKey
+  );
+  if (!clearedIdentityKeys?.has(verifiedIdentity.identityKey)) {
+    return;
+  }
+
+  const queuedRequests = Array.from(pendingWaveReadRequests.values()).filter(
+    (state) =>
+      state.identityKey === verifiedIdentity.identityKey &&
+      hasConsistentPendingWaveReadIdentity(state) &&
+      state.addressKey === verifiedIdentity.addressKey
+  );
+
+  flushQueuedWaveReadRequests({
+    queuedRequests,
+    getRequestKey: (queuedRequest) => queuedRequest.requestKey,
+    authHeaders: verifiedIdentity.authHeaders,
+    invalidateNotificationsRef,
+  });
+
+  clearedIdentityKeys.delete(verifiedIdentity.identityKey);
+  if (clearedIdentityKeys.size === 0) {
+    clearedWaveReadIdentityKeysByAddress.delete(verifiedIdentity.addressKey);
+  }
+};
+
+const useWaveReadCacheRefs = ({
+  identityKey,
+  temporaryProxyRoleIdentity,
+  verifiedIdentity,
+  invalidateNotifications,
+}: {
+  readonly identityKey: string;
+  readonly temporaryProxyRoleIdentity:
+    | WaveReadTemporaryProxyRoleIdentity
+    | undefined;
+  readonly verifiedIdentity: WaveReadVerifiedIdentity | undefined;
+  readonly invalidateNotifications: () => void;
+}): WaveReadCacheRefs => {
+  const invalidateNotificationsRef = useRef(invalidateNotifications);
+  const authByIdentityRef = useRef<Map<string, WaveReadVerifiedIdentity>>(
+    new Map<string, WaveReadVerifiedIdentity>(
+      verifiedIdentity ? [[identityKey, verifiedIdentity]] : []
+    )
+  );
+  const temporaryProxyRoleIdentityByIdentityRef = useRef<
+    Map<string, WaveReadTemporaryProxyRoleIdentity>
+  >(
+    new Map<string, WaveReadTemporaryProxyRoleIdentity>(
+      temporaryProxyRoleIdentity
+        ? [[identityKey, temporaryProxyRoleIdentity]]
+        : []
+    )
+  );
+  const latestVerifiedIdentityByAddressRef = useRef<
+    Map<string, WaveReadVerifiedIdentity>
+  >(
+    new Map<string, WaveReadVerifiedIdentity>(
+      verifiedIdentity ? [[verifiedIdentity.addressKey, verifiedIdentity]] : []
+    )
+  );
+  const latestVerifiedIdentityByProxyRoleRef = useRef<
+    Map<string, WaveReadVerifiedIdentity>
+  >(new Map<string, WaveReadVerifiedIdentity>());
+  const clearedIdentityKeysRef = useRef<Set<string>>(new Set<string>());
+
+  useLayoutEffect(() => {
+    invalidateNotificationsRef.current = invalidateNotifications;
+  }, [invalidateNotifications]);
+
+  useLayoutEffect(() => {
+    if (temporaryProxyRoleIdentity) {
+      temporaryProxyRoleIdentityByIdentityRef.current.set(
+        identityKey,
+        temporaryProxyRoleIdentity
+      );
+      return;
+    }
+
+    temporaryProxyRoleIdentityByIdentityRef.current.delete(identityKey);
+  }, [identityKey, temporaryProxyRoleIdentity]);
+
+  return useMemo(
+    () => ({
+      invalidateNotificationsRef,
+      authByIdentityRef,
+      temporaryProxyRoleIdentityByIdentityRef,
+      latestVerifiedIdentityByAddressRef,
+      latestVerifiedIdentityByProxyRoleRef,
+      clearedIdentityKeysRef,
+    }),
+    [
+      authByIdentityRef,
+      clearedIdentityKeysRef,
+      invalidateNotificationsRef,
+      latestVerifiedIdentityByAddressRef,
+      latestVerifiedIdentityByProxyRoleRef,
+      temporaryProxyRoleIdentityByIdentityRef,
+    ]
+  );
+};
+
+const useSyncWaveReadVerifiedIdentityCaches = ({
+  walletAuth,
+  verifiedIdentity,
+  cacheRefs,
+}: {
+  readonly walletAuth: string | null;
+  readonly verifiedIdentity: WaveReadVerifiedIdentity | undefined;
+  readonly cacheRefs: WaveReadCacheRefs;
+}): void => {
+  const {
+    authByIdentityRef,
+    clearedIdentityKeysRef,
+    invalidateNotificationsRef,
+    latestVerifiedIdentityByAddressRef,
+    latestVerifiedIdentityByProxyRoleRef,
+  } = cacheRefs;
+
+  useLayoutEffect(() => {
+    if (walletAuth === null) {
+      for (const identity of authByIdentityRef.current.values()) {
+        const proxyRoleIdentityKey = getVerifiedProxyRoleIdentityKey(identity);
+        markWaveReadIdentityCleared(identity);
+        clearedIdentityKeysRef.current.add(identity.identityKey);
+        latestVerifiedIdentityByAddressRef.current.delete(identity.addressKey);
+        latestVerifiedWaveReadIdentityByAddress.delete(identity.addressKey);
+        if (proxyRoleIdentityKey !== null) {
+          latestVerifiedIdentityByProxyRoleRef.current.delete(
+            proxyRoleIdentityKey
+          );
+        }
+      }
+      authByIdentityRef.current.clear();
+      return;
+    }
+
+    if (verifiedIdentity) {
+      authByIdentityRef.current.set(
+        verifiedIdentity.identityKey,
+        verifiedIdentity
+      );
+      latestVerifiedIdentityByAddressRef.current.set(
+        verifiedIdentity.addressKey,
+        verifiedIdentity
+      );
+      latestVerifiedWaveReadIdentityByAddress.set(
+        verifiedIdentity.addressKey,
+        verifiedIdentity
+      );
+      const proxyRoleIdentityKey =
+        getVerifiedProxyRoleIdentityKey(verifiedIdentity);
+      if (proxyRoleIdentityKey !== null) {
+        latestVerifiedIdentityByProxyRoleRef.current.set(
+          proxyRoleIdentityKey,
+          verifiedIdentity
+        );
+      }
+      flushPendingWaveReadRequests({
+        verifiedIdentity,
+        invalidateNotificationsRef,
+      });
+      flushPendingClearedWaveReadRequests({
+        verifiedIdentity,
+        invalidateNotificationsRef,
+      });
+    }
+  }, [
+    authByIdentityRef,
+    clearedIdentityKeysRef,
+    invalidateNotificationsRef,
+    latestVerifiedIdentityByAddressRef,
+    latestVerifiedIdentityByProxyRoleRef,
+    verifiedIdentity,
+    walletAuth,
+  ]);
+};
+
+const getLatestClearedWaveReadIdentity = ({
+  addressKey,
+  identityKey,
+  cacheRefs,
+}: {
+  readonly addressKey: string;
+  readonly identityKey: string;
+  readonly cacheRefs: WaveReadCacheRefs;
+}): WaveReadVerifiedIdentity | undefined => {
+  if (!cacheRefs.clearedIdentityKeysRef.current.has(identityKey)) {
+    return undefined;
+  }
+
+  return (
+    cacheRefs.latestVerifiedIdentityByAddressRef.current.get(addressKey) ??
+    latestVerifiedWaveReadIdentityByAddress.get(addressKey)
+  );
+};
+
+const markTemporaryProxyRoleWaveRead = ({
+  waveId,
+  addressKey,
+  temporaryProxyRoleIdentity,
+  cacheRefs,
+}: {
+  readonly waveId: string;
+  readonly addressKey: string;
+  readonly temporaryProxyRoleIdentity: WaveReadTemporaryProxyRoleIdentity;
+  readonly cacheRefs: WaveReadCacheRefs;
+}): Promise<void> => {
+  const latestVerifiedProxyRoleIdentity =
+    cacheRefs.latestVerifiedIdentityByProxyRoleRef.current.get(
+      temporaryProxyRoleIdentity.identityKey
+    );
+  if (latestVerifiedProxyRoleIdentity) {
+    return markWaveReadWithAuthHeaders({
+      waveId,
+      requestKey: getWaveReadRequestKey({
+        addressKey: latestVerifiedProxyRoleIdentity.addressKey,
+        activeProfileProxyId:
+          latestVerifiedProxyRoleIdentity.activeProfileProxyId,
+        waveId,
+      }),
+      authHeaders: latestVerifiedProxyRoleIdentity.authHeaders,
+      invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
+    });
+  }
+
+  return enqueuePendingWaveReadRequest({
+    addressKey,
+    activeProfileProxyId: null,
+    proxyCreatorId: temporaryProxyRoleIdentity.proxyCreatorId,
+    identityKey: temporaryProxyRoleIdentity.identityKey,
+    requestKey: getWaveReadProxyRoleRequestKey({
+      addressKey,
+      proxyCreatorId: temporaryProxyRoleIdentity.proxyCreatorId,
+      waveId,
+    }),
+    waveId,
+  });
+};
+
+const markWaveReadFromCache = ({
+  waveId,
+  addressKey,
+  activeProfileProxyId,
+  identityKey,
+  cacheRefs,
+}: {
+  readonly waveId: string;
+  readonly addressKey: string | null;
+  readonly activeProfileProxyId: string | null;
+  readonly identityKey: string;
+  readonly cacheRefs: WaveReadCacheRefs;
+}): Promise<void> => {
+  if (addressKey === null) {
+    return Promise.resolve();
+  }
+
+  const requestKey = getWaveReadRequestKey({
+    addressKey,
+    activeProfileProxyId,
+    waveId,
+  });
+  const verifiedCachedIdentity =
+    cacheRefs.authByIdentityRef.current.get(identityKey);
+  if (verifiedCachedIdentity) {
+    return markWaveReadWithAuthHeaders({
+      waveId,
+      requestKey,
+      authHeaders: verifiedCachedIdentity.authHeaders,
+      invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
+    });
+  }
+
+  const latestVerifiedIdentity = getLatestClearedWaveReadIdentity({
+    addressKey,
+    identityKey,
+    cacheRefs,
+  });
+  if (latestVerifiedIdentity?.identityKey === identityKey) {
+    return markWaveReadWithAuthHeaders({
+      waveId,
+      requestKey,
+      authHeaders: latestVerifiedIdentity.authHeaders,
+      invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
+    });
+  }
+
+  const temporaryProxyRoleIdentity =
+    cacheRefs.temporaryProxyRoleIdentityByIdentityRef.current.get(identityKey);
+  if (temporaryProxyRoleIdentity) {
+    return markTemporaryProxyRoleWaveRead({
+      waveId,
+      addressKey,
+      temporaryProxyRoleIdentity,
+      cacheRefs,
+    });
+  }
+
+  return enqueuePendingWaveReadRequest({
+    addressKey,
+    activeProfileProxyId,
+    proxyCreatorId: null,
+    identityKey,
+    requestKey,
+    waveId,
+  });
+};
+
+export const useWaveNotificationsReadMarker = ({
+  address,
+  activeProfileProxyId,
+  activeProfileProxyCreatorId,
+  walletAuth,
+  invalidateNotifications,
+}: WaveNotificationsReadMarkerConfig): ((waveId: string) => Promise<void>) => {
+  const identityState = useWaveReadIdentityState({
+    address,
+    activeProfileProxyId,
+    activeProfileProxyCreatorId,
+    walletAuth,
+  });
+  const cacheRefs = useWaveReadCacheRefs({
+    identityKey: identityState.identityKey,
+    temporaryProxyRoleIdentity: identityState.temporaryProxyRoleIdentity,
+    verifiedIdentity: identityState.verifiedIdentity,
+    invalidateNotifications,
+  });
+  useSyncWaveReadVerifiedIdentityCaches({
+    walletAuth,
+    verifiedIdentity: identityState.verifiedIdentity,
+    cacheRefs,
+  });
+  const {
+    addressKey,
+    activeProfileProxyId: currentProfileProxyId,
+    identityKey,
+  } = identityState;
+
+  return useCallback(
+    (waveId: string): Promise<void> =>
+      markWaveReadFromCache({
+        waveId,
+        addressKey,
+        activeProfileProxyId: currentProfileProxyId,
+        identityKey,
+        cacheRefs,
+      }),
+    [addressKey, cacheRefs, currentProfileProxyId, identityKey]
+  );
+};

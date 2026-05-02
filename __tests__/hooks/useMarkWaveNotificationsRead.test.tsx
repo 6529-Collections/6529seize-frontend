@@ -931,6 +931,53 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("queues a proxy read by JWT role until the matching proxy loads", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-loading",
+      jwtRole: "creator-1",
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const queuedPromise = result.current("wave-1");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-other",
+      activeProfileProxyId: "proxy-2",
+      activeProfileProxyCreatorId: "creator-2",
+    });
+    rerender();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-loading",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    rerender();
+
+    await expect(queuedPromise).resolves.toBeUndefined();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-proxy-loading" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
   it("collapses repeated queued same-wave reads into one request", async () => {
     const invalidateNotifications = jest.fn();
 
