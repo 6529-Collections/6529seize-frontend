@@ -331,29 +331,28 @@ const flushPendingClearedWaveReadRequests = ({
   const clearedIdentityKeys = clearedWaveReadIdentityKeysByAddress.get(
     verifiedIdentity.addressKey
   );
-  if (!clearedIdentityKeys) {
+  if (!clearedIdentityKeys?.has(verifiedIdentity.identityKey)) {
     return;
   }
 
   const queuedRequests = Array.from(pendingWaveReadRequests.values()).filter(
     (state) =>
-      state.addressKey === verifiedIdentity.addressKey &&
+      state.identityKey === verifiedIdentity.identityKey &&
       hasConsistentPendingWaveReadIdentity(state) &&
-      clearedIdentityKeys.has(state.identityKey)
+      state.addressKey === verifiedIdentity.addressKey
   );
 
   flushQueuedWaveReadRequests({
     queuedRequests,
-    getRequestKey: (queuedRequest) =>
-      getWaveReadRequestKey({
-        addressKey: verifiedIdentity.addressKey,
-        activeProfileProxyId: verifiedIdentity.activeProfileProxyId,
-        waveId: queuedRequest.waveId,
-      }),
+    getRequestKey: (queuedRequest) => queuedRequest.requestKey,
     authHeaders: verifiedIdentity.authHeaders,
     invalidateNotificationsRef,
   });
-  clearedWaveReadIdentityKeysByAddress.delete(verifiedIdentity.addressKey);
+
+  clearedIdentityKeys.delete(verifiedIdentity.identityKey);
+  if (clearedIdentityKeys.size === 0) {
+    clearedWaveReadIdentityKeysByAddress.delete(verifiedIdentity.addressKey);
+  }
 };
 
 export function useMarkWaveNotificationsRead(): (
@@ -476,14 +475,10 @@ export function useMarkWaveNotificationsRead(): (
         ? (latestVerifiedIdentityByAddressRef.current.get(addressKey) ??
           latestVerifiedWaveReadIdentityByAddress.get(addressKey))
         : undefined;
-      if (latestVerifiedIdentity) {
+      if (latestVerifiedIdentity?.identityKey === identityKey) {
         return markWaveReadWithAuthHeaders({
           waveId,
-          requestKey: getWaveReadRequestKey({
-            addressKey,
-            activeProfileProxyId: latestVerifiedIdentity.activeProfileProxyId,
-            waveId,
-          }),
+          requestKey,
           authHeaders: latestVerifiedIdentity.authHeaders,
           invalidateNotificationsRef,
         });
