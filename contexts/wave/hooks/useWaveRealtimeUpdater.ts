@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  type CachedDropReactionState,
+  findDropInCachedDrops,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
@@ -77,7 +79,7 @@ function isDocumentVisible(): boolean {
 
 function preserveProtectedReactionFields(
   serverDrop: ApiDrop,
-  localDrop: ExtendedDrop,
+  localDrop: CachedDropReactionState,
   protectedIntent: ProtectedReactionIntent
 ): ApiDrop {
   const serverContext = serverDrop.context_profile_context;
@@ -203,15 +205,8 @@ function isFetchedDropUpdate(type: ProcessIncomingDropType): boolean {
   );
 }
 
-function shouldSkipIncomingDrop(
-  type: ProcessIncomingDropType,
-  existingDrop: Drop | undefined
-): boolean {
-  if (existingDrop?.type === DropSize.LIGHT) {
-    return true;
-  }
-
-  return isFetchedDropUpdate(type) && existingDrop === undefined;
+function shouldSkipIncomingDrop(existingDrop: Drop | undefined): boolean {
+  return existingDrop?.type === DropSize.LIGHT;
 }
 
 function getFullDrop(drop: Drop | undefined): ExtendedDrop | null {
@@ -228,7 +223,7 @@ function getFullDrop(drop: Drop | undefined): ExtendedDrop | null {
 
 function reconcileReactionUpdate(
   apiDrop: ApiDrop,
-  latestExistingDrop: ExtendedDrop,
+  localDrop: CachedDropReactionState | null,
   type: ProcessIncomingDropType
 ): ApiDrop {
   if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
@@ -251,7 +246,10 @@ function reconcileReactionUpdate(
   if (protectedIntent && serverReaction !== protectedIntent.reaction) {
     return preserveProtectedReactionFields(
       apiDrop,
-      latestExistingDrop,
+      localDrop ?? {
+        context_profile_context: null,
+        reactions: [],
+      },
       protectedIntent
     );
   }
@@ -509,36 +507,28 @@ export function useWaveRealtimeUpdater({
     ): Promise<void> => {
       const apiDrop = await fetchDropByIdBatched(drop.id);
       const latestData = getData(waveId);
-
-      if (latestData === undefined) {
-        return;
-      }
-
       const latestExistingDrop = getFullDrop(
-        latestData.drops.find((cachedDrop) => cachedDrop.id === drop.id)
+        latestData?.drops.find((cachedDrop) => cachedDrop.id === drop.id)
       );
+      const cachedDrop =
+        latestExistingDrop ?? findDropInCachedDrops(queryClient, drop.id);
 
-      if (latestExistingDrop === null) {
-        return;
+      const nextDrop = reconcileReactionUpdate(apiDrop, cachedDrop, type);
+
+      if (latestExistingDrop !== null) {
+        updateData({
+          key: waveId,
+          drops: [
+            {
+              ...nextDrop,
+              type: DropSize.FULL,
+              stableHash: latestExistingDrop.stableHash,
+              stableKey: latestExistingDrop.stableKey,
+            },
+          ],
+        });
       }
 
-      const nextDrop = reconcileReactionUpdate(
-        apiDrop,
-        latestExistingDrop,
-        type
-      );
-
-      updateData({
-        key: waveId,
-        drops: [
-          {
-            ...nextDrop,
-            type: DropSize.FULL,
-            stableHash: latestExistingDrop.stableHash,
-            stableKey: latestExistingDrop.stableKey,
-          },
-        ],
-      });
       updateDropInCachedDrops(queryClient, nextDrop);
     },
     [getData, queryClient, updateData]
@@ -571,12 +561,12 @@ export function useWaveRealtimeUpdater({
 
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
 
-      if (shouldSkipIncomingDrop(type, existingDrop)) {
+      if (isFetchedDropUpdate(type)) {
+        await handleFetchedDropUpdate(drop, type, waveId);
         return;
       }
 
-      if (isFetchedDropUpdate(type)) {
-        await handleFetchedDropUpdate(drop, type, waveId);
+      if (shouldSkipIncomingDrop(existingDrop)) {
         return;
       }
 

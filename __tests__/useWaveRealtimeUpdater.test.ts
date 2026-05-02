@@ -40,9 +40,11 @@ jest.mock("@/services/api/drop-api", () => ({
 }));
 
 const mockSetQueriesData = jest.fn();
+const mockGetQueriesData = jest.fn();
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
+    getQueriesData: mockGetQueriesData,
     setQueriesData: mockSetQueriesData,
   })),
 }));
@@ -64,6 +66,7 @@ describe("useWaveRealtimeUpdater", () => {
 
   beforeEach(() => {
     setDocumentVisibility("visible");
+    mockGetQueriesData.mockReturnValue([]);
   });
 
   afterEach(() => {
@@ -208,7 +211,7 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.updateData).toHaveBeenCalled();
   });
 
-  it("skips fetched update when the latest cached drop is missing", async () => {
+  it("does not update wave store when the latest fetched drop is missing", async () => {
     const store: any = {
       wave1: {
         drops: [
@@ -254,7 +257,7 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.updateData).not.toHaveBeenCalled();
   });
 
-  it("skips fetched update when the latest cached drop is no longer full", async () => {
+  it("does not update wave store when the latest fetched drop is no longer full", async () => {
     const store: any = {
       wave1: {
         drops: [
@@ -306,6 +309,201 @@ describe("useWaveRealtimeUpdater", () => {
     await flushPromises();
 
     expect(props.updateData).not.toHaveBeenCalled();
+  });
+
+  it("updates React Query caches for reaction updates missing from wave store", async () => {
+    const store: any = {
+      wave1: {
+        drops: [],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-cache-only-reaction",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: contextProfileContext(":server:"),
+      reactions: reactionEntries(":server:"),
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-cache-only-reaction",
+      wave: { id: "wave1" },
+      author: {},
+      context_profile_context: contextProfileContext(":websocket:"),
+      reactions: reactionEntries(":websocket:"),
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d-cache-only-reaction");
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).toHaveBeenCalled();
+
+    for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
+      const updatedCacheDrop = updateCachedData({
+        id: "d-cache-only-reaction",
+        context_profile_context: contextProfileContext(":old-cache:"),
+        reactions: [],
+      });
+      expect(updatedCacheDrop.context_profile_context.reaction).toBe(
+        ":server:"
+      );
+      expect(updatedCacheDrop.reactions).toEqual(reactionEntries(":server:"));
+    }
+  });
+
+  it("updates React Query caches for rating updates without promoting light wave-store drops", async () => {
+    const store: any = {
+      wave1: {
+        drops: [
+          {
+            id: "d-light-rating",
+            type: DropSize.LIGHT,
+            stableKey: "light-key",
+            stableHash: "light-hash",
+            waveId: "wave1",
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-light-rating",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: {
+        ...contextProfileContext(null),
+        rating: 7,
+      },
+      reactions: [],
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-light-rating",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_RATING_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d-light-rating");
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).toHaveBeenCalled();
+
+    for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
+      const updatedCacheDrop = updateCachedData({
+        id: "d-light-rating",
+        type: DropSize.LIGHT,
+        stableKey: "cached-light-key",
+        stableHash: "cached-light-hash",
+        context_profile_context: contextProfileContext(null),
+        reactions: [],
+      });
+      expect(updatedCacheDrop.type).toBe(DropSize.LIGHT);
+      expect(updatedCacheDrop.context_profile_context.rating).toBe(7);
+    }
+  });
+
+  it("preserves protected cache-only reactions when server fetch is stale", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    beginReactionMutation({
+      dropId: "d-cache-only-stale",
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const currentUser = profile("profile-1", "current-user");
+    mockGetQueriesData.mockReturnValue([
+      [
+        ["DROPS"],
+        {
+          pages: [
+            [
+              {
+                id: "d-cache-only-stale",
+                context_profile_context: contextProfileContext(":joy:"),
+                reactions: [reactionEntry(":joy:", [currentUser])],
+              },
+            ],
+          ],
+        },
+      ],
+    ]);
+
+    const store: any = {
+      wave1: {
+        drops: [],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-cache-only-stale",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: contextProfileContext(":wave:"),
+      reactions: [
+        reactionEntry(":wave:", [
+          profile("profile-1", "server-current-user"),
+          profile("profile-2", "fresh-wave"),
+        ]),
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-cache-only-stale",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).toHaveBeenCalled();
+
+    for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
+      const updatedCacheDrop = updateCachedData({
+        id: "d-cache-only-stale",
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [],
+      });
+      expect(updatedCacheDrop.context_profile_context.reaction).toBe(":joy:");
+      expect(updatedCacheDrop.reactions).toEqual([
+        reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+        reactionEntry(":joy:", [currentUser]),
+      ]);
+    }
   });
 
   it("removes only the protected user when local remove sees stale server reaction", async () => {

@@ -3,6 +3,11 @@ import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey } from "../ReactQueryWrapper";
 
+export type CachedDropReactionState = Pick<
+  ApiDrop,
+  "context_profile_context" | "reactions"
+>;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -104,6 +109,55 @@ function replaceDrop(value: unknown, drop: ApiDrop): unknown {
   return changed ? next : value;
 }
 
+function toCachedDropReactionState(
+  value: Record<string, unknown>
+): CachedDropReactionState {
+  const contextProfileContext = value["context_profile_context"];
+
+  return {
+    context_profile_context:
+      contextProfileContext === undefined
+        ? null
+        : (contextProfileContext as ApiDrop["context_profile_context"]),
+    reactions: Array.isArray(value["reactions"])
+      ? (value["reactions"] as ApiDrop["reactions"])
+      : [],
+  };
+}
+
+function findDrop(
+  value: unknown,
+  dropId: string
+): CachedDropReactionState | null {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const drop = findDrop(item, dropId);
+      if (drop !== null) {
+        return drop;
+      }
+    }
+
+    return null;
+  }
+
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (isMatchingDrop(value, dropId)) {
+    return toCachedDropReactionState(value);
+  }
+
+  for (const item of Object.values(value)) {
+    const drop = findDrop(item, dropId);
+    if (drop !== null) {
+      return drop;
+    }
+  }
+
+  return null;
+}
+
 const CACHED_DROP_QUERY_KEYS = [
   QueryKey.DROPS,
   QueryKey.DROPS_LEADERBOARD,
@@ -132,4 +186,24 @@ export function updateDropInCachedDrops(
       replaceDrop(oldData, drop)
     );
   });
+}
+
+export function findDropInCachedDrops(
+  queryClient: QueryClient,
+  dropId: string
+): CachedDropReactionState | null {
+  for (const queryKey of CACHED_DROP_QUERY_KEYS) {
+    const cachedQueries = queryClient.getQueriesData({
+      queryKey: [queryKey],
+    });
+
+    for (const [, data] of cachedQueries) {
+      const drop = findDrop(data, dropId);
+      if (drop !== null) {
+        return drop;
+      }
+    }
+  }
+
+  return null;
 }

@@ -1,5 +1,6 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
+  findDropInCachedDrops,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
@@ -125,6 +126,49 @@ describe("cached drop websocket updates", () => {
       attachment_id: "attachment-1",
       status: "BAD",
       error_reason: "Blocked",
+    });
+  });
+
+  it("finds cached drop reaction state across cached drop query groups", () => {
+    const queryClient = createQueryClient();
+    queryClient.setQueryData([QueryKey.FEED_ITEMS, { page: 1 }], {
+      pages: [
+        [
+          {
+            item: {
+              id: "drop-2",
+              context_profile_context: {
+                rating: 0,
+                min_rating: 0,
+                max_rating: 0,
+                reaction: ":joy:",
+                boosted: false,
+                bookmarked: false,
+                curatable: false,
+                curated: false,
+              },
+              reactions: [
+                {
+                  reaction: ":joy:",
+                  profiles: [{ id: "profile-1", handle: "alice" }],
+                },
+              ],
+            },
+          },
+        ],
+      ],
+    });
+
+    expect(findDropInCachedDrops(queryClient, "drop-2")).toEqual({
+      context_profile_context: expect.objectContaining({
+        reaction: ":joy:",
+      }),
+      reactions: [
+        {
+          reaction: ":joy:",
+          profiles: [{ id: "profile-1", handle: "alice" }],
+        },
+      ],
     });
   });
 });
