@@ -31,7 +31,9 @@ import type {
   DropIdentityMode,
   DropInteractionParams,
   DropLocation,
+  DropTimestampLayout,
 } from "../drop.types";
+import { hasDropFooter } from "../drop.types";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -42,7 +44,9 @@ interface OngoingParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly footer?: React.ReactNode;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -62,7 +66,9 @@ export default function OngoingParticipationDrop({
   onReply,
   onQuoteClick,
   onDropContentClick,
+  footer,
   identityMode = "default",
+  timestampLayout = "inline",
   showInteractions = true,
   winningThreshold,
   isVotingClosed = false,
@@ -148,12 +154,16 @@ export default function OngoingParticipationDrop({
         <div className="tw-flex tw-w-full tw-flex-col">
           {showIdentity &&
             (identityMode === "minimal" ? (
-              <DropMinimalIdentityRow drop={drop} />
+              <DropMinimalIdentityRow
+                drop={drop}
+                timestampLayout={timestampLayout}
+              />
             ) : (
               <ParticipationDropHeader
                 drop={drop}
                 showWaveInfo={showWaveInfo}
                 winningThreshold={winningThreshold}
+                timestampLayout={timestampLayout}
               />
             ))}
           <ParticipationDropContent
@@ -189,13 +199,22 @@ export default function OngoingParticipationDrop({
           metadata={visibleMetadata}
           contextId={drop.id}
         />
-        <ParticipationDropFooter
-          drop={drop}
-          voteAction={voteAction}
-          showInteractions={showInteractions}
-          winningThreshold={winningThreshold}
-          isVotingClosed={isVotingClosed}
-        />
+        {(showInteractions || !hasDropFooter(footer)) && (
+          <ParticipationDropFooter
+            drop={drop}
+            voteAction={voteAction}
+            showInteractions={showInteractions}
+            winningThreshold={winningThreshold}
+            isVotingClosed={isVotingClosed}
+          />
+        )}
+        {hasDropFooter(footer) && (
+          <div
+            className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-px-4 tw-pb-4 tw-pt-2`}
+          >
+            {footer}
+          </div>
+        )}
       </div>
 
       {showInteractions &&

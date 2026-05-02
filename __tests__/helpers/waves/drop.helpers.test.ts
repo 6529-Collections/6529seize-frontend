@@ -7,6 +7,13 @@ import {
 } from "@/helpers/waves/drop.helpers";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (url: string) =>
+    url.startsWith("ipfs://")
+      ? `https://ipfs-gateway.test/ipfs/${url.slice(7)}`
+      : url,
+}));
+
 const baseDrop: any = {
   id: "d1",
   serial_no: 1,
@@ -64,7 +71,7 @@ describe("drop.helpers", () => {
         },
       ];
       const result = getDropPreviewImageUrl(metadata as any);
-      expect(result).toContain(ipfsHash);
+      expect(result).toBe(`https://ipfs-gateway.test/ipfs/${ipfsHash}`);
     });
 
     it("returns null when JSON parsing fails", () => {
@@ -111,7 +118,7 @@ describe("drop.helpers", () => {
         },
       ];
       const result = getDropPromoVideoUrl(metadata as any);
-      expect(result).toContain(ipfsHash);
+      expect(result).toBe(`https://ipfs-gateway.test/ipfs/${ipfsHash}`);
     });
 
     it("returns null when JSON parsing fails", () => {

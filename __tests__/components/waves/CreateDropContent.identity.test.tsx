@@ -22,6 +22,10 @@ const mockOtherSelection = {
   avatarUrl: null,
   profileId: "other-id",
 };
+const mockSetToast = jest.fn();
+const mockUploadFile = new File(["upload"], "duplicate.pdf", {
+  type: "application/pdf",
+});
 
 jest.mock("next/dynamic", () => () => () => null);
 
@@ -70,6 +74,12 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
     </button>
     <button type="button" onClick={props.onAddMetadataClick}>
       open metadata
+    </button>
+    <button
+      type="button"
+      onClick={() => props.handleFileChange([mockUploadFile])}
+    >
+      add upload file
     </button>
   </div>
 ));
@@ -148,7 +158,7 @@ jest.mock("@/components/waves/hooks/useDropMetadata", () => ({
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
     requestAuth: jest.fn(async () => ({ success: true })),
-    setToast: jest.fn(),
+    setToast: mockSetToast,
     connectedProfile: {
       id: mockViewerSelection.profileId,
       handle: mockViewerSelection.label,
@@ -187,11 +197,24 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 describe("CreateDropContent identity picker flow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSetToast.mockClear();
     (global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
       observe: jest.fn(),
       unobserve: jest.fn(),
       disconnect: jest.fn(),
     }));
+  });
+
+  it("skips duplicate file uploads", async () => {
+    renderSubject();
+
+    await userEvent.click(screen.getByText("add upload file"));
+    await userEvent.click(screen.getByText("add upload file"));
+
+    expect(mockSetToast).toHaveBeenCalledWith({
+      message: "1 duplicate file was skipped.",
+      type: "warning",
+    });
   });
 
   const baseWave = {

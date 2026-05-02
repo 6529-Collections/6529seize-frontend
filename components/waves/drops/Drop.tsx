@@ -14,6 +14,7 @@ import type {
   DropIdentityMode,
   DropInteractionParams,
   DropLocation,
+  DropTimestampLayout,
 } from "./drop.types";
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
@@ -36,7 +37,9 @@ interface DropProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
   readonly wrapContentOnly?: (content: React.ReactNode) => React.ReactNode;
+  readonly footer?: React.ReactNode;
   readonly identityMode?: DropIdentityMode | undefined;
+  readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -57,7 +60,9 @@ export default function Drop({
   showReplyAndQuote,
   parentContainerRef,
   wrapContentOnly,
+  footer,
   identityMode,
+  timestampLayout,
   showInteractions = true,
   winningThreshold,
   isVotingClosed = false,
@@ -74,7 +79,9 @@ export default function Drop({
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
+        footer={footer}
         identityMode={identityMode}
+        timestampLayout={timestampLayout}
         showInteractions={showInteractions}
         winningThreshold={winningThreshold}
         isVotingClosed={isVotingClosed}
@@ -95,7 +102,9 @@ export default function Drop({
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
+        footer={footer}
         identityMode={identityMode}
+        timestampLayout={timestampLayout}
         showInteractions={showInteractions}
       />
     ),
@@ -116,7 +125,9 @@ export default function Drop({
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         wrapContentOnly={wrapContentOnly}
+        footer={footer}
         identityMode={identityMode}
+        timestampLayout={timestampLayout}
         showInteractions={showInteractions}
       />
     ),

@@ -17,7 +17,6 @@ import PrimaryButton from "../../../utils/button/PrimaryButton";
 import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
-import type { WebUnifiedWavesListWavesHandle } from "./WebUnifiedWavesListWaves";
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
 
 interface WebDirectMessagesListProps {
@@ -37,7 +36,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 
   const shouldRenderCreateDirectMessage = !isApp;
 
-  const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const { directMessages, registerWave } = useMyStream();
 
   useInfiniteScroll(
@@ -45,7 +44,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     directMessages.isFetchingNextPage,
     directMessages.fetchNextPage,
     scrollContainerRef,
-    listRef.current?.sentinelRef || { current: null },
+    sentinelRef,
     "100px"
   );
 
@@ -70,7 +69,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   } else {
     listContent = (
       <WebUnifiedWavesListWaves
-        ref={listRef}
         waves={directMessages.list}
         onHover={registerWave}
         scrollContainerRef={scrollContainerRef}
@@ -79,6 +77,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         hidePin={true}
         basePath="/messages"
         isCollapsed={isCollapsed}
+        sentinelRef={sentinelRef}
       />
     );
   }
@@ -204,13 +203,11 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         />
       )}
 
-      {connectedProfile && (
-        <CreateDirectMessageModal
-          isOpen={isDirectMessageModalOpen}
-          onClose={close}
-          profile={connectedProfile}
-        />
-      )}
+      <CreateDirectMessageModal
+        isOpen={isDirectMessageModalOpen}
+        onClose={close}
+        profile={connectedProfile}
+      />
     </div>
   );
 };

@@ -4,7 +4,7 @@ import type { DistributionPhotoCompleteRequest } from "@/generated/models/Distri
 import type { DistributionPhotoCompleteResponse } from "@/generated/models/DistributionPhotoCompleteResponse";
 import { commonApiPost } from "@/services/api/common-api";
 import {
-  getContentType,
+  getApiMediaUploadMimeType,
   multipartUploadCore,
 } from "@/services/uploads/multipartUploadCore";
 import axios from "axios";
@@ -37,7 +37,7 @@ async function uploadSingleFile({
   onProgress,
 }: SingleFileUploadParams): Promise<string> {
   const endpoint = `distribution_photos/${contract}/${tokenId}/prep`;
-  const contentType = getContentType(file);
+  const contentType = getApiMediaUploadMimeType(file);
 
   const prepData = await commonApiPost<
     MediaUploadUrlRequest,

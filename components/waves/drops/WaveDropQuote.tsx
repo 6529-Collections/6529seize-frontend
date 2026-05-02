@@ -14,6 +14,11 @@ import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { useLinkPreviewContext } from "@/components/waves/LinkPreviewContext";
 import DropNotFound from "./DropNotFound";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
+import {
+  useWaveDropQuoteDisplay,
+  WaveDropQuoteDisplayProvider,
+} from "./WaveDropQuoteDisplayContext";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -65,6 +70,71 @@ const WaveDropQuoteProfilePicture: React.FC<
   );
 };
 
+function WaveDropQuoteBody({
+  drop,
+  quoteAuthorLabel,
+  quoteContent,
+  waveHref,
+}: {
+  readonly drop: ApiDrop | null;
+  readonly quoteAuthorLabel: string | null;
+  readonly quoteContent: React.ReactNode;
+  readonly waveHref: string;
+}) {
+  return (
+    <div className="tw-group tw-relative tw-flex tw-w-full tw-flex-col">
+      <div className="tw-flex tw-gap-x-2">
+        <div className="tw-relative tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-900">
+          <div className="tw-h-full tw-w-full tw-rounded-md">
+            <WaveDropQuoteProfilePicture drop={drop} />
+          </div>
+        </div>
+        <div className="tw-flex tw-w-full tw-flex-col">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <div className="tw-flex tw-items-center tw-gap-x-2">
+              {quoteAuthorLabel && (
+                <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
+                  <Link
+                    href={`/${quoteAuthorLabel}`}
+                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                  >
+                    {quoteAuthorLabel}
+                  </Link>
+                </p>
+              )}
+
+              {!!drop && (
+                <UserCICAndLevel
+                  level={drop.author.level}
+                  size={UserCICAndLevelSize.SMALL}
+                />
+              )}
+            </div>
+
+            {!!drop && (
+              <>
+                <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+                <WaveDropTime timestamp={drop.created_at} />
+              </>
+            )}
+          </div>
+          <div>
+            {drop && waveHref && (
+              <Link
+                href={waveHref}
+                className="tw-leading-0 -tw-mt-1 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+              >
+                {drop.wave.name}
+              </Link>
+            )}
+          </div>
+          <div className="tw-mt-0.5">{quoteContent}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   drop,
   partId,
@@ -77,6 +147,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   onLinkCardActionsActiveChange,
 }) => {
   const { onCardActionsActiveChange } = useLinkPreviewContext();
+  const { flattenWhenAuthorSameAs } = useWaveDropQuoteDisplay();
   const quotedPart = useMemo<ApiDropPart | null>(() => {
     if (!drop) {
       return null;
@@ -133,6 +204,13 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   const resolvedOnLinkCardActionsActiveChange =
     onLinkCardActionsActiveChange ?? onCardActionsActiveChange;
   const isInteractive = drop !== null && !isNotFound;
+  const shouldFlattenQuote = areSameProfileIdentity({
+    left: drop?.author,
+    right: flattenWhenAuthorSameAs,
+  });
+  const quoteAuthorLabel = drop
+    ? (drop.author.handle ?? drop.author.primary_address)
+    : null;
   const handleQuoteContainerClick = (
     event: React.MouseEvent<HTMLDivElement>
   ) => {
@@ -142,6 +220,15 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
       goToQuoteDrop();
     }
   };
+  const handleQuoteContainerKeyDown = isInteractive
+    ? (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          goToQuoteDrop();
+        }
+      }
+    : undefined;
   const quoteContainerClassName = `tw-mt-1 ${
     isInteractive ? "tw-cursor-pointer" : ""
   } tw-rounded-xl tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800`;
@@ -157,91 +244,45 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     );
   }
 
+  const quoteContent = (
+    <WaveDropQuoteDisplayProvider flattenWhenAuthorSameAs={null}>
+      <DropPartMarkdownWithPropLogger
+        partContent={quotedPart?.content ?? ""}
+        mentionedUsers={drop?.mentioned_users ?? []}
+        mentionedGroups={drop?.mentioned_groups ?? []}
+        mentionedWaves={drop?.mentioned_waves ?? []}
+        referencedNfts={drop?.referenced_nfts ?? []}
+        nftLinks={drop?.nft_links}
+        textSize="sm"
+        onQuoteClick={onQuoteClick}
+        currentDropId={drop?.id}
+        embedPath={embedPath}
+        quotePath={effectiveQuotePath}
+        embedDepth={embedDepth}
+        maxEmbedDepth={maxEmbedDepth}
+        onLinkCardActionsActiveChange={resolvedOnLinkCardActionsActiveChange}
+      />
+    </WaveDropQuoteDisplayProvider>
+  );
+
+  if (shouldFlattenQuote) {
+    return quoteContent;
+  }
+
   return (
     <div
       className={quoteContainerClassName}
       onClick={handleQuoteContainerClick}
-      onKeyDown={
-        isInteractive
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                goToQuoteDrop();
-              }
-            }
-          : undefined
-      }
+      onKeyDown={handleQuoteContainerKeyDown}
       role={isInteractive ? "button" : undefined}
       tabIndex={isInteractive ? 0 : undefined}
     >
-      <div className="tw-group tw-relative tw-flex tw-w-full tw-flex-col">
-        <div className="tw-flex tw-gap-x-2">
-          <div className="tw-relative tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-900">
-            <div className="tw-h-full tw-w-full tw-rounded-md">
-              <WaveDropQuoteProfilePicture drop={drop} />
-            </div>
-          </div>
-          <div className="tw-flex tw-w-full tw-flex-col">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <div className="tw-flex tw-items-center tw-gap-x-2">
-                {!!drop && (
-                  <UserCICAndLevel
-                    level={drop.author.level}
-                    size={UserCICAndLevelSize.SMALL}
-                  />
-                )}
-
-                <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
-                  <Link
-                    href={`/${drop?.author.handle ?? drop?.author.primary_address}`}
-                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-                  >
-                    {drop?.author.handle ?? drop?.author.primary_address}
-                  </Link>
-                </p>
-              </div>
-
-              {!!drop && (
-                <>
-                  <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
-                  <WaveDropTime timestamp={drop.created_at} />
-                </>
-              )}
-            </div>
-            <div>
-              {drop && waveHref && (
-                <Link
-                  href={waveHref}
-                  className="tw-leading-0 -tw-mt-1 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
-                >
-                  {drop.wave.name}
-                </Link>
-              )}
-            </div>
-            <div className="tw-mt-0.5">
-              <DropPartMarkdownWithPropLogger
-                partContent={quotedPart?.content ?? ""}
-                mentionedUsers={drop?.mentioned_users ?? []}
-                mentionedGroups={drop?.mentioned_groups ?? []}
-                mentionedWaves={drop?.mentioned_waves ?? []}
-                referencedNfts={drop?.referenced_nfts ?? []}
-                nftLinks={drop?.nft_links}
-                textSize="sm"
-                onQuoteClick={onQuoteClick}
-                currentDropId={drop?.id}
-                embedPath={embedPath}
-                quotePath={effectiveQuotePath}
-                embedDepth={embedDepth}
-                maxEmbedDepth={maxEmbedDepth}
-                onLinkCardActionsActiveChange={
-                  resolvedOnLinkCardActionsActiveChange
-                }
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <WaveDropQuoteBody
+        drop={drop}
+        quoteAuthorLabel={quoteAuthorLabel}
+        quoteContent={quoteContent}
+        waveHref={waveHref}
+      />
     </div>
   );
 };

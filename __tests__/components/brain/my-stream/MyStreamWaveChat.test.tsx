@@ -126,11 +126,18 @@ const wave = {
   wave: { type: ApiWaveType.Rank, winning_threshold: null },
 } as any;
 const mockOnDropClick = jest.fn();
+const setDocumentVisibility = (visibilityState: DocumentVisibilityState) => {
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    value: visibilityState,
+  });
+};
 
 describe("MyStreamWaveChat", () => {
   let store: any;
 
   beforeEach(() => {
+    setDocumentVisibility("visible");
     capturedPropsHolder.current = {};
     capturedCreatorPropsHolder.current = {};
     capturedMemesButtonPropsHolder.current = {};
@@ -312,6 +319,27 @@ describe("MyStreamWaveChat", () => {
       });
       expect(invalidateNotificationsMock).toHaveBeenCalled();
     });
+  });
+
+  it("does not call the read endpoint on unmount when the tab is hidden", async () => {
+    setDocumentVisibility("hidden");
+
+    const { unmount } = renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    await act(async () => {
+      unmount();
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotificationsMock).not.toHaveBeenCalled();
+    expect(mockRemoveWaveDeliveredNotifications).not.toHaveBeenCalled();
   });
 
   it("skips notification cleanup on unmount for anonymous viewers", async () => {

@@ -4,7 +4,6 @@ import React, { useRef } from "react";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
-import type { WebUnifiedWavesListWavesHandle } from "./WebUnifiedWavesListWaves";
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
@@ -17,6 +16,7 @@ interface WebUnifiedWavesListProps {
   readonly onHover: (waveId: string) => void;
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
   readonly isCollapsed?: boolean | undefined;
+  readonly showProfileFeedShortcut?: boolean | undefined;
 }
 
 const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
@@ -29,9 +29,9 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
     onHover,
     scrollContainerRef,
     isCollapsed = false,
+    showProfileFeedShortcut = true,
   } = props;
-  // Refs to the scroll container and sentinel
-  const listRef = useRef<WebUnifiedWavesListWavesHandle>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Use the custom hook for infinite scroll
   useInfiniteScroll(
@@ -39,7 +39,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
     isFetchingNextPage,
     fetchNextPage,
     scrollContainerRef,
-    listRef.current?.sentinelRef || { current: null },
+    sentinelRef,
     "100px"
   );
 
@@ -48,11 +48,12 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
       <div className="tw-w-full">
         {/* Unified Waves List */}
         <WebUnifiedWavesListWaves
-          ref={listRef}
           waves={waves}
           onHover={onHover}
           scrollContainerRef={scrollContainerRef}
           isCollapsed={isCollapsed}
+          showProfileFeedShortcut={showProfileFeedShortcut}
+          sentinelRef={sentinelRef}
         />
 
         {/* Loading indicator and intersection trigger */}

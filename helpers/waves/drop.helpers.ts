@@ -1,11 +1,11 @@
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
 import { sha256 } from "ethereum-cryptography/sha256.js";
 import { utf8ToBytes } from "ethereum-cryptography/utils.js";
 import { getRandomObjectId } from "../AllowlistToolHelpers";
-import { parseIpfsUrl } from "../Helpers";
 
 export enum DropSize {
   LIGHT = "LIGHT",
@@ -142,7 +142,7 @@ export const getDropPreviewImageUrl = (
       preview_image?: string;
     };
     if (!parsed?.preview_image) return null;
-    return parseIpfsUrl(parsed.preview_image);
+    return resolveIpfsUrlSync(parsed.preview_image);
   } catch {
     return null;
   }
@@ -161,7 +161,7 @@ export const getDropPromoVideoUrl = (
       promo_video?: string;
     };
     if (!parsed?.promo_video) return null;
-    return parseIpfsUrl(parsed.promo_video);
+    return resolveIpfsUrlSync(parsed.promo_video);
   } catch {
     return null;
   }
