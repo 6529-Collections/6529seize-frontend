@@ -84,16 +84,20 @@ describe("MobileMemesArtSubmissionBtn", () => {
     expect(screen.queryByTestId("modal")).toBeNull();
   });
 
-  it("adds urgent style when deadline approaching", () => {
-    const button = setup({
+  it("adds urgent style when deadline approaching", async () => {
+    setup({
       participation: {
         canSubmitNow: true,
         isWithinPeriod: true,
-        endTime: Date.now() + 1000,
+        endTime: Date.now() + 60_000,
         isEligible: true,
         hasReachedLimit: false,
         status: SubmissionStatus.ACTIVE,
       },
+    });
+
+    const button = await screen.findByRole("button", {
+      name: "Submit Work to The Memes - Deadline approaching!",
     });
 
     expect(button).toHaveClass("tw-animate-pulse");
