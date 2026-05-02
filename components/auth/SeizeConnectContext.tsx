@@ -1155,8 +1155,12 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   }, [activeAddress, storedConnectedAccounts]);
 
-  const inactiveStoredConnectedAccounts = useMemo(() => {
+  const jwtPollingStoredConnectedAccounts = useMemo(() => {
     if (!activeAddress) {
+      return storedConnectedAccounts;
+    }
+
+    if (!activeStoredAccount?.profileHandle) {
       return storedConnectedAccounts;
     }
 
@@ -1165,10 +1169,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         normalizeAddress(storedAccount.address) !==
         normalizeAddress(activeAddress)
     );
-  }, [activeAddress, storedConnectedAccounts]);
+  }, [
+    activeAddress,
+    activeStoredAccount?.profileHandle,
+    storedConnectedAccounts,
+  ]);
 
-  const otherConnectedAccountUnreadNotifications =
-    useConnectedAccountsUnreadNotifications(inactiveStoredConnectedAccounts);
+  const jwtConnectedAccountUnreadNotifications =
+    useConnectedAccountsUnreadNotifications(jwtPollingStoredConnectedAccounts);
 
   const { notifications: activeUnreadNotifications } = useUnreadNotifications(
     activeStoredAccount?.profileHandle ?? null
@@ -1176,22 +1184,27 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const connectedAccountUnreadNotifications = useMemo(() => {
     const unreadNotificationsByAddress = {
-      ...otherConnectedAccountUnreadNotifications,
+      ...jwtConnectedAccountUnreadNotifications,
     };
 
-    if (activeStoredAccount) {
+    if (activeStoredAccount?.profileHandle) {
       const activeAccountAddress = normalizeAddress(
         activeStoredAccount.address
       );
       unreadNotificationsByAddress[activeAccountAddress] =
         activeUnreadNotifications?.unread_count ?? 0;
+    } else if (activeStoredAccount) {
+      const activeAccountAddress = normalizeAddress(
+        activeStoredAccount.address
+      );
+      unreadNotificationsByAddress[activeAccountAddress] ??= 0;
     }
 
     return unreadNotificationsByAddress;
   }, [
     activeStoredAccount,
     activeUnreadNotifications?.unread_count,
-    otherConnectedAccountUnreadNotifications,
+    jwtConnectedAccountUnreadNotifications,
   ]);
 
   const contextValue = useMemo(

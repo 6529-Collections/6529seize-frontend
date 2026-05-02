@@ -72,12 +72,13 @@ const UnreadProbe: React.FC = () => {
 
 const buildStoredAccount = (
   address: string,
-  profileHandle: string | null = null
+  profileHandle: string | null = null,
+  jwt: string | null = null
 ): authUtils.ConnectedWalletAccount => ({
   address,
   refreshToken: "dummy-refresh-token",
   role: null,
-  jwt: null,
+  jwt,
   profileId: null,
   profileHandle,
 });
@@ -268,6 +269,68 @@ describe("SeizeConnectContext switch sync guard", () => {
 
     expect(unreadMap).toEqual({
       [addressA]: 7,
+      [addressB]: 4,
+    });
+  });
+
+  it("keeps the active JWT unread count when the active account has no profile handle", async () => {
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    const mockGetWalletAddress =
+      authUtils.getWalletAddress as jest.MockedFunction<
+        typeof authUtils.getWalletAddress
+      >;
+    const mockGetConnectedWalletAccounts =
+      authUtils.getConnectedWalletAccounts as jest.MockedFunction<
+        typeof authUtils.getConnectedWalletAccounts
+      >;
+    const mockUseConnectedAccountsUnreadNotifications =
+      require("@/hooks/useConnectedAccountsUnreadNotifications")
+        .useConnectedAccountsUnreadNotifications as jest.Mock;
+    const mockUseUnreadNotifications = require("@/hooks/useUnreadNotifications")
+      .useUnreadNotifications as jest.Mock;
+
+    const activeAccount = buildStoredAccount(addressA, null, "active-jwt");
+    const inactiveAccount = buildStoredAccount(addressB, "bob", "inactive-jwt");
+
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: addressA,
+      isConnected: true,
+      status: "connected",
+    });
+    mockGetWalletAddress.mockReturnValue(addressA);
+    mockGetConnectedWalletAccounts.mockReturnValue([
+      activeAccount,
+      inactiveAccount,
+    ]);
+    mockUseConnectedAccountsUnreadNotifications.mockReturnValue({
+      [addressA]: 9,
+      [addressB]: 4,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      notifications: { unread_count: 0 },
+      haveUnreadNotifications: false,
+    });
+
+    render(
+      <SeizeConnectProvider>
+        <UnreadProbe />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => {
+      expect(mockUseConnectedAccountsUnreadNotifications).toHaveBeenCalledWith([
+        activeAccount,
+        inactiveAccount,
+      ]);
+      expect(mockUseUnreadNotifications).toHaveBeenCalledWith(null);
+    });
+
+    const unreadMap = JSON.parse(
+      screen.getByTestId("unread-map").textContent ?? "{}"
+    );
+
+    expect(unreadMap).toEqual({
+      [addressA]: 9,
       [addressB]: 4,
     });
   });
