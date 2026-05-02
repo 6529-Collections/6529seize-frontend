@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiAttachment } from '../models/ApiAttachment';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
 import { HttpFile } from '../http/http';
@@ -22,6 +23,7 @@ export class ApiDropPart {
     'part_id': number;
     'content': string | null;
     'media': Array<ApiDropMedia>;
+    'attachments': Array<ApiAttachment>;
     'quoted_drop': ApiQuotedDropResponse | null;
 
     static readonly discriminator: string | undefined = undefined;
@@ -45,6 +47,12 @@ export class ApiDropPart {
             "name": "media",
             "baseName": "media",
             "type": "Array<ApiDropMedia>",
+            "format": ""
+        },
+        {
+            "name": "attachments",
+            "baseName": "attachments",
+            "type": "Array<ApiAttachment>",
             "format": ""
         },
         {

@@ -2,11 +2,20 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import useCapacitor from "./useCapacitor";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+import {
+  updateAttachmentInCachedDrops,
+  updateDropInCachedDrops,
+} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import {
   generateUniqueKeys,
@@ -23,6 +32,7 @@ import { WaveDropsSearchStrategy } from "@/contexts/wave/hooks/types";
 
 export function useDropMessages(waveId: string, dropId: string | null) {
   const { isCapacitor } = useCapacitor();
+  const queryClient = useQueryClient();
   const [init, setInit] = useState(false);
 
   const queryKey = [
@@ -133,9 +143,20 @@ export function useDropMessages(waveId: string, dropId: string | null) {
           return;
         }
 
+        updateDropInCachedDrops(queryClient, message);
         requestRefetch();
       },
-      [dropId, requestRefetch, waveId]
+      [dropId, queryClient, requestRefetch, waveId]
+    )
+  );
+
+  useWebSocketMessage<ApiAttachment>(
+    WsMessageType.ATTACHMENT_STATUS_UPDATE,
+    useCallback(
+      (attachment) => {
+        updateAttachmentInCachedDrops(queryClient, attachment);
+      },
+      [queryClient]
     )
   );
 

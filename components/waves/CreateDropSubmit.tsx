@@ -14,14 +14,18 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
   isDropMode,
   onDrop,
 }) => {
+  const submitLabel = isDropMode ? "Drop" : "Post";
+
   return (
     <PrimaryButton
       onClicked={onDrop}
       loading={submitting}
       disabled={!canSubmit}
-      padding="tw-px-2.5 lg:tw-px-3.5 tw-py-3 tw-max-w-[3.875rem]"
+      padding="tw-w-10 tw-px-2.5 tw-py-3 lg:tw-w-[3.875rem] lg:tw-px-3.5"
+      ariaLabel={submitting ? `${submitLabel} in progress` : submitLabel}
+      hideChildrenWhenLoading
     >
-      <span className="tw-hidden lg:tw-inline">{isDropMode ? "Drop" : "Post"}</span>
+      <span className="tw-hidden lg:tw-inline">{submitLabel}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"

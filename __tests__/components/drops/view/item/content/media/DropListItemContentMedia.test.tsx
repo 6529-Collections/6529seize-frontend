@@ -29,6 +29,10 @@ jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
     />
   ),
 }));
+jest.mock(
+  "@/components/drops/view/item/content/media/UnsupportedMediaLink",
+  () => ({ __esModule: true, default: () => <a href="file.txt">file.txt</a> })
+);
 jest.mock("next/dynamic", () => (importer: any) => () => (
   <div data-testid="glb" />
 ));
@@ -85,13 +89,13 @@ describe("DropListItemContentMedia", () => {
     );
   });
 
-  it("renders empty fragment for unknown type", () => {
-    const { container } = render(
+  it("renders compact link for unknown type", () => {
+    render(
       <DropListItemContentMedia
         media_mime_type="text/plain"
         media_url="file.txt"
       />
     );
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByRole("link", { name: "file.txt" })).toBeInTheDocument();
   });
 });

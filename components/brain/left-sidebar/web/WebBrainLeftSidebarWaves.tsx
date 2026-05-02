@@ -5,14 +5,14 @@ import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 interface WebBrainLeftSidebarWavesProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
   readonly isCollapsed?: boolean | undefined;
+  readonly showProfileFeedShortcut?: boolean | undefined;
 }
 
 const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
   scrollContainerRef,
   isCollapsed = false,
+  showProfileFeedShortcut = true,
 }) => {
-
-  
   const { waves, registerWave } = useMyStream();
 
   const onNextPage = () => {
@@ -31,6 +31,7 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
       onHover={registerWave}
       scrollContainerRef={scrollContainerRef}
       isCollapsed={isCollapsed}
+      showProfileFeedShortcut={showProfileFeedShortcut}
     />
   );
 };

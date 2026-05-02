@@ -9,6 +9,7 @@ import { getNextMintStart } from "@/components/meme-calendar/meme-calendar.helpe
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Link from "next/link";
 
@@ -34,6 +35,11 @@ const formatNextMintDateTime = (date: Date): string => {
 export const NextMintCard = ({ drop }: NextMintCardProps) => {
   const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
+  const isHtml = media?.mime_type === "text/html";
+  const htmlPreviewImageUrl =
+    hasTouchScreen && isHtml
+      ? (getDropPreviewImageUrl(drop.metadata) ?? undefined)
+      : undefined;
   const title =
     drop.title ??
     drop.metadata.find((m) => m.data_key === "title")?.data_value ??
@@ -66,6 +72,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
                 imageScale={ImageScale.AUTOx600}
                 disableAutoPlay={hasTouchScreen}
                 disableModal={hasTouchScreen}
+                htmlPreviewImageUrl={htmlPreviewImageUrl}
               />
             ) : (
               <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">

@@ -235,9 +235,7 @@ describe("multiPartUpload", () => {
           file: unsupportedFile,
           path: "drop",
         })
-      ).rejects.toThrow(
-        'Unsupported media upload MIME type: text/plain for file "notes.txt"'
-      );
+      ).rejects.toThrow("Unsupported file type for upload: notes.txt");
 
       expect(mockCommonApiPost).not.toHaveBeenCalled();
       expect(mockAxios.put).not.toHaveBeenCalled();

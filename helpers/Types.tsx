@@ -1,4 +1,5 @@
 import type { SortDirection } from "@/entities/ISort";
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 
@@ -340,6 +341,7 @@ export enum WsMessageType {
   DROP_DELETE = "DROP_DELETE",
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
+  ATTACHMENT_STATUS_UPDATE = "ATTACHMENT_STATUS_UPDATE",
   MEDIA_LINK_UPDATED = "MEDIA_LINK_UPDATED",
   USER_IS_TYPING = "USER_IS_TYPING",
   SUBSCRIBE_TO_WAVE = "SUBSCRIBE_TO_WAVE",
@@ -357,6 +359,11 @@ export interface WsTypingMessage {
 export interface WsDropUpdateMessage {
   type: WsMessageType.DROP_UPDATE;
   data: ApiDrop;
+}
+
+export interface WsAttachmentStatusUpdateMessage {
+  type: WsMessageType.ATTACHMENT_STATUS_UPDATE;
+  data: ApiAttachment;
 }
 
 export interface WsMediaLinkUpdatedData {

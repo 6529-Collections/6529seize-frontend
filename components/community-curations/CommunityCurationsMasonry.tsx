@@ -4,7 +4,9 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
+import CurationDropFooter from "@/components/waves/drops/CurationDropFooter";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
+import { WaveDropQuoteDisplayProvider } from "@/components/waves/drops/WaveDropQuoteDisplayContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
@@ -29,6 +31,10 @@ const MASONRY_COLUMN_WIDTH = 300;
 const MASONRY_GUTTER = 16;
 const INFINITE_SCROLL_ROOT_MARGIN = "1200px 0px";
 const SCROLL_IDLE_DELAY_MS = 120;
+const CURATION_CARD_CLASS_NAME =
+  "tw-group tw-relative tw-isolate tw-z-0 tw-rounded-xl desktop-hover:hover:tw-z-30 focus-within:tw-z-30";
+const CURATION_CARD_HOVER_FRAME_CLASS_NAME =
+  "tw-pointer-events-none tw-absolute tw-inset-0 -tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-border-white/10 motion-reduce:tw-transition-none";
 
 type PanelViewport = {
   readonly height: number;
@@ -243,22 +249,29 @@ function CommunityCurationsMasonryItem({
   const navigateToDropWave = useNavigateToDropWave();
 
   return (
-    <article className="tw-group tw-relative tw-isolate">
-      <Drop
-        drop={drop}
-        previousDrop={null}
-        nextDrop={null}
-        showWaveInfo={false}
-        activeDrop={null}
-        showReplyAndQuote={false}
-        location={DropLocation.MY_STREAM}
-        dropViewDropId={null}
-        onReply={noop}
-        onReplyClick={noop}
-        onQuoteClick={navigateToDropWave}
-        onDropContentClick={navigateToDropWave}
-        identityMode="default"
-        showInteractions={false}
+    <article className={CURATION_CARD_CLASS_NAME}>
+      <WaveDropQuoteDisplayProvider flattenWhenAuthorSameAs={drop.author}>
+        <Drop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.MY_STREAM}
+          dropViewDropId={null}
+          onReply={noop}
+          onReplyClick={noop}
+          onQuoteClick={navigateToDropWave}
+          onDropContentClick={navigateToDropWave}
+          footer={<CurationDropFooter drop={drop} />}
+          timestampLayout="stacked"
+          showInteractions={false}
+        />
+      </WaveDropQuoteDisplayProvider>
+      <div
+        aria-hidden="true"
+        className={CURATION_CARD_HOVER_FRAME_CLASS_NAME}
       />
     </article>
   );
@@ -334,7 +347,7 @@ export default function CommunityCurationsMasonry({
 
   return (
     <TweetPreviewModeProvider mode="never">
-      <div className="tw-overflow-hidden tw-rounded-2xl">
+      <div>
         <CommunityCurationsVirtualMasonry
           drops={drops}
           scrollContainer={scrollContainer}
