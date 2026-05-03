@@ -248,6 +248,11 @@ const flushQueuedWaveReadRequests = ({
   readonly authHeaders: AuthHeaders;
   readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
 }): void => {
+  const queuedRequestsByRequestKey = new Map<
+    string,
+    PendingWaveReadRequestState[]
+  >();
+
   for (const queuedRequest of queuedRequests) {
     if (
       pendingWaveReadRequests.get(queuedRequest.requestKey) !== queuedRequest
@@ -255,18 +260,34 @@ const flushQueuedWaveReadRequests = ({
       continue;
     }
 
+    const requestKey = getRequestKey(queuedRequest);
     pendingWaveReadRequests.delete(queuedRequest.requestKey);
+    const groupedRequests = queuedRequestsByRequestKey.get(requestKey) ?? [];
+    groupedRequests.push(queuedRequest);
+    queuedRequestsByRequestKey.set(requestKey, groupedRequests);
+  }
+
+  for (const [requestKey, groupedRequests] of queuedRequestsByRequestKey) {
+    const [firstQueuedRequest] = groupedRequests;
+    if (!firstQueuedRequest) {
+      continue;
+    }
+
     void (async () => {
       try {
         await markWaveReadWithAuthHeaders({
-          waveId: queuedRequest.waveId,
-          requestKey: getRequestKey(queuedRequest),
+          waveId: firstQueuedRequest.waveId,
+          requestKey,
           authHeaders,
           invalidateNotificationsRef,
         });
-        queuedRequest.resolve();
+        for (const queuedRequest of groupedRequests) {
+          queuedRequest.resolve();
+        }
       } catch (error) {
-        queuedRequest.reject(error);
+        for (const queuedRequest of groupedRequests) {
+          queuedRequest.reject(error);
+        }
       }
     })();
   }

@@ -203,10 +203,6 @@ export const useWaveReadIdentityState = ({
   walletAuth,
 }: WaveReadIdentityConfig): WaveReadIdentityState => {
   const addressKey = getAddressKey(address);
-  const identityKey = getWaveReadIdentityKey({
-    addressKey,
-    activeProfileProxyId,
-  });
   const jwtIdentity = useMemo(
     () => decodeWaveReadJwtIdentity(walletAuth),
     [walletAuth]
@@ -230,6 +226,12 @@ export const useWaveReadIdentityState = ({
       }),
     [activeProfileProxyId, addressKey, jwtIdentity]
   );
+  const identityKey =
+    temporaryProxyRoleIdentity?.identityKey ??
+    getWaveReadIdentityKey({
+      addressKey,
+      activeProfileProxyId,
+    });
   const verifiedIdentity = useMemo(
     () =>
       getVerifiedIdentity({
