@@ -44,7 +44,9 @@ export default function BrainMobileViewContent({
   wave,
 }: BrainMobileViewContentProps) {
   const isCompetitionWave = isRankWave || isApproveWave;
+  const supportsOutcomeView = isCompetitionWave && !isCurationWave;
   const rankWave = isCompetitionWave ? (wave ?? null) : null;
+  const outcomeWave = supportsOutcomeView ? (wave ?? null) : null;
   const curationWave = isCurationWave ? (wave ?? null) : null;
   const faqWave = isMemesWave ? (wave ?? null) : null;
 
@@ -74,8 +76,8 @@ export default function BrainMobileViewContent({
     </div>
   ) : null;
 
-  const outcomeContent = rankWave ? (
-    <MyStreamWaveOutcome wave={rankWave} />
+  const outcomeContent = outcomeWave ? (
+    <MyStreamWaveOutcome wave={outcomeWave} />
   ) : null;
 
   const myVotesContent = rankWave ? (

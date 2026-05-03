@@ -53,6 +53,10 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
 
+jest.mock("@/hooks/waves/useWaveCurations", () => ({
+  useWaveCurations: () => ({ data: [] }),
+}));
+
 const leaderboardMock = jest.fn();
 jest.mock("@/components/brain/my-stream/MyStreamWaveTabsLeaderboard", () => ({
   __esModule: true,
@@ -179,7 +183,7 @@ describe("BrainMobileTabs", () => {
       expect.objectContaining({
         wave: { id: "1" },
         activeView: BrainView.ABOUT,
-        onViewChange,
+        onViewChange: expect.any(Function),
       })
     );
     expect(screen.getByText("My Votes")).toBeInTheDocument();
@@ -206,8 +210,10 @@ describe("BrainMobileTabs", () => {
       />
     );
 
+    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("Sales")).toBeInTheDocument();
     expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).toBeNull();
     expect(screen.queryByText("FAQ")).toBeNull();
   });
 
@@ -283,11 +289,38 @@ describe("BrainMobileTabs", () => {
     );
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
+    expect(screen.getByText("Outcome")).toBeInTheDocument();
     expect(leaderboardMock).toHaveBeenCalledWith(
       expect.objectContaining({
         wave: { id: "1" },
         activeView: BrainView.ABOUT,
       })
     );
+  });
+
+  it("renders curation tabs without Outcome for approve curation waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      isRankWave: false,
+      isApproveWave: true,
+    });
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={{ id: "1" } as any}
+      />
+    );
+
+    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
+    expect(screen.getByText("Sales")).toBeInTheDocument();
+    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).toBeNull();
   });
 });

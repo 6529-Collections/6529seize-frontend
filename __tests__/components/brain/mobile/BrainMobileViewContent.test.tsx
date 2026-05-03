@@ -440,6 +440,33 @@ describe("BrainMobileViewContent", () => {
     );
   });
 
+  it.each([
+    { isRankWave: true, isApproveWave: false },
+    { isRankWave: false, isApproveWave: true },
+  ])(
+    "does not render outcome for curation competition waves",
+    ({ isRankWave, isApproveWave }) => {
+      const { container } = render(
+        <BrainMobileViewContent
+          activeView={BrainView.OUTCOME}
+          activeWaveId="1"
+          isCurationWave={true}
+          isMemesWave={false}
+          isRankWave={isRankWave}
+          isApproveWave={isApproveWave}
+          onDropClick={jest.fn()}
+          onOpenQuickVote={jest.fn()}
+          wave={{ id: "wave-1" } as any}
+        >
+          <div>child</div>
+        </BrainMobileViewContent>
+      );
+
+      expect(container.firstChild).toBeNull();
+      expect(mockMyStreamWaveOutcome).not.toHaveBeenCalled();
+    }
+  );
+
   it("renders faq for approve memes waves", () => {
     const wave = { id: "wave-1" } as any;
 

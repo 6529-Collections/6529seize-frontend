@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 import { useBrainMobileActiveView } from "@/components/brain/mobile/useBrainMobileActiveView";
@@ -60,5 +60,41 @@ describe("useBrainMobileActiveView", () => {
     );
 
     expect(result.current.activeView).toBe(BrainView.DEFAULT);
+  });
+
+  it("resets Outcome to default for approve curation waves", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isApproveWave: true,
+          isCurationWave: true,
+          isRankWave: false,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    act(() => {
+      result.current.onViewChange(BrainView.OUTCOME);
+    });
+
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+  });
+
+  it("resets Outcome to submissions for completed rank curation waves", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isCurationWave: true,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    act(() => {
+      result.current.onViewChange(BrainView.OUTCOME);
+    });
+
+    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
   });
 });
