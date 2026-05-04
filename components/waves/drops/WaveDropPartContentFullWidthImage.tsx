@@ -102,6 +102,7 @@ export default function WaveDropPartContentFullWidthImage({
   );
 
   const handleCloseModal = useCallback(() => {
+    setIsZoomed(false);
     setIsModalOpen(false);
   }, []);
 

@@ -716,7 +716,6 @@ function AttachmentMoreMenu({
           }
         }}
         buttonRef={buttonRef}
-        portalClassName="tw-z-[1100]"
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-1">
