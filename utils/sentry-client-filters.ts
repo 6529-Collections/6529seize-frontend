@@ -399,7 +399,11 @@ function getLatestFailedTransportBreadcrumb(
     if (statusCode !== null && statusCode >= 400) {
       const failedHttpTarget = getBreadcrumbTargetCandidate(breadcrumb);
       if (!failedHttpTarget) {
-        continue;
+        if (getBreadcrumbUrlIsFirstParty(breadcrumb) === false) {
+          continue;
+        }
+
+        return null;
       }
 
       if (
