@@ -1,6 +1,7 @@
 import {
   __testing,
   getLowValueNetworkErrorDecision,
+  getLowValueNetworkErrorTargetUrl,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
   shouldFilterThirdPartyTelemetrySpan,
@@ -430,6 +431,69 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe("drop");
+  });
+
+  it("drops raw first-party status 0 network errors when a later third-party status 0 fails", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "https://example.com/collect",
+            "url.is_first_party": false,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("keeps raw network errors when only a third-party status 0 fails", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "https://example.com/collect",
+            "url.is_first_party": false,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
   it("keeps message-target network errors when only a different API has status 0", () => {

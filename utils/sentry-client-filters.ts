@@ -445,12 +445,23 @@ function getLatestFailedTransportBreadcrumb(
 
     const failedTransportTarget =
       getFailedTransportBreadcrumbTarget(breadcrumb);
+    if (failedTransportTarget.isFirstParty === false) {
+      continue;
+    }
+
     if (
       messageTargetCandidates.length > 0 &&
       !canUseFailedTransportForMessageTarget(
         failedTransportTarget,
         messageTargetCandidates
       )
+    ) {
+      continue;
+    }
+
+    if (
+      messageTargetCandidates.length === 0 &&
+      !isFirstPartyApiTarget(failedTransportTarget)
     ) {
       continue;
     }
@@ -468,6 +479,35 @@ function getLatestFailedTransportBreadcrumb(
   }
 
   return null;
+}
+
+export function getLowValueNetworkErrorTargetUrl(
+  event: SentryClientEvent
+): string | null {
+  const latestBreadcrumb = getLatestFailedTransportBreadcrumb(event);
+  if (!latestBreadcrumb) {
+    return null;
+  }
+
+  const messageTargetCandidates = getMessageTargetCandidates(event);
+  if (isFilteredUrl(latestBreadcrumb.url)) {
+    return (
+      messageTargetCandidates.find(isFilteredBreadcrumbFallbackApiTarget)
+        ?.url ?? null
+    );
+  }
+
+  if (messageTargetCandidates.length === 0) {
+    return isFirstPartyApiTarget(latestBreadcrumb)
+      ? latestBreadcrumb.url
+      : null;
+  }
+
+  return (
+    messageTargetCandidates.find((target) =>
+      isSameFirstPartyApiTarget(target, latestBreadcrumb)
+    )?.url ?? null
+  );
 }
 
 function getMessageTargetCandidates(
@@ -501,36 +541,10 @@ function getNetworkTargetUrlCandidates(event: SentryClientEvent): string[] {
   );
 }
 
-function getPrimaryNetworkTargetCandidates(
-  event: SentryClientEvent
-): NetworkTargetCandidate[] {
-  const messageCandidates = getMessageTargetCandidates(event);
-  return messageCandidates.length > 0
-    ? messageCandidates
-    : getNetworkTargetCandidates(event);
-}
-
 function hasMatchingFailedTransportBreadcrumb(
   event: SentryClientEvent
 ): boolean {
-  const latestBreadcrumb = getLatestFailedTransportBreadcrumb(event);
-  if (!latestBreadcrumb) {
-    return false;
-  }
-
-  if (isFilteredUrl(latestBreadcrumb.url)) {
-    if (latestBreadcrumb.isFirstParty === false) {
-      return false;
-    }
-
-    return getMessageTargetCandidates(event).some(
-      isFilteredBreadcrumbFallbackApiTarget
-    );
-  }
-
-  return getPrimaryNetworkTargetCandidates(event).some((target) =>
-    isSameFirstPartyApiTarget(target, latestBreadcrumb)
-  );
+  return getLowValueNetworkErrorTargetUrl(event) !== null;
 }
 
 function isLowValueFirstPartyNetworkError(event: SentryClientEvent): boolean {

@@ -13,8 +13,8 @@ import {
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 import {
-  getBreadcrumbTransportStatusCode,
   getLowValueNetworkErrorDecision,
+  getLowValueNetworkErrorTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
@@ -24,7 +24,6 @@ import {
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
-import type { Breadcrumb } from "@sentry/nextjs";
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
 const isProduction = publicEnv.NODE_ENV === "production";
@@ -108,51 +107,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isHttpBreadcrumb(breadcrumb: Breadcrumb): boolean {
-  return (
-    breadcrumb.type === "http" ||
-    breadcrumb.category === "fetch" ||
-    breadcrumb.category === "xhr"
-  );
-}
-
-function getLatestHttpBreadcrumbUrl(
-  event: Sentry.Event,
-  statusCode?: number
-): unknown {
-  const breadcrumbs = event.breadcrumbs;
-  if (!Array.isArray(breadcrumbs)) {
-    return undefined;
-  }
-
-  for (let index = breadcrumbs.length - 1; index >= 0; index -= 1) {
-    const breadcrumb = breadcrumbs[index];
-    if (!breadcrumb || !isHttpBreadcrumb(breadcrumb)) {
-      continue;
-    }
-
-    if (
-      statusCode !== undefined &&
-      getBreadcrumbTransportStatusCode(breadcrumb) !== statusCode
-    ) {
-      continue;
-    }
-
-    const url = breadcrumb.data?.["url"];
-    if (url) {
-      return url;
-    }
-  }
-
-  return undefined;
-}
-
-function getLatestNetworkBreadcrumbUrl(event: Sentry.Event): unknown {
-  return (
-    getLatestHttpBreadcrumbUrl(event, 0) ?? getLatestHttpBreadcrumbUrl(event)
-  );
-}
-
 function filterNoisyThirdPartyTransactionSpans(
   event: Sentry.Event
 ): Sentry.Event {
@@ -221,10 +175,11 @@ function extractUrlFromError(error: Error, event: Sentry.Event): string {
     return String(sanitizeUrlString(urlMatch[1]));
   }
 
-  const breadcrumbUrl = getLatestNetworkBreadcrumbUrl(event);
-  if (breadcrumbUrl) {
-    return String(sanitizeUrlString(breadcrumbUrl));
+  const lowValueNetworkTargetUrl = getLowValueNetworkErrorTargetUrl(event);
+  if (lowValueNetworkTargetUrl) {
+    return String(sanitizeUrlString(lowValueNetworkTargetUrl));
   }
+
   if (event.request?.url) {
     return String(sanitizeUrlString(event.request.url));
   }
