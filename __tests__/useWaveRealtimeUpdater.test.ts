@@ -568,6 +568,135 @@ describe("useWaveRealtimeUpdater", () => {
     expect(replayedDrop.reactions).toBe(freshReaction);
   });
 
+  it("reconciles pending fetched reaction replays with the latest protected cache reaction", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentUser = profile("profile-1", "current-user");
+    const serverReactions = [
+      reactionEntry(":wave:", [
+        profile("profile-1", "server-current-user"),
+        profile("profile-2", "fresh-wave"),
+      ]),
+      reactionEntry(":fire:", [profile("profile-3", "fresh-fire")]),
+    ];
+    const serverContext = {
+      ...contextProfileContext(":wave:"),
+      rating: 9,
+    };
+    const loadedContext = {
+      ...contextProfileContext(":stale:"),
+      rating: 1,
+    };
+    const store: any = {
+      wave1: {
+        drops: [],
+        isLoading: true,
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-loading-replay-protected",
+      title: "server-title",
+      rating: 42,
+      realtime_rating: 43,
+      rating_prediction: 44,
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: serverContext,
+      reactions: serverReactions,
+    });
+
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: "d-loading-replay-protected",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+
+    dateNowSpy.mockReturnValue(1_500);
+    beginReactionMutation({
+      dropId: "d-loading-replay-protected",
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    mockGetQueriesData.mockReturnValue([
+      [
+        ["DROPS"],
+        {
+          pages: [
+            [
+              {
+                id: "d-loading-replay-protected",
+                context_profile_context: contextProfileContext(":joy:"),
+                reactions: [reactionEntry(":joy:", [currentUser])],
+              },
+            ],
+          ],
+        },
+      ],
+    ]);
+
+    dateNowSpy.mockReturnValue(2_000);
+    store.wave1 = {
+      ...store.wave1,
+      drops: [
+        {
+          id: "d-loading-replay-protected",
+          type: DropSize.FULL,
+          stableKey: "initial-protected-stable-key",
+          stableHash: "initial-protected-stable-hash",
+          title: "loaded-title",
+          rating: 1,
+          author: {},
+          wave: { id: "wave1" },
+          context_profile_context: loadedContext,
+          reactions: reactionEntries(":stale:"),
+        },
+      ],
+      isLoading: false,
+    };
+
+    act(() => {
+      rerender();
+    });
+
+    await waitFor(() => expect(props.updateData).toHaveBeenCalledTimes(1));
+
+    const replayedUpdate = props.updateData.mock.calls[0]?.[0];
+    const replayedDrop = replayedUpdate.drops[0];
+    expect(replayedDrop.stableKey).toBe("initial-protected-stable-key");
+    expect(replayedDrop.stableHash).toBe("initial-protected-stable-hash");
+    expect(replayedDrop.title).toBe("server-title");
+    expect(replayedDrop.rating).toBe(42);
+    expect(replayedDrop.realtime_rating).toBe(43);
+    expect(replayedDrop.rating_prediction).toBe(44);
+    expect(replayedDrop.context_profile_context.rating).toBe(9);
+    expect(replayedDrop.context_profile_context.reaction).toBe(":joy:");
+    expect(replayedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+      reactionEntry(":fire:", [profile("profile-3", "fresh-fire")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
   it("ignores older overlapping fetched reaction updates that finish last", async () => {
     const firstFetch = deferred<any>();
     const secondFetch = deferred<any>();

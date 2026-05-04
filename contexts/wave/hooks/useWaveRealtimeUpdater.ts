@@ -724,11 +724,28 @@ function useIncomingDropProcessor({
       const latestFullDrop = getFullDrop(latestDrop);
 
       if (latestFullDrop !== null) {
+        const latestCachedDrop = findDropInCachedDrops(
+          queryClient,
+          pendingUpdate.dropId
+        );
+        const protectedIntent = getProtectedReactionIntent(
+          pendingUpdate.dropId
+        );
+        const localDrop = selectFetchedDropLocalState({
+          cachedDropSnapshot: undefined,
+          latestCachedDrop,
+          latestExistingDrop: latestFullDrop,
+          protectedIntent,
+        });
+        const nextDrop = reconcileFetchedDropUpdate(
+          pendingUpdate.drop,
+          protectedIntent,
+          localDrop
+        );
+
         updateData({
           key: pendingUpdate.waveId,
-          drops: [
-            buildFetchedDropForWaveStore(pendingUpdate.drop, latestFullDrop),
-          ],
+          drops: [buildFetchedDropForWaveStore(nextDrop, latestFullDrop)],
         });
         pendingFetchedDropUpdatesRef.current.delete(key);
         continue;
@@ -738,7 +755,7 @@ function useIncomingDropProcessor({
         pendingFetchedDropUpdatesRef.current.delete(key);
       }
     }
-  }, [getData, updateData]);
+  }, [getData, queryClient, updateData]);
 
   useEffect(() => {
     flushPendingFetchedDropUpdates();
