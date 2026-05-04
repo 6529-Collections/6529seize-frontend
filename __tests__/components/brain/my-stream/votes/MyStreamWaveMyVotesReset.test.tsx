@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVotesReset from "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset";
 import { AuthContext } from "@/components/auth/Auth";
@@ -14,7 +14,14 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVotesResetProgress",
-  () => (p: any) => <div data-testid="progress" {...p} />
+  () => (p: any) => (
+    <div
+      data-testid="progress"
+      data-is-resetting={String(p.isResetting)}
+      data-reset-progress={String(p.resetProgress)}
+      data-total-count={String(p.totalCount)}
+    />
+  )
 );
 jest.mock("@/components/utils/button/SecondaryButton", () => (p: any) => (
   <button onClick={p.onClicked} disabled={p.disabled}>
@@ -148,12 +155,16 @@ test("resets votes for selected drops", async () => {
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
   );
-  await act(async () => {
-    fireEvent.click(screen.getAllByRole("button")[1]);
-  });
+  fireEvent.click(screen.getAllByRole("button")[1]);
+
+  await waitFor(() =>
+    expect(onResettingChange).toHaveBeenNthCalledWith(2, false)
+  );
+
   expect(onResettingChange).toHaveBeenNthCalledWith(1, true);
-  expect(onResettingChange).toHaveBeenNthCalledWith(2, false);
+  expect(onResettingChange).toHaveBeenCalledTimes(2);
   expect(removeSelected).toHaveBeenCalledTimes(2);
+  expect(invalidateQueries).toHaveBeenCalledTimes(2);
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
   });
@@ -161,4 +172,77 @@ test("resets votes for selected drops", async () => {
     queryKey: [QueryKey.WAVE_DECISIONS, { waveId: "wave-1" }],
   });
   // onDropRateChange is handled by React Query elsewhere, not directly by this component
+});
+
+test("cleans up and invalidates once when a later reset fails", async () => {
+  useMutationMock.mockImplementation((config: any) => {
+    let callCount = 0;
+
+    return {
+      mutateAsync: async (param: any) => {
+        callCount += 1;
+
+        if (callCount === 2) {
+          const error = new Error("API Error");
+          config.onError?.(error);
+          throw error;
+        }
+
+        const result = { id: param.dropId };
+        config.onSuccess?.(result);
+        return result;
+      },
+    };
+  });
+
+  const removeSelected = jest.fn();
+  const onResettingChange = jest.fn();
+  const selected = new Set(["a", "b"]);
+
+  render(
+    <AuthContext.Provider value={auth}>
+      <ReactQueryWrapperContext.Provider value={rqContext}>
+        <MyStreamWaveMyVotesReset
+          waveId="wave-1"
+          haveDrops
+          availableVotes={7}
+          selected={selected}
+          allItemsSelected={false}
+          onToggleSelectAll={jest.fn()}
+          removeSelected={removeSelected}
+          onResettingChange={onResettingChange}
+        />
+      </ReactQueryWrapperContext.Provider>
+    </AuthContext.Provider>
+  );
+
+  fireEvent.click(screen.getAllByRole("button")[1]);
+
+  await waitFor(() =>
+    expect(onResettingChange).toHaveBeenNthCalledWith(2, false)
+  );
+
+  expect(removeSelected).toHaveBeenCalledTimes(1);
+  expect(onResettingChange).toHaveBeenCalledTimes(2);
+  expect(removeSelected).toHaveBeenCalledWith("a");
+  expect(removeSelected).not.toHaveBeenCalledWith("b");
+  expect(invalidateQueries).toHaveBeenCalledTimes(2);
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
+  });
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.WAVE_DECISIONS, { waveId: "wave-1" }],
+  });
+  expect(screen.getByTestId("progress")).toHaveAttribute(
+    "data-is-resetting",
+    "false"
+  );
+  expect(screen.getByTestId("progress")).toHaveAttribute(
+    "data-reset-progress",
+    "0"
+  );
+  expect(screen.getByTestId("progress")).toHaveAttribute(
+    "data-total-count",
+    "0"
+  );
 });

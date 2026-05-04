@@ -55,7 +55,6 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       }),
     onSuccess: (response: ApiDrop) => {
       removeSelected(response.id);
-      invalidateWaveApprovalStatusQueries(queryClient, waveId);
     },
     onError: (error) => {
       setToast({
@@ -77,16 +76,26 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
 
     // Get all selected drop IDs
     const selectedDropIds = Array.from(selected);
+    let didResetAnyDrop = false;
 
-    for (const dropId of selectedDropIds) {
-      await rateChangeMutation.mutateAsync({ dropId });
-      setResetProgress((prev) => prev + 1);
+    try {
+      for (const dropId of selectedDropIds) {
+        await rateChangeMutation.mutateAsync({ dropId });
+        didResetAnyDrop = true;
+        setResetProgress((prev) => prev + 1);
+      }
+    } catch {
+      // The mutation onError shows the toast. Stop the batch and clean up below.
+    } finally {
+      setIsResetting(false);
+      setResetProgress(0);
+      onResettingChange(false);
+      setTotalCount(0);
     }
 
-    setIsResetting(false);
-    setResetProgress(0);
-    onResettingChange(false);
-    setTotalCount(0);
+    if (didResetAnyDrop) {
+      invalidateWaveApprovalStatusQueries(queryClient, waveId);
+    }
   };
 
   const handleResetClick = () => {
