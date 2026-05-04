@@ -221,11 +221,88 @@ function getFullDrop(drop: Drop | undefined): ExtendedDrop | null {
   return drop;
 }
 
+function hasProfileForReaction(
+  reactions: ApiDropReaction[],
+  profileId: string,
+  reaction: string
+): boolean {
+  return reactions.some(
+    (entry) =>
+      entry.reaction === reaction &&
+      entry.profiles.some((profile) => profile.id === profileId)
+  );
+}
+
+function matchesProtectedReactionIntent(
+  localDrop: CachedDropReactionState,
+  protectedIntent: ProtectedReactionIntent
+): boolean {
+  const localReaction = localDrop.context_profile_context?.reaction ?? null;
+  if (localReaction !== protectedIntent.reaction) {
+    return false;
+  }
+
+  const profileId = protectedIntent.profileId;
+  if (!profileId) {
+    return true;
+  }
+
+  if (protectedIntent.reaction === null) {
+    return findReactionProfile(localDrop.reactions, profileId) === null;
+  }
+
+  return hasProfileForReaction(
+    localDrop.reactions,
+    profileId,
+    protectedIntent.reaction
+  );
+}
+
+function getProtectedSnapshotFallback(
+  cachedDropSnapshot: CachedDropReactionState | null | undefined,
+  protectedIntent: ProtectedReactionIntent | null
+): CachedDropReactionState | null {
+  if (cachedDropSnapshot === undefined || cachedDropSnapshot === null) {
+    return null;
+  }
+
+  if (protectedIntent === null) {
+    return null;
+  }
+
+  return matchesProtectedReactionIntent(cachedDropSnapshot, protectedIntent)
+    ? cachedDropSnapshot
+    : null;
+}
+
+function selectFetchedDropLocalState({
+  cachedDropSnapshot,
+  latestCachedDrop,
+  latestExistingDrop,
+  protectedIntent,
+}: {
+  readonly cachedDropSnapshot: CachedDropReactionState | null | undefined;
+  readonly latestCachedDrop: CachedDropReactionState | null;
+  readonly latestExistingDrop: CachedDropReactionState | null;
+  readonly protectedIntent: ProtectedReactionIntent | null;
+}): CachedDropReactionState | null {
+  const snapshotFallback = getProtectedSnapshotFallback(
+    cachedDropSnapshot,
+    protectedIntent
+  );
+
+  if (cachedDropSnapshot !== undefined) {
+    return latestCachedDrop ?? latestExistingDrop ?? snapshotFallback;
+  }
+
+  return latestExistingDrop ?? latestCachedDrop ?? snapshotFallback;
+}
+
 function reconcileFetchedDropUpdate(
   apiDrop: ApiDrop,
+  protectedIntent: ProtectedReactionIntent | null,
   localDrop: CachedDropReactionState | null
 ): ApiDrop {
-  const protectedIntent = getProtectedReactionIntent(apiDrop.id);
   const serverReaction = apiDrop.context_profile_context?.reaction ?? null;
 
   recordReactionRealtimeReconciliation({
@@ -309,7 +386,7 @@ function replaceAttachmentInPart(
   part: ApiDropPart,
   attachment: ApiAttachment
 ): ApiDropPart {
-  const attachments = part.attachments ?? [];
+  const attachments = part.attachments;
   const hasAttachment = attachments.some(
     (item) => item.attachment_id === attachment.attachment_id
   );
@@ -520,11 +597,14 @@ function useNewestMessagesSync({
         if (needsRefetchAfterCurrentRef.current[waveId]) {
           needsRefetchAfterCurrentRef.current[waveId] = false;
           const latestData = getData(waveId);
-          if (latestData?.latestFetchedSerialNo) {
-            await initiateFetchNewestCycle(
-              waveId,
-              latestData.latestFetchedSerialNo
-            );
+          const latestFetchedSerialNo = latestData?.latestFetchedSerialNo;
+          if (
+            latestFetchedSerialNo !== undefined &&
+            latestFetchedSerialNo !== null &&
+            latestFetchedSerialNo !== 0 &&
+            !Number.isNaN(latestFetchedSerialNo)
+          ) {
+            await initiateFetchNewestCycle(waveId, latestFetchedSerialNo);
           }
         }
       }
@@ -580,12 +660,20 @@ function useIncomingDropProcessor({
       const latestExistingDrop = getFullDrop(
         latestData?.drops.find((cachedDrop) => cachedDrop.id === drop.id)
       );
-      const cachedDrop =
-        cachedDropSnapshot ??
-        latestExistingDrop ??
-        findDropInCachedDrops(queryClient, drop.id);
+      const latestCachedDrop = findDropInCachedDrops(queryClient, drop.id);
+      const protectedIntent = getProtectedReactionIntent(apiDrop.id);
+      const cachedDrop = selectFetchedDropLocalState({
+        cachedDropSnapshot,
+        latestCachedDrop,
+        latestExistingDrop,
+        protectedIntent,
+      });
 
-      const nextDrop = reconcileFetchedDropUpdate(apiDrop, cachedDrop);
+      const nextDrop = reconcileFetchedDropUpdate(
+        apiDrop,
+        protectedIntent,
+        cachedDrop
+      );
 
       if (latestExistingDrop !== null) {
         updateData({

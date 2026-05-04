@@ -1408,6 +1408,122 @@ describe("useWaveRealtimeUpdater", () => {
     }
   });
 
+  it("uses the newest cache reaction for unopened waves when fetch returns stale data", async () => {
+    const dropId = "d-unopened-cache-race";
+    const currentUser = profile("profile-1", "current-user");
+    const store: any = {};
+    let cachedDrop: any = null;
+    let resolveFetch: (drop: any) => void = () => undefined;
+
+    mockGetQueriesData.mockImplementation(() =>
+      cachedDrop === null
+        ? []
+        : [
+            [
+              ["DROPS"],
+              {
+                pages: [[cachedDrop]],
+              },
+            ],
+          ]
+    );
+    fetchDropByIdBatched.mockReturnValue(
+      new Promise((resolve) => {
+        resolveFetch = resolve;
+      })
+    );
+
+    const props = baseProps(store);
+    props.registerWave = jest.fn((waveId: string) => {
+      store[waveId] = {
+        drops: [
+          {
+            id: dropId,
+            type: DropSize.FULL,
+            stableKey: "registered-stable-key",
+            stableHash: "registered-stable-hash",
+            author: {},
+            wave: { id: waveId },
+            context_profile_context: contextProfileContext(":wave:"),
+            reactions: [
+              reactionEntry(":wave:", [
+                profile("profile-1", "server-current-user"),
+                profile("profile-2", "registered-wave"),
+              ]),
+            ],
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      };
+    });
+
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: dropId,
+      wave: { id: "wave2" },
+      author: {},
+    };
+
+    act(() => {
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      );
+    });
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith(dropId);
+
+    dateNowSpy.mockReturnValue(1_500);
+    beginReactionMutation({
+      dropId,
+      waveId: "wave2",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    cachedDrop = {
+      id: dropId,
+      context_profile_context: contextProfileContext(":joy:"),
+      reactions: [reactionEntry(":joy:", [currentUser])],
+    };
+
+    dateNowSpy.mockReturnValue(2_000);
+    await act(async () => {
+      resolveFetch({
+        id: dropId,
+        author: {},
+        wave: { id: "wave2" },
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-current-user"),
+            profile("profile-2", "fresh-wave"),
+          ]),
+        ],
+      });
+      await flushPromises();
+    });
+
+    await waitFor(() => {
+      expect(mockSetQueriesData).toHaveBeenCalled();
+    });
+
+    for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
+      const updatedCacheDrop = updateCachedData(cachedDrop);
+
+      expect(updatedCacheDrop.context_profile_context.reaction).toBe(":joy:");
+      expect(updatedCacheDrop.reactions).toEqual([
+        reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+        reactionEntry(":joy:", [currentUser]),
+      ]);
+    }
+  });
+
   it("skips when existing drop is LIGHT type", async () => {
     const store = {
       wave1: {
