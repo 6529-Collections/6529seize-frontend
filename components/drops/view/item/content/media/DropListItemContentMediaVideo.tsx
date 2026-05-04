@@ -1,13 +1,17 @@
 "use client";
 
-import { getDownloadFilenameFromUrl } from "@/helpers/media-download.helpers";
+import {
+  downloadMediaUrl,
+  getDownloadFilenameFromUrl,
+  triggerDirectDownload,
+} from "@/helpers/media-download.helpers";
 import { useInView } from "@/hooks/useInView";
+import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import useDownloader from "react-use-downloader";
 
 interface Props {
   readonly src: string;
@@ -20,9 +24,10 @@ function DropListItemContentMediaVideo({
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const { isApp } = useDeviceInfo();
-  const { download } = useDownloader();
+  const { isCapacitor } = useCapacitor();
   const [showDownloadButton, setShowDownloadButton] = useState(false);
   const hideDownloadButtonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isDownloadingRef = useRef(false);
 
   // 1) Pick up the best URL (HLS or MP4)
   const { playableUrl, isHls } = useOptimizedVideo(src, {
@@ -93,13 +98,29 @@ function DropListItemContentMediaVideo({
   }, []);
 
   const handleDownload = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
+    async (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      download(src, getDownloadFilenameFromUrl(src, "video"));
+      if (isDownloadingRef.current) {
+        return;
+      }
+      const fileName = getDownloadFilenameFromUrl(src, "video");
+      isDownloadingRef.current = true;
+      try {
+        await downloadMediaUrl({
+          url: src,
+          fileName,
+          isCapacitor,
+          dialogTitle: "Save video",
+        });
+      } catch {
+        triggerDirectDownload(src, fileName);
+      } finally {
+        isDownloadingRef.current = false;
+      }
       showDownloadButtonTemporarily();
     },
-    [download, showDownloadButtonTemporarily, src]
+    [isCapacitor, showDownloadButtonTemporarily, src]
   );
 
   return (
@@ -131,7 +152,9 @@ function DropListItemContentMediaVideo({
             ? "tw-pointer-events-auto tw-opacity-100"
             : "tw-pointer-events-none tw-opacity-0"
         }`}
-        onClick={handleDownload}
+        onClick={(event) => {
+          void handleDownload(event);
+        }}
         onFocus={showDownloadButtonTemporarily}
         type="button"
       >

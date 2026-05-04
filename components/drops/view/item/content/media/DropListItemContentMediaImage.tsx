@@ -206,16 +206,15 @@ function DropListItemContentMediaImage({
                     />
                   </button>
                 )}
-                <Link href={src} target="_blank" rel="noopener noreferrer">
-                  <button
-                    onClick={(e) => e.stopPropagation()}
-                    data-tooltip-id={`open-browser-${src}`}
-                    className={modalButtonClasses}
-                    aria-label="Open image in new tab"
-                  >
-                    <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                  </button>
-                </Link>
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  data-tooltip-id={`download-media-${src}`}
+                  className={modalButtonClasses}
+                  aria-label="Download image"
+                >
+                  <ArrowDownTrayIcon className="tw-size-5 tw-flex-shrink-0" />
+                </button>
                 {fullScreenSupported() && !isCapacitor && (
                   <button
                     onClick={handleFullScreen}
@@ -226,15 +225,16 @@ function DropListItemContentMediaImage({
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  data-tooltip-id={`download-media-${src}`}
-                  className={modalButtonClasses}
-                  aria-label="Download image"
-                >
-                  <ArrowDownTrayIcon className="tw-size-5 tw-flex-shrink-0" />
-                </button>
+                <Link href={src} target="_blank" rel="noopener noreferrer">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    data-tooltip-id={`open-browser-${src}`}
+                    className={modalButtonClasses}
+                    aria-label="Open image in new tab"
+                  >
+                    <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+                  </button>
+                </Link>
                 {onContainerClick && (
                   <button
                     onClick={(e) => {

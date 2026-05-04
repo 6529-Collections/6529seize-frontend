@@ -9,8 +9,12 @@ jest.mock("@/hooks/useInView", () => ({
 
 const playMock = jest.fn().mockResolvedValue(undefined);
 const pauseMock = jest.fn();
-const downloadMock = jest.fn();
+const downloadMediaUrlMock = jest.fn();
 
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: false }),
+}));
 jest.mock("@/hooks/useOptimizedVideo", () => ({
   useOptimizedVideo: jest.fn(() => ({
     playableUrl: "video.mp4",
@@ -21,9 +25,11 @@ jest.mock("@/hooks/useOptimizedVideo", () => ({
 const mockUseOptimizedVideo = require("@/hooks/useOptimizedVideo")
   .useOptimizedVideo as jest.Mock;
 
-jest.mock("react-use-downloader", () => ({
+jest.mock("@/helpers/media-download.helpers", () => ({
   __esModule: true,
-  default: () => ({ download: downloadMock }),
+  getDownloadFilenameFromUrl: jest.fn((_url: string) => "foo.mp4"),
+  downloadMediaUrl: (...args: unknown[]) => downloadMediaUrlMock(...args),
+  triggerDirectDownload: jest.fn(),
 }));
 
 beforeAll(() => {
@@ -41,7 +47,7 @@ beforeEach(() => {
   jest.useRealTimers();
   playMock.mockClear();
   pauseMock.mockClear();
-  downloadMock.mockClear();
+  downloadMediaUrlMock.mockClear();
 });
 
 describe("MediaDisplayVideo", () => {
@@ -92,9 +98,17 @@ describe("MediaDisplayVideo", () => {
 
     await user.click(screen.getByRole("button", { name: /download video/i }));
 
-    expect(downloadMock).toHaveBeenCalledWith(
-      "https://example.com/path/foo.mp4",
-      "foo.mp4"
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(downloadMediaUrlMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "https://example.com/path/foo.mp4",
+        fileName: "foo.mp4",
+        isCapacitor: false,
+        dialogTitle: "Save video",
+      })
     );
   });
 

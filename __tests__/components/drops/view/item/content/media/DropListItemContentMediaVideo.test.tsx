@@ -3,16 +3,22 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import DropListItemContentMediaVideo from "@/components/drops/view/item/content/media/DropListItemContentMediaVideo";
 
-const downloadMock = jest.fn();
+const downloadMediaUrlMock = jest.fn();
 
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: false }),
+}));
 jest.mock("@/hooks/useDeviceInfo", () => () => ({ isApp: false }));
 jest.mock("@/hooks/useInView", () => ({ useInView: jest.fn() }));
 jest.mock("@/hooks/useOptimizedVideo", () => ({
   useOptimizedVideo: jest.fn(),
 }));
-jest.mock("react-use-downloader", () => ({
+jest.mock("@/helpers/media-download.helpers", () => ({
   __esModule: true,
-  default: () => ({ download: downloadMock }),
+  getDownloadFilenameFromUrl: jest.fn((_url: string) => "foo.mp4"),
+  downloadMediaUrl: (...args: unknown[]) => downloadMediaUrlMock(...args),
+  triggerDirectDownload: jest.fn(),
 }));
 
 const mockUseInView = require("@/hooks/useInView").useInView as jest.Mock;
@@ -23,7 +29,7 @@ describe("DropListItemContentMediaVideo", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
-    downloadMock.mockClear();
+    downloadMediaUrlMock.mockClear();
   });
 
   it("renders video when in view", () => {
@@ -111,7 +117,7 @@ describe("DropListItemContentMediaVideo", () => {
     expect(button).toHaveClass("tw-opacity-0");
   });
 
-  it("downloads the original video source from the custom button", () => {
+  it("downloads the original video source from the custom button", async () => {
     const ref = {
       current: document.createElement("div"),
     } as React.RefObject<HTMLDivElement>;
@@ -128,9 +134,17 @@ describe("DropListItemContentMediaVideo", () => {
     fireEvent.mouseMove(container.firstElementChild as HTMLElement);
     fireEvent.click(screen.getByRole("button", { name: /download video/i }));
 
-    expect(downloadMock).toHaveBeenCalledWith(
-      "https://example.com/path/foo.mp4",
-      "foo.mp4"
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(downloadMediaUrlMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "https://example.com/path/foo.mp4",
+        fileName: "foo.mp4",
+        isCapacitor: false,
+        dialogTitle: "Save video",
+      })
     );
   });
 });

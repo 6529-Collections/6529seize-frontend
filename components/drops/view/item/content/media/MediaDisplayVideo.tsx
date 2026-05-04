@@ -4,9 +4,13 @@ import React, { useEffect, useCallback, useRef, useState } from "react";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
-import { getDownloadFilenameFromUrl } from "@/helpers/media-download.helpers";
+import {
+  downloadMediaUrl,
+  getDownloadFilenameFromUrl,
+  triggerDirectDownload,
+} from "@/helpers/media-download.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import useDownloader from "react-use-downloader";
 
 interface Props {
   readonly src: string;
@@ -21,9 +25,10 @@ const MediaDisplayVideo: React.FC<Props> = ({
 }) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
-  const { download } = useDownloader();
+  const { isCapacitor } = useCapacitor();
   const [showDownloadButton, setShowDownloadButton] = useState(false);
   const hideDownloadButtonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isDownloadingRef = useRef(false);
 
   // Poll for HLS → MP4 → fallback original
   const { playableUrl, isHls } = useOptimizedVideo(src, {
@@ -109,13 +114,29 @@ const MediaDisplayVideo: React.FC<Props> = ({
   }, []);
 
   const handleDownload = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      download(src, getDownloadFilenameFromUrl(src, "video"));
+      if (isDownloadingRef.current) {
+        return;
+      }
+      const fileName = getDownloadFilenameFromUrl(src, "video");
+      isDownloadingRef.current = true;
+      try {
+        await downloadMediaUrl({
+          url: src,
+          fileName,
+          isCapacitor,
+          dialogTitle: "Save video",
+        });
+      } catch {
+        triggerDirectDownload(src, fileName);
+      } finally {
+        isDownloadingRef.current = false;
+      }
       showDownloadButtonTemporarily();
     },
-    [download, showDownloadButtonTemporarily, src]
+    [isCapacitor, showDownloadButtonTemporarily, src]
   );
 
   return (
@@ -147,7 +168,9 @@ const MediaDisplayVideo: React.FC<Props> = ({
               ? "tw-pointer-events-auto tw-opacity-100"
               : "tw-pointer-events-none tw-opacity-0"
           }`}
-          onClick={handleDownload}
+          onClick={(event) => {
+            void handleDownload(event);
+          }}
           onFocus={showDownloadButtonTemporarily}
           type="button"
         >
