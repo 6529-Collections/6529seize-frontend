@@ -94,9 +94,11 @@ export default function WaveDropMobileMenuCopyLink({
             setCopied(false);
           }
         }, 2000);
+        onCopy();
       })
-      .catch(() => undefined);
-    onCopy();
+      .catch(() => {
+        onCopy();
+      });
   };
 
   return (
