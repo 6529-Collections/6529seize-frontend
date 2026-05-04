@@ -2,8 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import DropListItemContentMediaImage from "@/components/drops/view/item/content/media/DropListItemContentMediaImage";
 
-const downloadMock = jest.fn();
-
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: (_src: string) => _src,
   ImageScale: { AUTOx450: "AUTOx450", AUTOx1080: "AUTOx1080" },
@@ -22,34 +20,29 @@ jest.mock("@/hooks/useInView", () => ({
   useInView: () => [jest.fn(), true],
 }));
 
-jest.mock("react-use-downloader", () => ({
-  __esModule: true,
-  default: () => ({ download: downloadMock }),
-}));
-
 beforeEach(() => {
-  downloadMock.mockClear();
-  (global as any).ResizeObserver = class {
-    observe() {}
-    disconnect() {}
+  (globalThis as any).ResizeObserver = class {
+    observe() {
+      return undefined;
+    }
+    disconnect() {
+      return undefined;
+    }
   };
 });
 
 describe("DropListItemContentMediaImage", () => {
-  it("calls onContainerClick from modal button", () => {
-    const onContainerClick = jest.fn();
-    render(
-      <DropListItemContentMediaImage
-        src="img"
-        maxRetries={1}
-        onContainerClick={onContainerClick}
-      />
-    );
+  it("opens and closes the modal", () => {
+    render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
     fireEvent.click(img);
-    fireEvent.click(screen.getByLabelText("View drop details"));
-    expect(onContainerClick).toHaveBeenCalled();
+    const modalImage = screen.getByAltText("Full size drop media");
+    expect(modalImage).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /close modal/i }));
+    expect(
+      screen.queryByAltText("Full size drop media")
+    ).not.toBeInTheDocument();
   });
 
   it("does not open modal when disableModal is true", () => {
@@ -58,22 +51,8 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.load(img);
     fireEvent.click(img);
     expect(
-      screen.queryByLabelText("View drop details")
+      screen.queryByAltText("Full size drop media")
     ).not.toBeInTheDocument();
-  });
-
-  it("downloads the original image from the modal button", () => {
-    render(
-      <DropListItemContentMediaImage src="https://example.com/path/image.png" />
-    );
-    const img = screen.getByAltText("Drop media");
-    fireEvent.load(img);
-    fireEvent.click(img);
-    fireEvent.click(screen.getByRole("button", { name: /download image/i }));
-    expect(downloadMock).toHaveBeenCalledWith(
-      "https://example.com/path/image.png",
-      "image.png"
-    );
   });
 });
 

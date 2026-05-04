@@ -144,7 +144,7 @@ export default function CommonDropdownItemsDefaultWrapper({
 
   return createPortal(
     <div
-      className="tw-absolute tw-z-[100]"
+      className="tw-absolute tw-z-[1100]"
       ref={dropdownRef}
       style={{ left: 0, top: 0 }}
     >

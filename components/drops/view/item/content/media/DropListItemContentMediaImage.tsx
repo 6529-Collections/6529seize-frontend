@@ -129,12 +129,16 @@ function DropListItemContentMediaImage({
   const modalContent = (
     <div
       className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
-      onClick={handleCloseModal}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
     >
-      <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80"></div>
+      <button
+        type="button"
+        aria-label="Close modal"
+        onClick={handleCloseModal}
+        className="tw-fixed tw-inset-0 tw-border-0 tw-bg-black tw-bg-opacity-80 tw-p-0"
+      />
       <TransformWrapper
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
@@ -145,16 +149,7 @@ function DropListItemContentMediaImage({
           <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
             <div className="tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col lg:tw-flex-row">
               <div
-                role="button"
                 className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center"
-                onClick={(e) => e.stopPropagation()}
-                tabIndex={0}
-                aria-label="Full size drop media"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.stopPropagation();
-                  }
-                }}
               >
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"

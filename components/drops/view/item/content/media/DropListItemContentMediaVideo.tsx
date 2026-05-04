@@ -1,17 +1,10 @@
 "use client";
 
-import {
-  downloadMediaUrl,
-  getDownloadFilenameFromUrl,
-  triggerDirectDownload,
-} from "@/helpers/media-download.helpers";
 import { useInView } from "@/hooks/useInView";
-import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 
 interface Props {
   readonly src: string;
@@ -24,10 +17,6 @@ function DropListItemContentMediaVideo({
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const { isApp } = useDeviceInfo();
-  const { isCapacitor } = useCapacitor();
-  const [showDownloadButton, setShowDownloadButton] = useState(false);
-  const hideDownloadButtonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isDownloadingRef = useRef(false);
 
   // 1) Pick up the best URL (HLS or MP4)
   const { playableUrl, isHls } = useOptimizedVideo(src, {
@@ -70,69 +59,10 @@ function DropListItemContentMediaVideo({
     videoEl.setAttribute("x5-playsinline", "true");
   }, [videoRef]);
 
-  useEffect(() => {
-    return () => {
-      if (hideDownloadButtonTimeoutRef.current) {
-        clearTimeout(hideDownloadButtonTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const showDownloadButtonTemporarily = useCallback(() => {
-    setShowDownloadButton(true);
-    if (hideDownloadButtonTimeoutRef.current) {
-      clearTimeout(hideDownloadButtonTimeoutRef.current);
-    }
-    hideDownloadButtonTimeoutRef.current = setTimeout(() => {
-      setShowDownloadButton(false);
-      hideDownloadButtonTimeoutRef.current = null;
-    }, 2500);
-  }, []);
-
-  const hideDownloadButton = useCallback(() => {
-    if (hideDownloadButtonTimeoutRef.current) {
-      clearTimeout(hideDownloadButtonTimeoutRef.current);
-      hideDownloadButtonTimeoutRef.current = null;
-    }
-    setShowDownloadButton(false);
-  }, []);
-
-  const handleDownload = useCallback(
-    async (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (isDownloadingRef.current) {
-        return;
-      }
-      const fileName = getDownloadFilenameFromUrl(src, "video");
-      isDownloadingRef.current = true;
-      try {
-        await downloadMediaUrl({
-          url: src,
-          fileName,
-          isCapacitor,
-          dialogTitle: "Save video",
-        });
-      } catch {
-        triggerDirectDownload(src, fileName);
-      } finally {
-        isDownloadingRef.current = false;
-      }
-      showDownloadButtonTemporarily();
-    },
-    [isCapacitor, showDownloadButtonTemporarily, src]
-  );
-
   return (
     <div
       ref={wrapperRef}
       className="tw-group tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
-      onMouseEnter={showDownloadButtonTemporarily}
-      onMouseMove={showDownloadButtonTemporarily}
-      onMouseLeave={hideDownloadButton}
-      onFocus={showDownloadButtonTemporarily}
-      onBlur={hideDownloadButton}
-      onTouchStart={showDownloadButtonTemporarily}
     >
       <video
         ref={videoRef}
@@ -145,21 +75,6 @@ function DropListItemContentMediaVideo({
       >
         Your browser does not support the video tag.
       </video>
-      <button
-        aria-label="Download video"
-        className={`tw-absolute tw-right-3 tw-top-[calc(50%-1.75rem)] tw-z-10 tw-flex tw-size-9 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-black/65 tw-p-1.5 tw-text-white tw-shadow-lg tw-backdrop-blur-sm tw-transition-opacity tw-duration-200 desktop-hover:hover:tw-bg-black/80 ${
-          showDownloadButton
-            ? "tw-pointer-events-auto tw-opacity-100"
-            : "tw-pointer-events-none tw-opacity-0"
-        }`}
-        onClick={(event) => {
-          void handleDownload(event);
-        }}
-        onFocus={showDownloadButtonTemporarily}
-        type="button"
-      >
-        <ArrowDownTrayIcon className="tw-size-4" />
-      </button>
     </div>
   );
 }

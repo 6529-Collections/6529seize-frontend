@@ -122,9 +122,7 @@ export default function DropMediaActionRow({
             </button>
             <button
               type="button"
-              onClick={() => {
-                void handleDownload();
-              }}
+              onClick={handleDownload}
               disabled={isDownloading}
               className={itemClassName}
             >
