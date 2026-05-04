@@ -382,6 +382,23 @@ function getFailedTransportBreadcrumbTarget(
   };
 }
 
+function canUseFailedTransportForMessageTarget(
+  failedTransportTarget: NetworkTargetCandidate,
+  messageTargetCandidates: NetworkTargetCandidate[]
+): boolean {
+  if (isFilteredUrl(failedTransportTarget.url)) {
+    if (failedTransportTarget.isFirstParty === false) {
+      return false;
+    }
+
+    return messageTargetCandidates.some(isFilteredBreadcrumbFallbackApiTarget);
+  }
+
+  return messageTargetCandidates.some((target) =>
+    isSameFirstPartyApiTarget(target, failedTransportTarget)
+  );
+}
+
 function getLatestFailedTransportBreadcrumb(
   event: SentryClientEvent
 ): NetworkTargetCandidate | null {
@@ -428,6 +445,16 @@ function getLatestFailedTransportBreadcrumb(
 
     const failedTransportTarget =
       getFailedTransportBreadcrumbTarget(breadcrumb);
+    if (
+      messageTargetCandidates.length > 0 &&
+      !canUseFailedTransportForMessageTarget(
+        failedTransportTarget,
+        messageTargetCandidates
+      )
+    ) {
+      continue;
+    }
+
     if (
       messageTargetCandidates.length === 0 &&
       laterRealFailureTargetCandidates.some((target) =>

@@ -354,6 +354,114 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("drops sampled-out message-target status 0 errors when a later status 0 targets a different first-party API", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/a)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/a",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/b",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops sampled-out message-target status 0 errors when a later status 0 targets a third-party URL", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/a)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/a",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "https://example.com/collect",
+              "url.is_first_party": false,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("keeps message-target network errors when only a different API has status 0", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/a)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/b",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
   it("drops sampled-out first-party status 0 network errors when a later unrelated first-party request fails", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({
