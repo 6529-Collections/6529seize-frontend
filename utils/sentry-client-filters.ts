@@ -567,9 +567,15 @@ export function getNetworkErrorMessageTargetUrl(
     return lowValueTargetUrl;
   }
 
-  return getLatestUsableBreadcrumbMessageUrl(
-    event,
-    (breadcrumb) => getBreadcrumbFailureKind(breadcrumb) !== null
+  return (
+    getLatestUsableBreadcrumbMessageUrl(
+      event,
+      (breadcrumb) => getBreadcrumbFailureKind(breadcrumb) === "transport"
+    ) ??
+    getLatestUsableBreadcrumbMessageUrl(
+      event,
+      (breadcrumb) => getBreadcrumbFailureKind(breadcrumb) === "http"
+    )
   );
 }
 
