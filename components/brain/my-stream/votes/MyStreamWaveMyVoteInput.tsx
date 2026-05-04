@@ -9,6 +9,7 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
+import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
@@ -148,6 +149,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       void queryClient.invalidateQueries({
         queryKey: [QueryKey.DROPS_LEADERBOARD],
       });
+      invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
     },
     onError: (error) => {
       setToast({

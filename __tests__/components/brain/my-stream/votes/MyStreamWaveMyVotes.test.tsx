@@ -134,6 +134,7 @@ describe("MyStreamWaveMyVotes", () => {
       </AuthContext.Provider>
     );
     expect(screen.getByTestId("vote")).toHaveTextContent("a");
+    expect(resetProps?.waveId).toBe("1");
     expect(resetProps?.availableVotes).toBe(8);
     intersectionCb();
     expect(fetchNextPage).toHaveBeenCalled();

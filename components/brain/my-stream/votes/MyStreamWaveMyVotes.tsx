@@ -169,6 +169,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
         <div className="tw-mt-4 tw-space-y-4">
           {!isVotingControlsLocked && (
             <MyStreamWaveMyVotesReset
+              waveId={wave.id}
               haveDrops={!!drops.length}
               availableVotes={sharedAvailableVotes}
               selected={checkedDrops}

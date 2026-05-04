@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useState } from "react";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import MyStreamWaveMyVotesResetProgress from "./MyStreamWaveMyVotesResetProgress";
 import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 interface MyStreamWaveMyVotesResetProps {
+  readonly waveId: string;
   readonly haveDrops: boolean;
   readonly availableVotes?: number | null;
   readonly selected: Set<string>;
@@ -24,6 +26,7 @@ interface MyStreamWaveMyVotesResetProps {
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 
 const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
+  waveId,
   haveDrops,
   availableVotes = null,
   selected,
@@ -34,14 +37,12 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   onResettingChange,
 }) => {
   const { setToast } = useContext(AuthContext);
+  const queryClient = useQueryClient();
   // State for reset progress
   const [isResetting, setIsResetting] = useState(false);
   const [resetProgress, setResetProgress] = useState(0);
 
-  // Count total selected items
-  const selectedCount = useMemo(() => {
-    return selected.size;
-  }, [selected]);
+  const selectedCount = selected.size;
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { dropId: string }) =>
@@ -54,6 +55,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       }),
     onSuccess: (response: ApiDrop) => {
       removeSelected(response.id);
+      invalidateWaveApprovalStatusQueries(queryClient, waveId);
     },
     onError: (error) => {
       setToast({

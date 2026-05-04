@@ -2,10 +2,16 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVotesReset from "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset";
 import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMutation } from "@tanstack/react-query";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-jest.mock("@tanstack/react-query", () => ({ useMutation: jest.fn() }));
+jest.mock("@tanstack/react-query", () => ({
+  useMutation: jest.fn(),
+  useQueryClient: jest.fn(),
+}));
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVotesResetProgress",
   () => (p: any) => <div data-testid="progress" {...p} />
@@ -20,12 +26,15 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 const useMutationMock = useMutation as jest.Mock;
+const useQueryClientMock = useQueryClient as jest.Mock;
+const invalidateQueries = jest.fn();
 
 const auth = { setToast: jest.fn(), connectedProfile: { handle: "me" } } as any;
 const rqContext = { onDropRateChange: jest.fn() } as any;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  useQueryClientMock.mockReturnValue({ invalidateQueries });
   useMutationMock.mockImplementation((config: any) => ({
     mutateAsync: async (param: any) => {
       const result = { id: param.dropId };
@@ -43,6 +52,7 @@ test("returns null when no drops", () => {
     <AuthContext.Provider value={auth}>
       <ReactQueryWrapperContext.Provider value={rqContext}>
         <MyStreamWaveMyVotesReset
+          waveId="wave-1"
           haveDrops={false}
           selected={new Set()}
           allItemsSelected={false}
@@ -61,6 +71,7 @@ test("returns null when voting is closed", () => {
     <AuthContext.Provider value={auth}>
       <ReactQueryWrapperContext.Provider value={rqContext}>
         <MyStreamWaveMyVotesReset
+          waveId="wave-1"
           haveDrops
           isVotingClosed={true}
           selected={new Set(["a"])}
@@ -80,6 +91,7 @@ test("shows available votes when provided", () => {
     <AuthContext.Provider value={auth}>
       <ReactQueryWrapperContext.Provider value={rqContext}>
         <MyStreamWaveMyVotesReset
+          waveId="wave-1"
           haveDrops
           availableVotes={10463}
           selected={new Set()}
@@ -101,6 +113,7 @@ test("hides available votes when missing", () => {
     <AuthContext.Provider value={auth}>
       <ReactQueryWrapperContext.Provider value={rqContext}>
         <MyStreamWaveMyVotesReset
+          waveId="wave-1"
           haveDrops
           selected={new Set()}
           allItemsSelected={false}
@@ -123,6 +136,7 @@ test("resets votes for selected drops", async () => {
     <AuthContext.Provider value={auth}>
       <ReactQueryWrapperContext.Provider value={rqContext}>
         <MyStreamWaveMyVotesReset
+          waveId="wave-1"
           haveDrops
           availableVotes={7}
           selected={selected}
@@ -140,5 +154,11 @@ test("resets votes for selected drops", async () => {
   expect(onResettingChange).toHaveBeenNthCalledWith(1, true);
   expect(onResettingChange).toHaveBeenNthCalledWith(2, false);
   expect(removeSelected).toHaveBeenCalledTimes(2);
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
+  });
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.WAVE_DECISIONS, { waveId: "wave-1" }],
+  });
   // onDropRateChange is handled by React Query elsewhere, not directly by this component
 });
