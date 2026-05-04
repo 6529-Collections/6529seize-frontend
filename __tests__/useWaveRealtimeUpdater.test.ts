@@ -1227,6 +1227,80 @@ describe("useWaveRealtimeUpdater", () => {
       )
     );
     expect(props.registerWave).toHaveBeenCalledWith("wave2");
+    expect(fetchDropByIdBatched).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).not.toHaveBeenCalled();
+  });
+
+  it("registers unopened waves and refreshes cache-only reaction updates", async () => {
+    const props = baseProps({});
+    const serverContext = {
+      ...contextProfileContext(":server:"),
+      rating: 9,
+    };
+    const oldCacheContext = {
+      ...contextProfileContext(":old-cache:"),
+      rating: 1,
+    };
+
+    mockGetQueriesData.mockReturnValue([
+      [
+        ["DROPS"],
+        {
+          pages: [
+            [
+              {
+                id: "d-cache-only-unopened",
+                context_profile_context: oldCacheContext,
+                reactions: reactionEntries(":old-cache:"),
+              },
+            ],
+          ],
+        },
+      ],
+    ]);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-cache-only-unopened",
+      author: {},
+      wave: { id: "wave2" },
+      context_profile_context: serverContext,
+      reactions: reactionEntries(":server:"),
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-cache-only-unopened",
+      wave: { id: "wave2" },
+      author: {},
+      context_profile_context: contextProfileContext(":websocket:"),
+      reactions: reactionEntries(":websocket:"),
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.registerWave).toHaveBeenCalledWith("wave2");
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d-cache-only-unopened");
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).toHaveBeenCalled();
+
+    for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
+      const updatedCacheDrop = updateCachedData({
+        id: "d-cache-only-unopened",
+        context_profile_context: oldCacheContext,
+        reactions: reactionEntries(":old-cache:"),
+      });
+
+      expect(updatedCacheDrop.context_profile_context.rating).toBe(9);
+      expect(updatedCacheDrop.context_profile_context.reaction).toBe(
+        ":server:"
+      );
+      expect(updatedCacheDrop.reactions).toEqual(reactionEntries(":server:"));
+    }
   });
 
   it("skips when existing drop is LIGHT type", async () => {

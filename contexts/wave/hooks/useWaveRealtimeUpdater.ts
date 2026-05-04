@@ -367,10 +367,7 @@ type WaveRealtimeUpdaterResult = {
 
 function useWaveNotificationActions({
   removeWaveDeliveredNotifications,
-}: Pick<
-  UseWaveRealtimeUpdaterProps,
-  "removeWaveDeliveredNotifications"
->): {
+}: Pick<UseWaveRealtimeUpdaterProps, "removeWaveDeliveredNotifications">): {
   readonly clearActiveWaveNotifications: WaveIdCallback;
 } {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
@@ -623,6 +620,9 @@ function useIncomingDropProcessor({
 
       if (currentData === undefined) {
         registerWave(waveId);
+        if (isFetchedDropUpdate(type)) {
+          await handleFetchedDropUpdate(drop, waveId);
+        }
         return;
       }
 
