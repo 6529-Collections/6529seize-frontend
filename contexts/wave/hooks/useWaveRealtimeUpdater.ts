@@ -221,6 +221,22 @@ function getFullDrop(drop: Drop | undefined): ExtendedDrop | null {
   return drop;
 }
 
+function getWaveDropUpdateKey(waveId: string, dropId: string): string {
+  return JSON.stringify([waveId, dropId]);
+}
+
+function buildFetchedDropForWaveStore(
+  apiDrop: ApiDrop,
+  existingDrop: ExtendedDrop
+): ExtendedDrop {
+  return {
+    ...apiDrop,
+    type: DropSize.FULL,
+    stableHash: existingDrop.stableHash,
+    stableKey: existingDrop.stableKey,
+  };
+}
+
 function hasDropInWaveData(
   data: WaveMessages | undefined,
   dropId: string
@@ -468,6 +484,13 @@ type WaveRealtimeUpdaterResult = {
   processDropRemoved: (waveId: string, dropId: string) => void;
 };
 
+type PendingFetchedDropUpdate = {
+  readonly waveId: string;
+  readonly dropId: string;
+  readonly sequence: number;
+  readonly drop: ApiDrop;
+};
+
 function useWaveNotificationActions({
   removeWaveDeliveredNotifications,
 }: Pick<UseWaveRealtimeUpdaterProps, "removeWaveDeliveredNotifications">): {
@@ -675,17 +698,84 @@ function useIncomingDropProcessor({
 }: IncomingDropProcessorProps): {
   readonly processIncomingDrop: ProcessIncomingDropFn;
 } {
+  const pendingFetchedDropUpdatesRef = useRef<
+    Map<string, PendingFetchedDropUpdate>
+  >(new Map());
+  const fetchedDropRequestSequencesRef = useRef<Map<string, number>>(new Map());
+
+  const flushPendingFetchedDropUpdates = useCallback((): void => {
+    for (const [key, pendingUpdate] of pendingFetchedDropUpdatesRef.current) {
+      if (
+        fetchedDropRequestSequencesRef.current.get(key) !==
+        pendingUpdate.sequence
+      ) {
+        pendingFetchedDropUpdatesRef.current.delete(key);
+        continue;
+      }
+
+      const latestData = getData(pendingUpdate.waveId);
+      if (latestData === undefined) {
+        continue;
+      }
+
+      const latestDrop = latestData.drops.find(
+        (drop) => drop.id === pendingUpdate.dropId
+      );
+      const latestFullDrop = getFullDrop(latestDrop);
+
+      if (latestFullDrop !== null) {
+        updateData({
+          key: pendingUpdate.waveId,
+          drops: [
+            buildFetchedDropForWaveStore(pendingUpdate.drop, latestFullDrop),
+          ],
+        });
+        pendingFetchedDropUpdatesRef.current.delete(key);
+        continue;
+      }
+
+      if (latestData.isLoading !== true) {
+        pendingFetchedDropUpdatesRef.current.delete(key);
+      }
+    }
+  }, [getData, updateData]);
+
+  useEffect(() => {
+    flushPendingFetchedDropUpdates();
+  });
+
+  useEffect(() => {
+    const pendingFetchedDropUpdates = pendingFetchedDropUpdatesRef.current;
+    const fetchedDropRequestSequences = fetchedDropRequestSequencesRef.current;
+
+    return () => {
+      pendingFetchedDropUpdates.clear();
+      fetchedDropRequestSequences.clear();
+    };
+  }, []);
+
   const handleFetchedDropUpdate = useCallback(
     async (
       drop: IncomingDrop,
       waveId: string,
       cachedDropSnapshot?: CachedDropReactionState | null
     ): Promise<void> => {
+      const updateKey = getWaveDropUpdateKey(waveId, drop.id);
+      const sequence =
+        (fetchedDropRequestSequencesRef.current.get(updateKey) ?? 0) + 1;
+      fetchedDropRequestSequencesRef.current.set(updateKey, sequence);
+      pendingFetchedDropUpdatesRef.current.delete(updateKey);
+
       const apiDrop = await fetchDropByIdBatched(drop.id);
+      if (fetchedDropRequestSequencesRef.current.get(updateKey) !== sequence) {
+        return;
+      }
+
       const latestData = getData(waveId);
-      const latestExistingDrop = getFullDrop(
-        latestData?.drops.find((cachedDrop) => cachedDrop.id === drop.id)
+      const latestDrop = latestData?.drops.find(
+        (cachedDrop) => cachedDrop.id === drop.id
       );
+      const latestExistingDrop = getFullDrop(latestDrop);
       const latestCachedDrop = findDropInCachedDrops(queryClient, drop.id);
       const protectedIntent = getProtectedReactionIntent(apiDrop.id);
       const cachedDrop = selectFetchedDropLocalState({
@@ -701,21 +791,28 @@ function useIncomingDropProcessor({
         cachedDrop
       );
 
+      updateDropInCachedDrops(queryClient, nextDrop);
+
       if (latestExistingDrop !== null) {
+        pendingFetchedDropUpdatesRef.current.delete(updateKey);
         updateData({
           key: waveId,
-          drops: [
-            {
-              ...nextDrop,
-              type: DropSize.FULL,
-              stableHash: latestExistingDrop.stableHash,
-              stableKey: latestExistingDrop.stableKey,
-            },
-          ],
+          drops: [buildFetchedDropForWaveStore(nextDrop, latestExistingDrop)],
         });
+        return;
       }
 
-      updateDropInCachedDrops(queryClient, nextDrop);
+      if (latestData?.isLoading === true && latestDrop === undefined) {
+        pendingFetchedDropUpdatesRef.current.set(updateKey, {
+          waveId,
+          dropId: drop.id,
+          sequence,
+          drop: nextDrop,
+        });
+        return;
+      }
+
+      pendingFetchedDropUpdatesRef.current.delete(updateKey);
     },
     [getData, queryClient, updateData]
   );

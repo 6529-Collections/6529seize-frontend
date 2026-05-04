@@ -63,6 +63,14 @@ const {
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
+const deferred = <T>() => {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+};
 
 describe("useWaveRealtimeUpdater", () => {
   const setDocumentVisibility = (visibilityState: DocumentVisibilityState) => {
@@ -480,6 +488,166 @@ describe("useWaveRealtimeUpdater", () => {
     expect(updatedDrop.stableHash).toBe("loading-stable-hash");
     expect(updatedDrop.context_profile_context.reaction).toBe(":fresh:");
     expect(updatedDrop.reactions).toBe(freshReaction);
+  });
+
+  it("replays fetched reaction updates after the initial loading wave adds the drop", async () => {
+    const staleReaction = reactionEntries(":stale:");
+    const freshReaction = reactionEntries(":fresh:");
+    const freshContext = {
+      ...contextProfileContext(":fresh:"),
+      rating: 9,
+    };
+    const staleContext = {
+      ...contextProfileContext(":stale:"),
+      rating: 1,
+    };
+    const store: any = {
+      wave1: {
+        drops: [],
+        isLoading: true,
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-loading-replay",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: freshContext,
+      reactions: freshReaction,
+    });
+
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: "d-loading-replay",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+
+    store.wave1 = {
+      ...store.wave1,
+      drops: [
+        {
+          id: "d-loading-replay",
+          type: DropSize.FULL,
+          stableKey: "initial-stable-key",
+          stableHash: "initial-stable-hash",
+          author: {},
+          wave: { id: "wave1" },
+          context_profile_context: staleContext,
+          reactions: staleReaction,
+        },
+      ],
+      isLoading: false,
+    };
+
+    act(() => {
+      rerender();
+    });
+
+    await waitFor(() => expect(props.updateData).toHaveBeenCalledTimes(1));
+
+    const replayedUpdate = props.updateData.mock.calls[0]?.[0];
+    const replayedDrop = replayedUpdate.drops[0];
+    expect(replayedDrop.stableKey).toBe("initial-stable-key");
+    expect(replayedDrop.stableHash).toBe("initial-stable-hash");
+    expect(replayedDrop.context_profile_context.reaction).toBe(":fresh:");
+    expect(replayedDrop.context_profile_context.rating).toBe(9);
+    expect(replayedDrop.reactions).toBe(freshReaction);
+  });
+
+  it("ignores older overlapping fetched reaction updates that finish last", async () => {
+    const firstFetch = deferred<any>();
+    const secondFetch = deferred<any>();
+    const store: any = {
+      wave1: {
+        drops: [
+          {
+            id: "d-overlap-reaction",
+            type: DropSize.FULL,
+            stableKey: "overlap-stable-key",
+            stableHash: "overlap-stable-hash",
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":local:"),
+            reactions: reactionEntries(":local:"),
+          },
+        ],
+        isLoading: false,
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched
+      .mockImplementationOnce(() => firstFetch.promise)
+      .mockImplementationOnce(() => secondFetch.promise);
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-overlap-reaction",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    act(() => {
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      );
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      );
+    });
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      secondFetch.resolve({
+        id: "d-overlap-reaction",
+        author: {},
+        wave: { id: "wave1" },
+        context_profile_context: contextProfileContext(":second:"),
+        reactions: reactionEntries(":second:"),
+      });
+      await flushPromises();
+    });
+
+    expect(props.updateData).toHaveBeenCalledTimes(1);
+    expect(mockSetQueriesData).toHaveBeenCalledTimes(5);
+
+    await act(async () => {
+      firstFetch.resolve({
+        id: "d-overlap-reaction",
+        author: {},
+        wave: { id: "wave1" },
+        context_profile_context: contextProfileContext(":first:"),
+        reactions: reactionEntries(":first:"),
+      });
+      await flushPromises();
+    });
+
+    expect(props.updateData).toHaveBeenCalledTimes(1);
+    expect(mockSetQueriesData).toHaveBeenCalledTimes(5);
+
+    const update = props.updateData.mock.calls[0]?.[0];
+    const updatedDrop = update.drops[0];
+    expect(updatedDrop.stableKey).toBe("overlap-stable-key");
+    expect(updatedDrop.stableHash).toBe("overlap-stable-hash");
+    expect(updatedDrop.context_profile_context.reaction).toBe(":second:");
+    expect(updatedDrop.reactions).toEqual(reactionEntries(":second:"));
   });
 
   it("updates React Query caches for rating updates without promoting light wave-store drops", async () => {
