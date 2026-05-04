@@ -783,6 +783,7 @@ export default function DropAttachmentDisplay({
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const downloadAbortRef = useRef<AbortController | null>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
@@ -843,6 +844,7 @@ export default function DropAttachmentDisplay({
     }
 
     setIsDownloading(true);
+    setDownloadError(null);
     const controller = new AbortController();
     downloadAbortRef.current = controller;
     const timeoutId = globalThis.window.setTimeout(() => {
@@ -870,14 +872,21 @@ export default function DropAttachmentDisplay({
         anchor.remove();
         URL.revokeObjectURL(objectUrl);
       }
-    } catch {
+    } catch (error) {
       if (
         controller.signal.aborted ||
-        downloadAbortRef.current !== controller ||
-        isCapacitor
+        downloadAbortRef.current !== controller
       ) {
         return;
       }
+
+      console.error("Failed to download attachment", error);
+
+      if (isCapacitor) {
+        setDownloadError("Unable to download attachment.");
+        return;
+      }
+
       const anchor = document.createElement("a");
       anchor.href = safeAttachmentUrl;
       anchor.download = fileName;
@@ -916,6 +925,7 @@ export default function DropAttachmentDisplay({
   const handleToggleMoreMenu = () => {
     if (!isMoreMenuOpen) {
       setCopiedLink(false);
+      setDownloadError(null);
     }
     setIsMoreMenuOpen((current) => !current);
   };
@@ -1004,6 +1014,11 @@ export default function DropAttachmentDisplay({
           </div>
         )}
       </AnimatedAttachmentPanel>
+      {downloadError && (
+        <div className="tw-mt-1.5 tw-text-xs tw-font-medium tw-text-error">
+          {downloadError}
+        </div>
+      )}
       <AnimatedAttachmentPanel isOpen={isPreviewOpen && !!safeAttachmentUrl}>
         {renderType === "pdf" && safeAttachmentUrl && (
           <iframe
