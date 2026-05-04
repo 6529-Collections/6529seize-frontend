@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-interface VotingModalInternalState {
-  readonly isOpen: boolean;
-  readonly lastIsVotingClosed: boolean;
-}
+type VotingModalOpenToken = Readonly<{
+  readonly isVotingClosed: boolean;
+}>;
 
 interface VotingModalState {
   readonly isOpen: boolean;
@@ -14,51 +13,27 @@ interface VotingModalState {
 }
 
 export function useVotingModalState(isVotingClosed: boolean): VotingModalState {
-  const [state, setState] = useState<VotingModalInternalState>(() => ({
-    isOpen: false,
-    lastIsVotingClosed: isVotingClosed,
-  }));
-
-  // Reset stale modal state when voting closes during render, not in an effect.
-  if (state.lastIsVotingClosed !== isVotingClosed) {
-    setState({
-      isOpen: isVotingClosed ? false : state.isOpen,
-      lastIsVotingClosed: isVotingClosed,
-    });
-  }
+  // Lock/unlock changes invalidate older open requests without copying prop state.
+  const currentOpenToken = useMemo<VotingModalOpenToken>(
+    () => ({ isVotingClosed }),
+    [isVotingClosed]
+  );
+  const [openToken, setOpenToken] = useState<VotingModalOpenToken | null>(null);
 
   const open = useCallback(() => {
     if (isVotingClosed) {
       return;
     }
 
-    setState((current) => {
-      if (current.isOpen && current.lastIsVotingClosed === isVotingClosed) {
-        return current;
-      }
-
-      return {
-        isOpen: true,
-        lastIsVotingClosed: isVotingClosed,
-      };
-    });
-  }, [isVotingClosed]);
+    setOpenToken(currentOpenToken);
+  }, [currentOpenToken, isVotingClosed]);
 
   const close = useCallback(() => {
-    setState((current) => {
-      if (!current.isOpen) {
-        return current;
-      }
-
-      return {
-        ...current,
-        isOpen: false,
-      };
-    });
+    setOpenToken(null);
   }, []);
 
   return {
-    isOpen: state.isOpen && !isVotingClosed,
+    isOpen: openToken === currentOpenToken && !isVotingClosed,
     open,
     close,
   };
