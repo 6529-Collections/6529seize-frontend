@@ -58,8 +58,12 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     readonly useIntrinsicHeightMedia: boolean;
     readonly useCompactLink: boolean;
   }) => {
-    if (useIntrinsicHeightMedia || useCompactLink) {
+    if (useCompactLink) {
       return "tw-w-full";
+    }
+
+    if (useIntrinsicHeightMedia) {
+      return "tw-flex tw-w-full tw-max-h-64 tw-items-center tw-justify-center";
     }
 
     return clsx(

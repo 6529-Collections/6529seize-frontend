@@ -71,7 +71,7 @@ function DropListItemContentMediaVideo({
         autoPlay={false}
         muted
         loop
-        className="tw-block tw-h-auto tw-w-full tw-rounded-xl tw-object-contain"
+        className="tw-block tw-h-auto tw-max-h-64 tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
       >
         Your browser does not support the video tag.
       </video>
