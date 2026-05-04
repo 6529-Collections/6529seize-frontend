@@ -269,6 +269,92 @@ describe("instrumentation-client", () => {
     );
   });
 
+  it("uses a status 0 breadcrumb instead of a later successful breadcrumb", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      request: {
+        url: "/api/request-target",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 200,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).toBeNull();
+    expect(event.exception.values[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
+    );
+  });
+
+  it("falls back to the request URL when only successful breadcrumbs exist", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-keep-event",
+      request: {
+        url: "/api/request-target",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 200,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/request-target)"
+    );
+    expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
+  });
+
   it("uses the latest failed fetch breadcrumb for raw browser network errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {

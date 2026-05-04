@@ -25,6 +25,8 @@ type NetworkTargetCandidate = {
   isFirstPartyApi?: boolean | undefined;
 };
 
+type NetworkBreadcrumbFailureKind = "transport" | "http";
+
 type SentryExceptionValue = {
   type?: string | undefined;
   value?: string | undefined;
@@ -341,6 +343,21 @@ export function getBreadcrumbTransportStatusCode(
   return null;
 }
 
+function getBreadcrumbFailureKind(
+  breadcrumb: SentryBreadcrumb
+): NetworkBreadcrumbFailureKind | null {
+  const statusCode = getBreadcrumbTransportStatusCode(breadcrumb);
+  if (statusCode === 0) {
+    return "transport";
+  }
+
+  if (statusCode !== null && statusCode >= 400) {
+    return "http";
+  }
+
+  return null;
+}
+
 function getBreadcrumbUrl(breadcrumb: SentryBreadcrumb): string | undefined {
   return getStringValue(breadcrumb.data?.["url"]);
 }
@@ -412,8 +429,8 @@ function getLatestFailedTransportBreadcrumb(
       continue;
     }
 
-    const statusCode = getBreadcrumbTransportStatusCode(breadcrumb);
-    if (statusCode !== null && statusCode >= 400) {
+    const failureKind = getBreadcrumbFailureKind(breadcrumb);
+    if (failureKind === "http") {
       const failedHttpTarget = getBreadcrumbTargetCandidate(breadcrumb);
       if (!failedHttpTarget) {
         if (getBreadcrumbUrlIsFirstParty(breadcrumb) === false) {
@@ -439,7 +456,7 @@ function getLatestFailedTransportBreadcrumb(
       continue;
     }
 
-    if (statusCode !== 0) {
+    if (failureKind !== "transport") {
       continue;
     }
 
@@ -550,11 +567,9 @@ export function getNetworkErrorMessageTargetUrl(
     return lowValueTargetUrl;
   }
 
-  return (
-    getLatestUsableBreadcrumbMessageUrl(
-      event,
-      (breadcrumb) => getBreadcrumbTransportStatusCode(breadcrumb) === 0
-    ) ?? getLatestUsableBreadcrumbMessageUrl(event, () => true)
+  return getLatestUsableBreadcrumbMessageUrl(
+    event,
+    (breadcrumb) => getBreadcrumbFailureKind(breadcrumb) !== null
   );
 }
 
