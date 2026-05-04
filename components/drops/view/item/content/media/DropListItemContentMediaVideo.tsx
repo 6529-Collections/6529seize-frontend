@@ -112,7 +112,6 @@ function DropListItemContentMediaVideo({
           fileName,
           isCapacitor,
           dialogTitle: "Save video",
-          shareTitle: "Video",
         });
       } catch {
         triggerDirectDownload(src, fileName);

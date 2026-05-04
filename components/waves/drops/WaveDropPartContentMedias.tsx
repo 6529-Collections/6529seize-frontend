@@ -3,6 +3,7 @@ import clsx from "clsx";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import DropMediaActionRow from "@/components/drops/view/item/content/media/DropMediaActionRow";
 import { ImageScale } from "@/helpers/image.helpers";
 import WaveDropPartContentFullWidthImage from "./WaveDropPartContentFullWidthImage";
 
@@ -73,6 +74,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
         const useNaturalHeightImage =
           fullWidthMedia && media.mime_type.includes("image");
         const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
+        const showMediaActionRow =
+          media.mime_type.includes("image") || media.mime_type.includes("video");
         const mediaContainerClassName = getMediaContainerClassName({
           useNaturalHeightImage,
           useCompactLink,
@@ -107,11 +110,11 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
         }
 
         return (
-          <div
-            key={`part-${i}-media-${media.url}`}
-            className={mediaContainerClassName}
-          >
-            {mediaContent}
+          <div key={`part-${i}-media-${media.url}`}>
+            <div className={mediaContainerClassName}>{mediaContent}</div>
+            {showMediaActionRow && (
+              <DropMediaActionRow mimeType={media.mime_type} url={media.url} />
+            )}
           </div>
         );
       })}

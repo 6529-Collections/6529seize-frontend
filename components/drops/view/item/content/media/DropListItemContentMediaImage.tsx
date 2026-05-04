@@ -3,22 +3,14 @@
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { fullScreenSupported } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { getDownloadFilenameFromUrl } from "@/helpers/media-download.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
-import { faExpand, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
+import { faExpand } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  ArrowDownTrayIcon,
-  ArrowTopRightOnSquareIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
-import Link from "next/link";
 import React, { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
-import useDownloader from "react-use-downloader";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
@@ -35,7 +27,6 @@ const modalButtonClasses =
 function DropListItemContentMediaImage({
   src,
   maxRetries = 0,
-  onContainerClick,
   isCompetitionDrop = false,
   disableModal = false,
   imageObjectPosition,
@@ -62,7 +53,6 @@ function DropListItemContentMediaImage({
   const modalImageRef = useRef<HTMLImageElement>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const { isCapacitor } = useCapacitor();
-  const { download } = useDownloader();
 
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
@@ -118,14 +108,6 @@ function DropListItemContentMediaImage({
     []
   );
 
-  const handleDownload = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.stopPropagation();
-      download(src, getDownloadFilenameFromUrl(src, "image"));
-    },
-    [download, src]
-  );
-
   const loadingPlaceholderStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
@@ -159,7 +141,7 @@ function DropListItemContentMediaImage({
         smooth
         onZoom={(e) => setIsZoomed(e.state.scale > 1)}
       >
-        {({ resetTransform }) => (
+        {() => (
           <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
             <div className="tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col lg:tw-flex-row">
               <div
@@ -189,32 +171,6 @@ function DropListItemContentMediaImage({
               </div>
 
               <div className="tw-fixed tw-right-4 tw-top-2 tw-z-[1001] tw-flex tw-flex-row tw-gap-x-4 tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-right-auto lg:tw-top-0 lg:tw-ml-4 lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-self-start lg:tw-pt-0">
-                {isZoomed && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      resetTransform();
-                      setIsZoomed(false);
-                    }}
-                    data-tooltip-id="reset-zoom"
-                    className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700"
-                    aria-label="Reset"
-                  >
-                    <FontAwesomeIcon
-                      icon={faRotateLeft}
-                      className="tw-size-4"
-                    />
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  data-tooltip-id={`download-media-${src}`}
-                  className={modalButtonClasses}
-                  aria-label="Download image"
-                >
-                  <ArrowDownTrayIcon className="tw-size-5 tw-flex-shrink-0" />
-                </button>
                 {fullScreenSupported() && !isCapacitor && (
                   <button
                     onClick={handleFullScreen}
@@ -223,30 +179,6 @@ function DropListItemContentMediaImage({
                     aria-label="Full screen"
                   >
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
-                  </button>
-                )}
-                <Link href={src} target="_blank" rel="noopener noreferrer">
-                  <button
-                    onClick={(e) => e.stopPropagation()}
-                    data-tooltip-id={`open-browser-${src}`}
-                    className={modalButtonClasses}
-                    aria-label="Open image in new tab"
-                  >
-                    <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                  </button>
-                </Link>
-                {onContainerClick && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCloseModal();
-                      onContainerClick();
-                    }}
-                    data-tooltip-id="view-drop-details"
-                    className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700"
-                    aria-label="View drop details"
-                  >
-                    <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                   </button>
                 )}
 
@@ -281,24 +213,8 @@ function DropListItemContentMediaImage({
       {/* Tooltips inside modal */}
       {!isCapacitor && (
         <>
-          <Tooltip id={`open-browser-${src}`} {...tooltipProps}>
-            <span className="tw-text-xs">Open in Browser</span>
-          </Tooltip>
-
-          <Tooltip id={`download-media-${src}`} {...tooltipProps}>
-            <span className="tw-text-xs">Download</span>
-          </Tooltip>
-
           <Tooltip id="full-screen" {...tooltipProps}>
             <span className="tw-text-xs">Full screen</span>
-          </Tooltip>
-
-          <Tooltip id="view-drop-details" {...tooltipProps}>
-            <span className="tw-text-xs">View Drop details</span>
-          </Tooltip>
-
-          <Tooltip id="reset-zoom" {...tooltipProps}>
-            <span className="tw-text-xs">Reset zoom</span>
           </Tooltip>
 
           <Tooltip id="close-modal" {...tooltipProps}>

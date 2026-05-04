@@ -28,63 +28,11 @@ function cachePathForBlobDownload(fileName: string): string {
   return `${Date.now()}-${safe || "download"}`;
 }
 
-export async function shareFetchedBlobWithNavigator(
-  blob: Blob,
-  fileName: string,
-  title: string = fileName
-): Promise<boolean> {
-  if (
-    typeof navigator === "undefined" ||
-    typeof navigator.share !== "function" ||
-    typeof File === "undefined"
-  ) {
-    return false;
-  }
-
-  const file = new File([blob], fileName, { type: blob.type });
-  const shareData: ShareData = {
-    files: [file],
-    title,
-  };
-
-  if (
-    typeof navigator.canShare === "function" &&
-    !navigator.canShare(shareData)
-  ) {
-    return false;
-  }
-
-  try {
-    await navigator.share(shareData);
-    return true;
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return true;
-    }
-    return false;
-  }
-}
-
 export async function shareFetchedBlobInNativeApp(
   blob: Blob,
   fileName: string,
-  options?: {
-    readonly dialogTitle?: string | undefined;
-    readonly title?: string | undefined;
-    readonly preferNavigatorShare?: boolean | undefined;
-  }
+  options?: { readonly dialogTitle?: string | undefined }
 ): Promise<void> {
-  if (options?.preferNavigatorShare) {
-    const shared = await shareFetchedBlobWithNavigator(
-      blob,
-      fileName,
-      options.title
-    );
-    if (shared) {
-      return;
-    }
-  }
-
   const base64 = await blobToBase64(blob);
   const path = cachePathForBlobDownload(fileName);
   await Filesystem.writeFile({
