@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCalendarAlt,
+  faInfoCircle,
+  faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import DateAccordion from "@/components/common/DateAccordion";
@@ -14,9 +18,11 @@ import {
   getMinimumRollingEndDate,
 } from "../services/waveDecisionService";
 import { calculateLastDecisionTime } from "@/helpers/waves/create-wave.helpers";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 interface RollingEndDateProps {
   readonly dates: CreateWaveDatesConfig;
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
   readonly isExpanded: boolean;
   readonly setIsExpanded: (expanded: boolean) => void;
@@ -47,11 +53,16 @@ function RollingEndDateCollapsedContent({
 
 export default function RollingEndDate({
   dates,
+  errors,
   setDates,
   isExpanded,
   setIsExpanded,
 }: RollingEndDateProps) {
   const isRollingMode = dates.isRolling;
+  const hasRankFutureDateError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+  );
+  const shouldShowExpandedContent = isExpanded || hasRankFutureDateError;
 
   // Initialize with current end date values or defaults
   const initialDate = dates.endDate ? new Date(dates.endDate) : new Date();
@@ -131,8 +142,8 @@ export default function RollingEndDate({
             tooltipWidth="tw-w-80"
           />
         }
-        isExpanded={isExpanded}
-        onToggle={() => setIsExpanded(!isExpanded)}
+        isExpanded={shouldShowExpandedContent}
+        onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
         collapsedContent={collapsedContent}
       >
         <div className="tw-px-5 tw-pb-5 tw-pt-2">
@@ -141,6 +152,19 @@ export default function RollingEndDate({
             <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
               Set Wave End Date
             </p>
+            {hasRankFutureDateError && (
+              <div
+                role="alert"
+                className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
+              >
+                <FontAwesomeIcon
+                  icon={faTriangleExclamation}
+                  className="tw-size-4 tw-flex-shrink-0"
+                  aria-hidden="true"
+                />
+                <span>Wave end date must be in the future.</span>
+              </div>
+            )}
 
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
               {/* Date selection */}

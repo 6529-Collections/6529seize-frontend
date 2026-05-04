@@ -12,7 +12,8 @@ import {
   clampRollingEndDate,
   validateDateSequence,
 } from "../services/waveDecisionService";
-import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { Time } from "@/helpers/time";
 
 interface CreateWaveDatesRankProps {
   readonly waveType: ApiWaveType;
@@ -34,6 +35,29 @@ export default function CreateWaveDatesRank({
     rolling: dates.isRolling,
   });
   const [hasAutoCollapsedStart, setHasAutoCollapsedStart] = useState(false);
+  const rankFutureDateError =
+    CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE;
+  const hasRankFutureDateError = errors.includes(rankFutureDateError);
+  const now = hasRankFutureDateError ? Time.currentMillis() : null;
+  const isFirstDecisionTimeInPast =
+    now !== null && dates.firstDecisionTime <= now;
+  const isRollingEndDateInPast =
+    now !== null &&
+    dates.isRolling &&
+    (dates.endDate === null ||
+      !Number.isFinite(dates.endDate) ||
+      dates.endDate <= now);
+  const errorsWithoutRankFutureDate = errors.filter(
+    (error) => error !== rankFutureDateError
+  );
+  const decisionErrors =
+    hasRankFutureDateError && (!dates.isRolling || isFirstDecisionTimeInPast)
+      ? [...errorsWithoutRankFutureDate, rankFutureDateError]
+      : errorsWithoutRankFutureDate;
+  const rollingEndDateErrors =
+    hasRankFutureDateError && isRollingEndDateInPast
+      ? [rankFutureDateError]
+      : [];
 
   const toggleSection = (sectionName: "start" | "decisions" | "rolling") => {
     setExpandedSections((prev) => ({
@@ -111,7 +135,7 @@ export default function CreateWaveDatesRank({
 
       <Decisions
         dates={dates}
-        errors={errors}
+        errors={decisionErrors}
         setDates={commitDates}
         onRollingEnabled={handleRollingEnabled}
         isExpanded={expandedSections.decisions}
@@ -122,6 +146,7 @@ export default function CreateWaveDatesRank({
       {dates.subsequentDecisions.length > 0 && isRollingMode && (
         <RollingEndDate
           dates={dates}
+          errors={rollingEndDateErrors}
           setDates={commitDates}
           isExpanded={expandedSections.rolling}
           setIsExpanded={() => toggleSection("rolling")}

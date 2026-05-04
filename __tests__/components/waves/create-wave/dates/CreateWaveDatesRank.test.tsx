@@ -5,6 +5,7 @@ import { adjustDatesAfterSubmissionChange } from "@/components/waves/create-wave
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
+import { Time } from "@/helpers/time";
 
 jest.mock(
   "@/components/waves/create-wave/dates/StartDates",
@@ -34,6 +35,9 @@ jest.mock(
         data-testid="decisions"
         data-expanded={props.isExpanded}
         data-error-count={String(props.errors.length)}
+        data-has-rank-error={String(
+          props.errors.includes("RANK_DECISION_TIME_MUST_BE_IN_FUTURE")
+        )}
         onClick={() => {
           props.onInteraction();
         }}
@@ -61,7 +65,14 @@ jest.mock(
 jest.mock(
   "@/components/waves/create-wave/dates/RollingEndDate",
   () => (props: any) => (
-    <div data-testid="rolling" data-expanded={props.isExpanded} />
+    <div
+      data-testid="rolling"
+      data-expanded={props.isExpanded}
+      data-error-count={String(props.errors.length)}
+      data-has-rank-error={String(
+        props.errors.includes("RANK_DECISION_TIME_MUST_BE_IN_FUTURE")
+      )}
+    />
   )
 );
 
@@ -93,6 +104,10 @@ const baseDates: CreateWaveDatesConfig = {
 };
 
 describe("CreateWaveDatesRank", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("adjusts dates when submission start changes", async () => {
     const setDates = jest.fn();
     const adjustDatesAfterSubmissionChangeMock = jest.mocked(
@@ -179,6 +194,68 @@ describe("CreateWaveDatesRank", () => {
     expect(screen.getByTestId("decisions")).toHaveAttribute(
       "data-error-count",
       "1"
+    );
+  });
+
+  it("routes rolling end-date future errors to the rolling section", () => {
+    jest.spyOn(Time, "currentMillis").mockReturnValue(1_000);
+    const dates = {
+      ...baseDates,
+      firstDecisionTime: 2_000,
+      endDate: 999,
+      subsequentDecisions: [100],
+      isRolling: true,
+    };
+
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={dates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE,
+        ]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-rank-error",
+      "false"
+    );
+    expect(screen.getByTestId("rolling")).toHaveAttribute(
+      "data-has-rank-error",
+      "true"
+    );
+  });
+
+  it("routes rank future-date errors to both sections when both dates are past", () => {
+    jest.spyOn(Time, "currentMillis").mockReturnValue(1_000);
+    const dates = {
+      ...baseDates,
+      firstDecisionTime: 999,
+      endDate: 999,
+      subsequentDecisions: [100],
+      isRolling: true,
+    };
+
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={dates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE,
+        ]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-rank-error",
+      "true"
+    );
+    expect(screen.getByTestId("rolling")).toHaveAttribute(
+      "data-has-rank-error",
+      "true"
     );
   });
 

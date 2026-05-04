@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RollingEndDate from "@/components/waves/create-wave/dates/RollingEndDate";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 jest.mock("@/components/utils/calendar/CommonCalendar", () => (props: any) => (
   <button onClick={() => props.setSelectedTimestamp(1000)}>calendar</button>
@@ -16,7 +17,7 @@ type Config = {
 };
 
 jest.mock("@/components/common/DateAccordion", () => (props: any) => (
-  <div>
+  <div data-testid="accordion" data-expanded={String(props.isExpanded)}>
     <button onClick={props.onToggle}>toggle</button>
     {props.isExpanded && props.children}
     {props.collapsedContent}
@@ -59,6 +60,7 @@ describe("RollingEndDate", () => {
     render(
       <RollingEndDate
         dates={baseConfig}
+        errors={[]}
         setDates={setDates}
         isExpanded
         setIsExpanded={() => {}}
@@ -74,6 +76,7 @@ describe("RollingEndDate", () => {
     render(
       <RollingEndDate
         dates={baseConfig}
+        errors={[]}
         setDates={setDates}
         isExpanded
         setIsExpanded={() => {}}
@@ -81,5 +84,27 @@ describe("RollingEndDate", () => {
     );
     await user.click(screen.getByText("time"));
     expect(setDates).toHaveBeenCalled();
+  });
+
+  it("expands and shows an alert for rank future-date errors", () => {
+    render(
+      <RollingEndDate
+        dates={baseConfig}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE,
+        ]}
+        setDates={jest.fn()}
+        isExpanded={false}
+        setIsExpanded={() => {}}
+      />
+    );
+
+    expect(screen.getByTestId("accordion")).toHaveAttribute(
+      "data-expanded",
+      "true"
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Wave end date must be in the future."
+    );
   });
 });
