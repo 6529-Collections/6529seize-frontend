@@ -3,7 +3,7 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
+  updateServerDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiCurationDropsPage } from "@/generated/models/ApiCurationDropsPage";
@@ -18,6 +18,7 @@ import {
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   keepPreviousData,
@@ -131,7 +132,10 @@ export function useWaveCurationDrops({
           return;
         }
 
-        updateDropInCachedDrops(queryClient, message);
+        updateServerDropInCachedDrops(queryClient, {
+          serverDrop: message,
+          websocketStatus: WebSocketStatus.CONNECTED,
+        });
         requestRefetch();
       },
       [queryClient, requestRefetch, waveId]

@@ -13,7 +13,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import {
   updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
+  updateServerDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
@@ -27,6 +27,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { WaveDropsSearchStrategy } from "@/contexts/wave/hooks/types";
 
@@ -143,7 +144,10 @@ export function useDropMessages(waveId: string, dropId: string | null) {
           return;
         }
 
-        updateDropInCachedDrops(queryClient, message);
+        updateServerDropInCachedDrops(queryClient, {
+          serverDrop: message,
+          websocketStatus: WebSocketStatus.CONNECTED,
+        });
         requestRefetch();
       },
       [dropId, queryClient, requestRefetch, waveId]

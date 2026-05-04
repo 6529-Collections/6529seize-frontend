@@ -714,6 +714,107 @@ describe("useWaveRealtimeUpdater", () => {
     }
   });
 
+  it("lets stale server reaction win when pending replay happens after protection expires", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const mutation = beginReactionMutation({
+      dropId: "d-loading-replay-expired",
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    const currentUser = profile("profile-1", "current-user");
+    const store: any = {
+      wave1: {
+        drops: [],
+        isLoading: true,
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-loading-replay-expired",
+      title: "server-title",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: {
+        ...contextProfileContext(":wave:"),
+        rating: 9,
+      },
+      reactions: [
+        reactionEntry(":wave:", [
+          profile("profile-1", "server-current-user"),
+          profile("profile-2", "fresh-wave"),
+        ]),
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: "d-loading-replay-expired",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+
+    dateNowSpy.mockReturnValue(6_101);
+    store.wave1 = {
+      ...store.wave1,
+      drops: [
+        {
+          id: "d-loading-replay-expired",
+          type: DropSize.FULL,
+          stableKey: "expired-stable-key",
+          stableHash: "expired-stable-hash",
+          author: {},
+          wave: { id: "wave1" },
+          context_profile_context: contextProfileContext(":joy:"),
+          reactions: [reactionEntry(":joy:", [currentUser])],
+        },
+      ],
+      isLoading: false,
+    };
+
+    act(() => {
+      rerender();
+    });
+
+    await waitFor(() => expect(props.updateData).toHaveBeenCalledTimes(1));
+
+    const replayedUpdate = props.updateData.mock.calls[0]?.[0];
+    const replayedDrop = replayedUpdate.drops[0];
+    expect(replayedDrop.stableKey).toBe("expired-stable-key");
+    expect(replayedDrop.stableHash).toBe("expired-stable-hash");
+    expect(replayedDrop.title).toBe("server-title");
+    expect(replayedDrop.context_profile_context.rating).toBe(9);
+    expect(replayedDrop.context_profile_context.reaction).toBe(":wave:");
+    expect(replayedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [
+        profile("profile-1", "server-current-user"),
+        profile("profile-2", "fresh-wave"),
+      ]),
+    ]);
+  });
+
   it("ignores older overlapping fetched reaction updates that finish last", async () => {
     const firstFetch = deferred<any>();
     const secondFetch = deferred<any>();
@@ -1663,7 +1764,7 @@ describe("useWaveRealtimeUpdater", () => {
     );
     expect(props.registerWave).toHaveBeenCalledWith("wave2");
     expect(fetchDropByIdBatched).not.toHaveBeenCalled();
-    expect(mockSetQueriesData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).toHaveBeenCalled();
   });
 
   it("registers unopened waves and refreshes cache-only reaction updates", async () => {
@@ -2283,6 +2384,7 @@ describe("useWaveRealtimeUpdater", () => {
     await flushPromises();
 
     expect(props.isWaveMuted).toHaveBeenCalledWith("wave1");
+    expect(mockSetQueriesData).toHaveBeenCalled();
     expect(props.updateData).not.toHaveBeenCalled();
     expect(props.registerWave).not.toHaveBeenCalled();
     expect(props.syncNewestMessages).not.toHaveBeenCalled();

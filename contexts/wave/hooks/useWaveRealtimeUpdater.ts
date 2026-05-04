@@ -5,13 +5,12 @@ import {
   findDropInCachedDrops,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
+  updateServerDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
-import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type {
   WsAttachmentStatusUpdateMessage,
   WsDropUpdateMessage,
@@ -23,11 +22,6 @@ import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import {
-  getProtectedReactionIntent,
-  recordReactionRealtimeReconciliation,
-  type ProtectedReactionIntent,
-} from "@/utils/monitoring/dropReactionMonitoring";
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
@@ -58,8 +52,9 @@ type IncomingDropWave = Omit<
   readonly authenticated_user_eligible_to_chat?: ApiDrop["wave"]["authenticated_user_eligible_to_chat"];
 };
 
-type IncomingDrop = Omit<ApiDrop, "wave"> & {
+type IncomingDrop = Omit<ApiDrop, "wave" | "context_profile_context"> & {
   readonly wave?: IncomingDropWave;
+  readonly context_profile_context?: ApiDrop["context_profile_context"];
 };
 
 type ProcessIncomingDropFn = (
@@ -77,118 +72,6 @@ function isDocumentVisible(): boolean {
   return getDocument()?.visibilityState === "visible";
 }
 
-function preserveProtectedReactionFields(
-  serverDrop: ApiDrop,
-  localDrop: CachedDropReactionState,
-  protectedIntent: ProtectedReactionIntent
-): ApiDrop {
-  const serverContext = serverDrop.context_profile_context;
-  const localContext = localDrop.context_profile_context;
-  const contextSource =
-    serverContext ??
-    localContext ??
-    (protectedIntent.reaction !== null
-      ? {
-          rating: 0,
-          min_rating: 0,
-          max_rating: 0,
-          reaction: null,
-          boosted: false,
-          bookmarked: false,
-          curatable: false,
-          curated: false,
-        }
-      : null);
-
-  return {
-    ...serverDrop,
-    context_profile_context: contextSource
-      ? {
-          ...contextSource,
-          reaction: protectedIntent.reaction,
-        }
-      : null,
-    reactions: mergeProtectedReactionProfiles(
-      serverDrop.reactions,
-      localDrop.reactions,
-      protectedIntent
-    ),
-  };
-}
-
-function mergeProtectedReactionProfiles(
-  serverReactions: ApiDropReaction[],
-  localReactions: ApiDropReaction[],
-  protectedIntent: ProtectedReactionIntent
-): ApiDropReaction[] {
-  const profileId = protectedIntent.profileId;
-  if (!profileId) {
-    return serverReactions;
-  }
-
-  const mergedReactions = serverReactions.reduce<ApiDropReaction[]>(
-    (entries, entry) => {
-      const profiles = entry.profiles.filter(
-        (profile) => profile.id !== profileId
-      );
-
-      if (profiles.length > 0) {
-        entries.push({
-          ...entry,
-          profiles,
-        });
-      }
-
-      return entries;
-    },
-    []
-  );
-
-  if (protectedIntent.reaction === null) {
-    return mergedReactions;
-  }
-
-  const localProfile = findReactionProfile(localReactions, profileId);
-  if (!localProfile) {
-    return mergedReactions;
-  }
-
-  const targetIndex = mergedReactions.findIndex(
-    (entry) => entry.reaction === protectedIntent.reaction
-  );
-
-  if (targetIndex >= 0) {
-    const target = mergedReactions[targetIndex]!;
-    mergedReactions[targetIndex] = {
-      ...target,
-      profiles: [...target.profiles, localProfile],
-    };
-    return mergedReactions;
-  }
-
-  return [
-    ...mergedReactions,
-    {
-      reaction: protectedIntent.reaction,
-      profiles: [localProfile],
-    },
-  ];
-}
-
-function findReactionProfile(
-  reactions: ApiDropReaction[],
-  profileId: string
-): ApiProfileMin | null {
-  for (const reaction of reactions) {
-    const profile = reaction.profiles.find((item) => item.id === profileId);
-    if (profile) {
-      return profile;
-    }
-  }
-
-  return null;
-}
-
 function getIncomingWave(drop: IncomingDrop): IncomingDropWave | null {
   const wave = drop.wave;
   if (wave === undefined || wave.id.length === 0) {
@@ -196,6 +79,16 @@ function getIncomingWave(drop: IncomingDrop): IncomingDropWave | null {
   }
 
   return wave;
+}
+
+function buildIncomingServerDrop(
+  drop: IncomingDrop,
+  wave: IncomingDropWave
+): ApiDrop {
+  return {
+    ...drop,
+    wave,
+  } as ApiDrop;
 }
 
 function isFetchedDropUpdate(type: ProcessIncomingDropType): boolean {
@@ -244,132 +137,6 @@ function hasDropInWaveData(
   return data?.drops.some((drop) => drop.id === dropId) ?? false;
 }
 
-function hasProfileForReaction(
-  reactions: ApiDropReaction[],
-  profileId: string,
-  reaction: string
-): boolean {
-  return reactions.some(
-    (entry) =>
-      entry.reaction === reaction &&
-      entry.profiles.some((profile) => profile.id === profileId)
-  );
-}
-
-function matchesProtectedReactionIntent(
-  localDrop: CachedDropReactionState,
-  protectedIntent: ProtectedReactionIntent
-): boolean {
-  const localReaction = localDrop.context_profile_context?.reaction ?? null;
-  if (localReaction !== protectedIntent.reaction) {
-    return false;
-  }
-
-  const profileId = protectedIntent.profileId;
-  if (!profileId) {
-    return true;
-  }
-
-  if (protectedIntent.reaction === null) {
-    return findReactionProfile(localDrop.reactions, profileId) === null;
-  }
-
-  return hasProfileForReaction(
-    localDrop.reactions,
-    profileId,
-    protectedIntent.reaction
-  );
-}
-
-function getProtectedSnapshotFallback(
-  cachedDropSnapshot: CachedDropReactionState | null | undefined,
-  protectedIntent: ProtectedReactionIntent | null
-): CachedDropReactionState | null {
-  if (cachedDropSnapshot === undefined || cachedDropSnapshot === null) {
-    return null;
-  }
-
-  if (protectedIntent === null) {
-    return null;
-  }
-
-  return matchesProtectedReactionIntent(cachedDropSnapshot, protectedIntent)
-    ? cachedDropSnapshot
-    : null;
-}
-
-function selectFetchedDropLocalState({
-  cachedDropSnapshot,
-  latestCachedDrop,
-  latestExistingDrop,
-  protectedIntent,
-}: {
-  readonly cachedDropSnapshot: CachedDropReactionState | null | undefined;
-  readonly latestCachedDrop: CachedDropReactionState | null;
-  readonly latestExistingDrop: CachedDropReactionState | null;
-  readonly protectedIntent: ProtectedReactionIntent | null;
-}): CachedDropReactionState | null {
-  const sources =
-    cachedDropSnapshot !== undefined
-      ? [latestCachedDrop, latestExistingDrop, cachedDropSnapshot]
-      : [latestExistingDrop, latestCachedDrop, cachedDropSnapshot];
-  const protectedSource =
-    protectedIntent === null
-      ? null
-      : (sources.find(
-          (source) =>
-            source !== null &&
-            source !== undefined &&
-            matchesProtectedReactionIntent(source, protectedIntent)
-        ) ?? null);
-
-  if (protectedSource !== null) {
-    return protectedSource;
-  }
-
-  const snapshotFallback = getProtectedSnapshotFallback(
-    cachedDropSnapshot,
-    protectedIntent
-  );
-
-  if (cachedDropSnapshot !== undefined) {
-    return latestCachedDrop ?? latestExistingDrop ?? snapshotFallback;
-  }
-
-  return latestExistingDrop ?? latestCachedDrop ?? snapshotFallback;
-}
-
-function reconcileFetchedDropUpdate(
-  apiDrop: ApiDrop,
-  protectedIntent: ProtectedReactionIntent | null,
-  localDrop: CachedDropReactionState | null
-): ApiDrop {
-  const serverReaction = apiDrop.context_profile_context?.reaction ?? null;
-
-  recordReactionRealtimeReconciliation({
-    drop: {
-      id: apiDrop.id,
-      wave: { id: apiDrop.wave.id },
-      context_profile_context: apiDrop.context_profile_context,
-    },
-    websocketStatus: WebSocketStatus.CONNECTED,
-    protectedIntent,
-  });
-
-  if (protectedIntent && serverReaction !== protectedIntent.reaction) {
-    return preserveProtectedReactionFields(
-      apiDrop,
-      localDrop ?? {
-        context_profile_context: null,
-        reactions: [],
-      },
-      protectedIntent
-    );
-  }
-
-  return apiDrop;
-}
-
 function buildOptimisticDrop(
   drop: IncomingDrop,
   wave: IncomingDropWave,
@@ -380,9 +147,9 @@ function buildOptimisticDrop(
       ? drop.author.subscribed_actions
       : existingDrop.author.subscribed_actions;
   const contextProfileContext =
-    existingDrop === null
-      ? (drop.context_profile_context ?? null)
-      : existingDrop.context_profile_context;
+    existingDrop !== null && drop.context_profile_context === undefined
+      ? existingDrop.context_profile_context
+      : (drop.context_profile_context ?? null);
 
   return {
     ...drop,
@@ -488,7 +255,7 @@ type PendingFetchedDropUpdate = {
   readonly waveId: string;
   readonly dropId: string;
   readonly sequence: number;
-  readonly drop: ApiDrop;
+  readonly serverDrop: ApiDrop;
 };
 
 function useWaveNotificationActions({
@@ -724,26 +491,11 @@ function useIncomingDropProcessor({
       const latestFullDrop = getFullDrop(latestDrop);
 
       if (latestFullDrop !== null) {
-        const latestCachedDrop = findDropInCachedDrops(
-          queryClient,
-          pendingUpdate.dropId
-        );
-        const protectedIntent = getProtectedReactionIntent(
-          pendingUpdate.dropId
-        );
-        const localDrop = selectFetchedDropLocalState({
-          cachedDropSnapshot: undefined,
-          latestCachedDrop,
-          latestExistingDrop: latestFullDrop,
-          protectedIntent,
+        const nextDrop = updateServerDropInCachedDrops(queryClient, {
+          serverDrop: pendingUpdate.serverDrop,
+          latestWaveDrop: latestFullDrop,
+          websocketStatus: WebSocketStatus.CONNECTED,
         });
-        const nextDrop = reconcileFetchedDropUpdate(
-          pendingUpdate.drop,
-          protectedIntent,
-          localDrop
-        );
-
-        updateDropInCachedDrops(queryClient, nextDrop);
         updateData({
           key: pendingUpdate.waveId,
           drops: [buildFetchedDropForWaveStore(nextDrop, latestFullDrop)],
@@ -784,7 +536,7 @@ function useIncomingDropProcessor({
       fetchedDropRequestSequencesRef.current.set(updateKey, sequence);
       pendingFetchedDropUpdatesRef.current.delete(updateKey);
 
-      const apiDrop = await fetchDropByIdBatched(drop.id);
+      const serverDrop = await fetchDropByIdBatched(drop.id);
       if (fetchedDropRequestSequencesRef.current.get(updateKey) !== sequence) {
         return;
       }
@@ -794,22 +546,12 @@ function useIncomingDropProcessor({
         (cachedDrop) => cachedDrop.id === drop.id
       );
       const latestExistingDrop = getFullDrop(latestDrop);
-      const latestCachedDrop = findDropInCachedDrops(queryClient, drop.id);
-      const protectedIntent = getProtectedReactionIntent(apiDrop.id);
-      const cachedDrop = selectFetchedDropLocalState({
-        cachedDropSnapshot,
-        latestCachedDrop,
-        latestExistingDrop,
-        protectedIntent,
+      const nextDrop = updateServerDropInCachedDrops(queryClient, {
+        serverDrop,
+        latestWaveDrop: latestExistingDrop,
+        ...(cachedDropSnapshot !== undefined ? { cachedDropSnapshot } : {}),
+        websocketStatus: WebSocketStatus.CONNECTED,
       });
-
-      const nextDrop = reconcileFetchedDropUpdate(
-        apiDrop,
-        protectedIntent,
-        cachedDrop
-      );
-
-      updateDropInCachedDrops(queryClient, nextDrop);
 
       if (latestExistingDrop !== null) {
         pendingFetchedDropUpdatesRef.current.delete(updateKey);
@@ -825,7 +567,7 @@ function useIncomingDropProcessor({
           waveId,
           dropId: drop.id,
           sequence,
-          drop: nextDrop,
+          serverDrop,
         });
         return;
       }
@@ -846,12 +588,24 @@ function useIncomingDropProcessor({
       }
 
       const waveId = wave.id;
+      const currentData = getData(waveId);
+      const existingDrop = currentData?.drops.find((d) => d.id === drop.id);
+      const latestFullDrop = getFullDrop(existingDrop);
+      const incomingServerDrop = buildIncomingServerDrop(drop, wave);
+
+      const serverDisplayDrop = isFetchedDropUpdate(type)
+        ? null
+        : updateServerDropInCachedDrops(queryClient, {
+            serverDrop: incomingServerDrop,
+            latestWaveDrop: latestFullDrop,
+            websocketStatus: WebSocketStatus.CONNECTED,
+          });
+
       if (isWaveMuted(waveId)) {
         return;
       }
 
       refreshEligibilityAfterVisibilityChange(waveId);
-      const currentData = getData(waveId);
 
       if (currentData === undefined) {
         if (isFetchedDropUpdate(type)) {
@@ -875,8 +629,6 @@ function useIncomingDropProcessor({
         return;
       }
 
-      const existingDrop = currentData.drops.find((d) => d.id === drop.id);
-
       if (isFetchedDropUpdate(type)) {
         if (existingDrop !== undefined) {
           await handleFetchedDropUpdate(drop, waveId);
@@ -895,9 +647,9 @@ function useIncomingDropProcessor({
       }
 
       const optimisticDrop = buildOptimisticDrop(
-        drop,
+        serverDisplayDrop ?? incomingServerDrop,
         wave,
-        getFullDrop(existingDrop)
+        latestFullDrop
       );
       const serialNoForFetch = currentData.latestFetchedSerialNo;
 

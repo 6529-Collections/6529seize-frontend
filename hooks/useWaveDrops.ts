@@ -9,7 +9,7 @@ import { useCallback, useMemo } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
+  updateServerDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -18,6 +18,7 @@ import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 
@@ -154,7 +155,10 @@ export function useWaveDrops({
           return;
         }
 
-        updateDropInCachedDrops(queryClient, message);
+        updateServerDropInCachedDrops(queryClient, {
+          serverDrop: message,
+          websocketStatus: WebSocketStatus.CONNECTED,
+        });
         requestRefetch();
       },
       [queryClient, requestRefetch, waveId]
