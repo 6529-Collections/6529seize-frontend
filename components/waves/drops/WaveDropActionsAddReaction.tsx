@@ -15,15 +15,26 @@ const WaveDropActionsAddReaction: React.FC<{
   readonly isMobile?: boolean | undefined;
   readonly onAddReaction?: (() => void) | undefined;
   readonly dialogZIndexClassName?: string | undefined;
-}> = ({ drop, isMobile = false, onAddReaction, dialogZIndexClassName }) => {
+  readonly size?: "default" | "compact" | undefined;
+  readonly updateCurationCache?: boolean | undefined;
+}> = ({
+  drop,
+  isMobile = false,
+  onAddReaction,
+  dialogZIndexClassName,
+  size = "default",
+  updateCurationCache = false,
+}) => {
   const { react, canReact } = useDropReaction(drop, {
     source: "picker",
     onSuccess: onAddReaction,
+    updateCurationCache,
   });
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null);
   const { emojiMap, categories, categoryIcons } = useEmoji();
+  const desktopIconSizeClass = size === "compact" ? "tw-size-4" : "tw-size-5";
 
   const handleEmojiSelect = (emoji: {
     native?: string | undefined;
@@ -31,7 +42,7 @@ const WaveDropActionsAddReaction: React.FC<{
   }) => {
     const emojiText = `:${emoji.id ?? ""}:`;
     setShowPicker(false);
-    react(emojiText);
+    void react(emojiText);
   };
 
   useEffect(() => {
@@ -112,7 +123,7 @@ const WaveDropActionsAddReaction: React.FC<{
         {...(canReact ? { "data-tooltip-id": `add-reaction-${drop.id}` } : {})}
       >
         <svg
-          className={`tw-size-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out ${
+          className={`${desktopIconSizeClass} tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out ${
             !canReact && "tw-opacity-50"
           }`}
           xmlns="http://www.w3.org/2000/svg"

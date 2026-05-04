@@ -6,15 +6,33 @@ import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
 import { useCallback, useState } from "react";
 
-const COMMUNITY_CURATIONS_SKELETON_CARDS = [
-  { id: "compact", mediaHeight: 210, lines: 2 },
-  { id: "tall", mediaHeight: 320, lines: 4 },
-  { id: "mid", mediaHeight: 250, lines: 3 },
-  { id: "feature", mediaHeight: 390, lines: 2 },
-  { id: "balanced", mediaHeight: 280, lines: 4 },
-  { id: "short", mediaHeight: 220, lines: 3 },
-  { id: "portrait", mediaHeight: 350, lines: 3 },
-  { id: "wide", mediaHeight: 260, lines: 2 },
+const COMMUNITY_CURATIONS_SKELETON_COLUMNS = [
+  {
+    id: "left",
+    className: "tw-flex",
+    cards: [
+      { id: "compact", mediaHeight: 210, lines: 2 },
+      { id: "feature", mediaHeight: 390, lines: 2 },
+      { id: "portrait", mediaHeight: 350, lines: 3 },
+    ],
+  },
+  {
+    id: "middle",
+    className: "tw-hidden md:tw-flex",
+    cards: [
+      { id: "tall", mediaHeight: 320, lines: 4 },
+      { id: "balanced", mediaHeight: 280, lines: 4 },
+      { id: "wide", mediaHeight: 260, lines: 2 },
+    ],
+  },
+  {
+    id: "right",
+    className: "tw-hidden xl:tw-flex",
+    cards: [
+      { id: "mid", mediaHeight: 250, lines: 3 },
+      { id: "short", mediaHeight: 220, lines: 3 },
+    ],
+  },
 ] as const;
 
 const COMMUNITY_CURATIONS_SKELETON_LINE_IDS = [
@@ -32,7 +50,7 @@ function CommunityCurationsSkeletonCard({
   readonly mediaHeight: number;
 }) {
   return (
-    <div className="tw-mb-4 tw-break-inside-avoid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/75">
+    <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/75">
       <div
         className="tw-animate-pulse tw-bg-iron-900"
         style={{ height: mediaHeight }}
@@ -58,6 +76,14 @@ function CommunityCurationsSkeletonCard({
             )
           )}
         </div>
+        <div className="tw-mt-5 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-h-9 tw-w-20 tw-animate-pulse tw-rounded-lg tw-bg-iron-900" />
+            <div className="tw-h-9 tw-w-14 tw-animate-pulse tw-rounded-lg tw-bg-iron-900" />
+            <div className="tw-size-9 tw-animate-pulse tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700/80 tw-bg-iron-900/30" />
+          </div>
+          <div className="tw-size-9 tw-animate-pulse tw-rounded-lg tw-bg-iron-900/60" />
+        </div>
       </div>
     </div>
   );
@@ -65,13 +91,20 @@ function CommunityCurationsSkeletonCard({
 
 function CommunityCurationsSkeletonGrid() {
   return (
-    <div className="tw-[column-gap:1rem] tw-[column-width:300px]">
-      {COMMUNITY_CURATIONS_SKELETON_CARDS.map((card) => (
-        <CommunityCurationsSkeletonCard
-          key={`community-curations-skeleton-${card.id}`}
-          lines={card.lines}
-          mediaHeight={card.mediaHeight}
-        />
+    <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-3">
+      {COMMUNITY_CURATIONS_SKELETON_COLUMNS.map((column) => (
+        <div
+          key={`community-curations-skeleton-column-${column.id}`}
+          className={`${column.className} tw-flex-col tw-gap-4`}
+        >
+          {column.cards.map((card) => (
+            <CommunityCurationsSkeletonCard
+              key={`community-curations-skeleton-${column.id}-${card.id}`}
+              lines={card.lines}
+              mediaHeight={card.mediaHeight}
+            />
+          ))}
+        </div>
       ))}
     </div>
   );
@@ -130,11 +163,11 @@ export default function CommunityCurations() {
       <div className="tw-mx-auto tw-w-full tw-max-w-6xl">
         <div className="tw-flex tw-flex-col tw-gap-4">
           <div className="tw-max-w-2xl">
-            <h1 className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-white">
-              Community Curations
+            <h1 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">
+              Latest From Profile Waves
             </h1>
             <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-              Community-curated drops from across 6529 Waves.
+              Drops 6529 users are featuring from their own profile waves.
             </p>
           </div>
         </div>
@@ -151,8 +184,8 @@ export default function CommunityCurations() {
 
           {shouldShowEmptyState && (
             <CommunityCurationsEmptyState
-              title="No curated drops yet"
-              description="Community-curated drops will appear here when visible curations have activity."
+              title="No profile wave drops yet"
+              description="Drops will appear here when users feature them from their profile waves."
             />
           )}
 

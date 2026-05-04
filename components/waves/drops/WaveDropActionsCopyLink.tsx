@@ -12,39 +12,40 @@ interface WaveDropActionsCopyLinkProps {
   readonly drop: ApiDrop;
   readonly isDropdownItem?: boolean | undefined;
   readonly onCopy?: (() => void) | undefined;
+  readonly size?: "default" | "compact" | undefined;
 }
 
 const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   drop,
   isDropdownItem = false,
   onCopy,
+  size = "default",
 }) => {
   const [copied, setCopied] = useState(false);
   const { isMemesWave, isQuorumWave } = useSeizeSettings();
   const myStream = useMyStreamOptional();
   const directMessageWaves = myStream?.directMessages.list ?? [];
 
-  const isTemporaryDrop = (drop: ApiDrop): boolean => {
-    return drop.id.startsWith("temp-");
+  const isTemporaryDrop = (targetDrop: ApiDrop): boolean => {
+    return targetDrop.id.startsWith("temp-");
   };
 
   const copyToClipboard = () => {
     if (isTemporaryDrop(drop)) return;
 
-    const waveDetails =
-      (drop.wave as unknown as {
-        chat?:
-          | {
-              scope?:
-                | {
-                    group?:
-                      | { is_direct_message?: boolean | undefined }
-                      | undefined;
-                  }
-                | undefined;
-            }
-          | undefined;
-      }) ?? undefined;
+    const waveDetails = drop.wave as unknown as {
+      chat?:
+        | {
+            scope?:
+              | {
+                  group?:
+                    | { is_direct_message?: boolean | undefined }
+                    | undefined;
+                }
+              | undefined;
+          }
+        | undefined;
+    };
     const isDirectMessage = isWaveDirectMessage(
       drop.wave.id,
       waveDetails,
@@ -56,14 +57,18 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
       isMemesWave,
       isQuorumWave,
     });
-    navigator.clipboard.writeText(dropLink).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      onCopy?.();
-    });
+    void navigator.clipboard
+      .writeText(dropLink)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        onCopy?.();
+      })
+      .catch(() => undefined);
   };
 
   const isDisabled = isTemporaryDrop(drop);
+  const iconSizeClass = size === "compact" ? "tw-h-4 tw-w-4" : "tw-h-5 tw-w-5";
 
   const getLinkText = () => {
     if (isDisabled) return "Unavailable";
@@ -113,7 +118,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
         {...(!isDisabled ? { "data-tooltip-id": `copy-link-${drop.id}` } : {})}
       >
         <svg
-          className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out"
+          className={`${iconSizeClass} tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"

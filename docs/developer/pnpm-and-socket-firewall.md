@@ -16,6 +16,8 @@ The supported entrypoint is the repo-local `6529` command:
 6529 install
 6529 install:frozen
 6529 install:prod
+6529 update
+6529 update:all
 6529 run dev
 6529 run build
 6529 approve-builds
@@ -52,6 +54,18 @@ Then install dependencies:
 
 ```bash
 6529 install
+```
+
+To apply audit fixes, use the same secure wrapper path:
+
+```bash
+6529 update
+```
+
+For an intentional broader pnpm update, use:
+
+```bash
+6529 update:all
 ```
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you

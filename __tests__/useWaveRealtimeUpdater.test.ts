@@ -39,6 +39,12 @@ jest.mock("@/services/api/drop-api", () => ({
   fetchDropByIdBatched: jest.fn(),
 }));
 
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: jest.fn(() => ({
+    setQueriesData: jest.fn(),
+  })),
+}));
+
 const {
   commonApiPostWithoutBodyAndResponse,
 } = require("@/services/api/common-api");

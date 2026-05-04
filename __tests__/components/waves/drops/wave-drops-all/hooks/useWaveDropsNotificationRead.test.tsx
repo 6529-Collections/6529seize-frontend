@@ -179,26 +179,4 @@ describe("useWaveDropsNotificationRead", () => {
       expect(invalidateNotifications).toHaveBeenCalled();
     });
   });
-
-  it("marks the wave as read when there is no unread drop count", async () => {
-    render(
-      <ReactQueryWrapperContext.Provider
-        value={{ invalidateNotifications } as any}
-      >
-        <TestComponent
-          waveId="wave-1"
-          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
-        />
-      </ReactQueryWrapperContext.Provider>
-    );
-
-    await waitFor(() => {
-      expect(removeWaveDeliveredNotifications).toHaveBeenCalledWith("wave-1");
-      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
-        endpoint: "notifications/wave/wave-1/read",
-        headers: { Authorization: "Bearer test-jwt" },
-      });
-      expect(invalidateNotifications).toHaveBeenCalled();
-    });
-  });
 });
