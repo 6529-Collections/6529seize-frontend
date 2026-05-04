@@ -1,68 +1,84 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
-import DropListItemContentMediaImage from '@/components/drops/view/item/content/media/DropListItemContentMediaImage';
+import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import DropListItemContentMediaImage from "@/components/drops/view/item/content/media/DropListItemContentMediaImage";
 
 const downloadMock = jest.fn();
 
-jest.mock('@/helpers/image.helpers', () => ({
+jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: (_src: string) => _src,
-  ImageScale: { AUTOx450: 'AUTOx450', AUTOx1080: 'AUTOx1080' },
+  ImageScale: { AUTOx450: "AUTOx450", AUTOx1080: "AUTOx1080" },
 }));
 
-jest.mock('@/helpers/Helpers', () => ({
+jest.mock("@/helpers/Helpers", () => ({
   fullScreenSupported: () => true,
 }));
 
-jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isCapacitor: false }) }));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: false }),
+}));
 
-jest.mock('@/hooks/useInView', () => ({
+jest.mock("@/hooks/useInView", () => ({
   useInView: () => [jest.fn(), true],
 }));
 
-jest.mock('react-use-downloader', () => ({
+jest.mock("react-use-downloader", () => ({
   __esModule: true,
   default: () => ({ download: downloadMock }),
 }));
 
 beforeEach(() => {
   downloadMock.mockClear();
-  (global as any).ResizeObserver = class { observe(){} disconnect(){} };
+  (global as any).ResizeObserver = class {
+    observe() {}
+    disconnect() {}
+  };
 });
 
-describe('DropListItemContentMediaImage', () => {
-  it('calls onContainerClick from modal button', () => {
+describe("DropListItemContentMediaImage", () => {
+  it("calls onContainerClick from modal button", () => {
     const onContainerClick = jest.fn();
-    render(<DropListItemContentMediaImage src="img" maxRetries={1} onContainerClick={onContainerClick} />);
-    const img = screen.getByAltText('Drop media');
+    render(
+      <DropListItemContentMediaImage
+        src="img"
+        maxRetries={1}
+        onContainerClick={onContainerClick}
+      />
+    );
+    const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
     fireEvent.click(img);
-    fireEvent.click(screen.getByLabelText('View drop details'));
+    fireEvent.click(screen.getByLabelText("View drop details"));
     expect(onContainerClick).toHaveBeenCalled();
   });
 
-  it('does not open modal when disableModal is true', () => {
+  it("does not open modal when disableModal is true", () => {
     render(<DropListItemContentMediaImage src="img" disableModal />);
-    const img = screen.getByAltText('Drop media');
+    const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
     fireEvent.click(img);
-    expect(screen.queryByLabelText('View drop details')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("View drop details")
+    ).not.toBeInTheDocument();
   });
 
-  it('downloads the original image from the modal button', () => {
-    render(<DropListItemContentMediaImage src="https://example.com/path/image.png" />);
-    const img = screen.getByAltText('Drop media');
+  it("downloads the original image from the modal button", () => {
+    render(
+      <DropListItemContentMediaImage src="https://example.com/path/image.png" />
+    );
+    const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
     fireEvent.click(img);
-    fireEvent.click(screen.getByRole('button', { name: /download image/i }));
+    fireEvent.click(screen.getByRole("button", { name: /download image/i }));
     expect(downloadMock).toHaveBeenCalledWith(
-      'https://example.com/path/image.png',
-      'image.png'
+      "https://example.com/path/image.png",
+      "image.png"
     );
   });
 });
 
-describe('DropListItemContentMediaImage retry', () => {
-  it('shows error and retries manually', () => {
+describe("DropListItemContentMediaImage retry", () => {
+  it("shows error and retries manually", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={-1} />);
     expect(screen.getByText("Couldn’t load image.")).toBeInTheDocument();
   });

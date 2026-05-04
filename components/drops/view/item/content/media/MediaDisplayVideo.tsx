@@ -121,7 +121,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
   return (
     <div
       ref={wrapperRef}
-      className="tw-w-full tw-h-full tw-relative"
+      className="tw-relative tw-h-full tw-w-full"
       onMouseEnter={showDownloadButtonTemporarily}
       onMouseMove={showDownloadButtonTemporarily}
       onMouseLeave={hideDownloadButton}
@@ -131,7 +131,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
     >
       <video
         ref={videoRef}
-        className="tw-w-full tw-h-full tw-rounded-xl tw-object-contain"
+        className="tw-h-full tw-w-full tw-rounded-xl tw-object-contain"
         muted
         loop
         controls={showControls}
