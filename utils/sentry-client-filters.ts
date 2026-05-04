@@ -383,6 +383,10 @@ function getLatestFailedTransportBreadcrumb(
     }
 
     const statusCode = getBreadcrumbTransportStatusCode(breadcrumb);
+    if (statusCode !== null && statusCode >= 400) {
+      return null;
+    }
+
     if (statusCode !== 0) {
       continue;
     }

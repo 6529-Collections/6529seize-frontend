@@ -333,6 +333,54 @@ describe("instrumentation-client", () => {
     expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
   });
 
+  it("keeps browser network errors when a later breadcrumb has a real HTTP failure", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        errorType: "network",
+        handled: true,
+      })
+    );
+    expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
+  });
+
   it("removes only the known noisy third-party telemetry spans", () => {
     const beforeSendTransaction = loadBeforeSendTransaction();
     const event = {
