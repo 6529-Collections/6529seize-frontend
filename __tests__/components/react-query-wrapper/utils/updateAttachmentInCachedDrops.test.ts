@@ -306,6 +306,60 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
+  it("uses a protected cache snapshot when live local sources are stale", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const snapshotUser = profile("profile-1", "snapshot-user");
+    const queryKey = [QueryKey.DROPS, { waveId: "wave-1" }];
+    queryClient.setQueryData(queryKey, {
+      pages: [
+        [
+          {
+            id: "drop-snapshot-source",
+            context_profile_context: contextProfileContext(":wave:"),
+            reactions: [reactionEntry(":wave:", [profile("profile-2")])],
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId: "drop-snapshot-source",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":fire:",
+      optimisticReaction: ":fire:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      queryClient,
+      serverDrop: serverDrop({
+        id: "drop-snapshot-source",
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [reactionEntry(":wave:", [profile("profile-2")])],
+      }),
+      latestWaveDrop: {
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [reactionEntry(":wave:", [profile("profile-2")])],
+      },
+      cachedDropSnapshot: {
+        context_profile_context: contextProfileContext(":fire:"),
+        reactions: [reactionEntry(":fire:", [snapshotUser])],
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context?.reaction).toBe(":fire:");
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2")]),
+      reactionEntry(":fire:", [snapshotUser]),
+    ]);
+  });
+
   it("safe server cache writes use reconciled drops instead of stale raw server drops", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();

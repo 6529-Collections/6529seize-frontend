@@ -241,16 +241,16 @@ function selectProtectedLocalDrop({
   readonly latestWaveDrop: CachedDropReactionState | null | undefined;
   readonly protectedIntent: ProtectedReactionIntent;
 }): CachedDropReactionState | null {
-  const latestLocalSources = [latestWaveDrop, latestCachedDrop];
-  const protectedLatestLocalSource = latestLocalSources.find(
+  const localSources = [latestWaveDrop, latestCachedDrop, cachedDropSnapshot];
+  const protectedLocalSource = localSources.find(
     (source) =>
       source !== null &&
       source !== undefined &&
       matchesProtectedReactionIntent(source, protectedIntent)
   );
 
-  if (protectedLatestLocalSource !== undefined) {
-    return protectedLatestLocalSource;
+  if (protectedLocalSource !== undefined) {
+    return protectedLocalSource;
   }
 
   return latestWaveDrop ?? latestCachedDrop ?? cachedDropSnapshot ?? null;
