@@ -52,13 +52,10 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
   }, [inView, isLoading, videoRef]);
 
   return (
-    <div
-      ref={wrapperRef}
-      className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
-    >
+    <div ref={wrapperRef} className="tw-relative tw-max-h-64 tw-w-full">
       <video
         ref={videoRef}
-        className="tw-h-auto tw-max-h-64 tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
+        className="tw-h-auto tw-max-h-64 tw-w-full tw-rounded-xl tw-object-contain"
         muted
         loop
         controls={showControls}

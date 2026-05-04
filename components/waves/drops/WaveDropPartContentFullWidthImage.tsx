@@ -55,7 +55,7 @@ function NaturalHeightImage({
       src={currentSrc}
       alt="Drop media"
       loading="lazy"
-      className="tw-block tw-h-auto tw-max-h-64 tw-w-auto tw-max-w-full tw-object-contain"
+      className="tw-block tw-h-auto tw-max-h-64 tw-w-full tw-max-w-full tw-object-contain"
       style={{ objectPosition: "center" }}
       onLoad={onLoad}
       onError={handleError}
@@ -232,7 +232,7 @@ export default function WaveDropPartContentFullWidthImage({
         type="button"
         onClick={handleOpenModal}
         aria-label="Open drop media"
-        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0"
+        className="tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
       >
         <NaturalHeightImage
           key={retryTick}
