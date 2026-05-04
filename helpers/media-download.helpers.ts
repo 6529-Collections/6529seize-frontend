@@ -1,6 +1,7 @@
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 
 const DOWNLOAD_URL_PROTOCOLS = new Set(["blob:", "http:", "https:"]);
+const MEDIA_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
 
 function getSafeDownloadUrl(url: string): string {
   const parsed = new URL(url, globalThis.window.location.origin);
@@ -54,12 +55,27 @@ export async function downloadMediaUrl({
   readonly isCapacitor: boolean;
   readonly dialogTitle?: string | undefined;
 }) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error("Unable to download media.");
+  const controller = new AbortController();
+  const timeoutId = globalThis.window.setTimeout(() => {
+    controller.abort();
+  }, MEDIA_DOWNLOAD_FETCH_TIMEOUT_MS);
+  let blob: Blob;
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) {
+      throw new Error("Unable to download media.");
+    }
+
+    blob = await response.blob();
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error("Media download timed out.");
+    }
+    throw error;
+  } finally {
+    globalThis.window.clearTimeout(timeoutId);
   }
 
-  const blob = await response.blob();
   if (isCapacitor) {
     await shareFetchedBlobInNativeApp(blob, fileName, { dialogTitle });
     return;

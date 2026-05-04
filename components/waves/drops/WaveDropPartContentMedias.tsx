@@ -78,8 +78,9 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
         const useVideoIntrinsicHeight = media.mime_type.includes("video");
         const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
         const showMediaActionRow =
-          media.mime_type.includes("image") ||
-          media.mime_type.includes("video");
+          !disableMediaInteraction &&
+          (media.mime_type.includes("image") ||
+            media.mime_type.includes("video"));
         const mediaContainerClassName = getMediaContainerClassName({
           useIntrinsicHeightMedia:
             useNaturalHeightImage ||
