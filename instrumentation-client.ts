@@ -130,10 +130,19 @@ function isHttpBreadcrumb(breadcrumb: Breadcrumb): boolean {
 
 function getBreadcrumbStatusCode(breadcrumb: Breadcrumb): number | null {
   const data = breadcrumb.data;
-  return (
+  const statusCode =
     getNumericValue(data?.["status_code"]) ??
-    getNumericValue(data?.["http.response.status_code"])
-  );
+    getNumericValue(data?.["http.response.status_code"]);
+
+  if (statusCode !== null) {
+    return statusCode;
+  }
+
+  if (breadcrumb.category === "fetch" && breadcrumb.level === "error") {
+    return 0;
+  }
+
+  return null;
 }
 
 function getLatestHttpBreadcrumbUrl(
