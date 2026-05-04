@@ -259,9 +259,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = () => {
     setActiveDropForWave(null);
   };
-  const { winningThreshold, isVotingControlsLocked } = useApprovalWaveStatus({
-    wave,
-  });
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
+    useApprovalWaveStatus({
+      wave,
+    });
   const fixedDropMode = isVotingControlsLocked ? DropMode.CHAT : DropMode.BOTH;
 
   const shouldHandleContainerFileDrop = (
@@ -451,7 +452,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           dropId={null}
           isMuted={wave.metrics.muted}
           winningThreshold={winningThreshold}
-          isVotingClosed={isVotingControlsLocked}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
         {!(isApp && editingDropId) && (
           <div className="tw-mt-auto">

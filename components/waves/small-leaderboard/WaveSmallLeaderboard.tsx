@@ -21,7 +21,7 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
     useWaveDropsLeaderboard({
       waveId: wave.id,
     });
-  const { isVotingControlsLocked: isVotingClosed } = useApprovalWaveStatus({
+  const { isVotingClosed, isVotingControlsLocked } = useApprovalWaveStatus({
     wave,
   });
 
@@ -48,6 +48,7 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
                 wave={wave}
                 key={drop.id}
                 isVotingClosed={isVotingClosed}
+                isVotingControlsLocked={isVotingControlsLocked}
                 onDropClick={() => onDropClick(drop)}
               />
             ))}

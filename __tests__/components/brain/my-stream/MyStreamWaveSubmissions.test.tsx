@@ -37,6 +37,7 @@ jest.mock("@/components/waves/drops/participation/ParticipationDrop", () => ({
       data-testid="drop"
       data-winning-threshold={props.winningThreshold ?? ""}
       data-is-voting-closed={String(props.isVotingClosed)}
+      data-is-voting-controls-locked={String(props.isVotingControlsLocked)}
       onClick={() => props.onQuoteClick(props.drop)}
     >
       {props.drop.id}
@@ -155,6 +156,10 @@ describe("MyStreamWaveSubmissions", () => {
     );
     expect(screen.getByTestId("drop")).toHaveAttribute(
       "data-is-voting-closed",
+      "true"
+    );
+    expect(screen.getByTestId("drop")).toHaveAttribute(
+      "data-is-voting-controls-locked",
       "true"
     );
   });

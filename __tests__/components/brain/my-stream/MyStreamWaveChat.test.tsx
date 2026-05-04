@@ -155,6 +155,7 @@ describe("MyStreamWaveChat", () => {
     mockApprovalStatus.mockReset();
     mockApprovalStatus.mockReturnValue({
       winningThreshold: null,
+      isVotingClosed: false,
       isVotingControlsLocked: false,
     });
     mockUseAuth.mockReturnValue({
@@ -218,7 +219,7 @@ describe("MyStreamWaveChat", () => {
     expect(screen.queryByTestId("memes-btn")).toBeNull();
   });
 
-  it("locks approve submissions from chat while keeping drop voting state", async () => {
+  it("locks approve submissions while keeping drop status open during status locks", async () => {
     const approveWave = {
       ...wave,
       wave: {
@@ -234,6 +235,7 @@ describe("MyStreamWaveChat", () => {
     mockIsMemesWave = true;
     mockApprovalStatus.mockReturnValue({
       winningThreshold: 12,
+      isVotingClosed: false,
       isVotingControlsLocked: true,
     });
 
@@ -249,7 +251,8 @@ describe("MyStreamWaveChat", () => {
     });
 
     expect(capturedPropsHolder.current.winningThreshold).toBe(12);
-    expect(capturedPropsHolder.current.isVotingClosed).toBe(true);
+    expect(capturedPropsHolder.current.isVotingClosed).toBe(false);
+    expect(capturedPropsHolder.current.isVotingControlsLocked).toBe(true);
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
     expect(capturedMemesButtonPropsHolder.current.isSubmissionLocked).toBe(
       true

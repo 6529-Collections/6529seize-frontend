@@ -118,4 +118,18 @@ describe("WaveSmallLeaderboardDefaultDrop", () => {
       document.querySelector('[data-testid="rate"]')
     ).not.toBeInTheDocument();
   });
+
+  it("hides rate action when voting controls are locked", () => {
+    render(
+      <WaveSmallLeaderboardDefaultDrop
+        drop={{ ...drop, rank: null }}
+        wave={wave}
+        isVotingControlsLocked={true}
+        onDropClick={jest.fn()}
+      />
+    );
+    expect(
+      document.querySelector('[data-testid="rate"]')
+    ).not.toBeInTheDocument();
+  });
 });

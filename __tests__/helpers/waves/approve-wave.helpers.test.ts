@@ -1,5 +1,6 @@
 import {
   getApprovalDropStatus,
+  getApprovedDropsCount,
   hasApprovalDecisionCounts,
   isOfficiallyApprovedDrop,
 } from "@/helpers/waves/approve-wave.helpers";
@@ -53,6 +54,64 @@ describe("approve-wave.helpers", () => {
           winning_context: winningContext,
         })
       ).toBe(true);
+    });
+  });
+
+  describe("getApprovedDropsCount", () => {
+    it("uses decisions done when present", () => {
+      expect(
+        getApprovedDropsCount({
+          wave: {
+            wave: {
+              max_winners: 10,
+              no_of_decisions_done: 4,
+              no_of_decisions_left: 3,
+            },
+          } as any,
+        })
+      ).toBe(4);
+    });
+
+    it("derives approved count from max winners and decisions left", () => {
+      expect(
+        getApprovedDropsCount({
+          wave: {
+            wave: {
+              max_winners: 10,
+              no_of_decisions_done: null,
+              no_of_decisions_left: 3,
+            },
+          } as any,
+        })
+      ).toBe(7);
+    });
+
+    it("derives max winners when no decisions are left", () => {
+      expect(
+        getApprovedDropsCount({
+          wave: {
+            wave: {
+              max_winners: 10,
+              no_of_decisions_done: null,
+              no_of_decisions_left: 0,
+            },
+          } as any,
+        })
+      ).toBe(10);
+    });
+
+    it("does not derive a negative approved count", () => {
+      expect(
+        getApprovedDropsCount({
+          wave: {
+            wave: {
+              max_winners: 3,
+              no_of_decisions_done: null,
+              no_of_decisions_left: 10,
+            },
+          } as any,
+        })
+      ).toBe(0);
     });
   });
 

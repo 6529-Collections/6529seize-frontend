@@ -50,6 +50,7 @@ interface WaveDropsContentProps {
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -81,6 +82,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   suspendLightDropHydration = false,
   winningThreshold,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
     useUnreadDivider();
@@ -140,6 +142,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         suspendLightDropHydration={suspendLightDropHydration}
         winningThreshold={winningThreshold}
         isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

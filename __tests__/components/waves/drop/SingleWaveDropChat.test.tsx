@@ -92,6 +92,7 @@ describe("SingleWaveDropChat", () => {
     mockApprovalStatus.mockReset();
     mockApprovalStatus.mockReturnValue({
       winningThreshold: null,
+      isVotingClosed: false,
       isVotingControlsLocked: false,
     });
   });
@@ -156,13 +157,15 @@ describe("SingleWaveDropChat", () => {
     const drop: any = { id: "d1" };
     mockApprovalStatus.mockReturnValue({
       winningThreshold: 25,
+      isVotingClosed: false,
       isVotingControlsLocked: true,
     });
 
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     expect(capturedProps.winningThreshold).toBe(25);
-    expect(capturedProps.isVotingClosed).toBe(true);
+    expect(capturedProps.isVotingClosed).toBe(false);
+    expect(capturedProps.isVotingControlsLocked).toBe(true);
     expect(capturedCreatorProps.fixedDropMode).toBe("CHAT");
   });
 

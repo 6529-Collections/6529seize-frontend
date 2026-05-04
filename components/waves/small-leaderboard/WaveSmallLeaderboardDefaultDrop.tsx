@@ -19,6 +19,7 @@ interface WaveSmallLeaderboardDefaultDropProps {
   readonly onDropClick: () => void;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const WaveSmallLeaderboardDefaultDrop: React.FC<
@@ -28,8 +29,10 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
   onDropClick,
   contentPresentation = "default",
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   const authorLabel = drop.author.handle ?? drop.author.primary_address;
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
 
   const getCICColor = (cic: number): string => {
     const cicType = cicToType(cic);
@@ -80,7 +83,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                   </svg>
                 </div>
               )}
-              {!isVotingClosed && <WaveDropActionsRate drop={drop} />}
+              {!isVotingActionLocked && <WaveDropActionsRate drop={drop} />}
             </div>
 
             <div className="tw-flex-1">

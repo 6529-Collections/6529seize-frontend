@@ -318,6 +318,7 @@ interface RenderOptions {
   onDropContentClick?: jest.Mock | undefined;
   winningThreshold?: number | null | undefined;
   isVotingClosed?: boolean | undefined;
+  isVotingControlsLocked?: boolean | undefined;
 }
 
 function renderComponent(options: RenderOptions = {}) {
@@ -446,6 +447,7 @@ describe("WaveDropsAll", () => {
         initialDrop: 5,
         winningThreshold: 11,
         isVotingClosed: true,
+        isVotingControlsLocked: true,
       });
 
       expect(dropsProps).toMatchObject({
@@ -458,6 +460,7 @@ describe("WaveDropsAll", () => {
         onQuoteClick: expect.any(Function),
         winningThreshold: 11,
         isVotingClosed: true,
+        isVotingControlsLocked: true,
       });
     });
   });

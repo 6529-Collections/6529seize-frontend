@@ -76,7 +76,10 @@ describe("WaveSmallLeaderboard", () => {
     });
     expect(screen.getAllByTestId("drop").length).toBe(2);
     expect(mockDrop).toHaveBeenCalledWith(
-      expect.objectContaining({ isVotingClosed: false })
+      expect.objectContaining({
+        isVotingClosed: false,
+        isVotingControlsLocked: false,
+      })
     );
   });
 
@@ -93,7 +96,30 @@ describe("WaveSmallLeaderboard", () => {
       isFetchingNextPage: false,
     });
     expect(mockDrop).toHaveBeenCalledWith(
-      expect.objectContaining({ isVotingClosed: true })
+      expect.objectContaining({
+        isVotingClosed: true,
+        isVotingControlsLocked: true,
+      })
+    );
+  });
+
+  it("passes status locks without marking voting closed", () => {
+    mockApprovalStatus.mockReturnValue({
+      isVotingClosed: false,
+      isVotingControlsLocked: true,
+    });
+    renderComp({
+      drops: [{ id: 1 }],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+    expect(mockDrop).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isVotingClosed: false,
+        isVotingControlsLocked: true,
+      })
     );
   });
 });

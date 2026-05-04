@@ -178,15 +178,19 @@ describe("DefaultWaveSmallLeaderboardDrop", () => {
     expect(screen.getByText("Default Drop - Rank 5")).toBeInTheDocument();
   });
 
-  it("passes closed voting state to default component", () => {
+  it("passes voting state to default component", () => {
     const drop = { id: "drop-closed-voting", rank: 5 } as ExtendedDrop;
 
-    renderComponent(drop, { isVotingClosed: true });
+    renderComponent(drop, {
+      isVotingClosed: true,
+      isVotingControlsLocked: true,
+    });
 
     expect(mockDefaultDrop.mock.calls[0]?.[0]).toEqual(
       expect.objectContaining({
         drop,
         isVotingClosed: true,
+        isVotingControlsLocked: true,
       })
     );
   });

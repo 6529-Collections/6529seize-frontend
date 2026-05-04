@@ -87,9 +87,11 @@ it("passes approve wave state to participation drop", () => {
       showReplyAndQuote={false}
       winningThreshold={15}
       isVotingClosed={true}
+      isVotingControlsLocked={true}
     />
   );
   expect(screen.getByTestId("participation")).toBeInTheDocument();
   expect(participationProps.winningThreshold).toBe(15);
   expect(participationProps.isVotingClosed).toBe(true);
+  expect(participationProps.isVotingControlsLocked).toBe(true);
 });

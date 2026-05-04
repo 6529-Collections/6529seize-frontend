@@ -28,6 +28,7 @@ interface DefaultParticipationDropProps {
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export default function ParticipationDrop(

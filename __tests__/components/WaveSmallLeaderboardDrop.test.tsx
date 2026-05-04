@@ -34,6 +34,7 @@ describe("WaveSmallLeaderboardDrop", () => {
         drop={drop}
         wave={wave}
         isVotingClosed={true}
+        isVotingControlsLocked={true}
         onDropClick={onDropClick}
       />
     );
@@ -41,6 +42,7 @@ describe("WaveSmallLeaderboardDrop", () => {
     expect(smallLeaderboardDrop.mock.calls[0]?.[0]).toEqual({
       drop,
       isVotingClosed: true,
+      isVotingControlsLocked: true,
       onDropClick,
     });
     expect(screen.getByText("quorum")).toBeInTheDocument();

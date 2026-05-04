@@ -88,6 +88,34 @@ describe("ParticipationDropRatingsTotalSection", () => {
     expect(screen.queryByText("Approved")).not.toBeInTheDocument();
   });
 
+  it("shows Closed only when voting is really closed", () => {
+    const { rerender } = render(
+      <ParticipationDropRatingsTotalSection
+        drop={{ ...drop, rating: 5 }}
+        theme={theme}
+        ratingsData={{ ...ratingsData, currentRating: 5 }}
+        rank={1}
+        winningThreshold={8}
+      />
+    );
+
+    expect(screen.getByText("Needs 3")).toBeInTheDocument();
+    expect(screen.queryByText("Closed")).not.toBeInTheDocument();
+
+    rerender(
+      <ParticipationDropRatingsTotalSection
+        drop={{ ...drop, rating: 5 }}
+        theme={theme}
+        ratingsData={{ ...ratingsData, currentRating: 5 }}
+        rank={1}
+        winningThreshold={8}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByText("Closed")).toBeInTheDocument();
+  });
+
   it("does not show Approved for rank-only approve drops", () => {
     const { rerender } = render(
       <ParticipationDropRatingsTotalSection

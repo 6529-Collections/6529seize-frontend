@@ -52,6 +52,7 @@ interface WaveDropsAllProps {
   readonly isMuted?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
@@ -67,6 +68,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   isMuted = false,
   winningThreshold,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
@@ -295,6 +297,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           suspendLightDropHydration={isScrolling || serialTarget !== null}
           winningThreshold={winningThreshold}
           isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
       </TweetPreviewModeProvider>
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
@@ -318,6 +321,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   isMuted = false,
   winningThreshold,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   return (
     <UnreadDividerProvider
@@ -338,6 +342,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         isMuted={isMuted}
         winningThreshold={winningThreshold}
         isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
       />
     </UnreadDividerProvider>
   );

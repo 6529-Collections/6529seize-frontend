@@ -71,9 +71,21 @@ jest.mock(
     return <div data-testid="metadata" />;
   }
 );
+let footerProps: any;
 jest.mock(
   "@/components/waves/drops/participation/ParticipationDropFooter",
-  () => (props: any) => <div data-testid="footer">{props.voteAction}</div>
+  () => (props: any) => {
+    footerProps = props;
+    return (
+      <div
+        data-testid="footer"
+        data-is-voting-closed={String(props.isVotingClosed)}
+        data-is-voting-controls-locked={String(props.isVotingControlsLocked)}
+      >
+        {props.voteAction}
+      </div>
+    );
+  }
 );
 jest.mock(
   "@/components/waves/drops/participation/ParticipationDropContainer",
@@ -108,10 +120,12 @@ const renderComp = ({
   mobile = false,
   dropOverride = drop,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }: {
   readonly mobile?: boolean;
   readonly dropOverride?: ExtendedDrop;
   readonly isVotingClosed?: boolean;
+  readonly isVotingControlsLocked?: boolean;
 } = {}) => {
   const onReply = jest.fn();
   useIsMobileDevice.mockReturnValue(mobile);
@@ -125,6 +139,7 @@ const renderComp = ({
       onReply={onReply}
       onQuoteClick={jest.fn()}
       isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
     />
   );
   return { onReply, ...view };
@@ -134,6 +149,7 @@ describe("OngoingParticipationDrop", () => {
   beforeEach(() => {
     ParticipationDropMetadataMock.mockClear();
     ParticipationIdentityProfileCardMock.mockClear();
+    footerProps = undefined;
   });
 
   it("shows actions on desktop", () => {
@@ -155,6 +171,17 @@ describe("OngoingParticipationDrop", () => {
   it("hides voting in the mobile menu when voting is closed", () => {
     renderComp({ mobile: true, isVotingClosed: true });
 
+    expect(
+      (mobileMenuProps as { readonly showVoting?: boolean }).showVoting
+    ).toBe(false);
+  });
+
+  it("locks vote actions without marking ratings closed", () => {
+    renderComp({ mobile: true, isVotingControlsLocked: true });
+
+    expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
+    expect(footerProps.isVotingClosed).toBe(false);
+    expect(footerProps.isVotingControlsLocked).toBe(true);
     expect(
       (mobileMenuProps as { readonly showVoting?: boolean }).showVoting
     ).toBe(false);

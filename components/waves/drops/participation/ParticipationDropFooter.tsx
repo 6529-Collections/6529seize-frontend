@@ -13,6 +13,7 @@ interface ParticipationDropFooterProps {
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export default function ParticipationDropFooter({
@@ -21,9 +22,11 @@ export default function ParticipationDropFooter({
   showInteractions = true,
   winningThreshold,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }: ParticipationDropFooterProps) {
   const { canShowVote } = useDropInteractionRules(drop);
-  const canShowVoting = canShowVote && !isVotingClosed;
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
+  const canShowVoting = canShowVote && !isVotingActionLocked;
   const canShowCuration = drop.context_profile_context?.curatable ?? false;
   const hasRatings = drop.raters_count > 0;
   const hasWinningThreshold =

@@ -50,6 +50,7 @@ interface OngoingParticipationDropProps {
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
@@ -72,6 +73,7 @@ export default function OngoingParticipationDrop({
   showInteractions = true,
   winningThreshold,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
   contentPresentation = "default",
   embedPath,
   quotePath,
@@ -98,6 +100,7 @@ export default function OngoingParticipationDrop({
       })
     : false;
   const showIdentity = identityMode !== "hidden";
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -106,7 +109,7 @@ export default function OngoingParticipationDrop({
     isOpen: isVoteModalOpen,
     open: openVoteModal,
     close: closeVoteModal,
-  } = useVotingModalState(isVotingClosed);
+  } = useVotingModalState(isVotingActionLocked);
 
   const handleLongPress = useCallback(() => {
     if (!showInteractions || !hasTouch) return;
@@ -128,7 +131,7 @@ export default function OngoingParticipationDrop({
   }, [openVoteModal]);
 
   const voteAction =
-    canShowVote && showInteractions && !isVotingClosed ? (
+    canShowVote && showInteractions && !isVotingActionLocked ? (
       <VotingModalButton drop={drop} onClick={handleVoteButtonClick} />
     ) : null;
 
@@ -206,6 +209,7 @@ export default function OngoingParticipationDrop({
             showInteractions={showInteractions}
             winningThreshold={winningThreshold}
             isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
           />
         )}
         {hasDropFooter(footer) && (
@@ -241,7 +245,7 @@ export default function OngoingParticipationDrop({
           setOpen={setIsSlideUp}
           onReply={handleOnReply}
           onAddReaction={handleOnAddReaction}
-          showVoting={!isVotingClosed}
+          showVoting={!isVotingActionLocked}
         />
       )}
     </ParticipationDropContainer>

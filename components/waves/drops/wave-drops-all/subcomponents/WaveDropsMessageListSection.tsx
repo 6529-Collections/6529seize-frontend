@@ -47,6 +47,7 @@ interface WaveDropsMessageListSectionProps {
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;
@@ -83,6 +84,7 @@ export const WaveDropsMessageListSection: React.FC<
   suspendLightDropHydration = false,
   winningThreshold,
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   const hasNextPage =
     !!waveMessages?.hasNextPage &&
@@ -121,6 +123,7 @@ export const WaveDropsMessageListSection: React.FC<
           suspendLightDropHydration={suspendLightDropHydration}
           winningThreshold={winningThreshold}
           isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
           key="drops-list"
         />
         <div ref={anchorRef} style={{ height: "1px" }} />

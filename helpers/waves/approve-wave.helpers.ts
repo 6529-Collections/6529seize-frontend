@@ -106,6 +106,12 @@ export const getApprovedDropsCount = ({
     return decisionsDone;
   }
 
+  const maxWinners = wave.wave.max_winners;
+  const decisionsLeft = wave.wave.no_of_decisions_left;
+  if (isValidCount(maxWinners) && isValidCount(decisionsLeft)) {
+    return Math.max(0, maxWinners - decisionsLeft);
+  }
+
   if (!areDecisionPointsComplete) {
     return null;
   }

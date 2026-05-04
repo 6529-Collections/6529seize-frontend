@@ -868,7 +868,7 @@ export default function HeaderSearchModal({
     wave !== null &&
     searchMode === SEARCH_MODE.WAVE &&
     trimmedWaveSearchValue.length >= WAVE_SEARCH_MIN_LENGTH;
-  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
     useApprovalWaveStatus({ wave });
 
   const {
@@ -1492,6 +1492,9 @@ export default function HeaderSearchModal({
                                         onQuoteClick={() => {}}
                                         winningThreshold={winningThreshold}
                                         isVotingClosed={isVotingClosed}
+                                        isVotingControlsLocked={
+                                          isVotingControlsLocked
+                                        }
                                       />
                                     </div>
                                   </button>

@@ -83,6 +83,23 @@ describe("ParticipationDropFooter", () => {
     );
   });
 
+  it("locks voting actions without marking ratings closed", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop({ raters_count: 0 })}
+        winningThreshold={10}
+        isVotingControlsLocked={true}
+        voteAction={<button data-testid="vote-action" type="button" />}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-action")).not.toBeInTheDocument();
+    expect(screen.getByTestId("ratings")).toHaveAttribute(
+      "data-is-voting-closed",
+      "false"
+    );
+  });
+
   it("does not render ratings when there are no raters and no threshold", () => {
     render(<ParticipationDropFooter drop={createDrop({ raters_count: 0 })} />);
 

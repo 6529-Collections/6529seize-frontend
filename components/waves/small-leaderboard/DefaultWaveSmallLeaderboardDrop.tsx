@@ -9,6 +9,7 @@ interface DefaultWaveSmallLeaderboardDropProps {
   readonly onDropClick: () => void;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const DefaultWaveSmallLeaderboardDrop: React.FC<
@@ -18,6 +19,7 @@ export const DefaultWaveSmallLeaderboardDrop: React.FC<
   onDropClick,
   contentPresentation = "default",
   isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   return (
     <div className="tw-cursor-pointer" onClick={onDropClick}>
@@ -33,6 +35,7 @@ export const DefaultWaveSmallLeaderboardDrop: React.FC<
           onDropClick={onDropClick}
           contentPresentation={contentPresentation}
           isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
       )}
     </div>

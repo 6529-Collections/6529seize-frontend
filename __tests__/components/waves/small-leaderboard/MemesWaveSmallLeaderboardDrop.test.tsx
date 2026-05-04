@@ -119,6 +119,7 @@ describe("MemesWaveSmallLeaderboardDrop", () => {
         drop={drop}
         wave={mockWave}
         isVotingClosed={true}
+        isVotingControlsLocked={true}
         onDropClick={mockOnDropClick}
       />
     );
@@ -127,6 +128,7 @@ describe("MemesWaveSmallLeaderboardDrop", () => {
       expect.objectContaining({
         drop,
         isVotingClosed: true,
+        isVotingControlsLocked: true,
       })
     );
   });

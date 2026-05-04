@@ -37,6 +37,7 @@ function MyStreamWaveCurationDropItem({
   onDropClick,
   winningThreshold,
   isVotingClosed,
+  isVotingControlsLocked,
 }: {
   readonly drop: ExtendedDrop;
   readonly previousDrop: ExtendedDrop | null;
@@ -46,6 +47,7 @@ function MyStreamWaveCurationDropItem({
   readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }) {
   const { hasTouchScreen, isApp } = useDeviceInfo();
   const isTouchDevice = useIsTouchDevice();
@@ -102,6 +104,7 @@ function MyStreamWaveCurationDropItem({
         onDropContentClick={onDropClick}
         winningThreshold={winningThreshold}
         isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
       />
 
       {canManageActiveCuration && !shouldUseDetachedRemoveButton && (
@@ -155,7 +158,7 @@ export default function MyStreamWaveCurationContent({
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
-  const { winningThreshold, isVotingControlsLocked: isVotingClosed } =
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
     useApprovalWaveStatus({ wave });
 
   const handleBottomIntersection = useCallback(
@@ -184,6 +187,7 @@ export default function MyStreamWaveCurationContent({
           onDropClick={onDropClick}
           winningThreshold={winningThreshold}
           isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
       )),
     [
@@ -191,6 +195,7 @@ export default function MyStreamWaveCurationContent({
       curationId,
       drops,
       isVotingClosed,
+      isVotingControlsLocked,
       onDropClick,
       winningThreshold,
     ]

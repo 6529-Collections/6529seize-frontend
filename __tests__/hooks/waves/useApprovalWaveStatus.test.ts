@@ -271,6 +271,30 @@ describe("useApprovalWaveStatus", () => {
     });
   });
 
+  it("derives capped approval status from decisions left without loading decision pages", () => {
+    const wave = createWave({
+      maxWinners: 10,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: 3,
+      votingEnd: 2000,
+    });
+
+    const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      enabled: false,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
+    expect(result.current.approvedCount).toBe(7);
+    expect(result.current.closeStatus).toBeNull();
+    expect(result.current.isApprovalStatusLoading).toBe(false);
+    expect(result.current.isApprovalStatusError).toBe(false);
+    expect(result.current.isVotingClosed).toBe(false);
+    expect(result.current.isVotingControlsLocked).toBe(false);
+  });
+
   it("closes immediately when no decisions are left", () => {
     const wave = createWave({
       maxWinners: 2,
@@ -281,7 +305,7 @@ describe("useApprovalWaveStatus", () => {
 
     const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
 
-    expect(result.current.approvedCount).toBeNull();
+    expect(result.current.approvedCount).toBe(2);
     expect(result.current.closeStatus).toBe("max_reached");
     expect(result.current.isVotingClosed).toBe(true);
     expect(result.current.isVotingControlsLocked).toBe(true);

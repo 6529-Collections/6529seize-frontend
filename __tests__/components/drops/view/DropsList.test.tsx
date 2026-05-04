@@ -126,12 +126,14 @@ describe("DropsList", () => {
         dropViewDropId={null}
         winningThreshold={42}
         isVotingClosed={true}
+        isVotingControlsLocked={true}
       />
     );
 
     expect(dropProps).toHaveLength(1);
     expect(dropProps[0].winningThreshold).toBe(42);
     expect(dropProps[0].isVotingClosed).toBe(true);
+    expect(dropProps[0].isVotingControlsLocked).toBe(true);
   });
 
   it("renders unread divider when unreadDividerSerialNo matches a drop", () => {
