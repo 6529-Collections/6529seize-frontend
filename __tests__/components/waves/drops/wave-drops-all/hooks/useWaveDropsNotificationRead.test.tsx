@@ -307,4 +307,60 @@ describe("useWaveDropsNotificationRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
     expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
   });
+
+  it("syncs again when the active proxy changes while the same wave stays visible", async () => {
+    mockJwtRole("creator-1");
+    useAuthMock.mockReturnValue(
+      createAuthValue(
+        createActiveProfileProxy({
+          id: "proxy-1",
+          creatorId: "creator-1",
+        })
+      )
+    );
+
+    const renderTestComponent = () => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-1"
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const { rerender } = render(renderTestComponent());
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
+    });
+
+    expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
+
+    useAuthMock.mockReturnValue(
+      createAuthValue(
+        createActiveProfileProxy({
+          id: "proxy-2",
+          creatorId: "creator-1",
+        })
+      )
+    );
+
+    rerender(renderTestComponent());
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(2);
+    });
+
+    expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(2);
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenNthCalledWith(1, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenNthCalledWith(2, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
 });

@@ -38,6 +38,7 @@ interface WaveReadIdentityState {
   readonly addressKey: string | null;
   readonly activeProfileProxyId: string | null;
   readonly identityKey: string;
+  readonly proxyRoleIdentityKey: string | null;
   readonly temporaryProxyRoleIdentity:
     | WaveReadTemporaryProxyRoleIdentity
     | undefined;
@@ -196,6 +197,31 @@ const getVerifiedIdentity = ({
   };
 };
 
+const getProxyRoleIdentityKey = ({
+  addressKey,
+  activeProfileProxyCreatorId,
+  temporaryProxyRoleIdentity,
+}: {
+  readonly addressKey: string | null;
+  readonly activeProfileProxyCreatorId: string | null;
+  readonly temporaryProxyRoleIdentity:
+    | WaveReadTemporaryProxyRoleIdentity
+    | undefined;
+}): string | null => {
+  if (temporaryProxyRoleIdentity) {
+    return temporaryProxyRoleIdentity.identityKey;
+  }
+
+  if (addressKey === null || activeProfileProxyCreatorId === null) {
+    return null;
+  }
+
+  return getWaveReadProxyRoleIdentityKey({
+    addressKey,
+    proxyCreatorId: activeProfileProxyCreatorId,
+  });
+};
+
 export const useWaveReadIdentityState = ({
   address,
   activeProfileProxyId,
@@ -232,6 +258,15 @@ export const useWaveReadIdentityState = ({
       addressKey,
       activeProfileProxyId,
     });
+  const proxyRoleIdentityKey = useMemo(
+    () =>
+      getProxyRoleIdentityKey({
+        addressKey,
+        activeProfileProxyCreatorId,
+        temporaryProxyRoleIdentity,
+      }),
+    [activeProfileProxyCreatorId, addressKey, temporaryProxyRoleIdentity]
+  );
   const verifiedIdentity = useMemo(
     () =>
       getVerifiedIdentity({
@@ -254,6 +289,7 @@ export const useWaveReadIdentityState = ({
     addressKey,
     activeProfileProxyId,
     identityKey,
+    proxyRoleIdentityKey,
     temporaryProxyRoleIdentity,
     verifiedIdentity,
   };

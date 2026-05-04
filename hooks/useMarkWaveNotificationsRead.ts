@@ -3,13 +3,14 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useWaveNotificationsReadMarker } from "@/hooks/useMarkWaveNotificationsRead.helpers";
+import {
+  useWaveNotificationsReadMarkerState as useWaveNotificationsReadMarkerStateFromConfig,
+  type WaveNotificationsReadMarkerState,
+} from "@/hooks/useMarkWaveNotificationsRead.helpers";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { useContext } from "react";
 
-export function useMarkWaveNotificationsRead(): (
-  waveId: string
-) => Promise<void> {
+export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
@@ -18,11 +19,17 @@ export function useMarkWaveNotificationsRead(): (
     ? activeProfileProxy.created_by.id
     : null;
 
-  return useWaveNotificationsReadMarker({
+  return useWaveNotificationsReadMarkerStateFromConfig({
     address,
     activeProfileProxyId,
     activeProfileProxyCreatorId,
     walletAuth: getAuthJwt(),
     invalidateNotifications,
   });
+}
+
+export function useMarkWaveNotificationsRead(): (
+  waveId: string
+) => Promise<void> {
+  return useWaveNotificationsReadMarkerState().markWaveNotificationsRead;
 }

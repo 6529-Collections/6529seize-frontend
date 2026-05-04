@@ -53,6 +53,12 @@ interface WaveNotificationsReadMarkerConfig extends WaveReadIdentityConfig {
   readonly invalidateNotifications: () => void;
 }
 
+export interface WaveNotificationsReadMarkerState {
+  readonly markWaveNotificationsRead: (waveId: string) => Promise<void>;
+  readonly identityKey: string;
+  readonly proxyRoleIdentityKey: string | null;
+}
+
 const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
 const pendingWaveReadRequests = new Map<string, PendingWaveReadRequestState>();
 const clearedWaveReadIdentityKeysByAddress = new Map<string, Set<string>>();
@@ -644,13 +650,13 @@ const markWaveReadFromCache = ({
   });
 };
 
-export const useWaveNotificationsReadMarker = ({
+export const useWaveNotificationsReadMarkerState = ({
   address,
   activeProfileProxyId,
   activeProfileProxyCreatorId,
   walletAuth,
   invalidateNotifications,
-}: WaveNotificationsReadMarkerConfig): ((waveId: string) => Promise<void>) => {
+}: WaveNotificationsReadMarkerConfig): WaveNotificationsReadMarkerState => {
   const identityState = useWaveReadIdentityState({
     address,
     activeProfileProxyId,
@@ -672,9 +678,10 @@ export const useWaveNotificationsReadMarker = ({
     addressKey,
     activeProfileProxyId: currentProfileProxyId,
     identityKey,
+    proxyRoleIdentityKey,
   } = identityState;
 
-  return useCallback(
+  const markWaveNotificationsRead = useCallback(
     (waveId: string): Promise<void> =>
       markWaveReadFromCache({
         waveId,
@@ -684,5 +691,14 @@ export const useWaveNotificationsReadMarker = ({
         cacheRefs,
       }),
     [addressKey, cacheRefs, currentProfileProxyId, identityKey]
+  );
+
+  return useMemo(
+    () => ({
+      markWaveNotificationsRead,
+      identityKey,
+      proxyRoleIdentityKey,
+    }),
+    [identityKey, markWaveNotificationsRead, proxyRoleIdentityKey]
   );
 };
