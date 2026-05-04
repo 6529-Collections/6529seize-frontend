@@ -4,7 +4,6 @@ import React, { useMemo, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import WaveDropsAll from "../drops/wave-drops-all";
 import {
   CreateDropWaveWrapper,
@@ -20,11 +19,17 @@ import { WaveDropLayerProvider } from "../drops/WaveDropLayerContext";
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
   readonly drop: ApiDrop;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   wave,
   drop,
+  winningThreshold = null,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible } = useAndroidKeyboard();
@@ -43,11 +48,8 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     drop: drop,
     partId: 1,
   });
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({
-      wave,
-    });
-  const fixedDropMode = isVotingControlsLocked ? DropMode.CHAT : DropMode.BOTH;
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
+  const fixedDropMode = isVotingActionLocked ? DropMode.CHAT : DropMode.BOTH;
 
   const handleDropAction = ({
     targetDrop,

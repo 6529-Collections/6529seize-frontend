@@ -2,8 +2,6 @@ import { SingleWaveDropChat } from "@/components/waves/drop/SingleWaveDropChat";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { act, fireEvent, render } from "@testing-library/react";
 
-const mockApprovalStatus = jest.fn();
-
 jest.mock("@/hooks/useDeviceInfo", () => () => ({
   isMobileDevice: true,
   hasTouchScreen: true,
@@ -20,10 +18,6 @@ jest.mock("@/hooks/useAndroidKeyboard", () => ({
     keyboardHeight: mockKeyboardVisible ? 350 : 0,
     isAndroid: true,
   }),
-}));
-
-jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
-  useApprovalWaveStatus: (args: any) => mockApprovalStatus(args),
 }));
 
 let capturedProps: any;
@@ -89,12 +83,6 @@ describe("SingleWaveDropChat", () => {
     mockKeyboardVisible = false;
     capturedProps = undefined;
     capturedCreatorProps = undefined;
-    mockApprovalStatus.mockReset();
-    mockApprovalStatus.mockReturnValue({
-      winningThreshold: null,
-      isVotingClosed: false,
-      isVotingControlsLocked: false,
-    });
   });
 
   it("handles reply and reset actions", () => {
@@ -155,13 +143,15 @@ describe("SingleWaveDropChat", () => {
       },
     });
     const drop: any = { id: "d1" };
-    mockApprovalStatus.mockReturnValue({
-      winningThreshold: 25,
-      isVotingClosed: false,
-      isVotingControlsLocked: true,
-    });
-
-    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+    render(
+      <SingleWaveDropChat
+        wave={wave}
+        drop={drop}
+        winningThreshold={25}
+        isVotingClosed={false}
+        isVotingControlsLocked={true}
+      />
+    );
 
     expect(capturedProps.winningThreshold).toBe(25);
     expect(capturedProps.isVotingClosed).toBe(false);
@@ -176,5 +166,21 @@ describe("SingleWaveDropChat", () => {
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     expect(capturedCreatorProps.fixedDropMode).toBe("BOTH");
+  });
+
+  it("locks the composer when voting is closed", () => {
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+
+    render(
+      <SingleWaveDropChat
+        wave={wave}
+        drop={drop}
+        isVotingClosed={true}
+        isVotingControlsLocked={false}
+      />
+    );
+
+    expect(capturedCreatorProps.fixedDropMode).toBe("CHAT");
   });
 });
