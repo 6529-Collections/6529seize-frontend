@@ -10,10 +10,7 @@ interface Props {
   readonly showControls?: boolean | undefined;
 }
 
-const MediaDisplayVideo: React.FC<Props> = ({
-  src,
-  showControls = false,
-}) => {
+const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
 
@@ -55,10 +52,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
   }, [inView, isLoading, videoRef]);
 
   return (
-    <div
-      ref={wrapperRef}
-      className="tw-relative tw-h-full tw-w-full"
-    >
+    <div ref={wrapperRef} className="tw-relative tw-h-full tw-w-full">
       <video
         ref={videoRef}
         className="tw-h-full tw-w-full tw-rounded-xl tw-object-contain"
