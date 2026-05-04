@@ -421,6 +421,99 @@ describe("useWaveRealtimeUpdater", () => {
     }
   });
 
+  it("preserves protected reactions when a rating refetch returns stale reaction data", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    beginReactionMutation({
+      dropId: "d-rating-stale-reaction",
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const currentUser = profile("profile-1", "current-user");
+    const store: any = {
+      wave1: {
+        drops: [
+          {
+            id: "d-rating-stale-reaction",
+            type: DropSize.FULL,
+            stableKey: "stable-key",
+            stableHash: "stable-hash",
+            title: "local-title",
+            rating: 1,
+            realtime_rating: 2,
+            rating_prediction: 3,
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: {
+              ...contextProfileContext(":joy:"),
+              rating: 4,
+            },
+            reactions: [reactionEntry(":joy:", [currentUser])],
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-rating-stale-reaction",
+      title: "server-title",
+      rating: 42,
+      realtime_rating: 43,
+      rating_prediction: 44,
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: {
+        ...contextProfileContext(":wave:"),
+        rating: 7,
+      },
+      reactions: [
+        reactionEntry(":wave:", [
+          profile("profile-1", "server-current-user"),
+          profile("profile-2", "fresh-wave"),
+        ]),
+        reactionEntry(":fire:", [profile("profile-3", "fresh-fire")]),
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-rating-stale-reaction",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_RATING_UPDATE
+      )
+    );
+    await flushPromises();
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.title).toBe("server-title");
+    expect(updatedDrop.rating).toBe(42);
+    expect(updatedDrop.realtime_rating).toBe(43);
+    expect(updatedDrop.rating_prediction).toBe(44);
+    expect(updatedDrop.context_profile_context.rating).toBe(7);
+    expect(updatedDrop.context_profile_context.reaction).toBe(":joy:");
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+      reactionEntry(":fire:", [profile("profile-3", "fresh-fire")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
   it("preserves protected cache-only reactions when server fetch is stale", async () => {
     const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
     beginReactionMutation({
@@ -498,6 +591,110 @@ describe("useWaveRealtimeUpdater", () => {
         context_profile_context: contextProfileContext(":wave:"),
         reactions: [],
       });
+      expect(updatedCacheDrop.context_profile_context.reaction).toBe(":joy:");
+      expect(updatedCacheDrop.reactions).toEqual([
+        reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+        reactionEntry(":joy:", [currentUser]),
+      ]);
+    }
+  });
+
+  it("preserves protected cache-only reactions during rating refetches", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    beginReactionMutation({
+      dropId: "d-cache-only-rating-stale",
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const currentUser = profile("profile-1", "current-user");
+    mockGetQueriesData.mockReturnValue([
+      [
+        ["DROPS"],
+        {
+          pages: [
+            [
+              {
+                id: "d-cache-only-rating-stale",
+                rating: 1,
+                realtime_rating: 2,
+                rating_prediction: 3,
+                context_profile_context: {
+                  ...contextProfileContext(":joy:"),
+                  rating: 4,
+                },
+                reactions: [reactionEntry(":joy:", [currentUser])],
+              },
+            ],
+          ],
+        },
+      ],
+    ]);
+
+    const store: any = {
+      wave1: {
+        drops: [],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d-cache-only-rating-stale",
+      rating: 42,
+      realtime_rating: 43,
+      rating_prediction: 44,
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: {
+        ...contextProfileContext(":wave:"),
+        rating: 7,
+      },
+      reactions: [
+        reactionEntry(":wave:", [
+          profile("profile-1", "server-current-user"),
+          profile("profile-2", "fresh-wave"),
+        ]),
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-cache-only-rating-stale",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_RATING_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).toHaveBeenCalled();
+
+    for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
+      const updatedCacheDrop = updateCachedData({
+        id: "d-cache-only-rating-stale",
+        rating: 1,
+        realtime_rating: 2,
+        rating_prediction: 3,
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [],
+      });
+      expect(updatedCacheDrop.rating).toBe(42);
+      expect(updatedCacheDrop.realtime_rating).toBe(43);
+      expect(updatedCacheDrop.rating_prediction).toBe(44);
+      expect(updatedCacheDrop.context_profile_context.rating).toBe(7);
       expect(updatedCacheDrop.context_profile_context.reaction).toBe(":joy:");
       expect(updatedCacheDrop.reactions).toEqual([
         reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
