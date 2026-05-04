@@ -11,6 +11,7 @@ import {
   recordReactionRequestSucceeded,
 } from "@/utils/monitoring/dropReactionMonitoring";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { WsMessageType } from "@/helpers/Types";
 
 jest.mock("@sentry/nextjs", () => ({
   __esModule: true,
@@ -27,8 +28,15 @@ jest.mock("@sentry/nextjs", () => ({
   captureException: jest.fn(),
 }));
 
+const mockWebSocketHandlers = new Map<unknown, (messageData: any) => void>();
+
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
-  useWebSocketMessage: () => ({ isConnected: true }),
+  useWebSocketMessage: jest.fn(
+    (type: unknown, handler: (messageData: any) => void) => {
+      mockWebSocketHandlers.set(type, handler);
+      return { isConnected: true };
+    }
+  ),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -65,6 +73,7 @@ describe("useWaveRealtimeUpdater", () => {
   };
 
   beforeEach(() => {
+    mockWebSocketHandlers.clear();
     setDocumentVisibility("visible");
     mockGetQueriesData.mockReturnValue([]);
   });
@@ -1524,6 +1533,122 @@ describe("useWaveRealtimeUpdater", () => {
     }
   });
 
+  it("uses the protected wave-store reaction for unopened waves when cache is stale", async () => {
+    const dropId = "d-unopened-wave-store-protected";
+    const currentUser = profile("profile-1", "wave-store-user");
+    const staleCacheUser = profile("profile-1", "old-cache-user");
+    const store: any = {};
+    let resolveFetch: (drop: any) => void = () => undefined;
+
+    mockGetQueriesData.mockReturnValue([
+      [
+        ["DROPS"],
+        {
+          pages: [
+            [
+              {
+                id: dropId,
+                context_profile_context: contextProfileContext(":wave:"),
+                reactions: [reactionEntry(":wave:", [staleCacheUser])],
+              },
+            ],
+          ],
+        },
+      ],
+    ]);
+    fetchDropByIdBatched.mockReturnValue(
+      new Promise((resolve) => {
+        resolveFetch = resolve;
+      })
+    );
+
+    const props = baseProps(store);
+    props.registerWave = jest.fn((waveId: string) => {
+      store[waveId] = {
+        drops: [
+          {
+            id: dropId,
+            type: DropSize.FULL,
+            stableKey: "registered-stable-key",
+            stableHash: "registered-stable-hash",
+            author: {},
+            wave: { id: waveId },
+            context_profile_context: contextProfileContext(":wave:"),
+            reactions: [reactionEntry(":wave:", [staleCacheUser])],
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      };
+    });
+
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: dropId,
+      wave: { id: "wave2" },
+      author: {},
+    };
+
+    act(() => {
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      );
+    });
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith(dropId);
+
+    dateNowSpy.mockReturnValue(1_500);
+    beginReactionMutation({
+      dropId,
+      waveId: "wave2",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    store.wave2.drops = [
+      {
+        ...store.wave2.drops[0],
+        context_profile_context: contextProfileContext(":joy:"),
+        reactions: [reactionEntry(":joy:", [currentUser])],
+      },
+    ];
+
+    dateNowSpy.mockReturnValue(2_000);
+    await act(async () => {
+      resolveFetch({
+        id: dropId,
+        author: {},
+        wave: { id: "wave2" },
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-current-user"),
+            profile("profile-2", "fresh-wave"),
+          ]),
+        ],
+      });
+      await flushPromises();
+    });
+
+    await waitFor(() => {
+      expect(props.updateData).toHaveBeenCalled();
+    });
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.context_profile_context.reaction).toBe(":joy:");
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
   it("skips when existing drop is LIGHT type", async () => {
     const store = {
       wave1: {
@@ -1616,6 +1741,79 @@ describe("useWaveRealtimeUpdater", () => {
 
     expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+  });
+
+  it("handles attachment updates when a full drop part has no attachments", () => {
+    const oldAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "old.png",
+      mime_type: "image/png",
+      kind: "image",
+      status: "PENDING",
+    };
+    const updatedAttachment = {
+      ...oldAttachment,
+      file_name: "new.png",
+      status: "READY",
+    };
+    const otherAttachment = {
+      attachment_id: "attachment-2",
+      file_name: "other.png",
+      mime_type: "image/png",
+      kind: "image",
+      status: "PENDING",
+    };
+    const partWithoutAttachments = {
+      part_id: "part-without-attachments",
+      content: "no attachment data yet",
+    };
+    const store: any = {
+      wave1: {
+        drops: [
+          {
+            id: "d-attachment-update",
+            type: DropSize.FULL,
+            stableKey: "stable-key",
+            stableHash: "stable-hash",
+            author: {},
+            wave: { id: "wave1" },
+            parts: [
+              partWithoutAttachments,
+              {
+                part_id: "part-with-attachments",
+                content: "has attachment data",
+                attachments: [oldAttachment, otherAttachment],
+              },
+            ],
+          },
+        ],
+        latestFetchedSerialNo: 10,
+      },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+
+    renderHook(() => useWaveRealtimeUpdater(props));
+
+    const handler = mockWebSocketHandlers.get(
+      WsMessageType.ATTACHMENT_STATUS_UPDATE
+    );
+    expect(handler).toEqual(expect.any(Function));
+
+    expect(() => {
+      act(() => {
+        handler!(updatedAttachment);
+      });
+    }).not.toThrow();
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.parts[0]).not.toHaveProperty("attachments");
+    expect(updatedDrop.parts[1].attachments).toEqual([
+      updatedAttachment,
+      otherAttachment,
+    ]);
   });
 
   it("skips processing when wave is muted", async () => {

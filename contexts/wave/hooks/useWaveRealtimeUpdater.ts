@@ -286,6 +286,24 @@ function selectFetchedDropLocalState({
   readonly latestExistingDrop: CachedDropReactionState | null;
   readonly protectedIntent: ProtectedReactionIntent | null;
 }): CachedDropReactionState | null {
+  const sources =
+    cachedDropSnapshot !== undefined
+      ? [latestCachedDrop, latestExistingDrop, cachedDropSnapshot]
+      : [latestExistingDrop, latestCachedDrop, cachedDropSnapshot];
+  const protectedSource =
+    protectedIntent === null
+      ? null
+      : (sources.find(
+          (source) =>
+            source !== null &&
+            source !== undefined &&
+            matchesProtectedReactionIntent(source, protectedIntent)
+        ) ?? null);
+
+  if (protectedSource !== null) {
+    return protectedSource;
+  }
+
   const snapshotFallback = getProtectedSnapshotFallback(
     cachedDropSnapshot,
     protectedIntent
@@ -386,7 +404,8 @@ function replaceAttachmentInPart(
   part: ApiDropPart,
   attachment: ApiAttachment
 ): ApiDropPart {
-  const attachments = part.attachments;
+  const attachments =
+    (part as Partial<Pick<ApiDropPart, "attachments">>).attachments ?? [];
   const hasAttachment = attachments.some(
     (item) => item.attachment_id === attachment.attachment_id
   );
