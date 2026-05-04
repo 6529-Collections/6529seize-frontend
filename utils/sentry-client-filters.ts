@@ -326,7 +326,7 @@ function getBreadcrumbStatusCode(breadcrumb: SentryBreadcrumb): number | null {
   );
 }
 
-function getBreadcrumbTransportStatusCode(
+export function getBreadcrumbTransportStatusCode(
   breadcrumb: SentryBreadcrumb
 ): number | null {
   const statusCode = getBreadcrumbStatusCode(breadcrumb);

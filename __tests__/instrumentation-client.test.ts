@@ -182,6 +182,49 @@ describe("instrumentation-client", () => {
     );
   });
 
+  it("keeps a failed fetch breadcrumb with no status ahead of a later successful breadcrumb", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          category: "fetch",
+          level: "error",
+          data: {
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 200,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).toBeNull();
+    expect(event.exception.values[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
+    );
+  });
+
   it("uses the latest failed fetch breadcrumb for raw browser network errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {

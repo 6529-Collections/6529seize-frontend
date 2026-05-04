@@ -13,6 +13,7 @@ import {
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 import {
+  getBreadcrumbTransportStatusCode,
   getLowValueNetworkErrorDecision,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
@@ -107,42 +108,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function getNumericValue(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-
-  return null;
-}
-
 function isHttpBreadcrumb(breadcrumb: Breadcrumb): boolean {
   return (
     breadcrumb.type === "http" ||
     breadcrumb.category === "fetch" ||
     breadcrumb.category === "xhr"
   );
-}
-
-function getBreadcrumbStatusCode(breadcrumb: Breadcrumb): number | null {
-  const data = breadcrumb.data;
-  const statusCode =
-    getNumericValue(data?.["status_code"]) ??
-    getNumericValue(data?.["http.response.status_code"]);
-
-  if (statusCode !== null) {
-    return statusCode;
-  }
-
-  if (breadcrumb.category === "fetch" && breadcrumb.level === "error") {
-    return 0;
-  }
-
-  return null;
 }
 
 function getLatestHttpBreadcrumbUrl(
@@ -162,7 +133,7 @@ function getLatestHttpBreadcrumbUrl(
 
     if (
       statusCode !== undefined &&
-      getBreadcrumbStatusCode(breadcrumb) !== statusCode
+      getBreadcrumbTransportStatusCode(breadcrumb) !== statusCode
     ) {
       continue;
     }
