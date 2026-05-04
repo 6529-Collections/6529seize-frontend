@@ -570,14 +570,20 @@ function useIncomingDropProcessor({
   readonly processIncomingDrop: ProcessIncomingDropFn;
 } {
   const handleFetchedDropUpdate = useCallback(
-    async (drop: IncomingDrop, waveId: string): Promise<void> => {
+    async (
+      drop: IncomingDrop,
+      waveId: string,
+      cachedDropSnapshot?: CachedDropReactionState | null
+    ): Promise<void> => {
       const apiDrop = await fetchDropByIdBatched(drop.id);
       const latestData = getData(waveId);
       const latestExistingDrop = getFullDrop(
         latestData?.drops.find((cachedDrop) => cachedDrop.id === drop.id)
       );
       const cachedDrop =
-        latestExistingDrop ?? findDropInCachedDrops(queryClient, drop.id);
+        cachedDropSnapshot ??
+        latestExistingDrop ??
+        findDropInCachedDrops(queryClient, drop.id);
 
       const nextDrop = reconcileFetchedDropUpdate(apiDrop, cachedDrop);
 
@@ -619,9 +625,15 @@ function useIncomingDropProcessor({
       const currentData = getData(waveId);
 
       if (currentData === undefined) {
-        registerWave(waveId);
         if (isFetchedDropUpdate(type)) {
-          await handleFetchedDropUpdate(drop, waveId);
+          const cachedDropSnapshot = findDropInCachedDrops(
+            queryClient,
+            drop.id
+          );
+          registerWave(waveId);
+          await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot);
+        } else {
+          registerWave(waveId);
         }
         return;
       }
