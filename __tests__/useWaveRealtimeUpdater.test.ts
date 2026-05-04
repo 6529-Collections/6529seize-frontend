@@ -391,6 +391,7 @@ describe("useWaveRealtimeUpdater", () => {
     const store: any = {
       wave1: {
         drops: [],
+        isLoading: false,
         latestFetchedSerialNo: 20,
       },
     };
@@ -413,6 +414,72 @@ describe("useWaveRealtimeUpdater", () => {
     expect(fetchDropByIdBatched).not.toHaveBeenCalled();
     expect(props.updateData).not.toHaveBeenCalled();
     expect(mockSetQueriesData).not.toHaveBeenCalled();
+  });
+
+  it("fetches reaction updates for missing drops while the wave is loading", async () => {
+    const staleReaction = reactionEntries(":stale:");
+    const freshReaction = reactionEntries(":fresh:");
+    const store: any = {
+      wave1: {
+        drops: [],
+        isLoading: true,
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockImplementation(async () => {
+      store.wave1 = {
+        ...store.wave1,
+        drops: [
+          {
+            id: "d-loading-reaction",
+            type: DropSize.FULL,
+            stableKey: "loading-stable-key",
+            stableHash: "loading-stable-hash",
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":stale:"),
+            reactions: staleReaction,
+          },
+        ],
+        isLoading: false,
+      };
+
+      return {
+        id: "d-loading-reaction",
+        author: {},
+        wave: { id: "wave1" },
+        context_profile_context: contextProfileContext(":fresh:"),
+        reactions: freshReaction,
+      };
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-loading-reaction",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.registerWave).not.toHaveBeenCalled();
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d-loading-reaction");
+    expect(props.updateData).toHaveBeenCalled();
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.stableKey).toBe("loading-stable-key");
+    expect(updatedDrop.stableHash).toBe("loading-stable-hash");
+    expect(updatedDrop.context_profile_context.reaction).toBe(":fresh:");
+    expect(updatedDrop.reactions).toBe(freshReaction);
   });
 
   it("updates React Query caches for rating updates without promoting light wave-store drops", async () => {

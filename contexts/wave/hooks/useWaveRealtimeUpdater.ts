@@ -769,7 +769,7 @@ function useIncomingDropProcessor({
         }
 
         const cachedDropSnapshot = findDropInCachedDrops(queryClient, drop.id);
-        if (cachedDropSnapshot !== null) {
+        if (cachedDropSnapshot !== null || currentData.isLoading === true) {
           await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot);
         }
         return;
