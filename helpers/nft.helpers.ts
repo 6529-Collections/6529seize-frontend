@@ -20,8 +20,33 @@ type NFTMediaMetadata =
       readonly animation_details?: NFTMediaDetails | null | undefined;
       readonly image_details?: NFTMediaDetails | null | undefined;
     }
+  | string
   | null
   | undefined;
+
+type ParsedNFTMediaMetadata = Exclude<
+  NFTMediaMetadata,
+  string | null | undefined
+>;
+
+const parseMediaMetadata = (
+  metadata: NFTMediaMetadata
+): ParsedNFTMediaMetadata | null => {
+  if (!metadata) {
+    return null;
+  }
+
+  if (typeof metadata === "object") {
+    return metadata;
+  }
+
+  try {
+    const parsed = JSON.parse(metadata);
+    return parsed !== null && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+};
 
 const getMediaFormat = (
   details: NFTMediaDetails | null | undefined
@@ -84,25 +109,25 @@ const getMediaDimensions = (
 export function getAnimationFileTypeFromMetadata(
   metadata: NFTMediaMetadata
 ): string | null {
-  return getMediaFormat(metadata?.animation_details);
+  return getMediaFormat(parseMediaMetadata(metadata)?.animation_details);
 }
 
 export function getImageFileTypeFromMetadata(
   metadata: NFTMediaMetadata
 ): string | null {
-  return getMediaFormat(metadata?.image_details);
+  return getMediaFormat(parseMediaMetadata(metadata)?.image_details);
 }
 
 export function getAnimationDimensionsFromMetadata(
   metadata: NFTMediaMetadata
 ): string | null {
-  return getMediaDimensions(metadata?.animation_details);
+  return getMediaDimensions(parseMediaMetadata(metadata)?.animation_details);
 }
 
 export function getImageDimensionsFromMetadata(
   metadata: NFTMediaMetadata
 ): string | null {
-  return getMediaDimensions(metadata?.image_details);
+  return getMediaDimensions(parseMediaMetadata(metadata)?.image_details);
 }
 
 export function getFileTypeFromMetadata(metadata: NFTMediaMetadata) {
@@ -166,8 +191,8 @@ export function getNftMimeType(
 
   const metadata =
     "metadata" in nft &&
-    nft.metadata !== null &&
-    typeof nft.metadata === "object"
+    (typeof nft.metadata === "string" ||
+      (nft.metadata !== null && typeof nft.metadata === "object"))
       ? (nft.metadata as NFTMediaMetadata)
       : undefined;
 

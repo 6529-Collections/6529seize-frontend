@@ -47,6 +47,24 @@ describe("nft.helpers", () => {
     expect(getImageDimensionsFromMetadata(metadata)).toBe("1,200 x 800");
   });
 
+  it("parses string metadata before inferring media type", () => {
+    const metadata = JSON.stringify({
+      animation_details: { format: "HTML" },
+      image_details: { format: "GIF", width: 800, height: 971 },
+    });
+
+    expect(getFileTypeFromMetadata(metadata)).toBe("HTML");
+    expect(getFileMimeTypeFromMetadata(metadata)).toBe("text/html");
+    expect(getDimensionsFromMetadata(metadata)).toBe("800 x 971");
+    expect(
+      getNftMimeType({
+        image: "https://example.com/489.gif",
+        animation: "ipfs://bafybeichuu5d3jvkrbhs3wafvpvqexvpnm66rhm2uzt4kxucfjzf3xkf64",
+        metadata,
+      } as any)
+    ).toBe("text/html");
+  });
+
   it("maps known formats to mime types", () => {
     expect(getMimeTypeFromFormat(" html ")).toBe("text/html");
     expect(getMimeTypeFromFormat("GLB")).toBe("model/gltf-binary");
