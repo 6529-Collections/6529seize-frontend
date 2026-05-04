@@ -65,7 +65,9 @@ export default function DropMediaActionRow({
         });
       }
     } catch {
-      triggerDirectDownload(url, fileName);
+      if (!isCapacitor) {
+        triggerDirectDownload(url, fileName);
+      }
     } finally {
       setIsDownloading(false);
     }

@@ -873,7 +873,8 @@ export default function DropAttachmentDisplay({
     } catch {
       if (
         controller.signal.aborted ||
-        downloadAbortRef.current !== controller
+        downloadAbortRef.current !== controller ||
+        isCapacitor
       ) {
         return;
       }
