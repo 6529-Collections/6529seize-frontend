@@ -372,9 +372,9 @@ function getBreadcrumbTargetCandidate(
   };
 }
 
-function getLatestHttpBreadcrumbWithStatus(
+function getLatestFailedTransportBreadcrumb(
   event: SentryClientEvent
-): (NetworkTargetCandidate & { statusCode: number }) | null {
+): NetworkTargetCandidate | null {
   const breadcrumbs = getHttpBreadcrumbs(event);
   for (let index = breadcrumbs.length - 1; index >= 0; index -= 1) {
     const breadcrumb = breadcrumbs[index];
@@ -383,7 +383,7 @@ function getLatestHttpBreadcrumbWithStatus(
     }
 
     const statusCode = getBreadcrumbTransportStatusCode(breadcrumb);
-    if (statusCode === null) {
+    if (statusCode !== 0) {
       continue;
     }
 
@@ -391,7 +391,6 @@ function getLatestHttpBreadcrumbWithStatus(
       url: getBreadcrumbUrl(breadcrumb) ?? "",
       isFirstParty: getBreadcrumbUrlIsFirstParty(breadcrumb),
       isFirstPartyApi: getBreadcrumbUrlIsFirstPartyApi(breadcrumb),
-      statusCode,
     };
   }
 
@@ -441,8 +440,8 @@ function getPrimaryNetworkTargetCandidates(
 function hasMatchingFailedTransportBreadcrumb(
   event: SentryClientEvent
 ): boolean {
-  const latestBreadcrumb = getLatestHttpBreadcrumbWithStatus(event);
-  if (latestBreadcrumb?.statusCode !== 0) {
+  const latestBreadcrumb = getLatestFailedTransportBreadcrumb(event);
+  if (!latestBreadcrumb) {
     return false;
   }
 
@@ -457,10 +456,7 @@ function hasMatchingFailedTransportBreadcrumb(
   }
 
   return getPrimaryNetworkTargetCandidates(event).some((target) =>
-    isSameFirstPartyApiTarget(
-      target,
-      latestBreadcrumb as NetworkTargetCandidate
-    )
+    isSameFirstPartyApiTarget(target, latestBreadcrumb)
   );
 }
 

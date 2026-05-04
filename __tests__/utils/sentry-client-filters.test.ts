@@ -324,6 +324,36 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("drops sampled-out first-party status 0 network errors when a later request succeeds", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 200,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
   it("keeps third-party API paths after URL sanitization", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({
