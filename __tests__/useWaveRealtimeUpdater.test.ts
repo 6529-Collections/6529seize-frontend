@@ -653,6 +653,7 @@ describe("useWaveRealtimeUpdater", () => {
         },
       ],
     ]);
+    mockSetQueriesData.mockClear();
 
     dateNowSpy.mockReturnValue(2_000);
     store.wave1 = {
@@ -695,6 +696,22 @@ describe("useWaveRealtimeUpdater", () => {
       reactionEntry(":fire:", [profile("profile-3", "fresh-fire")]),
       reactionEntry(":joy:", [currentUser]),
     ]);
+
+    expect(mockSetQueriesData).toHaveBeenCalled();
+
+    for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
+      const updatedCacheDrop = updateCachedData({
+        id: "d-loading-replay-protected",
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [],
+      });
+      expect(updatedCacheDrop.context_profile_context.reaction).toBe(":joy:");
+      expect(updatedCacheDrop.reactions).toEqual([
+        reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+        reactionEntry(":fire:", [profile("profile-3", "fresh-fire")]),
+        reactionEntry(":joy:", [currentUser]),
+      ]);
+    }
   });
 
   it("ignores older overlapping fetched reaction updates that finish last", async () => {

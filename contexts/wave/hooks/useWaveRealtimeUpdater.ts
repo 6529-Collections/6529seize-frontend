@@ -743,6 +743,7 @@ function useIncomingDropProcessor({
           localDrop
         );
 
+        updateDropInCachedDrops(queryClient, nextDrop);
         updateData({
           key: pendingUpdate.waveId,
           drops: [buildFetchedDropForWaveStore(nextDrop, latestFullDrop)],
