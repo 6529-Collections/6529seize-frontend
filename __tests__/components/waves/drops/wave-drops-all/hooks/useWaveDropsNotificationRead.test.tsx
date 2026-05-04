@@ -1,7 +1,9 @@
+import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useWaveDropsNotificationRead } from "@/components/waves/drops/wave-drops-all/hooks/useWaveDropsNotificationRead";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { act, render, waitFor } from "@testing-library/react";
+import { jwtDecode } from "jwt-decode";
 import React from "react";
 
 jest.mock("@/services/api/common-api", () => ({
@@ -9,7 +11,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ activeProfileProxy: null }),
+  useAuth: jest.fn(),
 }));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -21,14 +23,69 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 
 jest.mock("jwt-decode", () => ({
-  jwtDecode: (token: string) => {
+  jwtDecode: jest.fn(),
+}));
+
+interface Deferred {
+  readonly promise: Promise<void>;
+  readonly resolve: () => void;
+  readonly reject: (error: unknown) => void;
+}
+
+const createDeferred = (): Deferred => {
+  let resolve: () => void = () => {};
+  let reject: (error: unknown) => void = () => {};
+
+  const promise = new Promise<void>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+
+  return { promise, resolve, reject };
+};
+
+const apiPostMock = commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
+  typeof commonApiPostWithoutBodyAndResponse
+>;
+const useAuthMock = useAuth as jest.MockedFunction<typeof useAuth>;
+const jwtDecodeMock = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
+type AuthValue = ReturnType<typeof useAuth>;
+
+const createAuthValue = (
+  activeProfileProxy: AuthValue["activeProfileProxy"]
+): AuthValue =>
+  ({
+    activeProfileProxy,
+  }) as AuthValue;
+
+const createActiveProfileProxy = ({
+  id,
+  creatorId,
+}: {
+  readonly id: string;
+  readonly creatorId: string;
+}): AuthValue["activeProfileProxy"] =>
+  ({
+    id,
+    created_by: { id: creatorId },
+  }) as AuthValue["activeProfileProxy"];
+
+const mockJwtRole = (role: string | null) => {
+  jwtDecodeMock.mockImplementation(<T,>(token: string): T => {
     if (token !== "test-jwt") {
       throw new Error(`Unexpected JWT decode for ${token}`);
     }
 
-    return { sub: "0xAAA", role: null };
-  },
-}));
+    return { sub: "0xAAA", role } as T;
+  });
+};
+
+const createReactQueryContextValue = (
+  invalidateNotifications: jest.Mock
+): React.ContextType<typeof ReactQueryWrapperContext> =>
+  ({
+    invalidateNotifications,
+  }) as React.ContextType<typeof ReactQueryWrapperContext>;
 
 let documentVisibilityState: DocumentVisibilityState = "visible";
 
@@ -74,11 +131,12 @@ describe("useWaveDropsNotificationRead", () => {
     setDocumentVisibilityState("visible");
     invalidateNotifications.mockClear();
     removeWaveDeliveredNotifications.mockClear();
-    (
-      commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
-        typeof commonApiPostWithoutBodyAndResponse
-      >
-    ).mockClear();
+    apiPostMock.mockReset();
+    apiPostMock.mockResolvedValue(undefined);
+    useAuthMock.mockReset();
+    useAuthMock.mockReturnValue(createAuthValue(null));
+    jwtDecodeMock.mockReset();
+    mockJwtRole(null);
   });
 
   it("skips read-sync when disabled", () => {
@@ -178,5 +236,75 @@ describe("useWaveDropsNotificationRead", () => {
       });
       expect(invalidateNotifications).toHaveBeenCalled();
     });
+  });
+
+  it("does not repeat the initial read-sync when a matching proxy loads", async () => {
+    const firstReadRequest = createDeferred();
+
+    mockJwtRole("creator-1");
+    apiPostMock.mockReturnValueOnce(firstReadRequest.promise);
+
+    const renderTestComponent = () => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-1"
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const { rerender } = render(renderTestComponent());
+
+    await waitFor(() => {
+      expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+
+    useAuthMock.mockReturnValue(
+      createAuthValue(
+        createActiveProfileProxy({
+          id: "proxy-1",
+          creatorId: "creator-1",
+        })
+      )
+    );
+
+    rerender(renderTestComponent());
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
+    });
+
+    expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      firstReadRequest.resolve();
+      await firstReadRequest.promise;
+    });
+
+    await waitFor(() => {
+      expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+    expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
   });
 });

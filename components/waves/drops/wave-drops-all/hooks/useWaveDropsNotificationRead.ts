@@ -1,5 +1,5 @@
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 interface UseWaveDropsNotificationReadParams {
   readonly waveId: string;
@@ -16,46 +16,41 @@ export const useWaveDropsNotificationRead = ({
 }: UseWaveDropsNotificationReadParams) => {
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
 
+  const syncReadState = useEffectEvent(async (targetWaveId: string) => {
+    if (document.visibilityState !== "visible") {
+      return;
+    }
+
+    try {
+      await Promise.resolve(removeWaveDeliveredNotifications(targetWaveId));
+    } catch (error) {
+      console.error("Failed to remove wave delivered notifications:", error);
+    }
+
+    try {
+      await markWaveNotificationsRead(targetWaveId);
+    } catch (error) {
+      console.error("Failed to mark feed as read:", error);
+    }
+  });
+
   useEffect(() => {
     if (!enabled) {
       return;
     }
 
-    const syncReadState = async () => {
-      if (document.visibilityState !== "visible") {
-        return;
-      }
-
-      try {
-        await Promise.resolve(removeWaveDeliveredNotifications(waveId));
-      } catch (error) {
-        console.error("Failed to remove wave delivered notifications:", error);
-      }
-
-      try {
-        await markWaveNotificationsRead(waveId);
-      } catch (error) {
-        console.error("Failed to mark feed as read:", error);
-      }
-    };
-
     const syncReadStateWhenVisible = () => {
       if (document.visibilityState === "visible") {
-        void syncReadState();
+        void syncReadState(waveId);
       }
     };
 
-    void syncReadState();
+    void syncReadState(waveId);
     document.addEventListener("visibilitychange", syncReadStateWhenVisible);
     return () =>
       document.removeEventListener(
         "visibilitychange",
         syncReadStateWhenVisible
       );
-  }, [
-    enabled,
-    waveId,
-    removeWaveDeliveredNotifications,
-    markWaveNotificationsRead,
-  ]);
+  }, [enabled, waveId]);
 };
