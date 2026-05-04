@@ -37,6 +37,46 @@ describe("fetchLinkPreview", () => {
     await Promise.resolve();
   };
 
+  const getFetchSignal = (callIndex: number): AbortSignal => {
+    const init = fetchMock.mock.calls[callIndex]?.[1] as
+      | RequestInit
+      | undefined;
+    const signal = init?.signal;
+
+    if (!(signal instanceof AbortSignal)) {
+      throw new Error(`Fetch call ${callIndex} did not include AbortSignal`);
+    }
+
+    return signal;
+  };
+
+  const createAbortError = (): Error => {
+    const error = new Error("The operation was aborted.");
+    error.name = "AbortError";
+
+    return error;
+  };
+
+  const createAbortableFetchResponse = (
+    init: RequestInit | undefined
+  ): Promise<Response> => {
+    const signal = init?.signal;
+
+    if (!(signal instanceof AbortSignal)) {
+      return Promise.reject(new Error("Missing AbortSignal"));
+    }
+
+    return new Promise<Response>((_resolve, reject) => {
+      signal.addEventListener(
+        "abort",
+        () => {
+          reject(createAbortError());
+        },
+        { once: true }
+      );
+    });
+  };
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.resetModules();
@@ -89,6 +129,7 @@ describe("fetchLinkPreview", () => {
         }),
       })
     );
+    expect(getFetchSignal(0).aborted).toBe(false);
   });
 
   it("splits same-tick calls into POST chunks of 5 urls", async () => {
@@ -387,6 +428,54 @@ describe("fetchLinkPreview", () => {
     );
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
       "/api/open-graph?url=https%3A%2F%2Ftwo.example%2Farticle"
+    );
+    expect(getFetchSignal(1).aborted).toBe(false);
+    expect(getFetchSignal(2).aborted).toBe(false);
+  });
+
+  it("aborts timed-out single GET fallback requests", async () => {
+    fetchMock
+      .mockRejectedValueOnce(new Error("batch unavailable"))
+      .mockImplementationOnce((_input: unknown, init?: RequestInit) =>
+        createAbortableFetchResponse(init)
+      );
+
+    const { fetchLinkPreview } = await loadApi();
+    const request = fetchLinkPreview("https://slow.example/article");
+
+    jest.runOnlyPendingTimers();
+    await flushMicrotasks();
+    await flushMicrotasks();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const singleRequestSignal = getFetchSignal(1);
+    expect(singleRequestSignal.aborted).toBe(false);
+
+    jest.advanceTimersByTime(10_000);
+
+    await expect(request).rejects.toThrow(
+      "Failed to fetch link preview metadata. Request timed out."
+    );
+    expect(singleRequestSignal.aborted).toBe(true);
+  });
+
+  it("uses OpenGraph error body from non-ok single GET fallback responses", async () => {
+    fetchMock
+      .mockRejectedValueOnce(new Error("batch unavailable"))
+      .mockResolvedValueOnce(
+        createResponse(
+          { error: "Preview metadata is unavailable for this URL." },
+          { ok: false }
+        )
+      );
+
+    const { fetchLinkPreview } = await loadApi();
+    const request = fetchLinkPreview("https://blocked.example/article");
+
+    jest.runOnlyPendingTimers();
+
+    await expect(request).rejects.toThrow(
+      "Preview metadata is unavailable for this URL."
     );
   });
 });

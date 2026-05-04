@@ -97,8 +97,10 @@ const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;
 const LINK_PREVIEW_BATCH_MAX_URLS = 5;
 const LINK_PREVIEW_BATCH_MAX_ACTIVE_CHUNKS = 2;
+const LINK_PREVIEW_FETCH_TIMEOUT_MS = 10_000;
 const LINK_PREVIEW_METADATA_ERROR_MESSAGE =
   "Failed to fetch link preview metadata.";
+const LINK_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE = `${LINK_PREVIEW_METADATA_ERROR_MESSAGE} Request timed out.`;
 const OPENSEA_CACHE_KEY_SUFFIX = "|opensea-v3-token-uri-fallback";
 
 const linkPreviewCache = new LruTtlCache<string, Promise<LinkPreviewResponse>>({
@@ -176,14 +178,50 @@ const readOpenGraphError = async (
   return new Error(errorMessage);
 };
 
+const isAbortError = (error: unknown): boolean => {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  return (error as { readonly name?: unknown }).name === "AbortError";
+};
+
+const fetchLinkPreviewMetadata = async (
+  input: RequestInfo | URL,
+  init: RequestInit
+): Promise<Response> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, LINK_PREVIEW_FETCH_TIMEOUT_MS);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+  } catch (error: unknown) {
+    if (isAbortError(error)) {
+      throw new Error(LINK_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE);
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
 const fetchSingleLinkPreview = async (
   normalizedUrl: string
 ): Promise<LinkPreviewResponse> => {
   const params = new URLSearchParams({ url: normalizedUrl });
 
-  const response = await fetch(`/api/open-graph?${params.toString()}`, {
-    headers: { Accept: "application/json" },
-  });
+  const response = await fetchLinkPreviewMetadata(
+    `/api/open-graph?${params.toString()}`,
+    {
+      headers: { Accept: "application/json" },
+    }
+  );
 
   if (!response.ok) {
     throw await readOpenGraphError(
@@ -198,7 +236,7 @@ const fetchSingleLinkPreview = async (
 const fetchLinkPreviewBatch = async (
   urls: readonly string[]
 ): Promise<OpenGraphBatchResponse> => {
-  const response = await fetch("/api/open-graph", {
+  const response = await fetchLinkPreviewMetadata("/api/open-graph", {
     method: "POST",
     headers: {
       Accept: "application/json",
