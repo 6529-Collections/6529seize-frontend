@@ -12,16 +12,19 @@ import {
   clampRollingEndDate,
   validateDateSequence,
 } from "../services/waveDecisionService";
+import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 interface CreateWaveDatesRankProps {
   readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
 }
 
 export default function CreateWaveDatesRank({
   waveType,
   dates,
+  errors,
   setDates,
 }: CreateWaveDatesRankProps) {
   const isRollingMode = dates.isRolling;
@@ -108,6 +111,7 @@ export default function CreateWaveDatesRank({
 
       <Decisions
         dates={dates}
+        errors={errors}
         setDates={commitDates}
         onRollingEnabled={handleRollingEnabled}
         isExpanded={expandedSections.decisions}

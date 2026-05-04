@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDatesRank from "@/components/waves/create-wave/dates/CreateWaveDatesRank";
 import { adjustDatesAfterSubmissionChange } from "@/components/waves/create-wave/services/waveDecisionService";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 
@@ -32,6 +33,7 @@ jest.mock(
       <button
         data-testid="decisions"
         data-expanded={props.isExpanded}
+        data-error-count={String(props.errors.length)}
         onClick={() => {
           props.onInteraction();
         }}
@@ -101,6 +103,7 @@ describe("CreateWaveDatesRank", () => {
       <CreateWaveDatesRank
         waveType={ApiWaveType.Rank}
         dates={baseDates}
+        errors={[]}
         setDates={setDates}
       />
     );
@@ -125,6 +128,7 @@ describe("CreateWaveDatesRank", () => {
       <CreateWaveDatesRank
         waveType={ApiWaveType.Rank}
         dates={dates}
+        errors={[]}
         setDates={jest.fn()}
       />
     );
@@ -138,6 +142,7 @@ describe("CreateWaveDatesRank", () => {
       <CreateWaveDatesRank
         waveType={ApiWaveType.Rank}
         dates={dates}
+        errors={[]}
         setDates={jest.fn()}
       />
     );
@@ -151,11 +156,30 @@ describe("CreateWaveDatesRank", () => {
       <CreateWaveDatesRank
         waveType={ApiWaveType.Rank}
         dates={baseDates}
+        errors={[]}
         setDates={setDates}
       />
     );
 
     expect(setDates).not.toHaveBeenCalled();
+  });
+
+  it("passes errors to the decisions section", () => {
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={baseDates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE,
+        ]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-error-count",
+      "1"
+    );
   });
 
   it("auto collapses start section after decisions interaction", async () => {
@@ -164,6 +188,7 @@ describe("CreateWaveDatesRank", () => {
       <CreateWaveDatesRank
         waveType={ApiWaveType.Rank}
         dates={baseDates}
+        errors={[]}
         setDates={jest.fn()}
       />
     );
@@ -193,6 +218,7 @@ describe("CreateWaveDatesRank", () => {
         <CreateWaveDatesRank
           waveType={ApiWaveType.Rank}
           dates={dates}
+          errors={[]}
           setDates={setDates}
         />
       );
@@ -202,6 +228,7 @@ describe("CreateWaveDatesRank", () => {
       <CreateWaveDatesRank
         waveType={ApiWaveType.Rank}
         dates={dates}
+        errors={[]}
         setDates={setDates}
       />
     );

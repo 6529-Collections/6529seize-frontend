@@ -15,6 +15,7 @@ import type {
   WaveOverviewConfig,
 } from "@/types/waves.types";
 import { CreateWaveStep } from "@/types/waves.types";
+import { Time } from "@/helpers/time";
 
 export enum CREATE_WAVE_VALIDATION_ERROR {
   NAME_REQUIRED = "NAME_REQUIRED",
@@ -43,6 +44,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE",
   TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION = "TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION",
   MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID = "MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID",
+  RANK_DECISION_TIME_MUST_BE_IN_FUTURE = "RANK_DECISION_TIME_MUST_BE_IN_FUTURE",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -61,6 +63,19 @@ const getOverviewValidationErrors = ({
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_TOO_LONG);
   }
   return errors;
+};
+
+const getRankEffectiveEndDate = (
+  dates: CreateWaveDatesConfig
+): number | null => {
+  if (dates.isRolling) {
+    return dates.endDate;
+  }
+
+  return (
+    dates.firstDecisionTime +
+    dates.subsequentDecisions.reduce((sum, interval) => sum + interval, 0)
+  );
 };
 
 const getDatesValidationErrors = ({
@@ -98,6 +113,18 @@ const getDatesValidationErrors = ({
     } else if (dates.votingStartDate && dates.endDate < dates.votingStartDate) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+      );
+    }
+
+    const now = Time.currentMillis();
+    const rankEffectiveEndDate = getRankEffectiveEndDate(dates);
+    if (
+      dates.firstDecisionTime <= now ||
+      rankEffectiveEndDate === null ||
+      rankEffectiveEndDate <= now
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
       );
     }
   } else {

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Decisions from "@/components/waves/create-wave/dates/Decisions";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 jest.mock("@/components/waves/create-wave/dates/DecisionsFirst", () => () => (
   <div data-testid="first" />
@@ -25,7 +26,9 @@ jest.mock("@/components/waves/create-wave/services/waveDecisionService", () => {
   };
 });
 jest.mock("@/components/common/DateAccordion", () => (props: any) => (
-  <div>{props.children}</div>
+  <div data-testid="accordion" data-expanded={String(props.isExpanded)}>
+    {props.isExpanded ? props.children : props.collapsedContent}
+  </div>
 ));
 jest.mock("@/components/common/TooltipIconButton", () => () => <div />);
 jest.mock("@/components/utils/switch/CommonSwitch", () => (props: any) => (
@@ -49,6 +52,7 @@ describe("Decisions", () => {
     render(
       <Decisions
         dates={baseDates}
+        errors={[]}
         setDates={setDates}
         onRollingEnabled={jest.fn()}
         isExpanded={true}
@@ -70,6 +74,7 @@ describe("Decisions", () => {
     render(
       <Decisions
         dates={{ ...baseDates, subsequentDecisions: [1] }}
+        errors={[]}
         setDates={setDates}
         onRollingEnabled={onRollingEnabled}
         isExpanded={true}
@@ -81,6 +86,30 @@ describe("Decisions", () => {
     expect(onRollingEnabled).toHaveBeenCalled();
     expect(setDates).toHaveBeenCalledWith(
       expect.objectContaining({ isRolling: true })
+    );
+  });
+
+  it("shows a future-date alert when rank dates are not in the future", () => {
+    render(
+      <Decisions
+        dates={baseDates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE,
+        ]}
+        setDates={jest.fn()}
+        onRollingEnabled={jest.fn()}
+        isExpanded={false}
+        setIsExpanded={jest.fn()}
+        onInteraction={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("accordion")).toHaveAttribute(
+      "data-expanded",
+      "true"
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "First winners announcement and wave end must be in the future."
     );
   });
 });

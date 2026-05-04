@@ -33,6 +33,7 @@ export default function CreateWaveDates({
     <CreateWaveDatesRank
       waveType={waveType}
       dates={dates}
+      errors={errors}
       setDates={setDates}
     />
   );

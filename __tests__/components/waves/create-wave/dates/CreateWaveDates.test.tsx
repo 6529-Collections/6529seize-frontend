@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import CreateWaveDates from "@/components/waves/create-wave/dates/CreateWaveDates";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 
@@ -10,7 +11,12 @@ jest.mock(
 
 jest.mock(
   "@/components/waves/create-wave/dates/CreateWaveDatesRank",
-  () => () => <div data-testid="rank-dates" />
+  () => (props: any) => (
+    <div
+      data-testid="rank-dates"
+      data-error-count={String(props.errors.length)}
+    />
+  )
 );
 
 const baseDates: CreateWaveDatesConfig = {
@@ -49,6 +55,24 @@ describe("CreateWaveDates", () => {
 
     expect(screen.getByTestId("rank-dates")).toBeInTheDocument();
     expect(screen.queryByTestId("approve-dates")).toBeNull();
+  });
+
+  it("passes validation errors to the rank dates flow", () => {
+    render(
+      <CreateWaveDates
+        waveType={ApiWaveType.Rank}
+        dates={baseDates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE,
+        ]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("rank-dates")).toHaveAttribute(
+      "data-error-count",
+      "1"
+    );
   });
 
   it("keeps non-approve waves on the rank flow", () => {

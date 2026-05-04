@@ -1,6 +1,9 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarPlus } from "@fortawesome/free-regular-svg-icons";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faInfoCircle,
+  faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import DateAccordion from "@/components/common/DateAccordion";
 import DecisionsFirst from "./DecisionsFirst";
@@ -12,9 +15,11 @@ import {
 } from "../services/waveDecisionService";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import CommonSwitch from "@/components/utils/switch/CommonSwitch";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 interface DecisionsProps {
   readonly dates: CreateWaveDatesConfig;
+  readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
   readonly onRollingEnabled: () => void;
   readonly isExpanded: boolean;
@@ -57,6 +62,7 @@ function DecisionsCollapsedContent({
 
 export default function Decisions({
   dates,
+  errors,
   setDates,
   onRollingEnabled,
   isExpanded,
@@ -64,6 +70,10 @@ export default function Decisions({
   onInteraction,
 }: DecisionsProps) {
   const isRollingMode = dates.isRolling;
+  const hasRankFutureDateError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+  );
+  const shouldShowExpandedContent = isExpanded || hasRankFutureDateError;
 
   // Calculate total decision points for summary
   const totalDecisionPoints = 1 + dates.subsequentDecisions.length;
@@ -143,8 +153,8 @@ export default function Decisions({
           tooltipWidth="tw-w-80"
         />
       }
-      isExpanded={isExpanded}
-      onToggle={() => setIsExpanded(!isExpanded)}
+      isExpanded={shouldShowExpandedContent}
+      onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
       collapsedContent={
         <DecisionsCollapsedContent
           totalDecisionPoints={totalDecisionPoints}
@@ -153,6 +163,21 @@ export default function Decisions({
       }
     >
       <div className="tw-px-5 tw-pb-1 tw-pt-2">
+        {hasRankFutureDateError && (
+          <div
+            role="alert"
+            className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
+          >
+            <FontAwesomeIcon
+              icon={faTriangleExclamation}
+              className="tw-size-4 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
+            <span>
+              First winners announcement and wave end must be in the future.
+            </span>
+          </div>
+        )}
         <div className="tw-mb-3 tw-border-b tw-border-iron-700/50 tw-pb-3">
           <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
             <strong>Winner announcements</strong> for showcasing selected
