@@ -77,8 +77,6 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       {activePart.media.map((media, i) => {
         const useNaturalHeightImage =
           fullWidthMedia && media.mime_type.includes("image");
-        const useImageIntrinsicHeight =
-          !fullWidthMedia && media.mime_type.includes("image");
         const useVideoIntrinsicHeight = media.mime_type.includes("video");
         const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
         const showMediaActionRow =
@@ -87,9 +85,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
             media.mime_type.includes("video"));
         const mediaContainerClassName = getMediaContainerClassName({
           useIntrinsicHeightMedia:
-            useNaturalHeightImage ||
-            useImageIntrinsicHeight ||
-            useVideoIntrinsicHeight,
+            useNaturalHeightImage || useVideoIntrinsicHeight,
           useCompactLink,
         });
         let mediaContent;
@@ -103,7 +99,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
               imageScale={imageScale}
             />
           );
-        } else if (useNaturalHeightImage || useImageIntrinsicHeight) {
+        } else if (useNaturalHeightImage) {
           mediaContent = (
             <WaveDropPartContentFullWidthImage
               src={media.url}
