@@ -328,6 +328,23 @@ describe("useWaveRealtimeUpdater", () => {
       },
     };
     const props = baseProps(store);
+    const oldCacheContext = contextProfileContext(":old-cache:");
+    mockGetQueriesData.mockReturnValue([
+      [
+        ["DROPS"],
+        {
+          pages: [
+            [
+              {
+                id: "d-cache-only-reaction",
+                context_profile_context: oldCacheContext,
+                reactions: [],
+              },
+            ],
+          ],
+        },
+      ],
+    ]);
     fetchDropByIdBatched.mockResolvedValue({
       id: "d-cache-only-reaction",
       author: {},
@@ -360,7 +377,7 @@ describe("useWaveRealtimeUpdater", () => {
     for (const [, updateCachedData] of mockSetQueriesData.mock.calls) {
       const updatedCacheDrop = updateCachedData({
         id: "d-cache-only-reaction",
-        context_profile_context: contextProfileContext(":old-cache:"),
+        context_profile_context: oldCacheContext,
         reactions: [],
       });
       expect(updatedCacheDrop.context_profile_context.reaction).toBe(
@@ -368,6 +385,34 @@ describe("useWaveRealtimeUpdater", () => {
       );
       expect(updatedCacheDrop.reactions).toEqual(reactionEntries(":server:"));
     }
+  });
+
+  it("skips reaction refetches when a loaded wave has no local or cached drop", async () => {
+    const store: any = {
+      wave1: {
+        drops: [],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-missing-local-and-cache",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(fetchDropByIdBatched).not.toHaveBeenCalled();
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).not.toHaveBeenCalled();
   });
 
   it("updates React Query caches for rating updates without promoting light wave-store drops", async () => {
@@ -1310,6 +1355,29 @@ describe("useWaveRealtimeUpdater", () => {
       );
       expect(updatedCacheDrop.reactions).toEqual(reactionEntries(":server:"));
     }
+  });
+
+  it("registers unopened waves but skips reaction refetches without a local or cached drop", async () => {
+    const props = baseProps({});
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-unopened-missing-local-and-cache",
+      wave: { id: "wave2" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.registerWave).toHaveBeenCalledWith("wave2");
+    expect(fetchDropByIdBatched).not.toHaveBeenCalled();
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).not.toHaveBeenCalled();
   });
 
   it("preserves protected cached reactions when registering an unopened wave adds stale data", async () => {

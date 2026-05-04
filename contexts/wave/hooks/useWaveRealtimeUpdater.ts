@@ -31,7 +31,7 @@ import {
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
-import type { WaveDataStoreUpdater } from "./types";
+import type { WaveDataStoreUpdater, WaveMessages } from "./types";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
@@ -219,6 +219,13 @@ function getFullDrop(drop: Drop | undefined): ExtendedDrop | null {
   }
 
   return drop;
+}
+
+function hasDropInWaveData(
+  data: WaveMessages | undefined,
+  dropId: string
+): boolean {
+  return data?.drops.some((drop) => drop.id === dropId) ?? false;
 }
 
 function hasProfileForReaction(
@@ -733,12 +740,20 @@ function useIncomingDropProcessor({
 
       if (currentData === undefined) {
         if (isFetchedDropUpdate(type)) {
+          registerWave(waveId);
+          const registeredData = getData(waveId);
+          if (hasDropInWaveData(registeredData, drop.id)) {
+            await handleFetchedDropUpdate(drop, waveId);
+            return;
+          }
+
           const cachedDropSnapshot = findDropInCachedDrops(
             queryClient,
             drop.id
           );
-          registerWave(waveId);
-          await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot);
+          if (cachedDropSnapshot !== null) {
+            await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot);
+          }
         } else {
           registerWave(waveId);
         }
@@ -748,7 +763,15 @@ function useIncomingDropProcessor({
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
 
       if (isFetchedDropUpdate(type)) {
-        await handleFetchedDropUpdate(drop, waveId);
+        if (existingDrop !== undefined) {
+          await handleFetchedDropUpdate(drop, waveId);
+          return;
+        }
+
+        const cachedDropSnapshot = findDropInCachedDrops(queryClient, drop.id);
+        if (cachedDropSnapshot !== null) {
+          await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot);
+        }
         return;
       }
 
