@@ -354,9 +354,109 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("drops sampled-out first-party status 0 network errors when a later unrelated first-party request fails", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 500,
+              url: "/api/identity",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops sampled-out first-party status 0 network errors when later unrelated third-party requests fail", () => {
+    for (const statusCode of [404, 500]) {
+      const result = getLowValueNetworkErrorDecision(
+        createLowValueNetworkEvent({
+          breadcrumbs: [
+            {
+              type: "http",
+              category: "fetch",
+              data: {
+                status_code: 0,
+                url: "/api/waves-overview",
+                "url.is_first_party": true,
+              },
+            },
+            {
+              type: "http",
+              category: "fetch",
+              data: {
+                status_code: statusCode,
+                url: "https://example.com/collect",
+                "url.is_first_party": false,
+              },
+            },
+          ],
+        }),
+        0
+      );
+
+      expect(result).toBe("drop");
+    }
+  });
+
   it("keeps first-party network errors when a later request has a real HTTP failure", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 500,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps raw first-party network errors when a later same-target request has a real HTTP failure", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value: "Load failed",
+            },
+          ],
+        },
         breadcrumbs: [
           {
             type: "http",

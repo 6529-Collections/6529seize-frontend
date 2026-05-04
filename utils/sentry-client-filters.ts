@@ -372,10 +372,23 @@ function getBreadcrumbTargetCandidate(
   };
 }
 
+function getFailedTransportBreadcrumbTarget(
+  breadcrumb: SentryBreadcrumb
+): NetworkTargetCandidate {
+  return {
+    url: getBreadcrumbUrl(breadcrumb) ?? "",
+    isFirstParty: getBreadcrumbUrlIsFirstParty(breadcrumb),
+    isFirstPartyApi: getBreadcrumbUrlIsFirstPartyApi(breadcrumb),
+  };
+}
+
 function getLatestFailedTransportBreadcrumb(
   event: SentryClientEvent
 ): NetworkTargetCandidate | null {
   const breadcrumbs = getHttpBreadcrumbs(event);
+  const messageTargetCandidates = getMessageTargetCandidates(event);
+  const laterRealFailureTargetCandidates: NetworkTargetCandidate[] = [];
+
   for (let index = breadcrumbs.length - 1; index >= 0; index -= 1) {
     const breadcrumb = breadcrumbs[index];
     if (!breadcrumb) {
@@ -384,18 +397,43 @@ function getLatestFailedTransportBreadcrumb(
 
     const statusCode = getBreadcrumbTransportStatusCode(breadcrumb);
     if (statusCode !== null && statusCode >= 400) {
-      return null;
+      const failedHttpTarget = getBreadcrumbTargetCandidate(breadcrumb);
+      if (!failedHttpTarget) {
+        continue;
+      }
+
+      if (
+        messageTargetCandidates.length > 0 &&
+        messageTargetCandidates.some((target) =>
+          isSameFirstPartyApiTarget(target, failedHttpTarget)
+        )
+      ) {
+        return null;
+      }
+
+      if (messageTargetCandidates.length === 0) {
+        laterRealFailureTargetCandidates.push(failedHttpTarget);
+      }
+
+      continue;
     }
 
     if (statusCode !== 0) {
       continue;
     }
 
-    return {
-      url: getBreadcrumbUrl(breadcrumb) ?? "",
-      isFirstParty: getBreadcrumbUrlIsFirstParty(breadcrumb),
-      isFirstPartyApi: getBreadcrumbUrlIsFirstPartyApi(breadcrumb),
-    };
+    const failedTransportTarget =
+      getFailedTransportBreadcrumbTarget(breadcrumb);
+    if (
+      messageTargetCandidates.length === 0 &&
+      laterRealFailureTargetCandidates.some((target) =>
+        isSameFirstPartyApiTarget(target, failedTransportTarget)
+      )
+    ) {
+      return null;
+    }
+
+    return failedTransportTarget;
   }
 
   return null;
