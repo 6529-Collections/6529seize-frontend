@@ -27,11 +27,13 @@ export async function downloadMediaUrl({
   fileName,
   isCapacitor,
   dialogTitle = "Save file",
+  shareTitle,
 }: {
   readonly url: string;
   readonly fileName: string;
   readonly isCapacitor: boolean;
   readonly dialogTitle?: string | undefined;
+  readonly shareTitle?: string | undefined;
 }) {
   const response = await fetch(url);
   if (!response.ok) {
@@ -40,7 +42,11 @@ export async function downloadMediaUrl({
 
   const blob = await response.blob();
   if (isCapacitor) {
-    await shareFetchedBlobInNativeApp(blob, fileName, { dialogTitle });
+    await shareFetchedBlobInNativeApp(blob, fileName, {
+      dialogTitle,
+      title: shareTitle,
+      preferNavigatorShare: true,
+    });
     return;
   }
 
