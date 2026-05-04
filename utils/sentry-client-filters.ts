@@ -510,6 +510,54 @@ export function getLowValueNetworkErrorTargetUrl(
   );
 }
 
+function getUsableBreadcrumbMessageUrl(
+  breadcrumb: SentryBreadcrumb
+): string | null {
+  const url = getBreadcrumbUrl(breadcrumb)?.trim();
+  if (!url || isFilteredUrl(url)) {
+    return null;
+  }
+
+  return url;
+}
+
+function getLatestUsableBreadcrumbMessageUrl(
+  event: SentryClientEvent,
+  predicate: (breadcrumb: SentryBreadcrumb) => boolean
+): string | null {
+  const breadcrumbs = getHttpBreadcrumbs(event);
+
+  for (let index = breadcrumbs.length - 1; index >= 0; index -= 1) {
+    const breadcrumb = breadcrumbs[index];
+    if (!breadcrumb || !predicate(breadcrumb)) {
+      continue;
+    }
+
+    const url = getUsableBreadcrumbMessageUrl(breadcrumb);
+    if (url) {
+      return url;
+    }
+  }
+
+  return null;
+}
+
+export function getNetworkErrorMessageTargetUrl(
+  event: SentryClientEvent
+): string | null {
+  const lowValueTargetUrl = getLowValueNetworkErrorTargetUrl(event)?.trim();
+  if (lowValueTargetUrl && !isFilteredUrl(lowValueTargetUrl)) {
+    return lowValueTargetUrl;
+  }
+
+  return (
+    getLatestUsableBreadcrumbMessageUrl(
+      event,
+      (breadcrumb) => getBreadcrumbTransportStatusCode(breadcrumb) === 0
+    ) ?? getLatestUsableBreadcrumbMessageUrl(event, () => true)
+  );
+}
+
 function getMessageTargetCandidates(
   event: SentryClientEvent
 ): NetworkTargetCandidate[] {

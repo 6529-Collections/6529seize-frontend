@@ -2,6 +2,7 @@ import {
   __testing,
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
+  getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
   shouldFilterThirdPartyTelemetrySpan,
@@ -714,41 +715,40 @@ describe("sentry-client-filters", () => {
   });
 
   it("keeps raw first-party network errors when a later same-target request has a real HTTP failure", () => {
-    const result = getLowValueNetworkErrorDecision(
-      createLowValueNetworkEvent({
-        exception: {
-          values: [
-            {
-              type: "TypeError",
-              value: "Load failed",
-            },
-          ],
-        },
-        breadcrumbs: [
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
           {
-            type: "http",
-            category: "fetch",
-            data: {
-              status_code: 0,
-              url: "/api/waves-overview",
-              "url.is_first_party": true,
-            },
-          },
-          {
-            type: "http",
-            category: "fetch",
-            data: {
-              status_code: 500,
-              url: "/api/waves-overview",
-              "url.is_first_party": true,
-            },
+            type: "TypeError",
+            value: "Load failed",
           },
         ],
-      }),
-      0
-    );
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
 
-    expect(result).toBe("not_applicable");
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
   it("keeps third-party API paths after URL sanitization", () => {

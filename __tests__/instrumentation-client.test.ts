@@ -576,6 +576,9 @@ describe("instrumentation-client", () => {
       })
     );
     expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
+    );
   });
 
   it("keeps browser network errors when a later breadcrumb has a real HTTP failure", () => {
@@ -622,6 +625,57 @@ describe("instrumentation-client", () => {
         errorType: "network",
         handled: true,
       })
+    );
+    expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
+    );
+  });
+
+  it("uses the failed breadcrumb instead of request URL when a later same-target request has a real HTTP failure", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      request: {
+        url: "/api/identity",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
     );
     expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
   });

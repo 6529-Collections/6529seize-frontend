@@ -14,7 +14,7 @@ import {
 } from "@/utils/sentry-sanitizer";
 import {
   getLowValueNetworkErrorDecision,
-  getLowValueNetworkErrorTargetUrl,
+  getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
@@ -175,9 +175,9 @@ function extractUrlFromError(error: Error, event: Sentry.Event): string {
     return String(sanitizeUrlString(urlMatch[1]));
   }
 
-  const lowValueNetworkTargetUrl = getLowValueNetworkErrorTargetUrl(event);
-  if (lowValueNetworkTargetUrl) {
-    return String(sanitizeUrlString(lowValueNetworkTargetUrl));
+  const networkMessageTargetUrl = getNetworkErrorMessageTargetUrl(event);
+  if (networkMessageTargetUrl) {
+    return String(sanitizeUrlString(networkMessageTargetUrl));
   }
 
   if (event.request?.url) {
