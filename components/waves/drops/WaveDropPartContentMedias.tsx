@@ -75,7 +75,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           fullWidthMedia && media.mime_type.includes("image");
         const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
         const showMediaActionRow =
-          media.mime_type.includes("image") || media.mime_type.includes("video");
+          media.mime_type.includes("image") ||
+          media.mime_type.includes("video");
         const mediaContainerClassName = getMediaContainerClassName({
           useNaturalHeightImage,
           useCompactLink,

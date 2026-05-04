@@ -107,7 +107,11 @@ export default function DropMediaActionRow({
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-1">
-            <button type="button" onClick={handleOpen} className={itemClassName}>
+            <button
+              type="button"
+              onClick={handleOpen}
+              className={itemClassName}
+            >
               <ArrowTopRightOnSquareIcon
                 className="tw-size-4 tw-flex-shrink-0"
                 aria-hidden="true"
