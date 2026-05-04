@@ -238,6 +238,57 @@ describe("useWaveDropsNotificationRead", () => {
     });
   });
 
+  it("queues a follow-up read when the same visible wave syncs while pending", async () => {
+    const firstReadRequest = createDeferred();
+    apiPostMock.mockReturnValueOnce(firstReadRequest.promise);
+
+    render(
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-1"
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
+    });
+
+    expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+
+    await act(async () => {
+      dispatchVisibilityChange();
+    });
+
+    await waitFor(() => {
+      expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(2);
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      firstReadRequest.resolve();
+      await firstReadRequest.promise;
+    });
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(2);
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenNthCalledWith(1, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenNthCalledWith(2, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
   it("does not repeat the initial read-sync when a matching proxy loads", async () => {
     const firstReadRequest = createDeferred();
 

@@ -23,14 +23,6 @@ interface ReadSyncAttempt {
   status: ReadSyncStatus;
 }
 
-const readSyncStatesMatch = (
-  left: ReadSyncState,
-  right: ReadSyncState
-): boolean =>
-  left.waveId === right.waveId &&
-  left.identityKey === right.identityKey &&
-  left.proxyRoleIdentityKey === right.proxyRoleIdentityKey;
-
 const usedTemporaryProxyRole = (state: ReadSyncState): boolean =>
   state.proxyRoleIdentityKey !== null &&
   state.identityKey === state.proxyRoleIdentityKey;
@@ -116,13 +108,6 @@ export const useWaveDropsNotificationRead = ({
     }
 
     const previousAttempt = readSyncAttemptRef.current;
-
-    if (
-      previousAttempt?.status === "pending" &&
-      readSyncStatesMatch(previousAttempt.state, state)
-    ) {
-      return;
-    }
 
     if (
       usesLoadedProxyForSameRole({
