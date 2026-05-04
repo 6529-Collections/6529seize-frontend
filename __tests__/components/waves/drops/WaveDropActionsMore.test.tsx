@@ -4,13 +4,14 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-const downloadMock = jest.fn(() => <div data-testid="download" />);
-
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/useDropLinkPreviewToggleControl", () => ({
   useDropLinkPreviewToggleControl: jest.fn(),
+}));
+jest.mock("@/hooks/drops/useCanShowDropCurationsAction", () => ({
+  useCanShowDropCurationsAction: jest.fn(() => false),
 }));
 
 jest.mock(
@@ -28,10 +29,6 @@ jest.mock("@/components/waves/drops/WaveDropActionsCopyLink", () => () => (
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
   <div data-testid="open" />
 ));
-jest.mock("@/components/waves/drops/WaveDropActionsDownload", () => ({
-  __esModule: true,
-  default: (props: any) => downloadMock(props),
-}));
 jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
   <div data-testid="delete" />
 ));
@@ -67,7 +64,6 @@ const drop = {
 
 describe("WaveDropActionsMore", () => {
   beforeEach(() => {
-    downloadMock.mockClear();
     mockedUseDropInteractionRules.mockReturnValue({
       canShowVote: true,
       canVote: true,
@@ -146,7 +142,7 @@ describe("WaveDropActionsMore", () => {
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
 
-  it("shows desktop download actions for all media and ignores attachments", async () => {
+  it("does not show a desktop download action for media", async () => {
     const dropWithMedia = {
       ...drop,
       parts: [
@@ -179,22 +175,6 @@ describe("WaveDropActionsMore", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
-    expect(screen.getAllByTestId("download")).toHaveLength(1);
-    expect(downloadMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        downloads: [
-          {
-            href: "https://example.com/first.png",
-            name: "first",
-            extension: "png",
-          },
-          {
-            href: "https://example.com/second.mp4",
-            name: "second",
-            extension: "mp4",
-          },
-        ],
-      })
-    );
+    expect(screen.queryByText("Download media")).toBeNull();
   });
 });

@@ -2,14 +2,19 @@
 
 import { fullScreenSupported } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getDownloadFilenameFromUrl } from "@/helpers/media-download.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { faExpand, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import React, { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
+import useDownloader from "react-use-downloader";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
@@ -80,6 +85,7 @@ export default function WaveDropPartContentFullWidthImage({
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
   const { isCapacitor } = useCapacitor();
+  const { download } = useDownloader();
 
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
@@ -116,6 +122,14 @@ export default function WaveDropPartContentFullWidthImage({
       }
     },
     []
+  );
+
+  const handleDownload = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      download(src, getDownloadFilenameFromUrl(src, "image"));
+    },
+    [download, src]
   );
 
   useKeyPressEvent("Escape", () => {
@@ -199,6 +213,16 @@ export default function WaveDropPartContentFullWidthImage({
 
                 <button
                   type="button"
+                  onClick={handleDownload}
+                  data-tooltip-id={`download-media-${src}`}
+                  className={modalButtonClasses}
+                  aria-label="Download image"
+                >
+                  <ArrowDownTrayIcon className="tw-size-5 tw-flex-shrink-0" />
+                </button>
+
+                <button
+                  type="button"
                   onClick={handleCloseModal}
                   data-tooltip-id={`close-modal-${src}`}
                   className={modalButtonClasses}
@@ -230,6 +254,10 @@ export default function WaveDropPartContentFullWidthImage({
         <>
           <Tooltip id={`open-browser-${src}`} {...tooltipProps}>
             <span className="tw-text-xs">Open in Browser</span>
+          </Tooltip>
+
+          <Tooltip id={`download-media-${src}`} {...tooltipProps}>
+            <span className="tw-text-xs">Download</span>
           </Tooltip>
 
           <Tooltip id={`full-screen-${src}`} {...tooltipProps}>

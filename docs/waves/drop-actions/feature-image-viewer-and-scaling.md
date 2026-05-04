@@ -28,6 +28,7 @@ Attachment images use larger scaling in single-drop views than in thread cards.
 3. Click or tap the image to open the modal viewer.
 4. Zoom the image and use modal controls:
    - `Open in Browser` opens the source URL in a new tab.
+   - `Download` saves the source image.
    - `Full screen` enters browser fullscreen when supported and not in native app.
    - `Reset zoom` appears after zooming in.
    - `Close` exits the modal.
@@ -47,7 +48,8 @@ Attachment images use larger scaling in single-drop views than in thread cards.
 
 - Fullscreen control is hidden in native app sessions and when browser fullscreen
   APIs are unavailable.
-- `Open in Browser` stays available even when fullscreen is hidden.
+- `Open in Browser` and `Download` stay available even when fullscreen is
+  hidden.
 - Scaled URL rewriting applies only to supported hosted raster image URLs
   (`gif`, `webp`, `jpg`, `jpeg`, `png` under supported media prefixes).
 - Fullscreen is requested on the current rendered image element, which can differ
@@ -76,5 +78,4 @@ Attachment images use larger scaling in single-drop views than in thread cards.
 - [Wave Drop Actions Index](README.md)
 - [Wave Drop Content Display](feature-content-display.md)
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
-- [Wave Drop Media Download](feature-media-download.md)
 - [Browser Zoom and Pinch Scaling](../../shared/feature-browser-zoom-and-pinch-scaling.md)

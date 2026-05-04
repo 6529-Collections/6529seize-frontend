@@ -5,17 +5,15 @@ import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimation
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { useAuth } from "@/components/auth/Auth";
-import { getDropDownloadMedia } from "@/helpers/waves/drop-media.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
 import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
-import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
@@ -56,8 +54,6 @@ export default function WaveDropActionsMore({
     handleOpenChange(false);
     setIsDeleteModalOpen(true);
   };
-
-  const downloadMedia = useMemo(() => getDropDownloadMedia(drop), [drop]);
 
   return (
     <>
@@ -133,18 +129,6 @@ export default function WaveDropActionsMore({
               isDropdownItem={true}
               onOpen={closeDropdown}
             />
-            {downloadMedia.length > 0 && (
-              <WaveDropActionsDownload
-                downloads={downloadMedia.map((media) => ({
-                  href: media.url,
-                  name: media.name,
-                  extension: media.extension,
-                }))}
-                tooltipId={`download-media-${drop.id}`}
-                isDropdownItem={true}
-                onDownload={closeDropdown}
-              />
-            )}
             {canSetPinnedDrop && (
               <WaveDropActionsSetPinnedDrop
                 drop={drop}

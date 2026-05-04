@@ -15,9 +15,6 @@ const addReactionMock = jest.fn((props: any) => (
     data-dialog-z-index={props.dialogZIndexClassName}
   />
 ));
-const downloadMock = jest.fn((props: any) => (
-  <div data-testid="download" data-href={props.href} />
-));
 const mobileWrapperMock = jest.fn((props: any) =>
   props.isOpen ? (
     <div data-testid="wrapper" data-z-index={props.zIndexClassName}>
@@ -54,10 +51,6 @@ jest.mock("@/components/waves/drops/WaveDropActionsRate", () => () => (
 jest.mock("@/components/waves/drops/WaveDropActionsAddReaction", () => ({
   __esModule: true,
   default: (props: any) => addReactionMock(props),
-}));
-jest.mock("@/components/waves/drops/WaveDropActionsDownload", () => ({
-  __esModule: true,
-  default: (props: any) => downloadMock(props),
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsQuickReact", () => () => (
   <div data-testid="quick-react" />
@@ -102,7 +95,6 @@ const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
 beforeEach(() => {
   writeText.mockClear();
   addReactionMock.mockClear();
-  downloadMock.mockClear();
   mobileWrapperMock.mockClear();
   mockIsMemesWave.mockReturnValue(false);
   mockIsQuorumWave.mockReturnValue(false);
@@ -381,7 +373,7 @@ test("shows full menu when a profile handle is present", () => {
   expect(screen.getByTestId("delete")).toBeInTheDocument();
 });
 
-test("shows mobile download actions for all media and ignores attachments", () => {
+test("does not show mobile download actions for media", () => {
   const drop = {
     id: "1",
     serial_no: 1,
@@ -421,24 +413,7 @@ test("shows mobile download actions for all media and ignores attachments", () =
     </AuthContext.Provider>
   );
 
-  expect(screen.getAllByTestId("download")).toHaveLength(1);
-  expect(downloadMock).toHaveBeenCalledWith(
-    expect.objectContaining({
-      downloads: [
-        {
-          href: "https://example.com/first.png",
-          name: "first",
-          extension: "png",
-        },
-        {
-          href: "https://example.com/second.mp4",
-          name: "second",
-          extension: "mp4",
-        },
-      ],
-      isMobile: true,
-    })
-  );
+  expect(screen.queryByText("Download media")).toBeNull();
 });
 
 test("shows only copy link in the mobile menu for guests", () => {

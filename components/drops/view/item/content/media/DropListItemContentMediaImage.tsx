@@ -3,12 +3,14 @@
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { fullScreenSupported } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getDownloadFilenameFromUrl } from "@/helpers/media-download.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
 import { faExpand, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -16,6 +18,7 @@ import Link from "next/link";
 import React, { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
+import useDownloader from "react-use-downloader";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
@@ -59,6 +62,7 @@ function DropListItemContentMediaImage({
   const modalImageRef = useRef<HTMLImageElement>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const { isCapacitor } = useCapacitor();
+  const { download } = useDownloader();
 
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
@@ -114,6 +118,14 @@ function DropListItemContentMediaImage({
     []
   );
 
+  const handleDownload = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      download(src, getDownloadFilenameFromUrl(src, "image"));
+    },
+    [download, src]
+  );
+
   const loadingPlaceholderStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
@@ -166,7 +178,6 @@ function DropListItemContentMediaImage({
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     ref={modalImageRef}
                     src={src}
@@ -215,6 +226,15 @@ function DropListItemContentMediaImage({
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  data-tooltip-id={`download-media-${src}`}
+                  className={modalButtonClasses}
+                  aria-label="Download image"
+                >
+                  <ArrowDownTrayIcon className="tw-size-5 tw-flex-shrink-0" />
+                </button>
                 {onContainerClick && (
                   <button
                     onClick={(e) => {
@@ -263,6 +283,10 @@ function DropListItemContentMediaImage({
         <>
           <Tooltip id={`open-browser-${src}`} {...tooltipProps}>
             <span className="tw-text-xs">Open in Browser</span>
+          </Tooltip>
+
+          <Tooltip id={`download-media-${src}`} {...tooltipProps}>
+            <span className="tw-text-xs">Download</span>
           </Tooltip>
 
           <Tooltip id="full-screen" {...tooltipProps}>

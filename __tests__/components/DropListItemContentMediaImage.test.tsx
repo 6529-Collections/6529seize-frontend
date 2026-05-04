@@ -2,6 +2,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import DropListItemContentMediaImage from '@/components/drops/view/item/content/media/DropListItemContentMediaImage';
 
+const downloadMock = jest.fn();
+
 jest.mock('@/helpers/image.helpers', () => ({
   getScaledImageUri: (_src: string) => _src,
   ImageScale: { AUTOx450: 'AUTOx450', AUTOx1080: 'AUTOx1080' },
@@ -17,7 +19,13 @@ jest.mock('@/hooks/useInView', () => ({
   useInView: () => [jest.fn(), true],
 }));
 
+jest.mock('react-use-downloader', () => ({
+  __esModule: true,
+  default: () => ({ download: downloadMock }),
+}));
+
 beforeEach(() => {
+  downloadMock.mockClear();
   (global as any).ResizeObserver = class { observe(){} disconnect(){} };
 });
 
@@ -38,6 +46,18 @@ describe('DropListItemContentMediaImage', () => {
     fireEvent.load(img);
     fireEvent.click(img);
     expect(screen.queryByLabelText('View drop details')).not.toBeInTheDocument();
+  });
+
+  it('downloads the original image from the modal button', () => {
+    render(<DropListItemContentMediaImage src="https://example.com/path/image.png" />);
+    const img = screen.getByAltText('Drop media');
+    fireEvent.load(img);
+    fireEvent.click(img);
+    fireEvent.click(screen.getByRole('button', { name: /download image/i }));
+    expect(downloadMock).toHaveBeenCalledWith(
+      'https://example.com/path/image.png',
+      'image.png'
+    );
   });
 });
 
