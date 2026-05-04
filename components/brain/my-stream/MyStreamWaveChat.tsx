@@ -42,6 +42,7 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
+import { useWaveChatLeaveCleanup } from "./useWaveChatLeaveCleanup";
 
 interface InitialDropState {
   readonly waveId: string;
@@ -71,41 +72,13 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
 
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    return () => {
-      setUnreadDividerSerialNo(null);
-      void (async () => {
-        if (document.visibilityState !== "visible") {
-          return;
-        }
-
-        try {
-          await Promise.resolve(removeWaveDeliveredNotifications(waveId));
-        } catch (error: unknown) {
-          console.error(
-            "Failed to remove wave delivered notifications:",
-            error
-          );
-        }
-
-        try {
-          await markWaveNotificationsRead(waveId);
-        } catch (error: unknown) {
-          console.error("Failed to mark feed as read:", error);
-        }
-      })();
-    };
-  }, [
+  useWaveChatLeaveCleanup({
     enabled,
     waveId,
     setUnreadDividerSerialNo,
     removeWaveDeliveredNotifications,
     markWaveNotificationsRead,
-  ]);
+  });
 
   return null;
 };
