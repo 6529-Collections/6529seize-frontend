@@ -461,6 +461,40 @@ describe("instrumentation-client", () => {
     expect(result?.tags?.["errorType"]).toBeUndefined();
   });
 
+  it("does not tag unrelated TypeErrors that mention network", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "event-200",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "network switch failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("network switch failed"),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags?.["errorType"]).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.value).toBe("network switch failed");
+  });
+
   it("keeps browser network errors with a real HTTP status", () => {
     const beforeSend = loadBeforeSend();
     const event = {

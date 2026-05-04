@@ -238,8 +238,14 @@ function isNetworkError(errorMessage: string): boolean {
     normalized.includes("load failed") ||
     normalized.includes("networkerror") ||
     normalized.includes("network error") ||
-    normalized.includes("network request failed") ||
-    /\bnetwork\b/.test(normalized)
+    normalized.includes("network request failed")
+  );
+}
+
+function isRawBrowserNetworkError(error: Error): boolean {
+  return (
+    error.name === "NetworkError" ||
+    (error instanceof TypeError && isNetworkError(error.message))
   );
 }
 
@@ -277,10 +283,9 @@ function handleNetworkError(
   value: Sentry.Exception | undefined
 ): void {
   const isAppWrappedError = isAppWrappedApiNetworkError(error.message);
-  const isRawBrowserNetworkError =
-    error instanceof TypeError && isNetworkError(error.message);
+  const isRawBrowserError = isRawBrowserNetworkError(error);
 
-  if (!isAppWrappedError && !isRawBrowserNetworkError) {
+  if (!isAppWrappedError && !isRawBrowserError) {
     return;
   }
 
