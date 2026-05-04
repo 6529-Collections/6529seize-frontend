@@ -62,7 +62,7 @@ function DropListItemContentMediaVideo({
   return (
     <div
       ref={wrapperRef}
-      className="tw-group tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
+      className="tw-group tw-relative tw-flex tw-w-full tw-items-center tw-justify-center"
     >
       <video
         ref={videoRef}
@@ -71,7 +71,7 @@ function DropListItemContentMediaVideo({
         autoPlay={false}
         muted
         loop
-        className={`tw-h-full tw-w-full tw-rounded-xl tw-object-contain`}
+        className="tw-block tw-h-auto tw-w-full tw-rounded-xl tw-object-contain"
       >
         Your browser does not support the video tag.
       </video>

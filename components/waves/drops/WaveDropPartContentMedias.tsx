@@ -52,13 +52,13 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
 
   const mediaStackClassName = clsx(topSpacingClassName, "tw-space-y-3");
   const getMediaContainerClassName = ({
-    useNaturalHeightImage,
+    useIntrinsicHeightMedia,
     useCompactLink,
   }: {
-    readonly useNaturalHeightImage: boolean;
+    readonly useIntrinsicHeightMedia: boolean;
     readonly useCompactLink: boolean;
   }) => {
-    if (useNaturalHeightImage || useCompactLink) {
+    if (useIntrinsicHeightMedia || useCompactLink) {
       return "tw-w-full";
     }
 
@@ -75,13 +75,16 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           fullWidthMedia && media.mime_type.includes("image");
         const useImageIntrinsicHeight =
           !fullWidthMedia && media.mime_type.includes("image");
+        const useVideoIntrinsicHeight = media.mime_type.includes("video");
         const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
         const showMediaActionRow =
           media.mime_type.includes("image") ||
           media.mime_type.includes("video");
         const mediaContainerClassName = getMediaContainerClassName({
-          useNaturalHeightImage:
-            useNaturalHeightImage || useImageIntrinsicHeight,
+          useIntrinsicHeightMedia:
+            useNaturalHeightImage ||
+            useImageIntrinsicHeight ||
+            useVideoIntrinsicHeight,
           useCompactLink,
         });
         let mediaContent;
