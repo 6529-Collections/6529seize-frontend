@@ -161,6 +161,14 @@ const hasErrorMessage = (value: unknown): value is OpenGraphErrorBody => {
   return typeof maybeError === "string" && maybeError.length > 0;
 };
 
+const isAbortError = (error: unknown): boolean => {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  return (error as { readonly name?: unknown }).name === "AbortError";
+};
+
 const readOpenGraphError = async (
   response: Response,
   fallbackMessage: string
@@ -171,35 +179,48 @@ const readOpenGraphError = async (
     if (hasErrorMessage(body)) {
       errorMessage = body.error;
     }
-  } catch {
+  } catch (error: unknown) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+
     // ignore parse errors and use default message
   }
 
   return new Error(errorMessage);
 };
 
-const isAbortError = (error: unknown): boolean => {
-  if (typeof error !== "object" || error === null) {
-    return false;
-  }
-
-  return (error as { readonly name?: unknown }).name === "AbortError";
-};
-
-const fetchLinkPreviewMetadata = async (
+const fetchLinkPreviewMetadata = async <T>(
   input: RequestInfo | URL,
   init: RequestInit
-): Promise<Response> => {
+): Promise<T> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, LINK_PREVIEW_FETCH_TIMEOUT_MS);
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(() => {
+      controller.abort();
+      reject(new Error(LINK_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE));
+    }, LINK_PREVIEW_FETCH_TIMEOUT_MS);
+  });
 
-  try {
-    return await fetch(input, {
+  const fetchAndReadJson = async (): Promise<T> => {
+    const response = await fetch(input, {
       ...init,
       signal: controller.signal,
     });
+
+    if (!response.ok) {
+      throw await readOpenGraphError(
+        response,
+        LINK_PREVIEW_METADATA_ERROR_MESSAGE
+      );
+    }
+
+    return (await response.json()) as T;
+  };
+
+  try {
+    return await Promise.race([fetchAndReadJson(), timeoutPromise]);
   } catch (error: unknown) {
     if (isAbortError(error)) {
       throw new Error(LINK_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE);
@@ -207,7 +228,9 @@ const fetchLinkPreviewMetadata = async (
 
     throw error;
   } finally {
-    clearTimeout(timeout);
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+    }
   }
 };
 
@@ -216,27 +239,18 @@ const fetchSingleLinkPreview = async (
 ): Promise<LinkPreviewResponse> => {
   const params = new URLSearchParams({ url: normalizedUrl });
 
-  const response = await fetchLinkPreviewMetadata(
+  return fetchLinkPreviewMetadata<LinkPreviewResponse>(
     `/api/open-graph?${params.toString()}`,
     {
       headers: { Accept: "application/json" },
     }
   );
-
-  if (!response.ok) {
-    throw await readOpenGraphError(
-      response,
-      LINK_PREVIEW_METADATA_ERROR_MESSAGE
-    );
-  }
-
-  return response.json() as Promise<LinkPreviewResponse>;
 };
 
 const fetchLinkPreviewBatch = async (
   urls: readonly string[]
 ): Promise<OpenGraphBatchResponse> => {
-  const response = await fetchLinkPreviewMetadata("/api/open-graph", {
+  return fetchLinkPreviewMetadata<OpenGraphBatchResponse>("/api/open-graph", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -244,15 +258,6 @@ const fetchLinkPreviewBatch = async (
     },
     body: JSON.stringify({ urls }),
   });
-
-  if (!response.ok) {
-    throw await readOpenGraphError(
-      response,
-      LINK_PREVIEW_METADATA_ERROR_MESSAGE
-    );
-  }
-
-  return response.json() as Promise<OpenGraphBatchResponse>;
 };
 
 const chunkRequests = (
