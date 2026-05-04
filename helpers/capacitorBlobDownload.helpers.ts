@@ -46,7 +46,6 @@ export async function shareFetchedBlobInNativeApp(
   });
   await Share.share({
     title: fileName,
-    text: fileName,
     url: uri,
     dialogTitle: options?.dialogTitle ?? "Save file",
   });
