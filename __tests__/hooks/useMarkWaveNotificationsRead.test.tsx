@@ -1,7 +1,10 @@
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
+import {
+  useMarkWaveNotificationsRead,
+  useWaveNotificationsReadMarkerState,
+} from "@/hooks/useMarkWaveNotificationsRead";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { renderHook, waitFor } from "@testing-library/react";
@@ -37,7 +40,12 @@ interface Deferred {
 interface JwtPayload {
   readonly sub: string;
   readonly role: string | null;
+  readonly exp?: number | undefined;
 }
+
+const getCurrentJwtSecond = (): number => Math.floor(Date.now() / 1000);
+
+const getFutureJwtExp = (): number => getCurrentJwtSecond() + 60;
 
 const createDeferred = (): Deferred => {
   let resolve: () => void = () => {};
@@ -78,6 +86,8 @@ const setActiveIdentity = ({
   activeProfileProxyCreatorId,
   jwtAddress,
   jwtRole,
+  jwtExp,
+  jwtHasExp,
 }: {
   readonly address?: string | undefined;
   readonly jwt?: string | null | undefined;
@@ -85,6 +95,8 @@ const setActiveIdentity = ({
   readonly activeProfileProxyCreatorId?: string | null | undefined;
   readonly jwtAddress?: string | undefined;
   readonly jwtRole?: string | null | undefined;
+  readonly jwtExp?: number | undefined;
+  readonly jwtHasExp?: boolean | undefined;
 }) => {
   const proxyCreatorId =
     activeProfileProxyId != null
@@ -92,10 +104,12 @@ const setActiveIdentity = ({
       : null;
 
   if (jwt && address) {
-    jwtPayloadsByToken.set(jwt, {
+    const payload: JwtPayload = {
       sub: jwtAddress ?? address,
       role: jwtRole !== undefined ? jwtRole : proxyCreatorId,
-    });
+      ...((jwtHasExp ?? true) ? { exp: jwtExp ?? getFutureJwtExp() } : {}),
+    };
+    jwtPayloadsByToken.set(jwt, payload);
   }
 
   useSeizeConnectContextMock.mockReturnValue({ address } as any);
@@ -930,6 +944,78 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("does not send a read with a JWT that is missing exp", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-missing-exp",
+      jwtHasExp: false,
+    });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(
+      result.current("wave-missing-exp", { queueIfBlocked: false })
+    ).resolves.toBe("skipped");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
+  it("does not send a read with an expired JWT", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-expired",
+      jwtExp: getCurrentJwtSecond(),
+    });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(
+      result.current("wave-expired", { queueIfBlocked: false })
+    ).resolves.toBe("skipped");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
+  it("sends a queued read after an expired JWT is replaced by a fresh JWT", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-expired",
+      jwtExp: getCurrentJwtSecond(),
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const queuedPromise = result.current("wave-expired-replaced");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-fresh" });
+    rerender();
+
+    await expect(queuedPromise).resolves.toBe("sent");
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-expired-replaced/read",
+      headers: { Authorization: "Bearer jwt-fresh" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects a queued read when the wallet disconnects", async () => {
     const invalidateNotifications = jest.fn();
 
@@ -1200,6 +1286,30 @@ describe("useMarkWaveNotificationsRead", () => {
       headers: { Authorization: "Bearer jwt-proxy-loading" },
     });
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not create a proxy-role identity from an expired JWT role", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-expired-role",
+      jwtRole: "creator-1",
+      jwtExp: getCurrentJwtSecond(),
+    });
+    const { result } = renderHook(() => useWaveNotificationsReadMarkerState(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    expect(result.current.proxyRoleIdentityKey).toBeNull();
+    await expect(
+      result.current.markWaveNotificationsRead("wave-expired-role", {
+        queueIfBlocked: false,
+      })
+    ).resolves.toBe("skipped");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
   it("drops a queued proxy-role read when its guard becomes stale before the proxy loads", async () => {

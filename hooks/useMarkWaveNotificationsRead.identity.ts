@@ -6,6 +6,7 @@ export type AuthHeaders = Record<string, string>;
 interface WaveReadJwtPayload {
   readonly sub?: string | undefined;
   readonly role?: string | null | undefined;
+  readonly exp?: number | undefined;
 }
 
 export interface WaveReadVerifiedIdentity {
@@ -98,6 +99,16 @@ const decodeWaveReadJwtIdentity = (
 
   try {
     const decodedJwt = jwtDecode<WaveReadJwtPayload>(walletAuth);
+    const expiresAt = decodedJwt.exp;
+    const now = Math.floor(Date.now() / 1000);
+    if (
+      typeof expiresAt !== "number" ||
+      !Number.isFinite(expiresAt) ||
+      expiresAt <= now
+    ) {
+      return undefined;
+    }
+
     const addressKey = decodedJwt.sub?.toLowerCase() ?? null;
     if (!addressKey) {
       return undefined;
