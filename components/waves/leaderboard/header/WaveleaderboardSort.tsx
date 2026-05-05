@@ -40,9 +40,43 @@ export const WAVE_LEADERBOARD_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLea
     },
   ];
 
+export const WAVE_LEADERBOARD_APPROVE_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
+  [
+    {
+      key: WaveDropsLeaderboardSort.RANK,
+      label: "Closest to approval",
+      value: WaveDropsLeaderboardSort.RANK,
+    },
+    {
+      key: WaveDropsLeaderboardSort.RATING_PREDICTION,
+      label: "Projected Vote",
+      value: WaveDropsLeaderboardSort.RATING_PREDICTION,
+    },
+    {
+      key: WaveDropsLeaderboardSort.TREND,
+      label: "Hot",
+      value: WaveDropsLeaderboardSort.TREND,
+    },
+    {
+      key: WaveDropsLeaderboardSort.CREATED_AT,
+      label: "Newest",
+      value: WaveDropsLeaderboardSort.CREATED_AT,
+    },
+  ];
+
 export const WAVE_LEADERBOARD_CURATION_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
   [
     ...WAVE_LEADERBOARD_SORT_ITEMS,
+    {
+      key: WaveDropsLeaderboardSort.PRICE,
+      label: "Price",
+      value: WaveDropsLeaderboardSort.PRICE,
+    },
+  ];
+
+export const WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
+  [
+    ...WAVE_LEADERBOARD_APPROVE_SORT_ITEMS,
     {
       key: WaveDropsLeaderboardSort.PRICE,
       label: "Price",

@@ -3,12 +3,14 @@ import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 
 export default function CreateWaveOutcomesRowCICRank({
   outcome,
+  removeOutcome,
 }: {
   readonly outcome: CreateWaveOutcomeConfig;
+  readonly removeOutcome: () => void;
 }) {
   return (
-    <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2">
-      <div className="tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full">
+    <div className="tw-rounded-lg tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-px-5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-primary-400/10">
+      <div className="tw-grid tw-w-full tw-grid-cols-10 tw-items-center tw-justify-between tw-gap-x-4">
         <div className="tw-col-span-1">
           <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
             NIC
@@ -16,7 +18,7 @@ export default function CreateWaveOutcomesRowCICRank({
         </div>
         <div className="tw-col-span-4"></div>
         <div className="tw-col-span-2">
-          <p className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-text-nowrap">
+          <p className="tw-mb-0 tw-text-nowrap tw-text-sm tw-font-normal tw-text-white">
             Total: {formatLargeNumber(outcome.winnersConfig?.totalAmount ?? 0)}{" "}
             NIC
           </p>
@@ -24,7 +26,7 @@ export default function CreateWaveOutcomesRowCICRank({
         <div className="tw-col-span-2">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
-              className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
+              className="tw-size-5 tw-flex-shrink-0 tw-text-primary-400"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -38,7 +40,7 @@ export default function CreateWaveOutcomesRowCICRank({
                 strokeLinejoin="round"
               />
             </svg>
-            <p className="tw-mb-0 tw-text-sm tw-text-primary-400 tw-font-medium">
+            <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-primary-400">
               Winners:{" "}
               {formatLargeNumber(outcome.winnersConfig?.winners.length ?? 0)}
             </p>
@@ -46,11 +48,12 @@ export default function CreateWaveOutcomesRowCICRank({
         </div>
         <div className="tw-col-span-1 tw-flex tw-justify-end">
           <button
+            onClick={removeOutcome}
             aria-label="Remove"
-            className="tw-h-8 tw-w-8 tw-text-error tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-error/10 focus:tw-scale-90 tw-transform tw-transition tw-duration-300 tw-ease-out"
+            className="tw-flex tw-h-8 tw-w-8 tw-transform tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-error tw-transition tw-duration-300 tw-ease-out hover:tw-bg-error/10 focus:tw-scale-90"
           >
             <svg
-              className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

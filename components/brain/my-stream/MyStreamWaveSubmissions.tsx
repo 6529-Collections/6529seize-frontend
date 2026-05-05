@@ -15,6 +15,7 @@ import ParticipationDrop from "@/components/waves/drops/participation/Participat
 import { DropLocation } from "@/components/waves/drops/drop.types";
 import { WaveLeaderboardLoading } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoading";
 import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 
 const CURATION_FILTER_PARAM = "curation_id";
 
@@ -32,6 +33,8 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
   const { leaderboardViewStyle } = useLayout();
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
+    useApprovalWaveStatus({ wave });
   const {
     drops,
     fetchNextPage,
@@ -132,6 +135,9 @@ const MyStreamWaveSubmissions: React.FC<MyStreamWaveSubmissionsProps> = ({
             onReply={handleReply}
             onQuoteClick={handleQuoteClick}
             onDropContentClick={onDropClick}
+            winningThreshold={winningThreshold}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
           />
         ))}
         {isFetchingNextPage && <WaveLeaderboardLoadingBar />}

@@ -6,13 +6,28 @@ import { useWaveLeaderboardRendererSet } from "../leaderboard/leaderboardRendere
 interface WaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: () => void;
 }
 
 export const WaveSmallLeaderboardDrop: React.FC<
   WaveSmallLeaderboardDropProps
-> = ({ drop, wave, onDropClick }) => {
+> = ({
+  drop,
+  wave,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
+  onDropClick,
+}) => {
   const { SmallLeaderboardDrop } = useWaveLeaderboardRendererSet(wave.id);
 
-  return <SmallLeaderboardDrop drop={drop} onDropClick={onDropClick} />;
+  return (
+    <SmallLeaderboardDrop
+      drop={drop}
+      isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
+      onDropClick={onDropClick}
+    />
+  );
 };

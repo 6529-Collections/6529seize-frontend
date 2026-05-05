@@ -52,7 +52,7 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - Unsupported image formats show toast: `Invalid file type`.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
 - Changing wave type resets all non-overview settings to that type's defaults
-  (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`, `approval`).
+  (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
 
 ## Failure and Recovery
 

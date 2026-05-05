@@ -51,10 +51,10 @@ This step is user-reachable for `Chat` and `Rank`.
   - `Enter` selects the active row
   - `Escape` closes the list
 - Clicking outside closes the list.
-- Typing in a row that already has a selected group clears that selection until
-  a new group is picked.
+- Typing in a row that already has a selected group keeps that current group
+  selected until the row is explicitly cleared or a new group is picked.
 - Clear control (`x`) resets the row to its default scope.
-- Helper text under each row shows `Selected: <group>` or `Default: <scope>`.
+- Helper text under each row shows `Current group: <group-or-scope>`.
 
 ## Warnings and State Changes
 

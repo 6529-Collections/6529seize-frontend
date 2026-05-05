@@ -64,7 +64,11 @@ export function useWaveDropsLeaderboard({
     [curatedByGroupId]
   );
   const canonicalPriceFilters = useMemo(() => {
-    const normalizedPriceCurrency = priceCurrency?.trim() ?? undefined;
+    const trimmedPriceCurrency = priceCurrency?.trim();
+    const normalizedPriceCurrency =
+      trimmedPriceCurrency && trimmedPriceCurrency.length > 0
+        ? trimmedPriceCurrency
+        : undefined;
     const normalizedMinPrice =
       typeof minPrice === "number" && Number.isFinite(minPrice) && minPrice >= 0
         ? minPrice

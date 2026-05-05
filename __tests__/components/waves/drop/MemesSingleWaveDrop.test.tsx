@@ -1,24 +1,102 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { MemesSingleWaveDrop } from '@/components/waves/drop/MemesSingleWaveDrop';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { MemesSingleWaveDrop } from "@/components/waves/drop/MemesSingleWaveDrop";
 
-jest.mock('@/components/waves/drop/SingleWaveDropWrapper', () => ({
+const mockApprovalStatus = jest.fn();
+let mockWrapperProps: any;
+let mockInfoPanelProps: any;
+
+jest.mock("@/components/waves/drop/SingleWaveDropWrapper", () => ({
   __esModule: true,
-  SingleWaveDropWrapper: ({ children }: any) => <div data-testid="wrapper">{children}</div>,
+  SingleWaveDropWrapper: (props: any) => {
+    mockWrapperProps = props;
+    return <div data-testid="wrapper">{props.children}</div>;
+  },
 }));
 
-jest.mock('@/components/waves/drop/MemesSingleWaveDropInfoPanel', () => ({
+jest.mock("@/components/waves/drop/MemesSingleWaveDropInfoPanel", () => ({
   __esModule: true,
-  MemesSingleWaveDropInfoPanel: (props: any) => <div data-testid="info-panel" data-wave={props.wave?.id} />,
+  MemesSingleWaveDropInfoPanel: (props: any) => {
+    mockInfoPanelProps = props;
+    return <div data-testid="info-panel" data-wave={props.wave?.id} />;
+  },
 }));
 
-jest.mock('@/hooks/useDrop', () => ({ useDrop: () => ({ drop: { id: 'd1', wave: { id: 'w1' } } }) }));
-jest.mock('@/hooks/useWaveData', () => ({ useWaveData: () => ({ data: { id: 'w1' } }) }));
+jest.mock("@/hooks/useDrop", () => ({
+  useDrop: () => ({ drop: { id: "d1", wave: { id: "w1" } } }),
+}));
+jest.mock("@/hooks/useWaveData", () => ({
+  useWaveData: () => ({ data: { id: "w1" } }),
+}));
+jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
+  useApprovalWaveStatus: (args: any) => mockApprovalStatus(args),
+}));
 
-describe('MemesSingleWaveDrop', () => {
-  it('renders wrapper with memes info panel', () => {
-    render(<MemesSingleWaveDrop drop={{ id: 'd1', wave: { id: 'w1' }, stableHash: 'sh', stableKey: 'sk' } as any} onClose={jest.fn()} />);
-    expect(screen.getByTestId('wrapper')).toBeInTheDocument();
-    expect(screen.getByTestId('info-panel')).toHaveAttribute('data-wave', 'w1');
+describe("MemesSingleWaveDrop", () => {
+  beforeEach(() => {
+    mockWrapperProps = undefined;
+    mockInfoPanelProps = undefined;
+    mockApprovalStatus.mockReset();
+    mockApprovalStatus.mockReturnValue({
+      winningThreshold: null,
+      isVotingClosed: false,
+      isVotingControlsLocked: false,
+    });
+  });
+
+  it("renders wrapper with memes info panel", () => {
+    render(
+      <MemesSingleWaveDrop
+        drop={
+          {
+            id: "d1",
+            wave: { id: "w1" },
+            stableHash: "sh",
+            stableKey: "sk",
+          } as any
+        }
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+    expect(screen.getByTestId("info-panel")).toHaveAttribute("data-wave", "w1");
+  });
+
+  it("passes approval lock props into wrapper and info panel", () => {
+    mockApprovalStatus.mockReturnValue({
+      winningThreshold: 25,
+      isVotingClosed: true,
+      isVotingControlsLocked: true,
+    });
+
+    render(
+      <MemesSingleWaveDrop
+        drop={
+          {
+            id: "d1",
+            wave: { id: "w1" },
+            stableHash: "sh",
+            stableKey: "sk",
+          } as any
+        }
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(mockApprovalStatus).toHaveBeenCalledWith({ wave: { id: "w1" } });
+    expect(mockWrapperProps).toEqual(
+      expect.objectContaining({
+        winningThreshold: 25,
+        isVotingClosed: true,
+        isVotingControlsLocked: true,
+      })
+    );
+    expect(mockInfoPanelProps).toEqual(
+      expect.objectContaining({
+        isVotingClosed: true,
+        isVotingControlsLocked: true,
+      })
+    );
   });
 });

@@ -48,6 +48,9 @@ interface DropsListProps {
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 const MemoizedDrop = memo(Drop);
@@ -73,6 +76,9 @@ const DropsList = memo(
     onBoostedDropClick,
     autoCollapseSerials,
     suspendLightDropHydration = false,
+    winningThreshold,
+    isVotingClosed = false,
+    isVotingControlsLocked = false,
   }: DropsListProps) => {
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
@@ -107,6 +113,9 @@ const DropsList = memo(
         dropViewDropId,
         onDropContentClick,
         scrollContainerRef,
+        winningThreshold,
+        isVotingClosed,
+        isVotingControlsLocked,
       };
     }, [
       showWaveInfo,
@@ -121,6 +130,9 @@ const DropsList = memo(
       dropViewDropId,
       onDropContentClick,
       scrollContainerRef,
+      winningThreshold,
+      isVotingClosed,
+      isVotingControlsLocked,
     ]);
 
     // Store the serial_no of drops that boosted cards should appear BEFORE
@@ -237,6 +249,9 @@ const DropsList = memo(
               onQuoteClick={getItemData.onQuoteClick}
               parentContainerRef={getItemData.parentContainerRef}
               onDropContentClick={getItemData.onDropContentClick}
+              winningThreshold={getItemData.winningThreshold}
+              isVotingClosed={getItemData.isVotingClosed}
+              isVotingControlsLocked={getItemData.isVotingControlsLocked}
             />
           ) : (
             <MemoizedLightDrop drop={drop} />

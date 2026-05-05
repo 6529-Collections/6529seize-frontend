@@ -34,10 +34,10 @@ export default function CreateWaveGroupSearchInput({
   readonly onClearSelection: () => void;
 }) {
   const inputClasses = [
-    "tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-peer tw-pl-10 tw-pr-4 tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out tw-text-base tw-pt-3 tw-pb-3",
+    "tw-form-input tw-peer tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-pb-3 tw-pl-10 tw-pr-4 tw-pt-3 tw-text-base sm:tw-text-sm tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-300 tw-ease-out",
     disabled
-      ? "tw-ring-iron-700 tw-text-iron-500 tw-caret-iron-500 placeholder:tw-text-iron-500 tw-bg-iron-800"
-      : "tw-ring-iron-700 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400 hover:tw-ring-iron-650 placeholder:tw-text-iron-500",
+      ? "tw-bg-iron-900/80 tw-text-iron-500 tw-caret-iron-500 placeholder:tw-text-iron-500"
+      : "tw-caret-primary-400 placeholder:tw-text-iron-500 hover:tw-ring-white/10 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400",
     hasValue || hasSelectedGroup
       ? "focus:tw-text-white tw-text-primary-400"
       : "tw-text-white",
@@ -65,7 +65,7 @@ export default function CreateWaveGroupSearchInput({
         autoComplete="off"
       />
       <svg
-        className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
+        className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-500"
         viewBox="0 0 20 20"
         fill="currentColor"
         aria-hidden="true"
@@ -107,7 +107,7 @@ export default function CreateWaveGroupSearchInput({
         htmlFor={inputId}
         className={`tw-absolute tw-cursor-text tw-rounded-lg tw-text-base tw-font-medium ${
           disabled ? "tw-text-iron-400" : "tw-text-iron-500"
-        } tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-bg-iron-900 tw-px-2 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
+        } tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-bg-iron-950 tw-px-2 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-950 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
       >
         {label}
       </label>
