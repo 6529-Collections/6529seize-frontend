@@ -27,6 +27,7 @@ function NaturalHeightImage({
   retryTick,
   onLoad,
   onFinalError,
+  imageObjectPosition,
 }: {
   readonly imgRef: React.RefObject<HTMLImageElement | null>;
   readonly primarySrc: string;
@@ -34,6 +35,7 @@ function NaturalHeightImage({
   readonly retryTick: number;
   readonly onLoad: () => void;
   readonly onFinalError: () => void;
+  readonly imageObjectPosition: string;
 }) {
   const [currentSrc, setCurrentSrc] = useState(primarySrc);
   const [usedFallback, setUsedFallback] = useState(false);
@@ -56,7 +58,7 @@ function NaturalHeightImage({
       alt="Drop media"
       loading="lazy"
       className="tw-block tw-h-auto tw-max-h-64 tw-w-full tw-max-w-full tw-object-contain"
-      style={{ objectPosition: "center" }}
+      style={{ objectPosition: imageObjectPosition }}
       onLoad={onLoad}
       onError={handleError}
     />
@@ -66,9 +68,11 @@ function NaturalHeightImage({
 export default function WaveDropPartContentFullWidthImage({
   src,
   imageScale = ImageScale.AUTOx450,
+  imageObjectPosition = "center",
 }: {
   readonly src: string;
   readonly imageScale?: ImageScale | undefined;
+  readonly imageObjectPosition?: string | undefined;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -242,6 +246,7 @@ export default function WaveDropPartContentFullWidthImage({
           retryTick={retryTick}
           onLoad={handleImageLoad}
           onFinalError={handleError}
+          imageObjectPosition={imageObjectPosition}
         />
       </button>
 
