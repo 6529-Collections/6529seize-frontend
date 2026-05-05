@@ -312,13 +312,16 @@ function isFilteredBreadcrumbFallbackApiTarget(
   );
 }
 
-function getHttpBreadcrumbs(event: SentryClientEvent): SentryBreadcrumb[] {
-  return getBreadcrumbValues(event).filter(
-    (breadcrumb) =>
-      breadcrumb.type === "http" ||
-      breadcrumb.category === "fetch" ||
-      breadcrumb.category === "xhr"
+function isHttpBreadcrumb(breadcrumb: SentryBreadcrumb): boolean {
+  return (
+    breadcrumb.type === "http" ||
+    breadcrumb.category === "fetch" ||
+    breadcrumb.category === "xhr"
   );
+}
+
+function getHttpBreadcrumbs(event: SentryClientEvent): SentryBreadcrumb[] {
+  return getBreadcrumbValues(event).filter(isHttpBreadcrumb);
 }
 
 function getBreadcrumbStatusCode(breadcrumb: SentryBreadcrumb): number | null {
@@ -337,7 +340,7 @@ export function getBreadcrumbTransportStatusCode(
     return statusCode;
   }
 
-  if (breadcrumb.category === "fetch" && breadcrumb.level === "error") {
+  if (breadcrumb.level === "error" && isHttpBreadcrumb(breadcrumb)) {
     return 0;
   }
 

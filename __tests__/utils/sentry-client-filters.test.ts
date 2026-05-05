@@ -1172,6 +1172,41 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("uses an HTTP error breadcrumb without a status before a later success", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          level: "error",
+          data: {
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 200,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
   it("handles Sentry breadcrumb values form for first-party status 0 errors", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({
