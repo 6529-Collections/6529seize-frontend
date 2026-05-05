@@ -614,22 +614,18 @@ function useIncomingDropProcessor({
       const isMuted = isWaveMuted(waveId);
       if (isMuted) {
         if (isFetchedDropUpdate(type)) {
-          if (existingDrop !== undefined) {
-            await handleFetchedDropUpdate(drop, waveId, undefined, {
-              updateWaveStore: false,
-            });
-            return;
-          }
-
           const cachedDropSnapshot = findDropInCachedDrops(
             queryClient,
             drop.id
           );
-          if (cachedDropSnapshot !== null || currentData?.isLoading === true) {
-            await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot, {
-              updateWaveStore: false,
-            });
+
+          if (cachedDropSnapshot === null) {
+            return;
           }
+
+          await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot, {
+            updateWaveStore: false,
+          });
         }
         return;
       }

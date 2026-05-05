@@ -2385,6 +2385,51 @@ describe("useWaveRealtimeUpdater", () => {
     ]);
   });
 
+  it.each<[string, ProcessIncomingDropType]>([
+    ["reaction", ProcessIncomingDropType.DROP_REACTION_UPDATE],
+    ["rating", ProcessIncomingDropType.DROP_RATING_UPDATE],
+  ])(
+    "skips muted %s updates when the drop exists only in the wave store",
+    async (_label, type) => {
+      const store: any = {
+        wave1: {
+          drops: [
+            {
+              id: "d-muted-wave-only",
+              type: DropSize.FULL,
+              stableKey: "muted-wave-only-stable-key",
+              stableHash: "muted-wave-only-stable-hash",
+              author: {},
+              wave: { id: "wave1" },
+              context_profile_context: contextProfileContext(":local:"),
+              reactions: reactionEntries(":local:"),
+            },
+          ],
+          isLoading: false,
+          latestFetchedSerialNo: 10,
+        },
+      };
+      const props = baseProps(store);
+      props.activeWaveId = "wave1";
+      props.isWaveMuted = jest.fn().mockReturnValue(true);
+
+      const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+      const drop: any = {
+        id: "d-muted-wave-only",
+        wave: { id: "wave1" },
+        author: {},
+      };
+
+      await act(async () => result.current.processIncomingDrop(drop, type));
+      await flushPromises();
+
+      expect(props.isWaveMuted).toHaveBeenCalledWith("wave1");
+      expect(fetchDropByIdBatched).not.toHaveBeenCalled();
+      expect(mockSetQueriesData).not.toHaveBeenCalled();
+      expectNoMutedWaveSideEffects(props);
+    }
+  );
+
   it("updates React Query caches for muted reaction updates without wave work", async () => {
     const oldCacheContext = contextProfileContext(":old-cache:");
     const store: any = {
