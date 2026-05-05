@@ -88,6 +88,68 @@ describe("sentry-sanitizer", () => {
     );
   });
 
+  it("does not mark redacted breadcrumb URL placeholders as first-party", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        url: "[Filtered]",
+      },
+    });
+
+    expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party");
+    expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party_api");
+  });
+
+  it("does not mark unknown breadcrumb URL placeholders as first-party", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        url: "unknown",
+      },
+    });
+
+    expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party");
+    expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party_api");
+  });
+
+  it("marks bare API paths as first-party API breadcrumb URLs", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        url: "api/waves-overview",
+      },
+    });
+
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "/api/waves-overview",
+        "url.is_first_party": true,
+        "url.is_first_party_api": true,
+      })
+    );
+  });
+
+  it("marks bare asset paths as first-party non-API breadcrumb URLs", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        url: "assets/app.js",
+      },
+    });
+
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "/assets/app.js",
+        "url.is_first_party": true,
+        "url.is_first_party_api": false,
+      })
+    );
+  });
+
   it("keeps existing breadcrumb URL origin metadata on later sanitize passes", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       type: "http",

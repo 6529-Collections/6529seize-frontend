@@ -15,6 +15,11 @@ const SENSITIVE_KEY_FRAGMENT_PATTERN =
 const SENSITIVE_HEADER_NAME_PATTERN =
   /^(authorization|cookie|set-cookie|x-api-key|x-auth-token|x-csrf-token|x-xsrf-token|proxy-authorization|x-forwarded-for|x-real-ip|cf-connecting-ip)$/i;
 
+type SanitizableSentryEvent<T extends Event> = Omit<T, "request" | "user"> & {
+  request?: Record<string, unknown> | null;
+  user?: unknown;
+};
+
 function isFirstPartyHost(hostname: string): boolean {
   const normalized = hostname.toLowerCase();
   return normalized === "6529.io" || normalized.endsWith(".6529.io");
@@ -22,6 +27,36 @@ function isFirstPartyHost(hostname: string): boolean {
 
 function isAbsoluteUrlLike(value: string): boolean {
   return /^[a-z][a-z\d+\-.]*:/i.test(value) || value.startsWith("//");
+}
+
+function isRelativeUrlPathLike(value: string): boolean {
+  for (const char of value) {
+    if (char.trim() === "") {
+      return false;
+    }
+  }
+
+  if (
+    value.startsWith("/") ||
+    value.startsWith("./") ||
+    value.startsWith("../")
+  ) {
+    return true;
+  }
+
+  const queryIndex = value.indexOf("?");
+  const hashIndex = value.indexOf("#");
+  let pathEnd = -1;
+  if (queryIndex === -1) {
+    pathEnd = hashIndex;
+  } else if (hashIndex === -1) {
+    pathEnd = queryIndex;
+  } else {
+    pathEnd = Math.min(queryIndex, hashIndex);
+  }
+  const path = pathEnd === -1 ? value : value.slice(0, pathEnd);
+
+  return path.indexOf("/") > 0;
 }
 
 function getBreadcrumbUrlIsFirstParty(value: unknown): boolean | undefined {
@@ -35,7 +70,7 @@ function getBreadcrumbUrlIsFirstParty(value: unknown): boolean | undefined {
   }
 
   if (!isAbsoluteUrlLike(trimmed)) {
-    return true;
+    return isRelativeUrlPathLike(trimmed) ? true : undefined;
   }
 
   try {
@@ -60,6 +95,10 @@ function getBreadcrumbUrlIsFirstPartyApi(
 
   const trimmed = value.trim();
   if (!trimmed) {
+    return undefined;
+  }
+
+  if (!isAbsoluteUrlLike(trimmed) && !isRelativeUrlPathLike(trimmed)) {
     return undefined;
   }
 
@@ -260,13 +299,13 @@ export function sanitizeSentryBreadcrumb(
 
 export function sanitizeSentryEvent<T extends Event>(event: T): T {
   // Avoid mutating the original reference in case Sentry reuses it.
-  const next = { ...event };
+  const next = { ...event } as unknown as SanitizableSentryEvent<T>;
 
   // Do not send user-identifying fields by default.
-  delete (next as any).user;
+  delete next.user;
 
   if (next.request) {
-    const req: Record<string, unknown> = { ...(next.request as any) };
+    const req: Record<string, unknown> = { ...next.request };
 
     if (typeof req["url"] === "string") {
       req["url"] = sanitizeUrlString(req["url"]);
@@ -284,7 +323,7 @@ export function sanitizeSentryEvent<T extends Event>(event: T): T {
     delete req["data"];
     delete req["query_string"];
 
-    (next as any).request = req;
+    next.request = req;
   }
 
   if (typeof next.message === "string") {
@@ -325,5 +364,5 @@ export function sanitizeSentryEvent<T extends Event>(event: T): T {
     >;
   }
 
-  return next;
+  return next as unknown as T;
 }
