@@ -8,6 +8,7 @@ import {
 import { useCallback, useMemo } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
+  reconcileServerDropsForDisplay,
   updateAttachmentInCachedDrops,
   updateServerDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
@@ -119,9 +120,15 @@ export function useWaveDrops({
         params["serial_no_less_than"] = `${pageParam}`;
       }
 
-      return await commonApiFetch<ApiDrop[]>({
+      const serverDrops = await commonApiFetch<ApiDrop[]>({
         endpoint: "drops",
         params,
+      });
+
+      return reconcileServerDropsForDisplay({
+        queryClient,
+        serverDrops,
+        websocketStatus: WebSocketStatus.CONNECTED,
       });
     },
     enabled: enabled && !!waveId,

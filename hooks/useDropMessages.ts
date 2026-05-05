@@ -12,6 +12,7 @@ import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import {
+  reconcileDropsWithoutWaveForDisplay,
   updateAttachmentInCachedDrops,
   updateServerDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
@@ -77,7 +78,15 @@ export function useDropMessages(waveId: string, dropId: string | null) {
         params,
       });
 
-      return results;
+      return {
+        ...results,
+        drops: reconcileDropsWithoutWaveForDisplay({
+          queryClient,
+          serverDrops: results.drops,
+          wave: results.wave,
+          websocketStatus: WebSocketStatus.CONNECTED,
+        }),
+      };
     },
     enabled: !!dropId,
     initialPageParam: null,

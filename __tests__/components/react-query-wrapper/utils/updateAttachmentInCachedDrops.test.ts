@@ -1,6 +1,7 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   findDropInCachedDrops,
+  reconcileDropsWithoutWaveForDisplay,
   reconcileServerDropForDisplay,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
@@ -532,6 +533,122 @@ describe("cached drop websocket updates", () => {
     expect(reconciledDrop.reactions).toEqual([
       reactionEntry(":wave:", [profile("profile-2")]),
       reactionEntry(":fire:", [snapshotUser]),
+    ]);
+  });
+
+  it("uses a protected cached copy after a stale cached copy", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: "drop-multi-cache-source",
+            context_profile_context: contextProfileContext(":wave:"),
+            reactions: [reactionEntry(":wave:", [profile("profile-2")])],
+          },
+        ],
+      ],
+    });
+    queryClient.setQueryData([QueryKey.FEED_ITEMS, { page: 1 }], {
+      pages: [
+        [
+          {
+            item: {
+              id: "drop-multi-cache-source",
+              context_profile_context: contextProfileContext(":joy:"),
+              reactions: [reactionEntry(":joy:", [currentUser])],
+            },
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId: "drop-multi-cache-source",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      queryClient,
+      serverDrop: serverDrop({
+        id: "drop-multi-cache-source",
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [profile("profile-2")]),
+          reactionEntry(":joy:", [profile("profile-3")]),
+        ],
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context?.reaction).toBe(":joy:");
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2")]),
+      reactionEntry(":joy:", [profile("profile-3"), currentUser]),
+    ]);
+  });
+
+  it("reconciles without-wave fetched drops and preserves page-only fields", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: "drop-without-wave-page",
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [reactionEntry(":joy:", [currentUser])],
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId: "drop-without-wave-page",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const [reconciledDrop] = reconcileDropsWithoutWaveForDisplay({
+      queryClient,
+      serverDrops: [
+        {
+          id: "drop-without-wave-page",
+          drop_priority_order: 7,
+          context_profile_context: contextProfileContext(":wave:"),
+          reactions: [reactionEntry(":wave:", [profile("profile-2")])],
+        },
+      ] as any[],
+      wave: { id: "wave-1" } as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop).not.toHaveProperty("wave");
+    expect(reconciledDrop).toMatchObject({
+      drop_priority_order: 7,
+      context_profile_context: expect.objectContaining({
+        reaction: ":joy:",
+      }),
+    });
+    expect(reconciledDrop?.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2")]),
+      reactionEntry(":joy:", [currentUser]),
     ]);
   });
 

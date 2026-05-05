@@ -2,6 +2,7 @@
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
+  reconcileDropsWithoutWaveForDisplay,
   updateAttachmentInCachedDrops,
   updateServerDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
@@ -79,13 +80,26 @@ export function useWaveCurationDrops({
         );
       }
 
-      return await commonApiFetch<ApiCurationDropsPage>({
+      const page = await commonApiFetch<ApiCurationDropsPage>({
         endpoint: `waves/${waveId}/curations/${normalizedCurationId}/drops`,
         params: {
           page: String(pageParam),
           page_size: String(pageSize),
         },
       });
+
+      return {
+        ...page,
+        data:
+          waveMin === null
+            ? page.data
+            : reconcileDropsWithoutWaveForDisplay({
+                queryClient,
+                serverDrops: page.data,
+                wave: waveMin,
+                websocketStatus: WebSocketStatus.CONNECTED,
+              }),
+      };
     },
     enabled: enabled && !!waveId && normalizedCurationId.length > 0,
     initialPageParam: 1,

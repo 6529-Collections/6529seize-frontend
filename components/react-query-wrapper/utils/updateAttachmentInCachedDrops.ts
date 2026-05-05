@@ -29,6 +29,9 @@ type UpdateServerDropInCachedDropsParams = Omit<
   "queryClient"
 >;
 
+type DropWithoutWaveReactionState = CachedDropReactionState &
+  Pick<ApiDrop, "id">;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -146,37 +149,30 @@ function toCachedDropReactionState(
   };
 }
 
-function findDrop(
+function findDrops(
   value: unknown,
-  dropId: string
-): CachedDropReactionState | null {
+  dropId: string,
+  drops: CachedDropReactionState[]
+): void {
   if (Array.isArray(value)) {
     for (const item of value) {
-      const drop = findDrop(item, dropId);
-      if (drop !== null) {
-        return drop;
-      }
+      findDrops(item, dropId, drops);
     }
 
-    return null;
+    return;
   }
 
   if (!isRecord(value)) {
-    return null;
+    return;
   }
 
   if (isMatchingDrop(value, dropId)) {
-    return toCachedDropReactionState(value);
+    drops.push(toCachedDropReactionState(value));
   }
 
   for (const item of Object.values(value)) {
-    const drop = findDrop(item, dropId);
-    if (drop !== null) {
-      return drop;
-    }
+    findDrops(item, dropId, drops);
   }
-
-  return null;
 }
 
 function findReactionProfile(
@@ -265,28 +261,46 @@ function serverReactionsMatchProtectedIntent(
 
 function selectProtectedLocalDrop({
   cachedDropSnapshot,
-  latestCachedDrop,
+  latestCachedDrops,
   latestWaveDrop,
   protectedIntent,
 }: {
   readonly cachedDropSnapshot: CachedDropReactionState | null | undefined;
-  readonly latestCachedDrop: CachedDropReactionState | null;
+  readonly latestCachedDrops: readonly CachedDropReactionState[];
   readonly latestWaveDrop: CachedDropReactionState | null | undefined;
   readonly protectedIntent: ProtectedReactionIntent;
 }): CachedDropReactionState | null {
-  const localSources = [latestWaveDrop, latestCachedDrop, cachedDropSnapshot];
-  const protectedLocalSource = localSources.find(
-    (source) =>
-      source !== null &&
-      source !== undefined &&
-      matchesProtectedReactionIntent(source, protectedIntent)
-  );
+  const protectedLatestWaveDrop =
+    latestWaveDrop !== null &&
+    latestWaveDrop !== undefined &&
+    matchesProtectedReactionIntent(latestWaveDrop, protectedIntent)
+      ? latestWaveDrop
+      : undefined;
 
-  if (protectedLocalSource !== undefined) {
-    return protectedLocalSource;
+  if (protectedLatestWaveDrop !== undefined) {
+    return protectedLatestWaveDrop;
   }
 
-  return latestWaveDrop ?? latestCachedDrop ?? cachedDropSnapshot ?? null;
+  const protectedCachedDrop = latestCachedDrops.find((source) =>
+    matchesProtectedReactionIntent(source, protectedIntent)
+  );
+
+  if (protectedCachedDrop !== undefined) {
+    return protectedCachedDrop;
+  }
+
+  const protectedSnapshot =
+    cachedDropSnapshot !== null &&
+    cachedDropSnapshot !== undefined &&
+    matchesProtectedReactionIntent(cachedDropSnapshot, protectedIntent)
+      ? cachedDropSnapshot
+      : undefined;
+
+  if (protectedSnapshot !== undefined) {
+    return protectedSnapshot;
+  }
+
+  return latestWaveDrop ?? latestCachedDrops[0] ?? cachedDropSnapshot ?? null;
 }
 
 function mergeProtectedReactionProfiles(
@@ -456,10 +470,10 @@ export function reconcileServerDropForDisplay({
     return serverDrop;
   }
 
-  const latestCachedDrop = findDropInCachedDrops(queryClient, serverDrop.id);
+  const latestCachedDrops = findDropsInCachedDrops(queryClient, serverDrop.id);
   const localDrop = selectProtectedLocalDrop({
     cachedDropSnapshot,
-    latestCachedDrop,
+    latestCachedDrops,
     latestWaveDrop,
     protectedIntent,
   });
@@ -485,22 +499,74 @@ export function updateServerDropInCachedDrops(
   return displayDrop;
 }
 
-export function findDropInCachedDrops(
+export function reconcileServerDropsForDisplay({
+  queryClient,
+  serverDrops,
+  websocketStatus,
+}: {
+  readonly queryClient: QueryClient;
+  readonly serverDrops: readonly ApiDrop[];
+  readonly websocketStatus?: WebSocketStatus | string | null;
+}): ApiDrop[] {
+  return serverDrops.map((serverDrop) =>
+    reconcileServerDropForDisplay({
+      queryClient,
+      serverDrop,
+      ...(websocketStatus !== undefined ? { websocketStatus } : {}),
+    })
+  );
+}
+
+export function reconcileDropsWithoutWaveForDisplay<
+  TDrop extends DropWithoutWaveReactionState,
+>({
+  queryClient,
+  serverDrops,
+  wave,
+  websocketStatus,
+}: {
+  readonly queryClient: QueryClient;
+  readonly serverDrops: readonly TDrop[];
+  readonly wave: ApiDrop["wave"];
+  readonly websocketStatus?: WebSocketStatus | string | null;
+}): TDrop[] {
+  return serverDrops.map((drop) => {
+    const serverDrop = { ...drop, wave } as ApiDrop & TDrop;
+    const displayDrop = reconcileServerDropForDisplay({
+      queryClient,
+      serverDrop,
+      ...(websocketStatus !== undefined ? { websocketStatus } : {}),
+    });
+    return {
+      ...drop,
+      context_profile_context: displayDrop.context_profile_context,
+      reactions: displayDrop.reactions,
+    } as TDrop;
+  });
+}
+
+function findDropsInCachedDrops(
   queryClient: QueryClient,
   dropId: string
-): CachedDropReactionState | null {
+): CachedDropReactionState[] {
+  const drops: CachedDropReactionState[] = [];
+
   for (const queryKey of CACHED_DROP_QUERY_KEYS) {
     const cachedQueries = queryClient.getQueriesData({
       queryKey: [queryKey],
     });
 
     for (const [, data] of cachedQueries) {
-      const drop = findDrop(data, dropId);
-      if (drop !== null) {
-        return drop;
-      }
+      findDrops(data, dropId, drops);
     }
   }
 
-  return null;
+  return drops;
+}
+
+export function findDropInCachedDrops(
+  queryClient: QueryClient,
+  dropId: string
+): CachedDropReactionState | null {
+  return findDropsInCachedDrops(queryClient, dropId)[0] ?? null;
 }
