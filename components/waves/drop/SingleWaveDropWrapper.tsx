@@ -24,6 +24,9 @@ interface SingleWaveDropWrapperProps {
   readonly wave: ApiWave;
   readonly children: React.ReactNode;
   readonly onClose: () => void;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
@@ -31,6 +34,9 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   wave,
   children,
   onClose,
+  winningThreshold = null,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const isSmallScreen = useMediaQuery("(max-width: 1023px)");
@@ -124,7 +130,14 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
         >
           <div className="@container tw-relative tw-flex tw-flex-1 tw-flex-col tw-overflow-hidden">
             <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-z-50 tw-h-12 tw-bg-gradient-to-b tw-from-black tw-to-transparent" />
-            <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
+            <SingleWaveDropChat
+              key={drop.id}
+              wave={wave}
+              drop={drop}
+              winningThreshold={winningThreshold}
+              isVotingClosed={isVotingClosed}
+              isVotingControlsLocked={isVotingControlsLocked}
+            />
           </div>
         </div>
       </CompactModeProvider>
@@ -167,7 +180,14 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
                 </div>
 
                 <div className="@container tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden">
-                  <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
+                  <SingleWaveDropChat
+                    key={drop.id}
+                    wave={wave}
+                    drop={drop}
+                    winningThreshold={winningThreshold}
+                    isVotingClosed={isVotingClosed}
+                    isVotingControlsLocked={isVotingControlsLocked}
+                  />
                 </div>
               </div>
             </Transition.Child>

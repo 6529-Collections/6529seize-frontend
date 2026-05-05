@@ -50,6 +50,9 @@ interface WaveDropsAllProps {
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly bottomPaddingClassName?: string | undefined;
   readonly isMuted?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
@@ -63,6 +66,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   onDropContentClick,
   bottomPaddingClassName,
   isMuted = false,
+  winningThreshold,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
@@ -285,6 +291,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           unreadCount={unreadCount}
           autoCollapseSerials={autoCollapseSerials}
           suspendLightDropHydration={isScrolling || serialTarget !== null}
+          winningThreshold={winningThreshold}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
       </TweetPreviewModeProvider>
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
@@ -306,6 +315,9 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   onDropContentClick,
   bottomPaddingClassName,
   isMuted = false,
+  winningThreshold,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }) => {
   return (
     <UnreadDividerProvider
@@ -324,6 +336,9 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         onDropContentClick={onDropContentClick}
         bottomPaddingClassName={bottomPaddingClassName}
         isMuted={isMuted}
+        winningThreshold={winningThreshold}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
       />
     </UnreadDividerProvider>
   );

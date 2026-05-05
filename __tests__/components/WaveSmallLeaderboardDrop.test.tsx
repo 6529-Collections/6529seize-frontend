@@ -22,20 +22,29 @@ describe("WaveSmallLeaderboardDrop", () => {
   });
 
   it("renders the resolved small leaderboard renderer", () => {
+    const smallLeaderboardDrop = jest.fn(() => <div>quorum</div>);
     useWaveLeaderboardRendererSet.mockReturnValue({
       variant: "quorum",
       LeaderboardDrop: () => null,
-      SmallLeaderboardDrop: () => <div>quorum</div>,
+      SmallLeaderboardDrop: smallLeaderboardDrop,
     });
 
     render(
       <WaveSmallLeaderboardDrop
         drop={drop}
         wave={wave}
+        isVotingClosed={true}
+        isVotingControlsLocked={true}
         onDropClick={onDropClick}
       />
     );
     expect(useWaveLeaderboardRendererSet).toHaveBeenCalledWith("w1");
+    expect(smallLeaderboardDrop.mock.calls[0]?.[0]).toEqual({
+      drop,
+      isVotingClosed: true,
+      isVotingControlsLocked: true,
+      onDropClick,
+    });
     expect(screen.getByText("quorum")).toBeInTheDocument();
   });
 });

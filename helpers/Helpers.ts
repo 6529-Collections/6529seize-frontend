@@ -24,7 +24,6 @@ import { DateIntervalsSelection } from "@/types/enums";
 import emojiRegex from "emoji-regex";
 import { goerli, mainnet, sepolia } from "wagmi/chains";
 import type { PageSSRMetadata } from "./Types";
-import { Period } from "./Types";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
 
@@ -758,13 +757,6 @@ export const formatLargeNumber = (num: number): string => {
 export const classNames = (...classes: string[]) =>
   classes.filter(Boolean).join(" ");
 
-export const PERIOD_LABELS: Record<Period, string> = {
-  [Period.MINUTES]: "Minutes",
-  [Period.HOURS]: "Hours",
-  [Period.DAYS]: "Days",
-  [Period.WEEKS]: "Weeks",
-  [Period.MONTHS]: "Months",
-};
 const hashSeed = (seed: string): number => {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
@@ -786,7 +778,7 @@ const seededRandom = (seed: number) => {
 };
 
 export const getRandomColorWithSeed = (seedString: string) => {
-  let seed = hashSeed(seedString);
+  const seed = hashSeed(seedString);
   const random = seededRandom(seed);
   const r = Math.floor(random() * 256)
     .toString(16)

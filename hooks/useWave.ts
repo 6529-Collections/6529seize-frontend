@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
 import { calculateLastDecisionTime } from "@/helpers/waves/time.utils";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
@@ -63,6 +64,7 @@ interface WaveInfo {
   };
   isChatWave: boolean;
   isRankWave: boolean;
+  isApproveWave: boolean;
   isMemesWave: boolean;
   isCurationWave: boolean;
   isQuorumWave: boolean;
@@ -428,8 +430,9 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
       calculateMintingDate,
     },
     // Wave type flags
-    isChatWave: wave?.wave.type === "CHAT",
-    isRankWave: wave?.wave.type === "RANK",
+    isChatWave: wave?.wave.type === ApiWaveType.Chat,
+    isRankWave: wave?.wave.type === ApiWaveType.Rank,
+    isApproveWave: wave?.wave.type === ApiWaveType.Approve,
     isMemesWave: isMemesWave(wave?.id.toLowerCase()),
     isCurationWave: isCurationWave(wave?.id.toLowerCase()),
     isQuorumWave: isQuorumWave(wave?.id.toLowerCase()),

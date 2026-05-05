@@ -22,21 +22,19 @@ export default function GroupCreateTDH({
       value: ApiGroupTdhInclusionStrategy.Tdh,
       key: ApiGroupTdhInclusionStrategy.Tdh,
     },
-
-
   ];
 
   return (
-    <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div className="tw-mb-4">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
           <div>
-            <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+            <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
               {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
                 ? "TDH + xTDH"
                 : tdh.inclusion_strategy}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-300">
+            <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
               Set the group&apos;s minimum{" "}
               {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
                 ? "TDH + xTDH"
@@ -51,6 +49,7 @@ export default function GroupCreateTDH({
               setSelected={(strategy) =>
                 setTDH({ ...tdh, inclusion_strategy: strategy })
               }
+              size="sm"
               fill={false}
               filterLabel="Group TDH Mode"
             />
@@ -59,10 +58,11 @@ export default function GroupCreateTDH({
       </div>
       <GroupCreateNumericValue
         value={tdh.min}
-        label={`${tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
-          ? "TDH + xTDH"
-          : tdh.inclusion_strategy
-          } at least`}
+        label={`${
+          tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
+            ? "TDH + xTDH"
+            : tdh.inclusion_strategy
+        } at least`}
         labelId="floating_tdh"
         setValue={(value) => setTDH({ ...tdh, min: value })}
       />

@@ -33,6 +33,19 @@ describe("WaveWinnersDrops", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("shows custom empty text when provided", () => {
+    render(
+      <WaveWinnersDrops
+        wave={wave}
+        winners={[]}
+        onDropClick={jest.fn()}
+        emptyMessage="No drops approved yet"
+      />
+    );
+
+    expect(screen.getByText("No drops approved yet")).toBeInTheDocument();
+  });
+
   it("renders a drop component for each winner", () => {
     render(
       <WaveWinnersDrops wave={wave} winners={winners} onDropClick={jest.fn()} />

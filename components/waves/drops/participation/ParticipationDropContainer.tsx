@@ -8,6 +8,7 @@ interface ParticipationDropContainerProps {
   readonly isActiveDrop: boolean;
   readonly location: DropLocation;
   readonly children: React.ReactNode;
+  readonly useRankStyles?: boolean | undefined;
 }
 
 const ACTIVE_DROP_STYLES =
@@ -63,11 +64,12 @@ export default function ParticipationDropContainer({
   isActiveDrop,
   location,
   children,
+  useRankStyles = true,
 }: ParticipationDropContainerProps) {
   const isDrop = drop.drop_type === ApiDropType.Participatory;
   const dropStyles = getDropStyles({
     isActiveDrop,
-    rank: drop.rank,
+    rank: useRankStyles ? drop.rank : null,
     isDrop,
   });
   const backgroundClass = getBackgroundClass({ isActiveDrop });

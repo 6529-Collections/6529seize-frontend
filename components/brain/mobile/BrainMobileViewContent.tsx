@@ -23,6 +23,7 @@ interface BrainMobileViewContentProps {
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
+  readonly isApproveWave?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
@@ -36,14 +37,18 @@ export default function BrainMobileViewContent({
   isCurationWave,
   isMemesWave,
   isRankWave,
+  isApproveWave = false,
   onDropClick,
   onOpenQuickVote,
   onPrefetchQuickVote,
   wave,
 }: BrainMobileViewContentProps) {
-  const rankWave = isRankWave ? (wave ?? null) : null;
+  const isCompetitionWave = isRankWave || isApproveWave;
+  const supportsOutcomeView = isCompetitionWave && !isCurationWave;
+  const rankWave = isCompetitionWave ? (wave ?? null) : null;
+  const outcomeWave = supportsOutcomeView ? (wave ?? null) : null;
   const curationWave = isCurationWave ? (wave ?? null) : null;
-  const faqWave = isRankWave && isMemesWave ? (wave ?? null) : null;
+  const faqWave = isMemesWave ? (wave ?? null) : null;
 
   const leaderboardContent = rankWave ? (
     <MyStreamWaveLeaderboard
@@ -71,8 +76,8 @@ export default function BrainMobileViewContent({
     </div>
   ) : null;
 
-  const outcomeContent = rankWave ? (
-    <MyStreamWaveOutcome wave={rankWave} />
+  const outcomeContent = outcomeWave ? (
+    <MyStreamWaveOutcome wave={outcomeWave} />
   ) : null;
 
   const myVotesContent = rankWave ? (

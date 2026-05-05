@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FocusTrap } from "focus-trap-react";
@@ -49,6 +50,8 @@ export default function WaveDropsSearchModal({
   );
 
   const meetsMinLength = normalizedQuery.length >= MIN_QUERY_LENGTH;
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
+    useApprovalWaveStatus({ wave });
 
   const {
     drops: results,
@@ -238,6 +241,11 @@ export default function WaveDropsSearchModal({
                                   onReply={() => {}}
                                   onReplyClick={() => {}}
                                   onQuoteClick={() => {}}
+                                  winningThreshold={winningThreshold}
+                                  isVotingClosed={isVotingClosed}
+                                  isVotingControlsLocked={
+                                    isVotingControlsLocked
+                                  }
                                 />
                               </div>
                             </button>

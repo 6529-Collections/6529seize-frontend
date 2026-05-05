@@ -1,5 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
@@ -56,5 +57,15 @@ describe("useWave", () => {
     const wave = { ...baseWave, id: "quorum" };
     const { result } = renderHook(() => useWave(wave));
     expect(result.current.isQuorumWave).toBe(true);
+  });
+
+  it("flags approve wave", () => {
+    const wave = {
+      ...baseWave,
+      wave: { ...baseWave.wave, type: ApiWaveType.Approve },
+    };
+    const { result } = renderHook(() => useWave(wave));
+    expect(result.current.isApproveWave).toBe(true);
+    expect(result.current.isRankWave).toBe(false);
   });
 });

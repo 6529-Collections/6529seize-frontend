@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { generateCalendar } from "@/helpers/calendar/calendar.helpers";
 import CommonCalendarDay from "./CommonCalendarDay";
 
@@ -19,78 +19,79 @@ const MONTHS = [
   "December",
 ];
 
-export default function CommonCalendar({
-  initialMonth,
-  initialYear,
-  minTimestamp,
-  maxTimestamp,
-  selectedTimestamp,
-  setSelectedTimestamp,
-}: {
+type CommonCalendarProps = {
   readonly initialMonth: number;
   readonly initialYear: number;
   readonly minTimestamp: number | null;
   readonly maxTimestamp: number | null;
   readonly selectedTimestamp: number | null;
   readonly setSelectedTimestamp: (timestamp: number) => void;
-}) {
-  const [month, setMonth] = useState(() => {
-    if (selectedTimestamp) {
-      return new Date(selectedTimestamp).getMonth();
-    }
-    return initialMonth;
-  });
+};
 
-  const [year, setYear] = useState(() => {
-    if (selectedTimestamp) {
-      return new Date(selectedTimestamp).getFullYear();
-    }
-    return initialYear;
-  });
+const getInitialVisibleDate = ({
+  initialMonth,
+  initialYear,
+  selectedTimestamp,
+}: Pick<
+  CommonCalendarProps,
+  "initialMonth" | "initialYear" | "selectedTimestamp"
+>) => {
+  if (selectedTimestamp !== null) {
+    const selectedDate = new Date(selectedTimestamp);
+    return new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+  }
 
-  const [days, setDays] = useState(generateCalendar({ month, year }));
-  useEffect(() => setDays(generateCalendar({ month, year })), [month, year]);
+  return new Date(initialYear, initialMonth, 1);
+};
 
-  useEffect(() => {
-    if (selectedTimestamp) {
-      const date = new Date(selectedTimestamp);
-      setMonth(date.getMonth());
-      setYear(date.getFullYear());
-    }
-  }, [selectedTimestamp]);
+function CommonCalendarView({
+  initialMonth,
+  initialYear,
+  minTimestamp,
+  maxTimestamp,
+  selectedTimestamp,
+  setSelectedTimestamp,
+}: CommonCalendarProps) {
+  const [visibleDate, setVisibleDate] = useState(() =>
+    getInitialVisibleDate({
+      initialMonth,
+      initialYear,
+      selectedTimestamp,
+    })
+  );
+  const month = visibleDate.getMonth();
+  const year = visibleDate.getFullYear();
+  const days = generateCalendar({ month, year });
 
   const setNextMonth = () => {
-    if (month === 11) {
-      setMonth(0);
-      setYear(year + 1);
-    } else {
-      setMonth(month + 1);
-    }
+    setVisibleDate(
+      (currentDate) =>
+        new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+    );
   };
 
   const setPreviousMonth = () => {
-    if (month === 0) {
-      setMonth(11);
-      setYear(year - 1);
-    } else {
-      setMonth(month - 1);
-    }
+    setVisibleDate(
+      (currentDate) =>
+        new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+    );
   };
 
   return (
-    <div className="tw-py-3 tw-relative tw-rounded-lg tw-bg-iron-800/60 tw-shadow-md tw-ring-1 tw-ring-iron-700/50 tw-ring-inset">
+    <div className="tw-relative tw-rounded-lg tw-bg-iron-800/60 tw-py-3 tw-shadow-md tw-ring-1 tw-ring-inset tw-ring-iron-700/50">
       <button
         onClick={setPreviousMonth}
         type="button"
         aria-label="Previous month"
-        className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute 
-              tw-left-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-iron-300 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
+        className="tw-absolute tw-left-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-p-2 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+      >
         <svg
           className="tw-h-6 tw-w-6"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M15 18L9 12L15 6"
             stroke="currentColor"
@@ -104,13 +105,15 @@ export default function CommonCalendar({
         onClick={setNextMonth}
         type="button"
         aria-label="Next month"
-        className="tw-bg-transparent tw-border tw-border-transparent tw-border-solid tw-absolute tw-right-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-iron-300 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
+        className="tw-absolute tw-right-1.5 tw-top-1.5 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-p-2 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+      >
         <svg
           className="tw-h-6 tw-w-6"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M9 18L15 12L9 6"
             stroke="currentColor"
@@ -124,7 +127,7 @@ export default function CommonCalendar({
         <p className="tw-text-base tw-font-medium tw-text-iron-50">
           {MONTHS[month]}
         </p>
-        <div className="tw-mt-4 tw-px-3 tw-grid tw-grid-cols-7 tw-text-sm tw-leading-6 tw-font-medium tw-text-iron-500">
+        <div className="tw-mt-4 tw-grid tw-grid-cols-7 tw-px-3 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-500">
           <div>Mo</div>
           <div>Tu</div>
           <div>We</div>
@@ -148,4 +151,31 @@ export default function CommonCalendar({
       </section>
     </div>
   );
+}
+
+const getResetKey = ({
+  initialMonth,
+  initialYear,
+  selectedTimestamp,
+}: Pick<
+  CommonCalendarProps,
+  "initialMonth" | "initialYear" | "selectedTimestamp"
+>) => {
+  if (selectedTimestamp === null) {
+    return `initial-${initialYear}-${initialMonth}`;
+  }
+
+  const selectedDate = new Date(selectedTimestamp);
+  return [
+    "selected",
+    selectedDate.getFullYear(),
+    selectedDate.getMonth(),
+    selectedDate.getDate(),
+  ].join("-");
+};
+
+export default function CommonCalendar(props: CommonCalendarProps) {
+  const resetKey = getResetKey(props);
+
+  return <CommonCalendarView key={resetKey} {...props} />;
 }

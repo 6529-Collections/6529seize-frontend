@@ -55,7 +55,7 @@ export default function CreateWaveDropsMetadataRow({
               hasError
                 ? "tw-border-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
                 : "tw-border-iron-650 tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
-            } tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-r-lg tw-border-0 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base ${
+            } tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-r-lg tw-border-0 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base sm:tw-text-sm ${
               item.key
                 ? "tw-text-primary-400 focus:tw-text-white"
                 : "tw-text-white"

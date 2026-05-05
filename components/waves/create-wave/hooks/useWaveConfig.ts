@@ -51,7 +51,7 @@ export function useWaveConfig() {
       dates: {
         submissionStartDate: now,
         votingStartDate: now,
-        endDate: null,
+        endDate: type === ApiWaveType.Rank ? now : null,
         firstDecisionTime: now,
         subsequentDecisions: [],
         isRolling: false,
@@ -69,6 +69,8 @@ export function useWaveConfig() {
         type: ApiWaveCreditType.TdhPlusXtdh,
         category: null,
         profileId: null,
+        maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
         timeWeighted: {
           enabled: false,
           averagingInterval: 24,
@@ -79,6 +81,7 @@ export function useWaveConfig() {
       approval: {
         threshold: null,
         thresholdTimeMs: null,
+        maxWinners: null,
       },
     };
   };
@@ -119,6 +122,7 @@ export function useWaveConfig() {
 
   // Section state updates
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
+    setEndDateConfig({ time: null, period: null });
     setConfig(() => ({
       ...getInitialConfig({ type: overview.type }),
       overview,
@@ -255,6 +259,8 @@ export function useWaveConfig() {
         type,
         category: null,
         profileId: null,
+        maxVotesPerIdentityPerDrop: prev.voting.maxVotesPerIdentityPerDrop,
+        winningThreshold: prev.voting.winningThreshold,
         timeWeighted: prev.voting.timeWeighted,
       },
     }));
@@ -301,6 +307,28 @@ export function useWaveConfig() {
     }));
   };
 
+  const onMaxVotesPerIdentityPerDropChange = (
+    maxVotesPerIdentityPerDrop: number | null
+  ) => {
+    setConfig((prev) => ({
+      ...prev,
+      voting: {
+        ...prev.voting,
+        maxVotesPerIdentityPerDrop,
+      },
+    }));
+  };
+
+  const onWinningThresholdChange = (winningThreshold: number | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      voting: {
+        ...prev.voting,
+        winningThreshold,
+      },
+    }));
+  };
+
   const onThresholdChange = (threshold: number | null) => {
     setConfig((prev) => ({
       ...prev,
@@ -317,6 +345,16 @@ export function useWaveConfig() {
       approval: {
         ...prev.approval,
         thresholdTimeMs,
+      },
+    }));
+  };
+
+  const onApprovalMaxWinnersChange = (maxWinners: number | null) => {
+    setConfig((prev) => ({
+      ...prev,
+      approval: {
+        ...prev.approval,
+        maxWinners,
       },
     }));
   };
@@ -346,10 +384,12 @@ export function useWaveConfig() {
     onVotingTypeChange,
     onCategoryChange,
     onProfileIdChange,
+    onMaxVotesPerIdentityPerDropChange,
     onTimeWeightedVotingChange,
-    // Approval
+    onWinningThresholdChange,
     onThresholdChange,
     onThresholdTimeChange,
+    onApprovalMaxWinnersChange,
     // Chat
     onChatEnabledChange,
   };

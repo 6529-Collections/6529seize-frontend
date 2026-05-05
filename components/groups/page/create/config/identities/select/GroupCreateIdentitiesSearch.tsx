@@ -9,9 +9,19 @@ import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 export default function GroupCreateIdentitiesSearch({
   selectedWallets,
   onIdentitySelect,
+  placeholder = " ",
+  label = "Identity",
+  hideLabel = false,
+  inputClassName = "",
+  iconClassName = "",
 }: {
   readonly selectedWallets: string[];
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
+  readonly placeholder?: string | undefined;
+  readonly label?: string | undefined;
+  readonly hideLabel?: boolean | undefined;
+  readonly inputClassName?: string | undefined;
+  readonly iconClassName?: string | undefined;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const onFocusChange = (newV: boolean) => {
@@ -39,7 +49,7 @@ export default function GroupCreateIdentitiesSearch({
   const randomId = getRandomObjectId();
 
   return (
-    <div className="tw-group tw-w-full tw-relative" ref={wrapperRef}>
+    <div className="tw-group tw-relative tw-w-full" ref={wrapperRef}>
       <input
         type="text"
         value={searchCriteria ?? ""}
@@ -47,25 +57,28 @@ export default function GroupCreateIdentitiesSearch({
         onFocus={() => onFocusChange(true)}
         onBlur={() => onFocusChange(false)}
         id={randomId}
-        className="tw-form-input tw-block tw-pb-3 tw-pt-3 tw-pl-10 tw-pr-4 tw-w-full tw-text-md tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-700 focus:tw-border-blue-500 tw-peer
- tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
-        placeholder=" "
+        className={`tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-950 tw-pb-3 tw-pl-10 tw-pr-4 tw-pt-3 tw-text-base tw-font-medium tw-text-white tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm ${inputClassName}`}
+        placeholder={placeholder}
       />
       <svg
-        className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
+        className={`tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300 ${iconClassName}`}
         viewBox="0 0 20 20"
         fill="currentColor"
-        aria-hidden="true">
+        aria-hidden="true"
+      >
         <path
           fillRule="evenodd"
           d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-          clipRule="evenodd"></path>
+          clipRule="evenodd"
+        ></path>
       </svg>
       <label
         htmlFor={randomId}
-        className="tw-absolute tw-rounded-lg tw-cursor-text tw-text-md tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 
-                    peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1">
-        Identity
+        className={`tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-text-md tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4 ${
+          hideLabel ? "tw-sr-only" : ""
+        }`}
+      >
+        {label}
       </label>
       <GroupCreateIdentitiesSearchItems
         open={isOpen}

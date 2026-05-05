@@ -1,9 +1,11 @@
 import { AuthContext } from "@/components/auth/Auth";
 import WaveDropMobileMenu from "@/components/waves/drops/WaveDropMobileMenu";
 import { WaveDropLayerProvider } from "@/components/waves/drops/WaveDropLayerContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 
 const mockIsMemesWave = jest.fn();
@@ -91,6 +93,7 @@ beforeAll(() => {
 });
 
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
+type AuthProviderValue = ComponentProps<typeof AuthContext.Provider>["value"];
 
 beforeEach(() => {
   writeText.mockClear();
@@ -371,6 +374,74 @@ test("shows full menu when a profile handle is present", () => {
   expect(screen.getByTestId("boost")).toBeInTheDocument();
   expect(screen.getByTestId("open")).toBeInTheDocument();
   expect(screen.getByTestId("delete")).toBeInTheDocument();
+});
+
+test("shows clap by default for non-author profiles", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Participatory,
+    author: { handle: "alice" },
+  } as unknown as ApiDrop;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "bob" },
+          activeProfileProxy: null,
+        } as unknown as AuthProviderValue
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByTestId("clap")).toBeInTheDocument();
+});
+
+test("hides clap when voting is hidden", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Participatory,
+    author: { handle: "alice" },
+  } as unknown as ApiDrop;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "bob" },
+          activeProfileProxy: null,
+        } as unknown as AuthProviderValue
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+        showVoting={false}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.queryByTestId("clap")).toBeNull();
+  expect(screen.getByTestId("mark-unread")).toBeInTheDocument();
 });
 
 test("shows only copy link in the mobile menu for guests", () => {

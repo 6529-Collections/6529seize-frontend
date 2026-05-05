@@ -9,12 +9,14 @@ interface WaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly isApprovalWave?: boolean | undefined;
 }
 
 export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
   winner,
   wave,
   onDropClick,
+  isApprovalWave = false,
 }) => {
   const { isMemesWave } = useWave(wave);
 
@@ -32,6 +34,7 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
     <DefaultWaveWinnersDrop
       winner={winner}
       onDropClick={onDropClick}
+      isApprovalWave={isApprovalWave}
     />
   );
 };

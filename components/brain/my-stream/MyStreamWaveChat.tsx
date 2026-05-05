@@ -24,6 +24,7 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useWave } from "@/hooks/useWave";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -227,6 +228,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = () => {
     setActiveDropForWave(null);
   };
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
+    useApprovalWaveStatus({
+      wave,
+    });
+  const fixedDropMode = isVotingControlsLocked ? DropMode.CHAT : DropMode.BOTH;
 
   const shouldHandleContainerFileDrop = (
     event: React.DragEvent<HTMLElement>
@@ -414,6 +420,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           unreadCount={wave.metrics.your_unread_drops_count}
           dropId={null}
           isMuted={wave.metrics.muted}
+          winningThreshold={winningThreshold}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
         {!(isApp && editingDropId) && (
           <div className="tw-mt-auto">
@@ -424,7 +433,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
                 onDropAddedToQueue={onCancelReplyQuote}
                 wave={wave}
                 dropId={null}
-                fixedDropMode={DropMode.BOTH}
+                fixedDropMode={fixedDropMode}
                 externalAttachmentDrop={externalAttachmentDrop}
                 onExternalAttachmentDropConsumed={() =>
                   setExternalAttachmentDrop(null)
@@ -434,7 +443,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           </div>
         )}
         {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (
-          <MobileMemesArtSubmissionBtn wave={wave} />
+          <MobileMemesArtSubmissionBtn
+            wave={wave}
+            isSubmissionLocked={isVotingControlsLocked}
+          />
         )}
       </section>
     </UnreadDividerProvider>

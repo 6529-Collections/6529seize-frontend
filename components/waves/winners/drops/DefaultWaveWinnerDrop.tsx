@@ -25,26 +25,88 @@ import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly isApprovalWave?: boolean | undefined;
 }
 
 const getRankHoverClass = (place: number | null): string => {
   return getRankHoverBorderClass(place);
 };
 
+const isClickFromCardDom = (
+  event: React.MouseEvent<HTMLDivElement>
+): boolean => {
+  return event.currentTarget.contains(event.target as Node);
+};
+
 export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   winner,
   onDropClick,
+  isApprovalWave = false,
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  const suppressNextClickRef = React.useRef(false);
+
+  const handleInteractionStart = React.useCallback(() => {
+    suppressNextClickRef.current = true;
+  }, []);
+
+  const handleClickCapture = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!isClickFromCardDom(event)) {
+        return;
+      }
+
+      if (!suppressNextClickRef.current) {
+        return;
+      }
+
+      suppressNextClickRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    []
+  );
+
+  const handleMenuClickCapture = React.useCallback(() => {
+    suppressNextClickRef.current = false;
+  }, []);
 
   // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
+    onInteractionStart: handleInteractionStart,
+    preventDefault: false,
   });
+
+  const handleMobileMenuOpenChange = React.useCallback(
+    (nextIsActive: boolean) => {
+      if (!nextIsActive) {
+        suppressNextClickRef.current = false;
+      }
+
+      setIsActive(nextIsActive);
+    },
+    [setIsActive]
+  );
+
+  const handleMobileMenuClose = React.useCallback(() => {
+    handleMobileMenuOpenChange(false);
+  }, [handleMobileMenuOpenChange]);
 
   // Convert the drop to ExtendedDrop using the helper function
   const extendedDrop = convertApiDropToExtendedDrop(winner.drop);
+
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!isClickFromCardDom(event)) {
+        return;
+      }
+
+      onDropClick(extendedDrop);
+    },
+    [extendedDrop, onDropClick]
+  );
 
   // Check if user has voted
   const userContextRating = winner.drop.context_profile_context?.rating ?? 0;
@@ -56,15 +118,24 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
 
   return (
     <div
-      onClick={() => onDropClick(extendedDrop)}
-      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${getRankHoverClass(winner.place)}`}
+      onClickCapture={handleClickCapture}
+      onClick={handleClick}
+      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${
+        isApprovalWave
+          ? "desktop-hover:hover:tw-border-iron-700"
+          : getRankHoverClass(winner.place)
+      }`}
     >
       <div className="tw-rounded-xl tw-p-4" {...touchHandlers}>
         <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-justify-between tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
           <div className="tw-flex tw-flex-1 tw-gap-x-3">
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
             <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
-              <WaveWinnersDropHeader winner={winner} showVotingInfo={false} />
+              <WaveWinnersDropHeader
+                winner={winner}
+                showVotingInfo={false}
+                isApprovalWave={isApprovalWave}
+              />
               <WaveWinnersDropContent
                 winner={winner}
                 isCompetitionDrop={true}
@@ -130,13 +201,16 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
         createPortal(
           <CommonDropdownItemsMobileWrapper
             isOpen={isActive}
-            setOpen={setIsActive}
+            setOpen={handleMobileMenuOpenChange}
           >
-            <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
+            <div
+              onClickCapture={handleMenuClickCapture}
+              className="tw-grid tw-grid-cols-1 tw-gap-y-2"
+            >
               {/* Open drop option */}
               <WaveDropMobileMenuOpen
                 drop={extendedDrop}
-                onOpenChange={() => setIsActive(false)}
+                onOpenChange={handleMobileMenuClose}
               />
             </div>
           </CommonDropdownItemsMobileWrapper>,

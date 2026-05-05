@@ -346,6 +346,9 @@ interface RenderOptions {
   initialDrop?: number | null | undefined;
   unreadCount?: number | undefined;
   onDropContentClick?: jest.Mock | undefined;
+  winningThreshold?: number | null | undefined;
+  isVotingClosed?: boolean | undefined;
+  isVotingControlsLocked?: boolean | undefined;
 }
 
 function renderComponent(options: RenderOptions = {}) {
@@ -473,6 +476,9 @@ describe("WaveDropsAll", () => {
         dropId: "target-drop",
         activeDrop: mockActiveDrop,
         initialDrop: 5,
+        winningThreshold: 11,
+        isVotingClosed: true,
+        isVotingControlsLocked: true,
       });
 
       expect(dropsProps).toMatchObject({
@@ -483,6 +489,9 @@ describe("WaveDropsAll", () => {
         dropViewDropId: "target-drop",
         onReply: props.onReply,
         onQuoteClick: expect.any(Function),
+        winningThreshold: 11,
+        isVotingClosed: true,
+        isVotingControlsLocked: true,
       });
     });
   });
