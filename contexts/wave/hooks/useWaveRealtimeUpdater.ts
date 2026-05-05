@@ -258,6 +258,10 @@ type PendingFetchedDropUpdate = {
   readonly serverDrop: ApiDrop;
 };
 
+type FetchedDropUpdateOptions = {
+  readonly updateWaveStore?: boolean;
+};
+
 function useWaveNotificationActions({
   removeWaveDeliveredNotifications,
 }: Pick<UseWaveRealtimeUpdaterProps, "removeWaveDeliveredNotifications">): {
@@ -528,7 +532,8 @@ function useIncomingDropProcessor({
     async (
       drop: IncomingDrop,
       waveId: string,
-      cachedDropSnapshot?: CachedDropReactionState | null
+      cachedDropSnapshot?: CachedDropReactionState | null,
+      { updateWaveStore = true }: FetchedDropUpdateOptions = {}
     ): Promise<void> => {
       const updateKey = getWaveDropUpdateKey(waveId, drop.id);
       const sequence =
@@ -552,6 +557,11 @@ function useIncomingDropProcessor({
         ...(cachedDropSnapshot !== undefined ? { cachedDropSnapshot } : {}),
         websocketStatus: WebSocketStatus.CONNECTED,
       });
+
+      if (!updateWaveStore) {
+        pendingFetchedDropUpdatesRef.current.delete(updateKey);
+        return;
+      }
 
       if (latestExistingDrop !== null) {
         pendingFetchedDropUpdatesRef.current.delete(updateKey);
@@ -601,7 +611,26 @@ function useIncomingDropProcessor({
             websocketStatus: WebSocketStatus.CONNECTED,
           });
 
-      if (isWaveMuted(waveId)) {
+      const isMuted = isWaveMuted(waveId);
+      if (isMuted) {
+        if (isFetchedDropUpdate(type)) {
+          if (existingDrop !== undefined) {
+            await handleFetchedDropUpdate(drop, waveId, undefined, {
+              updateWaveStore: false,
+            });
+            return;
+          }
+
+          const cachedDropSnapshot = findDropInCachedDrops(
+            queryClient,
+            drop.id
+          );
+          if (cachedDropSnapshot !== null || currentData?.isLoading === true) {
+            await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot, {
+              updateWaveStore: false,
+            });
+          }
+        }
         return;
       }
 
