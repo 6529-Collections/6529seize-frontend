@@ -176,10 +176,19 @@ function handleIndexedDBError(event: Sentry.Event): void {
   event.fingerprint = ["indexeddb-connection-lost"];
 }
 
+function isParenthesizedUrlLike(value: string | undefined): boolean {
+  const candidate = value?.trim();
+  return (
+    !!candidate &&
+    (candidate.startsWith("/") || /^https?:\/\//i.test(candidate))
+  );
+}
+
 function extractUrlFromError(error: Error, event: Sentry.Event): string {
   const urlMatch = URL_REGEX.exec(error.message.slice(0, 2048));
-  if (urlMatch?.[1]) {
-    return String(sanitizeUrlString(urlMatch[1]));
+  const parenthesizedValue = urlMatch?.[1];
+  if (isParenthesizedUrlLike(parenthesizedValue)) {
+    return String(sanitizeUrlString(parenthesizedValue));
   }
 
   const networkMessageTargetUrl = getNetworkErrorMessageTargetUrl(event);
@@ -208,11 +217,7 @@ function isRawBrowserNetworkError(error: Error): boolean {
 
 function hasUrlInParentheses(message: string): boolean {
   const urlMatch = URL_REGEX.exec(message.slice(0, 2048));
-  const candidate = urlMatch?.[1]?.trim();
-  return (
-    !!candidate &&
-    (candidate.startsWith("/") || /^https?:\/\//i.test(candidate))
-  );
+  return isParenthesizedUrlLike(urlMatch?.[1]);
 }
 
 function isAppWrappedApiNetworkError(errorMessage: string): boolean {

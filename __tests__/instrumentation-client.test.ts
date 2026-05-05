@@ -178,6 +178,81 @@ describe("instrumentation-client", () => {
     );
   });
 
+  it("ignores non-URL parentheses in raw browser network error messages", () => {
+    const beforeSend = loadBeforeSend();
+    const message = "Failed to fetch (while loading wave overview)";
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: message,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError(message),
+    });
+
+    expect(result).toBeNull();
+    expect(event.exception.values[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
+    );
+  });
+
+  it("uses valid parenthesized URLs in raw browser network error messages", () => {
+    const beforeSend = loadBeforeSend();
+    const message = "Failed to fetch (/api/message-target)";
+    const event = {
+      event_id: "network-drop-event",
+      request: {
+        url: "/api/request-target",
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: message,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/breadcrumb-target",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError(message),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/message-target)"
+    );
+  });
+
   it("keeps raw browser network errors for newer first-party page failures", () => {
     const beforeSend = loadBeforeSend();
     const event = {
