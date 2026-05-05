@@ -86,6 +86,7 @@ export default function WaveDropMobileMenuCopyLink({
         }
 
         setCopied(true);
+        onCopy();
         if (copiedResetTimeoutRef.current !== null) {
           globalThis.clearTimeout(copiedResetTimeoutRef.current);
         }
@@ -93,7 +94,6 @@ export default function WaveDropMobileMenuCopyLink({
           if (isMountedRef.current) {
             setCopied(false);
             copiedResetTimeoutRef.current = null;
-            onCopy();
           }
         }, 2000);
       })

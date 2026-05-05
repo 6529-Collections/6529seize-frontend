@@ -42,7 +42,9 @@ describe("WaveDropMobileMenuCopyLink", () => {
     mockIsQuorumWave.mockReturnValue(false);
   });
 
-  it("waits for clipboard success before showing copied state and closing the menu", async () => {
+  it("closes after clipboard success and only uses the timer to reset copied state", async () => {
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const clipboardWrite = createDeferredClipboardWrite();
     writeText.mockReturnValueOnce(clipboardWrite.promise);
     const onCopy = jest.fn();
@@ -53,21 +55,34 @@ describe("WaveDropMobileMenuCopyLink", () => {
       drop_type: ApiDropType.Chat,
     };
 
-    render(<WaveDropMobileMenuCopyLink drop={drop} onCopy={onCopy} />);
+    try {
+      render(<WaveDropMobileMenuCopyLink drop={drop} onCopy={onCopy} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Copy link" }));
+      await user.click(screen.getByRole("button", { name: "Copy link" }));
 
-    expect(writeText).toHaveBeenCalledWith("https://base/waves/w1?serialNo=5");
-    expect(onCopy).not.toHaveBeenCalled();
-    expect(screen.getByText("Copy link")).toBeInTheDocument();
+      expect(writeText).toHaveBeenCalledWith(
+        "https://base/waves/w1?serialNo=5"
+      );
+      expect(onCopy).not.toHaveBeenCalled();
+      expect(screen.getByText("Copy link")).toBeInTheDocument();
 
-    await act(async () => {
-      clipboardWrite.resolve();
-      await clipboardWrite.promise;
-    });
+      await act(async () => {
+        clipboardWrite.resolve();
+        await clipboardWrite.promise;
+      });
 
-    expect(await screen.findByText("Copied!")).toBeInTheDocument();
-    expect(onCopy).toHaveBeenCalledTimes(1);
+      expect(screen.getByText("Copied!")).toBeInTheDocument();
+      expect(onCopy).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(screen.getByText("Copy link")).toBeInTheDocument();
+      expect(onCopy).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("copies canonical drop links for memes submissions", async () => {
