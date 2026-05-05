@@ -17,6 +17,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 
 interface WaveReadRequestState {
   promise: Promise<MarkWaveNotificationsReadResult>;
+  readonly addressKey: string;
   readonly requestKey: string;
   authHeaders: AuthHeaders;
   shouldSends: WaveReadShouldSend[];
@@ -80,6 +81,61 @@ const latestVerifiedWaveReadIdentityByAddress = new Map<
   string,
   WaveReadVerifiedIdentity
 >();
+let mountedWaveNotificationsReadMarkerHookCount = 0;
+
+const createClearedWaveReadStateError = (reason: string): Error =>
+  new Error(`Pending wave notification read cleared: ${reason}.`);
+
+const clearInFlightWaveReadState = (state: WaveReadRequestState): void => {
+  state.pendingShouldSends = [];
+};
+
+const isCurrentInFlightWaveReadRequest = (
+  state: WaveReadRequestState
+): boolean => inFlightWaveReadRequests.get(state.requestKey) === state;
+
+const clearPendingWaveReadsForAddress = (addressKey: string): void => {
+  for (const [requestKey, state] of pendingWaveReadRequests) {
+    if (state.addressKey !== addressKey) {
+      continue;
+    }
+
+    pendingWaveReadRequests.delete(requestKey);
+    state.reject(
+      createClearedWaveReadStateError("wallet address changed or disconnected")
+    );
+  }
+
+  for (const [requestKey, state] of inFlightWaveReadRequests) {
+    if (state.addressKey !== addressKey) {
+      continue;
+    }
+
+    clearInFlightWaveReadState(state);
+    inFlightWaveReadRequests.delete(requestKey);
+  }
+
+  clearedWaveReadIdentityKeysByAddress.delete(addressKey);
+  latestVerifiedWaveReadIdentityByAddress.delete(addressKey);
+};
+
+const clearAllWaveReadState = (): void => {
+  for (const state of pendingWaveReadRequests.values()) {
+    state.reject(
+      createClearedWaveReadStateError("no marker hooks are mounted")
+    );
+  }
+
+  pendingWaveReadRequests.clear();
+
+  for (const state of inFlightWaveReadRequests.values()) {
+    clearInFlightWaveReadState(state);
+  }
+
+  inFlightWaveReadRequests.clear();
+  clearedWaveReadIdentityKeysByAddress.clear();
+  latestVerifiedWaveReadIdentityByAddress.clear();
+};
 
 const hasConsistentPendingWaveReadIdentity = (
   state: PendingWaveReadRequestState
@@ -156,7 +212,10 @@ const startWaveReadRequest = async (
   }
 
   try {
-    if (state.pendingShouldSends.length > 0) {
+    if (
+      state.pendingShouldSends.length > 0 &&
+      isCurrentInFlightWaveReadRequest(state)
+    ) {
       state.shouldSends = state.pendingShouldSends;
       state.pendingShouldSends = [];
       state.promise = startWaveReadRequest(
@@ -174,7 +233,7 @@ const startWaveReadRequest = async (
 
     return requestResult;
   } finally {
-    if (inFlightWaveReadRequests.get(state.requestKey) === state) {
+    if (isCurrentInFlightWaveReadRequest(state)) {
       inFlightWaveReadRequests.delete(state.requestKey);
     }
   }
@@ -182,12 +241,14 @@ const startWaveReadRequest = async (
 
 const markWaveReadWithAuthHeaders = ({
   waveId,
+  addressKey,
   requestKey,
   authHeaders,
   invalidateNotificationsRef,
   shouldSend,
 }: {
   readonly waveId: string;
+  readonly addressKey: string;
   readonly requestKey: string;
   readonly authHeaders: AuthHeaders;
   readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
@@ -202,6 +263,7 @@ const markWaveReadWithAuthHeaders = ({
 
   const state: WaveReadRequestState = {
     promise: Promise.resolve("skipped"),
+    addressKey,
     requestKey,
     authHeaders,
     shouldSends: [shouldSend],
@@ -342,6 +404,7 @@ const flushQueuedWaveReadRequests = ({
       try {
         const result = await markWaveReadWithAuthHeaders({
           waveId: firstQueuedRequest.waveId,
+          addressKey: firstQueuedRequest.addressKey,
           requestKey,
           authHeaders,
           invalidateNotificationsRef,
@@ -599,6 +662,36 @@ const getLatestClearedWaveReadIdentity = ({
   );
 };
 
+const useClearWaveReadStateOnAddressChange = (
+  addressKey: string | null
+): void => {
+  const previousAddressKeyRef = useRef(addressKey);
+
+  useLayoutEffect(() => {
+    const previousAddressKey = previousAddressKeyRef.current;
+    if (previousAddressKey !== null && previousAddressKey !== addressKey) {
+      clearPendingWaveReadsForAddress(previousAddressKey);
+    }
+
+    previousAddressKeyRef.current = addressKey;
+  }, [addressKey]);
+};
+
+const useClearWaveReadStateOnLastUnmount = (): void => {
+  useLayoutEffect(() => {
+    mountedWaveNotificationsReadMarkerHookCount += 1;
+
+    return () => {
+      mountedWaveNotificationsReadMarkerHookCount -= 1;
+
+      if (mountedWaveNotificationsReadMarkerHookCount <= 0) {
+        mountedWaveNotificationsReadMarkerHookCount = 0;
+        clearAllWaveReadState();
+      }
+    };
+  }, []);
+};
+
 const markTemporaryProxyRoleWaveRead = ({
   waveId,
   addressKey,
@@ -619,6 +712,7 @@ const markTemporaryProxyRoleWaveRead = ({
   if (latestVerifiedProxyRoleIdentity) {
     return markWaveReadWithAuthHeaders({
       waveId,
+      addressKey: latestVerifiedProxyRoleIdentity.addressKey,
       requestKey: getWaveReadRequestKey({
         addressKey: latestVerifiedProxyRoleIdentity.addressKey,
         activeProfileProxyId:
@@ -676,6 +770,7 @@ const markWaveReadFromCache = ({
   if (verifiedCachedIdentity) {
     return markWaveReadWithAuthHeaders({
       waveId,
+      addressKey: verifiedCachedIdentity.addressKey,
       requestKey,
       authHeaders: verifiedCachedIdentity.authHeaders,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
@@ -691,6 +786,7 @@ const markWaveReadFromCache = ({
   if (latestVerifiedIdentity?.identityKey === identityKey) {
     return markWaveReadWithAuthHeaders({
       waveId,
+      addressKey: latestVerifiedIdentity.addressKey,
       requestKey,
       authHeaders: latestVerifiedIdentity.authHeaders,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
@@ -746,6 +842,8 @@ export const useWaveNotificationsReadMarkerState = ({
     verifiedIdentity: identityState.verifiedIdentity,
     cacheRefs,
   });
+  useClearWaveReadStateOnAddressChange(identityState.addressKey);
+  useClearWaveReadStateOnLastUnmount();
   const {
     addressKey,
     activeProfileProxyId: currentProfileProxyId,
