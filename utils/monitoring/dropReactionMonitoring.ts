@@ -624,16 +624,6 @@ export function recordReactionRealtimeReconciliation(params: {
 
   const serverReaction = params.drop.context_profile_context?.reaction ?? null;
 
-  if (serverReaction === context.intendedReaction) {
-    addReactionBreadcrumb("reaction.realtime_reconciled", context, {
-      reconciled_from: "ws_refetch",
-      server_reaction: serverReaction ?? undefined,
-      time_since_mutation_ms: now - context.startedAt,
-      websocket_status: toWebsocketStatus(params.websocketStatus) ?? undefined,
-    });
-    return;
-  }
-
   const callerProtectedStale =
     params.protectedIntent?.mutationId === context.mutationId &&
     serverReaction !== params.protectedIntent.reaction;
@@ -641,7 +631,10 @@ export function recordReactionRealtimeReconciliation(params: {
     ? params.protectedIntent.reaction
     : context.intendedReaction;
 
-  if (callerProtectedStale || isProtectedReactionContext(context, now)) {
+  if (
+    serverReaction !== protectedReaction &&
+    (callerProtectedStale || isProtectedReactionContext(context, now))
+  ) {
     addReactionBreadcrumb("reaction.realtime_stale_ignored", context, {
       reconciled_from: "ws_refetch",
       server_reaction: serverReaction ?? undefined,
@@ -656,11 +649,21 @@ export function recordReactionRealtimeReconciliation(params: {
     return;
   }
 
-  if (context.apiFailedAt !== null || context.apiSucceededAt === null) {
+  if (now - context.startedAt > RECONCILIATION_WINDOW_MS) {
     return;
   }
 
-  if (now - context.startedAt > RECONCILIATION_WINDOW_MS) {
+  if (serverReaction === context.intendedReaction) {
+    addReactionBreadcrumb("reaction.realtime_reconciled", context, {
+      reconciled_from: "ws_refetch",
+      server_reaction: serverReaction ?? undefined,
+      time_since_mutation_ms: now - context.startedAt,
+      websocket_status: toWebsocketStatus(params.websocketStatus) ?? undefined,
+    });
+    return;
+  }
+
+  if (context.apiFailedAt !== null || context.apiSucceededAt === null) {
     return;
   }
 

@@ -266,11 +266,18 @@ function mergeProtectedReactionProfiles(
     return serverReactions;
   }
 
+  let removedServerProfile: ApiProfileMin | null = null;
   const mergedReactions = serverReactions.reduce<ApiDropReaction[]>(
     (entries, entry) => {
-      const profiles = entry.profiles.filter(
-        (profile) => profile.id !== profileId
-      );
+      const profiles = entry.profiles.filter((profile) => {
+        if (profile.id !== profileId) {
+          return true;
+        }
+
+        removedServerProfile ??= profile;
+
+        return false;
+      });
 
       if (profiles.length > 0) {
         entries.push({
@@ -288,8 +295,9 @@ function mergeProtectedReactionProfiles(
     return mergedReactions;
   }
 
-  const localProfile = findReactionProfile(localReactions, profileId);
-  if (!localProfile) {
+  const protectedProfile =
+    findReactionProfile(localReactions, profileId) ?? removedServerProfile;
+  if (!protectedProfile) {
     return mergedReactions;
   }
 
@@ -301,7 +309,7 @@ function mergeProtectedReactionProfiles(
     const target = mergedReactions[targetIndex]!;
     mergedReactions[targetIndex] = {
       ...target,
-      profiles: [...target.profiles, localProfile],
+      profiles: [...target.profiles, protectedProfile],
     };
     return mergedReactions;
   }
@@ -310,7 +318,7 @@ function mergeProtectedReactionProfiles(
     ...mergedReactions,
     {
       reaction: protectedIntent.reaction,
-      profiles: [localProfile],
+      profiles: [protectedProfile],
     },
   ];
 }

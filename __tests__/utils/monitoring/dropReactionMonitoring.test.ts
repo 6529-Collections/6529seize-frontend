@@ -328,6 +328,47 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
+  it("does not add a matched reconciliation breadcrumb after the reconciliation window", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-late-match",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-late-match/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+
+    dateNowSpy.mockReturnValue(16_001);
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-late-match",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":smile:",
+        } as any,
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(addBreadcrumbMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.realtime_reconciled",
+      })
+    );
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
   it("returns protected intent for the latest in-flight mutation", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-protected-1",
