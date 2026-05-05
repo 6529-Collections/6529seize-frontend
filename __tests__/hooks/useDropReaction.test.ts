@@ -1,4 +1,5 @@
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
+import { rollbackRejectedReactionInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -13,9 +14,20 @@ const rollbackMock = jest.fn();
 const applyOptimisticDropUpdateMock = jest.fn(() => ({
   rollback: rollbackMock,
 }));
+const mockQueryClient = {
+  getQueryCache: jest.fn(() => ({
+    findAll: jest.fn(() => []),
+  })),
+  setQueryData: jest.fn(),
+  setQueriesData: jest.fn(),
+};
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
+}));
+
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: jest.fn(() => mockQueryClient),
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -35,9 +47,20 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebsocketStatus: jest.fn(() => "connected"),
 }));
 
+jest.mock(
+  "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops",
+  () => ({
+    rollbackRejectedReactionInCachedDrops: jest.fn(),
+  })
+);
+
 jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
-  beginReactionMutation: jest.fn(() => ({ mutationId: "mutation-1" })),
+  beginReactionMutation: jest.fn(() => ({
+    mutationId: "mutation-1",
+    dropId: "drop-1",
+  })),
   deriveReactionAction: jest.fn(() => "add"),
+  isLatestReactionMutation: jest.fn(() => true),
   recordReactionOptimisticApplied: jest.fn(),
   recordReactionRequestFailed: jest.fn(),
   recordReactionRequestSent: jest.fn(),
@@ -142,6 +165,58 @@ describe("useDropReaction", () => {
       message: "Rate limited",
       type: "error",
     });
+  });
+
+  it("rolls back cached drop queries for latest quick react failures", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        message: "network failed",
+        status: 503,
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(rollbackRejectedReactionInCachedDrops).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        dropId: "drop-1",
+        failedReaction: ":smile:",
+        previousReaction: null,
+        profile: expect.objectContaining({
+          id: "identity-1",
+          handle: "user",
+        }),
+      })
+    );
+  });
+
+  it("does not roll back cached drop queries for superseded quick react failures", async () => {
+    (
+      dropReactionMonitoring.isLatestReactionMutation as jest.Mock
+    ).mockReturnValueOnce(false);
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        message: "network failed",
+        status: 503,
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(rollbackRejectedReactionInCachedDrops).not.toHaveBeenCalled();
   });
 
   it("does not treat a throwing onSuccess callback as a request failure", async () => {

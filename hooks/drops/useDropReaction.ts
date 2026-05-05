@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { rollbackRejectedReactionInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
@@ -26,6 +27,7 @@ import {
 import {
   beginReactionMutation,
   deriveReactionAction,
+  isLatestReactionMutation,
   recordReactionOptimisticApplied,
   recordReactionRequestFailed,
   recordReactionRequestSent,
@@ -374,6 +376,7 @@ export function useDropReaction(
 ): UseDropReactionResult {
   const { setToast, connectedProfile } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
+  const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
   const rollbackRef = useRef<(() => void) | null>(null);
   const source = options?.source ?? "picker";
@@ -404,22 +407,21 @@ export function useDropReaction(
     async (reactionCode: string) => {
       if (!canReact) return;
 
-      const isRemoving = reactionCode === contextProfileContext?.reaction;
+      const previousReaction = contextProfileContext?.reaction ?? null;
+      const isRemoving = reactionCode === previousReaction;
       const intendedReaction = isRemoving ? null : reactionCode;
       const mutation = beginReactionMutation({
         dropId,
         waveId,
         source,
-        action: deriveReactionAction(
-          contextProfileContext?.reaction ?? null,
-          intendedReaction
-        ),
-        previousReaction: contextProfileContext?.reaction ?? null,
+        action: deriveReactionAction(previousReaction, intendedReaction),
+        previousReaction,
         intendedReaction,
         optimisticReaction: intendedReaction,
         profileId: connectedProfile?.id ?? null,
         websocketStatus,
       });
+      const rollbackProfile = toProfileMin(connectedProfile);
 
       rollbackRef.current?.();
       rollbackRef.current = combineRollbacks([
@@ -467,6 +469,14 @@ export function useDropReaction(
         );
         setToast({ message: errorMessage, type: "error" });
         rollbackRef.current?.();
+        if (isLatestReactionMutation(mutation)) {
+          rollbackRejectedReactionInCachedDrops(queryClient, {
+            dropId,
+            failedReaction: intendedReaction,
+            previousReaction,
+            profile: rollbackProfile,
+          });
+        }
         recordReactionRollbackApplied(mutation);
         rollbackRef.current = null;
       }
@@ -483,10 +493,11 @@ export function useDropReaction(
       canReact,
       applyOptimisticReaction,
       applyOptimisticReactionToCurationQueries,
-      connectedProfile?.id,
+      connectedProfile,
       contextProfileContext?.reaction,
       drop.id,
       dropId,
+      queryClient,
       setToast,
       onSuccess,
       source,

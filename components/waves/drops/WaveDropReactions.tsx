@@ -15,6 +15,7 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
+import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -36,12 +37,14 @@ import {
 import {
   beginReactionMutation,
   deriveReactionAction,
+  isLatestReactionMutation,
   recordReactionOptimisticApplied,
   recordReactionRequestFailed,
   recordReactionRequestSent,
   recordReactionRequestSucceeded,
   recordReactionRollbackApplied,
 } from "@/utils/monitoring/dropReactionMonitoring";
+import { rollbackRejectedReactionInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import styles from "./WaveDropReactions.module.scss";
 import WaveDropReactionsDetailDialog from "./WaveDropReactionsDetailDialog";
 
@@ -96,6 +99,7 @@ function WaveDropReaction({
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
+  const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
   const rollbackRef = useRef<(() => void) | null>(null);
   const canReact = Boolean(connectedProfile?.handle);
@@ -338,21 +342,20 @@ function WaveDropReaction({
       return;
     }
 
+    const previousReaction = drop.context_profile_context?.reaction ?? null;
     const intendedReaction = selected ? null : reaction.reaction;
     const mutation = beginReactionMutation({
       dropId: drop.id,
       waveId,
       source: "chip",
-      action: deriveReactionAction(
-        drop.context_profile_context?.reaction ?? null,
-        intendedReaction
-      ),
-      previousReaction: drop.context_profile_context?.reaction ?? null,
+      action: deriveReactionAction(previousReaction, intendedReaction),
+      previousReaction,
       intendedReaction,
       optimisticReaction: intendedReaction,
       profileId: connectedProfile?.id ?? null,
       websocketStatus,
     });
+    const rollbackProfile = toProfileMin(connectedProfile);
 
     setSelected((s) => !s);
     setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
@@ -399,6 +402,14 @@ function WaveDropReaction({
       setSelected((s) => !s);
       setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
       rollbackRef.current?.();
+      if (isLatestReactionMutation(mutation)) {
+        rollbackRejectedReactionInCachedDrops(queryClient, {
+          dropId: drop.id,
+          failedReaction: intendedReaction,
+          previousReaction,
+          profile: rollbackProfile,
+        });
+      }
       recordReactionRollbackApplied(mutation);
       rollbackRef.current = null;
     }
@@ -406,10 +417,11 @@ function WaveDropReaction({
   }, [
     applyOptimisticReactionChange,
     canReact,
-    connectedProfile?.id,
+    connectedProfile,
     drop.id,
     drop.context_profile_context?.reaction,
     longPressTriggered,
+    queryClient,
     reaction.reaction,
     selected,
     setToast,

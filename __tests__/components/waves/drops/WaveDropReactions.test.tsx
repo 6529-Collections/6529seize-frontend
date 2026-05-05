@@ -1,9 +1,18 @@
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import { useAuth } from "@/components/auth/Auth";
 import { useEmoji } from "@/contexts/EmojiContext";
+import { rollbackRejectedReactionInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import * as commonApi from "@/services/api/common-api";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
+
+const mockQueryClient = {
+  setQueriesData: jest.fn(),
+};
+
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: jest.fn(() => mockQueryClient),
+}));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
@@ -27,6 +36,13 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
 }));
+
+jest.mock(
+  "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops",
+  () => ({
+    rollbackRejectedReactionInCachedDrops: jest.fn(),
+  })
+);
 
 jest.mock("@sentry/nextjs", () => ({
   __esModule: true,
@@ -358,6 +374,60 @@ describe("WaveDropReactions", () => {
         message: "Unauthorized",
         type: "error",
       });
+    });
+  });
+
+  it("rolls back cached drop queries when the latest chip reaction fails", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        message: "Service Unavailable",
+        status: 503,
+      })
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            context_profile_context: { reaction: null },
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole("button")[0]);
+
+    await waitFor(() => {
+      expect(rollbackRejectedReactionInCachedDrops).toHaveBeenCalledWith(
+        mockQueryClient,
+        expect.objectContaining({
+          dropId: "test-drop",
+          failedReaction: ":gm:",
+          previousReaction: null,
+          profile: expect.objectContaining({
+            id: "profile-1",
+            handle: "alice",
+          }),
+        })
+      );
     });
   });
 

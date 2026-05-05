@@ -32,6 +32,28 @@ type UpdateServerDropInCachedDropsParams = Omit<
 type DropWithoutWaveReactionState = CachedDropReactionState &
   Pick<ApiDrop, "id">;
 
+type DropContextProfileContext = NonNullable<
+  ApiDrop["context_profile_context"]
+>;
+
+type RollbackRejectedReactionParams = {
+  readonly dropId: string;
+  readonly failedReaction: string | null;
+  readonly previousReaction: string | null;
+  readonly profile: ApiProfileMin | null;
+};
+
+const EMPTY_CONTEXT_PROFILE_CONTEXT: DropContextProfileContext = {
+  rating: 0,
+  min_rating: 0,
+  max_rating: 0,
+  reaction: null,
+  boosted: false,
+  bookmarked: false,
+  curatable: false,
+  curated: false,
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -124,6 +146,185 @@ function replaceDrop(value: unknown, drop: ApiDrop): unknown {
   const next: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {
     const updated = replaceDrop(item, drop);
+    next[key] = updated;
+    if (updated !== item) {
+      changed = true;
+    }
+  }
+
+  return changed ? next : value;
+}
+
+function removeProfileFromFailedReaction(
+  reactions: ApiDropReaction[],
+  params: RollbackRejectedReactionParams
+): ApiDropReaction[] {
+  const profileId = params.profile?.id ?? null;
+  if (!profileId || params.failedReaction === null) {
+    return reactions;
+  }
+
+  let changed = false;
+  const nextReactions: ApiDropReaction[] = [];
+
+  for (const reaction of reactions) {
+    if (reaction.reaction !== params.failedReaction) {
+      nextReactions.push(reaction);
+      continue;
+    }
+
+    const profiles = reaction.profiles.filter(
+      (profile) => profile.id !== profileId
+    );
+    if (profiles.length === reaction.profiles.length) {
+      nextReactions.push(reaction);
+      continue;
+    }
+
+    changed = true;
+    if (profiles.length > 0) {
+      nextReactions.push({
+        ...reaction,
+        profiles,
+      });
+    }
+  }
+
+  return changed ? nextReactions : reactions;
+}
+
+function addProfileToPreviousReaction(
+  reactions: ApiDropReaction[],
+  params: RollbackRejectedReactionParams
+): ApiDropReaction[] {
+  if (params.previousReaction === null || params.profile === null) {
+    return reactions;
+  }
+
+  const targetIndex = reactions.findIndex(
+    (reaction) => reaction.reaction === params.previousReaction
+  );
+
+  if (targetIndex < 0) {
+    return [
+      ...reactions,
+      {
+        reaction: params.previousReaction,
+        profiles: [params.profile],
+      },
+    ];
+  }
+
+  const target = reactions[targetIndex]!;
+  if (target.profiles.some((profile) => profile.id === params.profile?.id)) {
+    return reactions;
+  }
+
+  const nextReactions = [...reactions];
+  nextReactions[targetIndex] = {
+    ...target,
+    profiles: [...target.profiles, params.profile],
+  };
+
+  return nextReactions;
+}
+
+function rollbackRejectedReactionEntries(
+  reactions: ApiDropReaction[],
+  params: RollbackRejectedReactionParams
+): ApiDropReaction[] {
+  return addProfileToPreviousReaction(
+    removeProfileFromFailedReaction(reactions, params),
+    params
+  );
+}
+
+function rollbackContextProfileContext(
+  contextProfileContext: unknown,
+  previousReaction: string | null
+): unknown {
+  if (isRecord(contextProfileContext)) {
+    if (contextProfileContext["reaction"] === previousReaction) {
+      return contextProfileContext;
+    }
+
+    return {
+      ...contextProfileContext,
+      reaction: previousReaction,
+    };
+  }
+
+  if (previousReaction === null) {
+    return contextProfileContext;
+  }
+
+  return {
+    ...EMPTY_CONTEXT_PROFILE_CONTEXT,
+    reaction: previousReaction,
+  };
+}
+
+function rollbackRejectedReactionDrop(
+  value: Record<string, unknown>,
+  params: RollbackRejectedReactionParams
+): Record<string, unknown> {
+  const contextProfileContext = value["context_profile_context"];
+  const nextContextProfileContext = rollbackContextProfileContext(
+    contextProfileContext,
+    params.previousReaction
+  );
+  const contextChanged = nextContextProfileContext !== contextProfileContext;
+
+  const reactions = Array.isArray(value["reactions"])
+    ? (value["reactions"] as ApiDropReaction[])
+    : [];
+  const nextReactions = rollbackRejectedReactionEntries(reactions, params);
+  const reactionsChanged = nextReactions !== reactions;
+
+  if (!contextChanged && !reactionsChanged) {
+    return value;
+  }
+
+  return {
+    ...value,
+    ...(contextChanged && {
+      context_profile_context: nextContextProfileContext,
+    }),
+    ...(reactionsChanged && { reactions: nextReactions }),
+  };
+}
+
+function rollbackRejectedReaction(
+  value: unknown,
+  params: RollbackRejectedReactionParams
+): unknown {
+  if (Array.isArray(value)) {
+    let changed = false;
+    const next: unknown[] = [];
+
+    for (const item of value) {
+      const updated = rollbackRejectedReaction(item, params);
+      if (updated !== item) {
+        changed = true;
+      }
+      next.push(updated);
+    }
+
+    return changed ? next : value;
+  }
+
+  if (!isRecord(value)) {
+    return value;
+  }
+
+  if (isMatchingDrop(value, params.dropId)) {
+    return rollbackRejectedReactionDrop(value, params);
+  }
+
+  let changed = false;
+  const next: Record<string, unknown> = {};
+  for (const [key, item] of Object.entries(value)) {
+    const updated = rollbackRejectedReaction(item, params);
     next[key] = updated;
     if (updated !== item) {
       changed = true;
@@ -435,6 +636,17 @@ export function updateDropInCachedDrops(
   CACHED_DROP_QUERY_KEYS.forEach((queryKey) => {
     queryClient.setQueriesData({ queryKey: [queryKey] }, (oldData) =>
       replaceDrop(oldData, drop)
+    );
+  });
+}
+
+export function rollbackRejectedReactionInCachedDrops(
+  queryClient: QueryClient,
+  params: RollbackRejectedReactionParams
+): void {
+  CACHED_DROP_QUERY_KEYS.forEach((queryKey) => {
+    queryClient.setQueriesData({ queryKey: [queryKey] }, (oldData) =>
+      rollbackRejectedReaction(oldData, params)
     );
   });
 }

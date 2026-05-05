@@ -5,11 +5,14 @@ import {
   reconcileServerDropForDisplay,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
+  rollbackRejectedReactionInCachedDrops,
   updateServerDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import {
   __resetDropReactionMonitoringForTests,
   beginReactionMutation,
+  isLatestReactionMutation,
+  recordReactionRequestFailed,
 } from "@/utils/monitoring/dropReactionMonitoring";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { QueryClient } from "@tanstack/react-query";
@@ -743,6 +746,197 @@ describe("cached drop websocket updates", () => {
     const updatedDrop = queryClient.getQueryData<any>(queryKey).pages[0][0];
     expect(updatedDrop.context_profile_context.reaction).toBe(":wave:");
     expect(updatedDrop.reactions).toEqual([reactionEntry(":wave:")]);
+  });
+
+  it("rolls back a rejected add reaction across cached drop query groups", () => {
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const otherUser = profile("profile-2", "other-user");
+    const queryKey = [QueryKey.DROPS, { waveId: "wave-1" }];
+    const feedQueryKey = [QueryKey.FEED_ITEMS, { page: 1 }];
+    const dropQueryKey = [QueryKey.DROP, { drop_id: "drop-rejected-add" }];
+
+    const optimisticDrop = {
+      id: "drop-rejected-add",
+      type: "FULL",
+      stableKey: "stable-rejected-add",
+      stableHash: "hash-rejected-add",
+      context_profile_context: {
+        ...contextProfileContext(":joy:"),
+        rating: 7,
+      },
+      reactions: [reactionEntry(":joy:", [currentUser, otherUser])],
+      parts: [{ content: "fresh content" }],
+    };
+    queryClient.setQueryData(queryKey, { pages: [[optimisticDrop]] });
+    queryClient.setQueryData(feedQueryKey, {
+      pages: [[{ item: { ...optimisticDrop } }]],
+    });
+    queryClient.setQueryData(dropQueryKey, { ...optimisticDrop });
+
+    rollbackRejectedReactionInCachedDrops(queryClient, {
+      dropId: "drop-rejected-add",
+      failedReaction: ":joy:",
+      previousReaction: null,
+      profile: currentUser as any,
+    });
+
+    const updatedDrop = queryClient.getQueryData<any>(queryKey).pages[0][0];
+    expect(updatedDrop).toMatchObject({
+      id: "drop-rejected-add",
+      type: "FULL",
+      stableKey: "stable-rejected-add",
+      stableHash: "hash-rejected-add",
+      parts: [{ content: "fresh content" }],
+      context_profile_context: expect.objectContaining({
+        rating: 7,
+        reaction: null,
+      }),
+    });
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":joy:", [otherUser]),
+    ]);
+    expect(
+      queryClient.getQueryData<any>(feedQueryKey).pages[0][0].item.reactions
+    ).toEqual([reactionEntry(":joy:", [otherUser])]);
+    expect(queryClient.getQueryData<any>(dropQueryKey).reactions).toEqual([
+      reactionEntry(":joy:", [otherUser]),
+    ]);
+  });
+
+  it("rolls back a rejected remove reaction by restoring the previous reaction", () => {
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const otherUser = profile("profile-2", "other-user");
+    const queryKey = [QueryKey.DROP, { drop_id: "drop-rejected-remove" }];
+
+    queryClient.setQueryData(queryKey, {
+      id: "drop-rejected-remove",
+      context_profile_context: {
+        ...contextProfileContext(null),
+        rating: 11,
+      },
+      reactions: [reactionEntry(":joy:", [otherUser])],
+    });
+
+    rollbackRejectedReactionInCachedDrops(queryClient, {
+      dropId: "drop-rejected-remove",
+      failedReaction: null,
+      previousReaction: ":joy:",
+      profile: currentUser as any,
+    });
+
+    const updatedDrop = queryClient.getQueryData<any>(queryKey);
+    expect(updatedDrop.context_profile_context).toMatchObject({
+      rating: 11,
+      reaction: ":joy:",
+    });
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":joy:", [otherUser, currentUser]),
+    ]);
+  });
+
+  it("rolls back a rejected replace reaction without touching other users", () => {
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const waveUser = profile("profile-2", "wave-user");
+    const joyUser = profile("profile-3", "joy-user");
+    const queryKey = [QueryKey.FEED_ITEMS, { page: 1 }];
+
+    queryClient.setQueryData(queryKey, {
+      pages: [
+        [
+          {
+            item: {
+              id: "drop-rejected-replace",
+              context_profile_context: contextProfileContext(":joy:"),
+              reactions: [
+                reactionEntry(":wave:", [waveUser]),
+                reactionEntry(":joy:", [currentUser, joyUser]),
+              ],
+            },
+          },
+        ],
+      ],
+    });
+
+    rollbackRejectedReactionInCachedDrops(queryClient, {
+      dropId: "drop-rejected-replace",
+      failedReaction: ":joy:",
+      previousReaction: ":wave:",
+      profile: currentUser as any,
+    });
+
+    const updatedDrop =
+      queryClient.getQueryData<any>(queryKey).pages[0][0].item;
+    expect(updatedDrop.context_profile_context.reaction).toBe(":wave:");
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [waveUser, currentUser]),
+      reactionEntry(":joy:", [joyUser]),
+    ]);
+  });
+
+  it("returns a protected refetched reaction to the previous reaction after failure", () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const queryKey = [QueryKey.DROPS, { waveId: "wave-1" }];
+
+    const mutation = beginReactionMutation({
+      dropId: "drop-protected-then-rejected",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    queryClient.setQueryData(queryKey, {
+      pages: [
+        [
+          {
+            id: "drop-protected-then-rejected",
+            stableKey: "stable-protected-then-rejected",
+            stableHash: "hash-protected-then-rejected",
+            context_profile_context: {
+              ...contextProfileContext(":joy:"),
+              rating: 13,
+            },
+            reactions: [
+              reactionEntry(":wave:", [profile("profile-2", "wave-user")]),
+              reactionEntry(":joy:", [currentUser]),
+            ],
+          },
+        ],
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(1_500);
+    recordReactionRequestFailed(mutation, new Error("network failed"));
+    if (isLatestReactionMutation(mutation)) {
+      rollbackRejectedReactionInCachedDrops(queryClient, {
+        dropId: "drop-protected-then-rejected",
+        failedReaction: ":joy:",
+        previousReaction: ":wave:",
+        profile: currentUser as any,
+      });
+    }
+
+    const updatedDrop = queryClient.getQueryData<any>(queryKey).pages[0][0];
+    expect(updatedDrop).toMatchObject({
+      stableKey: "stable-protected-then-rejected",
+      stableHash: "hash-protected-then-rejected",
+      context_profile_context: expect.objectContaining({
+        rating: 13,
+        reaction: ":wave:",
+      }),
+    });
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "wave-user"), currentUser]),
+    ]);
   });
 
   it("updates cached attachments by attachment id", () => {

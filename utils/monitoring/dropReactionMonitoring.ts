@@ -579,6 +579,16 @@ export function recordReactionRequestFailed(
   context.failureCaptured = true;
 }
 
+export function isLatestReactionMutation(context: {
+  readonly dropId: string;
+  readonly mutationId: string;
+}): boolean {
+  const now = Date.now();
+  pruneState(now);
+
+  return latestMutationIdByDrop.get(context.dropId) === context.mutationId;
+}
+
 export function recordReactionRollbackApplied(
   context: ReactionMutationContext
 ): void {
