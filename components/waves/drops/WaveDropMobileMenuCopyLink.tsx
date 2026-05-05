@@ -92,9 +92,10 @@ export default function WaveDropMobileMenuCopyLink({
         copiedResetTimeoutRef.current = globalThis.setTimeout(() => {
           if (isMountedRef.current) {
             setCopied(false);
+            copiedResetTimeoutRef.current = null;
+            onCopy();
           }
         }, 2000);
-        onCopy();
       })
       .catch(() => {
         onCopy();
