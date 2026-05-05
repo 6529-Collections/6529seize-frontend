@@ -159,6 +159,43 @@ describe("cached drop websocket updates", () => {
     ).toBe(rawDrop);
   });
 
+  it("returns raw server drops when protected context and reactions are fresh", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+
+    beginReactionMutation({
+      dropId: "drop-fresh-protected",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const rawDrop = serverDrop({
+      id: "drop-fresh-protected",
+      context_profile_context: contextProfileContext(":joy:"),
+      reactions: [
+        reactionEntry(":joy:", [
+          profile("profile-1", "current-user"),
+          profile("profile-2", "fresh-joy"),
+        ]),
+        reactionEntry(":wave:", [profile("profile-3", "fresh-wave")]),
+      ],
+    });
+
+    expect(
+      reconcileServerDropForDisplay({
+        queryClient,
+        serverDrop: rawDrop,
+        websocketStatus: WebSocketStatus.CONNECTED,
+      })
+    ).toBe(rawDrop);
+  });
+
   it("merges protected add and replace reactions into stale server drops", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();
@@ -193,6 +230,63 @@ describe("cached drop websocket updates", () => {
         id: "drop-protected-add",
         context_profile_context: {
           ...contextProfileContext(":wave:"),
+          rating: 9,
+        },
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-current-user"),
+            profile("profile-2", "fresh-wave"),
+          ]),
+          reactionEntry(":joy:", [profile("profile-3", "fresh-joy")]),
+        ],
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context).toMatchObject({
+      rating: 9,
+      reaction: ":joy:",
+    });
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+      reactionEntry(":joy:", [profile("profile-3", "fresh-joy"), currentUser]),
+    ]);
+  });
+
+  it("merges protected add and replace when server context is fresh but reactions are stale", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: "drop-protected-fresh-context-stale-reactions",
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [reactionEntry(":joy:", [currentUser])],
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId: "drop-protected-fresh-context-stale-reactions",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      queryClient,
+      serverDrop: serverDrop({
+        id: "drop-protected-fresh-context-stale-reactions",
+        context_profile_context: {
+          ...contextProfileContext(":joy:"),
           rating: 9,
         },
         reactions: [
@@ -291,6 +385,45 @@ describe("cached drop websocket updates", () => {
         context_profile_context: contextProfileContext(null),
         reactions: [],
       },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context?.reaction).toBeNull();
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":joy:", [profile("profile-2", "fresh-joy")]),
+      reactionEntry(":wave:", [profile("profile-3", "fresh-wave")]),
+    ]);
+  });
+
+  it("removes protected user when server context is fresh but reactions are stale", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+
+    beginReactionMutation({
+      dropId: "drop-protected-fresh-remove-stale-reactions",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "remove",
+      previousReaction: ":joy:",
+      intendedReaction: null,
+      optimisticReaction: null,
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      queryClient,
+      serverDrop: serverDrop({
+        id: "drop-protected-fresh-remove-stale-reactions",
+        context_profile_context: contextProfileContext(null),
+        reactions: [
+          reactionEntry(":joy:", [
+            profile("profile-1", "current-user"),
+            profile("profile-2", "fresh-joy"),
+          ]),
+          reactionEntry(":wave:", [profile("profile-3", "fresh-wave")]),
+        ],
+      }),
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 

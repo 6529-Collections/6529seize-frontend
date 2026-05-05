@@ -230,6 +230,39 @@ function matchesProtectedReactionIntent(
   );
 }
 
+function serverReactionsMatchProtectedIntent(
+  reactions: ApiDropReaction[],
+  protectedIntent: ProtectedReactionIntent
+): boolean {
+  const profileId = protectedIntent.profileId;
+  if (!profileId) {
+    return true;
+  }
+
+  let matchingProfiles = 0;
+  for (const entry of reactions) {
+    for (const profile of entry.profiles) {
+      if (profile.id !== profileId) {
+        continue;
+      }
+
+      if (
+        protectedIntent.reaction === null ||
+        entry.reaction !== protectedIntent.reaction
+      ) {
+        return false;
+      }
+
+      matchingProfiles += 1;
+      if (matchingProfiles > 1) {
+        return false;
+      }
+    }
+  }
+
+  return protectedIntent.reaction === null ? true : matchingProfiles === 1;
+}
+
 function selectProtectedLocalDrop({
   cachedDropSnapshot,
   latestCachedDrop,
@@ -412,7 +445,14 @@ export function reconcileServerDropForDisplay({
   });
 
   const serverReaction = serverDrop.context_profile_context?.reaction ?? null;
-  if (protectedIntent === null || serverReaction === protectedIntent.reaction) {
+  if (protectedIntent === null) {
+    return serverDrop;
+  }
+
+  if (
+    serverReaction === protectedIntent.reaction &&
+    serverReactionsMatchProtectedIntent(serverDrop.reactions, protectedIntent)
+  ) {
     return serverDrop;
   }
 
