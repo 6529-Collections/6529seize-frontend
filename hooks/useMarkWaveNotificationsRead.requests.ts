@@ -1,0 +1,462 @@
+import {
+  getWaveReadIdentityKey,
+  getWaveReadProxyRoleIdentityKey,
+  getWaveReadRequestKey,
+} from "@/hooks/useMarkWaveNotificationsRead.identity";
+import type {
+  AuthHeaders,
+  WaveReadVerifiedIdentity,
+} from "@/hooks/useMarkWaveNotificationsRead.identity";
+import type {
+  InvalidateNotificationsRef,
+  MarkWaveNotificationsReadResult,
+  PendingWaveReadRequestState,
+  WaveReadAddressEpoch,
+  WaveReadRequestState,
+  WaveReadShouldSend,
+} from "@/hooks/useMarkWaveNotificationsRead.types";
+import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import type { RefObject } from "react";
+
+const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
+const pendingWaveReadRequests = new Map<string, PendingWaveReadRequestState>();
+const clearedWaveReadIdentityKeysByAddress = new Map<string, Set<string>>();
+const latestVerifiedWaveReadIdentityByAddress = new Map<
+  string,
+  WaveReadVerifiedIdentity
+>();
+
+const createClearedWaveReadStateError = (reason: string): Error =>
+  new Error(`Pending wave notification read cleared: ${reason}.`);
+
+const clearInFlightWaveReadState = (state: WaveReadRequestState): void => {
+  state.pendingShouldSends = [];
+};
+
+const isCurrentInFlightWaveReadRequest = (
+  state: WaveReadRequestState
+): boolean => inFlightWaveReadRequests.get(state.requestKey) === state;
+
+export const clearPendingWaveReadsForAddress = (addressKey: string): void => {
+  for (const [requestKey, state] of pendingWaveReadRequests) {
+    if (state.addressKey !== addressKey) {
+      continue;
+    }
+
+    pendingWaveReadRequests.delete(requestKey);
+    state.reject(
+      createClearedWaveReadStateError("wallet address changed or disconnected")
+    );
+  }
+
+  for (const [requestKey, state] of inFlightWaveReadRequests) {
+    if (state.addressKey !== addressKey) {
+      continue;
+    }
+
+    clearInFlightWaveReadState(state);
+    inFlightWaveReadRequests.delete(requestKey);
+  }
+
+  clearedWaveReadIdentityKeysByAddress.delete(addressKey);
+  latestVerifiedWaveReadIdentityByAddress.delete(addressKey);
+};
+
+export const clearAllWaveReadState = (): void => {
+  for (const state of pendingWaveReadRequests.values()) {
+    state.reject(
+      createClearedWaveReadStateError("no marker hooks are mounted")
+    );
+  }
+
+  pendingWaveReadRequests.clear();
+
+  for (const state of inFlightWaveReadRequests.values()) {
+    clearInFlightWaveReadState(state);
+  }
+
+  inFlightWaveReadRequests.clear();
+  clearedWaveReadIdentityKeysByAddress.clear();
+  latestVerifiedWaveReadIdentityByAddress.clear();
+};
+
+const hasConsistentPendingWaveReadIdentity = (
+  state: PendingWaveReadRequestState
+): boolean => {
+  if (state.proxyCreatorId !== null) {
+    return (
+      state.identityKey ===
+      getWaveReadProxyRoleIdentityKey({
+        addressKey: state.addressKey,
+        proxyCreatorId: state.proxyCreatorId,
+      })
+    );
+  }
+
+  return (
+    state.identityKey ===
+    getWaveReadIdentityKey({
+      addressKey: state.addressKey,
+      activeProfileProxyId: state.activeProfileProxyId,
+    })
+  );
+};
+
+const shouldSendWaveRead = (shouldSend: WaveReadShouldSend): boolean =>
+  shouldSend?.() ?? true;
+
+const hasSendableWaveRead = (
+  shouldSends: readonly WaveReadShouldSend[]
+): boolean => shouldSends.some(shouldSendWaveRead);
+
+const mergeWaveReadResults = (
+  first: MarkWaveNotificationsReadResult,
+  second: MarkWaveNotificationsReadResult
+): MarkWaveNotificationsReadResult =>
+  first === "sent" || second === "sent" ? "sent" : "skipped";
+
+const sendWaveReadRequest = async (
+  waveId: string,
+  authHeaders: AuthHeaders,
+  invalidateNotificationsRef: InvalidateNotificationsRef,
+  shouldSends: readonly WaveReadShouldSend[]
+): Promise<MarkWaveNotificationsReadResult> => {
+  if (!hasSendableWaveRead(shouldSends)) {
+    return "skipped";
+  }
+
+  await commonApiPostWithoutBodyAndResponse({
+    endpoint: `notifications/wave/${waveId}/read`,
+    headers: authHeaders,
+  });
+  invalidateNotificationsRef.current();
+  return "sent";
+};
+
+const startWaveReadRequest = async (
+  waveId: string,
+  state: WaveReadRequestState,
+  invalidateNotificationsRef: InvalidateNotificationsRef
+): Promise<MarkWaveNotificationsReadResult> => {
+  let requestError: unknown;
+  let hasRequestError = false;
+  let requestResult: MarkWaveNotificationsReadResult = "skipped";
+
+  try {
+    requestResult = await sendWaveReadRequest(
+      waveId,
+      state.authHeaders,
+      invalidateNotificationsRef,
+      state.shouldSends
+    );
+  } catch (error) {
+    requestError = error;
+    hasRequestError = true;
+  }
+
+  try {
+    if (
+      state.pendingShouldSends.length > 0 &&
+      isCurrentInFlightWaveReadRequest(state)
+    ) {
+      state.shouldSends = state.pendingShouldSends;
+      state.pendingShouldSends = [];
+      state.promise = startWaveReadRequest(
+        waveId,
+        state,
+        invalidateNotificationsRef
+      );
+      const trailingResult = await state.promise;
+      return mergeWaveReadResults(requestResult, trailingResult);
+    }
+
+    if (hasRequestError) {
+      throw requestError;
+    }
+
+    return requestResult;
+  } finally {
+    if (isCurrentInFlightWaveReadRequest(state)) {
+      inFlightWaveReadRequests.delete(state.requestKey);
+    }
+  }
+};
+
+export const markWaveReadWithAuthHeaders = ({
+  waveId,
+  addressKey,
+  requestKey,
+  authHeaders,
+  invalidateNotificationsRef,
+  shouldSend,
+}: {
+  readonly waveId: string;
+  readonly addressKey: string;
+  readonly requestKey: string;
+  readonly authHeaders: AuthHeaders;
+  readonly invalidateNotificationsRef: InvalidateNotificationsRef;
+  readonly shouldSend: WaveReadShouldSend;
+}): Promise<MarkWaveNotificationsReadResult> => {
+  const existingState = inFlightWaveReadRequests.get(requestKey);
+  if (existingState) {
+    existingState.authHeaders = authHeaders;
+    existingState.pendingShouldSends.push(shouldSend);
+    return existingState.promise;
+  }
+
+  const state: WaveReadRequestState = {
+    promise: Promise.resolve("skipped"),
+    addressKey,
+    requestKey,
+    authHeaders,
+    shouldSends: [shouldSend],
+    pendingShouldSends: [],
+  };
+  inFlightWaveReadRequests.set(requestKey, state);
+  state.promise = startWaveReadRequest(
+    waveId,
+    state,
+    invalidateNotificationsRef
+  );
+  return state.promise;
+};
+
+export const markWaveReadIdentityCleared = (
+  identity: WaveReadVerifiedIdentity
+): void => {
+  const clearedIdentityKeys =
+    clearedWaveReadIdentityKeysByAddress.get(identity.addressKey) ??
+    new Set<string>();
+  clearedIdentityKeys.add(identity.identityKey);
+  clearedWaveReadIdentityKeysByAddress.set(
+    identity.addressKey,
+    clearedIdentityKeys
+  );
+};
+
+export const getVerifiedProxyRoleIdentityKey = (
+  identity: WaveReadVerifiedIdentity
+): string | null =>
+  identity.activeProfileProxyCreatorId !== null
+    ? getWaveReadProxyRoleIdentityKey({
+        addressKey: identity.addressKey,
+        proxyCreatorId: identity.activeProfileProxyCreatorId,
+      })
+    : null;
+
+export const enqueuePendingWaveReadRequest = ({
+  addressKey,
+  activeProfileProxyId,
+  proxyCreatorId,
+  identityKey,
+  requestKey,
+  waveId,
+  addressEpoch,
+  latestAddressEpochRef,
+  shouldSend,
+  queueIfBlocked,
+}: {
+  readonly addressKey: string;
+  readonly activeProfileProxyId: string | null;
+  readonly proxyCreatorId: string | null;
+  readonly identityKey: string;
+  readonly requestKey: string;
+  readonly waveId: string;
+  readonly addressEpoch: WaveReadAddressEpoch;
+  readonly latestAddressEpochRef: RefObject<WaveReadAddressEpoch>;
+  readonly shouldSend: WaveReadShouldSend;
+  readonly queueIfBlocked: boolean;
+}): Promise<MarkWaveNotificationsReadResult> => {
+  if (!queueIfBlocked) {
+    return Promise.resolve("skipped");
+  }
+
+  if (addressEpoch !== latestAddressEpochRef.current) {
+    return Promise.reject(
+      createClearedWaveReadStateError("wallet address changed or disconnected")
+    );
+  }
+
+  const existingState = pendingWaveReadRequests.get(requestKey);
+  if (existingState) {
+    existingState.shouldSends.push(shouldSend);
+    return existingState.promise;
+  }
+
+  let resolveQueuedRequest: (
+    result: MarkWaveNotificationsReadResult
+  ) => void = () => {};
+  let rejectQueuedRequest: (error: unknown) => void = () => {};
+  const promise = new Promise<MarkWaveNotificationsReadResult>(
+    (resolve, reject) => {
+      resolveQueuedRequest = resolve;
+      rejectQueuedRequest = reject;
+    }
+  );
+
+  const state: PendingWaveReadRequestState = {
+    addressKey,
+    activeProfileProxyId,
+    proxyCreatorId,
+    identityKey,
+    requestKey,
+    waveId,
+    promise,
+    resolve: resolveQueuedRequest,
+    reject: rejectQueuedRequest,
+    shouldSends: [shouldSend],
+  };
+  pendingWaveReadRequests.set(requestKey, state);
+
+  return promise;
+};
+
+const hasSendableQueuedWaveRead = (
+  queuedRequest: PendingWaveReadRequestState
+): boolean => hasSendableWaveRead(queuedRequest.shouldSends);
+
+const flushQueuedWaveReadRequests = ({
+  queuedRequests,
+  getRequestKey,
+  authHeaders,
+  invalidateNotificationsRef,
+}: {
+  readonly queuedRequests: readonly PendingWaveReadRequestState[];
+  readonly getRequestKey: (
+    queuedRequest: PendingWaveReadRequestState
+  ) => string;
+  readonly authHeaders: AuthHeaders;
+  readonly invalidateNotificationsRef: InvalidateNotificationsRef;
+}): void => {
+  const queuedRequestsByRequestKey = new Map<
+    string,
+    PendingWaveReadRequestState[]
+  >();
+
+  for (const queuedRequest of queuedRequests) {
+    if (
+      pendingWaveReadRequests.get(queuedRequest.requestKey) !== queuedRequest
+    ) {
+      continue;
+    }
+
+    const requestKey = getRequestKey(queuedRequest);
+    pendingWaveReadRequests.delete(queuedRequest.requestKey);
+    const groupedRequests = queuedRequestsByRequestKey.get(requestKey) ?? [];
+    groupedRequests.push(queuedRequest);
+    queuedRequestsByRequestKey.set(requestKey, groupedRequests);
+  }
+
+  for (const [requestKey, groupedRequests] of queuedRequestsByRequestKey) {
+    const [firstQueuedRequest] = groupedRequests;
+    if (!firstQueuedRequest) {
+      continue;
+    }
+
+    void (async () => {
+      try {
+        const result = await markWaveReadWithAuthHeaders({
+          waveId: firstQueuedRequest.waveId,
+          addressKey: firstQueuedRequest.addressKey,
+          requestKey,
+          authHeaders,
+          invalidateNotificationsRef,
+          shouldSend: () => groupedRequests.some(hasSendableQueuedWaveRead),
+        });
+        for (const queuedRequest of groupedRequests) {
+          queuedRequest.resolve(result);
+        }
+      } catch (error) {
+        for (const queuedRequest of groupedRequests) {
+          queuedRequest.reject(error);
+        }
+      }
+    })();
+  }
+};
+
+export const flushPendingWaveReadRequests = ({
+  verifiedIdentity,
+  invalidateNotificationsRef,
+}: {
+  readonly verifiedIdentity: WaveReadVerifiedIdentity;
+  readonly invalidateNotificationsRef: InvalidateNotificationsRef;
+}): void => {
+  const proxyRoleIdentityKey =
+    getVerifiedProxyRoleIdentityKey(verifiedIdentity);
+  const queuedRequests = Array.from(pendingWaveReadRequests.values()).filter(
+    (state) =>
+      (state.identityKey === verifiedIdentity.identityKey ||
+        state.identityKey === proxyRoleIdentityKey) &&
+      state.addressKey === verifiedIdentity.addressKey &&
+      hasConsistentPendingWaveReadIdentity(state)
+  );
+
+  flushQueuedWaveReadRequests({
+    queuedRequests,
+    getRequestKey: (queuedRequest) => {
+      if (queuedRequest.identityKey !== proxyRoleIdentityKey) {
+        return queuedRequest.requestKey;
+      }
+
+      return getWaveReadRequestKey({
+        addressKey: verifiedIdentity.addressKey,
+        activeProfileProxyId: verifiedIdentity.activeProfileProxyId,
+        waveId: queuedRequest.waveId,
+      });
+    },
+    authHeaders: verifiedIdentity.authHeaders,
+    invalidateNotificationsRef,
+  });
+};
+
+export const flushPendingClearedWaveReadRequests = ({
+  verifiedIdentity,
+  invalidateNotificationsRef,
+}: {
+  readonly verifiedIdentity: WaveReadVerifiedIdentity;
+  readonly invalidateNotificationsRef: InvalidateNotificationsRef;
+}): void => {
+  const clearedIdentityKeys = clearedWaveReadIdentityKeysByAddress.get(
+    verifiedIdentity.addressKey
+  );
+  if (!clearedIdentityKeys?.has(verifiedIdentity.identityKey)) {
+    return;
+  }
+
+  const queuedRequests = Array.from(pendingWaveReadRequests.values()).filter(
+    (state) =>
+      state.identityKey === verifiedIdentity.identityKey &&
+      hasConsistentPendingWaveReadIdentity(state) &&
+      state.addressKey === verifiedIdentity.addressKey
+  );
+
+  flushQueuedWaveReadRequests({
+    queuedRequests,
+    getRequestKey: (queuedRequest) => queuedRequest.requestKey,
+    authHeaders: verifiedIdentity.authHeaders,
+    invalidateNotificationsRef,
+  });
+
+  clearedIdentityKeys.delete(verifiedIdentity.identityKey);
+  if (clearedIdentityKeys.size === 0) {
+    clearedWaveReadIdentityKeysByAddress.delete(verifiedIdentity.addressKey);
+  }
+};
+
+export const getLatestVerifiedWaveReadIdentityByAddress = (
+  addressKey: string
+): WaveReadVerifiedIdentity | undefined =>
+  latestVerifiedWaveReadIdentityByAddress.get(addressKey);
+
+export const setLatestVerifiedWaveReadIdentityByAddress = (
+  identity: WaveReadVerifiedIdentity
+): void => {
+  latestVerifiedWaveReadIdentityByAddress.set(identity.addressKey, identity);
+};
+
+export const deleteLatestVerifiedWaveReadIdentityByAddress = (
+  addressKey: string
+): void => {
+  latestVerifiedWaveReadIdentityByAddress.delete(addressKey);
+};

@@ -1296,6 +1296,45 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("rejects an old temporary proxy-role callback after wallet address switch", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-role-1",
+      jwtRole: "creator-1",
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+    const oldRoleCallback = result.current;
+
+    setActiveIdentity({ address: "0xBBB", jwt: "jwt-b" });
+    rerender();
+
+    expect(result.current).not.toBe(oldRoleCallback);
+
+    await expect(oldRoleCallback("wave-1")).rejects.toThrow(
+      "wallet address changed or disconnected"
+    );
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-1",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    rerender();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
   it("flushes queued proxy-role and loaded-proxy reads for the same wave with one request", async () => {
     const invalidateNotifications = jest.fn();
 
@@ -1457,6 +1496,36 @@ describe("useMarkWaveNotificationsRead", () => {
       headers: { Authorization: "Bearer jwt-a" },
     });
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects an old missing-auth account callback after wallet address switch", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({ address: "0xAAA", jwt: null });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+    const oldAccountCallback = result.current;
+
+    setActiveIdentity({ address: "0xBBB", jwt: "jwt-b" });
+    rerender();
+
+    expect(result.current).not.toBe(oldAccountCallback);
+
+    await expect(oldAccountCallback("wave-1")).rejects.toThrow(
+      "wallet address changed or disconnected"
+    );
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    rerender();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
   it("does not replay a queued account read after the wallet address switches back", async () => {
