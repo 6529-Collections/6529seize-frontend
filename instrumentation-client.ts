@@ -44,6 +44,13 @@ const APP_WRAPPED_NETWORK_ERROR_PREFIXES = [
   "Network request failed.",
   "Network error:",
 ];
+const RAW_BROWSER_NETWORK_ERROR_PATTERNS = [
+  /\bfailed to fetch\b/i,
+  /\bload failed\b/i,
+  /\bnetwork\s*error\b/i,
+  /\bnetwork connection was lost\b/i,
+  /\bnetwork request failed\b/i,
+];
 type SentryTransactionEvent = Sentry.Event & {
   spans?: SentryTransactionSpan[] | undefined;
   tags?: Record<string, unknown> | undefined;
@@ -187,14 +194,8 @@ function extractUrlFromError(error: Error, event: Sentry.Event): string {
 }
 
 function isNetworkError(errorMessage: string): boolean {
-  const normalized = errorMessage.toLowerCase();
-  return (
-    normalized.includes("failed to fetch") ||
-    normalized.includes("load failed") ||
-    normalized.includes("networkerror") ||
-    normalized.includes("network error") ||
-    normalized.includes("network connection was lost") ||
-    normalized.includes("network request failed")
+  return RAW_BROWSER_NETWORK_ERROR_PATTERNS.some((pattern) =>
+    pattern.test(errorMessage)
   );
 }
 
