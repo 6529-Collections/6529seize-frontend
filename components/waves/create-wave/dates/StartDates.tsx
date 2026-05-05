@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
@@ -27,14 +26,11 @@ export default function StartDates({
   isExpanded,
   setIsExpanded,
 }: StartDatesProps) {
-  const [minVotingTimestamp, setMinVotingTimestamp] = useState<number | null>(
-    null
-  );
   const isRankWave = waveType === ApiWaveType.Rank;
-
-  useEffect(() => {
-    setMinVotingTimestamp(isRankWave ? dates.submissionStartDate : null);
-  }, [isRankWave, dates.submissionStartDate]);
+  const minStartTimestamp = Time.currentMillis();
+  const minVotingTimestamp = isRankWave
+    ? Math.max(dates.submissionStartDate, minStartTimestamp)
+    : null;
 
   const handleSubmissionDateChange = (timestamp: number) => {
     const adjustedTimestamp = Math.max(timestamp, Time.currentMillis());
@@ -67,22 +63,20 @@ export default function StartDates({
 
   return (
     <DateAccordion
-      title={
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <span>Wave Timeline</span>
-          <TooltipIconButton
-            icon={faInfoCircle}
-            tooltipText="Set when your wave begins accepting submissions and when voting starts. These dates create the foundational timeline for your wave."
-            tooltipPosition="bottom"
-            tooltipWidth="tw-w-80"
-          />
-        </div>
+      title="Wave Timeline"
+      titleActions={
+        <TooltipIconButton
+          icon={faInfoCircle}
+          tooltipText="Set when your wave begins accepting submissions and when voting starts. These dates create the foundational timeline for your wave."
+          tooltipPosition="bottom"
+          tooltipWidth="tw-w-80"
+        />
       }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={
         <div className="tw-flex tw-items-center tw-space-x-4">
-          <div className="tw-flex tw-items-center tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
+          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
             <FontAwesomeIcon
               icon={faCalendarDays}
               className="tw-mr-2 tw-size-4 tw-text-primary-400"
@@ -97,7 +91,7 @@ export default function StartDates({
             </div>
           </div>
           {isRankWave && (
-            <div className="tw-flex tw-items-center tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
+            <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
               <FontAwesomeIcon
                 icon={faCalendarDays}
                 className="tw-mr-2 tw-size-4 tw-text-primary-400"
@@ -113,14 +107,15 @@ export default function StartDates({
             </div>
           )}
         </div>
-      }>
+      }
+    >
       {/* Calendar Selection */}
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 tw-px-5 tw-pb-5 tw-pt-2 md:tw-grid-cols-2">
         <div className="tw-col-span-1">
-          <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
+          <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
             {CREATE_WAVE_START_DATE_LABELS[waveType]}
           </p>
-          <p className="tw-text-xs tw-text-iron-400 tw-mt-1">
+          <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
             Creators begin submitting work to your wave
           </p>
           <div className="tw-mt-4">
@@ -128,7 +123,7 @@ export default function StartDates({
               initialMonth={new Date().getMonth()}
               initialYear={new Date().getFullYear()}
               selectedTimestamp={dates.submissionStartDate}
-              minTimestamp={null}
+              minTimestamp={minStartTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleSubmissionDateChange}
             />
@@ -137,10 +132,10 @@ export default function StartDates({
 
         {isRankWave && (
           <div className="tw-col-span-1">
-            <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
+            <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
               Drops Voting Begins
             </p>
-            <p className="tw-text-xs tw-text-iron-400 tw-mt-1">
+            <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
               Community voting on wave submissions begins
             </p>
             <div className="tw-mt-4">

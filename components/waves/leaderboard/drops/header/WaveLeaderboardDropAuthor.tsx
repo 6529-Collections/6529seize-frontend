@@ -10,10 +10,13 @@ import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
+import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
   readonly showAvatar?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 interface WaveLeaderboardDropAuthorAvatarProps {
@@ -56,8 +59,28 @@ export const WaveLeaderboardDropAuthorAvatar: React.FC<
 
 export const WaveLeaderboardDropAuthor: React.FC<
   WaveLeaderboardDropAuthorProps
-> = ({ drop, showAvatar = true }) => {
+> = ({ drop, showAvatar = true, winningThreshold }) => {
   const authorLabel = drop.author.handle ?? drop.author.primary_address;
+  const isApproveDrop =
+    typeof winningThreshold === "number" && winningThreshold > 0;
+  const isApprovedDrop = isApproveDrop && isOfficiallyApprovedDrop(drop);
+  let authorStatusBadge: React.ReactNode = null;
+
+  if (isApprovedDrop) {
+    authorStatusBadge = (
+      <ApprovalStatusBadge
+        approvedAt={drop.winning_context?.decision_time ?? null}
+        order={drop.winning_context?.place ?? drop.rank}
+      />
+    );
+  } else if (!isApproveDrop) {
+    authorStatusBadge = (
+      <WinnerDropBadge
+        rank={drop.rank}
+        decisionTime={drop.winning_context?.decision_time ?? null}
+      />
+    );
+  }
 
   return (
     <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
@@ -78,10 +101,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
           level={drop.author.level}
           size={UserCICAndLevelSize.SMALL}
         />
-        <WinnerDropBadge
-          rank={drop.rank}
-          decisionTime={drop.winning_context?.decision_time ?? null}
-        />
+        {authorStatusBadge}
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-900"></div>
         <WaveDropTime timestamp={drop.created_at} />
       </div>

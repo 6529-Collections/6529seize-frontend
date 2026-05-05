@@ -32,9 +32,27 @@ export function MemesDropFullscreenOverlay({
 }: MemesDropFullscreenOverlayProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
   const isOverlayVisible = isOpen && isMemesDropImageMedia(artworkMedia);
+
+  useEffect(() => {
+    if (!isOverlayVisible) {
+      return;
+    }
+
+    const activeElement = document.activeElement;
+    previousFocusRef.current =
+      activeElement instanceof HTMLElement ? activeElement : null;
+    closeButtonRef.current?.focus({ preventScroll: true });
+
+    return () => {
+      const previousFocus = previousFocusRef.current;
+      previousFocusRef.current = null;
+      previousFocus?.focus({ preventScroll: true });
+    };
+  }, [isOverlayVisible]);
 
   useEffect(() => {
     if (!isOverlayVisible) {

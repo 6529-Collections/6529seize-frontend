@@ -26,6 +26,7 @@ type WaveTabParams = {
   hasAuthenticatedProfile: boolean;
   isMemesWave: boolean;
   isCurationWave: boolean;
+  isApproveWave?: boolean | undefined;
   votingState: WaveVotingState;
   hasFirstDecisionPassed: boolean;
   transientPreferredTab?: MyStreamWaveTab | null;
@@ -111,6 +112,27 @@ const buildDefaultTabs = (
   return tabs;
 };
 
+const buildApproveTabs = (isCurationWave: boolean) => {
+  const tabs: MyStreamWaveTab[] = [
+    MyStreamWaveTab.CHAT,
+    MyStreamWaveTab.LEADERBOARD,
+  ];
+
+  if (isCurationWave) {
+    tabs.push(MyStreamWaveTab.SALES);
+  }
+
+  tabs.push(MyStreamWaveTab.WINNERS);
+
+  if (!isCurationWave) {
+    tabs.push(MyStreamWaveTab.OUTCOME);
+  } else {
+    tabs.push(MyStreamWaveTab.MY_VOTES);
+  }
+
+  return tabs;
+};
+
 // Create the context with a default value
 const ContentTabContext = createContext<ContentTabContextType>({
   activeContentTab: MyStreamWaveTab.CHAT,
@@ -164,6 +186,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         hasAuthenticatedProfile,
         isMemesWave,
         isCurationWave,
+        isApproveWave = false,
         votingState,
         hasFirstDecisionPassed,
         transientPreferredTab,
@@ -172,6 +195,8 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       let tabs: MyStreamWaveTab[];
       if (isChatWave) {
         tabs = [MyStreamWaveTab.CHAT];
+      } else if (isApproveWave) {
+        tabs = buildApproveTabs(isCurationWave);
       } else if (isMemesWave) {
         tabs = buildMemesTabs(
           hasAuthenticatedProfile,

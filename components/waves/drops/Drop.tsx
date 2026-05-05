@@ -41,6 +41,9 @@ interface DropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export default function Drop({
@@ -62,6 +65,9 @@ export default function Drop({
   identityMode,
   timestampLayout,
   showInteractions = true,
+  winningThreshold,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }: DropProps) {
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
@@ -79,6 +85,9 @@ export default function Drop({
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        winningThreshold={winningThreshold}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
       />
     ),
     [ApiDropType.Winner]: (

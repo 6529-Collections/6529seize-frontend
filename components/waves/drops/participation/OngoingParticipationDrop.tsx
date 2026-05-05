@@ -2,6 +2,7 @@
 
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -47,6 +48,9 @@ interface OngoingParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
@@ -67,6 +71,9 @@ export default function OngoingParticipationDrop({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  winningThreshold,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
   contentPresentation = "default",
   embedPath,
   quotePath,
@@ -93,11 +100,16 @@ export default function OngoingParticipationDrop({
       })
     : false;
   const showIdentity = identityMode !== "hidden";
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
-  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const {
+    isOpen: isVoteModalOpen,
+    open: openVoteModal,
+    close: closeVoteModal,
+  } = useVotingModalState(isVotingActionLocked);
 
   const handleLongPress = useCallback(() => {
     if (!showInteractions || !hasTouch) return;
@@ -114,12 +126,13 @@ export default function OngoingParticipationDrop({
     setIsSlideUp(false);
   }, []);
 
+  const handleVoteButtonClick = useCallback(() => {
+    openVoteModal();
+  }, [openVoteModal]);
+
   const voteAction =
-    canShowVote && showInteractions ? (
-      <VotingModalButton
-        drop={drop}
-        onClick={() => setIsVotingModalOpen(true)}
-      />
+    canShowVote && showInteractions && !isVotingActionLocked ? (
+      <VotingModalButton drop={drop} onClick={handleVoteButtonClick} />
     ) : null;
 
   return (
@@ -127,6 +140,9 @@ export default function OngoingParticipationDrop({
       drop={drop}
       isActiveDrop={isActiveDrop}
       location={location}
+      useRankStyles={
+        !(typeof winningThreshold === "number" && winningThreshold > 0)
+      }
     >
       {!isMobile && showInteractions && showReplyAndQuote && (
         <WaveDropActions
@@ -149,6 +165,7 @@ export default function OngoingParticipationDrop({
               <ParticipationDropHeader
                 drop={drop}
                 showWaveInfo={showWaveInfo}
+                winningThreshold={winningThreshold}
                 timestampLayout={timestampLayout}
               />
             ))}
@@ -190,6 +207,9 @@ export default function OngoingParticipationDrop({
             drop={drop}
             voteAction={voteAction}
             showInteractions={showInteractions}
+            winningThreshold={winningThreshold}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
           />
         )}
         {hasDropFooter(footer) && (
@@ -205,14 +225,14 @@ export default function OngoingParticipationDrop({
         (isMobileScreen ? (
           <MobileVotingModal
             drop={drop}
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
+            isOpen={isVoteModalOpen}
+            onClose={closeVoteModal}
           />
         ) : (
           <VotingModal
             drop={drop}
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
+            isOpen={isVoteModalOpen}
+            onClose={closeVoteModal}
           />
         ))}
 
@@ -225,6 +245,7 @@ export default function OngoingParticipationDrop({
           setOpen={setIsSlideUp}
           onReply={handleOnReply}
           onAddReaction={handleOnAddReaction}
+          showVoting={!isVotingActionLocked}
         />
       )}
     </ParticipationDropContainer>

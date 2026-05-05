@@ -33,7 +33,13 @@ jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => () => (
 
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes",
-  () => () => <div data-testid="votes" />
+  () => (props: any) => (
+    <div
+      data-testid="votes"
+      data-winning-threshold={props.winningThreshold ?? ""}
+      data-is-voting-closed={String(props.isVotingClosed)}
+    />
+  )
 );
 jest.mock(
   "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity",
@@ -191,6 +197,115 @@ describe("WaveLeaderboardGridItem", () => {
     expect(card).toHaveClass("tw-bg-iron-950");
     expect(viewport).toHaveClass("tw-bg-iron-950");
     expect(content).toHaveClass("tw-space-y-3");
+  });
+
+  it("hides vote actions when voting is closed", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
+  });
+
+  it("closes voting modal when voting closes", () => {
+    const { rerender } = render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("vote-button"));
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
+
+    rerender(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("modal")).toBeNull();
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+  });
+
+  it("hides vote action while controls are locked without passing closed state to votes", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        winningThreshold={12}
+        isVotingClosed={false}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold",
+      "12"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-is-voting-closed",
+      "false"
+    );
+  });
+
+  it("closes voting modal when controls become locked", () => {
+    const { rerender } = render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("vote-button"));
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
+
+    rerender(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(screen.queryByTestId("modal")).toBeNull();
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+  });
+
+  it("passes approve status props to the compact vote display", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        winningThreshold={12}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold",
+      "12"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
   });
 
   it("hides compact footer in content-only mode", () => {

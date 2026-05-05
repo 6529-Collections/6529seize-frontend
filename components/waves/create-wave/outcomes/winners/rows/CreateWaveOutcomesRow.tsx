@@ -1,9 +1,6 @@
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
-import type {
-  CreateWaveOutcomeConfig} from "@/types/waves.types";
-import {
-  CreateWaveOutcomeType,
-} from "@/types/waves.types";
+import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
+import { CreateWaveOutcomeType } from "@/types/waves.types";
 import CreateWaveOutcomesRowCIC from "./cic/CreateWaveOutcomesRowCIC";
 import CreateWaveOutcomesRowManual from "./manual/CreateWaveOutcomesRowManual";
 import CreateWaveOutcomesRowRep from "./rep/CreateWaveOutcomesRowRep";
@@ -38,6 +35,7 @@ export default function CreateWaveOutcomesRow({
       <CreateWaveOutcomesRowCIC
         waveType={waveType}
         outcome={outcome}
+        removeOutcome={removeOutcome}
       />
     ),
   };

@@ -23,6 +23,7 @@ interface MyStreamWaveMyVoteProps {
   readonly isChecked?: boolean | undefined;
   readonly onToggleCheck?: ((dropId: string) => void) | undefined;
   readonly isResetting?: boolean | undefined;
+  readonly isVotingClosed?: boolean | undefined;
 }
 
 type ResolvedPreviewMedia = {
@@ -134,6 +135,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   isChecked = false,
   onToggleCheck,
   isResetting = false,
+  isVotingClosed = false,
 }) => {
   const { isCurationWave } = useSeizeSettings();
   const artWork = drop.parts.at(0)?.media.at(0);
@@ -152,6 +154,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const resolvedMediaMimeType =
     artWork?.mime_type ?? curationPreviewMedia?.mimeType ?? DEFAULT_MIME_TYPE;
   const badgeMimeType = artWork?.mime_type ?? curationPreviewMedia?.mimeType;
+  const isSelected = !isVotingClosed && isChecked;
 
   const handleClick = () => {
     if (window.getSelection()?.toString()) {
@@ -162,6 +165,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isVotingClosed) {
+      return;
+    }
+
     if (onToggleCheck) {
       onToggleCheck(drop.id);
     }
@@ -171,41 +178,43 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     <div
       key={drop.id}
       className={`tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-px-5 tw-py-4 tw-shadow-md tw-transition-all tw-duration-300 desktop-hover:hover:tw-shadow-lg ${
-        isChecked
+        isSelected
           ? "tw-border-primary-400"
           : "tw-border-iron-800 desktop-hover:hover:tw-border-iron-700"
       }`}
       onClick={handleClick}
     >
       <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
-        <div
-          className="tw-mr-1 tw-flex-shrink-0 tw-self-start"
-          onClick={handleCheckboxClick}
-        >
+        {!isVotingClosed && (
           <div
-            className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
-              isChecked
-                ? "tw-border-primary-400 tw-bg-primary-400/20"
-                : "tw-border-iron-600 tw-bg-iron-800"
-            } tw-cursor-pointer tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-shadow-md`}
+            className="tw-mr-1 tw-flex-shrink-0 tw-self-start"
+            onClick={handleCheckboxClick}
           >
-            {isChecked && (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
-                className="tw-size-4 tw-text-primary-400"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 0 1 1.04-.208Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            )}
+            <div
+              className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
+                isSelected
+                  ? "tw-border-primary-400 tw-bg-primary-400/20"
+                  : "tw-border-iron-600 tw-bg-iron-800"
+              } tw-cursor-pointer tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-shadow-md`}
+            >
+              {isSelected && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="tw-size-4 tw-text-primary-400"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 0 1 1.04-.208Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="tw-relative tw-h-56 tw-w-full tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 md:tw-size-[106px] md:tw-min-h-[106px] md:tw-min-w-[106px]">
           <div className="tw-relative tw-flex tw-h-full tw-w-full tw-transform tw-items-center tw-justify-center tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-105">
@@ -331,9 +340,15 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 </span>
               </div>
             </div>
-            <div onClick={(e) => e.stopPropagation()}>
-              <MyStreamWaveMyVoteInput drop={drop} isResetting={isResetting} />
-            </div>
+            {!isVotingClosed && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <MyStreamWaveMyVoteInput
+                  drop={drop}
+                  isResetting={isResetting}
+                  isVotingClosed={isVotingClosed}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

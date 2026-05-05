@@ -3,6 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
@@ -28,6 +29,8 @@ import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGro
 import { useLeaderboardHeaderControlMeasurements } from "./useLeaderboardHeaderControlMeasurements";
 import {
   WAVE_LEADERBOARD_CURATION_SORT_ITEMS,
+  WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS,
+  WAVE_LEADERBOARD_APPROVE_SORT_ITEMS,
   WAVE_LEADERBOARD_SORT_ITEMS,
   WaveleaderboardSort,
 } from "./WaveleaderboardSort";
@@ -331,13 +334,20 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     onCurationGroupChange && curationGroups.length > 0
   );
   const showPriceControls = Boolean(isCurationWave && onPriceRangeChange);
-  const sortItems = useMemo(
-    () =>
-      isCurationWave
-        ? WAVE_LEADERBOARD_CURATION_SORT_ITEMS
-        : WAVE_LEADERBOARD_SORT_ITEMS,
-    [isCurationWave]
-  );
+  const isApproveWave = wave.wave.type === ApiWaveType.Approve;
+  const sortItems = useMemo(() => {
+    if (isCurationWave) {
+      return isApproveWave
+        ? WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS
+        : WAVE_LEADERBOARD_CURATION_SORT_ITEMS;
+    }
+
+    if (isApproveWave) {
+      return WAVE_LEADERBOARD_APPROVE_SORT_ITEMS;
+    }
+
+    return WAVE_LEADERBOARD_SORT_ITEMS;
+  }, [isApproveWave, isCurationWave]);
   const viewModes: LeaderboardViewMode[] = isMemesWave
     ? ["list", "grid"]
     : ["list", "grid", "grid_content_only"];

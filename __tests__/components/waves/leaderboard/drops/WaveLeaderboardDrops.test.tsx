@@ -28,7 +28,12 @@ jest.mock("@/hooks/useIntersectionObserver", () => ({
 
 jest.mock("@/components/waves/leaderboard/drops/WaveLeaderboardDrop", () => ({
   WaveLeaderboardDrop: (props: any) => (
-    <button data-testid="drop" onClick={() => props.onDropClick(props.drop)}>
+    <button
+      data-testid="drop"
+      data-is-voting-closed={String(props.isVotingClosed)}
+      data-is-voting-controls-locked={String(props.isVotingControlsLocked)}
+      onClick={() => props.onDropClick(props.drop)}
+    >
       {props.drop.id}
     </button>
   ),
@@ -53,7 +58,11 @@ const wave = { id: "w1" } as ApiWave;
 
 const renderComp = (
   hookReturn: any,
-  onDropClick: (drop: { id: string }) => void = jest.fn()
+  onDropClick: (drop: { id: string }) => void = jest.fn(),
+  votingProps: {
+    readonly isVotingClosed?: boolean;
+    readonly isVotingControlsLocked?: boolean;
+  } = {}
 ) => {
   hook.mockReturnValue(hookReturn);
   return render(
@@ -63,6 +72,8 @@ const renderComp = (
         sort={WaveDropsLeaderboardSort.RANK}
         onDropClick={onDropClick}
         onCreateDrop={jest.fn()}
+        isVotingClosed={votingProps.isVotingClosed}
+        isVotingControlsLocked={votingProps.isVotingControlsLocked}
       />
     </AuthContext.Provider>
   );
@@ -115,7 +126,16 @@ describe("WaveLeaderboardDrops", () => {
         fetchNextPage: jest.fn(),
         hasNextPage: false,
       },
-      onDropClick
+      onDropClick,
+      { isVotingClosed: true, isVotingControlsLocked: true }
+    );
+    expect(screen.getByTestId("drop")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
+    expect(screen.getByTestId("drop")).toHaveAttribute(
+      "data-is-voting-controls-locked",
+      "true"
     );
     screen.getByTestId("drop").click();
     expect(onDropClick).toHaveBeenCalledWith({ id: "d1" });

@@ -5,6 +5,9 @@ import { MemesDropFullscreenOverlay } from "@/components/waves/drop/MemesDropFul
 import { MemesSingleWaveDropInfoPanel } from "@/components/waves/drop/MemesSingleWaveDropInfoPanel";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 
+const mockUseDropInteractionRules = jest.fn();
+let mockIsMobileScreen = false;
+
 jest.mock("framer-motion", () => ({
   motion: { div: (p: any) => <div {...p} /> },
   m: { div: (p: any) => <div {...p} /> },
@@ -20,9 +23,6 @@ jest.mock("@/components/waves/drop/SingleWaveDropInfoDetails", () => ({
 }));
 jest.mock("@/components/waves/drop/SingleWaveDropInfoAuthorSection", () => ({
   SingleWaveDropInfoAuthorSection: () => <div data-testid="author" />,
-}));
-jest.mock("@/components/waves/drop/SingleWaveDropInfoActions", () => ({
-  SingleWaveDropInfoActions: () => <div data-testid="actions" />,
 }));
 jest.mock("@/components/waves/drop/SingleWaveDropPosition", () => ({
   SingleWaveDropPosition: ({ rank }: any) => (
@@ -48,6 +48,15 @@ jest.mock("@/components/utils/button/WaveDropDeleteButton", () => ({
   __esModule: true,
   default: () => <div data-testid="delete" />,
 }));
+jest.mock("@/components/voting", () => ({
+  __esModule: true,
+  MobileVotingModal: ({ isOpen }: any) => (
+    <div data-testid="mobile-voting-modal" data-open={String(isOpen)} />
+  ),
+  VotingModal: ({ isOpen }: any) => (
+    <div data-testid="desktop-voting-modal" data-open={String(isOpen)} />
+  ),
+}));
 jest.mock("@/components/waves/memes/submission/MemesArtResubmitAction", () => ({
   MemesArtResubmitAction: (p: any) => (
     <button data-testid="resubmit" onClick={p.onSourceDropDeleted}>
@@ -67,12 +76,11 @@ jest.mock(
   )
 );
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
-  useDropInteractionRules: jest.fn(() => ({
-    isWinner: true,
-    canDelete: true,
-    canShowVote: false,
-    isVotingEnded: true,
-  })),
+  useDropInteractionRules: (drop: any) => mockUseDropInteractionRules(drop),
+}));
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => mockIsMobileScreen,
 }));
 jest.mock("@/hooks/waves/useWaveRankReward", () => ({
   useWaveRankReward: jest.fn(() => ({
@@ -106,6 +114,17 @@ const dropWithMedia = (mime_type: string, url = "media") => ({
 });
 
 describe("MemesSingleWaveDropInfoPanel", () => {
+  beforeEach(() => {
+    mockIsMobileScreen = false;
+    mockUseDropInteractionRules.mockReset();
+    mockUseDropInteractionRules.mockReturnValue({
+      isWinner: true,
+      canDelete: true,
+      canShowVote: false,
+      isVotingEnded: true,
+    });
+  });
+
   it("renders drop info and delete button", () => {
     render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
     expect(screen.getByTestId("badge")).toBeInTheDocument();
@@ -191,6 +210,108 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     await userEvent.click(screen.getByTestId("resubmit"));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows Vote and opens the desktop modal when voting is unlocked", () => {
+    mockUseDropInteractionRules.mockReturnValue({
+      isWinner: false,
+      canDelete: false,
+      canShowVote: true,
+      isVotingEnded: false,
+    });
+
+    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Vote" }));
+
+    expect(screen.getByTestId("desktop-voting-modal")).toHaveAttribute(
+      "data-open",
+      "true"
+    );
+  });
+
+  it("hides Vote and keeps the desktop modal closed when voting is locked", () => {
+    mockUseDropInteractionRules.mockReturnValue({
+      isWinner: false,
+      canDelete: false,
+      canShowVote: true,
+      isVotingEnded: false,
+    });
+
+    render(
+      <MemesSingleWaveDropInfoPanel
+        drop={baseDrop}
+        wave={null}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Vote" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("desktop-voting-modal")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
+    expect(screen.queryByText("Your votes:")).not.toBeInTheDocument();
+  });
+
+  it("hides Vote and keeps the mobile modal closed when voting is locked", () => {
+    mockIsMobileScreen = true;
+    mockUseDropInteractionRules.mockReturnValue({
+      isWinner: false,
+      canDelete: false,
+      canShowVote: true,
+      isVotingEnded: false,
+    });
+
+    render(
+      <MemesSingleWaveDropInfoPanel
+        drop={baseDrop}
+        wave={null}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Vote" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("mobile-voting-modal")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
+  });
+
+  it("closes an open voting modal when voting becomes locked", () => {
+    mockUseDropInteractionRules.mockReturnValue({
+      isWinner: false,
+      canDelete: false,
+      canShowVote: true,
+      isVotingEnded: false,
+    });
+
+    const { rerender } = render(
+      <MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Vote" }));
+    expect(screen.getByTestId("desktop-voting-modal")).toHaveAttribute(
+      "data-open",
+      "true"
+    );
+
+    rerender(
+      <MemesSingleWaveDropInfoPanel
+        drop={baseDrop}
+        wave={null}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(screen.getByTestId("desktop-voting-modal")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
   });
 });
 

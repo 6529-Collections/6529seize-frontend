@@ -4,7 +4,10 @@ import { useState, memo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import {
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  useWaveDecisions,
+} from "@/hooks/waves/useWaveDecisions";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 
@@ -14,6 +17,7 @@ import { WaveWinnersSmallLoading } from "./WaveWinnersSmallLoading";
 import { WaveWinnersSmallEmpty } from "./WaveWinnersSmallEmpty";
 import { WaveWinnersSmallDecisionSelector } from "./WaveWinnersSmallDecisionSelector";
 import { useWave } from "@/hooks/useWave";
+import { WaveWinnersApprovalError } from "./WaveWinnersApprovalError";
 
 interface WaveWinnersSmallProps {
   readonly wave: ApiWave;
@@ -30,6 +34,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
   ({ wave, onDropClick }) => {
     const {
       decisions: { multiDecision },
+      isApproveWave,
     } = useWave(wave);
     const [selectedDecisionPoint, setSelectedDecisionPoint] = useState<
       string | null
@@ -38,11 +43,29 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     // Fetch data using decisions endpoint for all waves - same approach as WaveWinners
     const {
       decisionPoints: rawDecisionPoints,
-      isFetching: isDecisionsLoading,
+      isFetching,
+      isLoadingAllPages,
+      isLoadingAllPagesError,
+      refetch,
+      fetchNextPage,
+      hasNextPage,
     } = useWaveDecisions({
       waveId: wave.id,
       enabled: true, // Always enabled now that we use it for both types
+      loadAllPages: isApproveWave,
+      pageSize: isApproveWave
+        ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
+        : undefined,
     });
+    const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
+    const handleApprovalWinnersRetry = () => {
+      if (hasNextPage) {
+        void fetchNextPage();
+        return;
+      }
+
+      void refetch();
+    };
 
     // Process decision points to include UI-friendly fields
     const decisionPoints: EnhancedDecisionPoint[] = rawDecisionPoints.map(
@@ -69,6 +92,49 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     // Loading state
     if (isDecisionsLoading) {
       return <WaveWinnersSmallLoading />;
+    }
+
+    if (isApproveWave && isLoadingAllPagesError) {
+      return <WaveWinnersApprovalError onRetry={handleApprovalWinnersRetry} />;
+    }
+
+    if (isApproveWave) {
+      const approvedWinners = getRenderableWaveDecisionWinners(
+        decisionPoints.flatMap((point) => point.winners)
+      );
+
+      if (approvedWinners.length === 0) {
+        return (
+          <WaveWinnersSmallEmpty
+            title="No approvals yet"
+            message="No drops approved yet"
+          />
+        );
+      }
+
+      return (
+        <div className="tw-p-3">
+          <div className="tw-flex tw-items-center tw-justify-between tw-px-1">
+            <h2 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+              Approved
+            </h2>
+          </div>
+
+          <div className="tw-mt-3 tw-space-y-3">
+            {approvedWinners.map((winner) => (
+              <WaveWinnerItemSmall
+                key={winner.drop.id}
+                drop={convertApiDropToExtendedDrop(winner.drop)}
+                wave={wave}
+                rank={winner.place}
+                onDropClick={() =>
+                  onDropClick(convertApiDropToExtendedDrop(winner.drop))
+                }
+              />
+            ))}
+          </div>
+        </div>
+      );
     }
 
     // Empty state

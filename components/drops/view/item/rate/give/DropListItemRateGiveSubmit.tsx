@@ -9,7 +9,8 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
+import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
@@ -47,6 +48,7 @@ export default function DropListItemRateGiveSubmit({
   readonly isMobile?: boolean | undefined;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
+  const queryClient = useQueryClient();
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -65,6 +67,7 @@ export default function DropListItemRateGiveSubmit({
       }),
     onSuccess: () => {
       onSuccessfulRateChange();
+      invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
       optimisticRollbackRef.current = null;
     },
     onError: (error) => {

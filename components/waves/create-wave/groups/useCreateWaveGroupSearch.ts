@@ -287,6 +287,16 @@ export function useCreateWaveGroupSearch({
     setActiveIndex(-1);
   }, [setActiveIndex]);
 
+  const dismissSearch = useCallback(() => {
+    setIsOpen(false);
+    setSearchState(
+      createSearchState({
+        selectedGroupKey,
+        selectedGroupName,
+      })
+    );
+  }, [selectedGroupKey, selectedGroupName, setSearchState]);
+
   const clearSelection = useCallback(() => {
     if (!allowClear || disabled) {
       return;
@@ -307,14 +317,14 @@ export function useCreateWaveGroupSearch({
     if (!isOpen) {
       return;
     }
-    closeSearch();
+    dismissSearch();
   });
 
   useKeyPressEvent("Escape", () => {
     if (!isOpen) {
       return;
     }
-    closeSearch();
+    dismissSearch();
   });
 
   const onInputFocus = () => {
@@ -327,15 +337,12 @@ export function useCreateWaveGroupSearch({
 
   const handleInputChange = (value: string) => {
     setSearchState({
-      selectedGroupKey: selectedGroup && allowClear ? null : selectedGroupKey,
+      selectedGroupKey,
       inputValue: value,
       searchCriteria: value,
       activeIndex: -1,
     });
     setIsOpen(true);
-    if (selectedGroup && allowClear) {
-      onSelect(null);
-    }
   };
 
   const onOptionSelect = useCallback(
@@ -355,7 +362,7 @@ export function useCreateWaveGroupSearch({
 
   const handleKeyDown = useCreateWaveGroupKeyboardNavigation({
     activeIndex,
-    closeSearch,
+    closeSearch: dismissSearch,
     isOpen,
     onOptionSelect,
     setActiveIndex,
@@ -364,9 +371,7 @@ export function useCreateWaveGroupSearch({
   });
 
   const hasValue = inputValue.trim().length > 0;
-  const helperText = selectedGroup
-    ? `Selected: ${selectedGroup.name}`
-    : `Default: ${defaultLabel}`;
+  const helperText = `Current group: ${selectedGroup?.name ?? defaultLabel}`;
   const showClearButton =
     allowClear && (hasValue || !!selectedGroup) && !disabled;
   const showNoResults = !isFetching && isOpen && suggestions.length === 0;

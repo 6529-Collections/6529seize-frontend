@@ -1,4 +1,5 @@
 import { SingleWaveDropChat } from "@/components/waves/drop/SingleWaveDropChat";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { act, fireEvent, render } from "@testing-library/react";
 
 jest.mock("@/hooks/useDeviceInfo", () => () => ({
@@ -20,6 +21,7 @@ jest.mock("@/hooks/useAndroidKeyboard", () => ({
 }));
 
 let capturedProps: any;
+let capturedCreatorProps: any;
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
   __esModule: true,
   default: (props: any) => {
@@ -37,16 +39,20 @@ jest.mock("@/components/waves/CreateDropWaveWrapper", () => ({
 
 jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   __esModule: true,
-  default: (props: any) => (
-    <button
-      data-testid="creator"
-      type="button"
-      onClick={props.onCancelReplyQuote}
-      data-part={props.activeDrop?.partId}
-      data-action={props.activeDrop?.action}
-    />
-  ),
-  DropMode: { BOTH: "BOTH" },
+  default: (props: any) => {
+    capturedCreatorProps = props;
+    return (
+      <button
+        data-testid="creator"
+        type="button"
+        onClick={props.onCancelReplyQuote}
+        data-part={props.activeDrop?.partId}
+        data-action={props.activeDrop?.action}
+        data-mode={props.fixedDropMode}
+      />
+    );
+  },
+  DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
 }));
 
 // Mock globalThis.matchMedia for useDeviceInfo hook
@@ -65,17 +71,28 @@ Object.defineProperty(globalThis, "matchMedia", {
 });
 
 describe("SingleWaveDropChat", () => {
+  const createWave = (overrides: Record<string, unknown> = {}) =>
+    ({
+      id: "w1",
+      metrics: { muted: false, your_unread_drops_count: 0 },
+      wave: { type: ApiWaveType.Rank, winning_threshold: null },
+      ...overrides,
+    }) as any;
+
   beforeEach(() => {
     mockKeyboardVisible = false;
+    capturedProps = undefined;
+    capturedCreatorProps = undefined;
   });
 
   it("handles reply and reset actions", () => {
-    const wave: any = { id: "w1" };
+    const wave = createWave();
     const drop: any = { id: "d1" };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     expect(capturedProps.waveId).toBe("w1");
     expect(capturedProps.dropId).toBe("d1");
+    expect(capturedCreatorProps.fixedDropMode).toBe("BOTH");
 
     act(() => capturedProps.onReply({ drop, partId: 2 }));
     expect(document.querySelector('[data-part="2"]')).toBeInTheDocument();
@@ -87,7 +104,7 @@ describe("SingleWaveDropChat", () => {
   it("applies safe-area-inset-bottom padding when keyboard is hidden", () => {
     mockKeyboardVisible = false;
 
-    const wave: any = { id: "w1" };
+    const wave = createWave();
     const drop: any = { id: "d1" };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
@@ -104,7 +121,7 @@ describe("SingleWaveDropChat", () => {
   it("applies 0px padding when keyboard is visible", () => {
     mockKeyboardVisible = true;
 
-    const wave: any = { id: "w1" };
+    const wave = createWave();
     const drop: any = { id: "d1" };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
@@ -114,5 +131,56 @@ describe("SingleWaveDropChat", () => {
     const container = wrapper?.parentElement as HTMLElement;
 
     expect(container.style.paddingBottom).toBe("0px");
+  });
+
+  it("passes approve wave state to WaveDropsAll", () => {
+    const wave = createWave({
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 25,
+        max_winners: 1,
+        no_of_decisions_done: 1,
+      },
+    });
+    const drop: any = { id: "d1" };
+    render(
+      <SingleWaveDropChat
+        wave={wave}
+        drop={drop}
+        winningThreshold={25}
+        isVotingClosed={false}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(capturedProps.winningThreshold).toBe(25);
+    expect(capturedProps.isVotingClosed).toBe(false);
+    expect(capturedProps.isVotingControlsLocked).toBe(true);
+    expect(capturedCreatorProps.fixedDropMode).toBe("CHAT");
+  });
+
+  it("keeps both composer mode for unlocked waves", () => {
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+
+    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+
+    expect(capturedCreatorProps.fixedDropMode).toBe("BOTH");
+  });
+
+  it("locks the composer when voting is closed", () => {
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+
+    render(
+      <SingleWaveDropChat
+        wave={wave}
+        drop={drop}
+        isVotingClosed={true}
+        isVotingControlsLocked={false}
+      />
+    );
+
+    expect(capturedCreatorProps.fixedDropMode).toBe("CHAT");
   });
 });

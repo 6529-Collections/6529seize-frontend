@@ -7,11 +7,10 @@ export default function CreateWaveBackStep({
     <button
       onClick={onPreviousStep}
       type="button"
-      className="tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-6 tw-py-3 
-      tw-text-base tw-font-semibold tw-border tw-border-solid tw-border-transparent tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+      className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-6 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
     >
       <svg
-        className="tw-size-6 tw-mr-2 tw-flex-shrink-0"
+        className="tw-mr-2 tw-size-6 tw-flex-shrink-0"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

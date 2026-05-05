@@ -195,6 +195,30 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
   });
 
+  it("keeps approve waves on approvals and always shows approved tab", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "approve-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: false,
+        isCurationWave: false,
+        isApproveWave: true,
+        votingState: WaveVotingState.ENDED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.WINNERS,
+      MyStreamWaveTab.OUTCOME,
+    ]);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+  });
+
   it("normalizes stored LEADERBOARD to SUBMISSIONS once voting ends", () => {
     const { result } = setup();
 

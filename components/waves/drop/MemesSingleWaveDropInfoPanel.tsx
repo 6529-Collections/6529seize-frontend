@@ -1,6 +1,7 @@
 "use client";
 
 import { MobileVotingModal, VotingModal } from "@/components/voting";
+import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import {
@@ -21,18 +22,29 @@ interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave | null;
   readonly onClose?: (() => void) | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const MemesSingleWaveDropInfoPanel = ({
   drop,
   wave,
   onClose,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }: MemesSingleWaveDropInfoPanelProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isVotingOpen, setIsVotingOpen] = useState(false);
   const isMobileScreen = useIsMobileScreen();
   const { isWinner, canDelete, canShowVote, isVotingEnded } =
     useDropInteractionRules(drop);
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
+  const {
+    isOpen: isVotingOpen,
+    open: openVoting,
+    close: closeVoting,
+  } = useVotingModalState(isVotingActionLocked);
+  const canShowVotingAction = canShowVote && !isVotingActionLocked;
+  const shouldShowVotingEndedSummary = isVotingEnded || isVotingClosed;
 
   const { nicTotal, repTotal, manualOutcomes } = useWaveRankReward({
     waveId: drop.wave.id,
@@ -103,11 +115,8 @@ export const MemesSingleWaveDropInfoPanel = ({
     setIsFullscreen(true);
   }, []);
   const handleOpenVoting = useCallback(() => {
-    setIsVotingOpen(true);
-  }, []);
-  const handleCloseVoting = useCallback(() => {
-    setIsVotingOpen(false);
-  }, []);
+    openVoting();
+  }, [openVoting]);
 
   return (
     <>
@@ -122,8 +131,8 @@ export const MemesSingleWaveDropInfoPanel = ({
           description={description}
           artworkMimeType={artworkMedia?.mime_type}
           isWinner={isWinner}
-          isVotingEnded={isVotingEnded}
-          canShowVote={canShowVote}
+          isVotingEnded={shouldShowVotingEndedSummary}
+          canShowVote={canShowVotingAction}
           manualOutcomes={manualOutcomes}
           nicTotal={nicTotal}
           repTotal={repTotal}
@@ -158,14 +167,10 @@ export const MemesSingleWaveDropInfoPanel = ({
         <MobileVotingModal
           drop={drop}
           isOpen={isVotingOpen}
-          onClose={handleCloseVoting}
+          onClose={closeVoting}
         />
       ) : (
-        <VotingModal
-          drop={drop}
-          isOpen={isVotingOpen}
-          onClose={handleCloseVoting}
-        />
+        <VotingModal drop={drop} isOpen={isVotingOpen} onClose={closeVoting} />
       )}
     </>
   );

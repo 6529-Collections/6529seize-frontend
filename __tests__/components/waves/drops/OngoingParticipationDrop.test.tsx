@@ -11,6 +11,29 @@ jest.mock("@/hooks/isMobileDevice", () => ({
   __esModule: true,
   default: (...args: any[]) => useIsMobileDevice(...args),
 }));
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => false,
+}));
+jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
+  useDropInteractionRules: () => ({ canShowVote: true }),
+}));
+jest.mock("@/components/voting", () => ({
+  VotingModal: ({ isOpen }: any) => (
+    <div data-testid="voting-modal" data-open={String(isOpen)} />
+  ),
+  MobileVotingModal: ({ isOpen }: any) => (
+    <div data-testid="mobile-voting-modal" data-open={String(isOpen)} />
+  ),
+}));
+jest.mock("@/components/voting/VotingModalButton", () => ({
+  __esModule: true,
+  default: ({ onClick }: any) => (
+    <button data-testid="vote-button" onClick={onClick} type="button">
+      Vote
+    </button>
+  ),
+}));
 
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
   <div data-testid="actions" onClick={props.onReply}></div>
@@ -48,9 +71,21 @@ jest.mock(
     return <div data-testid="metadata" />;
   }
 );
+let footerProps: any;
 jest.mock(
   "@/components/waves/drops/participation/ParticipationDropFooter",
-  () => () => <div />
+  () => (props: any) => {
+    footerProps = props;
+    return (
+      <div
+        data-testid="footer"
+        data-is-voting-closed={String(props.isVotingClosed)}
+        data-is-voting-controls-locked={String(props.isVotingControlsLocked)}
+      >
+        {props.voteAction}
+      </div>
+    );
+  }
 );
 jest.mock(
   "@/components/waves/drops/participation/ParticipationDropContainer",
@@ -84,14 +119,17 @@ const drop: ExtendedDrop = {
 const renderComp = ({
   mobile = false,
   dropOverride = drop,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }: {
   readonly mobile?: boolean;
   readonly dropOverride?: ExtendedDrop;
+  readonly isVotingClosed?: boolean;
+  readonly isVotingControlsLocked?: boolean;
 } = {}) => {
   const onReply = jest.fn();
-  const onQuote = jest.fn();
   useIsMobileDevice.mockReturnValue(mobile);
-  render(
+  const view = render(
     <OngoingParticipationDrop
       drop={dropOverride}
       showWaveInfo={false}
@@ -99,17 +137,19 @@ const renderComp = ({
       showReplyAndQuote={true}
       location="wave"
       onReply={onReply}
-      onQuote={onQuote}
       onQuoteClick={jest.fn()}
+      isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
     />
   );
-  return { onReply, onQuote };
+  return { onReply, ...view };
 };
 
 describe("OngoingParticipationDrop", () => {
   beforeEach(() => {
     ParticipationDropMetadataMock.mockClear();
     ParticipationIdentityProfileCardMock.mockClear();
+    footerProps = undefined;
   });
 
   it("shows actions on desktop", () => {
@@ -126,6 +166,69 @@ describe("OngoingParticipationDrop", () => {
     mobileMenuProps.onReply();
     expect(onReply).toHaveBeenCalledWith({ drop, partId: "p1" });
     expect(mobileMenuProps.setOpen).toBeDefined();
+  });
+
+  it("hides voting in the mobile menu when voting is closed", () => {
+    renderComp({ mobile: true, isVotingClosed: true });
+
+    expect(
+      (mobileMenuProps as { readonly showVoting?: boolean }).showVoting
+    ).toBe(false);
+  });
+
+  it("locks vote actions without marking ratings closed", () => {
+    renderComp({ mobile: true, isVotingControlsLocked: true });
+
+    expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
+    expect(footerProps.isVotingClosed).toBe(false);
+    expect(footerProps.isVotingControlsLocked).toBe(true);
+    expect(
+      (mobileMenuProps as { readonly showVoting?: boolean }).showVoting
+    ).toBe(false);
+  });
+
+  it("closes the voting modal when voting closes", async () => {
+    const user = userEvent.setup();
+    useIsMobileDevice.mockReturnValue(false);
+    const onReply = jest.fn();
+    const onQuoteClick = jest.fn();
+    const { rerender } = render(
+      <OngoingParticipationDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location="wave"
+        onReply={onReply}
+        onQuoteClick={onQuoteClick}
+      />
+    );
+
+    await user.click(screen.getByTestId("vote-button"));
+
+    expect(screen.getByTestId("voting-modal")).toHaveAttribute(
+      "data-open",
+      "true"
+    );
+
+    rerender(
+      <OngoingParticipationDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location="wave"
+        onReply={onReply}
+        onQuoteClick={onQuoteClick}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("voting-modal")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
+    expect(screen.queryByTestId("vote-button")).toBeNull();
   });
 
   it("renders the identity profile card and filters identity metadata", () => {
