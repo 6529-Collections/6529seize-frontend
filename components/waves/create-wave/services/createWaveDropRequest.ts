@@ -22,8 +22,9 @@ export const getCreateWaveDropRequest = async (
         })),
       };
 
-      if (part.attachments?.length) {
-        requestPart.attachments = part.attachments;
+      const attachments = part.attachments;
+      if (attachments !== undefined && attachments.length > 0) {
+        requestPart.attachments = attachments;
       }
 
       return requestPart;

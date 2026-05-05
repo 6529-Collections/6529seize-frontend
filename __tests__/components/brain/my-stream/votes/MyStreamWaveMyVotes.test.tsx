@@ -4,7 +4,6 @@ import MyStreamWaveMyVotes from "@/components/brain/my-stream/votes/MyStreamWave
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 
 let intersectionCb: () => void = () => {};
 let resetProps: any = null;
@@ -15,10 +14,6 @@ const mockApprovalStatus = jest.fn(() => ({
 }));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard");
-jest.mock("@/hooks/waves/useWaveDecisions", () => ({
-  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
-  useWaveDecisions: jest.fn(),
-}));
 jest.mock("@/hooks/useIntersectionObserver", () => ({
   useIntersectionObserver: (cb: any) => {
     intersectionCb = cb;
@@ -58,7 +53,6 @@ jest.mock(
 );
 
 const useWaveDropsLeaderboardMock = useWaveDropsLeaderboard as jest.Mock;
-const useWaveDecisionsMock = useWaveDecisions as jest.Mock;
 
 describe("MyStreamWaveMyVotes", () => {
   const wave = {
@@ -74,19 +68,7 @@ describe("MyStreamWaveMyVotes", () => {
 
   beforeEach(() => {
     useWaveDropsLeaderboardMock.mockReset();
-    useWaveDecisionsMock.mockReset();
     mockApprovalStatus.mockReset();
-    useWaveDecisionsMock.mockReturnValue({
-      decisionPoints: [],
-      isFetching: false,
-      isLoading: false,
-      hasLoadedAllPages: false,
-      isLoadingAllPages: false,
-      isLoadingAllPagesError: false,
-      refetch: jest.fn(),
-      fetchNextPage: jest.fn(),
-      hasNextPage: false,
-    });
     mockApprovalStatus.mockReturnValue({
       isApprovalStatusLoading: false,
       isVotingClosed: false,
@@ -162,7 +144,7 @@ describe("MyStreamWaveMyVotes", () => {
     expect(resetProps?.availableVotes).toBe(4);
   });
 
-  it("loads decision points for approve waves with missing decision counts", () => {
+  it("delegates approve-wave decision loading to approval status hook", () => {
     const approveWave = {
       id: "approve-1",
       wave: {
@@ -171,23 +153,6 @@ describe("MyStreamWaveMyVotes", () => {
         no_of_decisions_left: null,
       },
     } as any;
-    const decisionPoints = [
-      {
-        decision_time: 1,
-        winners: [{ place: 1, awards: [], drop: { id: "winner-1" } }],
-      },
-    ];
-    useWaveDecisionsMock.mockReturnValue({
-      decisionPoints,
-      isFetching: false,
-      isLoading: false,
-      hasLoadedAllPages: true,
-      isLoadingAllPages: false,
-      isLoadingAllPagesError: false,
-      refetch: jest.fn(),
-      fetchNextPage: jest.fn(),
-      hasNextPage: false,
-    });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
         {
@@ -207,19 +172,7 @@ describe("MyStreamWaveMyVotes", () => {
       </AuthContext.Provider>
     );
 
-    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
-      waveId: "approve-1",
-      enabled: true,
-      loadAllPages: true,
-      pageSize: 2000,
-    });
-    expect(mockApprovalStatus).toHaveBeenCalledWith({
-      wave: approveWave,
-      decisionPoints,
-      areDecisionPointsComplete: true,
-      isDecisionPointsLoadError: false,
-      onRetryDecisionPointsLoad: expect.any(Function),
-    });
+    expect(mockApprovalStatus).toHaveBeenCalledWith({ wave: approveWave });
   });
 
   it("does not pass decision points when approve decision counts exist", () => {
@@ -250,12 +203,6 @@ describe("MyStreamWaveMyVotes", () => {
       </AuthContext.Provider>
     );
 
-    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
-      waveId: "approve-1",
-      enabled: false,
-      loadAllPages: false,
-      pageSize: undefined,
-    });
     expect(mockApprovalStatus).toHaveBeenCalledWith({ wave: approveWave });
   });
 
@@ -268,17 +215,6 @@ describe("MyStreamWaveMyVotes", () => {
         no_of_decisions_left: null,
       },
     } as any;
-    useWaveDecisionsMock.mockReturnValue({
-      decisionPoints: [],
-      isFetching: true,
-      isLoading: true,
-      hasLoadedAllPages: false,
-      isLoadingAllPages: true,
-      isLoadingAllPagesError: false,
-      refetch: jest.fn(),
-      fetchNextPage: jest.fn(),
-      hasNextPage: false,
-    });
     mockApprovalStatus.mockReturnValue({
       isApprovalStatusLoading: true,
       isVotingClosed: false,
@@ -312,7 +248,7 @@ describe("MyStreamWaveMyVotes", () => {
     expect(vote).toHaveAttribute("data-is-checked", "false");
   });
 
-  it("keeps voting controls unlocked during approve decision point refetches", () => {
+  it("keeps voting controls unlocked when approval status hook says unlocked", () => {
     const approveWave = {
       id: "approve-1",
       wave: {
@@ -321,22 +257,6 @@ describe("MyStreamWaveMyVotes", () => {
         no_of_decisions_left: null,
       },
     } as any;
-    useWaveDecisionsMock.mockReturnValue({
-      decisionPoints: [
-        {
-          decision_time: 1,
-          winners: [{ place: 1, awards: [], drop: { id: "winner-1" } }],
-        },
-      ],
-      isFetching: true,
-      isLoading: false,
-      hasLoadedAllPages: true,
-      isLoadingAllPages: false,
-      isLoadingAllPagesError: false,
-      refetch: jest.fn(),
-      fetchNextPage: jest.fn(),
-      hasNextPage: false,
-    });
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [
         {

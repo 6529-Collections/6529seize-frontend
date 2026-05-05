@@ -39,6 +39,13 @@ jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => ({
   default: () => <div data-testid="badge" />,
 }));
 
+jest.mock("@/components/waves/approval/ApprovalStatusBadge", () => ({
+  __esModule: true,
+  default: ({ order }: any) => (
+    <div data-testid="approval-badge">Approved {order}</div>
+  ),
+}));
+
 jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
   __esModule: true,
   default: () => <div data-testid="progress" />,
@@ -68,6 +75,47 @@ describe("WaveSmallLeaderboardDefaultDrop", () => {
       />
     );
     expect(document.querySelector('[data-testid="badge"]')).toBeInTheDocument();
+  });
+
+  it("shows neutral placeholder for approve wave ranked drop without winning context", () => {
+    const { container } = render(
+      <WaveSmallLeaderboardDefaultDrop
+        drop={{ ...drop, rank: 1, winning_context: null }}
+        wave={wave}
+        isApproveWave={true}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      document.querySelector('[data-testid="badge"]')
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector('[data-testid="approval-badge"]')
+    ).not.toBeInTheDocument();
+    expect(container.querySelector("svg")).toBeInTheDocument();
+  });
+
+  it("shows approval badge for approve wave drop with winning context", () => {
+    render(
+      <WaveSmallLeaderboardDefaultDrop
+        drop={{
+          ...drop,
+          rank: 1,
+          winning_context: { decision_time: 123, place: 1 },
+        }}
+        wave={wave}
+        isApproveWave={true}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      document.querySelector('[data-testid="approval-badge"]')
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-testid="badge"]')
+    ).not.toBeInTheDocument();
   });
 
   it("shows minus icon when rank missing", () => {

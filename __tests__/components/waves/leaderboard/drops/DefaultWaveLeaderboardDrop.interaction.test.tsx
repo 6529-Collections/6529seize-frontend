@@ -42,6 +42,16 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => (p: any) => (
   />
 ));
 jest.mock(
+  "@/components/waves/drops/WaveDropMobileMenuCopyLink",
+  () => (p: any) => (
+    <button
+      type="button"
+      data-testid="mobile-copy"
+      onClick={() => p.onCopy()}
+    />
+  )
+);
+jest.mock(
   "@/components/waves/drops/WaveDropMobileMenuDelete",
   () => (p: any) => (
     <button
@@ -256,4 +266,25 @@ test("allows real mobile menu tap after pending long-press click is cleared", ()
   fireEvent.click(mobileOpen);
 
   expect(setIsActive).toHaveBeenCalledWith(false);
+});
+
+test("shows copy link in the touch action sheet", () => {
+  useRules.mockReturnValue({ canShowVote: true, canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useIsMobileScreen.mockReturnValue(true);
+  useLongPressInteraction.mockReturnValue({
+    isActive: true,
+    setIsActive: jest.fn(),
+    touchHandlers: {},
+  });
+
+  render(
+    <DefaultWaveLeaderboardDrop
+      drop={drop}
+      wave={wave}
+      onDropClick={jest.fn()}
+    />
+  );
+
+  expect(screen.getByTestId("mobile-copy")).toBeInTheDocument();
 });

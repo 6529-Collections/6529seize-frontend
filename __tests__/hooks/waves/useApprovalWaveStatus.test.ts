@@ -105,6 +105,52 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.isVotingControlsLocked).toBe(true);
   });
 
+  it("does not load full decisions for ended approve wave with missing counters", () => {
+    const wave = createWave({
+      maxWinners: 2,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: null,
+      votingEnd: 500,
+    });
+
+    const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      enabled: false,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
+    expect(result.current.approvedCount).toBeNull();
+    expect(result.current.closeStatus).toBe("ended");
+    expect(result.current.isApprovalStatusLoading).toBe(false);
+    expect(result.current.isVotingClosed).toBe(true);
+    expect(result.current.isVotingControlsLocked).toBe(true);
+  });
+
+  it("does not load full decisions for approve waves without max winners", () => {
+    const wave = createWave({
+      maxWinners: null,
+      noOfDecisionsDone: null,
+      noOfDecisionsLeft: null,
+      votingEnd: 2000,
+    });
+
+    const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+    expect(useWaveDecisionsMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      enabled: false,
+      loadAllPages: true,
+      pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+    });
+    expect(result.current.approvedCount).toBeNull();
+    expect(result.current.closeStatus).toBeNull();
+    expect(result.current.isApprovalStatusLoading).toBe(false);
+    expect(result.current.isApprovalStatusError).toBe(false);
+    expect(result.current.isVotingControlsLocked).toBe(false);
+  });
+
   it("closes immediately when max approvals are reached", () => {
     const wave = createWave({
       maxWinners: 2,
