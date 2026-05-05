@@ -27,6 +27,10 @@ type NetworkTargetCandidate = {
 
 type NetworkBreadcrumbFailureKind = "transport" | "http";
 
+type FailedBreadcrumbScanResult =
+  | { action: "continue" }
+  | { action: "return"; target: NetworkTargetCandidate | null };
+
 type SentryExceptionValue = {
   type?: string | undefined;
   value?: string | undefined;
@@ -420,6 +424,113 @@ function canUseFailedTransportForMessageTarget(
   );
 }
 
+function hasMessageTargetCandidates(
+  messageTargetCandidates: NetworkTargetCandidate[]
+): boolean {
+  return messageTargetCandidates.length > 0;
+}
+
+function hasLaterSameRealFailureTarget(
+  failedTransportTarget: NetworkTargetCandidate,
+  laterRealFailureTargetCandidates: NetworkTargetCandidate[]
+): boolean {
+  return laterRealFailureTargetCandidates.some((target) =>
+    isSameFirstPartyApiTarget(target, failedTransportTarget)
+  );
+}
+
+function getHttpFailureScanResult(
+  breadcrumb: SentryBreadcrumb,
+  messageTargetCandidates: NetworkTargetCandidate[],
+  laterRealFailureTargetCandidates: NetworkTargetCandidate[]
+): FailedBreadcrumbScanResult {
+  const failedHttpTarget = getBreadcrumbTargetCandidate(breadcrumb);
+  if (!failedHttpTarget) {
+    return getBreadcrumbUrlIsFirstParty(breadcrumb) === false
+      ? { action: "continue" }
+      : { action: "return", target: null };
+  }
+
+  const hasMessageTargets = hasMessageTargetCandidates(messageTargetCandidates);
+  if (
+    hasMessageTargets &&
+    messageTargetCandidates.some((target) =>
+      isSameFirstPartyApiTarget(target, failedHttpTarget)
+    )
+  ) {
+    return { action: "return", target: null };
+  }
+
+  if (!hasMessageTargets) {
+    laterRealFailureTargetCandidates.push(failedHttpTarget);
+  }
+
+  return { action: "continue" };
+}
+
+function getTransportFailureScanResult(
+  breadcrumb: SentryBreadcrumb,
+  messageTargetCandidates: NetworkTargetCandidate[],
+  laterRealFailureTargetCandidates: NetworkTargetCandidate[]
+): FailedBreadcrumbScanResult {
+  const failedTransportTarget = getFailedTransportBreadcrumbTarget(breadcrumb);
+  if (failedTransportTarget.isFirstParty === false) {
+    return { action: "continue" };
+  }
+
+  const hasMessageTargets = hasMessageTargetCandidates(messageTargetCandidates);
+  if (
+    hasMessageTargets &&
+    !canUseFailedTransportForMessageTarget(
+      failedTransportTarget,
+      messageTargetCandidates
+    )
+  ) {
+    return { action: "continue" };
+  }
+
+  if (!hasMessageTargets && !isFirstPartyApiTarget(failedTransportTarget)) {
+    return { action: "return", target: null };
+  }
+
+  if (
+    !hasMessageTargets &&
+    hasLaterSameRealFailureTarget(
+      failedTransportTarget,
+      laterRealFailureTargetCandidates
+    )
+  ) {
+    return { action: "return", target: null };
+  }
+
+  return { action: "return", target: failedTransportTarget };
+}
+
+function getFailedBreadcrumbScanResult(
+  breadcrumb: SentryBreadcrumb,
+  messageTargetCandidates: NetworkTargetCandidate[],
+  laterRealFailureTargetCandidates: NetworkTargetCandidate[]
+): FailedBreadcrumbScanResult {
+  const failureKind = getBreadcrumbFailureKind(breadcrumb);
+  if (failureKind === "http") {
+    return getHttpFailureScanResult(
+      breadcrumb,
+      messageTargetCandidates,
+      laterRealFailureTargetCandidates
+    );
+  }
+
+  if (failureKind === "transport") {
+    return getTransportFailureScanResult(
+      breadcrumb,
+      messageTargetCandidates,
+      laterRealFailureTargetCandidates
+    );
+  }
+
+  return { action: "continue" };
+}
+
 function getLatestFailedTransportBreadcrumb(
   event: SentryClientEvent
 ): NetworkTargetCandidate | null {
@@ -433,70 +544,14 @@ function getLatestFailedTransportBreadcrumb(
       continue;
     }
 
-    const failureKind = getBreadcrumbFailureKind(breadcrumb);
-    if (failureKind === "http") {
-      const failedHttpTarget = getBreadcrumbTargetCandidate(breadcrumb);
-      if (!failedHttpTarget) {
-        if (getBreadcrumbUrlIsFirstParty(breadcrumb) === false) {
-          continue;
-        }
-
-        return null;
-      }
-
-      if (
-        messageTargetCandidates.length > 0 &&
-        messageTargetCandidates.some((target) =>
-          isSameFirstPartyApiTarget(target, failedHttpTarget)
-        )
-      ) {
-        return null;
-      }
-
-      if (messageTargetCandidates.length === 0) {
-        laterRealFailureTargetCandidates.push(failedHttpTarget);
-      }
-
-      continue;
+    const scanResult = getFailedBreadcrumbScanResult(
+      breadcrumb,
+      messageTargetCandidates,
+      laterRealFailureTargetCandidates
+    );
+    if (scanResult.action === "return") {
+      return scanResult.target;
     }
-
-    if (failureKind !== "transport") {
-      continue;
-    }
-
-    const failedTransportTarget =
-      getFailedTransportBreadcrumbTarget(breadcrumb);
-    if (failedTransportTarget.isFirstParty === false) {
-      continue;
-    }
-
-    if (
-      messageTargetCandidates.length > 0 &&
-      !canUseFailedTransportForMessageTarget(
-        failedTransportTarget,
-        messageTargetCandidates
-      )
-    ) {
-      continue;
-    }
-
-    if (
-      messageTargetCandidates.length === 0 &&
-      !isFirstPartyApiTarget(failedTransportTarget)
-    ) {
-      return null;
-    }
-
-    if (
-      messageTargetCandidates.length === 0 &&
-      laterRealFailureTargetCandidates.some((target) =>
-        isSameFirstPartyApiTarget(target, failedTransportTarget)
-      )
-    ) {
-      return null;
-    }
-
-    return failedTransportTarget;
   }
 
   return null;
