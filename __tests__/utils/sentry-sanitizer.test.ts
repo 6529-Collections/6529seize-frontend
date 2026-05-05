@@ -1,6 +1,22 @@
 import { sanitizeSentryBreadcrumb } from "@/utils/sentry-sanitizer";
 
 describe("sentry-sanitizer", () => {
+  it("redacts secrets from breadcrumb text fields", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      message: "request failed Bearer abc123",
+      category: "fetch pk_1234567890abcdef",
+      type: "http Basic dGVzdA",
+    });
+
+    expect(breadcrumb).toEqual(
+      expect.objectContaining({
+        message: "request failed Bearer [Filtered]",
+        category: "fetch [Filtered]",
+        type: "http Basic [Filtered]",
+      })
+    );
+  });
+
   it("strips third-party breadcrumb URLs to paths and marks them as non-first-party", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       type: "http",

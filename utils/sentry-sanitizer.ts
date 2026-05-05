@@ -177,12 +177,7 @@ function sanitizeHeaders(
   return result;
 }
 
-export function sanitizeSentryBreadcrumb(
-  breadcrumb: Breadcrumb | undefined | null
-): Breadcrumb | null {
-  if (!breadcrumb) return null;
-
-  const crumb = { ...breadcrumb };
+function sanitizeBreadcrumbTextFields(crumb: Breadcrumb): void {
   if (typeof crumb.message === "string") {
     crumb.message = sanitizeString(crumb.message);
   }
@@ -192,49 +187,72 @@ export function sanitizeSentryBreadcrumb(
   if (typeof crumb.type === "string") {
     crumb.type = sanitizeString(crumb.type);
   }
+}
+
+function addMissingBreadcrumbUrlMetadata(
+  data: Record<string, unknown>,
+  key: string,
+  getValue: (data: Record<string, unknown>) => boolean | undefined
+): boolean {
+  if (Object.prototype.hasOwnProperty.call(data, key)) {
+    return false;
+  }
+
+  const value = getValue(data);
+  if (typeof value !== "boolean") {
+    return false;
+  }
+
+  data[key] = value;
+  return true;
+}
+
+function withBreadcrumbUrlMetadata(
+  data: Record<string, unknown>
+): Record<string, unknown> {
+  const nextData = { ...data };
+
+  addMissingBreadcrumbUrlMetadata(
+    nextData,
+    URL_IS_FIRST_PARTY_KEY,
+    (currentData) => getBreadcrumbUrlIsFirstParty(currentData["url"])
+  );
+  addMissingBreadcrumbUrlMetadata(
+    nextData,
+    URL_IS_FIRST_PARTY_API_KEY,
+    (currentData) =>
+      getBreadcrumbUrlIsFirstPartyApi(
+        currentData["url"],
+        currentData[URL_IS_FIRST_PARTY_KEY]
+      )
+  );
+
+  return nextData;
+}
+
+function sanitizeBreadcrumbData(
+  data: NonNullable<Breadcrumb["data"]>
+): NonNullable<Breadcrumb["data"]> {
+  const dataWithMetadata = isPlainObject(data)
+    ? withBreadcrumbUrlMetadata(data)
+    : data;
+
+  const seen = new WeakSet<object>();
+  return sanitizeUnknown(dataWithMetadata, 0, seen) as NonNullable<
+    Breadcrumb["data"]
+  >;
+}
+
+export function sanitizeSentryBreadcrumb(
+  breadcrumb: Breadcrumb | undefined | null
+): Breadcrumb | null {
+  if (!breadcrumb) return null;
+
+  const crumb = { ...breadcrumb };
+  sanitizeBreadcrumbTextFields(crumb);
 
   if (crumb.data) {
-    if (isPlainObject(crumb.data)) {
-      const nextData = { ...crumb.data };
-      let didAddUrlMetadata = false;
-
-      if (
-        !Object.prototype.hasOwnProperty.call(nextData, URL_IS_FIRST_PARTY_KEY)
-      ) {
-        const urlIsFirstParty = getBreadcrumbUrlIsFirstParty(nextData["url"]);
-        if (typeof urlIsFirstParty === "boolean") {
-          nextData[URL_IS_FIRST_PARTY_KEY] = urlIsFirstParty;
-          didAddUrlMetadata = true;
-        }
-      }
-
-      if (
-        !Object.prototype.hasOwnProperty.call(
-          nextData,
-          URL_IS_FIRST_PARTY_API_KEY
-        )
-      ) {
-        const urlIsFirstPartyApi = getBreadcrumbUrlIsFirstPartyApi(
-          nextData["url"],
-          nextData[URL_IS_FIRST_PARTY_KEY]
-        );
-        if (typeof urlIsFirstPartyApi === "boolean") {
-          nextData[URL_IS_FIRST_PARTY_API_KEY] = urlIsFirstPartyApi;
-          didAddUrlMetadata = true;
-        }
-      }
-
-      if (didAddUrlMetadata) {
-        crumb.data = {
-          ...nextData,
-        };
-      }
-    }
-
-    const seen = new WeakSet<object>();
-    crumb.data = sanitizeUnknown(crumb.data, 0, seen) as NonNullable<
-      Breadcrumb["data"]
-    >;
+    crumb.data = sanitizeBreadcrumbData(crumb.data);
   }
 
   return crumb;
@@ -242,7 +260,7 @@ export function sanitizeSentryBreadcrumb(
 
 export function sanitizeSentryEvent<T extends Event>(event: T): T {
   // Avoid mutating the original reference in case Sentry reuses it.
-  const next = { ...event } as T;
+  const next = { ...event };
 
   // Do not send user-identifying fields by default.
   delete (next as any).user;
